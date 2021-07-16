@@ -184,7 +184,7 @@ services:
       - SECURE=${SECURE}
       - CSRF_SECRET_KEY=${CSRF_SECRET_KEY}
       - RUST_BACKTRACE=1
-      - WAIT_HOSTS=mkpgbouncer:6432, mkrabbit:5672
+      - WAIT_HOSTS=mkpgbouncer:6432, mkrabbitmq:5672
     command: sh -c "/wait && /mediakraken/mkwebapp"
     container_name: mkstack_webapp
     stop_grace_period: 30s
