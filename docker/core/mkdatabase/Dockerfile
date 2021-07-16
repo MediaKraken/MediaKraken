@@ -1,4 +1,9 @@
-# vim:set ft=dockerfile:
+#
+# NOTE: THIS DOCKERFILE IS GENERATED VIA "apply-templates.sh"
+#
+# PLEASE DO NOT EDIT IT DIRECTLY.
+#
+
 FROM debian:buster-slim
 
 RUN set -ex; \
@@ -76,14 +81,16 @@ RUN set -ex; \
 # uid                  PostgreSQL Debian Repository
 	key='B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8'; \
 	export GNUPGHOME="$(mktemp -d)"; \
-	gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
+	gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
 	gpg --batch --export "$key" > /etc/apt/trusted.gpg.d/postgres.gpg; \
 	command -v gpgconf > /dev/null && gpgconf --kill all; \
 	rm -rf "$GNUPGHOME"; \
 	apt-key list
 
 ENV PG_MAJOR 13
-ENV PG_VERSION 13.2-1.pgdg100+1
+ENV PATH $PATH:/usr/lib/postgresql/$PG_MAJOR/bin
+
+ENV PG_VERSION 13.3-1.pgdg100+1
 
 RUN set -ex; \
 	\
@@ -101,15 +108,6 @@ RUN set -ex; \
 # we're on an architecture upstream doesn't officially build for
 # let's build binaries from their published source packages
 			echo "deb-src http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main $PG_MAJOR" > /etc/apt/sources.list.d/pgdg.list; \
-			\
-			case "$PG_MAJOR" in \
-				9.* | 10 ) ;; \
-				*) \
-# https://github.com/docker-library/postgres/issues/484 (clang-6.0 required, only available in stretch-backports)
-# TODO remove this once we hit buster+
-					echo 'deb http://deb.debian.org/debian buster-backports main' >> /etc/apt/sources.list.d/pgdg.list; \
-					;; \
-			esac; \
 			\
 			tempDir="$(mktemp -d)"; \
 			cd "$tempDir"; \
@@ -164,7 +162,9 @@ RUN set -ex; \
 	fi; \
 	\
 # some of the steps above generate a lot of "*.pyc" files (and setting "PYTHONDONTWRITEBYTECODE" beforehand doesn't propagate properly for some reason), so we clean them up manually (as long as they aren't owned by a package)
-	find /usr -name '*.pyc' -type f -exec bash -c 'for pyc; do dpkg -S "$pyc" &> /dev/null || rm -vf "$pyc"; done' -- '{}' +
+	find /usr -name '*.pyc' -type f -exec bash -c 'for pyc; do dpkg -S "$pyc" &> /dev/null || rm -vf "$pyc"; done' -- '{}' +; \
+	\
+	postgres --version
 
 # make the sample config easier to munge (and "correct by default")
 RUN set -eux; \
@@ -176,17 +176,14 @@ RUN set -eux; \
 
 RUN mkdir -p /var/run/postgresql && chown -R postgres:postgres /var/run/postgresql && chmod 2777 /var/run/postgresql
 
-ENV PATH $PATH:/usr/lib/postgresql/$PG_MAJOR/bin
 ENV PGDATA /var/lib/postgresql/data
 # this 777 will be replaced by 700 at runtime (allows semi-arbitrary "--user" values)
 RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA" && chmod 777 "$PGDATA"
 VOLUME /var/lib/postgresql/data
 
 COPY docker-entrypoint.sh /usr/local/bin/
-RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compat
 COPY docker-entrypoint-initdb.d /docker-entrypoint-initdb.d
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-RUN mkdir /mediakraken && mkdir /mediakraken/backup
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 # We set the default STOPSIGNAL to SIGINT, which corresponds to what PostgreSQL
