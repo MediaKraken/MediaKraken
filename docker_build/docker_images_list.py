@@ -61,6 +61,9 @@ STAGE_CORE_IMAGES = {
     # database via postgresql
     'mkdatabase': ('mkdatabase', 'debian:buster-slim', 'core'),
 
+    # inotify of file system changes to amqp
+    'mkinotify': ('mkinotify', 'busybox:1.33.1-uclibc', 'core'),
+
     # nginx proxy for http to https and some bot blocking
     'mknginx': ('mknginx', 'alpine:3.10', 'core'),
 
