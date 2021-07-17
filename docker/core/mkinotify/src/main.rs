@@ -7,13 +7,13 @@ use inotify::{
 use std::error::Error;
 
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_logging/src/mk_lib_logging.rs"]
+#[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
 mod mk_lib_logging;
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_database/src/mk_lib_database.rs"]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
 mod mk_lib_database;
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_database/src/mk_lib_database_library.rs"]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_library.rs"]
 mod mk_lib_database_library;
 
 #[cfg(not(debug_assertions))]
