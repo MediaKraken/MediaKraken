@@ -49,6 +49,9 @@ STAGE_ONE_GAME_SERVERS = {
 STAGE_TWO_GAME_SERVERS = {}
 
 STAGE_CORE_IMAGES = {
+    # broadcast server IP for web and client connectivity
+    'mkbroadcast': ('mkbroadcast', 'scratch', 'core'),
+
     # chat server via mumble
     'mkchatmumble': ('mkchatmumble', 'alpine:3.13.5', 'core'),
 
