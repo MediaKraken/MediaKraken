@@ -58,6 +58,9 @@ STAGE_CORE_IMAGES = {
     # chat server via ts3 - free license version
     'mkchatteamspeak': ('mkchatteamspeak', 'alpine:3.13.5', 'core'),
 
+    # process cron jobs from the database to amqp or direct container launch
+    'mkcron': ('mkcron', 'busybox:1.33.1-uclibc', 'core'),
+
     # database via postgresql
     'mkdatabase': ('mkdatabase', 'debian:buster-slim', 'core'),
 
