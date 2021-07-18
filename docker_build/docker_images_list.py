@@ -67,6 +67,9 @@ STAGE_CORE_IMAGES = {
     # inotify of file system changes to amqp
     'mkinotify': ('mkinotify', 'busybox:1.33.1-uclibc', 'core'),
 
+    # download libretro cores that are newer - run and exit
+    'mklibretrocorefetchupdate': ('mklibretrocorefetchupdate', 'scratch', 'core'),
+
     # nginx proxy for http to https and some bot blocking
     'mknginx': ('mknginx', 'alpine:3.10', 'core'),
 

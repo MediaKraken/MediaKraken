@@ -5,6 +5,12 @@ cp ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkcron/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_cron.rs ../docker/core/mkcron/src/.
 cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkcron/src/.
 
+# mklibretrocorefetchupdate
+cp ../src/mk_lib_compression/src/mk_lib_compression.rs ../docker/core/mklibretrocorefetchupdate/src/.
+cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mklibretrocorefetchupdate/src/.
+cp ../src/mk_lib_hash/src/mk_lib_hash_md5.rs ../docker/core/mklibretrocorefetchupdate/src/.
+cp ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mklibretrocorefetchupdate/src/.
+
 # mknotify
 cp ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkinotify/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_library.rs ../docker/core/mkinotify/src/.
