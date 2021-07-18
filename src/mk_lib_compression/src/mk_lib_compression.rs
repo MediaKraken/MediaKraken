@@ -15,7 +15,7 @@ pub fn mk_decompress_zip(archive_file: &str, write_to_file: bool,
     let mut gz_data = String::new();
     gz.read_to_string(&mut gz_data)?;
     if write_to_file {
-        std::fs::write("/tmp/foo", gz_data).expect("Unable to write file");
+        std::fs::write("/tmp/foo", &gz_data).expect("Unable to write file");
     }
     if remove_zip {
         std::fs::remove_file(archive_file)?;
