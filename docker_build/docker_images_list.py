@@ -76,6 +76,9 @@ STAGE_CORE_IMAGES = {
     # amqp service (rabbitmq)
     'mkrabbitmq': ('mkrabbitmq', 'alpine:3.11', 'core'),
 
+    # download tmdb dump of ids in database and insert into downloads - run and exit
+    'mktmdbnetfetchbulk': ('mktmdbnetfetchbulk', 'scratch', 'core'),
+
     # transmission server
     'mktransmission': ('mktransmission', 'alpine:3.13.5', 'core'),
 
