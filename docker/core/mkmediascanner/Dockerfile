@@ -35,9 +35,7 @@ COPY --from=cargo-build /etc/group /etc/group
 WORKDIR /mediakraken
 
 # Copy our build
-COPY --from=cargo-build /mediakraken/target/x86_64-unknown-linux-musl/release/mklibretrocorefetchupdate ./
+COPY --from=cargo-build /mediakraken/target/x86_64-unknown-linux-musl/release/mkmediascanner ./
 
 # Use an unprivileged user.
 USER mediakraken:mediakraken
-
-CMD ["/mediakraken/mklibretrocorefetchupdate"]

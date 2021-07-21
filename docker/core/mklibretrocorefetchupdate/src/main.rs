@@ -2,18 +2,26 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
+use walkdir::{DirEntry, WalkDir};
+
+fn is_hidden(entry: &DirEntry) -> bool {
+    entry.file_name()
+         .to_str()
+         .map(|s| s.starts_with("."))
+         .unwrap_or(false)
+}
 
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_compression/src/mk_lib_compression.rs"]
+#[path = "../../../../src/mk_lib_compression/src/mk_lib_compression.rs"]
 mod mk_lib_compression;
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_logging/src/mk_lib_logging.rs"]
+#[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
 mod mk_lib_logging;
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_hash/src/mk_lib_hash_md5.rs"]
+#[path = "../../../../src/mk_lib_hash/src/mk_lib_hash_md5.rs"]
 mod mk_lib_hash_md5;
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_network/src/mk_lib_network.rs"]
+#[path = "../../../../src/mk_lib_network/src/mk_lib_network.rs"]
 mod mk_lib_network;
 
 #[cfg(not(debug_assertions))]
@@ -50,7 +58,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // date md5 core_filename.zip
     let libtro_url = "http://buildbot.libretro.com/nightly/linux/x86_64/latest/";
     let fetch_result = mk_lib_network::mk_data_from_url(
-        libtro_url + ".index-extended").await;
+        format!("{}{}", libtro_url, ".index-extended")).await;
     for libretro_core in fetch_result.split('\n') {
         let mut download_core = false;
         let (core_date, core_md5, core_name) = libretro_core.split(" ");
@@ -64,12 +72,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
         if download_core {
             // download the missing or newer core
-            mk_lib_network::mk_download_file_from_url(libtro_url + core_name,
-                                                      "/mediakraken/emulation/cores/"
-                                                          + core_name);
+            mk_lib_network::mk_download_file_from_url(format!("{}{}", libtro_url, core_name),
+                                                      format!("/mediakraken/emulation/cores/{}", core_name));
             // unzip the core for use
-            mk_lib_compression::mk_decompress_zip("/mediakraken/emulation/cores/"
-                                                      + core_name,
+            mk_lib_compression::mk_decompress_zip(&format!("/mediakraken/emulation/cores/{}", core_name),
                                                   true,
                                                   true);
         }

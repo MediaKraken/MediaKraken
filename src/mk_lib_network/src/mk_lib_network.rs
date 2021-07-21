@@ -1,5 +1,6 @@
 use std::io::Cursor;
 use std::str;
+
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
 pub async fn mk_data_from_url(url: String) -> Result<String> {
@@ -11,7 +12,7 @@ pub async fn mk_data_from_url(url: String) -> Result<String> {
 pub async fn mk_download_file_from_url(url: String, file_name: String) -> Result<()> {
     let response = reqwest::get(url).await?;
     let mut file = std::fs::File::create(file_name)?;
-    let mut content =  Cursor::new(response.bytes().await?);
+    let mut content = Cursor::new(response.bytes().await?);
     std::io::copy(&mut content, &mut file)?;
     Ok(())
 }
@@ -59,6 +60,14 @@ mod test_mk_lib_network {
         tokio_test::block_on($e)
     };
   }
+
+    #[test]
+    fn test_mk_data_from_url() {
+        let res = aw!(mk_data_from_url(
+            "https://github.com/MediaKraken/MediaKraken_Deployment/raw/master/LICENSE".to_string(),
+            "license.md".to_string()));
+        assert!(res.is_ok());
+    }
 
     #[test]
     fn test_mk_download_file_from_url() {

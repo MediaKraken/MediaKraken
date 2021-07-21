@@ -104,8 +104,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                               mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                               Uuid::new_v4(),
                                                                               metadata_struct.id,
-                                                                              "Fetch".to_string(),
-                    ).await;
+                                                                              "Fetch".to_string()).await;
                 }
             }
         }
@@ -132,8 +131,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                               mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                               Uuid::new_v4(),
                                                                               metadata_struct.id,
-                                                                              "Fetch".to_string(),
-                    ).await;
+                                                                              "Fetch".to_string()).await;
                 }
             }
         }

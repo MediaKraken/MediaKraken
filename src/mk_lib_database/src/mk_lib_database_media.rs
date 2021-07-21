@@ -17,3 +17,16 @@ pub async fn mk_lib_database_media_insert(client: &tokio_postgres::Client,
                        &mm_media_metadata_guid, &mm_media_ffprobe_json, &mm_media_json]).await?;
     Ok()
 }
+
+
+// // cargo test -- --show-output
+// #[cfg(test)]
+// mod test_mk_lib_common {
+//     use super::*;
+//
+//     macro_rules! aw {
+//     ($e:expr) => {
+//         tokio_test::block_on($e)
+//     };
+//   }
+// }

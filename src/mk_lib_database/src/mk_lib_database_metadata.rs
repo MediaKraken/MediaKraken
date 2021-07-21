@@ -32,3 +32,16 @@ pub async fn mk_lib_database_metadata_exists_tv(client: &tokio_postgres::Client,
     let exists_status: bool = row.get("found_record");
     Ok(exists_status)
 }
+
+
+// // cargo test -- --show-output
+// #[cfg(test)]
+// mod test_mk_lib_common {
+//     use super::*;
+//
+//     macro_rules! aw {
+//     ($e:expr) => {
+//         tokio_test::block_on($e)
+//     };
+//   }
+// }
