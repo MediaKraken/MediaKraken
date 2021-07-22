@@ -71,9 +71,9 @@ struct MetadataTV {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // start logging
-    const LOGGING_INDEX_NAME: &str = "mk_tmdb_netfetch_update";
+    const LOGGING_INDEX_NAME: &str = "mktmdbnetfetchupdate";
     mk_lib_logging::mk_logging_post_elk("info",
-                                        "START",
+                                        json!({"START": "START"}),
                                         LOGGING_INDEX_NAME).await;
 
     // open the database
@@ -155,7 +155,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // stop logging
     mk_lib_logging::mk_logging_post_elk("info",
-                                        "STOP",
+                                        json!({"STOP": "STOP"}),
                                         LOGGING_INDEX_NAME).await;
     Ok(())
 }

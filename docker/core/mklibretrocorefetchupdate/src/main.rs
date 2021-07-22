@@ -40,9 +40,9 @@ mod mk_lib_network;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // start logging
-    const LOGGING_INDEX_NAME: &str = "mk_libretro_core_netfetch";
+    const LOGGING_INDEX_NAME: &str = "mklibretrocorenetfetchupdate";
     mk_lib_logging::mk_logging_post_elk("info",
-                                        "START",
+                                        json!({"START": "START"}),
                                         LOGGING_INDEX_NAME).await;
 
     // populate current cores into hashmap
@@ -83,7 +83,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // stop logging
     mk_lib_logging::mk_logging_post_elk("info",
-                                        "STOP",
+                                        json!({"STOP": "STOP"}),
                                         LOGGING_INDEX_NAME).await;
     Ok(())
 }

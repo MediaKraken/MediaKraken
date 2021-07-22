@@ -4,13 +4,13 @@ use std::error::Error;
 use tokio::time::{Duration, sleep};
 
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_logging/src/mk_lib_logging.rs"]
+#[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
 mod mk_lib_logging;
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_database/src/mk_lib_database.rs"]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
 mod mk_lib_database;
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_database/src/mk_lib_database_cron.rs"]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_cron.rs"]
 mod mk_lib_database_cron;
 
 #[cfg(not(debug_assertions))]
@@ -26,9 +26,9 @@ mod mk_lib_database_cron;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // start logging
-    const LOGGING_INDEX_NAME: &str = "mk_cron_processor";
+    const LOGGING_INDEX_NAME: &str = "mkcron";
     mk_lib_logging::mk_logging_post_elk("info",
-                                        "START",
+                                        json!({"START": "START"}),
                                         LOGGING_INDEX_NAME).await;
 
     // open the database
@@ -75,7 +75,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
             let uuid_cron: uuid::Uuid = row_data.get("mm_cron_guid");
             mk_lib_logging::mk_logging_post_elk("info",
-                                                &uuid_cron.to_string(),
+                                                json!({"UUID": &uuid_cron.to_string()}),
                                                 LOGGING_INDEX_NAME).await;
         }
         sleep(Duration::from_secs(60)).await;
@@ -83,7 +83,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
     // Code below can't be hit currently. So, drop the commands.
     // mk_lib_logging::mk_logging_post_elk("info",
-    //                                     "STOP",
+    //                                     json!({"STOP": "STOP"}),
     //                                     LOGGING_INDEX_NAME).await;
     // close the rabbit connection
     // rabbit_connection.close();

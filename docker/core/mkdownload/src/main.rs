@@ -27,9 +27,9 @@ mod mk_lib_network;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // start logging
-    const LOGGING_INDEX_NAME: &str = "mk_download_server";
+    const LOGGING_INDEX_NAME: &str = "mkdownload";
     mk_lib_logging::mk_logging_post_elk("info",
-                                        "START",
+                                        json!({"START": "START"}),
                                         LOGGING_INDEX_NAME).await;
 
     // open the database

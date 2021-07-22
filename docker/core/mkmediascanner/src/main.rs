@@ -69,9 +69,9 @@ mod mk_lib_database_notification;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // start logging
-    const LOGGING_INDEX_NAME: &str = "mk_file_system_media_scanner";
+    const LOGGING_INDEX_NAME: &str = "mkmediascanner";
     mk_lib_logging::mk_logging_post_elk("info",
-                                        "START",
+                                        json!({"START": "START"}),
                                         LOGGING_INDEX_NAME).await;
 
     // setup regex for finding media parts
@@ -385,6 +385,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // close rabbitmq
     rabbit_connection.close();
 
-    mk_lib_logging::mk_logging_post_elk("info", "STOP", LOGGING_INDEX_NAME).await;
+    mk_lib_logging::mk_logging_post_elk("info",
+                                        json!({"STOP": "STOP"}),
+                                        LOGGING_INDEX_NAME).await;
     Ok(())
 }

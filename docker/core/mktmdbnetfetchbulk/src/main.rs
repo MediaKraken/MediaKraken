@@ -3,28 +3,28 @@ use std::error::Error;
 use uuid::Uuid;
 
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_common/src/mk_lib_common.rs"]
+#[path = "../../../../src/mk_lib_common/src/mk_lib_common.rs"]
 mod mk_lib_common;
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_common/src/mk_lib_common_enum_media_type.rs"]
+#[path = "../../../../src/mk_lib_common/src/mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_compression/src/mk_lib_compression.rs"]
+#[path = "../../../../src/mk_lib_compression/src/mk_lib_compression.rs"]
 mod mk_lib_compression;
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_database/src/mk_lib_database.rs"]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
 mod mk_lib_database;
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_database/src/mk_lib_database_download.rs"]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_download.rs"]
 mod mk_lib_database_download;
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_database/src/mk_lib_database_metadata.rs"]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_metadata.rs"]
 mod mk_lib_database_metadata;
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_logging/src/mk_lib_logging.rs"]
+#[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
 mod mk_lib_logging;
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_network/src/mk_lib_network.rs"]
+#[path = "../../../../src/mk_lib_network/src/mk_lib_network.rs"]
 mod mk_lib_network;
 
 #[cfg(not(debug_assertions))]
@@ -71,9 +71,9 @@ struct MetadataTV {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // start logging
-    const LOGGING_INDEX_NAME: &str = "mk_tmdb_netfetch_bulk";
+    const LOGGING_INDEX_NAME: &str = "mktmdbnetfetchbulk";
     mk_lib_logging::mk_logging_post_elk("info",
-                                        "START",
+                                        json!({"START": "START"}),
                                         LOGGING_INDEX_NAME).await;
 
     let fetch_date: String = "07_15_2021".to_string();
@@ -139,7 +139,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // stop logging
     mk_lib_logging::mk_logging_post_elk("info",
-                                        "STOP",
+                                        json!({"STOP": "STOP"}),
                                         LOGGING_INDEX_NAME).await;
     Ok(())
 }
