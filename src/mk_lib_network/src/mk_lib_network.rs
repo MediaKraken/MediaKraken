@@ -64,8 +64,7 @@ mod test_mk_lib_network {
     #[test]
     fn test_mk_data_from_url() {
         let res = aw!(mk_data_from_url(
-            "https://github.com/MediaKraken/MediaKraken_Deployment/raw/master/LICENSE".to_string(),
-            "license.md".to_string()));
+            "https://github.com/MediaKraken/MediaKraken_Deployment/raw/master/LICENSE".to_string()));
         assert!(res.is_ok());
     }
 

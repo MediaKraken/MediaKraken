@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::fs;
 use walkdir::{DirEntry, WalkDir};
+use serde_json::json;
 
 fn is_hidden(entry: &DirEntry) -> bool {
     entry.file_name()

@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::error::Error;
 use uuid::Uuid;
+use serde_json::json;
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_common/src/mk_lib_common.rs"]
@@ -80,6 +81,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // open the database
     let db_client = &mk_lib_database::mk_lib_database_open().await?;
+    mk_lib_database_version::mk_lib_database_version_check(db_client,
+                                                           false).await?;
 
     // grab the movie id's
     // files.tmdb.org = 13.227.42.62

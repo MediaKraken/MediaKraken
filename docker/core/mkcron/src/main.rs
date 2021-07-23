@@ -2,6 +2,7 @@ use amiquip::{AmqpProperties, Connection, Exchange, Publish, Result};
 use chrono::prelude::*;
 use std::error::Error;
 use tokio::time::{Duration, sleep};
+use serde_json::json;
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
@@ -12,6 +13,10 @@ mod mk_lib_database;
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_cron.rs"]
 mod mk_lib_database_cron;
+#[cfg(debug_assertions)]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
+mod mk_lib_database_version;
+
 
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
@@ -22,6 +27,9 @@ mod mk_lib_database;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_cron.rs"]
 mod mk_lib_database_cron;
+#[cfg(not(debug_assertions))]
+#[path = "mk_lib_database_version.rs"]
+mod mk_lib_database_version;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -33,6 +41,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // open the database
     let db_client = &mk_lib_database::mk_lib_database_open().await?;
+    mk_lib_database_version::mk_lib_database_version_check(db_client,
+                                                           false).await?;
 
     // open rabbit connection
     let mut rabbit_connection = Connection::insecure_open(

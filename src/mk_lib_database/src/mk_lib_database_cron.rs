@@ -1,5 +1,4 @@
 use tokio_postgres::{Error, Row};
-use uuid::Uuid;
 
 pub async fn mk_lib_database_cron_service_read(client: &tokio_postgres::Client)
                                                -> Result<Vec<Row>, Error> {

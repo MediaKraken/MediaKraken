@@ -1,7 +1,7 @@
-use amiquip::{Connection, Exchange, Result, ConsumerMessage, ConsumerOptions, QueueDeclareOptions};
-use std::path::Path;
+use amiquip::{Connection, ConsumerMessage, ConsumerOptions, Exchange, QueueDeclareOptions, Result};
 use serde_json::{json, Value};
 use std::error::Error;
+use std::path::Path;
 use std::process::Command;
 
 #[cfg(debug_assertions)]
@@ -34,8 +34,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // open the database
     let db_client = &mk_lib_database::mk_lib_database_open().await?;
-    let option_config_json: Value = serde_json::from_str(
-        &mk_lib_database::mk_lib_database_options(db_client).await.unwrap());
+    let option_config_json = &mk_lib_database::mk_lib_database_options(db_client).await?;
 
     // open rabbit connection
     let mut rabbit_connection = Connection::insecure_open(
@@ -64,7 +63,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     if json_message["Type"].to_string() == "File" {
                         // do NOT remove the header.....this is the SAVE location
                         mk_lib_network::mk_download_file_from_url(json_message["URL"].to_string(),
-                                                                 json_message["Local Save Path"].to_string());
+                                                                  json_message["Local Save Path"].to_string());
                     } else if json_message["Type"].to_string() == "Youtube" {
                         if validator::validate_url(json_message["URL"].to_string()) {
                             Command::new("youtube-dl")
@@ -80,39 +79,37 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         }
                     } else if json_message["Type"].to_string() == "HDTrailers" {
                         // try to grab the RSS feed itself
-                        let data = serde_json::from_str(&mk_lib_network::mk_data_from_url(
-                            "http://feeds.hd-trailers.net/hd-trailers".to_string()).await.unwrap());
+                        let data: serde_json::Value = serde_json::from_str(&mk_lib_network::mk_data_from_url(
+                            "http://feeds.hd-trailers.net/hd-trailers".to_string()).await);
                         mk_lib_logging::mk_logging_post_elk("info",
                                                             json!({ "download": { "hdtrailer_json": data } }),
                                                             LOGGING_INDEX_NAME).await;
-                        if data != "" {
-                            for item in data["rss"]["channel"]["item"] {
-                                mk_lib_logging::mk_logging_post_elk("info",
-                                                                    json!({ "item": item }),
-                                                                    LOGGING_INDEX_NAME).await;
-                                let mut download_link = "";
-                                if (item["title"].contains("(Trailer") &&
-                                    option_config_json["Metadata"]["Trailer"]["Trailer"] == true)
-                                    || (item["title"].contains("(Behind")
-                                    && option_config_json["Metadata"]["Trailer"]["Behind"] == true)
-                                    || (item["title"].contains("(Clip")
-                                    && option_config_json["Metadata"]["Trailer"]["Clip"] == true)
-                                    || (item["title"].contains("(Featurette")
-                                    && option_config_json["Metadata"]["Trailer"]["Featurette"] == true)
-                                    || (item["title"].contains("(Carpool")
-                                    && option_config_json["Metadata"]["Trailer"]["Carpool"] == true)
-                                {
-                                    download_link = item["enclosure"]["@url"];
-                                }
-                                if download_link != "" {
-                                    // do NOT remove the header.....this is the SAVE location
-                                    let file_save_name = format!("/mediakraken/web_app_sanic/static/meta/trailer/{}",
-                                                                 download_link.rsplitn(1, "/"));
-                                    // verify it doesn't exist in meta folder
-                                    if !Path::new(file_save_name).exists() {
-                                        mk_lib_network::mk_download_file_from_url(download_link.to_string(),
-                                                                                  file_save_name.to_string());
-                                    }
+                        for item in data["rss"]["channel"]["item"] {
+                            mk_lib_logging::mk_logging_post_elk("info",
+                                                                json!({ "item": item }),
+                                                                LOGGING_INDEX_NAME).await;
+                            let mut download_link = "";
+                            if (item["title"].contains("(Trailer") &&
+                                option_config_json["Metadata"]["Trailer"]["Trailer"] == true)
+                                || (item["title"].contains("(Behind")
+                                && option_config_json["Metadata"]["Trailer"]["Behind"] == true)
+                                || (item["title"].contains("(Clip")
+                                && option_config_json["Metadata"]["Trailer"]["Clip"] == true)
+                                || (item["title"].contains("(Featurette")
+                                && option_config_json["Metadata"]["Trailer"]["Featurette"] == true)
+                                || (item["title"].contains("(Carpool")
+                                && option_config_json["Metadata"]["Trailer"]["Carpool"] == true)
+                            {
+                                download_link = item["enclosure"]["@url"];
+                            }
+                            if download_link != "" {
+                                // do NOT remove the header.....this is the SAVE location
+                                let file_save_name = format!("/mediakraken/web_app_sanic/static/meta/trailer/{:?}",
+                                                             download_link.rsplitn(1, "/"));
+                                // verify it doesn't exist in meta folder
+                                if !Path::new(&file_save_name).exists() {
+                                    mk_lib_network::mk_download_file_from_url(download_link.to_string(),
+                                                                              file_save_name.to_string());
                                 }
                             }
                         }
