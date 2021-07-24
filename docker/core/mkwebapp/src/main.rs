@@ -60,7 +60,7 @@ async fn main() -> std::io::Result<()> {
 
     // create crypto salt if needed
     if Path::new("./secure/data.zip").exists() == false {
-        mk_lib_logging::mk_logging_post_elk(message_type = "info",
+        mk_lib_logging::mk_logging_post_elk("info",
                                             json!({"stuff": "data.zip not found, generating."}),
                                             LOGGING_INDEX_NAME).await;
         // create the hash salt
