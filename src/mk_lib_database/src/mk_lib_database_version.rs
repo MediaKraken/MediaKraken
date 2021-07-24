@@ -1,4 +1,5 @@
 use tokio::time::{Duration, sleep};
+use tokio_postgres::{Error, Row};
 
 pub static DATABASE_VERSION: u32 = 43;
 
