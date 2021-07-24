@@ -3,6 +3,7 @@ use actix_web_grants::{GrantsMiddleware, PermissionGuard, proc_macro::has_permis
 use actix_web_grants::permissions::{AuthDetails, PermissionsCheck};
 use rcgen::generate_simple_self_signed;
 use serde_json::json;
+use std::path::Path;
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
