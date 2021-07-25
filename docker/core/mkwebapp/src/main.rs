@@ -4,6 +4,7 @@ use actix_web_grants::permissions::{AuthDetails, PermissionsCheck};
 use rcgen::generate_simple_self_signed;
 use serde_json::json;
 use std::path::Path;
+use std::fs::File;
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
@@ -52,9 +53,9 @@ async fn main() -> std::io::Result<()> {
         // generate certs/keys
         let subject_alt_names = vec!["www.mediakraken.org".to_string(), "localhost".to_string()];
         let cert = generate_simple_self_signed(subject_alt_names).unwrap();
-        let mut file_pem =  std::fs::File::create("./key/cacert.pem")?;
+        let mut file_pem =  File::create("./key/cacert.pem")?;
         file_pem.write_all(cert.serialize_pem().unwrap())?;
-        let mut file_key_pem =  std::fs::File::create("./key/privkey.pem")?;
+        let mut file_key_pem =  File::create("./key/privkey.pem")?;
         file_key_pem.write_all(cert.serialize_private_key_pem())?;
     }
 
@@ -66,7 +67,7 @@ async fn main() -> std::io::Result<()> {
         // create the hash salt
         let mut salt;
         if Path::new("/mediakraken/secure/data.zip").exists() == false {
-            let mut file_salt =  std::fs::File::create("/mediakraken/secure/data.zip")?;
+            let mut file_salt = File::create("/mediakraken/secure/data.zip")?;
             const CREDENTIAL_LEN: usize = digest::SHA512_OUTPUT_LEN;
             let salt = [0u8; CREDENTIAL_LEN];
             file_salt.write_all(salt);
