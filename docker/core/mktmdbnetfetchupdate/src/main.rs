@@ -22,6 +22,9 @@ mod mk_lib_database_download;
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_metadata.rs"]
 mod mk_lib_database_metadata;
 #[cfg(debug_assertions)]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
+mod mk_lib_database_version;
+#[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
 mod mk_lib_logging;
 #[cfg(debug_assertions)]
@@ -46,6 +49,9 @@ mod mk_lib_database_download;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_metadata.rs"]
 mod mk_lib_database_metadata;
+#[cfg(not(debug_assertions))]
+#[path = "mk_lib_database_version.rs"]
+mod mk_lib_database_version;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -89,7 +95,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let _fetch_result_movie = mk_lib_network::mk_download_file_from_url(
         format!("https://api.themoviedb.org/3/movie/changes?api_key={}",
                 option_config_json["API"]["themoviedb"]),
-        "/mediakraken/movie_update.gz").await;
+        "/mediakraken/movie_update.gz".to_string()).await;
     let json_result = mk_lib_compression::mk_decompress_gzip(
         "/mediakraken/movie_update.gz").unwrap();
     for movie_change in json_result["results"] {
