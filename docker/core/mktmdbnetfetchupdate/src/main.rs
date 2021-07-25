@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::error::Error;
 use uuid::Uuid;
-use serde_json::json;
+use serde_json::{json, Value};
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_common/src/mk_lib_common.rs"]
@@ -95,33 +95,36 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let _fetch_result_movie = mk_lib_network::mk_download_file_from_url(
         format!("https://api.themoviedb.org/3/movie/changes?api_key={}",
                 option_config_json["API"]["themoviedb"]),
-        "/mediakraken/movie_update.gz".to_string()).await;
+        (&"/mediakraken/movie_update.gz").to_string()).await;
     let json_result = mk_lib_compression::mk_decompress_gzip(
-        "/mediakraken/movie_update.gz").unwrap();
-    for movie_change in json_result["results"] {
-        // verify it's not already in the database
-        let result = mk_lib_database_metadata::mk_lib_database_metadata_exists_movie(db_client,
-                                                                                     metadata_struct.id).await.unwrap();
-        if result == false {
-            let download_result = mk_lib_database_download::mk_lib_database_download_exists(db_client,
-                                                                                            "themoviedb".to_string(),
-                                                                                            mk_lib_common_enum_media_type::DLMediaType::MOVIE,
-                                                                                            metadata_struct.id).await.unwrap();
-            if download_result == false {
-                mk_lib_database_download::mk_lib_database_download_insert(db_client,
-                                                                          "themoviedb".to_string(),
-                                                                          mk_lib_common_enum_media_type::DLMediaType::MOVIE,
-                                                                          Uuid::new_v4(),
-                                                                          metadata_struct.id,
-                                                                          "Fetch".to_string()).await;
-            } else {
-                // it"s on the database, so must update the record with latest information
-                mk_lib_database_download::mk_lib_database_download_insert(db_client,
-                                                                          "themoviedb".to_string(),
-                                                                          mk_lib_common_enum_media_type::DLMediaType::MOVIE,
-                                                                          Uuid::new_v4(),
-                                                                          metadata_struct.id,
-                                                                          "Update".to_string()).await;
+        &(&"/mediakraken/movie_update.gz").to_string()).unwrap();
+    for json_item in json_result["results"] {
+        if !json_item.trim().is_empty() {
+            let metadata_struct: MetadataMovie = serde_json::from_str(json_item)?;
+            // verify it's not already in the database
+            let result = mk_lib_database_metadata::mk_lib_database_metadata_exists_movie(db_client,
+                                                                                         metadata_struct.id).await.unwrap();
+            if result == false {
+                let download_result = mk_lib_database_download::mk_lib_database_download_exists(db_client,
+                                                                                                "themoviedb".to_string(),
+                                                                                                mk_lib_common_enum_media_type::DLMediaType::MOVIE,
+                                                                                                metadata_struct.id).await.unwrap();
+                if download_result == false {
+                    mk_lib_database_download::mk_lib_database_download_insert(db_client,
+                                                                              "themoviedb".to_string(),
+                                                                              mk_lib_common_enum_media_type::DLMediaType::MOVIE,
+                                                                              Uuid::new_v4(),
+                                                                              metadata_struct.id,
+                                                                              "Fetch".to_string()).await;
+                } else {
+                    // it"s on the database, so must update the record with latest information
+                    mk_lib_database_download::mk_lib_database_download_insert(db_client,
+                                                                              "themoviedb".to_string(),
+                                                                              mk_lib_common_enum_media_type::DLMediaType::MOVIE,
+                                                                              Uuid::new_v4(),
+                                                                              metadata_struct.id,
+                                                                              "Update".to_string()).await;
+                }
             }
         }
     }
@@ -131,33 +134,36 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let _fetch_result_movie = mk_lib_network::mk_download_file_from_url(
         format!("https://api.themoviedb.org/3/tv/changes?api_key={}",
                 option_config_json["API"]["themoviedb"]),
-        "/mediakraken/tv_update.gz").await;
+        (&"/mediakraken/tv_update.gz").to_string()).await;
     let json_result = mk_lib_compression::mk_decompress_gzip(
-        "/mediakraken/tv_update.gz").unwrap();
-    for tv_change in json_result["results"] {
-        // verify it's not already in the database
-        let result = mk_lib_database_metadata::mk_lib_database_metadata_exists_tv(db_client,
-                                                                                  metadata_struct.id).await.unwrap();
-        if result == false {
-            let download_result = mk_lib_database_download::mk_lib_database_download_exists(db_client,
-                                                                                            "themoviedb".to_string(),
-                                                                                            mk_lib_common_enum_media_type::DLMediaType::TV,
-                                                                                            metadata_struct.id).await.unwrap();
-            if download_result == false {
-                mk_lib_database_download::mk_lib_database_download_insert(db_client,
-                                                                          "themoviedb".to_string(),
-                                                                          mk_lib_common_enum_media_type::DLMediaType::TV,
-                                                                          Uuid::new_v4(),
-                                                                          metadata_struct.id,
-                                                                          "Fetch".to_string()).await;
-            } else {
-                // it's on the database, so must update the record with latest information
-                mk_lib_database_download::mk_lib_database_download_insert(db_client,
-                                                                          "themoviedb".to_string(),
-                                                                          mk_lib_common_enum_media_type::DLMediaType::TV,
-                                                                          Uuid::new_v4(),
-                                                                          metadata_struct.id,
-                                                                          "Update".to_string()).await;
+        &(&"/mediakraken/tv_update.gz").to_string()).unwrap();
+    for json_item in json_result["results"] {
+        if !json_item.trim().is_empty() {
+            let metadata_struct: MetadataTV = serde_json::from_str(json_item)?;
+            // verify it's not already in the database
+            let result = mk_lib_database_metadata::mk_lib_database_metadata_exists_tv(db_client,
+                                                                                      metadata_struct.id).await.unwrap();
+            if result == false {
+                let download_result = mk_lib_database_download::mk_lib_database_download_exists(db_client,
+                                                                                                "themoviedb".to_string(),
+                                                                                                mk_lib_common_enum_media_type::DLMediaType::TV,
+                                                                                                metadata_struct.id).await.unwrap();
+                if download_result == false {
+                    mk_lib_database_download::mk_lib_database_download_insert(db_client,
+                                                                              "themoviedb".to_string(),
+                                                                              mk_lib_common_enum_media_type::DLMediaType::TV,
+                                                                              Uuid::new_v4(),
+                                                                              metadata_struct.id,
+                                                                              "Fetch".to_string()).await;
+                } else {
+                    // it's on the database, so must update the record with latest information
+                    mk_lib_database_download::mk_lib_database_download_insert(db_client,
+                                                                              "themoviedb".to_string(),
+                                                                              mk_lib_common_enum_media_type::DLMediaType::TV,
+                                                                              Uuid::new_v4(),
+                                                                              metadata_struct.id,
+                                                                              "Update".to_string()).await;
+                }
             }
         }
     }
