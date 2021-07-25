@@ -1,5 +1,3 @@
-use amiquip::{AmqpProperties, Connection, Exchange, Publish, Result};
-use chrono::prelude::*;
 use serde_json::json;
 use std::error::Error;
 use tokio::time::{Duration, sleep};

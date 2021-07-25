@@ -1,0 +1,13 @@
+[package]
+name = "theater_controller_pi"
+version = "0.0.1"
+edition = "2018"
+
+[profile.release]
+panic = 'abort'
+
+[dependencies]
+
+
+[dev-dependencies]
+tokio-test = "*"
