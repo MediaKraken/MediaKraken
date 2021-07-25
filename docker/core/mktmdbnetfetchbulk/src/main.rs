@@ -49,7 +49,7 @@ mod mk_lib_database_download;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_metadata.rs"]
 mod mk_lib_database_metadata;
-#[cfg(debug_assertions)]
+#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_version.rs"]
 mod mk_lib_database_version;
 #[cfg(not(debug_assertions))]

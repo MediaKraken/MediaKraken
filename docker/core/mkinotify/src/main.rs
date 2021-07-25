@@ -30,7 +30,7 @@ mod mk_lib_database;
 #[path = "mk_lib_database_library.rs"]
 mod mk_lib_database_library;
 #[cfg(not(debug_assertions))]
-#[path = ".mk_lib_database_version.rs"]
+#[path = "mk_lib_database_version.rs"]
 mod mk_lib_database_version;
 
 #[tokio::main]
