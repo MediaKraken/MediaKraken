@@ -17,7 +17,6 @@ mod mk_lib_database_cron;
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
 mod mk_lib_database_version;
 
-
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
