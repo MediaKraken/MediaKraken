@@ -18,13 +18,13 @@ pub async fn mk_lib_database_version_check(client: &tokio_postgres::Client,
     let mut version_match: bool = false;
     let version_no: i32 = row.get("mm_version_no");
     if DATABASE_VERSION == version_no {
-        let version_match = true;
+        version_match = true;
     }
     if version_match == false {
         if update_schema == true {
             // do db updates here
             mk_lib_database_version_update(client, 43).await;
-            let version_match = true;
+            version_match = true;
         } else {
             loop {
                 sleep(Duration::from_secs(5)).await;
@@ -33,7 +33,7 @@ pub async fn mk_lib_database_version_check(client: &tokio_postgres::Client,
                     .await?;
                 let version_no: i32 = row.get("mm_version_no");
                 if DATABASE_VERSION == version_no {
-                    let version_match = true;
+                    version_match = true;
                     break;
                 }
             }
