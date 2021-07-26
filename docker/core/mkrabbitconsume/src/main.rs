@@ -27,7 +27,7 @@ mod mk_lib_network;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // start logging
-    const LOGGING_INDEX_NAME: &str = "mkhardwarecontrol";
+    const LOGGING_INDEX_NAME: &str = "mkdownload";
     mk_lib_logging::mk_logging_post_elk("info",
                                         json!({"START": "START"}),
                                         LOGGING_INDEX_NAME).await;
@@ -46,7 +46,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let rabbit_exchange = Exchange::direct(&rabbit_channel);
 
     // Declare the queue.
-    let queue = rabbit_channel.queue_declare("mk_hardware", QueueDeclareOptions::default())?;
+    let queue = rabbit_channel.queue_declare("mk_download", QueueDeclareOptions::default())?;
 
     // Start a consumer.
     let consumer = queue.consume(ConsumerOptions::default())?;

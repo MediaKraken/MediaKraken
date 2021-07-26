@@ -49,7 +49,7 @@ STAGE_ONE_GAME_SERVERS = {
 STAGE_TWO_GAME_SERVERS = {}
 
 STAGE_CORE_IMAGES = {
-    # broadcast server IP for web and client connectivity
+    # broadcast server IP for web and client connectivity, must run from HOST
     'mkbroadcast': ('mkbroadcast', 'scratch', 'core'),
 
     # chat server via mumble
@@ -65,7 +65,13 @@ STAGE_CORE_IMAGES = {
     'mkdatabase': ('mkdatabase', 'debian:buster-slim', 'core'),
 
     # download files/etc trailers/etc from ampq records
-    'mkdownload': ('mkdownload', 'mkbase_alpinepy3', 'core'),
+    'mkdownload': ('mkdownload', 'busybox:1.33.1-uclibc', 'core'),
+
+    # runs control network/ir/if/etc
+    'mkhardwarecontrol': ('mkhardwarecontrol', 'busybox:1.33.1-uclibc', 'core'),
+
+    # runs as HOST to find new hardware - run and exit
+    'mkhardwarescanner': ('mkhardwarescanner', 'busybox:1.33.1-uclibc', 'core'),
 
     # inotify of file system changes to amqp
     'mkinotify': ('mkinotify', 'busybox:1.33.1-uclibc', 'core'),
@@ -73,7 +79,7 @@ STAGE_CORE_IMAGES = {
     # download libretro cores that are newer - run and exit
     'mklibretrocorefetchupdate': ('mklibretrocorefetchupdate', 'scratch', 'core'),
 
-    # scan media directories for new media
+    # scan media directories for new media - run and exit
     'mkmediascanner': ('mkmediascanner', 'scratch', 'core'),
 
     # nginx proxy for http to https and some bot blocking
@@ -85,8 +91,17 @@ STAGE_CORE_IMAGES = {
     # amqp service (rabbitmq)
     'mkrabbitmq': ('mkrabbitmq', 'alpine:3.11', 'core'),
 
+    # download files/etc trailers/etc from ampq records
+    'mkrabbitconsume': ('mkrabbitconsume', 'busybox:1.33.1-uclibc', 'core'),
+
     # download tmdb dump of ids in database and insert into downloads - run and exit
     'mktmdbnetfetchbulk': ('mktmdbnetfetchbulk', 'scratch', 'core'),
+
+    # download tmdb dump of ids that were updated - run and exit
+    'mktmdbnetfetchupdate': ('mktmdbnetfetchupdate', 'scratch', 'core'),
+
+    # transcode/STREAM media to client - run and exit
+    'mktranscode': ('mktranscode', 'alpine:3.13.5', 'core'),
 
     # transmission server
     'mktransmission': ('mktransmission', 'alpine:3.13.5', 'core'),
