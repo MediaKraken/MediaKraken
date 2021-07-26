@@ -32,6 +32,9 @@ mod mk_lib_database_download;
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_library.rs"]
 mod mk_lib_database_library;
 #[cfg(debug_assertions)]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
+mod mk_lib_database_version;
+#[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_media.rs"]
 mod mk_lib_database_media;
 #[cfg(debug_assertions)]
@@ -59,6 +62,9 @@ mod mk_lib_database_download;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_library.rs"]
 mod mk_lib_database_library;
+#[cfg(not(debug_assertions))]
+#[path = "mk_lib_database_version.rs"]
+mod mk_lib_database_version;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_media.rs"]
 mod mk_lib_database_media;
@@ -149,7 +155,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let scan_path = false;
         }
 
-        if scan_path {
+        if scan_path == true {
             // verify the directory inodes has changed
             let metadata = fs::metadata(&media_path)?;
             let last_modified = metadata.modified()?.elapsed()?.as_secs();
@@ -194,8 +200,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     if mk_lib_database_library::mk_lib_database_library_file_exists(db_client,
                                                                                     &file_name).await.unwrap() == false {
                         // set lower here so I can remove a lot of .lower() in the code below
-                        let file_extension = Path::new(&file_name).extension().to_lowercase();
-
+                        let file_extension = Path::new(&file_name).extension().to_string().to_lowercase();
                         // checking subtitles for parts as need multiple files for multiple media files
                         if mk_lib_common_media_extension::MEDIA_EXTENSION.contains(&file_extension)
                             || mk_lib_common_media_extension::SUBTITLE_EXTENSION.contains(&file_extension)
@@ -327,7 +332,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                 None,
                                                                                                 media_json);
                                             // verify ffprobe and bif should run on the data
-                                            if ffprobe_bif_data && mk_lib_common_media_extension::MEDIA_EXTENSION_SKIP_FFMPEG.contains(&file_extension) == false
+                                            if ffprobe_bif_data == true && mk_lib_common_media_extension::MEDIA_EXTENSION_SKIP_FFMPEG.contains(&file_extension) == false
                                                 && mk_lib_common_media_extension::MEDIA_EXTENSION.contains(&file_extension) {
                                                 // Send a message so ffprobe runs
                                                 rabbit_exchange.publish(Publish::with_properties(json!({"Type": "FFProbe", "Media UUID": media_id, "Media Path": file_name}),
@@ -341,7 +346,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                 }
                                             }
                                             // verify it should save a dl "Z" record for search/lookup/etc
-                                            if save_dl_record {
+                                            if save_dl_record == true {
                                                 // media id begin and download que insert
                                                 mk_lib_database_download::mk_lib_database_download_insert(db_client,
                                                                                                           "Z".to_string(),
@@ -366,8 +371,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
                 // end of for loop for each file in library
                 mk_lib_logging::mk_logging_post_elk("info",
-                                                    json!({"worker dir done": dir_path,
-                                            "media class": media_class_type_uuid}),
+                                                    json!({"worker dir done": dir_path, "media class": media_class_type_uuid}),
                                                     LOGGING_INDEX_NAME).await;
                 // set to none so it doesn"t show up anymore in admin status page
                 mk_lib_database_library::mk_lib_database_library_path_status_update(db_client,
