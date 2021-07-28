@@ -119,7 +119,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         // check for UNC
         let unc_slice = &row_data.get("mm_media_dir_path")[..1];
         if unc_slice == "\\" {
-            let scan_path = false;
+            scan_path = false;
             // addr, share, path = common_string.com_string_unc_to_addr_path(row_data["mm_media_dir_path"]);
             // smb_stuff = common_network_cifs.CommonCIFSShare();
             // if smb_stuff.com_cifs_open(ip_addr = addr) {
@@ -144,7 +144,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             // }
         } else {
             // make sure the path still exists
-            let media_path: PathBuf = ["/mediakraken/mnt",
+            media_path: PathBuf = ["/mediakraken/mnt",
                 row_data.get("mm_media_dir_path")].iter().collect();
         }
         if !Path::new(&media_path).exists() {

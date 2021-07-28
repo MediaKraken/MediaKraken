@@ -1,12 +1,8 @@
 use amiquip::{Connection, ConsumerMessage, ConsumerOptions, Exchange, QueueDeclareOptions, Result};
 use serde_json::{json, Value};
 use std::error::Error;
-use std::path::Path;
-use std::process::Command;
+//use std::process::Command;
 
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
-mod mk_lib_database;
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -14,9 +10,6 @@ mod mk_lib_logging;
 #[path = "../../../../src/mk_lib_network/src/mk_lib_network.rs"]
 mod mk_lib_network;
 
-#[cfg(not(debug_assertions))]
-#[path = "mk_lib_database.rs"]
-mod mk_lib_database;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -32,10 +25,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         json!({"START": "START"}),
                                         LOGGING_INDEX_NAME).await;
 
-    // open the database
-    let db_client = &mk_lib_database::mk_lib_database_open().await?;
-    let option_config_json = &mk_lib_database::mk_lib_database_options(db_client).await?;
-
     // open rabbit connection
     let mut rabbit_connection = Connection::insecure_open(
         "amqp://guest:guest@mkstack_rabbitmq:5672")?;
@@ -43,7 +32,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let rabbit_channel = rabbit_connection.open_channel(None)?;
 
     // Get a handle to the direct exchange on our channel.
-    let rabbit_exchange = Exchange::direct(&rabbit_channel);
+    let _rabbit_exchange = Exchange::direct(&rabbit_channel);
 
     // Declare the queue.
     let queue = rabbit_channel.queue_declare("mk_hardware", QueueDeclareOptions::default())?;

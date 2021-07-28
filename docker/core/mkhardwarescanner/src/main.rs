@@ -1,6 +1,6 @@
 use serde_json::json;
 use std::error::Error;
-use tokio::time::{Duration, sleep};
+use onvif::discovery;
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
@@ -38,6 +38,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         json!({"HWScan": "After Chromcast"}),
                                         LOGGING_INDEX_NAME).await;
 
+    // crestron device discover
+// # crestron_devices = common_hardware_crestron.com_hardware_crestron_discover()
+// # if crestron_devices is not None:
+// #     for crestron in crestron_devices:
+// #         common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text= {'crestron out': crestron})
+// #         media_devices.append({'Crestron': crestron})
+    mk_lib_logging::mk_logging_post_elk("info",
+                                        json!({"HWScan": "After Crestron"}),
+                                        LOGGING_INDEX_NAME).await;
+
 // dlna devices
 // # TODO looks like debugging shows up if run from this program
 // # for dlna_devices in common_network_dlna.com_net_dlna_discover():
@@ -71,8 +81,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         json!({"HWScan": "After HDHomerun"}),
                                         LOGGING_INDEX_NAME).await;
 
+    // onvif cameras discover
+    use futures_util::stream::StreamExt;
+    const MAX_CONCURRENT_JUMPERS: usize = 100;
+    discovery::discover(std::time::Duration::from_secs(1))
+        .await
+        .unwrap()
+        .for_each_concurrent(MAX_CONCURRENT_JUMPERS, |addr| async move {
+            println!("Onvif Device found: {:?}", addr);
+        })
+        .await;
+    mk_lib_logging::mk_logging_post_elk("info",
+                                        json!({"HWScan": "After Onvif"}),
+                                        LOGGING_INDEX_NAME).await;
+
 // phillips hue discover
-// # TODO this does NOT do discovery
 // # hue_inst = common_hardware_hue.CommonHardwareHue()
 // # media_devices.append({'Phue': hue_inst.com_hardware_hue_get_api()})
     mk_lib_logging::mk_logging_post_elk("info",
@@ -100,14 +123,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         json!({"HWScan": "After SOCO"}),
                                         LOGGING_INDEX_NAME).await;
 
-// crestron device discover
-// # crestron_devices = common_hardware_crestron.com_hardware_crestron_discover()
-// # if crestron_devices is not None:
-// #     for crestron in crestron_devices:
-// #         common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text= {'crestron out': crestron})
-// #         media_devices.append({'Crestron': crestron})
+    // sonos discover
+    let mut devices = sonor::discover(Duration::from_secs(5)).await?;
+    while let Some(device) = devices.try_next().await? {
+        let name = device.name().await?;
+        println!("Sonos Discovered {}", name);
+    }
     mk_lib_logging::mk_logging_post_elk("info",
-                                        json!({"HWScan": "After Crestron"}),
+                                        json!({"HWScan": "After Sonos"}),
                                         LOGGING_INDEX_NAME).await;
 
 // common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
@@ -122,4 +145,5 @@ async fn main() -> Result<(), Box<dyn Error>> {
     mk_lib_logging::mk_logging_post_elk("info",
                                         json!({"STOP": "STOP"}),
                                         LOGGING_INDEX_NAME).await;
+    Ok(())
 }

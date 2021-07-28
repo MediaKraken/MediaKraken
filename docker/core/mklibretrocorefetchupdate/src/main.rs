@@ -1,7 +1,5 @@
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::error::Error;
-use std::fs;
 use walkdir::{DirEntry, WalkDir};
 use serde_json::json;
 

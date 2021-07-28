@@ -27,6 +27,7 @@ pub async fn mk_lib_database_open() -> Result<tokio_postgres::Client, Error> {
     Ok(client)
 }
 
+#[allow(dead_code)]
 pub async fn mk_lib_database_options(client: &tokio_postgres::Client) -> Result<serde_json::Value, Error> {
     let row = client
         .query_one("select mm_options_json from mm_options_and_status", &[])
@@ -36,6 +37,7 @@ pub async fn mk_lib_database_options(client: &tokio_postgres::Client) -> Result<
     Ok(mm_options_json)
 }
 
+#[allow(dead_code)]
 pub async fn mk_lib_database_status(client: &tokio_postgres::Client) -> Result<String, Error> {
     let row = client
         .query_one("select mm_status_json from mm_options_and_status", &[])

@@ -1,8 +1,9 @@
 use tokio::time::{Duration, sleep};
-use tokio_postgres::{Error, Row};
+use tokio_postgres::Error;
 
 pub static DATABASE_VERSION: i32 = 43;
 
+#[allow(dead_code)]
 pub async fn mk_lib_database_version(client: &tokio_postgres::Client) -> Result<i32, Error> {
     let row = client
         .query_one("select mm_version_no from mm_version", &[])
@@ -23,7 +24,7 @@ pub async fn mk_lib_database_version_check(client: &tokio_postgres::Client,
     if version_match == false {
         if update_schema == true {
             // do db updates here
-            mk_lib_database_version_update(client, 43).await;
+            mk_lib_database_version_update(client, 43).await?;
             version_match = true;
         } else {
             loop {
@@ -42,7 +43,7 @@ pub async fn mk_lib_database_version_check(client: &tokio_postgres::Client,
     Ok(version_match)
 }
 
-
+#[allow(dead_code)]
 pub async fn mk_lib_database_version_update(client: &tokio_postgres::Client,
                                             version_number: i32) -> Result<(), Error> {
     client

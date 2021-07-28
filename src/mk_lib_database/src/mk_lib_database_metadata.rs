@@ -11,6 +11,7 @@ pub async fn mk_lib_database_metadata_exists_movie(client: &tokio_postgres::Clie
     Ok(exists_status)
 }
 
+#[allow(dead_code)]
 pub async fn mk_lib_database_metadata_exists_person(client: &tokio_postgres::Client,
                                                 metadata_id: i32)
                                                 -> Result<bool, Error> {

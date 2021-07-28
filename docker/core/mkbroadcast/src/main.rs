@@ -1,7 +1,7 @@
 use pnet::datalink;
 use shiplift::Docker;
 use std::io;
-use std::net::{AddrParseError, IpAddr, Ipv4Addr};
+use std::net::IpAddr;
 use std::str;
 use tokio::net::UdpSocket;
 
@@ -13,14 +13,14 @@ async fn main() -> io::Result<()> {
         if iface.name == "ens18" {
             for source_ip in iface.ips.iter() {
                 if source_ip.is_ipv4() {
-                    println!("{:?}", source_ip);
+                    // println!("{:?}", source_ip);
                     let source_ip = iface.ips.iter().find(|ip| ip.is_ipv4())
                     .map(|ip| match ip.ip() {
                         IpAddr::V4(ip) => ip,
                         _ => unreachable!(),
                     }).unwrap();
                     mediakraken_ip = source_ip.to_string();
-                    println!("{:?}", mediakraken_ip);
+                    // println!("{:?}", mediakraken_ip);
                     break;
                 }
             }
@@ -54,13 +54,12 @@ async fn main() -> io::Result<()> {
             };
             if net_string == "who is MediaKrakenServer?"
             {
-                println!("{:?} bytes received {:?} {:?}", len, addr, net_string);
-                println!("{:?} mk port", host_port);
-
+                // println!("{:?} bytes received {:?} {:?}", len, addr, net_string);
+                // println!("{:?} mk port", host_port);
                 let mk_address = format!("{}:{}", mediakraken_ip, host_port);
-                println!("{:?} mk_address", mk_address);
-                let len = sock.send_to(&mk_address.into_bytes(), addr).await?;
-                println!("{:?} bytes sent", len);
+                // println!("{:?} mk_address", mk_address);
+                let _len = sock.send_to(&mk_address.into_bytes(), addr).await?;
+                // println!("{:?} bytes sent", len);
             }
         }
     }

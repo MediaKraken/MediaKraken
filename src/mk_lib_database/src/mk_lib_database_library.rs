@@ -8,6 +8,7 @@ pub async fn mk_lib_database_library_read(client: &tokio_postgres::Client)
     Ok(rows)
 }
 
+#[allow(dead_code)]
 pub async fn mk_lib_database_library_path_audit(client: &tokio_postgres::Client)
                                                 -> Result<Vec<Row>, Error> {
     let rows = client
@@ -17,7 +18,7 @@ pub async fn mk_lib_database_library_path_audit(client: &tokio_postgres::Client)
     Ok(rows)
 }
 
-
+#[allow(dead_code)]
 pub async fn mk_lib_database_library_path_status(client: &tokio_postgres::Client)
                                                  -> Result<Vec<Row>, Error> {
     let rows = client
@@ -28,7 +29,7 @@ pub async fn mk_lib_database_library_path_status(client: &tokio_postgres::Client
     Ok(rows)
 }
 
-
+#[allow(dead_code)]
 pub async fn mk_lib_database_library_path_status_update(client: &tokio_postgres::Client,
                                                         library_uuid: uuid::Uuid,
                                                         library_status_json: serde_json::Value)
@@ -38,6 +39,7 @@ pub async fn mk_lib_database_library_path_status_update(client: &tokio_postgres:
     Ok(())
 }
 
+#[allow(dead_code)]
 pub async fn mk_lib_database_library_path_timestamp_update(client: &tokio_postgres::Client,
                                                            library_uuid: uuid::Uuid)
                                                            -> Result<(), Error> {
@@ -47,6 +49,7 @@ pub async fn mk_lib_database_library_path_timestamp_update(client: &tokio_postgr
     Ok(())
 }
 
+#[allow(dead_code)]
 pub async fn mk_lib_database_library_file_exists(client: &tokio_postgres::Client,
                                                  file_name: String)
                                                  -> Result<bool, Error> {

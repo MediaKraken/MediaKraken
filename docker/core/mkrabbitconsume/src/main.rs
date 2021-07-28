@@ -1,8 +1,6 @@
 use amiquip::{Connection, ConsumerMessage, ConsumerOptions, Exchange, QueueDeclareOptions, Result};
 use serde_json::{json, Value};
 use std::error::Error;
-use std::path::Path;
-use std::process::Command;
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
@@ -43,7 +41,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let rabbit_channel = rabbit_connection.open_channel(None)?;
 
     // Get a handle to the direct exchange on our channel.
-    let rabbit_exchange = Exchange::direct(&rabbit_channel);
+    let _rabbit_exchange = Exchange::direct(&rabbit_channel);
 
     // Declare the queue.
     let queue = rabbit_channel.queue_declare("mk_download", QueueDeclareOptions::default())?;

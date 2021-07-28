@@ -58,18 +58,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let mut time_delta: chrono::Duration;
             println!("row_data: {:?}", row_data);
             let cron_schedule: String = row_data.get("mm_cron_schedule");
-            if cron_schedule == "Weekly" {
-                time_delta = chrono::Duration::weeks(1);
+            let cron_timespan: i64 = row_data.get("mm_cron_timespan");
+            if cron_schedule == "Week(s)" {
+                time_delta = chrono::Duration::weeks(cron_timespan);
+            } else if cron_schedule == "Day(s)" {
+                time_delta = chrono::Duration::days(cron_timespan);
+            } else if cron_schedule == "Hour(s)" {
+                time_delta = chrono::Duration::hours(cron_timespan);
+            } else if cron_schedule == "Minute(s)" {
+                time_delta = chrono::Duration::minutes(cron_timespan);
             } else {
-                let time_span_vector: Vec<&str> = cron_schedule.split(' ').collect();
-                if time_span_vector[0] == "Days" {
-                    time_delta = chrono::Duration::days(time_span_vector[1].parse().unwrap());
-                } else if time_span_vector[0] == "Hours" {
-                    time_delta = chrono::Duration::hours(time_span_vector[1].parse().unwrap());
-                } else {
-                    // time_span_vector[0] == "Minutes":
-                    time_delta = chrono::Duration::minutes(time_span_vector[1].parse().unwrap());
-                }
+                time_delta = chrono::Duration::seconds(cron_timespan);
             }
             let date_check: DateTime<Utc> = Utc::now() - time_delta;
             let last_run: DateTime<Utc> = row_data.get("mm_cron_last_run");
@@ -80,7 +79,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                  cron_json["route_key"].to_string(),
                                                                  AmqpProperties::default().with_delivery_mode(2).with_content_type("text/plain".to_string())))?;
                 mk_lib_database_cron::mk_lib_database_cron_time_update(db_client,
-                                                                       row_data.get("mm_cron_guid")).await;
+                                                                       row_data.get("mm_cron_guid")).await?;
             }
             let uuid_cron: uuid::Uuid = row_data.get("mm_cron_guid");
             mk_lib_logging::mk_logging_post_elk("info",
@@ -89,13 +88,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
         sleep(Duration::from_secs(60)).await;
     }
-    Ok(())
-    // Code below can't be hit currently. So, drop the commands.
-    // mk_lib_logging::mk_logging_post_elk("info",
-    //                                     json!({"STOP": "STOP"}),
-    //                                     LOGGING_INDEX_NAME).await;
-    // close the rabbit connection
-    // rabbit_connection.close();
-    // close the database
-    // db_client.db_close();
+// Ok(())
+// Code below can't be hit currently. So, drop the commands.
+// mk_lib_logging::mk_logging_post_elk("info",
+//                                     json!({"STOP": "STOP"}),
+//                                     LOGGING_INDEX_NAME).await;
+// close the rabbit connection
+// rabbit_connection.close();
+// close the database
+// db_client.db_close();
 }

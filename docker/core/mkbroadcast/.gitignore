@@ -1,2 +1,3 @@
 /Dockerfile~
 /target/
+/Cargo.lock

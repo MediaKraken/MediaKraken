@@ -68,7 +68,7 @@ async fn main() -> std::io::Result<()> {
                                             json!({"stuff": "data.zip not found, generating."}),
                                             LOGGING_INDEX_NAME).await;
         // create the hash salt
-        let mut salt;
+        //let mut salt;
         if Path::new("/mediakraken/secure/data.zip").exists() == false {
             let mut file_salt = File::create("/mediakraken/secure/data.zip")?;
             const CREDENTIAL_LEN: usize = digest::SHA512_OUTPUT_LEN;
@@ -104,9 +104,9 @@ return self.fernet.decrypt(decode_string.encode())
     }
 
     // db version check
-    let db_client = &mk_lib_database::mk_lib_database_open().await?;
+    let db_client = &mk_lib_database::mk_lib_database_open().await.unwrap();
     mk_lib_database_version::mk_lib_database_version_check(db_client,
-                                                           false).await?;
+                                                           false).await.unwrap();
 
     // startup the server
     HttpServer::new(|| {

@@ -1,3 +1,4 @@
+#![allow(unused)]
 #[non_exhaustive]
 pub struct DLMediaType;
 

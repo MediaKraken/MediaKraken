@@ -1,5 +1,5 @@
-use std::io::Read;
 
+#![allow(unused)]
 pub fn mk_decompress_gzip(archive_file: &str) -> Result<String, std::io::Error> {
     let file_handle = std::fs::File::open(archive_file)?;
     let mut gz = flate2::read::GzDecoder::new(file_handle);
@@ -23,7 +23,7 @@ pub fn mk_decompress_zip(archive_file: &str, write_to_file: bool,
     Ok(gz_data)
 }
 
-// // cargo test -- --show-output
+// cargo test -- --show-output
 // #[cfg(test)]
 // mod test_mk_lib_common {
 //     use super::*;
