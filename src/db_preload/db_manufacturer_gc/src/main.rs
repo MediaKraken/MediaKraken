@@ -12,6 +12,10 @@ mod mk_lib_database;
 mod mk_lib_database_hardware_device;
 
 #[cfg(debug_assertions)]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
+mod mk_lib_database_version;
+
+#[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_file/src/mk_lib_file.rs"]
 mod mk_lib_file;
 
@@ -23,20 +27,23 @@ mod mk_lib_network;
 async fn main() -> Result<(), Box<dyn Error>> {
     // open the database
     let db_client = &mk_lib_database::mk_lib_database_open().await?;
+    mk_lib_database_version::mk_lib_database_version_check(db_client,
+                                                           false).await?;
     // grab the manufacturer's from Global Cache
     // let fetch_result = mk_lib_network::mk_data_from_url(
     //     "https://irdb.globalcache.com:8081/api/brands/".to_string()).await;
+    // saved to data.txt as couldn't return data with reqwest
     let fetch_result = mk_lib_file::mk_read_file_data(
-        &"/home/spoot/MediaKraken/src/db_preload/db_manufacturer_gc/src/data.txt".to_string()).unwrap();
+        &"C:\\Users\\spoot\\Documents\\MediaKraken\\src\\db_preload\\db_manufacturer_gc\\src\\data.txt".to_string()).unwrap();
     //print!("{:?}", fetch_result);
 
     let v: Vec<Value> = serde_json::from_str(&fetch_result)?;
     for item in &v {
-        println!("{:?}\n", item);
-        println!("{:?} {:?}\n", item["$id"], item["Name"]);
+        // println!("{:?}\n", item);
+        // println!("{:?} {:?}\n", item["$id"].to_string().replace("\"", ""), item["Name"].to_string().replace("\"", ""));
         let result = mk_lib_database_hardware_device::mk_lib_database_hardware_manufacturer_upsert(db_client,
-                                                                                     item["Name"].to_string(),
-                                                                                                   item["$id"].to_string().parse::<i16>().unwrap()).await;
+                                                                                     item["Name"].to_string().to_string().replace("\"", ""),
+                                                                                                   item["$id"].to_string().replace("\"", "").parse::<i32>().unwrap()).await?;
     }
     Ok(())
 }
