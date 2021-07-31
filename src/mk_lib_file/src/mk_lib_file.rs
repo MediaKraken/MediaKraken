@@ -2,11 +2,11 @@ use std::io;
 use std::io::prelude::*;
 use walkdir::{DirEntry, WalkDir};
 
-pub fn mk_read_file_data(file_to_read: &str) -> io::Result<()> {
+pub fn mk_read_file_data(file_to_read: &str) -> io::Result<String> {
     let mut file_handle = std::fs::File::open(file_to_read)?;
     let mut buffer = String::new();
     file_handle.read_to_string(&mut buffer)?;
-    Ok(())
+    Ok(buffer)
 }
 
 pub fn mk_file_is_hidden(entry: &DirEntry) -> bool {
