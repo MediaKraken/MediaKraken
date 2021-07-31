@@ -44,6 +44,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let result = mk_lib_database_hardware_device::mk_lib_database_hardware_manufacturer_upsert(db_client,
                                                                                      item["Name"].to_string().to_string().replace("\"", ""),
                                                                                                    item["$id"].to_string().replace("\"", "").parse::<i32>().unwrap()).await?;
+        // fetch types for the manufacturer
+        let fetch_result = mk_lib_network::mk_data_from_url(format!("{:?}").to_string()).await;
     }
     Ok(())
 }
