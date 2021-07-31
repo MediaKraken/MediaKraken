@@ -45,7 +45,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                      item["Name"].to_string().to_string().replace("\"", ""),
                                                                                                    item["$id"].to_string().replace("\"", "").parse::<i32>().unwrap()).await?;
         // fetch types for the manufacturer
-        let fetch_result = mk_lib_network::mk_data_from_url(format!("{:?}").to_string()).await;
+        let fetch_result_type = mk_lib_network::mk_data_from_url(format!("https://irdb.globalcache.com:8081/api/brands/{:?}/types",
+                                                                    item["Name"].to_string().replace("\"", "")).to_string()).await.unwrap();
+        let v_type: Vec<Value> = serde_json::from_str(&fetch_result_type)?;
+        for item_type in &v_type {
+            println!("item_type: {:?}\n", item_type);
+        }
+        break;
     }
     Ok(())
 }
