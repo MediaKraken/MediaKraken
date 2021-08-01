@@ -1,15 +1,35 @@
 use std::io::Cursor;
 use std::str;
+use std::io::Read;
+use std::collections::HashMap;
+use reqwest::header::CONTENT_TYPE;
 
-type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+//type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
-pub async fn mk_data_from_url(url: String) -> Result<String> {
+pub async fn mk_data_from_url_to_json(url: String) -> Result<HashMap<String, String>, Box<dyn std::error::Error>> {
+    // Build the client using the builder pattern
+    let client = reqwest::Client::builder().build()?;
+    // Perform the actual execution of the network request
+    let res = client
+        .get(url)
+        .header(CONTENT_TYPE, "Content-Type: application/json")
+        .send()
+        .await?;
+    // Parse the response body as Json in this case
+    let ip = res
+        .json::<HashMap<String, String>>()
+        .await?;
+    println!("{:?}", ip);
+    Ok(ip)
+}
+
+pub async fn mk_data_from_url(url: String) -> Result<String, Box<dyn std::error::Error>> {
     let response = reqwest::get(url).await?;
     let content = response.bytes().await?;
     Ok(str::from_utf8(&content).unwrap().to_string())
 }
 
-pub async fn mk_download_file_from_url(url: String, file_name: String) -> Result<()> {
+pub async fn mk_download_file_from_url(url: String, file_name: String) -> Result<(), Box<dyn std::error::Error>> {
     let response = reqwest::get(url).await?;
     let mut file = std::fs::File::create(file_name)?;
     let mut content = Cursor::new(response.bytes().await?);
