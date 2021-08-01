@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate rocket;
 
+use rocket::fs::{FileServer, relative};
 use rocket::{Rocket, Request, Build};
 use rocket::response::{content, status};
 use rocket::http::Status;
@@ -93,7 +94,8 @@ fn rocket() -> _ {
         .mount("/hello", routes![world, mir])
         .mount("/wave", routes![wave])
         .register("/", catchers![general_not_found])
-        //.attach(sqlx::stage())
+        .mount("/", FileServer::from(relative!("static")))
+    //.attach(sqlx::stage())
     // .attach(Template::custom(|engines| {
     //     tera::customize(&mut engines.tera);
     // }))
