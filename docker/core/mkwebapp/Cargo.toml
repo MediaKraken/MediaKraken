@@ -7,9 +7,6 @@ edition = "2018"
 panic = 'abort'
 
 [dependencies]
-actix-session = "0.4.1"
-actix-web = "3.3.2"
-actix-web-grants = "2.0.1"
 amiquip = { version = "0.4", default-features = false }
 chrono = "0.4"
 rcgen = "0.8.11"
