@@ -12,11 +12,14 @@ chrono = "0.4"
 rcgen = "0.8.11"
 reqwest = { version = "0.11.3", default-features = false, features = ["json", "rustls-tls"] }
 ring = "0.16.20"
+rocket = { version = "0.5.0-rc.1" }
+# rocket_dyn_templates = { version = "0.1.0-rc.1", features = ["tera"] }
 serde = { version = "1.0.126", features = ["derive"] }
 serde_json = "1.0.64"
 shiplift = { version = "0.7", default-features = false, features = ["unix-socket"] }
+sqlx = { version = "0.5", features = [ "runtime-tokio-rustls" ] }
 sys-info = "0.4.0"
-tera = "1.10.0"
+tera = "1.12.1"
 tokio = { version = "1.6.0", features = ["full"] }
 tokio-postgres = { version = "0.7.2", features = ["with-serde_json-1"] }
 walkdir = "2.3.2"
