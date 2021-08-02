@@ -5,7 +5,7 @@ use rocket::fs::{FileServer, relative};
 use rocket::{Rocket, Request, Build};
 use rocket::response::{content, status};
 use rocket::http::Status;
-//use rocket_dyn_templates::Template;
+use rocket_dyn_templates::{Template, tera::Tera, context};
 
 #[derive(FromFormField)]
 enum Lang {
@@ -81,10 +81,24 @@ fn general_not_found() -> content::Html<&'static str> {
     "#)
 }
 
+#[catch(500)]
+fn general_security() -> content::Html<&'static str> {
+    content::Html(r#"
+        <p>Hmm... you shouldn't be here!r?</p>
+    "#)
+}
+
 #[catch(default)]
 fn default_catcher(status: Status, req: &Request<'_>) -> status::Custom<String> {
     let msg = format!("{} ({})", status, req.uri());
     status::Custom(status, msg)
+}
+
+#[get("/about")]
+pub fn about() -> Template {
+    Template::render("public/about.html", context! {
+        title: "MediaKraken About",
+    })
 }
 
 #[launch]
@@ -93,10 +107,10 @@ fn rocket() -> _ {
         .mount("/", routes![hello])
         .mount("/hello", routes![world, mir])
         .mount("/wave", routes![wave])
-        .register("/", catchers![general_not_found])
+        .register("/", catchers![general_not_found, general_security])
         .mount("/", FileServer::from(relative!("static")))
-    //.attach(sqlx::stage())
-    // .attach(Template::custom(|engines| {
-    //     tera::customize(&mut engines.tera);
-    // }))
+        // .attach(sqlx::stage())
+        // .attach(Template::custom(|engines| {
+        //     tera::customize(&mut engines.tera);
+        // }))
 }
