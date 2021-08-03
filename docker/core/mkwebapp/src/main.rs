@@ -103,13 +103,6 @@ fn default_catcher(status: Status, req: &Request<'_>) -> status::Custom<String> 
     status::Custom(status, msg)
 }
 
-// #[get("/about")]
-// pub fn about() -> Template {
-//     Template::render("public/about.html", context! {
-//         title: "MediaKraken About",
-//     })
-// }
-
 #[launch]
 fn rocket() -> _ {
     /*
