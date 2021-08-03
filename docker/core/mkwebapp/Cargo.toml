@@ -12,17 +12,26 @@ chrono = "0.4"
 rcgen = "0.8.11"
 reqwest = { version = "0.11.3", default-features = false, features = ["json", "rustls-tls"] }
 ring = "0.16.20"
-rocket = { version = "0.5.0-rc.1" }
-rocket_dyn_templates = { version = "0.1.0-rc.1", features = ["tera"] }
+# rocket = { version = "0.5.0-rc.1", features = ["json", "secrets"]  }
+# rocket_dyn_templates = { version = "0.1.0-rc.1", features = ["tera"] }
 serde = { version = "1.0.126", features = ["derive"] }
 serde_json = "1.0.64"
 shiplift = { version = "0.7", default-features = false, features = ["unix-socket"] }
-sqlx = { version = "0.5", features = [ "runtime-tokio-rustls" ] }
+sqlx = { version = "0.5", features = [ "chrono", "macros", "runtime-tokio-rustls", "postgres", "uuid" ] }
 sys-info = "0.4.0"
 tera = "1.12.1"
 tokio = { version = "1.6.0", features = ["full"] }
 tokio-postgres = { version = "0.7.2", features = ["with-serde_json-1"] }
+uuid = { version = "0.8.2", features = ["serde", "v4"] }
 walkdir = "2.3.2"
+
+[dependencies.rocket]
+path = "/home/spoot/Rocket/core/lib"
+features = ["json", "secrets"]
+
+[dependencies.rocket_dyn_templates]
+path = "/home/spoot/Rocket/contrib/dyn_templates"
+features = ["tera"]
 
 [dev-dependencies]
 tokio-test = "*"

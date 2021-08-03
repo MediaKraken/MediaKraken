@@ -1,8 +1,10 @@
 #[macro_use]
 extern crate rocket;
+mod template_base;
 
 use rocket::fs::{FileServer, relative};
 use rocket::{Rocket, Request, Build};
+use rocket::response::content::RawHtml;
 use rocket::response::{content, status};
 use rocket::http::Status;
 use rocket_dyn_templates::{Template, tera::Tera, context};
@@ -49,7 +51,6 @@ fn wave(name: &str, age: u8) -> String {
 }
 
 // Note: without the `..` in `opt..`, we'd need to pass `opt.emoji`, `opt.name`.
-//
 // http://127.0.0.1:8000/?emoji
 // http://127.0.0.1:8000/?name=Rocketeer
 // http://127.0.0.1:8000/?lang=ру
@@ -82,16 +83,16 @@ fn hello(lang: Option<Lang>, opt: Options<'_>) -> String {
 }
 
 #[catch(404)]
-fn general_not_found() -> content::Html<&'static str> {
-    content::Html(r#"
+fn general_not_found() -> content::RawHtml<&'static str> {
+    content::RawHtml(r#"
         <p>Hmm... What are you looking for?</p>
         Say <a href="/hello/Sergio/100">hello!</a>
     "#)
 }
 
 #[catch(500)]
-fn general_security() -> content::Html<&'static str> {
-    content::Html(r#"
+fn general_security() -> content::RawHtml<&'static str> {
+    content::RawHtml(r#"
         <p>Hmm... you shouldn't be here!r?</p>
     "#)
 }
@@ -102,22 +103,22 @@ fn default_catcher(status: Status, req: &Request<'_>) -> status::Custom<String> 
     status::Custom(status, msg)
 }
 
-#[get("/about")]
-pub fn about() -> Template {
-    Template::render("public/about.html", context! {
-        title: "MediaKraken About",
-    })
-}
+// #[get("/about")]
+// pub fn about() -> Template {
+//     Template::render("public/about.html", context! {
+//         title: "MediaKraken About",
+//     })
+// }
 
 #[launch]
 fn rocket() -> _ {
+    /*
     // start logging
     const LOGGING_INDEX_NAME: &str = "mkwebapp";
     mk_lib_logging::mk_logging_post_elk("info",
                                         json!({"START": "START"}),
                                         LOGGING_INDEX_NAME).await;
 
-    /*
     // check for and create ssl certs if needed
     if Path::new("./key/cacert.pem").exists() == false {
         mk_lib_logging::mk_logging_post_elk("info",
@@ -147,6 +148,7 @@ fn rocket() -> _ {
         } else {
             let salt = mk_lib_file::mk_read_file_data("/mediakraken/secure/data.zip");
         }
+
         /*
 kdf = PBKDF2HMAC(
 algorithm=hashes.SHA256(),
@@ -183,9 +185,11 @@ return self.fernet.decrypt(decode_string.encode())
         .mount("/hello", routes![world, mir])
         .mount("/wave", routes![wave])
         .register("/", catchers![general_not_found, general_security])
+        .mount("/tera", routes![template_base::index, template_base::hello, template_base::about])
+        .register("/tera", catchers![template_base::not_found])
         .mount("/", FileServer::from(relative!("static")))
-        // .attach(sqlx::stage())
-        // .attach(Template::custom(|engines| {
-        //     tera::customize(&mut engines.tera);
-        // }))
+        //.attach(sqlx::stage())
+        .attach(Template::custom(|engines| {
+            template_base::customize(&mut engines.tera);
+        }))
 }
