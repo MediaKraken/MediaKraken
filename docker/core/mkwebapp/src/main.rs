@@ -1,5 +1,8 @@
 #[macro_use]
 extern crate rocket;
+#[macro_use]
+extern crate lazy_static;
+
 mod template_base;
 
 use rocket::fs::{FileServer, relative};
@@ -7,7 +10,9 @@ use rocket::{Rocket, Request, Build};
 use rocket::response::content::RawHtml;
 use rocket::response::{content, status};
 use rocket::http::Status;
+use std::collections::{HashMap, BTreeMap};
 use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_contrib::templates::tera::{GlobalFn, Tera, Value, from_value, to_value, Error};
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
@@ -103,6 +108,33 @@ fn default_catcher(status: Status, req: &Request<'_>) -> status::Custom<String> 
     status::Custom(status, msg)
 }
 
+fn make_url_for(urls: BTreeMap<String, String>) -> GlobalFn {
+    Box::new(move |args| -> Result<Value, Error> {
+        match args.get("name") {
+            Some(val) => match from_value::<String>(val.clone()) {
+                Ok(v) => Ok(to_value(urls.get(&v).unwrap()).unwrap()),
+                Err(_) => Err("Oops".into()),
+            },
+            None => Err("Oops".into()),
+        }
+    })
+}
+
+lazy_static! {
+    pub static ref TEMPLATES: Tera = {
+        let mut tera = match Tera::new("templates/**/*") {
+            Ok(t) => t,
+            Err(e) => {
+                println!("Parsing error(s): {}", e);
+                ::std::process::exit(1);
+            }
+        };
+        tera.autoescape_on(vec!["html", ".sql"]);
+        //tera.register_filter("do_nothing", do_nothing_filter);
+        tera
+    };
+}
+
 #[launch]
 fn rocket() -> _ {
     /*
@@ -173,6 +205,8 @@ return self.fernet.decrypt(decode_string.encode())
     mk_lib_database_version::mk_lib_database_version_check(db_client,
                                                            true).await;
      */
+    let mut tera = Tera::default();
+    tera.register_function("url_for", make_url_for(urls));
     rocket::build()
         .mount("/", routes![hello])
         .mount("/hello", routes![world, mir])
@@ -182,6 +216,10 @@ return self.fernet.decrypt(decode_string.encode())
         .register("/tera", catchers![template_base::not_found])
         .mount("/", FileServer::from(relative!("static")))
         //.attach(sqlx::stage())
+.attach(Template::custom(|engines|{
+        let url = BTreeMap::new();
+        engines.tera.register_function("url_for", make_url_for(url))
+    }))
         .attach(Template::custom(|engines| {
             template_base::customize(&mut engines.tera);
         }))
