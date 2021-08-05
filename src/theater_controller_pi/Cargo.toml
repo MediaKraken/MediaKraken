@@ -7,7 +7,7 @@ edition = "2018"
 panic = 'abort'
 
 [dependencies]
-fltk = { version = "1.1.6", features = ["fltk-bundled"] }
+fltk = { version = "1.1.7", features = ["fltk-bundled"] }
 
 [dev-dependencies]
 tokio-test = "*"
