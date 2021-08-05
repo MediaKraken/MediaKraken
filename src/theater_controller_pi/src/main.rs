@@ -4,42 +4,84 @@ use std::error::Error;
 fn main() -> Result<(), Box<dyn Error>> {
     let app = app::App::default().with_scheme(app::Scheme::Gleam);
     let mut wind = Window::default().with_size(800, 480);
-    //let mut frame = Frame::default().size_of(&wind);
+
+    // setup frames for a page
+    let mut frame_main = Frame::default().size_of_parent();
+    let mut frame_media_list = Frame::default().size_of_parent();
+    let mut frame_settings = Frame::default().size_of_parent();
 
     // left side buttons
     let mut button_in_progress = Button::new(0, 0, 133, 96, "In Progress");
-    let mut image_in_progress = SharedImage::load("../../docker/core/mkwebapp/static/image/earth.png")?;
-    image_in_progress.scale(133, 96, true, true);
-    button_in_progress.set_image(Some(image_in_progress));
-    button_in_progress.redraw();
+    let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/rectangles_black.png")?;
+    image.scale(133, 96, true, true);
+    button_in_progress.set_image(Some(image));
+    //button_in_progress.redraw();
     let mut button_new = Button::new(0, 96, 133, 96, "New");
+    let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/new.png")?;
+    image.scale(133, 96, true, true);
+    button_new.set_image(Some(image));
+    //button_new.redraw();
     let mut button_movie = Button::new(0, 192, 133, 96, "Movie");
+    let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/movie_ticket.png")?;
+    image.scale(133, 96, true, true);
+    button_movie.set_image(Some(image));
+    //button_movie.redraw();
     let mut button_tv = Button::new(0, 288, 133, 96, "TV");
+    let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/television.png")?;
+    image.scale(133, 96, true, true);
+    button_tv.set_image(Some(image));
+    //button_tv.redraw();
     let mut button_game = Button::new(0, 384, 133, 96, "Games");
+    let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/vid_game.png")?;
+    image.scale(133, 96, true, true);
+    button_game.set_image(Some(image));
+    //button_game.redraw();
 
     // top middle button
     let mut button_demo = Button::new(133, 0, 532, 384, "Demo");
+    let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/theater.png")?;
+    image.scale(532, 384, true, true);
+    button_demo.set_image(Some(image));
 
     // bottom middle buttons
     let mut button_music = Button::new(133, 384, 133, 96, "Music");
+    let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/headphone.png")?;
+    image.scale(133, 96, true, true);
+    button_music.set_image(Some(image));
     let mut button_live_tv = Button::new(266, 384, 133, 96, "Live TV");
+    let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/television_live.png")?;
+    image.scale(133, 96, true, true);
+    button_live_tv.set_image(Some(image));
     let mut button_home_video = Button::new(399, 384, 133, 96, "Home Video");
+    let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/vid_camera.png")?;
+    image.scale(133, 96, true, true);
+    button_home_video.set_image(Some(image));
     let mut button_internet = Button::new(532, 384, 133, 96, "Internet");
+    let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/earth.png")?;
+    image.scale(133, 96, true, true);
+    button_internet.set_image(Some(image));
 
     // right side buttons
-    let mut button_music_video = Button::new(667, 0, 133, 96, "Music Video");
-    let mut button_pictures = Button::new(667, 96, 133, 96, "Pictures");
-    let mut button_radio = Button::new(667, 192, 133, 96, "Radio");
-    let mut button_books = Button::new(667, 288, 133, 96, "Books");
-    let mut button_settings = Button::new(667, 384, 133, 96, "Settings");
-
-    // let mut image_new = SharedImage::load("../../docker/core/mkwebapp/static/image/earth.png")?;
-    // image_new.scale(133, 96, true, true);
-    //
-    // frame.set_image(Some(image_new));
-
-    // // To remove an image
-    // frame.set_image(None::<SharedImage>);
+    let mut button_music_video = Button::new(666, 0, 133, 96, "Music Video");
+    let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/listening-music-video-clip-with-auricular.png")?;
+    image.scale(133, 96, true, true);
+    button_music_video.set_image(Some(image));
+    let mut button_pictures = Button::new(666, 96, 133, 96, "Pictures");
+    let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/photo.png")?;
+    image.scale(133, 96, true, true);
+    button_pictures.set_image(Some(image));
+    let mut button_radio = Button::new(666, 192, 133, 96, "Radio");
+    let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/radio.png")?;
+    image.scale(133, 96, true, true);
+    button_radio.set_image(Some(image));
+    let mut button_books = Button::new(666, 288, 133, 96, "Books");
+    let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/books.png")?;
+    image.scale(133, 96, true, true);
+    button_books.set_image(Some(image));
+    let mut button_settings = Button::new(666, 384, 133, 96, "Settings");
+    let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/settings.png")?;
+    image.scale(133, 96, true, true);
+    button_settings.set_image(Some(image));
 
     wind.make_resizable(true);
     wind.show();
