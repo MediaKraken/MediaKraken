@@ -84,6 +84,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     button_settings.set_image(Some(image));
 
     wind.make_resizable(true);
+    wind.end();
+    wind.fullscreen(true);
     wind.show();
 
     app.run()?;
