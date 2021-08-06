@@ -3,39 +3,29 @@ use std::error::Error;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let app = app::App::default().with_scheme(app::Scheme::Gleam);
-    let mut wind = Window::default().with_size(800, 480);
-
-    // setup frames for a page
-    let mut frame_main = Frame::default().size_of_parent();
-    let mut frame_media_list = Frame::default().size_of_parent();
-    let mut frame_settings = Frame::default().size_of_parent();
+    let mut wind_main = Window::default().with_size(800, 480);
 
     // left side buttons
     let mut button_in_progress = Button::new(0, 0, 133, 96, "In Progress");
     let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/rectangles_black.png")?;
     image.scale(133, 96, true, true);
     button_in_progress.set_image(Some(image));
-    //button_in_progress.redraw();
     let mut button_new = Button::new(0, 96, 133, 96, "New");
     let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/new.png")?;
     image.scale(133, 96, true, true);
     button_new.set_image(Some(image));
-    //button_new.redraw();
     let mut button_movie = Button::new(0, 192, 133, 96, "Movie");
     let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/movie_ticket.png")?;
     image.scale(133, 96, true, true);
     button_movie.set_image(Some(image));
-    //button_movie.redraw();
     let mut button_tv = Button::new(0, 288, 133, 96, "TV");
     let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/television.png")?;
     image.scale(133, 96, true, true);
     button_tv.set_image(Some(image));
-    //button_tv.redraw();
     let mut button_game = Button::new(0, 384, 133, 96, "Games");
     let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/vid_game.png")?;
     image.scale(133, 96, true, true);
     button_game.set_image(Some(image));
-    //button_game.redraw();
 
     // top middle button
     let mut button_demo = Button::new(133, 0, 532, 384, "Demo");
@@ -83,10 +73,27 @@ fn main() -> Result<(), Box<dyn Error>> {
     image.scale(133, 96, true, true);
     button_settings.set_image(Some(image));
 
-    wind.make_resizable(true);
-    wind.end();
-    wind.fullscreen(true);
-    wind.show();
+    wind_main.end();
+    wind_main.make_resizable(true);
+    wind_main.fullscreen(true);
+    wind_main.show();
+
+    let mut wind_media = Window::default().with_size(800, 480);
+    wind_media.end();
+    wind_media.make_resizable(true);
+    wind_media.fullscreen(true);
+    wind_media.hide();
+
+    let mut wind_settings = Window::default().with_size(800, 480);
+    let mut button_settings_back = Button::new(666, 384, 133, 96, "Back");
+    let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/navigation/return.png")?;
+    image.scale(133, 96, true, true);
+    button_settings_back.set_image(Some(image));
+
+    wind_settings.end();
+    wind_settings.make_resizable(true);
+    wind_settings.fullscreen(true);
+    wind_settings.hide();
 
     app.run()?;
     Ok(())
