@@ -37,7 +37,7 @@ COPY --from=cargo-build /bin/sh /sh
 WORKDIR /mediakraken
 
 # Copy our build
-COPY --from=cargo-build /mediakraken/target/x86_64-unknown-linux-musl/release/mktcpserver ./
+COPY --from=cargo-build /mediakraken/target/x86_64-unknown-linux-musl/release/mkhardwarescanner ./
 
 # Use an unprivileged user.
 USER mediakraken:mediakraken
