@@ -91,8 +91,11 @@ STAGE_CORE_IMAGES = {
     # amqp service (rabbitmq)
     'mkrabbitmq': ('mkrabbitmq', 'alpine:3.11', 'core'),
 
-    # download files/etc trailers/etc from ampq records
+    # consume and process ampq records
     'mkrabbitconsume': ('mkrabbitconsume', 'busybox:1.33.1-uclibc', 'core'),
+
+    # server for "fat" clients to talk too (local server)
+    'mktcpserver': ('mktcpserver', 'busybox:1.33.1-uclibc', 'core'),
 
     # download tmdb dump of ids in database and insert into downloads - run and exit
     'mktmdbnetfetchbulk': ('mktmdbnetfetchbulk', 'scratch', 'core'),
