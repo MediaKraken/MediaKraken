@@ -3,9 +3,9 @@ use std::error::Error;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let app = app::App::default().with_scheme(app::Scheme::Gleam);
-    let mut wind_main = Window::default().with_size(800, 480);
-
-    // left side buttons
+    let mut window_main = Window::default().with_size(800, 480); // pi 7" screen default
+    let mut window_menu = Window::default().with_size(800, 480);
+    // window_menu - left side buttons
     let mut button_in_progress = Button::new(0, 0, 133, 96, "In Progress");
     let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/rectangles_black.png")?;
     image.scale(133, 96, true, true);
@@ -26,14 +26,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/vid_game.png")?;
     image.scale(133, 96, true, true);
     button_game.set_image(Some(image));
-
-    // top middle button
+    // window_menu - top middle button
     let mut button_demo = Button::new(133, 0, 532, 384, "Demo");
     let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/theater.png")?;
     image.scale(532, 384, true, true);
     button_demo.set_image(Some(image));
-
-    // bottom middle buttons
+    // window_menu - bottom middle buttons
     let mut button_music = Button::new(133, 384, 133, 96, "Music");
     let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/headphone.png")?;
     image.scale(133, 96, true, true);
@@ -50,8 +48,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/earth.png")?;
     image.scale(133, 96, true, true);
     button_internet.set_image(Some(image));
-
-    // right side buttons
+   // window_menu - right side buttons
     let mut button_music_video = Button::new(666, 0, 133, 96, "Music Video");
     let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/listening-music-video-clip-with-auricular.png")?;
     image.scale(133, 96, true, true);
@@ -72,28 +69,49 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/settings.png")?;
     image.scale(133, 96, true, true);
     button_settings.set_image(Some(image));
+    window_menu.end();
+    window_menu.make_resizable(true);
+    window_menu.fullscreen(true);
 
-    wind_main.end();
-    wind_main.make_resizable(true);
-    wind_main.fullscreen(true);
-    wind_main.show();
-
-    let mut wind_media = Window::default().with_size(800, 480);
-    wind_media.end();
-    wind_media.make_resizable(true);
-    wind_media.fullscreen(true);
-    wind_media.hide();
-
-    let mut wind_settings = Window::default().with_size(800, 480);
+    let mut window_settings = Window::default().with_size(800, 480);
     let mut button_settings_back = Button::new(666, 384, 133, 96, "Back");
     let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/navigation/return.png")?;
     image.scale(133, 96, true, true);
     button_settings_back.set_image(Some(image));
+    window_settings.end();
+    window_settings.make_resizable(true);
+    window_settings.fullscreen(true);
+    window_settings.hide();
 
-    wind_settings.end();
-    wind_settings.make_resizable(true);
-    wind_settings.fullscreen(true);
-    wind_settings.hide();
+
+    let mut window_media = Window::default().with_size(800, 480);
+
+    window_media.end();
+    window_media.make_resizable(true);
+    window_media.fullscreen(true);
+    window_media.hide();
+
+    // close up the add to main window and setup current page
+    window_main.end();
+    window_main.make_resizable(true);
+    window_main.fullscreen(true);
+    window_main.show();
+    window_menu.make_current();
+
+
+    // main button
+    button_settings.set_callback( |_b| {
+        window_menu.hide();
+        window_settings.show();
+    });
+
+    // media list page
+
+    // settings page
+    button_settings_back.set_callback(move |bb| {
+        window_menu.show();
+        window_settings.hide();
+    });
 
     app.run()?;
     Ok(())
