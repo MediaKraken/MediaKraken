@@ -1,5 +1,36 @@
 use fltk::{app, button::Button, frame::Frame, image::SharedImage, prelude::*, window::Window};
 use std::error::Error;
+use argh::FromArgs;
+use std::fs::File;
+use std::io;
+use std::io::BufReader;
+use std::net::ToSocketAddrs;
+use std::path::PathBuf;
+use std::sync::Arc;
+use tokio::io::{copy, split, stdin as tokio_stdin, stdout as tokio_stdout, AsyncWriteExt};
+use tokio::net::TcpStream;
+use tokio_rustls::{rustls::ClientConfig, webpki::DNSNameRef, TlsConnector};
+use crossbeam_channel::unbounded;
+
+/// Tokio Rustls client
+#[derive(FromArgs)]
+struct Options {
+    /// host
+    #[argh(positional)]
+    host: String,
+
+    /// port
+    #[argh(option, short = 'p', default = "443")]
+    port: u16,
+
+    /// domain
+    #[argh(option, short = 'd')]
+    domain: Option<String>,
+
+    /// cafile
+    #[argh(option, short = 'c')]
+    cafile: Option<PathBuf>,
+}
 
 fn main() -> Result<(), Box<dyn Error>> {
     let app = app::App::default().with_scheme(app::Scheme::Gleam);
@@ -48,7 +79,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/earth.png")?;
     image.scale(133, 96, true, true);
     button_internet.set_image(Some(image));
-   // window_menu - right side buttons
+    // window_menu - right side buttons
     let mut button_music_video = Button::new(666, 0, 133, 96, "Music Video");
     let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/listening-music-video-clip-with-auricular.png")?;
     image.scale(133, 96, true, true);
@@ -98,21 +129,32 @@ fn main() -> Result<(), Box<dyn Error>> {
     window_main.show();
     window_menu.make_current();
 
+    // setup the event
+    let (s, r) = unbounded::<i32>();
 
-    // main button
-    button_settings.set_callback( |_b| {
-        window_menu.hide();
-        window_settings.show();
+    // main buttons
+    button_settings.set_callback(move |_| {
+        s.send(1).unwrap();
     });
 
     // media list page
 
     // settings page
-    button_settings_back.set_callback(move |bb| {
-        window_menu.show();
-        window_settings.hide();
+    // button_settings_back.set_callback(move |bb| {
+    //     window_menu.show();
+    //     window_settings.hide();
+    // });
+    button_settings_back.set_callback(move |_| {
+        s.send(2).unwrap();
     });
 
-    app.run()?;
+    // app.run()?;
+    while app.wait() {
+        if let Ok(msg) = r.try_recv() {
+            //button_settings.set_label(&format!("{}", msg));
+            window_menu.hide();
+            window_settings.show();
+        }
+    }
     Ok(())
 }
