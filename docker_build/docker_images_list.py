@@ -37,7 +37,7 @@ PROXY_USER_PASS = None
 # base OS images to build off of, meaning there is a 'from' in the docker file(s) that use these
 # or simply stand alone images
 STAGE_ONE_IMAGES = {
-    'AlpineBase3135Py3': ('mkbase_alpinepy3', 'alpine:3.13.5', 'base'),
+    'AlpineBase3141Py3': ('mkbase_alpinepy3', 'alpine:3.14.1', 'base'),
 }
 
 STAGE_TWO_IMAGES = {}
@@ -53,10 +53,10 @@ STAGE_CORE_IMAGES = {
     'mkbroadcast': ('mkbroadcast', 'scratch', 'core'),
 
     # chat server via mumble
-    'mkchatmumble': ('mkchatmumble', 'alpine:3.13.5', 'core'),
+    'mkchatmumble': ('mkchatmumble', 'alpine:3.14.1', 'core'),
 
     # chat server via ts3 - free license version
-    'mkchatteamspeak': ('mkchatteamspeak', 'alpine:3.13.5', 'core'),
+    'mkchatteamspeak': ('mkchatteamspeak', 'alpine:3.14.1', 'core'),
 
     # process cron jobs from the database to amqp or direct container launch
     'mkcron': ('mkcron', 'busybox:1.33.1-uclibc', 'core'),
@@ -86,7 +86,7 @@ STAGE_CORE_IMAGES = {
     'mknginx': ('mknginx', 'alpine:3.10', 'core'),
 
     # database connection pooler
-    'mkpgbouncer': ('mkpgbouncer', 'alpine:3.13.5', 'core'),
+    'mkpgbouncer': ('mkpgbouncer', 'alpine:3.14.1', 'core'),
 
     # amqp service (rabbitmq)
     'mkrabbitmq': ('mkrabbitmq', 'alpine:3.11', 'core'),
@@ -104,10 +104,10 @@ STAGE_CORE_IMAGES = {
     'mktmdbnetfetchupdate': ('mktmdbnetfetchupdate', 'scratch', 'core'),
 
     # transcode/STREAM media to client - run and exit
-    'mktranscode': ('mktranscode', 'alpine:3.13.5', 'core'),
+    'mktranscode': ('mktranscode', 'busybox:1.33.1-uclibc', 'core'),
 
     # transmission server
-    'mktransmission': ('mktransmission', 'alpine:3.13.5', 'core'),
+    'mktransmission': ('mktransmission', 'alpine:3.14.1', 'core'),
 
     # website via rust and actixweb
     'mkwebapp': ('mkwebapp', 'mkbase_alpinepy3', 'core'),  # TODO
