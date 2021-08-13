@@ -12,6 +12,10 @@ cp ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mkdownlo
 cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkdownload/src/.
 cp ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mkdownload/src/.
 
+# mkhardwarecontrol
+cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkhardwarecontrol/src/.
+cp ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mkhardwarecontrol/src/.
+
 # mklibretrocorefetchupdate
 cp ../src/mk_lib_compression/src/mk_lib_compression.rs ../docker/core/mklibretrocorefetchupdate/src/.
 cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mklibretrocorefetchupdate/src/.
@@ -36,6 +40,11 @@ cp ../src/mk_lib_database/src/mk_lib_database_library.rs ../docker/core/mkinotif
 cp ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mkinotify/src/.
 cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkinotify/src/.
 
+# mkrabbitconsume
+cp ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkrabbitconsume/src/.
+cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkrabbitconsume/src/.
+cp ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mkrabbitconsume/src/.
+
 # mktmdbnetfetchbulk
 cp ../src/mk_lib_common/src/mk_lib_common.rs ../docker/core/mktmdbnetfetchbulk/src/.
 cp ../src/mk_lib_common/src/mk_lib_common_enum_media_type.rs ../docker/core/mktmdbnetfetchbulk/src/.
@@ -57,6 +66,9 @@ cp ../src/mk_lib_database/src/mk_lib_database_metadata.rs ../docker/core/mktmdbn
 cp ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mktmdbnetfetchupdate/src/.
 cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mktmdbnetfetchupdate/src/.
 cp ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mktmdbnetfetchupdate/src/.
+
+# mktranscode
+cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mktranscode/src/.
 
 # mkwebapp
 cp ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkwebapp/src/.
