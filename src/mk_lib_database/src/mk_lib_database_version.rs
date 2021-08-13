@@ -8,7 +8,7 @@ pub async fn mk_lib_database_version(client: &tokio_postgres::Client) -> Result<
     let row = client
         .query_one("select mm_version_number from mm_version", &[])
         .await?;
-    Ok(row.get("mm_version_no"))
+    Ok(row.get("mm_version_number"))
 }
 
 pub async fn mk_lib_database_version_check(client: &tokio_postgres::Client,
