@@ -96,7 +96,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         format!("https://api.themoviedb.org/3/movie/changes?api_key={}",
                 option_config_json["API"]["themoviedb"]),
         (&"/mediakraken/movie_update.gz").to_string()).await;
-    let json_result = mk_lib_compression::mk_decompress_gzip(
+    let json_result = mk_lib_compression::mk_decompress_gz_data(
         &(&"/mediakraken/movie_update.gz").to_string()).unwrap();
     for json_item in json_result["results"] {
         if !json_item.trim().is_empty() {
@@ -135,7 +135,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         format!("https://api.themoviedb.org/3/tv/changes?api_key={}",
                 option_config_json["API"]["themoviedb"]),
         (&"/mediakraken/tv_update.gz").to_string()).await;
-    let json_result = mk_lib_compression::mk_decompress_gzip(
+    let json_result = mk_lib_compression::mk_decompress_gz_data(
         &(&"/mediakraken/tv_update.gz").to_string()).unwrap();
     for json_item in json_result["results"] {
         if !json_item.trim().is_empty() {
