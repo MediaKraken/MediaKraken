@@ -106,6 +106,7 @@ if not os.path.isfile('.env'):
     file_handle.write(random_key.replace('"', '').replace("'", ''))
     file_handle.write('\nSWARMIP=None\nDEBUG=False')
     file_handle.write('\nBRANCH=dev2021_07')
+    file_handle.write('\n')
     file_handle.close()
 
 subprocess.call(shlex.split('python3 mediakraken_update_images.py'),
