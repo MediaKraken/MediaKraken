@@ -3,9 +3,17 @@ use std::io::prelude::*;
 use walkdir::{DirEntry, WalkDir};
 
 pub fn mk_read_file_data(file_to_read: &str) -> io::Result<String> {
-    let mut file_handle = std::fs::File::open(file_to_read)?;
-    let mut buffer = String::new();
-    file_handle.read_to_string(&mut buffer)?;
+    let buffer = std::fs::read_to_string(file_to_read).expect("Unable to read file");
+    Ok(buffer)
+}
+
+pub fn mk_read_file_data_u8(file_to_read: &str) -> io::Result<String> {
+    let buffer = std::fs::read(file_to_read).expect("Unable to read file");
+    Ok(buffer)
+}
+
+pub fn mk_save_file_data(file_data: &str, file_to_save: &str) -> io::Result<String> {
+    let buffer = std::fs::write(file_to_save, file_data).expect("Unable to read file");
     Ok(buffer)
 }
 
