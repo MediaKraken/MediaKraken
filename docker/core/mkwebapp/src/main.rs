@@ -11,8 +11,8 @@ use rocket::response::content::RawHtml;
 use rocket::response::{content, status};
 use rocket::http::Status;
 use std::collections::{HashMap, BTreeMap};
-use rocket_dyn_templates::{Template, tera::Tera, context};
-use rocket_contrib::templates::tera::{GlobalFn, Tera, Value, from_value, to_value, Error};
+use rocket_dyn_templates::{GlobalFn, Value, Template, tera::Tera, context, from_value, to_value, Error};
+//use rocket_contrib::templates::tera::{GlobalFn, Tera, Value, from_value, to_value, Error};
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
@@ -216,7 +216,7 @@ return self.fernet.decrypt(decode_string.encode())
         .register("/tera", catchers![template_base::not_found])
         .mount("/", FileServer::from(relative!("static")))
         //.attach(sqlx::stage())
-.attach(Template::custom(|engines|{
+        .attach(Template::custom(|engines|{
         let url = BTreeMap::new();
         engines.tera.register_function("url_for", make_url_for(url))
     }))
