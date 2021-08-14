@@ -168,14 +168,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                     json!({"worker dir": dir_path}),
                                                     LOGGING_INDEX_NAME).await;
 
-                let original_media_class = media_class_type_uuid;
+                let original_media_class = row_data.get("mm_media_dir_class_enum");
                 // update the timestamp now so any other media added DURING this scan don"t get skipped
                 mk_lib_database_library::mk_lib_database_library_path_timestamp_update(db_client,
                                                                                        row_data.get("mm_media_dir_guid")).await.unwrap();
                 mk_lib_database_library::mk_lib_database_library_path_status_update(db_client,
                                                                                     row_data.get("mm_media_dir_guid"),
                                                                                     json!({"Status": "File search scan", "Pct": 0.0})).await.unwrap();
-
+                let mut file_data;
                 // check for UNC before grabbing dir list
                 if unc_slice == "\\" {
                     continue;
@@ -371,7 +371,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
                 // end of for loop for each file in library
                 mk_lib_logging::mk_logging_post_elk("info",
-                                                    json!({"worker dir done": dir_path, "media class": media_class_type_uuid}),
+                                                    json!({"worker dir done": dir_path,
+                                                        "media class": media_class_type_uuid}),
                                                     LOGGING_INDEX_NAME).await;
                 // set to none so it doesn"t show up anymore in admin status page
                 mk_lib_database_library::mk_lib_database_library_path_status_update(db_client,
@@ -382,7 +383,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     mk_lib_database_notification::mk_lib_database_notification_insert(db_client,
                                                                                       format!("{} file(s) added from {}",
                                                                                               total_files.to_formatted_string(&Locale::en),
-                                                                                              row_data.get("mm_media_dir_path")), true);
+                                                                                              row_data.get("mm_media_dir_path")),
+                                                                                      true);
                 }
             }
         }
