@@ -3,7 +3,7 @@ use tokio_postgres::{Error, Row};
 pub async fn mk_lib_database_library_read(client: &tokio_postgres::Client)
                                           -> Result<Vec<Row>, Error> {
     let rows = client
-        .query("select mm_media_dir_guid, mm_media_dir_path from mm_media_dir", &[])
+        .query("select mm_media_dir_guid, mm_media_dir_path from mm_library_dir", &[])
         .await?;
     Ok(rows)
 }
@@ -12,8 +12,8 @@ pub async fn mk_lib_database_library_read(client: &tokio_postgres::Client)
 pub async fn mk_lib_database_library_path_audit(client: &tokio_postgres::Client)
                                                 -> Result<Vec<Row>, Error> {
     let rows = client
-        .query("select mm_media_dir_guid, mm_media_dir_path, mm_media_dir_class_type, \
-        mm_media_dir_last_scanned from mm_media_dir", &[])
+        .query("select mm_media_dir_guid, mm_media_dir_path, mm_media_dir_class_enum, \
+        mm_media_dir_last_scanned from mm_library_dir", &[])
         .await?;
     Ok(rows)
 }
@@ -23,7 +23,7 @@ pub async fn mk_lib_database_library_path_status(client: &tokio_postgres::Client
                                                  -> Result<Vec<Row>, Error> {
     let rows = client
         .query("select mm_media_dir_path, mm_media_dir_status \
-        from mm_media_dir where mm_media_dir_status IS NOT NULL \
+        from mm_library_dir where mm_media_dir_status IS NOT NULL \
         order by mm_media_dir_path", &[])
         .await?;
     Ok(rows)
@@ -34,7 +34,7 @@ pub async fn mk_lib_database_library_path_status_update(client: &tokio_postgres:
                                                         library_uuid: uuid::Uuid,
                                                         library_status_json: serde_json::Value)
                                                         -> Result<(), Error> {
-    client.query("update mm_media_dir set mm_media_dir_status = $1 where mm_media_dir_guid = $2",
+    client.query("update mm_library_dir set mm_media_dir_status = $1 where mm_media_dir_guid = $2",
                  &[&library_status_json, &library_uuid]).await?;
     Ok(())
 }
@@ -43,9 +43,8 @@ pub async fn mk_lib_database_library_path_status_update(client: &tokio_postgres:
 pub async fn mk_lib_database_library_path_timestamp_update(client: &tokio_postgres::Client,
                                                            library_uuid: uuid::Uuid)
                                                            -> Result<(), Error> {
-    client.query("update mm_media_dir set mm_media_dir_last_scanned = NOW() \
-     where mm_media_dir_guid = $1)",
-                 &[&library_uuid]).await?;
+    client.query("update mm_library_dir set mm_media_dir_last_scanned = NOW() \
+          where mm_media_dir_guid = $1)", &[&library_uuid]).await?;
     Ok(())
 }
 
