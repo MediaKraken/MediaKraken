@@ -3,7 +3,7 @@ use tokio_postgres::{Error, Row};
 pub async fn mk_lib_database_cron_service_read(client: &tokio_postgres::Client)
                                                -> Result<Vec<Row>, Error> {
     let rows = client
-        .query("select mm_cron_guid, mm_cron_schedule_type, mm_cron_scedule_time, \
+        .query("select mm_cron_guid, mm_cron_schedule_type, mm_cron_schedule_time, \
         mm_cron_last_run, mm_cron_json from mm_cron_jobs \
         where mm_cron_enabled = true", &[])
         .await?;
