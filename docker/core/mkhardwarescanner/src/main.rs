@@ -1,6 +1,7 @@
 use serde_json::json;
 use std::error::Error;
 use onvif::discovery;
+use huelib::resource::sensor;
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
@@ -95,9 +96,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         json!({"HWScan": "After Onvif"}),
                                         LOGGING_INDEX_NAME).await;
 
-// phillips hue discover
-// # hue_inst = common_hardware_hue.CommonHardwareHue()
-// # media_devices.append({'Phue': hue_inst.com_hardware_hue_get_api()})
+    // phillips hue discover
+    let scan = bridge.get_new_sensors()?;
+    for resource in scan.resources {
+        println!("Discovered sensor `{}` with ID `{}`", resource.name, resource.id);
+    }
     mk_lib_logging::mk_logging_post_elk("info",
                                         json!({"HWScan": "After PHue"}),
                                         LOGGING_INDEX_NAME).await;
