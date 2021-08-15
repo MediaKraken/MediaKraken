@@ -186,8 +186,6 @@ services:
     container_name: mkstack_rabbitmq
     hostname: mkstack_rabbitmq
     environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
       - RABBITMQ_IO_THREAD_POOL_SIZE=256
     stop_grace_period: 30s
     stop_signal: SIGTERM
