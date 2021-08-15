@@ -26,8 +26,8 @@ mod mk_lib_logging;
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
 mod mk_lib_database;
 #[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_download.rs"]
-mod mk_lib_database_download;
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_metadata_download_que.rs"]
+mod mk_lib_database_metadata_download_que;
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_library.rs"]
 mod mk_lib_database_library;
@@ -57,8 +57,8 @@ mod mk_lib_logging;
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
 #[cfg(not(debug_assertions))]
-#[path = "mk_lib_database_download.rs"]
-mod mk_lib_database_download;
+#[path = "mk_lib_database_metadata_download_que.rs"]
+mod mk_lib_database_metadata_download_que;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_library.rs"]
 mod mk_lib_database_library;
