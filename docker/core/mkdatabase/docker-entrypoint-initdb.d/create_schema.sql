@@ -47,7 +47,7 @@ CREATE TABLE public.mm_cron_jobs (
     mm_cron_schedule_type text,
     mm_cron_last_run timestamp with time zone,
     mm_cron_json jsonb,
-    mm_cron_scedule_time smallint
+    mm_cron_schedule_time smallint
 );
 
 
@@ -761,7 +761,7 @@ ALTER TABLE ONLY public.mm_user ALTER COLUMN id SET DEFAULT nextval('public.mm_u
 -- Data for Name: mm_cron_jobs; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.mm_cron_jobs (mm_cron_guid, mm_cron_name, mm_cron_description, mm_cron_enabled, mm_cron_schedule_type, mm_cron_last_run, mm_cron_json, mm_cron_scedule_time) FROM stdin;
+COPY public.mm_cron_jobs (mm_cron_guid, mm_cron_name, mm_cron_description, mm_cron_enabled, mm_cron_schedule_type, mm_cron_last_run, mm_cron_json, mm_cron_schedule_time) FROM stdin;
 0d6f545f-2682-4bfd-8d9a-620eaae36690	The Movie Database	Grab updated metadata for movie(s) and TV show(s)	t	Week(s)	1969-12-31 18:00:01-06	{"Type": "Update Metadata", "program": "/mediakraken/async_metadata_themoviedb_updates.py", "route_key": "themoviedb", "exchange_key": "mkque_metadata_ex"}	1
 128d11cd-c0c2-44d7-ae16-cf5de96207d7	DB Vacuum	PostgreSQL Vacuum Analyze all tables	t	Week(s)	1969-12-31 18:00:01-06	{"Type": "Cron Run", "program": "/mediakraken/subprogram_postgresql_vacuum.py", "route_key": "mkque", "exchange_key": "mkque_ex"}	1
 3da17df9-fae9-4a3a-a70b-5f429d5c1821	Retro game data	Grab updated metadata for retro game(s)	t	Week(s)	1969-12-31 18:00:01-06	{"Type": "Cron Run", "program": "/mediakraken/subprogram_metadata_games.py", "route_key": "mkque", "exchange_key": "mkque_ex"}	1
