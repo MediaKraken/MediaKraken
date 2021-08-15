@@ -57,8 +57,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         for row_data in mk_lib_database_cron::mk_lib_database_cron_service_read(db_client).await.unwrap() {
             let mut time_delta: chrono::Duration;
             println!("row_data: {:?}", row_data);
-            let cron_schedule: String = row_data.get("mm_cron_schedule");
-            let cron_timespan: i64 = row_data.get("mm_cron_timespan");
+            let cron_schedule: String = row_data.get("mm_cron_schedule_type");
+            let cron_timespan: i64 = row_data.get("mm_cron_schedule_time");
             if cron_schedule == "Week(s)" {
                 time_delta = chrono::Duration::weeks(cron_timespan);
             } else if cron_schedule == "Day(s)" {
