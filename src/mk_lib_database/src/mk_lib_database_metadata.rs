@@ -5,7 +5,7 @@ pub async fn mk_lib_database_metadata_exists_movie(client: &tokio_postgres::Clie
                                                    -> Result<bool, Error> {
     let row = client
         .query_one("select exists(select 1 from mm_metadata_movie \
-        where mm_metadata_media_id = $1 limit 1) as found_record limit 1",
+        where mm_metadata_movie_media_id = $1 limit 1) as found_record limit 1",
                    &[&metadata_id]).await?;
     let exists_status: bool = row.get("found_record");
     Ok(exists_status)
@@ -17,7 +17,7 @@ pub async fn mk_lib_database_metadata_exists_person(client: &tokio_postgres::Cli
                                                 -> Result<bool, Error> {
     let row = client
         .query_one("select exists(select 1 from mm_metadata_person \
-        where mmp_person_media_id = $1 limit 1) as found_record limit 1",
+        where mm_metadata_person_media_id = $1 limit 1) as found_record limit 1",
                    &[&metadata_id]).await?;
     let exists_status: bool = row.get("found_record");
     Ok(exists_status)
