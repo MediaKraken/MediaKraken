@@ -83,7 +83,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         json!({"START": "START"}),
                                         LOGGING_INDEX_NAME).await;
 
-    let fetch_date: String = "07_15_2021".to_string();
+    let fetch_date: String = "08_10_2021".to_string();
 
     // open the database
     let db_client = &mk_lib_database::mk_lib_database_open().await?;
