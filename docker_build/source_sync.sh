@@ -16,6 +16,10 @@ cp ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mkdownload/src/.
 cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkhardwarecontrol/src/.
 cp ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mkhardwarecontrol/src/.
 
+# mkhardwarescanner
+cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkhardwarescanner/src/.
+cp ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mkhardwarescanner/src/.
+
 # mklibretrocorefetchupdate
 cp ../src/mk_lib_compression/src/mk_lib_compression.rs ../docker/core/mklibretrocorefetchupdate/src/.
 cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mklibretrocorefetchupdate/src/.
