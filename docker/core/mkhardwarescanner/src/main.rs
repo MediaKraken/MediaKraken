@@ -1,7 +1,9 @@
 use serde_json::json;
 use std::error::Error;
-use onvif::discovery;
+//use onvif::discovery;
 use huelib::resource::sensor;
+use huelib::{bridge, Bridge};
+use tokio::time::{Duration, sleep};
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
@@ -83,23 +85,28 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         LOGGING_INDEX_NAME).await;
 
     // onvif cameras discover
-    use futures_util::stream::StreamExt;
+    //use futures_util::stream::StreamExt;
     const MAX_CONCURRENT_JUMPERS: usize = 100;
-    discovery::discover(std::time::Duration::from_secs(1))
-        .await
-        .unwrap()
-        .for_each_concurrent(MAX_CONCURRENT_JUMPERS, |addr| async move {
-            println!("Onvif Device found: {:?}", addr);
-        })
-        .await;
+    // discovery::discover(std::time::Duration::from_secs(1))
+    //     .await
+    //     .unwrap()
+    //     .for_each_concurrent(MAX_CONCURRENT_JUMPERS, |addr| async move {
+    //         println!("Onvif Device found: {:?}", addr);
+    //     })
+    //     .await;
     mk_lib_logging::mk_logging_post_elk("info",
                                         json!({"HWScan": "After Onvif"}),
                                         LOGGING_INDEX_NAME).await;
 
-    // phillips hue discover
-    let scan = bridge.get_new_sensors()?;
-    for resource in scan.resources {
-        println!("Discovered sensor `{}` with ID `{}`", resource.name, resource.id);
+    // phillips hue hub discover
+    let hub_ip_addresses = bridge::discover_nupnp().unwrap();
+    for bridge_ip in hub_ip_addresses {
+        println!("{}", bridge_ip);
+        // Register a new user.
+        let username = bridge::register_user(bridge_ip, "huelib-rs example").unwrap();
+        let bridge = Bridge::new(bridge_ip, username);
+        let lights = bridge.get_all_lights().unwrap();
+        println!("{:?}", lights);
     }
     mk_lib_logging::mk_logging_post_elk("info",
                                         json!({"HWScan": "After PHue"}),
@@ -127,11 +134,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         LOGGING_INDEX_NAME).await;
 
     // sonos discover
-    let mut devices = sonor::discover(Duration::from_secs(5)).await?;
-    while let Some(device) = devices.try_next().await? {
-        let name = device.name().await?;
-        println!("Sonos Discovered {}", name);
-    }
+    // let mut devices = sonor::discover(std::time::Duration::from_secs(5)).await?;
+    // while let Some(device) = devices.try_next().await? {
+    //     let name = device.name().await?;
+    //     println!("Sonos Discovered {}", name);
+    // }
     mk_lib_logging::mk_logging_post_elk("info",
                                         json!({"HWScan": "After Sonos"}),
                                         LOGGING_INDEX_NAME).await;
