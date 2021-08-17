@@ -34,8 +34,8 @@ COPY --from=cargo-build /etc/passwd /etc/passwd
 COPY --from=cargo-build /etc/group /etc/group
 
 ## copy the files
-#COPY --from=cargo-build /myapp/movie.gz /myapp/movie.gz
-#COPY --from=cargo-build /myapp/tv.gz /myapp/tv.gz
+#COPY --from=cargo-build /mediakraken/movie.gz /mediakraken/movie.gz
+#COPY --from=cargo-build /mediakraken/tv.gz /mediakraken/tv.gz
 
 WORKDIR /mediakraken
 
