@@ -11,6 +11,7 @@ use rocket::response::content::RawHtml;
 use rocket::response::{content, status};
 use rocket::http::Status;
 use std::collections::{HashMap, BTreeMap};
+use rocket_dyn_templates::Template;
 //use rocket_dyn_templates::{GlobalFn, Value, Template, tera::Tera, context, from_value, to_value, Error};
 //use rocket_contrib::templates::tera::{GlobalFn, Tera, Value, from_value, to_value, Error};
 
@@ -85,6 +86,22 @@ fn hello(lang: Option<Lang>, opt: Options<'_>) -> String {
 
     greeting.push('!');
     greeting
+}
+
+#[catch(401)]
+fn general_not_authorized() -> content::RawHtml<&'static str> {
+    content::RawHtml(r#"
+        <p>Hmm... What are you looking for?</p>
+        Say <a href="/hello/Sergio/100">hello!</a>
+    "#)
+}
+
+#[catch(403)]
+fn general_not_administrator() -> content::RawHtml<&'static str> {
+    content::RawHtml(r#"
+        <p>Hmm... What are you looking for?</p>
+        Say <a href="/hello/Sergio/100">hello!</a>
+    "#)
 }
 
 #[catch(404)]
@@ -220,7 +237,7 @@ return self.fernet.decrypt(decode_string.encode())
     //     let url = BTreeMap::new();
     //     engines.tera.register_function("url_for", make_url_for(url))
     // }))
-    //     .attach(Template::custom(|engines| {
-    //         template_base::customize(&mut engines.tera);
-    //     }))
+        .attach(Template::custom(|engines| {
+            template_base::customize(&mut engines.tera);
+        }))
 }
