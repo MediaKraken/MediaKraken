@@ -66,6 +66,7 @@ fn wave(name: &str, age: u8) -> String {
 // http://127.0.0.1:8000/?emoji&name=Rocketeer
 // http://127.0.0.1:8000/?name=Rocketeer&lang=en&emoji
 // http://127.0.0.1:8000/?lang=ru&emoji&name=Rocketeer
+
 #[get("/?<lang>&<opt..>")]
 fn hello(lang: Option<Lang>, opt: Options<'_>) -> String {
     let mut greeting = String::new();
@@ -222,6 +223,11 @@ return self.fernet.decrypt(decode_string.encode())
     mk_lib_database_version::mk_lib_database_version_check(db_client,
                                                            true).await;
      */
+
+    let database_url = "postgresql://...";
+    let pool = sqlx::PgPool::connect(database_url)
+        .await
+        .expect("Failed to connect to database");
     // let mut tera = Tera::default();
     // tera.register_function("url_for", make_url_for(urls));
     rocket::build()
@@ -237,6 +243,7 @@ return self.fernet.decrypt(decode_string.encode())
     //     let url = BTreeMap::new();
     //     engines.tera.register_function("url_for", make_url_for(url))
     // }))
+        .manage::<PgPool>(pool)
         .attach(Template::custom(|engines| {
             template_base::customize(&mut engines.tera);
         }))
