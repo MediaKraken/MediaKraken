@@ -153,8 +153,10 @@ fn default_catcher(status: Status, req: &Request<'_>) -> status::Custom<String> 
 //     };
 // }
 
-#[launch]
-fn rocket() -> _ {
+#[rocket::main]
+async fn main() -> Result<(), rocket::Error> {
+// #[launch]
+// fn rocket() -> _ {
     /*
     // start logging
     const LOGGING_INDEX_NAME: &str = "mkwebapp";
@@ -243,8 +245,9 @@ return self.fernet.decrypt(decode_string.encode())
     //     let url = BTreeMap::new();
     //     engines.tera.register_function("url_for", make_url_for(url))
     // }))
-        .manage::<PgPool>(pool)
+        .manage::<sqlx::PgPool>(pool)
         .attach(Template::custom(|engines| {
             template_base::customize(&mut engines.tera);
-        }))
+        }));
+    Ok(())
 }
