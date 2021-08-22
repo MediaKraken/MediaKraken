@@ -5,6 +5,11 @@ extern crate lazy_static;
 
 mod template_base;
 
+use rcgen::generate_simple_self_signed;
+use ring::digest;
+use std::io::Write;
+use std::fs::File;
+use std::path::Path;
 use rocket::fs::{FileServer, relative};
 use rocket::{Rocket, Request, Build};
 use rocket::response::content::RawHtml;
@@ -12,15 +17,19 @@ use rocket::response::{content, status};
 use rocket::http::Status;
 use std::collections::{HashMap, BTreeMap};
 use rocket_dyn_templates::Template;
+use serde_json::json;
 //use rocket_dyn_templates::{GlobalFn, Value, Template, tera::Tera, context, from_value, to_value, Error};
 //use rocket_contrib::templates::tera::{GlobalFn, Tera, Value, from_value, to_value, Error};
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database_sqlx/src/mk_lib_database.rs"]
 mod mk_lib_database;
+// #[cfg(debug_assertions)]
+// #[path = "../../../../src/mk_lib_database_sqlx/src/mk_lib_database_version.rs"]
+// mod mk_lib_database_version;
 #[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database_sqlx/src/mk_lib_database_version.rs"]
-mod mk_lib_database_version;
+#[path = "../../../../src/mk_lib_file/src/mk_lib_file.rs"]
+mod mk_lib_file;
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -28,9 +37,12 @@ mod mk_lib_logging;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
+// #[cfg(not(debug_assertions))]
+// #[path = "mk_lib_database_version.rs"]
+// mod mk_lib_database_version;
 #[cfg(not(debug_assertions))]
-#[path = "mk_lib_database_version.rs"]
-mod mk_lib_database_version;
+#[path = "mk_lib_file.rs"]
+mod mk_lib_file;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -167,9 +179,6 @@ fn default_catcher(status: Status, req: &Request<'_>) -> status::Custom<String> 
 
 #[rocket::main]
 async fn main() -> Result<(), rocket::Error> {
-// #[launch]
-// fn rocket() -> _ {
-    /*
     // start logging
     const LOGGING_INDEX_NAME: &str = "mkwebapp";
     mk_lib_logging::mk_logging_post_elk("info",
@@ -184,29 +193,27 @@ async fn main() -> Result<(), rocket::Error> {
         // generate certs/keys
         let subject_alt_names = vec!["www.mediakraken.org".to_string(), "localhost".to_string()];
         let cert = generate_simple_self_signed(subject_alt_names).unwrap();
-        let mut file_pem = File::create("./key/cacert.pem")?;
-        file_pem.write_all(cert.serialize_pem().unwrap())?;
-        let mut file_key_pem = File::create("./key/privkey.pem")?;
-        file_key_pem.write_all(cert.serialize_private_key_pem())?;
+        let mut file_pem = File::create("./key/cacert.pem").unwrap();
+        file_pem.write_all(cert.serialize_pem().unwrap().as_bytes()).unwrap();
+        let mut file_key_pem = File::create("./key/privkey.pem").unwrap();
+        file_key_pem.write_all(cert.serialize_private_key_pem().as_bytes()).unwrap();
     }
 
     // create crypto salt if needed
     if Path::new("./secure/data.zip").exists() == false {
-        mk_lib_logging::mk_logging_post_elk(message_type = "info",
+        mk_lib_logging::mk_logging_post_elk("info",
                                             json!({"stuff": "data.zip not found, generating."}),
                                             LOGGING_INDEX_NAME).await;
         // create the hash salt
-        let mut salt;
-        if Path::new("/mediakraken/secure/data.zip") == false {
-            let mut file_salt = File::create("/mediakraken/secure/data.zip")?;
+        if Path::new("/mediakraken/secure/data.zip").exists() == false {
+            let mut file_salt = File::create("/mediakraken/secure/data.zip").unwrap();
             const CREDENTIAL_LEN: usize = digest::SHA512_OUTPUT_LEN;
             let salt = [0u8; CREDENTIAL_LEN];
-            file_salt.write_all(salt);
-        } else {
-            let salt = mk_lib_file::mk_read_file_data("/mediakraken/secure/data.zip");
+            file_salt.write_all(&salt);
         }
-
-        /*
+        let salt = mk_lib_file::mk_read_file_data("/mediakraken/secure/data.zip");
+    }
+    /*
 kdf = PBKDF2HMAC(
 algorithm=hashes.SHA256(),
 length=32,
@@ -230,13 +237,11 @@ def com_hash_gen_crypt_decode(self, decode_string):
 # encode, since it needs bytes
 return self.fernet.decrypt(decode_string.encode())
 */
-    }
 
-     */
     // db version check
-    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool();
-    mk_lib_database_version::mk_lib_database_version_check(sqlx_pool,
-                                                           true).await;
+    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
+    // mk_lib_database_version::mk_lib_database_version_check(sqlx_pool,
+    //                                                        true).await;
 
     // let mut tera = Tera::default();
     // tera.register_function("url_for", make_url_for(urls));
@@ -249,10 +254,10 @@ return self.fernet.decrypt(decode_string.encode())
         // .register("/tera", catchers![template_base::not_found])
         .mount("/", FileServer::from(relative!("static")))
         //.attach(sqlx::stage())
-    //     .attach(Template::custom(|engines|{
-    //     let url = BTreeMap::new();
-    //     engines.tera.register_function("url_for", make_url_for(url))
-    // }))
+        //     .attach(Template::custom(|engines|{
+        //     let url = BTreeMap::new();
+        //     engines.tera.register_function("url_for", make_url_for(url))
+        // }))
         .manage::<sqlx::PgPool>(sqlx_pool)
         .attach(Template::custom(|engines| {
             template_base::customize(&mut engines.tera);

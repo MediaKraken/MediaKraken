@@ -7,14 +7,14 @@ pub fn mk_read_file_data(file_to_read: &str) -> io::Result<String> {
     Ok(buffer)
 }
 
-pub fn mk_read_file_data_u8(file_to_read: &str) -> io::Result<String> {
+pub fn mk_read_file_data_u8(file_to_read: &str) -> io::Result<Vec<u8>> {
     let buffer = std::fs::read(file_to_read).expect("Unable to read file");
     Ok(buffer)
 }
 
-pub fn mk_save_file_data(file_data: &str, file_to_save: &str) -> io::Result<String> {
+pub fn mk_save_file_data(file_data: &str, file_to_save: &str) -> io::Result<()> {
     let buffer = std::fs::write(file_to_save, file_data).expect("Unable to read file");
-    Ok(buffer)
+    Ok(())
 }
 
 pub fn mk_file_is_hidden(entry: &DirEntry) -> bool {
