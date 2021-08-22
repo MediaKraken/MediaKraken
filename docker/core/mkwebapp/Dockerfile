@@ -17,7 +17,6 @@ RUN adduser \
     --uid "${UID}" \
     "${USER}"
 
-COPY /home/spoot/Rocket /home/spoot/Rocket
 WORKDIR /mediakraken
 
 COPY ./ .
