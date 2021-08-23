@@ -35,7 +35,7 @@ COPY --from=cargo-build /etc/group /etc/group
 COPY --from=cargo-build /bin/sh /sh
 
 WORKDIR /mediakraken
-
+RUN chown -R mediakraken: /mediakraken
 # Copy our build
 COPY --from=cargo-build /mediakraken/target/x86_64-unknown-linux-musl/release/mkwebapp ./
 
