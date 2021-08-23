@@ -240,8 +240,8 @@ services:
       - mediakraken_vol_webkey:/mediakraken/key
       # needed to show docker/swarm info
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      # server will generate salt/key
-      - mediakraken_vol_secure:/mediakraken/secure:ro
+      # web server will generate salt/key
+      - mediakraken_vol_secure:/mediakraken/secure
     networks:
       - mediakraken_network
     restart: unless-stopped
