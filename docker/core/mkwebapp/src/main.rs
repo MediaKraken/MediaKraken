@@ -186,21 +186,21 @@ async fn main() -> Result<(), rocket::Error> {
                                         LOGGING_INDEX_NAME).await;
 
     // check for and create ssl certs if needed
-    if Path::new("./key/cacert.pem").exists() == false {
+    if Path::new("/mediakraken/key/cacert.pem").exists() == false {
         mk_lib_logging::mk_logging_post_elk("info",
                                             json!({"stuff": "Cert not found, generating."}),
                                             LOGGING_INDEX_NAME).await;
         // generate certs/keys
         let subject_alt_names = vec!["www.mediakraken.org".to_string(), "localhost".to_string()];
         let cert = generate_simple_self_signed(subject_alt_names).unwrap();
-        let mut file_pem = File::create("./key/cacert.pem").unwrap();
+        let mut file_pem = File::create("/mediakraken/key/cacert.pem").unwrap();
         file_pem.write_all(cert.serialize_pem().unwrap().as_bytes()).unwrap();
-        let mut file_key_pem = File::create("./key/privkey.pem").unwrap();
+        let mut file_key_pem = File::create("/mediakraken/key/privkey.pem").unwrap();
         file_key_pem.write_all(cert.serialize_private_key_pem().as_bytes()).unwrap();
     }
 
     // create crypto salt if needed
-    if Path::new("./secure/data.zip").exists() == false {
+    if Path::new("/mediakraken/secure/data.zip").exists() == false {
         mk_lib_logging::mk_logging_post_elk("info",
                                             json!({"stuff": "data.zip not found, generating."}),
                                             LOGGING_INDEX_NAME).await;
