@@ -236,7 +236,7 @@ services:
       - "8080:8080"
     volumes:
       # must not be read only as it stores cache here
-      - mediakraken_vol_static:/mediakraken/web_app_sanic/static
+      - mediakraken_vol_static:/mediakraken/static
       - mediakraken_vol_webkey:/mediakraken/key
       # needed to show docker/swarm info
       - /var/run/docker.sock:/var/run/docker.sock:ro
