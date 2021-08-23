@@ -177,8 +177,28 @@ fn default_catcher(status: Status, req: &Request<'_>) -> status::Custom<String> 
 //     };
 // }
 
+fn rocket() -> Rocket<Build> {
+    rocket::build()
+        .mount("/", routes![hello])
+        .mount("/hello", routes![world, mir])
+        .mount("/wave", routes![wave])
+        .register("/", catchers![general_not_found, general_security])
+        // .mount("/tera", routes![template_base::index, template_base::hello, template_base::about])
+        // .register("/tera", catchers![template_base::not_found])
+        .mount("/", FileServer::from(relative!("static")))
+        //.attach(sqlx::stage())
+        //     .attach(Template::custom(|engines|{
+        //     let url = BTreeMap::new();
+        //     engines.tera.register_function("url_for", make_url_for(url))
+        // }))
+//        .manage::<sqlx::PgPool>(sqlx_pool)
+        .attach(Template::custom(|engines| {
+            template_base::customize(&mut engines.tera);
+        }))
+}
+
 #[rocket::main]
-async fn main() -> Result<(), rocket::Error> {
+async fn main() {
     // start logging
     const LOGGING_INDEX_NAME: &str = "mkwebapp";
     mk_lib_logging::mk_logging_post_elk("info",
@@ -239,28 +259,16 @@ return self.fernet.decrypt(decode_string.encode())
 */
 
     // db version check
-    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
+    //let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
     // mk_lib_database_version::mk_lib_database_version_check(sqlx_pool,
     //                                                        true).await;
 
     // let mut tera = Tera::default();
     // tera.register_function("url_for", make_url_for(urls));
-    rocket::build()
-        .mount("/", routes![hello])
-        .mount("/hello", routes![world, mir])
-        .mount("/wave", routes![wave])
-        .register("/", catchers![general_not_found, general_security])
-        // .mount("/tera", routes![template_base::index, template_base::hello, template_base::about])
-        // .register("/tera", catchers![template_base::not_found])
-        .mount("/", FileServer::from(relative!("static")))
-        //.attach(sqlx::stage())
-        //     .attach(Template::custom(|engines|{
-        //     let url = BTreeMap::new();
-        //     engines.tera.register_function("url_for", make_url_for(url))
-        // }))
-        .manage::<sqlx::PgPool>(sqlx_pool)
-        .attach(Template::custom(|engines| {
-            template_base::customize(&mut engines.tera);
-        }));
-    Ok(())
+
+    if let Err(e) = rocket().launch().await {
+        println!("Whoops! Rocket didn't launch!");
+        // We drop the error to get a Rocket-formatted panic.
+        drop(e);
+    };
 }
