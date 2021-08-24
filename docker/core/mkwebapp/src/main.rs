@@ -80,17 +80,6 @@ fn wave(name: &str, age: u8) -> String {
     format!("👋 Hello, {} year old named {}!", age, name)
 }
 
-// Note: without the `..` in `opt..`, we'd need to pass `opt.emoji`, `opt.name`.
-// http://127.0.0.1:8000/?emoji
-// http://127.0.0.1:8000/?name=Rocketeer
-// http://127.0.0.1:8000/?lang=ру
-// http://127.0.0.1:8000/?lang=ру&emoji
-// http://127.0.0.1:8000/?emoji&lang=en
-// http://127.0.0.1:8000/?name=Rocketeer&lang=en
-// http://127.0.0.1:8000/?emoji&name=Rocketeer
-// http://127.0.0.1:8000/?name=Rocketeer&lang=en&emoji
-// http://127.0.0.1:8000/?lang=ru&emoji&name=Rocketeer
-
 #[get("/?<lang>&<opt..>")]
 fn hello(lang: Option<Lang>, opt: Options<'_>) -> String {
     let mut greeting = String::new();
@@ -182,7 +171,7 @@ fn rocket() -> Rocket<Build> {
         .mount("/", routes![hello])
         .mount("/hello", routes![world, mir])
         .mount("/wave", routes![wave])
-        .register("/", catchers![general_not_found, general_security])
+        .register("/", catchers![general_not_administrator, general_not_administrator, general_not_found, general_security])
         // .mount("/tera", routes![template_base::index, template_base::hello, template_base::about])
         // .register("/tera", catchers![template_base::not_found])
         .mount("/", FileServer::from(relative!("static")))
@@ -233,30 +222,6 @@ async fn main() {
         }
         let salt = mk_lib_file::mk_read_file_data("/mediakraken/secure/data.zip");
     }
-    /*
-kdf = PBKDF2HMAC(
-algorithm=hashes.SHA256(),
-length=32,
-salt=salt,
-iterations=100000,
-backend=default_backend()
-)
-if 'SECURE' in os.environ:  # docker compose
-self.hash_key = base64.urlsafe_b64encode(
-kdf.derive(os.environ['SECURE'].encode('utf-8')))
-else:  # docker swarm
-self.hash_key = base64.urlsafe_b64encode(
-kdf.derive(common_file.com_file_load_data('/run/secrets/secure_key')))
-self.fernet = Fernet(self.hash_key)
-
-def com_hash_gen_crypt_encode(self, encode_string):
-# encode, since it needs bytes
-return self.fernet.encrypt(encode_string.encode())
-
-def com_hash_gen_crypt_decode(self, decode_string):
-# encode, since it needs bytes
-return self.fernet.decrypt(decode_string.encode())
-*/
 
     // db version check
     // let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
@@ -268,7 +233,6 @@ return self.fernet.decrypt(decode_string.encode())
 
     if let Err(e) = rocket().launch().await {
         println!("Whoops! Rocket didn't launch!");
-        // We drop the error to get a Rocket-formatted panic.
         drop(e);
     };
 }
