@@ -171,7 +171,7 @@ fn rocket() -> Rocket<Build> {
         .mount("/", routes![hello])
         .mount("/hello", routes![world, mir])
         .mount("/wave", routes![wave])
-        .register("/", catchers![general_not_administrator, general_not_administrator, general_not_found, general_security])
+        .register("/", catchers![general_not_administrator, general_not_found, general_security])
         // .mount("/tera", routes![template_base::index, template_base::hello, template_base::about])
         // .register("/tera", catchers![template_base::not_found])
         .mount("/", FileServer::from(relative!("static")))
