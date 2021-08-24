@@ -33,6 +33,7 @@ RUN wget -O /wait https://github.com/ufoscout/docker-compose-wait/releases/downl
 COPY --from=cargo-build /etc/passwd /etc/passwd
 COPY --from=cargo-build /etc/group /etc/group
 COPY --from=cargo-build /bin/sh /sh
+COPY --from=cargo-build /mediakraken/templates /mediakraken/templates
 
 WORKDIR /mediakraken
 RUN chown -R mediakraken: /mediakraken
