@@ -3,8 +3,6 @@ extern crate rocket;
 #[macro_use]
 extern crate lazy_static;
 
-mod template_base;
-
 use rcgen::generate_simple_self_signed;
 use ring::digest;
 use std::io::Write;
@@ -131,7 +129,8 @@ async fn main() {
         .register("/", catchers![general_not_administrator, general_not_found, general_security])
         .mount("/", FileServer::from(relative!("static")))
         .manage::<sqlx::PgPool>(sqlx_pool)
-        .attach(Template::custom(|engines| {
-            template_base::customize(&mut engines.tera);
-        }));
+        // .attach(Template::custom(|engines| {
+        //     template_base::customize(&mut engines.tera);
+        // }))
+    ;
 }
