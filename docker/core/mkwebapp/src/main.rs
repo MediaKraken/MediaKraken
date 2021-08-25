@@ -18,8 +18,6 @@ use rocket::http::Status;
 use std::collections::{HashMap, BTreeMap};
 use rocket_dyn_templates::Template;
 use serde_json::json;
-//use rocket_dyn_templates::{GlobalFn, Value, Template, tera::Tera, context, from_value, to_value, Error};
-//use rocket_contrib::templates::tera::{GlobalFn, Tera, Value, from_value, to_value, Error};
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database_sqlx/src/mk_lib_database.rs"]
@@ -46,61 +44,6 @@ mod mk_lib_file;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
-
-#[derive(FromFormField)]
-enum Lang {
-    #[field(value = "en")]
-    English,
-    #[field(value = "ru")]
-    #[field(value = "ру")]
-    Russian,
-}
-
-#[derive(FromForm)]
-struct Options<'r> {
-    emoji: bool,
-    name: Option<&'r str>,
-}
-
-// http://127.0.0.1:8000/hello/world
-#[get("/world")]
-fn world() -> &'static str {
-    "Hello, world!"
-}
-
-// http://127.0.0.1:8000/hello/мир
-#[get("/мир")]
-fn mir() -> &'static str {
-    "Привет, мир!"
-}
-
-// http://127.0.0.1:8000/wave/Rocketeer/100
-#[get("/<name>/<age>")]
-fn wave(name: &str, age: u8) -> String {
-    format!("👋 Hello, {} year old named {}!", age, name)
-}
-
-#[get("/?<lang>&<opt..>")]
-fn hello(lang: Option<Lang>, opt: Options<'_>) -> String {
-    let mut greeting = String::new();
-    if opt.emoji {
-        greeting.push_str("👋 ");
-    }
-
-    match lang {
-        Some(Lang::Russian) => greeting.push_str("Привет"),
-        Some(Lang::English) => greeting.push_str("Hello"),
-        None => greeting.push_str("Hi"),
-    }
-
-    if let Some(name) = opt.name {
-        greeting.push_str(", ");
-        greeting.push_str(name);
-    }
-
-    greeting.push('!');
-    greeting
-}
 
 #[catch(401)]
 fn general_not_authorized() -> content::RawHtml<&'static str> {
@@ -138,33 +81,6 @@ fn default_catcher(status: Status, req: &Request<'_>) -> status::Custom<String> 
     let msg = format!("{} ({})", status, req.uri());
     status::Custom(status, msg)
 }
-
-// fn make_url_for(urls: BTreeMap<String, String>) -> GlobalFn {
-//     Box::new(move |args| -> Result<Value, Error> {
-//         match args.get("name") {
-//             Some(val) => match from_value::<String>(val.clone()) {
-//                 Ok(v) => Ok(to_value(urls.get(&v).unwrap()).unwrap()),
-//                 Err(_) => Err("Oops".into()),
-//             },
-//             None => Err("Oops".into()),
-//         }
-//     })
-// }
-
-// lazy_static! {
-//     pub static ref TEMPLATES: Tera = {
-//         let mut tera = match Tera::new("templates/**/*") {
-//             Ok(t) => t,
-//             Err(e) => {
-//                 println!("Parsing error(s): {}", e);
-//                 ::std::process::exit(1);
-//             }
-//         };
-//         tera.autoescape_on(vec!["html", ".sql"]);
-//         //tera.register_filter("do_nothing", do_nothing_filter);
-//         tera
-//     };
-// }
 
 #[rocket::main]
 async fn main() {
@@ -208,22 +124,12 @@ async fn main() {
     // mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
     //                                                        true).await;
 
-    // let mut tera = Tera::default();
-    // tera.register_function("url_for", make_url_for(urls));
-
     rocket::build()
-        .mount("/", routes![hello])
-        .mount("/hello", routes![world, mir])
-        .mount("/wave", routes![wave])
+        .mount("/admin", routes![])
+        .mount("/public", routes![])
+        .mount("/user", routes![])
         .register("/", catchers![general_not_administrator, general_not_found, general_security])
-        // .mount("/tera", routes![template_base::index, template_base::hello, template_base::about])
-        // .register("/tera", catchers![template_base::not_found])
         .mount("/", FileServer::from(relative!("static")))
-        //.attach(sqlx::stage())
-        //     .attach(Template::custom(|engines|{
-        //     let url = BTreeMap::new();
-        //     engines.tera.register_function("url_for", make_url_for(url))
-        // }))
         .manage::<sqlx::PgPool>(sqlx_pool)
         .attach(Template::custom(|engines| {
             template_base::customize(&mut engines.tera);
