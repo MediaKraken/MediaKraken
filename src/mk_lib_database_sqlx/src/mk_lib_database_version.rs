@@ -42,18 +42,6 @@ pub async fn mk_lib_database_version_check(pool: &sqlx::PgPool,
     Ok(version_match)
 }
 
-#[allow(dead_code)]
-pub async fn mk_lib_database_version_update(pool: &sqlx::PgPool,
-                                            version_number: i64)
-                                            -> Result<(), sqlx::Error> {
-    sqlx::query("update mm_version set mm_version_number = $1")
-        .bind(version_number)
-        .execute(pool)
-        .await?;
-    Ok(())
-}
-
-
 // // cargo test -- --show-output
 // #[cfg(test)]
 // mod test_mk_lib_common {
