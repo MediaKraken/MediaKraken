@@ -166,26 +166,6 @@ fn default_catcher(status: Status, req: &Request<'_>) -> status::Custom<String> 
 //     };
 // }
 
-fn rocket() -> Rocket<Build> {
-    rocket::build()
-        .mount("/", routes![hello])
-        .mount("/hello", routes![world, mir])
-        .mount("/wave", routes![wave])
-        .register("/", catchers![general_not_administrator, general_not_found, general_security])
-        // .mount("/tera", routes![template_base::index, template_base::hello, template_base::about])
-        // .register("/tera", catchers![template_base::not_found])
-        .mount("/", FileServer::from(relative!("static")))
-        //.attach(sqlx::stage())
-        //     .attach(Template::custom(|engines|{
-        //     let url = BTreeMap::new();
-        //     engines.tera.register_function("url_for", make_url_for(url))
-        // }))
-//        .manage::<sqlx::PgPool>(sqlx_pool)
-        .attach(Template::custom(|engines| {
-            template_base::customize(&mut engines.tera);
-        }))
-}
-
 #[rocket::main]
 async fn main() {
     // start logging
@@ -231,8 +211,21 @@ async fn main() {
     // let mut tera = Tera::default();
     // tera.register_function("url_for", make_url_for(urls));
 
-    if let Err(e) = rocket().launch().await {
-        println!("Whoops! Rocket didn't launch!");
-        drop(e);
-    };
+    rocket::build()
+        .mount("/", routes![hello])
+        .mount("/hello", routes![world, mir])
+        .mount("/wave", routes![wave])
+        .register("/", catchers![general_not_administrator, general_not_found, general_security])
+        // .mount("/tera", routes![template_base::index, template_base::hello, template_base::about])
+        // .register("/tera", catchers![template_base::not_found])
+        .mount("/", FileServer::from(relative!("static")))
+        //.attach(sqlx::stage())
+        //     .attach(Template::custom(|engines|{
+        //     let url = BTreeMap::new();
+        //     engines.tera.register_function("url_for", make_url_for(url))
+        // }))
+        .manage::<sqlx::PgPool>(sqlx_pool)
+        .attach(Template::custom(|engines| {
+            template_base::customize(&mut engines.tera);
+        }));
 }
