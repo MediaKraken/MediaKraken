@@ -1,21 +1,25 @@
 use tokio::time::{Duration, sleep};
 
-pub static DATABASE_VERSION: i32 = 43;
+pub static DATABASE_VERSION: i64 = 43;
+
+struct VersionRow {
+    id: i64,
+}
 
 #[allow(dead_code)]
 pub async fn mk_lib_database_version(pool: &sqlx::PgPool)
-                                     -> Result<i32, sqlx::Error> {
-    let row = sqlx::query_as("select mm_version_number from mm_version")
-        .fetch_one(&*pool)
+                                     -> Result<i64, sqlx::Error> {
+    let row: (i64, ) = sqlx::query_as("select mm_version_number from mm_version")
+        .fetch_one(pool)
         .await?;
-    Ok(row.get("mm_version_number"))
+    Ok(row.0)
 }
 
 pub async fn mk_lib_database_version_check(pool: &sqlx::PgPool,
                                            update_schema: bool)
                                            -> Result<bool, sqlx::Error> {
     let mut version_match: bool = false;
-    let version_no: i32 = mk_lib_database_version(pool);
+    let version_no: i64 = mk_lib_database_version(pool).await.unwrap();
     if DATABASE_VERSION == version_no {
         version_match = true;
     }
@@ -27,7 +31,7 @@ pub async fn mk_lib_database_version_check(pool: &sqlx::PgPool,
         } else {
             loop {
                 sleep(Duration::from_secs(5)).await;
-                let version_no: i32 = mk_lib_database_version(pool);
+                let version_no: i64 = mk_lib_database_version(pool).await.unwrap();
                 if DATABASE_VERSION == version_no {
                     version_match = true;
                     break;
@@ -40,8 +44,12 @@ pub async fn mk_lib_database_version_check(pool: &sqlx::PgPool,
 
 #[allow(dead_code)]
 pub async fn mk_lib_database_version_update(pool: &sqlx::PgPool,
-                                            version_number: i32) -> Result<(), sqlx::Error> {
-    sqlx::query_as("update mm_version set mm_version_number = $1", &[&version_number]).await?;
+                                            version_number: i64)
+                                            -> Result<(), sqlx::Error> {
+    sqlx::query("update mm_version set mm_version_number = $1")
+        .bind(version_number)
+        .execute(pool)
+        .await?;
     Ok(())
 }
 

@@ -20,9 +20,9 @@ use serde_json::json;
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database_sqlx/src/mk_lib_database.rs"]
 mod mk_lib_database;
-// #[cfg(debug_assertions)]
-// #[path = "../../../../src/mk_lib_database_sqlx/src/mk_lib_database_version.rs"]
-// mod mk_lib_database_version;
+#[cfg(debug_assertions)]
+#[path = "../../../../src/mk_lib_database_sqlx/src/mk_lib_database_version.rs"]
+mod mk_lib_database_version;
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_file/src/mk_lib_file.rs"]
 mod mk_lib_file;
@@ -33,9 +33,9 @@ mod mk_lib_logging;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
-// #[cfg(not(debug_assertions))]
-// #[path = "mk_lib_database_version.rs"]
-// mod mk_lib_database_version;
+#[cfg(not(debug_assertions))]
+#[path = "mk_lib_database_version.rs"]
+mod mk_lib_database_version;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_file.rs"]
 mod mk_lib_file;
@@ -117,20 +117,21 @@ async fn main() {
         let salt = mk_lib_file::mk_read_file_data("/mediakraken/secure/data.zip");
     }
 
-    // db version check
+    // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
-    // mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
-    //                                                        true).await;
+    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
+                                                           true).await;
 
     rocket::build()
+        .mount("/", FileServer::from(relative!("static")))
         .mount("/admin", routes![])
         .mount("/public", routes![])
         .mount("/user", routes![])
-        .register("/", catchers![general_not_administrator, general_not_found, general_security])
-        .mount("/", FileServer::from(relative!("static")))
+        .register("/", catchers![general_not_authorized, general_not_administrator,
+            general_not_found, general_security, default_catcher])
         .manage::<sqlx::PgPool>(sqlx_pool)
-        // .attach(Template::custom(|engines| {
-        //     template_base::customize(&mut engines.tera);
-        // }))
+    // .attach(Template::custom(|engines| {
+    //     template_base::customize(&mut engines.tera);
+    // }))
     ;
 }
