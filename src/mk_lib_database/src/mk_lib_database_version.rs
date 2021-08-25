@@ -24,7 +24,8 @@ pub async fn mk_lib_database_version_check(client: &tokio_postgres::Client,
     if version_match == false {
         if update_schema == true {
             // do db updates here
-            mk_lib_database_version_update(client, 43).await?;
+            mk_lib_database_version_schema::mk_lib_database_version_schema(pool).await?;
+            //mk_lib_database_version_update(pool, DATABASE_VERSION).await?;
             version_match = true;
         } else {
             loop {
