@@ -1,7 +1,7 @@
 use tokio::time::{Duration, sleep};
 use tokio_postgres::Error;
 
-pub static DATABASE_VERSION: i32 = 43;
+pub static DATABASE_VERSION: i64 = 43;
 
 #[allow(dead_code)]
 pub async fn mk_lib_database_version(client: &tokio_postgres::Client) -> Result<i32, Error> {
@@ -11,33 +11,20 @@ pub async fn mk_lib_database_version(client: &tokio_postgres::Client) -> Result<
     Ok(row.get("mm_version_number"))
 }
 
-pub async fn mk_lib_database_version_check(client: &tokio_postgres::Client,
-                                           update_schema: bool) -> Result<bool, Error> {
-    let row = client
-        .query_one("select mm_version_number from mm_version", &[])
-        .await?;
+pub async fn mk_lib_database_version_check(client: &tokio_postgres::Client)
+                                           -> Result<bool, Error> {
     let mut version_match: bool = false;
-    let version_no: i32 = row.get("mm_version_number");
+    let version_no: i64 = mk_lib_database_version(&client).await.unwrap();
     if DATABASE_VERSION == version_no {
         version_match = true;
     }
     if version_match == false {
-        if update_schema == true {
-            // do db updates here
-            mk_lib_database_version_schema::mk_lib_database_version_schema(pool).await?;
-            //mk_lib_database_version_update(pool, DATABASE_VERSION).await?;
-            version_match = true;
-        } else {
-            loop {
-                sleep(Duration::from_secs(5)).await;
-                let row = client
-                    .query_one("select mm_version_number from mm_version", &[])
-                    .await?;
-                let version_no: i32 = row.get("mm_version_number");
-                if DATABASE_VERSION == version_no {
-                    version_match = true;
-                    break;
-                }
+        loop {
+            sleep(Duration::from_secs(5)).await;
+            let version_no: i64 = mk_lib_database_version(&client).await.unwrap();
+            if DATABASE_VERSION == version_no {
+                version_match = true;
+                break;
             }
         }
     }

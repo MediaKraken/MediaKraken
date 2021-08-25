@@ -2,7 +2,7 @@ use tokio::time::{Duration, sleep};
 
 pub static DATABASE_VERSION: i64 = 43;
 
-#[path = "mk_lib_database_version_schema.rs"]
+#[path = "./mk_lib_database_version_schema.rs"]
 mod mk_lib_database_version_schema;
 
 #[allow(dead_code)]
@@ -18,21 +18,20 @@ pub async fn mk_lib_database_version_check(pool: &sqlx::PgPool,
                                            update_schema: bool)
                                            -> Result<bool, sqlx::Error> {
     let mut version_match: bool = false;
-    let version_no: i64 = mk_lib_database_version(pool).await.unwrap();
+    let version_no: i64 = mk_lib_database_version(&pool).await.unwrap();
     if DATABASE_VERSION == version_no {
         version_match = true;
     }
     if version_match == false {
         if update_schema == true {
             // do db updates here
-            mk_lib_database_version_schema::mk_lib_database_update_schema(pool,
+            mk_lib_database_version_schema::mk_lib_database_update_schema(&pool,
                                                                           version_no).await?;
-            //mk_lib_database_version_update(pool, DATABASE_VERSION).await?;
             version_match = true;
         } else {
             loop {
                 sleep(Duration::from_secs(5)).await;
-                let version_no: i64 = mk_lib_database_version(pool).await.unwrap();
+                let version_no: i64 = mk_lib_database_version(&pool).await.unwrap();
                 if DATABASE_VERSION == version_no {
                     version_match = true;
                     break;
