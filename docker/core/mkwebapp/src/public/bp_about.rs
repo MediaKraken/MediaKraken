@@ -1,6 +1,5 @@
 use rocket::Request;
 use rocket::response::Redirect;
-
 use rocket_dyn_templates::{Template, tera::Tera, context};
 
 #[get("/about")]
