@@ -1,7 +1,7 @@
 use tokio::time::{Duration, sleep};
 use tokio_postgres::Error;
 
-pub static DATABASE_VERSION: i64 = 43;
+pub static DATABASE_VERSION: i32 = 43;
 
 #[allow(dead_code)]
 pub async fn mk_lib_database_version(client: &tokio_postgres::Client) -> Result<i32, Error> {
@@ -14,14 +14,14 @@ pub async fn mk_lib_database_version(client: &tokio_postgres::Client) -> Result<
 pub async fn mk_lib_database_version_check(client: &tokio_postgres::Client)
                                            -> Result<bool, Error> {
     let mut version_match: bool = false;
-    let version_no: i64 = mk_lib_database_version(&client).await.unwrap();
+    let version_no: i32 = mk_lib_database_version(&client).await.unwrap();
     if DATABASE_VERSION == version_no {
         version_match = true;
     }
     if version_match == false {
         loop {
             sleep(Duration::from_secs(5)).await;
-            let version_no: i64 = mk_lib_database_version(&client).await.unwrap();
+            let version_no: i32 = mk_lib_database_version(&client).await.unwrap();
             if DATABASE_VERSION == version_no {
                 version_match = true;
                 break;

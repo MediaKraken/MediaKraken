@@ -1,14 +1,14 @@
 use tokio::time::{Duration, sleep};
 
-pub static DATABASE_VERSION: i64 = 43;
+pub static DATABASE_VERSION: i32 = 43;
 
 #[path = "./mk_lib_database_version_schema.rs"]
 mod mk_lib_database_version_schema;
 
 #[allow(dead_code)]
 pub async fn mk_lib_database_version(pool: &sqlx::PgPool)
-                                     -> Result<i64, sqlx::Error> {
-    let row: (i64, ) = sqlx::query_as("select mm_version_number from mm_version")
+                                     -> Result<i32, sqlx::Error> {
+    let row: (i32, ) = sqlx::query_as("select mm_version_number from mm_version")
         .fetch_one(pool)
         .await?;
     Ok(row.0)
@@ -18,7 +18,7 @@ pub async fn mk_lib_database_version_check(pool: &sqlx::PgPool,
                                            update_schema: bool)
                                            -> Result<bool, sqlx::Error> {
     let mut version_match: bool = false;
-    let version_no: i64 = mk_lib_database_version(&pool).await.unwrap();
+    let version_no: i32 = mk_lib_database_version(&pool).await.unwrap();
     if DATABASE_VERSION == version_no {
         version_match = true;
     }
@@ -31,7 +31,7 @@ pub async fn mk_lib_database_version_check(pool: &sqlx::PgPool,
         } else {
             loop {
                 sleep(Duration::from_secs(5)).await;
-                let version_no: i64 = mk_lib_database_version(&pool).await.unwrap();
+                let version_no: i32 = mk_lib_database_version(&pool).await.unwrap();
                 if DATABASE_VERSION == version_no {
                     version_match = true;
                     break;
