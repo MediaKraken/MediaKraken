@@ -43,42 +43,11 @@ mod mk_lib_file;
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
-#[catch(401)]
-fn general_not_authorized() -> content::RawHtml<&'static str> {
-    content::RawHtml(r#"
-        <p>Hmm... What are you looking for?</p>
-        Say <a href="/hello/Sergio/100">hello!</a>
-    "#)
-}
+#[path = "error/bp_error.rs"]
+mod bp_error;
 
-#[catch(403)]
-fn general_not_administrator() -> content::RawHtml<&'static str> {
-    content::RawHtml(r#"
-        <p>Hmm... What are you looking for?</p>
-        Say <a href="/hello/Sergio/100">hello!</a>
-    "#)
-}
-
-#[catch(404)]
-fn general_not_found() -> content::RawHtml<&'static str> {
-    content::RawHtml(r#"
-        <p>Hmm... What are you looking for?</p>
-        Say <a href="/hello/Sergio/100">hello!</a>
-    "#)
-}
-
-#[catch(500)]
-fn general_security() -> content::RawHtml<&'static str> {
-    content::RawHtml(r#"
-        <p>Hmm... you shouldn't be here!r?</p>
-    "#)
-}
-
-#[catch(default)]
-fn default_catcher(status: Status, req: &Request<'_>) -> status::Custom<String> {
-    let msg = format!("{} ({})", status, req.uri());
-    status::Custom(status, msg)
-}
+#[path = "public/bp_about.rs"]
+mod bp_about;
 
 #[rocket::main]
 async fn main() {
@@ -127,11 +96,14 @@ async fn main() {
         .mount("/admin", routes![])
         .mount("/public", routes![])
         .mount("/user", routes![])
-        .register("/", catchers![general_not_authorized, general_not_administrator,
-            general_not_found, general_security, default_catcher])
+        .register("/", catchers![bp_error::general_not_authorized,
+            bp_error::general_not_administrator,
+            bp_error::general_not_found,
+            bp_error::general_security,
+            bp_error::default_catcher])
         .manage::<sqlx::PgPool>(sqlx_pool)
-    // .attach(Template::custom(|engines| {
-    //     template_base::customize(&mut engines.tera);
-    // }))
+        .attach(Template::custom(|engines| {
+            bp_about::customize(&mut engines.tera);
+        }))
     ;
 }
