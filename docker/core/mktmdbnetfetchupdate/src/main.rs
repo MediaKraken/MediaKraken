@@ -85,8 +85,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // open the database
     let db_client = &mk_lib_database::mk_lib_database_open().await?;
-    mk_lib_database_version::mk_lib_database_version_check(db_client,
-                                                           false).await?;
+    mk_lib_database_version::mk_lib_database_version_check(db_client).await?;
     let option_config_json: Value = serde_json::from_str(
         &mk_lib_database::mk_lib_database_options(db_client).await.unwrap());
 

@@ -27,8 +27,7 @@ mod mk_lib_network;
 async fn main() -> Result<(), Box<dyn Error>> {
     // open the database
     let db_client = &mk_lib_database::mk_lib_database_open().await?;
-    mk_lib_database_version::mk_lib_database_version_check(db_client,
-                                                           false).await?;
+    mk_lib_database_version::mk_lib_database_version_check(db_client).await?;
     // grab the manufacturer's from Global Cache
     // let fetch_result = mk_lib_network::mk_data_from_url(
     //     "https://irdb.globalcache.com:8081/api/brands/".to_string()).await;

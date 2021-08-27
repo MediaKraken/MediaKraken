@@ -8,12 +8,21 @@ use std::num::NonZeroU32;
 //     let mut lim = RateLimiter::direct(Quota::per_second(nonzero!(50u32))); // Allow 50 units per second
 //     assert_eq!(Ok(()), lim.check());
 // }
+/*
+let lim = RateLimiter::direct(Quota::per_second(nonzero!(10u32)));
+    // exhaust the limiter:
+    loop {
+        if lim.check().is_err() {
+            break;
+        }
+    }
+    block_on(lim.until_ready());
+ */
 
 pub static API_LIMIT: phf::Map<&'static str, i16, i16> = phf_map! {
 "anidb" => 1, 4,  // A Client MUST NOT send more than one packet
 // every four seconds over an extended amount of time. 4-16-2016)
-// no mention of limits 7/29/2016 just says don't abuse
-"chart_lyrics" => 9999, 1,
+"chart_lyrics" => 9999, 1,  // no mention of limits 7/29/2016 just says don't abuse
 "comicvine" => 1, 1,  // 4-16-2016)
 "discogs" => 240, 60,  // 1-16-2017)
 "giantbomb" => 1, 1,  // 10-18-2020) 1 per second or hit wall hard

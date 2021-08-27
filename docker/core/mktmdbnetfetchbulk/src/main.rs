@@ -87,8 +87,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // open the database
     let db_client = &mk_lib_database::mk_lib_database_open().await?;
-    mk_lib_database_version::mk_lib_database_version_check(db_client,
-                                                           false).await?;
+    mk_lib_database_version::mk_lib_database_version_check(db_client).await?;
 
     // grab the movie id's
     // files.tmdb.org = 13.227.42.62
