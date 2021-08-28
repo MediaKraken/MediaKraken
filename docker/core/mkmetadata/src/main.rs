@@ -98,13 +98,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
         }
         // update the media row with the json media id AND THE proper NAME!!!
-        if metadata_uuid
-        is
-        not
-        None {
+        if metadata_uuid != None {
             db_connection.db_begin();
-            db_connection.db_update_media_id(row_data["mdq_provider_id"],
-            metadata_uuid);
+            db_connection.db_update_media_id(row_data["mdq_provider_id"], metadata_uuid);
             db_connection.db_download_delete(row_data["mdq_id"]);
             db_connection.db_commit();
         }

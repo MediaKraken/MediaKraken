@@ -118,7 +118,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         // check for UNC
         let unc_slice = &row_data.get("mm_media_dir_path")[..1];
         if unc_slice == "\\" {
-            scan_path = false;
+            let scan_path = false;
             // addr, share, path = common_string.com_string_unc_to_addr_path(row_data["mm_media_dir_path"]);
             // smb_stuff = common_network_cifs.CommonCIFSShare();
             // if smb_stuff.com_cifs_open(ip_addr = addr) {
@@ -143,7 +143,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             // }
         } else {
             // make sure the path still exists
-            media_path: PathBuf = ["/mediakraken/mnt",
+            let media_path: PathBuf = ["/mediakraken/mnt",
                 row_data.get("mm_media_dir_path")].iter().collect();
         }
         if !Path::new(&media_path).exists() {
@@ -190,7 +190,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     // }
                     // smb_stuff.com_cifs_close();
                 } else {
-                    file_data = mk_lib_file::mk_directory_walk(&dir_path);
+                     let file_data = mk_lib_file::mk_directory_walk(&dir_path);
                 }
                 let total_file_in_dir = len(file_data);
                 let mut total_scanned: u64 = 0;
@@ -206,7 +206,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             || mk_lib_common_media_extension::GAME_EXTENSION.contains(&file_extension) {
                             let mut ffprobe_bif_data = true;
                             let mut save_dl_record = true;
-                            total_files += 1;
+                            let total_files += 1;
                             // set here which MIGHT be overrode later
                             let new_class_type_uuid = media_class_type_uuid;
                             // check for "stacked" media file
@@ -228,34 +228,34 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     && stack_disk1.is_match(&base_file_name) == false
                                     && stack_disc1.is_match(&base_file_name) == false {
                                     // it's not a part one here so, no DL record needed
-                                    save_dl_record = false;
+                                    let save_dl_record = false;
                                 }
                             }
                             // video game data
                             // TODO look for cue/bin data as well
                             if original_media_class == mk_lib_common_enum_media_type::DLMediaType::GAME {
                                 if file_extension == "iso" {
-                                    new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::GAME_ISO;
-                                } else if file_extension == "chd" {
-                                    new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::GAME_CHD;
+                                    let new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::GAME_ISO;
+                                } else {if file_extension == "chd" {
+                                    let new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::GAME_CHD;
                                 } else {
-                                    new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::GAME_ROM;
-                                }
-                                ffprobe_bif_data = false;
+                                    let new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::GAME_ROM;
+                                }}
+                                let ffprobe_bif_data = false;
                             }
                             // set new media class for subtitles
                             else {
                                 if mk_lib_common_media_extension::SUBTITLE_EXTENSION.contains(&file_extension) {
                                     if original_media_class == mk_lib_common_enum_media_type::DLMediaType::MOVIE {
-                                        new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::MOVIE_SUBTITLE;
+                                        let new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::MOVIE_SUBTITLE;
                                     } else {
                                         if original_media_class == mk_lib_common_enum_media_type::DLMediaType::TV
                                             || original_media_class == mk_lib_common_enum_media_type::DLMediaType::TV_EPISODE
                                             || original_media_class == mk_lib_common_enum_media_type::DLMediaType::TV_SEASON {
-                                            new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::TV_SUBTITLE;
+                                            let new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::TV_SUBTITLE;
                                         }
                                     }
-                                    ffprobe_bif_data = false;
+                                    let ffprobe_bif_data = false;
                                 }
                                 // set new media class for trailers or themes
                                 else {
@@ -267,18 +267,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         || file_name.contains("\\theme.mp4") {
                                         if original_media_class == mk_lib_common_enum_media_type::DLMediaType::MOVIE {
                                             if file_name.contains("/trailers/") || file_name.contains("\\trailers\\") {
-                                                new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::MOVIE_TRAILER;
+                                                let new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::MOVIE_TRAILER;
                                             } else {
-                                                new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::MOVIE_THEME;
+                                                let new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::MOVIE_THEME;
                                             }
                                         } else {
                                             if original_media_class == mk_lib_common_enum_media_type::DLMediaType::TV
                                                 || original_media_class == mk_lib_common_enum_media_type::DLMediaType::TV_EPISODE
                                                 || original_media_class == mk_lib_common_enum_media_type::DLMediaType::TV_SEASON {
                                                 if file_name.contains("/trailers/") || file_name.contains("\\trailers\\") {
-                                                    new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::TV_TRAILER;
+                                                    let new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::TV_TRAILER;
                                                 } else {
-                                                    new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::TV_THEME;
+                                                    let new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::TV_THEME;
                                                 }
                                             }
                                         }
@@ -287,12 +287,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     else {
                                         if file_name.contains("/extras/") || file_name.contains("\\extras\\") {
                                             if original_media_class == mk_lib_common_enum_media_type::DLMediaType::MOVIE {
-                                                new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::MOVIE_EXTRAS;
+                                                let new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::MOVIE_EXTRAS;
                                             } else {
                                                 if original_media_class == mk_lib_common_enum_media_type::DLMediaType::TV
                                                     || original_media_class == mk_lib_common_enum_media_type::DLMediaType::TV_EPISODE
                                                     || original_media_class == mk_lib_common_enum_media_type::DLMediaType::TV_SEASON {
-                                                    new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::TV_EXTRAS;
+                                                    let new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::TV_EXTRAS;
                                                 }
                                             }
                                         }
@@ -306,19 +306,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                     || file_name.contains("/theme.mp4")
                                                     || file_name.contains("\\theme.mp4") {
                                                     if original_media_class == mk_lib_common_enum_media_type::DLMediaType::MOVIE {
-                                                        new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::MOVIE_THEME;
+                                                        let new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::MOVIE_THEME;
                                                     } else {
                                                         if original_media_class == mk_lib_common_enum_media_type::DLMediaType::TV
                                                             || original_media_class == mk_lib_common_enum_media_type::DLMediaType::TV_EPISODE
                                                             || original_media_class == mk_lib_common_enum_media_type::DLMediaType::TV_SEASON {
-                                                            new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::TV_THEME;
+                                                            let new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::TV_THEME;
                                                         }
                                                     }
                                                 }
                                             }
                                             // flip around slashes for smb paths
                                             if file_name == "\\" {
-                                                file_name = file_name.replace("\\\\", "smb://guest:\"\"@").replace("\\", "/");
+                                                let file_name = file_name.replace("\\\\", "smb://guest:\"\"@").replace("\\", "/");
                                             }
                                             // create media_json data
                                             let media_json = json!({ "Added": datetime.now().strftime("%Y-%m-%d HH:mm:ss") });
@@ -359,7 +359,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 }
                             }
                         }
-                        total_scanned += 1;
+                        let total_scanned += 1;
                         mk_lib_database_library::mk_lib_database_library_path_status_update(db_client,
                                                                                             row_data.get("mm_media_dir_guid"),
                                                                                             json!({format!("Status": "File scan: {:?}/{:?}",
