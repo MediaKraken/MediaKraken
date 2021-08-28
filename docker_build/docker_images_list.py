@@ -37,14 +37,12 @@ PROXY_USER_PASS = None
 # base OS images to build off of, meaning there is a 'from' in the docker file(s) that use these
 # or simply stand alone images
 STAGE_ONE_IMAGES = {
-    'AlpineBase3141Py3': ('mkbase_alpinepy3', 'alpine:3.14.1', 'base'),
+    'AlpineBase3142Py3': ('mkbase_alpinepy3', 'alpine:3.14.2', 'base'),
 }
 
 STAGE_TWO_IMAGES = {}
 
-STAGE_ONE_GAME_SERVERS = {
-
-}
+STAGE_ONE_GAME_SERVERS = {}
 
 STAGE_TWO_GAME_SERVERS = {}
 
