@@ -21,9 +21,6 @@ pub async fn mk_lib_database_open_pool() -> Result<sqlx::PgPool, sqlx::Error> {
     let pool = PgPoolOptions::new()
         .max_connections(25)
         .connect(&connection_string).await?;
-    // let pool = sqlx::PgPool::connect(&connection_string)
-    //     .await
-    //     .expect("Failed to connect to database");
     Ok(pool)
 }
 

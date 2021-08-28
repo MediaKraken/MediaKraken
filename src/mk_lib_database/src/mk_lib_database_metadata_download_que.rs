@@ -35,15 +35,3 @@ pub async fn mk_lib_database_metadata_download_que_insert(client: &tokio_postgre
                        &metadata_new_uuid, &metadata_provider_id, &metadata_status]).await?;
     Ok(())
 }
-
-// // cargo test -- --show-output
-// #[cfg(test)]
-// mod test_mk_lib_common {
-//     use super::*;
-//
-//     macro_rules! aw {
-//     ($e:expr) => {
-//         tokio_test::block_on($e)
-//     };
-//   }
-// }
