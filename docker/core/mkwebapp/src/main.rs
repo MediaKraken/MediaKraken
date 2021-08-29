@@ -18,10 +18,10 @@ use rocket_dyn_templates::Template;
 use serde_json::json;
 
 #[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database_sqlx/src/mk_lib_database.rs"]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
 mod mk_lib_database;
 #[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database_sqlx/src/mk_lib_database_version.rs"]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
 mod mk_lib_database_version;
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_file/src/mk_lib_file.rs"]

@@ -6,13 +6,13 @@ use tokio::time::{Duration, sleep};
 use uuid::Uuid;
 
 #[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database_sqlx/src/mk_lib_database.rs"]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
 mod mk_lib_database;
 #[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database_sqlx/src/mk_lib_database_metadata.rs"]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_metadata.rs"]
 mod mk_lib_database_metadata;
 #[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database_sqlx/src/mk_lib_database_version.rs"]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
 mod mk_lib_database_version;
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]

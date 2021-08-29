@@ -1,45 +1,46 @@
 use tokio::time::{Duration, sleep};
-use tokio_postgres::Error;
 
 pub static DATABASE_VERSION: i32 = 43;
 
+#[path = "./mk_lib_database_version_schema.rs"]
+mod mk_lib_database_version_schema;
+
 #[allow(dead_code)]
-pub async fn mk_lib_database_version(client: &tokio_postgres::Client) -> Result<i32, Error> {
-    let row = client
-        .query_one("select mm_version_number from mm_version", &[])
+pub async fn mk_lib_database_version(pool: &sqlx::PgPool)
+                                     -> Result<i32, sqlx::Error> {
+    let row: (i32, ) = sqlx::query_as("select mm_version_number from mm_version")
+        .fetch_one(pool)
         .await?;
-    Ok(row.get("mm_version_number"))
+    Ok(row.0)
 }
 
-pub async fn mk_lib_database_version_check(client: &tokio_postgres::Client)
-                                           -> Result<bool, Error> {
+pub async fn mk_lib_database_version_check(pool: &sqlx::PgPool,
+                                           update_schema: bool)
+                                           -> Result<bool, sqlx::Error> {
     let mut version_match: bool = false;
-    let version_no: i32 = mk_lib_database_version(&client).await.unwrap();
+    let version_no: i32 = mk_lib_database_version(&pool).await.unwrap();
     if DATABASE_VERSION == version_no {
         version_match = true;
     }
     if version_match == false {
-        loop {
-            sleep(Duration::from_secs(5)).await;
-            let version_no: i32 = mk_lib_database_version(&client).await.unwrap();
-            if DATABASE_VERSION == version_no {
-                version_match = true;
-                break;
+        if update_schema == true {
+            // do db updates here
+            mk_lib_database_version_schema::mk_lib_database_update_schema(&pool,
+                                                                          version_no).await?;
+            version_match = true;
+        } else {
+            loop {
+                sleep(Duration::from_secs(5)).await;
+                let version_no: i32 = mk_lib_database_version(&pool).await.unwrap();
+                if DATABASE_VERSION == version_no {
+                    version_match = true;
+                    break;
+                }
             }
         }
     }
     Ok(version_match)
 }
-
-#[allow(dead_code)]
-pub async fn mk_lib_database_version_update(client: &tokio_postgres::Client,
-                                            version_number: i32) -> Result<(), Error> {
-    client
-        .query("update mm_version set mm_version_number = $1", &[&version_number])
-        .await?;
-    Ok(())
-}
-
 
 // // cargo test -- --show-output
 // #[cfg(test)]

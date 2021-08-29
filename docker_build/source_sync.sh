@@ -75,8 +75,8 @@ cp ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mktmdbnetfetchupda
 cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mktranscode/src/.
 
 # mkwebapp
-cp ../src/mk_lib_database_sqlx/src/mk_lib_database.rs ../docker/core/mkwebapp/src/.
-cp ../src/mk_lib_database_sqlx/src/mk_lib_database_version.rs ../docker/core/mkwebapp/src/.
-cp ../src/mk_lib_database_sqlx/src/mk_lib_database_version_schema.rs ../docker/core/mkwebapp/src/.
+cp ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkwebapp/src/.
+cp ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mkwebapp/src/.
+cp ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mkwebapp/src/.
 cp ../src/mk_lib_file/src/mk_lib_file.rs ../docker/core/mkwebapp/src/.
 cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkwebapp/src/.

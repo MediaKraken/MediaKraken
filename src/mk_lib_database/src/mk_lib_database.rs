@@ -1,9 +1,9 @@
 use std::env;
 use std::fs;
 use std::path::Path;
-use tokio_postgres::{Error, NoTls};
+use sqlx::postgres::PgPoolOptions;
 
-pub async fn mk_lib_database_open() -> Result<tokio_postgres::Client, Error> {
+pub async fn mk_lib_database_open_pool() -> Result<sqlx::PgPool, sqlx::Error> {
     // trim is get rid of the \r returned in hostname
     let hostname: String = sys_info::hostname().unwrap().trim().to_string();
     let connection_string: String;
@@ -18,33 +18,10 @@ pub async fn mk_lib_database_open() -> Result<tokio_postgres::Client, Error> {
         connection_string = format!("postgresql://postgres:{}@mkstack_database/postgres",
                                     dp_pass);
     }
-    let (client, connection) = tokio_postgres::connect(&connection_string, NoTls).await?;
-    tokio::spawn(async move {
-        if let Err(e) = connection.await {
-            eprintln!("connection error: {}", e);
-        }
-    });
-    Ok(client)
-}
-
-#[allow(dead_code)]
-pub async fn mk_lib_database_options(client: &tokio_postgres::Client) -> Result<serde_json::Value, Error> {
-    let row = client
-        .query_one("select mm_options_json from mm_options_and_status", &[])
-        .await?;
-    // TODO make this return the actual json instead of a string......less converts
-    let mm_options_json = row.try_get::<&str, serde_json::Value>("mm_options_json")?;
-    Ok(mm_options_json)
-}
-
-#[allow(dead_code)]
-pub async fn mk_lib_database_status(client: &tokio_postgres::Client) -> Result<String, Error> {
-    let row = client
-        .query_one("select mm_status_json from mm_options_and_status", &[])
-        .await?;
-    // TODO make this return the actual json instead of a string......less converts
-    let mm_status_json: String = row.try_get::<&str, serde_json::Value>("mm_status_json")?.to_string();
-    Ok(mm_status_json)
+    let pool = PgPoolOptions::new()
+        .max_connections(25)
+        .connect(&connection_string).await?;
+    Ok(pool)
 }
 
 // // cargo test -- --show-output
