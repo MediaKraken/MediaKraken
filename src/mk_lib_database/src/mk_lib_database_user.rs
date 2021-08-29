@@ -1,4 +1,4 @@
-// // cargo test -- --show-output
+// cargo test -- --show-output
 // #[cfg(test)]
 // mod test_mk_lib_common {
 //     use super::*;

@@ -38,9 +38,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         json!({"START": "START"}),
                                         LOGGING_INDEX_NAME).await;
 
-    // open the database
-    let db_client = &mk_lib_database::mk_lib_database_open().await?;
-    mk_lib_database_version::mk_lib_database_version_check(db_client).await?;
+    // connect to db and do a version check
+    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
+    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
+                                                           false).await;
 
     // open rabbit connection
     let mut rabbit_connection = Connection::insecure_open(
@@ -53,7 +54,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // start loop for cron checks
     loop {
-        for row_data in mk_lib_database_cron::mk_lib_database_cron_service_read(db_client).await.unwrap() {
+        for row_data in mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool).await.unwrap() {
             let mut time_delta: chrono::Duration;
             println!("row_data: {:?}", row_data);
             let cron_schedule: String = row_data.get("mm_cron_schedule_type");
@@ -77,7 +78,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 rabbit_exchange.publish(Publish::with_properties("hello there".as_bytes(),
                                                                  cron_json["route_key"].to_string(),
                                                                  AmqpProperties::default().with_delivery_mode(2).with_content_type("text/plain".to_string())))?;
-                mk_lib_database_cron::mk_lib_database_cron_time_update(db_client,
+                mk_lib_database_cron::mk_lib_database_cron_time_update(&sqlx_pool,
                                                                        row_data.get("mm_cron_guid")).await?;
             }
             let uuid_cron: uuid::Uuid = row_data.get("mm_cron_guid");

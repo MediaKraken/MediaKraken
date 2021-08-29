@@ -1,8 +1,6 @@
-use tokio_postgres::{Error};
-
-pub async fn mk_lib_database_metadata_exists_movie(client: &tokio_postgres::Client,
+pub async fn mk_lib_database_metadata_exists_movie(pool: &sqlx::PgPool,
                                                    metadata_id: i32)
-                                                   -> Result<bool, Error> {
+                                                   -> Result<bool, sqlx::Error> {
     let row = client
         .query_one("select exists(select 1 from mm_metadata_movie \
         where mm_metadata_movie_media_id = $1 limit 1) as found_record limit 1",
@@ -12,9 +10,9 @@ pub async fn mk_lib_database_metadata_exists_movie(client: &tokio_postgres::Clie
 }
 
 #[allow(dead_code)]
-pub async fn mk_lib_database_metadata_exists_person(client: &tokio_postgres::Client,
+pub async fn mk_lib_database_metadata_exists_person(pool: &sqlx::PgPool,
                                                 metadata_id: i32)
-                                                -> Result<bool, Error> {
+                                                -> Result<bool, sqlx::Error> {
     let row = client
         .query_one("select exists(select 1 from mm_metadata_person \
         where mm_metadata_person_media_id = $1 limit 1) as found_record limit 1",
@@ -23,9 +21,9 @@ pub async fn mk_lib_database_metadata_exists_person(client: &tokio_postgres::Cli
     Ok(exists_status)
 }
 
-pub async fn mk_lib_database_metadata_exists_tv(client: &tokio_postgres::Client,
+pub async fn mk_lib_database_metadata_exists_tv(pool: &sqlx::PgPool,
                                                 metadata_id: i32)
-                                                -> Result<bool, Error> {
+                                                -> Result<bool, sqlx::Error> {
     let row = client
         .query_one("select exists(select 1 from mm_metadata_tvshow \
         where mm_metadata_media_tvshow_id = $1 limit 1) as found_record limit 1",

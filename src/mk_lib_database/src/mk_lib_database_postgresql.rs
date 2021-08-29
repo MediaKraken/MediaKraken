@@ -1,5 +1,6 @@
-pub async fn mk_lib_database_table_rows(client: &tokio_postgres::Client)
-                                        -> Result<Vec<Row>, Error> {
+
+pub async fn mk_lib_database_table_rows(pool: &sqlx::PgPool)
+                                        -> Result<Vec<Row>, sqlx::Error> {
     // query provided by postgresql wiki
     let rows = client
         .query("SELECT nspname AS schemaname,relname,reltuples \
@@ -10,8 +11,8 @@ pub async fn mk_lib_database_table_rows(client: &tokio_postgres::Client)
     Ok(rows)
 }
 
-pub async fn mk_lib_database_table_size(client: &tokio_postgres::Client)
-                                        -> Result<Vec<Row>, Error> {
+pub async fn mk_lib_database_table_size(pool: &sqlx::PgPool)
+                                        -> Result<Vec<Row>, sqlx::Error> {
     // query provided by postgresql wiki
     let rows = client
         .query("SELECT nspname | | \'.\'  | | relname AS \'relation\', \
@@ -24,8 +25,8 @@ pub async fn mk_lib_database_table_size(client: &tokio_postgres::Client)
     Ok(rows)
 }
 
-pub async fn mk_lib_database_parallel_workers(client: &tokio_postgres::Client)
-                                              -> Result<Vec<Row>, Error> {
+pub async fn mk_lib_database_parallel_workers(pool: &sqlx::PgPool)
+                                              -> Result<Vec<Row>, sqlx::Error> {
     let rows = client
         .query_one("show max_parallel_workers_per_gather", &[])
         .await?;

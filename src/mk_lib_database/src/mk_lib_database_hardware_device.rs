@@ -1,10 +1,9 @@
-use tokio_postgres::Error;
 use uuid::Uuid;
 
-pub async fn mk_lib_database_hardware_manufacturer_upsert(client: &tokio_postgres::Client,
+pub async fn mk_lib_database_hardware_manufacturer_upsert(pool: &sqlx::PgPool,
                                                           manufacturer_name: String,
                                                           manufacturer_id: i32)
-                                                          -> Result<(), Error> {
+                                                          -> Result<(), sqlx::Error> {
     println!("here {:?} {:?}", manufacturer_name, manufacturer_id);
     client
         .query("insert into mm_hardware_manufacturer (mm_hardware_manu_guid, \
@@ -14,9 +13,9 @@ pub async fn mk_lib_database_hardware_manufacturer_upsert(client: &tokio_postgre
     Ok(())
 }
 
-pub async fn mk_lib_database_hardware_type_upsert(client: &tokio_postgres::Client,
+pub async fn mk_lib_database_hardware_type_upsert(pool: &sqlx::PgPool,
                                                   hardware_type: String)
-                                                  -> Result<(), Error> {
+                                                  -> Result<(), sqlx::Error> {
     println!("here2 {:?}", hardware_type);
     client
         .query("insert into mm_hardware_type (mm_hardware_type_guid, \

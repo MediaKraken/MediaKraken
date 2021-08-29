@@ -1,9 +1,8 @@
-use tokio_postgres::{Error, Row};
 use uuid::Uuid;
 
-pub async fn mk_lib_database_notification_read(client: &tokio_postgres::Client,
+pub async fn mk_lib_database_notification_read(pool: &sqlx::PgPool,
                                                offset: i32, limit: i32)
-                                               -> Result<Vec<Row>, Error> {
+                                               -> Result<Vec<Row>, sqlx::Error> {
     let rows = client
         .query("select mm_notification_guid, mm_notification_text, mm_notification_time,\
         mm_notification_dismissable from mm_notification \
@@ -12,10 +11,10 @@ pub async fn mk_lib_database_notification_read(client: &tokio_postgres::Client,
     Ok(rows)
 }
 
-pub async fn mk_lib_database_notification_insert(client: &tokio_postgres::Client,
+pub async fn mk_lib_database_notification_insert(pool: &sqlx::PgPool,
                                                  mm_notification_text: String,
                                                  mm_notification_dismissable: bool)
-                                                 -> Result<(), Error> {
+                                                 -> Result<(), sqlx::Error> {
     client
         .query("insert into mm_notification (mm_notification_guid, \
         mm_notification_text, \
@@ -28,9 +27,9 @@ pub async fn mk_lib_database_notification_insert(client: &tokio_postgres::Client
 }
 
 
-pub async fn mk_lib_database_notification_delete(client: &tokio_postgres::Client,
+pub async fn mk_lib_database_notification_delete(pool: &sqlx::PgPool,
                                                  mk_notification_guid: uuid::Uuid)
-                                                 -> Result<Vec<Row>, Error> {
+                                                 -> Result<Vec<Row>, sqlx::Error> {
     let rows = client
         .query("delete from mm_notification where mm_notification_guid = $1",
                &[&mk_notification_guid])
