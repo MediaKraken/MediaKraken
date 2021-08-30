@@ -3,6 +3,7 @@ use chrono::prelude::*;
 use std::error::Error;
 use tokio::time::{Duration, sleep};
 use serde_json::json;
+use sqlx::Row;
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
