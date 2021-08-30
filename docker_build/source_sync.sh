@@ -34,7 +34,7 @@ cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkmediascanner/src
 cp ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkmediascanner/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_library.rs ../docker/core/mkmediascanner/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_media.rs ../docker/core/mkmediascanner/src/.
-cp ../src/mk_lib_database/src/mk_lib_database_metadata_download_que.rs ../docker/core/mkmediascanner/src/.
+cp ../src/mk_lib_database/src/mk_lib_database_metadata_download_queue.rs ../docker/core/mkmediascanner/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_notification.rs ../docker/core/mkmediascanner/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mkmediascanner/src/.
 
@@ -55,7 +55,7 @@ cp ../src/mk_lib_common/src/mk_lib_common_enum_media_type.rs ../docker/core/mktm
 cp ../src/mk_lib_compression/src/mk_lib_compression.rs ../docker/core/mktmdbnetfetchbulk/src/.
 cp ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mktmdbnetfetchbulk/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_metadata.rs ../docker/core/mktmdbnetfetchbulk/src/.
-cp ../src/mk_lib_database/src/mk_lib_database_metadata_download_que.rs ../docker/core/mktmdbnetfetchbulk/src/.
+cp ../src/mk_lib_database/src/mk_lib_database_metadata_download_queue.rs ../docker/core/mktmdbnetfetchbulk/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mktmdbnetfetchbulk/src/.
 cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mktmdbnetfetchbulk/src/.
 cp ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mktmdbnetfetchbulk/src/.
@@ -66,7 +66,7 @@ cp ../src/mk_lib_common/src/mk_lib_common_enum_media_type.rs ../docker/core/mktm
 cp ../src/mk_lib_compression/src/mk_lib_compression.rs ../docker/core/mktmdbnetfetchupdate/src/.
 cp ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mktmdbnetfetchupdate/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_metadata.rs ../docker/core/mktmdbnetfetchupdate/src/.
-cp ../src/mk_lib_database/src/mk_lib_database_metadata_download_que.rs ../docker/core/mktmdbnetfetchupdate/src/.
+cp ../src/mk_lib_database/src/mk_lib_database_metadata_download_queue.rs ../docker/core/mktmdbnetfetchupdate/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mktmdbnetfetchupdate/src/.
 cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mktmdbnetfetchupdate/src/.
 cp ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mktmdbnetfetchupdate/src/.
