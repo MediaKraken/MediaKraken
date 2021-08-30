@@ -1,4 +1,21 @@
 use sqlx::postgres::PgRow;
+use sqlx::types::Json;
+use serde::{Deserialize, Serialize};
+use serde_json::{Map, Value};
+use std::num::NonZeroU8;
+
+#[derive(Deserialize, Serialize)]
+struct Person {
+    name: String,
+    age: NonZeroU8,
+    #[serde(flatten)]
+    extra: Map<String, Value>,
+}
+
+struct Row {
+    uiid: uuid::Uuid,
+    person: Json<Person>,
+}
 
 pub async fn mk_lib_database_cron_service_read(pool: &sqlx::PgPool)
                                                -> Result<Vec<PgRow>, sqlx::Error> {

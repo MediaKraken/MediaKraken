@@ -1,0 +1,58 @@
+version: '3.6'
+# Volumes are HOST directory and then CONTAINER directory
+
+services:
+  # Postgresql server
+  mkdatabase:
+    image: th-registry-1.beaverbay.local:5000/mediakraken/mkdatabase:refactor
+    environment:
+      - MAX_CONNECTIONS=125
+      - MAX_WAL_SENDERS=10
+      - SHARED_BUFFERS=4096MB
+      - WORK_MEM=256MB
+      - MAX_WORKER_PROCESSES=4
+      - MAX_PARALLEL_WORKERS_PER_GATHER=2
+      - MAX_PARALLEL_WORKERS=4
+      - POSTGRES_PASSWORD=metaman
+    command: postgres -c logging_collector=on -c log_directory='/var/log/postgresql' -c log_filename='postgresql-%Y-%m-%d_%H%M%S.log' -c log_statement='all' -c log_duration=on -c log_connections=off -c log_disconnections=off
+    container_name: mkstack_database
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    volumes:
+      - mediakraken_vol_postgresql:/var/lib/postgresql/data
+      - mediakraken_vol_postgresql_logging:/var/log/postgresql
+    networks:
+      - mediakraken_network
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  # database management tool
+  mkpgadmin:
+    image: dpage/pgadmin4:5.6
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    container_name: mkstack_pgadmin
+    networks:
+      - mediakraken_network
+    ports:
+      - "5050:5050"
+    environment:
+      PGADMIN_LISTEN_PORT: 5050
+      PGADMIN_DEFAULT_EMAIL: spootdev@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: metaman
+      PGADMIN_DISABLE_POSTFIX: 1
+    volumes:
+      - mediakraken_vol_pgadmin:/var/lib/pgadmin
+
+# Docker private networks
+networks:
+  # Twisted, Database and AMQP communications network
+  mediakraken_network:
+    driver: bridge
+    name: mk_mediakraken_network
+
+volumes:
+  mediakraken_vol_pgadmin:
+  mediakraken_vol_postgresql:
+  mediakraken_vol_postgresql_logging:

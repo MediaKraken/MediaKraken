@@ -54,9 +54,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // start loop for cron checks
     loop {
-        for row_data in mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool).await.unwrap() {
+        let cron_row = mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool).await.unwrap();
+        for row_data in cron_row {
             let mut time_delta: chrono::Duration;
-            println!("row_data: {:?}", row_data);
+            //println!("row_data: {}", row_data);
             let cron_schedule: String = row_data.get("mm_cron_schedule_type");
             let cron_timespan: i64 = row_data.get("mm_cron_schedule_time");
             if cron_schedule == "Week(s)" {
@@ -74,7 +75,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let last_run: DateTime<Utc> = row_data.get("mm_cron_last_run");
             println!("date_check: {:?}, {:?}", date_check, last_run);
             if last_run < date_check {
-                let cron_json = row_data.try_get::<&str, serde_json::Value>("mm_cron_json")?;
+                let cron_json = row_data.get::<&str, serde_json::Value>("mm_cron_json")?;
                 rabbit_exchange.publish(Publish::with_properties("hello there".as_bytes(),
                                                                  cron_json["route_key"].to_string(),
                                                                  AmqpProperties::default().with_delivery_mode(2).with_content_type("text/plain".to_string())))?;
