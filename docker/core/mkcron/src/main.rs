@@ -76,7 +76,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let last_run: DateTime<Utc> = row_data.get("mm_cron_last_run");
             println!("date_check: {:?}, {:?}", date_check, last_run);
             if last_run < date_check {
-                let cron_json = row_data.get::<&str, serde_json::Value>("mm_cron_json")?;
+                let cron_json: serde_json::Value = row_data.try_get("mm_cron_json")?;
                 rabbit_exchange.publish(Publish::with_properties("hello there".as_bytes(),
                                                                  cron_json["route_key"].to_string(),
                                                                  AmqpProperties::default().with_delivery_mode(2).with_content_type("text/plain".to_string())))?;
