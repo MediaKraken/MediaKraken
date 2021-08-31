@@ -9,6 +9,9 @@ use rustube::{Id, VideoFetcher};
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
 mod mk_lib_database;
 #[cfg(debug_assertions)]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_option_status.rs"]
+mod mk_lib_database_option_status;
+#[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
 mod mk_lib_logging;
 #[cfg(debug_assertions)]
@@ -18,6 +21,9 @@ mod mk_lib_network;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
+#[cfg(not(debug_assertions))]
+#[path = "mk_lib_database_option_status.rs"]
+mod mk_lib_database_option_status;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -37,7 +43,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
     mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
                                                            false).await;
-    let option_config_json = &mk_lib_database::mk_lib_database_options(&sqlx_pool).await?;
+    let option_config_json = &mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool).await?;
 
     // open rabbit connection
     let mut rabbit_connection = Connection::insecure_open(
