@@ -4,6 +4,7 @@
 cp ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkcron/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_cron.rs ../docker/core/mkcron/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mkcron/src/.
+cp ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mkcron/src/.
 cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkcron/src/.
 
 # mkdownload
