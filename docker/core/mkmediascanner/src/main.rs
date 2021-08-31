@@ -9,6 +9,7 @@ use std::fs;
 use std::path::Path;
 use tokio::time::{Duration, sleep};
 use uuid::Uuid;
+use sqlx::Row;
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_common/src/mk_lib_common_enum_media_type.rs"]
@@ -26,8 +27,8 @@ mod mk_lib_logging;
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
 mod mk_lib_database;
 #[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_metadata_download_que.rs"]
-mod mk_lib_database_metadata_download_que;
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_metadata_download_queue.rs"]
+mod mk_lib_database_metadata_download_queue;
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_library.rs"]
 mod mk_lib_database_library;
@@ -57,8 +58,8 @@ mod mk_lib_logging;
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
 #[cfg(not(debug_assertions))]
-#[path = "mk_lib_database_metadata_download_que.rs"]
-mod mk_lib_database_metadata_download_que;
+#[path = "mk_lib_database_metadata_download_queue.rs"]
+mod mk_lib_database_metadata_download_queue;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_library.rs"]
 mod mk_lib_database_library;
@@ -207,7 +208,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             || mk_lib_common_media_extension::GAME_EXTENSION.contains(&file_extension) {
                             let mut ffprobe_bif_data = true;
                             let mut save_dl_record = true;
-                            let total_files += 1;
+                            total_files += 1;
                             // set here which MIGHT be overrode later
                             let new_class_type_uuid = media_class_type_uuid;
                             // check for "stacked" media file
@@ -360,7 +361,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 }
                             }
                         }
-                        let total_scanned += 1;
+                        total_scanned += 1;
                         mk_lib_database_library::mk_lib_database_library_path_status_update(&sqlx_pool,
                                                                                             row_data.get("mm_media_dir_guid"),
                                                                                             json!({format!("Status": "File scan: {:?}/{:?}",

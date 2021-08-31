@@ -1,3 +1,5 @@
+use sqlx::postgres::PgRow;
+
 pub async fn mk_lib_database_table_rows(pool: &sqlx::PgPool)
                                         -> Result<Vec<PgRow>, sqlx::Error> {
     // query provided by postgresql wiki

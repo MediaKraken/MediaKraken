@@ -1,4 +1,5 @@
 use uuid::Uuid;
+use sqlx::postgres::PgRow;
 
 pub async fn mk_lib_database_hardware_manufacturer_upsert(pool: &sqlx::PgPool,
                                                           manufacturer_name: String,
@@ -8,7 +9,9 @@ pub async fn mk_lib_database_hardware_manufacturer_upsert(pool: &sqlx::PgPool,
     sqlx::query("insert into mm_hardware_manufacturer (mm_hardware_manu_guid, \
         mm_hardware_manu_name, mm_hardware_manu_gc_id) values ($1, $2, $3) \
         ON CONFLICT (mm_hardware_manu_name) DO NOTHING")
-        .bind(Uuid::new_v4(), manufacturer_name, manufacturer_id)
+        .bind(Uuid::new_v4())
+        .bind(manufacturer_name)
+        .bind(manufacturer_id)
         .execute(pool)
         .await?;
     Ok(())
@@ -21,7 +24,8 @@ pub async fn mk_lib_database_hardware_type_upsert(pool: &sqlx::PgPool,
     sqlx::query("insert into mm_hardware_type (mm_hardware_type_guid, \
         mm_hardware_type_name) values ($1, $2) \
         ON CONFLICT (mm_hardware_manu_name) DO NOTHING")
-        .bind(Uuid::new_v4(), hardware_type)
+        .bind(Uuid::new_v4())
+        .bind(hardware_type)
         .execute(pool)
         .await?;
     Ok(())

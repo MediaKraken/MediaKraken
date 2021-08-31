@@ -1,3 +1,5 @@
+use sqlx::postgres::PgRow;
+
 pub async fn mk_lib_database_library_read(pool: &sqlx::PgPool)
                                           -> Result<Vec<PgRow>, sqlx::Error> {
     let rows = sqlx::query("select mm_media_dir_guid, mm_media_dir_path \
@@ -21,7 +23,7 @@ pub async fn mk_lib_database_library_path_audit(pool: &sqlx::PgPool)
 #[allow(dead_code)]
 pub async fn mk_lib_database_library_path_status(pool: &sqlx::PgPool)
                                                  -> Result<Vec<PgRow>, sqlx::Error> {
-    let rows = csqlx::query("select mm_media_dir_path, mm_media_dir_status \
+    let rows = sqlx::query("select mm_media_dir_path, mm_media_dir_status \
         from mm_library_dir where mm_media_dir_status IS NOT NULL \
         order by mm_media_dir_path")
         .fetch_all(pool)
@@ -36,7 +38,8 @@ pub async fn mk_lib_database_library_path_status_update(pool: &sqlx::PgPool,
                                                         -> Result<(), sqlx::Error> {
     sqlx::query("update mm_library_dir set mm_media_dir_status = $1 \
         where mm_media_dir_guid = $2")
-        .bind(library_status_json, library_uuid)
+        .bind(library_status_json)
+        .bind(library_uuid)
         .execute(pool)
         .await?;
     Ok(())
@@ -58,7 +61,7 @@ pub async fn mk_lib_database_library_path_timestamp_update(pool: &sqlx::PgPool,
 pub async fn mk_lib_database_library_file_exists(pool: &sqlx::PgPool,
                                                  file_name: String)
                                                  -> Result<i32, sqlx::Error> {
-    let row: (i32, ) = sqlx::query("select exists(select 1 from mm_media \
+    let row: (i32, ) = sqlx::query_as("select exists(select 1 from mm_media \
         where mm_media_path = $1 limit 1) \
         as found_record limit 1")
         .bind(file_name)

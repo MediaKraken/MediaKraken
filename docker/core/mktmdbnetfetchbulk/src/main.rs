@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::error::Error;
 use uuid::Uuid;
 use serde_json::json;
+use sqlx::Row;
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_common/src/mk_lib_common.rs"]
@@ -16,8 +17,8 @@ mod mk_lib_compression;
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
 mod mk_lib_database;
 #[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_metadata_download_que.rs"]
-mod mk_lib_database_metadata_download_que;
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_metadata_download_queue.rs"]
+mod mk_lib_database_metadata_download_queue;
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_metadata.rs"]
 mod mk_lib_database_metadata;
@@ -44,8 +45,8 @@ mod mk_lib_compression;
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
 #[cfg(not(debug_assertions))]
-#[path = "mk_lib_database_metadata_download_que.rs"]
-mod mk_lib_database_metadata_download_que;
+#[path = "mk_lib_database_metadata_download_queue.rs"]
+mod mk_lib_database_metadata_download_queue;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_metadata.rs"]
 mod mk_lib_database_metadata;
@@ -103,17 +104,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let result = mk_lib_database_metadata::mk_lib_database_metadata_exists_movie(&sqlx_pool,
                                                                                          metadata_struct.id).await.unwrap();
             if result == false {
-                let download_result = mk_lib_database_metadata_download_que::mk_lib_database_metadata_download_que_exists(&sqlx_pool,
-                                                                                                                          "themoviedb".to_string(),
-                                                                                                                          mk_lib_common_enum_media_type::DLMediaType::MOVIE,
-                                                                                                                          metadata_struct.id).await.unwrap();
+                let download_result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
+                                                                                                                              "themoviedb".to_string(),
+                                                                                                                              mk_lib_common_enum_media_type::DLMediaType::MOVIE,
+                                                                                                                              metadata_struct.id).await.unwrap();
                 if download_result == false {
-                    mk_lib_database_metadata_download_que::mk_lib_database_metadata_download_que_insert(&sqlx_pool,
-                                                                                                        "themoviedb".to_string(),
-                                                                                                        mk_lib_common_enum_media_type::DLMediaType::MOVIE,
-                                                                                                        Uuid::new_v4(),
-                                                                                                        metadata_struct.id,
-                                                                                                        "Fetch".to_string()).await;
+                    mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                                                                                                            "themoviedb".to_string(),
+                                                                                                            mk_lib_common_enum_media_type::DLMediaType::MOVIE,
+                                                                                                            Uuid::new_v4(),
+                                                                                                            metadata_struct.id,
+                                                                                                            "Fetch".to_string()).await;
                 }
             }
         }
@@ -130,17 +131,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let result = mk_lib_database_metadata::mk_lib_database_metadata_exists_tv(&sqlx_pool,
                                                                                       metadata_struct.id).await.unwrap();
             if result == false {
-                let download_result = mk_lib_database_metadata_download_que::mk_lib_database_metadata_download_que_exists(&sqlx_pool,
-                                                                                                                          "themoviedb".to_string(),
-                                                                                                                          mk_lib_common_enum_media_type::DLMediaType::TV,
-                                                                                                                          metadata_struct.id).await.unwrap();
+                let download_result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
+                                                                                                                              "themoviedb".to_string(),
+                                                                                                                              mk_lib_common_enum_media_type::DLMediaType::TV,
+                                                                                                                              metadata_struct.id).await.unwrap();
                 if download_result == false {
-                    mk_lib_database_metadata_download_que::mk_lib_database_metadata_download_que_insert(&sqlx_pool,
-                                                                                                        "themoviedb".to_string(),
-                                                                                                        mk_lib_common_enum_media_type::DLMediaType::TV,
-                                                                                                        Uuid::new_v4(),
-                                                                                                        metadata_struct.id,
-                                                                                                        "Fetch".to_string()).await;
+                    mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                                                                                                            "themoviedb".to_string(),
+                                                                                                            mk_lib_common_enum_media_type::DLMediaType::TV,
+                                                                                                            Uuid::new_v4(),
+                                                                                                            metadata_struct.id,
+                                                                                                            "Fetch".to_string()).await;
                 }
             }
         }

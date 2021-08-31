@@ -1,4 +1,5 @@
 use uuid::Uuid;
+use sqlx::postgres::PgRow;
 
 pub async fn mk_lib_database_notification_read(pool: &sqlx::PgPool,
                                                offset: i32, limit: i32)
@@ -7,7 +8,8 @@ pub async fn mk_lib_database_notification_read(pool: &sqlx::PgPool,
         mm_notification_time, \
         mm_notification_dismissable from mm_notification \
         order by mm_notification_time desc offset $1 limit $2")
-        .bind(offset, limit)
+        .bind(offset)
+        .bind(limit)
         .fetch_all(pool)
         .await?;
     Ok(rows)
@@ -22,8 +24,9 @@ pub async fn mk_lib_database_notification_insert(pool: &sqlx::PgPool,
         mm_notification_time = NOW(), \
         mm_notification_dismissable) \
         values ($1, $2, $3)")
-        .bind(Uuid::new_v4(), mm_notification_text,
-              mm_notification_dismissable)
+        .bind(Uuid::new_v4())
+        .bind(mm_notification_text)
+        .bind(mm_notification_dismissable)
         .execute(pool)
         .await?;
     Ok(())

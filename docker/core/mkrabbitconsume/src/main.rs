@@ -1,6 +1,7 @@
 use amiquip::{Connection, ConsumerMessage, ConsumerOptions, Exchange, QueueDeclareOptions, Result};
 use serde_json::{json, Value};
 use std::error::Error;
+use sqlx::Row;
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
