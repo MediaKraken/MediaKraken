@@ -8,3 +8,5 @@
 /mk_lib_common.rs
 /mk_lib_compression.rs
 /mk_lib_database_metadata_download_que.rs
+/mk_lib_database_metadata_download_queue.rs
+/mk_lib_database_version_schema.rs
