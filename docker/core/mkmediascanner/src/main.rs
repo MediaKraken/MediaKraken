@@ -110,7 +110,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let rabbit_exchange = Exchange::direct(&rabbit_channel);
 
     // determine directories to audit
-    for row_data in mk_lib_database_library::mk_lib_database_library_path_audit(db_client).await.unwrap() {
+    for row_data in mk_lib_database_library::mk_lib_database_library_path_audit(&sqlx_pool).await.unwrap() {
         mk_lib_logging::mk_logging_post_elk("info",
                                             json!({ "Audit Path": row_data }),
                                             LOGGING_INDEX_NAME).await;
@@ -139,7 +139,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             //                                                       }));
             //         }
             //     } else {
-            //         mk_lib_database_notification::mk_lib_database_notification_insert(db_client,format!("UNC Library path not found: {}", row_data["mm_media_dir_path"]), true);
+            //         mk_lib_database_notification::mk_lib_database_notification_insert(&sqlx_pool,format!("UNC Library path not found: {}", row_data["mm_media_dir_path"]), true);
             //     }
             // }
         } else {
@@ -148,7 +148,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 row_data.get("mm_media_dir_path")].iter().collect();
         }
         if !Path::new(&media_path).exists() {
-            mk_lib_database_notification::mk_lib_database_notification_insert(db_client,
+            mk_lib_database_notification::mk_lib_database_notification_insert(&sqlx_pool,
                                                                               format!("Library path not found: {}",
                                                                                       row_data.get("mm_media_dir_path")),
                                                                               true).await.unwrap();
@@ -160,7 +160,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let metadata = fs::metadata(&media_path)?;
             let last_modified = metadata.modified()?.elapsed()?.as_secs();
             if last_modified > row_data.get("mm_media_dir_last_scanned") {
-                mk_lib_database_library::mk_lib_database_library_path_status_update(db_client,
+                mk_lib_database_library::mk_lib_database_library_path_status_update(&sqlx_pool,
                                                                                     row_data.get("mm_media_dir_guid"),
                                                                                     json!({"Status": "Added to scan", "Pct": 100})).await.unwrap();
 
@@ -170,9 +170,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                 let original_media_class = row_data.get("mm_media_dir_class_enum");
                 // update the timestamp now so any other media added DURING this scan don"t get skipped
-                mk_lib_database_library::mk_lib_database_library_path_timestamp_update(db_client,
+                mk_lib_database_library::mk_lib_database_library_path_timestamp_update(&sqlx_pool,
                                                                                        row_data.get("mm_media_dir_guid")).await.unwrap();
-                mk_lib_database_library::mk_lib_database_library_path_status_update(db_client,
+                mk_lib_database_library::mk_lib_database_library_path_status_update(&sqlx_pool,
                                                                                     row_data.get("mm_media_dir_guid"),
                                                                                     json!({"Status": "File search scan", "Pct": 0.0})).await.unwrap();
                 let mut file_data;
@@ -197,7 +197,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let mut total_scanned: u64 = 0;
                 let mut total_files: u64 = 0;
                 for file_name in file_data {
-                    if mk_lib_database_library::mk_lib_database_library_file_exists(db_client,
+                    if mk_lib_database_library::mk_lib_database_library_file_exists(&sqlx_pool,
                                                                                     &file_name).await.unwrap() == false {
                         // set lower here so I can remove a lot of .lower() in the code below
                         let file_extension = Path::new(&file_name).extension().to_string().to_lowercase();
@@ -324,7 +324,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                             // create media_json data
                                             let media_json = json!({ "Added": datetime.now().strftime("%Y-%m-%d HH:mm:ss") });
                                             let media_id = Uuid::new_v4();
-                                            mk_lib_database_media::mk_lib_database_media_insert(db_client,
+                                            mk_lib_database_media::mk_lib_database_media_insert(&sqlx_pool,
                                                                                                 media_id,
                                                                                                 new_class_type_uuid,
                                                                                                 file_name,
@@ -348,7 +348,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                             // verify it should save a dl "Z" record for search/lookup/etc
                                             if save_dl_record == true {
                                                 // media id begin and download que insert
-                                                mk_lib_database_download::mk_lib_database_download_insert(db_client,
+                                                mk_lib_database_download::mk_lib_database_download_insert(&sqlx_pool,
                                                                                                           "Z".to_string(),
                                                                                                           new_class_type_uuid,
                                                                                                           Uuid::new_v4(),
@@ -361,7 +361,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             }
                         }
                         let total_scanned += 1;
-                        mk_lib_database_library::mk_lib_database_library_path_status_update(db_client,
+                        mk_lib_database_library::mk_lib_database_library_path_status_update(&sqlx_pool,
                                                                                             row_data.get("mm_media_dir_guid"),
                                                                                             json!({format!("Status": "File scan: {:?}/{:?}",
                                                                                                 total_scanned.to_formatted_string(&Locale::en),
@@ -375,12 +375,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                         "media class": media_class_type_uuid}),
                                                     LOGGING_INDEX_NAME).await;
                 // set to none so it doesn"t show up anymore in admin status page
-                mk_lib_database_library::mk_lib_database_library_path_status_update(db_client,
+                mk_lib_database_library::mk_lib_database_library_path_status_update(&sqlx_pool,
                                                                                     row_data.get("mm_media_dir_guid"),
                                                                                     json!({"Status": "File scan complete", "Pct": 100}));
                 if total_files > 0 {
                     // add notification to admin status page
-                    mk_lib_database_notification::mk_lib_database_notification_insert(db_client,
+                    mk_lib_database_notification::mk_lib_database_notification_insert(&sqlx_pool,
                                                                                       format!("{} file(s) added from {}",
                                                                                               total_files.to_formatted_string(&Locale::en),
                                                                                               row_data.get("mm_media_dir_path")),

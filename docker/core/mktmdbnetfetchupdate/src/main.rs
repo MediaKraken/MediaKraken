@@ -88,7 +88,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
                                                            false).await;
     let option_config_json: Value = serde_json::from_str(
-        &mk_lib_database::mk_lib_database_options(db_client).await.unwrap());
+        &mk_lib_database::mk_lib_database_options(&sqlx_pool).await.unwrap());
 
     // TODO this should go through the limiter
     // process movie changes
@@ -102,15 +102,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
         if !json_item.trim().is_empty() {
             let metadata_struct: MetadataMovie = serde_json::from_str(json_item)?;
             // verify it's not already in the database
-            let result = mk_lib_database_metadata::mk_lib_database_metadata_exists_movie(db_client,
+            let result = mk_lib_database_metadata::mk_lib_database_metadata_exists_movie(&sqlx_pool,
                                                                                          metadata_struct.id).await.unwrap();
             if result == false {
-                let download_result = mmk_lib_database_metadata_download_que::mk_lib_database_metadata_download_que_exists(db_client,
+                let download_result = mmk_lib_database_metadata_download_que::mk_lib_database_metadata_download_que_exists(&sqlx_pool,
                                                                                                                            "themoviedb".to_string(),
                                                                                                                            mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                                            metadata_struct.id).await.unwrap();
                 if download_result == false {
-                    mmk_lib_database_metadata_download_que::mk_lib_database_metadata_download_que_insert(db_client,
+                    mmk_lib_database_metadata_download_que::mk_lib_database_metadata_download_que_insert(&sqlx_pool,
                                                                                                          "themoviedb".to_string(),
                                                                                                          mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                          Uuid::new_v4(),
@@ -118,7 +118,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                          "Fetch".to_string()).await;
                 } else {
                     // it"s on the database, so must update the record with latest information
-                    mk_lib_database_metadata_download_que::mk_lib_database_metadata_download_que_insert(db_client,
+                    mk_lib_database_metadata_download_que::mk_lib_database_metadata_download_que_insert(&sqlx_pool,
                                                                                                         "themoviedb".to_string(),
                                                                                                         mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                         Uuid::new_v4(),
@@ -141,15 +141,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
         if !json_item.trim().is_empty() {
             let metadata_struct: MetadataTV = serde_json::from_str(json_item)?;
             // verify it's not already in the database
-            let result = mk_lib_database_metadata::mk_lib_database_metadata_exists_tv(db_client,
+            let result = mk_lib_database_metadata::mk_lib_database_metadata_exists_tv(&sqlx_pool,
                                                                                       metadata_struct.id).await.unwrap();
             if result == false {
-                let download_result = mk_lib_database_metadata_download_que::mk_lib_database_metadata_download_que_exists(db_client,
+                let download_result = mk_lib_database_metadata_download_que::mk_lib_database_metadata_download_que_exists(&sqlx_pool,
                                                                                                                           "themoviedb".to_string(),
                                                                                                                           mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                                           metadata_struct.id).await.unwrap();
                 if download_result == false {
-                    mk_lib_database_metadata_download_que: mk_lib_database_metadata_download_que_insert(db_client,
+                    mk_lib_database_metadata_download_que: mk_lib_database_metadata_download_que_insert(&sqlx_pool,
                     "themoviedb".to_string(),
                     mk_lib_common_enum_media_type::DLMediaType::TV,
                     Uuid::new_v4(),
@@ -157,7 +157,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     "Fetch".to_string()).await;
                 } else {
                     // it's on the database, so must update the record with latest information
-                    mk_lib_database_metadata_download_que::mk_lib_database_metadata_download_que_insert(db_client,
+                    mk_lib_database_metadata_download_que::mk_lib_database_metadata_download_que_insert(&sqlx_pool,
                                                                                                         "themoviedb".to_string(),
                                                                                                         mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                         Uuid::new_v4(),

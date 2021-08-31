@@ -30,9 +30,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         json!({"START": "START"}),
                                         LOGGING_INDEX_NAME).await;
 
-    // open the database
-    let db_client = &mk_lib_database::mk_lib_database_open().await?;
-    let option_config_json = &mk_lib_database::mk_lib_database_options(db_client).await?;
+    // connect to db and do a version check
+    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
+    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
+                                                           false).await;
+    let option_config_json = &mk_lib_database::mk_lib_database_options(&sqlx_pool).await?;
 
     // open rabbit connection
     let mut rabbit_connection = Connection::insecure_open(

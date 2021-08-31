@@ -58,7 +58,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let mut inotify = Inotify::init()
         .expect("Failed to initialize inotify");
 
-    for row_data in mk_lib_database_library::mk_lib_database_library_read(db_client).await.unwrap() {
+    for row_data in mk_lib_database_library::mk_lib_database_library_read(&sqlx_pool).await.unwrap() {
         let lib_path: String = row_data.get("mm_media_dir_path");
         inotify.add_watch(
             &lib_path,

@@ -72,7 +72,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
                                                            false).await;
     let option_config_json: Value = serde_json::from_str(
-        &mk_lib_database::mk_lib_database_options(db_client).await.unwrap()).unwrap();
+        &mk_lib_database::mk_lib_database_options(&sqlx_pool).await.unwrap()).unwrap();
 
     let mut update_game = 0;
     let mut insert_game = 0;

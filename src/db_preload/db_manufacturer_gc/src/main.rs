@@ -25,9 +25,10 @@ mod mk_lib_network;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    // open the database
-    let db_client = &mk_lib_database::mk_lib_database_open().await?;
-    mk_lib_database_version::mk_lib_database_version_check(db_client).await?;
+    // connect to db and do a version check
+    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
+    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
+                                                           false).await;
     // grab the manufacturer's from Global Cache
     // let fetch_result = mk_lib_network::mk_data_from_url(
     //     "https://irdb.globalcache.com:8081/api/brands/".to_string()).await;
@@ -41,7 +42,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         println!("here 100");
         // println!("{:?}\n", item);
         // println!("{:?} {:?}\n", item["$id"].to_string().replace("\"", ""), item["Name"].to_string().replace("\"", ""));
-        let result = mk_lib_database_hardware_device::mk_lib_database_hardware_manufacturer_upsert(db_client,
+        let result = mk_lib_database_hardware_device::mk_lib_database_hardware_manufacturer_upsert(&sqlx_pool,
                                                                                      item["Name"].to_string().to_string().replace("\"", ""),
                                                                                                    item["$id"].to_string().replace("\"", "").parse::<i32>().unwrap()).await?;
         // fetch types for the manufacturer
