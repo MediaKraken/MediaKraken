@@ -85,9 +85,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let fetch_date: String = "08_10_2021".to_string();
 
-    // open the database
-    let db_client = &mk_lib_database::mk_lib_database_open().await?;
-    mk_lib_database_version::mk_lib_database_version_check(db_client).await?;
+    // connect to db and do a version check
+    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
+    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
+                                                           false).await;
 
     // grab the movie id's
     // files.tmdb.org = 13.227.42.62

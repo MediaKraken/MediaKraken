@@ -10,6 +10,7 @@ cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkcron/src/.
 # mkdownload
 cp ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkdownload/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mkdownload/src/.
+cp ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mkdownload/src/.
 cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkdownload/src/.
 cp ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mkdownload/src/.
 
@@ -38,11 +39,13 @@ cp ../src/mk_lib_database/src/mk_lib_database_media.rs ../docker/core/mkmediasca
 cp ../src/mk_lib_database/src/mk_lib_database_metadata_download_queue.rs ../docker/core/mkmediascanner/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_notification.rs ../docker/core/mkmediascanner/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mkmediascanner/src/.
+cp ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mkmediascanner/src/.
 
 # mknotify
 cp ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkinotify/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_library.rs ../docker/core/mkinotify/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mkinotify/src/.
+cp ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mkinotify/src/.
 cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkinotify/src/.
 
 # mkrabbitconsume
@@ -58,6 +61,7 @@ cp ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mktmdbnetfetchbu
 cp ../src/mk_lib_database/src/mk_lib_database_metadata.rs ../docker/core/mktmdbnetfetchbulk/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_metadata_download_queue.rs ../docker/core/mktmdbnetfetchbulk/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mktmdbnetfetchbulk/src/.
+cp ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mktmdbnetfetchbulk/src/.
 cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mktmdbnetfetchbulk/src/.
 cp ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mktmdbnetfetchbulk/src/.
 
@@ -69,6 +73,7 @@ cp ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mktmdbnetfetchup
 cp ../src/mk_lib_database/src/mk_lib_database_metadata.rs ../docker/core/mktmdbnetfetchupdate/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_metadata_download_queue.rs ../docker/core/mktmdbnetfetchupdate/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mktmdbnetfetchupdate/src/.
+cp ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mktmdbnetfetchupdate/src/.
 cp ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mktmdbnetfetchupdate/src/.
 cp ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mktmdbnetfetchupdate/src/.
 
