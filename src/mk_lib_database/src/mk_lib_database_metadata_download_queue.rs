@@ -51,11 +51,12 @@ pub async fn mk_lib_database_metadata_download_queue_insert(pool: &sqlx::PgPool,
                                                             metadata_provider_id: i32,
                                                             metadata_status: String)
                                                             -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_metadata_download_que (mm_download_guid, \
         mm_download_provider, \
         mm_download_que_type, \
         mm_download_new_uuid, \
-        mm_download__provider_id, \
+        mm_download_provider_id, \
         mm_download_status) \
         values ($1, $2, $3, $4, $5, $6)")
         .bind(Uuid::new_v4())
@@ -64,7 +65,8 @@ pub async fn mk_lib_database_metadata_download_queue_insert(pool: &sqlx::PgPool,
         .bind(metadata_new_uuid)
         .bind(metadata_provider_id)
         .bind(metadata_status)
-        .execute(pool)
+        .execute(&mut transaction)
         .await?;
+    transaction.commit().await?;
     Ok(())
 }

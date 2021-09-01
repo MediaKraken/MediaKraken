@@ -93,28 +93,34 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // grab the movie id's
     // files.tmdb.org = 13.227.42.62
-    let _fetch_result_movie = mk_lib_network::mk_download_file_from_url(
-        format!("http://files.tmdb.org/p/exports/movie_ids_{}.json.gz", fetch_date),
-        "/mediakraken/movie.gz".to_string()).await;
+    // let _fetch_result_movie = mk_lib_network::mk_download_file_from_url(
+    //     format!("http://files.tmdb.org/p/exports/movie_ids_{}.json.gz", fetch_date),
+    //     "/mediakraken/movie.gz".to_string()).await;
+    println!("here");
     let json_result = mk_lib_compression::mk_decompress_gz_data("/mediakraken/movie.gz").unwrap();
+    println!("here2");
     // Please note that the data is NOT in id order
     for json_item in json_result.split('\n') {
         if !json_item.trim().is_empty() {
-            let metadata_struct: MetadataMovie = serde_json::from_str(json_item)?;
+            println!("here3 {:?}", json_item);
+            let metadata_struct: MetadataMovie = serde_json::from_str(json_item.trim())?;
             let result = mk_lib_database_metadata::mk_lib_database_metadata_exists_movie(&sqlx_pool,
                                                                                          metadata_struct.id).await.unwrap();
+            println!("here4 {:?}", result);
             if result == false {
                 let download_result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
                                                                                                                               "themoviedb".to_string(),
                                                                                                                               mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                                               metadata_struct.id).await.unwrap();
+                println!("here5 {:?}", download_result);
                 if download_result == false {
-                    mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                    let result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                             "themoviedb".to_string(),
                                                                                                             mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                             Uuid::new_v4(),
                                                                                                             metadata_struct.id,
                                                                                                             "Fetch".to_string()).await;
+                    //println!("result {:?}", result);
                 }
             }
         }
@@ -127,7 +133,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let json_result = mk_lib_compression::mk_decompress_gz_data("/mediakraken/tv.gz").unwrap();
     for json_item in json_result.split('\n') {
         if !json_item.trim().is_empty() {
-            let metadata_struct: MetadataTV = serde_json::from_str(json_item)?;
+            let metadata_struct: MetadataTV = serde_json::from_str(json_item.trim())?;
             let result = mk_lib_database_metadata::mk_lib_database_metadata_exists_tv(&sqlx_pool,
                                                                                       metadata_struct.id).await.unwrap();
             if result == false {
@@ -136,12 +142,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                               mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                                               metadata_struct.id).await.unwrap();
                 if download_result == false {
-                    mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                    let result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                             "themoviedb".to_string(),
                                                                                                             mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                             Uuid::new_v4(),
                                                                                                             metadata_struct.id,
                                                                                                             "Fetch".to_string()).await;
+                    println!("tv result {:?}", result)
                 }
             }
         }
