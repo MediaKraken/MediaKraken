@@ -66,6 +66,17 @@ mod mk_lib_logging;
 #[path = "mk_lib_network.rs"]
 mod mk_lib_network;
 
+#[derive(Serialize, Deserialize)]
+struct MetadataMovie {
+    id: i32,
+    adult: bool,
+}
+
+#[derive(Serialize, Deserialize)]
+struct MetadataTV {
+    id: i32,
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // start logging
@@ -86,49 +97,47 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                  option_config_json["API"]["themoviedb"]).replace("\"", ""));
     // TODO this should go through the limiter
     // process movie changes
-    let json_result = mk_lib_network::mk_data_from_url(
+    let url_result = mk_lib_network::mk_data_from_url(
         format!("https://api.themoviedb.org/3/movie/changes?api_key={}",
                 option_config_json["API"]["themoviedb"]).replace("\"", "")).await?;
-    println!("result: {:?}", json_result);
-    // for json_item in json_result["results"] {
-    //     if !json_item.trim().is_empty() {
-    //         let metadata_struct: MetadataMovie = serde_json::from_str(json_item)?;
-    //         // verify it's not already in the database
-    //         let result = mk_lib_database_metadata::mk_lib_database_metadata_exists_movie(&sqlx_pool,
-    //                                                                                      metadata_struct.id).await.unwrap();
-    //         if result == false {
-    //             let download_result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
-    //                                                                                                                            "themoviedb".to_string(),
-    //                                                                                                                            mk_lib_common_enum_media_type::DLMediaType::MOVIE,
-    //                                                                                                                            metadata_struct.id).await.unwrap();
-    //             if download_result == false {
-    //                 mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
-    //                                                                                                         "themoviedb".to_string(),
-    //                                                                                                         mk_lib_common_enum_media_type::DLMediaType::MOVIE,
-    //                                                                                                         Uuid::new_v4(),
-    //                                                                                                         metadata_struct.id,
-    //                                                                                                         "Fetch".to_string()).await;
-    //             } else {
-    //                 // it"s on the database, so must update the record with latest information
-    //                 mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
-    //                                                                                                         "themoviedb".to_string(),
-    //                                                                                                         mk_lib_common_enum_media_type::DLMediaType::MOVIE,
-    //                                                                                                         Uuid::new_v4(),
-    //                                                                                                         metadata_struct.id,
-    //                                                                                                         "Update".to_string()).await;
-    //             }
-    //         }
-    //     }
-    // }
+    println!("result: {:?}", url_result);
+    let json_result: Value = serde_json::from_str(&url_result).unwrap();
+    for (json_key, json_item) in json_result["results"].as_object().unwrap() {
+        println!("item {:?}", json_item);
+        // verify it's not already in the database
+        // let result = mk_lib_database_metadata::mk_lib_database_metadata_exists_movie(&sqlx_pool,
+        //                                                                              json_item["id"]).await.unwrap();
+        // if result == false {
+        //     let download_result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
+        //                                                                                                                   "themoviedb".to_string(),
+        //                                                                                                                   mk_lib_common_enum_media_type::DLMediaType::MOVIE,
+        //                                                                                                                   json_item["id"]).await.unwrap();
+        //     if download_result == false {
+        //         mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+        //                                                                                                 "themoviedb".to_string(),
+        //                                                                                                 mk_lib_common_enum_media_type::DLMediaType::MOVIE,
+        //                                                                                                 Uuid::new_v4(),
+        //                                                                                                json_item["id"],
+        //                                                                                                 "Fetch".to_string()).await;
+        //     } else {
+        //         // it"s on the database, so must update the record with latest information
+        //         mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+        //                                                                                                 "themoviedb".to_string(),
+        //                                                                                                 mk_lib_common_enum_media_type::DLMediaType::MOVIE,
+        //                                                                                                 Uuid::new_v4(),
+        //                                                                                                 json_item["id"],
+        //                                                                                                 "Update".to_string()).await;
+        //     }
+        // }
+    }
 
     // // TODO this should go through the limiter
     // // process tv changes
-    // let json_result = mk_lib_network::mk_download_file_from_url(
+    // let url_result = mk_lib_network::mk_download_file_from_url(
     //     format!("https://api.themoviedb.org/3/tv/changes?api_key={}",
     //             option_config_json["API"]["themoviedb"]).replace("\"", "")).await?;
-    // for json_item in json_result["results"] {
-    //     if !json_item.trim().is_empty() {
-    //         let metadata_struct: MetadataTV = serde_json::from_str(json_item)?;
+    // let json_result: Value = serde_json::from_str(&url_result).unwrap();
+    // for json_item in json_result["results"].as_object().unwrap() {
     //         // verify it's not already in the database
     //         let result = mk_lib_database_metadata::mk_lib_database_metadata_exists_tv(&sqlx_pool,
     //                                                                                   metadata_struct.id).await.unwrap();
@@ -154,7 +163,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //                                                                                                         "Update".to_string()).await;
     //             }
     //         }
-    //     }
     // }
 
     // TODO need person changes in here as well
