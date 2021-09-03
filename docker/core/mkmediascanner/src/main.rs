@@ -166,7 +166,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                     json!({"Status": "Added to scan", "Pct": 100})).await.unwrap();
 
                 mk_lib_logging::mk_logging_post_elk("info",
-                                                    json!({"worker dir": dir_path}),
+                                                    json!({"worker dir": media_path}),
                                                     LOGGING_INDEX_NAME).await;
 
                 let original_media_class = row_data.get("mm_media_dir_class_enum");
@@ -192,7 +192,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     // }
                     // smb_stuff.com_cifs_close();
                 } else {
-                     let file_data = mk_lib_file::mk_directory_walk(&dir_path);
+                     let file_data = mk_lib_file::mk_directory_walk(&media_path);
                 }
                 let total_file_in_dir = len(file_data);
                 let mut total_scanned: u64 = 0;
@@ -212,7 +212,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             // set here which MIGHT be overrode later
                             let new_class_type_uuid = media_class_type_uuid;
                             // check for "stacked" media file
-                            let base_file_name = Path::new(&file_name).file_name()?.to_str()?;
+                            let base_file_name = Path::new(&file_name).file_name().unwarp();
 
                             // check to see if it"s a "stacked" file
                             // including games since some are two or more discs
