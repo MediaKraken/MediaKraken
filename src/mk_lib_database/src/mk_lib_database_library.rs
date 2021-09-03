@@ -60,8 +60,8 @@ pub async fn mk_lib_database_library_path_timestamp_update(pool: &sqlx::PgPool,
 #[allow(dead_code)]
 pub async fn mk_lib_database_library_file_exists(pool: &sqlx::PgPool,
                                                  file_name: String)
-                                                 -> Result<i32, sqlx::Error> {
-    let row: (i32, ) = sqlx::query_as("select exists(select 1 from mm_media \
+                                                 -> Result<bool, sqlx::Error> {
+    let row: (bool, ) = sqlx::query_as("select exists(select 1 from mm_media \
         where mm_media_path = $1 limit 1) \
         as found_record limit 1")
         .bind(file_name)
