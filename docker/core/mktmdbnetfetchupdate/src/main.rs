@@ -3,6 +3,7 @@ use std::error::Error;
 use uuid::Uuid;
 use serde_json::{json, Value};
 use sqlx::Row;
+use std::collections::HashMap;
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_common/src/mk_lib_common.rs"]
@@ -66,7 +67,12 @@ mod mk_lib_logging;
 #[path = "mk_lib_network.rs"]
 mod mk_lib_network;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
+struct Response {
+    results: Vec<MetadataMovie>,
+}
+
+#[derive(Deserialize)]
 struct MetadataMovie {
     id: i32,
     adult: bool,
@@ -90,20 +96,30 @@ async fn main() -> Result<(), Box<dyn Error>> {
     mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
                                                            false).await;
     let option_config_json = mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool).await.unwrap();
-    println!("options: {:?}", option_config_json);
-    println!("api {:?}", option_config_json["API"]);
-    println!("tmdb{:?}", option_config_json["API"]["themoviedb"]);
-    println!("huh {:?}", format!("https://api.themoviedb.org/3/movie/changes?api_key={}",
-                                 option_config_json["API"]["themoviedb"]).replace("\"", ""));
+    // println!("options: {:?}", option_config_json);
+    // println!("api {:?}", option_config_json["API"]);
+    // println!("tmdb{:?}", option_config_json["API"]["themoviedb"]);
+    // println!("huh {:?}", format!("https://api.themoviedb.org/3/movie/changes?api_key={}",
+    //                              option_config_json["API"]["themoviedb"]).replace("\"", ""));
     // TODO this should go through the limiter
     // process movie changes
     let url_result = mk_lib_network::mk_data_from_url(
         format!("https://api.themoviedb.org/3/movie/changes?api_key={}",
                 option_config_json["API"]["themoviedb"]).replace("\"", "")).await?;
-    println!("result: {:?}", url_result);
-    let json_result: Value = serde_json::from_str(&url_result).unwrap();
-    for (json_key, json_item) in json_result["results"].as_object().unwrap() {
-        println!("item {:?}", json_item);
+    //println!("result: {:?}", url_result);
+    //let json_result: HashMap<String, Value> = serde_json::from_str(&url_result).unwrap();
+    // let json_result: Value = serde_json::from_str(&url_result).unwrap();
+    // println!("json_result: {:?}", json_result["results"]);
+    // let vec_result: Vec<MetadataMovie> = json_result["results"];
+    //println!("vec {:?}", vec_result);
+    println!("here");
+    let resp: Response = serde_json::from_str(&url_result.trim()).unwrap();
+    println!("what");
+    for json_item in resp.results {
+    //for json_item in vec_result.iter() {
+        //println!("item {}", json_item);
+        println!("item {}", json_item.id);
+        //println!("key {:?} item {:?}", json_key, json_item);
         // verify it's not already in the database
         // let result = mk_lib_database_metadata::mk_lib_database_metadata_exists_movie(&sqlx_pool,
         //                                                                              json_item["id"]).await.unwrap();
