@@ -35,7 +35,7 @@ pub async fn mk_lib_database_notification_insert(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_notification_delete(pool: &sqlx::PgPool,
                                                  mk_notification_guid: uuid::Uuid)
-                                                 -> Resul<(), sqlx::Error> {
+                                                 -> Result<(), sqlx::Error> {
     sqlx::query("delete from mm_notification where mm_notification_guid = $1")
         .bind(mk_notification_guid)
         .execute(pool)
