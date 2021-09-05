@@ -13,7 +13,7 @@ reqwest = { version = "0.11.3", default-features = false, features = ["json", "r
 #rustube = "0.3.5"    # this is adding openssl to hyper - due to cargo.toml of "default" request settings
 serde = { version = "1.0.126", features = ["derive"] }
 serde_json = "1.0.64"
-sqlx = { version = "0.5.6", features = [ "chrono", "runtime-tokio-rustls", "postgres", "uuid" ] }
+sqlx = { version = "0.5.7", features = [ "chrono", "runtime-tokio-rustls", "postgres", "uuid" ] }
 sys-info = "0.4.0"
 tokio = { version = "1.6.0", features = ["full"] }
 validator = { version = "0.14", features = ["derive"] }
