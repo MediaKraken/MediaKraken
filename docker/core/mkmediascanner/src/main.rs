@@ -192,16 +192,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     // }
                     // smb_stuff.com_cifs_close();
                 } else {
-                     let file_data = mk_lib_file::mk_directory_walk(&media_path);
+                    let file_data = mk_lib_file::mk_directory_walk(&media_path.to_str());
                 }
-                let total_file_in_dir = len(file_data);
+                let total_file_in_dir = file_data.len;
                 let mut total_scanned: u64 = 0;
                 let mut total_files: u64 = 0;
                 for file_name in file_data {
                     if mk_lib_database_library::mk_lib_database_library_file_exists(&sqlx_pool,
-                                                                                    &file_name).await.unwrap() == false {
+                                                                                    file_name).await.unwrap() == false {
                         // set lower here so I can remove a lot of .lower() in the code below
-                        let file_extension = Path::new(&file_name).extension().to_string().to_lowercase();
+                        let file_extension = Path::new(&file_name).extension().to_lowercase();
                         // checking subtitles for parts as need multiple files for multiple media files
                         if mk_lib_common_media_extension::MEDIA_EXTENSION.contains(&file_extension)
                             || mk_lib_common_media_extension::SUBTITLE_EXTENSION.contains(&file_extension)
@@ -212,7 +212,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             // set here which MIGHT be overrode later
                             let new_class_type_uuid = media_class_type_uuid;
                             // check for "stacked" media file
-                            let base_file_name = Path::new(&file_name).file_name().unwarp();
+                            let base_file_name = Path::new(&file_name).file_name().to_str().unwrap();
 
                             // check to see if it"s a "stacked" file
                             // including games since some are two or more discs
@@ -238,11 +238,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             if original_media_class == mk_lib_common_enum_media_type::DLMediaType::GAME {
                                 if file_extension == "iso" {
                                     let new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::GAME_ISO;
-                                } else {if file_extension == "chd" {
-                                    let new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::GAME_CHD;
                                 } else {
-                                    let new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::GAME_ROM;
-                                }}
+                                    if file_extension == "chd" {
+                                        let new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::GAME_CHD;
+                                    } else {
+                                        let new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::GAME_ROM;
+                                    }
+                                }
                                 let ffprobe_bif_data = false;
                             }
                             // set new media class for subtitles
@@ -323,7 +325,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                 let file_name = file_name.replace("\\\\", "smb://guest:\"\"@").replace("\\", "/");
                                             }
                                             // create media_json data
-                                            let media_json = json!({ "Added": datetime.now().strftime("%Y-%m-%d HH:mm:ss") });
+                                            let media_json = json!({ "Added": Utc::now().to_string() });
                                             let media_id = Uuid::new_v4();
                                             mk_lib_database_media::mk_lib_database_media_insert(&sqlx_pool,
                                                                                                 media_id,
@@ -349,12 +351,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                             // verify it should save a dl "Z" record for search/lookup/etc
                                             if save_dl_record == true {
                                                 // media id begin and download que insert
-                                                mk_lib_database_download::mk_lib_database_download_insert(&sqlx_pool,
-                                                                                                          "Z".to_string(),
-                                                                                                          new_class_type_uuid,
-                                                                                                          Uuid::new_v4(),
-                                                                                                          media_id,
-                                                                                                          "".to_string());
+                                                mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                                                                                                                                        "Z".to_string(),
+                                                                                                                                        new_class_type_uuid,
+                                                                                                                                        Uuid::new_v4(),
+                                                                                                                                        media_id,
+                                                                                                                                        "".to_string());
                                             }
                                         }
                                     }
@@ -372,7 +374,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
                 // end of for loop for each file in library
                 mk_lib_logging::mk_logging_post_elk("info",
-                                                    json!({"worker dir done": dir_path,
+                                                    json!({"worker dir done": media_path.to_str(),
                                                         "media class": media_class_type_uuid}),
                                                     LOGGING_INDEX_NAME).await;
                 // set to none so it doesn"t show up anymore in admin status page
