@@ -69,13 +69,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
         for row_data in metadata_to_process {
             let mut metadata_uuid: Uuid;
             // check for dupes by name/year
-            let path_data: String = row_data.get("mm_download_path");
-            let output = Command::new("guessit")
-                .arg(path_data)
-                .output()
-                .expect("failed to execute process");
-            println!("Output: {:?}", output);
-            println!("OutputStd: {:?}", String::from_utf8_lossy(&output.stdout));
+            // let path_data: String = row_data.get("mm_download_path");
+            // let output = Command::new("guessit")
+            //     .arg(path_data)
+            //     .output()
+            //     .expect("failed to execute process");
+            // println!("Output: {:?}", output);
+            // println!("OutputStd: {:?}", String::from_utf8_lossy(&output.stdout));
+            // let output_string = String::from_utf8_lossy(&output.stdout);
+            // println!("OutputString: {:?}", output_string);
+            // for line in output_string.split("\n") {
+            //     println!("Line {:?}", line);
+            // }
+            //let json_output = serde_json::from_str(&output_string)?;
+            //println!("OutJson: {:?}", json_output);
             //     if (file_name["title"]) == list {
             //         file_name["title"] = common_string.com_string_guessit_list(file_name["title"]);
             //     }

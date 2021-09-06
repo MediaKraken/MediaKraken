@@ -65,6 +65,9 @@ STAGE_CORE_IMAGES = {
     # download files/etc trailers/etc from ampq records
     'mkdownload': ('mkdownload', 'busybox:1.33.1-uclibc', 'core'),
 
+    # guessit via web rest
+    'mkguessitrest': ('mkguessitrest', 'tiangolo/uwsgi-nginx-flask:python3.7-alpine3.8', 'core'),
+
     # runs control network/ir/if/etc
     'mkhardwarecontrol': ('mkhardwarecontrol', 'busybox:1.33.1-uclibc', 'core'),
 
