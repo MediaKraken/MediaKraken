@@ -1,9 +1,11 @@
-use pyo3::prelude::*;
+use std::process::Command;
+// use pyo3::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::error::Error;
 use tokio::time::{Duration, sleep};
 use uuid::Uuid;
+use sqlx::Row;
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
@@ -11,6 +13,9 @@ mod mk_lib_database;
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_metadata.rs"]
 mod mk_lib_database_metadata;
+#[cfg(debug_assertions)]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_metadata_download_queue.rs"]
+mod mk_lib_database_metadata_download_queue;
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
 mod mk_lib_database_version;
@@ -25,11 +30,19 @@ mod mk_lib_database;
 #[path = "mk_lib_database_metadata.rs"]
 mod mk_lib_database_metadata;
 #[cfg(not(debug_assertions))]
+#[path = "mk_lib_database_metadata_download_queue.rs"]
+mod mk_lib_database_metadata_download_queue;
+#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_version.rs"]
 mod mk_lib_database_version;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
+
+struct MediaNameYear {
+    name: String,
+    year: Option<i8>,
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -52,66 +65,63 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // process all the "Z" records
     loop {
         // grab new batch of records to process by content provider
-        for row_data in db_connection.db_download_read_provider("Z").await()
-        {
+        let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "Z").await.unwrap();
+        for row_data in metadata_to_process {
             let mut metadata_uuid: Uuid;
-
-
             // check for dupes by name/year
-            file_name = guessit(row_data["mdq_path"]);
-            if (file_name["title"]) == list {
-                file_name["title"] = common_string.com_string_guessit_list(file_name["title"]);
-            }
-            if "title" in file_name {
-            if "year" in file_name {
-            if type (file_name["year"]) == list {
-            file_name["year"] = file_name["year"][0];
-            }
-            if file_name["title"].lower() == metadata_last_title
-            and file_name["year"] == metadata_last_year {
-            // matches last media scanned, so set with that metadata id
-            let metadata_uuid = metadata_last_id;
-            }}
-            else if file_name["title"].lower() == metadata_last_title {
-            // matches last media scanned, so set with that metadata id
-            let metadata_uuid = metadata_last_id;
+            let path_data: String = row_data.get("mm_download_path");
+            let output = Command::new("guessit")
+                .arg(path_data)
+                .output()
+                .expect("failed to execute process");
+            println!("Output: {:?}", output);
+            println!("OutputStd: {:?}", String::from_utf8_lossy(&output.stdout));
+            //     if (file_name["title"]) == list {
+            //         file_name["title"] = common_string.com_string_guessit_list(file_name["title"]);
+            //     }
+            //     if "title" in file_name {
+            //     if "year" in file_name {
+            //     if type (file_name["year"]) == list {
+            //     file_name["year"] = file_name["year"][0];
+            //     }
+            //     if file_name["title"].lower() == metadata_last_title
+            //     and file_name["year"] == metadata_last_year {
+            //     // matches last media scanned, so set with that metadata id
+            //     let metadata_uuid = metadata_last_id;
+            //     }}
+            //     else if file_name["title"].lower() == metadata_last_title {
+            //     // matches last media scanned, so set with that metadata id
+            //     let metadata_uuid = metadata_last_id;
+            // }
+            //     // doesn"t match the last file, so set the file to be id"d
+            //     if metadata_uuid == None {
+            //         // begin id process
+            //         metadata_uuid = metadata_identification::metadata_identification(
+            //             db_connection,
+            //             row_data,
+            //             file_name).await();
+            //     }
+            //     // allow NONE to be set so, unmatched stuff can work for skipping
+            //     let metadata_last_id = metadata_uuid
+            //     let metadata_last_title = file_name["title"].lower();
+            //     try:
+            //     let metadata_last_year = file_name["year"];
+            //     except
+            //     KeyError:
+            //     let metadata_last_year = None;
+            //     else {
+            //     // invalid guessit guess so set to ZZ to skip for now
+            //     db_connection.db_download_update_provider("ZZ", row_data["mdq_id"]).await();
+            // }
+            // }
+            // update the media row with the json media id AND THE proper NAME!!!
+            // if metadata_uuid != None {
+            //     db_connection.db_begin();
+            //     db_connection.db_update_media_id(row_data["mdq_provider_id"], metadata_uuid);
+            //     db_connection.db_download_delete(row_data["mdq_id"]);
+            //     db_connection.db_commit();
+            // }
         }
-            // doesn"t match the last file, so set the file to be id"d
-            if metadata_uuid == None {
-                // begin id process
-                metadata_uuid = metadata_identification::metadata_identification(
-                db_connection,
-                row_data,
-                file_name).await();
-            }
-            // allow NONE to be set so, unmatched stuff can work for skipping
-            let metadata_last_id = metadata_uuid
-            let metadata_last_title = file_name["title"].lower();
-            try:
-            let metadata_last_year = file_name["year"];
-            except
-            KeyError:
-            let metadata_last_year = None;
-            else {
-            // invalid guessit guess so set to ZZ to skip for now
-            db_connection.db_download_update_provider("ZZ", row_data["mdq_id"]).await();
-        }
-        }
-        // update the media row with the json media id AND THE proper NAME!!!
-        if metadata_uuid != None {
-            db_connection.db_begin();
-            db_connection.db_update_media_id(row_data["mdq_provider_id"], metadata_uuid);
-            db_connection.db_download_delete(row_data["mdq_id"]);
-            db_connection.db_commit();
-        }
+        sleep(Duration::from_secs(1)).await;
     }
-    sleep(Duration::from_secs(1)).await;
-}
-
-
-    // stop logging
-    mk_lib_logging::mk_logging_post_elk("info",
-    json ! ({"STOP": "STOP"}),
-    LOGGING_INDEX_NAME).await;
-    Ok(())
 }

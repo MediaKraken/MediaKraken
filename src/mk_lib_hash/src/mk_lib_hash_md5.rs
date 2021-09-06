@@ -2,23 +2,20 @@ use md5::{Md5, Digest};
 use std::fs;
 use std::error::Error;
 
-pub fn mk_file_hash_md5(file_to_read: &str) -> Result<String, Error> {
+#[cfg(debug_assertions)]
+#[path = "../../../src/mk_lib_file/src/mk_lib_file.rs"]
+mod mk_lib_file;
+#[cfg(not(debug_assertions))]
+#[path = "mk_lib_file.rs"]
+mod mk_lib_file;
+
+pub fn mk_file_hash_md5(file_to_read: &str) -> Result<String, Box<dyn Error>> {
     let mut hasher = Md5::new();
-
-    let mut file = fs::File::open(&file_to_read)?;
-    //let hash = md5::digest_reader(&mut file)?;
-
-    hasher.update(&mut file);
-
+    let mut file_data = mk_lib_file::mk_read_file_data_u8(&file_to_read)?;
+    hasher.update(&mut file_data);
     let result = hasher.finalize();
-    Ok(result)
+    Ok(result.to_string())
 }
-
-// pub fn mk_file_hash_md5(file_to_read: &str) -> io::Result<()> {
-//     let mut file = fs::File::open(&file_to_read)?;
-//     let hash = md5::digest_reader(&mut file)?;
-//     Ok(hash)
-// }
 
 // // cargo test -- --show-output
 // #[cfg(test)]

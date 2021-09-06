@@ -12,6 +12,9 @@ mod mk_lib_database;
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_option_status.rs"]
 mod mk_lib_database_option_status;
 #[cfg(debug_assertions)]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
+mod mk_lib_database_version;
+#[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
 mod mk_lib_logging;
 #[cfg(debug_assertions)]
@@ -24,6 +27,9 @@ mod mk_lib_database;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_option_status.rs"]
 mod mk_lib_database_option_status;
+#[cfg(not(debug_assertions))]
+#[path = "mk_lib_database_version.rs"]
+mod mk_lib_database_version;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -91,11 +97,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     } else if json_message["Type"].to_string() == "HDTrailers" {
                         // try to grab the RSS feed itself
                         let data: serde_json::Value = serde_json::from_str(&mk_lib_network::mk_data_from_url(
-                            "http://feeds.hd-trailers.net/hd-trailers".to_string()).await);
+                            "http://feeds.hd-trailers.net/hd-trailers".to_string()).await?);
                         mk_lib_logging::mk_logging_post_elk("info",
                                                             json!({ "download": { "hdtrailer_json": data } }),
                                                             LOGGING_INDEX_NAME).await;
-                        for item in data["rss"]["channel"]["item"] {
+                        for item in data["rss"]["channel"]["item"].iter() {
                             mk_lib_logging::mk_logging_post_elk("info",
                                                                 json!({ "item": item }),
                                                                 LOGGING_INDEX_NAME).await;
