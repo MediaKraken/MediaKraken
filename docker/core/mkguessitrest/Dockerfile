@@ -6,5 +6,3 @@ RUN cd /guessit-rest && pip3 install -e .
 
 ENV UWSGI_INI /guessit-rest/guessitrest/uwsgi.ini
 WORKDIR /guessit-rest/guessitrest
-
-
