@@ -65,7 +65,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                            false).await;
 
     // setup last used id's per thread
-    let mut metadata_last_id: Uuid = Uuid::parse_str("00000000-0000-0000-0000-4dc1edf71f51")?;
+    let mut metadata_last_uuid: Uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000")?;
     let mut metadata_last_title: String = "".to_string();
     let mut metadata_last_year: i8 = 0;
 
@@ -74,7 +74,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         // grab new batch of records to process by content provider
         let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "Z").await.unwrap();
         for row_data in metadata_to_process {
-            let mut metadata_uuid: Uuid;
+            let mut metadata_uuid: Uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000")?;
             // check for dupes by name/year
             let row_data_path: String = row_data.get("mm_download_path");
             println!("Path: {:?}", row_data_path);
@@ -93,46 +93,44 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     if guessit_data["title"].to_string().to_lowercase() == metadata_last_title
                         && guessit_data["year"] == metadata_last_year {
                         // matches last media scanned, so set with that metadata id
-                        metadata_uuid = metadata_last_id
+                        metadata_uuid = metadata_last_uuid
                     }
                 } else if guessit_data["title"].to_string().to_lowercase() == metadata_last_title {
                     // matches last media scanned, so set with that metadata id
-                    metadata_uuid = metadata_last_id
+                    metadata_uuid = metadata_last_uuid
+                }
+                if metadata_uuid == Uuid::parse_str("00000000-0000-0000-0000-000000000000")? {
+                    // begin id process
+                    /*
+                    metadata_uuid = await metadata_identification.metadata_identification(
+                                            db_connection,
+                                            row_data,
+                                            file_name)
+                     */
+                }
+                // allow none to be set so unmatched stuff can work for skipping
+                metadata_last_uuid = metadata_uuid;
+                metadata_last_title = guessit_data["title"].to_string().to_lowercase();
+                if guessit_data["year"].is_i64() {
+                    metadata_last_year = guessit_data["year"]::as_i64();
+                } else {
+                    metadata_last_year = 0;
                 }
             } else {
                 mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_update_provider(&sqlx_pool,
                                                                                                                  "ZZ".to_string(),
                                                                                                                  row_data.get("mdq_id")).await.unwrap();
             }
-
-            //     // doesn"t match the last file, so set the file to be id"d
-            //     if metadata_uuid == None {
-            //         // begin id process
-            //         metadata_uuid = metadata_identification::metadata_identification(
-            //             db_connection,
-            //             row_data,
-            //             file_name).await();
-            //     }
-            //     // allow NONE to be set so, unmatched stuff can work for skipping
-            //     let metadata_last_id = metadata_uuid
-            //     let metadata_last_title = file_name["title"].lower();
-            //     try:
-            //     let metadata_last_year = file_name["year"];
-            //     except
-            //     KeyError:
-            //     let metadata_last_year = None;
-            //     else {
-            //     // invalid guessit guess so set to ZZ to skip for now
-            //     db_connection.db_download_update_provider("ZZ", row_data["mdq_id"]).await();
-            // }
-            // }
-            // update the media row with the json media id AND THE proper NAME!!!
-            // if metadata_uuid != None {
-            //     db_connection.db_begin();
-            //     db_connection.db_update_media_id(row_data["mdq_provider_id"], metadata_uuid);
-            //     db_connection.db_download_delete(row_data["mdq_id"]);
-            //     db_connection.db_commit();
-            // }
+            // update the media row with the json media id and the proper name
+            if metadata_uuid != Uuid::parse_str("00000000-0000-0000-0000-000000000000")? {
+                /*
+                await db_connection.db_begin()
+                await db_connection.db_update_media_id(row_data['mdq_provider_id'],
+                                                           metadata_uuid)
+                await db_connection.db_download_delete(row_data['mdq_id'])
+                await db_connection.db_commit()
+                 */
+            }
         }
         sleep(Duration::from_secs(1)).await;
     }
