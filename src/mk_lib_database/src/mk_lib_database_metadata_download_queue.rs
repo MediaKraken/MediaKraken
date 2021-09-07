@@ -45,6 +45,22 @@ pub async fn mk_lib_database_metadata_download_queue_exists(pool: &sqlx::PgPool,
     Ok(row.0)
 }
 
+pub async fn mk_lib_database_metadata_download_queue_update_provider(pool: &sqlx::PgPool,
+                                                                     metadata_provider: String,
+                                                                     metadata_queue_uuid: Uuid)
+                                                                     -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
+    sqlx::query("update mm_metadata_download_que \
+        set mm_download_provider = $1 \
+        where mm_download_guid = $2")
+        .bind(metadata_provider)
+        .bind(metadata_queue_uuid)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(())
+}
+
 pub async fn mk_lib_database_metadata_download_queue_insert(pool: &sqlx::PgPool,
                                                             metadata_provider: String,
                                                             metadata_que_type: i16,

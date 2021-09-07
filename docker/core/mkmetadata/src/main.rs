@@ -3,6 +3,7 @@ use std::process::Command;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::error::Error;
+use std::path::Path;
 use tokio::time::{Duration, sleep};
 use uuid::Uuid;
 use sqlx::Row;
@@ -22,6 +23,9 @@ mod mk_lib_database_version;
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
 mod mk_lib_logging;
+#[cfg(debug_assertions)]
+#[path = "../../../../src/mk_lib_network/src/mk_lib_network.rs"]
+mod mk_lib_network;
 
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_database.rs"]
@@ -38,6 +42,9 @@ mod mk_lib_database_version;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
+#[cfg(not(debug_assertions))]
+#[path = "mk_lib_network.rs"]
+mod mk_lib_network;
 
 struct MediaNameYear {
     name: String,
@@ -58,9 +65,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                            false).await;
 
     // setup last used id's per thread
-    let mut metadata_last_id: i32;
-    let mut metadata_last_title: String;
-    let mut metadata_last_year: i8;
+    let mut metadata_last_id: Uuid = Uuid::parse_str("00000000-0000-0000-0000-4dc1edf71f51")?;
+    let mut metadata_last_title: String = "".to_string();
+    let mut metadata_last_year: i8 = 0;
 
     // process all the "Z" records
     loop {
@@ -69,37 +76,35 @@ async fn main() -> Result<(), Box<dyn Error>> {
         for row_data in metadata_to_process {
             let mut metadata_uuid: Uuid;
             // check for dupes by name/year
-            // let path_data: String = row_data.get("mm_download_path");
-            // let output = Command::new("guessit")
-            //     .arg(path_data)
-            //     .output()
-            //     .expect("failed to execute process");
-            // println!("Output: {:?}", output);
-            // println!("OutputStd: {:?}", String::from_utf8_lossy(&output.stdout));
-            // let output_string = String::from_utf8_lossy(&output.stdout);
-            // println!("OutputString: {:?}", output_string);
-            // for line in output_string.split("\n") {
-            //     println!("Line {:?}", line);
-            // }
-            //let json_output = serde_json::from_str(&output_string)?;
-            //println!("OutJson: {:?}", json_output);
+            let row_data_path: String = row_data.get("mm_download_path");
+            println!("Path: {:?}", row_data_path);
+            let file_name = Path::new(&row_data_path).file_name().unwrap().to_os_string().into_string().unwrap();
+            println!("File: {:?}", file_name);
+            let url_link = format!("http://th-docker-1:5000/?filename={:}", file_name);
+            println!("URL: {:?}", url_link);
+            let guessit_data = mk_lib_network::mk_data_from_url_to_json(url_link).await?;
+            println!("Guess: {}", guessit_data["title"]);
+            println!("GuessYear: {}", guessit_data["year"]);
             //     if (file_name["title"]) == list {
             //         file_name["title"] = common_string.com_string_guessit_list(file_name["title"]);
             //     }
-            //     if "title" in file_name {
-            //     if "year" in file_name {
-            //     if type (file_name["year"]) == list {
-            //     file_name["year"] = file_name["year"][0];
-            //     }
-            //     if file_name["title"].lower() == metadata_last_title
-            //     and file_name["year"] == metadata_last_year {
-            //     // matches last media scanned, so set with that metadata id
-            //     let metadata_uuid = metadata_last_id;
-            //     }}
-            //     else if file_name["title"].lower() == metadata_last_title {
-            //     // matches last media scanned, so set with that metadata id
-            //     let metadata_uuid = metadata_last_id;
-            // }
+            if guessit_data["title"].to_string().len() > 0 {
+                if guessit_data["year"].is_i64() {
+                    if guessit_data["title"].to_string().to_lowercase() == metadata_last_title
+                        && guessit_data["year"] == metadata_last_year {
+                        // matches last media scanned, so set with that metadata id
+                        metadata_uuid = metadata_last_id
+                    }
+                } else if guessit_data["title"].to_string().to_lowercase() == metadata_last_title {
+                    // matches last media scanned, so set with that metadata id
+                    metadata_uuid = metadata_last_id
+                }
+            } else {
+                mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_update_provider(&sqlx_pool,
+                                                                                                                 "ZZ".to_string(),
+                                                                                                                 row_data.get("mdq_id")).await.unwrap();
+            }
+
             //     // doesn"t match the last file, so set the file to be id"d
             //     if metadata_uuid == None {
             //         // begin id process

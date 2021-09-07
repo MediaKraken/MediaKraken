@@ -6,21 +6,28 @@ use reqwest::header::CONTENT_TYPE;
 
 //type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
-pub async fn mk_data_from_url_to_json(url: String) -> Result<HashMap<String, String>, Box<dyn std::error::Error>> {
+pub async fn mk_data_from_url_to_json(url: String)
+    -> Result<serde_json::Value,
+    Box<dyn std::error::Error>> {
     // Build the client using the builder pattern
     let client = reqwest::Client::builder().build()?;
+    println!("2");
     // Perform the actual execution of the network request
-    let res = client
+    let res: serde_json::Value = client
         .get(url)
         .header(CONTENT_TYPE, "Content-Type: application/json")
         .send()
+        .await?
+        .json()
         .await?;
-    // Parse the response body as Json in this case
-    let ip = res
-        .json::<HashMap<String, String>>()
-        .await?;
-    println!("{:?}", ip);
-    Ok(ip)
+    println!("3 {:#?}", res);
+    Ok(res)
+    // // Parse the response body as Json in this case
+    // let ip = res
+    //     .json::<HashMap<String, i8>>()
+    //     .await?;
+    // println!("Returned HASH {:?}", ip);
+    // Ok(ip)
 }
 
 pub async fn mk_data_from_url(url: String) -> Result<String, Box<dyn std::error::Error>> {
