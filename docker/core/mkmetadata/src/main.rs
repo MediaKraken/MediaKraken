@@ -46,6 +46,9 @@ mod mk_lib_logging;
 #[path = "mk_lib_network.rs"]
 mod mk_lib_network;
 
+#[path = "identification.rs"]
+mod mkmetadata_identification;
+
 #[derive(Serialize, Deserialize)]
 struct MediaTitleYear {
     title: String,
@@ -104,12 +107,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
                 if metadata_uuid == Uuid::parse_str("00000000-0000-0000-0000-000000000000")? {
                     // begin id process
-                    /*
-                    metadata_uuid = metadata_identification.metadata_identification(
-                                            db_connection,
-                                            row_data,
-                                            file_name)
-                     */
+                    metadata_uuid = mkmetadata_identification::metadata_identification(&sqlx_pool,
+                                                                                       row_data,
+                                                                                       guessit_data);
                 }
                 // allow none to be set so unmatched stuff can work for skipping
                 metadata_last_uuid = metadata_uuid;
