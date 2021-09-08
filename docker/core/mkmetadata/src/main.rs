@@ -46,8 +46,9 @@ mod mk_lib_logging;
 #[path = "mk_lib_network.rs"]
 mod mk_lib_network;
 
-struct MediaNameYear {
-    name: String,
+#[derive(Serialize, Deserialize)]
+struct MediaTitleYear {
+    title: String,
     year: Option<i8>,
 }
 
@@ -82,27 +83,29 @@ async fn main() -> Result<(), Box<dyn Error>> {
             println!("File: {:?}", file_name);
             let url_link = format!("http://th-docker-1:5000/?filename={:}", file_name);
             println!("URL: {:?}", url_link);
-            let guessit_data = mk_lib_network::mk_data_from_url_to_json(url_link).await?;
-            println!("Guess: {}", guessit_data["title"]);
-            println!("GuessYear: {}", guessit_data["year"]);
+            //let guessit_data = mk_lib_network::mk_data_from_url_to_json(url_link).await?;
+            let buff = mk_lib_network::mk_data_from_url(url_link).await?;
+            let guessit_data: MediaTitleYear = serde_json::from_str(&buff).unwrap();
+            println!("Guess: {:?}", guessit_data.title);
+            println!("GuessYear: {:?}", guessit_data.year);
             //     if (file_name["title"]) == list {
             //         file_name["title"] = common_string.com_string_guessit_list(file_name["title"]);
             //     }
-            if guessit_data["title"].to_string().len() > 0 {
-                if guessit_data["year"].is_i64() {
-                    if guessit_data["title"].to_string().to_lowercase() == metadata_last_title
-                        && guessit_data["year"] == metadata_last_year {
+            if guessit_data.title.len() > 0 {
+                if guessit_data.year.is_some() {
+                    if guessit_data.title.to_lowercase() == metadata_last_title
+                        && guessit_data.year.unwrap() == metadata_last_year {
                         // matches last media scanned, so set with that metadata id
                         metadata_uuid = metadata_last_uuid
                     }
-                } else if guessit_data["title"].to_string().to_lowercase() == metadata_last_title {
+                } else if guessit_data.title.to_lowercase() == metadata_last_title {
                     // matches last media scanned, so set with that metadata id
                     metadata_uuid = metadata_last_uuid
                 }
                 if metadata_uuid == Uuid::parse_str("00000000-0000-0000-0000-000000000000")? {
                     // begin id process
                     /*
-                    metadata_uuid = await metadata_identification.metadata_identification(
+                    metadata_uuid = metadata_identification.metadata_identification(
                                             db_connection,
                                             row_data,
                                             file_name)
@@ -110,9 +113,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
                 // allow none to be set so unmatched stuff can work for skipping
                 metadata_last_uuid = metadata_uuid;
-                metadata_last_title = guessit_data["title"].to_string().to_lowercase();
-                if guessit_data["year"].is_i64() {
-                    metadata_last_year = guessit_data["year"]::as_i64();
+                metadata_last_title = guessit_data.title.to_lowercase();
+                if guessit_data.year.is_some() {
+                    metadata_last_year = guessit_data.year.unwrap();
                 } else {
                     metadata_last_year = 0;
                 }
