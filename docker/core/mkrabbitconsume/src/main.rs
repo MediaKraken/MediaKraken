@@ -7,6 +7,9 @@ use sqlx::Row;
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
 mod mk_lib_database;
 #[cfg(debug_assertions)]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
+mod mk_lib_database_version;
+#[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
 mod mk_lib_logging;
 #[cfg(debug_assertions)]
@@ -16,6 +19,9 @@ mod mk_lib_network;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
+#[cfg(not(debug_assertions))]
+#[path = "mk_lib_database_version.rs"]
+mod mk_lib_database_version;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
