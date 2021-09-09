@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 
 pub async fn nfo_xml_file(media_file_path: &str) {
     let mut nfo_data;
@@ -17,18 +18,18 @@ pub async fn nfo_xml_file(media_file_path: &str) {
         }
     if os.path.isfile(nfo_file_check) {
         // check for nfo
-            let nfo_data = xmltodict.parse(common_file.com_file_load_data(nfo_file_check, False));
+        let nfo_data = xmltodict.parse(common_file.com_file_load_data(nfo_file_check, False));
         }
     else {
-        // only check for xml if nfo doesn"t exist
+        // only check for xml if nfo doesn't exist
         if os.path.isfile(xml_file_name) {
             // check for xml
-                let xml_data = xmltodict.parse(common_file.com_file_load_data(xml_file_name, False));
-                }
+            let xml_data = xmltodict.parse(common_file.com_file_load_data(xml_file_name, False));
+        }
         else { if os.path.isfile(
                 os.path.join(os.path.dirname(os.path.abspath(media_file_path)), "movie.xml")) {
                 let xml_data = xmltodict.parse(common_file.com_file_load_data(os.path.join(
                     os.path.dirname(os.path.abspath(media_file_path)), "movie.xml"), False));
               }  }}
-    return nfo_data, xml_data
+    return (nfo_data, xml_data)
  }

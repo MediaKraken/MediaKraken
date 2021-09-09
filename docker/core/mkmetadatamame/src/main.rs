@@ -61,7 +61,7 @@ mod mk_lib_network;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // start logging
-    const LOGGING_INDEX_NAME: &str = "mk_game_metadata_mame";
+    const LOGGING_INDEX_NAME: &str = "mkmetadatamame";
     mk_lib_logging::mk_logging_post_elk("info",
                                         "START",
                                         LOGGING_INDEX_NAME).await;
@@ -89,10 +89,22 @@ async fn main() -> Result<(), Box<dyn Error>> {
             file_name);
     }
     let mame_xml: String = mk_lib_compression::mk_decompress_zip(&file_name,
-                                                         false, false).unwrap();
-    for token in xmlparser::Tokenizer::from(mame_xml) {
-        println!("{:?}", token);
+                                                                 false, false).unwrap();
+    let doc = match roxmltree::Document::parse(&mame_xml) {
+        Ok(doc) => doc,
+        Err(e) => {
+            println!("Error: {}.", e);
+            std::process::exit(1);
+        }
+    };
+    for node in doc.descendants() {
+        if node.is_element() {
+            println!("{:?} at {}", node.tag_name(), doc.text_pos_at(node.range().start));
+        }
     }
+    // for token in xmlparser::Tokenizer::from(mame_xml) {
+    //     println!("{:?}", token);
+    // }
 
     //     game_xml = ""
     //     first_record = true

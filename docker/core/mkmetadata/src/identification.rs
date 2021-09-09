@@ -1,6 +1,7 @@
 use uuid::Uuid;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use sqlx::Row;
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_common/src/mk_lib_common_enum_media_type.rs"]
@@ -10,6 +11,27 @@ mod mk_lib_common_enum_media_type;
 #[path = "mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;
 
+#[path = "metadata/adult.rs"]
+mod metadata_adult;
+
+#[path = "metadata/book.rs"]
+mod metadata_book;
+
+#[path = "metadata/game.rs"]
+mod metadata_game;
+
+#[path = "metadata/movie.rs"]
+mod metadata_movie;
+
+#[path = "metadata/music.rs"]
+mod metadata_music;
+
+#[path = "metadata/music_video.rs"]
+mod metadata_music_video;
+
+#[path = "metadata/tv.rs"]
+mod metadata_music_tv;
+
 #[derive(Serialize, Deserialize)]
 struct MediaTitleYear {
     title: String,
@@ -17,17 +39,18 @@ struct MediaTitleYear {
 }
 
 pub async fn metadata_identification(pool: &sqlx::PgPool,
+                                     dl_row: sqlx::Row,
                                      guessit_data: MediaTitleYear) {
     let mut metadata_uuid: Uuid;
-    match dl_row["mdq_que_type"] {
+    match dl_row.get("mdq_que_type") {
         mk_lib_common_enum_media_type::DLMediaType::ADULT => {
-            let metadata_uuid = metadata_adult::metadata_adult_lookup(&sqlx_pool,
+            let metadata_uuid = metadata_adult::metadata_adult_lookup(&pool,
                                                                       dl_row,
                                                                       guessit_data);
         }
 
         mk_lib_common_enum_media_type::DLMediaType::ANIME => {
-            let metadata_uuid = metadata_anime::metadata_anime_lookup(&sqlx_pool,
+            let metadata_uuid = metadata_anime::metadata_anime_lookup(&pool,
                                                                       dl_row,
                                                                       guessit_data);
         }
@@ -36,7 +59,7 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
             let metadata_uuid = &sqlx_pool::db_meta_game_by_name_and_system(os.path.basename(
                 os.path.splitext(dl_row["mdq_path"])[0]), lookup_system_id);
             if metadata_uuid == None {
-                let sha1_value = common_hash.com_hash_sha1_c(dl_row["mdq_path"]);
+                let sha1_value = common_hash.com_hash_sha1_c(dl_row.get("mdq_path"));
                 let metadata_uuid = &sqlx_pool::db_meta_game_by_sha1(sha1_value);
             }
         }
@@ -45,7 +68,7 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
             let metadata_uuid = &sqlx_pool::db_meta_game_by_name_and_system(os.path.basename(
                 os.path.splitext(dl_row["mdq_path"])[0]), lookup_system_id);
             if metadata_uuid == None {
-                let sha1_value = common_hash.com_hash_sha1_c(dl_row["mdq_path"]);
+                let sha1_value = common_hash.com_hash_sha1_c(dl_row.get("mdq_path"));
                 let metadata_uuid = &sqlx_pool::db_meta_game_by_sha1(sha1_value);
             }
         }
@@ -54,7 +77,7 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
             let metadata_uuid = &sqlx_pool.db_meta_game_by_name_and_system(os.path.basename(
                 os.path.splitext(dl_row["mdq_path"])[0]), lookup_system_id);
             if metadata_uuid == None {
-                let sha1_hash = common_hash.com_hash_sha1_by_filename(dl_row["mdq_path"]);
+                let sha1_hash = common_hash.com_hash_sha1_by_filename(dl_row.get("mdq_path"));
                 if sha1_hash != None {
                     let metadata_uuid = &sqlx_pool::db_meta_game_by_sha1(sha1_hash);
                 }
@@ -67,7 +90,7 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
         mk_lib_common_enum_media_type::DLMediaType::PUBLICATION_COMIC_STRIP |
         mk_lib_common_enum_media_type::DLMediaType::PUBLICATION_MAGAZINE |
         mk_lib_common_enum_media_type::DLMediaType::PUBLICATION_GRAPHIC_NOVEL => {
-            let metadata_uuid = metadata_periodicals::metadata_periodicals_lookup(&sqlx_pool,
+            let metadata_uuid = metadata_periodicals::metadata_periodicals_lookup(&pool,
                                                                                   dl_row);
         }
 
@@ -76,7 +99,7 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
         mk_lib_common_enum_media_type::DLMediaType::MOVIE_SUBTITLE |
         mk_lib_common_enum_media_type::DLMediaType::MOVIE_THEME |
         mk_lib_common_enum_media_type::DLMediaType::MOVIE_TRAILER => {
-            let metadata_uuid = metadata_movie::metadata_movie_lookup(&sqlx_pool,
+            let metadata_uuid = metadata_movie::metadata_movie_lookup(&pool,
                                                                       dl_row,
                                                                       guessit_data);
         }
@@ -89,17 +112,17 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
         mk_lib_common_enum_media_type::DLMediaType::MUSIC |
         mk_lib_common_enum_media_type::DLMediaType::MUSIC_ALBUM |
         mk_lib_common_enum_media_type::DLMediaType::MUSIC_SONG => {
-            let metadata_uuid = metadata_music::metadata_music_lookup(&sqlx_pool,
+            let metadata_uuid = metadata_music::metadata_music_lookup(&pool,
                                                                       dl_row);
         }
 
         mk_lib_common_enum_media_type::DLMediaType::MUSIC_VIDEO => {
-            let metadata_uuid = metadata_music_video.metadata_music_video_lookup(&sqlx_pool,
+            let metadata_uuid = metadata_music_video.metadata_music_video_lookup(&pool,
                                                                                  dl_row);
         }
 
         mk_lib_common_enum_media_type::DLMediaType::SPORTS => {
-            let metadata_uuid = metadata_sports.metadata_sports_lookup(&sqlx_pool,
+            let metadata_uuid = metadata_sports.metadata_sports_lookup(&pool,
                                                                        dl_row);
         }
 
@@ -110,7 +133,7 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
         mk_lib_common_enum_media_type::DLMediaType::TV_SUBTITLE |
         mk_lib_common_enum_media_type::DLMediaType::TV_THEME |
         mk_lib_common_enum_media_type::DLMediaType::TV_TRAILER => {
-            let metadata_uuid = metadata_tv.metadata_tv_lookup(&sqlx_pool,
+            let metadata_uuid = metadata_tv.metadata_tv_lookup(&pool,
                                                                dl_row,
                                                                guessit_data);
         }
@@ -138,7 +161,7 @@ async def metadata_identification(&sqlx_pool, dl_row, guessit_data):
     #     if metadata_uuid is not None:
     #         &sqlx_pool.db_download_delete(download_que_id)
     #     else:
-    #         metadata_uuid = await metadata_tv.metadata_tv_lookup(&sqlx_pool,
+    #         metadata_uuid = await metadata_tv.metadata_tv_lookup(&pool,
     #                                                        dl_row,
     #                                                        guessit_data)
 
@@ -156,7 +179,7 @@ async def metadata_identification(&sqlx_pool, dl_row, guessit_data):
     #         &sqlx_pool.db_download_delete(download_que_id)
     #     else:
     #         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type="info", message_text= {"stuff": "tv theme ident 5"})
-    #         metadata_uuid = metadata_tv.metadata_tv_lookup(&sqlx_pool,
+    #         metadata_uuid = metadata_tv.metadata_tv_lookup(&pool,
     #                                                        download_que_json,
     #                                                        download_que_id,
     #                                                        guessit_data)
@@ -172,11 +195,11 @@ async def metadata_identification(&sqlx_pool, dl_row, guessit_data):
     #     if metadata_uuid is not None:
     #         &sqlx_pool.db_download_delete(download_que_id)
     #     else:
-    #         metadata_uuid = metadata_tv.metadata_tv_lookup(&sqlx_pool,
+    #         metadata_uuid = metadata_tv.metadata_tv_lookup(&pool,
     #                                                        dl_row,
     #                                                        guessit_data)
     else if dl_row["mdq_que_type"] == common_global.DLMediaType.Game.value {
-        metadata_uuid = await metadata_game.metadata_game_lookup(&sqlx_pool,
+        metadata_uuid = await metadata_game.metadata_game_lookup(&pool,
                                                                  dl_row);
                                                                  }
     else if dl_row["mdq_que_type"] == common_global.DLMediaType.Game_Intro.value {

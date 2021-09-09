@@ -1,5 +1,5 @@
 
-pub async fn metadata_movie_lookup(pool: &sqlx::PgPool, dl_row, file_name) {
+pub async fn metadata_movie_lookup(pool: &sqlx::PgPool, dl_row, guessit_data) {
     // don"t bother checking title/year as the main_server_metadata_api_worker does it already
     if not
     hasattr(metadata_movie_lookup, "metadata_last_id")
@@ -10,9 +10,9 @@ pub async fn metadata_movie_lookup(pool: &sqlx::PgPool, dl_row, file_name) {
         metadata_movie_lookup.metadata_last_tmdb = None;
     }
     let mut metadata_uuid = None;  // so not found checks verify later
-    // determine provider id"s from nfo/xml if they exist
-    nfo_data, xml_data = metadata_nfo_xml.nfo_xml_file(dl_row["mdq_path"]);
-    imdb_id, tmdb_id = metadata_nfo_xml.nfo_xml_id_lookup(nfo_data, xml_data);
+    // determine provider id's from nfo/xml if they exist
+    (nfo_data, xml_data) = metadata_nfo_xml.nfo_xml_file(dl_row.get("mdq_path"));
+    (imdb_id, tmdb_id) = metadata_nfo_xml.nfo_xml_id_lookup(nfo_data, xml_data);
     // if same as last, return last id and save lookup
     if (imdb_id != None && imdb_id == metadata_movie_lookup.metadata_last_imdb)
         || (tmdb_id != None && tmdb_id == metadata_movie_lookup.metadata_last_tmdb) {
@@ -37,19 +37,19 @@ pub async fn metadata_movie_lookup(pool: &sqlx::PgPool, dl_row, file_name) {
             } else {
                 provider_id = imdb_id;
             }
-            dl_meta = db_connection.db_download_que_exists(dl_row["mdq_id"],
+            dl_meta = db_connection.db_download_que_exists(dl_row.get("mdq_id"),
                                                            common_global.DLMediaType.Movie.value,
                                                            "themoviedb",
                                                            provider_id);
             if dl_meta == None {
-                let metadata_uuid = dl_row["mdq_new_uuid"];
+                let metadata_uuid = dl_row.get("mdq_new_uuid");
                 db_connection.db_begin();
-                db_connection.db_download_update(guid = dl_row["mdq_id"],
+                db_connection.db_download_update(guid = dl_row.get("mdq_id"),
                                                  status = "Fetch",
                                                  provider_guid = provider_id);
                 // set provider last so it"s not picked up by the wrong thread too early
                 db_connection.db_download_update_provider("themoviedb",
-                                                          dl_row["mdq_id"]);
+                                                          dl_row.get("mdq_id"));
                 db_connection.db_commit();
             } else {
                 let metadata_uuid = dl_meta;
@@ -68,15 +68,15 @@ pub async fn metadata_movie_lookup(pool: &sqlx::PgPool, dl_row, file_name) {
         }
     }
     if metadata_uuid == None {
-        let metadata_uuid = dl_row["mdq_new_uuid"];
+        let metadata_uuid = dl_row.get("mdq_new_uuid");
         // no matches by name/year on local database
         // search themoviedb since not matched above via DB or nfo/xml
         // save the updated status
         db_connection.db_begin();
-        db_connection.db_download_update(guid = dl_row["mdq_id"],
+        db_connection.db_download_update(guid = dl_row.get("mdq_id"),
                                          status = "Search");
         // set provider last so it"s not picked up by the wrong thread
-        db_connection.db_download_update_provider("themoviedb", dl_row["mdq_id"]);
+        db_connection.db_download_update_provider("themoviedb", dl_row.get("mdq_id"));
         db_connection.db_commit();
     }
     // set last values to negate lookups for same title/show
