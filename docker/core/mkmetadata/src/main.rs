@@ -21,6 +21,9 @@ mod mk_lib_database_metadata_download_queue;
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
 mod mk_lib_database_version;
 #[cfg(debug_assertions)]
+#[path = "../../../../src/mk_lib_hash/src/mk_lib_hash_sha1.rs"]
+mod mk_lib_hash_sha1;
+#[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
 mod mk_lib_logging;
 #[cfg(debug_assertions)]

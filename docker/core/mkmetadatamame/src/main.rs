@@ -74,8 +74,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let option_config_json: Value = serde_json::from_str(
         &mk_lib_database::mk_lib_database_options(&sqlx_pool).await.unwrap()).unwrap();
 
-    let mut update_game = 0;
-    let mut insert_game = 0;
+    let mut update_game: i32 = 0;
+    let mut insert_game: i32 = 0;
 
     // create mame game list
     let file_name = format!("/mediakraken/emulation/mame0{}lx.zip",
@@ -106,9 +106,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //     println!("{:?}", token);
     // }
 
-    //     game_xml = ""
-    //     first_record = true
-    //     old_line = None
+        let game_xml = "";
+        let first_record = true;
+        let old_line = None;
     //     with open("/mediakraken/emulation/mame0%s.xml"
     //               % option_config_json["MAME"]["Version"]) as infile:
     //         for line in infile:
@@ -149,8 +149,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //         ("https://github.com/mamedev/mame/archive/mame0%s.zip"
     //          % option_config_json["MAME"]["Version"]),
     //         file_name)
-    //     total_software = 0
-    //     total_software_update = 0
+        let total_software: i32 = 0;
+        let total_software_update: i32 = 0;
     //     zip_handle = zipfile.ZipFile(file_name, "r")  # issues if u do RB
     //     zip_handle.extractall("/mediakraken/emulation/")
     //     zip_handle.close()
@@ -241,12 +241,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //          option_config_json["MAME"]["Version"]),
     //         file_name)
     //     game_titles = []
-    //     game_desc = ""
-    //     add_to_desc = false
-    //     new_title = None
-    //     total_software = 0
-    //     total_software_update = 0
-    //     system_name = None
+        let mut game_desc = "";
+        let mut add_to_desc = false;
+        let mut new_title = None;
+        let mut total_software: i32 = 0;
+        let mut total_software_update: i32 = 0;
+        let mut system_name = None;
     //     # do this all the time, since could be a new one
     //     with zipfile.ZipFile(file_name, "r") as zf:
     //         zf.extract("history.dat", "/mediakraken/emulation/")
@@ -367,25 +367,25 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //         zf.extract("messinfo.dat", "/mediakraken/emulation/")
     //     infile = open("/mediakraken/emulation/messinfo.dat", "r",
     //                   encoding="utf-8")
-    //     start_system_read = false
-    //     skip_next_line = false
-    //     long_name_next = false
-    //     desc_next = false
-    //     wip_in_progress = false
-    //     romset_in_progress = false
-    //     # store args to sql
-    //     sys_short_name = ""
-    //     sys_longname = None
-    //     sys_manufacturer = None
-    //     sys_year = None
-    //     sys_desc = None
-    //     sys_emulation = None
-    //     sys_color = None
-    //     sys_sound = None
-    //     sys_graphics = None
-    //     sys_save_state = None
-    //     sys_wip = ""
-    //     sys_romset = None
+        let mut start_system_read = false;
+        let mut skip_next_line = false;
+        let mut long_name_next = false;
+        let mut desc_next = false;
+        let mut wip_in_progress = false;
+        let mut romset_in_progress = false;
+        // store args to sql
+        let mut sys_short_name = "";
+        let mut sys_longname = None;
+        let mut sys_manufacturer = None;
+        let mut sys_year = None;
+        let mut sys_desc = None;
+        let mut sys_emulation = None;
+        let mut sys_color = None;
+        let mut sys_sound = None;
+        let mut sys_graphics = None;
+        let mut sys_save_state = None;
+        let mut sys_wip = "";
+        let mut sys_romset = None;
     //
     //     sql_string = ""
     //     while 1:
@@ -430,7 +430,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //                     # sys_wip += line[:-1] + "<BR>"
     //                     pass
     //                 if romset_in_progress and line.find("$end") != 0:
-    //                     # sys_romset += line[:-1] + "<BR>"
+    //                     // sys_romset += line[:-1] + "<BR>"
     //                     pass
     //                 if desc_next:
     //                     sys_desc = line
@@ -452,7 +452,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //                     sys_color = sys_color[:-1]
     //                     sys_sound = sys_sound[:-1]
     //                     sys_graphics = sys_graphics[:-1]
-    //                     # upsert the system
+    //                     // upsert the system
     //                     db_connection.db_meta_game_system_upsert(sys_short_name[:-1],
     //                                                              sys_longname,
     //                                                              sys_desc, sys_year[:-1],
