@@ -1,4 +1,3 @@
-use uuid::Uuid;
 use sqlx::postgres::PgRow;
 
 pub async fn mk_lib_database_option_read(pool: &sqlx::PgPool)

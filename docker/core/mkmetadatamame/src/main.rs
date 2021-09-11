@@ -6,16 +6,22 @@ use std::path::Path;
 use tokio::time::{Duration, sleep};
 
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_compression/src/mk_lib_compression.rs"]
+#[path = "../../../../src/mk_lib_compression/src/mk_lib_compression.rs"]
 mod mk_lib_compression;
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_logging/src/mk_lib_logging.rs"]
+#[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
 mod mk_lib_logging;
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_database/src/mk_lib_database.rs"]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
 mod mk_lib_database;
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_network/src/mk_lib_network.rs"]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
+mod mk_lib_database_version;
+#[cfg(debug_assertions)]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_option_status.rs"]
+mod mk_lib_database_option_status;
+#[cfg(debug_assertions)]
+#[path = "../../../../src/mk_lib_network/src/mk_lib_network.rs"]
 mod mk_lib_network;
 
 #[cfg(not(debug_assertions))]
@@ -27,6 +33,12 @@ mod mk_lib_logging;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
+#[cfg(not(debug_assertions))]
+#[path = "mk_lib_database_option_status.rs"]
+mod mk_lib_database_option_status;
+#[cfg(not(debug_assertions))]
+#[path = "mk_lib_database_version.rs"]
+mod mk_lib_database_version;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_network.rs"]
 mod mk_lib_network;
@@ -63,7 +75,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // start logging
     const LOGGING_INDEX_NAME: &str = "mkmetadatamame";
     mk_lib_logging::mk_logging_post_elk("info",
-                                        "START",
+                                        json!({"START": "START"}),
                                         LOGGING_INDEX_NAME).await;
 
     // open the database
@@ -71,8 +83,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
     mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
                                                            false).await;
-    let option_config_json: Value = serde_json::from_str(
-        &mk_lib_database::mk_lib_database_options(&sqlx_pool).await.unwrap()).unwrap();
+    let option_config_json: Value = mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool).await.unwrap();
 
     let mut update_game: i32 = 0;
     let mut insert_game: i32 = 0;
@@ -85,11 +96,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     {
         mk_lib_network::mk_download_file_from_url(
             (format!("https://github.com/mamedev/mame/releases/download/mame0{}/mame0{}lx.zip",
-                     option_config_json["MAME"]["Version"], option_config_json["MAME"]["Version"])),
-            file_name);
+                     option_config_json["MAME"]["Version"],
+                     option_config_json["MAME"]["Version"])), &file_name);
     }
     let mame_xml: String = mk_lib_compression::mk_decompress_zip(&file_name,
-                                                                 false, false).unwrap();
+                                                                 false,
+                                                                 false).unwrap();
     let doc = match roxmltree::Document::parse(&mame_xml) {
         Ok(doc) => doc,
         Err(e) => {
@@ -106,9 +118,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //     println!("{:?}", token);
     // }
 
-        let game_xml = "";
-        let first_record = true;
-        let old_line = None;
+    let game_xml = "";
+    let first_record = true;
+    let old_line = "";
     //     with open("/mediakraken/emulation/mame0%s.xml"
     //               % option_config_json["MAME"]["Version"]) as infile:
     //         for line in infile:
@@ -149,8 +161,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //         ("https://github.com/mamedev/mame/archive/mame0%s.zip"
     //          % option_config_json["MAME"]["Version"]),
     //         file_name)
-        let total_software: i32 = 0;
-        let total_software_update: i32 = 0;
+    let total_software: i32 = 0;
+    let total_software_update: i32 = 0;
     //     zip_handle = zipfile.ZipFile(file_name, "r")  # issues if u do RB
     //     zip_handle.extractall("/mediakraken/emulation/")
     //     zip_handle.close()
@@ -241,12 +253,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //          option_config_json["MAME"]["Version"]),
     //         file_name)
     //     game_titles = []
-        let mut game_desc = "";
-        let mut add_to_desc = false;
-        let mut new_title = None;
-        let mut total_software: i32 = 0;
-        let mut total_software_update: i32 = 0;
-        let mut system_name = None;
+    let mut game_desc = "";
+    let mut add_to_desc = false;
+    let mut new_title = "";
+    let mut total_software: i32 = 0;
+    let mut total_software_update: i32 = 0;
+    let mut system_name = "";
     //     # do this all the time, since could be a new one
     //     with zipfile.ZipFile(file_name, "r") as zf:
     //         zf.extract("history.dat", "/mediakraken/emulation/")
@@ -367,25 +379,25 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //         zf.extract("messinfo.dat", "/mediakraken/emulation/")
     //     infile = open("/mediakraken/emulation/messinfo.dat", "r",
     //                   encoding="utf-8")
-        let mut start_system_read = false;
-        let mut skip_next_line = false;
-        let mut long_name_next = false;
-        let mut desc_next = false;
-        let mut wip_in_progress = false;
-        let mut romset_in_progress = false;
-        // store args to sql
-        let mut sys_short_name = "";
-        let mut sys_longname = None;
-        let mut sys_manufacturer = None;
-        let mut sys_year = None;
-        let mut sys_desc = None;
-        let mut sys_emulation = None;
-        let mut sys_color = None;
-        let mut sys_sound = None;
-        let mut sys_graphics = None;
-        let mut sys_save_state = None;
-        let mut sys_wip = "";
-        let mut sys_romset = None;
+    let mut start_system_read = false;
+    let mut skip_next_line = false;
+    let mut long_name_next = false;
+    let mut desc_next = false;
+    let mut wip_in_progress = false;
+    let mut romset_in_progress = false;
+    // store args to sql
+    let mut sys_short_name = "";
+    let mut sys_longname = "";
+    let mut sys_manufacturer = "";
+    let mut sys_year: i8 = 0;
+    let mut sys_desc = "";
+    let mut sys_emulation = "";
+    let mut sys_color = "";
+    let mut sys_sound = "";
+    let mut sys_graphics = "";
+    let mut sys_save_state = "";
+    let mut sys_wip = "";
+    let mut sys_romset = "";
     //
     //     sql_string = ""
     //     while 1:
