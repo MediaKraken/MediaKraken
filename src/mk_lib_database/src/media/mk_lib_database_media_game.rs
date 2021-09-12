@@ -1,16 +1,8 @@
+use sqlx::postgres::PgRow;
+use uuid::Uuid;
 
 
 /*
-
-async def db_media_mame_game_list(self, db_connection=None):
-    """
-    Game systems are NULL for MAME
-    """
-    await db_conn.fetch('select gi_id, gi_short_name'
-                        ' from mm_game_info'
-                        ' where gi_system_id is null'
-                        ' and gi_gc_category is null')
-
 
 async def db_media_game_category_update(self, category, game_id, db_connection=None):
     await db_conn.execute('update mm_game_info'

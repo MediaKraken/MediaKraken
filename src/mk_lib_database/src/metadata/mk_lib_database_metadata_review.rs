@@ -1,51 +1,43 @@
+use sqlx::postgres::PgRow;
+use uuid::Uuid;
 
-/*
+pub async fn mk_lib_database_metadata_review_insert(pool: &sqlx::PgPool,
+                                                    metadata_uuid: Uuid,
+                                                    review_json: serde_json::Value)
+                                                    -> Result<(uuid::Uuid), sqlx::Error> {
+    new_guid = Uuid::new_v4();
+    let mut transaction = pool.begin().await?;
+    sqlx::query("insert into mm_review(mm_review_guid, mm_review_metadata_guid, \
+        mm_review_json) values($1, $2, $3)")
+        .bind(new_guid)
+        .bind(metadata_uuid)
+        .bind(review_json)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(new_guid)
+}
 
-async def db_review_list_by_tmdb_guid(self, metadata_id, db_connection=None):
-    """
-    # grab reviews for metadata
-    """
-    # TODO order by release date
-    # TODO order by rating? (optional?)
-    return await db_conn.fetch('select mm_review_guid,'
-                               ' mm_review_json'
-                               ' from mm_review'
-                               ' where mm_review_metadata_id = $1',
-                               str(metadata_id))
+pub async fn mk_lib_database_metadata_review_count(pool: &sqlx::PgPool,
+                                                   metadata_uuid: Uuid)
+                                                   -> Result<(i32), sqlx::Error> {
+    let row: (i32, ) = sqlx::query("select count(*) from mm_review \
+        where mm_review_metadata_guid = $1")
+        .bind(metadata_uuid)
+        .execute(pool)
+        .await?;
+    Ok(row.0)
+}
 
-async def db_review_count(self, metadata_id, db_connection=None):
-    """
-    # count reviews for media
-    """
-    return await db_conn.fetchval('select count(*) from mm_review'
-                                  ' where mm_review_metadata_guid = $1',
-                                  metadata_id)
-
-
-async def db_review_list_by_meta_guid(self, metadata_id, db_connection=None):
-    """
-    # grab reviews for metadata
-    """
-    # TODO order by release date
-    # TODO order by rating? (optional?)
-    return await db_conn.fetch('select mm_review_guid,'
-                               'mm_review_json'
-                               ' from mm_review'
-                               ' where mm_review_metadata_guid = $1',
-                               metadata_id)
-
-
-async def db_review_insert(self, metadata_guid, review_json, db_connection=None):
-    """
-    # insert record
-    """
-    new_guid = uuid.uuid4()
-    await self.db_cursor.execute('insert into mm_review (mm_review_guid,'
-                                 ' mm_review_metadata_guid,'
-                                 ' mm_review_json)'
-                                 ' values ($1,$2,$3)',
-                                 new_guid, metadata_guid, review_json)
-    await self.db_cursor.db_commit()
-    return new_guid
-
- */
+pub async fn mk_lib_database_metadata_by_uuid(pool: &sqlx::PgPool,
+                                              metadata_uuid: Uuid)
+                                              -> Result<Vec<PgRow>, sqlx::Error> {
+    // TODO order by release date
+    // TODO order by rating? (optional?)
+    let rows: Vec<PgRow> = sqlx::query("select mm_review_guid, mm_review_json \
+        from mm_review where mm_review_metadata_guid = $1")
+        .bind(metadata_uuid)
+        .execute(pool)
+        .await?;
+    Ok(rows)
+}

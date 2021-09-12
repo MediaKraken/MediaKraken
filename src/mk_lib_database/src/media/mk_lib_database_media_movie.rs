@@ -1,4 +1,5 @@
-
+use uuid::Uuid;
+use sqlx::postgres::PgRow;
 
 /*
 async def db_media_random(self, db_connection=None):

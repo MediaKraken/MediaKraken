@@ -1,4 +1,5 @@
-
+use uuid::Uuid;
+use sqlx::postgres::PgRow;
 
 /*
 async def db_meta_music_album_by_guid(self, guid, db_connection=None):

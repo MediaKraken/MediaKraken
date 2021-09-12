@@ -1,4 +1,5 @@
-
+use sqlx::postgres::PgRow;
+use uuid::Uuid;
 /*
 def db_user_profile_insert(self, profile_name, profile_json):
     """

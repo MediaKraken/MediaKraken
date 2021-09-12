@@ -1,5 +1,5 @@
-use uuid::Uuid;
 use sqlx::postgres::PgRow;
+use uuid::Uuid;
 
 pub async fn mk_lib_database_media_insert(pool: &sqlx::PgPool,
                                           mm_media_guid: Uuid,
@@ -9,6 +9,7 @@ pub async fn mk_lib_database_media_insert(pool: &sqlx::PgPool,
                                           mm_media_ffprobe_json: serde_json::Value,
                                           mm_media_json: serde_json::Value)
                                           -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_media (mm_media_guid, mm_media_class_enum, \
          mm_media_path, mm_media_metadata_guid, mm_media_ffprobe_json, mm_media_json) \
          values ($1, $2, $3, $4, $5, $6)")
@@ -18,7 +19,8 @@ pub async fn mk_lib_database_media_insert(pool: &sqlx::PgPool,
         .bind(mm_media_metadata_guid)
         .bind(mm_media_ffprobe_json)
         .bind(mm_media_json)
-        .execute(pool)
+        .execute(&mut transaction)
         .await?;
+    transaction.commit().await?;
     Ok(())
 }

@@ -1,4 +1,5 @@
-
+use uuid::Uuid;
+use sqlx::postgres::PgRow;
 /*
 async def db_collection_list(self, offset=None, records=None, search_value=None,
                              db_connection=None):

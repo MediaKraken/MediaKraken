@@ -1,15 +1,17 @@
+use uuid::Uuid;
+use sqlx::postgres::PgRow;
 
+pub async fn mk_lib_database_metadata_book_by_uuid(pool: &sqlx::PgPool, book_uuid: uuid::Uuid)
+                                                   -> Result<Vec<PgRow>, sqlx::Error> {
+    let rows: Vec<PgRow> = sqlx::query("select mm_metadata_book_json from mm_metadata_book \
+        where mm_metadata_book_guid = $1")
+        .bind(book_uuid)
+        .fetch_one(pool)
+        .await?;
+    Ok(rows)
+}
 
 /*
-async def db_meta_periodical_by_uuid(self, book_uuid, db_connection=None):
-    """
-    grab periodical by uuid
-    """
-    return await db_conn.fetchrow('select mm_metadata_book_json'
-                                  ' from mm_metadata_book'
-                                  ' where mm_metadata_book_guid = $1',
-                                  book_uuid)
-
 
 async def db_meta_periodical_list(self, offset=0, records=None, search_value=None,
                                   db_connection=None):

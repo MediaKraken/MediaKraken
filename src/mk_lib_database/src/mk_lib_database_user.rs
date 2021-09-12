@@ -1,3 +1,18 @@
+use sqlx::postgres::PgRow;
+use uuid::Uuid;
+
+pub async fn mk_lib_database_user_read(pool: &sqlx::PgPool,
+                                       offset: i32, limit: i32)
+                                       -> Result<Vec<PgRow>, sqlx::Error> {
+    let rows: Vec<PgRow> = sqlx::query("select id, username, email, created_at, active, \
+         is_admin, lang from mm_user offset $1 limit $2) order by LOWER(username)")
+        .bind(offset)
+        .bind(limit)
+        .fetch_all(pool)
+        .await?;
+    Ok(rows)
+}
+
 /*
 
 async def db_user_count(self, user_name=None, db_connection=None):
@@ -37,22 +52,6 @@ async def db_user_insert(self, user_name, user_email, user_password, db_connecti
         ' current_timestamp)'
         ' returning id',
         user_name, user_email, user_password, user_admin), user_admin, 30
-
-
-async def db_user_list_name(self, offset=0, records=None, db_connection=None):
-    """
-    # return user list
-    """
-    return await db_conn.fetch('select id,'
-                               ' username,'
-                               ' email,'
-                               ' created_at,'
-                               ' active,'
-                               ' is_admin,'
-                               ' lang'
-                               ' from mm_user'
-                               ' offset $1 limit $2) order by LOWER(username)',
-                               offset, records)
 
 
 async def db_user_login(self, user_name, user_password, db_connection=None):

@@ -1,15 +1,17 @@
+use sqlx::postgres::PgRow;
+use uuid::Uuid;
 
-
+pub async fn mk_lib_database_metadata_game_system_by_uuid(pool: &sqlx::PgPool,
+                                                          game_sys_uuid: uuid::Uuid)
+                                                          -> Result<Vec<PgRow>, sqlx::Error> {
+    let rows: Vec<PgRow> = sqlx::query("select * from mm_metadata_game_systems_info \
+        where gs_id = $1")
+        .bind(game_sys_uuid)
+        .fetch_one(pool)
+        .await?;
+    Ok(rows)
+}
 /*
-
-async def db_meta_game_system_by_guid(self, guid, db_connection=None):
-    """
-    # return game system data
-    """
-    return await db_conn.fetchrow('select * from mm_metadata_game_systems_info'
-                                  ' where gs_id = $1',
-                                  guid)
-
 
 async def db_meta_game_system_list_count(self, search_value=None, db_connection=None):
     """

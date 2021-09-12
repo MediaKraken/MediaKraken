@@ -41,15 +41,3 @@ pub async fn mk_lib_database_version_check(pool: &sqlx::PgPool,
     }
     Ok(version_match)
 }
-
-// // cargo test -- --show-output
-// #[cfg(test)]
-// mod test_mk_lib_common {
-//     use super::*;
-//
-//     macro_rules! aw {
-//     ($e:expr) => {
-//         tokio_test::block_on($e)
-//     };
-//   }
-// }

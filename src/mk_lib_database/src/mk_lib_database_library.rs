@@ -36,12 +36,14 @@ pub async fn mk_lib_database_library_path_status_update(pool: &sqlx::PgPool,
                                                         library_uuid: uuid::Uuid,
                                                         library_status_json: serde_json::Value)
                                                         -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
     sqlx::query("update mm_library_dir set mm_media_dir_status = $1 \
         where mm_media_dir_guid = $2")
         .bind(library_status_json)
         .bind(library_uuid)
-        .execute(pool)
+        .execute(&mut transaction)
         .await?;
+    transaction.commit().await?;
     Ok(())
 }
 
@@ -49,11 +51,13 @@ pub async fn mk_lib_database_library_path_status_update(pool: &sqlx::PgPool,
 pub async fn mk_lib_database_library_path_timestamp_update(pool: &sqlx::PgPool,
                                                            library_uuid: uuid::Uuid)
                                                            -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
     sqlx::query("update mm_library_dir set mm_media_dir_last_scanned = NOW() \
         where mm_media_dir_guid = $1")
         .bind(library_uuid)
-        .execute(pool)
+        .execute(&mut transaction)
         .await?;
+    transaction.commit().await?;
     Ok(())
 }
 
@@ -69,15 +73,3 @@ pub async fn mk_lib_database_library_file_exists(pool: &sqlx::PgPool,
         .await?;
     Ok(row.0)
 }
-
-// // cargo test -- --show-output
-// #[cfg(test)]
-// mod test_mk_lib_common {
-//     use super::*;
-//
-//     macro_rules! aw {
-//     ($e:expr) => {
-//         tokio_test::block_on($e)
-//     };
-//   }
-// }

@@ -1,3 +1,4 @@
+use uuid::Uuid;
 use sqlx::postgres::PgRow;
 
 #[allow(dead_code)]
@@ -88,14 +89,6 @@ async def db_meta_person_list_count(self, search_value=None, db_connection=None)
                                       ' where mmp_person_name % $1', search_value)
     else:
         return await db_conn.fetchval('select count(*) from mm_metadata_person')
-
-
-async def db_meta_person_id_count(self, guid, db_connection=None):
-    """
-    # does person exist already by host/id
-    """
-    return await db_conn.fetchval('SELECT EXISTS(SELECT 1 FROM mm_metadata_person'
-                                  ' WHERE mmp_person_media_id = $1 limit 1) limit 1', guid)
 
 
 async def db_meta_person_insert(self, uuid_id, person_name, media_id, person_json,

@@ -1,7 +1,7 @@
-use sqlx::postgres::PgRow;
-use sqlx::types::Json;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
+use sqlx::postgres::PgRow;
+use sqlx::types::Json;
 use std::num::NonZeroU8;
 
 pub async fn mk_lib_database_cron_service_read(pool: &sqlx::PgPool)
@@ -18,11 +18,13 @@ pub async fn mk_lib_database_cron_service_read(pool: &sqlx::PgPool)
 pub async fn mk_lib_database_cron_time_update(pool: &sqlx::PgPool,
                                               cron_uuid: uuid::Uuid)
                                               -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
     sqlx::query("update mm_cron_jobs set mm_cron_last_run = NOW() \
         where mm_cron_guid = $1")
         .bind(cron_uuid)
-        .execute(pool)
+        .execute(&mut transaction)
         .await?;
+    transaction.commit().await?;
     Ok(())
 }
 

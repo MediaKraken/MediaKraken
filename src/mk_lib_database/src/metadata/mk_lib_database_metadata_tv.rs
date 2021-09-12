@@ -1,3 +1,4 @@
+use uuid::Uuid;
 use sqlx::postgres::PgRow;
 
 pub async fn mk_lib_database_metadata_exists_tv(pool: &sqlx::PgPool,

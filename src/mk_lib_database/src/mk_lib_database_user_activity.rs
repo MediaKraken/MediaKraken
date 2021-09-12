@@ -1,4 +1,5 @@
-
+use sqlx::postgres::PgRow;
+use uuid::Uuid;
 
 /*
 async def db_activity_insert(self, activity_name, activity_overview,

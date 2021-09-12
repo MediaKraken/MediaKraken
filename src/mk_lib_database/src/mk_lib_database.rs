@@ -26,15 +26,3 @@ pub async fn mk_lib_database_open_pool() -> Result<sqlx::PgPool, sqlx::Error> {
         .connect(&connection_string).await?;
     Ok(pool)
 }
-
-// // cargo test -- --show-output
-// #[cfg(test)]
-// mod test_mk_lib_common {
-//     use super::*;
-//
-//     macro_rules! aw {
-//     ($e:expr) => {
-//         tokio_test::block_on($e)
-//     };
-//   }
-// }
