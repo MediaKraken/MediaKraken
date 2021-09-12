@@ -1,29 +1,10 @@
 
 
 /*
-import datetime
-import inspect
-
-from common import common_logging_elasticsearch_httpx
-
-
 async def db_media_random(self, db_connection=None):
     """
     Find random movie
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
-    if db_connection is None:
-        db_conn = self.db_connection
-    else:
-        db_conn = db_connection
     return await db_conn.fetchrow('select mm_metadata_guid,'
                                   'mm_media_guid '
                                   'from mm_media,'
@@ -39,19 +20,6 @@ async def db_media_movie_list(self, class_guid, list_type=None, list_genre='all'
     """
     # web media return
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
-    if db_connection is None:
-        db_conn = self.db_connection
-    else:
-        db_conn = db_connection
     if list_genre == 'all':
         if list_type == "recent_addition":
             if not group_collection:
@@ -586,19 +554,6 @@ async def db_media_movie_list_count(self, class_guid, list_type=None,
     """
     # web media count
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
-    if db_connection is None:
-        db_conn = self.db_connection
-    else:
-        db_conn = db_connection
     # messageWords[0]=="movie" or messageWords[0]=='in_progress' or messageWords[0]=='video':
     if list_genre == 'all':
         if list_type == "recent_addition":
@@ -738,19 +693,6 @@ async def db_media_movie_count_by_genre(self, class_guid, db_connection=None):
     """
     # movie count by genre
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
-    if db_connection is None:
-        db_conn = self.db_connection
-    else:
-        db_conn = db_connection
     return await db_conn.fetch(
         'select mm_metadata_json->\'genres\' as gen,'
         ' count(mm_metadata_json->\'genres\') as gen_count'

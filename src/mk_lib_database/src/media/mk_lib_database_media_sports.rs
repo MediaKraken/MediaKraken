@@ -1,11 +1,6 @@
 
 
 /*
-import datetime
-import inspect
-
-from common import common_logging_elasticsearch_httpx
-
 
 async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                search_text=None,
@@ -14,19 +9,6 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
     """
     # sports media return
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
-    if db_connection is None:
-        db_conn = self.db_connection
-    else:
-        db_conn = db_connection
     # messageWords[0]=="movie" or messageWords[0]=='in_progress' or messageWords[0]=='video':
     if list_genre == 'All':
         if list_type == "recent_addition":
@@ -508,19 +490,6 @@ async def db_media_sports_list_count(self, class_guid, list_type=None,
     """
     # sports media count
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
-    if db_connection is None:
-        db_conn = self.db_connection
-    else:
-        db_conn = db_connection
     # messageWords[0]=="movie" or messageWords[0]=='in_progress' or messageWords[0]=='video':
     if list_genre == 'All':
         if list_type == "recent_addition":

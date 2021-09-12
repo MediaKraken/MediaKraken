@@ -12,29 +12,11 @@ pub async fn mk_lib_database_metadata_exists_movie(pool: &sqlx::PgPool,
 }
 
 /*
-import inspect
-import json
-
-from common import common_logging_elasticsearch_httpx
-
 
 async def db_meta_movie_by_media_uuid(self, media_guid, db_connection=None):
     """
     # read in metadata via media id
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
-    if db_connection is None:
-        db_conn = self.db_connection
-    else:
-        db_conn = db_connection
     return await db_conn.fetchrow('select mm_metadata_json,'
                                   ' mm_metadata_localimage_json'
                                   ' from mm_media, mm_metadata_movie'
@@ -46,19 +28,6 @@ async def db_meta_movie_detail(self, media_guid, db_connection=None):
     """
     # read in the media with corresponding metadata
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
-    if db_connection is None:
-        db_conn = self.db_connection
-    else:
-        db_conn = db_connection
     return await db_conn.fetchrow('select mm_metadata_guid,'
                                   ' mm_metadata_media_id,'
                                   ' mm_metadata_name,'
@@ -74,19 +43,6 @@ async def db_meta_movie_list(self, offset=0, records=None, search_value=None, db
     """
     # return list of movies
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
-    if db_connection is None:
-        db_conn = self.db_connection
-    else:
-        db_conn = db_connection
     if search_value is not None:
         return await db_conn.fetch('select mm_metadata_guid, mm_metadata_name,'
                                    ' mm_metadata_json->\'release_date\' as mm_date,'
@@ -115,19 +71,6 @@ async def db_meta_movie_list(self, offset=0, records=None, search_value=None, db
 
 
 async def db_meta_movie_count(self, search_value=None, db_connection=None):
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
-    if db_connection is None:
-        db_conn = self.db_connection
-    else:
-        db_conn = db_connection
     if search_value is not None:
         return await db_conn.fetchval('select count(*) from mm_metadata_movie '
                                       ' where mm_metadata_name % $1',
@@ -141,19 +84,6 @@ async def db_meta_movie_status_update(self, metadata_guid, user_id, status_text,
     """
     # set status's for metadata
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
-    if db_connection is None:
-        db_conn = self.db_connection
-    else:
-        db_conn = db_connection
     # do before the select to save db lock time
     if status_text == 'watched' or status_text == 'requested':
         status_setting = True
@@ -182,19 +112,6 @@ async def db_meta_movie_json_update(self, media_guid, metadata_json, db_connecti
     """
     # update the metadata json
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
-    if db_connection is None:
-        db_conn = self.db_connection
-    else:
-        db_conn = db_connection
     await db_conn.execute('update mm_metadata_movie'
                           ' set mm_metadata_user_json = $1'
                           ' where mm_metadata_guid = $2',
@@ -206,19 +123,6 @@ async def db_meta_movie_guid_count(self, guid, db_connection=None):
     """
     # does movie exist already by metadata id
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
-    if db_connection is None:
-        db_conn = self.db_connection
-    else:
-        db_conn = db_connection
     return await db_conn.fetchval('select exists(select 1 from mm_metadata_movie'
                                   ' where mm_metadata_guid = $1 limit 1) limit 1', guid)
 
@@ -227,19 +131,6 @@ async def db_meta_movie_count_by_id(self, guid, db_connection=None):
     """
     # does movie exist already by provider id
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
-    if db_connection is None:
-        db_conn = self.db_connection
-    else:
-        db_conn = db_connection
     return await db_conn.fetchval('select exists(select 1 from mm_metadata_movie'
                                   ' where mm_metadata_media_id = $1 limit 1) limit 1', guid)
 
