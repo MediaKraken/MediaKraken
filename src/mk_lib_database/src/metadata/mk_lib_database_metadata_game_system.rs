@@ -11,46 +11,56 @@ pub async fn mk_lib_database_metadata_game_system_by_uuid(pool: &sqlx::PgPool,
         .await?;
     Ok(rows)
 }
+
+pub async fn mk_lib_database_metadata_game_system_count(pool: &sqlx::PgPool,
+                                                  search_value: String)
+                                                  -> Result<(i32), sqlx::Error> {
+    if search_value != "" {
+        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_game_systems_info \
+            where gs_game_system_name % $1")
+            .bind(search_value)
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    } else {
+        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_game_systems_info")
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    }
+}
+
+pub async fn mk_lib_database_metadata_game_system_read(pool: &sqlx::PgPool,
+                                                 search_value: String,
+                                                 offset: i32, limit: i32)
+                                                 -> Result<Vec<PgRow>, sqlx::Error> {
+    // TODO might need to sort by release year as well for machines with multiple releases
+    if search_value != "" {
+        let rows = sqlx::query("select gs_id,gs_game_system_name, \
+            gs_game_system_json->\'description\', gs_game_system_json->\'year\', \
+            gs_game_system_alias from mm_metadata_game_systems_info \
+            where gs_game_system_name % $1 \
+            order by gs_game_system_json->\'description\' \
+            offset $2 limit $2")
+            .bind(search_value)
+            .bind(offset)
+            .bind(limit)
+            .fetch_all(pool)
+            .await?;
+        Ok(rows)
+    } else {
+        let rows = sqlx::query("select gs_id,gs_game_system_name, \
+            gs_game_system_json->\'description\', gs_game_system_json->\'year\', \
+            gs_game_system_alias from mm_metadata_game_systems_info \
+            order by gs_game_system_json->\'description\' offset $1 limit $2")
+            .bind(offset)
+            .bind(limit)
+            .fetch_all(pool)
+            .await?;
+        Ok(rows)
+    }
+}
 /*
-
-async def db_meta_game_system_list_count(self, search_value=None, db_connection=None):
-    """
-    Return game system count
-    """
-    if search_value is not None:
-        return await db_conn.fetchval(
-            'select count(*) from mm_metadata_game_systems_info'
-            ' where gs_game_system_name % $1', search_value)
-    else:
-        return await db_conn.fetchval(
-            'select count(*) from mm_metadata_game_systems_info')
-
-
-async def db_meta_game_system_list(self, offset=0, records=None, search_value=None,
-                                   db_connection=None):
-    """
-    # return list of game systems
-    """
-    # TODO might need to sort by release year as well for machines with multiple releases
-    if search_value is not None:
-        return await db_conn.fetch('select gs_id,gs_game_system_name,'
-                                   'gs_game_system_json->\'description\','
-                                   'gs_game_system_json->\'year\','
-                                   'gs_game_system_alias'
-                                   ' from mm_metadata_game_systems_info'
-                                   ' where gs_game_system_name % $1'
-                                   ' order by gs_game_system_json->\'description\''
-                                   ' offset $2 limit $2',
-                                   search_value, offset, records)
-    else:
-        return await db_conn.fetch('select gs_id,gs_game_system_name,'
-                                   'gs_game_system_json->\'description\','
-                                   'gs_game_system_json->\'year\','
-                                   'gs_game_system_alias'
-                                   ' from mm_metadata_game_systems_info'
-                                   ' order by gs_game_system_json->\'description\''
-                                   ' offset $1 limit $2',
-                                   offset, records)
 
 def db_meta_games_system_insert(self, platform_name,
                                 platform_alias, platform_json=None):

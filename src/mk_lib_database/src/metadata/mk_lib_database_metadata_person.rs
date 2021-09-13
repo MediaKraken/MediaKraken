@@ -1,5 +1,5 @@
-use uuid::Uuid;
 use sqlx::postgres::PgRow;
+use uuid::Uuid;
 
 #[allow(dead_code)]
 pub async fn mk_lib_database_metadata_exists_person(pool: &sqlx::PgPool,
@@ -11,6 +11,53 @@ pub async fn mk_lib_database_metadata_exists_person(pool: &sqlx::PgPool,
         .fetch_one(pool)
         .await?;
     Ok(row.0)
+}
+
+pub async fn mk_lib_database_metadata_person_count(pool: &sqlx::PgPool,
+                                                   search_value: String)
+                                                   -> Result<(i32), sqlx::Error> {
+    if search_value != "" {
+        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_person \
+            where mmp_person_name % $1")
+            .bind(search_value)
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    } else {
+        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_person")
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    }
+}
+
+pub async fn mk_lib_database_metadata_person_read(pool: &sqlx::PgPool,
+                                                 search_value: String,
+                                                 offset: i32, limit: i32)
+                                                 -> Result<Vec<PgRow>, sqlx::Error> {
+    // TODO order by birth date
+    if search_value != "" {
+        let rows = sqlx::query("select mmp_id,mmp_person_name, mmp_person_image, \
+            mmp_person_meta_json->\'profile_path\' as mmp_meta \
+            from mm_metadata_person where mmp_person_name % $1 \
+            order by LOWER(mmp_person_name) offset $2 limit $3")
+            .bind(search_value)
+            .bind(offset)
+            .bind(limit)
+            .fetch_all(pool)
+            .await?;
+        Ok(rows)
+    } else {
+        let rows = sqlx::query("select mmp_id,mmp_person_name, mmp_person_image, \
+            mmp_person_meta_json->\'profile_path\' as mmp_meta \
+            from mm_metadata_person order by LOWER(mmp_person_name) \
+            offset $1 limit $2")
+            .bind(offset)
+            .bind(limit)
+            .fetch_all(pool)
+            .await?;
+        Ok(rows)
+    }
 }
 
 /*
@@ -56,39 +103,6 @@ async def db_meta_person_by_guid(self, guid, db_connection=None):
                                   ' mmp_person_meta_json->\'profile_path\' as mmp_meta'
                                   ' from mm_metadata_person where mmp_id = $1',
                                   guid)
-
-
-async def db_meta_person_list(self, offset=0, records=None, search_value=None, db_connection=None):
-    """
-    # return list of people
-    """
-    # TODO order by birth date
-    if search_value is not None:
-        return await db_conn.fetch('select mmp_id,mmp_person_name,'
-                                   ' mmp_person_image,'
-                                   ' mmp_person_meta_json->\'profile_path\' as mmp_meta'
-                                   ' from mm_metadata_person where mmp_person_name % $1'
-                                   ' order by LOWER(mmp_person_name) offset $2 limit $3',
-                                   search_value, offset, records)
-    else:
-        return await db_conn.fetch('select mmp_id,mmp_person_name,'
-                                   ' mmp_person_image,'
-                                   ' mmp_person_meta_json->\'profile_path\' as mmp_meta'
-                                   ' from mm_metadata_person'
-                                   ' order by LOWER(mmp_person_name)'
-                                   ' offset $1 limit $2',
-                                   offset, records)
-
-
-async def db_meta_person_list_count(self, search_value=None, db_connection=None):
-    """
-    # count person metadata
-    """
-    if search_value is not None:
-        return await db_conn.fetchval('select count(*) from mm_metadata_person'
-                                      ' where mmp_person_name % $1', search_value)
-    else:
-        return await db_conn.fetchval('select count(*) from mm_metadata_person')
 
 
 async def db_meta_person_insert(self, uuid_id, person_name, media_id, person_json,

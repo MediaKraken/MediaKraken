@@ -1,64 +1,55 @@
 use uuid::Uuid;
 use sqlx::postgres::PgRow;
+
+pub async fn mk_lib_database_metadata_collections_count(pool: &sqlx::PgPool,
+                                                  search_value: String)
+                                                  -> Result<(i32), sqlx::Error> {
+    if search_value != "" {
+        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_collection \
+            where mm_metadata_collection_name = $1")
+            .bind(search_value)
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    } else {
+        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_collection")
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    }
+}
+
+pub async fn mk_lib_database_metadata_collection_read(pool: &sqlx::PgPool,
+                                                 search_value: String,
+                                                 offset: i32, limit: i32)
+                                                 -> Result<Vec<PgRow>, sqlx::Error> {
+    if search_value != "" {
+        let rows = sqlx::query("select mm_metadata_collection_guid, mm_metadata_collection_name, \
+            mm_metadata_collection_imagelocal_json from mm_metadata_collection \
+            where mm_metadata_collection_guid in (select mm_metadata_collection_guid \
+            from mm_metadata_collection where mm_metadata_collection_name % $1 \
+            order by mm_metadata_collection_name \
+            offset $2 limit $3) order by mm_metadata_collection_name")
+            .bind(search_value)
+            .bind(offset)
+            .bind(limit)
+            .fetch_all(pool)
+            .await?;
+        Ok(rows)
+    } else {
+        let rows = sqlx::query("select mm_metadata_collection_guid, mm_metadata_collection_name, \
+            mm_metadata_collection_imagelocal_json from mm_metadata_collection \
+            where mm_metadata_collection_guid in (select mm_metadata_collection_guid \
+            from mm_metadata_collection order by mm_metadata_collection_name \
+            offset $1 limit $2) order by mm_metadata_collection_name")
+            .bind(offset)
+            .bind(limit)
+            .fetch_all(pool)
+            .await?;
+        Ok(rows)
+    }
+}
 /*
-async def db_collection_list(self, offset=None, records=None, search_value=None,
-                             db_connection=None):
-    """
-    Return collections list from the database
-    """
-    if offset is None:
-        if search_value is not None:
-            return await db_conn.fetch('select mm_metadata_collection_guid,'
-                                       ' mm_metadata_collection_name,'
-                                       ' mm_metadata_collection_imagelocal_json'
-                                       ' from mm_metadata_collection'
-                                       ' where mm_metadata_collection_name % $1'
-                                       ' order by mm_metadata_collection_name',
-                                       search_value)
-        else:
-            return await db_conn.fetch('select mm_metadata_collection_guid,'
-                                       ' mm_metadata_collection_name,'
-                                       ' mm_metadata_collection_imagelocal_json'
-                                       ' from mm_metadata_collection'
-                                       ' order by mm_metadata_collection_name')
-    else:
-        if search_value is not None:
-            return await db_conn.fetch('select mm_metadata_collection_guid,'
-                                       ' mm_metadata_collection_name,'
-                                       ' mm_metadata_collection_imagelocal_json'
-                                       ' from mm_metadata_collection'
-                                       ' where mm_metadata_collection_guid'
-                                       ' in (select mm_metadata_collection_guid'
-                                       ' from mm_metadata_collection'
-                                       ' where mm_metadata_collection_name % $1'
-                                       ' order by mm_metadata_collection_name'
-                                       ' offset $2 limit $3)'
-                                       ' order by mm_metadata_collection_name',
-                                       search_value, offset, records)
-        else:
-            return await db_conn.fetch('select mm_metadata_collection_guid,'
-                                       ' mm_metadata_collection_name,'
-                                       ' mm_metadata_collection_imagelocal_json'
-                                       ' from mm_metadata_collection'
-                                       ' where mm_metadata_collection_guid'
-                                       ' in (select mm_metadata_collection_guid'
-                                       ' from mm_metadata_collection'
-                                       ' order by mm_metadata_collection_name'
-                                       ' offset $1 limit $2) '
-                                       'order by mm_metadata_collection_name',
-                                       offset, records)
-
-
-async def db_collection_list_count(self, search_value=None, db_connection=None):
-    if search_value is not None:
-        return await db_conn.fetchval('select count(*)'
-                                      ' from mm_metadata_collection'
-                                      ' where mm_metadata_collection_name = $1',
-                                      search_value)
-    else:
-        return await db_conn.fetchval('select count(*)'
-                                      ' from mm_metadata_collection')
-
 
 async def db_collection_read_by_guid(self, media_uuid, db_connection=None):
     """

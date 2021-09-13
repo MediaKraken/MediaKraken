@@ -31,53 +31,70 @@ pub async fn mk_lib_database_metadata_game_by_blake3(pool: &sqlx::PgPool, blake3
     Ok(rows)
 }
 
+// pub async fn mk_lib_database_metadata_game_read(pool: &sqlx::PgPool,
+//                                                 offset: i32, limit: i32)
+//                                                 -> Result<Vec<PgRow>, sqlx::Error> {
+//     let rows: Vec<PgRow> = sqlx::query("select gi_id, gi_game_info_short_name \
+//         from mm_metadata_game_software_info \
+//         where gi_system_id is null and gi_gc_category is null \
+//         order by gi_short_name offset $1 limit $2")
+//         .bind(offset)
+//         .bind(limit)
+//         .fetch_all(pool)
+//         .await?;
+//     Ok(rows)
+// }
+
+pub async fn mk_lib_database_metadata_game_count(pool: &sqlx::PgPool,
+                                                 search_value: String)
+                                                 -> Result<(i32), sqlx::Error> {
+    if search_value != "" {
+        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_game_software_info \
+            where gi_game_info_name %% %s")
+            .bind(search_value)
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    } else {
+        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_game_software_info")
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    }
+}
+
 pub async fn mk_lib_database_metadata_game_read(pool: &sqlx::PgPool,
-                                                offset: i32, limit: i32)
-                                                -> Result<Vec<PgRow>, sqlx::Error> {
-    let rows: Vec<PgRow> = sqlx::query("select gi_id, gi_game_info_short_name \
-        from mm_metadata_game_software_info \
-        where gi_system_id is null and gi_gc_category is null \
-        order by gi_short_name offset $1 limit $2")
-        .bind(offset)
-        .bind(limit)
-        .fetch_all(pool)
-        .await?;
-    Ok(rows)
+                                                 search_value: String,
+                                                 offset: i32, limit: i32)
+                                                 -> Result<Vec<PgRow>, sqlx::Error> {
+    if search_value != "" {
+        let rows = sqlx::query("select gi_id,gi_game_info_short_name, gi_game_info_name, \
+             gi_game_info_json->\"year\", gs_game_system_json->\"description\" \
+             from mm_metadata_game_software_info, mm_metadata_game_systems_info \
+             where gi_system_id = gs_id  and gi_game_info_name % $1 \
+             order by gi_game_info_name, gi_game_info_json->\"year\" \
+             offset $2 limit $3")
+            .bind(search_value)
+            .bind(offset)
+            .bind(limit)
+            .fetch_all(pool)
+            .await?;
+        Ok(rows)
+    } else {
+        let rows = sqlx::query("select gi_id,gi_game_info_short_name, gi_game_info_name, \
+            gi_game_info_json->\"year\", gs_game_system_json->\"description\" \
+            from mm_metadata_game_software_info, mm_metadata_game_systems_info \
+            where gi_system_id = gs_id order by gi_game_info_name, gi_game_info_json->\"year\" \
+            offset $1 limit $2")
+            .bind(offset)
+            .bind(limit)
+            .fetch_all(pool)
+            .await?;
+        Ok(rows)
+    }
 }
 
 /*
-
-async def db_meta_game_list(self, offset=0, records=None, search_value=None, db_connection=None):
-    """
-    # return list of games
-    """
-    if search_value is not None:
-        return await db_conn.fetch("select gi_id,gi_game_info_short_name,"
-                                   " gi_game_info_name,"
-                                   " gi_game_info_json->\"year\","
-                                   " gs_game_system_json->\"description\""
-                                   " from mm_metadata_game_software_info,"
-                                   " mm_metadata_game_systems_info"
-                                   " where gi_system_id = gs_id"
-                                   " and gi_game_info_name % $1"
-                                   " order by gi_game_info_name,"
-                                   " gi_game_info_json->\"year\""
-                                   " offset $2 limit $3",
-                                   search_value,
-                                   offset, records)
-    else:
-        return await db_conn.fetch("select gi_id,gi_game_info_short_name,"
-                                   " gi_game_info_name,"
-                                   " gi_game_info_json->\"year\","
-                                   " gs_game_system_json->\"description\""
-                                   " from mm_metadata_game_software_info,"
-                                   " mm_metadata_game_systems_info"
-                                   " where gi_system_id = gs_id"
-                                   " order by gi_game_info_name,"
-                                   " gi_game_info_json->\"year\""
-                                   " offset $1 limit $2",
-                                   offset, records)
-
 
 async def db_meta_game_insert(self, game_system_id, game_short_name, game_name, game_json,
                               db_connection=None):
@@ -128,19 +145,6 @@ async def db_meta_game_update_by_guid(self, game_id, game_json, db_connection=No
                           " set gi_game_info_json = $1"
                           " where gi_system_id = $2",
                           game_json, game_id)
-
-
-def db_meta_game_list_count(self, search_value=None):
-    """
-    # return list of games count
-    """
-    if search_value is not None:
-        self.db_cursor.execute("select count(*) from mm_metadata_game_software_info"
-                               " where gi_game_info_name %% %s", (search_value,))
-    else:
-        self.db_cursor.execute(
-            "select count(*) from mm_metadata_game_software_info")
-    return self.db_cursor.fetchone()[0]
 
 
 def db_meta_game_by_system_count(self, guid):

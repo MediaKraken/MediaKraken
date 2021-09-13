@@ -1,5 +1,57 @@
-use uuid::Uuid;
 use sqlx::postgres::PgRow;
+use uuid::Uuid;
+
+pub async fn mk_lib_database_metadata_sports_count(pool: &sqlx::PgPool,
+                                                   search_value: String)
+                                                   -> Result<(i32), sqlx::Error> {
+    if search_value != "" {
+        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_sports \
+            where mm_metadata_sports_name % $1")
+            .bind(search_value)
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    } else {
+        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_sports")
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    }
+}
+
+pub async fn mk_lib_database_metadata_sports_read(pool: &sqlx::PgPool,
+                                                 search_value: String,
+                                                 offset: i32, limit: i32)
+                                                 -> Result<Vec<PgRow>, sqlx::Error> {
+    // TODO order by year
+    if search_value != "" {
+        let rows = sqlx::query("select mm_metadata_sports_guid, mm_metadata_sports_name \
+            from mm_metadata_sports where mm_metadata_sports_guid \
+            in (select mm_metadata_sports_guid from mm_metadata_sports \
+            where mm_metadata_sports_name % $1 \
+            order by LOWER(mm_metadata_sports_name) \
+            offset $2 limit $3) \
+            order by LOWER(mm_metadata_sports_name)")
+            .bind(search_value)
+            .bind(offset)
+            .bind(limit)
+            .fetch_all(pool)
+            .await?;
+        Ok(rows)
+    } else {
+        let rows = sqlx::query("select mm_metadata_sports_guid, mm_metadata_sports_name \
+            from mm_metadata_sports where mm_metadata_sports_guid \
+            in (select mm_metadata_sports_guid from mm_metadata_sports \
+            order by LOWER(mm_metadata_sports_name) \
+            offset $1 limit $2) \
+            order by LOWER(mm_metadata_sports_name)")
+            .bind(offset)
+            .bind(limit)
+            .fetch_all(pool)
+            .await?;
+        Ok(rows)
+    }
+}
 
 /*
 
@@ -12,48 +64,6 @@ async def db_meta_sports_guid_by_thesportsdb(self, thesports_uuid, db_connection
                                   ' where mm_metadata_media_sports_id->\'thesportsdb\''
                                   ' ? $1',
                                   thesports_uuid)
-
-
-async def db_meta_sports_list(self, offset=0, records=None, search_value=None, db_connection=None):
-    """
-    # return list of sporting events
-    # TODO order by year
-    """
-    if search_value is not None:
-        return await db_conn.fetch('select mm_metadata_sports_guid,'
-                                   ' mm_metadata_sports_name'
-                                   ' from mm_metadata_sports'
-                                   ' where mm_metadata_sports_guid'
-                                   ' in (select mm_metadata_sports_guid'
-                                   ' from mm_metadata_sports'
-                                   ' where mm_metadata_sports_name % $1'
-                                   ' order by LOWER(mm_metadata_sports_name)'
-                                   ' offset $2 limit $3)'
-                                   ' order by LOWER(mm_metadata_sports_name)',
-                                   search_value, offset, records)
-    else:
-        return await db_conn.fetch('select mm_metadata_sports_guid,'
-                                   ' mm_metadata_sports_name'
-                                   ' from mm_metadata_sports'
-                                   ' where mm_metadata_sports_guid'
-                                   ' in (select mm_metadata_sports_guid'
-                                   ' from mm_metadata_sports'
-                                   ' order by LOWER(mm_metadata_sports_name)'
-                                   ' offset $1 limit $2)'
-                                   ' order by LOWER(mm_metadata_sports_name)',
-                                   offset, records)
-
-
-async def db_meta_sports_list_count(self, search_value=None, db_connection=None):
-    """
-    Count sport events
-    """
-    if search_value is not None:
-        return await db_conn.fetchval('select count(*) from mm_metadata_sports'
-                                      ' where mm_metadata_sports_name % $1',
-                                      search_value)
-    else:
-        return await db_conn.fetchval('select count(*) from mm_metadata_sports')
 
 
 def db_meta_sports_guid_by_event_name(self, event_name):

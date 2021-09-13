@@ -46,6 +46,24 @@ pub async fn mk_lib_database_metadata_movie_read(pool: &sqlx::PgPool,
     }
 }
 
+pub async fn mk_lib_database_metadata_movie_count(pool: &sqlx::PgPool,
+                                                  search_value: String)
+                                                  -> Result<(i32), sqlx::Error> {
+    if search_value != "" {
+        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_movie \
+            where mm_metadata_name % $1")
+            .bind(search_value)
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    } else {
+        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_movie")
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    }
+}
+
 /*
 
 async def db_meta_movie_by_media_uuid(self, media_guid, db_connection=None):
@@ -72,14 +90,6 @@ async def db_meta_movie_detail(self, media_guid, db_connection=None):
                                   ' from mm_metadata_movie'
                                   ' where mm_metadata_guid = $1',
                                   media_guid)
-
-async def db_meta_movie_count(self, search_value=None, db_connection=None):
-    if search_value is not None:
-        return await db_conn.fetchval('select count(*) from mm_metadata_movie '
-                                      ' where mm_metadata_name % $1',
-                                      search_value)
-    else:
-        return await db_conn.fetchval('select count(*) from mm_metadata_movie')
 
 
 async def db_meta_movie_status_update(self, metadata_guid, user_id, status_text,

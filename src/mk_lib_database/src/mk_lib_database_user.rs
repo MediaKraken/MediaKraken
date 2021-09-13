@@ -24,8 +24,7 @@ async def db_user_count(self, user_name=None, db_connection=None):
 
 
 async def db_user_delete(self, user_guid, db_connection=None):
-    await db_conn.execute('delete from mm_user'
-                          ' where id = $1', user_guid)
+    await db_conn.execute('delete from mm_user where id = $1', user_guid)
 
 
 async def db_user_detail(self, guid, db_connection=None):
@@ -71,20 +70,6 @@ async def db_user_login(self, user_name, user_password, db_connection=None):
     return 'invalid_password', None, None
 
 
-async def db_user_group_insert(self, group_name, group_desc, group_rights_json,
-                               db_connection=None):
-    """
-    insert user group
-    """
-    new_user_group_id = uuid.uuid4()
-    await db_conn.execute('insert into mm_user_group (mm_user_group_guid,'
-                          ' mm_user_group_name,'
-                          ' mm_user_group_description,'
-                          ' mm_user_group_rights_json)'
-                          ' values ($1,$2,$3,$4)',
-                          new_user_group_id, group_name,
-                          group_desc, group_rights_json)
-    await db_conn.execute('commit')
-    return new_user_group_id
+
 
  */

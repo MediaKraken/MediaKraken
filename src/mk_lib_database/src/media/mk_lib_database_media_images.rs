@@ -12,7 +12,7 @@ pub async fn mk_lib_database_metadata_image_count(pool: &sqlx::PgPool,
     Ok(row.0)
 }
 
-pub async fn mk_lib_database_metadata_image_list(pool: &sqlx::PgPool,
+pub async fn mk_lib_database_metadata_image_read(pool: &sqlx::PgPool,
                                                  class_id: i32, offset: i32, limit: i32)
                                                  -> Result<i32, sqlx::Error> {
     let rows: (i32, ) = sqlx::query_as("select mm_media_path from mm_media \
