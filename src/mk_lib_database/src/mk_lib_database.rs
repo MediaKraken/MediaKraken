@@ -26,3 +26,14 @@ pub async fn mk_lib_database_open_pool() -> Result<sqlx::PgPool, sqlx::Error> {
         .connect(&connection_string).await?;
     Ok(pool)
 }
+
+/*
+async def db_table_index_check(self, resource_name, db_connection=None):
+    """
+    # check for table or index
+    """
+    # TODO little bobby tables
+    await self.db_cursor.execute('SELECT to_regclass(\'public.$1\')', resource_name)
+    return await self.db_cursor.fetchval()
+
+ */

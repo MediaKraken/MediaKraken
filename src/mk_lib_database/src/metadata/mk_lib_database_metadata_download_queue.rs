@@ -87,3 +87,18 @@ pub async fn mk_lib_database_metadata_download_queue_insert(pool: &sqlx::PgPool,
     transaction.commit().await?;
     Ok(())
 }
+
+/*
+async def db_download_status_update(self, guid, status, provider_guid=None, db_connection=None):
+    """
+    Update download que record
+    """
+    if provider_guid is not None:
+        await db_conn.execute('update mm_download_que set mdq_status = $1,'
+                              ' mdq_provider_id = $2'
+                              ' where mdq_id = $3',
+                              status, provider_guid, guid)
+    else:
+        await db_conn.execute('update mm_download_que set mdq_status = $1'
+                              ' where mdq_id = $2', status, guid)
+*/
