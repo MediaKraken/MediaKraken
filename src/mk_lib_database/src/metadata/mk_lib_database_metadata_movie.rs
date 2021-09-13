@@ -12,6 +12,40 @@ pub async fn mk_lib_database_metadata_exists_movie(pool: &sqlx::PgPool,
     Ok(row.0)
 }
 
+pub async fn mk_lib_database_metadata_movie_read(pool: &sqlx::PgPool,
+                                                 search_value: String,
+                                                 offset: i32, limit: i32)
+                                                 -> Result<Vec<PgRow>, sqlx::Error> {
+    if search_value != "" {
+        let rows = sqlx::query("select mm_metadata_guid, mm_metadata_name, \
+             mm_metadata_json->\'release_date\' as mm_date, \
+             mm_metadata_localimage_json->\'Poster\' as mm_poster, \
+             mm_metadata_user_json \
+             from mm_metadata_movie \
+             where mm_metadata_name % $1 \
+             order by mm_metadata_name, mm_date offset $2 limit $3)")
+            .bind(search_value)
+            .bind(offset)
+            .bind(limit)
+            .fetch_all(pool)
+            .await?;
+        Ok(rows)
+    } else {
+        let rows = sqlx::query("select mm_metadata_guid, mm_metadata_name, \
+            mm_metadata_json->\'release_date\' as mm_date, \
+            mm_metadata_localimage_json->\'Poster\' as mm_poster, \
+            mm_metadata_user_json \
+            from mm_metadata_movie \
+            order by mm_metadata_name, mm_date \
+            offset $1 limit $2)")
+            .bind(offset)
+            .bind(limit)
+            .fetch_all(pool)
+            .await?;
+        Ok(rows)
+    }
+}
+
 /*
 
 async def db_meta_movie_by_media_uuid(self, media_guid, db_connection=None):
@@ -38,38 +72,6 @@ async def db_meta_movie_detail(self, media_guid, db_connection=None):
                                   ' from mm_metadata_movie'
                                   ' where mm_metadata_guid = $1',
                                   media_guid)
-
-
-async def db_meta_movie_list(self, offset=0, records=None, search_value=None, db_connection=None):
-    """
-    # return list of movies
-    """
-    if search_value is not None:
-        return await db_conn.fetch('select mm_metadata_guid, mm_metadata_name,'
-                                   ' mm_metadata_json->\'release_date\' as mm_date,'
-                                   ' mm_metadata_localimage_json->\'Poster\''
-                                   ' as mm_poster,'
-                                   ' mm_metadata_user_json'
-                                   ' from mm_metadata_movie where mm_metadata_guid'
-                                   ' in (select mm_metadata_guid'
-                                   ' from mm_metadata_movie where mm_metadata_name % $1'
-                                   ' order by mm_metadata_name offset $2 limit $3)'
-                                   ' order by mm_metadata_name, mm_date',
-                                   search_value, offset, records)
-    else:
-        return await db_conn.fetch('select mm_metadata_guid, mm_metadata_name,'
-                                   ' mm_metadata_json->\'release_date\' as mm_date,'
-                                   ' mm_metadata_localimage_json->\'Poster\''
-                                   ' as mm_poster,'
-                                   ' mm_metadata_user_json'
-                                   ' from mm_metadata_movie where mm_metadata_guid'
-                                   ' in (select mm_metadata_guid'
-                                   ' from mm_metadata_movie'
-                                   ' order by mm_metadata_name offset'
-                                   ' $1 limit $2)'
-                                   ' order by mm_metadata_name, mm_date',
-                                   offset, records)
-
 
 async def db_meta_movie_count(self, search_value=None, db_connection=None):
     if search_value is not None:
