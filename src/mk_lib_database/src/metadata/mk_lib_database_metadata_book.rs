@@ -12,9 +12,9 @@ pub async fn mk_lib_database_metadata_book_by_uuid(pool: &sqlx::PgPool, book_uui
 }
 
 pub async fn mk_lib_database_metadata_book_read(pool: &sqlx::PgPool,
-                                       search_value: String,
-                                       offset: i32, limit: i32)
-                                       -> Result<Vec<PgRow>, sqlx::Error> {
+                                                search_value: String,
+                                                offset: i32, limit: i32)
+                                                -> Result<Vec<PgRow>, sqlx::Error> {
     // TODO sort by release date
     if search_value != "" {
         let rows = sqlx::query("select mm_metadata_book_guid, mm_metadata_book_name \
@@ -38,18 +38,20 @@ pub async fn mk_lib_database_metadata_book_read(pool: &sqlx::PgPool,
     }
 }
 
-/*
-
-async def db_meta_periodical_list_count(self, search_value=None, db_connection=None):
-    """
-    periodical list count
-    """
-    if search_value is not None:
-        return await db_conn.fetchval('select count(*)'
-                                      ' from mm_metadata_book'
-                                      ' where mm_metadata_book_name % $1',
-                                      search_value, )
-    else:
-        return await db_conn.fetchval('select count(*) from mm_metadata_book')
-
- */
+pub async fn mk_lib_database_metadata_book_count(pool: &sqlx::PgPool,
+                                                 search_value: String)
+                                                 -> Result<(i32), sqlx::Error> {
+    if search_value != "" {
+        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_book \
+            where mm_metadata_book_name % $1")
+            .bind(search_value)
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    } else {
+        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_book")
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    }
+}

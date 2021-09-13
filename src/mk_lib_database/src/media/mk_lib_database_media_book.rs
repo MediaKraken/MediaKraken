@@ -4,9 +4,6 @@ use sqlx::postgres::PgRow;
 /*
 
 async def db_media_book_list(self, offset=0, records=None, search_value=None, db_connection=None):
-    """
-    book list
-    """
     if search_value is not None:
         return await db_conn.fetch('select mm_metadata_book_guid,'
                                    ' mm_metadata_book_name'
@@ -27,22 +24,24 @@ async def db_media_book_list(self, offset=0, records=None, search_value=None, db
                                    ' offset $1 limit $2',
                                    offset, records)
 
-
-async def db_media_book_list_count(self, search_value=None, db_connection=None):
-    """
-    book list count
-    """
-    if search_value is not None:
-        return await db_conn.fetchval('select count(*) from mm_metadata_book,'
-                                      ' mm_media'
-                                      ' where mm_media_metadata_guid'
-                                      ' = mm_metadata_book_guid '
-                                      'and mm_metadata_book_name % $1',
-                                      search_value)
-    else:
-        return await db_conn.fetchval('select count(*) from mm_metadata_book,'
-                                      ' mm_media'
-                                      ' where mm_media_metadata_guid'
-                                      ' = mm_metadata_book_guid')
-
  */
+
+pub async fn mk_lib_database_media_book_count(pool: &sqlx::PgPool,
+                                              search_value: String)
+                                              -> Result<(i32), sqlx::Error> {
+    if search_value != "" {
+        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_book, \
+            mm_media where mm_media_metadata_guid = mm_metadata_book_guid \
+            and mm_metadata_book_name % $1")
+            .bind(search_value)
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    } else {
+        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_book, \
+            mm_media where mm_media_metadata_guid = mm_metadata_book_guid")
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    }
+}
