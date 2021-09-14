@@ -10,7 +10,7 @@ panic = 'abort'
 async-std = "1.9.0"
 chrono = "0.4"
 flate2 = "1.0.20"
-reqwest = { version = "0.11.3", default-features = false, features = ["json", "rustls-tls"] }
+reqwest = { version = "0.11.4", default-features = false, features = ["json", "rustls-tls"] }
 roxmltree = "0.14.1"
 rustls = "0.19.1"
 serde = { version = "1.0.126", features = ["derive"] }
