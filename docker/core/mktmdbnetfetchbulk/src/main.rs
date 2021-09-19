@@ -17,11 +17,14 @@ mod mk_lib_compression;
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
 mod mk_lib_database;
 #[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_metadata_download_queue.rs"]
+#[path = "../../../../src/mk_lib_database/src/metadata/mk_lib_database_metadata_download_queue.rs"]
 mod mk_lib_database_metadata_download_queue;
 #[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_metadata.rs"]
-mod mk_lib_database_metadata;
+#[path = "../../../../src/mk_lib_database/src/metadata/mk_lib_database_metadata_movie.rs"]
+mod mk_lib_database_metadata_movie;
+#[cfg(debug_assertions)]
+#[path = "../../../../src/mk_lib_database/src/metadata/mk_lib_database_metadata_tv.rs"]
+mod mk_lib_database_metadata_tv;
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
 mod mk_lib_database_version;
@@ -48,8 +51,11 @@ mod mk_lib_database;
 #[path = "mk_lib_database_metadata_download_queue.rs"]
 mod mk_lib_database_metadata_download_queue;
 #[cfg(not(debug_assertions))]
-#[path = "mk_lib_database_metadata.rs"]
-mod mk_lib_database_metadata;
+#[path = "mk_lib_database_metadata_movie.rs"]
+mod mk_lib_database_metadata_movie;
+#[cfg(not(debug_assertions))]
+#[path = "mk_lib_database_metadata_tv.rs"]
+mod mk_lib_database_metadata_tv;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_version.rs"]
 mod mk_lib_database_version;
@@ -101,7 +107,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     for json_item in json_result.split('\n') {
         if !json_item.trim().is_empty() {
             let metadata_struct: MetadataMovie = serde_json::from_str(json_item.trim())?;
-            let result = mk_lib_database_metadata::mk_lib_database_metadata_exists_movie(&sqlx_pool,
+            let result = mk_lib_database_metadata_movie::mk_lib_database_metadata_exists_movie(&sqlx_pool,
                                                                                          metadata_struct.id).await.unwrap();
             if result == false {
                 let download_result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
@@ -129,7 +135,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     for json_item in json_result.split('\n') {
         if !json_item.trim().is_empty() {
             let metadata_struct: MetadataTV = serde_json::from_str(json_item.trim())?;
-            let result = mk_lib_database_metadata::mk_lib_database_metadata_exists_tv(&sqlx_pool,
+            let result = mk_lib_database_metadata_tv::mk_lib_database_metadata_exists_tv(&sqlx_pool,
                                                                                       metadata_struct.id).await.unwrap();
             if result == false {
                 let download_result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,

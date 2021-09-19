@@ -36,7 +36,7 @@ pub async fn mk_data_from_url(url: String) -> Result<String, Box<dyn std::error:
     Ok(str::from_utf8(&content).unwrap().to_string())
 }
 
-pub async fn mk_download_file_from_url(url: String, file_name: String) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn mk_download_file_from_url(url: String, file_name: &String) -> Result<(), Box<dyn std::error::Error>> {
     let response = reqwest::get(url).await?;
     let mut file = std::fs::File::create(file_name)?;
     let mut content = Cursor::new(response.bytes().await?);

@@ -1,17 +1,18 @@
-use amiquip::{AmqpProperties, Connection, Exchange, Publish, Result};
 use chrono::prelude::*;
 use std::error::Error;
 use tokio::time::{Duration, sleep};
+use serde_json::{json, Value};
+use sqlx::Row;
 
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_logging/src/mk_lib_logging.rs"]
+#[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
 mod mk_lib_logging;
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_database/src/mk_lib_database.rs"]
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
 mod mk_lib_database;
 #[cfg(debug_assertions)]
-#[path = "../../../../source_rust/mk_lib_database/src/mk_lib_database_cron.rs"]
-mod mk_lib_database_cron;
+#[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
+mod mk_lib_database_version;
 
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
@@ -20,15 +21,15 @@ mod mk_lib_logging;
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
 #[cfg(not(debug_assertions))]
-#[path = "mk_lib_database_cron.rs"]
-mod mk_lib_database_cron;
+#[path = "mk_lib_database_version.rs"]
+mod mk_lib_database_version;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // start logging
     const LOGGING_INDEX_NAME: &str = "mk_schedules_direct_update";
     mk_lib_logging::mk_logging_post_elk("info",
-                                        "START",
+                                        json!({"START": "START"}),
                                         LOGGING_INDEX_NAME).await;
 
     // connect to db and do a version check

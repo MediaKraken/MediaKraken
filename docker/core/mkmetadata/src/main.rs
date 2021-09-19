@@ -12,10 +12,13 @@ use sqlx::Row;
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
 mod mk_lib_database;
 #[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_metadata.rs"]
-mod mk_lib_database_metadata;
+#[path = "../../../../src/mk_lib_database/src/metadata/mk_lib_database_metadata_movie.rs"]
+mod mk_lib_database_metadata_movie;
 #[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_metadata_download_queue.rs"]
+#[path = "../../../../src/mk_lib_database/src/metadata/mk_lib_database_metadata_tv.rs"]
+mod mk_lib_database_metadata_tv;
+#[cfg(debug_assertions)]
+#[path = "../../../../src/mk_lib_database/src/metadata/mk_lib_database_metadata_download_queue.rs"]
 mod mk_lib_database_metadata_download_queue;
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
@@ -34,8 +37,11 @@ mod mk_lib_network;
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
 #[cfg(not(debug_assertions))]
-#[path = "mk_lib_database_metadata.rs"]
-mod mk_lib_database_metadata;
+#[path = "mk_lib_database_metadata_movie.rs"]
+mod mk_lib_database_metadata_movie;
+#[cfg(not(debug_assertions))]
+#[path = "mk_lib_database_metadata_tv.rs"]
+mod mk_lib_database_metadata_tv;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_metadata_download_queue.rs"]
 mod mk_lib_database_metadata_download_queue;

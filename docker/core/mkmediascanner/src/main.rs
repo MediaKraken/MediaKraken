@@ -27,7 +27,7 @@ mod mk_lib_logging;
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
 mod mk_lib_database;
 #[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_metadata_download_queue.rs"]
+#[path = "../../../../src/mk_lib_database/src/metadata/mk_lib_database_metadata_download_queue.rs"]
 mod mk_lib_database_metadata_download_queue;
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_library.rs"]
@@ -36,8 +36,11 @@ mod mk_lib_database_library;
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
 mod mk_lib_database_version;
 #[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_media.rs"]
-mod mk_lib_database_media;
+#[path = "../../../../src/mk_lib_database/src/media/mk_lib_database_media_movie.rs"]
+mod mk_lib_database_media_movie;
+#[cfg(debug_assertions)]
+#[path = "../../../../src/mk_lib_database/src/media/mk_lib_database_media_tv.rs"]
+mod mk_lib_database_media_tv;
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_notification.rs"]
 mod mk_lib_database_notification;
@@ -67,8 +70,11 @@ mod mk_lib_database_library;
 #[path = "mk_lib_database_version.rs"]
 mod mk_lib_database_version;
 #[cfg(not(debug_assertions))]
-#[path = "mk_lib_database_media.rs"]
-mod mk_lib_database_media;
+#[path = "mk_lib_database_media_movie.rs"]
+mod mk_lib_database_media_movie;
+#[cfg(not(debug_assertions))]
+#[path = "mk_lib_database_media_tv.rs"]
+mod mk_lib_database_media_tv;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_notification.rs"]
 mod mk_lib_database_notification;
