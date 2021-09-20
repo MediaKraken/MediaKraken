@@ -37,6 +37,7 @@ pub async fn mk_data_from_url(url: String) -> Result<String, Box<dyn std::error:
 }
 
 pub async fn mk_download_file_from_url(url: String, file_name: &String) -> Result<(), Box<dyn std::error::Error>> {
+    println!("waffles {}", url);
     let response = reqwest::get(url).await?;
     let mut file = std::fs::File::create(file_name)?;
     let mut content = Cursor::new(response.bytes().await?);

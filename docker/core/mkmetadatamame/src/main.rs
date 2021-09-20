@@ -94,10 +94,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // only do the parse/import if not processed before
     if !Path::new(&file_name).exists()
     {
+        println!("here {}", file_name);
         mk_lib_network::mk_download_file_from_url(
             (format!("https://github.com/mamedev/mame/releases/download/mame0{}/mame0{}lx.zip",
                      option_config_json["MAME"]["Version"],
-                     option_config_json["MAME"]["Version"])), &file_name);
+                     option_config_json["MAME"]["Version"])), &file_name).await;
+        println!("here2");
     }
     let mame_xml: String = mk_lib_compression::mk_decompress_zip(&file_name,
                                                                  false,
