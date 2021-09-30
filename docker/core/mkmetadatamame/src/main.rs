@@ -9,6 +9,9 @@ use tokio::time::{Duration, sleep};
 #[path = "../../../../src/mk_lib_compression/src/mk_lib_compression.rs"]
 mod mk_lib_compression;
 #[cfg(debug_assertions)]
+#[path = "../../../../src/mk_lib_file/src/mk_lib_file.rs"]
+mod mk_lib_file;
+#[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
 mod mk_lib_logging;
 #[cfg(debug_assertions)]
@@ -27,6 +30,9 @@ mod mk_lib_network;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_compression.rs"]
 mod mk_lib_compression;
+#[cfg(not(debug_assertions))]
+#[path = "mk_lib_file.rs"]
+mod mk_lib_file;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -94,23 +100,38 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // only do the parse/import if not processed before
     if !Path::new(&file_name).exists()
     {
-        println!("here {}", file_name);
+        println!("download {}", file_name);
         mk_lib_network::mk_download_file_from_url(
             (format!("https://github.com/mamedev/mame/releases/download/mame0{}/mame0{}lx.zip",
                      option_config_json["MAME"]["Version"],
                      option_config_json["MAME"]["Version"])), &file_name).await;
         println!("here2");
     }
-    let mame_xml: String = mk_lib_compression::mk_decompress_zip(&file_name,
-                                                                 false,
-                                                                 false).unwrap();
-    let doc = match roxmltree::Document::parse(&mame_xml) {
+    println!("b4 xml");
+    let unzip_file_name = format!("/mediakraken/emulation/mame0{}.xml", option_config_json["MAME"]["Version"]);
+    if !Path::new(&unzip_file_name).exists()
+    {
+        println!("b4 unzip");
+        mk_lib_compression::mk_decompress_zip(&file_name,
+                                              true,
+                                              false,
+                                              "/mediakraken/emulation/").unwrap();
+    }
+    println!("b4 read");
+    let mame_xml: String = mk_lib_file::mk_read_file_data(&unzip_file_name).unwrap();
+    println!("after xml");
+    // Allow DTD
+    let opt = roxmltree::ParsingOptions {
+        allow_dtd: true,
+    };
+    let doc = match roxmltree::Document::parse_with_options(&mame_xml, opt) {
         Ok(doc) => doc,
         Err(e) => {
             println!("Error: {}.", e);
             std::process::exit(1);
         }
     };
+    println!("after parse");
     for node in doc.descendants() {
         if node.is_element() {
             println!("{:?} at {}", node.tag_name(), doc.text_pos_at(node.range().start));
