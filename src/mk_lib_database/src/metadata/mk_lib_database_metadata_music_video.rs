@@ -1,10 +1,10 @@
-use uuid::Uuid;
 use sqlx::postgres::PgRow;
+use uuid::Uuid;
 
 pub async fn mk_lib_database_metadata_music_video_read(pool: &sqlx::PgPool,
-                                                 search_value: String,
-                                                 offset: i32, limit: i32)
-                                                 -> Result<Vec<PgRow>, sqlx::Error> {
+                                                       search_value: String,
+                                                       offset: i32, limit: i32)
+                                                       -> Result<Vec<PgRow>, sqlx::Error> {
     if search_value != "" {
         let rows = sqlx::query("select mm_metadata_music_video_guid, mm_media_music_video_band, \
             mm_media_music_video_song, mm_metadata_music_video_localimage_json \
@@ -76,18 +76,17 @@ async def db_meta_music_video_count(self, imvdb_id=None, search_value=None, db_c
                                       ' where mm_metadata_music_video_media_id->\'imvdb\' ? $1',
                                       imvdb_id)
 
-
-async def db_meta_music_video_detail_uuid(self, item_guid, db_connection=None):
-    """
-    Grab metadata for specified music video
-    """
-    return await db_conn.fetchrow('select mm_media_music_video_band,'
-                                  ' mm_media_music_video_song,'
-                                  ' mm_metadata_music_video_json,'
-                                  ' mm_metadata_music_video_localimage_json'
-                                  ' from mm_metadata_music_video'
-                                  ' where mm_metadata_music_video_guid = $1',
-                                  item_guid)
-
-
  */
+
+pub async fn mk_lib_database_meta_music_video_detail_uuid(pool: &sqlx::PgPool,
+                                                          music_video_uuid: uuid::Uuid)
+                                                          -> Result<Vec<PgRow>, sqlx::Error> {
+    let rows: Vec<PgRow> = sqlx::query("select mm_media_music_video_band, \
+        mm_media_music_video_song, mm_metadata_music_video_json, \
+        mm_metadata_music_video_localimage_json from mm_metadata_music_video \
+        where mm_metadata_music_video_guid = $1")
+        .bind(music_video_uuid)
+        .fetch_one(pool)
+        .await?;
+    Ok(rows)
+}

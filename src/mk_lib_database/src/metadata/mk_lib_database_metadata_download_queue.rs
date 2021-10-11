@@ -88,17 +88,16 @@ pub async fn mk_lib_database_metadata_download_queue_insert(pool: &sqlx::PgPool,
     Ok(())
 }
 
-/*
-async def db_download_status_update(self, guid, status, provider_guid=None, db_connection=None):
-    """
-    Update download que record
-    """
-    if provider_guid is not None:
-        await db_conn.execute('update mm_download_que set mdq_status = $1,'
-                              ' mdq_provider_id = $2'
-                              ' where mdq_id = $3',
-                              status, provider_guid, guid)
-    else:
-        await db_conn.execute('update mm_download_que set mdq_status = $1'
-                              ' where mdq_id = $2', status, guid)
-*/
+pub async fn mk_lib_database_metadata_download_status_update(pool: &sqlx::PgPool,
+                                                             metadata_download_uuid: Uuid,
+                                                             metadata_status: String)
+                                                             -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
+    sqlx::query("update mm_download_que set mdq_status = $1 where mdq_id = $2")
+        .bind(metadata_status)
+        .bind(metadata_download_uuid)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(())
+}

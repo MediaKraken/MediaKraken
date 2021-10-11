@@ -719,7 +719,4 @@ async def db_media_movie_list_count(self, class_guid, list_type=None,
             else:
                 return await db_conn.fetchval('select 1')
 
-
-
-
  */

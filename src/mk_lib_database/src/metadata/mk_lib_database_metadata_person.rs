@@ -32,9 +32,9 @@ pub async fn mk_lib_database_metadata_person_count(pool: &sqlx::PgPool,
 }
 
 pub async fn mk_lib_database_metadata_person_read(pool: &sqlx::PgPool,
-                                                 search_value: String,
-                                                 offset: i32, limit: i32)
-                                                 -> Result<Vec<PgRow>, sqlx::Error> {
+                                                  search_value: String,
+                                                  offset: i32, limit: i32)
+                                                  -> Result<Vec<PgRow>, sqlx::Error> {
     // TODO order by birth date
     if search_value != "" {
         let rows = sqlx::query("select mmp_id,mmp_person_name, mmp_person_image, \
@@ -58,6 +58,19 @@ pub async fn mk_lib_database_metadata_person_read(pool: &sqlx::PgPool,
             .await?;
         Ok(rows)
     }
+}
+
+pub async fn mk_lib_database_meta_person_by_guid(pool: &sqlx::PgPool,
+                                                 person_uuid: uuid::Uuid)
+                                                 -> Result<Vec<PgRow>, sqlx::Error> {
+    let rows: Vec<PgRow> = sqlx::query("select mmp_id, mmp_person_media_id, \
+        mmp_person_meta_json, mmp_person_image, mmp_person_name, \
+        mmp_person_meta_json->'profile_path' as mmp_meta \
+        from mm_metadata_person where mmp_id = $1")
+        .bind(person_uuid)
+        .fetch_one(pool)
+        .await?;
+    Ok(rows)
 }
 
 /*
@@ -91,18 +104,6 @@ async def db_meta_person_as_seen_in(self, person_guid, db_connection=None):
                                ' @> \'[{"id": '
                                + str(row_data['mmp_person_media_id'])
                                + '}]\' order by LOWER(mm_metadata_name)')
-
-
-async def db_meta_person_by_guid(self, guid, db_connection=None):
-    """
-    # return person data
-    """
-    return await db_conn.fetchrow('select mmp_id, mmp_person_media_id,'
-                                  ' mmp_person_meta_json,'
-                                  ' mmp_person_image, mmp_person_name,'
-                                  ' mmp_person_meta_json->\'profile_path\' as mmp_meta'
-                                  ' from mm_metadata_person where mmp_id = $1',
-                                  guid)
 
 
 async def db_meta_person_insert(self, uuid_id, person_name, media_id, person_json,

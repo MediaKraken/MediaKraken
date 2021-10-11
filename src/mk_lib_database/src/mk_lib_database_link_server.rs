@@ -1,11 +1,16 @@
 
+pub async fn mk_lib_database_link_delete(pool: &sqlx::PgPool,
+                                         link_uuid: uuid::Uuid)
+                                         -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
+    sqlx::query("delete from mm_link where mm_link_guid = $1")
+        .bind(link_uuid)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(())
+}
 /*
-async def db_link_delete(self, sync_guid, db_connection=None):
-    """
-    Delete server link
-    """
-    await db_conn.execute('delete from mm_link where mm_link_guid = $1', sync_guid)
-
 
 async def db_link_list(self, offset=0, records=None, search_value=None, db_connection=None):
     """

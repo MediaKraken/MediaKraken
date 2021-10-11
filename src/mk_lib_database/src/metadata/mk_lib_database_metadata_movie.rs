@@ -132,22 +132,6 @@ async def db_meta_movie_json_update(self, media_guid, metadata_json, db_connecti
     await db_conn.execute('commit')
 
 
-async def db_meta_movie_guid_count(self, guid, db_connection=None):
-    """
-    # does movie exist already by metadata id
-    """
-    return await db_conn.fetchval('select exists(select 1 from mm_metadata_movie'
-                                  ' where mm_metadata_guid = $1 limit 1) limit 1', guid)
-
-
-async def db_meta_movie_count_by_id(self, guid, db_connection=None):
-    """
-    # does movie exist already by provider id
-    """
-    return await db_conn.fetchval('select exists(select 1 from mm_metadata_movie'
-                                  ' where mm_metadata_media_id = $1 limit 1) limit 1', guid)
-
-
 # poster, backdrop, etc
 def db_meta_movie_image_random(self, return_image_type='Poster'):
     """

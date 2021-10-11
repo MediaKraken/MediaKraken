@@ -1,6 +1,18 @@
 use sqlx::postgres::PgRow;
 use uuid::Uuid;
 
+pub async fn mk_lib_database_sync_delete(pool: &sqlx::PgPool,
+                                         sync_guid: uuid::Uuid)
+                                         -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
+    sqlx::query("delete from mm_sync where mm_sync_guid = $1")
+        .bind(sync_guid)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(())
+}
+
 /*
 async def db_sync_progress_update(self, sync_guid, sync_percent, db_connection=None):
     """
@@ -16,15 +28,6 @@ async def db_sync_list_count(self, db_connection=None):
     # return count of sync jobs
     """
     return await db_conn.fetchval('select count(*) from mm_sync')
-
-
-async def db_sync_delete(self, sync_guid, db_connection=None):
-    """
-    # delete sync job
-    """
-    await db_conn.execute(
-        'delete from mm_sync'
-        ' where mm_sync_guid = $1', sync_guid)
 
 
 async def db_sync_insert(self, sync_path, sync_path_to, sync_json, db_connection=None):

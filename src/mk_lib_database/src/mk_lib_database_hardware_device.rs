@@ -74,10 +74,16 @@ async def db_hardware_insert(self, manufacturer, model_name, json_data, db_conne
     await db_conn.execute('commit')
     return new_guid
 
-
-async def db_hardware_delete(self, guid, db_connection=None):
-    await db_conn.execute('delete from mm_hardware_json'
-                          ' where mm_hardware_id = $1', guid)
-    await db_conn.execute('commit')
-
  */
+
+pub async fn mk_lib_database_hardware_delete(pool: &sqlx::PgPool,
+                                             hardware_uuid: uuid::Uuid)
+                                             -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
+    sqlx::query("delete from mm_hardware_json where mm_hardware_id = $1")
+        .bind(hardware_uuid)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(())
+}

@@ -1,6 +1,18 @@
 use sqlx::postgres::PgRow;
 use uuid::Uuid;
 
+pub async fn mk_lib_database_game_server_delete(pool: &sqlx::PgPool,
+                                                game_server_uuid: uuid::Uuid)
+                                                -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
+    sqlx::query("delete from mm_game_dedicated_servers where mm_game_server_guid = $1")
+        .bind(game_server_uuid)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(())
+}
+
 pub async fn mk_lib_database_dedicated_server_read(pool: &sqlx::PgPool,
                                                    offset: i32, limit: i32)
                                                    -> Result<Vec<PgRow>, sqlx::Error> {
@@ -30,15 +42,6 @@ async def db_game_server_upsert(self, server_name, server_json, db_connection=No
                           new_guid, server_name, server_json,
                           server_json)
     return new_guid
-
-
-async def db_game_server_delete(self, record_uuid, db_connection=None):
-    """
-    Delete game_server
-    """
-    await db_conn.execute('delete from mm_game_dedicated_servers'
-                          ' where mm_game_server_guid = $1',
-                          record_uuid)
 
 
 async def db_game_server_detail(self, record_uuid, db_connection=None):

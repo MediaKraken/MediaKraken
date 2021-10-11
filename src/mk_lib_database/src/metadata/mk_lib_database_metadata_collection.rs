@@ -1,9 +1,9 @@
-use uuid::Uuid;
 use sqlx::postgres::PgRow;
+use uuid::Uuid;
 
 pub async fn mk_lib_database_metadata_collections_count(pool: &sqlx::PgPool,
-                                                  search_value: String)
-                                                  -> Result<(i32), sqlx::Error> {
+                                                        search_value: String)
+                                                        -> Result<(i32), sqlx::Error> {
     if search_value != "" {
         let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_collection \
             where mm_metadata_collection_name = $1")
@@ -20,9 +20,9 @@ pub async fn mk_lib_database_metadata_collections_count(pool: &sqlx::PgPool,
 }
 
 pub async fn mk_lib_database_metadata_collection_read(pool: &sqlx::PgPool,
-                                                 search_value: String,
-                                                 offset: i32, limit: i32)
-                                                 -> Result<Vec<PgRow>, sqlx::Error> {
+                                                      search_value: String,
+                                                      offset: i32, limit: i32)
+                                                      -> Result<Vec<PgRow>, sqlx::Error> {
     if search_value != "" {
         let rows = sqlx::query("select mm_metadata_collection_guid, mm_metadata_collection_name, \
             mm_metadata_collection_imagelocal_json from mm_metadata_collection \
@@ -49,18 +49,20 @@ pub async fn mk_lib_database_metadata_collection_read(pool: &sqlx::PgPool,
         Ok(rows)
     }
 }
+
+pub async fn mk_lib_database_meta_collection_uuid(pool: &sqlx::PgPool,
+                                                  collection_uuid: uuid::Uuid)
+                                                  -> Result<Vec<PgRow>, sqlx::Error> {
+    let rows: Vec<PgRow> = sqlx::query("select mm_metadata_collection_json, \
+        mm_metadata_collection_imagelocal_json from mm_metadata_collection \
+        where mm_metadata_collection_guid = $1")
+        .bind(collection_uuid)
+        .fetch_one(pool)
+        .await?;
+    Ok(rows)
+}
+
 /*
-
-async def db_collection_read_by_guid(self, media_uuid, db_connection=None):
-    """
-    Collection details
-    """
-    return await db_conn.fetchrow('select mm_metadata_collection_json,'
-                                  ' mm_metadata_collection_imagelocal_json'
-                                  ' from mm_metadata_collection'
-                                  ' where mm_metadata_collection_guid = $1',
-                                  media_uuid)
-
 
 async def db_media_collection_scan(self, db_connection=None):
     """
@@ -79,7 +81,7 @@ async def db_collection_guid_by_name(self, collection_name, db_connection=None):
     """
     return await db_conn.fetchval(
         'select mm_metadata_collection_guid from mm_metadata_collection'
-        ' where mm_metadata_collection_name->>\'name\' = $1',
+        ' where mm_metadata_collection_name->>'name' = $1',
         collection_name)
 
 

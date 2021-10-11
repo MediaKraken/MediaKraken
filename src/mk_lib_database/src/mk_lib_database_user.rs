@@ -1,6 +1,17 @@
 use sqlx::postgres::PgRow;
 use uuid::Uuid;
 
+pub async fn mk_lib_database_user_exists(pool: &sqlx::PgPool,
+                                         user_name: String)
+                                         -> Result<bool, sqlx::Error> {
+    let row: (bool, ) = sqlx::query_as("select exists(select 1 from mm_user \
+        where username = $1 limit 1) limit 1")
+        .bind(user_name)
+        .fetch_one(pool)
+        .await?;
+    Ok(row.0)
+}
+
 pub async fn mk_lib_database_user_read(pool: &sqlx::PgPool,
                                        offset: i32, limit: i32)
                                        -> Result<Vec<PgRow>, sqlx::Error> {
@@ -13,29 +24,39 @@ pub async fn mk_lib_database_user_read(pool: &sqlx::PgPool,
     Ok(rows)
 }
 
+pub async fn mk_lib_database_user_count(pool: &sqlx::PgPool,
+                                        user_name: String)
+                                        -> Result<(i32), sqlx::Error> {
+    if user_name != "" {
+        let row: (i32, ) = sqlx::query_as("select count(*) from mm_user")
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    } else {
+        let row: (i32, ) = sqlx::query_as("select count(*) from mm_user where username = $1")
+            .bind(user_name)
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    }
+}
+
+pub async fn mk_lib_database_user_delete(pool: &sqlx::PgPool,
+                                         user_uuid: uuid::Uuid)
+                                         -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
+    sqlx::query("delete from mm_user where id = $1")
+        .bind(user_uuid)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(())
+}
 /*
-
-async def db_user_count(self, user_name=None, db_connection=None):
-    if user_name is None:
-        return await db_conn.fetchval('select count(*) from mm_user')
-    else:
-        return await db_conn.fetchval('select count(*) from mm_user'
-                                      ' where username = $1', user_name)
-
-
-async def db_user_delete(self, user_guid, db_connection=None):
-    await db_conn.execute('delete from mm_user where id = $1', user_guid)
-
 
 async def db_user_detail(self, guid, db_connection=None):
     return await db_conn.fetchrow('select * from mm_user'
                                   ' where id = $1', guid)
-
-
-async def db_user_exists(self, user_name, db_connection=None):
-    return await db_conn.fetchval('select exists(select 1 from mm_user'
-                                  ' where username = $1 limit 1) limit 1', user_name)
-
 
 async def db_user_insert(self, user_name, user_email, user_password, db_connection=None):
     """
@@ -68,8 +89,5 @@ async def db_user_login(self, user_name, user_password, db_connection=None):
             return 'inactive_account', None, None
         return result['id'], result['is_admin'], result['per_page']
     return 'invalid_password', None, None
-
-
-
 
  */
