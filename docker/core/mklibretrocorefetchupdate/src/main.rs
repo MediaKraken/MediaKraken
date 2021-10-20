@@ -5,9 +5,9 @@ use serde_json::json;
 
 fn is_hidden(entry: &DirEntry) -> bool {
     entry.file_name()
-         .to_str()
-         .map(|s| s.starts_with("."))
-         .unwrap_or(false)
+        .to_str()
+        .map(|s| s.starts_with("."))
+        .unwrap_or(false)
 }
 
 #[cfg(debug_assertions)]
@@ -17,8 +17,8 @@ mod mk_lib_compression;
 #[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
 mod mk_lib_logging;
 #[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_hash/src/mk_lib_hash_md5.rs"]
-mod mk_lib_hash_md5;
+#[path = "../../../../src/mk_lib_hash/src/mk_lib_hash_crc32.rs"]
+mod mk_lib_hash_crc32;
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_network/src/mk_lib_network.rs"]
 mod mk_lib_network;
@@ -30,8 +30,8 @@ mod mk_lib_compression;
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 #[cfg(not(debug_assertions))]
-#[path = "mk_lib_hash_md5.rs"]
-mod mk_lib_hash_md5;
+#[path = "mk_lib_hash_crc32.rs"]
+mod mk_lib_hash_crc32;
 #[cfg(not(debug_assertions))]
 #[path = "mk_lib_network.rs"]
 mod mk_lib_network;
@@ -44,26 +44,36 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         json!({"START": "START"}),
                                         LOGGING_INDEX_NAME).await;
 
-    // populate current cores into hashmap
+    // populate current zipped cores into hashmap
     let mut emulation_cores = HashMap::new();
     let walker = WalkDir::new("/mediakraken/emulation/cores").into_iter();
-    for entry in walker.filter_entry(|e| !is_hidden(e)) {
-        let entry = entry.unwrap();
-        emulation_cores.insert(entry.path().display().split(".")[0],
-                               mk_lib_hash_md5::mk_file_hash_md5(
-                                   entry.path().display()));
+    for entry in walker.filter_entry(|e| !is_hidden(e)).filter_map(Result::ok).filter(|e| !e.file_type().is_dir()) {
+        println!("str: {}", &entry.path().display().to_string());
+        println!("crc: {:?}", mk_lib_hash_crc32::mk_file_hash_crc32(&entry.path().display().to_string()));
+        let file_name = entry.path().display().to_string();
+        emulation_cores.insert(file_name,
+                               mk_lib_hash_crc32::mk_file_hash_crc32(&entry.path().display().to_string()).unwrap());
     }
+    println!("hash: {:?}", emulation_cores);
 
-    // date md5 core_filename.zip
+    // date crc32 core_filename.zip
     let libtro_url = "http://buildbot.libretro.com/nightly/linux/x86_64/latest/";
     let fetch_result = mk_lib_network::mk_data_from_url(
-        format!("{}{}", libtro_url, ".index-extended")).await;
+        format!("{}{}", libtro_url, ".index-extended")).await.unwrap();
     for libretro_core in fetch_result.split('\n') {
         let mut download_core = false;
-        let (core_date, core_md5, core_name) = libretro_core.split(" ");
-        if emulation_cores.contains_key(core_name) {
-            // we have the core, check to see if md5 changed
-            if emulation_cores[core_name][1] != core_md5 {
+        let mut iter = libretro_core.splitn(3, " ");
+        let core_date = iter.next().unwrap();
+        let core_crc32 = iter.next().unwrap();
+        let core_name = iter.next().unwrap();
+        println!("line: {} {} {}", core_date, core_crc32, core_name);
+        let path_core_name = format!("/mediakraken/emulation/cores/{}", core_name.replace(".zip", ""));
+        println!("path: {}", path_core_name);
+        if emulation_cores.contains_key(&path_core_name) {
+            // we have the core, check to see if crc32 changed\
+            println!("emu: {}", emulation_cores[&path_core_name]);
+            println!("md5: {}", core_crc32);
+            if emulation_cores[&path_core_name] != core_crc32 {
                 download_core = true;
             }
         } else {
@@ -72,11 +82,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
         if download_core {
             // download the missing or newer core
             mk_lib_network::mk_download_file_from_url(format!("{}{}", libtro_url, core_name),
-                                                      format!("/mediakraken/emulation/cores/{}", core_name));
+                                                      &format!("/mediakraken/emulation/cores/{}", core_name)).await;
             // unzip the core for use
             mk_lib_compression::mk_decompress_zip(&format!("/mediakraken/emulation/cores/{}", core_name),
                                                   true,
-                                                  true);
+                                                  false,
+                                                  "/mediakraken/emulation/cores/");
         }
     }
 

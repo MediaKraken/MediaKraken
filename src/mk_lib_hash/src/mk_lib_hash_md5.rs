@@ -14,7 +14,7 @@ pub fn mk_file_hash_md5(file_to_read: &str) -> Result<String, Box<dyn Error>> {
     let mut file_data = mk_lib_file::mk_read_file_data_u8(&file_to_read)?;
     hasher.update(&mut file_data);
     let result = hasher.finalize();
-    Ok(result.to_string())
+    Ok(format!("{:x}", result))
 }
 
 // // cargo test -- --show-output

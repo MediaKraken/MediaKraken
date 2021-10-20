@@ -5,6 +5,8 @@ use std::error::Error;
 use std::path::Path;
 use tokio::time::{Duration, sleep};
 
+// https://www.progettosnaps.net/download/?tipo=dat_mame&file=/dats/MAME/packs/MAME_Dats_236.7z
+
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_compression/src/mk_lib_compression.rs"]
 mod mk_lib_compression;
