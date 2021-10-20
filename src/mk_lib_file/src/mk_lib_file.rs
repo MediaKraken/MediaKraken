@@ -25,6 +25,7 @@ pub fn mk_file_is_hidden(entry: &DirEntry) -> bool {
 }
 
 // "C:\\Users\\spoot\\Documents\\MediaKraken_Deployment\\source_rust\\bulk_themoviedb_netfetch"
+// TODO allow ext filters and such
 pub fn mk_directory_walk(dir_path: &str) {
     let walker = WalkDir::new(dir_path).into_iter();
     for entry in walker.filter_entry(|e| !mk_file_is_hidden(e)) {

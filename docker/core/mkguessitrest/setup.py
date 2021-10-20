@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import io
 import os
-import re
-import sys
 
 from setuptools import setup, find_packages
 
@@ -39,13 +36,11 @@ args = dict(name='guessit-rest',
                          'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
                          'Operating System :: OS Independent',
                          'Intended Audience :: Developers',
-                         'Programming Language :: Python :: 2',
-                         'Programming Language :: Python :: 2.7',
-                         'Programming Language :: Python :: 3',
                          'Programming Language :: Python :: 3.4',
                          'Programming Language :: Python :: 3.5',
                          'Programming Language :: Python :: 3.6',
                          'Programming Language :: Python :: 3.7',
+                         'Programming Language :: Python :: 3.8',
                          'Topic :: Multimedia',
                          'Topic :: Software Development :: Libraries :: Python Modules'
                          ],

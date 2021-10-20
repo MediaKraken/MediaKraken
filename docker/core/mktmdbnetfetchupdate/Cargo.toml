@@ -7,15 +7,15 @@ edition = "2018"
 panic = 'abort'
 
 [dependencies]
-chrono = "0.4"
+chrono = "0.4.19"
 flate2 = "1.0.20"
 reqwest = { version = "0.11.4", default-features = false, features = ["json", "rustls-tls"] }
-serde = { version = "1.0.126", features = ["derive"] }
-serde_json = "1.0.64"
+serde = { version = "1.0.130", features = ["derive"] }
+serde_json = "1.0.68"
 sys-info = "0.9.0"
-sqlx = { version = "0.5.7", features = [ "chrono", "runtime-tokio-rustls", "postgres", "uuid" ] }
+sqlx = { version = "0.5.9", features = [ "chrono", "json", "runtime-tokio-rustls", "postgres", "uuid" ] }
 tar = "0.4.37"
-tokio = { version = "1.6.0", features = ["full"] }
+tokio = { version = "1.12.0", features = ["full"] }
 uuid = { version = "0.8.2", features = ["serde", "v4"] }
 
 [dev-dependencies]

@@ -46,7 +46,6 @@ pub async fn mk_download_file_from_url(url: String, file_name: &String) -> Resul
 }
 
 // wait_seconds - 120 typically
-#[allow(dead_code)]
 pub async fn mk_network_service_available(host_dns: &str, host_port: &str,
                                           wait_seconds: &str) {
     if std::path::Path::new("/mediakraken/wait-for-it-ash-busybox130.sh").exists() {

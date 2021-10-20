@@ -2,7 +2,7 @@ swagger: '2.0'
 info:
   title: GuessIt 2 API
   description: Extract as much information as possible from a video filename, filepath or release name.
-  version: 2.1.0
+  version: 2.1.4
 host: api.guessit.io
 schemes:
   - https

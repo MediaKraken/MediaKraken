@@ -5,7 +5,7 @@ RUN apt update && apt install -y musl-tools musl-dev
 RUN update-ca-certificates
 
 # Create appuser
-ENV USER=myapp
+ENV USER=mediakraken
 ENV UID=10001
 
 RUN adduser \
@@ -17,7 +17,7 @@ RUN adduser \
     --uid "${UID}" \
     "${USER}"
 
-WORKDIR /myapp
+WORKDIR /mediakraken
 
 COPY ./ .
 
@@ -34,10 +34,10 @@ COPY --from=cargo-build /etc/passwd /etc/passwd
 COPY --from=cargo-build /etc/group /etc/group
 COPY --from=cargo-build /bin/sh /sh
 
-WORKDIR /myapp
+WORKDIR /mediakraken
 
 # Copy our build
-COPY --from=cargo-build /myapp/target/x86_64-unknown-linux-musl/release/myapp ./
+COPY --from=cargo-build /myapp/target/x86_64-unknown-linux-musl/release/mkmetadatamame ./
 
 # Use an unprivileged user.
-USER myapp:myapp
+USER mediakraken:mediakraken

@@ -9,7 +9,6 @@ pub async fn mk_lib_database_library_read(pool: &sqlx::PgPool)
     Ok(rows)
 }
 
-#[allow(dead_code)]
 pub async fn mk_lib_database_library_path_audit(pool: &sqlx::PgPool)
                                                 -> Result<Vec<PgRow>, sqlx::Error> {
     let rows = sqlx::query("select mm_media_dir_guid, mm_media_dir_path, \
@@ -20,7 +19,6 @@ pub async fn mk_lib_database_library_path_audit(pool: &sqlx::PgPool)
     Ok(rows)
 }
 
-#[allow(dead_code)]
 pub async fn mk_lib_database_library_path_status(pool: &sqlx::PgPool)
                                                  -> Result<Vec<PgRow>, sqlx::Error> {
     let rows = sqlx::query("select mm_media_dir_path, mm_media_dir_status \
@@ -31,7 +29,6 @@ pub async fn mk_lib_database_library_path_status(pool: &sqlx::PgPool)
     Ok(rows)
 }
 
-#[allow(dead_code)]
 pub async fn mk_lib_database_library_path_status_update(pool: &sqlx::PgPool,
                                                         library_uuid: uuid::Uuid,
                                                         library_status_json: serde_json::Value)
@@ -47,7 +44,6 @@ pub async fn mk_lib_database_library_path_status_update(pool: &sqlx::PgPool,
     Ok(())
 }
 
-#[allow(dead_code)]
 pub async fn mk_lib_database_library_path_timestamp_update(pool: &sqlx::PgPool,
                                                            library_uuid: uuid::Uuid)
                                                            -> Result<(), sqlx::Error> {
@@ -61,7 +57,6 @@ pub async fn mk_lib_database_library_path_timestamp_update(pool: &sqlx::PgPool,
     Ok(())
 }
 
-#[allow(dead_code)]
 pub async fn mk_lib_database_library_file_exists(pool: &sqlx::PgPool,
                                                  file_name: String)
                                                  -> Result<bool, sqlx::Error> {

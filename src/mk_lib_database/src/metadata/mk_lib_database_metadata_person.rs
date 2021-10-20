@@ -1,7 +1,6 @@
 use sqlx::postgres::PgRow;
 use uuid::Uuid;
 
-#[allow(dead_code)]
 pub async fn mk_lib_database_metadata_exists_person(pool: &sqlx::PgPool,
                                                     metadata_id: i32)
                                                     -> Result<bool, sqlx::Error> {

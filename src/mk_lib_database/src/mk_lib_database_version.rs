@@ -5,7 +5,6 @@ pub static DATABASE_VERSION: i32 = 43;
 #[path = "./mk_lib_database_version_schema.rs"]
 mod mk_lib_database_version_schema;
 
-#[allow(dead_code)]
 pub async fn mk_lib_database_version(pool: &sqlx::PgPool)
                                      -> Result<i32, sqlx::Error> {
     let row: (i32, ) = sqlx::query_as("select mm_version_number from mm_version")

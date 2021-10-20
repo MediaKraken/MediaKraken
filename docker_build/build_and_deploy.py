@@ -33,7 +33,7 @@ import network_email
 # TODO proxy docker build -t mediakraken/mkbase38py3 --build-arg http_proxy="http://proxyip:8080"
 #  --build-arg ALPMIRROR=dl-cdn.alpinelinux.org --build-arg PIPMIRROR=pypi.python.org .
 
-parser = argparse.ArgumentParser(description='This program build and deploys MediaKraken')
+parser = argparse.ArgumentParser(description='This program builds and deploys MediaKraken')
 parser.add_argument('-b', '--base', required=False,
                     help='Base images only', action="store_true")
 # set args.image variable if entered - ex. ComposeMediaKrakenBaseFFMPEG

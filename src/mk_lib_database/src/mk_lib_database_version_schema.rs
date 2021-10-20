@@ -7,7 +7,6 @@ pub async fn mk_lib_database_update_schema(pool: &sqlx::PgPool, version_no: i32)
     Ok(true)
 }
 
-#[allow(dead_code)]
 pub async fn mk_lib_database_version_update(pool: &sqlx::PgPool,
                                             version_number: i32)
                                             -> Result<(), sqlx::Error> {

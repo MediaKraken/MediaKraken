@@ -2,7 +2,6 @@ use std::io::Read;
 use std::fs::File;
 use std::path::PathBuf;
 
-//#![allow(unused)]
 pub fn mk_decompress_tar_gz_file(archive_file: &str) -> Result<(), std::io::Error> {
     let tar_gz = std::fs::File::open(archive_file)?;
     let tar = flate2::read::GzDecoder::new(tar_gz);

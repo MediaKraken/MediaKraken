@@ -121,7 +121,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             }
                             if download_link != "" {
                                 // do NOT remove the header.....this is the SAVE location
-                                let file_save_name = format!("/mediakraken/web_app_sanic/static/meta/trailer/{:?}",
+                                let file_save_name = format!("/mediakraken/web_app/static/meta/trailer/{:?}",
                                                              download_link.rsplitn(1, "/"));
                                 // verify it doesn't exist in meta folder
                                 if !Path::new(&file_save_name).exists() {

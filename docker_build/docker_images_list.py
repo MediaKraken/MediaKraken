@@ -111,7 +111,7 @@ STAGE_CORE_IMAGES = {
     'mktransmission': ('mktransmission', 'alpine:3.14.1', 'core'),
 
     # website via rust and actixweb
-    'mkwebapp': ('mkwebapp', 'mkbase_alpinepy3', 'core'),  # TODO
+    'mkwebapp': ('mkwebapp', 'mkbase_alpinepy3', 'core'),
 }
 
 STAGE_ONE_SECURITY_TOOLS = {

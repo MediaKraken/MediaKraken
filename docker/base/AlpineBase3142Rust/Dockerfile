@@ -1,4 +1,4 @@
-# https://github.com/rust-lang/docker-rust/blob/master/1.54.0/alpine3.14/Dockerfile
+# https://github.com/rust-lang/docker-rust/blob/master/1.55.0/alpine3.14/Dockerfile
 
 # Download base image
 FROM alpine:3.14.2
@@ -19,7 +19,7 @@ RUN apk add --no-cache \
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
     PATH=/usr/local/cargo/bin:$PATH \
-    RUST_VERSION=1.54.0
+    RUST_VERSION=1.55.0
 
 RUN set -eux; \
     apkArch="$(apk --print-arch)"; \
@@ -37,4 +37,4 @@ RUN set -eux; \
     chmod -R a+w $RUSTUP_HOME $CARGO_HOME; \
     rustup --version; \
     cargo --version; \
-    rustc --version;
+    rustc --version; \

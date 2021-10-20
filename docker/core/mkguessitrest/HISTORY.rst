@@ -1,6 +1,13 @@
 History
 =======
 
+2.1.4
+------------------
+
+- Python 3.8
+- Upgrade docker image to `tiangolo/uwsgi-nginx-flask:python3.8-alpine-2021-10-02`
+
+
 2.1.3 (unreleased)
 ------------------
 
