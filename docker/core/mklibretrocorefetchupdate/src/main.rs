@@ -1,3 +1,5 @@
+use std::ffi::OsStr;
+use std::os::unix::ffi::OsStrExt;
 use std::collections::HashMap;
 use std::error::Error;
 use walkdir::{DirEntry, WalkDir};
@@ -47,7 +49,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // populate current zipped cores into hashmap
     let mut emulation_cores = HashMap::new();
     let walker = WalkDir::new("/mediakraken/emulation/cores").into_iter();
-    for entry in walker.filter_entry(|e| !is_hidden(e)).filter_map(Result::ok).filter(|e| !e.file_type().is_dir()) {
+    for entry in walker.filter_entry(|e| !is_hidden(e)).filter_map(Result::ok).filter(|d| d.path().extension() == Some(OsStr::from_bytes(b"zip"))).filter(|e| !e.file_type().is_dir()) {
         println!("str: {}", &entry.path().display().to_string());
         println!("crc: {:?}", mk_lib_hash_crc32::mk_file_hash_crc32(&entry.path().display().to_string()));
         let file_name = entry.path().display().to_string();
