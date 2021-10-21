@@ -31,11 +31,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                            false).await;
     // grab the manufacturer's from Global Cache
     let fetch_result = mk_lib_network::mk_data_from_url_to_json(
-        "https://irdb.globalcache.com:8081/api/brands/".to_string()).await;
-
-    // saved to data.txt as couldn't return data with reqwest
-//     let fetch_result = mk_lib_file::mk_read_file_data(
-//         &"C:\\Users\\spoot\\Documents\\MediaKraken\\src\\db_preload\\db_manufacturer_gc\\src\\data.txt".to_string()).unwrap();
+        "https://irdb.globalcache.com:8081/api/brands/".to_string()).await.unwrap();
     print!("{:?}", fetch_result);
 
     let v: Vec<Value> = serde_json::from_str(&fetch_result)?;
