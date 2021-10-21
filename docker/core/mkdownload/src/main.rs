@@ -49,7 +49,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
     mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
                                                            false).await;
-    let option_config_json = &mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool).await?;
+    let option_config_json: Value = mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool).await.unwrap();
 
     // open rabbit connection
     let mut rabbit_connection = Connection::insecure_open(
@@ -78,7 +78,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     if json_message["Type"].to_string() == "File" {
                         // do NOT remove the header.....this is the SAVE location
                         mk_lib_network::mk_download_file_from_url(json_message["URL"].to_string(),
-                                                                  json_message["Local Save Path"].to_string());
+                                                                  &json_message["Local Save Path"].to_string());
                     } else if json_message["Type"].to_string() == "Youtube" {
                         if validator::validate_url(json_message["URL"].to_string()) {
                             //let url = "https://www.youtube.com/watch?v=Edx9D2yaOGs&ab_channel=CollegeHumor";
@@ -97,11 +97,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     } else if json_message["Type"].to_string() == "HDTrailers" {
                         // try to grab the RSS feed itself
                         let data: serde_json::Value = serde_json::from_str(&mk_lib_network::mk_data_from_url(
-                            "http://feeds.hd-trailers.net/hd-trailers".to_string()).await?);
+                            "http://feeds.hd-trailers.net/hd-trailers".to_string()).await.unwrap()).unwrap();
                         mk_lib_logging::mk_logging_post_elk("info",
                                                             json!({ "download": { "hdtrailer_json": data } }),
                                                             LOGGING_INDEX_NAME).await;
-                        for item in data["rss"]["channel"]["item"].iter() {
+                        for item in data["rss"]["channel"]["item"] {
                             mk_lib_logging::mk_logging_post_elk("info",
                                                                 json!({ "item": item }),
                                                                 LOGGING_INDEX_NAME).await;
@@ -126,7 +126,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 // verify it doesn't exist in meta folder
                                 if !Path::new(&file_save_name).exists() {
                                     mk_lib_network::mk_download_file_from_url(download_link.to_string(),
-                                                                              file_save_name.to_string());
+                                                                              &file_save_name.to_string());
                                 }
                             }
                         }
