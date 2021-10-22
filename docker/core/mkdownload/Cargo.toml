@@ -10,7 +10,7 @@ panic = 'abort'
 amiquip = { version = "0.4", default-features = false }
 chrono = "0.4.19"
 reqwest = { version = "0.11.4", default-features = false, features = ["json", "rustls-tls"] }
-rustube = "0.3.6"    # this is adding openssl to hyper - due to cargo.toml of "default" request settings
+# rustube = "0.3.6"    # this is adding openssl to hyper - due to cargo.toml of "default" request settings
 serde = { version = "1.0.130", features = ["derive"] }
 serde_json = "1.0.68"
 sqlx = { version = "0.5.9", features = [ "chrono", "json", "runtime-tokio-rustls", "postgres", "uuid" ] }

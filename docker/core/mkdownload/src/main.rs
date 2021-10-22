@@ -3,7 +3,7 @@ use serde_json::{json, Value};
 use std::error::Error;
 use std::path::Path;
 use std::process::Command;
-use rustube::{Id, VideoFetcher};
+//use rustube::{Id, VideoFetcher};
 
 #[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
@@ -78,11 +78,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     if json_message["Type"].to_string() == "File" {
                         // do NOT remove the header.....this is the SAVE location
                         mk_lib_network::mk_download_file_from_url(json_message["URL"].to_string(),
-                                                                  &json_message["Local Save Path"].to_string());
+                                                                  &json_message["Local Save Path"].to_string()).await;
                     } else if json_message["Type"].to_string() == "Youtube" {
                         if validator::validate_url(json_message["URL"].to_string()) {
                             //let url = "https://www.youtube.com/watch?v=Edx9D2yaOGs&ab_channel=CollegeHumor";
-                            println!("downloaded video to {:?}", rustube::download_best_quality(&json_message["URL"].to_string()).await.unwrap());
+                            //println!("downloaded video to {:?}", rustube::download_best_quality(&json_message["URL"].to_string()).await.unwrap());
+                            continue;
                             // Command::new("youtube-dl")
                             //     .arg("-i")
                             //     .arg("--download-archive")
@@ -126,7 +127,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 // verify it doesn't exist in meta folder
                                 if !Path::new(&file_save_name).exists() {
                                     mk_lib_network::mk_download_file_from_url(download_link.to_string(),
-                                                                              &file_save_name.to_string());
+                                                                              &file_save_name.to_string()).await;
                                 }
                             }
                         }

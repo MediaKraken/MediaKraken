@@ -219,7 +219,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             let new_class_type_uuid = media_class_type_uuid;
                             // check for "stacked" media file
                             let base_file_name = Path::new(&file_name).file_name().to_str().unwrap();
-
                             // check to see if it"s a "stacked" file
                             // including games since some are two or more discs
                             if stack_cd.is_match(&base_file_name)

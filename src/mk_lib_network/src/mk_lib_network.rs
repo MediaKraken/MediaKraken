@@ -22,12 +22,6 @@ pub async fn mk_data_from_url_to_json(url: String)
         .await?;
     println!("3 {:#?}", res);
     Ok(res)
-    // // Parse the response body as Json in this case
-    // let ip = res
-    //     .json::<HashMap<String, i8>>()
-    //     .await?;
-    // println!("Returned HASH {:?}", ip);
-    // Ok(ip)
 }
 
 pub async fn mk_data_from_url(url: String) -> Result<String, Box<dyn std::error::Error>> {
