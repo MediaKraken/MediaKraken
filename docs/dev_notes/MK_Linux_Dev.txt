@@ -1,4 +1,67 @@
 Debian 11
 apt install curl build-essential libssl-dev
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# restart terminal!
 cargo install cargo-audit
+apt install python3-dotenv
+nano /etc/docker/daemon.json
+{
+  "insecure-registries" : ["th-registry-1.beaverbay.local:5000"]
+}
+
+
+lightsail
+debian 10
+sudo apt install curl build-essential libssl-dev git
+source $HOME/.cargo/env
+sudo apt install pkg-config
+cargo install cargo-audit
+git clone https://github.com/MediaKraken/MediaKraken
+cd ./MediaKraken/
+git checkout refactor
+cd docker_compose
+-
+sudo docker run -d -p 5000:5000 --restart=always --name registry registry:2
+
+
+# registry
+reaspian lite on pi4
+sudo apt update
+sudo apt upgrade
+curl -sSL https://get.docker.com | sh
+sudo apt-get install -y libffi-dev libssl-dev python3-dev
+sudo apt-get install -y python3 python3-pip
+sudo pip3 install docker-compose
+sudo systemctl enable docker
+sudo usermod -aG docker pi
+# restart terminal
+
+
+raspbian lite on pi4 (armv7-unknown-linux-gnueabihf)
+sudo apt install git libssl-dev
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# restart terminal
+cargo install cargo-audit
+sudo python3 mediakraken_setup.py
+
+
+
+all platforms
+git clone https://github.com/MediaKraken/MediaKraken
+cd ./MediaKraken/
+git checkout refactor
+cd docker_compose
+# as root/sudo/whatever so it can install things
+# no workie on raspbian......dirrent paths/packages of course
+python3 mediakraken_setup.py
+
+
+# pi docker stuff
+curl -sSL https://get.docker.com | sh
+sudo apt-get install libffi-dev libssl-dev
+sudo apt install python3-dev
+sudo apt-get install -y python3 python3-pip
+sudo pip3 install docker-compose
+sudo systemctl enable docker
+sudo usermod -aG docker pi
+# restart terminal
