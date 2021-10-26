@@ -18,7 +18,7 @@ appnope==0.1.2
 arduino-python==0.2
 argcomplete==1.12.3
 babel==2.9.1
-babelfish==0.5.5
+babelfish==0.6.0
 #backports.shutil-get-terminal-size==1.0.0
 bs4==0.0.1
 certifi==2021.10.8

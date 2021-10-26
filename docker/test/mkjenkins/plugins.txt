@@ -1,0 +1,15 @@
+android-emulator:3.1.3
+cloudbees-disk-usage-simple:0.10
+cppcheck:1.25
+docker-build-step:2.8
+git:4.9.0
+github-branch-source:2.11.3
+google-play-android-publisher:4.2
+mailer:1.34
+proxmox:0.4.2
+python:1.3
+seleniumhtmlreport:1.1
+sloccount:1.24
+validating-email-parameter:1.10
+violations:0.7.11
+vncrecorder:1.35

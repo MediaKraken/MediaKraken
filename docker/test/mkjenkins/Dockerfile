@@ -1,7 +1,9 @@
 FROM jenkins/jenkins:lts
 USER root
 RUN apt-get update && apt-get install -y python3-pip sloccount libpq-dev libcurl4-openssl-dev \
-  mesa-common-dev libssl-dev libusb-dev
+  mesa-common-dev libssl-dev libusb-dev cppcheck
 ADD requirements.txt /
 RUN pip3 install -r /requirements.txt && rm /requirements.txt
+COPY --chown=jenkins:jenkins plugins.txt /usr/share/jenkins/ref/plugins.txt
+RUN /usr/local/bin/install-plugins.sh < /usr/share/jenkins/ref/plugins.txt
 USER jenkins

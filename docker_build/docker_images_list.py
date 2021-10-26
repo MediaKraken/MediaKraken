@@ -66,7 +66,7 @@ STAGE_CORE_IMAGES = {
     'mkdownload': ('mkdownload', 'busybox:1.33.1-uclibc', 'core'),
 
     # guessit via web rest
-    'mkguessitrest': ('mkguessitrest', 'tiangolo/uwsgi-nginx-flask:python3.7-alpine3.8', 'core'),
+    'mkguessitrest': ('mkguessitrest', 'tiangolo/uwsgi-nginx-flask:python3.8-alpine-2021-10-02', 'core'),
 
     # runs control network/ir/if/etc
     'mkhardwarecontrol': ('mkhardwarecontrol', 'busybox:1.33.1-uclibc', 'core'),
