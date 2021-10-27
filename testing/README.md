@@ -1,7 +1,7 @@
 = Description of validation and testing process via CI =
 
 The Jenkins docker image I use is jenkins/jenkins:lts
-    Then I install pip requirements file
+    Then I install pip requirements file and other plugins
 
 The ELK docker image I use is https://github.com/spujadas/elk-docker
     This is used to view logs as they are output via MK programs
@@ -63,6 +63,8 @@ https://github.com/drwetter/testssl.sh
 https://github.com/facebook/pyre-check
 https://hub.datree.io/?utm_source=datree.io&utm_medium=footer&utm_campaign=get-started-pricing-free
 
+https://github.com/xd009642/tarpaulin
+https://github.com/rust-lang/rust-clippy
 cppcheck - c/c++ code checker
     http://cppcheck.sourceforge.net/
 Clair - docker vuln scanner
