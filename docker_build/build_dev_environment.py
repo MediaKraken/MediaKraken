@@ -18,19 +18,19 @@ def subprocess_run(command_string):
 
 # build out docker and docker-compose
 print("build out docker and docker-compose")
-subprocess_run(shlex.split('python3 ../docker_compose/mediakraken_setup.py'))
+subprocess_run('python3 ../docker_compose/mediakraken_setup.py')
 
 # build the jenkins build for mediakraken
 print("build the jenkins build for mediakraken")
-subprocess_run(shlex.split('docker build ../docker/test/mkjenkins/. -t mkjenkins'))
+subprocess_run('docker build ../docker/test/mkjenkins/. -t mkjenkins')
 
 # TODO setup the mailcow
-# subprocess_run(shlex.split('python3 ../docker_compose/mediakraken_setup.py'))
+# subprocess_run('python3 ../docker_compose/mediakraken_setup.py')
 
 # selenium mediakraken test image
 print("selenium mediakraken test image")
-subprocess_run(shlex.split('docker build ../docker/test/mkselenium/. -t mkselenium'))
+subprocess_run('docker build ../docker/test/mkselenium/. -t mkselenium')
 
 # trac instance for bug tracking
 print("trac instance for bug tracking")
-subprocess_run(shlex.split('docker build ../docker/test/mktrac/. -t mktrac'))
+subprocess_run('docker build ../docker/test/mktrac/. -t mktrac')
