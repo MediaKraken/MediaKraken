@@ -13,8 +13,8 @@ subprocess.call(shlex.split('docker build ../docker/test/mkjenkins/. -t mkjenkin
                 stdout=subprocess.PIPE, shell=False)
 
 # TODO setup the mailcow
-subprocess.call(shlex.split('python3 ../docker_compose/mediakraken_setup.py'),
-                stdout=subprocess.PIPE, shell=False)
+# subprocess.call(shlex.split('python3 ../docker_compose/mediakraken_setup.py'),
+#                 stdout=subprocess.PIPE, shell=False)
 
 # selenium mediakraken test image
 subprocess.call(shlex.split('docker build ../docker/test/mkselenium/. -t mkselenium'),

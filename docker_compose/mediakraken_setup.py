@@ -93,6 +93,7 @@ if not os.path.isfile('/usr/local/bin/docker-compose'):
                                    stdout=subprocess.PIPE, shell=False)
     install_pid.wait()
 
+# this won't create on th-mkbuild-1 as there is an .env file in that directory
 if not os.path.isfile('.env'):
     file_handle = open('.env', 'w+')
     file_handle.write('DBPASS=')
@@ -109,5 +110,8 @@ if not os.path.isfile('.env'):
     file_handle.write('\n')
     file_handle.close()
 
-subprocess.call(shlex.split('python3 mediakraken_update_images.py'),
-                stdout=subprocess.PIPE, shell=False)
+try:
+    subprocess.call(shlex.split('python3 mediakraken_update_images.py'),
+                    stdout=subprocess.PIPE, shell=False)
+except:
+    pass

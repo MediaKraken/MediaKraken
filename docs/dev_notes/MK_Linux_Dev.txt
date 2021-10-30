@@ -1,3 +1,15 @@
+th-mkbuild-1
+debian 11
+apt update && apt upgrade
+apt install git nano
+# cd to home directy of user created during install
+git clone https://github.com/MediaKraken/MediaKraken
+cd MediaKraken
+git checkout refactor
+cd docker_build
+python3 build_dev_environment.py
+
+
 Debian 11
 apt install curl build-essential libssl-dev
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
