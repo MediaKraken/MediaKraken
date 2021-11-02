@@ -27,6 +27,19 @@ services:
       - "15432:5432"
     restart: unless-stopped
 
+  mktestjenkins:
+    image: th-registry-1.beaverbay.local:5000/mediakraken/mkjenkins:refactor
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    container_name: mktest_jenkins
+    networks:
+      - mediakraken_test_network
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - mediakraken_vol_test_jenkins:/var/jenkins_home
+
   # database management tool
   mktestpgadmin:
     image: dpage/pgadmin4:6.1
@@ -45,12 +58,28 @@ services:
     volumes:
       - mediakraken_vol_test_pgadmin:/var/lib/pgadmin
 
+  mktesttrac:
+    image: th-registry-1.beaverbay.local:5000/mediakraken/mktrac:refactor
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    container_name: mktest_trac
+    networks:
+      - mediakraken_test_network
+    ports:
+      - "18080:80"
+    volumes:
+      - mediakraken_vol_test_trac:/trac
+      - mediakraken_vol_test_trac_git:/trac/git/:ro
+
 networks:
   mediakraken_test_network:
     driver: bridge
     name: mk_mediakraken_test_network
 
 volumes:
+  mediakraken_vol_test_jenkins:
   mediakraken_vol_test_pgadmin:
   mediakraken_vol_test_postgresql:
   mediakraken_vol_test_postgresql_logging:
+  mediakraken_vol_test_trac:
+  mediakraken_vol_test_trac_git:
