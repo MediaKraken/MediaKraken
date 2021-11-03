@@ -10,7 +10,7 @@ panic = 'abort'
 amiquip = { version = "0.4", default-features = false }
 chrono = "0.4.19"
 reqwest = { version = "0.11.6", default-features = false, features = ["json", "rustls-tls"] }
-rppal = { version = "0.13.0", features = ["hal"] }
+rppal = { version = "0.13.1", features = ["hal"] }
 serde = { version = "1.0.130", features = ["derive"] }
 serde_json = "1.0.68"
 sys-info = "0.9.1"

@@ -7,7 +7,7 @@ edition = "2018"
 panic = 'abort'
 
 [dependencies]
-argh = "0.1.5"
+argh = "0.1.6"
 amiquip = { version = "0.4", default-features = false }
 chrono = "0.4.19"
 rustls = "0.20.0"

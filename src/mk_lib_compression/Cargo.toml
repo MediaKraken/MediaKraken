@@ -7,7 +7,7 @@ edition = "2018"
 panic = 'abort'
 
 [dependencies]
-flate2 = "1.0.20"
+flate2 = "1.0.22"
 
 [dev-dependencies]
 tokio-test = "*"

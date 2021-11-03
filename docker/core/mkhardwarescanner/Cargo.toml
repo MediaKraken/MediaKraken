@@ -8,7 +8,7 @@ panic = 'abort'
 
 [dependencies]
 chrono = "0.4.19"
-huelib = "0.13.1"  # https://github.com/nn1ks/huelib-rs
+huelib = "0.13.2"  # https://github.com/nn1ks/huelib-rs
 # onvif = { git = "https://github.com/lumeohq/onvif-rs" }   # has request with default
 reqwest = { version = "0.11.6", default-features = false, features = ["json", "rustls-tls"] }
 serde = { version = "1.0.130", features = ["derive"] }

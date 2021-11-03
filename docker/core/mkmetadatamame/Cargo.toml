@@ -7,9 +7,9 @@ edition = "2018"
 panic = 'abort'
 
 [dependencies]
-async-std = "1.9.0"
+async-std = "1.10.0"
 chrono = "0.4.19"
-flate2 = "1.0.20"
+flate2 = "1.0.22"
 reqwest = { version = "0.11.6", default-features = false, features = ["json", "rustls-tls"] }
 roxmltree = "0.14.1"
 rustls = "0.20.0"
