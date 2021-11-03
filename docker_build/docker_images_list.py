@@ -50,10 +50,10 @@ STAGE_CORE_IMAGES = {
     'mkbroadcast': ('mkbroadcast', 'scratch', 'core'),
 
     # chat server via mumble
-    'mkchatmumble': ('mkchatmumble', 'alpine:3.14.1', 'core'),
+    'mkchatmumble': ('mkchatmumble', 'alpine:3.14.2', 'core'),
 
     # chat server via ts3 - free license version
-    'mkchatteamspeak': ('mkchatteamspeak', 'alpine:3.14.1', 'core'),
+    'mkchatteamspeak': ('mkchatteamspeak', 'alpine:3.14.2', 'core'),
 
     # process cron jobs from the database to amqp or direct container launch
     'mkcron': ('mkcron', 'busybox:1.33.1-uclibc', 'core'),
@@ -86,7 +86,7 @@ STAGE_CORE_IMAGES = {
     'mknginx': ('mknginx', 'alpine:3.10', 'core'),
 
     # database connection pooler
-    'mkpgbouncer': ('mkpgbouncer', 'alpine:3.14.1', 'core'),
+    'mkpgbouncer': ('mkpgbouncer', 'alpine:3.14.2', 'core'),
 
     # amqp service (rabbitmq)
     'mkrabbitmq': ('mkrabbitmq', 'alpine:3.11', 'core'),
@@ -107,10 +107,10 @@ STAGE_CORE_IMAGES = {
     'mktranscode': ('mktranscode', 'busybox:1.33.1-uclibc', 'core'),
 
     # transmission server
-    'mktransmission': ('mktransmission', 'alpine:3.14.1', 'core'),
+    'mktransmission': ('mktransmission', 'alpine:3.14.2', 'core'),
 
-    # website via rust and actixweb
-    'mkwebapp': ('mkwebapp', 'mkbase_alpinepy3', 'core'),
+    # website via rust and rocket
+    'mkwebapp': ('mkwebapp', 'busybox:1.33.1-uclibc', 'core'),
 }
 
 STAGE_ONE_SECURITY_TOOLS = {

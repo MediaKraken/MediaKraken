@@ -8,13 +8,13 @@ panic = 'abort'
 
 [dependencies]
 chrono = "0.4.19"
-reqwest = { version = "0.11.4", default-features = false, features = ["json", "rustls-tls"] }
+reqwest = { version = "0.11.6", default-features = false, features = ["json", "rustls-tls"] }
 rustls = "0.20.0"
 serde = { version = "1.0.130", features = ["derive"] }
 serde_json = "1.0.68"
 sqlx = { version = "0.5.9", features = [ "chrono", "json", "runtime-tokio-rustls", "postgres", "uuid" ] }
-sys-info = "0.9.0"
-tokio = { version = "1.12.0", features = ["full"] }
+sys-info = "0.9.1"
+tokio = { version = "1.13.0", features = ["full"] }
 tokio-rustls = "0.22.0"
 validator = { version = "0.14", features = ["derive"] }
 

@@ -11,15 +11,15 @@ amiquip = { version = "0.4", default-features = false }
 chrono = "0.4.19"
 lazy_static = "1.4.0"
 rcgen = "0.8.14"
-reqwest = { version = "0.11.4", default-features = false, features = ["json", "rustls-tls"] }
+reqwest = { version = "0.11.6", default-features = false, features = ["json", "rustls-tls"] }
 ring = "0.16.20"
 serde = { version = "1.0.130", features = ["derive"] }
 serde_json = "1.0.68"
 shiplift = { version = "0.7", default-features = false, features = ["unix-socket"] }
 sqlx = { version = "0.5.9", features = [ "chrono", "json", "runtime-tokio-rustls", "postgres", "uuid" ] }
-sys-info = "0.9.0"
+sys-info = "0.9.1"
 tera = "1.13.0"
-tokio = { version = "1.12.0", features = ["full"] }
+tokio = { version = "1.13.0", features = ["full"] }
 uuid = { version = "0.8.2", features = ["serde", "v4"] }
 walkdir = "2.3.2"
 
