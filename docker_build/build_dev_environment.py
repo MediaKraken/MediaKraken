@@ -24,9 +24,6 @@ subprocess_run('python3 ../docker_compose/mediakraken_setup.py')
 print("build the jenkins build for mediakraken")
 subprocess_run('docker build ../docker/test/mkjenkins/. -t mkjenkins')
 
-# TODO setup the mailcow
-# subprocess_run('python3 ../docker_compose/mediakraken_setup.py')
-
 # selenium mediakraken test image
 print("selenium mediakraken test image")
 subprocess_run('docker build ../docker/test/mkselenium/. -t mkselenium')
