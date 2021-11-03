@@ -2,7 +2,6 @@ import subprocess
 import shlex
 
 # shouldn't need to build out Rust since that's container build
-# TODO do I really need a registry for the test/dev environment?
 
 
 def subprocess_run(command_string):

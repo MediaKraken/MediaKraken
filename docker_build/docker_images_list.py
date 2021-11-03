@@ -25,7 +25,6 @@ DEBIAN_MIRROR = 'ftp.us.debian.org'
 # PYPI_MIRROR = 'th-bandersnatch-1'
 PYPI_MIRROR = 'pypi.python.org'
 
-DOCKER_REPOSITORY = 'th-registry-1.beaverbay.local:5000'
 DOCKERHUB_REPOSITORY = 'index.docker.io:443'
 
 PROXY_IP_PORT = '0.0.0.0:8080'

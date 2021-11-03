@@ -94,34 +94,34 @@ def build_email_push(build_group, email_subject, branch_tag, push_hub_image=Fals
             subject_text = ' FAILED'
             if email_body.find('Successfully tagged mediakraken') != -1:
                 subject_text = ' SUCCESS'
-                # tag for local repo
-                pid_tag_proc = subprocess.Popen(
-                    shlex.split('docker tag mediakraken/%s:%s %s/mediakraken/%s:%s'
-                                % (build_group[docker_images][0],
-                                   branch_tag,
-                                   docker_images_list.DOCKER_REPOSITORY,
-                                   build_group[docker_images][0],
-                                   branch_tag)),
-                    stdout=subprocess.PIPE, shell=False)
-                while True:
-                    line = pid_tag_proc.stdout.readline()
-                    if not line:
-                        break
-                    print(line.rstrip(), flush=True)
-                pid_tag_proc.wait()
+                # # tag for local repo
+                # pid_tag_proc = subprocess.Popen(
+                #     shlex.split('docker tag mediakraken/%s:%s %s/mediakraken/%s:%s'
+                #                 % (build_group[docker_images][0],
+                #                    branch_tag,
+                #                    docker_images_list.DOCKER_REPOSITORY,
+                #                    build_group[docker_images][0],
+                #                    branch_tag)),
+                #     stdout=subprocess.PIPE, shell=False)
+                # while True:
+                #     line = pid_tag_proc.stdout.readline()
+                #     if not line:
+                #         break
+                #     print(line.rstrip(), flush=True)
+                # pid_tag_proc.wait()
                 # push to local repo
-                pid_push_proc = subprocess.Popen(
-                    shlex.split('docker push %s/mediakraken/%s:%s'
-                                % (docker_images_list.DOCKER_REPOSITORY,
-                                   build_group[docker_images][0],
-                                   branch_tag)),
-                    stdout=subprocess.PIPE, shell=False)
-                while True:
-                    line = pid_push_proc.stdout.readline()
-                    if not line:
-                        break
-                    print(line.rstrip(), flush=True)
-                pid_push_proc.wait()
+                # pid_push_proc = subprocess.Popen(
+                #     shlex.split('docker push %s/mediakraken/%s:%s'
+                #                 % (docker_images_list.DOCKER_REPOSITORY,
+                #                    build_group[docker_images][0],
+                #                    branch_tag)),
+                #     stdout=subprocess.PIPE, shell=False)
+                # while True:
+                #     line = pid_push_proc.stdout.readline()
+                #     if not line:
+                #         break
+                #     print(line.rstrip(), flush=True)
+                # pid_push_proc.wait()
                 # push to remote repo
                 if push_hub_image:
                     pid_push_proc = subprocess.Popen(
