@@ -20,6 +20,11 @@ RUN adduser \
 WORKDIR /mediakraken
 
 COPY ./ .
+COPY ../../../src/mk_lib_database/src/mk_lib_database.rs .
+COPY ../../../src/mk_lib_database/src/mk_lib_database_cron.rs .
+COPY ../../../src/mk_lib_database/src/mk_lib_database_version.rs .
+COPY ../../../src/mk_lib_database/src/mk_lib_database_version_schema.rs .
+COPY ../../../src/mk_lib_logging/src/mk_lib_logging.rs .
 
 RUN cargo build --target x86_64-unknown-linux-musl --release
 
