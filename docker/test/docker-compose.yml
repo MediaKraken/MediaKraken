@@ -4,7 +4,7 @@ version: '3.6'
 services:
   # Postgresql server
   mktestdatabase:
-    image: th-registry-1.beaverbay.local:5000/mediakraken/mkdatabase:refactor
+    image: mediakraken/mkdatabase:refactor
     environment:
       - MAX_CONNECTIONS=10
       - MAX_WAL_SENDERS=2
@@ -28,7 +28,7 @@ services:
     restart: unless-stopped
 
   mktestjenkins:
-    image: th-registry-1.beaverbay.local:5000/mediakraken/mkjenkins:refactor
+    image: mediakraken/mkjenkins:refactor
     stop_grace_period: 30s
     stop_signal: SIGTERM
     container_name: mktest_jenkins
@@ -59,7 +59,7 @@ services:
       - mediakraken_vol_test_pgadmin:/var/lib/pgadmin
 
   mktesttrac:
-    image: th-registry-1.beaverbay.local:5000/mediakraken/mktrac:refactor
+    image: mediakraken/mktrac:refactor
     stop_grace_period: 30s
     stop_signal: SIGTERM
     container_name: mktest_trac
