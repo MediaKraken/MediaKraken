@@ -10,7 +10,7 @@ mailer:1.34
 proxmox:0.4.2
 python:1.3
 seleniumhtmlreport:1.1
-sloccount:1.24
+sloccount:1.25
 validating-email-parameter:1.10
 violations:0.7.11
 vncrecorder:1.35
