@@ -1,4 +1,3 @@
-
 pub async fn mk_lib_database_link_delete(pool: &sqlx::PgPool,
                                          link_uuid: uuid::Uuid)
                                          -> Result<(), sqlx::Error> {
@@ -10,6 +9,7 @@ pub async fn mk_lib_database_link_delete(pool: &sqlx::PgPool,
     transaction.commit().await?;
     Ok(())
 }
+
 /*
 
 async def db_link_list(self, offset=0, records=None, search_value=None, db_connection=None):
@@ -36,19 +36,6 @@ async def db_link_list(self, offset=0, records=None, search_value=None, db_conne
                                    ' offset $1 limit $2)',
                                    offset, records)
 
-
-async def db_link_list_count(self, search_value=None, db_connection=None):
-    """
-    Return count of linked servers
-    """
-    if search_value is not None:
-        return await db_conn.fetchval('select count(*)'
-                                      ' from mm_link where mm_link_name % $1',
-                                      search_value)
-    else:
-        return await db_conn.fetchval('select count(*) from mm_link')
-
-
 async def db_link_insert(self, link_json, db_connection=None):
     """
     Insert linked server
@@ -61,3 +48,21 @@ async def db_link_insert(self, link_json, db_connection=None):
     return new_guid
 
  */
+
+pub async fn mk_lib_database_link_list_count(pool: &sqlx::PgPool,
+                                             search_value: String)
+                                             -> Result<(i32), sqlx::Error> {
+    if search_value != "" {
+        let row: (i32, ) = sqlx::query_as("select count(*) from mm_library_link \
+            where mm_link_name % $1")
+            .bind(search_value)
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    } else {
+        let row: (i32, ) = sqlx::query_as("select count(*) from mm_library_link")
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    }
+}

@@ -26,38 +26,54 @@ pub async fn mk_lib_database_dedicated_server_read(pool: &sqlx::PgPool,
     Ok(rows)
 }
 
-/*
 
-async def db_game_server_upsert(self, server_name, server_json, db_connection=None):
-    """
-    Upsert a game server into the database
-    """
-    new_guid = uuid.uuid4()
-    await db_conn.execute('INSERT INTO mm_game_dedicated_servers (mm_game_server_guid,'
-                          ' mm_game_server_name,'
-                          ' mm_game_server_json)'
-                          ' VALUES ($1, $2, $3)'
-                          ' ON CONFLICT (mm_game_server_name)'
-                          ' DO UPDATE SET mm_game_server_json = $4',
-                          new_guid, server_name, server_json,
-                          server_json)
-    return new_guid
+pub async fn mk_lib_database_game_server_detail(pool: &sqlx::PgPool,
+                                                game_server_uuid: uuid::Uuid)
+                                                -> Result<Vec<PgRow>, sqlx::Error> {
+    let rows: Vec<PgRow> = sqlx::query("select mm_game_server_name, mm_game_server_json \
+        from mm_game_dedicated_servers where mm_game_server_guid = $1")
+        .bind(game_server_uuid)
+        .fetch_one(pool)
+        .await?;
+    Ok(rows)
+}
 
 
-async def db_game_server_detail(self, record_uuid, db_connection=None):
-    """
-    game server info
-    """
-    return await db_conn.fetchrow('select mm_game_server_name,'
-                                  ' mm_game_server_json'
-                                  ' from mm_game_dedicated_servers'
-                                  ' where mm_game_server_guid = %s', record_uuid)
+pub async fn mk_lib_database_game_server_list_count(pool: &sqlx::PgPool,
+                                                    search_value: String)
+                                                    -> Result<(i32), sqlx::Error> {
+    if search_value != "" {
+        let row: (i32, ) = sqlx::query_as("select count(*) from mm_game_dedicated_servers \
+            where mm_game_server_name = $1")
+            .bind(search_value)
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    } else {
+        let row: (i32, ) = sqlx::query_as("select count(*) from mm_game_dedicated_servers")
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    }
+}
 
 
-async def db_game_server_list_count(self, db_connection=None):
-    """
-    Return number of game servers
-    """
-    return await db_conn.fetchval('select count(*) from mm_game_dedicated_servers')
-
- */
+pub async fn mk_lib_database_game_server_upsert(pool: &sqlx::PgPool,
+                                                server_name: String,
+                                                server_json: serde_json::Value)
+                                                -> Result<(uuid::Uuid), sqlx::Error> {
+    // TODO um, would return "invalid" uuid on update
+    new_guid = Uuid::new_v4();
+    let mut transaction = pool.begin().await?;
+    sqlx::query_as("INSERT INTO mm_game_dedicated_servers(mm_game_server_guid, \
+        mm_game_server_name, mm_game_server_json) VALUES($ 1, $2, $3) \
+        ON CONFLICT(mm_game_server_name) DO UPDATE SET mm_game_server_json = $ 4")
+        .bind(new_guid)
+        .bind(server_name)
+        .bind(server_json)
+        .bind(server_json)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(new_guid)
+}

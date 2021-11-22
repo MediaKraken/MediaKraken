@@ -88,4 +88,11 @@ def db_pgsql_table_exits(self, table_name):
 # TODO - see last analynze, etc
 # SELECT schemaname, relname, last_analyze FROM pg_stat_all_tables WHERE relname = 'city';
 
+async def db_table_index_check(self, resource_name, db_connection=None):
+    """
+    # check for table or index
+    """
+    # TODO little bobby tables
+    await self.db_cursor.execute('SELECT to_regclass(\'public.$1\')', resource_name)
+    return await self.db_cursor.fetchval()
  */
