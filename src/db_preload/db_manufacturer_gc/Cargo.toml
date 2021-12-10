@@ -1,7 +1,7 @@
 [package]
 name = "db_manufacturer_gc"
 version = "0.0.1"
-edition = "2018"
+edition = "2021"
 
 [profile.release]
 panic = 'abort'
