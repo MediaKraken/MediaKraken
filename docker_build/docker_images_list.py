@@ -56,25 +56,25 @@ STAGE_CORE_IMAGES = {
     'mkchatteamspeak': ('mkchatteamspeak', 'alpine:3.14.2', 'core'),
 
     # process cron jobs from the database to amqp or direct container launch
-    'mkcron': ('mkcron', 'busybox:1.33.1-uclibc', 'core'),
+    'mkcron': ('mkcron', 'busybox:1.34.1-uclibc', 'core'),
 
     # database via postgresql
     'mkdatabase': ('mkdatabase', 'debian:buster-slim', 'core'),
 
     # download files/etc trailers/etc from ampq records
-    'mkdownload': ('mkdownload', 'busybox:1.33.1-uclibc', 'core'),
+    'mkdownload': ('mkdownload', 'busybox:1.34.1-uclibc', 'core'),
 
     # guessit via web rest
     'mkguessitrest': ('mkguessitrest', 'tiangolo/uwsgi-nginx-flask:python3.8-alpine-2021-10-02', 'core'),
 
     # runs control network/ir/if/etc
-    'mkhardwarecontrol': ('mkhardwarecontrol', 'busybox:1.33.1-uclibc', 'core'),
+    'mkhardwarecontrol': ('mkhardwarecontrol', 'busybox:1.34.1-uclibc', 'core'),
 
     # runs as HOST to find new hardware - run and exit
-    'mkhardwarescanner': ('mkhardwarescanner', 'busybox:1.33.1-uclibc', 'core'),
+    'mkhardwarescanner': ('mkhardwarescanner', 'busybox:1.34.1-uclibc', 'core'),
 
     # inotify of file system changes to amqp
-    'mkinotify': ('mkinotify', 'busybox:1.33.1-uclibc', 'core'),
+    'mkinotify': ('mkinotify', 'busybox:1.34.1-uclibc', 'core'),
 
     # download libretro cores that are newer - run and exit
     'mklibretrocorefetchupdate': ('mklibretrocorefetchupdate', 'scratch', 'core'),
@@ -92,10 +92,10 @@ STAGE_CORE_IMAGES = {
     'mkrabbitmq': ('mkrabbitmq', 'alpine:3.11', 'core'),
 
     # consume and process ampq records
-    'mkrabbitconsume': ('mkrabbitconsume', 'busybox:1.33.1-uclibc', 'core'),
+    'mkrabbitconsume': ('mkrabbitconsume', 'busybox:1.34.1-uclibc', 'core'),
 
     # server for "fat" clients to talk too (local server)
-    'mktcpserver': ('mktcpserver', 'busybox:1.33.1-uclibc', 'core'),
+    'mktcpserver': ('mktcpserver', 'busybox:1.34.1-uclibc', 'core'),
 
     # download tmdb dump of ids in database and insert into downloads - run and exit
     'mktmdbnetfetchbulk': ('mktmdbnetfetchbulk', 'scratch', 'core'),
@@ -104,13 +104,13 @@ STAGE_CORE_IMAGES = {
     'mktmdbnetfetchupdate': ('mktmdbnetfetchupdate', 'scratch', 'core'),
 
     # transcode/STREAM media to client - run and exit
-    'mktranscode': ('mktranscode', 'busybox:1.33.1-uclibc', 'core'),
+    'mktranscode': ('mktranscode', 'busybox:1.34.1-uclibc', 'core'),
 
     # transmission server
     'mktransmission': ('mktransmission', 'alpine:3.14.2', 'core'),
 
     # website via rust and rocket
-    'mkwebapp': ('mkwebapp', 'busybox:1.33.1-uclibc', 'core'),
+    'mkwebapp': ('mkwebapp', 'busybox:1.34.1-uclibc', 'core'),
 }
 
 STAGE_ONE_SECURITY_TOOLS = {

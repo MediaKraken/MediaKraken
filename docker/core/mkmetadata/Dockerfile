@@ -26,7 +26,7 @@ RUN cargo build --target x86_64-unknown-linux-musl --release
 ####################################################################################################
 ## Final image
 ####################################################################################################
-#FROM busybox:1.33.1-uclibc
+#FROM busybox:1.34.1-uclibc
 FROM scratch
 
 # Import from builder.
