@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Don't think you can get rid of this.
+# Docker build is dumb and can only access stuff in root directory
+
 # mkcron
 cp ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkcron/src/.
 cp ../src/mk_lib_database/src/mk_lib_database_cron.rs ../docker/core/mkcron/src/.
