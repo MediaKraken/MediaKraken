@@ -1,4 +1,4 @@
-FROM rust:1.56.1 as cargo-build
+FROM rust:1.57 as cargo-build
 
 RUN rustup target add x86_64-unknown-linux-musl
 RUN apt update && apt install -y musl-tools musl-dev
@@ -26,7 +26,7 @@ RUN cargo build --target x86_64-unknown-linux-musl --release
 ####################################################################################################
 ## Final image
 ####################################################################################################
-FROM busybox:1.33.1-uclibc
+FROM busybox:1.34.1-uclibc
 RUN wget -O /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.9.0/wait &&\
     chmod +x /wait
 # Import from builder.

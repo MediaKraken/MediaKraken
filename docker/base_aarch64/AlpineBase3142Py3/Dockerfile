@@ -22,7 +22,7 @@ RUN sed -i "2 s/^#//" /etc/apk/repositories \
   busybox==1.33.1-r3 \
   python3==3.9.5-r1 \
   py3-pip==20.3.4-r1 \
-  && pip3 install --no-cache-dir --upgrade pip==21.3 \
+  && pip3 install --no-cache-dir --upgrade pip==21.3.1 \
   && pip3 install --no-cache-dir --trusted-host ${PIPMIRROR} -i https://${PIPMIRROR}/simple -r requirements.txt \
   && rm requirements.txt \
   && adduser -DHs /sbin/nologin metaman
