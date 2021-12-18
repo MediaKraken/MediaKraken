@@ -60,7 +60,8 @@ services:
 
   # package cache tool
   mktestsonatype:
-    image: mediakraken/mksonatype:refactor
+    image: sonatype/nexus3:3.37.1
+#    image: mediakraken/mksonatype:refactor
     stop_grace_period: 30s
     stop_signal: SIGTERM
     container_name: mktest_sonatype
