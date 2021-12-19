@@ -61,7 +61,6 @@ services:
   # package cache tool
   mktestsonatype:
     image: sonatype/nexus3:3.37.1
-#    image: mediakraken/mksonatype:refactor
     stop_grace_period: 30s
     stop_signal: SIGTERM
     container_name: mktest_sonatype
@@ -71,6 +70,8 @@ services:
       - "8081:8081"
     volumes:
       - mediakraken_vol_test_sonatype:/nexus-data
+      - ./mksonatype/deploy:/opt/sonatype/nexus/deploy
+      #- ./mksonatype/plugins:/opt/sonatype/sonatype-work/nexus3/plugin-repository
 
   mktesttrac:
     image: mediakraken/mktrac:refactor
