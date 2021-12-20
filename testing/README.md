@@ -6,10 +6,8 @@ The Jenkins docker image I use is jenkins/jenkins:lts
 The ELK docker image I use is https://github.com/spujadas/elk-docker
     This is used to view logs as they are output via MK programs
 
-# debian buster
+# debian bullseye
 apt install python3-dotenv
-Buster upgrade broke  python3 -m pip install --user packagetoinstall
-
 
 Run the following tests from under the MediaKraken_CI
     python3 validate_code.py
