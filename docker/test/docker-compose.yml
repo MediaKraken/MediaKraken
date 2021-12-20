@@ -71,7 +71,6 @@ services:
     volumes:
       - mediakraken_vol_test_sonatype:/nexus-data
       - ./mksonatype/deploy:/opt/sonatype/nexus/deploy
-      #- ./mksonatype/plugins:/opt/sonatype/sonatype-work/nexus3/plugin-repository
 
   mktesttrac:
     image: mediakraken/mktrac:refactor
