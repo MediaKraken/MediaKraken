@@ -27,6 +27,26 @@ services:
       - "15432:5432"
     restart: unless-stopped
 
+  mktestelk:
+    image: mediakraken/mkelk:refactor
+    environment:
+      - ELASTICSEARCH_START=1
+      - LOGSTASH_START=1
+      - KIBANA_START=1
+    container_name: mktest_elk
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    volumes:
+      - mediakraken_vol_test_elk:/var/lib/elasticsearch
+    networks:
+      - mediakraken_test_network
+    ports:
+      - "5000:5000"
+      - "5044:5044"
+      - "5601:5601"
+      - "9200:9200"
+    restart: unless-stopped
+
   mktestjenkins:
     image: mediakraken/mkjenkins:refactor
     stop_grace_period: 30s
@@ -91,6 +111,7 @@ networks:
     name: mk_mediakraken_test_network
 
 volumes:
+  mediakraken_vol_test_elk:
   mediakraken_vol_test_jenkins:
   mediakraken_vol_test_pgadmin:
   mediakraken_vol_test_postgresql:
