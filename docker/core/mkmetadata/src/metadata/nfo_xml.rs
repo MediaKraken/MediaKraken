@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 pub async fn nfo_xml_file(media_file_path: &str) {
     let mut nfo_data;
-    let mut mutxml_data;
+    let mut xml_data;
     // check for NFO or XML as no need to do lookup if ID found in it
     // pull the "real" extension
     let ext_check = pathlib.Path(media_file_path).suffix.lower();
