@@ -21,12 +21,16 @@ pub async fn mk_lib_database_media_category_by_name(pool: &sqlx::PgPool,
     Ok(rows)
 }
 
-/*
-
-async def db_media_game_category_update(self, category, game_id, db_connection=None):
-    await db_conn.execute('update mm_game_info'
-                          ' set gi_gc_category = $1'
-                          ' where gi_id = $2', category, game_id)
-    await db_conn.execute('commit')
-
- */
+pub async fn mk_lib_database_media_game_category_update(pool: &sqlx::PgPool,
+                                                        category: String,
+                                                        game_id: uuid::Uuid)
+                                                        -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
+    sqlx::query("update mm_game_info set gi_gc_category = $1 where gi_id = $2")
+        .bind(category)
+        .bind(game_id)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(())
+}

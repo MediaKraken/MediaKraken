@@ -2,6 +2,7 @@ use sqlx::postgres::PgRow;
 use uuid::Uuid;
 
 /*
+# TODO port query
 async def db_activity_insert(self, activity_name, activity_overview,
                              activity_short_overview, activity_type, activity_itemid,
                              activity_userid,
@@ -28,6 +29,7 @@ async def db_activity_insert(self, activity_name, activity_overview,
     return new_guid
 
 
+# TODO port query
 async def db_activity_purge(self, days_old, db_connection=None):
     """
     Purge records older than specified days

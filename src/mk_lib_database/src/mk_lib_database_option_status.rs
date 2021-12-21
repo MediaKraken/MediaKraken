@@ -26,6 +26,7 @@ pub async fn mk_lib_database_option_status_read(pool: &sqlx::PgPool)
 }
 
 /*
+# TODO port query
 async def db_opt_update(self, option_json, db_connection=None):
     """
     Update option json
@@ -36,6 +37,7 @@ async def db_opt_update(self, option_json, db_connection=None):
                           option_json)
 
 
+# TODO port query
 async def db_opt_status_update(self, option_json, status_json, db_connection=None):
     """
     Update option and status json
@@ -47,6 +49,7 @@ async def db_opt_status_update(self, option_json, status_json, db_connection=Non
                           option_json, status_json)
     await db_conn.execute('commit')
 
+# TODO port query
 def db_opt_status_update_scan(self, scan_json):
     """
     Update scan info
@@ -58,6 +61,7 @@ def db_opt_status_update_scan(self, scan_json):
     self.db_commit()
 
 
+# TODO port query
 def db_opt_status_update_scan_rec(self, dir_path, scan_status, scan_percent):
     """
     Update scan data

@@ -3,6 +3,7 @@ use sqlx::postgres::PgRow;
 
 /*
 
+# TODO port query
 async def db_media_tv_list(self, genre_type=None, list_limit=None,
                            group_collection=False, offset=0, search_value=None,
                            db_connection=None):

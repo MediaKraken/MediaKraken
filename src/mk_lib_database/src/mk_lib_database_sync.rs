@@ -14,6 +14,7 @@ pub async fn mk_lib_database_sync_delete(pool: &sqlx::PgPool,
 }
 
 /*
+# TODO port query
 async def db_sync_progress_update(self, sync_guid, sync_percent, db_connection=None):
     """
     # update progress
@@ -23,6 +24,7 @@ async def db_sync_progress_update(self, sync_guid, sync_percent, db_connection=N
     await db_conn.execute('commit')
 
 
+# TODO port query
 async def db_sync_list_count(self, db_connection=None):
     """
     # return count of sync jobs
@@ -30,6 +32,7 @@ async def db_sync_list_count(self, db_connection=None):
     return await db_conn.fetchval('select count(*) from mm_sync')
 
 
+# TODO port query
 async def db_sync_insert(self, sync_path, sync_path_to, sync_json, db_connection=None):
     """
     # insert sync job
@@ -45,6 +48,7 @@ async def db_sync_insert(self, sync_path, sync_path_to, sync_json, db_connection
     return new_guid
 
 
+# TODO port query
 async def db_sync_list(self, offset=0, records=None, user_guid=None, db_connection=None):
     """
     # return list of sync jobs

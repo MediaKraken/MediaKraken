@@ -44,6 +44,7 @@ pub async fn mk_lib_database_media_movie_random(pool: &sqlx::PgPool)
 
 /*
 
+# TODO port query
 async def db_media_movie_list(self, class_guid, list_type=None, list_genre='all',
                               list_limit=0, group_collection=False, offset=None,
                               include_remote=False,
@@ -578,6 +579,7 @@ async def db_media_movie_list(self, class_guid, list_type=None, list_genre='all'
                     return await db_conn.fetch('select 1')
 
 
+# TODO port query
 async def db_media_movie_list_count(self, class_guid, list_type=None,
                                     list_genre='all',
                                     group_collection=False, include_remote=False, search_text=None,

@@ -63,7 +63,7 @@ pub async fn mk_lib_database_cron_insert(pool: &sqlx::PgPool,
                     .execute(&mut transaction)
                     .await?;
     transaction.commit().await?;
-    Ok(new_cron_id)
+    Ok(new_guid)
 }
 
 pub async fn mk_lib_database_cron_count(pool: &sqlx::PgPool,
