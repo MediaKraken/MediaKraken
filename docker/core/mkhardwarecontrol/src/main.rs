@@ -49,11 +49,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     mk_lib_logging::mk_logging_post_elk("info",
                                                         json!({ "msg body": json_message }),
                                                         LOGGING_INDEX_NAME).await;
-                    // if json_message["Type"].to_string() == "File" {
-                    //     // do NOT remove the header.....this is the SAVE location
-                    //     mk_lib_network::mk_download_file_from_url(json_message["URL"].to_string(),
-                    //                                               json_message["Local Save Path"].to_string());
-                    // }
               /*
                       if json_message['Type'] == 'Hardware':
                 if json_message['Subtype'] == 'Lights':
