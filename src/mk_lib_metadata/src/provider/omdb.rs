@@ -1,17 +1,29 @@
 /*
 
-class CommonMetadataANIdb:
+class CommonMetadataOMDB:
     """
-    Class for interfacing with anidb
+    Class for interfacing with omdb
     """
 
-    def __init__(self, db_connection):
-        self.adba_connection = None
-        self.db_connection = db_connection
+    def __init__(self):
+        pass
 
-    async def com_net_anidb_fetch_titles_file(self):
+    async def com_omdb_get(self, media_title, media_year, media_fullplot, media_tomatoes):
+        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+                                                                         message_text={
+                                                                             'function':
+                                                                                 inspect.stack()[0][
+                                                                                     3],
+                                                                             'locals': locals(),
+                                                                             'caller':
+                                                                                 inspect.stack()[1][
+                                                                                     3]})
+        omdb.get(title=media_title, year=media_year, fullplot=media_fullplot,
+                 tomatoes=media_tomatoes)
+
+    async def com_omdb_search(self, media_title):
         """
-        Fetch the tarball of anime titles
+        Search
         """
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
@@ -22,18 +34,11 @@ class CommonMetadataANIdb:
                                                                              'caller':
                                                                                  inspect.stack()[1][
                                                                                      3]})
-        # check to see if local titles file is older than 24 hours
-        if common_file.com_file_modification_timestamp('./cache/anidb_titles.gz') \
-                < (time.time() - 86400):
-            await common_network_async.mk_network_fetch_from_url_async(
-                'http://anidb.net/api/anime-titles.xml.gz',
-                './cache/anidb_titles.gz')
-            return True  # new file
-        return False
+        omdb.search(media_title)
 
-    async def com_net_anidb_save_title_data_to_db(self, title_file='./cache/anidb_titles.gz'):
+    async def com_omdb_search_movie(self, media_title):
         """
-        Save anidb title data to database
+        Search movie
         """
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
@@ -44,45 +49,11 @@ class CommonMetadataANIdb:
                                                                              'caller':
                                                                                  inspect.stack()[1][
                                                                                      3]})
-        file_handle = gzip.open(title_file, 'rb')
-        # file_handle = gzip.open(title_file, 'rt', encoding='utf-8') # python 3.3+
-        anime_aid = None
-        anime_title = None
-        anime_title_ja = None
-        for file_line in file_handle.readlines():
-            # common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text=
-            # {'stuff':'line: %s', file_line.decode('utf-8'))
-            if file_line.decode('utf-8').find('<anime aid="') != -1:
-                anime_aid = file_line.decode(
-                    'utf-8').split('"', 1)[1].rsplit('"', 1)[0]
-                # common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text=
-                # {'stuff':'aid: %s', anime_aid)
-            elif file_line.decode('utf-8').find('title xml:lang="ja"') != -1:
-                anime_title_ja = file_line.decode(
-                    'utf-8').split('>', 1)[1].rsplit('<', 1)[0]
-                # common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text=
-                # {'stuff':'title: %s', anime_title_ja)
-            elif file_line.decode('utf-8').find('title xml:lang="en"') != -1:
-                anime_title = file_line.decode(
-                    'utf-8').split('>', 1)[1].rsplit('<', 1)[0]
-                # common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text=
-                # {'stuff':'title: %s', anime_title)
-            elif file_line.decode('utf-8').find('</anime>') != -1:
-                if self.db_connection.db_meta_anime_meta_by_id(anime_aid) is None:
-                    if anime_title is None:
-                        anime_title = anime_title_ja
-                    self.db_connection.db_meta_anime_title_insert(
-                        {'anidb': anime_aid}, anime_title,
-                        None, None, None, None, None)
-                # reset each time to handle ja when this doesn't exist
-                anime_title = None
-        file_handle.close()
-        common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
-                                                             message_text={'stuff': 'end'})
+        omdb.search_movie(media_title)
 
-    async def com_net_anidb_aid_by_title(self, title_to_search):
+    async def com_omdb_search_episode(self, media_title):
         """
-        Find AID by title
+        Search episode
         """
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
@@ -93,22 +64,11 @@ class CommonMetadataANIdb:
                                                                              'caller':
                                                                                  inspect.stack()[1][
                                                                                      3]})
-        # check the local DB
-        local_db_result = self.db_connection.db_meta_anime_title_search(
-            title_to_search)
-        if local_db_result is None:
-            # check to see if local titles file is older than 24 hours
-            if self.com_net_anidb_fetch_titles_file():
-                # since new titles file....recheck by title
-                self.com_net_anidb_aid_by_title(title_to_search)
-            else:
-                return None
-        else:
-            return local_db_result
+        omdb.search_episode(media_title)
 
-    async def com_net_anidb_connect(self, user_name, user_password):
+    async def com_omdb_search_series(self, media_title):
         """
-        Remote api calls
+        Search series
         """
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
@@ -119,18 +79,11 @@ class CommonMetadataANIdb:
                                                                              'caller':
                                                                                  inspect.stack()[1][
                                                                                      3]})
-        self.adba_connection = adba.Connection(log=True)
-        try:
-            self.adba_connection.auth(user_name, user_password)
-        except Exception as err_code:
-            common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='error',
-                                                                 message_text={"exception msg":
-                                                                                   err_code})
-        return self.adba_connection
+        omdb.search_series(media_title)
 
-    async def com_net_anidb_logout(self):
+    async def com_omdb_imdb(self, imdbid):
         """
-        Logout of anidb
+        Info by IMDB id
         """
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
@@ -141,11 +94,11 @@ class CommonMetadataANIdb:
                                                                              'caller':
                                                                                  inspect.stack()[1][
                                                                                      3]})
-        self.adba_connection.logout()
+        omdb.imdbid(imdbid)
 
-    async def com_net_anidb_stop(self):
+    async def com_omdb_title(self, media_title):
         """
-        Close the anidb connect and stop the thread
+        Grab by title
         """
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
@@ -156,6 +109,33 @@ class CommonMetadataANIdb:
                                                                              'caller':
                                                                                  inspect.stack()[1][
                                                                                      3]})
-        self.adba_connection.stop()
+        omdb.title(media_title)
+
+    async def com_omdb_default(self):
+        """
+        Set defaults for data returned
+        """
+        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+                                                                         message_text={
+                                                                             'function':
+                                                                                 inspect.stack()[0][
+                                                                                     3],
+                                                                             'locals': locals(),
+                                                                             'caller':
+                                                                                 inspect.stack()[1][
+                                                                                     3]})
+        omdb.set_default('tomatoes', True)
+
+    async def com_omdb_request(self, media_title, media_year, media_fullplot, media_tomatoes):
+        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+                                                                         message_text={
+                                                                             'function':
+                                                                                 inspect.stack()[0][
+                                                                                     3],
+                                                                             'locals': locals(),
+                                                                             'caller':
+                                                                                 inspect.stack()[1][
+                                                                                     3]})
+        omdb.request(media_title, media_year, media_fullplot, media_tomatoes)
 
  */
