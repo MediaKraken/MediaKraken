@@ -75,3 +75,9 @@ pub async fn mk_lib_database_cron_count(pool: &sqlx::PgPool,
         .await?;
     Ok(row.0)
 }
+
+/*
+async def db_user_detail(self, guid, db_connection=None):
+    return await db_conn.fetchrow('select * from mm_user'
+                                  ' where id = $1', guid)
+ */

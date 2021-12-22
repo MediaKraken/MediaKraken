@@ -9,6 +9,7 @@ pub fn about() -> Template {
     })
 }
 
+// @common_global.jinja_template.template('bss_public/bss_public_about.html')
 pub fn customize(tera: &mut Tera) {
     tera.add_raw_template("tera/about.html", r#"
         {% extends "tera/base" %}

@@ -88,4 +88,7 @@ async def db_user_login(self, user_name, user_password, db_connection=None):
         return result['id'], result['is_admin'], result['per_page']
     return 'invalid_password', None, None
 
+async def db_user_detail(self, guid, db_connection=None):
+    return await db_conn.fetchrow('select * from mm_user'
+                                  ' where id = $1', guid)
  */

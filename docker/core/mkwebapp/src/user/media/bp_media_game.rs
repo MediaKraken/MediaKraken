@@ -1,16 +1,23 @@
 /*
-@blueprint_user_metadata_game_system.route('/user_meta_game_system', methods=['GET', 'POST'])
-@common_global.jinja_template.template('bss_user/metadata/bss_user_metadata_game_system.html')
+from common import common_global
+from common import common_pagination_bootstrap
+from sanic import Blueprint
+
+blueprint_user_game = Blueprint('name_blueprint_user_game', url_prefix='/user')
+
+
+@blueprint_user_game.route('/user_game', methods=['GET', 'POST'])
+@common_global.jinja_template.template('bss_user/media/bss_user_media_game.html')
 @common_global.auth.login_required
-async def url_bp_user_metadata_game_system(request):
+async def url_bp_user_game(request):
     """
-    Display list of game system metadata
+    Display game page
     """
     page, offset = common_pagination_bootstrap.com_pagination_page_calc(request)
-    request.ctx.session['search_page'] = 'meta_game_system'
+    request.ctx.session['search_page'] = 'media_games'
     db_connection = await request.app.db_pool.acquire()
     pagination = common_pagination_bootstrap.com_pagination_boot_html(page,
-                                                                      url='/user/user_meta_game',
+                                                                      url='/user/user_game',
                                                                       item_count=await request.app.db_functions.db_meta_game_system_list_count(
                                                                           db_connection=db_connection),
                                                                       client_items_per_page=
@@ -30,21 +37,13 @@ async def url_bp_user_metadata_game_system(request):
     }
 
 
-@blueprint_user_metadata_game_system.route('/user_meta_game_system_detail/<guid>')
-@common_global.jinja_template.template(
-    'bss_user/metadata/bss_user_metadata_game_system_detail.html')
+@blueprint_user_game.route('/user_game_detail/<guid>', methods=['GET', 'POST'])
+@common_global.jinja_template.template('bss_user/media/bss_user_media_game_detail.html')
 @common_global.auth.login_required
-async def url_bp_user_metadata_game_system_detail(request, guid):
+async def url_bp_user_game_detail(request, guid):
     """
-    Display metadata game detail
+    Display game detail page
     """
-    db_connection = await request.app.db_pool.acquire()
-    media_data = await request.app.db_functions.db_meta_game_system_by_guid(guid,
-                                                                            db_connection=db_connection)
-    await request.app.db_pool.release(db_connection)
-    return {
-        'guid': guid,
-        'data': media_data,
-    }
+    return {}
 
  */
