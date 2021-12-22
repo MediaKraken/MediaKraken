@@ -44,6 +44,66 @@ pub async fn mk_lib_database_media_movie_random(pool: &sqlx::PgPool)
 
 /*
 
+def db_read_media_metadata_movie_both(self, media_guid):
+    """
+    # read in metadata and ffprobe by id
+    """
+    self.db_cursor.execute('select mm_media_ffprobe_json,'
+                           'mm_metadata_json,'
+                           'mm_metadata_localimage_json'
+                           ' from mm_media, mm_metadata_movie'
+                           ' where mm_media_metadata_guid = mm_metadata_guid'
+                           ' and mm_media_guid = %s', (media_guid,))
+    try:
+        return self.db_cursor.fetchone()
+    except:
+        return None
+
+def db_read_media_list_by_uuid(self, media_guid):
+    self.db_cursor.execute('select mm_media_ffprobe_json'
+                           ' from mm_media'
+                           ' where mm_media_metadata_guid in (select mm_metadata_guid from '
+                           'mm_media where mm_media_guild = %s)', (media_guid,))
+    video_data = []
+    for file_data in self.db_cursor.fetchall():
+        # go through streams
+        audio_streams = []
+        subtitle_streams = ['None']
+        if 'streams' in file_data['FFprobe'] and file_data['FFprobe']['streams'] is not None:
+            for stream_info in file_data['FFprobe']['streams']:
+                common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
+                                                                     message_text={
+                                                                         "info": stream_info})
+                stream_language = ''
+                stream_title = ''
+                stream_codec = ''
+                try:
+                    stream_language = stream_info['tags']['language'] + ' - '
+                except:
+                    pass
+                try:
+                    stream_title = stream_info['tags']['title'] + ' - '
+                except:
+                    pass
+                try:
+                    stream_codec \
+                        = stream_info['codec_long_name'].rsplit('(', 1)[1].replace(')', '') \
+                          + ' - '
+                except:
+                    pass
+                if stream_info['codec_type'] == 'audio':
+                    common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
+                                                                         message_text={
+                                                                             'stuff': 'audio'})
+                    audio_streams.append((stream_codec + stream_language
+                                          + stream_title)[:-3])
+                elif stream_info['codec_type'] == 'subtitle':
+                    subtitle_streams.append(stream_language)
+                    common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
+                                                                         message_text={
+                                                                             'stuff': 'subtitle'})
+    return video_data
+
 # TODO port query
 async def db_media_movie_list(self, class_guid, list_type=None, list_genre='all',
                               list_limit=0, group_collection=False, offset=None,
