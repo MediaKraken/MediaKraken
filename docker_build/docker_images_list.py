@@ -16,14 +16,19 @@
   MA 02110-1301, USA.
 '''
 
-# ALPINE_MIRROR = 'th-alpinemirror-1.beaverbay.local'
+# ALPINE_MIRROR = 'th-mkrepo-1.beaverbay.local'
 ALPINE_MIRROR = 'dl-cdn.alpinelinux.org'
 
-# DEBIAN_MIRROR = 'th-debianmirror-1.beaverbay.local'
+# CENTOS_MIRROR = 'http://th-mkrepo-1.beaverbay.local'
+CENTOS_MIRROR = 'http://mirror.centos.org/'
+
+# DEBIAN_MIRROR = 'th-mkrepo-1.beaverbay.local'
 DEBIAN_MIRROR = 'ftp.us.debian.org'
 
-# PYPI_MIRROR = 'th-bandersnatch-1'
+# PYPI_MIRROR = 'th-mkrepo-1.beaverbay.local'
 PYPI_MIRROR = 'pypi.python.org'
+
+DOCKER_REPOSITORY = 'th-mkrepo-1.beaverbay.local'
 
 DOCKERHUB_REPOSITORY = 'index.docker.io:443'
 
@@ -34,16 +39,13 @@ PROXY_USER_PASS = None
 # the data is directory, name of container, base image used to build container
 
 # base OS images to build off of, meaning there is a 'from' in the docker file(s) that use these
-# or simply stand alone images
 STAGE_ONE_IMAGES = {
     'AlpineBase3142Py3': ('mkbase_alpinepy3', 'alpine:3.14.2', 'base'),
+    # 'AlpineBase3143Py3': ('mkbase_alpinepy3', 'alpine:3.14.3', 'base'),
+    # 'AlpineBase3150Py3': ('mkbase_alpinepy3', 'alpine:3.15.0', 'base'),
 }
 
 STAGE_TWO_IMAGES = {}
-
-STAGE_ONE_GAME_SERVERS = {}
-
-STAGE_TWO_GAME_SERVERS = {}
 
 STAGE_CORE_IMAGES = {
     # broadcast server IP for web and client connectivity, must run from HOST
@@ -59,10 +61,13 @@ STAGE_CORE_IMAGES = {
     'mkcron': ('mkcron', 'busybox:1.34.1-uclibc', 'core'),
 
     # database via postgresql
-    'mkdatabase': ('mkdatabase', 'debian:buster-slim', 'core'),
+    'mkdatabase': ('mkdatabase', 'debian:bullseye-slim', 'core'),
 
     # download files/etc trailers/etc from ampq records
     'mkdownload': ('mkdownload', 'busybox:1.34.1-uclibc', 'core'),
+
+    # thegamesdb bulk data fetch
+    'mkgamesdbnetfetchbulk': ('mkgamesdbnetfetchbulk', 'busybox:1.34.1-uclibc', 'core'),
 
     # guessit via web rest
     'mkguessitrest': ('mkguessitrest', 'tiangolo/uwsgi-nginx-flask:python3.8-alpine-2021-10-02', 'core'),
@@ -82,17 +87,26 @@ STAGE_CORE_IMAGES = {
     # scan media directories for new media - run and exit
     'mkmediascanner': ('mkmediascanner', 'scratch', 'core'),
 
+    # process metadata for media
+    'mkmetadata': ('mkmetadata', 'busybox:1.34.1-uclibc', 'core'),
+
+    # process metadata for mame and other game xml
+    'mkmetadatamame': ('mkmetadatamame', 'busybox:1.34.1-uclibc', 'core'),
+
     # nginx proxy for http to https and some bot blocking
-    'mknginx': ('mknginx', 'alpine:3.10', 'core'),
+    'mknginx': ('mknginx', 'alpine:3.13', 'core'),
 
     # database connection pooler
     'mkpgbouncer': ('mkpgbouncer', 'alpine:3.14.2', 'core'),
 
+    # consume and process ampq records
+    'mkrabbitconsume': ('mkrabbitconsume', 'busybox:1.34.1-uclibc', 'core'),
+
     # amqp service (rabbitmq)
     'mkrabbitmq': ('mkrabbitmq', 'alpine:3.11', 'core'),
 
-    # consume and process ampq records
-    'mkrabbitconsume': ('mkrabbitconsume', 'busybox:1.34.1-uclibc', 'core'),
+    # schedulesdirect update
+    'mkschedulesdirectupdate': ('mkschedulesdirectupdate', 'busybox:1.34.1-uclibc', 'core'),
 
     # server for "fat" clients to talk too (local server)
     'mktcpserver': ('mktcpserver', 'busybox:1.34.1-uclibc', 'core'),
@@ -109,8 +123,32 @@ STAGE_CORE_IMAGES = {
     # transmission server
     'mktransmission': ('mktransmission', 'alpine:3.14.2', 'core'),
 
+    # tvheadend
+    'mktvheadend': ('mktvheadend', 'alpine:3.12', 'core'),
+
     # website via rust and rocket
     'mkwebapp': ('mkwebapp', 'busybox:1.34.1-uclibc', 'core'),
+}
+
+STAGE_ONE_GAME_SERVERS = {
+    # for hosting games via dosbox and web
+    'mkgamebasedosboxweb': ('mkgamebasedosboxweb', 'ubuntu:20.10', 'game_base'),
+
+    # for hosting games via retroarch and web
+    'mkgamebaseretroarchweb': ('mkgamebaseretroarchweb', 'debian:buster-slim', 'game_base'),
+
+    # for hosting games via steamcmd
+    'mkgamebasesteamcmd': ('mkgamebasesteamcmd', 'debian:10.9-slim', 'game_base'),
+
+    # for hosting games via steamcmd as root
+    'mkgamebasesteamcmdroot': ('mkgamebasesteamcmdroot', 'debian:10.9-slim', 'game_base'),
+
+    # for hosting software via wine
+    'mkgamebasewine': ('mkgamebasewine', 'debian:10.9-slim', 'game_base'),
+}
+
+STAGE_TWO_GAME_SERVERS = {
+
 }
 
 STAGE_ONE_SECURITY_TOOLS = {
@@ -121,6 +159,10 @@ STAGE_TWO_SECURITY_TOOLS = {
 
 }
 
-STAGE_ONE_TESTING_TOOLS = {}
+STAGE_ONE_TESTING_TOOLS = {
 
-STAGE_TWO_TESTING_TOOLS = {}
+}
+
+STAGE_TWO_TESTING_TOOLS = {
+
+}
