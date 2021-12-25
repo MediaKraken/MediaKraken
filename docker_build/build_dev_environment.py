@@ -19,15 +19,20 @@ def subprocess_run(command_string):
 print("build out docker and docker-compose")
 subprocess_run('python3 ../docker_compose/mediakraken_setup.py')
 
+# pull and start mailcow
+print("pull and start mailcow")
+subprocess_run('docker-compose -t ./docker/test/docker-compose-mailcow.yml pull')
+subprocess_run('docker-compose -t ./docker/test/docker-compose-mailcow.yml up -d')
 
-# # build the jenkins build for mediakraken
-# print("build the jenkins build for mediakraken")
-# subprocess_run('docker build ../docker/test/mkjenkins/. -t mediakraken/mkjenkins')
+# build out test images
+print("build out test images")
+subprocess_run('python3 ./docker_build/build_and_deploy.py -t')
 
-# # selenium mediakraken test image
-# print("selenium mediakraken test image")
-# subprocess_run('docker build ../docker/test/mkselenium/. -t mediakraken/mkselenium')
-#
-# # trac instance for bug tracking
-# print("trac instance for bug tracking")
-# subprocess_run('docker build ../docker/test/mktrac/. -t mediakraken/mktrac')
+# build out BASE images
+print("build out base images")
+subprocess_run('python3 ./docker_build/build_and_deploy.py -b')
+
+# pull the test images
+print("pull the test images")
+subprocess_run('docker-compose -t ./docker/test/docker-compose.yml pull')
+subprocess_run('docker-compose -t ./docker/test/docker-compose.yml up -d')

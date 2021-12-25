@@ -1,6 +1,8 @@
 dev build
 debian 11
-git pull code
+apt install nano git python3
+git clone https://www.github.com/MediaKraken/MediaKraken
+cd MediaKraken
 git checkout refactor
 
 cd ./docker_build
