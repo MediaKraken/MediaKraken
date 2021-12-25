@@ -21,8 +21,8 @@ subprocess_run('python3 ../docker_compose/mediakraken_setup.py')
 
 # pull and start mailcow
 print("pull and start mailcow")
-subprocess_run('docker-compose -t ../docker/test/docker-compose-mailcow.yml pull')
-subprocess_run('docker-compose -t ../docker/test/docker-compose-mailcow.yml up -d')
+subprocess_run('docker-compose -f ../docker/test/docker-compose-mailcow.yml pull')
+subprocess_run('docker-compose -f ../docker/test/docker-compose-mailcow.yml up -d')
 
 # build out test images
 print("build out test images")
@@ -34,5 +34,5 @@ subprocess_run('python3 build_and_deploy.py -b')
 
 # pull the test images
 print("pull the test images")
-subprocess_run('docker-compose -t ../docker/test/docker-compose.yml pull')
-subprocess_run('docker-compose -t ../docker/test/docker-compose.yml up -d')
+subprocess_run('docker-compose -f ../docker/test/docker-compose.yml pull')
+subprocess_run('docker-compose -f ../docker/test/docker-compose.yml up -d')
