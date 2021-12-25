@@ -160,7 +160,12 @@ STAGE_TWO_SECURITY_TOOLS = {
 }
 
 STAGE_ONE_TESTING_TOOLS = {
-
+    'mkelk': ('mkelk', 'phusion/baseimage-focal-1.1.0', 'test'),
+    'mkftpserver': ('mkftpserver', 'alpine:3.14.2', 'test'),
+    'mkjenkins': ('mkjenkins', 'jenkins/jenkins:lts', 'test'),
+    'mkselenium': ('mkselenium', 'mkbase_alpinepy3', 'test'),
+    'mksonatype': ('mksonatype', 'sonatype/nexus3', 'test'),
+    'mktrac': ('mktrac', 'debian:buster-slim', 'test'),
 }
 
 STAGE_TWO_TESTING_TOOLS = {
