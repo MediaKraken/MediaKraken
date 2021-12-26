@@ -110,6 +110,7 @@ if not os.path.isfile('.env'):
     file_handle.write('\n')
     file_handle.close()
 
+# so being run from "wrong" location during th-mkbuild-1 setup will finish
 try:
     subprocess.call(shlex.split('python3 mediakraken_update_images.py'),
                     stdout=subprocess.PIPE, shell=False)
