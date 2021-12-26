@@ -1,3 +1,2 @@
 #!/bin/sh
-docker system prune -a -f
-docker volume prune -f
+docker system prune -a -f --volumes
