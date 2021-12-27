@@ -17,17 +17,21 @@ def subprocess_run(command_string):
     pid_build_proc.wait()
 
 
+# so the shutils will work
+working_directory = os.getcwd()
+
 print("Path:", os.getcwd())
 # build dir(s) to hold mediakraken data (docker data)
 os.makedirs("/var/opt/mediakraken/sonatype/deploy", exist_ok=True)
 print("Path:", os.getcwd())
-shutil.copy("../docker/test/mksonatype/deploy/*.kar", "/var/opt/mediakraken/sonatype/deploy/.")
+shutil.copy(os.path.join(working_directory + "docker/test/mksonatype/deploy/*.kar",
+                         "/var/opt/mediakraken/sonatype/deploy/."))
 print("Path:", os.getcwd())
 os.makedirs("/var/opt/mediakraken/trac/projects", exist_ok=True)
 print("Path:", os.getcwd())
-shutil.copy("../docker/test/mktrac/.htpasswd", "/var/opt/mediakraken/trac/.")
+shutil.copy(os.path.join(working_directory + "docker/test/mktrac/.htpasswd", "/var/opt/mediakraken/trac/."))
 print("Path:", os.getcwd())
-shutil.copy("../docker/test/*.yml", "/var/opt/mediakraken/")
+shutil.copy(os.path.join(working_directory + "docker/test/*.yml", "/var/opt/mediakraken/"))
 print("Path:", os.getcwd())
 
 # build out docker and docker-compose
