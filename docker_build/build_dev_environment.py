@@ -19,7 +19,7 @@ def subprocess_run(command_string):
 
 # build dir(s) to hold mediakraken data (docker data)
 os.makedirs("/var/opt/mediakraken/sonatype", exist_ok=True)
-shutil.copy("../docker/test/mksonatype/deploy", "/var/opt/mediakraken/sonatype/.")
+shutil.copy("../docker/test/mksonatype/deploy/*.kar", "/var/opt/mediakraken/sonatype/deploy/.")
 os.makedirs("/var/opt/mediakraken/trac/projects", exist_ok=True)
 shutil.copy("../docker/test/mktrac/.htpasswd", "/var/opt/mediakraken/trac/.")
 shutil.copy("../docker/test/*.yml", "/var/opt/mediakraken/")
