@@ -25,7 +25,8 @@ print("Path:", os.getcwd())
 os.makedirs("/var/opt/mediakraken/sonatype", exist_ok=True)
 print("Path:", os.getcwd())
 shutil.copytree(os.path.join(working_directory, "docker/test/mksonatype/deploy"),
-                         "/var/opt/mediakraken/sonatype")
+                         "/var/opt/mediakraken/sonatype", dirs_exist_ok=True)
+
 print("Path:", os.getcwd())
 os.makedirs("/var/opt/mediakraken/trac/projects", exist_ok=True)
 print("Path:", os.getcwd())
