@@ -24,7 +24,7 @@ print("Path:", os.getcwd())
 # build dir(s) to hold mediakraken data (docker data)
 os.makedirs("/var/opt/mediakraken/sonatype/deploy", exist_ok=True)
 print("Path:", os.getcwd())
-shutil.copy(os.path.join(working_directory, "docker/test/mksonatype/deploy/*.kar"),
+shutil.copy(os.path.join(working_directory, "docker/test/mksonatype/deploy/*"),
                          "/var/opt/mediakraken/sonatype/deploy/.")
 print("Path:", os.getcwd())
 os.makedirs("/var/opt/mediakraken/trac/projects", exist_ok=True)
