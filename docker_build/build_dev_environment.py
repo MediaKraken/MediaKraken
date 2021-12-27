@@ -17,8 +17,11 @@ def subprocess_run(command_string):
     pid_build_proc.wait()
 
 
-# build dir to hold mediakraken data (docker data)
-os.makedirs("/var/opt/mediakraken", exist_ok=True)
+# build dir(s) to hold mediakraken data (docker data)
+os.makedirs("/var/opt/mediakraken/sonatype", exist_ok=True)
+shutil.copy("../docker/test/mksonatype/deploy", "/var/opt/mediakraken/sonatype/.")
+os.makedirs("/var/opt/mediakraken/trac/projects", exist_ok=True)
+shutil.copy("../docker/test/mktrac/.htpasswd", "/var/opt/mediakraken/trac/.")
 shutil.copy("../docker/test/*.yml", "/var/opt/mediakraken/")
 
 # build out docker and docker-compose
@@ -33,13 +36,11 @@ subprocess_run('docker-compose -f docker-compose-mailcow.yml up -d')
 
 # build out test images
 print("build out test images")
+os.chdir("/home/metaman/MediaKraken/docker_build")
 subprocess_run('python3 build_and_deploy.py -t')
 
-# # build out BASE images
-# print("build out base images")
-# subprocess_run('python3 build_and_deploy.py -b')
-#
-# # pull the test images
-# print("pull the test images")
-# # why pull stuff I just built? subprocess_run('docker-compose -f ../docker/test/docker-compose.yml pull')
-# subprocess_run('docker-compose -f ../docker/test/docker-compose.yml up -d')
+# pull the test images, for sonatype, etc
+print("pull the test images")
+subprocess_run('docker-compose -f ../docker/test/docker-compose.yml pull')
+os.chdir("/var/opt/mediakraken")
+subprocess_run('docker-compose -f docker-compose.yml up -d')

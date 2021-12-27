@@ -90,7 +90,7 @@ services:
       - "8081:8081"
     volumes:
       - mediakraken_vol_test_sonatype:/nexus-data
-      - ./mksonatype/deploy:/opt/sonatype/nexus/deploy
+      - /var/opt/mediakraken/sonatype/deploy:/opt/sonatype/nexus/deploy
 
   mktesttrac:
     image: mediakraken/mktrac:refactor
@@ -102,8 +102,7 @@ services:
     ports:
       - "18080:80"
     volumes:
-      - mediakraken_vol_test_trac:/trac
-      - mediakraken_vol_test_trac_git:/trac/git/:ro
+      - /var/opt/mediakraken/trac:/trac
 
 networks:
   mediakraken_test_network:
@@ -117,5 +116,3 @@ volumes:
   mediakraken_vol_test_postgresql:
   mediakraken_vol_test_postgresql_logging:
   mediakraken_vol_test_sonatype:
-  mediakraken_vol_test_trac:
-  mediakraken_vol_test_trac_git:
