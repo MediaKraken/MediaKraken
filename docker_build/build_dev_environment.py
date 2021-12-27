@@ -18,7 +18,7 @@ def subprocess_run(command_string):
 
 
 # so the shutils will work
-working_directory = os.getcwd()
+working_directory = os.getcwd().replace("docker_build", "")
 
 print("Path:", os.getcwd())
 # build dir(s) to hold mediakraken data (docker data)
