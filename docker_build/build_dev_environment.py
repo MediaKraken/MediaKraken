@@ -25,7 +25,7 @@ os.makedirs("/var/opt/mediakraken/sonatype/deploy", exist_ok=True)
 shutil.copytree(os.path.join(working_directory, "docker/test/mksonatype/deploy"),
                          "/var/opt/mediakraken/sonatype/deploy", dirs_exist_ok=True)
 
-os.makedirs("/var/opt/mediakraken/trac/projects", exist_ok=True)
+os.makedirs("/var/opt/mediakraken/trac", exist_ok=True)
 shutil.copy(os.path.join(working_directory, "docker/test/mktrac/.htpasswd"), "/var/opt/mediakraken/trac/.")
 shutil.copy(os.path.join(working_directory, "docker/test/docker-compose.yml"), "/var/opt/mediakraken/.")
 shutil.copy(os.path.join(working_directory, "docker/test/docker-compose-thebuggenie.yml"), "/var/opt/mediakraken/.")
