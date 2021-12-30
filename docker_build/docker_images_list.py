@@ -16,19 +16,20 @@
   MA 02110-1301, USA.
 '''
 
-# ALPINE_MIRROR = 'th-mkrepo-1.beaverbay.local'
-ALPINE_MIRROR = 'dl-cdn.alpinelinux.org'
 
-# CENTOS_MIRROR = 'http://th-mkrepo-1.beaverbay.local'
-CENTOS_MIRROR = 'http://mirror.centos.org/'
+ALPINE_MIRROR = 'th-mkbuild-1.beaverbay.local'
+#ALPINE_MIRROR = 'dl-cdn.alpinelinux.org'
 
-# DEBIAN_MIRROR = 'th-mkrepo-1.beaverbay.local'
-DEBIAN_MIRROR = 'ftp.us.debian.org'
+CENTOS_MIRROR = 'th-mkbuild-1.beaverbay.local'
+#CENTOS_MIRROR = 'http://mirror.centos.org/'
 
-# PYPI_MIRROR = 'th-mkrepo-1.beaverbay.local'
-PYPI_MIRROR = 'pypi.python.org'
+DEBIAN_MIRROR = 'th-mkbuild-1.beaverbay.local'
+#DEBIAN_MIRROR = 'ftp.us.debian.org'
 
-DOCKER_REPOSITORY = 'th-mkrepo-1.beaverbay.local'
+PYPI_MIRROR = 'th-mkbuild-1.beaverbay.local'
+#PYPI_MIRROR = 'pypi.python.org'
+
+DOCKER_REPOSITORY = 'th-mkbuild-1.beaverbay.local'
 
 DOCKERHUB_REPOSITORY = 'index.docker.io:443'
 

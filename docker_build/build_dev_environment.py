@@ -42,15 +42,21 @@ os.chdir("/var/opt/mediakraken/mailcow-dockerized")
 subprocess_run('./generate_config.sh')
 subprocess_run('docker-compose -f docker-compose.yml up -d')
 
+# pull sonatype ane pgadmin images
+os.chdir("/home/metaman/MediaKraken/docker_build")
+subprocess_run('docker-compose -f ../docker/test/docker-compose.yml pull mktestsonatype')
+subprocess_run('docker-compose -f ../docker/test/docker-compose.yml pull mktestpgadmin')
+
+# pause user to setup sonatype
+print("Access and configure sonatype at http://th-mkbuild-1.beaverbay.local:8081")
+input("Press Enter to continue...after configuration of Alpine, Debian, CentOS, PyPi are completed")
+
 # build out test images
 print("build out test images")
-os.chdir("/home/metaman/MediaKraken/docker_build")
 subprocess_run('python3 build_and_deploy.py -t')
-
-# pull the test images, for sonatype, etc
-print("pull the test images")
-subprocess_run('docker-compose -f ../docker/test/docker-compose.yml pull')
 
 # start up the "test" images
 os.chdir("/var/opt/mediakraken")
 subprocess_run('docker-compose -f docker-compose.yml up -d')
+
+print("setup has completed. Access Jenkins at http://th-mkbuild-1.beaverbay.local:8080 for build pipeline")
