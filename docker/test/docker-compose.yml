@@ -104,6 +104,8 @@ services:
     volumes:
       - mediakraken_vol_test_teamcity:/data/teamcity_server/datadir
       - mediakraken_vol_test_teamcity_logs:/opt/teamcity/logs
+    depends_on:
+      - mktestteamcitydb
 
   mktestteamcityagent:
     image: jetbrains/teamcity-agent:2021.2.1
@@ -126,9 +128,10 @@ services:
     ports:
       - "15432:5432"
     environment:
-      POSTGRES_PASSWORD: metaman
-      POSTGRES_USER: metaman
-      POSTGRES_DB: mkdbserver
+      - POSTGRES_PASSWORD=metaman
+      - POSTGRES_USER=metaman
+      - POSTGRES_DB=mkdbserver
+      - PG_DATA=/var/lib/postgresql/data
     networks:
       - mediakraken_test_network
     volumes:
