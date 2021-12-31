@@ -42,10 +42,12 @@ os.chdir("/var/opt/mediakraken/mailcow-dockerized")
 subprocess_run('./generate_config.sh')
 subprocess_run('docker-compose -f docker-compose.yml up -d')
 
-# pull sonatype ane pgadmin images
+# pull sonatype, teamcity and pgadmin images
 os.chdir("/home/metaman/MediaKraken/docker_build")
 subprocess_run('docker-compose -f ../docker/test/docker-compose.yml pull mktestsonatype')
 subprocess_run('docker-compose -f ../docker/test/docker-compose.yml pull mktestpgadmin')
+subprocess_run('docker-compose -f ../docker/test/docker-compose.yml pull mktestteamcity')
+subprocess_run('docker-compose -f ../docker/test/docker-compose.yml pull mktestteamcityagent')
 
 # pause user to setup sonatype
 print("Access and configure sonatype at http://th-mkbuild-1.beaverbay.local:8081")
@@ -60,3 +62,4 @@ os.chdir("/var/opt/mediakraken")
 subprocess_run('docker-compose -f docker-compose.yml up -d')
 
 print("setup has completed. Access Jenkins at http://th-mkbuild-1.beaverbay.local:8080 for build pipeline")
+print("setup has completed. Access TeamCity at http://th-mkbuild-1.beaverbay.local:8111 for build pipeline")
