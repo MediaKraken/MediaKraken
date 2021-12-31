@@ -118,6 +118,22 @@ services:
       - mediakraken_vol_test_teamcity_agent:/teamcity_agent/conf
       - /var/run/docker.sock:/var/run/docker.sock
 
+  mktestteamcitydb:
+    image: postgres:14.1-bullseye
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    container_name: mktest_teamcity_db
+    ports:
+      - "15432:5432"
+    environment:
+      POSTGRES_PASSWORD: metaman
+      POSTGRES_USER: metaman
+      POSTGRES_DB: mkdbserver
+    networks:
+      - mediakraken_test_network
+    volumes:
+      - mediakraken_vol_test_teamcity_db:/var/lib/postgresql/data
+
   mktesttrac:
     image: mediakraken/mktrac:refactor
     stop_grace_period: 30s
@@ -145,3 +161,4 @@ volumes:
   mediakraken_vol_test_teamcity:
   mediakraken_vol_test_teamcity_logs:
   mediakraken_vol_test_teamcity_agent:
+  mediakraken_vol_test_teamcity_db:

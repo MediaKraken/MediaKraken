@@ -48,6 +48,7 @@ subprocess_run('docker-compose -f ../docker/test/docker-compose.yml pull mktests
 subprocess_run('docker-compose -f ../docker/test/docker-compose.yml pull mktestpgadmin')
 subprocess_run('docker-compose -f ../docker/test/docker-compose.yml pull mktestteamcity')
 subprocess_run('docker-compose -f ../docker/test/docker-compose.yml pull mktestteamcityagent')
+subprocess_run('docker-compose -f ../docker/test/docker-compose.yml pull mktestteamcitydb')
 
 # pause user to setup sonatype
 print("Access and configure sonatype at http://th-mkbuild-1.beaverbay.local:8081")
