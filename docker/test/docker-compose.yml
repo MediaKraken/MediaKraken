@@ -126,7 +126,7 @@ services:
     stop_signal: SIGTERM
     container_name: mktest_teamcity_db
     ports:
-      - "15432:5432"
+      - "25432:5432"
     environment:
       - POSTGRES_PASSWORD=metaman
       - POSTGRES_USER=metaman
