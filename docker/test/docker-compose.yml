@@ -92,52 +92,52 @@ services:
       - mediakraken_vol_test_sonatype:/nexus-data
       - /var/opt/mediakraken/sonatype/deploy:/opt/sonatype/nexus/deploy
 
-  mktestteamcity:
-    image: jetbrains/teamcity-server:2021.2.1
-    stop_grace_period: 30s
-    stop_signal: SIGTERM
-    container_name: mktest_teamcity_server
-    networks:
-      - mediakraken_test_network
-    ports:
-      - "8111:8111"
-    volumes:
-      - mediakraken_vol_test_teamcity:/data/teamcity_server/datadir
-      - mediakraken_vol_test_teamcity_logs:/opt/teamcity/logs
-    depends_on:
-      - mktestteamcitydb
+#  mktestteamcity:
+#    image: jetbrains/teamcity-server:2021.2.1
+#    stop_grace_period: 30s
+#    stop_signal: SIGTERM
+#    container_name: mktest_teamcity_server
+#    networks:
+#      - mediakraken_test_network
+#    ports:
+#      - "8111:8111"
+#    volumes:
+#      - mediakraken_vol_test_teamcity:/data/teamcity_server/datadir
+#      - mediakraken_vol_test_teamcity_logs:/opt/teamcity/logs
+#    depends_on:
+#      - mktestteamcitydb
 
-  mktestteamcityagent:
-    image: jetbrains/teamcity-agent:2021.2.1-linux-sudo
-    stop_grace_period: 30s
-    stop_signal: SIGTERM
-    container_name: mktest_teamcity_agent
-    privileged: true
-    environment:
-      SERVER_URL: "http://th-mkbuild-1.beaverbay.local:8111"
-      DOCKER_IN_DOCKER: start
-    networks:
-      - mediakraken_test_network
-    volumes:
-      - mediakraken_vol_test_teamcity_agent:/teamcity_agent/conf
-      - /var/run/docker.sock:/var/run/docker.sock
+#  mktestteamcityagent:
+#    image: jetbrains/teamcity-agent:2021.2.1-linux-sudo
+#    stop_grace_period: 30s
+#    stop_signal: SIGTERM
+#    container_name: mktest_teamcity_agent
+#    privileged: true
+#    environment:
+#      SERVER_URL: "http://th-mkbuild-1.beaverbay.local:8111"
+#      DOCKER_IN_DOCKER: start
+#    networks:
+#      - mediakraken_test_network
+#    volumes:
+#      - mediakraken_vol_test_teamcity_agent:/teamcity_agent/conf
+#      - /var/run/docker.sock:/var/run/docker.sock
 
-  mktestteamcitydb:
-    image: postgres:14.1-bullseye
-    stop_grace_period: 30s
-    stop_signal: SIGTERM
-    container_name: mktest_teamcity_db
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_PASSWORD=metaman
-      - POSTGRES_USER=metaman
-      - POSTGRES_DB=mkdbserver
-      - PG_DATA=/var/lib/postgresql/data
-    networks:
-      - mediakraken_test_network
-    volumes:
-      - mediakraken_vol_test_teamcity_db:/var/lib/postgresql/data
+#  mktestteamcitydb:
+#    image: postgres:14.1-bullseye
+#    stop_grace_period: 30s
+#    stop_signal: SIGTERM
+#    container_name: mktest_teamcity_db
+#    ports:
+#      - "5432:5432"
+#    environment:
+#      - POSTGRES_PASSWORD=metaman
+#      - POSTGRES_USER=metaman
+#      - POSTGRES_DB=mkdbserver
+#      - PG_DATA=/var/lib/postgresql/data
+#    networks:
+#      - mediakraken_test_network
+#    volumes:
+#      - mediakraken_vol_test_teamcity_db:/var/lib/postgresql/data
 
   mktesttrac:
     image: mediakraken/mktrac:refactor
