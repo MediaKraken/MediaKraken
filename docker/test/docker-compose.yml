@@ -108,12 +108,14 @@ services:
       - mktestteamcitydb
 
   mktestteamcityagent:
-    image: jetbrains/teamcity-agent:2021.2.1
+    image: jetbrains/teamcity-agent:2021.2.1-linux-sudo
     stop_grace_period: 30s
     stop_signal: SIGTERM
     container_name: mktest_teamcity_agent
+    privileged: true
     environment:
       SERVER_URL: "http://th-mkbuild-1.beaverbay.local:8111"
+      DOCKER_IN_DOCKER: start
     networks:
       - mediakraken_test_network
     volumes:
