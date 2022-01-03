@@ -15,7 +15,7 @@ except ModuleNotFoundError:
 
 # TODO install pyflakes
 # TODO install pylint
-# TODO python3-pip wget
+# TODO python3-pip wget shellcheck
 """
 wget https://github.com/hadolint/hadolint/releases/download/v2.8.0/hadolint-Linux-x86_64
 mv hadolint-Linux-x86_64 /usr/bin/hadolint
@@ -37,10 +37,12 @@ job.add_task(ExecTask(['cloc', '.']))
 
 stage = pipeline.ensure_stage("linting")
 job = stage.ensure_job("lint_docker")
-job.add_task(ExecTask(['hadolint', '$(git ls-files | grep Dockerfile)']))
+job.add_task(ExecTask(['hadolint', '$(git\rls-files\r|\rgrep\rDockerfile)']))
 job = stage.ensure_job("lint_python")
 job.add_task(ExecTask(['pylint', '$(git ls-files *.py)']))
 job.add_task(ExecTask(['pyflakes', '.']))  # it didn't like the git method above
+job = stage.ensure_job("lint_shell")
+job.add_task(ExecTask(['shellcheck', '$(git ls-files *.sh)']))
 # job = stage.ensure_job("lint_rust")
 # job.add_task(ExecTask(['cloc', '.']))
 
@@ -58,6 +60,8 @@ for build_group in (docker_images_list.STAGE_ONE_IMAGES,
 # stage = pipeline.ensure_stage("docker_build_core")
 
 # stage = pipeline.ensure_stage("docker_build_games")
+
+# stage = pipeline.ensure_stage("docker_security")
 
 # stage = pipeline.ensure_stage("test_mediakraken")
 

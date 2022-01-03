@@ -75,9 +75,6 @@ pocsuite3 - remote vulnerability testing
     https://github.com/knownsec/pocsuite3
 safety - pip requirements security check
     https://pyup.io/safety/
-Shellcheck - shell script checker
-    https://github.com/anordal/shellharden
-    https://github.com/koalaman/shellcheck
 Sonarqube - code scanner
     https://docs.sonarqube.org/latest/setup/install-server/
 Vuls - os scanner via ssh
@@ -93,11 +90,13 @@ archerysec - vuln db and monitor
 gocd:
 cloc
 pylint - python linter
+    https://www.pylint.org/
 pyflakes - python linter
     https://github.com/PyCQA/pyflakes
-https://www.pylint.org/
-    Hadolint (https://github.com/hadolint/hadolint) - lint your Dockerfile
-        # docker pull hadolint/hadolint
-        wget https://github.com/hadolint/hadolint/releases/download/v2.0.0/hadolint-Linux-x86_64
-        mv hadolint-Linux-x86_64 /usr/bin/hadolint
-        chmod +x /usr/bin/hadolint
+Hadolint (https://github.com/hadolint/hadolint) - lint your Dockerfile
+    wget https://github.com/hadolint/hadolint/releases/download/v2.0.0/hadolint-Linux-x86_64
+    mv hadolint-Linux-x86_64 /usr/bin/hadolint
+    chmod +x /usr/bin/hadolint
+Shellcheck - shell script checker
+#    https://github.com/anordal/shellharden
+    https://github.com/koalaman/shellcheck
