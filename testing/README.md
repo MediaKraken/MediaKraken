@@ -7,13 +7,13 @@ The ELK docker image I use is https://github.com/spujadas/elk-docker
     This is used to view logs as they are output via MK programs
 
 # debian bullseye
-apt install python3-dotenv python3-pip cloc shellcheck
+apt install python3-dotenv python3-pip wget cloc shellcheck
 pip3 install pylint pyflakes
 
 Run the following tests from under the MediaKraken_CI
     python3 validate_code.py
-        Bandit (https://github.com/PyCQA/bandit) to find unsecured code - against MediaKraken source
-            pip3 install bandit==1.7.0
+#        Bandit (https://github.com/PyCQA/bandit) to find unsecured code - against MediaKraken source
+#            pip3 install bandit==1.7.0
         # TODO FIX Graudit (https://github.com/wireghoul/graudit) - against MediaKraken_Deployment source
             cd ~
             git clone https://github.com/wireghoul/graudit
@@ -100,3 +100,5 @@ Hadolint (https://github.com/hadolint/hadolint) - lint your Dockerfile
 Shellcheck - shell script checker
 #    https://github.com/anordal/shellharden
     https://github.com/koalaman/shellcheck
+Bandit (https://github.com/PyCQA/bandit) to find unsecured code - against MediaKraken source
+            pip3 install bandit==1.7.0

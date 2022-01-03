@@ -13,8 +13,7 @@ except ModuleNotFoundError:
     install_pid.wait()
     from gomatic import *
 
-# TODO install pyflakes
-# TODO install pylint
+# TODO pip3 install pylint bandit pyflakes
 # TODO python3-pip wget shellcheck
 """
 wget https://github.com/hadolint/hadolint/releases/download/v2.8.0/hadolint-Linux-x86_64
@@ -48,6 +47,10 @@ job.add_task(ExecTask(['bash', '-c', 'shellcheck $(git ls-files *.sh)']))
 #job.add_task(ExecTask(['shellcheck', '$(git', 'ls-files', '*.sh)']))
 # job = stage.ensure_job("lint_rust")
 # job.add_task(ExecTask(['cloc', '.']))
+
+stage = pipeline.ensure_stage("code_security")
+job = stage.ensure_job("bandit_python")
+job.add_task(ExecTask(['bandit', '-r', '.']))
 
 pipeline = configurator \
     .ensure_pipeline_group("MediaKraken") \
