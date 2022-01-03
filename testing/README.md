@@ -7,7 +7,8 @@ The ELK docker image I use is https://github.com/spujadas/elk-docker
     This is used to view logs as they are output via MK programs
 
 # debian bullseye
-apt install python3-dotenv
+apt install python3-dotenv python3-pip cloc
+pip3 install pylint pyflakes
 
 Run the following tests from under the MediaKraken_CI
     python3 validate_code.py
@@ -24,11 +25,11 @@ Run the following tests from under the MediaKraken_CI
     python3 validate_docker.py
         Docker Bench Security - https://github.com/docker/docker-bench-security
             docker_bench_security.sh from the above link
-        Hadolint (https://github.com/hadolint/hadolint) - lint your Dockerfile
-            # docker pull hadolint/hadolint
-            wget https://github.com/hadolint/hadolint/releases/download/v2.0.0/hadolint-Linux-x86_64
-            mv hadolint-Linux-x86_64 /usr/bin/hadolint
-            chmod +x /usr/bin/hadolint
+#        Hadolint (https://github.com/hadolint/hadolint) - lint your Dockerfile
+#            # docker pull hadolint/hadolint
+#            wget https://github.com/hadolint/hadolint/releases/download/v2.0.0/hadolint-Linux-x86_64
+#            mv hadolint-Linux-x86_64 /usr/bin/hadolint
+#            chmod +x /usr/bin/hadolint
         Trivy (https://github.com/aquasecurity/trivy) Vulnerability Scanner for Containers - against docker images - alerts on apps/packages installed in the OS
             apt-get install wget apt-transport-https gnupg lsb-release
             wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | apt-key add -
@@ -60,9 +61,9 @@ https://github.com/almandin/fuxploider
 https://github.com/drwetter/testssl.sh
 https://github.com/facebook/pyre-check
 https://hub.datree.io/?utm_source=datree.io&utm_medium=footer&utm_campaign=get-started-pricing-free
-
 https://github.com/xd009642/tarpaulin
 https://github.com/rust-lang/rust-clippy
+
 cppcheck - c/c++ code checker
     http://cppcheck.sourceforge.net/
 Clair - docker vuln scanner
@@ -72,11 +73,7 @@ dagda - static analysis of known vulnerabilities, trojans, viruses, malware & ot
     https://github.com/eliasgranderubio/dagda
 pocsuite3 - remote vulnerability testing
     https://github.com/knownsec/pocsuite3
-pyflakes - python linter
-    https://github.com/PyCQA/pyflakes
-pylint - python linter
-    https://www.pylint.org/
-safety - pip requiments security check
+safety - pip requirements security check
     https://pyup.io/safety/
 Shellcheck - shell script checker
     https://github.com/anordal/shellharden
@@ -92,3 +89,15 @@ core intruque = attack surface checker - looks for stuff running that's insecure
     https://core.intrigue.io/
 archerysec - vuln db and monitor
     https://www.archerysec.com/index.html
+
+gocd:
+cloc
+pylint - python linter
+pyflakes - python linter
+    https://github.com/PyCQA/pyflakes
+https://www.pylint.org/
+    Hadolint (https://github.com/hadolint/hadolint) - lint your Dockerfile
+        # docker pull hadolint/hadolint
+        wget https://github.com/hadolint/hadolint/releases/download/v2.0.0/hadolint-Linux-x86_64
+        mv hadolint-Linux-x86_64 /usr/bin/hadolint
+        chmod +x /usr/bin/hadolint
