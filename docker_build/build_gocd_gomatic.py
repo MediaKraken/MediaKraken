@@ -37,12 +37,15 @@ job.add_task(ExecTask(['cloc', '.']))
 
 stage = pipeline.ensure_stage("linting")
 job = stage.ensure_job("lint_docker")
-job.add_task(ExecTask(['hadolint', '$(git\rls-files\r|\rgrep\rDockerfile)']))
+job.add_task(ExecTask(['bash', '-c', 'hadolint $(git ls-files | grep Dockerfile)']))
+#job.add_task(ExecTask(['hadolint', '$(git', 'ls-files', '|', 'grep', 'Dockerfile)']))
 job = stage.ensure_job("lint_python")
-job.add_task(ExecTask(['pylint', '$(git ls-files *.py)']))
+job.add_task(ExecTask(['bash', '-c', 'pylint $(git ls-files *.py)']))
+#job.add_task(ExecTask(['pylint', '$(git', 'ls-files', '*.py)']))
 job.add_task(ExecTask(['pyflakes', '.']))  # it didn't like the git method above
 job = stage.ensure_job("lint_shell")
-job.add_task(ExecTask(['shellcheck', '$(git ls-files *.sh)']))
+job.add_task(ExecTask(['bash', '-c', 'shellcheck $(git ls-files *.sh)']))
+#job.add_task(ExecTask(['shellcheck', '$(git', 'ls-files', '*.sh)']))
 # job = stage.ensure_job("lint_rust")
 # job.add_task(ExecTask(['cloc', '.']))
 

@@ -7,7 +7,7 @@ The ELK docker image I use is https://github.com/spujadas/elk-docker
     This is used to view logs as they are output via MK programs
 
 # debian bullseye
-apt install python3-dotenv python3-pip cloc
+apt install python3-dotenv python3-pip cloc shellcheck
 pip3 install pylint pyflakes
 
 Run the following tests from under the MediaKraken_CI
