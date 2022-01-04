@@ -23,8 +23,8 @@ Run the following tests from under the MediaKraken_CI
         Taint to find unsecured code - against MediaKraken source
             pip3 install python-taint==0.42
     python3 validate_docker.py
-        Docker Bench Security - https://github.com/docker/docker-bench-security
-            docker_bench_security.sh from the above link
+#        Docker Bench Security - https://github.com/docker/docker-bench-security
+#            docker_bench_security.sh from the above link
 #        Hadolint (https://github.com/hadolint/hadolint) - lint your Dockerfile
 #            # docker pull hadolint/hadolint
 #            wget https://github.com/hadolint/hadolint/releases/download/v2.0.0/hadolint-Linux-x86_64
@@ -50,20 +50,20 @@ Run the following tests from under the MediaKraken_CI
 
 
 Maybe:
+https://github.com/PyCQA/isort
 https://github.com/epi052/feroxbuster - website attacker
-https://github.com/dotenv-linter/dotenv-linter - env file linter
+https://github.com/ffuf/ffuf - website attacker
 https://github.com/vintasoftware/python-linters-and-code-analysis
 https://github.com/analysis-tools-dev/static-analysis#python
 https://github.com/Yelp/detect-secrets
 https://github.com/pawamoy/dependenpy
-https://github.com/collab-qa/check-all-the-things
 https://github.com/almandin/fuxploider
 https://github.com/drwetter/testssl.sh
 https://github.com/facebook/pyre-check
-https://hub.datree.io/?utm_source=datree.io&utm_medium=footer&utm_campaign=get-started-pricing-free
 https://github.com/xd009642/tarpaulin
+https://github.com/myint/scspell --report-only
 https://github.com/rust-lang/rust-clippy
-
+metasploit
 Clair - docker vuln scanner
     https://github.com/arminc/clair-scanner
     https://github.com/arminc/clair-local-scan
@@ -78,12 +78,28 @@ Sonarqube - code scanner
 Vuls - os scanner via ssh
     https://vuls.io/docs/en/tutorial-docker.html
     https://github.com/ishiDACo/vulsrepo
+https://coala.io/#/home?lang=Python
+http://jwilk.net/software/pydiatra
+https://github.com/PyCQA/pydocstyle
+https://github.com/pyupio/safety
+https://github.com/PyCQA/flake8-bugbear
 
 Nonproject:
 core intruque = attack surface checker - looks for stuff running that's insecure
     https://core.intrigue.io/
 archerysec - vuln db and monitor
     https://www.archerysec.com/index.html
+
+implement
+https://github.com/dotenv-linter/dotenv-linter - env file linter
+https://github.com/wemake-services/dotenv-linter
+https://github.com/wemake-services/wemake-python-styleguide
+https://github.com/PyCQA/prospector
+https://github.com/RetireJS/retire.js
+https://github.com/channable/dbcritic
+https://github.com/openstack/bashate
+https://github.com/megalinter/megalinter/#run-mega-linter-locally
+
 
 gocd:
 cloc
@@ -102,3 +118,5 @@ Bandit (https://github.com/PyCQA/bandit) to find unsecured code - against MediaK
             pip3 install bandit==1.7.0
 cppcheck - c/c++ code checker
     http://cppcheck.sourceforge.net/
+Docker Bench Security - https://github.com/docker/docker-bench-security
+    docker_bench_security.sh from the above link

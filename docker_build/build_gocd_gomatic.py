@@ -47,14 +47,14 @@ job = stage.ensure_job("dockerfile_hadolint")
 job.add_task(ExecTask(['bash', '-c', 'hadolint $(git ls-files | grep Dockerfile)']))
 
 job = stage.ensure_job("python_pyflakes")
-job.add_task(ExecTask(['pyflakes', '.']))  # it didn't like the git method above
+job.add_task(ExecTask(['pyflakes', '.']))  # it didn't like the git method
 job = stage.ensure_job("python_pylint")
 job.add_task(ExecTask(['bash', '-c', 'pylint $(git ls-files *.py)']))
 
 job = stage.ensure_job("shell_shellcheck")
 job.add_task(ExecTask(['bash', '-c', 'shellcheck $(git ls-files *.sh)']))
 
-# job = stage.ensure_job("lint_rust")
+# job = stage.ensure_job("rust_clippy")
 # job.add_task(ExecTask(['cloc', '.']))
 
 
@@ -71,25 +71,35 @@ job = stage.ensure_job("build_base")
 for build_group in (docker_images_list.STAGE_ONE_IMAGES,
                      docker_images_list.STAGE_ONE_GAME_SERVERS,):
     for docker_images in build_group:
-        job.add_task(ExecTask(['docker', 'build', '-t', 'mediakraken/%s:refactor' % (build_group[docker_images][0])]))
+        job.add_task(ExecTask(['docker', 'build', '-t', 'mediakraken/%s:refactor'
+                               % (build_group[docker_images][0]),
+                               '.']))
 
 # stage = pipeline.ensure_stage("docker_build_core")
 
 # stage = pipeline.ensure_stage("docker_build_games")
 
-# stage = pipeline.ensure_stage("docker_security")
+stage = pipeline.ensure_stage("docker_security")
+job = stage.ensure_job("docker_dockerbench")
+job.add_task(ExecTask(['./docker/test/docker_bench_security.sh']))
 
-# stage = pipeline.ensure_stage("test_mediakraken")
 
 # pipeline = configurator \
 #     .ensure_pipeline_group("MediaKraken") \
 #     .ensure_replacement_of_pipeline("mediakraken_test_pipeline") \
 #     .set_git_url("https://github.com/MediaKraken/MediaKraken")
+# stage = pipeline.ensure_stage("test_mediakraken")
+# TODO start mediakraken docker-compose
+# TODO test selenium
+# TODO security test website
+# TODO ab website
+# TODO stop mediakraken docker-compose
 #
 # pipeline = configurator \
 #     .ensure_pipeline_group("MediaKraken") \
 #     .ensure_replacement_of_pipeline("mediakraken_deploy_pipeline") \
 #     .set_git_url("https://github.com/MediaKraken/MediaKraken")
+# TODO push to dockerhub
 
 configurator.save_updated_config()
 
