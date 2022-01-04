@@ -8,7 +8,7 @@ The ELK docker image I use is https://github.com/spujadas/elk-docker
 
 # debian bullseye
 apt install python3-dotenv python3-pip wget cloc shellcheck
-pip3 install pylint pyflakes
+pip3 install pylint pyflakes bandit
 
 Run the following tests from under the MediaKraken_CI
     python3 validate_code.py
@@ -64,8 +64,6 @@ https://hub.datree.io/?utm_source=datree.io&utm_medium=footer&utm_campaign=get-s
 https://github.com/xd009642/tarpaulin
 https://github.com/rust-lang/rust-clippy
 
-cppcheck - c/c++ code checker
-    http://cppcheck.sourceforge.net/
 Clair - docker vuln scanner
     https://github.com/arminc/clair-scanner
     https://github.com/arminc/clair-local-scan
@@ -102,3 +100,5 @@ Shellcheck - shell script checker
     https://github.com/koalaman/shellcheck
 Bandit (https://github.com/PyCQA/bandit) to find unsecured code - against MediaKraken source
             pip3 install bandit==1.7.0
+cppcheck - c/c++ code checker
+    http://cppcheck.sourceforge.net/

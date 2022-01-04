@@ -14,7 +14,7 @@ except ModuleNotFoundError:
     from gomatic import *
 
 # TODO pip3 install pylint bandit pyflakes
-# TODO python3-pip wget shellcheck
+# TODO python3-pip wget shellcheck cppcheck
 """
 wget https://github.com/hadolint/hadolint/releases/download/v2.8.0/hadolint-Linux-x86_64
 mv hadolint-Linux-x86_64 /usr/bin/hadolint
@@ -35,18 +35,28 @@ job = stage.ensure_job("cloc_job")
 job.add_task(ExecTask(['cloc', '.']))
 
 stage = pipeline.ensure_stage("linting")
-job = stage.ensure_job("lint_docker")
+# If a directory is given instead of a filename, *.cpp, *.cxx, *.cc, *.c++, *.c,
+# *.tpp, and *.txx files are checked recursively from the given directory.
+# TODO should I use --quiet flag?
+job = stage.ensure_job("c_cpp_cppcheck")
+job.add_task(ExecTask(['cppcheck', '--enable=all', '--platform=unix64', '.']))
+
+job = stage.ensure_job("dockerfile_hadolint")
+# TODO use -t error later on to fail only on error or above
+# TODO maybe use --no-fail.......but then it doesn't error and display nice in gocd
 job.add_task(ExecTask(['bash', '-c', 'hadolint $(git ls-files | grep Dockerfile)']))
-#job.add_task(ExecTask(['hadolint', '$(git', 'ls-files', '|', 'grep', 'Dockerfile)']))
-job = stage.ensure_job("lint_python")
-job.add_task(ExecTask(['bash', '-c', 'pylint $(git ls-files *.py)']))
-#job.add_task(ExecTask(['pylint', '$(git', 'ls-files', '*.py)']))
+
+job = stage.ensure_job("python_pyflakes")
 job.add_task(ExecTask(['pyflakes', '.']))  # it didn't like the git method above
-job = stage.ensure_job("lint_shell")
+job = stage.ensure_job("python_pylint")
+job.add_task(ExecTask(['bash', '-c', 'pylint $(git ls-files *.py)']))
+
+job = stage.ensure_job("shell_shellcheck")
 job.add_task(ExecTask(['bash', '-c', 'shellcheck $(git ls-files *.sh)']))
-#job.add_task(ExecTask(['shellcheck', '$(git', 'ls-files', '*.sh)']))
+
 # job = stage.ensure_job("lint_rust")
 # job.add_task(ExecTask(['cloc', '.']))
+
 
 stage = pipeline.ensure_stage("code_security")
 job = stage.ensure_job("bandit_python")
@@ -61,7 +71,7 @@ job = stage.ensure_job("build_base")
 for build_group in (docker_images_list.STAGE_ONE_IMAGES,
                      docker_images_list.STAGE_ONE_GAME_SERVERS,):
     for docker_images in build_group:
-        job.add_task(ExecTask(['docker', 'build -t mediakraken/%s:refactor' % (build_group[docker_images][0])]))
+        job.add_task(ExecTask(['docker', 'build', '-t', 'mediakraken/%s:refactor' % (build_group[docker_images][0])]))
 
 # stage = pipeline.ensure_stage("docker_build_core")
 
