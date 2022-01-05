@@ -1,4 +1,4 @@
-FROM rust:1.57 as cargo-build
+FROM rust:1.56.1 as cargo-build
 
 RUN rustup target add x86_64-unknown-linux-musl
 RUN apt-get update && apt-get install -y musl-tools musl-dev
