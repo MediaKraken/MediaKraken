@@ -3,6 +3,7 @@ use serde_json::{Map, Value};
 use sqlx::postgres::PgRow;
 use sqlx::types::Json;
 use std::num::NonZeroU8;
+use uuid::Uuid;
 
 pub async fn mk_lib_database_cron_service_read(pool: &sqlx::PgPool)
                                                -> Result<Vec<PgRow>, sqlx::Error> {
@@ -44,24 +45,22 @@ pub async fn mk_lib_database_cron_insert(pool: &sqlx::PgPool,
                                          cron_name: String,
                                          cron_desc: String,
                                          cron_enabled: bool,
-                                         cron_schedule,
-                                         cron_last_run,
+                                         cron_schedule: String,
                                          cron_json: serde_json::Value)
                                          -> Result<(uuid::Uuid), sqlx::Error> {
-    new_guid = Uuid::new_v4();
+    let new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_cron (mm_cron_guid, mm_cron_name, mm_cron_description, \
-                    mm_cron_enabled, mm_cron_schedule, mm_cron_last_run, mm_cron_json) \
-                    values ($1,$2,$3,$4,$5,$6,$7)"
-                    .bind(new_guid)
-                    .bind(cron_name)
-                    .bind(cron_desc)
-                    .bind(cron_enabled)
-                    .bind(cron_schedule)
-                    .bind(cron_last_run)
-                    .bind(cron_json)
-                    .execute(&mut transaction)
-                    .await?;
+        mm_cron_enabled, mm_cron_schedule, mm_cron_last_run, mm_cron_json) \
+        values ($1,$2,$3,$4,$5,Null,$6)")
+        .bind(new_guid)
+        .bind(cron_name)
+        .bind(cron_desc)
+        .bind(cron_enabled)
+        .bind(cron_schedule)
+        .bind(cron_json)
+        .execute(&mut transaction)
+        .await?;
     transaction.commit().await?;
     Ok(new_guid)
 }
