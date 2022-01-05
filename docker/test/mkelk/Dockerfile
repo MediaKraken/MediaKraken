@@ -23,8 +23,8 @@ ENV \
 ### install prerequisites (cURL, gosu, tzdata, JDK for Logstash)
 
 RUN set -x \
- && apt update -qq \
- && apt install -qqy --no-install-recommends ca-certificates curl gosu tzdata openjdk-11-jdk-headless \
+ && apt-get update -qq \
+ && apt-get install -qqy --no-install-recommends ca-certificates curl gosu tzdata openjdk-11-jdk-headless \
  && apt clean \
  && rm -rf /var/lib/apt/lists/* \
  && gosu nobody true \

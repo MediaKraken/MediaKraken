@@ -1,6 +1,6 @@
 dev build
 debian 11
-apt install nano git python3
+apt-get install nano git python3
 git clone https://www.github.com/MediaKraken/MediaKraken
 cd MediaKraken
 git checkout refactor

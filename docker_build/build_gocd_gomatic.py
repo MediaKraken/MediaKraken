@@ -5,7 +5,7 @@ import docker_images_list
 try:
     from gomatic import *
 except ModuleNotFoundError:
-    install_pid = subprocess.Popen(shlex.split('apt install -y python3-pip'),
+    install_pid = subprocess.Popen(shlex.split('apt-get install -y python3-pip'),
                                    stdout=subprocess.PIPE, shell=False)
     install_pid.wait()
     install_pid = subprocess.Popen(shlex.split('pip3 install gomatic'),

@@ -24,7 +24,7 @@ from base64 import b64encode
 # check to see if docker is installed
 if not os.path.isfile('/usr/bin/docker'):
     # setup docker dependencies
-    install_pid = subprocess.Popen(shlex.split('apt install -y apt-transport-https'
+    install_pid = subprocess.Popen(shlex.split('apt-get install -y apt-transport-https'
                                                ' ca-certificates curl gnupg lsb-release'),
                                    stdout=subprocess.PIPE, shell=False)
     while True:
@@ -62,7 +62,7 @@ if not os.path.isfile('/usr/bin/docker'):
         print(line.rstrip(), flush=True)
     install_pid.wait()
     # general update to grab new package list from new repo
-    install_pid = subprocess.Popen(shlex.split('apt update -y'),
+    install_pid = subprocess.Popen(shlex.split('apt-get update -y'),
                                    stdout=subprocess.PIPE, shell=False)
     while True:
         line = install_pid.stdout.readline()
@@ -71,7 +71,7 @@ if not os.path.isfile('/usr/bin/docker'):
         print(line.rstrip(), flush=True)
     install_pid.wait()
     # finalize docker install
-    install_pid = subprocess.Popen(shlex.split('apt install -y'
+    install_pid = subprocess.Popen(shlex.split('apt-get install -y'
                                                ' docker-ce docker-ce-cli containerd.io'),
                                    stdout=subprocess.PIPE, shell=False)
     while True:

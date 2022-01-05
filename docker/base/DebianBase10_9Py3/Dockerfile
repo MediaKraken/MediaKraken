@@ -16,7 +16,7 @@ COPY requirements.txt /mediakraken
 
 WORKDIR /mediakraken
 
-RUN apt update && apt -y install \
+RUN apt-get update && apt -y install \
   && pip3 install --upgrade pip \
   && pip3 install --trusted-host ${PIPMIRROR} -i https://${PIPMIRROR}/simple -r requirements.txt \
   && rm requirements.txt \
