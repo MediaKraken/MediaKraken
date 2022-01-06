@@ -11,9 +11,9 @@ RUN sed -i "s/dl-cdn.alpinelinux.org/${ALPMIRROR}/" /etc/apk/repositories \
   busybox==1.33.1-r3 \
   c-ares==1.17.2-r0 \
   libevent==2.1.12-r2 \
-  openssl==1.1.1k-r0 \
+  openssl-1.1.1l-r0 \
   pgbouncer==1.15.0-r0 \
-  postgresql-client==13.3-r0 \
+  postgresql-client-13.5-r0 \
   && mkdir /run/postgresql \
   && chmod 777 /run/postgresql
 
