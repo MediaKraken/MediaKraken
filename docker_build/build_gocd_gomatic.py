@@ -13,7 +13,7 @@ except ModuleNotFoundError:
     install_pid.wait()
     from gomatic import *
 
-# TODO pip3 install pylint bandit pyflakes
+# TODO pip3 install pylint bandit pyflakes vulture dead
 # TODO python3-pip wget shellcheck cppcheck
 # TODO chmod 666 /var/run/docker.sock
 
@@ -59,6 +59,14 @@ job.add_task(ExecTask(['bash', '-c', 'shellcheck $(git ls-files *.sh)']))
 # job.add_task(ExecTask(['cloc', '.']))
 
 
+stage = pipeline.ensure_stage("dead_code")
+job = stage.ensure_job("python_vulture")
+job.add_task(ExecTask(['bash', '-c', 'vulture $(git ls-files *.py)']))
+
+job = stage.ensure_job("python_dead")
+job.add_task(ExecTask(['bash', '-c', 'dead --files $(git ls-files *.py)']))
+
+
 stage = pipeline.ensure_stage("code_security")
 job = stage.ensure_job("bandit_python")
 job.add_task(ExecTask(['bandit', '-r', '.']))
@@ -86,6 +94,7 @@ for build_group in (docker_images_list.STAGE_ONE_IMAGES,
                                                                     build_group[docker_images][2],
                                                                     docker_images)]))
 
+
 stage = pipeline.ensure_stage("docker_build_core")
 job = stage.ensure_job("build_core_code_sync")
 job.add_task(ExecTask(['./docker_build/source_core_sync.sh']))
@@ -103,6 +112,7 @@ for build_group in (docker_images_list.STAGE_CORE_IMAGES,):
                                                                     build_group[docker_images][2],
                                                                     docker_images)]))
 
+
 # stage = pipeline.ensure_stage("docker_build_games")
 # for build_group in (docker_images_list.STAGE_TWO_GAME_SERVERS,):
 #     for docker_images in build_group:
@@ -118,9 +128,11 @@ for build_group in (docker_images_list.STAGE_CORE_IMAGES,):
 #                                                                     build_group[docker_images][2],
 #                                                                     docker_images)]))
 
+
 stage = pipeline.ensure_stage("docker_security")
 job = stage.ensure_job("docker_dockerbench")
 job.add_task(ExecTask(['./docker/test/docker_bench_security.sh']))
+
 
 # pipeline = configurator \
 #     .ensure_pipeline_group("MediaKraken") \

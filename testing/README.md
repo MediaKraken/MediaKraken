@@ -18,10 +18,10 @@ Run the following tests from under the MediaKraken_CI
             cd ~
             git clone https://github.com/wireghoul/graudit
             ln -s ~/graudit/graudit /bin/graudit
-        Vulture to find dead code - against MediaKraken source
-            pip3 install vulture==2.3
-        Taint to find unsecured code - against MediaKraken source
-            pip3 install python-taint==0.42
+#        Vulture to find dead code - against MediaKraken source
+#            pip3 install vulture==2.3
+#        Taint to find unsecured code - against MediaKraken source
+#            pip3 install python-taint==0.42  (dead project)
     python3 validate_docker.py
 #        Docker Bench Security - https://github.com/docker/docker-bench-security
 #            docker_bench_security.sh from the above link
@@ -50,17 +50,46 @@ Run the following tests from under the MediaKraken_CI
 
 
 Maybe:
-https://github.com/PyCQA/isort
+https://github.com/dotenv-linter/dotenv-linter       - env file linter
+https://github.com/wemake-services/dotenv-linter     - env file linter
+https://github.com/wemake-services/wemake-python-styleguide    - uber linter?
+https://github.com/PyCQA/prospector   - python linter
+https://github.com/PyCQA/isort   - sorts and updates your imports
 https://github.com/epi052/feroxbuster - website attacker
 https://github.com/ffuf/ffuf - website attacker
+https://github.com/openstack/bashate    - pep8 for bash
+https://github.com/xd009642/tarpaulin     - code coverage for rust
+https://github.com/drwetter/testssl.sh          - check port for tls/ssl support and some flaws
+https://coala.io/#/home?lang=Python     - linter for alot of langs and web code
+
+
+https://hegel.js.org/
+https://github.com/rslint/rslint
+https://github.com/phan/phan
+https://github.com/phpstan/phpstan
+https://developers.google.com/closure/compiler
+https://deepscan.io/docs/open-report
+https://flow.org/en/docs/cli/
+https://www.npmjs.com/package/grunt-html
+https://html-validate.org/
+https://htmlhint.com/docs/user-guide/configuration
+https://github.com/HTMLHint/HTMLHint
+https://validator.github.io/validator/
+https://github.com/mrtazz/checkmake
+https://github.com/collections/code-quality-in-php
+https://github.com/twbs/bootlint
+https://github.com/Checkmarx/kics
+https://github.com/stylelint/stylelint
+https://validator.github.io/validator/
+https://github.com/purcell/sqlint
+https://github.com/jarulraj/sqlcheck
+
+
 https://github.com/vintasoftware/python-linters-and-code-analysis
 https://github.com/analysis-tools-dev/static-analysis#python
 https://github.com/Yelp/detect-secrets
-https://github.com/pawamoy/dependenpy
 https://github.com/almandin/fuxploider
-https://github.com/drwetter/testssl.sh
 https://github.com/facebook/pyre-check
-https://github.com/xd009642/tarpaulin
 https://github.com/myint/scspell --report-only
 https://github.com/rust-lang/rust-clippy
 metasploit
@@ -71,18 +100,17 @@ dagda - static analysis of known vulnerabilities, trojans, viruses, malware & ot
     https://github.com/eliasgranderubio/dagda
 pocsuite3 - remote vulnerability testing
     https://github.com/knownsec/pocsuite3
-safety - pip requirements security check
-    https://pyup.io/safety/
 Sonarqube - code scanner
     https://docs.sonarqube.org/latest/setup/install-server/
 Vuls - os scanner via ssh
     https://vuls.io/docs/en/tutorial-docker.html
     https://github.com/ishiDACo/vulsrepo
-https://coala.io/#/home?lang=Python
-http://jwilk.net/software/pydiatra
 https://github.com/PyCQA/pydocstyle
 https://github.com/pyupio/safety
 https://github.com/PyCQA/flake8-bugbear
+https://github.com/RetireJS/retire.js
+https://github.com/channable/dbcritic
+https://github.com/megalinter/megalinter/#run-mega-linter-locally
 
 Nonproject:
 core intruque = attack surface checker - looks for stuff running that's insecure
@@ -90,19 +118,10 @@ core intruque = attack surface checker - looks for stuff running that's insecure
 archerysec - vuln db and monitor
     https://www.archerysec.com/index.html
 
-implement
-https://github.com/dotenv-linter/dotenv-linter - env file linter
-https://github.com/wemake-services/dotenv-linter
-https://github.com/wemake-services/wemake-python-styleguide
-https://github.com/PyCQA/prospector
-https://github.com/RetireJS/retire.js
-https://github.com/channable/dbcritic
-https://github.com/openstack/bashate
-https://github.com/megalinter/megalinter/#run-mega-linter-locally
 
 
-gocd:
-cloc
+implemented in gocd:
+cloc - code line counter
 pylint - python linter
     https://www.pylint.org/
 pyflakes - python linter
@@ -112,7 +131,6 @@ Hadolint (https://github.com/hadolint/hadolint) - lint your Dockerfile
     mv hadolint-Linux-x86_64 /usr/bin/hadolint
     chmod +x /usr/bin/hadolint
 Shellcheck - shell script checker
-#    https://github.com/anordal/shellharden
     https://github.com/koalaman/shellcheck
 Bandit (https://github.com/PyCQA/bandit) to find unsecured code - against MediaKraken source
             pip3 install bandit==1.7.0
@@ -120,3 +138,6 @@ cppcheck - c/c++ code checker
     http://cppcheck.sourceforge.net/
 Docker Bench Security - https://github.com/docker/docker-bench-security
     docker_bench_security.sh from the above link
+Vulture to find dead code - against MediaKraken source
+    pip3 install vulture==2.3
+dead - to find dead python code
