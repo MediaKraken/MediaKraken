@@ -149,7 +149,11 @@ STAGE_ONE_GAME_SERVERS = {
 }
 
 STAGE_TWO_GAME_SERVERS = {
+    # Dockerized battlefield 1942
+    'mkgamebf42': ('mkgamebf42', 'ubuntu:14.04', 'game_server'),
 
+    # Factorio Server in docker
+    'mkgamefactorio': ('mkgamefactorio', 'ubuntu:14.04', 'game_server'),
 }
 
 STAGE_ONE_SECURITY_TOOLS = {
