@@ -1,5 +1,5 @@
 FROM gameservers/steamcmd
-MAINTAINER Jason Rivers <docker@jasonrivers.co.uk>
+LABEL author="Jason Rivers <docker@jasonrivers.co.uk>"
 
 ENV APPID=295230
 ENV APPDIR=/home/steamsrv/fof

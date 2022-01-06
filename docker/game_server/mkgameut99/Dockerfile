@@ -6,23 +6,23 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Original Server v436
-ADD files/ut-server-linux-436.tar.gz /
+COPY files/ut-server-linux-436.tar.gz /
 # Update to 451
-ADD files/Patches/UTPGPatch451LINUX.tar.gz /ut-server/
+COPY files/Patches/UTPGPatch451LINUX.tar.gz /ut-server/
 # Fix for broken maps from the original file
-ADD files/Patches/BrokenMapsFix.tar.gz /ut-server/
+COPY files/Patches/BrokenMapsFix.tar.gz /ut-server/
 # Add the bonus packs
-ADD files/UTBonusPack* /ut-server/
+COPY files/UTBonusPack* /ut-server/
 # Startup scripts
-ADD files/Scripts/startup.sh /
-ADD files/Scripts/prepare.py /
+COPY files/Scripts/startup.sh /
+COPY files/Scripts/prepare.py /
 
 # Additonal Mutators
-ADD files/Mutators/* /ut-data/
+COPY files/Mutators/* /ut-data/
 # Additonal Maps Packed
-ADD files/Maps-Packed/* /ut-data/
+COPY files/Maps-Packed/* /ut-data/
 # Maps
-ADD files/Maps/* /ut-data/Maps/
+COPY files/Maps/* /ut-data/Maps/
 
 # Environment variables
 ENV UT_SERVERURL="CTF-Face?game=BotPack.CTFGame?mutator=BotPack.InstaGibDM,MapVoteLAv2.BDBMapVote,FlagAnnouncementsV2.FlagAnnouncements"

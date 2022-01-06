@@ -10,7 +10,7 @@ ENV APP_SERVER_NAME SteamLUG [UK]
 ENV APP_SRCDS_FLAGS -insecure
 ENV USE_SRCDS true
 
-ADD server.cfg /tmp/server.cfg
+COPY server.cfg /tmp/server.cfg
 
 expose ${APP_SERVER_PORT}/udp
 expose ${APP_SERVER_PORT}

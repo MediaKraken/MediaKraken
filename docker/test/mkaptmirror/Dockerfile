@@ -1,8 +1,8 @@
 FROM debian:bullseye-slim
-MAINTAINER Abhas Abhinav <abhas@deeproot.in>
+LABEL author="Abhas Abhinav <abhas@deeproot.in>"
 
 RUN apt-get update && apt-get install -y apt-mirror
-ADD mirror.list /etc/apt/mirror.list
+COPY mirror.list /etc/apt/mirror.list
 
 VOLUME /var/spool/apt-mirror
 

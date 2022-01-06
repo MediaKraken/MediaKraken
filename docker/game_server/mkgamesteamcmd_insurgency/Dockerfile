@@ -9,7 +9,7 @@ ENV APP_SERVER_MAP market_coop
 ENV APP_SERVER_NAME SteamLUG [UK]
 ENV USE_SRCDS true
 
-ADD server.cfg /home/steamsrv/server.cfg
+COPY server.cfg /home/steamsrv/server.cfg
 
 expose ${APP_SERVER_PORT}/udp
 expose ${APP_SERVER_PORT}

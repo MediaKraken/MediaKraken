@@ -1,15 +1,13 @@
 # Dockerfile to run a linux quake live server
 FROM ubuntu:20.10
-MAINTAINER Thomas T <tynor@hotmail.com>
+LABEL author="Thomas T <tynor@hotmail.com>"
 
-RUN dpkg --add-architecture i386
-RUN apt-get update
-RUN apt-get install -y libc6:i386 libstdc++6:i386 wget
-RUN apt-get install -y python3 python3-dev build-essential
-
-RUN useradd -ms /bin/bash quake
-
-RUN cd && cp -R .bashrc .profile /home/quake
+RUN dpkg --add-architecture i386 \
+  && apt-get update \
+  && apt-get install -y libc6:i386 libstdc++6:i386 wget \
+  && apt-get install -y python3 python3-dev build-essential \
+  && useradd -ms /bin/bash quake \
+  && cd && cp -R .bashrc .profile /home/quake
 
 WORKDIR /home/quake
 
@@ -24,8 +22,8 @@ RUN wget https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz
 RUN tar -xvzf steamcmd_linux.tar.gz
 
 # install the quake live server program
-RUN ./steamcmd.sh +login anonymous +app_update 349090 +quit
-RUN ln -s "Steam/steamapps/common/Quake Live Dedicated Server/" ql
+RUN ./steamcmd.sh +login anonymous +app_update 349090 +quit \
+  && ln -s "Steam/steamapps/common/Quake Live Dedicated Server/" ql
 
 # copy over the custom game files
 USER root
@@ -50,14 +48,14 @@ RUN ./download-workshop.sh
 
 # download and install latest minqlx
 # http://stackoverflow.com/a/26738019
-RUN wget -O - https://api.github.com/repos/MinoMino/minqlx/releases | grep browser_download_url | head -n 1 | cut -d '"' -f 4 | xargs wget
-RUN cd ql && tar xzf ~/minqlx_v*.tar.gz
+RUN wget -O - https://api.github.com/repos/MinoMino/minqlx/releases | grep browser_download_url | head -n 1 | cut -d '"' -f 4 | xargs wget \
+  && cd ql && tar xzf ~/minqlx_v*.tar.gz
 USER root
 COPY minqlx-plugins ql/minqlx-plugins
 COPY Quake-Live/minqlx-plugins ql/minqlx-plugins
 COPY install_minqlx_plugins.sh ./
-RUN cd ql && ~/install_minqlx_plugins.sh
-RUN chown -R quake:quake ql/
+RUN cd ql && ~/install_minqlx_plugins.sh \
+  && chown -R quake:quake ql/
 USER quake
 
 # ports to connect to: 27960 is udp and tcp, 28960 is tcp
