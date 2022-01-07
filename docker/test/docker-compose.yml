@@ -163,7 +163,7 @@ volumes:
   mediakraken_vol_test_postgresql:
   mediakraken_vol_test_postgresql_logging:
   mediakraken_vol_test_sonatype:
-  mediakraken_vol_test_teamcity:
-  mediakraken_vol_test_teamcity_logs:
-  mediakraken_vol_test_teamcity_agent:
-  mediakraken_vol_test_teamcity_db:
+#  mediakraken_vol_test_teamcity:
+#  mediakraken_vol_test_teamcity_logs:
+#  mediakraken_vol_test_teamcity_agent:
+#  mediakraken_vol_test_teamcity_db:
