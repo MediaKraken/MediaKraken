@@ -46,66 +46,66 @@ pid_proc.wait()
 # this sleep is here so that everything has time to fully start like pika
 time.sleep(60)
 
-if True:
-    # run nikto web scanner
-    if not os.path.exists('./nikto/program/nikto.pl'):
-        pid_proc = subprocess.Popen(shlex.split('git clone https://github.com/sullo/nikto'),
-                                    stdout=subprocess.PIPE, shell=False)
-        pid_proc.wait()
-    pid_proc = subprocess.Popen(shlex.split('perl ./nikto/program/nikto.pl'
-                                            ' -h https://localhost:8900'),
+
+# run nikto web scanner
+if not os.path.exists('./nikto/program/nikto.pl'):
+    pid_proc = subprocess.Popen(shlex.split('git clone https://github.com/sullo/nikto'),
                                 stdout=subprocess.PIPE, shell=False)
-    email_body = ''
-    while True:
-        line = pid_proc.stdout.readline()
-        if not line:
-            break
-        email_body += line.decode("utf-8")
-        print(line.rstrip(), flush=True)
     pid_proc.wait()
-    common_network_email.com_net_send_email(os.environ['MAILUSER'], os.environ['MAILPASS'],
-                                            os.environ['MAILUSER'],
-                                            'Nitko', email_body,
-                                            smtp_server=os.environ['MAILSERVER'],
-                                            smtp_port=os.environ['MAILPORT'])
+pid_proc = subprocess.Popen(shlex.split('perl ./nikto/program/nikto.pl'
+                                        ' -h https://localhost:8900'),
+                            stdout=subprocess.PIPE, shell=False)
+email_body = ''
+while True:
+    line = pid_proc.stdout.readline()
+    if not line:
+        break
+    email_body += line.decode("utf-8")
+    print(line.rstrip(), flush=True)
+pid_proc.wait()
+common_network_email.com_net_send_email(os.environ['MAILUSER'], os.environ['MAILPASS'],
+                                        os.environ['MAILUSER'],
+                                        'Nitko', email_body,
+                                        smtp_server=os.environ['MAILSERVER'],
+                                        smtp_port=os.environ['MAILPORT'])
 
-if True:
-    # Web Vulnerability Scanner via rapidscan
-    pid_proc = subprocess.Popen(
-        shlex.split('docker run -ti mablanco/rapidscan https://localhost:8900'),
-        stdout=subprocess.PIPE, shell=False)
-    email_body = ''
-    while True:
-        line = pid_proc.stdout.readline()
-        if not line:
-            break
-        email_body += line.decode("utf-8")
-        print(line.rstrip(), flush=True)
-    pid_proc.wait()
-    common_network_email.com_net_send_email(os.environ['MAILUSER'], os.environ['MAILPASS'],
-                                            os.environ['MAILUSER'],
-                                            'Rapidscan', email_body,
-                                            smtp_server=os.environ['MAILSERVER'],
-                                            smtp_port=os.environ['MAILPORT'])
 
-if True:
-    # Web Vulnerability Scanner via wapiti
-    pid_proc = subprocess.Popen(
-        shlex.split('wapiti -u https://localhost:8900'),
-        stdout=subprocess.PIPE, shell=False)
-    email_body = ''
-    while True:
-        line = pid_proc.stdout.readline()
-        if not line:
-            break
-        email_body += line.decode("utf-8")
-        print(line.rstrip(), flush=True)
-    pid_proc.wait()
-    common_network_email.com_net_send_email(os.environ['MAILUSER'], os.environ['MAILPASS'],
-                                            os.environ['MAILUSER'],
-                                            'Wapiti', email_body,
-                                            smtp_server=os.environ['MAILSERVER'],
-                                            smtp_port=os.environ['MAILPORT'])
+# Web Vulnerability Scanner via rapidscan
+pid_proc = subprocess.Popen(
+    shlex.split('docker run -ti mablanco/rapidscan https://localhost:8900'),
+    stdout=subprocess.PIPE, shell=False)
+email_body = ''
+while True:
+    line = pid_proc.stdout.readline()
+    if not line:
+        break
+    email_body += line.decode("utf-8")
+    print(line.rstrip(), flush=True)
+pid_proc.wait()
+common_network_email.com_net_send_email(os.environ['MAILUSER'], os.environ['MAILPASS'],
+                                        os.environ['MAILUSER'],
+                                        'Rapidscan', email_body,
+                                        smtp_server=os.environ['MAILSERVER'],
+                                        smtp_port=os.environ['MAILPORT'])
+
+
+# Web Vulnerability Scanner via wapiti
+pid_proc = subprocess.Popen(
+    shlex.split('wapiti -u https://localhost:8900'),
+    stdout=subprocess.PIPE, shell=False)
+email_body = ''
+while True:
+    line = pid_proc.stdout.readline()
+    if not line:
+        break
+    email_body += line.decode("utf-8")
+    print(line.rstrip(), flush=True)
+pid_proc.wait()
+common_network_email.com_net_send_email(os.environ['MAILUSER'], os.environ['MAILPASS'],
+                                        os.environ['MAILUSER'],
+                                        'Wapiti', email_body,
+                                        smtp_server=os.environ['MAILSERVER'],
+                                        smtp_port=os.environ['MAILPORT'])
 
 #####################################
 # stop the application

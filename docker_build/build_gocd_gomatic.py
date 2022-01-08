@@ -66,7 +66,7 @@ job = stage.ensure_job("python_vulture")
 job.add_task(ExecTask(['bash', '-c', 'vulture $(git ls-files *.py)']))
 
 job = stage.ensure_job("python_dead")
-job.add_task(ExecTask(['bash', '-c', 'dead --files $(git ls-files *.py)']))
+job.add_task(ExecTask(['bash', '-c', 'dead']))  # --files $(git ls-files *.py)'])) needs to be regex
 
 
 stage = pipeline.ensure_stage("code_security")

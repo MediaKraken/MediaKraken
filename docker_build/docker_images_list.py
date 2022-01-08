@@ -21,7 +21,7 @@
 ALPINE_MIRROR = 'dl-cdn.alpinelinux.org'
 
 #CENTOS_MIRROR = 'th-mkbuild-1.beaverbay.local'
-CENTOS_MIRROR = 'http://mirror.centos.org/'
+# CENTOS_MIRROR = 'http://mirror.centos.org/'
 
 #DEBIAN_MIRROR = 'th-mkbuild-1.beaverbay.local'
 DEBIAN_MIRROR = 'ftp.us.debian.org'
@@ -29,13 +29,13 @@ DEBIAN_MIRROR = 'ftp.us.debian.org'
 #PYPI_MIRROR = 'th-mkbuild-1.beaverbay.local'
 PYPI_MIRROR = 'pypi.python.org'
 
-DOCKER_REPOSITORY = 'th-mkbuild-1.beaverbay.local'
+# DOCKER_REPOSITORY = 'th-mkbuild-1.beaverbay.local'
+#
+# DOCKERHUB_REPOSITORY = 'index.docker.io:443'
 
-DOCKERHUB_REPOSITORY = 'index.docker.io:443'
-
-PROXY_IP_PORT = '0.0.0.0:8080'
-PROXY_USER_NAME = None
-PROXY_USER_PASS = None
+# PROXY_IP_PORT = '0.0.0.0:8080'
+# PROXY_USER_NAME = None
+# PROXY_USER_PASS = None
 
 # the data is directory, name of container, base image used to build container
 
@@ -98,7 +98,7 @@ STAGE_CORE_IMAGES = {
     'mknginx': ('mknginx', 'alpine:3.13', 'core'),
 
     # database connection pooler
-    'mkpgbouncer': ('mkpgbouncer', 'alpine:3.14.2', 'core'),
+    'mkpgbouncer': ('mkpgbouncer', 'alpine:3.14.3', 'core'),
 
     # consume and process ampq records
     'mkrabbitconsume': ('mkrabbitconsume', 'busybox:1.34.1-uclibc', 'core'),
