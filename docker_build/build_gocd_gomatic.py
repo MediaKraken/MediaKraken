@@ -13,7 +13,7 @@ except ModuleNotFoundError:
     install_pid.wait()
     from gomatic import *
 
-# TODO pip3 install pylint bandit pyflakes vulture dead
+# TODO pip3 install pylint bandit pyflakes vulture dead bashate
 # TODO python3-pip wget shellcheck cppcheck
 # TODO chmod 666 /var/run/docker.sock
 
@@ -54,6 +54,8 @@ job.add_task(ExecTask(['bash', '-c', 'pylint $(git ls-files *.py)']))
 
 job = stage.ensure_job("shell_shellcheck")
 job.add_task(ExecTask(['bash', '-c', 'shellcheck $(git ls-files *.sh)']))
+job = stage.ensure_job("shell_bashate")
+job.add_task(ExecTask(['bash', '-c', 'bashate $(git ls-files *.sh)']))
 
 # job = stage.ensure_job("rust_clippy")
 # job.add_task(ExecTask(['cloc', '.']))
@@ -117,20 +119,20 @@ for build_group in (docker_images_list.STAGE_CORE_IMAGES,):
                                                                     docker_images)]))
 
 
-# stage = pipeline.ensure_stage("docker_build_games")
-# for build_group in (docker_images_list.STAGE_TWO_GAME_SERVERS,):
-#     for docker_images in build_group:
-#         job = stage.ensure_job("build_games_%s" % build_group[docker_images][0])
-#         job.add_task(ExecTask(['bash', '-c', 'docker build -t mediakraken/%s:refactor'
-#                                              ' --build-arg ALPMIRROR=%s'
-#                                              ' --build-arg DEBMIRROR=%s'
-#                                              ' --build-arg PIPMIRROR=%s'
-#                                              ' ./docker/%s/%s/.' % (build_group[docker_images][0],
-#                                                                     docker_images_list.ALPINE_MIRROR,
-#                                                                     docker_images_list.DEBIAN_MIRROR,
-#                                                                     docker_images_list.PYPI_MIRROR,
-#                                                                     build_group[docker_images][2],
-#                                                                     docker_images)]))
+stage = pipeline.ensure_stage("docker_build_games")
+for build_group in (docker_images_list.STAGE_TWO_GAME_SERVERS,):
+    for docker_images in build_group:
+        job = stage.ensure_job("build_games_%s" % build_group[docker_images][0])
+        job.add_task(ExecTask(['bash', '-c', 'docker build -t mediakraken/%s:refactor'
+                                             ' --build-arg ALPMIRROR=%s'
+                                             ' --build-arg DEBMIRROR=%s'
+                                             ' --build-arg PIPMIRROR=%s'
+                                             ' ./docker/%s/%s/.' % (build_group[docker_images][0],
+                                                                    docker_images_list.ALPINE_MIRROR,
+                                                                    docker_images_list.DEBIAN_MIRROR,
+                                                                    docker_images_list.PYPI_MIRROR,
+                                                                    build_group[docker_images][2],
+                                                                    docker_images)]))
 
 
 stage = pipeline.ensure_stage("docker_security")

@@ -57,42 +57,35 @@ https://github.com/PyCQA/prospector   - python linter
 https://github.com/PyCQA/isort   - sorts and updates your imports
 https://github.com/epi052/feroxbuster - website attacker
 https://github.com/ffuf/ffuf - website attacker
-https://github.com/openstack/bashate    - pep8 for bash
 https://github.com/xd009642/tarpaulin     - code coverage for rust
 https://github.com/drwetter/testssl.sh          - check port for tls/ssl support and some flaws
 https://coala.io/#/home?lang=Python     - linter for alot of langs and web code
-
-
-https://hegel.js.org/
-https://github.com/rslint/rslint
-https://github.com/phan/phan
-https://github.com/phpstan/phpstan
-https://developers.google.com/closure/compiler
-https://deepscan.io/docs/open-report
-https://flow.org/en/docs/cli/
-https://www.npmjs.com/package/grunt-html
-https://html-validate.org/
-https://htmlhint.com/docs/user-guide/configuration
-https://github.com/HTMLHint/HTMLHint
-https://validator.github.io/validator/
-https://github.com/mrtazz/checkmake
+https://hegel.js.org/               - static type checker for js
+https://github.com/rslint/rslint        - JavaScript and TypeScript linter
+https://github.com/phan/phan            - static analyzer for PHP
+https://github.com/phpstan/phpstan          - PHP Static Analysis Tool
+https://developers.google.com/closure/compiler   - Closure Compiler is a tool for making JavaScript download and run faster
+https://flow.org/en/docs/cli/           -FLOW IS A STATIC TYPE CHECKER FOR JAVASCRIPT.
+https://html-validate.org/              -Offline HTML5 validator
+https://github.com/HTMLHint/HTMLHint        - static code analysis tool you need for your HTML
+https://validator.github.io/validator/      -  catch unintended mistakes in your HTML, CSS, and SVG
+https://github.com/mrtazz/checkmake         - experimental linter/analyzer for Makefiles
 https://github.com/collections/code-quality-in-php
-https://github.com/twbs/bootlint
-https://github.com/Checkmarx/kics
-https://github.com/stylelint/stylelint
-https://validator.github.io/validator/
-https://github.com/purcell/sqlint
-https://github.com/jarulraj/sqlcheck
-
-
+https://github.com/twbs/bootlint            - HTML linter for Bootstrap proje    eol?
+https://github.com/Checkmarx/kics           - Find security vulnerabilities, compliance issues, and infrastructure misconfigurations early in the development cycle of your infrastructure-as-code (docke, k8s)
+https://github.com/stylelint/stylelint      - A mighty, modern linter that helps you avoid errors and enforce conventions in your styles. (css, etc)
+https://github.com/purcell/sqlint       -  SQL linter supporting ANSI and PostgreSQL
+https://github.com/jarulraj/sqlcheck    -  identify anti-patterns in SQL queries
 https://github.com/vintasoftware/python-linters-and-code-analysis
 https://github.com/analysis-tools-dev/static-analysis#python
-https://github.com/Yelp/detect-secrets
-https://github.com/almandin/fuxploider
+https://github.com/Yelp/detect-secrets      - detecting and preventing secrets in code
+https://github.com/almandin/fuxploider      - File upload vulnerability scanner and exploitation tool.
 https://github.com/facebook/pyre-check
-https://github.com/myint/scspell --report-only
+https://github.com/myint/scspell --report-only      - find spelling mistakes
 https://github.com/rust-lang/rust-clippy
 metasploit
+https://github.com/yandex/gixy   - Gixy is a tool to analyze Nginx configuration.
+https://github.com/adrienverge/yamllint     - yml linter
 Clair - docker vuln scanner
     https://github.com/arminc/clair-scanner
     https://github.com/arminc/clair-local-scan
@@ -102,22 +95,32 @@ pocsuite3 - remote vulnerability testing
     https://github.com/knownsec/pocsuite3
 Sonarqube - code scanner
     https://docs.sonarqube.org/latest/setup/install-server/
+    docker run -d --name sonarqube -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true -p 9000:9000 sonarqube:latest    (admin/admin login)
 Vuls - os scanner via ssh
     https://vuls.io/docs/en/tutorial-docker.html
     https://github.com/ishiDACo/vulsrepo
-https://github.com/PyCQA/pydocstyle
-https://github.com/pyupio/safety
-https://github.com/PyCQA/flake8-bugbear
-https://github.com/RetireJS/retire.js
-https://github.com/channable/dbcritic
+https://github.com/PyCQA/pydocstyle             - docstring style checker for python code
+https://github.com/pyupio/safety                - Safety checks your installed dependencies for known security vulnerabilities - python
+https://github.com/PyCQA/flake8-bugbear         - A plugin for Flake8 finding likely bugs and design problems in your program.
+https://github.com/RetireJS/retire.js              - scanner detecting the use of JavaScript libraries with known vulnerabilities
+https://github.com/channable/dbcritic           - dbcritic finds problems in a database schema.
 https://github.com/megalinter/megalinter/#run-mega-linter-locally
+cargo audit
+cargo spellcheck
+cargo udeps
+https://www.codacy.com/product     - security/etc scanner for alot of langs
+https://github.com/ZupIT/horusec   - static code analys on alot of langs
+https://huskyci.opensource.globo.com/docs/quickstart/overview    - huskyCI is an open-source tool that orchestrates security tests inside CI pipelines of multiple projects and centralizes all results into a database for further analysis and metrics.
+https://psalm.dev/docs/running_psalm/installation/     - php
+https://pyre-check.org/     - type checker python3
+https://lgtm.com/help/lgtm/getting-started    - dont' I have a lgtm account?
+https://dwheeler.com/flawfinder/     - c/c++ flaw finder
+
 
 Nonproject:
 core intruque = attack surface checker - looks for stuff running that's insecure
     https://core.intrigue.io/
-archerysec - vuln db and monitor
-    https://www.archerysec.com/index.html
-
+    docker run -e LANG=C.UTF-8 --memory=8g -p 0.0.0.0:7777:7777 -v /var/opt/mediakraken/intrigue-data:/data -it "intrigueio/intrigue-core:latest"
 
 
 implemented in gocd:
@@ -141,3 +144,8 @@ Docker Bench Security - https://github.com/docker/docker-bench-security
 Vulture to find dead code - against MediaKraken source
     pip3 install vulture==2.3
 dead - to find dead python code
+https://github.com/openstack/bashate    - pep8 for bash
+
+standalone app:
+archerysec - vuln db and monitor
+    https://www.archerysec.com/index.html
