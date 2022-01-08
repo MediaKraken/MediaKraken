@@ -1,9 +1,9 @@
-FROM lsiobase/alpine:3.12 as buildstage
+FROM ghcr.io/linuxserver/baseimage-alpine:3.15 as buildstage
 ############## build stage ##############
 
 # package versions
 ARG ARGTABLE_VER="2.13"
-ARG XMLTV_VER="v0.6.1"
+ARG XMLTV_VER="v1.0.0"
 
 # environment settings
 ARG TZ="Europe/Oslo"
@@ -11,7 +11,7 @@ ARG TVHEADEND_COMMIT
 ENV HOME="/config"
 
 # copy patches
-COPY patches /tmp/patches/
+COPY patches/ /tmp/patches/
 
 RUN \
  echo "**** install build packages ****" && \
@@ -52,7 +52,6 @@ RUN \
 	perl-capture-tiny \
 	perl-cgi \
 	perl-compress-raw-zlib \
-	perl-data-dumper \
 	perl-date-manip \
 	perl-datetime \
 	perl-datetime-format-strptime \
@@ -70,7 +69,6 @@ RUN \
 	perl-html-tree \
 	perl-http-cookies \
 	perl-io \
-	perl-io-compress \
 	perl-io-html \
 	perl-io-socket-ssl \
 	perl-io-stringy \
@@ -103,7 +101,7 @@ RUN \
 	perl-xml-writer \
 	pkgconf \
 	pngquant \
-	python2 \
+	python3 \
 	sdl-dev \
 	tar \
 	uriparser-dev \
@@ -119,7 +117,7 @@ RUN \
 
 RUN \
  echo "**** install perl modules for xmltv ****" && \
- curl -L https://cpanmin.us | perl - App::cpanminus && \
+ curl -s -L https://cpanmin.us | perl - App::cpanminus && \
  cpanm --installdeps /tmp/patches
 
 RUN \
@@ -127,8 +125,6 @@ RUN \
  git clone https://github.com/XMLTV/xmltv.git /tmp/xmltv && \
  cd /tmp/xmltv && \
  git checkout ${XMLTV_VER} && \
- echo "**** Fix test for xmltv alpine 3.11 ****" && \
- patch -p1 -i /tmp/patches/test_tv_imdb.t.patch && \
  echo "**** Perl 5.26 fixes for XMTLV ****" && \
  sed "s/use POSIX 'tmpnam';//" -i filter/tv_to_latex && \
  sed "s/use POSIX 'tmpnam';//" -i filter/tv_to_text && \
@@ -174,6 +170,7 @@ RUN \
 	--disable-avahi \
 	--disable-dbus_1 \
 	--disable-bintray_cache \
+	--disable-execinfo \
 	--disable-hdhomerun_static \
 	--enable-hdhomerun_client \
 	--enable-libav \
@@ -184,6 +181,7 @@ RUN \
 	--localstatedir=/var \
 	--mandir=/usr/share/man \
 	--prefix=/usr \
+	--python=python3 \
 	--sysconfdir=/config && \
  make -j 2 && \
  make DESTDIR=/tmp/tvheadend-build install
@@ -193,7 +191,7 @@ RUN \
  ARGTABLE_VER1="${ARGTABLE_VER//./-}" && \
  mkdir -p \
 	/tmp/argtable && \
- curl -o \
+ curl -s -o \
  /tmp/argtable-src.tar.gz -L \
 	"https://sourceforge.net/projects/argtable/files/argtable/argtable-${ARGTABLE_VER}/argtable${ARGTABLE_VER1}.tar.gz" && \
  tar xf \
@@ -221,7 +219,7 @@ RUN \
  make DESTDIR=/tmp/comskip-build install
 
 ############## runtime stage ##############
-FROM lsiobase/alpine:3.12
+FROM ghcr.io/linuxserver/baseimage-alpine:3.15
 
 # set version label
 ARG BUILD_DATE
@@ -249,6 +247,7 @@ RUN \
 	libssl1.1 \
 	libva \
 	libva-intel-driver \
+	intel-media-driver \
 	mesa-dri-ati \
 	libvpx \
 	libxml2 \
@@ -263,7 +262,6 @@ RUN \
 	perl-capture-tiny \
 	perl-cgi \
 	perl-compress-raw-zlib \
-	perl-data-dumper \
 	perl-date-manip \
 	perl-datetime \
 	perl-datetime-format-strptime \
@@ -280,7 +278,6 @@ RUN \
 	perl-html-tree \
 	perl-http-cookies \
 	perl-io \
-	perl-io-compress \
 	perl-io-html \
 	perl-io-socket-ssl \
 	perl-io-stringy \
@@ -312,7 +309,7 @@ RUN \
 	perl-xml-twig \
 	perl-xml-writer \
 	py3-requests \
-	python2 \
+	python3 \
 	tar \
 	uriparser \
 	wget \
@@ -321,7 +318,7 @@ RUN \
 	zlib && \
  echo "**** Add Picons ****" && \
  mkdir -p /picons && \
- curl -o \
+ curl -s -o \
         /picons.tar.bz2 -L \
         https://lsio-ci.ams3.digitaloceanspaces.com/picons/picons.tar.bz2
 
@@ -332,7 +329,7 @@ COPY --from=buildstage /tmp/tvheadend-build/usr/ /usr/
 COPY --from=buildstage /tmp/xmltv-build/usr/ /usr/
 COPY --from=buildstage /usr/local/share/man/ /usr/local/share/man/
 COPY --from=buildstage /usr/local/share/perl5/ /usr/local/share/perl5/
-COPY root /
+COPY root/ /
 
 # ports and volumes
 EXPOSE 9981 9982

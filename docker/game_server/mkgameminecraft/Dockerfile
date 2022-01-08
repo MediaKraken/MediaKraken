@@ -36,7 +36,7 @@ ARG TARGETARCH=amd64
 ARG TARGETVARIANT=""
 
 ARG EASY_ADD_VER=0.7.1
-ADD https://github.com/itzg/easy-add/releases/download/${EASY_ADD_VER}/easy-add_${TARGETOS}_${TARGETARCH}${TARGETVARIANT} /usr/bin/easy-add
+COPY  https://github.com/itzg/easy-add/releases/download/${EASY_ADD_VER}/easy-add_${TARGETOS}_${TARGETARCH}${TARGETVARIANT} /usr/bin/easy-add
 RUN chmod +x /usr/bin/easy-add
 
 RUN easy-add --var os=${TARGETOS} --var arch=${TARGETARCH}${TARGETVARIANT} \
@@ -78,7 +78,7 @@ ENV UID=1000 GID=1000 \
 
 COPY start* /
 COPY health.sh /
-ADD files/autopause /autopause
+COPY files/autopause /autopause
 
 RUN dos2unix /start* && chmod +x /start*
 RUN dos2unix /health.sh && chmod +x /health.sh

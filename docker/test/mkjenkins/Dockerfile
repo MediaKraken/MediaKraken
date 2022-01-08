@@ -1,6 +1,6 @@
 FROM jenkins/jenkins:lts
 USER root
-ADD requirements.txt /
+COPY requirements.txt /
 COPY --chown=jenkins:jenkins plugins.txt /usr/share/jenkins/ref/plugins.txt
 RUN apt-get update && apt-get install -y apt-utils python3-pip sloccount cloc \
   libpq-dev libcurl4-openssl-dev apache2-utils wapiti \

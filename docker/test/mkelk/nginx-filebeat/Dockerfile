@@ -25,9 +25,8 @@ ENV FILEBEAT_BASE_VERSION 7.16.2
 
 RUN apt-get update -qq \
  && apt-get install -qqy curl \
- && apt-get clean
-
-RUN curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${FILEBEAT_VERSION}-amd64.deb \
+ && apt-get clean \
+ && curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${FILEBEAT_VERSION}-amd64.deb \
  && dpkg -i filebeat-${FILEBEAT_VERSION}-amd64.deb \
  && rm filebeat-${FILEBEAT_VERSION}-amd64.deb
 
@@ -45,12 +44,12 @@ RUN rm /var/log/nginx/access.log /var/log/nginx/error.log
 ### configure Filebeat
 
 # config file
-ADD filebeat.yml /etc/filebeat/filebeat.yml
+COPY filebeat.yml /etc/filebeat/filebeat.yml
 RUN chmod 644 /etc/filebeat/filebeat.yml
 
 # CA cert
 RUN mkdir -p /etc/pki/tls/certs
-ADD logstash-beats.crt /etc/pki/tls/certs/logstash-beats.crt
+COPY logstash-beats.crt /etc/pki/tls/certs/logstash-beats.crt
 
 # create template based on filebeat version (assumption: it is the same version as elasticsearch version)
 RUN filebeat export template --es.version ${FILEBEAT_BASE_VERSION} > /etc/filebeat/filebeat.template.json
@@ -68,6 +67,6 @@ COPY html /usr/share/nginx/html
 #                                    START
 ###############################################################################
 
-ADD ./start.sh /usr/local/bin/start.sh
+COPY ./start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
 CMD [ "/usr/local/bin/start.sh" ]

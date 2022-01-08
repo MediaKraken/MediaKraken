@@ -23,8 +23,6 @@ development_versions: true
 development_versions_items:
   - { tag: "latest", desc: "Current latest release." }
   - { tag: "release-4.2", desc: "Latest release from 4.2 branch." }
-  - { tag: "stable-4.2.1", desc: "Old stable version. Will not be updated anymore!" }
-  - { tag: "stable-4.0.9", desc: "Old stable version. Will not be updated anymore!" }
 
 # container parameters
 common_param_env_vars_enabled: true
@@ -61,7 +59,7 @@ optional_block_1_items:
     #### Host vs. Bridge
 
     If you use IPTV, SAT>IP or HDHomeRun, you need to create the container with --net=host and remove the -p flags. This is because to work with these services Tvheadend requires a multicast address of `239.255.255.250` and a UDP port of `1900` which at this time is not possible with docker bridge mode.
-    If you have other host services which also use multicast such as SSDP/DLNA/Emby you may experience stabilty problems. These can be solved by giving tvheadend its own IP using macavlan.
+    If you have other host services which also use multicast such as SSDP/DLNA/Emby you may experience stabilty problems. These can be solved by giving tvheadend its own IP using macvlan.
 
 # application setup block
 app_setup_block_enabled: true
@@ -117,7 +115,7 @@ app_setup_block: |
 
   **Picons**
 
-  We have added all the picons from [picons.eu](https://picons.eu/) in the folder /picons. To enable the use of these picons, add the path to the Channel icon path in Configuration --> General --> Base.
+  We have added all the picons from [picons](https://github.com/picons/picons) in the folder /picons. To enable the use of these picons, add the path to the Channel icon path in Configuration --> General --> Base.
   You need to enable minimum advanced view level to see the picons options.
 
   ## Additional runtime parameters
@@ -126,6 +124,8 @@ app_setup_block: |
 
 # changelog
 changelogs:
+  - { date: "05.01.22:", desc: "Rebase to Alpine 3.15. Disable execinfo to fix builds. Update xmltv." }
+  - { date: "11.05.21:", desc: "Added Intel iHD driver support." }
   - { date: "02.06.20:", desc: "Update to Alpine 3.12." }
   - { date: "27.12.19:", desc: "Add requests and perl-json-xs package." }
   - { date: "27.12.19:", desc: "Update to Alpine 3.11." }

@@ -1,5 +1,5 @@
 FROM alpine:3.14.2
-LABEL maintainer="Chris Kankiewicz <Chris@ChrisKankiewicz.com>"
+LABEL author="Chris Kankiewicz <Chris@ChrisKankiewicz.com>"
 
 # Define Mumble version
 ARG MUMBLE_VERSION=1.3.4
@@ -7,11 +7,9 @@ ARG MUMBLE_VERSION=1.3.4
 # Define environment variables
 ENV CONFIG_PATH=/etc/mumble/config.ini
 
-# Create Mumble directories
-RUN mkdir -pv /opt/mumble /etc/mumble
-
-# Create non-root user
-RUN adduser -DHs /sbin/nologin mumble
+# Create Mumble directories and Create non-root user
+RUN mkdir -pv /opt/mumble /etc/mumble \
+  && adduser -DHs /sbin/nologin mumble
 
 # Copy config file
 COPY files/config.ini /etc/mumble/config.ini

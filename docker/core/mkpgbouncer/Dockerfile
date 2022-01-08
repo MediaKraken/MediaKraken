@@ -8,12 +8,12 @@ ARG ALPMIRROR
 
 RUN sed -i "s/dl-cdn.alpinelinux.org/${ALPMIRROR}/" /etc/apk/repositories \
   && apk add --no-cache \
-  busybox==1.33.1-r3 \
+  busybox==1.33.1-r6 \
   c-ares==1.17.2-r0 \
   libevent==2.1.12-r2 \
-  openssl-1.1.1l-r0 \
+  openssl \
   pgbouncer==1.15.0-r0 \
-  postgresql-client-13.5-r0 \
+  postgresql-client \
   && mkdir /run/postgresql \
   && chmod 777 /run/postgresql
 

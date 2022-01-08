@@ -117,21 +117,21 @@ RUN mkdir ${KIBANA_HOME} \
 
 ### Elasticsearch
 
-ADD ./elasticsearch-init /etc/init.d/elasticsearch
+COPY ./elasticsearch-init /etc/init.d/elasticsearch
 RUN sed -i -e 's#^ES_HOME=$#ES_HOME='$ES_HOME'#' /etc/init.d/elasticsearch \
  && chmod +x /etc/init.d/elasticsearch
 
 
 ### Logstash
 
-ADD ./logstash-init /etc/init.d/logstash
+COPY ./logstash-init /etc/init.d/logstash
 RUN sed -i -e 's#^LS_HOME=$#LS_HOME='$LOGSTASH_HOME'#' /etc/init.d/logstash \
  && chmod +x /etc/init.d/logstash
 
 
 ### Kibana
 
-ADD ./kibana-init /etc/init.d/kibana
+COPY ./kibana-init /etc/init.d/kibana
 RUN sed -i -e 's#^KIBANA_HOME=$#KIBANA_HOME='$KIBANA_HOME'#' /etc/init.d/kibana \
  && chmod +x /etc/init.d/kibana
 
@@ -142,8 +142,8 @@ RUN sed -i -e 's#^KIBANA_HOME=$#KIBANA_HOME='$KIBANA_HOME'#' /etc/init.d/kibana 
 
 ### configure Elasticsearch
 
-ADD ./elasticsearch.yml ${ES_PATH_CONF}/elasticsearch.yml
-ADD ./elasticsearch-default /etc/default/elasticsearch
+COPY ./elasticsearch.yml ${ES_PATH_CONF}/elasticsearch.yml
+COPY ./elasticsearch-default /etc/default/elasticsearch
 RUN cp ${ES_HOME}/config/log4j2.properties ${ES_HOME}/config/jvm.options \
     ${ES_PATH_CONF} \
  && chown -R elasticsearch:elasticsearch ${ES_PATH_CONF} \
@@ -154,17 +154,17 @@ RUN cp ${ES_HOME}/config/log4j2.properties ${ES_HOME}/config/jvm.options \
 
 # certs/keys for Beats and Lumberjack input
 RUN mkdir -p /etc/pki/tls/{certs,private}
-ADD ./logstash-beats.crt /etc/pki/tls/certs/logstash-beats.crt
-ADD ./logstash-beats.key /etc/pki/tls/private/logstash-beats.key
+COPY ./logstash-beats.crt /etc/pki/tls/certs/logstash-beats.crt
+COPY ./logstash-beats.key /etc/pki/tls/private/logstash-beats.key
 
 # pipelines
-ADD pipelines.yml ${LOGSTASH_PATH_SETTINGS}/pipelines.yml
+COPY pipelines.yml ${LOGSTASH_PATH_SETTINGS}/pipelines.yml
 
 # filters
-ADD ./logstash-conf/*.conf ${LOGSTASH_PATH_CONF}/conf.d/
+COPY ./logstash-conf/*.conf ${LOGSTASH_PATH_CONF}/conf.d/
 
 # patterns
-ADD ./nginx.pattern ${LOGSTASH_HOME}/patterns/nginx
+COPY ./nginx.pattern ${LOGSTASH_HOME}/patterns/nginx
 RUN chown -R logstash:logstash ${LOGSTASH_HOME}/patterns
 
 # Fix permissions
@@ -174,9 +174,9 @@ RUN chmod -R +r ${LOGSTASH_PATH_CONF} ${LOGSTASH_PATH_SETTINGS} \
 
 ### configure logrotate
 
-ADD ./elasticsearch-logrotate /etc/logrotate.d/elasticsearch
-ADD ./logstash-logrotate /etc/logrotate.d/logstash
-ADD ./kibana-logrotate /etc/logrotate.d/kibana
+COPY ./elasticsearch-logrotate /etc/logrotate.d/elasticsearch
+COPY ./logstash-logrotate /etc/logrotate.d/logstash
+COPY ./kibana-logrotate /etc/logrotate.d/kibana
 RUN chmod 644 /etc/logrotate.d/elasticsearch \
  && chmod 644 /etc/logrotate.d/logstash \
  && chmod 644 /etc/logrotate.d/kibana
@@ -184,14 +184,14 @@ RUN chmod 644 /etc/logrotate.d/elasticsearch \
 
 ### configure Kibana
 
-ADD ./kibana.yml ${KIBANA_HOME}/config/kibana.yml
+COPY ./kibana.yml ${KIBANA_HOME}/config/kibana.yml
 
 
 ###############################################################################
 #                                   START
 ###############################################################################
 
-ADD ./start.sh /usr/local/bin/start.sh
+COPY ./start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
 
 EXPOSE 5601 9200 9300 9600 5044
