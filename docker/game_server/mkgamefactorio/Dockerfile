@@ -1,6 +1,6 @@
 FROM ubuntu:14.04
 
-MAINTAINER Jason Rivers <docker@jasonrivers.co.uk>
+LABEL AUTHOR=Jason Rivers <docker@jasonrivers.co.uk>
 ENV FACTORIO_SERVER_PORT=34197
 
 WORKDIR /opt

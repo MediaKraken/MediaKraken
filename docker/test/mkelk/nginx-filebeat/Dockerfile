@@ -9,7 +9,7 @@
 #     --name filebeat-nginx-example filebeat-nginx-example
 
 FROM nginx
-MAINTAINER Sebastien Pujadas http://pujadas.net
+LABEL AUTHOR=Sebastien Pujadas http://pujadas.net
 ENV REFRESHED_AT 2020-10-02
 
 

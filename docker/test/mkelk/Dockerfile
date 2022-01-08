@@ -11,7 +11,7 @@
 ARG IMAGE=focal-1.1.0
 
 FROM phusion/baseimage:${IMAGE}
-MAINTAINER Sebastien Pujadas http://pujadas.net
+LABEL AUTHOR=Sebastien Pujadas http://pujadas.net
 ENV \
  REFRESHED_AT=2020-06-20
 

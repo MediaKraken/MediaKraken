@@ -14,6 +14,8 @@ except ModuleNotFoundError:
     from gomatic import *
 
 # TODO pip3 install pylint bandit pyflakes vulture dead bashate
+# TODO for python/linting....can't import
+# TODO pip3 install pytest selenium psutil flask guessit gomatic
 # TODO python3-pip wget shellcheck cppcheck
 # TODO chmod 666 /var/run/docker.sock
 
