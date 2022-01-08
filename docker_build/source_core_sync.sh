@@ -44,6 +44,12 @@ cp src/mk_lib_database/src/mk_lib_database_notification.rs docker/core/mkmediasc
 cp src/mk_lib_database/src/mk_lib_database_version.rs docker/core/mkmediascanner/src/.
 cp src/mk_lib_database/src/mk_lib_database_version_schema.rs docker/core/mkmediascanner/src/.
 
+# mkmetadata
+cp src/mk_lib_database/src/mk_lib_database.rs docker/core/mkmetadata/src/.
+
+# mkmetadatamame
+cp src/mk_lib_compression/src/mk_lib_compression.rs docker/core/mkmetadatamame/src/.
+
 # mknotify
 cp src/mk_lib_database/src/mk_lib_database.rs docker/core/mkinotify/src/.
 cp src/mk_lib_database/src/mk_lib_database_library.rs docker/core/mkinotify/src/.
@@ -55,6 +61,9 @@ cp src/mk_lib_logging/src/mk_lib_logging.rs docker/core/mkinotify/src/.
 cp src/mk_lib_database/src/mk_lib_database.rs docker/core/mkrabbitconsume/src/.
 cp src/mk_lib_logging/src/mk_lib_logging.rs docker/core/mkrabbitconsume/src/.
 cp src/mk_lib_network/src/mk_lib_network.rs docker/core/mkrabbitconsume/src/.
+
+# mkschedulesdirectupdate
+cp src/mk_lib_logging/src/mk_lib_logging.rs docker/core/mkschedulesdirectupdate /src/.
 
 # mktmdbnetfetchbulk
 cp src/mk_lib_common/src/mk_lib_common.rs docker/core/mktmdbnetfetchbulk/src/.
