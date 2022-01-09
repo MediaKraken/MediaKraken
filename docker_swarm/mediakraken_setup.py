@@ -37,9 +37,9 @@ if not os.path.isfile('/usr/bin/docker'):
     install_pid = subprocess.Popen(shlex.split('curl -fsSL https://download.docker.com/linux/'
                                                'debian/gpg'),
                                    stdout=subprocess.PIPE, shell=False)
-    output = subprocess.check_output(shlex.split('gpg --dearmor -o /usr/share/keyrings/'
-                                                 'docker-archive-keyring.gpg'),
-                                     stdin=install_pid.stdout)
+    subprocess.check_output(shlex.split('gpg --dearmor -o /usr/share/keyrings/'
+                                        'docker-archive-keyring.gpg'),
+                            stdin=install_pid.stdout)
     while True:
         line = install_pid.stdout.readline()
         if not line:
