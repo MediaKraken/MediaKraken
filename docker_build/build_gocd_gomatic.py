@@ -3,7 +3,7 @@ import subprocess
 import docker_images_list
 
 try:
-    from gomatic import *
+    from gomatic import ExecTask, GoCdConfigurator, HostRestClient
 except ModuleNotFoundError:
     install_pid = subprocess.Popen(shlex.split('apt-get install -y python3-pip'),
                                    stdout=subprocess.PIPE, shell=False)
@@ -11,7 +11,7 @@ except ModuleNotFoundError:
     install_pid = subprocess.Popen(shlex.split('pip3 install gomatic'),
                                    stdout=subprocess.PIPE, shell=False)
     install_pid.wait()
-    from gomatic import *
+    from gomatic import ExecTask, GoCdConfigurator, HostRestClient
 
 # TODO pip3 install pylint bandit pyflakes vulture dead bashate
 # TODO for python/linting....can't import
