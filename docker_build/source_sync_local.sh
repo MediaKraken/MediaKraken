@@ -33,6 +33,7 @@
 \cp -f --remove-destination ../src/mk_lib_compression/src/mk_lib_compression.rs ../docker/core/mklibretrocorefetchupdate/src/.
 \cp -f --remove-destination ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mklibretrocorefetchupdate/src/.
 \cp -f --remove-destination ../src/mk_lib_hash/src/mk_lib_hash_md5.rs ../docker/core/mklibretrocorefetchupdate/src/.
+\cp -f --remove-destination ../src/mk_lib_hash/src/mk_lib_hash_crc32.rs ../docker/core/mklibretrocorefetchupdate/src/.
 \cp -f --remove-destination ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mklibretrocorefetchupdate/src/.
 
 # mkmediascanner
@@ -50,8 +51,10 @@
 
 # mkmetadata
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkmetadata/src/.
+\cp -f --remove-destination ../src/mk_lib_file/src/mk_lib_file.rs ../docker/core/mkmetadata/src/.
 
 # mkmetadatamame
+\cp -f --remove-destination ../src/mk_lib_compression/src/mk_lib_compression.rs ../docker/core/mkmetadatamame/src/.
 \cp -f --remove-destination ../src/mk_lib_compression/src/mk_lib_compression.rs ../docker/core/mkmetadatamame/src/.
 
 # mknotify
@@ -67,13 +70,14 @@
 \cp -f --remove-destination ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mkrabbitconsume/src/.
 
 # mkschedulesdirectupdate
-\cp -f --remove-destination ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkschedulesdirectupdate /src/.
+\cp -f --remove-destination ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkschedulesdirectupdate/src/.
 
 # mktmdbnetfetchbulk
 \cp -f --remove-destination ../src/mk_lib_common/src/mk_lib_common.rs ../docker/core/mktmdbnetfetchbulk/src/.
 \cp -f --remove-destination ../src/mk_lib_common/src/mk_lib_common_enum_media_type.rs ../docker/core/mktmdbnetfetchbulk/src/.
 \cp -f --remove-destination ../src/mk_lib_compression/src/mk_lib_compression.rs ../docker/core/mktmdbnetfetchbulk/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mktmdbnetfetchbulk/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_metadata_movie.rs ../docker/core/mktmdbnetfetchbulk/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/metadata/mk_lib_database_metadata_download_queue.rs ../docker/core/mktmdbnetfetchbulk/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mktmdbnetfetchbulk/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mktmdbnetfetchbulk/src/.
@@ -85,6 +89,7 @@
 \cp -f --remove-destination ../src/mk_lib_common/src/mk_lib_common_enum_media_type.rs ../docker/core/mktmdbnetfetchupdate/src/.
 \cp -f --remove-destination ../src/mk_lib_compression/src/mk_lib_compression.rs ../docker/core/mktmdbnetfetchupdate/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mktmdbnetfetchupdate/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_metadata_movie.rs ../docker/core/mktmdbnetfetchupdate/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/metadata/mk_lib_database_metadata_download_queue.rs ../docker/core/mktmdbnetfetchupdate/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mktmdbnetfetchupdate/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mktmdbnetfetchupdate/src/.
