@@ -32,7 +32,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         json!({"START": "START"}),
                                         LOGGING_INDEX_NAME).await;
 
-    // connect to db and do a version check
+    // open the database
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
     mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
                                                            false).await;
