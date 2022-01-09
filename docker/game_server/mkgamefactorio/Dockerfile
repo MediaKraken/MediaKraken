@@ -1,6 +1,6 @@
 FROM ubuntu:14.04
 
-LABEL AUTHOR=Jason Rivers <docker@jasonrivers.co.uk>
+LABEL AUTHOR="Jason Rivers <docker@jasonrivers.co.uk>"
 ENV FACTORIO_SERVER_PORT=34197
 
 WORKDIR /opt
@@ -30,13 +30,13 @@ ENV FACTORIO_BUILD \
     FACTORIO_SERVER_VERIFY_IDENTITY=false \
     FACTORIO_SERVER_VERSION=
 
-RUN  apt-get update \
+RUN apt-get update \
   && apt-get install -y wget xz-utils \
   && rm -rf /var/lib/apt/lists/*
 
 ## Pre-load the image with the stable version
 
-RUN  wget -q -O - https://www.factorio.com/download-headless | grep -o -m1 "/get-download/.*/headless/linux64" | tee /tmp/factorioV | awk '{print "--no-check-certificate https://www.factorio.com"$1" -O /tmp/factorio.tar.xz"}' | xargs wget \
+RUN wget -qO - https://www.factorio.com/download-headless | grep -o -m1 "/get-download/.*/headless/linux64" | tee /tmp/factorioV | awk '{print "--no-check-certificate https://www.factorio.com"$1" -O /tmp/factorio.tar.xz"}' | xargs wget \
   && tar xf /tmp/factorio.tar.xz -C /opt \
   && rm -rf /tmp/factorio.tar.xz    \
   && cat /tmp/factorioV | sed 's/\/get-download\/\(.*\)\/headless\/linux64/\1/' >> /opt/factorio/currentVersion

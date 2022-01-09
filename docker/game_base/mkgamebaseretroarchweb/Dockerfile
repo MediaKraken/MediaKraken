@@ -25,7 +25,7 @@ ENV ROOT_WWW_PATH /var/www/html
 
 
 RUN cd ${ROOT_WWW_PATH} \
-	&& wget https://buildbot.libretro.com/stable/${RETROARCH_VERSION}/emscripten/RetroArch.7z \
+	&& wget -qO https://buildbot.libretro.com/stable/${RETROARCH_VERSION}/emscripten/RetroArch.7z \
 	&& 7z x -y RetroArch.7z \
 	&& mv retroarch/* . \
 	&& rmdir retroarch \
@@ -35,7 +35,7 @@ RUN cd ${ROOT_WWW_PATH} \
 	#&& mkdir -p ${ROOT_WWW_PATH}/assets/frontend \
 	&& mkdir -p ${ROOT_WWW_PATH}/assets/cores \
 	#&& cd ${ROOT_WWW_PATH}/assets/frontend \
-	#&& wget https://buildbot.libretro.com/assets/frontend/bundle.zip \
+	#&& wget -qO https://buildbot.libretro.com/assets/frontend/bundle.zip \
 	#&& unzip bundle.zip -d bundle \
 	&& cd ${ROOT_WWW_PATH}/assets/frontend/bundle \
 	&& ../../../indexer > .index-xhr \

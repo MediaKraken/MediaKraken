@@ -25,7 +25,7 @@ RUN set -x \
 		libtinfo5:i386=6.1+20181013-2+deb10u2 \
 		libcurl3-gnutls:i386=7.64.0-4+deb10u2 \
 	&& mkdir -p "${STEAMAPPDIR}" \
-	&& wget "${DLURL}/master/etc/entry.sh" -O "${HOMEDIR}/entry.sh" \
+	&& wget "${DLURL}/master/etc/entry.sh" -qO "${HOMEDIR}/entry.sh" \
 	&& { \
 		echo '@ShutdownOnFailedCommand 1'; \
 		echo '@NoPromptForPassword 1'; \

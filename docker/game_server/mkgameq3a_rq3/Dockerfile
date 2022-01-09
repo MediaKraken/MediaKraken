@@ -6,7 +6,7 @@ USER root
 # add rq3 
 RUN \
   echo "# INSTALL DEPENDENCIES ##########################################" && \
-  wget ftp://ftp.nsysu.edu.tw/BSD/FreeBSD/ports/distfiles/ReactionQuake3-v3.2-Full.zip && \
+  wget -qO ftp://ftp.nsysu.edu.tw/BSD/FreeBSD/ports/distfiles/ReactionQuake3-v3.2-Full.zip && \
   su ioq3srv -c "unzip ReactionQuake3-v3.2-Full.zip -d ~/ioquake3" && \
   echo "# CLEAN UP ######################################################" && \
   rm ReactionQuake3-v3.2-Full.zip

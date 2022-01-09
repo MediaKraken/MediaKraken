@@ -22,8 +22,8 @@ RUN set -x \
 		libc6-dev=2.28-10 \
 		file=1:5.35-4+deb10u2 \
 	&& mkdir -p "${STEAMAPPDIR}" \
-	&& wget --max-redirect=30 "${DLURL}/master/etc/entry.sh" -O "${HOMEDIR}/entry.sh" \
-	&& wget --max-redirect=30 "${DLURL}/master/etc/tinientry.sh" -O "${HOMEDIR}/tinientry.sh" \
+	&& wget --max-redirect=30 "${DLURL}/master/etc/entry.sh" -qO "${HOMEDIR}/entry.sh" \
+	&& wget --max-redirect=30 "${DLURL}/master/etc/tinientry.sh" -qO "${HOMEDIR}/tinientry.sh" \
 	&& chmod +x "${HOMEDIR}/entry.sh" "${HOMEDIR}/tinientry.sh" \
 	&& chown -R "${USER}:${USER}" "${HOMEDIR}/entry.sh" "${HOMEDIR}/tinientry.sh" "${STEAMAPPDIR}" \	
 	&& apt-get remove --purge -y \

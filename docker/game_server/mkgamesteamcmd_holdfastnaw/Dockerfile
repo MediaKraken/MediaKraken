@@ -19,8 +19,8 @@ RUN set -x \
 		libsqlite3-0=3.27.2-3+deb10u1 \
 		tini=0.18.0-1 \
 	&& mkdir -p "${STEAMAPPDIR}" \
-	&& wget "${DLURL}/master/etc/entry.sh" -O "${HOMEDIR}/entry.sh" \
-	&& wget "${DLURL}/master/etc/tinientry.sh" -O "${HOMEDIR}/tinientry.sh" \
+	&& wget "${DLURL}/master/etc/entry.sh" -qO "${HOMEDIR}/entry.sh" \
+	&& wget "${DLURL}/master/etc/tinientry.sh" -qO "${HOMEDIR}/tinientry.sh" \
 	&& chmod +x "${HOMEDIR}/entry.sh" "${HOMEDIR}/tinientry.sh" \
 	&& chown -R "${USER}:${USER}" "${HOMEDIR}/entry.sh" "${HOMEDIR}/tinientry.sh" "${STEAMAPPDIR}" \	
 	&& apt-get remove --purge -y \

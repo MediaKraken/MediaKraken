@@ -6,7 +6,7 @@ USER root
 # add osp 
 RUN \
   echo "# INSTALL DEPENDENCIES ##########################################" && \
-  wget http://osp.dget.cc/orangesmoothie/downloads/osp-Quake3-1.03a_full.zip && \
+  wget -qO http://osp.dget.cc/orangesmoothie/downloads/osp-Quake3-1.03a_full.zip && \
   unzip osp-Quake3-1.03a_full.zip -d /home/ioq3srv/ioquake3 && \
   echo "# CLEAN UP ######################################################" && \
   rm osp-Quake3-1.03a_full.zip

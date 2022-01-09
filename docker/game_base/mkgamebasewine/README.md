@@ -25,7 +25,7 @@ Using the `docker-wine` script is the easiest way to get started and should be a
 On Linux:
 
 ```bash
-wget https://raw.githubusercontent.com/scottyhardy/docker-wine/master/docker-wine
+wget -qO https://raw.githubusercontent.com/scottyhardy/docker-wine/master/docker-wine
 chmod +x docker-wine
 ```
 

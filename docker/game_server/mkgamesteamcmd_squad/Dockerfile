@@ -13,7 +13,7 @@ ENV DLURL https://raw.githubusercontent.com/CM2Walki/Squad
 
 RUN set -x \
 	&& apt-get update \
-	&& wget "${DLURL}/master/etc/entry.sh" -O "${HOMEDIR}/entry.sh" \
+	&& wget "${DLURL}/master/etc/entry.sh" -qO "${HOMEDIR}/entry.sh" \
 	&& mkdir -p "${STEAMAPPDIR}" \
 	&& chmod 755 "${HOMEDIR}/entry.sh" "${STEAMAPPDIR}" \
 	&& chown "${USER}:${USER}" "${HOMEDIR}/entry.sh" "${STEAMAPPDIR}" \

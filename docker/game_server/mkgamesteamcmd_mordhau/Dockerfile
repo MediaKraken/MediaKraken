@@ -32,7 +32,7 @@ RUN set -x \
 		libcurl4=7.64.0-4+deb10u2 \
 		iputils-ping=3:20180629-2+deb10u2 \
 	&& mkdir -p "${STEAMAPPDIR}" \
-	&& wget --max-redirect=30 "${DLURL}/master/etc/entry.sh" -O "${HOMEDIR}/entry.sh" \
+	&& wget --max-redirect=30 "${DLURL}/master/etc/entry.sh" -qO "${HOMEDIR}/entry.sh" \
 	&& chmod +x "${HOMEDIR}/entry.sh" \
 	&& chown -R "${USER}:${USER}" "${HOMEDIR}/entry.sh" "${STEAMAPPDIR}" \
 	&& apt-get remove --purge -y \
