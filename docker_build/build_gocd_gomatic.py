@@ -80,10 +80,6 @@ pipeline = configurator \
     .ensure_replacement_of_pipeline("mediakraken_build_pipeline") \
     .set_git_url("https://github.com/MediaKraken/MediaKraken")
 
-stage = pipeline.ensure_stage("docker_build_base_sync")
-job = stage.ensure_job("build_base_code_sync")
-job.add_task(ExecTask(['./docker_build/source_base_sync.sh']))
-
 stage = pipeline.ensure_stage("docker_build_base")
 for build_group in (docker_images_list.STAGE_ONE_IMAGES,
                     docker_images_list.STAGE_TWO_IMAGES,
@@ -101,9 +97,6 @@ for build_group in (docker_images_list.STAGE_ONE_IMAGES,
                                                                     build_group[docker_images][2],
                                                                     docker_images)]))
 
-stage = pipeline.ensure_stage("docker_build_core_sync")
-job = stage.ensure_job("build_core_code_sync")
-job.add_task(ExecTask(['./docker_build/source_core_sync.sh']))
 
 stage = pipeline.ensure_stage("docker_build_core")
 for build_group in (docker_images_list.STAGE_CORE_IMAGES,):
