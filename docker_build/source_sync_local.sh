@@ -53,6 +53,7 @@
 # mkmetadata
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkmetadata/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mkmetadata/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mkmetadata/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/metadata/mk_lib_database_metadata_download_queue.rs ../docker/core/mkmetadata/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/metadata/mk_lib_database_metadata_movie.rs ../docker/core/mkmetadata/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/metadata/mk_lib_database_metadata_tv.rs ../docker/core/mkmetadata/src/.
@@ -63,7 +64,8 @@
 
 # mkmetadatamame
 \cp -f --remove-destination ../src/mk_lib_compression/src/mk_lib_compression.rs ../docker/core/mkmetadatamame/src/.
-\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mkinotify/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mkmetadatamame/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mkmetadatamame/src/.
 
 # mknotify
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkinotify/src/.
