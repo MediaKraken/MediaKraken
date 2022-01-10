@@ -13,11 +13,17 @@ except ModuleNotFoundError:
     install_pid.wait()
     from gomatic import ExecTask, GoCdConfigurator, HostRestClient
 
-# TODO pip3 install pylint bandit pyflakes vulture dead bashate
+# TODO pip3 install pylint bandit pyflakes vulture dead bashate yamllint pydocstyle flawfinder
 # TODO for python/linting....can't import
 # TODO pip3 install pytest selenium psutil flask guessit gomatic
-# TODO python3-pip wget shellcheck cppcheck
+# TODO apt-get install -y python3-pip wget shellcheck cppcheck nodejs npm
 # TODO chmod 666 /var/run/docker.sock
+
+# TODO npm install htmlhint -g
+
+# TODO curl -sSfL https://raw.githubusercontent.com/dotenv-linter/dotenv-linter/master/install.sh | sh -s
+# TODO npm install --save-dev stylelint stylelint-config-standard
+# TODO curl -sL https://raw.githubusercontent.com/epi052/feroxbuster/master/install-nix.sh | bash
 
 """
 wget https://github.com/hadolint/hadolint/releases/download/v2.8.0/hadolint-Linux-x86_64
@@ -43,6 +49,8 @@ stage = pipeline.ensure_stage("linting")
 # TODO should I use --quiet flag?
 job = stage.ensure_job("c_cpp_cppcheck")
 job.add_task(ExecTask(['cppcheck', '--enable=all', '--platform=unix64', '.']))
+job = stage.ensure_job("c_cpp_flawfinder")
+job.add_task(ExecTask(['flawfinder', '.']))
 
 job = stage.ensure_job("dockerfile_hadolint")
 # TODO use -t error later on to fail only on error or above
@@ -53,6 +61,8 @@ job = stage.ensure_job("python_pyflakes")
 job.add_task(ExecTask(['pyflakes', '.']))  # it didn't like the git method
 job = stage.ensure_job("python_pylint")
 job.add_task(ExecTask(['bash', '-c', 'pylint $(git ls-files *.py)']))
+job = stage.ensure_job("python_pydocstyle")
+job.add_task(ExecTask(['bash', '-c', 'pydocstyle $(git ls-files *.py)']))
 
 job = stage.ensure_job("shell_shellcheck")
 job.add_task(ExecTask(['bash', '-c', 'shellcheck $(git ls-files *.sh)']))
@@ -61,6 +71,18 @@ job.add_task(ExecTask(['bash', '-c', 'bashate $(git ls-files *.sh)']))
 
 # job = stage.ensure_job("rust_clippy")
 # job.add_task(ExecTask(['cloc', '.']))
+
+job = stage.ensure_job("html_htmlhint")
+job.add_task(ExecTask(['htmlhint', 'docker/core/mkwebapp/templates/**/*.html']))
+
+job = stage.ensure_job("env_dotenv-linter")
+job.add_task(ExecTask(['bash', '-c', 'dotenv-linter $(git ls-files | grep .env)']))
+
+job = stage.ensure_job("yml_yamllint")
+job.add_task(ExecTask(['bash', '-c', 'yamllint $(git ls-files *.yml)']))
+
+job = stage.ensure_job("css_stylelint")
+job.add_task(ExecTask(['bash', '-c', 'npx stylelint "docker/core/mkwebapp/static/**/*.css"']))
 
 
 stage = pipeline.ensure_stage("dead_code")
@@ -135,16 +157,25 @@ job = stage.ensure_job("docker_dockerbench")
 job.add_task(ExecTask(['./docker/test/docker_bench_security.sh']))
 
 
-# pipeline = configurator \
-#     .ensure_pipeline_group("MediaKraken") \
-#     .ensure_replacement_of_pipeline("mediakraken_test_pipeline") \
-#     .set_git_url("https://github.com/MediaKraken/MediaKraken")
-# stage = pipeline.ensure_stage("test_mediakraken")
-# TODO start mediakraken docker-compose
+pipeline = configurator \
+    .ensure_pipeline_group("MediaKraken") \
+    .ensure_replacement_of_pipeline("mediakraken_security_pipeline") \
+    .set_git_url("https://github.com/MediaKraken/MediaKraken")
+stage = pipeline.ensure_stage("security_mediakraken")
+job = stage.ensure_job("mediakraken_start")
+job.add_task(ExecTask(['./docker_compose/mediakraken_stop.sh']))
+job = stage.ensure_job("security_feroxbuster")
+job.add_task(ExecTask(['bash', '-c', './feroxbuster -u https://th-mkbuild-1:8900 -x pdf -x js,html -x php txt json,docx']))
+
+pipeline = configurator \
+    .ensure_pipeline_group("MediaKraken") \
+    .ensure_replacement_of_pipeline("mediakraken_test_pipeline") \
+    .set_git_url("https://github.com/MediaKraken/MediaKraken")
+stage = pipeline.ensure_stage("test_mediakraken")
 # TODO test selenium
-# TODO security test website
 # TODO ab website
-# TODO stop mediakraken docker-compose
+job = stage.ensure_job('mediakraken_stop')
+job.add_task(ExecTask(['./docker_compose/mediakraken_stop.sh']))
 #
 # pipeline = configurator \
 #     .ensure_pipeline_group("MediaKraken") \

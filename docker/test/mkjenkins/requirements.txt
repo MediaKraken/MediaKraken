@@ -2,7 +2,7 @@
 pytest==6.2.5
 pytest-xdist==2.4.0
 pytest-selenium==2.0.1
-selenium==4.0.0
+selenium==4.1.0
 coverage==6.0.2
 pytest-cov==3.0.0
 tox==3.24.4
@@ -11,8 +11,8 @@ pytest-timeout==2.0.1
 pytest-profiling==1.7.0
 pylint==2.11.1
 safety==1.10.3
-pyre-check==0.9.6
-apache-libcloud==3.3.1
+pyre-check==0.9.9
+apache-libcloud==3.4.1
 appdirs==1.4.4
 appnope==0.1.2
 arduino-python==0.2
@@ -27,8 +27,8 @@ colorama==0.4.4
 #crochet
 cryptography==3.4.7
 #cssselect
-cython==0.29.24
-decorator==5.1.0
+cython==0.29.26
+decorator==5.1.1
 distro==1.6.0
 docker==5.0.3
 dosage==2.17

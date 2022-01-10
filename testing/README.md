@@ -49,43 +49,66 @@ Run the following tests from under the MediaKraken_CI
     python3 validate_web_selenium
 
 
-Maybe:
-https://github.com/dotenv-linter/dotenv-linter       - env file linter
-https://github.com/wemake-services/dotenv-linter     - env file linter
-https://github.com/wemake-services/wemake-python-styleguide    - uber linter?
+lint:
 https://github.com/PyCQA/prospector   - python linter
-https://github.com/PyCQA/isort   - sorts and updates your imports
-https://github.com/epi052/feroxbuster - website attacker
-https://github.com/ffuf/ffuf - website attacker
-https://github.com/xd009642/tarpaulin     - code coverage for rust
-https://github.com/drwetter/testssl.sh          - check port for tls/ssl support and some flaws
 https://coala.io/#/home?lang=Python     - linter for alot of langs and web code
+https://github.com/mrtazz/checkmake         - experimental linter/analyzer for Makefiles     I don't have any makefiles
+https://github.com/myint/scspell --report-only      - find spelling mistakes
 https://hegel.js.org/               - static type checker for js
 https://github.com/rslint/rslint        - JavaScript and TypeScript linter
-https://github.com/phan/phan            - static analyzer for PHP
-https://github.com/phpstan/phpstan          - PHP Static Analysis Tool
-https://developers.google.com/closure/compiler   - Closure Compiler is a tool for making JavaScript download and run faster
 https://flow.org/en/docs/cli/           -FLOW IS A STATIC TYPE CHECKER FOR JAVASCRIPT.
-https://html-validate.org/              -Offline HTML5 validator
-https://github.com/HTMLHint/HTMLHint        - static code analysis tool you need for your HTML
-https://validator.github.io/validator/      -  catch unintended mistakes in your HTML, CSS, and SVG
-https://github.com/mrtazz/checkmake         - experimental linter/analyzer for Makefiles
-https://github.com/collections/code-quality-in-php
-https://github.com/twbs/bootlint            - HTML linter for Bootstrap proje    eol?
+https://github.com/wemake-services/wemake-python-styleguide    - uber linter?
+
+
+security:
+https://github.com/Yelp/detect-secrets      - detecting and preventing secrets in code
 https://github.com/Checkmarx/kics           - Find security vulnerabilities, compliance issues, and infrastructure misconfigurations early in the development cycle of your infrastructure-as-code (docke, k8s)
-https://github.com/stylelint/stylelint      - A mighty, modern linter that helps you avoid errors and enforce conventions in your styles. (css, etc)
+
+
+security - app running
+
+https://github.com/ffuf/ffuf - website attacker
+https://github.com/drwetter/testssl.sh          - check port for tls/ssl support and some flaws
+https://github.com/almandin/fuxploider      - File upload vulnerability scanner and exploitation tool.
+https://github.com/johannesschaefer/webnettools
+https://www.zaproxy.org/   - web scanner
+https://www.arachni-scanner.com/    - web scanner
+http://rgaucher.info/beta/grabber/     - web scanner
+https://cirt.net/nikto2     - web scanner
+https://github.com/vwt-digital/sec-helpers/tree/master    - web scanner
+https://subgraph.com/vega/   - web scanner
+http://w3af.org/    - web scanner
+
+
+howto:
+https://medium.com/techbull/deploying-elk-stack-for-apache-logs-analysis-3d23648dafa6
+
+https://github.com/PyCQA/isort   - sorts and updates your imports
+https://github.com/xd009642/tarpaulin     - code coverage for rust
+
+
+https://github.com/phan/phan            - static analyzer for PHP
+https://psalm.dev/docs/running_psalm/installation/     - php
+https://github.com/phpstan/phpstan          - PHP Static Analysis Tool
+https://github.com/collections/code-quality-in-php
+
+
+https://github.com/twbs/bootlint            - HTML linter for Bootstrap proje    eol?
+https://github.com/yandex/gixy   - Gixy is a tool to analyze Nginx configuration.   2-years ago
+https://github.com/wemake-services/dotenv-linter     - env file linter, same exe name as other linter
+
+
+
+https://developers.google.com/closure/compiler   - Closure Compiler is a tool for making JavaScript download and run faster
+https://html-validate.org/              -Offline HTML5 validator
+https://validator.github.io/validator/      -  catch unintended mistakes in your HTML, CSS, and SVG
 https://github.com/purcell/sqlint       -  SQL linter supporting ANSI and PostgreSQL
 https://github.com/jarulraj/sqlcheck    -  identify anti-patterns in SQL queries
 https://github.com/vintasoftware/python-linters-and-code-analysis
 https://github.com/analysis-tools-dev/static-analysis#python
-https://github.com/Yelp/detect-secrets      - detecting and preventing secrets in code
-https://github.com/almandin/fuxploider      - File upload vulnerability scanner and exploitation tool.
 https://github.com/facebook/pyre-check
-https://github.com/myint/scspell --report-only      - find spelling mistakes
 https://github.com/rust-lang/rust-clippy
 metasploit
-https://github.com/yandex/gixy   - Gixy is a tool to analyze Nginx configuration.
-https://github.com/adrienverge/yamllint     - yml linter
 Clair - docker vuln scanner
     https://github.com/arminc/clair-scanner
     https://github.com/arminc/clair-local-scan
@@ -99,7 +122,6 @@ Sonarqube - code scanner
 Vuls - os scanner via ssh
     https://vuls.io/docs/en/tutorial-docker.html
     https://github.com/ishiDACo/vulsrepo
-https://github.com/PyCQA/pydocstyle             - docstring style checker for python code
 https://github.com/pyupio/safety                - Safety checks your installed dependencies for known security vulnerabilities - python
 https://github.com/PyCQA/flake8-bugbear         - A plugin for Flake8 finding likely bugs and design problems in your program.
 https://github.com/RetireJS/retire.js              - scanner detecting the use of JavaScript libraries with known vulnerabilities
@@ -111,19 +133,21 @@ cargo udeps
 https://www.codacy.com/product     - security/etc scanner for alot of langs
 https://github.com/ZupIT/horusec   - static code analys on alot of langs
 https://huskyci.opensource.globo.com/docs/quickstart/overview    - huskyCI is an open-source tool that orchestrates security tests inside CI pipelines of multiple projects and centralizes all results into a database for further analysis and metrics.
-https://psalm.dev/docs/running_psalm/installation/     - php
 https://pyre-check.org/     - type checker python3
 https://lgtm.com/help/lgtm/getting-started    - dont' I have a lgtm account?
-https://dwheeler.com/flawfinder/     - c/c++ flaw finder
 
 
 Nonproject:
 core intruque = attack surface checker - looks for stuff running that's insecure
     https://core.intrigue.io/
     docker run -e LANG=C.UTF-8 --memory=8g -p 0.0.0.0:7777:7777 -v /var/opt/mediakraken/intrigue-data:/data -it "intrigueio/intrigue-core:latest"
+$ signed up via github.........doenst' appear to bring in my code
+https://app.snyk.io/org/spootdev/manage/members
+
 
 
 implemented in gocd:
+https://github.com/adrienverge/yamllint     - yml linter
 cloc - code line counter
 pylint - python linter
     https://www.pylint.org/
@@ -145,6 +169,13 @@ Vulture to find dead code - against MediaKraken source
     pip3 install vulture==2.3
 dead - to find dead python code
 https://github.com/openstack/bashate    - pep8 for bash
+https://github.com/HTMLHint/HTMLHint        - static code analysis tool you need for your HTML
+https://github.com/dotenv-linter/dotenv-linter       - env file linter
+https://github.com/PyCQA/pydocstyle             - docstring style checker for python code
+https://dwheeler.com/flawfinder/     - c/c++ flaw finder
+https://github.com/stylelint/stylelint      - A mighty, modern linter that helps you avoid errors and enforce conventions in your styles. (css, etc)
+https://github.com/epi052/feroxbuster - website attacker
+
 
 standalone app:
 archerysec - vuln db and monitor
