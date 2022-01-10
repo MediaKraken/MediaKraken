@@ -35,6 +35,7 @@
 \cp -f --remove-destination ../src/mk_lib_hash/src/mk_lib_hash_md5.rs ../docker/core/mklibretrocorefetchupdate/src/.
 \cp -f --remove-destination ../src/mk_lib_hash/src/mk_lib_hash_crc32.rs ../docker/core/mklibretrocorefetchupdate/src/.
 \cp -f --remove-destination ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mklibretrocorefetchupdate/src/.
+\cp -f --remove-destination ../src/mk_lib_file/src/mk_lib_file.rs ../docker/core/mklibretrocorefetchupdate/src/.
 
 # mkmediascanner
 \cp -f --remove-destination ../src/mk_lib_common/src/mk_lib_common_enum_media_type.rs ../docker/core/mkmediascanner/src/.
