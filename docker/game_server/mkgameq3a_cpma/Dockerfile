@@ -2,8 +2,8 @@ FROM th-registry-1.beaverbay.local:5000/mediakraken/mkgameq3a:dev
 
 LABEL maintainer="jberrenberg"
 
-ADD https://cdn.playmorepromode.com/files/cpma/cpma-1.52-nomaps.zip /tmp/cpma-nomaps.zip 
-ADD https://cdn.playmorepromode.com/files/cpma-mappack-full.zip /tmp/cpma-mappack-full.zip  
+COPY https://cdn.playmorepromode.com/files/cpma/cpma-1.52-nomaps.zip /tmp/cpma-nomaps.zip
+COPY https://cdn.playmorepromode.com/files/cpma-mappack-full.zip /tmp/cpma-mappack-full.zip
 
 USER root
 RUN \

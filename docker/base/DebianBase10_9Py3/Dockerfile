@@ -16,11 +16,11 @@ COPY requirements.txt /mediakraken
 
 WORKDIR /mediakraken
 
-RUN apt-get update && apt -y install \
+RUN apt-get update && apt-get -y install \
   && pip3 install --upgrade pip \
   && pip3 install --trusted-host ${PIPMIRROR} -i https://${PIPMIRROR}/simple -r requirements.txt \
   && rm requirements.txt \
-  && apt clean \
+  && apt-get clean \
   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Do NOT do the below as other containers won't have rights to install/build.

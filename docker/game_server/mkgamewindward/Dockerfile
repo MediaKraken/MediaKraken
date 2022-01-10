@@ -20,9 +20,8 @@ RUN apk add --no-cache --virtual=.build-dependencies wget ca-certificates tar zs
     tar -I zstd -xvf "/tmp/mono.pkg.tar.zst" && \
     cert-sync /etc/ssl/certs/ca-certificates.crt && \
     apk del .build-dependencies && \
-    rm /tmp/*
-
-RUN mkdir -p /windward && \
+    rm /tmp/* && \
+    mkdir -p /windward && \
     chmod ugo=rwx /windward && \
 	addgroup -g $PGID -S $GROUP && \
 	adduser -u $PUID -G $GROUP -s /bin/sh -SD $USER && \

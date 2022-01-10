@@ -1,10 +1,8 @@
 FROM rust:1.57 as cargo-build
 
-RUN apt-get update
-
-RUN apt-get install musl-tools -y
-
-RUN rustup target add x86_64-unknown-linux-musl
+RUN apt-get update \
+  && apt-get install musl-tools -y \
+  && rustup target add x86_64-unknown-linux-musl
 
 WORKDIR /usr/src/myapp
 
@@ -12,11 +10,9 @@ COPY Cargo.toml Cargo.toml
 
 RUN mkdir src/
 
-RUN echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main.rs
-
-RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl
-
-RUN rm -f target/x86_64-unknown-linux-musl/release/deps/myapp*
+RUN echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main.rs \
+  && RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl \
+  && rm -f target/x86_64-unknown-linux-musl/release/deps/myapp*
 
 COPY . .
 
