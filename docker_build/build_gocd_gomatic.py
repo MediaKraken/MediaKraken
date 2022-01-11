@@ -79,7 +79,7 @@ job = stage.ensure_job("html_htmlhint")
 job.add_task(ExecTask(['htmlhint', 'docker/core/mkwebapp/templates/**/*.html']))
 
 job = stage.ensure_job("env_dotenv-linter")
-job.add_task(ExecTask(['bash', '-c', 'dotenv-linter $(git ls-files | grep .env)']))
+job.add_task(ExecTask(['bash', '-c', 'dotenv-linter $(git ls-files | grep -F \.env)']))
 
 job = stage.ensure_job("yml_yamllint")
 job.add_task(ExecTask(['bash', '-c', 'yamllint $(git ls-files *.yml)']))
@@ -179,7 +179,7 @@ stage = pipeline.ensure_stage("test_mediakraken")
 # TODO ab website
 job = stage.ensure_job('mediakraken_stop')
 job.add_task(ExecTask(['./docker_compose/mediakraken_stop.sh']))
-#
+
 # pipeline = configurator \
 #     .ensure_pipeline_group("MediaKraken") \
 #     .ensure_replacement_of_pipeline("mediakraken_deploy_pipeline") \
