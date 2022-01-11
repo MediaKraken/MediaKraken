@@ -22,9 +22,12 @@ except ModuleNotFoundError:
 # TODO npm install htmlhint -g
 
 # TODO curl -sSfL https://raw.githubusercontent.com/dotenv-linter/dotenv-linter/master/install.sh | sh -s
-# TODO npm install --save-dev stylelint stylelint-config-standard
-# TODO curl -sL https://raw.githubusercontent.com/epi052/feroxbuster/master/install-nix.sh | bash
+# TODO mv bin/dotenv-linter /usr/bin/.
 
+# TODO npm install --save-dev stylelint stylelint-config-standard
+
+# TODO curl -sL https://raw.githubusercontent.com/epi052/feroxbuster/master/install-nix.sh | bash
+# TODO mv feroxbuster /usr/bin/.
 """
 wget https://github.com/hadolint/hadolint/releases/download/v2.8.0/hadolint-Linux-x86_64
 mv hadolint-Linux-x86_64 /usr/bin/hadolint
@@ -76,7 +79,7 @@ job = stage.ensure_job("html_htmlhint")
 job.add_task(ExecTask(['htmlhint', 'docker/core/mkwebapp/templates/**/*.html']))
 
 job = stage.ensure_job("env_dotenv-linter")
-job.add_task(ExecTask(['bash', '-c', './home/metaman/MediaKraken/bin/dotenv-linter $(git ls-files | grep .env)']))
+job.add_task(ExecTask(['bash', '-c', 'dotenv-linter $(git ls-files | grep .env)']))
 
 job = stage.ensure_job("yml_yamllint")
 job.add_task(ExecTask(['bash', '-c', 'yamllint $(git ls-files *.yml)']))
@@ -165,7 +168,7 @@ stage = pipeline.ensure_stage("security_mediakraken")
 job = stage.ensure_job("mediakraken_start")
 job.add_task(ExecTask(['./docker_compose/mediakraken_stop.sh']))
 job = stage.ensure_job("security_feroxbuster")
-job.add_task(ExecTask(['bash', '-c', './home/metaman/MediaKraken/feroxbuster -u https://th-mkbuild-1:8900 -x pdf -x js,html -x php txt json,docx']))
+job.add_task(ExecTask(['bash', '-c', 'feroxbuster -u https://th-mkbuild-1:8900 -x pdf -x js,html -x php txt json,docx']))
 
 pipeline = configurator \
     .ensure_pipeline_group("MediaKraken") \
