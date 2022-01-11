@@ -24,7 +24,7 @@ except ModuleNotFoundError:
 # TODO curl -sSfL https://raw.githubusercontent.com/dotenv-linter/dotenv-linter/master/install.sh | sh -s
 # TODO mv bin/dotenv-linter /usr/bin/.
 
-# TODO npm install --save-dev stylelint stylelint-config-standard
+# TODO npm install -g --save-dev stylelint stylelint-config-standard
 
 # TODO curl -sL https://raw.githubusercontent.com/epi052/feroxbuster/master/install-nix.sh | bash
 # TODO mv feroxbuster /usr/bin/.
@@ -85,7 +85,7 @@ job = stage.ensure_job("yml_yamllint")
 job.add_task(ExecTask(['bash', '-c', 'yamllint $(git ls-files *.yml)']))
 
 job = stage.ensure_job("css_stylelint")
-job.add_task(ExecTask(['bash', '-c', 'npx stylelint "docker/core/mkwebapp/static/**/*.css"']))
+job.add_task(ExecTask(['bash', '-c', 'npx stylelint docker/core/mkwebapp/static/**/*.css']))
 
 
 stage = pipeline.ensure_stage("dead_code")
