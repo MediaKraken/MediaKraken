@@ -16,7 +16,7 @@ except ModuleNotFoundError:
 # TODO pip3 install pylint bandit pyflakes vulture dead bashate yamllint pydocstyle flawfinder
 # TODO for python/linting....can't import
 # TODO pip3 install pytest selenium psutil flask guessit gomatic
-# TODO apt-get install -y python3-pip wget shellcheck cppcheck nodejs npm
+# TODO apt-get install -y python3-pip wget shellcheck cppcheck nodejs npm unzip
 # TODO chmod 666 /var/run/docker.sock
 
 # TODO npm install htmlhint -g
@@ -76,7 +76,7 @@ job = stage.ensure_job("html_htmlhint")
 job.add_task(ExecTask(['htmlhint', 'docker/core/mkwebapp/templates/**/*.html']))
 
 job = stage.ensure_job("env_dotenv-linter")
-job.add_task(ExecTask(['bash', '-c', 'dotenv-linter $(git ls-files | grep .env)']))
+job.add_task(ExecTask(['bash', '-c', './home/metaman/MediaKraken/bin/dotenv-linter $(git ls-files | grep .env)']))
 
 job = stage.ensure_job("yml_yamllint")
 job.add_task(ExecTask(['bash', '-c', 'yamllint $(git ls-files *.yml)']))
@@ -165,7 +165,7 @@ stage = pipeline.ensure_stage("security_mediakraken")
 job = stage.ensure_job("mediakraken_start")
 job.add_task(ExecTask(['./docker_compose/mediakraken_stop.sh']))
 job = stage.ensure_job("security_feroxbuster")
-job.add_task(ExecTask(['bash', '-c', './feroxbuster -u https://th-mkbuild-1:8900 -x pdf -x js,html -x php txt json,docx']))
+job.add_task(ExecTask(['bash', '-c', './home/metaman/MediaKraken/feroxbuster -u https://th-mkbuild-1:8900 -x pdf -x js,html -x php txt json,docx']))
 
 pipeline = configurator \
     .ensure_pipeline_group("MediaKraken") \

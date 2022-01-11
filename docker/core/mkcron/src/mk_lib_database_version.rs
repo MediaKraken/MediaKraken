@@ -29,7 +29,7 @@ pub async fn mk_lib_database_version_check(pool: &sqlx::PgPool,
             version_match = true;
         } else {
             loop {
-                sleep(Duration::from_secs(5)).await;
+                sleep(Duration::from_secs(1)).await;
                 let version_no: i32 = mk_lib_database_version(&pool).await.unwrap();
                 if DATABASE_VERSION == version_no {
                     version_match = true;
