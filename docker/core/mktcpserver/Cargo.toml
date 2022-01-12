@@ -8,7 +8,7 @@ panic = 'abort'
 
 [dependencies]
 argh = "0.1.6"
-amiquip = { version = "0.4.1" }
+amiquip = { version = "0.4.2" }
 chrono = "0.4.19"
 rustls = "0.20.2"
 serde = { version = "1.0.132", features = ["derive"] }

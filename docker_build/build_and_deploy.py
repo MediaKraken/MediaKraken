@@ -1,4 +1,4 @@
-'''
+"""
   Copyright (C) 2021 Quinn D Granfor <spootdev@gmail.com>
 
   This program is free software; you can redistribute it and/or
@@ -14,7 +14,7 @@
   version 2 along with this program; if not, write to the Free
   Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301, USA.
-'''
+"""
 
 # must login to docker hub first *IF* one wants to push to dockerhub
 # docker login --username=mediakraken

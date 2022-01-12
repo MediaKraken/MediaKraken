@@ -7,7 +7,7 @@ edition = "2021"
 panic = 'abort'
 
 [dependencies]
-amiquip = { version = "0.4.1", default-features = false }
+amiquip = { version = "0.4.2", default-features = false }
 
 [dev-dependencies]
 tokio-test = "*"

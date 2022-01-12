@@ -10,11 +10,9 @@ COPY Cargo.toml Cargo.toml
 
 RUN mkdir src/
 
-RUN echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main.rs
-
-RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl
-
-RUN rm -f target/x86_64-unknown-linux-musl/release/deps/myapp*
+RUN echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main.rs \
+  && RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl \
+  && rm -f target/x86_64-unknown-linux-musl/release/deps/myapp*
 
 COPY . .
 
