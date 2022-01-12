@@ -7,7 +7,7 @@ edition = "2021"
 panic = 'abort'
 
 [dependencies]
-amiquip = { version = "0.4.2" }
+amiquip = { version = "0.4.2", default-features = false }
 chrono = "0.4.19"
 lazy_static = "1.4.0"
 rcgen = "0.8.14"
