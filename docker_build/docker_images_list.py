@@ -71,7 +71,8 @@ STAGE_CORE_IMAGES = {
     'mkgamesdbnetfetchbulk': ('mkgamesdbnetfetchbulk', 'busybox:1.34.1-uclibc', 'core'),
 
     # guessit via web rest
-    'mkguessitrest': ('mkguessitrest', 'tiangolo/uwsgi-nginx-flask:python3.8-alpine-2021-10-02', 'core'),
+    'mkguessitrest': ('mkguessitrest',
+                      'tiangolo/uwsgi-nginx-flask:python3.8-alpine-2021-10-02', 'core'),
 
     # runs control network/ir/if/etc
     'mkhardwarecontrol': ('mkhardwarecontrol', 'busybox:1.34.1-uclibc', 'core'),

@@ -168,7 +168,8 @@ stage = pipeline.ensure_stage("security_mediakraken")
 job = stage.ensure_job("mediakraken_start")
 job.add_task(ExecTask(['./docker_compose/mediakraken_stop.sh']))
 job = stage.ensure_job("security_feroxbuster")
-job.add_task(ExecTask(['bash', '-c', 'feroxbuster -u https://th-mkbuild-1:8900 -x pdf -x js,html -x php txt json,docx']))
+job.add_task(ExecTask(['bash', '-c', 'feroxbuster -u https://th-mkbuild-1:8900'
+                                     'x -x pdf -x js,html -x php txt json,docx']))
 
 pipeline = configurator \
     .ensure_pipeline_group("MediaKraken") \
