@@ -18,6 +18,7 @@
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkdownload/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mkdownload/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mkdownload/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_option_status.rs ../docker/core/mkdownload/src/.
 \cp -f --remove-destination ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkdownload/src/.
 \cp -f --remove-destination ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mkdownload/src/.
 
@@ -45,6 +46,7 @@
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkmediascanner/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_library.rs ../docker/core/mkmediascanner/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/media/mk_lib_database_media.rs ../docker/core/mkmediascanner/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/media/mk_lib_database_media_movie.rs ../docker/core/mkmediascanner/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/metadata/mk_lib_database_metadata_download_queue.rs ../docker/core/mkmediascanner/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_notification.rs ../docker/core/mkmediascanner/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mkmediascanner/src/.
@@ -70,6 +72,7 @@
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkmetadatamame/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mkmetadatamame/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mkmetadatamame/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_option_status.rs ../docker/core/mkmetadatamame/src/.
 \cp -f --remove-destination ../src/mk_lib_file/src/mk_lib_file.rs ../docker/core/mkmetadatamame/src/.
 
 # mknotify
@@ -85,6 +88,7 @@
 \cp -f --remove-destination ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mkrabbitconsume/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mkrabbitconsume/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mkrabbitconsume/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_option_status.rs ../docker/core/mkrabbitconsume/src/.
 
 # mkschedulesdirectupdate
 \cp -f --remove-destination ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkschedulesdirectupdate/src/.

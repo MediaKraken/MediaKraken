@@ -1,4 +1,3 @@
-use crate::Error::TlsFeatureNotEnabled;
 use amiquip::{AmqpProperties, Connection, Exchange, Publish, Result};
 use inotify::{
     EventMask,
