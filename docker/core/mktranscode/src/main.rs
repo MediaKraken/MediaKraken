@@ -2,11 +2,6 @@ use amiquip::{Connection, ConsumerMessage, ConsumerOptions, Exchange, QueueDecla
 use serde_json::{json, Value};
 use std::error::Error;
 
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
-mod mk_lib_logging;
-
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 

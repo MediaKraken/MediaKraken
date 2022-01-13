@@ -5,35 +5,14 @@ use std::path::Path;
 use std::process::Command;
 //use rustube::{Id, VideoFetcher};
 
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
-mod mk_lib_database;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_option_status.rs"]
-mod mk_lib_database_option_status;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
-mod mk_lib_database_version;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
-mod mk_lib_logging;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_network/src/mk_lib_network.rs"]
-mod mk_lib_network;
-
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_option_status.rs"]
 mod mk_lib_database_option_status;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_version.rs"]
 mod mk_lib_database_version;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_network.rs"]
 mod mk_lib_network;
 
@@ -81,16 +60,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                   &json_message["Local Save Path"].to_string()).await;
                     } else if json_message["Type"].to_string() == "Youtube" {
                         if validator::validate_url(json_message["URL"].to_string()) {
-                            //let url = "https://www.youtube.com/watch?v=Edx9D2yaOGs&ab_channel=CollegeHumor";
-                            //println!("downloaded video to {:?}", rustube::download_best_quality(&json_message["URL"].to_string()).await.unwrap());
-                            continue;
-                            // Command::new("youtube-dl")
-                            //     .arg("-i")
-                            //     .arg("--download-archive")
-                            //     .arg("/mediakraken/downloads/yt_dl_archive.txt")
-                            //     .arg(json_message["URL"].to_string())
-                            //     .spawn()
-                            //     .expect("youtube-dl command failed to start");
+                            println!("downloaded video to {:?}", rustube::download_best_quality(&json_message["URL"].to_string()).await.unwrap());
                         } else {
                             // TODO log error by user requested
                             continue;

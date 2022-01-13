@@ -7,47 +7,18 @@ use tokio::time::{Duration, sleep};
 
 // https://www.progettosnaps.net/download/?tipo=dat_mame&file=/dats/MAME/packs/MAME_Dats_236.7z
 
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_compression/src/mk_lib_compression.rs"]
-mod mk_lib_compression;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_file/src/mk_lib_file.rs"]
-mod mk_lib_file;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
-mod mk_lib_logging;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
-mod mk_lib_database;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
-mod mk_lib_database_version;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_option_status.rs"]
-mod mk_lib_database_option_status;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_network/src/mk_lib_network.rs"]
-mod mk_lib_network;
-
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_compression.rs"]
 mod mk_lib_compression;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_file.rs"]
 mod mk_lib_file;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_option_status.rs"]
 mod mk_lib_database_option_status;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_version.rs"]
 mod mk_lib_database_version;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_network.rs"]
 mod mk_lib_network;
 

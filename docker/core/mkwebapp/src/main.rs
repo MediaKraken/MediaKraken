@@ -17,29 +17,12 @@ use std::collections::{HashMap, BTreeMap};
 use rocket_dyn_templates::Template;
 use serde_json::json;
 
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
-mod mk_lib_database;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
-mod mk_lib_database_version;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_file/src/mk_lib_file.rs"]
-mod mk_lib_file;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
-mod mk_lib_logging;
-
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_version.rs"]
 mod mk_lib_database_version;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_file.rs"]
 mod mk_lib_file;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 

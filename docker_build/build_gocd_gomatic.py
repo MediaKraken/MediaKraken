@@ -13,7 +13,7 @@ except ModuleNotFoundError:
     install_pid.wait()
     from gomatic import ExecTask, GoCdConfigurator, HostRestClient
 
-# TODO pip3 install pylint bandit pyflakes vulture dead bashate yamllint pydocstyle flawfinder
+# TODO pip3 install pylint bandit pyflakes vulture dead bashate yamllint pydocstyle flawfinder isort
 # TODO for python/linting....can't import
 # TODO pip3 install pytest selenium psutil flask guessit gomatic
 # TODO apt-get install -y python3-pip wget shellcheck cppcheck nodejs npm unzip
@@ -66,6 +66,8 @@ job = stage.ensure_job("python_pylint")
 job.add_task(ExecTask(['bash', '-c', 'pylint $(git ls-files *.py)']))
 job = stage.ensure_job("python_pydocstyle")
 job.add_task(ExecTask(['bash', '-c', 'pydocstyle $(git ls-files *.py)']))
+job = stage.ensure_job("python_isort")
+job.add_task(ExecTask(['isort', '--check', '.']))
 
 job = stage.ensure_job("shell_shellcheck")
 job.add_task(ExecTask(['bash', '-c', 'shellcheck $(git ls-files *.sh)']))

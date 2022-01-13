@@ -5,71 +5,26 @@ use serde_json::{json, Value};
 use sqlx::Row;
 use std::collections::HashMap;
 
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_common/src/mk_lib_common.rs"]
-mod mk_lib_common;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_common/src/mk_lib_common_enum_media_type.rs"]
-mod mk_lib_common_enum_media_type;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_compression/src/mk_lib_compression.rs"]
-mod mk_lib_compression;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
-mod mk_lib_database;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/metadata/mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/metadata/mk_lib_database_metadata_movie.rs"]
-mod mk_lib_database_metadata_movie;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/metadata/mk_lib_database_metadata_tv.rs"]
-mod mk_lib_database_metadata_tv;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_option_status.rs"]
-mod mk_lib_database_option_status;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
-mod mk_lib_database_version;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
-mod mk_lib_logging;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_network/src/mk_lib_network.rs"]
-mod mk_lib_network;
-
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_common.rs"]
 mod mk_lib_common;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_compression.rs"]
 mod mk_lib_compression;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_metadata_download_queue.rs"]
 mod mk_lib_database_metadata_download_queue;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_metadata_movie.rs"]
 mod mk_lib_database_metadata_movie;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_metadata_tv.rs"]
 mod mk_lib_database_metadata_tv;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_option_status.rs"]
 mod mk_lib_database_option_status;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_version.rs"]
 mod mk_lib_database_version;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_network.rs"]
 mod mk_lib_network;
 

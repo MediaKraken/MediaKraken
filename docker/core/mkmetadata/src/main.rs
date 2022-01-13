@@ -1,5 +1,4 @@
 use std::process::Command;
-// use pyo3::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::error::Error;
@@ -8,50 +7,18 @@ use tokio::time::{Duration, sleep};
 use uuid::Uuid;
 use sqlx::Row;
 
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
-mod mk_lib_database;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/metadata/mk_lib_database_metadata_movie.rs"]
-mod mk_lib_database_metadata_movie;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/metadata/mk_lib_database_metadata_tv.rs"]
-mod mk_lib_database_metadata_tv;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/metadata/mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
-mod mk_lib_database_version;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_hash/src/mk_lib_hash_sha1.rs"]
-mod mk_lib_hash_sha1;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
-mod mk_lib_logging;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_network/src/mk_lib_network.rs"]
-mod mk_lib_network;
-
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_metadata_movie.rs"]
 mod mk_lib_database_metadata_movie;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_metadata_tv.rs"]
 mod mk_lib_database_metadata_tv;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_metadata_download_queue.rs"]
 mod mk_lib_database_metadata_download_queue;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_version.rs"]
 mod mk_lib_database_version;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_network.rs"]
 mod mk_lib_network;
 
@@ -95,7 +62,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             println!("File: {:?}", file_name);
             let url_link = format!("http://th-docker-1:5000/?filename={:}", file_name);
             println!("URL: {:?}", url_link);
-            //let guessit_data = mk_lib_network::mk_data_from_url_to_json(url_link).await?;
             let buff = mk_lib_network::mk_data_from_url(url_link).await?;
             let guessit_data: MediaTitleYear = serde_json::from_str(&buff).unwrap();
             println!("Guess: {:?}", guessit_data.title);
@@ -135,6 +101,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
             // update the media row with the json media id and the proper name
             if metadata_uuid != Uuid::parse_str("00000000-0000-0000-0000-000000000000")? {
+                continue;
                 /*
                 await db_connection.db_begin()
                 await db_connection.db_update_media_id(row_data['mdq_provider_id'],

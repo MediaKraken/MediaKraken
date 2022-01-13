@@ -3,17 +3,8 @@ use serde_json::{json, Value};
 use std::error::Error;
 //use std::process::Command;
 
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
-mod mk_lib_logging;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_network/src/mk_lib_network.rs"]
-mod mk_lib_network;
-
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_network.rs"]
 mod mk_lib_network;
 

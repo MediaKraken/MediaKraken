@@ -25,7 +25,7 @@ about = {}
 
 here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'guessitrest', '__version__.py'), 'r') as f:
-    exec(f.read(), about)
+    exec(f.read(), about)  # pylint:disable=exec-used
 
 args = dict(name='guessit-rest',
             version=about['__version__'],

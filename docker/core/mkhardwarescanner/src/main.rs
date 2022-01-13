@@ -5,11 +5,6 @@ use huelib::resource::sensor;
 use huelib::{bridge, Bridge};
 use tokio::time::{Duration, sleep};
 
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
-mod mk_lib_logging;
-
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 

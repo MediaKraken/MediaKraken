@@ -58,19 +58,23 @@ https://hegel.js.org/               - static type checker for js
 https://github.com/rslint/rslint        - JavaScript and TypeScript linter
 https://flow.org/en/docs/cli/           -FLOW IS A STATIC TYPE CHECKER FOR JAVASCRIPT.
 https://github.com/wemake-services/wemake-python-styleguide    - uber linter?
-
+https://github.com/slomkowski/nginx-config-formatter
 
 security:
 https://github.com/Yelp/detect-secrets      - detecting and preventing secrets in code
 https://github.com/Checkmarx/kics           - Find security vulnerabilities, compliance issues, and infrastructure misconfigurations early in the development cycle of your infrastructure-as-code (docke, k8s)
+https://github.com/anchore/anchore-engine
+https://github.com/anchore/syft    - docker
+https://github.com/anchore/grype   - docker
 
 
 security - app running
-
+https://github.com/proferosec/log4jScanner
 https://github.com/ffuf/ffuf - website attacker
 https://github.com/drwetter/testssl.sh          - check port for tls/ssl support and some flaws
 https://github.com/almandin/fuxploider      - File upload vulnerability scanner and exploitation tool.
 https://github.com/johannesschaefer/webnettools
+https://www.offensive-security.com/metasploit-unleashed/wmap-web-scanner/
 https://www.zaproxy.org/   - web scanner
 https://www.arachni-scanner.com/    - web scanner
 http://rgaucher.info/beta/grabber/     - web scanner
@@ -78,27 +82,36 @@ https://cirt.net/nikto2     - web scanner
 https://github.com/vwt-digital/sec-helpers/tree/master    - web scanner
 https://subgraph.com/vega/   - web scanner
 http://w3af.org/    - web scanner
-
+https://github.com/stark0de/nginxpwner  - nginx boo boo finder
+https://github.com/shenril/Sitadel  - attacker
 
 howto:
 https://medium.com/techbull/deploying-elk-stack-for-apache-logs-analysis-3d23648dafa6
 
-https://github.com/PyCQA/isort   - sorts and updates your imports
-https://github.com/xd009642/tarpaulin     - code coverage for rust
 
+https://github.com/xd009642/tarpaulin     - code coverage for rust
+https://github.com/jhinch/nginx-linter  - nginx linter
+https://dev.to/simdrouin/validate-your-nginx-configuration-files-easily-with-docker-4ihi  - validate ngindx config
 
 https://github.com/phan/phan            - static analyzer for PHP
 https://psalm.dev/docs/running_psalm/installation/     - php
 https://github.com/phpstan/phpstan          - PHP Static Analysis Tool
 https://github.com/collections/code-quality-in-php
-
+https://www.npmjs.com/package/uglify-js
 
 https://github.com/twbs/bootlint            - HTML linter for Bootstrap proje    eol?
 https://github.com/yandex/gixy   - Gixy is a tool to analyze Nginx configuration.   2-years ago
 https://github.com/wemake-services/dotenv-linter     - env file linter, same exe name as other linter
-
-
-
+https://sqlmap.org/
+https://github.com/rapid7/metasploit-framework/wiki/Nightly-Installers
+https://www.arachni-scanner.com/
+https://nmap.org/book/install.html
+https://www.open-scap.org/getting-started/
+https://wazuh.com/
+http://w3af.org/
+https://github.com/sullo/nikto
+https://subgraph.com/vega/download.html
+https://github.com/future-architect/vuls
 https://developers.google.com/closure/compiler   - Closure Compiler is a tool for making JavaScript download and run faster
 https://html-validate.org/              -Offline HTML5 validator
 https://validator.github.io/validator/      -  catch unintended mistakes in your HTML, CSS, and SVG
@@ -175,6 +188,7 @@ https://github.com/PyCQA/pydocstyle             - docstring style checker for py
 https://dwheeler.com/flawfinder/     - c/c++ flaw finder
 https://github.com/stylelint/stylelint      - A mighty, modern linter that helps you avoid errors and enforce conventions in your styles. (css, etc)
 https://github.com/epi052/feroxbuster - website attacker
+https://github.com/PyCQA/isort   - sorts and updates your imports
 
 
 standalone app:

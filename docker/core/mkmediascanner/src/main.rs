@@ -11,71 +11,26 @@ use tokio::time::{Duration, sleep};
 use uuid::Uuid;
 use sqlx::Row;
 
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_common/src/mk_lib_common_enum_media_type.rs"]
-mod mk_lib_common_enum_media_type;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_common/src/mk_lib_common_media_extension.rs"]
-mod mk_lib_common_media_extension;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_file/src/mk_lib_file.rs"]
-mod mk_lib_file;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_logging/src/mk_lib_logging.rs"]
-mod mk_lib_logging;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
-mod mk_lib_database;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/metadata/mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_library.rs"]
-mod mk_lib_database_library;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
-mod mk_lib_database_version;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/media/mk_lib_database_media_movie.rs"]
-mod mk_lib_database_media_movie;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/media/mk_lib_database_media_tv.rs"]
-mod mk_lib_database_media_tv;
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_notification.rs"]
-mod mk_lib_database_notification;
-
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_common_media_extension.rs"]
 mod mk_lib_common_media_extension;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_file.rs"]
 mod mk_lib_file;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_metadata_download_queue.rs"]
 mod mk_lib_database_metadata_download_queue;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_library.rs"]
 mod mk_lib_database_library;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_version.rs"]
 mod mk_lib_database_version;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_media_movie.rs"]
 mod mk_lib_database_media_movie;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_media_tv.rs"]
 mod mk_lib_database_media_tv;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_database_notification.rs"]
 mod mk_lib_database_notification;
 
