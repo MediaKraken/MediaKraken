@@ -37,7 +37,7 @@ COPY --from=cargo-build /bin/sh /sh
 WORKDIR /mediakraken
 
 # Copy our build
-COPY --from=cargo-build /myapp/target/x86_64-unknown-linux-musl/release/mkmetadatamame ./
+COPY --from=cargo-build /mediakraken/target/x86_64-unknown-linux-musl/release/mkmetadatamame ./
 
 # Use an unprivileged user.
 USER mediakraken:mediakraken
