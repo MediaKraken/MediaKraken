@@ -109,6 +109,8 @@ https://nmap.org/book/install.html
 https://www.open-scap.org/getting-started/
 https://wazuh.com/
 http://w3af.org/
+https://github.com/rust-lang/rustfmt
+https://crates.io/crates/cargo-tarpaulin
 https://github.com/sullo/nikto
 https://subgraph.com/vega/download.html
 https://github.com/future-architect/vuls
@@ -148,6 +150,9 @@ https://github.com/ZupIT/horusec   - static code analys on alot of langs
 https://huskyci.opensource.globo.com/docs/quickstart/overview    - huskyCI is an open-source tool that orchestrates security tests inside CI pipelines of multiple projects and centralizes all results into a database for further analysis and metrics.
 https://pyre-check.org/     - type checker python3
 https://lgtm.com/help/lgtm/getting-started    - dont' I have a lgtm account?
+https://gitlab.com/pwoolcoc/soup
+https://github.com/deadlinks/cargo-deadlinks
+https://sunjay.dev/2016/07/25/rust-code-coverage
 
 
 Nonproject:
