@@ -129,23 +129,24 @@
         </div>
         <div class="row">
             <div class="col-xl-12">
-                <div>                            <table class="table table-bordered">
-                                <thead>
-                                <tr>
-                                    <th>Home Team</th>
-                                    <th>Away Team</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for row_data in data_scan_info %}
-                                <tr>
-                                    <td>{{ row_data[0] }}</td>
-                                    <td>{{ row_data[1] }}</td>
-                                </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
- </div>
+                <div>
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>Home Team</th>
+                            <th>Away Team</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for row_data in data_scan_info %}
+                        <tr>
+                            <td>{{ row_data[0] }}</td>
+                            <td>{{ row_data[1] }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -154,5 +155,4 @@
     <script src="{{ url_for('static', filename='js/jquery.easing.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.min.js') }}"></script>
 </body>
-
-</html>
+{% endblock %}
