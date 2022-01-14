@@ -24,6 +24,9 @@
 
 # mkgamesdbnetfetchbulk
 \cp -f --remove-destination ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkgamesdbnetfetchbulk/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkgamesdbnetfetchbulk/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mkgamesdbnetfetchbulk/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mkgamesdbnetfetchbulk/src/.
 
 # mkhardwarecontrol
 \cp -f --remove-destination ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkhardwarecontrol/src/.
