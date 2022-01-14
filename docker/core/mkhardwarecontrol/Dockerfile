@@ -1,8 +1,8 @@
 FROM rust:1.58 as cargo-build
 
-RUN rustup target add x86_64-unknown-linux-musl
-RUN apt-get update && apt-get install -y musl-tools musl-dev
-RUN update-ca-certificates
+RUN rustup target add x86_64-unknown-linux-musl \
+  && apt-get update && apt-get install -y musl-tools musl-dev \
+  && update-ca-certificates
 
 # Create appuser
 ENV USER=mediakraken
