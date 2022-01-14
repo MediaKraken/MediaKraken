@@ -1,5 +1,5 @@
 [package]
-name = "mk_lib_file"
+name = "mk_lib_hash"
 version = "0.0.1"
 edition = "2021"
 
