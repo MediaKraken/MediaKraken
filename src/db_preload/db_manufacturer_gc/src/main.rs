@@ -3,23 +3,18 @@ use std::error::Error;
 use uuid::Uuid;
 use serde_json::{json, Value};
 
-#[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
 mod mk_lib_database;
 
-#[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_hardware_device.rs"]
 mod mk_lib_database_hardware_device;
 
-#[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
 mod mk_lib_database_version;
 
-#[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_file/src/mk_lib_file.rs"]
 mod mk_lib_file;
 
-#[cfg(debug_assertions)]
 #[path = "../../../../src/mk_lib_network/src/mk_lib_network.rs"]
 mod mk_lib_network;
 
