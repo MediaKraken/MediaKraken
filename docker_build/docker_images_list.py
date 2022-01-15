@@ -155,6 +155,72 @@ STAGE_TWO_GAME_SERVERS = {
 
     # Factorio Server in docker
     'mkgamefactorio': ('mkgamefactorio', 'ubuntu:14.04', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgamekerbalspaceprogram': ('mkgamekerbalspaceprogram', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgameminecraft': ('mkgameminecraft', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgameq3a': ('mkgameq3a', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgameq3a_cpma': ('mkgameq3a_cpma', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgameq3a_osp': ('mkgameq3a_osp', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgameq3a_rq3': ('mkgameq3a_rq3', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgamequake2': ('mkgamequake2', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgamequake4': ('mkgamequake4', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgamequakelive': ('mkgamequakelive', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgamesteamcmd_arma3': ('mkgamesteamcmd_arma3', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgamesteamcmd_csgo': ('mkgamesteamcmd_csgo', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgamesteamcmd_doubleaction': ('mkgamesteamcmd_doubleaction', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgamesteamcmd_fistfuloffrags': ('mkgamesteamcmd_fistfuloffrags', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgamesteamcmd_holdfastnaw': ('mkgamesteamcmd_holdfastnaw', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgamesteamcmd_insurgency': ('mkgamesteamcmd_insurgency', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgamesteamcmd_mordhau': ('mkgamesteamcmd_mordhau', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgamesteamcmd_squad': ('mkgamesteamcmd_squad', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgamesteamcmd_tf2': ('mkgamesteamcmd_tf2', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgamesteamcmd_valheim': ('mkgamesteamcmd_valheim', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgameut99': ('mkgameut99', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgameut2004': ('mkgameut2004', 'FAKE', 'game_server'),
+
+    # FAKE Server in docker
+    'mkgamewindward': ('mkgamewindward', 'FAKE', 'game_server'),
 }
 
 STAGE_ONE_SECURITY_TOOLS = {
