@@ -102,6 +102,19 @@ stage = pipeline.ensure_stage("code_security")
 job = stage.ensure_job("bandit_python")
 job.add_task(ExecTask(['bandit', '-r', '.']))
 
+
+# pipeline = configurator \
+#     .ensure_pipeline_group("MediaKraken") \
+#     .ensure_replacement_of_pipeline("mediakraken_unit_test_pipeline") \
+#     .set_git_url("https://github.com/MediaKraken/MediaKraken")
+# stage = pipeline.ensure_stage("unit_test")
+# for build_group in (docker_images_list.STAGE_ONE_IMAGES,
+#                     docker_images_list.STAGE_TWO_IMAGES,):
+#     for docker_images in build_group:
+#         job = stage.ensure_job("unit_test_%s" % build_group[docker_images][0])
+#         job.add_task(ExecTask(['bash', '-c', 'cargo test ./docker/%s/%s/.']))
+
+
 pipeline = configurator \
     .ensure_pipeline_group("MediaKraken") \
     .ensure_replacement_of_pipeline("mediakraken_build_pipeline") \
