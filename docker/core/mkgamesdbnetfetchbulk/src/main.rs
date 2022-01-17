@@ -21,12 +21,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
     mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
                                                            false).await;
+
+    let option_config_json: Value = mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool).await.unwrap();
 }
 
 /*
-
-# open the database
-option_config_json, db_connection = common_config_ini.com_config_read()
 
 GAMESDB_INST = metadata_provider_thegamesdb.CommonMetadataGamesDB()
 
