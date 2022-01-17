@@ -13,10 +13,6 @@ except ModuleNotFoundError:
     install_pid.wait()
     from gomatic import ExecTask, GoCdConfigurator, HostRestClient
 
-# TODO pip3 install pylint bandit pyflakes vulture dead bashate yamllint pydocstyle flawfinder isort
-# TODO for python/linting....can't import
-# TODO pip3 install pytest selenium psutil flask guessit gomatic
-# TODO apt-get install -y python3-pip wget shellcheck cppcheck nodejs npm unzip
 # TODO chmod 666 /var/run/docker.sock
 
 # TODO npm install htmlhint -g
@@ -170,15 +166,13 @@ for build_group in (docker_images_list.STAGE_TWO_GAME_SERVERS,):
                                                                     docker_images)]))
 
 
-stage = pipeline.ensure_stage("docker_security")
-job = stage.ensure_job("docker_dockerbench")
-job.add_task(ExecTask(['./docker/test/docker_bench_security.sh']))
-
-
 pipeline = configurator \
     .ensure_pipeline_group("MediaKraken") \
     .ensure_replacement_of_pipeline("mediakraken_security_pipeline") \
     .set_git_url("https://github.com/MediaKraken/MediaKraken")
+stage = pipeline.ensure_stage("docker_security")
+job = stage.ensure_job("docker_dockerbench")
+job.add_task(ExecTask(['./docker/test/docker_bench_security.sh']))
 stage = pipeline.ensure_stage("security_mediakraken")
 job = stage.ensure_job("mediakraken_start")
 job.add_task(ExecTask(['./docker_compose/mediakraken_stop.sh']))

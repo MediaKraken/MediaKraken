@@ -1,14 +1,5 @@
-= Description of validation and testing process via CI =
 
-The Jenkins docker image I use is jenkins/jenkins:lts
-    Then I install pip requirements file and other plugins
 
-The ELK docker image I use is https://github.com/spujadas/elk-docker
-    This is used to view logs as they are output via MK programs
-
-# debian bullseye
-apt-get install python3-dotenv python3-pip wget cloc shellcheck
-pip3 install pylint pyflakes bandit
 
 Run the following tests from under the MediaKraken_CI
     python3 validate_code.py
@@ -151,7 +142,6 @@ https://huskyci.opensource.globo.com/docs/quickstart/overview    - huskyCI is an
 https://pyre-check.org/     - type checker python3
 https://lgtm.com/help/lgtm/getting-started    - dont' I have a lgtm account?
 https://gitlab.com/pwoolcoc/soup
-https://github.com/deadlinks/cargo-deadlinks
 https://sunjay.dev/2016/07/25/rust-code-coverage
 
 
@@ -167,30 +157,20 @@ https://app.snyk.io/org/spootdev/manage/members
 implemented in gocd:
 https://github.com/adrienverge/yamllint     - yml linter
 cloc - code line counter
-pylint - python linter
-    https://www.pylint.org/
-pyflakes - python linter
-    https://github.com/PyCQA/pyflakes
 Hadolint (https://github.com/hadolint/hadolint) - lint your Dockerfile
     wget https://github.com/hadolint/hadolint/releases/download/v2.0.0/hadolint-Linux-x86_64
     mv hadolint-Linux-x86_64 /usr/bin/hadolint
     chmod +x /usr/bin/hadolint
 Shellcheck - shell script checker
     https://github.com/koalaman/shellcheck
-Bandit (https://github.com/PyCQA/bandit) to find unsecured code - against MediaKraken source
-            pip3 install bandit==1.7.0
-cppcheck - c/c++ code checker
-    http://cppcheck.sourceforge.net/
 Docker Bench Security - https://github.com/docker/docker-bench-security
     docker_bench_security.sh from the above link
 Vulture to find dead code - against MediaKraken source
-    pip3 install vulture==2.3
 dead - to find dead python code
 https://github.com/openstack/bashate    - pep8 for bash
 https://github.com/HTMLHint/HTMLHint        - static code analysis tool you need for your HTML
 https://github.com/dotenv-linter/dotenv-linter       - env file linter
 https://github.com/PyCQA/pydocstyle             - docstring style checker for python code
-https://dwheeler.com/flawfinder/     - c/c++ flaw finder
 https://github.com/stylelint/stylelint      - A mighty, modern linter that helps you avoid errors and enforce conventions in your styles. (css, etc)
 https://github.com/epi052/feroxbuster - website attacker
 https://github.com/PyCQA/isort   - sorts and updates your imports
