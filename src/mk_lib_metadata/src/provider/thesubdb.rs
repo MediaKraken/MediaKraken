@@ -9,15 +9,6 @@ class CommonMetadataTheSubDB:
     }
 
     async def com_meta_thesubdb_search(self, filename, langs):
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         filehash = common_hash.com_hash_thesubdb(filename)
         async with httpx.AsyncClient() as client:
             response = await client.get(self.url,
@@ -38,15 +29,6 @@ class CommonMetadataTheSubDB:
         return subtitles
 
     async def com_meta_thesubdb_download(self, subtitle, stream):
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         async with httpx.AsyncClient() as client:
             response = await client.get(subtitle["link"], headers=self.headers, timeout=5)
         stream.write(response.content)

@@ -14,15 +14,6 @@ class CommonMetadataGamesDB:
         """
         Get platform list
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         async with httpx.AsyncClient() as client:
             return xmltodict.parse(await client.get(self.BASE_URL + 'GetPlatformsList.php',
                                                     headers=self.httpheaders,
@@ -32,15 +23,6 @@ class CommonMetadataGamesDB:
         """
         Platform info by id
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         async with httpx.AsyncClient() as client:
             return xmltodict.parse(await client.get(self.BASE_URL + 'GetPlatform.php?id=%s' % platform_id,
                                                     headers=self.httpheaders,
@@ -50,15 +32,6 @@ class CommonMetadataGamesDB:
         """
         # 'mega man'
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         async with httpx.AsyncClient() as client:
             return xmltodict.parse(await client.get(self.BASE_URL + 'GetGamesList.php?name=%s'
                                                     % game_name.replace(' ', '%20'),
@@ -69,15 +42,6 @@ class CommonMetadataGamesDB:
         """
         # game by id
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         async with httpx.AsyncClient() as client:
             return xmltodict.parse(await client.get(self.BASE_URL + 'GetGamesList.php?id=%s' % game_id,
                                                     headers=self.httpheaders,
@@ -87,15 +51,6 @@ class CommonMetadataGamesDB:
         """
         # game by id
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         async with httpx.AsyncClient() as client:
             return xmltodict.parse(await client.get(self.BASE_URL + 'GetArt.php?id=%s' % game_id,
                                                     headers=self.httpheaders,
@@ -105,15 +60,6 @@ class CommonMetadataGamesDB:
         """
         Games by platform id
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         async with httpx.AsyncClient() as client:
             return xmltodict.parse(await client.get(self.BASE_URL + 'GetPlatformGames.php?platform=%s'
                                                     % platform_id,
@@ -124,15 +70,6 @@ class CommonMetadataGamesDB:
         """
         Games by platform id
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         async with httpx.AsyncClient() as client:
             return xmltodict.parse(await client.get(self.BASE_URL + 'PlatformGames.php?platform=%s'
                                                     % platform_name,
@@ -143,15 +80,6 @@ class CommonMetadataGamesDB:
         """
         Games updated in last n seconds
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         async with httpx.AsyncClient() as client:
             return xmltodict.parse(await client.get(self.BASE_URL + 'Updates.php?time=%s' % update_time,
                                                     headers=self.httpheaders,
@@ -161,15 +89,6 @@ class CommonMetadataGamesDB:
         """
         Grab the json database dump and process
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         async with httpx.AsyncClient() as client:
             for game_row in xmltodict.parse(await client.get(
                     'https://cdn.thegamesdb.net/json/database-latest.json', timeout=3.05))['games']:

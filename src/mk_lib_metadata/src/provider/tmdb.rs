@@ -1,3 +1,10 @@
+// tmdb_client = "1.6.0"
+// use tmdb_client::apis::Error;
+// use tmdb_client::apis::client::APIClient;
+// use tmdb_client::models::MoviePaginated;
+
+
+
 /*
 
 class CommonMetadataTMDB:
@@ -13,15 +20,6 @@ class CommonMetadataTMDB:
         """
         # search for media title and year
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         if media_type == common_global.DLMediaType.Movie.value:
             async with httpx.AsyncClient() as client:
                 search_json = await client.get('https://api.themoviedb.org/3/search/movie'
@@ -81,15 +79,6 @@ class CommonMetadataTMDB:
         """
         Fetch all metadata by id to reduce calls
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         async with httpx.AsyncClient() as client:
             try:
                 return await client.get('https://api.themoviedb.org/3/movie/%s'
@@ -115,15 +104,6 @@ class CommonMetadataTMDB:
         """
         Fetch all metadata by id to reduce calls
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         async with httpx.AsyncClient() as client:
             try:
                 return await client.get('https://api.themoviedb.org/3/tv/%s'
@@ -149,15 +129,6 @@ class CommonMetadataTMDB:
         """
         Fetch all metadata bio by id to reduce calls
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         async with httpx.AsyncClient() as client:
             try:
                 return await client.get('https://api.themoviedb.org/3/person/%s'
@@ -183,15 +154,6 @@ class CommonMetadataTMDB:
         """
         # download info and set data to be ready for insert into database
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         # create file path for poster
         image_file_path = await common_metadata.com_meta_image_file_path(result_json['name'],
                                                                          'person')
@@ -209,15 +171,6 @@ class CommonMetadataTMDB:
         """
         Grab high metadata id
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         return json.loads(await common_network_async.mk_network_fetch_from_url_async(
             'https://api.themoviedb.org/3/movie/latest'
             '?api_key=%s' % self.API_KEY))['id']
@@ -226,15 +179,6 @@ class CommonMetadataTMDB:
         """
         Grab high bios metadata id (person)
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         return json.loads(await common_network_async.mk_network_fetch_from_url_async(
             'https://api.themoviedb.org/3/person/latest'
             '?api_key=%s' % self.API_KEY))['id']
@@ -243,15 +187,6 @@ class CommonMetadataTMDB:
         """
         Grab high tv metadata id
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         return json.loads(await common_network_async.mk_network_fetch_from_url_async(
             'https://api.themoviedb.org/3/tv/latest'
             '?api_key=%s' % self.API_KEY))['id']
@@ -260,15 +195,6 @@ class CommonMetadataTMDB:
         """
         # review by tmdb
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         return json.loads(await common_network_async.mk_network_fetch_from_url_async(
             'https://api.themoviedb.org/3/review/%s'
             '?api_key=%s', (self.API_KEY, tmdb_id)))
@@ -277,15 +203,6 @@ class CommonMetadataTMDB:
         """
         # person changes since date within 24 hours
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         return json.loads(await common_network_async.mk_network_fetch_from_url_async(
             'https://api.themoviedb.org/3/person/changes'
             '?api_key=%s' % self.API_KEY))['id']
@@ -294,15 +211,6 @@ class CommonMetadataTMDB:
         """
         # collection info
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         return json.loads(await common_network_async.mk_network_fetch_from_url_async(
             'https://api.themoviedb.org/3/collection/%s'
             '?api_key=%s', (self.API_KEY, tmdb_id)))
@@ -311,15 +219,6 @@ class CommonMetadataTMDB:
         """
         # download info and set data to be ready for insert into database
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         # create file path for poster
         if 'title' in result_json:  # movie
             image_file_path = await common_metadata.com_meta_image_file_path(result_json['title'],
@@ -379,15 +278,6 @@ async def movie_search_tmdb(db_connection, file_name):
     """
     # search tmdb
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
     # TODO aren't I doing two guessits per file name then?
     file_name = guessit(file_name)
     if type(file_name['title']) == list:
@@ -436,15 +326,6 @@ async def movie_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid):
     """
     # fetch from tmdb
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
     # fetch and save json data via tmdb id
     result_json = await common_global.api_instance.com_tmdb_metadata_by_id(tmdb_id)
     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
@@ -520,15 +401,6 @@ async def movie_fetch_save_tmdb_review(db_connection, tmdb_id):
     """
     # grab reviews
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
     review_json = await common_global.api_instance.com_tmdb_meta_review_by_id(tmdb_id)
     # review record doesn't exist on all media
     if review_json is not None and review_json['total_results'] > 0:
@@ -544,15 +416,6 @@ async def movie_fetch_save_tmdb_collection(db_connection, tmdb_collection_id, do
     """
     # grab collection
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
     # store/update the record
     # don't string this since it's a pure result store
     collection_guid = await db_connection.db_collection_by_tmdb(tmdb_collection_id)
@@ -597,15 +460,6 @@ async def metadata_fetch_tmdb_person(db_connection, provider_name, download_data
     """
     fetch person bio
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
     if common_global.api_instance is not None:
         # fetch and save json data via tmdb id
         result_json = await common_global.api_instance.com_tmdb_metadata_bio_by_id(

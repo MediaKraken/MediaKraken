@@ -15,15 +15,6 @@ class CommonMetadataIMVdb:
         """
         Video info
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         resp = requests.post(self.base_api_url + "/video/" + video_id
                              + "?include=sources,credits,bts,featured,popularity,countries",
                              headers=self.headers)
@@ -38,15 +29,6 @@ class CommonMetadataIMVdb:
         """
         Search for video by band name and song title
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         resp = requests.post(self.base_api_url + "/search/videos?q="
                              + (artist_name.replace(' ', '+') + '+'
                                 + song_title.replace(' ', '+')),
@@ -62,15 +44,6 @@ class CommonMetadataIMVdb:
         """
         Search by band name
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         resp = requests.post(self.base_api_url + "/search/entities?q="
                              + artist_name.replace(' ', '+'), headers=self.headers)
         try:
@@ -85,15 +58,6 @@ async def movie_fetch_save_imvdb(db_connection, imvdb_id, metadata_uuid):
     """
     # fetch from imvdb
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
     # fetch and save json data via tmdb id
     result_json = await common_global.api_instance.com_imvdb_video_info(imvdb_id)
     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',

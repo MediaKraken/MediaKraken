@@ -1,11 +1,6 @@
 use sqlx::postgres::PgRow;
 use uuid::Uuid;
 
-#[cfg(debug_assertions)]
-#[path = "../../../../src/mk_lib_common/src/mk_lib_common_enum_media_type.rs"]
-mod mk_lib_common_enum_media_type;
-
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;
 

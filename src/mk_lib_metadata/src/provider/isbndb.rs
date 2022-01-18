@@ -14,15 +14,6 @@ class CommonMetadataISBNdb:
         """
         Grab the author
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         return await common_network_async.mk_network_fetch_from_url_async(
             'http://isbndb.com/api/v2/json/'
             + self.api_key + '/author/' + author_name,
@@ -36,15 +27,6 @@ class CommonMetadataISBNdb:
         """
         Grab the publisher
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         return await common_network_async.mk_network_fetch_from_url_async(
             'http://isbndb.com/api/v2/json/'
             + self.api_key + '/publisher/'
@@ -64,15 +46,6 @@ class CommonMetadataISBNdb:
         """
         Grab prices
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         return await common_network_async.mk_network_fetch_from_url_async(
             'http://isbndb.com/api/v2/json/'
             + self.api_key + '/prices/'
@@ -86,15 +59,6 @@ class CommonMetadataISBNdb:
         """
         Search
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         return requests.get('http://isbndb.com/api/v2/json/'
                             + self.api_key + '/book/' + book_info, timeout=5)
 
@@ -103,15 +67,6 @@ async def metadata_periodicals_search_isbndb(db_connection, lookup_name):
     """
     search isbndb
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
     metadata_uuid = None
     if common_global.api_instance is not None:
         api_response = await common_global.api_instance.com_isbndb_books(lookup_name)

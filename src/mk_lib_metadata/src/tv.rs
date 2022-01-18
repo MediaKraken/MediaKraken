@@ -1,21 +1,4 @@
 /*
-"""
-  Copyright (C) 2016 Quinn D Granfor <spootdev@gmail.com>
-
-  This program is free software; you can redistribute it and/or
-  modify it under the terms of the GNU General Public License
-  version 2, as published by the Free Software Foundation.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-  General Public License version 2 for more details.
-
-  You should have received a copy of the GNU General Public License
-  version 2 along with this program; if not, write to the Free
-  Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-  MA 02110-1301, USA.
-"""
 
 import inspect
 
@@ -29,15 +12,6 @@ async def metadata_tv_lookup(db_connection, download_data, file_name):
     """
     Lookup tv metadata
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
     # don't bother checking title/year as the main_server_metadata_api_worker does it already
     if not hasattr(metadata_tv_lookup, "metadata_last_id"):
         # it doesn't exist yet, so initialize it
@@ -161,15 +135,6 @@ async def tv_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid):
     """
     # tmdb data fetch for tv
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                      message_text={
                                                                          "meta tv themoviedb save fetch": tmdb_id})

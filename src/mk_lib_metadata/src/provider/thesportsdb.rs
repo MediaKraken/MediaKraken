@@ -13,15 +13,6 @@ class CommonMetadataTheSportsDB:
         """
         Team and player looksup
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         return await common_network_async.mk_network_fetch_from_url_async(
             'http://www.thesportsdb.com/api/v1/json/'
             + self.thesportsdb_api_key
@@ -32,15 +23,6 @@ class CommonMetadataTheSportsDB:
         """
         Get players list by team
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         return await common_network_async.mk_network_fetch_from_url_async(
             'http://www.thesportsdb.com/api/v1/json/'
             + self.thesportsdb_api_key
@@ -51,15 +33,6 @@ class CommonMetadataTheSportsDB:
         """
         Get players by name
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         return await common_network_async.mk_network_fetch_from_url_async(
             'http://www.thesportsdb.com/api/v1/json/'
             + self.thesportsdb_api_key
@@ -71,15 +44,6 @@ class CommonMetadataTheSportsDB:
         """
         Search plays by team and player name
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         return await common_network_async.mk_network_fetch_from_url_async(
             'http://www.thesportsdb.com/api/v1/json/'
             + self.thesportsdb_api_key
@@ -96,15 +60,6 @@ class CommonMetadataTheSportsDB:
         """
         Search for events by name
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         return await common_network_async.mk_network_fetch_from_url_async(
             'http://www.thesportsdb.com/api/v1/json/'
             + self.thesportsdb_api_key

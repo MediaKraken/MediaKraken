@@ -4,10 +4,6 @@ use blake3;
 use std::fs;
 use std::error::Error;
 
-#[cfg(debug_assertions)]
-#[path = "../../../src/mk_lib_file/src/mk_lib_file.rs"]
-mod mk_lib_file;
-#[cfg(not(debug_assertions))]
 #[path = "mk_lib_file.rs"]
 mod mk_lib_file;
 

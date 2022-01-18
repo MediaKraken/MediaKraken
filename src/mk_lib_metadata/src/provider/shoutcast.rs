@@ -10,15 +10,6 @@ class CommonMetadataShoutcast:
         self.shoutcast_url = 'http://api.shoutcast.com/legacy/'
 
     async def com_shoutcast_generate_options(self, rec_limit=None, bit_rate=None, media_type=None):
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         options = ''
         if rec_limit is not None:
             options += '&limit=%s' % rec_limit
@@ -37,15 +28,6 @@ class CommonMetadataShoutcast:
         """
         Grab top 500 stations
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         return json.loads(await common_network_async.mk_network_fetch_from_url_async(
             self.shoutcast_url + 'Top500?k=' + self.shoutcast_api_key
             + self.com_shoutcast_generate_options(rec_limit, bit_rate, media_type), None))
@@ -55,15 +37,6 @@ class CommonMetadataShoutcast:
         """
         Grab stations by keyword
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         return json.loads(await common_network_async.mk_network_fetch_from_url_async(
             self.shoutcast_url + 'stationsearch?k=' + self.shoutcast_api_key
             + ('&search=%s' % search_string.replace(' ', '+'))
@@ -74,15 +47,6 @@ class CommonMetadataShoutcast:
         """
         Grab stations by genre
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         return json.loads(await common_network_async.mk_network_fetch_from_url_async(
             self.shoutcast_url + 'stationsearch?k=' + self.shoutcast_api_key
             + ('&genresearch=%s' % genre_string.replace(' ', '+'))
@@ -92,15 +56,6 @@ class CommonMetadataShoutcast:
         """
         Grab genre list
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         return json.loads(await common_network_async.mk_network_fetch_from_url_async(
             self.shoutcast_url + 'genrelist?k=' + self.shoutcast_api_key, None))
 
