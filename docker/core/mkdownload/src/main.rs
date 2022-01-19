@@ -60,7 +60,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                   &json_message["Local Save Path"].to_string()).await;
                     } else if json_message["Type"].to_string() == "Youtube" {
                         if validator::validate_url(json_message["URL"].to_string()) {
-                            println!("downloaded video to {:?}", rustube::download_best_quality(&json_message["URL"].to_string()).await.unwrap());
+                            continue;
+                            //println!("downloaded video to {:?}", rustube::download_best_quality(&json_message["URL"].to_string()).await.unwrap());
                         } else {
                             // TODO log error by user requested
                             continue;

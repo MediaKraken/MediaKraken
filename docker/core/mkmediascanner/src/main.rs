@@ -78,37 +78,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                             LOGGING_INDEX_NAME).await;
         let mut media_path: PathBuf;
         let mut scan_path: bool = true;
-        // check for UNC
-        let unc_slice = &row_data.get("mm_media_dir_path")[..1];
-        if unc_slice == "\\" {
-            let scan_path = false;
-            // addr, share, path = common_string.com_string_unc_to_addr_path(row_data["mm_media_dir_path"]);
-            // smb_stuff = common_network_cifs.CommonCIFSShare();
-            // if smb_stuff.com_cifs_open(ip_addr = addr) {
-            //     if smb_stuff.com_cifs_share_directory_check(share, path) {
-            //         if datetime.strptime(time.ctime(
-            //             smb_stuff.com_cifs_share_file_dir_info(share, path).last_write_time),
-            //                              "%a %b %d %H:%M:%S %Y") > row_data["mm_media_dir_last_scanned"] {
-            //             audit_directories.append((row_data["mm_media_dir_path"],
-            //                                       row_data["mm_media_dir_class_type"],
-            //                                       row_data["mm_media_dir_guid"]));
-            //             db_connection.db_audit_path_update_status(row_data["mm_media_dir_guid"],
-            //                                                       json.dumps({
-            //                                                           "Status": "Added to
-            //                                                           scan
-            //                                                           ",
-            //                                                           "Pct": 100
-            //                                                       }));
-            //         }
-            //     } else {
-            //         mk_lib_database_notification::mk_lib_database_notification_insert(&sqlx_pool,format!("UNC Library path not found: {}", row_data["mm_media_dir_path"]), true);
-            //     }
-            // }
-        } else {
-            // make sure the path still exists
-            let media_path: PathBuf = ["/mediakraken/mnt",
-                row_data.get("mm_media_dir_path")].iter().collect();
-        }
+        // shouldn't need to care  let unc_slice = &row_data.get("mm_media_dir_path")[..1];
+        // obviously this would mean we mount unc to below as well when defining libraries
+        // make sure the path still exists
+        let media_path: PathBuf = ["/mediakraken/mnt",
+            row_data.get("mm_media_dir_path")].iter().collect();
+
         if !Path::new(&media_path).exists() {
             mk_lib_database_notification::mk_lib_database_notification_insert(&sqlx_pool,
                                                                               format!("Library path not found: {}",
@@ -137,24 +112,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 mk_lib_database_library::mk_lib_database_library_path_status_update(&sqlx_pool,
                                                                                     row_data.get("mm_media_dir_guid"),
                                                                                     json!({"Status": "File search scan", "Pct": 0.0})).await.unwrap();
-                let mut file_data;
-                // check for UNC before grabbing dir list
-                if unc_slice == "\\" {
-                    continue;
-                    // file_data = [];
-                    // addr, share, path = common_string.com_string_unc_to_addr_path(dir_path);
-                    // smb_stuff = common_network_cifs.CommonCIFSShare();
-                    // smb_stuff.com_cifs_open(addr);
-                    // for dir_data in smb_stuff.com_cifs_walk(share, path) {
-                    //     for file_name in dir_data[2] {
-                    //         // TODO can I do os.path.join with UNC?
-                    //         file_data.append("\\\\\"" + addr + "\\" + share + "\\" + dir_data[0] + "\\" + file_name + "\"");
-                    //     }
-                    // }
-                    // smb_stuff.com_cifs_close();
-                } else {
-                    let file_data = mk_lib_file::mk_directory_walk(&media_path.to_str());
-                }
+
+                let mut file_data = mk_lib_file::mk_directory_walk(&media_path.to_str());
+
                 let total_file_in_dir = file_data.len;
                 let mut total_scanned: u64 = 0;
                 let mut total_files: u64 = 0;
