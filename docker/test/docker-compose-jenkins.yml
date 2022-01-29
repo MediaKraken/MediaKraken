@@ -1,0 +1,24 @@
+version: '3.6'
+# Volumes are HOST directory and then CONTAINER directory
+
+services:
+  mkjenkins:
+    image: mediakraken/mkjenkins:refactor
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    container_name: mkjenkins
+    networks:
+      - mediakraken_test_network
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - mediakraken_vol_test_jenkins:/var/jenkins_home
+
+networks:
+  mediakraken_test_network:
+    driver: bridge
+    name: mk_mediakraken_test_network
+
+volumes:
+  mediakraken_vol_test_jenkins:

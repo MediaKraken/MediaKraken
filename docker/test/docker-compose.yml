@@ -47,19 +47,6 @@ services:
       - "9200:9200"
     restart: unless-stopped
 
-  mktestjenkins:
-    image: mediakraken/mkjenkins:refactor
-    stop_grace_period: 30s
-    stop_signal: SIGTERM
-    container_name: mktest_jenkins
-    networks:
-      - mediakraken_test_network
-    ports:
-      - "8080:8080"
-      - "50000:50000"
-    volumes:
-      - mediakraken_vol_test_jenkins:/var/jenkins_home
-
   # database management tool
   mktestpgadmin:
     image: dpage/pgadmin4:6.3
@@ -158,7 +145,6 @@ networks:
 
 volumes:
   mediakraken_vol_test_elk:
-  mediakraken_vol_test_jenkins:
   mediakraken_vol_test_pgadmin:
   mediakraken_vol_test_postgresql:
   mediakraken_vol_test_postgresql_logging:
