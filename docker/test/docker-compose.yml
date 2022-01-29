@@ -45,20 +45,6 @@ services:
     volumes:
       - mediakraken_vol_test_pgadmin:/var/lib/pgadmin
 
-  # package cache tool
-  mktestsonatype:
-    image: sonatype/nexus3:3.37.3
-    stop_grace_period: 30s
-    stop_signal: SIGTERM
-    container_name: mktest_sonatype
-    networks:
-      - mediakraken_test_network
-    ports:
-      - "8081:8081"
-    volumes:
-      - mediakraken_vol_test_sonatype:/nexus-data
-      - /var/opt/mediakraken/sonatype/deploy:/opt/sonatype/nexus/deploy
-
 #  mktestteamcity:
 #    image: jetbrains/teamcity-server:2021.2.1
 #    stop_grace_period: 30s
@@ -127,7 +113,6 @@ volumes:
   mediakraken_vol_test_pgadmin:
   mediakraken_vol_test_postgresql:
   mediakraken_vol_test_postgresql_logging:
-  mediakraken_vol_test_sonatype:
 #  mediakraken_vol_test_teamcity:
 #  mediakraken_vol_test_teamcity_logs:
 #  mediakraken_vol_test_teamcity_agent:
