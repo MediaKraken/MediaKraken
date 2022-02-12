@@ -26,6 +26,7 @@ ALPINE_MIRROR = 'dl-cdn.alpinelinux.org'
 #DEBIAN_MIRROR = 'th-mkbuild-1.beaverbay.local'
 DEBIAN_MIRROR = 'ftp.us.debian.org'
 
+# pip3 install --trusted-host mksontatype -i http://mksonatype:8081/repository/pypi/simple -r requirements.txt
 #PYPI_MIRROR = 'th-mkbuild-1.beaverbay.local'
 PYPI_MIRROR = 'pypi.python.org'
 
