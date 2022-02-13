@@ -75,9 +75,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     {
         println!("download {}", file_name);
         mk_lib_network::mk_download_file_from_url(
-            (format!("https://github.com/mamedev/mame/releases/download/mame0{}/mame0{}lx.zip",
-                     option_config_json["MAME"]["Version"],
-                     option_config_json["MAME"]["Version"])), &file_name).await;
+            format!("https://github.com/mamedev/mame/releases/download/mame0{}/mame0{}lx.zip",
+                    option_config_json["MAME"]["Version"],
+                    option_config_json["MAME"]["Version"]), &file_name).await;
         println!("here2");
     }
     println!("b4 xml");
