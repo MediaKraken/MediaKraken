@@ -1,13 +1,6 @@
 /*
 
 async def game_system_update():
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][3]})
     data = await common_global.api_instance.com_meta_gamesdb_platform_list()[
         'Data']['Platforms']['Platform']
     print((type(data)), flush=True)
@@ -28,13 +21,6 @@ async def metadata_game_lookup(db_connection, download_data):
     """
     Lookup game metadata
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][3]})
     metadata_uuid = None  # so not found checks verify later
     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                      message_text={

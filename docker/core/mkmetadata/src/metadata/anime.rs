@@ -4,13 +4,6 @@ async def metadata_anime_lookup(db_connection, download_data, file_name):
     """
     Check for anime in tv sections of the metadata providers
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][3]})
     if not hasattr(metadata_anime_lookup, "metadata_last_id"):
         # it doesn't exist yet, so initialize it
         metadata_anime_lookup.metadata_last_id = None

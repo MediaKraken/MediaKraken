@@ -17,13 +17,6 @@ async def metadata_music_lookup(db_connection, download_json):
     """
     Music lookup
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][3]})
     # don't bother checking title/year as the main_server_metadata_api_worker does it already
     if not hasattr(metadata_music_lookup, "metadata_last_id"):
         # it doesn't exist yet, so initialize it

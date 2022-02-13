@@ -5,13 +5,6 @@ async def metadata_music_video_lookup(db_connection, file_name):
     """
     Lookup by name on music video database
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][3]})
     # check for same variables
     if not hasattr(metadata_music_video_lookup, "metadata_last_id"):
         metadata_music_video_lookup.metadata_last_id = None  # it doesn't exist, so initialize it

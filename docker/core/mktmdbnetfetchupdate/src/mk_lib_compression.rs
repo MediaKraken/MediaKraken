@@ -91,15 +91,3 @@ pub fn mk_decompress_zip(archive_file: &str, write_to_file: bool,
     // Ok(gz_data)
     Ok("OK".to_string())
 }
-
-// cargo test -- --show-output
-// #[cfg(test)]
-// mod test_mk_lib_common {
-//     use super::*;
-//
-//     macro_rules! aw {
-//     ($e:expr) => {
-//         tokio_test::block_on($e)
-//     };
-//   }
-// }

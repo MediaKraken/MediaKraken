@@ -25,20 +25,22 @@ pub async fn mk_lib_database_option_status_read(pool: &sqlx::PgPool)
     Ok(rows)
 }
 
+pub async fn mk_lib_database_option_update(pool: &sqlx::PgPool,
+                                           option_json: serde_json::Value)
+                                           -> Result<(), sqlx::Error> {
+    // no need for where clause as it's only the one record
+    let mut transaction = pool.begin().await?;
+    sqlx::query("update mm_options_and_status set mm_options_json = $1")
+        .bind(option_json)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(())
+}
+
 /*
 # TODO port query
-async def db_opt_update(self, option_json, db_connection=None):
-    """
-    Update option json
-    """
-    # no need for where clause as it's only the one record
-    await db_conn.execute('update mm_options_and_status'
-                          ' set mm_options_json = $1',
-                          option_json)
-
-
-# TODO port query
-async def db_opt_status_update(self, option_json, status_json, db_connection=None):
+async def db_opt_status_update(self, option_json, status_json):
     """
     Update option and status json
     """
