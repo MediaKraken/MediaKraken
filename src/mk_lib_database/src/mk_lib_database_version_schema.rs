@@ -1,8 +1,12 @@
 pub async fn mk_lib_database_update_schema(pool: &sqlx::PgPool, version_no: i32)
                                            -> Result<bool, sqlx::Error> {
     if version_no < 43 {
-        mk_lib_database_version_update(&pool,
-                                       43).await?;
+        mk_lib_database_version_update(&pool,43).await?;
+    } else if version_no < 44 {
+        // set mame version to 240
+        let option_json: Value = mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool).await.unwrap();
+        mk_lib_database_option_status::mk_lib_database_option_update(&pool, option_json["MAME"]["Version"]).await?;
+        mk_lib_database_version_update(&pool,44).await?;
     }
     Ok(true)
 }
