@@ -3,7 +3,8 @@ use serde_json::{json, Value};
 #[path = "mk_lib_database_option_status.rs"]
 mod mk_lib_database_option_status;
 
-pub async fn mk_lib_database_update_schema(pool: &sqlx::PgPool, version_no: i32)
+pub async fn mk_lib_database_update_schema(pool: &sqlx::PgPool,
+                                           version_no: i32)
                                            -> Result<bool, sqlx::Error> {
     if version_no < 44 {
         // set mame version to 240

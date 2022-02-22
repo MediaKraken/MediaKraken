@@ -93,9 +93,6 @@ async def db_meta_person_as_seen_in(self, person_guid, db_connection=None):
     if row_data is None:  # exit on not found person
         return None
     # TODO jin index the credits
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         "row_data": row_data})
     return await db_conn.fetch('select mm_metadata_guid,mm_metadata_name,'
                                ' mm_metadata_localimage_json->\'Poster\''
                                ' from mm_metadata_movie'

@@ -31,20 +31,6 @@ pub async fn mk_lib_database_metadata_game_by_blake3(pool: &sqlx::PgPool, blake3
     Ok(rows)
 }
 
-// pub async fn mk_lib_database_metadata_game_read(pool: &sqlx::PgPool,
-//                                                 offset: i32, limit: i32)
-//                                                 -> Result<Vec<PgRow>, sqlx::Error> {
-//     let rows: Vec<PgRow> = sqlx::query("select gi_id, gi_game_info_short_name \
-//         from mm_metadata_game_software_info \
-//         where gi_system_id is null and gi_gc_category is null \
-//         order by gi_short_name offset $1 limit $2")
-//         .bind(offset)
-//         .bind(limit)
-//         .fetch_all(pool)
-//         .await?;
-//     Ok(rows)
-// }
-
 pub async fn mk_lib_database_metadata_game_count(pool: &sqlx::PgPool,
                                                  search_value: String)
                                                  -> Result<(i32), sqlx::Error> {
