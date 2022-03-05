@@ -17,7 +17,7 @@ ring = "0.16.20"
 serde = { version = "1.0.136", features = ["derive"] }
 serde_json = "1.0.79"
 shiplift = { version = "0.7", default-features = false, features = ["unix-socket"] }
-sqlx = { version = "0.5.10", features = [ "chrono", "json", "runtime-tokio-rustls", "postgres", "uuid" ] }
+sqlx = { version = "0.5.11", features = [ "chrono", "json", "runtime-tokio-rustls", "postgres", "uuid" ] }
 sys-info = "0.9.1"
 tera = "1.15.0"
 tokio = { version = "1.17.0", features = ["full"] }
