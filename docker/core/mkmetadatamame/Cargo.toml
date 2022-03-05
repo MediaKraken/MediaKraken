@@ -19,7 +19,7 @@ serde_json = "1.0.73"
 sqlx = { version = "0.5.10", features = [ "chrono", "json", "runtime-tokio-rustls", "postgres", "uuid" ] }
 sys-info = "0.9.1"
 tar = "0.4.38"
-tokio = { version = "1.15.0", features = ["full"] }
+tokio = { version = "1.17.0", features = ["full"] }
 #xmlparser = "0.13.3"
 walkdir = "2.3.2"
 zip = "0.5.13"

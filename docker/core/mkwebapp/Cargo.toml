@@ -20,7 +20,7 @@ shiplift = { version = "0.7", default-features = false, features = ["unix-socket
 sqlx = { version = "0.5.10", features = [ "chrono", "json", "runtime-tokio-rustls", "postgres", "uuid" ] }
 sys-info = "0.9.1"
 tera = "1.15.0"
-tokio = { version = "1.15.0", features = ["full"] }
+tokio = { version = "1.17.0", features = ["full"] }
 uuid = { version = "0.8.2", features = ["serde", "v4"] }
 walkdir = "2.3.2"
 
