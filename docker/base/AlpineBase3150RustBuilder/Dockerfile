@@ -1,4 +1,4 @@
-FROM rust:1.58 as cargo-build
+FROM rust:1.59 as cargo-build
 
 RUN apt-get update \
   && apt-get install musl-tools -y \
