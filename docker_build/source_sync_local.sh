@@ -12,6 +12,7 @@
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_cron.rs ../docker/core/mkcron/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mkcron/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mkcron/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_option_status.rs ../docker/core/mkcron/src/.
 \cp -f --remove-destination ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkcron/src/.
 
 # mkdownload

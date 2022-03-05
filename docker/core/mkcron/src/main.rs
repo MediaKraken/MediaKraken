@@ -41,7 +41,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let cron_row = mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool).await.unwrap();
         for row_data in cron_row {
             let mut time_delta: chrono::Duration;
-            println!("row_data: {}", row_data);
             let cron_schedule: String = row_data.get("mm_cron_schedule_type");
             let cron_timespan: i64 = row_data.get("mm_cron_schedule_time");
             if cron_schedule == "Week(s)" {
