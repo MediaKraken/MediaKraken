@@ -15,7 +15,7 @@ rcgen = "0.8.14"
 reqwest = { version = "0.11.9", default-features = false, features = ["json", "rustls-tls"] }
 ring = "0.16.20"
 serde = { version = "1.0.136", features = ["derive"] }
-serde_json = "1.0.73"
+serde_json = "1.0.79"
 shiplift = { version = "0.7", default-features = false, features = ["unix-socket"] }
 sqlx = { version = "0.5.10", features = [ "chrono", "json", "runtime-tokio-rustls", "postgres", "uuid" ] }
 sys-info = "0.9.1"
