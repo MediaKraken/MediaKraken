@@ -5,6 +5,7 @@ edition = "2021"
 
 [profile.release]
 panic = 'abort'
+strip = "symbols"
 
 [dependencies]
 amiquip = { version = "0.4.2", default-features = false }
