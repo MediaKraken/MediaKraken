@@ -6,7 +6,6 @@ The Jenkins docker image I use is jenkins/jenkins:lts
 The ELK docker image I use is https://github.com/spujadas/elk-docker
     This is used to view logs as they are output via MK programs
 
-
 CI/CD pipelines are built with Debian Bullseye
 
 # setup the Debian environment
@@ -15,7 +14,7 @@ apt-get install -y python3-dotenv python3-pip wget cloc shellcheck \
 
 # install the python tools 
 pip3 install pylint pyflakes bandit vulture dead bashate yamllint \ 
-  pydocstyle flawfinder isort pytest selenium psutil flask guessit gomatic
+  pydocstyle flawfinder isort pytest selenium psutil gomatic
 
 # Pipelines
 ## mediakraken_code_pipeline - This pipeline will cloc, lint and other static tests

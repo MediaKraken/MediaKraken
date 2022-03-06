@@ -31,7 +31,7 @@ chmod +x /usr/bin/hadolint
 """
 
 # connect to gocd instance
-configurator = GoCdConfigurator(HostRestClient("th-mkbuild-1:8153"))
+configurator = GoCdConfigurator(HostRestClient("mkgocd:8153"))
 pipeline = configurator \
     .ensure_pipeline_group("MediaKraken") \
     .ensure_replacement_of_pipeline("mediakraken_code_pipeline") \
