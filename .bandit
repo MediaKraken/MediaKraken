@@ -1,4 +1,4 @@
 [bandit]
 
 # B101 # assert used
-skips: ['B101']
+skips: B101
