@@ -1,4 +1,5 @@
 [bandit]
-skips:
-  - B101 # assert used
-  - B404 # import_subprocess
+
+# B101 # assert used
+# B404 # import_subprocess
+skips: ['B101', 'B404']
