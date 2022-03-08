@@ -46,7 +46,6 @@ pid_proc.wait()
 # this sleep is here so that everything has time to fully start like pika
 time.sleep(60)
 
-
 # run nikto web scanner
 if not os.path.exists('./nikto/program/nikto.pl'):
     pid_proc = subprocess.Popen(shlex.split('git clone https://github.com/sullo/nikto'),
@@ -69,7 +68,6 @@ common_network_email.com_net_send_email(os.environ['MAILUSER'], os.environ['MAIL
                                         smtp_server=os.environ['MAILSERVER'],
                                         smtp_port=os.environ['MAILPORT'])
 
-
 # Web Vulnerability Scanner via rapidscan
 pid_proc = subprocess.Popen(
     shlex.split('docker run -ti mablanco/rapidscan https://localhost:8900'),
@@ -87,7 +85,6 @@ common_network_email.com_net_send_email(os.environ['MAILUSER'], os.environ['MAIL
                                         'Rapidscan', email_body,
                                         smtp_server=os.environ['MAILSERVER'],
                                         smtp_port=os.environ['MAILPORT'])
-
 
 # Web Vulnerability Scanner via wapiti
 pid_proc = subprocess.Popen(

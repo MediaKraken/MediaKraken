@@ -29,7 +29,6 @@ load_dotenv()
 CWD_HOME_DIRECTORY = os.getcwd().rsplit('MediaKraken', 1)[0]
 print(CWD_HOME_DIRECTORY, flush=True)
 
-
 #####################################
 # start up the application so can see running images for several tools
 #####################################
@@ -45,13 +44,9 @@ pid_proc.wait()
 # this sleep is here so that everything has time to fully start like pika
 time.sleep(60)
 
-
 """
 ab -n 10000 -c 30 https://th-mediakraken-1/
 """
-
-
-
 
 #####################################
 # stop the application
