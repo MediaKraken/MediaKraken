@@ -58,7 +58,6 @@ common_network_email.com_net_send_email(os.environ['MAILUSER'], os.environ['MAIL
                                         smtp_server=os.environ['MAILSERVER'],
                                         smtp_port=os.environ['MAILPORT'])
 
-
 # run Graudit to find unsecure code
 try:
     print('Graudit & %s' % os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken'), flush=True)
@@ -87,7 +86,6 @@ common_network_email.com_net_send_email(os.environ['MAILUSER'], os.environ['MAIL
                                         smtp_server=os.environ['MAILSERVER'],
                                         smtp_port=os.environ['MAILPORT'])
 
-
 # run vulture to find dead code
 try:
     print('Vulture & %s' % os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken'), flush=True)
@@ -114,7 +112,6 @@ common_network_email.com_net_send_email(os.environ['MAILUSER'], os.environ['MAIL
                                         email_body,
                                         smtp_server=os.environ['MAILSERVER'],
                                         smtp_port=os.environ['MAILPORT'])
-
 
 # run python taint to find unsecured code
 try:

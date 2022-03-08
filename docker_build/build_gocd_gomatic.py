@@ -85,7 +85,6 @@ job.add_task(ExecTask(['bash', '-c', 'yamllint $(git ls-files *.yml)']))
 job = stage.ensure_job("css_stylelint")
 job.add_task(ExecTask(['bash', '-c', 'npx stylelint docker/core/mkwebapp/static/**/*.css']))
 
-
 stage = pipeline.ensure_stage("dead_code")
 job = stage.ensure_job("python_vulture")
 job.add_task(ExecTask(['bash', '-c', 'vulture $(git ls-files *.py)']))
@@ -93,11 +92,9 @@ job.add_task(ExecTask(['bash', '-c', 'vulture $(git ls-files *.py)']))
 job = stage.ensure_job("python_dead")
 job.add_task(ExecTask(['bash', '-c', 'dead']))  # --files $(git ls-files *.py)'])) needs to be regex
 
-
 stage = pipeline.ensure_stage("code_security")
 job = stage.ensure_job("bandit_python")
 job.add_task(ExecTask(['bandit', '-r', '.']))
-
 
 # pipeline = configurator \
 #     .ensure_pipeline_group("MediaKraken") \
@@ -133,7 +130,6 @@ for build_group in (docker_images_list.STAGE_ONE_IMAGES,
                                                                     build_group[docker_images][2],
                                                                     docker_images)]))
 
-
 stage = pipeline.ensure_stage("docker_build_core")
 for build_group in (docker_images_list.STAGE_CORE_IMAGES,):
     for docker_images in build_group:
@@ -149,7 +145,6 @@ for build_group in (docker_images_list.STAGE_CORE_IMAGES,):
                                                                     build_group[docker_images][2],
                                                                     docker_images)]))
 
-
 stage = pipeline.ensure_stage("docker_build_games")
 for build_group in (docker_images_list.STAGE_TWO_GAME_SERVERS,):
     for docker_images in build_group:
@@ -164,7 +159,6 @@ for build_group in (docker_images_list.STAGE_TWO_GAME_SERVERS,):
                                                                     docker_images_list.PYPI_MIRROR,
                                                                     build_group[docker_images][2],
                                                                     docker_images)]))
-
 
 pipeline = configurator \
     .ensure_pipeline_group("MediaKraken") \

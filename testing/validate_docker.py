@@ -50,7 +50,6 @@ def is_running_check(app_name, app_parameter=None):
 CWD_HOME_DIRECTORY = os.getcwd().rsplit('MediaKraken', 1)[0]
 print(CWD_HOME_DIRECTORY, flush=True)
 
-
 # Docker best practices
 pid_proc = subprocess.Popen(
     shlex.split('./docker_bench_security.sh'),
@@ -68,7 +67,6 @@ common_network_email.com_net_send_email(os.environ['MAILUSER'], os.environ['MAIL
                                         'Docker Bench Security', email_body,
                                         smtp_server=os.environ['MAILSERVER'],
                                         smtp_port=os.environ['MAILPORT'])
-
 
 # hadolint - lint your Dockerfile
 # don't do the testing/security images as they aren't MK production code
@@ -116,7 +114,6 @@ for build_stages in (common_docker_images.STAGE_ONE_IMAGES,
                                                 smtp_server=os.environ['MAILSERVER'],
                                                 smtp_port=os.environ['MAILPORT'])
 print('Hadolint End', flush=True)
-
 
 # startup local server if it's not running
 if is_running_check(app_name='trivy', app_parameter='server'):

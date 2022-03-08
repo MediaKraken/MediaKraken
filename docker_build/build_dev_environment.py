@@ -3,6 +3,7 @@ import subprocess
 import shlex
 import shutil
 
+
 # shouldn't need to build out Rust since that's container build
 
 
@@ -23,7 +24,7 @@ working_directory = os.getcwd().replace("docker_build", "")
 # build dir(s) to hold mediakraken data (docker data)
 os.makedirs("/var/opt/mediakraken/sonatype/deploy", exist_ok=True)
 shutil.copytree(os.path.join(working_directory, "docker/test/mksonatype/deploy"),
-                         "/var/opt/mediakraken/sonatype/deploy", dirs_exist_ok=True)
+                "/var/opt/mediakraken/sonatype/deploy", dirs_exist_ok=True)
 
 os.makedirs("/var/opt/mediakraken/trac/projects/MediaKraken", exist_ok=True)
 shutil.copy(os.path.join(working_directory, "docker/test/mktrac/.htpasswd"),
