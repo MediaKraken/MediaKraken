@@ -11,8 +11,8 @@ pub async fn mk_lib_database_open_pool() -> Result<sqlx::PgPool, sqlx::Error> {
     if hostname == "wsripper2" {
          connection_string = "postgresql://postgres:metaman@localhost/postgres".to_string();
     } else if hostname == "th-hplaptop-1" || hostname == "th-hplap-1"
-        || hostname == "th-linuxgui-1" {
-         connection_string = "postgresql://postgres:metaman@th-docker-1/postgres".to_string();
+        || hostname == "th-linuxgui-1" || hostname == "mkstage" {
+         connection_string = "postgresql://postgres:metaman@mkstage/postgres".to_string();
     } else if Path::new("/run/secrets/db_password").exists() {
         let dp_pass = fs::read_to_string("/run/secrets/db_password").unwrap();
          connection_string = format!("postgresql://postgres:{}@mkstack_database/postgres",
