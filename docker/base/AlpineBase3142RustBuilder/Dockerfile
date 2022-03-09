@@ -1,7 +1,7 @@
 FROM rust:1.59 as cargo-build
 
 RUN apt-get update \
-  && apt-get install musl-tools -y \
+  && apt-get install --no-install-recommends musl-tools -y \
   && rustup target add x86_64-unknown-linux-musl
 
 WORKDIR /usr/src/myapp
