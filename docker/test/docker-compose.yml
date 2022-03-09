@@ -24,7 +24,7 @@ services:
     networks:
       - mediakraken_test_network
     ports:
-      - "5433:5432"
+      - "5432:5432"
     restart: unless-stopped
 
   # database management tool
