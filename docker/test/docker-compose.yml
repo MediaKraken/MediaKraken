@@ -15,7 +15,7 @@ services:
       - MAX_PARALLEL_WORKERS=4
       - POSTGRES_PASSWORD=metaman
     command: postgres -c logging_collector=on -c log_directory='/var/log/postgresql' -c log_filename='postgresql-%Y-%m-%d_%H%M%S.log' -c log_statement='all' -c log_duration=on -c log_connections=off -c log_disconnections=off
-    container_name: mktest_database
+    container_name: mkdatabase
     stop_grace_period: 30s
     stop_signal: SIGTERM
     volumes:
@@ -29,14 +29,14 @@ services:
 
   # database management tool
   mktestpgadmin:
-    image: dpage/pgadmin4:6.3
+    image: dpage/pgadmin4:6.5
     stop_grace_period: 30s
     stop_signal: SIGTERM
-    container_name: mktest_pgadmin
+    container_name: mkpgadmin
     networks:
       - mediakraken_test_network
     ports:
-      - "15050:5050"
+      - "5050:5050"
     environment:
       PGADMIN_LISTEN_PORT: 5050
       PGADMIN_DEFAULT_EMAIL: spootdev@gmail.com
@@ -92,17 +92,17 @@ services:
 #    volumes:
 #      - mediakraken_vol_test_teamcity_db:/var/lib/postgresql/data
 
-  mktesttrac:
-    image: mediakraken/mktrac:refactor
-    stop_grace_period: 30s
-    stop_signal: SIGTERM
-    container_name: mktest_trac
-    networks:
-      - mediakraken_test_network
-    ports:
-      - "18080:80"
-    volumes:
-      - /var/opt/mediakraken/trac:/trac
+#  mktesttrac:
+#    image: mediakraken/mktrac:refactor
+#    stop_grace_period: 30s
+#    stop_signal: SIGTERM
+#    container_name: mktest_trac
+#    networks:
+#      - mediakraken_test_network
+#    ports:
+#      - "18080:80"
+#    volumes:
+#      - /var/opt/mediakraken/trac:/trac
 
 networks:
   mediakraken_test_network:
