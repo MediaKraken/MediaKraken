@@ -87,5 +87,5 @@ async fn main() {
         .manage::<sqlx::PgPool>(sqlx_pool)
         .attach(Template::custom(|engines| {
             bp_about::customize(&mut engines.tera);
-        }));
+        })).launch().await;
 }
