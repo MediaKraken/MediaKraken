@@ -22,7 +22,6 @@ pub fn general_not_administrator() -> content::RawHtml<&'static str> {
     "#)
 }
 
-
 #[catch(404)]
 pub fn general_not_found() -> content::RawHtml<&'static str> {
     // @common_global.jinja_template.template('bss_error/bss_error_404.html')

@@ -85,7 +85,8 @@ async fn main() {
             bp_error::general_security,
             bp_error::default_catcher])
         .manage::<sqlx::PgPool>(sqlx_pool)
-        .attach(Template::custom(|engines| {
-            bp_about::customize(&mut engines.tera);
-        })).launch().await;
+        // .attach(Template::custom(|engines| {
+        //     bp_about::customize(&mut engines.tera);
+        //}))
+        .launch().await;
 }

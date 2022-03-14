@@ -9,14 +9,14 @@ pub fn about() -> Template {
     })
 }
 
-// @common_global.jinja_template.template('bss_public/bss_public_about.html')
-pub fn customize(tera: &mut Tera) {
-    tera.add_raw_template("templates/bbs_public_about.html", r#"
-        {% extends "tera/base" %}
-        {% block content %}
-            <section id="about">
-              <h1>About - Here's another page!</h1>
-            </section>
-        {% endblock content %}
-    "#).expect("valid Tera template");
-}
+// // @common_global.jinja_template.template('bss_public/bss_public_about.html')
+// pub fn customize(tera: &mut Tera) {
+//     tera.add_raw_template("templates/bbs_public_about.html", r#"
+//         {% extends "tera/base" %}
+//         {% block content %}
+//             <section id="about">
+//               <h1>About - Here's another page!</h1>
+//             </section>
+//         {% endblock content %}
+//     "#).expect("valid Tera template");
+// }
