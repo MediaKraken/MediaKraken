@@ -30,7 +30,13 @@ mod mk_lib_logging;
 mod bp_error;
 
 #[path = "public/bp_about.rs"]
-mod bp_about;
+mod bp_public_about;
+#[path = "public/bp_forgot_password.rs"]
+mod bp_public_forgot_password;
+#[path = "public/bp_login.rs"]
+mod bp_public_login;
+#[path = "public/bp_register.rs"]
+mod bp_public_register;
 
 #[rocket::main]
 async fn main() {
@@ -75,9 +81,10 @@ async fn main() {
                                                            true).await;
 
     rocket::build()
+        .attach(Template::fairing())
         .mount("/", FileServer::from(relative!("static")))
         .mount("/admin", routes![])
-        .mount("/public", routes![])
+        .mount("/public", routes![bp_public_about::public_about])
         .mount("/user", routes![])
         .register("/", catchers![bp_error::general_not_authorized,
             bp_error::general_not_administrator,
@@ -86,7 +93,8 @@ async fn main() {
             bp_error::default_catcher])
         .manage::<sqlx::PgPool>(sqlx_pool)
         // .attach(Template::custom(|engines| {
-        //     bp_about::customize(&mut engines.tera);
+        //     bp_about::
+        // customize(&mut engines.tera);
         //}))
         .launch().await;
 }
