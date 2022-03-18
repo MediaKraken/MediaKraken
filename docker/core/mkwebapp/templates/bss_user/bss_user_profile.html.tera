@@ -16,7 +16,7 @@
                 <div class="container-fluid">
                     <!-- Start: Navigation with Button -->
     <nav class="navbar navbar-light navbar-expand-md navigation-clean-button">
-        <div class="container"><a class="navbar-brand" href="{{ url_for('name_blueprint_user_homepage.url_bp_user_homepage') }}">MediaKraken</a><button data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+        <div class="container"><a class="navbar-brand" href="/user/bss_user_homepage">MediaKraken</a><button data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
             <div
                 class="collapse navbar-collapse" id="navcol-1">
                 <ul class="nav navbar-nav mr-auto">
@@ -117,7 +117,7 @@
         </footer>
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-    <script src="{{ url_for('static', filename='js/jquery.easing.min.js') }}"></script>
+    <script src="/static/js/jquery.easing.min.js"></script>
     <script src="/static/js/script.min.js"></script>
 </body>
 {% endblock %}

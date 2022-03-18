@@ -73,12 +73,12 @@
             </footer>
         </div>
     </div><div>
-    <script src="{{ url_for('static', filename='js/jquery.tmpl.min.js') }}"></script>
+    <script src="/static/js/jquery.tmpl.min.js"></script>
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-    <script src="{{ url_for('static', filename='js/base_webapp_delete.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/base_webapp_update.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/base_webapp_run.js') }}"></script></div>
+    <script src="/static/js/base_webapp_delete.js"></script>
+    <script src="/static/js/base_webapp_update.js"></script>
+    <script src="/static/js/base_webapp_run.js"></script></div>
     <script src="/static/js/jquery.easing.js"></script>
     <script src="/static/js/script.min.js"></script>
 </body>
