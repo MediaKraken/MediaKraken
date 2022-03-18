@@ -82,7 +82,7 @@ async fn main() {
 
     rocket::build()
         .attach(Template::fairing())
-        .mount("/", FileServer::from(relative!("static")))
+        .mount("/static", FileServer::from(relative!("static")))
         .mount("/admin", routes![])
         .mount("/public", routes![bp_public_about::public_about])
         .mount("/user", routes![])
