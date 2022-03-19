@@ -18,20 +18,25 @@
                 <ul class="nav navbar-nav mr-auto">
                     <li class="nav-item" role="presentation"></li>
                     <li class="nav-item" role="presentation"></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="#">Sync</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link" href="/user/media/bss_user_media_sync">Sync</a></li>
                     <li class="nav-item dropdown"><a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false" href="#">Metadata</a>
                         <div class="dropdown-menu" role="menu">
-                            <!-- Start: metadata_movie --><a class="dropdown-item" role="presentation" href="bss_user_metadata_movie.html">Movie</a>
-                            <!-- End: metadata_movie --><a class="dropdown-item" role="presentation" href="bss_user_metadata_movie_collection.html">Movie Collection</a><a class="dropdown-item" role="presentation" href="bss_user_metadata_tv.html">TV Show</a><a class="dropdown-item"
-                                role="presentation" href="bss_user_metadata_music_album.html">Music Album</a><a class="dropdown-item" role="presentation" href="bss_user_metadata_sports.html">Sports</a><a class="dropdown-item" role="presentation" href="bss_user_metadata_game.html">Games</a>
-                            <a
-                                class="dropdown-item" role="presentation" href="bss_user_metadata_game_systems.html">Game Systems</a><a class="dropdown-item" role="presentation" href="bss_user_metadata_person.html">Person</a><a class="dropdown-item" role="presentation" href="bss_user_metadata_book.html">Book/Periodical</a><a class="dropdown-item"
-                                    role="presentation" href="bss_user_metadata_music_video.html">Music Video</a></div>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_movie">Movie</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_movie_collection">Movie Collection</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_tv">TV Show</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_music">Music</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_sports">Sports</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_games">Games</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_game_system">Game Systems</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_person">Person</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_book">Book/Periodical</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_music_video">Music Video</a>
+                        </div>
                     </li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="/bss_user/bss_user_profile.html">Profile</a></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="/bss_admin/bss_admin_home.html">Admin</a></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="#">About</a></li>
-                </ul><span class="navbar-text actions"> <a class="login" href="#">Log Out</a></span></div>
+                    <li class="nav-item" role="presentation"><a class="nav-link" href="/user/bss_user_profile">Profile</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link" href="/admin/bss_admin_home">Admin</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link" href="/public/about">About</a></li>
+                </ul><span class="navbar-text actions"> <a class="login" href="/logout">Log Out</a></span></div>
         </div>
     </nav>
     <!-- End: Navigation with Button -->

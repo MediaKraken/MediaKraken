@@ -18,24 +18,24 @@
                 <ul class="nav navbar-nav mr-auto">
                     <li class="nav-item" role="presentation"></li>
                     <li class="nav-item" role="presentation"></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="{{ url_for('name_blueprint_user_sync.url_bp_user_sync_display_all') }}">Sync</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link" href="/user/media/bss_user_media_sync">Sync</a></li>
                     <li class="nav-item dropdown"><a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false" href="#">Metadata</a>
                         <div class="dropdown-menu" role="menu">
-                            <a class="dropdown-item" role="presentation" href="{{ url_for('name_blueprint_user_metadata_movie.url_bp_user_metadata_movie_list') }}">Movie</a>
-                            <a class="dropdown-item" role="presentation" href="{{ url_for('name_blueprint_user_media_collection.url_bp_user_metadata_movie_collection') }}">Movie Collection</a>
-                            <a class="dropdown-item" role="presentation" href="{{ url_for('name_blueprint_user_metadata_tv.url_bp_user_metadata_tvshow_list') }}">TV Show</a>
-                            <a class="dropdown-item" role="presentation" href="{{ url_for('name_blueprint_user_metadata_music.url_bp_user_metadata_music_album_list') }}">Music Album</a>
-                            <a class="dropdown-item" role="presentation" href="{{ url_for('name_blueprint_user_metadata_sports.url_bp_user_metadata_sports_list') }}">Sports</a>
-                            <a class="dropdown-item" role="presentation" href="{{ url_for('name_blueprint_user_metadata_game.url_bp_user_metadata_game') }}">Games</a>
-                            <a class="dropdown-item" role="presentation" href="{{ url_for('name_blueprint_user_metadata_game_system.url_bp_user_metadata_game_system') }}">Game Systems</a>
-                            <a class="dropdown-item" role="presentation" href="{{ url_for('name_blueprint_user_metadata_people.url_bp_user_metadata_person_list') }}">Person</a>
-                            <a class="dropdown-item" role="presentation" href="{{ url_for('name_blueprint_user_metadata_periodical.url_bp_user_metadata_periodical') }}">Book/Periodical</a>
-                            <a class="dropdown-item" role="presentation" href="{{ url_for('name_blueprint_user_metadata_music_video.url_bp_user_metadata_music_video') }}">Music Video</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_movie">Movie</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_movie_collection">Movie Collection</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_tv">TV Show</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_music">Music</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_sports">Sports</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_games">Games</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_game_system">Game Systems</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_person">Person</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_book">Book/Periodical</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_music_video">Music Video</a>
                         </div>
                     </li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="{{ url_for('name_blueprint_user_profile.url_bp_user_profile') }}">Profile</a></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="{{ url_for('name_blueprint_admin.url_bp_admin') }}">Admin</a></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="{{ url_for('name_blueprint_public_about.url_bp_public_about') }}">About</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link" href="/user/bss_user_profile">Profile</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link" href="/admin/bss_admin_home">Admin</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link" href="/public/about">About</a></li>
                 </ul><span class="navbar-text actions"> <a class="login" href="/logout">Log Out</a></span></div>
         </div>
     </nav>
