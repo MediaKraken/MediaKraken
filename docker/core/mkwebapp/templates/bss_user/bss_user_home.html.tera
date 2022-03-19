@@ -42,18 +42,18 @@
     <!-- End: Navigation with Button -->
     <div>
     {% if data_new_media %}
-        <a href="{{ url_for('name_blueprint_user_media_new.url_bp_user_media_new') }}"><img src="{{ url_for('static', filename='img/new.png')}}" width="200" height="200" loading="lazy"></a>
+        <a href="{{ url_for('name_blueprint_user_media_new.url_bp_user_media_new') }}"><img src="/static/image/new.png" width="200" height="200" loading="lazy"></a>
     {% endif %}
     {% if data_user_media_queue %}
-        <a href="{{ url_for('name_blueprint_user_queue.url_bp_user_queue') }}"><img src="{{ url_for('static', filename='img/rectangles_black.png')}}" width="200" height="200" loading="lazy"></a>
+        <a href="{{ url_for('name_blueprint_user_queue.url_bp_user_queue') }}"><img src="/static/image/rectangles_black.png" width="200" height="200" loading="lazy"></a>
     {% endif %}
-    <a href="{{ url_for('name_blueprint_user_media_genre.url_bp_user_movie_page', genre='all') }}"><img src="{{ url_for('static', filename='img/movie_ticket.png') }}" width="200" height="200" loading="lazy"></a>
-    <a href="{{ url_for('name_blueprint_user_music.url_bp_user_album_list') }}"><img src="{{ url_for('static', filename='img/headphone.png') }}" width="200" height="200" loading="lazy"></a>
-    <a href="{{ url_for('name_blueprint_user_tv.url_bp_user_tv') }}"><img src="{{ url_for('static', filename='img/television.png') }}" width="200" height="200" loading="lazy"></a>
-    <a href="{{ url_for('name_blueprint_user_sports.url_bp_user_sports') }}"><img src="{{ url_for('static', filename='img/stadium.png') }}" width="200" height="200" loading="lazy"></a>
+    <a href="{{ url_for('name_blueprint_user_media_genre.url_bp_user_movie_page', genre='all') }}"><img src="/static/image/movie_ticket.png" width="200" height="200" loading="lazy"></a>
+    <a href="{{ url_for('name_blueprint_user_music.url_bp_user_album_list') }}"><img src="/static/image/headphone.png" width="200" height="200" loading="lazy"></a>
+    <a href="{{ url_for('name_blueprint_user_tv.url_bp_user_tv') }}"><img src="/static/image/television.png" width="200" height="200" loading="lazy"></a>
+    <a href="{{ url_for('name_blueprint_user_sports.url_bp_user_sports') }}"><img src="/static/image/stadium.png" width="200" height="200" loading="lazy"></a>
     <a href="{{ url_for('name_blueprint_user_tv_live.url_bp_user_tv_live', schedule_date='20170716', schedule_time='213500') }}"><img src="{{ url_for('static', filename='img/television_live.png') }}" width="200" height="200" loading="lazy"></a>
-    <a href="{{ url_for('name_blueprint_user_image.url_bp_user_image_gallery') }}"><img src="{{ url_for('static', filename='img/photo.png') }}" width="200" height="200" loading="lazy"></a>
-    <a href="{{ url_for('name_blueprint_user_game.url_bp_user_game') }}"><img src="{{ url_for('static', filename='img/vid_game.png') }}" width="200" height="200" loading="lazy"></a>
+    <a href="{{ url_for('name_blueprint_user_image.url_bp_user_image_gallery') }}"><img src="/static/image/photo.png" width="200" height="200" loading="lazy"></a>
+    <a href="{{ url_for('name_blueprint_user_game.url_bp_user_game') }}"><img src="/static/image/vid_game.png" width="200" height="200" loading="lazy"></a>
     <a href="{{ url_for('name_blueprint_user_periodical.url_bp_user_periodical_list') }}"><img src="{{ url_for('static', filename='img/books.png') }}" width="200" height="200" loading="lazy"></a>
     <a href="{{ url_for('name_blueprint_user_media_iradio.url_bp_user_iradio_list') }}"><img src="{{ url_for('static', filename='img/radio.png') }}" width="200" height="200" loading="lazy"></a>
     <a href="{{ url_for('name_blueprint_user_home_media.url_bp_user_home_media_list') }}"><img src="{{ url_for('static', filename='img/vid_camera.png') }}" width="200" height="200" loading="lazy"></a>
