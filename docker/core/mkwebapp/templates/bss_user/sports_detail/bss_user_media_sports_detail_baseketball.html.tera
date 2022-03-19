@@ -73,7 +73,7 @@
                                                     <td>{{data_ffprobe_data[stream_uuid][0]}}</td>
                                                     <td>{{data_ffprobe_data[stream_uuid][1]}}</td>
                                                     <td>
-                                                        <select id="{{"audio" + loop.index|string }}" >
+                                                        <select id="audio{{loop.index|string}}" >
                                                             {% for audio_stream in data_ffprobe_data[stream_uuid][2] %}
                                                                 <option value="{{loop.index|string}}">{{audio_stream[2] + ' (' + audio_stream[0] + ') ' + audio_stream[1]}}</option>
                                                             {% endfor %}
@@ -98,7 +98,7 @@
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <input type="button" id="{{"play" + loop.index|string}}" value="Play" />
+                                                        <input type="button" id="play{{loop.index|string}}" value="Play" />
                                                     </td>
                                                 </tr>
                                             {% endfor %}
