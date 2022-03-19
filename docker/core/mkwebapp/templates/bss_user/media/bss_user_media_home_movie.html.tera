@@ -43,7 +43,7 @@
     <div><div>
     {% if media %}
     <div id="filter_homediv">
-        <form name="media_filter" action="{{url_for('name_blueprint_user_media_home.url_bp_user_media_home')}}" method="post">
+        <form name="media_filter" action="/user/media/bss_user_media_home_movie" method="post">
             Status:
             <select name="movie_status", id="movie_status">
                 <option value="All">All</option>
