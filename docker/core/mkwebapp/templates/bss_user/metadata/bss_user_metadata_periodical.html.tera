@@ -51,7 +51,7 @@
         <div class="main_photo">
             <div class="media_context_right" data-id={{row_data[1]}}>
                 <a href = "/user/metadata/bss_user_metadata_book_detail, guid=row_data[0]) }}">
-                <img src= "{{ url_for('static', filename=row_data[2]) }}" loading="lazy" height="300" width="200"></a>
+                <img src= "/static/{{row_data[2]}}" loading="lazy" height="300" width="200"></a>
                 <div class="description">
                     <p class="description_content_left">{{row_data[1]}}</p>
                 </div>

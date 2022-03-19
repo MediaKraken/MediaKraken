@@ -58,7 +58,7 @@
                             <img class="watched_icon" src="/static/image/eye.png" loading="lazy" height="25" width="25">
                             {% endif %}
                             {% if row_data[5] != None %}
-                            <img class="rating_icon" src="{{ url_for('static', filename='image/' + row_data[5] ) }}" loading="lazy" height="25" width="25">
+                            <img class="rating_icon" src="/static/image/{{row_data[5]}}" loading="lazy" height="25" width="25">
                             {% endif %}
                             {% if row_data[6] != None %}
                             <img class="request_icon" src="/static/image/add-button.png" loading="lazy" height="25" width="25">
@@ -71,12 +71,12 @@
                                 <p class="description_content_left">{{row_data[1]}}</p>
                             </div>
                         {% else %}
-                            <img src="{{ url_for('static', filename=row_data[3].replace('\"', '') ) }}" loading="lazy" height="300" width="200">
+                            <img src="{{row_data[3].replace('\"', '')}}" loading="lazy" height="300" width="200">
                             {% if row_data[4] == True %}
                             <img class="watched_icon" src="/static/image/eye.png" loading="lazy" height="25" width="25">
                             {% endif %}
                             {% if row_data[5] != None %}
-                            <img class="rating_icon" src="{{ url_for('static', filename='image/' + row_data[5] ) }}" loading="lazy" height="25" width="25">
+                            <img class="rating_icon" src="/static/image/{{row_data[5]}}" loading="lazy" height="25" width="25">
                             {% endif %}
                             {% if row_data[6] != None %}
                             <img class="request_icon" src="/static/image/add-button.png" loading="lazy" height="25" width="25">

@@ -42,7 +42,7 @@
     <!-- End: Navigation with Button -->
     {% if media %}
     <div id="filter_game_div">
-        <form name="media_filter" action="{{url_for('name_blueprint_user_game_genre.url_bp_user_game_genre')}}" method="post">
+        <form name="media_filter" action="/user/media/bss_user_media_game_genre" method="post">
             <p>Media Filters:
             <button type="submit" value="game_genre">Genre</button>
             Rating:
@@ -74,7 +74,7 @@
         <!-- 0 mm_media_name, 1 mm_media_guid, 2 mm_metadata_json (poster only), 3 = watched or not -->
         <div class="main_photo">
             <div data-id={{row_data[1]}}>
-                <a href= "{{ url_for('name_blueprint_user_game.url_bp_user_game_detail', guid=row_data[1]) }}">
+                <a href= "/user/media/bss_user_media_game_detail/{{row_data[1]}}">
                 {% if row_data[2] == None %}
                     <img src="/static/image/Movie-icon.png" height="300" width="200">
                     {% if row_data[3] == True %}
