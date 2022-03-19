@@ -41,7 +41,7 @@
     </nav>
     <!-- End: Navigation with Button -->
     <div class="row">
-        <div class="col"><img src="/assets/img/headphone.png"></div>
+        <div class="col"><img src="/static/image/headphone.png"></div>
         <div class="col">
             <div class="row">
                 <div class="col"><span>Band: {{}}</span></div>
