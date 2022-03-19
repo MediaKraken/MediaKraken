@@ -47,11 +47,11 @@
     {% if data_user_media_queue %}
         <a href="/user/media/bss_user_media_queue"><img src="/static/image/rectangles_black.png" width="200" height="200" loading="lazy"></a>
     {% endif %}
-    <a href="{{ url_for('name_blueprint_user_media_genre.url_bp_user_movie_page', genre='all') }}"><img src="/static/image/movie_ticket.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/bss_user_media_movie_genre, genre='all') }}"><img src="/static/image/movie_ticket.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/media/bss_user_media_music"><img src="/static/image/headphone.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/media/bss_user_media_tv"><img src="/static/image/television.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/media/bss_user_media_sports"><img src="/static/image/stadium.png" width="200" height="200" loading="lazy"></a>
-    <a href="{{ url_for('name_blueprint_user_tv_live.url_bp_user_tv_live', schedule_date='20170716', schedule_time='213500') }}"><img src="/static/image/television_live.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/bss_user_media_live_tv, schedule_date='20170716', schedule_time='213500') }}"><img src="/static/image/television_live.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/media/bss_user_media_images"><img src="/static/image/photo.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/media/bss_user_media_game"><img src="/static/image/vid_game.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/media/bss_user_media_periodical"><img src="/static/image/books.png" width="200" height="200" loading="lazy"></a>
@@ -61,8 +61,8 @@
     <a href="/user/internet/bss_user_internet"><img src="/static/image/earth.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/media/bss_user_media_music_video"><img src="/static/image/listening-music-video-clip-with-auricular.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/media/bss_user_media_cctv"><img src="/static/image/surveillance-cctv-symbol-in-rounded-triangle.png" width="200" height="200" loading="lazy"></a>
-    <a href="{{ url_for('name_blueprint_user_search.url_bp_user_search_media') }}"><img src="/static/image/magnifying-glass.png" width="200" height="200" loading="lazy"></a>
-    <a href="{{ url_for('name_blueprint_user_hardware.url_bp_user_hardware') }}"><img src="/static/image/circuit-board.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/bss_user_media_search"><img src="/static/image/magnifying-glass.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/hardware/bss_user_hardware"><img src="/static/image/circuit-board.png" width="200" height="200" loading="lazy"></a>
     </div>
     <footer
         class="bg-white sticky-footer">

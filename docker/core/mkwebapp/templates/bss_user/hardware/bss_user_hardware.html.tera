@@ -42,7 +42,7 @@
     <!-- End: Navigation with Button -->
     <div>
     {% if phue > 0 %}
-    <a href="{{ url_for('name_blueprint_user_hardware.url_bp_user_hardware_phue') }}" id="user_hardware_page">
+    <a href="/user/hardware/bss_user_hardware_phue" id="user_hardware_page">
         <img src="/static/image/light-bulb.png" width="200" height="200">
     </a>
     {% endif %}

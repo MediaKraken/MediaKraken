@@ -50,7 +50,7 @@
         {% for row_data in media %}
         <div class="main_photo">
             <div class="media_context_right" data-id={{row_data[0]}}>
-                <a href= "{{ url_for('name_blueprint_user_metadata_music_video.url_bp_user_metadata_music_video_detail', guid=row_data[0]) }}" >
+                <a href= "/user/metadata/bss_user_metadata_music_video_detail, guid=row_data[0]) }}" >
                 {% if row_data[3] == None %}
                 <img src= "/static/image/Movie-icon.png" loading="lazy" height="300" width="200">
                 </a>
