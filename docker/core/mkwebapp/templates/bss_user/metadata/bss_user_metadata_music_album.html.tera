@@ -59,7 +59,7 @@
                     </div>
                 {% else %}
                     <div class="description">
-                        <p class="description_content_left">{{row_data[1] + " - " + row_data[2]}}</p>
+                        <p class="description_content_left">{{row_data[1]}} - {{row_data[2]}}</p>
                     </div>
                 {% endif %}
                 {% else %}
