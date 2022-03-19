@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
     <link href="/static/fonts/fontawesome-all.min.css" rel="stylesheet">
     <link href="/static/css/styles.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/base_webapp_layout.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery.contextMenu.min.css') }}">
+    <link rel="stylesheet" href="/static/css/base_webapp_layout.css">
+    <link rel="stylesheet" href="/static/css/jquery.contextMenu.min.css">
 </head>
 
 <body>
@@ -58,13 +58,13 @@
                             <img class="watched_icon" src="/static/image/eye.png" loading="lazy" height="25" width="25">
                             {% endif %}
                             {% if row_data[5] != None %}
-                            <img class="rating_icon" src="{{ url_for('static', filename='img/' + row_data[5] ) }}" loading="lazy" height="25" width="25">
+                            <img class="rating_icon" src="{{ url_for('static', filename='image/' + row_data[5] ) }}" loading="lazy" height="25" width="25">
                             {% endif %}
                             {% if row_data[6] != None %}
-                            <img class="request_icon" src="{{ url_for('static', filename='img/add-button.png') }}" loading="lazy" height="25" width="25">
+                            <img class="request_icon" src="/static/image/add-button.png" loading="lazy" height="25" width="25">
                             {% endif %}
                             {% if row_data[7] != None %}
-                            <img class="queue_icon" src="{{ url_for('static', filename='img/rectangles.png') }}" loading="lazy" height="25" width="25">
+                            <img class="queue_icon" src="/static/image/rectangles.png" loading="lazy" height="25" width="25">
                             {% endif %}
                             </a>
                             <div class="description">
@@ -76,13 +76,13 @@
                             <img class="watched_icon" src="/static/image/eye.png" loading="lazy" height="25" width="25">
                             {% endif %}
                             {% if row_data[5] != None %}
-                            <img class="rating_icon" src="{{ url_for('static', filename='img/' + row_data[5] ) }}" loading="lazy" height="25" width="25">
+                            <img class="rating_icon" src="{{ url_for('static', filename='image/' + row_data[5] ) }}" loading="lazy" height="25" width="25">
                             {% endif %}
                             {% if row_data[6] != None %}
-                            <img class="request_icon" src="{{ url_for('static', filename='img/add-button.png') }}" loading="lazy" height="25" width="25">
+                            <img class="request_icon" src="/static/image/add-button.png" loading="lazy" height="25" width="25">
                             {% endif %}
                             {% if row_data[7] != None %}
-                            <img class="queue_icon" src="{{ url_for('static', filename='img/rectangles.png') }}" loading="lazy" height="25" width="25">
+                            <img class="queue_icon" src="/static/image/rectangles.png" loading="lazy" height="25" width="25">
                             {% endif %}
                         {% endif %}
                     </a>

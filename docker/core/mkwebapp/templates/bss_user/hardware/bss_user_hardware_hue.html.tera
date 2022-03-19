@@ -52,7 +52,7 @@
                 </div>
                 <div class="col">
                     <div class="row">
-                        <div class="col"><a href="#"><img src="{{ url_for('static', filename='img/lightbulb_on.png') }}" width="200" height="200"></a><a href="#">
+                        <div class="col"><a href="#"><img src="/static/image/lightbulb_on.png" width="200" height="200"></a><a href="#">
                             <img src="/static/image/lightbulb_off.png" width="200" height="200"></a><input type="color"></div>
                     </div>
                 </div>
