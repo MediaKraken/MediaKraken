@@ -43,7 +43,6 @@
     <!-- End: Navigation with Button -->
     <div>
         <form id="SearchForm" class="form form-youtube" method="POST" action="/user/internet/bss_user_internet_youtube" role="form">
-            {{ form.hidden_tag() }}
             <div class="form-group">
                 {{form.search_text.label}}
                 {{form.search_text(placeholder="Search string", class_="form-control")}}

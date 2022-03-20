@@ -5,7 +5,6 @@
     <h1>Library Path Addition</h1>
     <br>
     <form id="libraryaddeditForm" class="form form-libraryedit" method="POST" action="" role="form">
-        {{ form.hidden_tag() }}
         <div class="form-group">
             {{form.library_path.label}}
             {{form.library_path(placeholder="Library Path", class_="form-control")}}

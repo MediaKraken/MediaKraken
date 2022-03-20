@@ -24,29 +24,23 @@
                                 <h4 class="text-dark mb-4">Create an Account!</h4>
                             </div>
                             <form action="/register" class="user" method="post">
-                                {{ errors.token_errors }}
-                                <span style="color: red;">{{errors.validate_errors}}</span>
                                 <div class="form-group">
                                     {{form.csrf_token}}
-                                    {{form.username.label}}
-                                    {{form.username(size=32)}}
-                                    <span style="color: red;">{{ errors.username_errors }}</span>
+                                    {{ m::input(label="Name", type="text", name="account.name") }}
+                                    <!-- required -->
                                 </div>
                                 <div class="form-group">
-                                    {{form.email.label}}
-                                    {{form.email(size=32)}}
-                                    <span style="color: red;">{{ errors.email_errors }}</span>
+                                    {{ m::input(label="Email Address", type="text", name="account.email") }}
+                                    <!-- required pattern=".*@.*"/> -->
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-6 mb-3 mb-sm-0">
-                                        {{form.password.label}}
-                                        {{form.password(size=32)}}
-                                        <span style="color: red;">{{ errors.password_errors }}</span>
+                                        {{ m::input(label="Password", type="password", name="account.password.first") }}
+                                        <!--   required minlength="6" value="" /> -->
                                     </div>
                                     <div class="col-sm-6">
-                                        {{form.password2.label}}
-                                        {{form.password2(size=32)}}
-                                        <span style="color: red;">{{ errors.password2_errors }}</span>
+                                        {{ m::input(label="Confirm Password", type="password", name="account.password.second")}}
+                                        <!--   required minlength="6" value="" /> -->
                                     </div>
                                 </div>
                                 <button class="btn btn-primary btn-block text-white btn-user" type="submit">Register Account</button>
