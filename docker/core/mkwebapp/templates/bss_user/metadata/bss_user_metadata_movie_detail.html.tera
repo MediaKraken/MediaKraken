@@ -96,7 +96,7 @@
                     <div class="grid">
                         {% for chapter_info in data_json_media_cast %}
                         <div class="col-1-4">
-                            <a href="/user/media/bss_user_media_playback/hls/{{data_guid}}/{{chapter_info[0].replace(' ','%20')}}/0/0">
+                            <a href="/user/media/bss_user_media_playback/hls/{{data_guid}}/{{chapter_info[0]|replace(from=' ', to='%20')}}/0/0">
                                 <img src="/static/meta/images/{{chapter_info[1]}}" height="150" width="150">
                             </a>
                         </div>
@@ -119,7 +119,7 @@
                     <div class="grid">
                         {% for chapter_info in data_json_media_crew %}
                         <div class="col-1-4">
-                            <a href="/user/media/bss_user_media_playback/hls/{{data_guid}}/{{chapter_info[0].replace(' ','%20')}}/0/0">
+                            <a href="/user/media/bss_user_media_playback/hls/{{data_guid}}/{{chapter_info[0]|replace(from=' ', to='%20')}}/0/0">
                                 <img src="/static/meta/images/{{chapter_info[1]}}" height="150" width="150">
                             </a>
                         </div>

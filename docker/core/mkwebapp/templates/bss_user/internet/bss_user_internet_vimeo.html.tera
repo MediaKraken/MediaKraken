@@ -45,10 +45,10 @@
             <div>
                 {% for row_data in media %}
                     {% if row_data[2] == None %}
-                        <a href= "/user/internet/bss_user_vimeo_detail, guid=row_data[1]) }}" > {{row_data[0]}}</a>
+                        <a href= "/user/internet/bss_user_vimeo_detail/{{row_data[1]}}" > {{row_data[0]}}</a>
                     {% else %}
-                        <a href= "/user/internet/bss_user_vimeo_detail, guid=row_data[1]) }}" >
-                        <img src= "/static/meta/images/{{row_data[2] | replace('/mediakraken/web_app/MediaKraken/static/meta/images/', '')}}" height="300" width="200">
+                        <a href= "/user/internet/bss_user_vimeo_detail/{{row_data[1]}}" >
+                        <img src= "/static/meta/images/{{row_data[2] | replace(from='/mediakraken/web_app/MediaKraken/static/meta/images/', to='')}}" height="300" width="200">
                         </a>
                     {% endif %}
                 {% endfor %}

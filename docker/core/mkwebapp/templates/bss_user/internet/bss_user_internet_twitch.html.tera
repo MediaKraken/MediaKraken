@@ -46,10 +46,10 @@
                 {% for row_data in media %}
                     <div class="main_photo">
                         <a href= "/user/internet/bss_user_internet_twich_detail, stream_name=row_data[0]) }}" }} >
-                        <img src="{{ row_data[1] | replace('/mediakraken/web_app/MediaKraken/static/meta/images/', '') }}" height="180" width="320">
+                        <img src="{{ row_data[1] | replace(from='/mediakraken/web_app/MediaKraken/static/meta/images/', to='') }}" height="180" width="320">
                         </a>
                         <div class="description">
-                            <p class="description_content_left">{{row_data[0] + ": " + row_data[2]}}</p>
+                            <p class="description_content_left">{{row_data[0]}}: {{row_data[2]}}</p>
                         </div>
                     </div>
                 {% endfor %}

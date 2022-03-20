@@ -96,7 +96,7 @@
                         <p class="description_content_left">{{row_data[0]}}</p>
                     </div>
                 {% else %}
-                    <img src="/static/{{row_data[2].replace('\"', ''))}}" height="300" width="200">
+                    <img src="/static/{{row_data[2]|replace(from='\"', to='')}}" height="300" width="200">
                     {% if row_data[3] == True %}
                     <img class="watched_icon" src="/static/image/eye.png" height="20" width="20">
                     {% endif %}
