@@ -51,3 +51,4 @@
     <script src="/static/js/jquery.easing.js"></script>
     <script src="/static/js/script.min.js"></script>
 </body>
+{% endblock %}

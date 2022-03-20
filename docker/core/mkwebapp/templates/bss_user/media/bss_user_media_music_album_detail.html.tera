@@ -44,7 +44,7 @@
         <div class="col"><img src="/static/image/headphone.png"></div>
         <div class="col">
             <div class="row">
-                <div class="col"><span>Band: {{}}</span></div>
+                <div class="col"><span>Band: {{json_metadata['mm_metadata_json']['band']}}</span></div>
                 <div class="col"><span>Released: 9999/99/99</span></div>
             </div>
             <div class="row">
