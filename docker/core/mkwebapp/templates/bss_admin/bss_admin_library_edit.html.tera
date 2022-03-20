@@ -1,3 +1,4 @@
+{% import "form_input_macro" as m %}
 {% extends "layout.html" %}
 {% block content %}
 <div class="container-narrow">
