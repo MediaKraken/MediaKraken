@@ -1,3 +1,19 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+use uuid::Uuid;
+
+#[get("/media/music_video")]
+pub fn user_media_music_video(user: User) -> Template {
+    Template::render("bss_user/media/bss_user_media_music_video", context! {})
+}
+
+#[get("/media/music_video_detail/<guid>")]
+pub fn user_media_music_video_detail(user: User, guid: uuid::Uuid) -> Template {
+    Template::render("bss_user/media/bss_user_media_music_video_detail", context! {})
+}
+
 /*
 @blueprint_user_music_video.route('/user_music_video', methods=['GET'])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_music_video.html')

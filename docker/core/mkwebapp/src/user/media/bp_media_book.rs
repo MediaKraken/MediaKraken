@@ -1,10 +1,20 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+use uuid::Uuid;
+
+#[get("/media/book")]
+pub fn user_media_book(user: User) -> Template {
+    Template::render("bss_user/media/bss_user_media_periodical", context! {})
+}
+
+#[get("/media/book_detail/<guid>")]
+pub fn user_media_book_detail(user: User, guid: uuid::Uuid) -> Template {
+    Template::render("bss_user/media/bss_user_media_periodical_detail", context! {})
+}
+
 /*
-from common import common_global
-from common import common_pagination_bootstrap
-from sanic import Blueprint
-
-blueprint_user_periodical = Blueprint('name_blueprint_user_periodical', url_prefix='/user')
-
 
 @blueprint_user_periodical.route('/user_periodical', methods=['GET'])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_periodical.html')

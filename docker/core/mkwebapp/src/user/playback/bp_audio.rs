@@ -1,3 +1,13 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+
+#[get("/playback/audio")]
+pub fn user_playback_audio(user: User) -> Template {
+    Template::render("bss_user/playback/bss_user_album_playback", context! {})
+}
+
 /*
 @blueprint_user_playback_audio.route('/user_play_album/<guid>', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/bss_user_album_playback.html')

@@ -1,16 +1,15 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+
+#[get("/admin_hardware")]
+#[post("/admin_hardware")]
+pub fn admin_hardware(user: AdminUser) -> Template {
+    Template::render("bss_admin/bss_admin_hardware", context! {})
+}
+
 /*
-import json
-
-from common import common_global
-from common import common_network_pika
-from sanic import Blueprint
-from sanic.response import redirect
-from web_app_sanic.blueprint.admin.bss_form_chromecast import BSSChromecastEditForm
-from web_app_sanic.blueprint.admin.bss_form_tvtuner import BSSTVTunerEditForm
-
-blueprint_admin_hardware = Blueprint('name_blueprint_admin_hardware', url_prefix='/admin')
-
-
 @blueprint_admin_hardware.route("/admin_hardware", methods=["GET", "POST"])
 @common_global.jinja_template.template('bss_admin/bss_admin_hardware.html')
 @common_global.auth.login_required

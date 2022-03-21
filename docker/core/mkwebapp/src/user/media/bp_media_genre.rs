@@ -1,14 +1,15 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+
+#[get("/media/genre")]
+#[post("/media/genre")]
+pub fn user_media_genre(user: User) -> Template {
+    Template::render("bss_user/media/bss_user_media_genre_video", context! {})
+}
+
 /*
-import json
-
-from common import common_global
-from common import common_internationalization
-from common import common_logging_elasticsearch_httpx
-from common import common_pagination_bootstrap
-from sanic import Blueprint
-
-blueprint_user_media_genre = Blueprint('name_blueprint_user_media_genre', url_prefix='/user')
-
 
 @blueprint_user_media_genre.route("/user_media_genre", methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_genre_video.html')

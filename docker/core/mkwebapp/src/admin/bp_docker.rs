@@ -1,11 +1,14 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+
+#[get("/admin_docker")]
+pub fn admin_docker(user: AdminUser) -> Template {
+    Template::render("bss_admin/bss_admin_docker", context! {})
+}
+
 /*
-from common import common_docker
-from common import common_global
-from common import common_logging_elasticsearch_httpx
-from sanic import Blueprint
-
-blueprint_admin_docker = Blueprint('name_blueprint_admin_docker', url_prefix='/admin')
-
 
 @blueprint_admin_docker.route("/admin_docker_stat")
 @common_global.jinja_template.template('bss_admin/bss_admin_docker.html')

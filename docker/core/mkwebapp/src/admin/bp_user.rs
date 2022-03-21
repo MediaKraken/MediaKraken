@@ -1,13 +1,20 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+use uuid::Uuid;
+
+#[get("/admin_user")]
+pub fn admin_user(user: AdminUser) -> Template {
+    Template::render("bss_admin/bss_admin_user", context! {})
+}
+
+#[get("/admin_user_detail/<guid>")]
+pub fn admin_user_detail(user: AdminUser, guid: uuid::Uuid) -> Template {
+    Template::render("bss_admin/bss_admin_user_detail", context! {})
+}
+
 /*
-import json
-
-from common import common_global
-from common import common_pagination_bootstrap
-from sanic import Blueprint
-
-blueprint_admin_users = Blueprint('name_blueprint_admin_users', url_prefix='/admin')
-
-
 @blueprint_admin_users.route('/admin_user_delete', methods=["POST"])
 @common_global.auth.login_required
 async def url_bp_admin_user_delete(request):

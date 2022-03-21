@@ -1,13 +1,14 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+
+#[get("/sync")]
+pub fn user_sync(user: User) -> Template {
+    Template::render("bss_user/media/bss_user_media_sync", context! {})
+}
+
 /*
-import json
-
-from common import common_global
-from common import common_pagination_bootstrap
-from sanic import Blueprint
-from sanic.response import redirect
-
-blueprint_user_sync = Blueprint('name_blueprint_user_sync', url_prefix='/user')
-
 
 @blueprint_user_sync.route('/user_sync')
 @common_global.jinja_template.template('bss_user/media/bss_user_media_sync.html')

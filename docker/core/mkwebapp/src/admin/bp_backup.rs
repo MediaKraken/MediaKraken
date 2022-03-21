@@ -1,26 +1,19 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+
+#[get("/admin_backup")]
+#[post("/admin_backup")]
+pub fn admin_backup(user: AdminUser) -> Template {
+    Template::render("bss_admin/bss_admin_backup", context! {})
+}
+
 /*
-import json
-import os
-
-from common import common_database
-from common import common_file
-from common import common_global
-from common import common_network_cloud
-from common import common_pagination_bootstrap
-from common import common_string
-from sanic import Blueprint
-from web_app_sanic.blueprint.admin.bss_form_backup import BSSBackupEditForm
-
-blueprint_admin_backup = Blueprint('name_blueprint_admin_backup', url_prefix='/admin')
-
-
 @blueprint_admin_backup.route("/admin_backup", methods=["GET", "POST"])
 @common_global.jinja_template.template('bss_admin/bss_admin_backup.html.tera')
 @common_global.auth.login_required
 async def url_bp_admin_backup(request):
-    """
-    List backups from local fs and cloud
-    """
     form = BSSBackupEditForm(request)
     errors = {}
     if request.method == 'POST':

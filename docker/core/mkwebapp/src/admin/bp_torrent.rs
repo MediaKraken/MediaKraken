@@ -1,14 +1,14 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+
+#[get("/admin_torrent")]
+pub fn admin_torrent(user: AdminUser) -> Template {
+    Template::render("bss_admin/bss_admin_torrent", context! {})
+}
+
 /*
-import json
-
-from common import common_global
-from common import common_internationalization
-from common import common_network_torrent
-from sanic import Blueprint
-
-blueprint_admin_torrent = Blueprint('name_blueprint_admin_torrent', url_prefix='/admin')
-
-
 @blueprint_admin_torrent.route("/admin_torrent")
 @common_global.jinja_template.template('bss_admin/bss_admin_torrent.html')
 @common_global.auth.login_required

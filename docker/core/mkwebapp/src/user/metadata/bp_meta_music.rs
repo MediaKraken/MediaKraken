@@ -1,3 +1,19 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+use uuid::Uuid;
+
+#[get("/metadata/music")]
+pub fn user_metadata_music(user: User) -> Template {
+    Template::render("bss_user/metadata/bss_user_metadata_music_album", context! {})
+}
+
+#[get("/metadata/music_detail/<guid>")]
+pub fn user_metadata_music_detail(user: User, guid: uuid::Uuid) -> Template {
+    Template::render("bss_user/metadata/bss_user_metadata_music_album_detail", context! {})
+}
+
 /*
 from common import common_global
 from common import common_logging_elasticsearch_httpx

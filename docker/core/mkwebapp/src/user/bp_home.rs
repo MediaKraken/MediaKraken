@@ -1,3 +1,13 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+
+#[get("/home")]
+pub fn user_home(user: User) -> Template {
+    Template::render("bss_user/bss_user_home", context! {})
+}
+
 /*
 @blueprint_user_homepage.route('/user_home', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/bss_user_home.html')

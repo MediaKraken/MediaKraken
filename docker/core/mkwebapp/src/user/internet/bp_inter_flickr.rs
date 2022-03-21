@@ -1,21 +1,14 @@
-/*
-@blueprint_user_internet_flickr.route('/user_internet/flickr')
-@common_global.jinja_template.template('bss_user/internet/bss_user_internet_flickr.html')
-@common_global.auth.login_required
-async def url_bp_user_internet_flickr(request):
-    """
-    Display main page for flickr
-    """
-    return {}
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
 
+#[get("/internet/flickr")]
+pub fn user_internet_flickr(user: User) -> Template {
+    Template::render("bss_user/internet/bss_user_internet_flickr", context! {})
+}
 
-@blueprint_user_internet_flickr.route(
-    '/user_internet/internet/bss_user_internet_flickr_detail/<guid>')
-@common_global.auth.login_required
-async def url_bp_user_internet_flickr_detail(request, guid):
-    """
-    Display main page for flickr
-    """
-    return {}
-
- */
+#[get("/internet/flickr_detail/<guid>")]
+pub fn user_internet_flickr_detail(user: User) -> Template {
+    Template::render("bss_user/internet/bss_user_internet_flickr_detail", context! {})
+}

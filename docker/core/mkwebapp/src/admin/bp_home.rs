@@ -1,18 +1,15 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+
+#[get("/admin_home")]
+pub fn admin_home(user: AdminUser) -> Template {
+    Template::render("bss_admin/bss_admin_home", context! {})
+}
+
 /*
-import json
-import os
-
-from common import common_global
-from common import common_internationalization
-from common import common_network
-from common import common_system
-from common import common_version
-from sanic import Blueprint
-
-blueprint_admin = Blueprint('name_blueprint_admin', url_prefix='/admin')
-
 outside_ip = None
-
 
 @blueprint_admin.route("/admin_home")
 @common_global.jinja_template.template('bss_admin/bss_admin_home.html')

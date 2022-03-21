@@ -1,3 +1,13 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+
+#[get("/media/image")]
+pub fn user_media_image(user: User) -> Template {
+    Template::render("bss_user/media/bss_user_media_image_gallery", context! {})
+}
+
 /*
 @blueprint_user_image.route('/user_imagegallery')
 @common_global.jinja_template.template('bss_user/media/bss_user_media_image_gallery.html')

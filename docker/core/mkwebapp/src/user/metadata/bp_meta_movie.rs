@@ -1,3 +1,19 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+use uuid::Uuid;
+
+#[get("/metadata/movie")]
+pub fn user_metadata_movie(user: User) -> Template {
+    Template::render("bss_user/metadata/bss_user_metadata_movie", context! {})
+}
+
+#[get("/metadata/movie_detail/<guid>")]
+pub fn user_metadata_movie_detail(user: User, guid: uuid::Uuid) -> Template {
+    Template::render("bss_user/metadata/bss_user_metadata_movie_detail", context! {})
+}
+
 /*
 from common import common_global
 from common import common_internationalization

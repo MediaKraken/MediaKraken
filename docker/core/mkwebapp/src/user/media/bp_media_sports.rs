@@ -1,3 +1,19 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+use uuid::Uuid;
+
+#[get("/media/sports")]
+pub fn user_media_sports(user: User) -> Template {
+    Template::render("bss_user/media/bss_user_media_sports", context! {})
+}
+
+#[get("/media/sports_detail/<guid>")]
+pub fn user_media_sports_detail(user: User, guid: uuid::Uuid) -> Template {
+    Template::render("bss_user/media/bss_user_media_sports_detail", context! {})
+}
+
 /*
 # list of spoting events
 @blueprint_user_sports.route("/user_sports", methods=['GET', 'POST'])

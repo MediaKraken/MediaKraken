@@ -1,13 +1,21 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+use uuid::Uuid;
+
+#[get("/metadata/book")]
+pub fn user_metadata_book(user: User) -> Template {
+    Template::render("bss_user/metadata/bss_user_metadata_periodical", context! {})
+}
+
+#[get("/metadata/book_detail/<guid>")]
+pub fn user_metadata_book_detail(user: User, guid: uuid::Uuid) -> Template {
+    Template::render("bss_user/metadata/bss_user_metadata_periodical_detail", context! {})
+}
+
+
 /*
-from common import common_global
-from common import common_isbn
-from common import common_logging_elasticsearch_httpx
-from common import common_pagination_bootstrap
-from sanic import Blueprint
-
-blueprint_user_metadata_periodical = Blueprint('name_blueprint_user_metadata_periodical',
-                                               url_prefix='/user')
-
 
 @blueprint_user_metadata_periodical.route('/user_meta_periodical', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/metadata/bss_user_metadata_periodical.html')

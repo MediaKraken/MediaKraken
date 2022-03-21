@@ -1,3 +1,13 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+
+#[get("/queue")]
+pub fn user_queue(user: User) -> Template {
+    Template::render("bss_user/bss_user_queue", context! {})
+}
+
 /*
 @blueprint_user_queue.route("/user_queue", methods=['GET'])
 @common_global.jinja_template.template('bss_user/user_queue.html')

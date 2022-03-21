@@ -1,18 +1,20 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+use uuid::Uuid;
+
+#[get("/media/movie")]
+pub fn user_media_movie(user: User) -> Template {
+    Template::render("bss_user/media/bss_user_media_movie", context! {})
+}
+
+#[get("/media/movie_detail/<guid>")]
+pub fn user_media_movie_detail(user: User, guid: uuid::Uuid) -> Template {
+    Template::render("bss_user/media/bss_user_media_movie_detail", context! {})
+}
+
 /*
-import json
-import subprocess
-from shlex import split
-
-from common import common_global
-from common import common_internationalization
-from common import common_logging_elasticsearch_httpx
-from common import common_network_pika
-from sanic import Blueprint
-from sanic.response import redirect
-
-blueprint_user_movie = Blueprint('name_blueprint_user_movie', url_prefix='/user')
-
-
 @blueprint_user_movie.route('/user_movie_detail/<guid>', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_movie_detail.html')
 @common_global.auth.login_required(user_keyword='user')

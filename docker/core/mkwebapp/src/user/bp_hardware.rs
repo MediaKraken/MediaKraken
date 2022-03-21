@@ -1,3 +1,18 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+
+#[get("/hardware")]
+pub fn user_hardware(user: User) -> Template {
+    Template::render("bss_user/hardware/bss_user_hardware", context! {})
+}
+
+#[get("/hardware_phue")]
+pub fn user_hardware_phue(user: User) -> Template {
+    Template::render("bss_user/hardware/bss_user_hardware_phue", context! {})
+}
+
 /*
 @blueprint_user_hardware.route('/user_hardware', methods=['GET'])
 @common_global.jinja_template.template('bss_user/hardware/bss_user_hardware.html')
@@ -13,13 +28,4 @@ async def url_bp_user_hardware(request):
     return {
         'phue': phue_hardware
     }
-
-
-@blueprint_user_hardware.route('/user_hardware_phue', methods=['GET'])
-@common_global.jinja_template.template('bss_user/hardware/bss_user_hardware_phue.html')
-@common_global.auth.login_required
-async def url_bp_user_hardware_phue(request):
-    return {
-    }
-
  */

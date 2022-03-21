@@ -1,11 +1,20 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+use uuid::Uuid;
+
+#[get("/metadata/music_video")]
+pub fn user_metadata_music_video(user: User) -> Template {
+    Template::render("bss_user/metadata/bss_user_metadata_music_video", context! {})
+}
+
+#[get("/metadata/music_video_detail/<guid>")]
+pub fn user_metadata_music_video_detail(user: User, guid: uuid::Uuid) -> Template {
+    Template::render("bss_user/metadata/bss_user_metadata_music_video_detail", context! {})
+}
+
 /*
-from common import common_global
-from common import common_pagination_bootstrap
-from sanic import Blueprint
-
-blueprint_user_metadata_music_video = Blueprint('name_blueprint_user_metadata_music_video',
-                                                url_prefix='/user')
-
 
 @blueprint_user_metadata_music_video.route('/user_meta_music_video', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/metadata/bss_user_metadata_music_video.html')

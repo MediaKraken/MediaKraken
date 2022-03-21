@@ -1,12 +1,21 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+use uuid::Uuid;
+
+#[get("/media/home_media")]
+pub fn user_media_home_media(user: User) -> Template {
+    Template::render("bss_user/media/bss_user_media_home_movie", context! {})
+}
+
+#[get("/media/home_media_detail/<guid>")]
+pub fn user_media_home_media_detail(user: User, guid: uuid::Uuid) -> Template {
+    Template::render("bss_user/media/bss_user_media_home_movie_detail", context! {})
+}
+
+
 /*
-from common import common_global
-from common import common_pagination_bootstrap
-from sanic import Blueprint
-
-blueprint_user_home_media = Blueprint('name_blueprint_user_home_media',
-                                      url_prefix='/user')
-
-
 @blueprint_user_home_media.route('/user_home_media', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_home_movie.html')
 @common_global.auth.login_required

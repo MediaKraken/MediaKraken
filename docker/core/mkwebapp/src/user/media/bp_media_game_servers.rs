@@ -1,3 +1,19 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+use uuid::Uuid;
+
+#[get("/media/game_servers")]
+pub fn user_media_game_servers(user: User) -> Template {
+    Template::render("bss_user/media/bss_user_media_game_server", context! {})
+}
+
+#[get("/media/game_servers_detail/<guid>")]
+pub fn user_media_game_servers_detail(user: User, guid: uuid::Uuid) -> Template {
+    Template::render("bss_user/media/bss_user_media_game_server_detail", context! {})
+}
+
 /*
 @blueprint_user_game_servers.route('/user_game_server', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_game_server.html')

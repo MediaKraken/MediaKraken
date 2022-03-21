@@ -1,17 +1,14 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+
+#[get("/admin_cron")]
+pub fn admin_cron(user: AdminUser) -> Template {
+    Template::render("bss_admin/bss_admin_cron", context! {})
+}
+
 /*
-import json
-
-from common import common_global
-from common import common_logging_elasticsearch_httpx
-from common import common_network_pika
-from common import common_pagination_bootstrap
-from sanic import Blueprint
-from sanic.response import redirect
-from web_app_sanic.blueprint.admin.bss_form_cron import BSSCronEditForm
-
-blueprint_admin_cron = Blueprint('name_blueprint_admin_cron', url_prefix='/admin')
-
-
 @blueprint_admin_cron.route('/admin_cron')
 @common_global.jinja_template.template('bss_admin/bss_admin_cron.html.tera')
 @common_global.auth.login_required

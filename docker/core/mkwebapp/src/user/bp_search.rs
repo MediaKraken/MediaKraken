@@ -1,12 +1,14 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+
+#[get("/search")]
+pub fn user_search(user: User) -> Template {
+    Template::render("bss_user/bss_user_media_search", context! {})
+}
+
 /*
-from common import common_global
-from common import common_logging_elasticsearch_httpx
-from sanic import Blueprint
-from sanic.response import redirect
-from web_app_sanic.blueprint.user.bss_form_search import BSSSearchEditForm
-
-blueprint_user_search = Blueprint('name_blueprint_user_search', url_prefix='/user')
-
 
 @blueprint_user_search.route("/user_search", methods=["GET", "POST"])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_search.html')

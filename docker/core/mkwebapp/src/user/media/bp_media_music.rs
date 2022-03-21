@@ -1,10 +1,20 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+use uuid::Uuid;
+
+#[get("/media/music")]
+pub fn user_media_music(user: User) -> Template {
+    Template::render("bss_user/media/bss_user_media_music_album", context! {})
+}
+
+#[get("/media/music_detail/<guid>")]
+pub fn user_media_music_detail(user: User, guid: uuid::Uuid) -> Template {
+    Template::render("bss_user/media/bss_user_media_music_album_detail", context! {})
+}
+
 /*
-from common import common_global
-from common import common_pagination_bootstrap
-from sanic import Blueprint
-
-blueprint_user_music = Blueprint('name_blueprint_user_music', url_prefix='/user')
-
 
 @blueprint_user_music.route("/user_album_detail/<guid>")
 @common_global.jinja_template.template('bss_user/media/bss_user_media_music_album_detail.html')

@@ -1,12 +1,14 @@
+use rocket::Request;
+use rocket::response::Redirect;
+use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_auth::{Users, Error, Auth, Signup, Login};
+
+#[get("/internet/twitchtv")]
+pub fn user_internet_twitchtv(user: User) -> Template {
+    Template::render("bss_user/internet/bss_user_internet_twitch", context! {})
+}
+
 /*
-from common import common_global
-from common import common_logging_elasticsearch_httpx
-from sanic import Blueprint
-
-blueprint_user_internet_twitch = Blueprint('name_blueprint_user_internet_twitch',
-                                           url_prefix='/user')
-
-
 @blueprint_user_internet_twitch.route('/user_internet/twitch')
 @common_global.jinja_template.template('bss_user/internet/bss_user_internet_twitch.html')
 @common_global.auth.login_required
