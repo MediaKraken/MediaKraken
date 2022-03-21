@@ -84,7 +84,10 @@ async fn main() {
         .attach(Template::fairing())
         .mount("/static", FileServer::from(relative!("static")))
         .mount("/admin", routes![])
-        .mount("/public", routes![bp_public_about::public_about])
+        .mount("/public", routes![bp_public_about::public_about,
+            bp_public_forgot_password::public_forgot_password,
+            bp_public_login::public_login,
+            bp_public_register::public_register])
         .mount("/user", routes![])
         .register("/", catchers![bp_error::general_not_authorized,
             bp_error::general_not_administrator,
@@ -92,9 +95,5 @@ async fn main() {
             bp_error::general_security,
             bp_error::default_catcher])
         .manage::<sqlx::PgPool>(sqlx_pool)
-        // .attach(Template::custom(|engines| {
-        //     bp_about::
-        // customize(&mut engines.tera);
-        //}))
         .launch().await;
 }

@@ -65,7 +65,7 @@
     </footer>
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/static/js/jquery.easing.js"></script>
+    <script src="/static/js/jquery-easing.min.js"></script>
     <script src="/static/js/script.min.js"></script>
 </body>
 {% endblock %}

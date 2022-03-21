@@ -43,7 +43,7 @@
     <div>
         <div class="jumbotron">
             <h1 class="text-center">404 - File not found</h1>
-            <p class="text-center"><img src="/static/image/worker-of-construction-working-with-a-shovel-beside-material-pile.png" loading="lazy"></p>
+            <p class="text-center"><img src="/static/image/errors/worker-of-construction-working-with-a-shovel-beside-material-pile.png" loading="lazy"></p>
         </div>
     </div>
     <footer class="bg-white sticky-footer">
@@ -53,7 +53,7 @@
     </footer>
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/static/js/jquery.easing.js"></script>
+    <script src="/static/js/jquery-easing.min.js"></script>
     <script src="/static/js/script.min.js"></script>
 </body>
 {% endblock %}

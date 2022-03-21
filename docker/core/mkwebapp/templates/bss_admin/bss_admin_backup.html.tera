@@ -42,7 +42,6 @@
                     <form action="/admin/bss_admin_backup" method="post">
                         {{ errors.token_errors }}
                         <span style="color: red;">{{errors.validate_errors}}</span>
-                        {{form.csrf_token}}
                         <div class="row flex-wrap">
                             <div class="col">
                                 <fieldset>
@@ -146,7 +145,7 @@
     </div>
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/static/js/jquery.easing.js"></script>
+    <script src="/static/js/jquery-easing.min.js"></script>
     <script src="/static/js/script.min.js"></script>
 </body>
 {% endblock %}

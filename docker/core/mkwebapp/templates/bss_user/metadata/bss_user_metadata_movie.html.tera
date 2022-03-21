@@ -103,7 +103,7 @@
     </footer>
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/static/js/jquery.easing.min.js"></script>
+    <script src="/static/js/jquery-easing.min.js"></script>
     <script src="/static/js/script.min.js"></script>
     <script src="/static/js/jquery.contextMenu.min.js"></script>
     <script src="/static/js/base_webapp.js"></script>

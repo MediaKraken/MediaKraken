@@ -3,47 +3,26 @@ use rocket::{Rocket, Request, Build};
 use rocket::response::content::RawHtml;
 use rocket::response::{content, status};
 use rocket::http::Status;
+use rocket_dyn_templates::{Template, tera::Tera, context};
 
 #[catch(401)]
-pub fn general_not_authorized() -> content::RawHtml<&'static str> {
-    // @common_global.jinja_template.template('bss_error/bss_error_401.html')
-    content::RawHtml(r#"
-        <p>401</p>
-        Say <a href="/hello/Sergio/100">hello!</a>
-    "#)
+pub fn general_not_authorized() -> Template {
+    Template::render("bss_error/bss_error_401", context! {})
 }
 
-// #[get("/about")]
-// pub fn public_about() -> Template {
-//     Template::render("templates/bbs_public_about.html", context! {
-//         title: "About",
-//     })
-// }
-
 #[catch(403)]
-pub fn general_not_administrator() -> content::RawHtml<&'static str> {
-    // @common_global.jinja_template.template('bss_error/bss_error_403.html')
-    content::RawHtml(r#"
-        <p>403</p>
-        Say <a href="/hello/Sergio/100">hello!</a>
-    "#)
+pub fn general_not_administrator() -> Template {
+    Template::render("bss_error/bss_error_403", context! {})
 }
 
 #[catch(404)]
-pub fn general_not_found() -> content::RawHtml<&'static str> {
-    // @common_global.jinja_template.template('bss_error/bss_error_404.html')
-    content::RawHtml(r#"
-        <p>404</p>
-        Say <a href="/hello/Sergio/100">hello!</a>
-    "#)
+pub fn general_not_found() -> Template {
+    Template::render("bss_error/bss_error_404", context! {})
 }
 
 #[catch(500)]
-pub fn general_security() -> content::RawHtml<&'static str> {
-    // @common_global.jinja_template.template('bss_error/bss_error_500.html')
-    content::RawHtml(r#"
-        <p>500</p>
-    "#)
+pub fn general_security() -> Template {
+    Template::render("bss_error/bss_error_500", context! {})
 }
 
 #[catch(default)]
