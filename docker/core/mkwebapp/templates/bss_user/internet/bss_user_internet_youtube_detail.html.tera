@@ -44,8 +44,7 @@
     <div>
         <form id="SearchForm" class="form form-youtube" method="POST" action="/user/internet/bss_user_internet_youtube" role="form">
             <div class="form-group">
-                {{form.search_text.label}}
-                {{form.search_text(placeholder="Search string", class_="form-control")}}
+                {{ m::input(label="Search string", type="text", name="account.name") }}
             </div>
         </form>
         <video id="vid1" src="" class="video-js vjs-default-skin" controls preload="auto" width="100%" height="100%" data-setup='{"fluid":"true","techOrder":["youtube"]}'>

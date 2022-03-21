@@ -42,25 +42,42 @@
                     <h5 class="mb-0">Server</h5>
                 </div>
                 <div class="card-body">
-                    <p class="card-text">{{form.servername.label}} {{form.servername(placeholder="Server Name", class_="form-control")}}<br></p>
-                    <p>{{form.servermotd.label}} {{form.servermotd(placeholder="Server MOTD", class_="form-control")}}<br></p>
-                    <p>{{form.activity_purge_interval.label}} {{form.activity_purge_interval(placeholder="Purge Activity Data Older Than", class_="form-control")}}<br></p>
-                    <p>{{form.user_password_lock.label}} {{form.user_password_lock(placeholder="Lock account after failed attempts", class_="form-control")}}<br></p>
+                    <p class="card-text">
+                    {{ m::input(label="Server Name", type="text", name="server.name") }}
+                    <!-- required -->
+                    <br></p>
+                    <p>
+                    {{ m::input(label="Server MOTD", type="text", name="server.motd") }}
+                    <br></p>
+                    <p>
+                    {{ m::input(label="Purge Activity Data Older Than", type="text", name="server.purge_activity") }}
+                    <br></p>
+                    <p>
+                    {{ m::input(label="Lock account after failed attempts", type="text", name="server.lock_account") }}
+                    <br></p>
                 </div>
                 <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0">Metadata</h5>
                     </div>
                     <div class="card-body">
-                        <p class="card-text">{{form.metadata_with_media.label}} {{form.metadata_with_media(placeholder="Save metadata with media", class_="form-control")}}<br></p>
+                        <p class="card-text">
+                        {{ m::checkbox(name="server.metadata_with_media", label="Save metadata with media", value="False") }}
+                        <br></p>
                         <div class="card">
                             <div class="card-header">
                                 <h5 class="mb-0">Subtitles</h5>
                             </div>
                             <div class="card-body">
-                                <p class="card-text">{{form.metadata_sub_media_down.label}} {{form.metadata_sub_media_down(placeholder="Media", class_="form-control")}} {{form.metadata_sub_code.label}}<br><br></p>
-                                <p class="card-text">{{form.metadata_sub_code(placeholder="OpenSubtitles", class_="form-control")}}<br></p>
-                                <p class="card-text">{{form.metadata_sub_skip_if_audio.label}} {{form.metadata_sub_skip_if_audio(placeholder="Skip if audio track in media", class_="form-control")}}<br></p>
+                                <p class="card-text">
+                                {{ m::checkbox(name="server.subtitle_for_media", label="Subtitle", value="False") }}
+                                <br><br></p>
+                                <p class="card-text">
+                                {{ m::checkbox(name="server.subtitle_opensubtitles", label="OpenSubtitles", value="False") }}
+                                <br></p>
+                                <p class="card-text">
+                                {{ m::checkbox(name="server.subtitle_skip_if_audio", label="Skip if audio track in media", value="False") }}
+                                <br></p>
                             </div>
                         </div>
                     </div>
@@ -71,11 +88,17 @@
                     <h5 class="mb-0">Subservers via Docker</h5>
                 </div>
                 <div class="card-body">
-                    <p class="card-text">{{form.docker_musicbrainz.label}} {{form.docker_musicbrainz(placeholder="MusicBrainz", class_="form-control")}} {{form.docker_musicbrainz_code.label}}<br></p>
-                    <p>{{form.docker_musicbrainz_code(placeholder="Brainzcode", class_="form-control")}}<br></p>
-                    <p>{{form.docker_mumble.label}} {{form.docker_mumble(placeholder="Mumble", class_="form-control")}}<br></p>
-                    <p>{{form.docker_teamspeak.label}} {{form.docker_teamspeak(placeholder="Teamspeak 3", class_="form-control")}}<br></p>
-                    <p>{{form.docker_transmission.label}} {{form.docker_transmission(placeholder="Transmission", class_="form-control")}}<br></p>
+                    <p class="card-text">
+                    {{ m::input(label="Brainzcode", type="text", name="server.brainzcode") }}
+                    <br></p>
+                    <p>
+                    {{ m::checkbox(name="server.docker_mumble", label="Mumble", value="False") }}
+                    <br></p>
+                    <p>
+                    {{ m::checkbox(name="server.docker_teamspeak3", label="Teamspeak 3", value="False") }}                    <br></p>
+                    <p>
+                    {{ m::checkbox(name="server.docker_transmission", label="Transmission", value="False") }}                    <br></p>
+                    <br></p>
                 </div>
             </div>
             <footer class="bg-white sticky-footer">

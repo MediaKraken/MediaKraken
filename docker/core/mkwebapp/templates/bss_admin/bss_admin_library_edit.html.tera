@@ -1,13 +1,11 @@
 {% import "form_input_macro" as m %}
-{% extends "layout.html" %}
 {% block content %}
 <div class="container-narrow">
     <h1>Library Path Addition</h1>
     <br>
     <form id="libraryaddeditForm" class="form form-libraryedit" method="POST" action="" role="form">
         <div class="form-group">
-            {{form.library_path.label}}
-            {{form.library_path(placeholder="Library Path", class_="form-control")}}
+            {{ m::input(label="Library Path", type="text", name="account.name") }}
         </div>
         <select name="Lib_Class", id="lib_class">
             {% for class_data in data_class %}
