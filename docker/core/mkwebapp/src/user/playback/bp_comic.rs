@@ -4,7 +4,7 @@ use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 
 #[get("/playback/comic")]
-pub fn user_playback_comic(user: User) -> Template {
+pub fn user_playback_comic() -> Template {
     Template::render("bss_user/playback/bss_user_playback_comic", context! {})
 }
 

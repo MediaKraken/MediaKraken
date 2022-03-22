@@ -4,7 +4,7 @@ use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 
 #[get("/search")]
-pub fn user_search(user: User) -> Template {
+pub fn user_search() -> Template {
     Template::render("bss_user/bss_user_media_search", context! {})
 }
 

@@ -5,12 +5,12 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 use uuid::Uuid;
 
 #[get("/media/home_media")]
-pub fn user_media_home_media(user: User) -> Template {
+pub fn user_media_home_media() -> Template {
     Template::render("bss_user/media/bss_user_media_home_movie", context! {})
 }
 
 #[get("/media/home_media_detail/<guid>")]
-pub fn user_media_home_media_detail(user: User, guid: &str) -> Template {
+pub fn user_media_home_media_detail(guid: &str) -> Template {
     Template::render("bss_user/media/bss_user_media_home_movie_detail", context! {})
 }
 

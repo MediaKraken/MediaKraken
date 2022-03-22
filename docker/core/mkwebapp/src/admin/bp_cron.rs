@@ -4,7 +4,7 @@ use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
 
 #[get("/admin_cron")]
-pub fn admin_cron(user: AdminUser) -> Template {
+pub fn admin_cron() -> Template {
     Template::render("bss_admin/bss_admin_cron", context! {})
 }
 

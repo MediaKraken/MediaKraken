@@ -5,12 +5,12 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 use uuid::Uuid;
 
 #[post("/media/game")]
-pub fn user_media_game(user: User) -> Template {
+pub fn user_media_game() -> Template {
     Template::render("bss_user/media/bss_user_media_game", context! {})
 }
 
 #[post("/media/game_detail/<guid>")]
-pub fn user_media_game_detail(user: User, guid: &str) -> Template {
+pub fn user_media_game_detail(guid: &str) -> Template {
     Template::render("bss_user/media/bss_user_media_game_detail", context! {})
 }
 

@@ -4,12 +4,12 @@ use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 
 #[get("/internet/youtube")]
-pub fn user_inter_youtube(user: User) -> Template {
+pub fn user_inter_youtube() -> Template {
     Template::render("bss_user/internet/bss_user_internet_youtube", context! {})
 }
 
 #[get("/internet/youtube_detail/<guid>")]
-pub fn user_inter_youtube_detail(user: User) -> Template {
+pub fn user_inter_youtube_detail(guid: &str) -> Template {
     Template::render("bss_user/internet/bss_user_internet_youtube_detail", context! {})
 }
 

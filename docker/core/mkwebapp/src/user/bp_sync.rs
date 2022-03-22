@@ -4,7 +4,7 @@ use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 
 #[get("/sync")]
-pub fn user_sync(user: User) -> Template {
+pub fn user_sync() -> Template {
     Template::render("bss_user/media/bss_user_media_sync", context! {})
 }
 

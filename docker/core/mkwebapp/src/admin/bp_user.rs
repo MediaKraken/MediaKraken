@@ -5,12 +5,12 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
 use uuid::Uuid;
 
 #[get("/admin_user")]
-pub fn admin_user(user: AdminUser) -> Template {
+pub fn admin_user() -> Template {
     Template::render("bss_admin/bss_admin_user", context! {})
 }
 
 #[get("/admin_user_detail/<guid>")]
-pub fn admin_user_detail(user: AdminUser, guid: &str) -> Template {
+pub fn admin_user_detail(guid: &str) -> Template {
     Template::render("bss_admin/bss_admin_user_detail", context! {})
 }
 

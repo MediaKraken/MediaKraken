@@ -4,7 +4,7 @@ use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
 
 #[get("/admin_docker")]
-pub fn admin_docker(user: AdminUser) -> Template {
+pub fn admin_docker() -> Template {
     Template::render("bss_admin/bss_admin_docker", context! {})
 }
 

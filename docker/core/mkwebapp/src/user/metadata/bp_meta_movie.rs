@@ -5,12 +5,12 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 use uuid::Uuid;
 
 #[get("/metadata/movie")]
-pub fn user_metadata_movie(user: User) -> Template {
+pub fn user_metadata_movie() -> Template {
     Template::render("bss_user/metadata/bss_user_metadata_movie", context! {})
 }
 
 #[get("/metadata/movie_detail/<guid>")]
-pub fn user_metadata_movie_detail(user: User, guid: &str) -> Template {
+pub fn user_metadata_movie_detail(guid: &str) -> Template {
     Template::render("bss_user/metadata/bss_user_metadata_movie_detail", context! {})
 }
 

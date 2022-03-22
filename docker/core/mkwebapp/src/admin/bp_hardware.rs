@@ -4,7 +4,7 @@ use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
 
 #[post("/admin_hardware")]
-pub fn admin_hardware(user: AdminUser) -> Template {
+pub fn admin_hardware() -> Template {
     Template::render("bss_admin/bss_admin_hardware", context! {})
 }
 
