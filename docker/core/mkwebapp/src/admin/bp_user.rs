@@ -1,7 +1,7 @@
 use rocket::Request;
 use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera, context};
-use rocket_auth::{Users, Error, Auth, Signup, Login};
+use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
 use uuid::Uuid;
 
 #[get("/admin_user")]
@@ -10,7 +10,7 @@ pub fn admin_user(user: AdminUser) -> Template {
 }
 
 #[get("/admin_user_detail/<guid>")]
-pub fn admin_user_detail(user: AdminUser, guid: uuid::Uuid) -> Template {
+pub fn admin_user_detail(user: AdminUser, guid: &str) -> Template {
     Template::render("bss_admin/bss_admin_user_detail", context! {})
 }
 

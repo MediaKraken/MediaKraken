@@ -196,7 +196,7 @@ async fn main() {
             bp_public_forgot_password::public_forgot_password,
             bp_public_login::public_login,
             bp_public_register::public_register])
-        .mount("/user", routes![bp_user_internet_bp_inter_flickr,
+        .mount("/user", routes![bp_user_internet_bp_inter_flickr::user_inter_flickr,
             bp_user_internet_bp_inter_home::user_inter_home,
             bp_user_internet_bp_inter_twitchtv::user_inter_twitchtv,
             bp_user_internet_bp_inter_vimeo::user_inter_vimeo,

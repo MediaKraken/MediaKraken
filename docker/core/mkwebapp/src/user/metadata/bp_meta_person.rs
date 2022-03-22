@@ -1,7 +1,7 @@
 use rocket::Request;
 use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera, context};
-use rocket_auth::{Users, Error, Auth, Signup, Login};
+use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 use uuid::Uuid;
 
 #[get("/metadata/person")]
@@ -10,7 +10,7 @@ pub fn user_metadata_person(user: User) -> Template {
 }
 
 #[get("/metadata/person_detail/<guid>")]
-pub fn user_metadata_person_detail(user: User guid: uuid::Uuid) -> Template {
+pub fn user_metadata_person_detail(user: User guid: &str) -> Template {
     Template::render("bss_user/metadata/bss_user_metadata_person_detail", context! {})
 }
 

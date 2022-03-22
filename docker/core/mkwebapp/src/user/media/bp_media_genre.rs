@@ -1,9 +1,8 @@
 use rocket::Request;
 use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera, context};
-use rocket_auth::{Users, Error, Auth, Signup, Login};
+use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 
-#[get("/media/genre")]
 #[post("/media/genre")]
 pub fn user_media_genre(user: User) -> Template {
     Template::render("bss_user/media/bss_user_media_genre_video", context! {})

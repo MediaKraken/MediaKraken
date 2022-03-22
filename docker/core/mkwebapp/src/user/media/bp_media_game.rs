@@ -1,18 +1,16 @@
 use rocket::Request;
 use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera, context};
-use rocket_auth::{Users, Error, Auth, Signup, Login};
+use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 use uuid::Uuid;
 
-#[get("/media/game")]
 #[post("/media/game")]
 pub fn user_media_game(user: User) -> Template {
     Template::render("bss_user/media/bss_user_media_game", context! {})
 }
 
-#[get("/media/game_detail/<guid>")]
 #[post("/media/game_detail/<guid>")]
-pub fn user_media_game_detail(user: User, guid: uuid::Uuid) -> Template {
+pub fn user_media_game_detail(user: User, guid: &str) -> Template {
     Template::render("bss_user/media/bss_user_media_game_detail", context! {})
 }
 

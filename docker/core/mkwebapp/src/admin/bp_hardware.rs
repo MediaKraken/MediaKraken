@@ -1,9 +1,8 @@
 use rocket::Request;
 use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera, context};
-use rocket_auth::{Users, Error, Auth, Signup, Login};
+use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
 
-#[get("/admin_hardware")]
 #[post("/admin_hardware")]
 pub fn admin_hardware(user: AdminUser) -> Template {
     Template::render("bss_admin/bss_admin_hardware", context! {})
