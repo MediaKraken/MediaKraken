@@ -3,6 +3,7 @@ use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 use uuid::Uuid;
+use paginate::Pages;
 
 #[get("/metadata/game")]
 pub fn user_metadata_game() -> Template {

@@ -3,6 +3,7 @@ use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
 use uuid::Uuid;
+use paginate::Pages;
 
 #[get("/admin_user")]
 pub fn admin_user() -> Template {

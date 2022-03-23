@@ -9,14 +9,6 @@ pub fn admin_database() -> Template {
 }
 
 /*
-
-@blueprint_admin_database.route("/admin_database")
-@common_global.jinja_template.template('bss_admin/bss_admin_db_statistics.html')
-@common_global.auth.login_required
-async def url_bp_admin_database_statistics(request):
-    """
-    Display database statistics page
-    """
     db_stats_count = []
     db_stats_total = 0
     db_connection = await request.app.db_pool.acquire()

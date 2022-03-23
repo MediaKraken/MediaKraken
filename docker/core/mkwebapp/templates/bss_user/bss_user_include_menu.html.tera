@@ -14,7 +14,7 @@
                             <a class="dropdown-item" role="presentation" href="/user/metadata/tv">TV Show</a>
                             <a class="dropdown-item" role="presentation" href="/user/metadata/music">Music</a>
                             <a class="dropdown-item" role="presentation" href="/user/metadata/sports">Sports</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/games">Games</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/game">Games</a>
                             <a class="dropdown-item" role="presentation" href="/user/metadata/game_system">Game Systems</a>
                             <a class="dropdown-item" role="presentation" href="/user/metadata/person">Person</a>
                             <a class="dropdown-item" role="presentation" href="/user/metadata/book">Book/Periodical</a>
