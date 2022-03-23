@@ -4,7 +4,7 @@ use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 
 #[get("/home")]
-pub fn user_home(user: User) -> Template {
+pub fn user_home() -> Template {
     Template::render("bss_user/bss_user_home", context! {})
 }
 

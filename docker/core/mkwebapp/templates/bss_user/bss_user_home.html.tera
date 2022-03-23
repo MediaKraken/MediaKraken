@@ -10,59 +10,30 @@
 </head>
 
 <body>
-    <!-- Start: Navigation with Button -->
-    <nav class="navbar navbar-light navbar-expand-md navigation-clean-button">
-        <div class="container"><a class="navbar-brand" href="/user/bss_user_homepage">MediaKraken</a><button data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
-            <div
-                class="collapse navbar-collapse" id="navcol-1">
-                <ul class="nav navbar-nav mr-auto">
-                    <li class="nav-item" role="presentation"></li>
-                    <li class="nav-item" role="presentation"></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="/user/media/bss_user_media_sync">Sync</a></li>
-                    <li class="nav-item dropdown"><a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false" href="#">Metadata</a>
-                        <div class="dropdown-menu" role="menu">
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_movie">Movie</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_movie_collection">Movie Collection</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_tv">TV Show</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_music">Music</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_sports">Sports</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_games">Games</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_game_system">Game Systems</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_person">Person</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_book">Book/Periodical</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_music_video">Music Video</a>
-                        </div>
-                    </li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="/user/bss_user_profile">Profile</a></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="/admin/bss_admin_home">Admin</a></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="/public/about">About</a></li>
-                </ul><span class="navbar-text actions"> <a class="login" href="/logout">Log Out</a></span></div>
-        </div>
-    </nav>
-    <!-- End: Navigation with Button -->
+    {% include "bss_user/bss_user_include_menu" %}
     <div>
     {% if data_new_media %}
-        <a href="/user/media/bss_user_media_new"><img src="/static/image/new.png" width="200" height="200" loading="lazy"></a>
+        <a href="/user/media/new"><img src="/static/image/new.png" width="200" height="200" loading="lazy"></a>
     {% endif %}
     {% if data_user_media_queue %}
-        <a href="/user/media/bss_user_media_queue"><img src="/static/image/rectangles_black.png" width="200" height="200" loading="lazy"></a>
+        <a href="/user/media/queue"><img src="/static/image/rectangles_black.png" width="200" height="200" loading="lazy"></a>
     {% endif %}
-    <a href="/user/media/bss_user_media_movie_genre, genre='all') }}"><img src="/static/image/movie_ticket.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/bss_user_media_music"><img src="/static/image/headphone.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/bss_user_media_tv"><img src="/static/image/television.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/bss_user_media_sports"><img src="/static/image/stadium.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/bss_user_media_live_tv, schedule_date='20170716', schedule_time='213500') }}"><img src="/static/image/television_live.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/bss_user_media_images"><img src="/static/image/photo.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/bss_user_media_game"><img src="/static/image/vid_game.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/bss_user_media_periodical"><img src="/static/image/books.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/bss_user_media_iradio"><img src="/static/image/radio.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/bss_user_media_home_video"><img src="/static/image/vid_camera.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/bss_user_media_3d"><img src="/static/image/3D.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/movie_genre/all"><img src="/static/image/movie_ticket.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/music"><img src="/static/image/headphone.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/tv"><img src="/static/image/television.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/sports"><img src="/static/image/stadium.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/live_tv/20170716/213500"><img src="/static/image/television_live.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/images"><img src="/static/image/photo.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/game"><img src="/static/image/vid_game.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/book"><img src="/static/image/books.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/iradio"><img src="/static/image/radio.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/home_video"><img src="/static/image/vid_camera.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/3d"><img src="/static/image/3D.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/internet/bss_user_internet"><img src="/static/image/earth.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/bss_user_media_music_video"><img src="/static/image/listening-music-video-clip-with-auricular.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/bss_user_media_cctv"><img src="/static/image/surveillance-cctv-symbol-in-rounded-triangle.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/bss_user_media_search"><img src="/static/image/magnifying-glass.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/hardware/bss_user_hardware"><img src="/static/image/circuit-board.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/music_video"><img src="/static/image/listening-music-video-clip-with-auricular.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/cctv"><img src="/static/image/surveillance-cctv-symbol-in-rounded-triangle.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/search"><img src="/static/image/magnifying-glass.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/hardware/hardware"><img src="/static/image/circuit-board.png" width="200" height="200" loading="lazy"></a>
     </div>
     <footer
         class="bg-white sticky-footer">

@@ -10,36 +10,7 @@
 </head>
 
 <body>
-    <!-- Start: Navigation with Button -->
-    <nav class="navbar navbar-light navbar-expand-md navigation-clean-button">
-        <div class="container"><a class="navbar-brand" href="/user/bss_user_home.html">MediaKraken</a><button data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
-            <div
-                class="collapse navbar-collapse" id="navcol-1">
-                 <ul class="nav navbar-nav mr-auto">
-                    <li class="nav-item" role="presentation"></li>
-                    <li class="nav-item" role="presentation"></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="/user/media/bss_user_media_sync">Sync</a></li>
-                    <li class="nav-item dropdown"><a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false" href="#">Metadata</a>
-                        <div class="dropdown-menu" role="menu">
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_movie">Movie</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_movie_collection">Movie Collection</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_tv">TV Show</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_music">Music</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_sports">Sports</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_games">Games</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_game_system">Game Systems</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_person">Person</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_book">Book/Periodical</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/bss_metadata_music_video">Music Video</a>
-                        </div>
-                    </li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="/user/bss_user_profile">Profile</a></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="/admin/bss_admin_home">Admin</a></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="/public/about">About</a></li>
-                </ul><span class="navbar-text actions"> <a class="login" href="/logout">Log Out</a></span></div>
-        </div>
-    </nav>
-    <!-- End: Navigation with Button -->
+    {% include "bss_user/bss_user_include_menu" %}
     <div>
         <div class="row">
             <div class="col"><img src="/static/image/Movie-icon.png"></div>
