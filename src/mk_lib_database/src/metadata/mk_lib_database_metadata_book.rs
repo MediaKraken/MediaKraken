@@ -1,5 +1,6 @@
 use uuid::Uuid;
 use sqlx::postgres::PgRow;
+use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_metadata_book_by_uuid(pool: &sqlx::PgPool, book_uuid: uuid::Uuid)
                                                    -> Result<Vec<PgRow>, sqlx::Error> {

@@ -1,3 +1,5 @@
+use rocket_dyn_templates::serde::{Serialize, Deserialize};
+
 /*
 def db_insert_remote_media(self, media_link_uuid, media_uuid, media_class_uuid,
                            media_metadata_uuid, media_ffprobe_json):

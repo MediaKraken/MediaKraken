@@ -1,5 +1,6 @@
 use sqlx::postgres::PgRow;
 use uuid::Uuid;
+use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 #[path = "mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;

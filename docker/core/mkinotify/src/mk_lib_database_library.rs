@@ -1,12 +1,24 @@
 use sqlx::postgres::PgRow;
+use rocket_dyn_templates::serde::{Serialize, Deserialize};
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBLibraryList {
+	mm_media_dir_guid: uuid::Uuid,
+	mm_media_dir_path: String,
+}
 
 pub async fn mk_lib_database_library_read(pool: &sqlx::PgPool)
-                                          -> Result<Vec<PgRow>, sqlx::Error> {
-    let rows = sqlx::query("select mm_media_dir_guid, mm_media_dir_path \
-        from mm_library_dir")
+                                          -> Result<Vec<DBLibraryList>, sqlx::Error> {
+    let select_query = sqlx::query("select mm_media_dir_guid, mm_media_dir_path \
+        from mm_library_dir");
+    let table_rows: Vec<DBLibraryList> = select_query
+		.map(|row: PgRow| DBLibraryList {
+			mm_media_dir_guid: row.get("mm_media_dir_guid"),
+			mm_media_dir_path: row.get("mm_media_dir_path"),
+		})
         .fetch_all(pool)
         .await?;
-    Ok(rows)
+    Ok(table_rows)
 }
 
 pub async fn mk_lib_database_library_path_audit(pool: &sqlx::PgPool)

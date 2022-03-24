@@ -13,16 +13,36 @@ pub async fn mk_lib_database_user_exists(pool: &sqlx::PgPool,
     Ok(row.0)
 }
 
+pub struct DBUserList {
+	id: uuid::Uuid,
+	username: String,
+	email: String,
+	created_at: String,
+	active: String,
+	is_admin: String,
+	lang: String,
+}
+
 pub async fn mk_lib_database_user_read(pool: &sqlx::PgPool,
                                        offset: i32, limit: i32)
-                                       -> Result<Vec<PgRow>, sqlx::Error> {
-    let rows: Vec<PgRow> = sqlx::query("select id, username, email, created_at, active, \
+                                       -> Result<Vec<DBUserList>, sqlx::Error> {
+    let select_query = sqlx::query("select id, username, email, created_at, active, \
          is_admin, lang from mm_user offset $1 limit $2) order by LOWER(username)")
         .bind(offset)
-        .bind(limit)
+        .bind(limit);
+    let table_rows: Vec<DBUserList> = select_query
+		.map(|row: PgRow| DBUserList {
+			id: row.get("id"),
+			username: row.get("username"),
+			email: row.get("email"),
+			created_at: row.get("created_at"),
+			active: row.get("active"),
+			is_admin: row.get("is_admin"),
+			lang: row.get("lang"),
+		})
         .fetch_all(pool)
         .await?;
-    Ok(rows)
+    Ok(table_rows)
 }
 
 pub async fn mk_lib_database_user_count(pool: &sqlx::PgPool,

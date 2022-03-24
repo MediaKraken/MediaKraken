@@ -1,5 +1,6 @@
 use sqlx::postgres::PgRow;
 use uuid::Uuid;
+use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_metadata_game_system_by_uuid(pool: &sqlx::PgPool,
                                                           game_sys_uuid: uuid::Uuid)

@@ -1,5 +1,6 @@
 use uuid::Uuid;
 use sqlx::postgres::PgRow;
+use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_media_book_read(pool: &sqlx::PgPool,
                                               search_value: String,
