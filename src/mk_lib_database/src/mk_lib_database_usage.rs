@@ -1,3 +1,4 @@
+use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_usage_top10_movie(pool: &sqlx::PgPool)
                                                -> Result<Vec<PgRow>, sqlx::Error> {

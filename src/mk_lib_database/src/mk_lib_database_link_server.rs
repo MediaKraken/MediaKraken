@@ -1,3 +1,5 @@
+use rocket_dyn_templates::serde::{Serialize, Deserialize};
+
 pub async fn mk_lib_database_link_delete(pool: &sqlx::PgPool,
                                          link_uuid: uuid::Uuid)
                                          -> Result<(), sqlx::Error> {
@@ -10,19 +12,32 @@ pub async fn mk_lib_database_link_delete(pool: &sqlx::PgPool,
     Ok(())
 }
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBLinkList {
+	mm_link_guid: uuid::Uuid,
+	mm_link_name: String,
+	mm_link_json: Json,
+}
+
 pub async fn mk_lib_database_link_list(pool: &sqlx::PgPool,
                                        offset: i32,
                                        records: i32)
-                                       -> Result<Vec<PgRow>, sqlx::Error> {
-    let rows: Vec<PgRow> = sqlx::query("select mm_link_guid, mm_link_name, \
+                                       -> Result<Vec<DBLinkList>, sqlx::Error> {
+    let select_query = sqlx::query("select mm_link_guid, mm_link_name, \
         mm_link_json from mm_link \
         order by mm_link_name \
         offset $1 limit $2")
         .bind(offset)
-        .bind(records)
+        .bind(records);
+    let table_rows: Vec<DBLinkList> = select_query
+		.map(|row: PgRow| DBLinkList {
+			mm_link_guid: row.get("mm_link_guid"),
+			mm_link_name: row.get("mm_link_name"),
+			mm_link_json: row.get("mm_link_json"),
+		})
         .fetch_all(pool)
         .await?;
-    Ok(rows)
+    Ok(table_rows)
 }
 
 pub async fn mk_lib_database_link_insert(pool: &sqlx::PgPool,

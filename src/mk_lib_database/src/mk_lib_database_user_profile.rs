@@ -1,6 +1,6 @@
 use sqlx::postgres::PgRow;
 use uuid::Uuid;
-
+use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_user_profile_insert(pool: &sqlx::PgPool,
                                                  profile_name: String,

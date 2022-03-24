@@ -1,3 +1,4 @@
+use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_meta_queue_count(pool: &sqlx::PgPool,
                                               user_uuid: uuid::Uuid,

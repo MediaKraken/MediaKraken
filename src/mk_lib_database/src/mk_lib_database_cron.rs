@@ -4,16 +4,35 @@ use sqlx::postgres::PgRow;
 use sqlx::types::Json;
 use std::num::NonZeroU8;
 use uuid::Uuid;
+use rocket_dyn_templates::serde::{Serialize, Deserialize};
+use chrono::prelude::*;
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBCronList {
+	mm_cron_guid: uuid::Uuid,
+	mm_cron_schedule_type: String,
+	mm_cron_schedule_time: i64,
+	mm_cron_last_run: DateTime<Utc>,
+	mm_cron_json: Json,
+}
 
 pub async fn mk_lib_database_cron_service_read(pool: &sqlx::PgPool)
-                                               -> Result<Vec<PgRow>, sqlx::Error> {
-    let rows: Vec<PgRow> = sqlx::query("select mm_cron_guid, \
+                                               -> Result<Vec<DBCronList>, sqlx::Error> {
+    let select_query = sqlx::query("select mm_cron_guid, \
         mm_cron_schedule_type, mm_cron_schedule_time, \
         mm_cron_last_run, mm_cron_json from mm_cron_jobs \
-        where mm_cron_enabled = true")
-        .fetch_all(pool)
-        .await?;
-    Ok(rows)
+        where mm_cron_enabled = true");
+    let table_rows: Vec<DBCronList> = select_query
+		.map(|row: PgRow| DBCronList {
+			mm_cron_guid: row.get("mm_cron_guid"),
+			mm_cron_schedule_type: row.get("mm_cron_schedule_type"),
+			mm_cron_schedule_time: row.get("mm_cron_schedule_time"),
+			mm_cron_last_run: row.get("mm_cron_last_run"),
+			mm_cron_json: row.get("mm_cron_json"),
+		})
+		.fetch_all(pool)
+		.await?;
+    Ok(table_rows)
 }
 
 pub async fn mk_lib_database_cron_time_update(pool: &sqlx::PgPool,

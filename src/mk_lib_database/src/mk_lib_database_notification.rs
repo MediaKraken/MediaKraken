@@ -1,5 +1,6 @@
 use sqlx::postgres::PgRow;
 use uuid::Uuid;
+use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_notification_read(pool: &sqlx::PgPool,
                                                offset: i32, limit: i32)

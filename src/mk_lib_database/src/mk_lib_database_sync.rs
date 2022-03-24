@@ -1,5 +1,6 @@
 use sqlx::postgres::PgRow;
 use uuid::Uuid;
+use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_sync_delete(pool: &sqlx::PgPool,
                                          sync_guid: uuid::Uuid)
