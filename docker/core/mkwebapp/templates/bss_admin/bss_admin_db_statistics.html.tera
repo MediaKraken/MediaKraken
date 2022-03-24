@@ -34,8 +34,8 @@
                                     <tbody>
                                         {% for row_data in data_db_count %}
                                         <tr>
-                                            <td>{{ row_data[0] }}</td>
-                                            <td>{{ row_data[1] }}</td>
+                                            <td>{{ row_data.table_name }}</td>
+                                            <td>{{ row_data.table_rows }}</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -56,8 +56,8 @@
                                 <tbody>
                                     {% for row_data in data_db_size %}
                                     <tr>
-                                        <td>{{ row_data[0] }}</td>
-                                        <td>{{ row_data[1] }}</td>
+                                        <td>{{ row_data.table_name }}</td>
+                                        <td>{{ row_data.table_size }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>

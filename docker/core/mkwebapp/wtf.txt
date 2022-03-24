@@ -1,0 +1,153 @@
+Host: th-hplap-1
+Connection String "postgresql://postgres:metaman@mkstage/postgres"
+/* SQLx ping */; rows: 0, elapsed: 3.227ms
+Configured for debug.
+   >> address: 0.0.0.0
+   >> port: 8080
+   >> workers: 10
+   >> ident: Rocket
+   >> limits: bytes = 8KiB, data-form = 2MiB, file = 1MiB, form = 32KiB, json = 1MiB, msgpack = 1MiB, string = 8KiB
+   >> temp dir: /tmp
+   >> http/2: true
+   >> keep-alive: 5s
+   >> tls: disabled
+   >> secret key: [provided]
+   >> shutdown: ctrlc = true, force = true, signals = [SIGTERM], grace = 2s, mercy = 3s
+   >> log level: normal
+   >> cli colors: true
+Routes:
+   >> (user_home) GET /user/home
+   >> (user_sync) GET /user/sync
+   >> (user_queue) GET /user/queue
+   >> (user_search) GET /user/search
+   >> (user_profile) GET /user/profile
+   >> (user_hardware) GET /user/hardware
+   >> (user_media_tv) GET /user/media/tv
+   >> (user_media_book) GET /user/media/book
+   >> (user_media_game) POST /user/media/game
+   >> (user_media_genre) POST /user/media/genre
+   >> (user_media_image) GET /user/media/image
+   >> (user_media_movie) GET /user/media/movie
+   >> (user_media_music) GET /user/media/music
+   >> (user_metadata_tv) GET /user/metadata/tv
+   >> (user_media_sports) GET /user/media/sports
+   >> (user_inter_home) GET /user/internet/home
+   >> (user_metadata_book) GET /user/metadata/book
+   >> (user_metadata_game) GET /user/metadata/game
+   >> (user_inter_vimeo) GET /user/internet/vimeo
+   >> (user_metadata_movie) GET /user/metadata/movie
+   >> (user_metadata_music) GET /user/metadata/music
+   >> (user_playback_audio) GET /user/playback/audio
+   >> (user_playback_comic) GET /user/playback/comic
+   >> (user_playback_video) GET /user/playback/video
+   >> (user_inter_flickr) GET /user/internet/flickr
+   >> (user_metadata_person) GET /user/metadata/person
+   >> (user_metadata_sports) GET /user/metadata/sports
+   >> (user_inter_youtube) GET /user/internet/youtube
+   >> (user_media_collection) GET /user/media/collection
+   >> (user_media_home_media) GET /user/media/home_media
+   >> (user_inter_twitchtv) GET /user/internet/twitchtv
+   >> (user_media_music_video) GET /user/media/music_video
+   >> (user_media_game_servers) GET /user/media/game_servers
+   >> (user_metadata_game_system) GET /user/metadata/game_system
+   >> (user_metadata_music_video) GET /user/metadata/music_video
+   >> (admin_cron) GET /admin/admin_cron
+   >> (admin_home) GET /admin/admin_home
+   >> (admin_user) GET /admin/admin_user
+   >> (admin_backup) POST /admin/admin_backup
+   >> (admin_docker) GET /admin/admin_docker
+   >> (admin_library) POST /admin/admin_library
+   >> (admin_torrent) GET /admin/admin_torrent
+   >> (admin_database) GET /admin/admin_database
+   >> (admin_hardware) POST /admin/admin_hardware
+   >> (admin_settings) POST /admin/admin_settings
+   >> (admin_game_servers) GET /admin/admin_game_servers
+   >> (public_about) GET /public/about
+   >> (public_login) GET /public/login
+   >> (FileServer: static) GET /static/<path..> [10]
+   >> (public_register) GET /public/register
+   >> (public_forgot_password) GET /public/forgot_password
+Catchers:
+   >> (general_not_authorized) 401
+   >> (general_not_administrator) 403
+   >> (general_not_found) 404
+   >> (general_security) 500
+   >> (default_catcher) default
+Fairings:
+   >> Templating (ignite, liftoff, request)
+   >> Shield (liftoff, response, singleton)
+Shield:
+   >> X-Content-Type-Options: nosniff
+   >> X-Frame-Options: SAMEORIGIN
+   >> Permissions-Policy: interest-cohort=()
+Templating:
+   >> directory: templates
+   >> engines: ["tera"]
+Rocket has launched from http://0.0.0.0:8080
+GET /admin/admin_database text/html:
+   >> Matched: (admin_database) GET /admin/admin_database
+/* SQLx ping */; rows: 0, elapsed: 4.955ms
+SELECT version();; rows: 1, elapsed: 7.978ms
+/* SQLx ping */; rows: 0, elapsed: 3.901ms
+SELECT nspname | | …; rows: 0, elapsed: 3.843ms
+
+SELECT
+  nspname | | "." | | relname AS "relation",
+  pg_total_relation_size(C.oid) AS "total_size"
+FROM
+  pg_class C
+  LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
+WHERE
+  nspname NOT IN ("pg_catalog", "information_schema")
+  AND C.relkind < > "i"
+  AND nspname !~ "^pg_toast"
+ORDER BY
+  pg_total_relation_size(C.oid) DESC
+
+   >> Handler admin_database panicked.
+   >> This is an application bug.
+   >> A panic in Rust must be treated as an exceptional event.
+   >> Panicking is not a suitable error handling mechanism.
+   >> Unwinding, the result of a panic, is an expensive operation.
+   >> Panics will degrade application performance.
+   >> Instead of panicking, return `Option` and/or `Result`.
+   >> Values of either type can be returned directly from handlers.
+   >> A panic is treated as an internal server error.
+   >> Outcome: Failure
+   >> Responding with registered (general_security) 500 catcher.
+   >> Response succeeded.
+/* SQLx ping */; rows: 0, elapsed: 4.257ms
+GET /static/bootstrap/css/bootstrap.min.css text/css:
+   >> Matched: (FileServer: static) GET /static/<path..> [10]
+   >> Outcome: Success
+GET /static/css/styles.min.css text/css:
+GET /static/js/jquery-easing.min.js:
+   >> GET /static/js/jquery.min.js:
+GET /static/fonts/fontawesome-all.min.css text/css:
+GET /static/bootstrap/js/bootstrap.min.js:
+Matched: (FileServer: static) GET /static/<path..> [10]
+   >> Matched: (FileServer: static) GET /static/<path..> [10]
+   >> Matched: (FileServer: static) GET /static/<path..> [10]
+   >> Matched: (FileServer: static) GET /static/<path..> [10]
+   >> Matched: (FileServer: static) GET /static/<path..> [10]
+   >> Outcome: Success
+   >> Outcome: Success
+   >> Outcome: Success
+   >> Outcome: Success
+   >> Outcome: Success
+   >> Response succeeded.
+   >> Response succeeded.
+   >> Response succeeded.
+   >> Response succeeded.
+   >> Response succeeded.
+   >> Response succeeded.
+GET /static/js/script.min.js:
+   >> Matched: (FileServer: static) GET /static/<path..> [10]
+   >> Outcome: Success
+   >> Response succeeded.
+GET /static/image/errors/bricks-wall-and-demolition-ball.png image/avif:
+   >> Matched: (FileServer: static) GET /static/<path..> [10]
+   >> Outcome: Success
+   >> Response succeeded.
+Warning: Received SIGINT. Requesting shutdown.
+Received shutdown request. Waiting for pending I/O...

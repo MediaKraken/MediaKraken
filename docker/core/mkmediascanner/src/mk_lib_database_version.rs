@@ -5,6 +5,14 @@ pub static DATABASE_VERSION: i32 = 44;
 #[path = "./mk_lib_database_version_schema.rs"]
 mod mk_lib_database_version_schema;
 
+pub async fn mk_lib_database_postgresql_version(pool: &sqlx::PgPool)
+                                                -> Result<String, sqlx::Error> {
+    let row: (String, ) = sqlx::query_as("SELECT version();")
+        .fetch_one(pool)
+        .await?;
+    Ok(row.0)
+}
+
 pub async fn mk_lib_database_version(pool: &sqlx::PgPool)
                                      -> Result<i32, sqlx::Error> {
     let row: (i32, ) = sqlx::query_as("select mm_version_number from mm_version")

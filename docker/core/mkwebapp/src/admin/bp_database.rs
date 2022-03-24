@@ -2,10 +2,27 @@ use rocket::Request;
 use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
+use sqlx::postgres::PgRow;
+use rocket::serde::{Serialize, Deserialize, json::Json};
+
+#[path = "../mk_lib_database_version.rs"]
+mod mk_lib_database_version;
+
+#[path = "../mk_lib_database_postgresql.rs"]
+mod mk_lib_database_postgresql;
 
 #[get("/admin_database")]
-pub fn admin_database() -> Template {
-    Template::render("bss_admin/bss_admin_db_statistics", context! {})
+pub async fn admin_database(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
+    let pg_version = mk_lib_database_version::mk_lib_database_postgresql_version(&sqlx_pool).await.unwrap();
+    let pg_table_size = mk_lib_database_postgresql::mk_lib_database_table_size(&sqlx_pool).await.unwrap();
+    let pg_row_count = mk_lib_database_postgresql::mk_lib_database_table_rows(&sqlx_pool).await.unwrap();
+    let pg_worker_count = mk_lib_database_postgresql::mk_lib_database_parallel_workers(&sqlx_pool).await.unwrap();
+    Template::render("bss_admin/bss_admin_db_statistics", context! {
+        data_db_version: pg_version,
+        data_db_size: pg_table_size,
+        data_db_count: pg_row_count,
+        data_workers: pg_worker_count,
+    })
 }
 
 /*
