@@ -77,7 +77,7 @@ def db_meta_sports_guid_by_event_name(self, event_name):
     """
     self.db_cursor.execute('select mm_metadata_sports_guid'
                            ' from mm_metadata_sports'
-                           ' where mm_metadata_sports_name = %s', (event_name,))
+                           ' where mm_metadata_sports_name = $1', (event_name,))
     try:
         return self.db_cursor.fetchone()['mm_metadata_sports_guid']
     except:
@@ -91,7 +91,7 @@ def db_metathesportsdb_select_guid(self, guid):
     """
     self.db_cursor.execute('select mm_metadata_sports_json'
                            ' from mm_metadata_sports'
-                           ' where mm_metadata_sports_guid = %s', (guid,))
+                           ' where mm_metadata_sports_guid = $1', (guid,))
     try:
         return self.db_cursor.fetchone()['mm_metadata_sports_json']
     except:
@@ -109,7 +109,7 @@ def db_metathesportsdb_insert(self, series_id_json, event_name, show_detail,
                            ' mm_metadata_sports_name,'
                            ' mm_metadata_sports_json,'
                            ' mm_metadata_sports_image_json)'
-                           ' values (%s,%s,%s,%s,%s)',
+                           ' values ($1,$2,$3,$4,$5)',
                            (new_guid, series_id_json, event_name, show_detail, image_json))
     self.db_commit()
     return new_guid
@@ -121,10 +121,10 @@ def db_metathesports_update(self, series_id_json, event_name, show_detail,
     # updated
     """
     self.db_cursor.execute('update mm_metadata_sports'
-                           ' set mm_metadata_media_sports_id = %s,'
-                           ' mm_metadata_sports_name = %s,'
-                           ' mm_metadata_sports_json = %s'
-                           ' where mm_metadata_media_sports_id->\'thesportsdb\' ? %s',
+                           ' set mm_metadata_media_sports_id = $1,'
+                           ' mm_metadata_sports_name = $2,'
+                           ' mm_metadata_sports_json = $3'
+                           ' where mm_metadata_media_sports_id->\'thesportsdb\' ? $4',
                            (series_id_json, event_name, show_detail, sportsdb_id))
     self.db_commit()
 

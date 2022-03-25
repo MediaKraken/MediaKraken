@@ -173,7 +173,7 @@ def db_metatv_insert_tmdb(self, uuid_id, series_id, data_title, data_json,
                            ' mm_metadata_tvshow_name,'
                            ' mm_metadata_tvshow_json,'
                            ' mm_metadata_tvshow_localimage_json)'
-                           ' values (%s,%s,%s,%s,%s)', (uuid_id, series_id, data_title,
+                           ' values ($1,$2,$3,$4,$5)', (uuid_id, series_id, data_title,
                                                         data_json, data_image_json))
     self.db_commit()
 
@@ -188,17 +188,17 @@ def db_metatv_guid_by_tvshow_name(self, tvshow_name, tvshow_year=None):
     metadata_guid = None
     if tvshow_year is None:
         self.db_cursor.execute('select mm_metadata_tvshow_guid from mm_metadata_tvshow'
-                               ' where LOWER(mm_metadata_tvshow_name) = %s',
+                               ' where LOWER(mm_metadata_tvshow_name) = $1',
                                (tvshow_name.lower(),))
     else:
         # TODO jin index firstaird and premiered
         # TODO check tvmaze as well
         self.db_cursor.execute('select mm_metadata_tvshow_guid from mm_metadata_tvshow'
-                               ' where (LOWER(mm_metadata_tvshow_name) = %s)'
+                               ' where (LOWER(mm_metadata_tvshow_name) = $1)'
                                ' and (substring(mm_metadata_tvshow_json->\'Meta\'->\'thetvdb\'->\'Meta\''
-                               '->>\'FirstAired\' from 0 for 5) in (%s,%s,%s,%s,%s,%s,%s)'
+                               '->>\'FirstAired\' from 0 for 5) in ($2,$3,$4,$5,$6,$7,$8)'
                                ' or substring(mm_metadata_tvshow_json->\'Meta\'->\'tvmaze\'->>\'premiered\''
-                               ' from 0 for 5) in (%s,%s,%s,%s,%s,%s,%s))',
+                               ' from 0 for 5) in ($9,$10,$11,$12,$13,$14,$15))',
                                (tvshow_name.lower(), str(tvshow_year),
                                 str(int(tvshow_year) + 1),
                                 str(int(tvshow_year) + 2),
@@ -227,7 +227,7 @@ def db_metatv_guid_by_imdb(self, imdb_uuid):
     # metadata guid by imdb id
     """
     self.db_cursor.execute('select mm_metadata_tvshow_guid from mm_metadata_tvshow'
-                           ' where mm_metadata_media_tvshow_id->\'imdb\' ? %s', (imdb_uuid,))
+                           ' where mm_metadata_media_tvshow_id->\'imdb\' ? $1', (imdb_uuid,))
     try:
         return self.db_cursor.fetchone()['mm_metadata_tvshow_guid']
     except:
@@ -239,7 +239,7 @@ def db_metatv_guid_by_tvmaze(self, tvmaze_uuid):
     # metadata guid by tvmaze id
     """
     self.db_cursor.execute('select mm_metadata_tvshow_guid from mm_metadata_tvshow'
-                           ' where mm_metadata_media_tvshow_id->\'tvmaze\' ? %s', (tvmaze_uuid,))
+                           ' where mm_metadata_media_tvshow_id->\'tvmaze\' ? $1', (tvmaze_uuid,))
     try:
         return self.db_cursor.fetchone()['mm_metadata_tvshow_guid']
     except:
@@ -251,7 +251,7 @@ def db_metatv_guid_by_tmdb(self, tmdb_uuid):
     # metadata guid by tmdb id
     """
     self.db_cursor.execute('select mm_metadata_tvshow_guid from mm_metadata_tvshow'
-                           ' where mm_metadata_media_tvshow_id->\'themoviedb\' ? %s',
+                           ' where mm_metadata_media_tvshow_id->\'themoviedb\' ? $1',
                            (tmdb_uuid,))
     try:
         return self.db_cursor.fetchone()['mm_metadata_tvshow_guid']
@@ -264,7 +264,7 @@ def db_metatv_guid_by_rt(self, rt_uuid):
     # metadata guid by rt id
     """
     self.db_cursor.execute('select mm_metadata_tvshow_guid from mm_metadata_tvshow'
-                           ' where mm_metadata_media_tvshow_id->\'rottentomatoes\' ? %s',
+                           ' where mm_metadata_media_tvshow_id->\'rottentomatoes\' ? $1',
                            (rt_uuid,))
     try:
         return self.db_cursor.fetchone()['mm_metadata_tvshow_guid']
@@ -294,7 +294,7 @@ def db_meta_tvshow_list(self, offset=0, records=None, search_value=None):
                            '->\'thetvdb\'->>\'Poster\') as image_json from mm_metadata_tvshow'
                            ' where mm_metadata_tvshow_guid in (select mm_metadata_tvshow_guid'
                            ' from mm_metadata_tvshow order by LOWER(mm_metadata_tvshow_name)'
-                           ' offset %s limit %s) order by LOWER(mm_metadata_tvshow_name)',
+                           ' offset $1 limit $2) order by LOWER(mm_metadata_tvshow_name)',
                            (offset, records))
     return self.db_cursor.fetchall()
 
@@ -304,8 +304,8 @@ def db_meta_tvshow_update_image(self, image_json, metadata_uuid):
     # update image json
     """
     self.db_cursor.execute('update mm_metadata_tvshow'
-                           ' set mm_metadata_tvshow_localimage_json = %s'
-                           ' where mm_metadata_tvshow_guid = %s',
+                           ' set mm_metadata_tvshow_localimage_json = $1'
+                           ' where mm_metadata_tvshow_guid = $2',
                            (image_json, metadata_uuid))
     self.db_commit()
 
@@ -335,7 +335,7 @@ def db_meta_tvshow_detail(self, guid):
                            '->\'Images\'->\'tvmaze\'->>\'Poster\','
                            ' mm_metadata_tvshow_localimage_json'
                            '->\'Images\'->\'thetvdb\'->>\'Poster\') from mm_metadata_tvshow'
-                           ' where mm_metadata_tvshow_guid = %s', (guid,))
+                           ' where mm_metadata_tvshow_guid = $1', (guid,))
     try:
         return self.db_cursor.fetchone()
     except:
@@ -362,12 +362,12 @@ def db_read_tvmeta_eps_season(self, show_guid):
     #                         '->\'Meta\'->\'tvmaze\'->\'_embedded\'->\'episodes\')b->\'number\','
     #                         '(mm_metadata_tvshow_json->\'Meta\'->\'thetvdb\'->\'Meta\'->\'Episode\')'
     #                         'b->\'EpisodeNumber\'))'
-    #                         'from mm_metadata_tvshow where mm_metadata_tvshow_guid = %s', (show_guid,))
+    #                         'from mm_metadata_tvshow where mm_metadata_tvshow_guid = $1', (show_guid,))
 
     self.db_cursor.execute(
         'select count(*) as ep_count, jsonb_array_elements_text(mm_metadata_tvshow_json'
         '->\'Meta\'->\'thetvdb\'->\'Meta\'->\'Episode\')b->\'SeasonNumber\' as season_num'
-        ' from mm_metadata_tvshow where mm_metadata_tvshow_guid = %s'
+        ' from mm_metadata_tvshow where mm_metadata_tvshow_guid = $1'
         ' group by season_num', (show_guid,))
     for row_data in self.db_cursor.fetchall():
         # if row_data[0] in season_data:
@@ -401,7 +401,7 @@ def db_read_tvmeta_season_eps_list(self, show_guid, season_number):
         ' eps_data->\'filename\' as eps_filename'
         ' from (select jsonb_array_elements_text('
         'mm_metadata_tvshow_json->\'Meta\'->\'thetvdb\'->\'Meta\'->\'Episode\')b as eps_data'
-        ' from mm_metadata_tvshow where mm_metadata_tvshow_guid = %s)'
+        ' from mm_metadata_tvshow where mm_metadata_tvshow_guid = $1)'
         ' as select_eps_data where eps_data @> \'{ "SeasonNumber": "'
         + str(season_number) + '" }\'', (show_guid,))
     # id, episode_number, episode_name, filename
@@ -431,7 +431,7 @@ def db_read_tvmeta_epsisode_by_id(self, show_guid, show_episode_id):
                            ' eps_data->\'filename\' as eps_filename'
                            ' from (select jsonb_array_elements_text('
                            'mm_metadata_tvshow_json->\'Meta\'->\'thetvdb\'->\'Meta\'->\'Episode\')b as eps_data'
-                           ' from mm_metadata_tvshow where mm_metadata_tvshow_guid = %s)'
+                           ' from mm_metadata_tvshow where mm_metadata_tvshow_guid = $1)'
                            ' as select_eps_data where eps_data @> \'{ "id": "'
                            + str(show_episode_id) + '" }\'', (show_guid,))
     return self.db_cursor.fetchone()
@@ -463,7 +463,7 @@ def db_read_tvmeta_episode(self, show_guid, season_number, episode_number):
         ' mm_metadata_tvshow_json->\'Meta\'->\'thetvdb\'->\'Runtime\' as eps_runtime,'
         ' jsonb_array_elements_text(mm_metadata_tvshow_json->\'Meta\'->\'thetvdb\''
         '->\'Episode\')b->\'Overview\' as eps_overview'
-        ' from mm_metadata_tvshow where mm_metadata_tvshow_guid = %s',
+        ' from mm_metadata_tvshow where mm_metadata_tvshow_guid = $1',
         (show_guid, str(season_number), str(episode_number)))
     return self.db_cursor.fetchone()
 

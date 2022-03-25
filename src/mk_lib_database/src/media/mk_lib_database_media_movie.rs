@@ -49,7 +49,7 @@ def db_read_media_metadata_movie_both(self, media_guid):
                            'mm_metadata_localimage_json'
                            ' from mm_media, mm_metadata_movie'
                            ' where mm_media_metadata_guid = mm_metadata_guid'
-                           ' and mm_media_guid = %s', (media_guid,))
+                           ' and mm_media_guid = $1', (media_guid,))
     try:
         return self.db_cursor.fetchone()
     except:
@@ -59,7 +59,7 @@ def db_read_media_list_by_uuid(self, media_guid):
     self.db_cursor.execute('select mm_media_ffprobe_json'
                            ' from mm_media'
                            ' where mm_media_metadata_guid in (select mm_metadata_guid from '
-                           'mm_media where mm_media_guild = %s)', (media_guid,))
+                           'mm_media where mm_media_guild = $1)', (media_guid,))
     video_data = []
     for file_data in self.db_cursor.fetchall():
         # go through streams

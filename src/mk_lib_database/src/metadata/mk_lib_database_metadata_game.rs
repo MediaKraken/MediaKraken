@@ -158,7 +158,7 @@ def db_meta_game_by_system_count(self, guid):
     self.db_cursor.execute("select count(*) from mm_metadata_game_software_info,"
                            " mm_metadata_game_systems_info"
                            " where gi_system_id = gs_id"
-                           " and gs_id = %s", (guid,))
+                           " and gs_id = $1", (guid,))
     return self.db_cursor.fetchone()[0]
 
 
@@ -169,8 +169,8 @@ def db_meta_game_by_system(self, guid, offset=0, records=None):
     self.db_cursor.execute("select * from mm_metadata_game_software_info,"
                            " mm_metadata_game_systems_info"
                            " where gi_system_id = gs_id"
-                           " and gs_id = %s"
-                           " offset %s, limit %s", (guid, offset, records))
+                           " and gs_id = $1"
+                           " offset $2, limit $3", (guid, offset, records))
     try:
         return self.db_cursor.fetchone()
     except:
@@ -184,12 +184,12 @@ def db_meta_game_by_name_and_system(self, game_name, game_system_short_name):
     if game_system_short_name is None:
         self.db_cursor.execute("select gi_id, gi_game_info_json"
                                " from mm_metadata_game_software_info"
-                               " where gi_game_info_name = %s and gi_system_id IS NULL",
+                               " where gi_game_info_name = $1 and gi_system_id IS NULL",
                                (game_name,))
     else:
         self.db_cursor.execute("select gi_id, gi_game_info_json"
                                " from mm_metadata_game_software_info"
-                               " where gi_game_info_name = %s and gi_system_id = %s",
+                               " where gi_game_info_name = $1 and gi_system_id = $2",
                                (game_name, game_system_short_name))
     return self.db_cursor.fetchall()
 
@@ -218,7 +218,7 @@ def db_meta_game_image_random(self, return_image_type="Poster"):
 
 def db_meta_game_category_by_name(self, category_name):
     self.db_cursor.execute(
-        "select gc_id from mm_game_category where gc_category = %s", (category_name,))
+        "select gc_id from mm_game_category where gc_category = $1", (category_name,))
     try:
         return self.db_cursor.fetchone()
     except:
@@ -228,7 +228,7 @@ def db_meta_game_category_by_name(self, category_name):
 def db_meta_game_category_add(self, category_name):
     category_uuid = uuid.uuid4()
     self.db_cursor.execute("insert into mm_game_category (gc_id, gc_category)"
-                           " values (%s, %s)",
+                           " values ($1, $2)",
                            (category_uuid, category_name))
     self.db_cursor.commit()
     return category_uuid

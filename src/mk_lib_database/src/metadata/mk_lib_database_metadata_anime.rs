@@ -18,7 +18,7 @@ def db_meta_anime_title_insert(self, ani_media_id_json, ani_name, ani_json,
                            ' mm_metadata_anime_user_json,'
                            ' mm_metadata_anime_mapping,'
                            ' mm_metadata_anime_mapping_before)'
-                           ' values (%s,%s,%s,%s,%s,%s,%s,%s)',
+                           ' values ($1,$2,$3,$4,$5,$6,$7,$8)',
                            (new_guid, ani_media_id_json, ani_name, ani_json,
                             ani_image_local, ani_user_json, mapping_data, before_data))
     self.db_commit()
@@ -32,7 +32,7 @@ def db_meta_anime_title_search(self, title_to_search):
     # TODO hit movie and tv db's as well?
     self.db_cursor.execute('select mm_metadata_anime_guid'
                            ' from mm_metadata_anime'
-                           ' where mm_media_anime_name = %s', (title_to_search,))
+                           ' where mm_media_anime_name = $1', (title_to_search,))
     try:
         return self.db_cursor.fetchone()[0]
     except:
@@ -45,10 +45,10 @@ def db_meta_anime_update_meta_id(self, media_id_json, mapping_json, mapping_befo
     """
     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text={
         'ani_id_json': media_id_json})
-    self.db_cursor.execute('update mm_metadata_anime set mm_metadata_anime_media_id = %s,'
-                           ' mm_metadata_anime_mapping = %s,'
-                           ' mm_metadata_anime_mapping_before = %s'
-                           ' where mm_metadata_anime_media_id->\'anidb\' ? %s',
+    self.db_cursor.execute('update mm_metadata_anime set mm_metadata_anime_media_id = $1,'
+                           ' mm_metadata_anime_mapping = $2,'
+                           ' mm_metadata_anime_mapping_before = $3'
+                           ' where mm_metadata_anime_media_id->\'anidb\' ? $4',
                            (media_id_json, mapping_json, mapping_before,
                             json.loads(media_id_json)['anidb']))
     self.db_commit()
@@ -60,7 +60,7 @@ def db_meta_anime_meta_by_id(self, anidb_id):
     """
     self.db_cursor.execute('select mm_metadata_anime_guid'
                            ' from mm_metadata_anime'
-                           ' where mm_metadata_anime_media_id->\'anidb\' ? %s', (anidb_id,))
+                           ' where mm_metadata_anime_media_id->\'anidb\' ? $1', (anidb_id,))
     try:
         return self.db_cursor.fetchone()['mm_metadata_anime_guid']
     except:

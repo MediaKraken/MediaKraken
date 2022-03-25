@@ -677,13 +677,13 @@ def db_media_sports_count_by_genre(self, class_guid):
                            ' from ((select distinct on (mm_media_metadata_guid)'
                            ' mm_metadata_sports_json'
                            ' from mm_media, mm_metadata_sports'
-                           ' where mm_media_class_guid = %s'
+                           ' where mm_media_class_guid = $1'
                            ' and mm_media_metadata_guid = mm_metadata_sports_guid)'
                            ' union (select distinct'
                            ' on (mmr_media_metadata_guid) mm_metadata_sports_json'
                            ' from mm_media_remote,'
                            ' mm_metadata_sports'
-                           ' where mmr_media_class_guid = %s'
+                           ' where mmr_media_class_guid = $2'
                            ' and mmr_media_metadata_guid = mm_metadata_sports_guid))'
                            ' as temp group by gen',
                            (class_guid, class_guid))
@@ -699,7 +699,7 @@ def db_read_media_metadata_sports_both(self, media_guid):
                            'mm_metadata_sports_image_json'
                            ' from mm_media, mm_metadata_sports'
                            ' where mm_media_metadata_guid = mm_metadata_sports_guid'
-                           ' and mm_media_guid = %s', (media_guid,))
+                           ' and mm_media_guid = $1', (media_guid,))
     try:
         return self.db_cursor.fetchone()
     except:
@@ -711,7 +711,7 @@ def db_read_media_sports_list_by_uuid(self, media_guid):
     self.db_cursor.execute('select mm_media_ffprobe_json'
                            ' from mm_media'
                            ' where mm_media_metadata_guid in (select mm_metadata_sports_guid from '
-                           'mm_media where mm_media_guild = %s)', (media_guid,))
+                           'mm_media where mm_media_guild = $1)', (media_guid,))
     video_data = []
     for file_data in self.db_cursor.fetchall():
         # go through streams

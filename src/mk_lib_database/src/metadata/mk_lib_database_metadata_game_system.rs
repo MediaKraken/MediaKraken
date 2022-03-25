@@ -91,7 +91,7 @@ def db_meta_games_system_insert(self, platform_name,
                            ' gs_game_system_name,'
                            ' gs_game_system_alias,'
                            ' gs_game_system_json)'
-                           ' values (%s, %s, %s, %s)',
+                           ' values ($1, $2, $3, $4)',
                            (new_guid, platform_name, platform_alias, platform_json))
     self.db_commit()
     return new_guid
@@ -100,7 +100,7 @@ def db_meta_games_system_insert(self, platform_name,
 def db_meta_games_system_guid_by_short_name(self, short_name):
     self.db_cursor.execute('select gs_id'
                            ' from mm_metadata_game_systems_info'
-                           ' where gs_game_system_name = %s', (short_name,))
+                           ' where gs_game_system_name = $1', (short_name,))
     try:
         return self.db_cursor.fetchone()['gs_id']
     except:
@@ -110,7 +110,7 @@ def db_meta_games_system_guid_by_short_name(self, short_name):
 def db_meta_games_system_game_count(self, short_name):
     self.db_cursor.execute('select gs_id'
                            ' from mm_metadata_game_systems_info'
-                           ' where gs_game_system_name = %s', (short_name,))
+                           ' where gs_game_system_name = $1', (short_name,))
     try:
         return self.db_cursor.fetchone()['gs_id']
     except:
@@ -124,9 +124,9 @@ def db_meta_game_system_upsert(self, system_name, system_alias=None, system_json
                            ' gs_game_system_name,'
                            ' gs_game_system_alias,'
                            ' gs_game_system_json)'
-                           ' VALUES (%s, %s, %s, %s)'
+                           ' VALUES ($1, $2, $3, $4)'
                            ' ON CONFLICT (gs_game_system_name)'
-                           ' DO UPDATE SET gs_game_system_alias = %s, gs_game_system_json = %s',
+                           ' DO UPDATE SET gs_game_system_alias = $5, gs_game_system_json = $6',
                            (new_guid, system_name, system_alias, system_json,
                             system_alias, system_json))
     self.db_cursor.commit()

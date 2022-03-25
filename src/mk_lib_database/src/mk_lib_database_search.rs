@@ -10,9 +10,9 @@ def db_search(self, search_string, search_type='Local', search_movie=True, searc
             # movie section
             self.db_cursor.execute('SELECT mm_metadata_guid,'
                                    ' mm_metadata_name, '
-                                   'similarity(mm_metadata_name, %s) AS sml'
+                                   'similarity(mm_metadata_name, $1) AS sml'
                                    ' FROM mm_metadata_movie'
-                                   ' WHERE mm_metadata_name % %s'
+                                   ' WHERE mm_metadata_name % $2'
                                    ' ORDER BY sml DESC, LOWER(mm_metadata_name);',
                                    (search_string, search_string))
             json_return_data['Movie'] = json.dumps(self.db_cursor.fetchall())
@@ -20,9 +20,9 @@ def db_search(self, search_string, search_type='Local', search_movie=True, searc
             # tv show section
             self.db_cursor.execute('SELECT mm_metadata_tvshow_guid,'
                                    ' mm_metadata_tvshow_name,'
-                                   ' similarity(mm_metadata_tvshow_name, %s) AS sml'
+                                   ' similarity(mm_metadata_tvshow_name, $1) AS sml'
                                    ' FROM mm_metadata_tvshow'
-                                   ' WHERE mm_metadata_tvshow_name % %s'
+                                   ' WHERE mm_metadata_tvshow_name % $2'
                                    ' ORDER BY sml DESC, LOWER(mm_metadata_tvshow_name);',
                                    (search_string, search_string))
             json_return_data['TVShow'] = json.dumps(self.db_cursor.fetchall())
@@ -30,9 +30,9 @@ def db_search(self, search_string, search_type='Local', search_movie=True, searc
             # album section
             self.db_cursor.execute('SELECT mm_metadata_album_guid,'
                                    ' mm_metadata_album_name,'
-                                   ' similarity(mm_metadata_album_name, %s) AS sml'
+                                   ' similarity(mm_metadata_album_name, $1) AS sml'
                                    ' FROM mm_metadata_album'
-                                   ' WHERE mm_metadata_album_name % %s'
+                                   ' WHERE mm_metadata_album_name % $2'
                                    ' ORDER BY sml DESC, LOWER(mm_metadata_album_name);',
                                    (search_string, search_string))
             json_return_data['Album'] = json.dumps(self.db_cursor.fetchall())
@@ -43,9 +43,9 @@ def db_search(self, search_string, search_type='Local', search_movie=True, searc
             # publication section
             self.db_cursor.execute('SELECT mm_metadata_book_guid,'
                                    ' mm_metadata_book_name,'
-                                   ' similarity(mm_metadata_book_name, %s) AS sml'
+                                   ' similarity(mm_metadata_book_name, $1) AS sml'
                                    ' FROM mm_metadata_book'
-                                   ' WHERE mm_metadata_book_name % %s'
+                                   ' WHERE mm_metadata_book_name % $2'
                                    ' ORDER BY sml DESC, LOWER(mm_metadata_book_name);',
                                    (search_string, search_string))
             json_return_data['Publication'] = json.dumps(self.db_cursor.fetchall())
@@ -53,9 +53,9 @@ def db_search(self, search_string, search_type='Local', search_movie=True, searc
             # game section
             self.db_cursor.execute('SELECT gi_id,'
                                    ' gi_game_info_name,'
-                                   ' similarity(gi_game_info_name, %s) AS sml'
+                                   ' similarity(gi_game_info_name, $1) AS sml'
                                    ' FROM mm_metadata_game_software_info'
-                                   ' WHERE gi_game_info_name % %s'
+                                   ' WHERE gi_game_info_name % $2'
                                    ' ORDER BY sml DESC, LOWER(gi_game_info_name);',
                                    (search_string, search_string))
             json_return_data['Game'] = json.dumps(self.db_cursor.fetchall())

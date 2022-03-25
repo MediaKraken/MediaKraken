@@ -74,7 +74,7 @@ def db_meta_book_guid_by_isbn(self, isbn_uuid, isbn13_uuid):
     """
     self.db_cursor.execute('select mm_metadata_book_guid'
                            ' from mm_metadata_book'
-                           ' where mm_metadata_book_isbn = %s or mm_metadata_book_isbn13 = %s',
+                           ' where mm_metadata_book_isbn = $1 or mm_metadata_book_isbn13 = $2',
                            (isbn_uuid, isbn13_uuid))
     try:
         return self.db_cursor.fetchone()['mm_metadata_book_guid']
@@ -90,7 +90,7 @@ def db_meta_book_guid_by_name(self, book_name):
     # TODO sort by release date
     self.db_cursor.execute('select mm_metadata_book_guid'
                            ' from mm_metadata_book'
-                           ' where mm_metadata_book_name = %s', (book_name,))
+                           ' where mm_metadata_book_name = $1', (book_name,))
     try:
         return self.db_cursor.fetchone()['mm_metadata_book_guid']
     except:
@@ -112,7 +112,7 @@ def db_meta_book_insert(self, json_data):
                            ' mm_metadata_book_isbn13,'
                            ' mm_metadata_book_name,'
                            ' mm_metadata_book_json)'
-                           ' values (%s,%s,%s,%s,%s)',
+                           ' values ($1,$2,$3,$4,$5)',
                            (insert_uuid, json_data['data'][0]['isbn10'],
                             json_data['data'][0]['isbn13'], json_data['data'][0]['title'],
                             json.dumps(json_data['data'][0])))

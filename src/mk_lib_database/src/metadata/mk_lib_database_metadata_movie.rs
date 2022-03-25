@@ -177,7 +177,7 @@ def db_meta_movie_update_castcrew(self, cast_crew_json, metadata_id):
                                                          message_text={'upt castcrew': metadata_id})
     self.db_cursor.execute('select mm_metadata_json'
                            ' from mm_metadata_movie'
-                           ' where mm_metadata_guid = %s', (metadata_id,))
+                           ' where mm_metadata_guid = $1', (metadata_id,))
     cast_crew_json_row = self.db_cursor.fetchone()[0]
     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text={
         'castrow': cast_crew_json_row})
@@ -189,8 +189,8 @@ def db_meta_movie_update_castcrew(self, cast_crew_json, metadata_id):
         cast_crew_json_row.update({'Crew': cast_crew_json['crew']})
     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
                                                          message_text={'upt': cast_crew_json_row})
-    self.db_cursor.execute('update mm_metadata_movie set mm_metadata_json = %s'
-                           ' where mm_metadata_guid = %s',
+    self.db_cursor.execute('update mm_metadata_movie set mm_metadata_json = $1'
+                           ' where mm_metadata_guid = $2',
                            (json.dumps(cast_crew_json_row), metadata_id))
     self.db_commit()
 
