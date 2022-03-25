@@ -2,44 +2,20 @@ use rocket::Request;
 use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
+use rocket::serde::{Serialize, Deserialize, json::Json};
+
+#[path = "../mk_lib_database_cron.rs"]
+mod mk_lib_database_cron;
 
 #[get("/admin_cron")]
-pub fn admin_cron() -> Template {
-    Template::render("bss_admin/bss_admin_cron", context! {})
+pub async fn admin_cron(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
+    let cron_list = mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool).await.unwrap();
+    Template::render("bss_admin/bss_admin_cron", context! {
+        media_cron: cron_list,
+    })
 }
 
 /*
-@blueprint_admin_cron.route('/admin_cron')
-@common_global.jinja_template.template('bss_admin/bss_admin_cron.html.tera')
-@common_global.auth.login_required
-async def url_bp_admin_cron(request):
-    """
-    Display cron jobs
-    """
-    page, offset = common_pagination_bootstrap.com_pagination_page_calc(request)
-    db_connection = await request.app.db_pool.acquire()
-    pagination = common_pagination_bootstrap.com_pagination_boot_html(page=page,
-                                                                      url='/admin/admin_cron',
-                                                                      item_count=await request.app.db_functions.db_cron_list_count(
-                                                                          enabled_only=False,
-                                                                          db_connection=db_connection),
-                                                                      client_items_per_page=
-                                                                      int(request.ctx.session[
-                                                                              'per_page']),
-                                                                      format_number=True)
-    cron_data = await request.app.db_functions.db_cron_list(enabled_only=False,
-                                                            offset=offset,
-                                                            records=int(
-                                                                request.ctx.session['per_page']),
-                                                            db_connection=db_connection)
-    await request.app.db_pool.release(db_connection)
-    return {
-        'media_cron': cron_data,
-        'pagination_links': pagination,
-        'page': page,
-        'per_page': int(request.ctx.session['per_page'])
-    }
-
 
 @blueprint_admin_cron.route('/admin_cron_delete', methods=["POST"])
 @common_global.auth.login_required

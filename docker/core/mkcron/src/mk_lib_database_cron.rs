@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use sqlx::{FromRow, Row};
 use serde_json::{Map, Value};
 use sqlx::postgres::PgRow;
 use sqlx::types::Json;
@@ -10,25 +10,30 @@ use chrono::prelude::*;
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBCronList {
 	mm_cron_guid: uuid::Uuid,
+	mm_cron_name: String,
+	mm_cron_description: String,
+    mm_cron_enabled: bool,
 	mm_cron_schedule_type: String,
-	mm_cron_schedule_time: i64,
+	mm_cron_schedule_time: i16,
 	mm_cron_last_run: DateTime<Utc>,
-	mm_cron_json: Json,
 }
 
 pub async fn mk_lib_database_cron_service_read(pool: &sqlx::PgPool)
                                                -> Result<Vec<DBCronList>, sqlx::Error> {
     let select_query = sqlx::query("select mm_cron_guid, \
+        mm_cron_name, mm_cron_description, mm_cron_enabled, \
         mm_cron_schedule_type, mm_cron_schedule_time, \
-        mm_cron_last_run, mm_cron_json from mm_cron_jobs \
-        where mm_cron_enabled = true");
+        mm_cron_last_run from mm_cron_jobs \
+        order by mm_cron_name");
     let table_rows: Vec<DBCronList> = select_query
 		.map(|row: PgRow| DBCronList {
 			mm_cron_guid: row.get("mm_cron_guid"),
+			mm_cron_name: row.get("mm_cron_name"),
+			mm_cron_description: row.get("mm_cron_description"),
+			mm_cron_enabled: row.get("mm_cron_enabled"),
 			mm_cron_schedule_type: row.get("mm_cron_schedule_type"),
 			mm_cron_schedule_time: row.get("mm_cron_schedule_time"),
 			mm_cron_last_run: row.get("mm_cron_last_run"),
-			mm_cron_json: row.get("mm_cron_json"),
 		})
 		.fetch_all(pool)
 		.await?;

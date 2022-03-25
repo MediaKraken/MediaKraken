@@ -35,7 +35,7 @@ def db_read_media(self, media_guid=None):
     if media_guid is not None:
         self.db_cursor.execute(
             'select * from mm_media'
-            ' where mm_media_guid = %s', (media_guid,))
+            ' where mm_media_guid = $1', (media_guid,))
         try:
             return self.db_cursor.fetchone()
         except:
@@ -49,7 +49,7 @@ def db_metadata_from_media_guid(self, guid):
     self.db_cursor.execute(
         'select mm_media_metadata_guid'
         ' from mm_media'
-        ' where mm_media_guid = %s', (guid,))
+        ' where mm_media_guid = $1', (guid,))
     return self.db_cursor.fetchone()[0]
 
 
@@ -61,7 +61,7 @@ def db_known_media(self, offset=0, records=None):
                            ' from mm_media where mm_media_guid'
                            ' in (select mm_media_guid'
                            ' from mm_media order by mm_media_path'
-                           ' offset %s limit %s) order by mm_media_path', (offset, records))
+                           ' offset $1 limit $2) order by mm_media_path', (offset, records))
     return self.db_cursor.fetchall()
 
 
@@ -99,7 +99,7 @@ def db_media_duplicate(self, offset=0, records=None):
                            ' and mm_media_metadata_guid = mm_metadata_guid'
                            ' group by mm_media_metadata_guid,'
                            ' mm_media_name HAVING count(*) > 1 order by LOWER(mm_media_name)'
-                           ' offset %s limit %s', (offset, records))
+                           ' offset $1 limit $2', (offset, records))
     return self.db_cursor.fetchall()
 
 
@@ -108,7 +108,7 @@ def db_media_duplicate_detail_count(self, guid):
     # duplicate detail count
     """
     self.db_cursor.execute('select count(*) from mm_media'
-                           ' where mm_media_metadata_guid = %s',
+                           ' where mm_media_metadata_guid = $1',
                            (guid,))
     return self.db_cursor.fetchall()
 
@@ -122,7 +122,7 @@ def db_media_duplicate_detail(self, guid, offset=0, records=None):
                            'mm_media_ffprobe_json'
                            ' from mm_media where mm_media_guid'
                            ' in (select mm_media_guid from mm_media'
-                           ' where mm_media_metadata_guid = %s offset %s limit %s)',
+                           ' where mm_media_metadata_guid = $1 offset $2 limit $3)',
                            (guid, offset, records))
     return self.db_cursor.fetchall()
 
@@ -132,7 +132,7 @@ def db_media_path_by_uuid(self, media_uuid):
     # find path for media by uuid
     """
     self.db_cursor.execute('select mm_media_path from mm_media'
-                           ' where mm_media_guid = %s',
+                           ' where mm_media_guid = $1',
                            (media_uuid,))
     try:
         return self.db_cursor.fetchone()['mm_media_path']
@@ -145,7 +145,7 @@ def db_media_rating_update(self, media_guid, user_id, status_text):
     # set favorite status for media
     """
     self.db_cursor.execute('SELECT mm_media_json from mm_media'
-                           ' where mm_media_guid = %s FOR UPDATE', (media_guid,))
+                           ' where mm_media_guid = $1 FOR UPDATE', (media_guid,))
     if status_text == 'watched' or status_text == 'mismatch':
         status_setting = True
     else:
@@ -171,7 +171,7 @@ def db_media_watched_checkpoint_update(self, media_guid, user_id, ffmpeg_time):
     # set checkpoint for media (so can pick up where left off per user)
     """
     self.db_cursor.execute('SELECT mm_media_json from mm_media'
-                           ' where mm_media_guid = %s FOR UPDATE', (media_guid,))
+                           ' where mm_media_guid = $1 FOR UPDATE', (media_guid,))
     json_data = self.db_cursor.fetchone()['mm_media_json']
     if 'UserStats' not in json_data:
         json_data['UserStats'] = {}
@@ -187,16 +187,16 @@ def db_update_media_id(self, media_guid, metadata_guid):
     """
     # update the mediaid
     """
-    self.db_cursor.execute('update mm_media set mm_media_metadata_guid = %s'
-                           ' where mm_media_guid = %s', (metadata_guid, media_guid))
+    self.db_cursor.execute('update mm_media set mm_media_metadata_guid = $1'
+                           ' where mm_media_guid = $2', (metadata_guid, media_guid))
 
 
 def db_update_media_json(self, media_guid, mediajson):
     """
     # update the mediajson
     """
-    self.db_cursor.execute('update mm_media set mm_media_json = %s'
-                           ' where mm_media_guid = %s',
+    self.db_cursor.execute('update mm_media set mm_media_json = $1'
+                           ' where mm_media_guid = $2',
                            (mediajson, media_guid))
 
 
@@ -208,8 +208,8 @@ def db_media_by_metadata_guid(self, metadata_guid, media_class_uuid):
                            'mm_media_guid'
                            ' from mm_media, mm_metadata_movie'
                            ' where mm_media_metadata_guid = mm_metadata_guid'
-                           ' and mm_media_metadata_guid = %s'
-                           ' and mm_media_class_guid = %s',
+                           ' and mm_media_metadata_guid = $1'
+                           ' and mm_media_class_guid = $2',
                            (metadata_guid, media_class_uuid))
     return self.db_cursor.fetchall()
 
@@ -218,10 +218,10 @@ def db_media_image_path(self, media_id):
     """
     # grab image path for media id NOT metadataid
     """
-    self.db_cursor.execute('select mm_metadata_localimage_json->\'Images\''
+    self.db_cursor.execute('select mm_metadata_localimage_json->\'Images\' as mm_image'
                            ' from mm_media, mm_metadata_movie'
                            ' where mm_media_metadata_guid = mm_metadata_guid'
-                           ' and mm_media_guid = %s', (media_id,))
+                           ' and mm_media_guid = $1', (media_id,))
     try:
         return self.db_cursor.fetchone()['mm_metadata_localimage_json']
     except:
@@ -241,7 +241,7 @@ def db_read_media_metadata_both(self, media_guid):
                            'mm_metadata_media_id'
                            ' from mm_media, mm_metadata_movie'
                            ' where mm_media_metadata_guid = mm_metadata_guid'
-                           ' and mm_media_guid = %s', (media_guid,))
+                           ' and mm_media_guid = $1', (media_guid,))
     try:
         return self.db_cursor.fetchone()
     except:
@@ -257,7 +257,7 @@ def db_read_media_path_like(self, media_path):
                                                          message_text={'path like': media_path})
     self.db_cursor.execute('select mm_media_metadata_guid'
                            ' from mm_media'
-                           ' where mm_media_path LIKE %s'
+                           ' where mm_media_path LIKE $1'
                            ' and mm_media_metadata_guid IS NOT NULL limit 1',
                            ((media_path + '%'),))
     try:
@@ -278,7 +278,7 @@ def db_read_media_new(self, offset=None, records=None, search_value=None, days_o
                                ' mm_media_class_guid'
                                ' from mm_media, mm_metadata_movie'
                                ' where mm_media_metadata_guid = mm_metadata_guid'
-                               ' and mm_media_json->>\'DateAdded\' >= %s'
+                               ' and mm_media_json->>\'DateAdded\' >= $1'
                                ' order by LOWER(mm_media_name),'
                                ' mm_media_class_guid',
                                ((datetime.datetime.now()
@@ -289,9 +289,9 @@ def db_read_media_new(self, offset=None, records=None, search_value=None, days_o
                                ' mm_media_class_guid'
                                ' from mm_media, mm_metadata_movie'
                                ' where mm_media_metadata_guid = mm_metadata_guid'
-                               ' and mm_media_json->>\'DateAdded\' >= %s'
+                               ' and mm_media_json->>\'DateAdded\' >= $1'
                                ' order by LOWER(mm_media_name),'
-                               ' mm_media_class_guid offset %s limit %s',
+                               ' mm_media_class_guid offset $2 limit $3',
                                ((datetime.datetime.now()
                                  - datetime.timedelta(days=days_old)).strftime("%Y-%m-%d"),
                                 offset, records))
@@ -311,8 +311,8 @@ def db_media_ffmeg_update(self, media_guid, ffmpeg_json):
     """
     Update the ffprobe json data
     """
-    self.db_cursor.execute('update mm_media set mm_media_ffprobe_json = %s'
-                           ' where mm_media_guid = %s', (ffmpeg_json, media_guid))
+    self.db_cursor.execute('update mm_media set mm_media_ffprobe_json = $1'
+                           ' where mm_media_guid = $2', (ffmpeg_json, media_guid))
 
 
 def db_unmatched_list_count(self):
@@ -325,14 +325,14 @@ def db_unmatched_list(self, offset=0, list_limit=None):
     self.db_cursor.execute('select mm_media_guid,'
                            ' mm_media_path from mm_media'
                            ' where mm_media_metadata_guid is NULL'
-                           ' order by mm_media_path offset %s limit %s',
+                           ' order by mm_media_path offset $1 limit $2',
                            (offset, list_limit))
     return self.db_cursor.fetchall()
 
 
 def db_ffprobe_data(self, guid):
     self.db_cursor.execute('select mm_media_ffprobe_json from mm_media'
-                           ' where mm_media_guid = %s', (guid,))
+                           ' where mm_media_guid = $1', (guid,))
     return self.db_cursor.fetchone()[0]
 
 
@@ -346,8 +346,8 @@ def db_ffprobe_all_media_guid(self, media_uuid, media_class_uuid):
         ' from mm_media, mm_metadata_movie'
         ' where mm_media_metadata_guid = '
         '(select mm_media_metadata_guid'
-        ' from mm_media where mm_media_guid = %s)'
-        ' and mm_media_class_guid = %s',
+        ' from mm_media where mm_media_guid = $1)'
+        ' and mm_media_class_guid = $2',
         (media_uuid, media_class_uuid))
     return self.db_cursor.fetchall()
 

@@ -13,12 +13,22 @@ pub async fn mk_lib_database_metadata_exists_movie(pool: &sqlx::PgPool,
     Ok(row.0)
 }
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMetaMovieList {
+	mm_metadata_guid: uuid::Uuid,
+	mm_metadata_name: String,
+	mm_date: DateTime<Utc>,
+	mm_poster: String,
+	mm_metadata_user_json: Json,
+}
+
 pub async fn mk_lib_database_metadata_movie_read(pool: &sqlx::PgPool,
                                                  search_value: String,
                                                  offset: i32, limit: i32)
-                                                 -> Result<Vec<PgRow>, sqlx::Error> {
+                                                 -> Result<Vec<DBMetaMovieList>, sqlx::Error> {
+    let mut select_query;
     if search_value != "" {
-        let rows = sqlx::query("select mm_metadata_guid, mm_metadata_name, \
+        select_query = sqlx::query("select mm_metadata_guid, mm_metadata_name, \
              mm_metadata_json->\'release_date\' as mm_date, \
              mm_metadata_localimage_json->\'Poster\' as mm_poster, \
              mm_metadata_user_json \
@@ -27,12 +37,9 @@ pub async fn mk_lib_database_metadata_movie_read(pool: &sqlx::PgPool,
              order by mm_metadata_name, mm_date offset $2 limit $3)")
             .bind(search_value)
             .bind(offset)
-            .bind(limit)
-            .fetch_all(pool)
-            .await?;
-        Ok(rows)
+            .bind(limit);
     } else {
-        let rows = sqlx::query("select mm_metadata_guid, mm_metadata_name, \
+        select_query = sqlx::query("select mm_metadata_guid, mm_metadata_name, \
             mm_metadata_json->\'release_date\' as mm_date, \
             mm_metadata_localimage_json->\'Poster\' as mm_poster, \
             mm_metadata_user_json \
@@ -40,11 +47,19 @@ pub async fn mk_lib_database_metadata_movie_read(pool: &sqlx::PgPool,
             order by mm_metadata_name, mm_date \
             offset $1 limit $2)")
             .bind(offset)
-            .bind(limit)
-            .fetch_all(pool)
-            .await?;
-        Ok(rows)
+            .bind(limit);
     }
+    let table_rows: Vec<DBMetaMovieList> = select_query
+        .map(|row: PgRow| DBMetaMovieList {
+            mm_metadata_guid: row.get("mm_metadata_guid"),
+            mm_metadata_name: row.get("mm_metadata_name"),
+            mm_date: row.get("mm_date"),
+            mm_poster: row.get("mm_poster"),
+            mm_metadata_user_json: row.get("mm_metadata_user_json"),
+        })
+        .fetch_all(pool)
+        .await?;
+    Ok(table_rows)
 }
 
 pub async fn mk_lib_database_metadata_movie_count(pool: &sqlx::PgPool,
@@ -162,7 +177,7 @@ def db_meta_movie_update_castcrew(self, cast_crew_json, metadata_id):
                                                          message_text={'upt castcrew': metadata_id})
     self.db_cursor.execute('select mm_metadata_json'
                            ' from mm_metadata_movie'
-                           ' where mm_metadata_guid = %s', (metadata_id,))
+                           ' where mm_metadata_guid = $1', (metadata_id,))
     cast_crew_json_row = self.db_cursor.fetchone()[0]
     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text={
         'castrow': cast_crew_json_row})
@@ -174,8 +189,8 @@ def db_meta_movie_update_castcrew(self, cast_crew_json, metadata_id):
         cast_crew_json_row.update({'Crew': cast_crew_json['crew']})
     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
                                                          message_text={'upt': cast_crew_json_row})
-    self.db_cursor.execute('update mm_metadata_movie set mm_metadata_json = %s'
-                           ' where mm_metadata_guid = %s',
+    self.db_cursor.execute('update mm_metadata_movie set mm_metadata_json = $1'
+                           ' where mm_metadata_guid = $2',
                            (json.dumps(cast_crew_json_row), metadata_id))
     self.db_commit()
 
