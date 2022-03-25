@@ -77,7 +77,7 @@ pub async fn mk_lib_database_hardware_insert(pool: &sqlx::PgPool,
     new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_hardware_json(mm_hardware_id, mm_hardware_manufacturer, \
-        mm_hardware_model, mm_hardware_json) values($ 1, $ 2, $ 3, $ 4)")
+        mm_hardware_model, mm_hardware_json) values($1, $2, $3, $4)")
         .bind(new_guid)
         .bind(manufacturer)
         .bind(model_name)

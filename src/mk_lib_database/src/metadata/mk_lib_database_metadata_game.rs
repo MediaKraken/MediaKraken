@@ -62,9 +62,10 @@ pub struct DBMetaGameList {
 pub async fn mk_lib_database_metadata_game_read(pool: &sqlx::PgPool,
                                                  search_value: String,
                                                  offset: i32, limit: i32)
-                                                 -> Result<Vec<PgRow>, sqlx::Error> {
+                                                 -> Result<Vec<DBMetaGameList>, sqlx::Error> {
+    let mut select_query;
     if search_value != "" {
-        let rows = sqlx::query("select gi_id,gi_game_info_short_name, gi_game_info_name, \
+        select_query = sqlx::query("select gi_id,gi_game_info_short_name, gi_game_info_name, \
              gi_game_info_json->\"year\" as gi_year, \
              gs_game_system_json->\"description\" as gi_description \
              from mm_metadata_game_software_info, mm_metadata_game_systems_info \
@@ -73,22 +74,28 @@ pub async fn mk_lib_database_metadata_game_read(pool: &sqlx::PgPool,
              offset $2 limit $3")
             .bind(search_value)
             .bind(offset)
-            .bind(limit)
-            .fetch_all(pool)
-            .await?;
-        Ok(rows)
+            .bind(limit);
     } else {
-        let rows = sqlx::query("select gi_id,gi_game_info_short_name, gi_game_info_name, \
-            gi_game_info_json->\"year\", gs_game_system_json->\"description\" \
+        select_query = sqlx::query("select gi_id,gi_game_info_short_name, gi_game_info_name, \
+            gi_game_info_json->\"year\" as gi_year, \
+            gs_game_system_json->\"description\" as gi_description \
             from mm_metadata_game_software_info, mm_metadata_game_systems_info \
             where gi_system_id = gs_id order by gi_game_info_name, gi_game_info_json->\"year\" \
             offset $1 limit $2")
             .bind(offset)
-            .bind(limit)
-            .fetch_all(pool)
-            .await?;
-        Ok(rows)
+            .bind(limit);
     }
+    let table_rows: Vec<DBMetaGameList> = select_query
+        .map(|row: PgRow| DBMetaGameList {
+            gi_id: row.get("gi_id"),
+            gi_game_info_short_name: row.get("gi_game_info_short_name"),
+            gi_game_info_name: row.get("gi_game_info_name"),
+            gi_year: row.get("gi_year"),
+            gi_description: row.get("gi_description"),
+        })
+        .fetch_all(pool)
+        .await?;
+    Ok(table_rows)
 }
 
 /*

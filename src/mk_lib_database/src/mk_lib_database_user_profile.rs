@@ -9,12 +9,12 @@ pub async fn mk_lib_database_user_profile_insert(pool: &sqlx::PgPool,
     new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query_as("insert into mm_user_profile(mm_user_profile_guid, \
-                       mm_user_profile_name, mm_user_profile_json) values($1, $2, $3)"
-                       .bind(new_guid)
-                       .bind(profile_name)
-                       .bind(profile_json)
-                       .execute(&mut transaction)
-                       .await?;
+        mm_user_profile_name, mm_user_profile_json) values($1, $2, $3)")
+        .bind(new_guid)
+        .bind(profile_name)
+        .bind(profile_json)
+        .execute(&mut transaction)
+        .await?;
     transaction.commit().await?;
     Ok(new_guid)
 }
@@ -27,14 +27,14 @@ pub async fn mk_lib_database_user_group_insert(pool: &sqlx::PgPool,
     new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query_as("insert into mm_user_group(mm_user_group_guid, \
-                       mm_user_group_name, mm_user_group_description, \
-                       mm_user_group_rights_json) values($1, $2, $3, $4)"
-                       .bind(new_guid)
-                       .bind(group_name)
-                       .bind(group_desc)
-                       .bind(group_rights_json)
-                       .execute(&mut transaction)
-                       .await?;
+        mm_user_group_name, mm_user_group_description, \
+        mm_user_group_rights_json) values($1, $2, $3, $4)")
+        .bind(new_guid)
+        .bind(group_name)
+        .bind(group_desc)
+        .bind(group_rights_json)
+        .execute(&mut transaction)
+        .await?;
     transaction.commit().await?;
     Ok(new_guid)
 }

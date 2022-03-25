@@ -30,9 +30,11 @@ pub struct DBMetaCollectionList {
 pub async fn mk_lib_database_metadata_collection_read(pool: &sqlx::PgPool,
                                                       search_value: String,
                                                       offset: i32, limit: i32)
-                                                      -> Result<Vec<PgRow>, sqlx::Error> {
+                                                      -> Result<Vec<DBMetaCollectionList>, sqlx::Error> {
+    let mut select_query;
     if search_value != "" {
-        let rows = sqlx::query("select mm_metadata_collection_guid, mm_metadata_collection_name, \
+        select_query = sqlx::query("select mm_metadata_collection_guid, \
+            mm_metadata_collection_name, \
             mm_metadata_collection_imagelocal_json from mm_metadata_collection \
             where mm_metadata_collection_guid in (select mm_metadata_collection_guid \
             from mm_metadata_collection where mm_metadata_collection_name % $1 \
@@ -40,22 +42,26 @@ pub async fn mk_lib_database_metadata_collection_read(pool: &sqlx::PgPool,
             offset $2 limit $3) order by mm_metadata_collection_name")
             .bind(search_value)
             .bind(offset)
-            .bind(limit)
-            .fetch_all(pool)
-            .await?;
-        Ok(rows)
+            .bind(limit);
     } else {
-        let rows = sqlx::query("select mm_metadata_collection_guid, mm_metadata_collection_name, \
+        select_query = sqlx::query("select mm_metadata_collection_guid, \
+            mm_metadata_collection_name, \
             mm_metadata_collection_imagelocal_json from mm_metadata_collection \
             where mm_metadata_collection_guid in (select mm_metadata_collection_guid \
             from mm_metadata_collection order by mm_metadata_collection_name \
             offset $1 limit $2) order by mm_metadata_collection_name")
             .bind(offset)
-            .bind(limit)
-            .fetch_all(pool)
-            .await?;
-        Ok(rows)
+            .bind(limit);
     }
+    let table_rows: Vec<DBMetaCollectionList> = select_query
+        .map(|row: PgRow| DBMetaCollectionList {
+            mm_metadata_collection_guid: row.get("mm_metadata_collection_guid"),
+            mm_metadata_collection_name: row.get("mm_metadata_collection_name"),
+            mm_metadata_collection_imagelocal_json: row.get("mm_metadata_collection_imagelocal_json"),
+        })
+        .fetch_all(pool)
+        .await?;
+    Ok(table_rows)
 }
 
 pub async fn mk_lib_database_meta_collection_uuid(pool: &sqlx::PgPool,

@@ -43,10 +43,11 @@ pub struct DBMetaGameSystemList {
 pub async fn mk_lib_database_metadata_game_system_read(pool: &sqlx::PgPool,
                                                  search_value: String,
                                                  offset: i32, limit: i32)
-                                                 -> Result<Vec<PgRow>, sqlx::Error> {
+                                                 -> Result<Vec<DBMetaGameSystemList>, sqlx::Error> {
     // TODO might need to sort by release year as well for machines with multiple releases
+    let mut select_query;
     if search_value != "" {
-        let rows = sqlx::query("select gs_id, gs_game_system_name, \
+        select_query = sqlx::query("select gs_id, gs_game_system_name, \
             gs_game_system_json->\'description\' as gs_description, \
             gs_game_system_json->\'year\' as gs_year, \
             gs_game_system_alias from mm_metadata_game_systems_info \
@@ -55,22 +56,29 @@ pub async fn mk_lib_database_metadata_game_system_read(pool: &sqlx::PgPool,
             offset $2 limit $2")
             .bind(search_value)
             .bind(offset)
-            .bind(limit)
-            .fetch_all(pool)
-            .await?;
-        Ok(rows)
+            .bind(limit);
     } else {
-        let rows = sqlx::query("select gs_id,gs_game_system_name, \
-            gs_game_system_json->\'description\', gs_game_system_json->\'year\', \
+        select_query = sqlx::query("select gs_id,gs_game_system_name, \
+            gs_game_system_json->\'description\' as gs_description, \
+            gs_game_system_json->\'year\' as gs_year, \
             gs_game_system_alias from mm_metadata_game_systems_info \
             order by gs_game_system_json->\'description\' offset $1 limit $2")
             .bind(offset)
-            .bind(limit)
-            .fetch_all(pool)
-            .await?;
-        Ok(rows)
+            .bind(limit);
     }
+    let table_rows: Vec<DBMetaGameSystemList> = select_query
+        .map(|row: PgRow| DBMetaGameSystemList {
+            gs_id: row.get("gs_id"),
+            gs_game_system_name: row.get("gs_game_system_name"),
+            gs_description: row.get("gs_description"),
+            gs_year: row.get("gs_year"),
+            gs_game_system_alias: row.get("gs_game_system_alias"),
+        })
+        .fetch_all(pool)
+        .await?;
+    Ok(table_rows)
 }
+
 /*
 
 def db_meta_games_system_insert(self, platform_name,

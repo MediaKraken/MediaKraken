@@ -81,18 +81,39 @@ pub async fn mk_lib_database_meta_person_by_guid(pool: &sqlx::PgPool,
     Ok(rows)
 }
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMetaPersonNameList {
+	mmp_id: uuid::Uuid,
+	mmp_person_media_id: String,
+	mmp_person_meta_json: String,
+	mmp_person_image: String,
+    mmp_person_name: String,
+}
+
+pub async fn mk_lib_database_meta_person_by_name(pool: &sqlx::PgPool,
+                                                 person_name: String)
+                                                 -> Result<Vec<DBMetaPersonNameList>, sqlx::Error> {
+    let select_query = sqlx::query("select mmp_id, mmp_person_media_id, \
+        mmp_person_meta_json, \
+        mmp_person_image, \
+        mmp_person_name \
+        from mm_metadata_person \
+        where mmp_person_name = %s")
+        .bind(person_name);
+    let table_rows: Vec<DBMetaPersonNameList> = select_query
+		.map(|row: PgRow| DBMetaPersonNameList {
+			mmp_id: row.get("mmp_id"),
+			mmp_person_media_id: row.get("mmp_person_media_id"),
+			mmp_person_meta_json: row.get("mmp_person_meta_json"),
+			mmp_person_image: row.get("mmp_person_image"),
+			mmp_person_name: row.get("mmp_person_name"),
+		})
+        .fetch_all(pool)
+        .await?;
+    Ok(table_rows)
+}
+
 /*
-def db_meta_person_by_name(self, person_name):
-    """
-    # return person data by name
-    """
-    self.db_cursor.execute('select mmp_id, mmp_person_media_id,'
-                           ' mmp_person_meta_json,'
-                           ' mmp_person_image,'
-                           ' mmp_person_name'
-                           ' from mm_metadata_person'
-                           ' where mmp_person_name = %s', (person_name,))
-    return self.db_cursor.fetchone()
 
 async def db_meta_person_as_seen_in(self, person_guid, db_connection=None):
     """

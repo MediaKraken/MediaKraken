@@ -31,14 +31,25 @@ pub async fn mk_lib_database_library_path_audit(pool: &sqlx::PgPool)
     Ok(rows)
 }
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBLibraryPathStatus {
+	mm_media_dir_path: String,
+	mm_media_dir_status: String,
+}
+
 pub async fn mk_lib_database_library_path_status(pool: &sqlx::PgPool)
-                                                 -> Result<Vec<PgRow>, sqlx::Error> {
-    let rows = sqlx::query("select mm_media_dir_path, mm_media_dir_status \
+                                                 -> Result<Vec<DBLibraryPathStatus>, sqlx::Error> {
+    let select_query = sqlx::query("select mm_media_dir_path, mm_media_dir_status \
         from mm_library_dir where mm_media_dir_status IS NOT NULL \
-        order by mm_media_dir_path")
+        order by mm_media_dir_path");
+    let table_rows: Vec<DBLibraryPathStatus> = select_query
+		.map(|row: PgRow| DBLibraryPathStatus {
+			mm_media_dir_path: row.get("mm_media_dir_path"),
+			mm_media_dir_status: row.get("mm_media_dir_status"),
+		})
         .fetch_all(pool)
         .await?;
-    Ok(rows)
+    Ok(table_rows)
 }
 
 pub async fn mk_lib_database_library_path_status_update(pool: &sqlx::PgPool,
