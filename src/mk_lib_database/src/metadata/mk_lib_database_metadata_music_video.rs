@@ -2,6 +2,14 @@ use sqlx::postgres::PgRow;
 use uuid::Uuid;
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMetaMusicVideoList {
+	mm_metadata_music_video_guid: uuid::Uuid,
+	mm_media_music_video_band: String,
+	mm_media_music_video_song: String,
+	mm_metadata_music_video_localimage_json: String,
+}
+
 pub async fn mk_lib_database_metadata_music_video_read(pool: &sqlx::PgPool,
                                                        search_value: String,
                                                        offset: i32, limit: i32)

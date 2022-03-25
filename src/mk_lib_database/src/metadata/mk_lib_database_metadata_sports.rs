@@ -20,6 +20,12 @@ pub async fn mk_lib_database_metadata_sports_count(pool: &sqlx::PgPool,
     }
 }
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMetaSportsList {
+	mm_metadata_sports_guid: uuid::Uuid,
+	mm_metadata_sports_name: String,
+}
+
 pub async fn mk_lib_database_metadata_sports_read(pool: &sqlx::PgPool,
                                                  search_value: String,
                                                  offset: i32, limit: i32)
@@ -28,11 +34,9 @@ pub async fn mk_lib_database_metadata_sports_read(pool: &sqlx::PgPool,
     if search_value != "" {
         let rows = sqlx::query("select mm_metadata_sports_guid, mm_metadata_sports_name \
             from mm_metadata_sports where mm_metadata_sports_guid \
-            in (select mm_metadata_sports_guid from mm_metadata_sports \
             where mm_metadata_sports_name % $1 \
             order by LOWER(mm_metadata_sports_name) \
-            offset $2 limit $3) \
-            order by LOWER(mm_metadata_sports_name)")
+            offset $2 limit $3")
             .bind(search_value)
             .bind(offset)
             .bind(limit)
@@ -41,11 +45,9 @@ pub async fn mk_lib_database_metadata_sports_read(pool: &sqlx::PgPool,
         Ok(rows)
     } else {
         let rows = sqlx::query("select mm_metadata_sports_guid, mm_metadata_sports_name \
-            from mm_metadata_sports where mm_metadata_sports_guid \
-            in (select mm_metadata_sports_guid from mm_metadata_sports \
+            from mm_metadata_sports
             order by LOWER(mm_metadata_sports_name) \
-            offset $1 limit $2) \
-            order by LOWER(mm_metadata_sports_name)")
+            offset $1 limit $2")
             .bind(offset)
             .bind(limit)
             .fetch_all(pool)

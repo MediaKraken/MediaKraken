@@ -2,6 +2,12 @@ use uuid::Uuid;
 use sqlx::postgres::PgRow;
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMediaBookList {
+	mm_metadata_book_guid: uuid::Uuid,
+	mm_metadata_book_name: String,
+}
+
 pub async fn mk_lib_database_media_book_read(pool: &sqlx::PgPool,
                                               search_value: String,
                                               offset: i32, limit: i32)

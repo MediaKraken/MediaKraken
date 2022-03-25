@@ -12,6 +12,12 @@ pub async fn mk_lib_database_metadata_book_by_uuid(pool: &sqlx::PgPool, book_uui
     Ok(rows)
 }
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMetaBookList {
+	mm_metadata_book_guid: uuid::Uuid,
+	mm_metadata_book_name: String,
+}
+
 pub async fn mk_lib_database_metadata_book_read(pool: &sqlx::PgPool,
                                                 search_value: String,
                                                 offset: i32, limit: i32)

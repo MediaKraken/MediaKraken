@@ -20,6 +20,13 @@ pub async fn mk_lib_database_metadata_collections_count(pool: &sqlx::PgPool,
     }
 }
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMetaCollectionList {
+	mm_metadata_collection_guid: uuid::Uuid,
+	mm_metadata_collection_name: String,
+	mm_metadata_collection_imagelocal_json: Json,
+}
+
 pub async fn mk_lib_database_metadata_collection_read(pool: &sqlx::PgPool,
                                                       search_value: String,
                                                       offset: i32, limit: i32)

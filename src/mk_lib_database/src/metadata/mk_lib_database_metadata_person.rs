@@ -31,14 +31,22 @@ pub async fn mk_lib_database_metadata_person_count(pool: &sqlx::PgPool,
     }
 }
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMetaPersonList {
+	mmp_id: uuid::Uuid,
+	mmp_person_name: String,
+	mmp_person_image: String,
+	mmp_profile: String,
+}
+
 pub async fn mk_lib_database_metadata_person_read(pool: &sqlx::PgPool,
                                                   search_value: String,
                                                   offset: i32, limit: i32)
                                                   -> Result<Vec<PgRow>, sqlx::Error> {
     // TODO order by birth date
     if search_value != "" {
-        let rows = sqlx::query("select mmp_id,mmp_person_name, mmp_person_image, \
-            mmp_person_meta_json->\'profile_path\' as mmp_meta \
+        let rows = sqlx::query("select mmp_id, mmp_person_name, mmp_person_image, \
+            mmp_person_meta_json->\'profile_path\' as mmp_profile \
             from mm_metadata_person where mmp_person_name % $1 \
             order by LOWER(mmp_person_name) offset $2 limit $3")
             .bind(search_value)

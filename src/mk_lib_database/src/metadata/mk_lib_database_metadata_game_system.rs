@@ -31,14 +31,24 @@ pub async fn mk_lib_database_metadata_game_system_count(pool: &sqlx::PgPool,
     }
 }
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMetaGameSystemList {
+	gs_id: uuid::Uuid,
+	gs_game_system_name: String,
+	gs_description: String,
+	gs_year: String,
+	gs_game_system_alias: String,
+}
+
 pub async fn mk_lib_database_metadata_game_system_read(pool: &sqlx::PgPool,
                                                  search_value: String,
                                                  offset: i32, limit: i32)
                                                  -> Result<Vec<PgRow>, sqlx::Error> {
     // TODO might need to sort by release year as well for machines with multiple releases
     if search_value != "" {
-        let rows = sqlx::query("select gs_id,gs_game_system_name, \
-            gs_game_system_json->\'description\', gs_game_system_json->\'year\', \
+        let rows = sqlx::query("select gs_id, gs_game_system_name, \
+            gs_game_system_json->\'description\' as gs_description, \
+            gs_game_system_json->\'year\' as gs_year, \
             gs_game_system_alias from mm_metadata_game_systems_info \
             where gs_game_system_name % $1 \
             order by gs_game_system_json->\'description\' \

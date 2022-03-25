@@ -50,13 +50,23 @@ pub async fn mk_lib_database_metadata_game_count(pool: &sqlx::PgPool,
     }
 }
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMetaGameList {
+	gi_id: uuid::Uuid,
+	gi_game_info_short_name: String,
+	gi_game_info_name: String,
+	gi_year: String,
+	gi_description: String,
+}
+
 pub async fn mk_lib_database_metadata_game_read(pool: &sqlx::PgPool,
                                                  search_value: String,
                                                  offset: i32, limit: i32)
                                                  -> Result<Vec<PgRow>, sqlx::Error> {
     if search_value != "" {
         let rows = sqlx::query("select gi_id,gi_game_info_short_name, gi_game_info_name, \
-             gi_game_info_json->\"year\", gs_game_system_json->\"description\" \
+             gi_game_info_json->\"year\" as gi_year, \
+             gs_game_system_json->\"description\" as gi_description \
              from mm_metadata_game_software_info, mm_metadata_game_systems_info \
              where gi_system_id = gs_id  and gi_game_info_name % $1 \
              order by gi_game_info_name, gi_game_info_json->\"year\" \

@@ -2,6 +2,13 @@ use uuid::Uuid;
 use sqlx::postgres::PgRow;
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMetaTVLiveList {
+	mm_tv_station_name: String,
+	mm_tv_station_channel: String,
+	mm_tv_schedule_json: Json,
+}
+
 pub async fn mk_lib_database_meta_tv_live_read(pool: &sqlx::PgPool,
                                                broadcast_time: chrono::DateTime)
                                                -> Result<Vec<PgRow>, sqlx::Error> {

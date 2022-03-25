@@ -23,6 +23,13 @@ pub async fn mk_lib_database_media_album_count(pool: &sqlx::PgPool,
     }
 }
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMediaMusicList {
+	mm_metadata_album_guid: uuid::Uuid,
+	mm_metadata_album_name: String,
+	mm_metadata_album_json: Json,
+}
+
 pub async fn mk_lib_database_media_album_read(pool: &sqlx::PgPool,
                                               search_value: String,
                                               offset: i32, limit: i32)
