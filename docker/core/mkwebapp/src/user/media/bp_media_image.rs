@@ -4,7 +4,7 @@ use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 
 #[get("/media/image")]
-pub fn user_media_image() -> Template {
+pub async fn user_media_image() -> Template {
     Template::render("bss_user/media/bss_user_media_image_gallery", context! {})
 }
 

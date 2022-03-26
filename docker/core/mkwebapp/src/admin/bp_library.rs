@@ -5,7 +5,7 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
 use paginate::Pages;
 
 #[get("/admin_library")]
-pub fn admin_library() -> Template {
+pub async fn admin_library() -> Template {
     Template::render("bss_admin/bss_admin_library", context! {})
 }
 

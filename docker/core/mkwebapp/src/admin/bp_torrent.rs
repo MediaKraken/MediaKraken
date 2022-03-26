@@ -5,7 +5,7 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
 use paginate::Pages;
 
 #[get("/admin_torrent")]
-pub fn admin_torrent() -> Template {
+pub async fn admin_torrent() -> Template {
     Template::render("bss_admin/bss_admin_torrent", context! {})
 }
 

@@ -5,6 +5,6 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
 use paginate::Pages;
 
 #[get("/admin_game_servers")]
-pub fn admin_game_servers() -> Template {
+pub async fn admin_game_servers() -> Template {
     Template::render("bss_admin/bss_admin_game_servers", context! {})
 }

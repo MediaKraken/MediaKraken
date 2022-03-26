@@ -6,12 +6,12 @@ use uuid::Uuid;
 use paginate::Pages;
 
 #[get("/admin_user")]
-pub fn admin_user() -> Template {
+pub async fn admin_user() -> Template {
     Template::render("bss_admin/bss_admin_user", context! {})
 }
 
 #[get("/admin_user_detail/<guid>")]
-pub fn admin_user_detail(guid: &str) -> Template {
+pub async fn admin_user_detail(guid: &str) -> Template {
     Template::render("bss_admin/bss_admin_user_detail", context! {})
 }
 

@@ -1,10 +1,13 @@
 use rocket::Request;
 use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera, context};
-use rocket_auth::{Users, Error, Auth, Signup, Login, User};
+use rocket_auth::{Users, Auth, Signup, Login, User};
+use rocket_auth::{prelude::Error, *};
+use rocket::{get, post, form::Form, routes};
+use rocket::{form::*, State};
 
 #[get("/home")]
-pub fn user_home() -> Template {
+pub async fn user_home() -> Template {
     Template::render("bss_user/bss_user_home", context! {})
 }
 

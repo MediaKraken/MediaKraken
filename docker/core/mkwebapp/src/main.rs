@@ -16,6 +16,7 @@ use rocket::http::Status;
 use std::collections::{HashMap, BTreeMap};
 use rocket_dyn_templates::Template;
 use serde_json::json;
+use rocket_auth::{prelude::Error, *};
 
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
@@ -137,7 +138,7 @@ mod bp_user_search;
 mod bp_user_sync;
 
 #[rocket::main]
-async fn main() {
+async fn main() -> Result<(), Error> {
     // start logging
     const LOGGING_INDEX_NAME: &str = "mkwebapp";
     mk_lib_logging::mk_logging_post_elk("info",
@@ -177,9 +178,13 @@ async fn main() {
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
     mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
                                                            true).await;
+
+    // setup auth
+    let users: Users = sqlx_pool.clone().into();
+    users.create_table().await?;
+
     // setup rocket
     rocket::build()
-        .attach(Template::fairing())
         .mount("/static", FileServer::from(relative!("static")))
         .mount("/admin", routes![bp_admin_backup::admin_backup,
             bp_admin_cron::admin_cron,
@@ -238,5 +243,9 @@ async fn main() {
             bp_error::general_security,
             bp_error::default_catcher])
         .manage::<sqlx::PgPool>(sqlx_pool)
+        .manage(users)
+        .attach(Template::fairing())
         .launch().await;
+ Ok(())
 }
+

@@ -4,12 +4,12 @@ use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 
 #[get("/hardware")]
-pub fn user_hardware() -> Template {
+pub async fn user_hardware() -> Template {
     Template::render("bss_user/hardware/bss_user_hardware", context! {})
 }
 
 #[get("/hardware_phue")]
-pub fn user_hardware_phue() -> Template {
+pub async fn user_hardware_phue() -> Template {
     Template::render("bss_user/hardware/bss_user_hardware_phue", context! {})
 }
 

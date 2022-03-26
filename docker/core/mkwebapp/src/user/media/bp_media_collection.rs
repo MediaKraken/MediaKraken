@@ -6,12 +6,12 @@ use uuid::Uuid;
 use paginate::Pages;
 
 #[get("/media/collection")]
-pub fn user_media_collection() -> Template {
+pub async fn user_media_collection() -> Template {
     Template::render("bss_user/metadata/bss_user_metadata_movie_collection", context! {})
 }
 
 #[get("/media/collection_detail/<guid>")]
-pub fn user_media_collection_detail(guid: &str) -> Template {
+pub async fn user_media_collection_detail(guid: &str) -> Template {
     Template::render("bss_user/metadata/bss_user_metadata_movie_collection_detail", context! {})
 }
 

@@ -4,7 +4,7 @@ use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 
 #[get("/logout")]
-pub fn public_logout(auth: Auth<'_>) -> Template {
+pub async fn public_logout(auth: Auth<'_>) -> Template {
     Template::render("bss_public/bss_public_logout", context! {});
     auth.logout();
 }
