@@ -81,6 +81,7 @@ pub async fn mk_lib_database_metadata_game_system_read(pool: &sqlx::PgPool,
 
 /*
 
+// TODO port query
 def db_meta_games_system_insert(self, platform_name,
                                 platform_alias, platform_json=None):
     """
@@ -97,6 +98,7 @@ def db_meta_games_system_insert(self, platform_name,
     return new_guid
 
 
+// TODO port query
 def db_meta_games_system_guid_by_short_name(self, short_name):
     self.db_cursor.execute('select gs_id'
                            ' from mm_metadata_game_systems_info'
@@ -107,6 +109,7 @@ def db_meta_games_system_guid_by_short_name(self, short_name):
         return None
 
 
+// TODO port query
 def db_meta_games_system_game_count(self, short_name):
     self.db_cursor.execute('select gs_id'
                            ' from mm_metadata_game_systems_info'
@@ -117,6 +120,7 @@ def db_meta_games_system_game_count(self, short_name):
         return None
 
 
+// TODO port query
 def db_meta_game_system_upsert(self, system_name, system_alias=None, system_json=None):
     new_guid = uuid.uuid4()
     self.db_cursor.execute('INSERT INTO mm_metadata_game_systems_info'

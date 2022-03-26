@@ -1,5 +1,71 @@
 use sqlx::postgres::PgRow;
 use uuid::Uuid;
+use rocket_dyn_templates::serde::{Serialize, Deserialize};
+
+pub async fn mk_lib_database_media_unmatched_count(pool: &sqlx::PgPool)
+                                                   -> Result<(i32), sqlx::Error> {
+    let row: (i32, ) = sqlx::query_as("select count(*) from mm_media \
+        where mm_media_metadata_guid is NULL")
+        .fetch_one(pool)
+        .await?;
+    Ok(row.0)
+}
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMediaUnmatchedList {
+	mm_media_guid: uuid::Uuid,
+	mm_media_path: String,
+}
+
+pub async fn mk_lib_database_media_unmatched_read(pool: &sqlx::PgPool,
+                                                  offset: i32, limit: i32)
+                                                  -> Result<Vec<DBMediaUnmatchedList>, sqlx::Error> {
+    let select_query = sqlx::query("select mm_media_guid, \
+        mm_media_path from mm_media \
+        where mm_media_metadata_guid is NULL \
+        order by mm_media_path offset $1 limit $2")
+        .bind(offset)
+        .bind(limit);
+    let table_rows: Vec<DBCronList> = select_query
+		.map(|row: PgRow| DBCronList {
+			mm_media_guid: row.get("mm_media_guid"),
+			mm_media_path: row.get("mm_media_path"),
+		})
+		.fetch_all(pool)
+		.await?;
+    Ok(table_rows)
+}
+
+pub async fn mk_lib_database_media_matched_count(pool: &sqlx::PgPool)
+                                                 -> Result<(i32), sqlx::Error> {
+    let row: (i32, ) = sqlx::query_as("select count(*) from mm_media \
+        where mm_media_metadata_guid is not NULL")
+        .fetch_one(pool)
+        .await?;
+    Ok(row.0)
+}
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMediaKnownList {
+    mm_media_path: String,
+}
+
+pub async fn mk_lib_database_media_known(pool: &sqlx::PgPool,
+                                         offset: i32, limit: i32)
+                                         -> Result<Vec<DBMediaKnownList>, sqlx::Error> {
+    let select_query = sqlx::query("select mm_media_path \
+        from mm_media where mm_media_guid \
+        order by mm_media_path offset $1 limit $2")
+        .bind(offset)
+        .bind(limit);
+    let table_rows: Vec<DBMediaKnownList> = select_query
+		.map(|row: PgRow| DBMediaKnownList {
+			mm_media_path: row.get("mm_media_path"),
+		})
+		.fetch_all(pool)
+		.await?;
+    Ok(table_rows)
+}
 
 pub async fn mk_lib_database_media_insert(pool: &sqlx::PgPool,
                                           mm_media_guid: Uuid,
@@ -27,7 +93,7 @@ pub async fn mk_lib_database_media_insert(pool: &sqlx::PgPool,
 
 
 /*
-
+// TODO port query
 def db_read_media(self, media_guid=None):
     """
     # read in all media unless guid specified
@@ -45,35 +111,7 @@ def db_read_media(self, media_guid=None):
         return self.db_cursor.fetchall()
 
 
-def db_metadata_from_media_guid(self, guid):
-    self.db_cursor.execute(
-        'select mm_media_metadata_guid'
-        ' from mm_media'
-        ' where mm_media_guid = $1', (guid,))
-    return self.db_cursor.fetchone()[0]
-
-
-def db_known_media(self, offset=0, records=None):
-    """
-    # find all known media
-    """
-    self.db_cursor.execute('select mm_media_path'
-                           ' from mm_media where mm_media_guid'
-                           ' in (select mm_media_guid'
-                           ' from mm_media order by mm_media_path'
-                           ' offset $1 limit $2) order by mm_media_path', (offset, records))
-    return self.db_cursor.fetchall()
-
-
-def db_matched_media_count(self):
-    """
-    # count matched media
-    """
-    self.db_cursor.execute('select count(*) from mm_media'
-                           ' where mm_media_metadata_guid is not NULL')
-    return self.db_cursor.fetchone()[0]
-
-
+// TODO port query
 def db_media_duplicate_count(self):
     """
     # count the duplicates for pagination
@@ -86,6 +124,7 @@ def db_media_duplicate_count(self):
     return self.db_cursor.fetchone()[0]
 
 
+// TODO port query
 def db_media_duplicate(self, offset=0, records=None):
     """
     # list duplicates
@@ -103,6 +142,7 @@ def db_media_duplicate(self, offset=0, records=None):
     return self.db_cursor.fetchall()
 
 
+// TODO port query
 def db_media_duplicate_detail_count(self, guid):
     """
     # duplicate detail count
@@ -113,6 +153,7 @@ def db_media_duplicate_detail_count(self, guid):
     return self.db_cursor.fetchall()
 
 
+// TODO port query
 def db_media_duplicate_detail(self, guid, offset=0, records=None):
     """
     # list duplicate detail
@@ -127,6 +168,7 @@ def db_media_duplicate_detail(self, guid, offset=0, records=None):
     return self.db_cursor.fetchall()
 
 
+// TODO port query
 def db_media_path_by_uuid(self, media_uuid):
     """
     # find path for media by uuid
@@ -140,6 +182,7 @@ def db_media_path_by_uuid(self, media_uuid):
         return None
 
 
+// TODO port query
 def db_media_rating_update(self, media_guid, user_id, status_text):
     """
     # set favorite status for media
@@ -166,6 +209,7 @@ def db_media_rating_update(self, media_guid, user_id, status_text):
         return None
 
 
+// TODO port query
 def db_media_watched_checkpoint_update(self, media_guid, user_id, ffmpeg_time):
     """
     # set checkpoint for media (so can pick up where left off per user)
@@ -183,6 +227,7 @@ def db_media_watched_checkpoint_update(self, media_guid, user_id, ffmpeg_time):
     self.db_commit()
 
 
+// TODO port query
 def db_update_media_id(self, media_guid, metadata_guid):
     """
     # update the mediaid
@@ -191,6 +236,7 @@ def db_update_media_id(self, media_guid, metadata_guid):
                            ' where mm_media_guid = $2', (metadata_guid, media_guid))
 
 
+// TODO port query
 def db_update_media_json(self, media_guid, mediajson):
     """
     # update the mediajson
@@ -200,6 +246,7 @@ def db_update_media_json(self, media_guid, mediajson):
                            (mediajson, media_guid))
 
 
+// TODO port query
 def db_media_by_metadata_guid(self, metadata_guid, media_class_uuid):
     """
     # fetch all media with METADATA match
@@ -214,6 +261,7 @@ def db_media_by_metadata_guid(self, metadata_guid, media_class_uuid):
     return self.db_cursor.fetchall()
 
 
+// TODO port query
 def db_media_image_path(self, media_id):
     """
     # grab image path for media id NOT metadataid
@@ -228,6 +276,7 @@ def db_media_image_path(self, media_id):
         return None
 
 
+// TODO port query
 def db_read_media_metadata_both(self, media_guid):
     """
     # read in metadata by id
@@ -248,6 +297,7 @@ def db_read_media_metadata_both(self, media_guid):
         return None
 
 
+// TODO port query
 def db_read_media_path_like(self, media_path):
     """
     # do a like class path match for trailers and extras
@@ -266,8 +316,7 @@ def db_read_media_path_like(self, media_path):
         return None
 
 
-
-
+// TODO port query
 def db_read_media_new(self, offset=None, records=None, search_value=None, days_old=7):
     """
     # new media
@@ -298,15 +347,7 @@ def db_read_media_new(self, offset=None, records=None, search_value=None, days_o
     return self.db_cursor.fetchall()
 
 
-def db_read_media_ffprobe(self):
-    """
-    Read in all media that needs ffprobe
-    """
-    self.db_cursor.execute('select mm_media_guid from mm_media'
-                           ' where mm_media_ffprobe_json is NULL')
-    return self.db_cursor.fetchall()
-
-
+// TODO port query
 def db_media_ffmeg_update(self, media_guid, ffmpeg_json):
     """
     Update the ffprobe json data
@@ -315,27 +356,14 @@ def db_media_ffmeg_update(self, media_guid, ffmpeg_json):
                            ' where mm_media_guid = $2', (ffmpeg_json, media_guid))
 
 
-def db_unmatched_list_count(self):
-    self.db_cursor.execute('select count(*) from mm_media'
-                           ' where mm_media_metadata_guid is NULL')
-    return self.db_cursor.fetchone()[0]
-
-
-def db_unmatched_list(self, offset=0, list_limit=None):
-    self.db_cursor.execute('select mm_media_guid,'
-                           ' mm_media_path from mm_media'
-                           ' where mm_media_metadata_guid is NULL'
-                           ' order by mm_media_path offset $1 limit $2',
-                           (offset, list_limit))
-    return self.db_cursor.fetchall()
-
-
+// TODO port query
 def db_ffprobe_data(self, guid):
     self.db_cursor.execute('select mm_media_ffprobe_json from mm_media'
                            ' where mm_media_guid = $1', (guid,))
     return self.db_cursor.fetchone()[0]
 
 
+// TODO port query
 def db_ffprobe_all_media_guid(self, media_uuid, media_class_uuid):
     """
     # fetch all media with METADATA match

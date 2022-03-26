@@ -7,8 +7,8 @@ mod mk_lib_common_enum_media_type;
 
 pub async fn mk_lib_database_media_movie_genre_count(pool: &sqlx::PgPool)
                                                      -> Result<Vec<PgRow>, sqlx::Error> {
-    let rows: Vec<PgRow> = sqlx::query("select mm_metadata_json->\'genres\' as gen, \
-        count(mm_metadata_json->\'genres\') as gen_count \
+    let rows: Vec<PgRow> = sqlx::query("select mm_metadata_json->'genres' as gen, \
+        count(mm_metadata_json->'genres') as gen_count \
         from ((select distinct on (mm_media_metadata_guid) \
         mm_metadata_json from mm_media, mm_metadata_movie \
         where mm_media_class_guid = $1 \

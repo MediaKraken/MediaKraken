@@ -60,6 +60,7 @@ pub async fn mk_lib_database_metadata_sports_read(pool: &sqlx::PgPool,
 
 /*
 
+// TODO port query
 async def db_meta_sports_guid_by_thesportsdb(self, thesports_uuid, db_connection=None):
     """
     # metadata guid by thesportsdb id
@@ -71,6 +72,7 @@ async def db_meta_sports_guid_by_thesportsdb(self, thesports_uuid, db_connection
                                   thesports_uuid)
 
 
+// TODO port query
 def db_meta_sports_guid_by_event_name(self, event_name):
     """
     # fetch guid by event name
@@ -85,6 +87,7 @@ def db_meta_sports_guid_by_event_name(self, event_name):
 
 
 
+// TODO port query
 def db_metathesportsdb_select_guid(self, guid):
     """
     # select
@@ -98,6 +101,7 @@ def db_metathesportsdb_select_guid(self, guid):
         return None
 
 
+// TODO port query
 def db_metathesportsdb_insert(self, series_id_json, event_name, show_detail,
                               image_json):
     """
@@ -115,6 +119,7 @@ def db_metathesportsdb_insert(self, series_id_json, event_name, show_detail,
     return new_guid
 
 
+// TODO port query
 def db_metathesports_update(self, series_id_json, event_name, show_detail,
                             sportsdb_id):
     """

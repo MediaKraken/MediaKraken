@@ -15,6 +15,7 @@ pub async fn mk_lib_database_metadata_exists_tv(pool: &sqlx::PgPool,
 
 /*
 
+// TODO port query
 async def db_metatv_guid_by_tmdb(self, tmdb_uuid, db_connection=None):
     """
     # metadata guid by tmdb id
@@ -24,6 +25,7 @@ async def db_metatv_guid_by_tmdb(self, tmdb_uuid, db_connection=None):
                                   tmdb_uuid)['mm_metadata_tvshow_guid']
 
 
+// TODO port query
 async def db_meta_tv_detail(self, guid, db_connection=None):
     """
     # return metadata for tvshow
@@ -40,6 +42,7 @@ async def db_meta_tv_detail(self, guid, db_connection=None):
                                   guid)
 
 
+// TODO port query
 async def db_meta_tv_episode(self, show_guid, season_number, episode_number, db_connection=None):
     """
     # grab episode detail
@@ -56,6 +59,7 @@ async def db_meta_tv_episode(self, show_guid, season_number, episode_number, db_
         show_guid, str(season_number), str(episode_number))
 
 
+// TODO port query
 async def db_meta_tv_epsisode_by_id(self, show_guid, show_episode_id, db_connection=None):
     """
     # grab episode detail by eps id
@@ -77,6 +81,7 @@ async def db_meta_tv_epsisode_by_id(self, show_guid, show_episode_id, db_connect
                                   show_guid)
 
 
+// TODO port query
 async def db_meta_tv_eps_season(self, show_guid, db_connection=None):
     """
     # grab tvmaze ep data for eps per season
@@ -96,6 +101,7 @@ async def db_meta_tv_eps_season(self, show_guid, db_connection=None):
     return season_data
 
 
+// TODO port query
 async def db_meta_tv_list(self, offset=0, records=None, search_value=None, db_connection=None):
     """
     # return list of tvshows
@@ -113,6 +119,7 @@ async def db_meta_tv_list(self, offset=0, records=None, search_value=None, db_co
                                offset, records)
 
 
+// TODO port query
 async def db_meta_tv_list_count(self, search_value=None, db_connection=None):
     """
     # tvshow count
@@ -125,6 +132,7 @@ async def db_meta_tv_list_count(self, search_value=None, db_connection=None):
         return await db_conn.fetchval('select count(*) from mm_metadata_tvshow')
 
 
+// TODO port query
 async def db_meta_tv_season_eps_list(self, show_guid, season_number, db_connection=None):
     """
     # grab episodes within the season
@@ -154,6 +162,7 @@ async def db_meta_tv_season_eps_list(self, show_guid, season_number, db_connecti
     return episode_data
 
 
+// TODO port query
 async def db_meta_tv_count_by_id(self, guid, db_connection=None):
     """
     # does movie exist already by provider id
@@ -163,6 +172,7 @@ async def db_meta_tv_count_by_id(self, guid, db_connection=None):
 
 
 
+// TODO port query
 def db_metatv_insert_tmdb(self, uuid_id, series_id, data_title, data_json,
                           data_image_json):
     """
@@ -178,6 +188,7 @@ def db_metatv_insert_tmdb(self, uuid_id, series_id, data_title, data_json,
     self.db_commit()
 
 
+// TODO port query
 def db_metatv_guid_by_tvshow_name(self, tvshow_name, tvshow_year=None):
     """
     # metadata guid by name
@@ -222,6 +233,7 @@ def db_metatv_guid_by_tvshow_name(self, tvshow_name, tvshow_year=None):
     return metadata_guid
 
 
+// TODO port query
 def db_metatv_guid_by_imdb(self, imdb_uuid):
     """
     # metadata guid by imdb id
@@ -234,6 +246,7 @@ def db_metatv_guid_by_imdb(self, imdb_uuid):
         return None
 
 
+// TODO port query
 def db_metatv_guid_by_tvmaze(self, tvmaze_uuid):
     """
     # metadata guid by tvmaze id
@@ -246,6 +259,7 @@ def db_metatv_guid_by_tvmaze(self, tvmaze_uuid):
         return None
 
 
+// TODO port query
 def db_metatv_guid_by_tmdb(self, tmdb_uuid):
     """
     # metadata guid by tmdb id
@@ -259,6 +273,7 @@ def db_metatv_guid_by_tmdb(self, tmdb_uuid):
         return None
 
 
+// TODO port query
 def db_metatv_guid_by_rt(self, rt_uuid):
     """
     # metadata guid by rt id
@@ -272,6 +287,7 @@ def db_metatv_guid_by_rt(self, rt_uuid):
         return None
 
 
+// TODO port query
 def db_meta_tvshow_list_count(self, search_value=None):
     """
     # tvshow count
@@ -280,6 +296,7 @@ def db_meta_tvshow_list_count(self, search_value=None):
     return self.db_cursor.fetchone()[0]
 
 
+// TODO port query
 def db_meta_tvshow_list(self, offset=0, records=None, search_value=None):
     """
     # return list of tvshows
@@ -299,6 +316,7 @@ def db_meta_tvshow_list(self, offset=0, records=None, search_value=None):
     return self.db_cursor.fetchall()
 
 
+// TODO port query
 def db_meta_tvshow_update_image(self, image_json, metadata_uuid):
     """
     # update image json
@@ -310,6 +328,7 @@ def db_meta_tvshow_update_image(self, image_json, metadata_uuid):
     self.db_commit()
 
 
+// TODO port query
 def db_meta_tvshow_images_to_update(self, image_type):
     """
     # fetch tv rows to update
@@ -325,6 +344,7 @@ def db_meta_tvshow_images_to_update(self, image_type):
     return self.db_cursor.fetchall()
 
 
+// TODO port query
 def db_meta_tvshow_detail(self, guid):
     """
     # return metadata for tvshow
@@ -342,6 +362,7 @@ def db_meta_tvshow_detail(self, guid):
         return None
 
 
+// TODO port query
 def db_read_tvmeta_episodes(self, show_guid):
     """
     # read in the tv episodes metadata by guid
@@ -349,6 +370,7 @@ def db_read_tvmeta_episodes(self, show_guid):
     return self.db_cursor.fetchall()
 
 
+// TODO port query
 def db_read_tvmeta_eps_season(self, show_guid):
     """
     # grab tvmaze ep data for eps per season
@@ -379,6 +401,7 @@ def db_read_tvmeta_eps_season(self, show_guid):
     return season_data
 
 
+// TODO port query
 def db_read_tvmeta_season_eps_list(self, show_guid, season_number):
     """
     # grab episodes within the season
@@ -418,6 +441,7 @@ def db_read_tvmeta_season_eps_list(self, show_guid, season_number):
     return episode_data
 
 
+// TODO port query
 def db_read_tvmeta_epsisode_by_id(self, show_guid, show_episode_id):
     """
     # grab episode detail by eps id
@@ -437,6 +461,7 @@ def db_read_tvmeta_epsisode_by_id(self, show_guid, show_episode_id):
     return self.db_cursor.fetchone()
 
 
+// TODO port query
 def db_read_tvmeta_episode(self, show_guid, season_number, episode_number):
     """
     # grab episode detail
@@ -477,6 +502,7 @@ def db_read_tvmeta_episode(self, show_guid, season_number, episode_number):
 # - 1)->'season'
 
 # poster, backdrop, etc
+// TODO port query
 def db_meta_tvshow_image_random(self, return_image_type='Poster'):
     """
     Find random tv show image

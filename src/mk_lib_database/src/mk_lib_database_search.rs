@@ -1,4 +1,5 @@
 /*
+// TODO port query
 def db_search(self, search_string, search_type='Local', search_movie=True, search_tvshow=True,
               search_album=True, search_image=True, search_publication=True, search_game=True):
     """

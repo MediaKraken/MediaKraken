@@ -100,6 +100,7 @@ pub async fn mk_lib_database_metadata_game_read(pool: &sqlx::PgPool,
 
 /*
 
+// TODO port query
 async def db_meta_game_insert(self, game_system_id, game_short_name, game_name, game_json,
                               db_connection=None):
     """
@@ -117,6 +118,7 @@ async def db_meta_game_insert(self, game_system_id, game_short_name, game_name, 
     return new_game_id
 
 
+// TODO port query
 async def db_meta_game_update(self, game_system_id, game_short_name, game_name, game_json,
                               db_connection=None):
     """
@@ -130,6 +132,7 @@ async def db_meta_game_update(self, game_system_id, game_short_name, game_name, 
                           game_json, game_system_id, game_short_name, game_name)
 
 
+// TODO port query
 async def db_meta_game_by_name(self, game_short_name, game_name, db_connection=None):
     """
     # return game info by name
@@ -141,6 +144,7 @@ async def db_meta_game_by_name(self, game_short_name, game_name, db_connection=N
                                " or game_short_name = $2", game_name, game_short_name)
 
 
+// TODO port query
 async def db_meta_game_update_by_guid(self, game_id, game_json, db_connection=None):
     """
     Update game by uuid
@@ -151,6 +155,7 @@ async def db_meta_game_update_by_guid(self, game_id, game_json, db_connection=No
                           game_json, game_id)
 
 
+// TODO port query
 def db_meta_game_by_system_count(self, guid):
     """
     # game list by system count
@@ -162,6 +167,7 @@ def db_meta_game_by_system_count(self, guid):
     return self.db_cursor.fetchone()[0]
 
 
+// TODO port query
 def db_meta_game_by_system(self, guid, offset=0, records=None):
     """
     # game list by system count
@@ -177,6 +183,7 @@ def db_meta_game_by_system(self, guid, offset=0, records=None):
         return None
 
 
+// TODO port query
 def db_meta_game_by_name_and_system(self, game_name, game_system_short_name):
     """
     # game by name and system short name
@@ -195,6 +202,7 @@ def db_meta_game_by_name_and_system(self, game_name, game_system_short_name):
 
 
 # poster, backdrop, etc
+// TODO port query
 def db_meta_game_image_random(self, return_image_type="Poster"):
     """
     Find random game image
@@ -216,6 +224,7 @@ def db_meta_game_image_random(self, return_image_type="Poster"):
         return None, None
 
 
+// TODO port query
 def db_meta_game_category_by_name(self, category_name):
     self.db_cursor.execute(
         "select gc_id from mm_game_category where gc_category = $1", (category_name,))
@@ -225,6 +234,7 @@ def db_meta_game_category_by_name(self, category_name):
         return None
 
 
+// TODO port query
 def db_meta_game_category_add(self, category_name):
     category_uuid = uuid.uuid4()
     self.db_cursor.execute("insert into mm_game_category (gc_id, gc_category)"

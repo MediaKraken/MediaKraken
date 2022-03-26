@@ -23,6 +23,7 @@ pub async fn mk_lib_database_meta_tv_live_read(pool: &sqlx::PgPool,
 }
 
 /*
+// TODO port query
 def db_tv_stations_read(self):
     """
     # read the stations
@@ -35,6 +36,7 @@ def db_tv_stations_read(self):
     return self.db_cursor.fetchall()
 
 
+// TODO port query
 def db_tv_stations_read_stationid_list(self):
     """
     # read the stationid list
@@ -44,6 +46,7 @@ def db_tv_stations_read_stationid_list(self):
     return self.db_cursor.fetchall()
 
 
+// TODO port query
 def db_tv_station_insert(self, station_id, channel_id):
     """
     # insert station/channel unless it exists
@@ -59,6 +62,7 @@ def db_tv_station_insert(self, station_id, channel_id):
         return new_guid
 
 
+// TODO port query
 def db_tv_station_exist(self, station_id, channel_id):
     """
     # channel exist check
@@ -70,6 +74,7 @@ def db_tv_station_exist(self, station_id, channel_id):
     return self.db_cursor.fetchone()[0]
 
 
+// TODO port query
 def db_tv_station_update(self, station_name, station_id, station_json):
     """
     # update station/channel info
@@ -81,6 +86,7 @@ def db_tv_station_update(self, station_name, station_id, station_json):
     self.db_commit()
 
 
+// TODO port query
 def db_tv_schedule_insert(self, station_id, schedule_date, schedule_json):
     """
     # insert schedule info
@@ -107,6 +113,7 @@ def db_tv_schedule_insert(self, station_id, schedule_date, schedule_json):
         return new_guid
 
 
+// TODO port query
 def db_tv_program_insert(self, program_id, program_json):
     """
     # insert program info
@@ -131,6 +138,7 @@ def db_tv_program_insert(self, program_id, program_json):
         return new_guid
 
 
+// TODO port query
 def db_tv_schedule_by_date(self, display_date):
     """
     # tv shows for schedule display

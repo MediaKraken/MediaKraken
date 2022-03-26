@@ -42,6 +42,7 @@ pub async fn mk_lib_database_metadata_music_album_read(pool: &sqlx::PgPool,
 }
 
 /*
+// TODO port query
 async def db_meta_music_album_by_guid(self, guid, db_connection=None):
     """
     # return album data by guid
@@ -51,6 +52,7 @@ async def db_meta_music_album_by_guid(self, guid, db_connection=None):
                                   guid)
 
 
+// TODO port query
 async def db_meta_music_songs_by_album_guid(self, guid, db_connection=None):
     """
     # return song list from album guid
@@ -62,6 +64,7 @@ async def db_meta_music_songs_by_album_guid(self, guid, db_connection=None):
 
 
 
+// TODO port query
 def db_meta_song_list(self, offset=0, records=None, search_value=None):
     """
     # return song metadata list
@@ -70,6 +73,7 @@ def db_meta_song_list(self, offset=0, records=None, search_value=None):
     return self.db_cursor.fetchall()
 
 
+// TODO port query
 def db_music_lookup(self, artist_name, album_name, song_title):
     """
     # query to see if song is in local DB
@@ -91,6 +95,7 @@ def db_music_lookup(self, artist_name, album_name, song_title):
         return None
 
 
+// TODO port query
 def db_meta_musician_by_guid(self, guid):
     """
     # return musician data by guid
@@ -103,6 +108,7 @@ def db_meta_musician_by_guid(self, guid):
         return None
 
 
+// TODO port query
 def db_meta_musician_add(self, data_name, data_id, data_json):
     """
     # insert musician
@@ -118,6 +124,7 @@ def db_meta_musician_add(self, data_name, data_id, data_json):
     return new_guid
 
 
+// TODO port query
 def db_meta_album_by_guid(self, guid):
     """
     # return album data by guid
@@ -130,6 +137,7 @@ def db_meta_album_by_guid(self, guid):
         return None
 
 
+// TODO port query
 def db_meta_album_add(self, data_name, data_id, data_json):
     """
     # insert album
@@ -145,6 +153,7 @@ def db_meta_album_add(self, data_name, data_id, data_json):
     return new_guid
 
 
+// TODO port query
 def db_meta_song_by_guid(self, guid):
     """
     # return song data by guid
@@ -157,6 +166,7 @@ def db_meta_song_by_guid(self, guid):
         return None
 
 
+// TODO port query
 def db_meta_song_add(self, data_name, data_id, data_json):
     """
     # insert song
@@ -170,6 +180,7 @@ def db_meta_song_add(self, data_name, data_id, data_json):
     return new_guid
 
 
+// TODO port query
 def db_meta_songs_by_album_guid(self, guid):
     """
     # return song list from ablum guid
@@ -179,6 +190,7 @@ def db_meta_songs_by_album_guid(self, guid):
     return self.db_cursor.fetchall()
 
 
+// TODO port query
 def db_meta_album_list(self, offset=0, records=None, search_value=None):
     """
     # return albums metadatalist
@@ -201,6 +213,7 @@ def db_meta_album_list(self, offset=0, records=None, search_value=None):
     return self.db_cursor.fetchall()
 
 
+// TODO port query
 def db_meta_musician_list(self, offset=0, records=None, search_value=None):
     """
     # return musician metadatalist
@@ -220,6 +233,7 @@ def db_meta_musician_list(self, offset=0, records=None, search_value=None):
     return self.db_cursor.fetchall()
 
 
+// TODO port query
 def db_meta_album_image_random(self):
     """
     Find random album cover image
@@ -237,6 +251,7 @@ def db_meta_album_image_random(self):
         return None, None
 
 
+// TODO port query
 def db_meta_music_by_provider_uuid(self, provider, uuid_id):
     try:
         self.db_cursor.execute('select mm_metadata_music_guid from mm_metadata_music'

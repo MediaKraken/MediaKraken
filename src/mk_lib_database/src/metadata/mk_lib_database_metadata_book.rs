@@ -68,6 +68,7 @@ pub async fn mk_lib_database_metadata_book_count(pool: &sqlx::PgPool,
 
 /*
 
+// TODO port query
 def db_meta_book_guid_by_isbn(self, isbn_uuid, isbn13_uuid):
     """
     # metadata guid by isbm id
@@ -82,6 +83,7 @@ def db_meta_book_guid_by_isbn(self, isbn_uuid, isbn13_uuid):
         return None
 
 
+// TODO port query
 def db_meta_book_guid_by_name(self, book_name):
     """
     # metadata guid by name
@@ -97,6 +99,7 @@ def db_meta_book_guid_by_name(self, book_name):
         return None
 
 
+// TODO port query
 def db_meta_book_insert(self, json_data):
     """
     # insert metadata json from isbndb
@@ -121,6 +124,7 @@ def db_meta_book_insert(self, json_data):
 
 
 
+// TODO port query
 def db_meta_book_image_random(self, return_image_type='Cover'):
     """
     Find random book image

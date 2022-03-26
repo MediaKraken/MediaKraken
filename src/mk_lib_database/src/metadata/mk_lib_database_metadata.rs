@@ -1,5 +1,6 @@
 /*
 
+// TODO port query
 def db_read_media_metadata(self, media_guid):
     """
     # read in the media with corresponding metadata
@@ -18,6 +19,7 @@ def db_read_media_metadata(self, media_guid):
         return None
 
 
+// TODO port query
 def db_meta_update(self, series_id_json, result_json, image_json):
     """
     # update record by tmdb
@@ -33,6 +35,7 @@ def db_meta_update(self, series_id_json, result_json, image_json):
     self.db_commit()
 
 
+// TODO port query
 def db_meta_genre_list_count(self):
     """
     # count all the generes
@@ -43,6 +46,7 @@ def db_meta_genre_list_count(self):
     return len(self.db_cursor.fetchall())
 
 
+// TODO port query
 def db_meta_genre_list(self, offset=0, records=None):
     """
     # grab all the generes
@@ -54,6 +58,7 @@ def db_meta_genre_list(self, offset=0, records=None):
     return self.db_cursor.fetchall()
 
 
+// TODO port query
 def db_meta_movie_count_genre(self):
     """
     # movie count by genre
@@ -65,6 +70,7 @@ def db_meta_movie_count_genre(self):
     return self.db_cursor.fetchall()
 
 
+// TODO port query
 def db_meta_guid_by_imdb(self, imdb_uuid):
     """
     # metadata guid by imdb id
@@ -78,6 +84,7 @@ def db_meta_guid_by_imdb(self, imdb_uuid):
         return None
 
 
+// TODO port query
 def db_meta_guid_by_tmdb(self, tmdb_uuid):
     """
     # see if metadata exists type and id
@@ -92,6 +99,7 @@ def db_meta_guid_by_tmdb(self, tmdb_uuid):
         return None
 
 
+// TODO port query
 def db_meta_insert_tmdb(self, uuid_id, series_id, data_title, data_json,
                         data_image_json):
     """
@@ -107,6 +115,7 @@ def db_meta_insert_tmdb(self, uuid_id, series_id, data_title, data_json,
     self.db_commit()
 
 
+// TODO port query
 def db_meta_tmdb_count(self, tmdb_id):
     """
     # see if metadata exists via themovedbid
@@ -116,6 +125,7 @@ def db_meta_tmdb_count(self, tmdb_id):
     return self.db_cursor.fetchone()[0]
 
 
+// TODO port query
 def db_meta_movie_count(self, search_value=None):
     if search_value is not None:
         self.db_cursor.execute('select count(*) from mm_metadata_movie '
@@ -126,6 +136,7 @@ def db_meta_movie_count(self, search_value=None):
     return self.db_cursor.fetchone()[0]
 
 
+// TODO port query
 def db_meta_movie_list(self, offset=0, records=None, search_value=None):
     """
     # return list of movies
@@ -153,6 +164,7 @@ def db_meta_movie_list(self, offset=0, records=None, search_value=None):
     return self.db_cursor.fetchall()
 
 
+// TODO port query
 def db_meta_fetch_media_id_json(self, media_id_id,
                                 collection_media=False):
     """
@@ -176,6 +188,7 @@ def db_meta_fetch_media_id_json(self, media_id_id,
         return None
 
 
+// TODO port query
 def db_meta_fetch_series_media_id_json(self, media_id_id,
                                        collection_media=False):
     """
@@ -193,6 +206,7 @@ def db_meta_fetch_series_media_id_json(self, media_id_id,
             return None
 
 
+// TODO port query
 def db_find_metadata_guid(self, media_name, media_release_year):
     """
     Lookup id by name/year
@@ -226,6 +240,7 @@ def db_find_metadata_guid(self, media_name, media_release_year):
     return metadata_guid
 
 
+// TODO port query
 def db_meta_update_media_id_from_scudlee(self, media_tvid, media_imdbid,
                                          media_aniid):
     """
@@ -282,6 +297,7 @@ def db_meta_update_media_id_from_scudlee(self, media_tvid, media_imdbid,
                                                                            'mm_metadata_tvshow_guid']))
 
 
+// TODO port query
 def db_meta_queue_list(self, user_id, offset=0, records=None, search_value=None):
     # TODO sort by release date as well
     # TODO use the search value

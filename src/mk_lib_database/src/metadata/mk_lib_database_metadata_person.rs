@@ -115,6 +115,7 @@ pub async fn mk_lib_database_meta_person_by_name(pool: &sqlx::PgPool,
 
 /*
 
+// TODO port query
 async def db_meta_person_as_seen_in(self, person_guid, db_connection=None):
     """
     # find other media for person
@@ -132,6 +133,7 @@ async def db_meta_person_as_seen_in(self, person_guid, db_connection=None):
                                + '}]\' order by LOWER(mm_metadata_name)')
 
 
+// TODO port query
 async def db_meta_person_insert(self, uuid_id, person_name, media_id, person_json,
                                 image_path=None, db_connection=None):
     """
@@ -148,6 +150,7 @@ async def db_meta_person_insert(self, uuid_id, person_name, media_id, person_jso
     await db_conn.execute('commit')
 
 
+// TODO port query
 async def db_meta_person_update(self, provider_name, provider_uuid, person_bio, person_image,
                                 db_connection=None):
     """
@@ -160,6 +163,7 @@ async def db_meta_person_update(self, provider_name, provider_uuid, person_bio, 
     await db_conn.execute('commit')
 
 
+// TODO port query
 async def db_meta_person_insert_cast_crew(self, meta_type, person_json, db_connection=None):
     """
     # batch insert from json of crew/cast

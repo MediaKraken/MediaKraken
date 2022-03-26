@@ -82,6 +82,7 @@ pub async fn mk_lib_database_metadata_movie_count(pool: &sqlx::PgPool,
 
 /*
 
+// TODO port query
 async def db_meta_movie_by_media_uuid(self, media_guid, db_connection=None):
     """
     # read in metadata via media id
@@ -93,6 +94,7 @@ async def db_meta_movie_by_media_uuid(self, media_guid, db_connection=None):
                                   ' and mm_media_guid = $1', media_guid)
 
 
+// TODO port query
 async def db_meta_movie_detail(self, media_guid, db_connection=None):
     """
     # read in the media with corresponding metadata
@@ -108,6 +110,7 @@ async def db_meta_movie_detail(self, media_guid, db_connection=None):
                                   media_guid)
 
 
+// TODO port query
 async def db_meta_movie_status_update(self, metadata_guid, user_id, status_text,
                                       db_connection=None):
     """
@@ -137,6 +140,7 @@ async def db_meta_movie_status_update(self, metadata_guid, user_id, status_text,
                                         json_data)
 
 
+// TODO port query
 async def db_meta_movie_json_update(self, media_guid, metadata_json, db_connection=None):
     """
     # update the metadata json
@@ -149,6 +153,7 @@ async def db_meta_movie_json_update(self, media_guid, metadata_json, db_connecti
 
 
 # poster, backdrop, etc
+// TODO port query
 def db_meta_movie_image_random(self, return_image_type='Poster'):
     """
     Find random movie image
@@ -169,6 +174,7 @@ def db_meta_movie_image_random(self, return_image_type='Poster'):
         return None, None
 
 
+// TODO port query
 def db_meta_movie_update_castcrew(self, cast_crew_json, metadata_id):
     """
     Update the cast/crew for selected media

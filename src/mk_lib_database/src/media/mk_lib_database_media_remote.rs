@@ -1,6 +1,7 @@
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 /*
+// TODO port query
 def db_insert_remote_media(self, media_link_uuid, media_uuid, media_class_uuid,
                            media_metadata_uuid, media_ffprobe_json):
     """
@@ -20,6 +21,7 @@ def db_insert_remote_media(self, media_link_uuid, media_uuid, media_class_uuid,
     return new_guid
 
 
+// TODO port query
 def db_read_remote_media(self, media_guid=None):
     """
     # read in all media unless guid specified
@@ -36,6 +38,7 @@ def db_read_remote_media(self, media_guid=None):
         return self.db_cursor.fetchall()
 
 
+// TODO port query
 def db_known_remote_media_count(self):
     """
     # count known media
@@ -80,6 +83,7 @@ def db_known_remote_media_count(self):
 # self.db_media_uuid_by_class(row_data[1]), metadata_guid[0], json.dumps(row_data[2]))
 
 
+// TODO port query
 def db_media_remote_read_new(self, date_last_sync, sync_movie=None, sync_tv=None,
                              sync_sports=None, sync_music=None, sync_music_video=None,
                              sync_book=None):

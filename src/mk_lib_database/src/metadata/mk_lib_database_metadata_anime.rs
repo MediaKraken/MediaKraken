@@ -4,6 +4,7 @@ use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 /*
 
+// TODO port query
 def db_meta_anime_title_insert(self, ani_media_id_json, ani_name, ani_json,
                                ani_image_local, ani_user_json, mapping_data, before_data):
     """
@@ -25,6 +26,7 @@ def db_meta_anime_title_insert(self, ani_media_id_json, ani_name, ani_json,
     return new_guid
 
 
+// TODO port query
 def db_meta_anime_title_search(self, title_to_search):
     """
     search for title
@@ -39,6 +41,7 @@ def db_meta_anime_title_search(self, title_to_search):
         return None
 
 
+// TODO port query
 def db_meta_anime_update_meta_id(self, media_id_json, mapping_json, mapping_before):
     """
     Update the media id json from scudlee data
@@ -54,6 +57,7 @@ def db_meta_anime_update_meta_id(self, media_id_json, mapping_json, mapping_befo
     self.db_commit()
 
 
+// TODO port query
 def db_meta_anime_meta_by_id(self, anidb_id):
     """
     Return count of records with id
