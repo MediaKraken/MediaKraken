@@ -2,6 +2,21 @@ use sqlx::postgres::PgRow;
 use uuid::Uuid;
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
+pub async fn mk_lib_database_media_update_metadata_guid(pool: &sqlx::PgPool,
+                                                        mm_media_guid: Uuid,
+                                                        mm_metadata_guid: Uuid,)
+                                                        -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
+    sqlx::query("update mm_media set mm_media_metadata_guid = $1 \
+        where mm_media_guid = $2")
+        .bind(mm_metadata_guid)
+        .bind(mm_media_guid)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(())
+}
+
 pub async fn mk_lib_database_media_unmatched_count(pool: &sqlx::PgPool)
                                                    -> Result<(i32), sqlx::Error> {
     let row: (i32, ) = sqlx::query_as("select count(*) from mm_media \
@@ -91,6 +106,99 @@ pub async fn mk_lib_database_media_insert(pool: &sqlx::PgPool,
     Ok(())
 }
 
+pub async fn mk_lib_database_media_duplicate_detail_count(pool: &sqlx::PgPool,
+                                                          mm_metadata_guid: Uuid)
+                                                          -> Result<(i32), sqlx::Error> {
+    let row: (i32, ) = sqlx::query_as("select count(*) from mm_media \
+        where mm_media_metadata_guid = $1")
+        .bind(mm_metadata_guid)
+        .fetch_one(pool)
+        .await?;
+    Ok(row.0)
+}
+
+pub async fn mk_lib_database_media_duplicate_count(pool: &sqlx::PgPool)
+                                                   -> Result<(i32), sqlx::Error> {
+    // TODO technically this will "dupe" things like subtitles atm
+    let row: (i32, ) = sqlx::query_as("select count(*) from (select mm_media_metadata_guid \
+        from mm_media where mm_media_metadata_guid is not null \
+        group by mm_media_metadata_guid HAVING count(*) > 1) as total")
+        .fetch_one(pool)
+        .await?;
+    Ok(row.0)
+}
+
+pub async fn mk_lib_database_media_path_by_uuid(pool: &sqlx::PgPool,
+                                                mm_media_guid: Uuid)
+                                                -> Result<(String), sqlx::Error> {
+    let row: (String, ) = sqlx::query_as("select mm_media_path from mm_media \
+        where mm_media_guid = $1")
+        .bind(mm_media_guid)
+        .fetch_one(pool)
+        .await?;
+    Ok(row.0)
+}
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMediaDuplicateList {
+	mm_media_metadata_guid: uuid::Uuid,
+	mm_media_name: String,
+	mm_count: i64,
+}
+
+pub async fn mk_lib_database_media_duplicate(pool: &sqlx::PgPool, offset: i32, limit: i32)
+                                             -> Result<(DBMediaDuplicateList), sqlx::Error> {
+    // TODO technically this will "dupe" things like subtitles atm
+    let select_query = sqlx::query("select mm_media_metadata_guid, \
+        mm_media_name, count(*) as mm_count \
+        from mm_media, mm_metadata_movie \
+        where mm_media_metadata_guid is not null \
+        and mm_media_metadata_guid = mm_metadata_guid \
+        group by mm_media_metadata_guid, \
+        mm_media_name HAVING count(*) > 1 order by LOWER(mm_media_name) \
+        offset $1 limit $2")
+        .bind(offset)
+        .bind(limit);
+    let table_rows: Vec<DBMediaDuplicateList> = select_query
+        .map(|row: PgRow| DBMediaDuplicateList {
+            mm_media_metadata_guid: row.get("mm_media_metadata_guid"),
+            mm_media_name: row.get("mm_media_name"),
+            mm_count: row.get("mm_count"),
+        })
+        .fetch_all(pool)
+        .await?;
+    Ok(table_rows)
+}
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMediaDuplicateDetailList {
+	mm_media_guid: uuid::Uuid,
+	mm_media_path: String,
+	mm_media_ffprobe_json: Json,
+}
+
+pub async fn mk_lib_database_media_duplicate_detail(pool: &sqlx::PgPool,
+                                                    mm_metadata_guid: Uuid,
+                                                    offset: i32, limit: i32)
+                                                    -> Result<(DBMediaDuplicateDetailList), sqlx::Error> {
+    let select_query = sqlx::query("select mm_media_guid, \
+        mm_media_path, mm_media_ffprobe_json \
+        from mm_media where mm_media_guid \
+        in (select mm_media_guid from mm_media \
+        where mm_media_metadata_guid = $1 offset $2 limit $3")
+        .bind(mm_metadata_guid)
+        .bind(offset)
+        .bind(limit);
+    let table_rows: Vec<DBMediaDuplicateDetailList> = select_query
+        .map(|row: PgRow| DBMediaDuplicateDetailList {
+            mm_media_guid: row.get("mm_media_guid"),
+            mm_media_path: row.get("mm_media_path"),
+            mm_media_ffprobe_json: row.get("mm_media_ffprobe_json"),
+        })
+        .fetch_all(pool)
+        .await?;
+    Ok(table_rows)
+}
 
 /*
 // TODO port query
@@ -109,77 +217,6 @@ def db_read_media(self, media_guid=None):
     else:
         self.db_cursor.execute('select * from mm_media')
         return self.db_cursor.fetchall()
-
-
-// TODO port query
-def db_media_duplicate_count(self):
-    """
-    # count the duplicates for pagination
-    """
-    # TODO technically this will "dupe" things like subtitles atm
-    self.db_cursor.execute('select count(*) from (select mm_media_metadata_guid'
-                           ' from mm_media'
-                           ' where mm_media_metadata_guid is not null'
-                           ' group by mm_media_metadata_guid HAVING count(*) > 1) as total')
-    return self.db_cursor.fetchone()[0]
-
-
-// TODO port query
-def db_media_duplicate(self, offset=0, records=None):
-    """
-    # list duplicates
-    """
-    # TODO technically this will "dupe" things like subtitles atm
-    self.db_cursor.execute('select mm_media_metadata_guid,'
-                           'mm_media_name,'
-                           'count(*)'
-                           ' from mm_media, mm_metadata_movie'
-                           ' where mm_media_metadata_guid is not null'
-                           ' and mm_media_metadata_guid = mm_metadata_guid'
-                           ' group by mm_media_metadata_guid,'
-                           ' mm_media_name HAVING count(*) > 1 order by LOWER(mm_media_name)'
-                           ' offset $1 limit $2', (offset, records))
-    return self.db_cursor.fetchall()
-
-
-// TODO port query
-def db_media_duplicate_detail_count(self, guid):
-    """
-    # duplicate detail count
-    """
-    self.db_cursor.execute('select count(*) from mm_media'
-                           ' where mm_media_metadata_guid = $1',
-                           (guid,))
-    return self.db_cursor.fetchall()
-
-
-// TODO port query
-def db_media_duplicate_detail(self, guid, offset=0, records=None):
-    """
-    # list duplicate detail
-    """
-    self.db_cursor.execute('select mm_media_guid,'
-                           'mm_media_path,'
-                           'mm_media_ffprobe_json'
-                           ' from mm_media where mm_media_guid'
-                           ' in (select mm_media_guid from mm_media'
-                           ' where mm_media_metadata_guid = $1 offset $2 limit $3)',
-                           (guid, offset, records))
-    return self.db_cursor.fetchall()
-
-
-// TODO port query
-def db_media_path_by_uuid(self, media_uuid):
-    """
-    # find path for media by uuid
-    """
-    self.db_cursor.execute('select mm_media_path from mm_media'
-                           ' where mm_media_guid = $1',
-                           (media_uuid,))
-    try:
-        return self.db_cursor.fetchone()['mm_media_path']
-    except:
-        return None
 
 
 // TODO port query
@@ -227,13 +264,7 @@ def db_media_watched_checkpoint_update(self, media_guid, user_id, ffmpeg_time):
     self.db_commit()
 
 
-// TODO port query
-def db_update_media_id(self, media_guid, metadata_guid):
-    """
-    # update the mediaid
-    """
-    self.db_cursor.execute('update mm_media set mm_media_metadata_guid = $1'
-                           ' where mm_media_guid = $2', (metadata_guid, media_guid))
+
 
 
 // TODO port query
