@@ -1,3 +1,7 @@
+use uuid::Uuid;
+use sqlx::postgres::PgRow;
+use rocket_dyn_templates::serde::{Serialize, Deserialize};
+
 /*
 
 // TODO port query
@@ -56,6 +60,7 @@ def db_meta_genre_list(self, offset=0, records=None):
                            ' order by jsonb_array_elements_text(mm_metadata_json->\'genres\')b offset $1 limit $2',
                            (offset, records))
     return self.db_cursor.fetchall()
+
 
 
 // TODO port query

@@ -1,3 +1,7 @@
+use uuid::Uuid;
+use sqlx::postgres::PgRow;
+use rocket_dyn_templates::serde::{Serialize, Deserialize};
+
 /*
 // TODO port query
 def db_search(self, search_string, search_type='Local', search_movie=True, search_tvshow=True,
