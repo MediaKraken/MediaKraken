@@ -66,22 +66,44 @@ pub async fn mk_lib_database_metadata_book_count(pool: &sqlx::PgPool,
     }
 }
 
+pub async fn mk_lib_database_metadata_book_guid_by_isbn(pool: &sqlx::PgPool,
+                                                        isbn_uuid: uuid::Uuid,
+                                                        isbn13_uuid: uuid::Uuid)
+                                                       -> Result<(uuid::Uuid), sqlx::Error> {
+    let row: (i32, ) = sqlx::query("select mm_metadata_book_guid \
+        from mm_metadata_book \
+        where mm_metadata_book_isbn = $1 \
+        or mm_metadata_book_isbn13 = $2")
+        .bind(isbn_uuid)
+        .bind(isbn13_uuid)
+        .fetch_one(pool)
+        .await?;
+    Ok(row.0)
+}
+
+pub async fn mk_lib_database_metadata_book_insert(pool: &sqlx::PgPool,
+                                                  json_data: Json)
+                                                 -> Result<(uuid::Uuid), sqlx::Error> {
+    let new_guid = Uuid::new_v4();
+    let mut transaction = pool.begin().await?;
+    sqlx::query("insert into mm_metadata_book (mm_metadata_book_guid, \
+        mm_metadata_book_isbn, \
+        mm_metadata_book_isbn13, \
+        mm_metadata_book_name, \
+        mm_metadata_book_json) \
+        values ($1,$2,$3,$4,$5)")
+        .bind(new_guid)
+        .bind(json_data["data"][0]["isbn10"])
+        .bind(json_data["data"][0]["isbn13"])
+        .bind(json_data["data"][0]["title"])
+        .bind(json_data["data"][0])
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(new_guid)
+}                                                       }
+
 /*
-
-// TODO port query
-def db_meta_book_guid_by_isbn(self, isbn_uuid, isbn13_uuid):
-    """
-    # metadata guid by isbm id
-    """
-    self.db_cursor.execute('select mm_metadata_book_guid'
-                           ' from mm_metadata_book'
-                           ' where mm_metadata_book_isbn = $1 or mm_metadata_book_isbn13 = $2',
-                           (isbn_uuid, isbn13_uuid))
-    try:
-        return self.db_cursor.fetchone()['mm_metadata_book_guid']
-    except:
-        return None
-
 
 // TODO port query
 def db_meta_book_guid_by_name(self, book_name):
@@ -97,31 +119,6 @@ def db_meta_book_guid_by_name(self, book_name):
         return self.db_cursor.fetchone()['mm_metadata_book_guid']
     except:
         return None
-
-
-// TODO port query
-def db_meta_book_insert(self, json_data):
-    """
-    # insert metadata json from isbndb
-    """
-    # json_data = json.dumps(json_data)
-    common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
-                                                         message_text={'book insert': json_data})
-    common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text={
-        'book insert data': json_data['data']})
-    insert_uuid = uuid.uuid4()
-    self.db_cursor.execute('insert into mm_metadata_book (mm_metadata_book_guid,'
-                           ' mm_metadata_book_isbn,'
-                           ' mm_metadata_book_isbn13,'
-                           ' mm_metadata_book_name,'
-                           ' mm_metadata_book_json)'
-                           ' values ($1,$2,$3,$4,$5)',
-                           (insert_uuid, json_data['data'][0]['isbn10'],
-                            json_data['data'][0]['isbn13'], json_data['data'][0]['title'],
-                            json.dumps(json_data['data'][0])))
-    self.db_commit()
-    return insert_uuid
-
 
 
 // TODO port query

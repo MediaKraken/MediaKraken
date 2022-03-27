@@ -51,7 +51,7 @@ def db_meta_anime_update_meta_id(self, media_id_json, mapping_json, mapping_befo
     self.db_cursor.execute('update mm_metadata_anime set mm_metadata_anime_media_id = $1,'
                            ' mm_metadata_anime_mapping = $2,'
                            ' mm_metadata_anime_mapping_before = $3'
-                           ' where mm_metadata_anime_media_id->\'anidb\' ? $4',
+                           ' where mm_metadata_anime_media_id->'anidb' ? $4',
                            (media_id_json, mapping_json, mapping_before,
                             json.loads(media_id_json)['anidb']))
     self.db_commit()
@@ -64,7 +64,7 @@ def db_meta_anime_meta_by_id(self, anidb_id):
     """
     self.db_cursor.execute('select mm_metadata_anime_guid'
                            ' from mm_metadata_anime'
-                           ' where mm_metadata_anime_media_id->\'anidb\' ? $1', (anidb_id,))
+                           ' where mm_metadata_anime_media_id->'anidb' ? $1', (anidb_id,))
     try:
         return self.db_cursor.fetchone()['mm_metadata_anime_guid']
     except:

@@ -63,16 +63,6 @@ async def db_meta_music_songs_by_album_guid(self, guid, db_connection=None):
                                guid)
 
 
-
-// TODO port query
-def db_meta_song_list(self, offset=0, records=None, search_value=None):
-    """
-    # return song metadata list
-    """
-    # TODO, only grab the poster locale from json
-    return self.db_cursor.fetchall()
-
-
 // TODO port query
 def db_music_lookup(self, artist_name, album_name, song_title):
     """

@@ -2,6 +2,50 @@ use uuid::Uuid;
 use sqlx::postgres::PgRow;
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMetadataGenreCountList {
+	gen: String,
+    mm_count: i64,
+}
+
+pub async fn mk_lib_database_metadata_genre_count_read(pool: &sqlx::PgPool)
+                                                       -> Result<Vec<DBMetadataGenreCountList>, sqlx::Error> {
+    let select_query = sqlx::query("select \
+        jsonb_array_elements_text(mm_metadata_json->'genres')b as gen, \
+        count(mm_metadata_json->'genres') as mm_count from mm_metadata_movie group by gen \
+        order by jsonb_array_elements_text(mm_metadata_json->'genres')b")
+    let table_rows: Vec<DBMetadataGenreCountList> = select_query
+		.map(|row: PgRow| DBMetadataGenreCountList {
+			gen: row.get("gen"),
+            mm_count: row.get("mm_count"),
+		})
+		.fetch_all(pool)
+		.await?;
+    Ok(table_rows)
+}
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMetadataGenreList {
+	gen: String,
+}
+
+pub async fn mk_lib_database_metadata_genre_read(pool: &sqlx::PgPool,
+                                                  offset: i32, limit: i32)
+                                                  -> Result<Vec<DBMetadataGenreList>, sqlx::Error> {
+    let select_query = sqlx::query("select distinct \
+        jsonb_array_elements_text(mm_metadata_json->'genres')b as gen from mm_metadata_movie \
+        order by jsonb_array_elements_text(mm_metadata_json->'genres')b offset $1 limit $2")
+        .bind(offset)
+        .bind(limit);
+    let table_rows: Vec<DBMetadataGenreList> = select_query
+		.map(|row: PgRow| DBMetadataGenreList {
+			gen: row.get("gen"),
+		})
+		.fetch_all(pool)
+		.await?;
+    Ok(table_rows)
+}
+
 /*
 
 // TODO port query
@@ -48,45 +92,6 @@ def db_meta_genre_list_count(self):
                            '->\'genres\')b'
                            ' from mm_metadata_movie')
     return len(self.db_cursor.fetchall())
-
-
-// TODO port query
-def db_meta_genre_list(self, offset=0, records=None):
-    """
-    # grab all the generes
-    """
-    self.db_cursor.execute('select distinct jsonb_array_elements_text(mm_metadata_json'
-                           '->\'genres\')b from mm_metadata_movie'
-                           ' order by jsonb_array_elements_text(mm_metadata_json->\'genres\')b offset $1 limit $2',
-                           (offset, records))
-    return self.db_cursor.fetchall()
-
-
-
-// TODO port query
-def db_meta_movie_count_genre(self):
-    """
-    # movie count by genre
-    """
-    self.db_cursor.execute(
-        'select jsonb_array_elements_text(mm_metadata_json->\'genres\')b as gen,'
-        ' count(mm_metadata_json->\'genres\') from mm_metadata_movie group by gen'
-        ' order by jsonb_array_elements_text(mm_metadata_json->\'genres\')b ')
-    return self.db_cursor.fetchall()
-
-
-// TODO port query
-def db_meta_guid_by_imdb(self, imdb_uuid):
-    """
-    # metadata guid by imdb id
-    """
-    self.db_cursor.execute('select mm_metadata_guid'
-                           ' from mm_metadata_movie'
-                           ' where mm_metadata_media_id->\'imdb\' ? $1', (imdb_uuid,))
-    try:
-        return self.db_cursor.fetchone()['mm_metadata_guid']
-    except:
-        return None
 
 
 // TODO port query

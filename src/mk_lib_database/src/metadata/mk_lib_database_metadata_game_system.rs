@@ -79,24 +79,26 @@ pub async fn mk_lib_database_metadata_game_system_read(pool: &sqlx::PgPool,
     Ok(table_rows)
 }
 
+pub async fn mk_lib_database_metadata_game_system_insert(pool: &sqlx::PgPool,
+                                                         platform_name:String,
+                                                         platform_alias:String,
+                                                         platform_json: Json)
+                                                        -> Result<(uuid::Uuid), sqlx::Error> {
+    let new_guid = Uuid::new_v4();
+    let mut transaction = pool.begin().await?;
+    sqlx::query("insert into mm_metadata_game_systems_info(gs_id, gs_game_system_name, \
+        gs_game_system_alias, gs_game_system_json) \
+        values ($1, $2, $3, $4)")
+        .bind(new_guid)
+        .bind(platform_name)
+        .bind(platform_alias)
+        .bind(platform_json)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(new_guid)
+}
 /*
-
-// TODO port query
-def db_meta_games_system_insert(self, platform_name,
-                                platform_alias, platform_json=None):
-    """
-    # insert game system
-    """
-    new_guid = uuid.uuid4()
-    self.db_cursor.execute('insert into mm_metadata_game_systems_info(gs_id,'
-                           ' gs_game_system_name,'
-                           ' gs_game_system_alias,'
-                           ' gs_game_system_json)'
-                           ' values ($1, $2, $3, $4)',
-                           (new_guid, platform_name, platform_alias, platform_json))
-    self.db_commit()
-    return new_guid
-
 
 // TODO port query
 def db_meta_games_system_guid_by_short_name(self, short_name):

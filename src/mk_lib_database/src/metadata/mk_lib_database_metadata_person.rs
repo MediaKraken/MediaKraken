@@ -113,6 +113,29 @@ pub async fn mk_lib_database_meta_person_by_name(pool: &sqlx::PgPool,
     Ok(table_rows)
 }
 
+pub async fn mk_lib_database_metadata_person_insert(pool: &sqlx::PgPool,
+                                                    person_name:String,
+                                                    media_id:String,
+                                                    person_json: Json,
+                                                    person_image_path:String)
+                                                    -> Result<(uuid::Uuid), sqlx::Error> {
+    let new_guid = Uuid::new_v4();
+    let mut transaction = pool.begin().await?;
+    sqlx::query("insert into mm_metadata_person (mmp_id, mmp_person_name, \
+        mmp_person_media_id, mmp_person_meta_json, \
+        mmp_person_image) \
+        values ($1,$2,$3,$4,$5)")
+        .bind(new_guid)
+        .bind(person_name)
+        .bind(media_id)
+        .bind(person_json)
+        .bind(person_image_path)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(new_guid)
+}
+
 /*
 
 // TODO port query
@@ -131,23 +154,6 @@ async def db_meta_person_as_seen_in(self, person_guid, db_connection=None):
                                ' @> \'[{"id": '
                                + str(row_data['mmp_person_media_id'])
                                + '}]\' order by LOWER(mm_metadata_name)')
-
-
-// TODO port query
-async def db_meta_person_insert(self, uuid_id, person_name, media_id, person_json,
-                                image_path=None, db_connection=None):
-    """
-    # insert person
-    """
-    await db_conn.execute('insert into mm_metadata_person (mmp_id,'
-                          ' mmp_person_name,'
-                          ' mmp_person_media_id,'
-                          ' mmp_person_meta_json,'
-                          ' mmp_person_image)'
-                          ' values ($1,$2,$3,$4,$5)',
-                          uuid_id, person_name, media_id,
-                          person_json, image_path)
-    await db_conn.execute('commit')
 
 
 // TODO port query
