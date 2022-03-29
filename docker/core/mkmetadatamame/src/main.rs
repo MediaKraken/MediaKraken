@@ -4,6 +4,8 @@ use serde_json::{json, Value};
 use std::error::Error;
 use std::path::Path;
 use tokio::time::{Duration, sleep};
+use quickxml_to_serde::{xml_string_to_json, Config, JsonArray, JsonType, NullValue};
+use std::io::{self, prelude::*, BufReader};
 
 // https://www.progettosnaps.net/download/?tipo=dat_mame&file=/dats/MAME/packs/MAME_Dats_236.7z
 
@@ -21,27 +23,6 @@ mod mk_lib_database_option_status;
 mod mk_lib_database_version;
 #[path = "mk_lib_network.rs"]
 mod mk_lib_network;
-
-
-// def process_mame_record(game_xml):
-//     global update_game
-//     global insert_game
-//     # TODO change this to upsert
-//     json_data = xmltodict.parse(game_xml)
-//     # see if exists then need to update
-//     if db_connection.db_meta_game_list_count(json_data["machine"]["@name"]) > 0:
-//         # TODO handle shortname properly
-//         db_connection.db_meta_game_update(None, json_data["machine"]["@name"],
-//                                           json_data["machine"]["description"],
-//                                           json_data)
-//         update_game += 1
-//     else:
-//         # TODO handle shortname properly
-//         db_connection.db_meta_game_insert(None, json_data["machine"]["@name"],
-//                                           json_data["machine"]["description"],
-//                                           json_data)
-//         insert_game += 1
-
 
 // technically arcade games are "systems"....
 // they just don"t have @isdevice = "yes" like mess hardware does
@@ -90,50 +71,37 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                               false,
                                               "/mediakraken/emulation/").unwrap();
     }
-    println!("b4 read");
-    let mame_xml: String = mk_lib_file::mk_read_file_data(&unzip_file_name).unwrap();
-    println!("after xml");
-    // Allow DTD
-    let opt = roxmltree::ParsingOptions {
-        allow_dtd: true,
-    };
-    let doc = match roxmltree::Document::parse_with_options(&mame_xml, opt) {
-        Ok(doc) => doc,
-        Err(e) => {
-            println!("Error: {}.", e);
-            std::process::exit(1);
+    println!("b4 file load");
+    let file = File::open(&unzip_file_name)?;
+    let reader = BufReader::new(file);
+    let mut xml_data: String = "".to_string();
+    let conf = Config::new_with_custom_values(true, "", "text", NullValue::Ignore)
+        .add_json_type_override("/machine/@name", JsonArray::Infer(JsonType::AlwaysString))
+        .add_json_type_override("/year", JsonArray::Infer(JsonType::AlwaysString))
+        .add_json_type_override("/manufacturer", JsonArray::Infer(JsonType::AlwaysString));
+    println!("b4 read lines");
+    for line in reader.lines() {
+        let xml_line = &line.unwrap().trim().to_string();
+        if xml_line.starts_with("<machine") == true {
+            println!("here");
+            xml_data = xml_line.to_string();
         }
-    };
-    println!("after parse");
-    for node in doc.descendants() {
-        if node.is_element() {
-            println!("{:?} at {}", node.tag_name(), doc.text_pos_at(node.range().start));
+        else if xml_line.starts_with("</machine") == true {
+            xml_data += xml_line;
+            println!("xml {}", xml_data);
+            let json_data = xml_string_to_json(xml_data.to_string(), &conf);
+            println!("json {:?}", json_data.unwrap());
+            //println!("json {:?}", json.unwrap()["machine"]["@name"]);
+            // TODO change this to upsert
+            //     db_connection.db_meta_game_insert(None, json_data["machine"]["@name"],
+            //                                       json_data["machine"]["description"],
+            //                                       json_data)
+        }
+        else {
+            xml_data += xml_line;
         }
     }
-    // for token in xmlparser::Tokenizer::from(mame_xml) {
-    //     println!("{:?}", token);
-    // }
 
-    let game_xml = "";
-    let first_record = true;
-    let old_line = "";
-    //     with open("/mediakraken/emulation/mame0%s.xml"
-    //               % option_config_json["MAME"]["Version"]) as infile:
-    //         for line in infile:
-    //             if line.find("</mame>") == 0:  # skip the last line
-    //                 pass
-    //             elif line.find("	<machine") == 0:  # first position of line
-    //                 old_line = line
-    //                 if first_record is false:
-    //                     process_mame_record(line + game_xml)
-    //                     game_xml = ""
-    //                 first_record = false
-    //             else:
-    //                 if first_record is false:
-    //                     game_xml += line
-    //         # game_xml += line  # get last value - do NOT do this as it"ll attach </mame>
-    // do last machine
-    //     process_mame_record(old_line + game_xml)
     // write totals
     //     if update_game > 0:
     //         db_connection.db_notification_insert(
@@ -145,9 +113,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //             common_internationalization.com_inter_number_format(insert_game)
     //             + " games(s) metadata added from MAME %s XML" % option_config_json["MAME"]["Version"],
     //             true)
-    // commit all changes to db
-    //     db_connection.db_commit()
-    //
+
+
+
     // load games from hash files
     // file_name = ("/mediakraken/emulation/mame0%s.zip" %
     //              option_config_json["MAME"]["Version"])
