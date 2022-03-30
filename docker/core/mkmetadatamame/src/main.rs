@@ -1,3 +1,4 @@
+use std::fs::File;
 use async_std::path::PathBuf;
 use chrono::prelude::*;
 use serde_json::{json, Value};
@@ -23,6 +24,8 @@ mod mk_lib_database_option_status;
 mod mk_lib_database_version;
 #[path = "mk_lib_network.rs"]
 mod mk_lib_network;
+#[path = "mk_lib_database_metadata_game.rs"]
+mod mk_lib_database_metadata_game;
 
 // technically arcade games are "systems"....
 // they just don"t have @isdevice = "yes" like mess hardware does
@@ -92,10 +95,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let json_data = xml_string_to_json(xml_data.to_string(), &conf);
             println!("json {:?}", json_data.unwrap());
             //println!("json {:?}", json.unwrap()["machine"]["@name"]);
-            // TODO change this to upsert
-            //     db_connection.db_meta_game_insert(None, json_data["machine"]["@name"],
-            //                                       json_data["machine"]["description"],
-            //                                       json_data)
+            mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
+                &sqlx_pool, None, json_data["machine"]["@name"],
+                json_data["machine"]["description"],
+                json_data);
         }
         else {
             xml_data += xml_line;

@@ -94,6 +94,8 @@
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_option_status.rs ../docker/core/mkmetadatamame/src/.
 \cp -f --remove-destination ../src/mk_lib_file/src/mk_lib_file.rs ../docker/core/mkmetadatamame/src/.
 \cp -f --remove-destination ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mkmetadatamame/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/metadata/mk_lib_database_metadata_game.rs ../docker/core/mkmetadatamame/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/metadata/mk_lib_database_metadata_game_system.rs ../docker/core/mkmetadatamame/src/.
 
 # mkrabbitconsume
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkrabbitconsume/src/.
