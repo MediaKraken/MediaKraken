@@ -7,6 +7,8 @@ use std::path::Path;
 use tokio::time::{Duration, sleep};
 use quickxml_to_serde::{xml_string_to_json, Config, JsonArray, JsonType, NullValue};
 use std::io::{self, prelude::*, BufReader};
+use uuid::Uuid;
+use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 // https://www.progettosnaps.net/download/?tipo=dat_mame&file=/dats/MAME/packs/MAME_Dats_236.7z
 
@@ -92,31 +94,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
         else if xml_line.starts_with("</machine") == true {
             xml_data += xml_line;
             println!("xml {}", xml_data);
-            let json_data = xml_string_to_json(xml_data.to_string(), &conf);
-            println!("json {:?}", json_data.unwrap());
+            let json_data = xml_string_to_json(xml_data.to_string(), &conf).unwrap();
+            println!("json {:?}", json_data);
             //println!("json {:?}", json.unwrap()["machine"]["@name"]);
             mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
-                &sqlx_pool, None, json_data["machine"]["@name"],
-                json_data["machine"]["description"],
+                &sqlx_pool, uuid::Uuid::parse_str("00000000-0000-0000-0000-000000000000")?,
+                json_data["machine"]["@name"].to_string(),
+                json_data["machine"]["description"].to_string(),
                 json_data);
         }
         else {
             xml_data += xml_line;
         }
     }
-
-    // write totals
-    //     if update_game > 0:
-    //         db_connection.db_notification_insert(
-    //             common_internationalization.com_inter_number_format(update_game)
-    //             + " games(s) metadata updated from MAME %s XML" % option_config_json["MAME"]["Version"],
-    //             true)
-    //     if insert_game > 0:
-    //         db_connection.db_notification_insert(
-    //             common_internationalization.com_inter_number_format(insert_game)
-    //             + " games(s) metadata added from MAME %s XML" % option_config_json["MAME"]["Version"],
-    //             true)
-
 
 
     // load games from hash files

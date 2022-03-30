@@ -48,21 +48,21 @@ pub async fn mk_lib_database_metadata_game_system_read(pool: &sqlx::PgPool,
     let mut select_query;
     if search_value != "" {
         select_query = sqlx::query("select gs_id, gs_game_system_name, \
-            gs_game_system_json->\'description\' as gs_description, \
-            gs_game_system_json->\'year\' as gs_year, \
+            gs_game_system_json->'description' as gs_description, \
+            gs_game_system_json->'year' as gs_year, \
             gs_game_system_alias from mm_metadata_game_systems_info \
             where gs_game_system_name % $1 \
-            order by gs_game_system_json->\'description\' \
+            order by gs_game_system_json->'description' \
             offset $2 limit $2")
             .bind(search_value)
             .bind(offset)
             .bind(limit);
     } else {
         select_query = sqlx::query("select gs_id,gs_game_system_name, \
-            gs_game_system_json->\'description\' as gs_description, \
-            gs_game_system_json->\'year\' as gs_year, \
+            gs_game_system_json->'description' as gs_description, \
+            gs_game_system_json->'year' as gs_year, \
             gs_game_system_alias from mm_metadata_game_systems_info \
-            order by gs_game_system_json->\'description\' offset $1 limit $2")
+            order by gs_game_system_json->'description' offset $1 limit $2")
             .bind(offset)
             .bind(limit);
     }
@@ -98,6 +98,7 @@ pub async fn mk_lib_database_metadata_game_system_insert(pool: &sqlx::PgPool,
     transaction.commit().await?;
     Ok(new_guid)
 }
+
 /*
 
 // TODO port query

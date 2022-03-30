@@ -20,9 +20,10 @@ sqlx = { version = "0.5.11", features = [ "chrono", "json", "runtime-tokio-rustl
 sys-info = "0.9.1"
 tar = "0.4.38"
 tokio = { version = "1.17.0", features = ["full"] }
-#xmlparser = "0.13.3"
 walkdir = "2.3.2"
+uuid = { version = "0.8.2", features = ["serde", "v4"] }
 zip = "0.5.13"
+rocket_dyn_templates = { git = "https://github.com/SergioBenitez/Rocket/", features = ["tera"]}
 
 [dev-dependencies]
 tokio-test = "*"

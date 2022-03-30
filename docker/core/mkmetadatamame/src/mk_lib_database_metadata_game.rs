@@ -1,11 +1,11 @@
-use sqlx::{FromRow, Row};
 use sqlx::postgres::PgRow;
-use uuid::Uuid;
+use sqlx::{FromRow, Row};
+use sqlx::{types::Uuid, types::Json};
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_metadata_game_by_uuid(pool: &sqlx::PgPool, game_uuid: uuid::Uuid)
                                                    -> Result<(uuid::Uuid), sqlx::Error> {
-    let row: (uuid::Uuid, ) = sqlx::query("select gi_game_info_id, \
+    let row: (uuid::Uuid, ) = sqlx::query_as("select gi_game_info_id, \
         gi_game_info_system_id, gi_game_info_json \
         from mm_metadata_game_software_info where gi_game_info_id = $1")
         .bind(game_uuid)
@@ -16,7 +16,7 @@ pub async fn mk_lib_database_metadata_game_by_uuid(pool: &sqlx::PgPool, game_uui
 
 pub async fn mk_lib_database_metadata_game_by_sha1(pool: &sqlx::PgPool, sha1_hash: String)
                                                    -> Result<(uuid::Uuid), sqlx::Error> {
-    let row: (uuid::Uuid, ) = sqlx::query("select gi_game_info_id \
+    let row: (uuid::Uuid, ) = sqlx::query_as("select gi_game_info_id \
         from mm_metadata_game_software_info \
         where gi_game_info_sha1 = $1")
         .bind(sha1_hash)
@@ -27,7 +27,7 @@ pub async fn mk_lib_database_metadata_game_by_sha1(pool: &sqlx::PgPool, sha1_has
 
 pub async fn mk_lib_database_metadata_game_by_blake3(pool: &sqlx::PgPool, blake3_hash: String)
                                                      -> Result<(uuid::Uuid), sqlx::Error> {
-    let row: (uuid::Uuid, ) = sqlx::query("select gi_game_info_id \
+    let row: (uuid::Uuid, ) = sqlx::query_as("select gi_game_info_id \
         from mm_metadata_game_software_info \
         where gi_game_info_blake3 = $1")
         .bind(blake3_hash)
@@ -36,27 +36,27 @@ pub async fn mk_lib_database_metadata_game_by_blake3(pool: &sqlx::PgPool, blake3
     Ok(row.0)
 }
 
-// pub async fn mk_lib_database_metadata_game_count(pool: &sqlx::PgPool,
-//                                                  search_value: String)
-//                                                  -> Result<(i32), sqlx::Error> {
-//     if search_value != "" {
-//         let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_game_software_info \
-//             where gi_game_info_name %% $1")
-//             .bind(search_value)
-//             .fetch_one(pool)
-//             .await?;
-//         Ok(row.0)
-//     } else {
-//         let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_game_software_info")
-//             .fetch_one(pool)
-//             .await?;
-//         Ok(row.0)
-//     }
-// }
+pub async fn mk_lib_database_metadata_game_count(pool: &sqlx::PgPool,
+                                                 search_value: String)
+                                                 -> Result<(i32), sqlx::Error> {
+    if search_value != "" {
+        let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_game_software_info \
+            where gi_game_info_name %% $1")
+            .bind(search_value)
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    } else {
+        let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_game_software_info")
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    }
+}
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaGameList {
-	gi_game_info_id: uuid::Uuid,
+	gi_game_info_id: Uuid,
 	gi_game_info_short_name: String,
 	gi_game_info_name: String,
 	gi_year: String,
@@ -64,18 +64,18 @@ pub struct DBMetaGameList {
 }
 
 pub async fn mk_lib_database_metadata_game_read(pool: &sqlx::PgPool,
-                                                 search_value: String,
-                                                 offset: i32, limit: i32)
-                                                 -> Result<Vec<DBMetaGameList>, sqlx::Error> {
+                                                search_value: String,
+                                                offset: i32, limit: i32)
+                                                -> Result<Vec<DBMetaGameList>, sqlx::Error> {
     let mut select_query;
     if search_value != "" {
         select_query = sqlx::query("select gi_game_info_id, gi_game_info_short_name, \
              gi_game_info_name, \
-             gi_game_info_json->\"year\" as gi_year, \
-             gs_game_system_json->\"description\" as gi_description \
+             gi_game_info_json->'year' as gi_year, \
+             gs_game_system_json->'description' as gi_description \
              from mm_metadata_game_software_info, mm_metadata_game_systems_info \
-             where gi_system_id = gs_id  and gi_game_info_name % $1 \
-             order by gi_game_info_name, gi_game_info_json->\"year\" \
+             where gi_system_id = gs_id and gi_game_info_name % $1 \
+             order by gi_game_info_name, gi_game_info_json->'year' \
              offset $2 limit $3")
             .bind(search_value)
             .bind(offset)
@@ -83,10 +83,10 @@ pub async fn mk_lib_database_metadata_game_read(pool: &sqlx::PgPool,
     } else {
         select_query = sqlx::query("select gi_game_info_id, gi_game_info_short_name, \
             gi_game_info_name, \
-            gi_game_info_json->\"year\" as gi_year, \
-            gs_game_system_json->\"description\" as gi_description \
+            gi_game_info_json->'year' as gi_year, \
+            gs_game_system_json->'description' as gi_description \
             from mm_metadata_game_software_info, mm_metadata_game_systems_info \
-            where gi_system_id = gs_id order by gi_game_info_name, gi_game_info_json->\"year\" \
+            where gi_system_id = gs_id order by gi_game_info_name, gi_game_info_json->'year' \
             offset $1 limit $2")
             .bind(offset)
             .bind(limit);
@@ -110,7 +110,7 @@ pub async fn mk_lib_database_metadata_game_insert(pool: &sqlx::PgPool,
                                                   game_name: String,
                                                   game_json: serde_json::Value)
                                                   -> Result<(uuid::Uuid), sqlx::Error> {
-    let new_guid = Uuid::new_v4();
+    let new_guid = uuid::Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_metadata_game_software_info(gi_game_info_id, \
         gi_game_info_system_id,
