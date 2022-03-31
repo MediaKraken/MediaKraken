@@ -1,3 +1,9 @@
+pub struct MetadataAdultLastLookup {
+    metadata_last_id: Uuid,
+    metadata_last_imdb: String,
+    metadata_last_tmdb: String,
+}
+
 /*
 
 async def metadata_adult_lookup(db_connection, download_data, file_name):
@@ -6,11 +12,6 @@ async def metadata_adult_lookup(db_connection, download_data, file_name):
     This is the main function called from metadata_identification
     """
     # don't bother checking title/year as the main_server_metadata_api_worker does it already
-    if not hasattr(metadata_adult_lookup, "metadata_last_id"):
-        # it doesn't exist yet, so initialize it
-        metadata_adult_lookup.metadata_last_id = None
-        metadata_adult_lookup.metadata_last_imdb = None
-        metadata_adult_lookup.metadata_last_tmdb = None
     metadata_uuid = None  # so not found checks verify later
     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                      message_text={
@@ -110,15 +111,3 @@ async def metadata_adult_lookup(db_connection, download_data, file_name):
     return metadata_uuid
 
  */
-
-// cargo test -- --show-output
-#[cfg(test)]
-mod test_mk_lib_common {
-    use super::*;
-
-    macro_rules! aw {
-    ($e:expr) => {
-        tokio_test::block_on($e)
-    };
-  }
-}

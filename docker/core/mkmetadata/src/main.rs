@@ -60,6 +60,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             println!("Path: {:?}", row_data_path);
             let file_name = Path::new(&row_data_path).file_name().unwrap().to_os_string().into_string().unwrap();
             println!("File: {:?}", file_name);
+            // fetch data from guessit container
             let url_link = format!("http://th-docker-1:5000/?filename={:}", file_name);
             println!("URL: {:?}", url_link);
             let buff = mk_lib_network::mk_data_from_url(url_link).await?;

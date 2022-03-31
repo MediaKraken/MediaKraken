@@ -57,14 +57,3 @@ async def metadata_music_lookup(db_connection, download_json):
     return metadata_uuid
 
  */
-// cargo test -- --show-output
-#[cfg(test)]
-mod test_mk_lib_common {
-    use super::*;
-
-    macro_rules! aw {
-    ($e:expr) => {
-        tokio_test::block_on($e)
-    };
-  }
-}

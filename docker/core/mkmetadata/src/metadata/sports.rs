@@ -1,3 +1,10 @@
+pub struct MetadataSportsLastLookup {
+    metadata_last_id: Uuid,
+    metadata_last_imdb: String,
+    metadata_last_tmdb: String,
+    metadata_last_thesportsdb: String,
+}
+
 /*
 
 async def metadata_sports_lookup(db_connection, download_data):
@@ -5,12 +12,6 @@ async def metadata_sports_lookup(db_connection, download_data):
     Lookup sporting event by name
     """
     # don't bother checking title/year as the main_server_metadata_api_worker does it already
-    if not hasattr(metadata_sports_lookup, "metadata_last_id"):
-        # it doesn't exist yet, so initialize it
-        metadata_sports_lookup.metadata_last_id = None
-        metadata_sports_lookup.metadata_last_imdb = None
-        metadata_sports_lookup.metadata_last_tmdb = None
-        metadata_sports_lookup.metadata_last_thesportsdb = None
     metadata_uuid = None  # so not found checks verify later
 
     stripped_name = os.path.basename(
@@ -55,14 +56,3 @@ async def metadata_sports_lookup(db_connection, download_data):
     return metadata_uuid
 
  */
-// cargo test -- --show-output
-#[cfg(test)]
-mod test_mk_lib_common {
-    use super::*;
-
-    macro_rules! aw {
-    ($e:expr) => {
-        tokio_test::block_on($e)
-    };
-  }
-}

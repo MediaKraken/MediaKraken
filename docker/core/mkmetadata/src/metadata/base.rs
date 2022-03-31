@@ -268,14 +268,3 @@ async def metadata_collection(db_connection, provider_name, download_data):
     await db_connection.db_commit()
 
  */
-// cargo test -- --show-output
-#[cfg(test)]
-mod test_mk_lib_common {
-    use super::*;
-
-    macro_rules! aw {
-    ($e:expr) => {
-        tokio_test::block_on($e)
-    };
-  }
-}
