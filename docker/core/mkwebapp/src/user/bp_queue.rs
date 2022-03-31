@@ -7,7 +7,7 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 mod mk_lib_database_user_queue;
 
 #[get("/queue")]
-pub async fn user_queue() -> Template {
+pub async fn user_queue(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
     Template::render("bss_user/bss_user_queue", context! {})
 }
 

@@ -1,5 +1,5 @@
 use sqlx::postgres::PgRow;
-use uuid::Uuid;
+use sqlx::{types::Uuid, types::Json};
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_media_game_clone_read(pool: &sqlx::PgPool)
@@ -13,13 +13,13 @@ pub async fn mk_lib_database_media_game_clone_read(pool: &sqlx::PgPool)
 
 pub async fn mk_lib_database_media_category_by_name(pool: &sqlx::PgPool,
                                                     category_name: String)
-                                                    -> Result<Vec<PgRow>, sqlx::Error> {
-    let rows: Vec<PgRow> = sqlx::query("select gi_gc_category from mm_game_info \
+                                                    -> Result<PgRow, sqlx::Error> {
+    let row: PgRow = sqlx::query("select gi_gc_category from mm_game_info \
         where gi_short_name = $1")
         .bind(category_name)
         .fetch_one(pool)
         .await?;
-    Ok(rows)
+    Ok(row)
 }
 
 pub async fn mk_lib_database_media_game_category_update(pool: &sqlx::PgPool,

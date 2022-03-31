@@ -1,5 +1,5 @@
 use sqlx::postgres::PgRow;
-use uuid::Uuid;
+use sqlx::{types::Uuid, types::Json};
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_user_profile_insert(pool: &sqlx::PgPool,
@@ -8,7 +8,7 @@ pub async fn mk_lib_database_user_profile_insert(pool: &sqlx::PgPool,
                                                  -> Result<(uuid::Uuid), sqlx::Error> {
     let new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;
-    sqlx::query_as("insert into mm_user_profile(mm_user_profile_guid, \
+    sqlx::query("insert into mm_user_profile(mm_user_profile_guid, \
         mm_user_profile_name, mm_user_profile_json) values($1, $2, $3)")
         .bind(new_guid)
         .bind(profile_name)
@@ -26,7 +26,7 @@ pub async fn mk_lib_database_user_group_insert(pool: &sqlx::PgPool,
                                                -> Result<(uuid::Uuid), sqlx::Error> {
     let new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;
-    sqlx::query_as("insert into mm_user_group(mm_user_group_guid, \
+    sqlx::query("insert into mm_user_group(mm_user_group_guid, \
         mm_user_group_name, mm_user_group_description, \
         mm_user_group_rights_json) values($1, $2, $3, $4)")
         .bind(new_guid)

@@ -9,12 +9,12 @@ use paginate::Pages;
 mod mk_lib_database_media_book;
 
 #[get("/media/book")]
-pub async fn user_media_book() -> Template {
+pub async fn user_media_book(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
     Template::render("bss_user/media/bss_user_media_periodical", context! {})
 }
 
 #[get("/media/book_detail/<guid>")]
-pub async fn user_media_book_detail(guid: &str) -> Template {
+pub async fn user_media_book_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: &str) -> Template {
     Template::render("bss_user/media/bss_user_media_periodical_detail", context! {})
 }
 

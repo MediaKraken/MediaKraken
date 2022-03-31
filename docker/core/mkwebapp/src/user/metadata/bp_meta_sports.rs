@@ -9,12 +9,12 @@ use paginate::Pages;
 mod mk_lib_database_metadata_sports;
 
 #[get("/metadata/sports")]
-pub async fn user_metadata_sports() -> Template {
+pub async fn user_metadata_sports(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
     Template::render("bss_user/metadata/bss_user_metadata_sports", context! {})
 }
 
 #[get("/metadata/sports_detail/<guid>")]
-pub async fn user_metadata_sports_detail(guid: &str) -> Template {
+pub async fn user_metadata_sports_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: &str) -> Template {
     Template::render("bss_user/metadata/bss_user_metadata_sports_detail", context! {})
 }
 

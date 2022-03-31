@@ -1,5 +1,6 @@
 use sqlx::postgres::PgRow;
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
+use sqlx::{types::Uuid, types::Json};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBLibraryList {

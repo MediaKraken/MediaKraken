@@ -7,7 +7,7 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 mod mk_lib_database_search;
 
 #[get("/search")]
-pub async fn user_search() -> Template {
+pub async fn user_search(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
     Template::render("bss_user/bss_user_media_search", context! {})
 }
 

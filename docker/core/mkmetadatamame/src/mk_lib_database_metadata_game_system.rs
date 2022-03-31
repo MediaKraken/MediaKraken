@@ -1,31 +1,31 @@
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
-use uuid::Uuid;
+use sqlx::{types::Uuid, types::Json};
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_metadata_game_system_by_uuid(pool: &sqlx::PgPool,
-                                                          game_sys_uuid: uuid::Uuid)
-                                                          -> Result<Vec<PgRow>, sqlx::Error> {
-    let rows: Vec<PgRow> = sqlx::query("select * from mm_metadata_game_systems_info \
+                                                          game_sys_uuid: Uuid)
+                                                          -> Result<PgRow, sqlx::Error> {
+    let row: PgRow = sqlx::query("select * from mm_metadata_game_systems_info \
         where gs_id = $1")
         .bind(game_sys_uuid)
         .fetch_one(pool)
         .await?;
-    Ok(rows)
+    Ok(row)
 }
 
 pub async fn mk_lib_database_metadata_game_system_count(pool: &sqlx::PgPool,
                                                   search_value: String)
                                                   -> Result<(i32), sqlx::Error> {
     if search_value != "" {
-        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_game_systems_info \
+        let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_game_systems_info \
             where gs_game_system_name % $1")
             .bind(search_value)
             .fetch_one(pool)
             .await?;
         Ok(row.0)
     } else {
-        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_game_systems_info")
+        let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_game_systems_info")
             .fetch_one(pool)
             .await?;
         Ok(row.0)
@@ -83,7 +83,7 @@ pub async fn mk_lib_database_metadata_game_system_read(pool: &sqlx::PgPool,
 pub async fn mk_lib_database_metadata_game_system_insert(pool: &sqlx::PgPool,
                                                          platform_name:String,
                                                          platform_alias:String,
-                                                         platform_json: Json)
+                                                         platform_json: serde_json::Value)
                                                         -> Result<(uuid::Uuid), sqlx::Error> {
     let new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;

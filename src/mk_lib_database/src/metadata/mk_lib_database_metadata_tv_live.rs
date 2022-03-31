@@ -1,4 +1,4 @@
-use uuid::Uuid;
+use sqlx::{types::Uuid, types::Json};
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
 use rocket_dyn_templates::serde::{Serialize, Deserialize};

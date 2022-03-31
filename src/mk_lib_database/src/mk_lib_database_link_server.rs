@@ -1,4 +1,5 @@
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
+use sqlx::{types::Uuid, types::Json};
 
 pub async fn mk_lib_database_link_delete(pool: &sqlx::PgPool,
                                          link_uuid: uuid::Uuid)

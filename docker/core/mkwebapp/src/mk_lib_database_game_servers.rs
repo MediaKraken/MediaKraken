@@ -20,7 +20,7 @@ pub async fn mk_lib_database_game_server_delete(pool: &sqlx::PgPool,
 pub struct DBGameServerList {
 	mm_game_server_guid: uuid::Uuid,
 	mm_game_server_name: String,
-    mm_game_server_json: Json,
+    mm_game_server_json: serde_json::Value,
 }
 
 pub async fn mk_lib_database_dedicated_server_read(pool: &sqlx::PgPool,
@@ -86,8 +86,8 @@ pub async fn mk_lib_database_game_server_upsert(pool: &sqlx::PgPool,
         ON CONFLICT(mm_game_server_name) DO UPDATE SET mm_game_server_json = $ 4")
         .bind(new_guid)
         .bind(server_name)
-        .bind(server_json)
-        .bind(server_json)
+        .bind(&server_json)
+        .bind(&server_json)
         .execute(&mut transaction)
         .await?;
     transaction.commit().await?;

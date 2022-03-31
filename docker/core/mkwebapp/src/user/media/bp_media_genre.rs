@@ -4,7 +4,7 @@ use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 
 #[post("/media/genre")]
-pub async fn user_media_genre() -> Template {
+pub async fn user_media_genre(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
     Template::render("bss_user/media/bss_user_media_genre_video", context! {})
 }
 

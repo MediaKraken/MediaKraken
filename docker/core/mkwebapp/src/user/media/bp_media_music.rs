@@ -9,12 +9,12 @@ use paginate::Pages;
 mod mk_lib_database_media_music;
 
 #[get("/media/music")]
-pub async fn user_media_music() -> Template {
+pub async fn user_media_music(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
     Template::render("bss_user/media/bss_user_media_music_album", context! {})
 }
 
 #[get("/media/music_detail/<guid>")]
-pub async fn user_media_music_detail(guid: &str) -> Template {
+pub async fn user_media_music_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: &str) -> Template {
     Template::render("bss_user/media/bss_user_media_music_album_detail", context! {})
 }
 

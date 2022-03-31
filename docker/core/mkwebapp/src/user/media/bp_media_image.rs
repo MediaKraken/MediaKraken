@@ -7,7 +7,7 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 mod mk_lib_database_media_images;
 
 #[get("/media/image")]
-pub async fn user_media_image() -> Template {
+pub async fn user_media_image(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
     Template::render("bss_user/media/bss_user_media_image_gallery", context! {})
 }
 

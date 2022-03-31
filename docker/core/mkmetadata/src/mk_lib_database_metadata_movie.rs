@@ -1,5 +1,5 @@
-use uuid::Uuid;
 use sqlx::{FromRow, Row};
+use sqlx::{types::Uuid, types::Json};
 use sqlx::postgres::PgRow;
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 use chrono::prelude::*;
@@ -21,7 +21,7 @@ pub struct DBMetaMovieList {
 	mm_metadata_name: String,
 	mm_date: DateTime<Utc>,
 	mm_poster: String,
-	mm_metadata_user_json: Json,
+	mm_metadata_user_json: serde_json::Value,
 }
 
 pub async fn mk_lib_database_metadata_movie_read(pool: &sqlx::PgPool,

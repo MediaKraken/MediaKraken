@@ -1,20 +1,20 @@
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
-use uuid::Uuid;
+use sqlx::{types::Uuid, types::Json};
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_metadata_collections_count(pool: &sqlx::PgPool,
                                                         search_value: String)
                                                         -> Result<(i32), sqlx::Error> {
     if search_value != "" {
-        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_collection \
+        let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_collection \
             where mm_metadata_collection_name = $1")
             .bind(search_value)
             .fetch_one(pool)
             .await?;
         Ok(row.0)
     } else {
-        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_collection")
+        let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_collection")
             .fetch_one(pool)
             .await?;
         Ok(row.0)
@@ -25,7 +25,7 @@ pub async fn mk_lib_database_metadata_collections_count(pool: &sqlx::PgPool,
 pub struct DBMetaCollectionList {
 	mm_metadata_collection_guid: uuid::Uuid,
 	mm_metadata_collection_name: String,
-	mm_metadata_collection_imagelocal_json: Json,
+	mm_metadata_collection_imagelocal_json: serde_json::Value,
 }
 
 pub async fn mk_lib_database_metadata_collection_read(pool: &sqlx::PgPool,
@@ -67,14 +67,14 @@ pub async fn mk_lib_database_metadata_collection_read(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_meta_collection_uuid(pool: &sqlx::PgPool,
                                                   collection_uuid: uuid::Uuid)
-                                                  -> Result<Vec<PgRow>, sqlx::Error> {
-    let rows: Vec<PgRow> = sqlx::query("select mm_metadata_collection_json, \
+                                                  -> Result<PgRow, sqlx::Error> {
+    let row: PgRow = sqlx::query("select mm_metadata_collection_json, \
         mm_metadata_collection_imagelocal_json from mm_metadata_collection \
         where mm_metadata_collection_guid = $1")
         .bind(collection_uuid)
         .fetch_one(pool)
         .await?;
-    Ok(rows)
+    Ok(row)
 }
 
 /*

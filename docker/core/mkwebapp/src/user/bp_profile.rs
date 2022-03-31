@@ -7,7 +7,7 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 mod mk_lib_database_user_profile;
 
 #[get("/profile")]
-pub async fn user_profile() -> Template {
+pub async fn user_profile(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
     Template::render("bss_user/bss_user_profile", context! {})
 }
 

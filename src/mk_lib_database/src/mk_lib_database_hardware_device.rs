@@ -1,5 +1,5 @@
 use sqlx::postgres::PgRow;
-use uuid::Uuid;
+use sqlx::{types::Uuid, types::Json};
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_hardware_manufacturer_upsert(pool: &sqlx::PgPool,

@@ -7,7 +7,7 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 mod mk_lib_database_sync;
 
 #[get("/sync")]
-pub async fn user_sync() -> Template {
+pub async fn user_sync(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
     Template::render("bss_user/media/bss_user_media_sync", context! {})
 }
 

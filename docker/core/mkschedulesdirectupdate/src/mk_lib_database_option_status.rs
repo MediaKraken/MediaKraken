@@ -1,4 +1,5 @@
 use sqlx::postgres::PgRow;
+use sqlx::{types::Uuid, types::Json};
 
 pub async fn mk_lib_database_option_read(pool: &sqlx::PgPool)
                                          -> Result<serde_json::Value, sqlx::Error> {

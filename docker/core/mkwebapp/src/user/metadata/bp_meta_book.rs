@@ -9,12 +9,12 @@ use paginate::Pages;
 mod mk_lib_database_metadata_book;
 
 #[get("/metadata/book")]
-pub async fn user_metadata_book() -> Template {
+pub async fn user_metadata_book(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
     Template::render("bss_user/metadata/bss_user_metadata_periodical", context! {})
 }
 
 #[get("/metadata/book_detail/<guid>")]
-pub async fn user_metadata_book_detail(guid: &str) -> Template {
+pub async fn user_metadata_book_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: &str) -> Template {
     Template::render("bss_user/metadata/bss_user_metadata_periodical_detail", context! {})
 }
 

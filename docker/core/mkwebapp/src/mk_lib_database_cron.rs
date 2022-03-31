@@ -1,9 +1,8 @@
 use sqlx::{FromRow, Row};
 use serde_json::{Map, Value};
 use sqlx::postgres::PgRow;
-use sqlx::types::Json;
+use sqlx::{types::Uuid, types::Json};
 use std::num::NonZeroU8;
-use uuid::Uuid;
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 use chrono::prelude::*;
 

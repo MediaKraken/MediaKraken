@@ -9,12 +9,12 @@ use paginate::Pages;
 mod mk_lib_database_metadata_movie;
 
 #[get("/metadata/movie")]
-pub async fn user_metadata_movie() -> Template {
+pub async fn user_metadata_movie(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
     Template::render("bss_user/metadata/bss_user_metadata_movie", context! {})
 }
 
 #[get("/metadata/movie_detail/<guid>")]
-pub async fn user_metadata_movie_detail(guid: &str) -> Template {
+pub async fn user_metadata_movie_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: &str) -> Template {
     Template::render("bss_user/metadata/bss_user_metadata_movie_detail", context! {})
 }
 

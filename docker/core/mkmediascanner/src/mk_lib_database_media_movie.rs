@@ -1,5 +1,5 @@
 use sqlx::postgres::PgRow;
-use uuid::Uuid;
+use sqlx::{types::Uuid, types::Json};
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 #[path = "mk_lib_common_enum_media_type.rs"]

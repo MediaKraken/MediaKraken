@@ -1,16 +1,16 @@
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
-use uuid::Uuid;
+use sqlx::{types::Uuid, types::Json};
 
 pub async fn mk_lib_database_metadata_book_by_uuid(pool: &sqlx::PgPool, book_uuid: uuid::Uuid)
-                                                   -> Result<Vec<PgRow>, sqlx::Error> {
-    let rows: Vec<PgRow> = sqlx::query("select mm_metadata_book_json from mm_metadata_book \
+                                                   -> Result<PgRow, sqlx::Error> {
+    let row: PgRow = sqlx::query("select mm_metadata_book_json from mm_metadata_book \
         where mm_metadata_book_guid = $1")
         .bind(book_uuid)
         .fetch_one(pool)
         .await?;
-    Ok(rows)
+    Ok(row)
 }
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
@@ -53,14 +53,14 @@ pub async fn mk_lib_database_metadata_book_count(pool: &sqlx::PgPool,
                                                  search_value: String)
                                                  -> Result<(i32), sqlx::Error> {
     if search_value != "" {
-        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_book \
+        let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_book \
             where mm_metadata_book_name % $1")
             .bind(search_value)
             .fetch_one(pool)
             .await?;
         Ok(row.0)
     } else {
-        let row: (i32, ) = sqlx::query("select count(*) from mm_metadata_book")
+        let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_book")
             .fetch_one(pool)
             .await?;
         Ok(row.0)
@@ -71,7 +71,7 @@ pub async fn mk_lib_database_metadata_book_guid_by_isbn(pool: &sqlx::PgPool,
                                                         isbn_uuid: uuid::Uuid,
                                                         isbn13_uuid: uuid::Uuid)
                                                        -> Result<(uuid::Uuid), sqlx::Error> {
-    let row: (i32, ) = sqlx::query("select mm_metadata_book_guid \
+    let row: (uuid::Uuid, ) = sqlx::query_as("select mm_metadata_book_guid \
         from mm_metadata_book \
         where mm_metadata_book_isbn = $1 \
         or mm_metadata_book_isbn13 = $2")
@@ -83,7 +83,7 @@ pub async fn mk_lib_database_metadata_book_guid_by_isbn(pool: &sqlx::PgPool,
 }
 
 pub async fn mk_lib_database_metadata_book_insert(pool: &sqlx::PgPool,
-                                                  json_data: Json)
+                                                  json_data: serde_json::Value)
                                                  -> Result<(uuid::Uuid), sqlx::Error> {
     let new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;
@@ -94,10 +94,10 @@ pub async fn mk_lib_database_metadata_book_insert(pool: &sqlx::PgPool,
         mm_metadata_book_json) \
         values ($1,$2,$3,$4,$5)")
         .bind(new_guid)
-        .bind(json_data["data"][0]["isbn10"])
-        .bind(json_data["data"][0]["isbn13"])
-        .bind(json_data["data"][0]["title"])
-        .bind(json_data["data"][0])
+        .bind(&json_data["data"][0]["isbn10"])
+        .bind(&json_data["data"][0]["isbn13"])
+        .bind(&json_data["data"][0]["title"])
+        .bind(&json_data["data"][0])
         .execute(&mut transaction)
         .await?;
     transaction.commit().await?;

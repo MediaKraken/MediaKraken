@@ -1,6 +1,6 @@
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
-use uuid::Uuid;
+use sqlx::{types::Uuid, types::Json};
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
@@ -93,13 +93,13 @@ async def db_meta_music_video_count(self, imvdb_id=None, search_value=None, db_c
 
 pub async fn mk_lib_database_meta_music_video_detail_uuid(pool: &sqlx::PgPool,
                                                           music_video_uuid: uuid::Uuid)
-                                                          -> Result<Vec<PgRow>, sqlx::Error> {
-    let rows: Vec<PgRow> = sqlx::query("select mm_media_music_video_band, \
+                                                          -> Result<PgRow, sqlx::Error> {
+    let row: PgRow = sqlx::query("select mm_media_music_video_band, \
         mm_media_music_video_song, mm_metadata_music_video_json, \
         mm_metadata_music_video_localimage_json from mm_metadata_music_video \
         where mm_metadata_music_video_guid = $1")
         .bind(music_video_uuid)
         .fetch_one(pool)
         .await?;
-    Ok(rows)
+    Ok(row)
 }

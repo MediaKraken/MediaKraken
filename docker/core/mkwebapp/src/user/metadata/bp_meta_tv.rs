@@ -9,12 +9,12 @@ use paginate::Pages;
 mod mk_lib_database_metadata_tv;
 
 #[get("/metadata/tv")]
-pub async fn user_metadata_tv() -> Template {
+pub async fn user_metadata_tv(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
     Template::render("bss_user/metadata/bss_user_metadata_tv", context! {})
 }
 
 #[get("/metadata/tv_detail/<guid>")]
-pub async fn user_metadata_tv_detail(guid: &str) -> Template {
+pub async fn user_metadata_tv_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: &str) -> Template {
     Template::render("bss_user/metadata/bss_user_metadata_tv_detail", context! {})
 }
 

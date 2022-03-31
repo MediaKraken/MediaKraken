@@ -1,4 +1,4 @@
-use uuid::Uuid;
+use sqlx::{types::Uuid, types::Json};
 use sqlx::{FromRow, Row};
 use sqlx::postgres::PgRow;
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
@@ -7,14 +7,14 @@ use rocket_dyn_templates::serde::{Serialize, Deserialize};
 pub struct DBMetaMusicList {
 	mm_metadata_album_guid: uuid::Uuid,
 	mm_metadata_album_name: String,
-	mm_metadata_album_json: Json,
+	mm_metadata_album_json: serde_json::Value,
 	mm_metadata_album_localimage: String,
 }
 
 pub async fn mk_lib_database_metadata_music_album_read(pool: &sqlx::PgPool,
-                                                 search_value: String,
-                                                 offset: i32, limit: i32)
-                                                 -> Result<Vec<PgRow>, sqlx::Error> {
+                                                     search_value: String,
+                                                     offset: i32, limit: i32)
+                                                     -> Result<Vec<PgRow>, sqlx::Error> {
     // TODO, only grab the poster locale from json
     // TODO order by release year
     if search_value != "" {

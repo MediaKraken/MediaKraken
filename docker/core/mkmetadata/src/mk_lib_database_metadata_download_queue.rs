@@ -1,6 +1,6 @@
 use sqlx::postgres::PgRow;
 use sqlx::Row;
-use uuid::Uuid;
+use sqlx::{types::Uuid, types::Json};
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_download_queue_by_provider(pool: &sqlx::PgPool, provider_name: &str)
