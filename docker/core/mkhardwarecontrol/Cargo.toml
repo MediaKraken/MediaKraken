@@ -9,7 +9,7 @@ strip = "symbols"
 
 [dependencies]
 amiquip = { version = "0.4.2", default-features = false }
-chrono = "0.4.19"
+chrono = { version = "0.4.19", features = ["serde"] }
 reqwest = { version = "0.11.9", default-features = false, features = ["json", "rustls-tls"] }
 rppal = { version = "0.13.1", features = ["hal"] }
 serde = { version = "1.0.136", features = ["derive"] }

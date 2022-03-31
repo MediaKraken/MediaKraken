@@ -4,7 +4,7 @@ use serde_json::json;
 use std::error::Error;
 use std::path::Path;
 use tokio::time::{Duration, sleep};
-use uuid::Uuid;
+use sqlx::types::Uuid;
 use sqlx::Row;
 
 #[path = "mk_lib_database.rs"]
