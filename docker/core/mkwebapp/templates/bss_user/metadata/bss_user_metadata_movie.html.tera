@@ -8,7 +8,7 @@
     <link href="/static/fonts/fontawesome-all.min.css" rel="stylesheet">
     <link href="/static/css/styles.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/base_webapp_layout.css">
-    <link rel="stylesheet" href="/static/css/jquery.contextMenu.min.css">
+    <link rel="stylesheet" href="/static/contextmenu/jquery.contextMenu.min.css">
 </head>
 
 <body>
@@ -76,7 +76,7 @@
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
     <script src="/static/js/jquery-easing.min.js"></script>
     <script src="/static/js/script.min.js"></script>
-    <script src="/static/js/jquery.contextMenu.min.js"></script>
+    <script src="/static/contextmenu/jquery.contextMenu.min.js"></script>
     <script src="/static/js/base_webapp.js"></script>
 </body>
 {% endblock %}
