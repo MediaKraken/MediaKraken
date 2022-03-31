@@ -5,6 +5,9 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 use uuid::Uuid;
 use paginate::Pages;
 
+#[path = "../../mk_lib_database_metadata_movie.rs"]
+mod mk_lib_database_metadata_movie;
+
 #[get("/metadata/movie")]
 pub async fn user_metadata_movie() -> Template {
     Template::render("bss_user/metadata/bss_user_metadata_movie", context! {})

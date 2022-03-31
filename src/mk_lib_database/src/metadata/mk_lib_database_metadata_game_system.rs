@@ -1,4 +1,5 @@
 use sqlx::postgres::PgRow;
+use sqlx::{FromRow, Row};
 use uuid::Uuid;
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 

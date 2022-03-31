@@ -3,6 +3,9 @@ use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 
+#[path = "../mk_lib_database_user_profile.rs"]
+mod mk_lib_database_user_profile;
+
 #[get("/profile")]
 pub async fn user_profile() -> Template {
     Template::render("bss_user/bss_user_profile", context! {})

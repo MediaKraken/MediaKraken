@@ -5,6 +5,9 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 use uuid::Uuid;
 use paginate::Pages;
 
+#[path = "../../mk_lib_database_media_music_video.rs"]
+mod mk_lib_database_media_music_video;
+
 #[get("/media/music_video")]
 pub async fn user_media_music_video() -> Template {
     Template::render("bss_user/media/bss_user_media_music_video", context! {})

@@ -248,4 +248,3 @@ async fn main() -> Result<(), Error> {
         .launch().await;
  Ok(())
 }
-

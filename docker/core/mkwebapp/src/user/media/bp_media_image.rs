@@ -3,6 +3,9 @@ use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 
+#[path = "../../mk_lib_database_media_images.rs"]
+mod mk_lib_database_media_images;
+
 #[get("/media/image")]
 pub async fn user_media_image() -> Template {
     Template::render("bss_user/media/bss_user_media_image_gallery", context! {})

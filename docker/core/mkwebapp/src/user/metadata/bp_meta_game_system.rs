@@ -5,6 +5,9 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 use uuid::Uuid;
 use paginate::Pages;
 
+#[path = "../../mk_lib_database_metadata_game_system.rs"]
+mod mk_lib_database_metadata_game_system;
+
 #[get("/metadata/game_system")]
 pub async fn user_metadata_game_system() -> Template {
     Template::render("bss_user/metadata/bss_user_metadata_game_system", context! {})

@@ -144,6 +144,7 @@
 \cp -f --remove-destination ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mktranscode/src/.
 
 # mkwebapp
+\cp -f --remove-destination ../src/mk_lib_common/src/mk_lib_common_enum_media_type.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_cron.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_game_servers.rs ../docker/core/mkwebapp/src/.
@@ -156,6 +157,7 @@
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_user.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_user_activity.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_user_queue.rs ../docker/core/mkwebapp/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_user_profile.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/media/mk_lib_database_media.rs ../docker/core/mkwebapp/src/.
@@ -164,6 +166,7 @@
 \cp -f --remove-destination ../src/mk_lib_database/src/media/mk_lib_database_media_book.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/media/mk_lib_database_media_game.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/media/mk_lib_database_media_game_system.rs ../docker/core/mkwebapp/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/media/mk_lib_database_media_home_media.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/media/mk_lib_database_media_images.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/media/mk_lib_database_media_iradio.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/media/mk_lib_database_media_movie.rs ../docker/core/mkwebapp/src/.

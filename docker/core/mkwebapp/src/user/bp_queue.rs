@@ -3,6 +3,9 @@ use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 
+#[path = "../mk_lib_database_user_queue.rs"]
+mod mk_lib_database_user_queue;
+
 #[get("/queue")]
 pub async fn user_queue() -> Template {
     Template::render("bss_user/bss_user_queue", context! {})
