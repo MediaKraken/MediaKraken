@@ -1,3 +1,5 @@
+use sqlx::types::Uuid;
+
 /*
 
 async def game_system_update():

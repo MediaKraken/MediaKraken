@@ -1,3 +1,5 @@
+use sqlx::types::Uuid;
+
 pub struct MetadataTVLastLookup {
     metadata_last_id: Uuid,
     metadata_last_imdb: String,
@@ -8,6 +10,9 @@ pub struct MetadataTVLastLookup {
 /*
 
 async def metadata_tv_lookup(db_connection, download_data, file_name):
+    """
+    Lookup tv metadata
+    """
     # don't bother checking title/year as the main_server_metadata_api_worker does it already
     metadata_uuid = None  # so not found checks verify later
     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',

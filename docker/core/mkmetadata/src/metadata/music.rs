@@ -1,3 +1,5 @@
+use sqlx::types::Uuid;
+
 /*
 
 # example ffprobe output for music file

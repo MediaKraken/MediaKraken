@@ -1,3 +1,11 @@
+use sqlx::types::Uuid;
+
+pub struct MetadataMusicVideoLastLookup {
+    metadata_last_id: Uuid,
+    metadata_last_band: String,
+    metadata_last_song: String,
+}
+
 /*
 
 # imvdb lookup
@@ -6,10 +14,6 @@ async def metadata_music_video_lookup(db_connection, file_name):
     Lookup by name on music video database
     """
     # check for same variables
-    if not hasattr(metadata_music_video_lookup, "metadata_last_id"):
-        metadata_music_video_lookup.metadata_last_id = None  # it doesn't exist, so initialize it
-        metadata_music_video_lookup.metadata_last_band = None
-        metadata_music_video_lookup.metadata_last_song = None
     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                      message_text={
                                                                          'mv file': file_name})
@@ -82,16 +86,4 @@ async def metadata_music_video_lookup(db_connection, file_name):
         return metadata_uuid
     else:
         return None
-
-// cargo test -- --show-output
  */
-#[cfg(test)]
-mod test_mk_lib_common {
-    use super::*;
-
-    macro_rules! aw {
-    ($e:expr) => {
-        tokio_test::block_on($e)
-    };
-  }
-}

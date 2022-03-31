@@ -1,3 +1,5 @@
+use sqlx::types::Uuid;
+
 pub struct MetadataAnimeLastLookup {
     metadata_last_id: Uuid,
     metadata_last_imdb: String,

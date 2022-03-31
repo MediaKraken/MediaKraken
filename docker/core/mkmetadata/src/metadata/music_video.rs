@@ -1,3 +1,5 @@
+use sqlx::types::Uuid;
+
 pub struct MetadataMusicVideoLastLookup {
     metadata_last_id: Uuid,
     metadata_last_band: String,
@@ -11,6 +13,10 @@ async def metadata_music_video_lookup(db_connection, file_name):
     """
     Lookup by name on music video database
     """
+    # check for same variables
+    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+                                                                     message_text={
+                                                                         'mv file': file_name})
     # determine names
     if file_name.find('-') != -1:
         band_name, song_name = os.path.splitext(
@@ -80,5 +86,4 @@ async def metadata_music_video_lookup(db_connection, file_name):
         return metadata_uuid
     else:
         return None
-
  */

@@ -1,24 +1,19 @@
+use sqlx::types::Uuid;
+
+pub struct MetadataTVLastLookup {
+    metadata_last_id: Uuid,
+    metadata_last_imdb: String,
+    metadata_last_tvdb: String,
+    metadata_last_tmdb: String,
+}
+
 /*
-
-import inspect
-
-from common import common_global
-from common import common_logging_elasticsearch_httpx
-
-from . import metadata_nfo_xml
-
 
 async def metadata_tv_lookup(db_connection, download_data, file_name):
     """
     Lookup tv metadata
     """
     # don't bother checking title/year as the main_server_metadata_api_worker does it already
-    if not hasattr(metadata_tv_lookup, "metadata_last_id"):
-        # it doesn't exist yet, so initialize it
-        metadata_tv_lookup.metadata_last_id = None
-        metadata_tv_lookup.metadata_last_imdb = None
-        metadata_tv_lookup.metadata_last_tvdb = None
-        metadata_tv_lookup.metadata_last_tmdb = None
     metadata_uuid = None  # so not found checks verify later
     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                      message_text={
@@ -181,14 +176,3 @@ async def tv_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid):
     return metadata_uuid
 
  */
-// cargo test -- --show-output
-#[cfg(test)]
-mod test_mk_lib_common {
-    use super::*;
-
-    macro_rules! aw {
-    ($e:expr) => {
-        tokio_test::block_on($e)
-    };
-  }
-}

@@ -1,3 +1,5 @@
+use sqlx::types::Uuid;
+
 /*
 
 async def metadata_periodicals_lookup(db_connection, download_data):

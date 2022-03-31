@@ -1,3 +1,5 @@
+use sqlx::types::Uuid;
+
 /*
 
 async def game_system_update():
@@ -47,14 +49,3 @@ async def metadata_game_lookup(db_connection, download_data):
     return metadata_uuid
 
  */
-// cargo test -- --show-output
-#[cfg(test)]
-mod test_mk_lib_common {
-    use super::*;
-
-    macro_rules! aw {
-    ($e:expr) => {
-        tokio_test::block_on($e)
-    };
-  }
-}
