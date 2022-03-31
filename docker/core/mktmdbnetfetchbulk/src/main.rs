@@ -49,7 +49,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         json!({"START": "START"}),
                                         LOGGING_INDEX_NAME).await;
 
-    let fetch_date: String = "08_10_2021".to_string();
+    let fetch_date: String = "03_30_2022".to_string();
 
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
@@ -113,7 +113,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
         }
     }
-
     // stop logging
     mk_lib_logging::mk_logging_post_elk("info",
                                         json!({"STOP": "STOP"}),
