@@ -1,41 +1,49 @@
 use sqlx::types::Uuid;
 
+pub async fn metadata_process(pool: &sqlx::PgPool,
+                              provider_name: String,
+                              download_data: serde_json::Value) {
+    // TODO art, posters, trailers, etc in here as well
+    if download_data["mdq_status"] == "Search" {
+        metadata_search(&pool, provider_name, download_data);
+    }
+    else if download_data["mdq_status"] == "Update" {
+        metadata_update(&pool, provider_name, download_data);
+    }
+    else if download_data["mdq_status"] == "Fetch" {
+        metadata_fetch(&pool, provider_name, download_data);
+    }
+    else if download_data["mdq_status"] == "FetchCastCrew" {
+        metadata_castcrew(&pool, provider_name, download_data);
+    }
+    else if download_data["mdq_status"] == "FetchReview" {
+        metadata_review(&pool, provider_name, download_data);
+    }
+    else if download_data["mdq_status"] == "FetchImage" {
+        metadata_image(&pool, provider_name, download_data);
+    }
+    else if download_data["mdq_status"] == "FetchCollection" {
+        metadata_collection(&pool, provider_name, download_data);
+    }
+}
+
+pub async fn metadata_update(pool: &sqlx::PgPool,
+                             provider_name: String,
+                             download_data: serde_json::Value) {
+    // TODO horribly broken.  Need to add the dlid, that to update, etc
+}
+
+pub async fn metadata_search(pool: &sqlx::PgPool,
+                             provider_name: String,
+                             download_data: serde_json::Value) {
+    let mut metadata_uuid: Uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000")?;
+    let mut match_result = None;
+    let mut set_fetch = false;
+    let mut lookup_halt = false;
+    let mut update_provider = None;
+}
+
 /*
-
-async def metadata_process(db_connection, provider_name, download_data):
-    # TODO art, posters, trailers, etc in here as well
-    if download_data['mdq_status'] == "Search":
-        await metadata_search(db_connection, provider_name, download_data)
-    elif download_data['mdq_status'] == "Update":
-        await metadata_update(db_connection, provider_name, download_data)
-    elif download_data['mdq_status'] == "Fetch":
-        await metadata_fetch(db_connection, provider_name, download_data)
-    elif download_data['mdq_status'] == "FetchCastCrew":
-        await metadata_castcrew(db_connection, provider_name, download_data)
-    elif download_data['mdq_status'] == "FetchReview":
-        await metadata_review(db_connection, provider_name, download_data)
-    elif download_data['mdq_status'] == "FetchImage":
-        await metadata_image(db_connection, provider_name, download_data)
-    elif download_data['mdq_status'] == "FetchCollection":
-        await metadata_collection(db_connection, provider_name, download_data)
-
-
-async def metadata_update(db_connection, provider_name, download_data):
-    """
-    Update main metadata for specified provider
-    """
-    # TODO horribly broken.  Need to add the dlid, that to update, etc
-
-
-async def metadata_search(db_connection, provider_name, download_data):
-    """
-    Search for metadata via specified provider
-    """
-    metadata_uuid = None
-    match_result = None
-    set_fetch = False
-    lookup_halt = False
-    update_provider = None
     if provider_name == 'anidb':
         metadata_uuid = await metadata_anime.metadata_anime_lookup(db_connection,
                                                                    download_data,
@@ -44,20 +52,20 @@ async def metadata_search(db_connection, provider_name, download_data):
         if metadata_uuid is None:
             if match_result is None:
                 # do lookup halt as we'll start all movies in tmdb
-                lookup_halt = True
+                lookup_halt = true
             else:
-                set_fetch = True
+                set_fetch = true
     elif provider_name == 'chart_lyrics':
         common_metadata_provider_chart_lyrics.com_meta_chart_lyrics(artist_name, song_name)
-        lookup_halt = True
+        lookup_halt = true
     elif provider_name == 'comicvine':
-        lookup_halt = True
+        lookup_halt = true
     elif provider_name == 'discogs':
-        lookup_halt = True
+        lookup_halt = true
     elif provider_name == 'giantbomb':
-        lookup_halt = True
+        lookup_halt = true
     elif provider_name == 'imdb':
-        lookup_halt = True
+        lookup_halt = true
     elif provider_name == 'imvdb':
         metadata_uuid, match_result = await metadata_music_video.metadata_music_video_lookup(
             db_connection,
@@ -66,31 +74,27 @@ async def metadata_search(db_connection, provider_name, download_data):
             if match_result is None:
                 update_provider = 'theaudiodb'
             else:
-                set_fetch = True
+                set_fetch = true
     elif provider_name == 'isbndb':
         metadata_uuid, match_result = await metadata_provider_isbndb.metadata_periodicals_search_isbndb(
             db_connection, download_data['mdq_provider_id'])
         if metadata_uuid is None:
-            lookup_halt = True
+            lookup_halt = true
     elif provider_name == 'lastfm':
-        lookup_halt = True
+        lookup_halt = true
     elif provider_name == 'musicbrainz':
         metadata_uuid, match_result = await metadata_music.metadata_music_lookup(db_connection,
                                                                                  download_data)
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'metadata_uuid': metadata_uuid,
-                                                                             'result': match_result})
         if metadata_uuid is None:
-            lookup_halt = True
+            lookup_halt = true
     elif provider_name == 'omdb':
-        lookup_halt = True
+        lookup_halt = true
     elif provider_name == 'openlibrary':
-        lookup_halt = True
+        lookup_halt = true
     elif provider_name == 'pitchfork':
-        lookup_halt = True
+        lookup_halt = true
     elif provider_name == 'pornhub':
-        lookup_halt = True
+        lookup_halt = true
     elif provider_name == 'televisiontunes':
         # if download succeeds remove dl
         # TODO....handle list return for title?
@@ -102,47 +106,39 @@ async def metadata_search(db_connection, provider_name, download_data):
             await db_connection.db_commit()
             return  # since it's a search/fetch/insert in one shot
         else:
-            lookup_halt = True
+            lookup_halt = true
     elif provider_name == 'theaudiodb':
-        lookup_halt = True
+        lookup_halt = true
     elif provider_name == 'thegamesdb':
-        lookup_halt = True
+        lookup_halt = true
     elif provider_name == 'themoviedb':
         if download_data['mdq_que_type'] == common_global.DLMediaType.Movie.value:
             metadata_uuid, match_result = await metadata_provider_themoviedb.movie_search_tmdb(
                 db_connection,
                 download_data['mdq_path'])
-            await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                             message_text={
-                                                                                 'metadata_uuid': metadata_uuid,
-                                                                                 'result': match_result})
             # if match_result is an int, that means the lookup found a match but isn't in db
             if metadata_uuid is None and type(match_result) != int:
-                lookup_halt = True
+                lookup_halt = true
             else:
                 if metadata_uuid is not None:
-                    set_fetch = True
+                    set_fetch = true
         elif download_data['mdq_que_type'] == common_global.DLMediaType.TV.value:
             metadata_uuid, match_result = await metadata_tv.metadata_tv_lookup(db_connection,
                                                                                download_data[
                                                                                    'mdq_path'])
-            await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                             message_text={
-                                                                                 'metadata_uuid': metadata_uuid,
-                                                                                 'result': match_result})
             # if match_result is an int, that means the lookup found a match but isn't in db
             if metadata_uuid is None and type(match_result) != int:
-                lookup_halt = True
+                lookup_halt = true
             else:
                 if metadata_uuid is not None:
-                    set_fetch = True
+                    set_fetch = true
         else:
             # this will hit from type 0's (trailers, etc)
             if metadata_uuid is None:
-                lookup_halt = True
+                lookup_halt = true
             else:
                 if metadata_uuid is not None:
-                    set_fetch = True
+                    set_fetch = true
     elif provider_name == 'thesportsdb':
         metadata_uuid, match_result = await metadata_sports.metadata_sports_lookup(db_connection,
                                                                                    download_data)
@@ -152,9 +148,9 @@ async def metadata_search(db_connection, provider_name, download_data):
             else:
                 set_fetch = True
     elif provider_name == 'tv_intros':
-        lookup_halt = True
+        lookup_halt = true
     elif provider_name == 'twitch':
-        lookup_halt = True
+        lookup_halt = true
 
     # if search is being updated to new provider
     if update_provider is not None:
@@ -170,16 +166,9 @@ async def metadata_search(db_connection, provider_name, download_data):
     if set_fetch:
         # first verify a download queue record doesn't exist for this id
         metadata_uuid = await db_connection.db_download_que_exists(download_data['mdq_id'],
-                                                                   download_data['mdq_id'],
                                                                    provider_name, str(match_result))
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'metaquelook': metadata_uuid})
         if metadata_uuid is None:
             metadata_uuid = download_data['mdq_new_uuid']
-            await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                             message_text={
-                                                                                 'meta setfetch': metadata_uuid})
             await db_connection.db_update_media_id(download_data['mdq_provider_id'],
                                                    metadata_uuid)
             await db_connection.db_download_update(guid=download_data['mdq_id'],
@@ -194,9 +183,6 @@ async def metadata_fetch(db_connection, provider_name, download_data):
     Fetch main metadata for specified provider
     """
     if provider_name == 'imvdb':
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'fetch imvdb': provider_name})
         imvdb_id = await metadata_provider_imvdb.movie_fetch_save_imvdb(db_connection,
                                                                         download_data[
                                                                             'mdq_provider_id'],
@@ -204,9 +190,6 @@ async def metadata_fetch(db_connection, provider_name, download_data):
                                                                             'mdq_new_uuid'])
     elif provider_name == 'themoviedb':
         if download_data['mdq_que_type'] == common_global.DLMediaType.Person.value:
-            await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                             message_text={
-                                                                                 'fetch person bio': provider_name})
             await metadata_provider_themoviedb.metadata_fetch_tmdb_person(
                 db_connection, provider_name, download_data)
         elif download_data['mdq_que_type'] == common_global.DLMediaType.Movie.value:

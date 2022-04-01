@@ -3,7 +3,8 @@
 // use tmdb_client::apis::client::APIClient;
 // use tmdb_client::models::MoviePaginated;
 
-
+#[path = "mk_lib_network.rs"]
+mod mk_lib_network;
 
 /*
 

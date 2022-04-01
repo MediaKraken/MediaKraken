@@ -1,3 +1,6 @@
+#[path = "mk_lib_network.rs"]
+mod mk_lib_network;
+
 /*
 async def com_meta_chart_lyrics(artist_name, song_name):
     """
