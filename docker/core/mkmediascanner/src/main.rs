@@ -89,7 +89,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                               format!("Library path not found: {}",
                                                                                       row_data.get("mm_media_dir_path")),
                                                                               true).await.unwrap();
-            let scan_path = false;
+            scan_path = false;
         }
 
         if scan_path == true {
@@ -150,7 +150,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     && stack_disk1.is_match(&base_file_name) == false
                                     && stack_disc1.is_match(&base_file_name) == false {
                                     // it's not a part one here so, no DL record needed
-                                    let save_dl_record = false;
+                                    save_dl_record = false;
                                 }
                             }
                             // video game data
@@ -165,7 +165,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         let new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::GAME_ROM;
                                     }
                                 }
-                                let ffprobe_bif_data = false;
+                                ffprobe_bif_data = false;
                             }
                             // set new media class for subtitles
                             else {
@@ -179,7 +179,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                             let new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::TV_SUBTITLE;
                                         }
                                     }
-                                    let ffprobe_bif_data = false;
+                                    ffprobe_bif_data = false;
                                 }
                                 // set new media class for trailers or themes
                                 else {
