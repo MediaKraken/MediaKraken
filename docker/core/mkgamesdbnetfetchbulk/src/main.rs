@@ -48,12 +48,4 @@ for platform in \
                                                           system_alias,
                                                           json.dumps(platform_json))
                 db_connection.db_commit()
-
-
-# commit all changes
-db_connection.db_commit()
-
-# close DB
-db_connection.db_close()
-
  */
