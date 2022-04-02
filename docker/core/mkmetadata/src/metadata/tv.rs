@@ -10,6 +10,12 @@ pub struct MetadataTVLastLookup {
     metadata_last_tmdb: String,
 }
 
+pub async fn metadata_tv_lookup(pool: &sqlx::PgPool,
+                                   download_data: serde_json::Value,
+                                   file_name: String) {
+
+}
+
 /*
 
 async def metadata_tv_lookup(db_connection, download_data, file_name):

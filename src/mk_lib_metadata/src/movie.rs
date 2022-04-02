@@ -15,6 +15,12 @@ pub struct MetadataMovieLastLookup {
     metadata_last_tmdb: String,
 }
 
+pub async fn metadata_movie_lookup(pool: &sqlx::PgPool,
+                                   download_data: serde_json::Value,
+                                   file_name: String) {
+
+}
+
 /*
 pub async fn metadata_movie_lookup(pool: &sqlx::PgPool, dl_row, guessit_data) {
     // don"t bother checking title/year as the main_server_metadata_api_worker does it already

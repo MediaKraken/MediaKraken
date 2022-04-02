@@ -6,6 +6,11 @@ mod mk_provider_isbndb;
 #[path = "provider/open_library.rs"]
 mod mk_provider_open_library;
 
+pub async fn metadata_book_lookup(pool: &sqlx::PgPool,
+                                   download_data: serde_json::Value) {
+
+}
+
 /*
 
 async def metadata_periodicals_lookup(db_connection, download_data):

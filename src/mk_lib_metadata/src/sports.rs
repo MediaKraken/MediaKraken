@@ -10,6 +10,11 @@ pub struct MetadataSportsLastLookup {
     metadata_last_thesportsdb: String,
 }
 
+pub async fn metadata_sports_lookup(pool: &sqlx::PgPool,
+                                   download_data: serde_json::Value) {
+
+}
+
 /*
 
 async def metadata_sports_lookup(db_connection, download_data):

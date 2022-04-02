@@ -9,6 +9,11 @@ mod mk_provider_pitchfork;
 #[path = "provider/shoutcast.rs"]
 mod mk_provider_shoutcast;
 
+pub async fn metadata_music_lookup(pool: &sqlx::PgPool,
+                                   download_data: serde_json::Value) {
+
+}
+
 /*
 
 # example ffprobe output for music file

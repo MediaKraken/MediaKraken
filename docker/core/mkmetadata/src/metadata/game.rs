@@ -6,6 +6,11 @@ mod mk_provider_giant_bomb;
 #[path = "provider/thegamesdb.rs"]
 mod mk_provider_thegamesdb;
 
+pub async fn metadata_game_lookup(pool: &sqlx::PgPool,
+                                   download_data: serde_json::Value) {
+
+}
+
 /*
 
 async def game_system_update():

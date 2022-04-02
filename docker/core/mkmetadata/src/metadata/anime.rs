@@ -10,6 +10,12 @@ pub struct MetadataAnimeLastLookup {
     metadata_last_anidb: String,
 }
 
+pub async fn metadata_anime_lookup(pool: &sqlx::PgPool,
+                                   download_data: serde_json::Value,
+                                   file_name: String) {
+
+}
+
 /*
 
 async def metadata_anime_lookup(db_connection, download_data, file_name):

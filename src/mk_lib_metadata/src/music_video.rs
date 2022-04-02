@@ -9,6 +9,11 @@ pub struct MetadataMusicVideoLastLookup {
     metadata_last_song: String,
 }
 
+pub async fn metadata_music_video_lookup(pool: &sqlx::PgPool,
+                                   file_name: String) {
+
+}
+
 /*
 
 // imvdb lookup
