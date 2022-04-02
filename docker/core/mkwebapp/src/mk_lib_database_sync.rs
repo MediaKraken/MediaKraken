@@ -14,30 +14,32 @@ pub async fn mk_lib_database_sync_delete(pool: &sqlx::PgPool,
     Ok(())
 }
 
+pub async fn mk_lib_database_sync_process_update(pool: &sqlx::PgPool,
+                                           sync_guid: UUid,
+                                            sync_percent: f32)
+                                           -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
+    sqlx::query("update mm_sync set mm_sync_options_json->'Progress' = $1
+        where mm_sync_guid = $2")
+        .bind(sync_percent)
+        .bind(sync_guid)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(())
+}
+
+pub async fn mk_lib_database_sync_count(pool: &sqlx::PgPool)
+                                        -> Result<(i32), sqlx::Error> {
+    let row: (i32, ) = sqlx::query_as("select count(*) from mm_syn")
+        .fetch_one(pool)
+        .await?;
+    Ok(row.0)
+}
+
 /*
 # TODO port query
-async def db_sync_progress_update(self, sync_guid, sync_percent, db_connection=None):
-    """
-    # update progress
-    """
-    await db_conn.execute('update mm_sync set mm_sync_options_json->\'Progress\' = $1'
-                          ' where mm_sync_guid = $2', sync_percent, sync_guid)
-    await db_conn.execute('commit')
-
-
-# TODO port query
-async def db_sync_list_count(self, db_connection=None):
-    """
-    # return count of sync jobs
-    """
-    return await db_conn.fetchval('select count(*) from mm_sync')
-
-
-# TODO port query
 async def db_sync_insert(self, sync_path, sync_path_to, sync_json, db_connection=None):
-    """
-    # insert sync job
-    """
     new_guid = uuid.uuid4()
     await db_conn.execute('insert into mm_sync (mm_sync_guid,'
                           ' mm_sync_path,'
@@ -64,10 +66,10 @@ async def db_sync_list(self, offset=0, records=None, user_guid=None, db_connecti
                                    ' from mm_sync'
                                    ' where mm_sync_guid in (select mm_sync_guid'
                                    ' from mm_sync'
-                                   ' order by mm_sync_options_json->\'Priority\''
+                                   ' order by mm_sync_options_json->'Priority''
                                    ' desc, mm_sync_path'
                                    ' offset $1 limit $2)'
-                                   ' order by mm_sync_options_json->\'Priority\''
+                                   ' order by mm_sync_options_json->'Priority''
                                    ' desc, mm_sync_path',
                                    offset, records)
     else:
@@ -78,10 +80,10 @@ async def db_sync_list(self, offset=0, records=None, user_guid=None, db_connecti
                                    ' from mm_sync'
                                    ' where mm_sync_guid in (select mm_sync_guid'
                                    ' from mm_sync'
-                                   ' where mm_sync_options_json->\'User\'::text = $1'
-                                   ' order by mm_sync_options_json->\'Priority\''
+                                   ' where mm_sync_options_json->'User'::text = $1'
+                                   ' order by mm_sync_options_json->'Priority''
                                    ' desc, mm_sync_path offset $2 limit $3)'
-                                   ' order by mm_sync_options_json->\'Priority\''
+                                   ' order by mm_sync_options_json->'Priority''
                                    ' desc, mm_sync_path',
                                    str(user_guid), offset, records)
 

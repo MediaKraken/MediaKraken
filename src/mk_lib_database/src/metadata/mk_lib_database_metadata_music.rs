@@ -72,7 +72,7 @@ def db_music_lookup(self, artist_name, album_name, song_title):
     # TODO the following fields don't exist on the database (album and musician)
     # TODO order by release year
     self.db_cursor.execute('select mm_metadata_music_guid,'
-                           ' mm_metadata_media_music_id->\'Mbrainz\' as mbrainz from '
+                           ' mm_metadata_media_music_id->'Mbrainz' as mbrainz from '
                            'mm_metadata_music,'
                            ' mm_metadata_album,'
                            ' mm_metadata_musician'
@@ -229,11 +229,11 @@ def db_meta_album_image_random(self):
     """
     Find random album cover image
     """
-    # self.db_cursor.execute('select mm_metadata_localimage_json->\'Images\'->\'themoviedb\'->>\''
-    #     + return_image_type + '\' as image_json,mm_metadata_guid from mm_media,mm_metadata_movie'\
+    # self.db_cursor.execute('select mm_metadata_localimage_json->'Images'->'themoviedb'->>''
+    #     + return_image_type + '' as image_json,mm_metadata_guid from mm_media,mm_metadata_movie'\
     #     ' where mm_media_metadata_guid = mm_metadata_guid'\
-    #     ' and (mm_metadata_localimage_json->\'Images\'->\'themoviedb\'->>\''
-    #     + return_image_type + '\'' + ')::text != \'null\' order by random() limit 1')
+    #     ' and (mm_metadata_localimage_json->'Images'->'themoviedb'->>''
+    #     + return_image_type + ''' + ')::text != 'null' order by random() limit 1')
     try:
         # then if no results.....a None will except which will then pass None, None
         image_json, metadata_id = self.db_cursor.fetchone()
@@ -246,8 +246,8 @@ def db_meta_album_image_random(self):
 def db_meta_music_by_provider_uuid(self, provider, uuid_id):
     try:
         self.db_cursor.execute('select mm_metadata_music_guid from mm_metadata_music'
-                               ' where mm_metadata_media_music_id->\'' + provider
-                               + '\' ? $1', (uuid_id,))
+                               ' where mm_metadata_media_music_id->'' + provider
+                               + '' ? $1', (uuid_id,))
         return self.db_cursor.fetchone()['mm_metadata_music_guid']
     except:
         return None

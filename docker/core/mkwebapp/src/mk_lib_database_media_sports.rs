@@ -27,7 +27,7 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    ' from mm_media, mm_metadata_sports'
                                                    ' where mm_media_class_guid = $1'
                                                    ' and mm_media_metadata_guid = mm_metadata_sports_guid'
-                                                   ' and mm_media_json->>\'DateAdded\' >= '
+                                                   ' and mm_media_json->>'DateAdded' >= '
                                                    '$2) as temp'
                                                    ' order by LOWER(mm_metadata_sports_name)',
                                                    class_guid, (datetime.datetime.now()
@@ -44,7 +44,7 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    ' from mm_media, mm_metadata_sports'
                                                    ' where mm_media_class_guid = $1'
                                                    ' and mm_media_metadata_guid = mm_metadata_sports_guid'
-                                                   ' and mm_media_json->>\'DateAdded\' >= '
+                                                   ' and mm_media_json->>'DateAdded' >= '
                                                    '$2) as temp'
                                                    ' order by LOWER('
                                                    'mm_metadata_sports_name) offset $3 '
@@ -66,7 +66,7 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    ' from mm_media, mm_metadata_sports'
                                                    ' where mm_media_class_guid = $1'
                                                    ' and mm_media_metadata_guid = mm_metadata_sports_guid'
-                                                   ' and mm_media_json->>\'DateAdded\' >= $2)'
+                                                   ' and mm_media_json->>'DateAdded' >= $2)'
                                                    ' union (select distinct on (mmr_media_metadata_guid) mm_metadata_sports_name,'
                                                    ' mmr_media_guid,'
                                                    ' mmr_media_json,'
@@ -77,7 +77,7 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    ' where mmr_media_class_guid = $3 and '
                                                    'mmr_media_metadata_guid'
                                                    ' = mm_metadata_sports_guid and '
-                                                   'mmr_media_json->>\'DateAdded\' >= $4) '
+                                                   'mmr_media_json->>'DateAdded' >= $4) '
                                                    'as temp'
                                                    ' order by LOWER(mm_metadata_sports_name)',
                                                    class_guid, (datetime.datetime.now()
@@ -100,7 +100,7 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    ' mm_metadata_sports'
                                                    ' where mm_media_class_guid = $1'
                                                    ' and mm_media_metadata_guid = mm_metadata_sports_guid'
-                                                   ' and mm_media_json->>\'DateAdded\' >= $2)'
+                                                   ' and mm_media_json->>'DateAdded' >= $2)'
                                                    ' union (select distinct on (mmr_media_metadata_guid) mm_metadata_sports_name,'
                                                    ' mmr_media_guid,'
                                                    ' mmr_media_json, '
@@ -110,7 +110,7 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    ' where mmr_media_class_guid = $3 and '
                                                    'mmr_media_metadata_guid'
                                                    ' = mm_metadata_sports_guid and '
-                                                   'mmr_media_json->>\'DateAdded\' >= $4) '
+                                                   'mmr_media_json->>'DateAdded' >= $4) '
                                                    'as temp'
                                                    ' order by LOWER('
                                                    'mm_metadata_sports_name) offset $5 '
@@ -219,7 +219,7 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    ' mm_metadata_sports'
                                                    ' where mm_media_class_guid = $1'
                                                    ' and mm_media_metadata_guid = mm_metadata_sports_guid'
-                                                   ' and (mm_metadata_sports_json->>\'belongs_to_collection\') is null'
+                                                   ' and (mm_metadata_sports_json->>'belongs_to_collection') is null'
                                                    ' union select mm_metadata_collection_name as name,'
                                                    ' mm_metadata_collection_guid as guid, nullb as metajson,'
                                                    ' mm_media_path as mediapath'
@@ -237,7 +237,7 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    ' from mm_media, mm_metadata_sports'
                                                    ' where mm_media_class_guid = $1'
                                                    ' and mm_media_metadata_guid = mm_metadata_sports_guid'
-                                                   ' and (mm_metadata_sports_json->>\'belongs_to_collection\') is null'
+                                                   ' and (mm_metadata_sports_json->>'belongs_to_collection') is null'
                                                    ' union select mm_metadata_collection_name as name,'
                                                    ' mm_metadata_collection_guid as guid, nullb as metajson,'
                                                    ' mm_media_path as mediapath'
@@ -256,7 +256,7 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    ' from mm_media, mm_metadata_sports'
                                                    ' where mm_media_class_guid = $1'
                                                    ' and mm_media_metadata_guid = mm_metadata_sports_guid'
-                                                   ' and (mm_metadata_sports_json->>\'belongs_to_collection\') is null'
+                                                   ' and (mm_metadata_sports_json->>'belongs_to_collection') is null'
                                                    # TODO put back in
                                                    #                        ' union select mm_metadata_collection_name as name,'
                                                    #                        ' mm_metadata_collection_guid as guid,'
@@ -277,7 +277,7 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    ' from mm_media, mm_metadata_sports'
                                                    ' where mm_media_class_guid = $1'
                                                    ' and mm_media_metadata_guid = mm_metadata_sports_guid'
-                                                   ' and (mm_metadata_sports_json->>\'belongs_to_collection\') is null'
+                                                   ' and (mm_metadata_sports_json->>'belongs_to_collection') is null'
                                                    # TODO put back in
                                                    #                        ' union select mm_metadata_collection_name as name,'
                                                    #                        ' mm_metadata_collection_guid as guid,'
@@ -301,8 +301,8 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    ' from mm_media, mm_metadata_sports'
                                                    ' where mm_media_class_guid = $1'
                                                    ' and mm_media_metadata_guid = mm_metadata_sports_guid'
-                                                   ' and mm_media_json->>\'DateAdded\' >= $2'
-                                                   ' and mm_metadata_sports_json->\'genres\'->0->\'name\' ? $3) as temp'
+                                                   ' and mm_media_json->>'DateAdded' >= $2'
+                                                   ' and mm_metadata_sports_json->'genres'->0->'name' ? $3) as temp'
                                                    ' order by LOWER(mm_metadata_sports_name)',
                                                    class_guid, (datetime.datetime.now()
                                                                 - datetime.timedelta(
@@ -319,8 +319,8 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    ' from mm_media, mm_metadata_sports'
                                                    ' where mm_media_class_guid = $1'
                                                    ' and mm_media_metadata_guid = mm_metadata_sports_guid'
-                                                   ' and mm_media_json->>\'DateAdded\' >= $2'
-                                                   ' and mm_metadata_sports_json->\'genres\'->0->\'name\' ? $3) as temp'
+                                                   ' and mm_media_json->>'DateAdded' >= $2'
+                                                   ' and mm_metadata_sports_json->'genres'->0->'name' ? $3) as temp'
                                                    ' order by LOWER('
                                                    'mm_metadata_sports_name) offset $4 '
                                                    'limit $5',
@@ -341,8 +341,8 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    ' from mm_media, mm_metadata_sports'
                                                    ' where mm_media_class_guid = $1'
                                                    ' and mm_media_metadata_guid = mm_metadata_sports_guid'
-                                                   ' and mm_media_json->>\'DateAdded\' >= $2'
-                                                   ' and mm_metadata_sports_json->\'genres\'->0->\'name\' ? $3)'
+                                                   ' and mm_media_json->>'DateAdded' >= $2'
+                                                   ' and mm_metadata_sports_json->'genres'->0->'name' ? $3)'
                                                    ' union (select distinct on (mmr_media_metadata_guid) mm_metadata_sports_name,'
                                                    ' mmr_media_guid, mmr_media_json, '
                                                    'mm_metadata_sports_image_json, NULL as '
@@ -350,8 +350,8 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    '  from mm_media_remote, mm_metadata_sports'
                                                    ' where mmr_media_class_guid = $4'
                                                    ' and mmr_media_metadata_guid = mm_metadata_sports_guid'
-                                                   ' and mmr_media_json->>\'DateAdded\' >= $5'
-                                                   ' and mm_metadata_sports_json->\'genres\'->0->\'name\' ? $6)) as temp'
+                                                   ' and mmr_media_json->>'DateAdded' >= $5'
+                                                   ' and mm_metadata_sports_json->'genres'->0->'name' ? $6)) as temp'
                                                    ' order by LOWER(mm_metadata_sports_name)',
                                                    class_guid, (datetime.datetime.now()
                                                                 - datetime.timedelta(
@@ -368,8 +368,8 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    ' from mm_media, mm_metadata_sports'
                                                    ' where mm_media_class_guid = $1'
                                                    ' and mm_media_metadata_guid = mm_metadata_sports_guid'
-                                                   ' and mm_media_json->>\'DateAdded\' >= $2'
-                                                   ' and mm_metadata_sports_json->\'genres\'->0->\'name\' ? $3)'
+                                                   ' and mm_media_json->>'DateAdded' >= $2'
+                                                   ' and mm_metadata_sports_json->'genres'->0->'name' ? $3)'
                                                    ' union (select distinct on (mmr_media_metadata_guid) mm_metadata_sports_name,'
                                                    ' mmr_media_guid,'
                                                    ' mmr_media_json, '
@@ -378,8 +378,8 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    '  from mm_media_remote, mm_metadata_sports'
                                                    ' where mmr_media_class_guid = $4'
                                                    ' and mmr_media_metadata_guid = mm_metadata_sports_guid'
-                                                   ' and mmr_media_json->>\'DateAdded\' >= $5'
-                                                   ' and mm_metadata_sports_json->\'genres\'->0->\'name\' ? $6)) as temp'
+                                                   ' and mmr_media_json->>'DateAdded' >= $5'
+                                                   ' and mm_metadata_sports_json->'genres'->0->'name' ? $6)) as temp'
                                                    ' order by LOWER('
                                                    'mm_metadata_sports_name) offset $7 '
                                                    'limit $8',
@@ -405,7 +405,7 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    ' from mm_media, mm_metadata_sports'
                                                    ' where mm_media_class_guid = $1'
                                                    ' and mm_media_metadata_guid = mm_metadata_sports_guid'
-                                                   ' and mm_metadata_sports_json->\'genres\'->0->\'name\' ? $2) as temp'
+                                                   ' and mm_metadata_sports_json->'genres'->0->'name' ? $2) as temp'
                                                    ' order by LOWER(mm_metadata_sports_name)',
                                                    class_guid, list_genre)
                     else:
@@ -419,7 +419,7 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    ' from mm_media, mm_metadata_sports'
                                                    ' where mm_media_class_guid = $1'
                                                    ' and mm_media_metadata_guid = mm_metadata_sports_guid'
-                                                   ' and mm_metadata_sports_json->\'genres\'->0->\'name\' ? $2) as temp'
+                                                   ' and mm_metadata_sports_json->'genres'->0->'name' ? $2) as temp'
                                                    ' order by LOWER('
                                                    'mm_metadata_sports_name) offset $3 '
                                                    'limit $4',
@@ -439,7 +439,7 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    ' mm_metadata_sports'
                                                    ' where mm_media_class_guid = $1'
                                                    ' and mm_media_metadata_guid = mm_metadata_sports_guid'
-                                                   ' and mm_metadata_sports_json->\'genres\'->0->\'name\' ? $2)'
+                                                   ' and mm_metadata_sports_json->'genres'->0->'name' ? $2)'
                                                    ' union (select distinct on (mmr_media_metadata_guid)'
                                                    ' mm_metadata_sports_name,'
                                                    ' mmr_media_guid,'
@@ -449,7 +449,7 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    '  from mm_media_remote, mm_metadata_sports'
                                                    ' where mmr_media_class_guid = $3 and '
                                                    'mmr_media_metadata_guid'
-                                                   ' = mm_metadata_sports_guid and mm_metadata_sports_json->\'genres\'->0->\'name\' ? $4)) as temp'
+                                                   ' = mm_metadata_sports_guid and mm_metadata_sports_json->'genres'->0->'name' ? $4)) as temp'
                                                    ' order by LOWER(mm_metadata_sports_name)',
                                                    class_guid, list_genre, class_guid,
                                                    list_genre)
@@ -463,7 +463,7 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    ' from mm_media, mm_metadata_sports'
                                                    ' where mm_media_class_guid = $1'
                                                    ' and mm_media_metadata_guid = mm_metadata_sports_guid'
-                                                   ' and mm_metadata_sports_json->\'genres\'->0->\'name\' ? $2)'
+                                                   ' and mm_metadata_sports_json->'genres'->0->'name' ? $2)'
                                                    ' union (select distinct on (mmr_media_metadata_guid)'
                                                    ' mm_metadata_sports_name,'
                                                    ' mmr_media_guid, mmr_media_json,'
@@ -472,7 +472,7 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    '  from mm_media_remote, mm_metadata_sports'
                                                    ' where mmr_media_class_guid = $3 and '
                                                    'mmr_media_metadata_guid'
-                                                   ' = mm_metadata_sports_guid and mm_metadata_sports_json->\'genres\'->0->\'name\' ? $4)) as temp'
+                                                   ' = mm_metadata_sports_guid and mm_metadata_sports_json->'genres'->0->'name' ? $4)) as temp'
                                                    ' order by LOWER('
                                                    'mm_metadata_sports_name) offset $5 '
                                                    'limit $6',
@@ -506,7 +506,7 @@ async def db_media_sports_list_count(self, class_guid, list_type=None,
                                                   ' where mm_media_class_guid = $1'
                                                   ' and mm_media_metadata_guid'
                                                   ' = mm_metadata_sports_guid'
-                                                  ' and mm_media_json->>\'DateAdded\' >= $2)'
+                                                  ' and mm_media_json->>'DateAdded' >= $2)'
                                                   ' as temp',
                                                   class_guid, (datetime.datetime.now()
                                                                - datetime.timedelta(
@@ -519,13 +519,13 @@ async def db_media_sports_list_count(self, class_guid, list_type=None,
                         ' where mm_media_class_guid = $1'
                         ' and mm_media_metadata_guid'
                         ' = mm_metadata_sports_guid'
-                        ' and mm_media_json->>\'DateAdded\' >= $2)'
+                        ' and mm_media_json->>'DateAdded' >= $2)'
                         ' union (select distinct mmr_metadata_guid'
                         ' from mm_media_remote,'
                         ' mm_metadata_sports where '
                         'mmr_media_class_guid = $3'
                         ' and mmr_media_metadata_guid = mm_metadata_sports_guid'
-                        ' and mm_media_json->>\'DateAdded\' >= '
+                        ' and mm_media_json->>'DateAdded' >= '
                         '$4)) as temp',
                         class_guid, (datetime.datetime.now()
                                      - datetime.timedelta(
@@ -568,7 +568,7 @@ async def db_media_sports_list_count(self, class_guid, list_type=None,
                                                   ' mm_metadata_sports'
                                                   ' where mm_media_class_guid = $1'
                                                   ' and mm_media_metadata_guid = mm_metadata_sports_guid'
-                                                  ' and (mm_metadata_sports_json->>\'belongs_to_collection\') is null)'
+                                                  ' and (mm_metadata_sports_json->>'belongs_to_collection') is null)'
                                                   ' union (select count(*) from xxxx as row_count)) as temp',
                                                   class_guid, class_guid)
                 else:
@@ -583,8 +583,8 @@ async def db_media_sports_list_count(self, class_guid, list_type=None,
                                                   ' where mm_media_class_guid = $1 and '
                                                   'mm_media_metadata_guid'
                                                   ' = mm_metadata_sports_guid and '
-                                                  'mm_media_json->>\'DateAdded\' >= $2'
-                                                  ' and mm_metadata_sports_json->\'genres\'->0->\'name\' ? $3) as temp',
+                                                  'mm_media_json->>'DateAdded' >= $2'
+                                                  ' and mm_metadata_sports_json->'genres'->0->'name' ? $3) as temp',
                                                   class_guid, (datetime.datetime.now()
                                                                - datetime.timedelta(
                                     days=7)).strftime(
@@ -597,15 +597,15 @@ async def db_media_sports_list_count(self, class_guid, list_type=None,
                         ' where mm_media_class_guid = $1 and '
                         'mm_media_metadata_guid'
                         ' = mm_metadata_sports_guid and '
-                        'mm_media_json->>\'DateAdded\' >= $2'
-                        ' and mm_metadata_sports_json->\'genres\'->0->\'name\' ? $3)'
+                        'mm_media_json->>'DateAdded' >= $2'
+                        ' and mm_metadata_sports_json->'genres'->0->'name' ? $3)'
                         ' union (select distinct mmr_metadata_guid from mm_media_remote,'
                         ' mm_metadata_sports'
                         ' where mmr_media_class_guid = $4'
                         ' and mmr_media_metadata_guid = mm_metadata_sports_guid'
-                        ' and mmr_media_json->>\'DateAdded\' >= $5'
+                        ' and mmr_media_json->>'DateAdded' >= $5'
                         ' and '
-                        'mm_metadata_sports_json->\'genres\'->0->\'name\' ? $6)) as temp',
+                        'mm_metadata_sports_json->'genres'->0->'name' ? $6)) as temp',
                         class_guid, (datetime.datetime.now()
                                      - datetime.timedelta(
                                     days=7)).strftime(
@@ -624,7 +624,7 @@ async def db_media_sports_list_count(self, class_guid, list_type=None,
                                                   ' from mm_media, mm_metadata_sports'
                                                   ' where mm_media_class_guid = $1 and '
                                                   'mm_media_metadata_guid'
-                                                  ' = mm_metadata_sports_guid and mm_metadata_sports_json->\'genres\'->0->\'name\' ? $2)'
+                                                  ' = mm_metadata_sports_guid and mm_metadata_sports_json->'genres'->0->'name' ? $2)'
                                                   ' as temp', class_guid, list_genre)
                 else:
                     return await db_conn.fetchval(
@@ -634,14 +634,14 @@ async def db_media_sports_list_count(self, class_guid, list_type=None,
                         ' where mm_media_class_guid = $1 and'
                         ' mm_media_metadata_guid'
                         ' = mm_metadata_sports_guid'
-                        ' and mm_metadata_sports_json->\'genres\'->0->\'name\' ? $2)'
+                        ' and mm_metadata_sports_json->'genres'->0->'name' ? $2)'
                         ' union (select distinct mmr_media_metadata_guid'
                         ' from mm_media_remote,'
                         ' mm_metadata_sports'
                         ' where mmr_media_class_guid = $3'
                         ' and mmr_media_metadata_guid = mm_metadata_sports_guid'
                         ' and'
-                        ' mm_metadata_sports_json->\'genres\'->0->\'name\' ? $4)) as temp',
+                        ' mm_metadata_sports_json->'genres'->0->'name' ? $4)) as temp',
                         class_guid, list_genre, class_guid,
                         list_genre)
             else:
@@ -670,10 +670,10 @@ def db_media_sports_count_by_genre(self, class_guid):
     """
     # movie count by genre
     """
-    self.db_cursor.execute('select jsonb_array_elements_text(mm_metadata_sports_json->\'Meta\''
-                           '->\'themoviedb\'->\'Meta\'->\'genres\')b as gen,'
-                           ' count(mm_metadata_sports_json->\'Meta\''
-                           '->\'themoviedb\'->\'Meta\'->\'genres\')'
+    self.db_cursor.execute('select jsonb_array_elements_text(mm_metadata_sports_json->'Meta''
+                           '->'themoviedb'->'Meta'->'genres')b as gen,'
+                           ' count(mm_metadata_sports_json->'Meta''
+                           '->'themoviedb'->'Meta'->'genres')'
                            ' from ((select distinct on (mm_media_metadata_guid)'
                            ' mm_metadata_sports_json'
                            ' from mm_media, mm_metadata_sports'

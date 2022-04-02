@@ -39,31 +39,35 @@ pub async fn mk_lib_database_option_update(pool: &sqlx::PgPool,
     Ok(())
 }
 
+pub async fn mk_lib_database_option_status_update(pool: &sqlx::PgPool,
+                                           option_json: serde_json::Value,
+                                           status_json: serde_json::Value)
+                                           -> Result<(), sqlx::Error> {
+    // no need for where clause as it's only the one record
+    let mut transaction = pool.begin().await?;
+    sqlx::query("update mm_options_and_status set mm_options_json = $1, mm_status_json = $2")
+        .bind(option_json)
+        .bind(status_json)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(())
+}
+
+pub async fn mk_lib_database_status_update_scan(pool: &sqlx::PgPool,
+                                           status_json: serde_json::Value)
+                                           -> Result<(), sqlx::Error> {
+    // no need for where clause as it's only the one record
+    let mut transaction = pool.begin().await?;
+    sqlx::query("update mm_options_and_status set mm_status_json = $1")
+        .bind(status_json)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(())
+}
+
 /*
-# TODO port query
-async def db_opt_status_update(self, option_json, status_json):
-    """
-    Update option and status json
-    """
-    # no need for where clause as it's only the one record
-    await db_conn.execute('update mm_options_and_status'
-                          ' set mm_options_json = $1,'
-                          ' mm_status_json = $2',
-                          option_json, status_json)
-    await db_conn.execute('commit')
-
-# TODO port query
-def db_opt_status_update_scan(self, scan_json):
-    """
-    Update scan info
-    """
-    # no need for where clause as it's only the one record
-    self.db_cursor.execute(
-        'update mm_options_and_status'
-        ' set mm_status_json = $1', (scan_json,))
-    self.db_commit()
-
-
 # TODO port query
 def db_opt_status_update_scan_rec(self, dir_path, scan_status, scan_percent):
     """

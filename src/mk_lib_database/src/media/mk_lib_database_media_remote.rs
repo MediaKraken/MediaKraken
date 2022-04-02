@@ -96,67 +96,67 @@ def db_media_remote_read_new(self, date_last_sync, sync_movie=None, sync_tv=None
     first_query = True
     sync_query = ''
     if sync_movie is not None:
-        sync_query += ('select mm_media_guid, \'Movie\','
+        sync_query += ('select mm_media_guid, 'Movie','
                        ' mm_media_ffprobe_json,'
                        ' mm_metadata_media_id'
                        ' from mm_media, mm_metadata_movie'
                        ' where mm_media_metadata_guid = mm_metadata_guid'
-                       ' and mm_media_json->>\'DateAdded\' >= $1', (date_last_sync,))
+                       ' and mm_media_json->>'DateAdded' >= $1', (date_last_sync,))
         first_query = False
 
     if sync_tv is not None:
         if not first_query:
             sync_query += ' union all '
-        sync_query += ('select mm_media_guid, \'TV Show\','
+        sync_query += ('select mm_media_guid, 'TV Show','
                        ' mm_media_ffprobe_json,'
                        ' mm_metadata_media_tvshow_id'
                        ' from mm_media, mm_metadata_tvshow'
                        ' where mm_metadata_tvshow_guid = mm_metadata_tvshow_guid'
-                       ' and mm_media_json->>\'DateAdded\' >= $1', (date_last_sync,))
+                       ' and mm_media_json->>'DateAdded' >= $1', (date_last_sync,))
         first_query = False
 
     if sync_sports is not None:
         if not first_query:
             sync_query += ' union all '
-        sync_query += ('select mm_media_guid, \'Sports\','
+        sync_query += ('select mm_media_guid, 'Sports','
                        ' mm_media_ffprobe_json,'
                        ' mm_metadata_media_sports_id'
                        ' from mm_media, mm_metadata_sports'
                        ' where mm_metadata_sports_guid = mm_metadata_sports_guid'
-                       ' and mm_media_json->>\'DateAdded\' >= $1', (date_last_sync,))
+                       ' and mm_media_json->>'DateAdded' >= $1', (date_last_sync,))
         first_query = False
 
     if sync_music is not None:
         if not first_query:
             sync_query += ' union all '
-        sync_query += ('select mm_media_guid, \'Music\','
+        sync_query += ('select mm_media_guid, 'Music','
                        ' mm_media_ffprobe_json,'
                        ' mm_metadata_media_music_id'
                        ' from mm_media, mm_metadata_music'
                        ' where mm_metadata_music_guid = mm_metadata_music_guid'
-                       ' and mm_media_json->>\'DateAdded\' >= $1', (date_last_sync,))
+                       ' and mm_media_json->>'DateAdded' >= $1', (date_last_sync,))
         first_query = False
 
     if sync_music_video is not None:
         if not first_query:
             sync_query += ' union all '
-        sync_query += ('select mm_media_guid, \'Music Video\','
+        sync_query += ('select mm_media_guid, 'Music Video','
                        ' mm_media_ffprobe_json,'
                        ' mm_metadata_music_video_media_id'
                        ' from mm_media, mm_metadata_music_video'
                        ' where mm_metadata_music_video_guid = mm_metadata_music_video_guid'
-                       ' and mm_media_json->>\'DateAdded\' >= $1', (date_last_sync,))
+                       ' and mm_media_json->>'DateAdded' >= $1', (date_last_sync,))
         first_query = False
 
     if sync_book is not None:
         if not first_query:
             sync_query += ' union all '
-        sync_query += ('select mm_media_guid, \'Book\','
+        sync_query += ('select mm_media_guid, 'Book','
                        ' mm_media_ffprobe_json,'
                        ' mm_metadata_book_isbn'
                        ' from mm_media, mm_metadata_book'
                        ' where mm_metadata_book_guid = mm_metadata_book_guid'
-                       ' and mm_media_json->>\'DateAdded\' >= $1', (date_last_sync,))
+                       ' and mm_media_json->>'DateAdded' >= $1', (date_last_sync,))
         first_query = False
     if sync_query != '':
         self.db_cursor.execute(sync_query)

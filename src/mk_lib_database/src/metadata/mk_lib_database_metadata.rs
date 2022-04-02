@@ -89,7 +89,7 @@ def db_meta_genre_list_count(self):
     # count all the generes
     """
     self.db_cursor.execute('select distinct jsonb_array_elements_text(mm_metadata_json'
-                           '->\'genres\')b'
+                           '->'genres')b'
                            ' from mm_metadata_movie')
     return len(self.db_cursor.fetchall())
 
@@ -153,8 +153,8 @@ def db_meta_movie_list(self, offset=0, records=None, search_value=None):
     """
     if search_value is not None:
         self.db_cursor.execute('select mm_metadata_guid,mm_metadata_name,'
-                               'mm_metadata_json->\'release_date\' as mm_date,'
-                               'mm_metadata_localimage_json->\'Poster\' as mm_poster,'
+                               'mm_metadata_json->'release_date' as mm_date,'
+                               'mm_metadata_localimage_json->'Poster' as mm_poster,'
                                'mm_metadata_user_json'
                                ' from mm_metadata_movie where mm_metadata_guid'
                                ' in (select mm_metadata_guid'
@@ -164,8 +164,8 @@ def db_meta_movie_list(self, offset=0, records=None, search_value=None):
                                (search_value, offset, records))
     else:
         self.db_cursor.execute('select mm_metadata_guid,mm_metadata_name,'
-                               'mm_metadata_json->\'release_date\' as mm_date,'
-                               'mm_metadata_localimage_json->\'Poster\' as mm_poster,'
+                               'mm_metadata_json->'release_date' as mm_date,'
+                               'mm_metadata_localimage_json->'Poster' as mm_poster,'
                                'mm_metadata_user_json'
                                ' from mm_metadata_movie '
                                'where mm_metadata_guid in (select mm_metadata_guid'
@@ -226,8 +226,8 @@ def db_find_metadata_guid(self, media_name, media_release_year):
         # for year and -3/+3 year as well
         self.db_cursor.execute('select mm_metadata_guid from mm_metadata_movie'
                                ' where (LOWER(mm_metadata_name) = $1'
-                               ' or LOWER(mm_metadata_json->>\'original_title\') = $2)'
-                               ' and substring(mm_metadata_json->>\'release_date\' from 0 for 5)'
+                               ' or LOWER(mm_metadata_json->>'original_title') = $2)'
+                               ' and substring(mm_metadata_json->>'release_date' from 0 for 5)'
                                ' in ($3,$4,$5,$6,$7,$8,$9)',
                                (media_name.lower(), media_name.lower(), str(media_release_year),
                                 str(int(media_release_year) + 1),
@@ -239,7 +239,7 @@ def db_find_metadata_guid(self, media_name, media_release_year):
     else:
         self.db_cursor.execute('select mm_metadata_guid from mm_metadata_movie'
                                ' where (LOWER(mm_metadata_name) = $1'
-                               ' or LOWER(mm_metadata_json->>\'original_title\') = $2)',
+                               ' or LOWER(mm_metadata_json->>'original_title') = $2)',
                                (media_name.lower(), media_name.lower()))
     for row_data in self.db_cursor.fetchall():
         # TODO should probably handle multiple results better.   Perhaps a notification?
@@ -314,30 +314,30 @@ def db_meta_queue_list(self, user_id, offset=0, records=None, search_value=None)
     self.db_cursor.execute('(select mm_metadata_guid,'
                            ' mm_metadata_name'
                            ' from mm_metadata_movie '
-                           ' where mm_metadata_user_json->\'UserStats\'->$1->>\'queue\' = '
-                           '\'True\''
+                           ' where mm_metadata_user_json->'UserStats'->$1->>'queue' = '
+                           ''True''
                            ' order by LOWER(mm_metadata_name))'
                            ' UNION ALL '
                            '(select mm_metadata_tvshow_guid,'
                            ' mm_metadata_tvshow_name'
                            ' from mm_metadata_tvshow '
-                           ' where mm_metadata_tvshow_user_json->\'UserStats\'->$2->>\'queue\' '
-                           '= \'True\''
+                           ' where mm_metadata_tvshow_user_json->'UserStats'->$2->>'queue' '
+                           '= 'True''
                            ' order by LOWER(mm_metadata_tvshow_name))'
                            ' UNION ALL '
                            '(select mm_metadata_music_guid,'
                            ' mm_metadata_music_name'
                            ' from mm_metadata_music '
-                           ' where mm_metadata_music_user_json->\'UserStats\'->$3->>\'queue\' '
-                           '= \'True\''
+                           ' where mm_metadata_music_user_json->'UserStats'->$3->>'queue' '
+                           '= 'True''
                            ' order by LOWER(mm_metadata_music_name))'
                            ' UNION ALL '
                            '(select mm_metadata_music_video_guid,'
                            ' mm_media_music_video_band'
                            ' from mm_metadata_music_video '
                            ' where '
-                           'mm_metadata_music_video_user_json->\'UserStats\'->$4->>\'queue\' '
-                           '= \'True\''
+                           'mm_metadata_music_video_user_json->'UserStats'->$4->>'queue' '
+                           '= 'True''
                            ' order by LOWER(mm_media_music_video_band))'
                            ' offset $5 limit $6',
                            (user_id, user_id, user_id, user_id, offset, records))

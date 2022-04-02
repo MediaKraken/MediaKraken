@@ -70,10 +70,10 @@ async def db_pgsql_vacuum_stat_by_day(self, days=1, db_connection=None):
     """
     if days == 0:
         return await db_conn.fetch('SELECT relname FROM pg_stat_all_tables'
-                               ' WHERE schemaname = \'public\'')
+                               ' WHERE schemaname = 'public'')
     else:
         return await db_conn.fetch('SELECT relname FROM pg_stat_all_tables'
-                               ' WHERE schemaname = \'public\' AND ((last_analyze is NULL'
+                               ' WHERE schemaname = 'public' AND ((last_analyze is NULL'
                                ' AND last_autoanalyze is NULL)'
                                ' OR ((last_analyze < last_autoanalyze'
                                ' OR last_analyze is null)'
@@ -125,6 +125,6 @@ async def db_table_index_check(self, resource_name, db_connection=None):
     # check for table or index
     """
     # TODO little bobby tables
-    await self.db_cursor.execute('SELECT to_regclass(\'public.$1\')', resource_name)
+    await self.db_cursor.execute("SELECT to_regclass('public.$1')", resource_name)
     return await self.db_cursor.fetchval()
  */

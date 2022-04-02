@@ -297,7 +297,7 @@ def db_media_image_path(self, media_id):
     """
     # grab image path for media id NOT metadataid
     """
-    self.db_cursor.execute('select mm_metadata_localimage_json->\'Images\' as mm_image'
+    self.db_cursor.execute('select mm_metadata_localimage_json->'Images' as mm_image'
                            ' from mm_media, mm_metadata_movie'
                            ' where mm_media_metadata_guid = mm_metadata_guid'
                            ' and mm_media_guid = $1', (media_id,))
@@ -358,7 +358,7 @@ def db_read_media_new(self, offset=None, records=None, search_value=None, days_o
                                ' mm_media_class_guid'
                                ' from mm_media, mm_metadata_movie'
                                ' where mm_media_metadata_guid = mm_metadata_guid'
-                               ' and mm_media_json->>\'DateAdded\' >= $1'
+                               ' and mm_media_json->>'DateAdded' >= $1'
                                ' order by LOWER(mm_media_name),'
                                ' mm_media_class_guid',
                                ((datetime.datetime.now()
@@ -369,7 +369,7 @@ def db_read_media_new(self, offset=None, records=None, search_value=None, days_o
                                ' mm_media_class_guid'
                                ' from mm_media, mm_metadata_movie'
                                ' where mm_media_metadata_guid = mm_metadata_guid'
-                               ' and mm_media_json->>\'DateAdded\' >= $1'
+                               ' and mm_media_json->>'DateAdded' >= $1'
                                ' order by LOWER(mm_media_name),'
                                ' mm_media_class_guid offset $2 limit $3',
                                ((datetime.datetime.now()

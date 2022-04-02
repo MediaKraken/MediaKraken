@@ -68,7 +68,7 @@ async def db_meta_sports_guid_by_thesportsdb(self, thesports_uuid, db_connection
     """
     return await db_conn.fetchval('select mm_metadata_sports_guid'
                                   ' from mm_metadata_sports'
-                                  ' where mm_metadata_media_sports_id->\'thesportsdb\''
+                                  ' where mm_metadata_media_sports_id->'thesportsdb''
                                   ' ? $1',
                                   thesports_uuid)
 
@@ -130,7 +130,7 @@ def db_metathesports_update(self, series_id_json, event_name, show_detail,
                            ' set mm_metadata_media_sports_id = $1,'
                            ' mm_metadata_sports_name = $2,'
                            ' mm_metadata_sports_json = $3'
-                           ' where mm_metadata_media_sports_id->\'thesportsdb\' ? $4',
+                           ' where mm_metadata_media_sports_id->'thesportsdb' ? $4',
                            (series_id_json, event_name, show_detail, sportsdb_id))
     self.db_commit()
 

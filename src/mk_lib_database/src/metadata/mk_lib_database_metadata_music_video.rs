@@ -86,7 +86,7 @@ async def db_meta_music_video_count(self, imvdb_id=None, search_value=None, db_c
                 'select count(*) from mm_metadata_music_video')
     else:
         return await db_conn.fetchval('select count(*) from mm_metadata_music_video'
-                                      ' where mm_metadata_music_video_media_id->\'imvdb\' ? $1',
+                                      ' where mm_metadata_music_video_media_id->'imvdb' ? $1',
                                       imvdb_id)
 
  */

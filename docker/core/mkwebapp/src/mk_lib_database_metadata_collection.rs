@@ -86,9 +86,9 @@ async def db_media_collection_scan(self, db_connection=None):
     """
     return await db_conn.fetch('select mm_metadata_guid, mm_metadata_json'
                                ' from mm_metadata_movie'
-                               ' where mm_metadata_json->\'belongs_to_collection\'::text'
-                               ' <> \'{}\'::text'
-                               ' order by mm_metadata_json->\'belongs_to_collection\'')
+                               ' where mm_metadata_json->'belongs_to_collection'::text'
+                               ' <> '{}'::text'
+                               ' order by mm_metadata_json->'belongs_to_collection'')
 
 
 // TODO port query
@@ -109,7 +109,7 @@ async def db_collection_by_tmdb(self, tmdb_id, db_connection=None):
     """
     return await db_conn.fetchval(
         'select mm_metadata_collection_guid from mm_metadata_collection'
-        ' where mm_metadata_collection_json @> \'{"id":$1}\'', tmdb_id)
+        ' where mm_metadata_collection_json @> '{"id":$1}'', tmdb_id)
 
 
 // TODO port query

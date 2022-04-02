@@ -86,7 +86,7 @@ async def db_user_insert(self, user_name, user_email, user_password, db_connecti
         user_admin = False
     return await db_conn.execute(
         'insert into mm_user (username, email, password, active, is_admin, user_json, created_at)'
-        ' values ($1, $2, crypt($3, gen_salt(\'bf\', 10)), True, $4, \'{"per_page": 30}\','
+        ' values ($1, $2, crypt($3, gen_salt('bf', 10)), True, $4, '{"per_page": 30}','
         ' current_timestamp)'
         ' returning id',
         user_name, user_email, user_password, user_admin), user_admin, 30
@@ -98,7 +98,7 @@ async def db_user_login(self, user_name, user_password, db_connection=None):
     # verify user logon
     """
     result = await db_conn.fetchrow('select id, active, is_admin,'
-                                    ' user_json->\'per_page\' as per_page'
+                                    ' user_json->'per_page' as per_page'
                                     ' from mm_user where username = $1'
                                     ' and password = crypt($2, password)',
                                     user_name, user_password)
