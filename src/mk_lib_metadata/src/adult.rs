@@ -1,5 +1,8 @@
 use sqlx::types::Uuid;
 
+#[path = "provider/pornhub.rs"]
+mod mk_provider_pornhub;
+
 pub struct MetadataAdultLastLookup {
     metadata_last_id: Uuid,
     metadata_last_imdb: String,

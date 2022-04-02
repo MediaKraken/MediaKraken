@@ -1,5 +1,8 @@
 use sqlx::types::Uuid;
 
+#[path = "provider/thesportsdb.rs"]
+mod mk_provider_thesportsdb;
+
 pub struct MetadataSportsLastLookup {
     metadata_last_id: Uuid,
     metadata_last_imdb: String,

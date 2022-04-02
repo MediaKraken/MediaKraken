@@ -1,5 +1,8 @@
 use sqlx::types::Uuid;
 
+#[path = "provider/imvdb.rs"]
+mod mk_provider_imvdb;
+
 pub struct MetadataMusicVideoLastLookup {
     metadata_last_id: Uuid,
     metadata_last_band: String,

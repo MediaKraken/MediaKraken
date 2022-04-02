@@ -1,5 +1,14 @@
 use sqlx::types::Uuid;
 
+#[path = "provider/musicbrainz.rs"]
+mod mk_provider_musicbrainz;
+
+#[path = "provider/pitchfork.rs"]
+mod mk_provider_pitchfork;
+
+#[path = "provider/shoutcast.rs"]
+mod mk_provider_shoutcast;
+
 /*
 
 # example ffprobe output for music file

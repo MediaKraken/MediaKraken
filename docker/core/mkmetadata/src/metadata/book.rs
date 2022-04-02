@@ -1,5 +1,11 @@
 use sqlx::types::Uuid;
 
+#[path = "provider/isbndb.rs"]
+mod mk_provider_isbndb;
+
+#[path = "provider/open_library.rs"]
+mod mk_provider_open_library;
+
 /*
 
 async def metadata_periodicals_lookup(db_connection, download_data):

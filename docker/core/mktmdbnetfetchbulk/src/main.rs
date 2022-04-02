@@ -108,7 +108,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                             Uuid::new_v4(),
                                                                                                             metadata_struct.id,
                                                                                                             "Fetch".to_string()).await;
-                    println!("tv result {:?}", result)
+                    //println!("tv result {:?}", result)
                 }
             }
         }
