@@ -104,7 +104,7 @@ pub async fn mk_lib_database_metadata_game_system_insert(pool: &sqlx::PgPool,
 
 // TODO port query
 def db_meta_games_system_guid_by_short_name(self, short_name):
-    self.db_cursor.execute('select gs_id'
+    self.db_cursor.execute('select gs_game_system_id'
                            ' from mm_metadata_game_systems_info'
                            ' where gs_game_system_name = $1', (short_name,))
     try:

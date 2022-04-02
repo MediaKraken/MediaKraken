@@ -200,6 +200,21 @@ pub async fn mk_lib_database_media_duplicate_detail(pool: &sqlx::PgPool,
     Ok(table_rows)
 }
 
+pub async fn mk_lib_database_media_ffmpeg_update(pool: &sqlx::PgPool,
+                                                mm_media_guid: Uuid,
+                                                ffmpeg_json: serder_json::Value)
+                                                -> Result<(), sqlx::Error>{
+    let mut transaction = pool.begin().await?;
+    sqlx::query("update mm_media set mm_media_ffprobe_json = $1 \
+        where mm_media_guid = $2")
+        .bind(ffmpeg_json)
+        .bind(mm_media_guid)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(())
+}
+
 /*
 // TODO port query
 def db_read_media(self, media_guid=None):
@@ -227,7 +242,7 @@ def db_media_rating_update(self, media_guid, user_id, status_text):
     self.db_cursor.execute('SELECT mm_media_json from mm_media'
                            ' where mm_media_guid = $1 FOR UPDATE', (media_guid,))
     if status_text == 'watched' or status_text == 'mismatch':
-        status_setting = True
+        status_setting = true
     else:
         status_setting = status_text
         status_text = 'Rating'
@@ -270,7 +285,7 @@ def db_media_watched_checkpoint_update(self, media_guid, user_id, ffmpeg_time):
 // TODO port query
 def db_update_media_json(self, media_guid, mediajson):
     """
-    # update the mediajson
+    # update the media json
     """
     self.db_cursor.execute('update mm_media set mm_media_json = $1'
                            ' where mm_media_guid = $2',
@@ -291,7 +306,6 @@ def db_media_by_metadata_guid(self, metadata_guid, media_class_uuid):
                            (metadata_guid, media_class_uuid))
     return self.db_cursor.fetchall()
 
-
 // TODO port query
 def db_media_image_path(self, media_id):
     """
@@ -301,11 +315,6 @@ def db_media_image_path(self, media_id):
                            ' from mm_media, mm_metadata_movie'
                            ' where mm_media_metadata_guid = mm_metadata_guid'
                            ' and mm_media_guid = $1', (media_id,))
-    try:
-        return self.db_cursor.fetchone()['mm_metadata_localimage_json']
-    except:
-        return None
-
 
 // TODO port query
 def db_read_media_metadata_both(self, media_guid):
@@ -376,22 +385,6 @@ def db_read_media_new(self, offset=None, records=None, search_value=None, days_o
                                  - datetime.timedelta(days=days_old)).strftime("%Y-%m-%d"),
                                 offset, records))
     return self.db_cursor.fetchall()
-
-
-// TODO port query
-def db_media_ffmeg_update(self, media_guid, ffmpeg_json):
-    """
-    Update the ffprobe json data
-    """
-    self.db_cursor.execute('update mm_media set mm_media_ffprobe_json = $1'
-                           ' where mm_media_guid = $2', (ffmpeg_json, media_guid))
-
-
-// TODO port query
-def db_ffprobe_data(self, guid):
-    self.db_cursor.execute('select mm_media_ffprobe_json from mm_media'
-                           ' where mm_media_guid = $1', (guid,))
-    return self.db_cursor.fetchone()[0]
 
 
 // TODO port query

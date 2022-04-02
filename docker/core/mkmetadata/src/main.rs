@@ -105,9 +105,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 continue;
                 /*
                 await db_connection.db_begin()
-                await db_connection.db_update_media_id(row_data['mdq_provider_id'],
+                await db_connection.db_update_media_id(row_data["mdq_provider_id"],
                                                            metadata_uuid)
-                await db_connection.db_download_delete(row_data['mdq_id'])
+                await db_connection.db_download_delete(row_data["mdq_id"])
                 await db_connection.db_commit()
                  */
             }
