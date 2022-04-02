@@ -9,7 +9,7 @@ pub fn mk_lib_metadata_m3u8_validate_playlist(playlist: &str) {
 
 
 /*
-# global statics
+// global statics
 M3U_HEADER = 'EXTM3U\n'
 M3U_LINE_HEADER = 'EXTINF:'
 

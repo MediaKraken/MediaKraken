@@ -228,7 +228,7 @@ async def metadata_fetch(db_connection, provider_name, download_data):
             await metadata_provider_themoviedb.metadata_fetch_tmdb_person(
                 db_connection, provider_name, download_data)
         else if download_data["mdq_que_type"] == common_global.DLMediaType.Movie.value:
-            # removing the imdb check.....as com_tmdb_metadata_by_id converts it
+            // removing the imdb check.....as com_tmdb_metadata_by_id converts it
             await metadata_provider_themoviedb.movie_fetch_save_tmdb(db_connection,
                                                                      download_data[
                                                                          "mdq_provider_id"],
@@ -269,7 +269,7 @@ async def metadata_review(db_connection, provider_name, download_data):
         await metadata_provider_themoviedb.movie_fetch_save_tmdb_review(db_connection,
                                                                         download_data[
                                                                             "mdq_provider_id"])
-    # review is last.....so can delete download que
+    // review is last.....so can delete download que
     await db_connection.db_download_delete(download_data["mdq_id"])
     await db_connection.db_commit()
 

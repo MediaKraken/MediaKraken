@@ -16,7 +16,7 @@ async def metadata_sports_lookup(db_connection, download_data):
     """
     Lookup sporting event by name
     """
-    # don't bother checking title/year as the main_server_metadata_api_worker does it already
+    // don't bother checking title/year as the main_server_metadata_api_worker does it already
     metadata_uuid = None  # so not found checks verify later
 
     stripped_name = os.path.basename(
@@ -31,11 +31,11 @@ async def metadata_sports_lookup(db_connection, download_data):
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
                                                                              "sports return": thesportsdb_data})
-        # "valid" key returned in case of null response........or event none
+        // "valid" key returned in case of null response........or event none
         if thesportsdb_data is not None:
             thesportsdb_data = json.loads(thesportsdb_data)
             if thesportsdb_data['event'] is not None:
-                # TODO "find" the right event by name?  if multiples?
+                // TODO "find" the right event by name?  if multiples?
                 metadata_uuid = await db_connection.db_meta_sports_guid_by_thesportsdb(
                     thesportsdb_data['event'][0]['idEvent'])
                 if metadata_uuid is None:
@@ -53,7 +53,7 @@ async def metadata_sports_lookup(db_connection, download_data):
     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                      message_text={
                                                                          "metadata_sports return uuid": metadata_uuid})
-    # set last values to negate lookups for same title/show
+    // set last values to negate lookups for same title/show
     metadata_sports_lookup.metadata_last_id = metadata_uuid
     metadata_sports_lookup.metadata_last_imdb = imdb_id
     metadata_sports_lookup.metadata_last_tmdb = tmdb_id

@@ -5,8 +5,8 @@ async def nfo_file_tv(media_file_path):
     Find and load nfo and xml file(s) if they exist
     """
     nfo_data = None
-    # check for NFO or XML as no need to do lookup if ID found in it
-    # TODO should check for one dir back too I suppose
+    // check for NFO or XML as no need to do lookup if ID found in it
+    // TODO should check for one dir back too I suppose
     nfo_file_check = media_file_path.rsplit('/', 1)[0] + 'tvinfo.nfo'
     if os.path.isfile(nfo_file_check):  # check for nfo
         try:
@@ -33,15 +33,15 @@ async def nfo_xml_id_lookup(nfo_data, xml_data):
     """
     imdb_id = None
     tmdb_id = None
-    # load both fields for more data in media_id_json on db
+    // load both fields for more data in media_id_json on db
     if nfo_data is not None:
-        try:  # not all will have imdb
+        try:  // not all will have imdb
             imdb_id = nfo_data['movie']['imdbid']
             if len(imdb_id) == 0:
                 imdb_id = None
         except KeyError:
             pass
-        try:  # not all nfo's have the movie/tmdb
+        try:  // not all nfo's have the movie/tmdb
             tmdb_id = nfo_data['movie']['tmdbid']
             if len(tmdb_id) == 0:
                 tmdb_id = None
@@ -63,7 +63,7 @@ async def nfo_xml_id_lookup(nfo_data, xml_data):
                         tmdb_id = None
                 except KeyError:
                     pass
-        else:  # movie.xml
+        else:  // movie.xml
             if imdb_id is None:
                 try:  # not all xmls's will have the imdb
                     imdb_id = xml_data['Title']['IMDB']
@@ -88,7 +88,7 @@ async def nfo_id_lookup_tv(nfo_data):
     imdb_id = None
     tvdb_id = None
     tmdb_id = None
-    # load both fields for more data in media_id_json on db
+    // load both fields for more data in media_id_json on db
     if nfo_data is not None:
         try:
             tvdb_id = nfo_data['episodedetails']['tvdbid']

@@ -28,7 +28,7 @@ pub async fn metadata_movie_lookup(pool: &sqlx::PgPool, dl_row, guessit_data) {
         // don"t need to set last......since they are equal
         return metadata_movie_lookup.metadata_last_id;
     }
-    // doesn"t match last id"s so continue lookup
+    // doesn't match last id"s so continue lookup
     // if ids from nfo/xml, query local db to see if exist
     if tmdb_id != None {
         let metadata_uuid = db_connection.db_meta_guid_by_tmdb(tmdb_id);

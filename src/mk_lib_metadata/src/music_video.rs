@@ -11,16 +11,16 @@ pub struct MetadataMusicVideoLastLookup {
 
 /*
 
-# imvdb lookup
+// imvdb lookup
 async def metadata_music_video_lookup(db_connection, file_name):
     """
     Lookup by name on music video database
     """
-    # check for same variables
+    // check for same variables
     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                      message_text={
                                                                          'mv file': file_name})
-    # determine names
+    // determine names
     if file_name.find('-') != -1:
         band_name, song_name = os.path.splitext(
             os.path.basename(file_name.lower()))[0].split('-', 1)
@@ -28,14 +28,14 @@ async def metadata_music_video_lookup(db_connection, file_name):
             song_name = song_name.split('(', 1)[0].strip()
         except:
             pass
-        # set name for lookups
+        // set name for lookups
         band_name = band_name.strip().replace(' ', '-')
         song_name = song_name.strip().replace(' ', '-')
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
                                                                              'mv title': band_name,
                                                                              'song': song_name})
-        # if same as last, return last id and save lookup
+        // if same as last, return last id and save lookup
         if band_name == metadata_music_video_lookup.metadata_last_band \
                 and song_name == metadata_music_video_lookup.metadata_last_song:
             return metadata_music_video_lookup.metadata_last_id
@@ -55,7 +55,7 @@ async def metadata_music_video_lookup(db_connection, file_name):
                 if imvdb_json is not None:
                     # parse the results and insert/update
                     for video_data in imvdb_json['results']:
-                        # the results are bit crazy....hence the breakup and insert
+                        // the results are bit crazy....hence the breakup and insert
                         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(
                             message_type='info',
                             message_text={
@@ -77,12 +77,12 @@ async def metadata_music_video_lookup(db_connection, file_name):
                             #                                       video_data['song_slug'],  {'imvdb': str(video_data['id'])},
                             #                                       video_data,
                             #                                         {'Images': {'imvdb': None}})
-                    # try after inserting new records
+                    // try after inserting new records
                     metadata_uuid = db_connection.db_meta_music_video_lookup(
                         band_name, song_name)
                     if metadata_uuid == []:
                         metadata_uuid = None
-        # set last values to negate lookups for same song
+        // set last values to negate lookups for same song
         metadata_music_video_lookup.metadata_last_id = metadata_uuid
         metadata_music_video_lookup.metadata_last_band = band_name
         metadata_music_video_lookup.metadata_last_song = song_name

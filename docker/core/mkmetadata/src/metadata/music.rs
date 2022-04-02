@@ -28,17 +28,17 @@ async def metadata_music_lookup(db_connection, download_json):
     """
     Music lookup
     """
-    # don't bother checking title/year as the main_server_metadata_api_worker does it already
+    // don't bother checking title/year as the main_server_metadata_api_worker does it already
     if not hasattr(metadata_music_lookup, "metadata_last_id"):
-        # it doesn't exist yet, so initialize it
+        // it doesn't exist yet, so initialize it
         metadata_music_lookup.metadata_last_id = None
     metadata_uuid = None
-    # get ffmpeg data from database
+    // get ffmpeg data from database
     ffmpeg_data_json = await db_connection.db_ffprobe_data(download_json['MediaID'])
     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                      message_text={
                                                                          "meta music ffmpeg": ffmpeg_data_json})
-    # see if record is stored locally as long as there is valid tagging
+    // see if record is stored locally as long as there is valid tagging
     if 'format' in ffmpeg_data_json \
             and 'tags' in ffmpeg_data_json['format'] \
             and 'ARTIST' in ffmpeg_data_json['format']['tags'] \
@@ -51,13 +51,13 @@ async def metadata_music_lookup(db_connection, download_json):
             metadata_uuid = db_result['mm_metadata_music_guid']
     if metadata_uuid is None:
         metadata_uuid = download_json['mdq_new_uuid']
-        # no matches on local database
-        # search musicbrainz since not matched above via DB
-        # save the updated status
+        // no matches on local database
+        // search musicbrainz since not matched above via DB
+        // save the updated status
         await db_connection.db_begin()
         await db_connection.db_download_update(guid=download_json['mdq_id'],
                                                status='Search')
-        # set provider last so it's not picked up by the wrong thread
+        // set provider last so it's not picked up by the wrong thread
         await db_connection.db_download_update_provider('musicbrainz', download_json['mdq_id'])
         await db_connection.db_commit()
     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
