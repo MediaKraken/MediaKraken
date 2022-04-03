@@ -11,7 +11,6 @@ strip = "symbols"
 amiquip = { version = "0.4.2", default-features = false }
 chrono = { version = "0.4.19", features = ["serde"] }
 reqwest = { version = "0.11.10", default-features = false, features = ["json", "rustls-tls"] }
-# rustube = "0.3.8"   # this is adding openssl to hyper - due to cargo.toml of "default" request settings
 serde = { version = "1.0.136", features = ["derive"] }
 serde_json = "1.0.79"
 sqlx = { version = "0.5.11", features = [ "chrono", "json", "runtime-tokio-rustls", "postgres", "uuid" ] }

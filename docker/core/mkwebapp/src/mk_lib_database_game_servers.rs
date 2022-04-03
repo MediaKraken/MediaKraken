@@ -42,7 +42,6 @@ pub async fn mk_lib_database_dedicated_server_read(pool: &sqlx::PgPool,
     Ok(table_rows)
 }
 
-
 pub async fn mk_lib_database_game_server_detail(pool: &sqlx::PgPool,
                                                 game_server_uuid: uuid::Uuid)
                                                 -> Result<PgRow, sqlx::Error> {
@@ -53,7 +52,6 @@ pub async fn mk_lib_database_game_server_detail(pool: &sqlx::PgPool,
         .await?;
     Ok(row)
 }
-
 
 pub async fn mk_lib_database_game_server_list_count(pool: &sqlx::PgPool,
                                                     search_value: String)
@@ -72,7 +70,6 @@ pub async fn mk_lib_database_game_server_list_count(pool: &sqlx::PgPool,
         Ok(row.0)
     }
 }
-
 
 pub async fn mk_lib_database_game_server_upsert(pool: &sqlx::PgPool,
                                                 server_name: String,

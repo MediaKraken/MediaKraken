@@ -15,9 +15,9 @@ pub async fn mk_lib_database_sync_delete(pool: &sqlx::PgPool,
 }
 
 pub async fn mk_lib_database_sync_process_update(pool: &sqlx::PgPool,
-                                           sync_guid: UUid,
-                                            sync_percent: f32)
-                                           -> Result<(), sqlx::Error> {
+                                                 sync_guid: UUid,
+                                                 sync_percent: f32)
+                                                 -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
     sqlx::query("update mm_sync set mm_sync_options_json->'Progress' = $1
         where mm_sync_guid = $2")
@@ -37,54 +37,69 @@ pub async fn mk_lib_database_sync_count(pool: &sqlx::PgPool)
     Ok(row.0)
 }
 
-/*
-# TODO port query
-async def db_sync_insert(self, sync_path, sync_path_to, sync_json, db_connection=None):
-    new_guid = uuid.uuid4()
-    await db_conn.execute('insert into mm_sync (mm_sync_guid,'
-                          ' mm_sync_path,'
-                          ' mm_sync_path_to,'
-                          ' mm_sync_options_json)'
-                          ' values ($1, $2, $3, $4)',
-                          new_guid, sync_path,
-                          sync_path_to, sync_json)
-    return new_guid
+pub async fn mk_lib_database_sync_insert(pool: &sqlx::PgPool,
+                                         sync_path: String,
+                                         sync_path_to: String,
+                                         sync_json: serde_json::Value)
+                                         -> Result<Uuid, sqlx::Error> {
+    new_guid = Uuid::new_v4();
+    let mut transaction = pool.begin().await?;
+    sqlx::query("insert into mm_sync (mm_sync_guid, mm_sync_path, \
+        mm_sync_path_to, mm_sync_options_json) \
+        values ($1, $2, $3, $4)")
+        .bind(new_guid)
+        .bind(sync_path)
+        .bind(sync_path_to)
+        .bind(sync_json)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(new_guid)
+}
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBSyncList {
+    mm_sync_guid: uuid::Uuid,
+    mm_sync_path: String,
+    mm_sync_path_to: String,
+    mm_sync_options_json: Json,
+}
 
-# TODO port query
-async def db_sync_list(self, offset=0, records=None, user_guid=None, db_connection=None):
-    """
-    # return list of sync jobs
-    """
-    # TODO by priority, name, year
-    if user_guid is None:
-        # complete list for admins
-        return await db_conn.fetch('select mm_sync_guid uuid,'
-                                   ' mm_sync_path,'
-                                   ' mm_sync_path_to,'
-                                   ' mm_sync_options_json'
-                                   ' from mm_sync'
-                                   ' where mm_sync_guid in (select mm_sync_guid'
-                                   ' from mm_sync'
-                                   ' order by mm_sync_options_json->'Priority''
-                                   ' desc, mm_sync_path'
-                                   ' offset $1 limit $2)'
-                                   ' order by mm_sync_options_json->'Priority''
-                                   ' desc, mm_sync_path',
-                                   offset, records)
-    else:
-        return await db_conn.fetch('select mm_sync_guid uuid,'
-                                   ' mm_sync_path,'
-                                   ' mm_sync_path_to,'
-                                   ' mm_sync_options_json'
-                                   ' from mm_sync'
-                                   ' where mm_sync_guid in (select mm_sync_guid'
-                                   ' from mm_sync'
-                                   ' where mm_sync_options_json->'User'::text = $1'
-                                   ' order by mm_sync_options_json->'Priority''
-                                   ' desc, mm_sync_path offset $2 limit $3)'
-                                   ' order by mm_sync_options_json->'Priority''
-                                   ' desc, mm_sync_path',
-                                   str(user_guid), offset, records)
-
- */
+pub async fn mk_lib_database_sync_list(pool: &sqlx::PgPool,
+                                       user_id: Uuid,
+                                       offset: i32,
+                                       limit: i32)
+                                       -> Result<Vec<DBSyncList>, sqlx::Error> {
+    let mut select_query;
+    if user_id != None {
+        select_query = sqlx::query("select mm_sync_guid, mm_sync_path, \
+            mm_sync_path_to, mm_sync_options_json \
+            from mm_sync where mm_sync_guid in (select mm_sync_guid \
+            from mm_sync order by mm_sync_options_json->'Priority' desc, \
+            mm_sync_path offset $1 limit $2) \
+            order by mm_sync_options_json->'Priority' desc, mm_sync_path")
+            .bind(user_id)
+            .bind(offset)
+            .bind(limit);
+    } else {
+        select_query = sqlx::query("select mm_sync_guid, mm_sync_path, \
+            mm_sync_path_to, mm_sync_options_json \
+            from mm_sync where mm_sync_guid in (select mm_sync_guid \
+            from mm_sync where mm_sync_options_json->'User'::text = $1 \
+            order by mm_sync_options_json->'Priority' desc, \
+            mm_sync_path offset $2 limit $3) \
+            order by mm_sync_options_json->'Priority' desc, mm_sync_path")
+            .bind(offset)
+            .bind(limit);
+    }
+    let table_rows: Vec<DBSyncList> = select_query
+        .map(|row: PgRow| DBSyncList {
+            mm_sync_guid: row.get("mm_sync_guid"),
+            mm_sync_path: row.get("mm_sync_path"),
+            mm_sync_path_to: row.get("mm_sync_path_to"),
+            mm_sync_options_json: row.get("mm_sync_options_json"),
+        })
+        .fetch_all(pool)
+        .await?;
+    Ok(table_rows)
+}

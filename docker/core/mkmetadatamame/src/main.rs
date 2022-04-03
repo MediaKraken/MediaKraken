@@ -171,7 +171,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             format!("https://www.arcade-history.com/dats/historydat{}.zip",
                     option_config_json["MAME"]["Version"]),
             &file_name);
-        let mut game_titles = vec![];
+        let mut game_titles = Vec::new();;
         let mut game_desc = "".to_string();
         let mut add_to_desc = false;
         let mut new_title = "".to_string();
@@ -186,13 +186,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
         //         // print("line: %s" % line, flush=True)
         //         if not line:
         //             break
-        //         if line[0] == "$" and line[-1:] == ",":  # this could be a new system/game item
+        //         if line[0] == "$" and line[-1:] == ",":  // this could be a new system/game item
         // MAME "system"....generally a PCB game
         //             if line.find("$info=") == 0:  # goes by position if found
         //                 system_name = None
         //                 game_titles = line.split("=", 1)[1].split(",")
         // end of info block for game
-        //             elif line.find("$end") == 0:  # goes by position if found
+        //             elif line.find("$end") == 0:  // goes by position if found
         //                 add_to_desc = false
         //                 for game in game_titles:
         //                     game_data = db_connection.db_meta_game_by_name_and_system(game, system_name)[0]

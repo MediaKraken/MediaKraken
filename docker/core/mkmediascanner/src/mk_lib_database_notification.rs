@@ -17,7 +17,7 @@ pub async fn mk_lib_database_notification_read(pool: &sqlx::PgPool,
                                                -> Result<Vec<DBNotificationList>, sqlx::Error> {
     let select_query = sqlx::query("select mm_notification_guid, mm_notification_text, \
         mm_notification_time, \
-        mm_notification_dismissable from mm_notification \
+        mm_notification_dismissible from mm_notification \
         order by mm_notification_time desc offset $1 limit $2")
         .bind(offset)
         .bind(limit);
@@ -41,7 +41,7 @@ pub async fn mk_lib_database_notification_insert(pool: &sqlx::PgPool,
     sqlx::query("insert into mm_notification (mm_notification_guid, \
         mm_notification_text, \
         mm_notification_time = NOW(), \
-        mm_notification_dismissable) \
+        mm_notification_dismissible) \
         values ($1, $2, $3)")
         .bind(Uuid::new_v4())
         .bind(mm_notification_text)
