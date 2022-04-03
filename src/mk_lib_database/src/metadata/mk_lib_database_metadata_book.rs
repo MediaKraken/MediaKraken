@@ -137,7 +137,7 @@ def db_meta_book_image_random(self, return_image_type='Cover'):
         + return_image_type + ''' + ')::text != 'null''
                                      ' order by random() limit 1')
     try:
-        # then if no results.....a None will except which will then pass None, None
+        // then if no results.....a None will except which will then pass None, None
         image_json, metadata_id = self.db_cursor.fetchone()
         return image_json, metadata_id
     except:

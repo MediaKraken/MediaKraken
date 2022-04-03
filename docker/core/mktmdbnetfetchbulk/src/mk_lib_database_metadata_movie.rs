@@ -124,12 +124,12 @@ async def db_meta_movie_status_update(self, metadata_guid, user_id, status_text,
     else:
         status_setting = status_text
         status_text = 'Rating'
-    # grab the user json for the metadata
+    // grab the user json for the metadata
     json_data = await db_conn.fetchrow('SELECT mm_metadata_user_json'
                                        ' from mm_metadata_movie'
                                        ' where mm_metadata_guid = $1 FOR UPDATE',
                                        metadata_guid)
-    # split this off so coroutine doesn't get mad
+    // split this off so coroutine doesn't get mad
     try:
         json_data = json_data['mm_metadata_user_json']
     except:
