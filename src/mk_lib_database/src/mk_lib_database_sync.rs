@@ -30,7 +30,7 @@ pub async fn mk_lib_database_sync_process_update(pool: &sqlx::PgPool,
 }
 
 pub async fn mk_lib_database_sync_count(pool: &sqlx::PgPool)
-                                        -> Result<(i32), sqlx::Error> {
+                                        -> Result<i32, sqlx::Error> {
     let row: (i32, ) = sqlx::query_as("select count(*) from mm_syn")
         .fetch_one(pool)
         .await?;

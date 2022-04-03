@@ -3,7 +3,7 @@ use sqlx::postgres::PgRow;
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_remote_media_count(pool: &sqlx::PgPool)
-                                                -> Result<(i32), sqlx::Error> {
+                                                -> Result<i32, sqlx::Error> {
     let row: (i32, ) = sqlx::query_as("select count(*) from mm_media_remote")
         .fetch_one(pool)
         .await?;

@@ -18,7 +18,7 @@ pub async fn mk_lib_database_media_update_metadata_guid(pool: &sqlx::PgPool,
 }
 
 pub async fn mk_lib_database_media_unmatched_count(pool: &sqlx::PgPool)
-                                                   -> Result<(i32), sqlx::Error> {
+                                                   -> Result<i32, sqlx::Error> {
     let row: (i32, ) = sqlx::query_as("select count(*) from mm_media \
         where mm_media_metadata_guid is NULL")
         .fetch_one(pool)
@@ -52,7 +52,7 @@ pub async fn mk_lib_database_media_unmatched_read(pool: &sqlx::PgPool,
 }
 
 pub async fn mk_lib_database_media_matched_count(pool: &sqlx::PgPool)
-                                                 -> Result<(i32), sqlx::Error> {
+                                                 -> Result<i32, sqlx::Error> {
     let row: (i32, ) = sqlx::query_as("select count(*) from mm_media \
         where mm_media_metadata_guid is not NULL")
         .fetch_one(pool)
@@ -108,7 +108,7 @@ pub async fn mk_lib_database_media_insert(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_media_duplicate_detail_count(pool: &sqlx::PgPool,
                                                           mm_metadata_guid: Uuid)
-                                                          -> Result<(i32), sqlx::Error> {
+                                                          -> Result<i32, sqlx::Error> {
     let row: (i32, ) = sqlx::query_as("select count(*) from mm_media \
         where mm_media_metadata_guid = $1")
         .bind(mm_metadata_guid)
@@ -118,7 +118,7 @@ pub async fn mk_lib_database_media_duplicate_detail_count(pool: &sqlx::PgPool,
 }
 
 pub async fn mk_lib_database_media_duplicate_count(pool: &sqlx::PgPool)
-                                                   -> Result<(i32), sqlx::Error> {
+                                                   -> Result<i32, sqlx::Error> {
     // TODO technically this will "dupe" things like subtitles atm
     let row: (i32, ) = sqlx::query_as("select count(*) from (select mm_media_metadata_guid \
         from mm_media where mm_media_metadata_guid is not null \

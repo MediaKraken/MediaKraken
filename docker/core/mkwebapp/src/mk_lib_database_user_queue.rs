@@ -5,7 +5,7 @@ use rocket_dyn_templates::serde::{Serialize, Deserialize};
 pub async fn mk_lib_database_meta_queue_count(pool: &sqlx::PgPool,
                                               user_uuid: uuid::Uuid,
                                               search_value: String)
-                                              -> Result<(i32), sqlx::Error> {
+                                              -> Result<i32, sqlx::Error> {
     if search_value != "" {
         let row: (i32, ) = sqlx::query_as("select count(*) from mm_user_queue \
             where mm_user_queue_name % $1 and mm_user_queue_user_id = $2")

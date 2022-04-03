@@ -5,7 +5,7 @@ use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_metadata_exists_person(pool: &sqlx::PgPool,
                                                     metadata_id: i32)
-                                                    -> Result<i32, sqlx::Error> {
+                                                    -> Result<(i32), sqlx::Error> {
     let row: (i32, ) = sqlx::query_as("select exists(select 1 from mm_metadata_person \
         where mm_metadata_person_media_id = $1 limit 1) as found_record limit 1")
         .bind(metadata_id)
@@ -16,7 +16,7 @@ pub async fn mk_lib_database_metadata_exists_person(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_metadata_person_count(pool: &sqlx::PgPool,
                                                    search_value: String)
-                                                   -> Result<(i32), sqlx::Error> {
+                                                   -> Result<i32, sqlx::Error> {
     if search_value != "" {
         let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_person \
             where mmp_person_name % $1")

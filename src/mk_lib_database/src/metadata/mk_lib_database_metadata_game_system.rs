@@ -16,7 +16,7 @@ pub async fn mk_lib_database_metadata_game_system_by_uuid(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_metadata_game_system_count(pool: &sqlx::PgPool,
                                                   search_value: String)
-                                                  -> Result<(i32), sqlx::Error> {
+                                                  -> Result<i32, sqlx::Error> {
     if search_value != "" {
         let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_game_systems_info \
             where gs_game_system_name % $1")
@@ -84,7 +84,7 @@ pub async fn mk_lib_database_metadata_game_system_insert(pool: &sqlx::PgPool,
                                                          platform_name:String,
                                                          platform_alias:String,
                                                          platform_json: serde_json::Value)
-                                                        -> Result<(uuid::Uuid), sqlx::Error> {
+                                                        -> Result<uuid::Uuid, sqlx::Error> {
     let new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_metadata_game_systems_info(gs_id, gs_game_system_name, \

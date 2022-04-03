@@ -46,7 +46,7 @@ async def db_media_tv_list(self, genre_type=None, list_limit=None,
 */
 
 pub async fn mk_lib_database_media_tv_count(pool: &sqlx::PgPool)
-                                                     -> Result<(i32), sqlx::Error> {
+                                                     -> Result<i32, sqlx::Error> {
     let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_tvshow, \
         mm_media where mm_media_metadata_guid = mm_metadata_tvshow_guid")
         .fetch_one(pool)

@@ -57,7 +57,7 @@ pub async fn mk_lib_database_game_server_detail(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_game_server_list_count(pool: &sqlx::PgPool,
                                                     search_value: String)
-                                                    -> Result<(i32), sqlx::Error> {
+                                                    -> Result<i32, sqlx::Error> {
     if search_value != "" {
         let row: (i32, ) = sqlx::query_as("select count(*) from mm_game_dedicated_servers \
             where mm_game_server_name = $1")
@@ -77,7 +77,7 @@ pub async fn mk_lib_database_game_server_list_count(pool: &sqlx::PgPool,
 pub async fn mk_lib_database_game_server_upsert(pool: &sqlx::PgPool,
                                                 server_name: String,
                                                 server_json: serde_json::Value)
-                                                -> Result<(uuid::Uuid), sqlx::Error> {
+                                                -> Result<uuid::Uuid, sqlx::Error> {
     // TODO um, would return "invalid" uuid on update
     let new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;

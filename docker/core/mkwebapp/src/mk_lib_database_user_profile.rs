@@ -5,7 +5,7 @@ use rocket_dyn_templates::serde::{Serialize, Deserialize};
 pub async fn mk_lib_database_user_profile_insert(pool: &sqlx::PgPool,
                                                  profile_name: String,
                                                  profile_json: serde_json::Value)
-                                                 -> Result<(uuid::Uuid), sqlx::Error> {
+                                                 -> Result<uuid::Uuid, sqlx::Error> {
     let new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_user_profile(mm_user_profile_guid, \
@@ -23,7 +23,7 @@ pub async fn mk_lib_database_user_group_insert(pool: &sqlx::PgPool,
                                                group_name: String,
                                                group_desc: String,
                                                group_rights_json: serde_json::Value)
-                                               -> Result<(uuid::Uuid), sqlx::Error> {
+                                               -> Result<uuid::Uuid, sqlx::Error> {
     let new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_user_group(mm_user_group_guid, \

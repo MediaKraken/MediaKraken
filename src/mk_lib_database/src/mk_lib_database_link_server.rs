@@ -43,7 +43,7 @@ pub async fn mk_lib_database_link_list(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_link_insert(pool: &sqlx::PgPool,
                                          link_json: serde_json::Value)
-                                         -> Result<(uuid::Uuid), sqlx::Error> {
+                                         -> Result<uuid::Uuid, sqlx::Error> {
     new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_link (mm_link_guid, mm_link_json) \
@@ -58,7 +58,7 @@ pub async fn mk_lib_database_link_insert(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_link_list_count(pool: &sqlx::PgPool,
                                              search_value: String)
-                                             -> Result<(i32), sqlx::Error> {
+                                             -> Result<i32, sqlx::Error> {
     if search_value != "" {
         let row: (i32, ) = sqlx::query_as("select count(*) from mm_library_link \
             where mm_link_name % $1")

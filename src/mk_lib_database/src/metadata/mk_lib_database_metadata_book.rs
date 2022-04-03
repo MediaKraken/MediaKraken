@@ -51,7 +51,7 @@ pub async fn mk_lib_database_metadata_book_read(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_metadata_book_count(pool: &sqlx::PgPool,
                                                  search_value: String)
-                                                 -> Result<(i32), sqlx::Error> {
+                                                 -> Result<i32, sqlx::Error> {
     if search_value != "" {
         let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_book \
             where mm_metadata_book_name % $1")
@@ -70,7 +70,7 @@ pub async fn mk_lib_database_metadata_book_count(pool: &sqlx::PgPool,
 pub async fn mk_lib_database_metadata_book_guid_by_isbn(pool: &sqlx::PgPool,
                                                         isbn_uuid: uuid::Uuid,
                                                         isbn13_uuid: uuid::Uuid)
-                                                       -> Result<(uuid::Uuid), sqlx::Error> {
+                                                       -> Result<uuid::Uuid, sqlx::Error> {
     let row: (uuid::Uuid, ) = sqlx::query_as("select mm_metadata_book_guid \
         from mm_metadata_book \
         where mm_metadata_book_isbn = $1 \
@@ -84,7 +84,7 @@ pub async fn mk_lib_database_metadata_book_guid_by_isbn(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_metadata_book_insert(pool: &sqlx::PgPool,
                                                   json_data: serde_json::Value)
-                                                 -> Result<(uuid::Uuid), sqlx::Error> {
+                                                 -> Result<uuid::Uuid, sqlx::Error> {
     let new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_metadata_book (mm_metadata_book_guid, \

@@ -51,7 +51,7 @@ pub async fn mk_lib_database_cron_service_read(pool: &sqlx::PgPool)
 pub async fn mk_lib_database_tv_station_exists(pool: &sqlx::PgPool,
 											   station_id: String,
 											   channel_id: String)
-											   -> Result<(i32), sqlx::Error> {
+											   -> Result<i32, sqlx::Error> {
     let row: (i32, ) = sqlx::query_as("select exists(select 1 from mm_tv_stations \
         where mm_tv_station_id = $1 \
         and mm_tv_station_channel = $2 limit 1) limit 1")

@@ -5,7 +5,7 @@ use rocket_dyn_templates::serde::{Serialize, Deserialize};
 pub async fn mk_lib_database_metadata_review_insert(pool: &sqlx::PgPool,
                                                     metadata_uuid: Uuid,
                                                     review_json: serde_json::Value)
-                                                    -> Result<(uuid::Uuid), sqlx::Error> {
+                                                    -> Result<uuid::Uuid, sqlx::Error> {
     new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_review(mm_review_guid, mm_review_metadata_guid, \
@@ -21,7 +21,7 @@ pub async fn mk_lib_database_metadata_review_insert(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_metadata_review_count(pool: &sqlx::PgPool,
                                                    metadata_uuid: Uuid)
-                                                   -> Result<(i32), sqlx::Error> {
+                                                   -> Result<i32, sqlx::Error> {
     let row: (i32, ) = sqlx::query("select count(*) from mm_review \
         where mm_review_metadata_guid = $1")
         .bind(metadata_uuid)

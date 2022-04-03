@@ -72,7 +72,7 @@ pub async fn mk_lib_database_cron_insert(pool: &sqlx::PgPool,
                                          cron_enabled: bool,
                                          cron_schedule: String,
                                          cron_json: serde_json::Value)
-                                         -> Result<(uuid::Uuid), sqlx::Error> {
+                                         -> Result<uuid::Uuid, sqlx::Error> {
     let new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_cron (mm_cron_guid, mm_cron_name, mm_cron_description, \
@@ -92,7 +92,7 @@ pub async fn mk_lib_database_cron_insert(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_cron_count(pool: &sqlx::PgPool,
                                         cron_enabled: bool)
-                                        -> Result<(i32), sqlx::Error> {
+                                        -> Result<i32, sqlx::Error> {
     let row: (i32, ) = sqlx::query_as("select count(*) from mm_cron where mm_cron_enabled = $1")
         .bind(cron_enabled)
         .fetch_one(pool)
