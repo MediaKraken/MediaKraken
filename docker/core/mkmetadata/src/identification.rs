@@ -190,7 +190,7 @@ async def metadata_identification(&sqlx_pool, dl_row, guessit_data):
     #         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type="info", message_text= {"stuff": "tv theme ident 6"})
     #         if metadata_uuid == None:
     #             await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type="info", message_text= {"stuff": "tv theme ident 7"})
-    #             # TODO so, the show hasn"t been fetched yet.....so, no path match
+    #             // TODO so, the show hasn"t been fetched yet.....so, no path match
     #             &sqlx_pool.db_download_update_provider("ZZ", download_que_id)
     # else if dl_row["mdq_que_type"] == common_global.DLMediaType.TV_Trailer.value:
     #     // include end slash so theme.mp3 doesn't get chopped up

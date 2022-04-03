@@ -75,7 +75,7 @@ pub async fn mk_lib_database_user_delete(pool: &sqlx::PgPool,
 }
 /*
 
-# TODO port query
+// TODO port query
 async def db_user_insert(self, user_name, user_email, user_password, db_connection=None):
     """
     # insert user
@@ -92,7 +92,7 @@ async def db_user_insert(self, user_name, user_email, user_password, db_connecti
         user_name, user_email, user_password, user_admin), user_admin, 30
 
 
-# TODO port query
+// TODO port query
 async def db_user_login(self, user_name, user_password, db_connection=None):
     """
     # verify user logon

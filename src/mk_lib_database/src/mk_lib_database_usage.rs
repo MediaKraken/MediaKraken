@@ -22,7 +22,7 @@ pub async fn mk_lib_database_usage_top10_tv(pool: &sqlx::PgPool)
 
 /*
 
-# TODO port query
+// TODO port query
 async def db_usage_top10_alltime(self, db_connection=None):
     """
     Top 10 of all time
@@ -30,7 +30,7 @@ async def db_usage_top10_alltime(self, db_connection=None):
     return await db_conn.fetch('select 1 limit 10')
 
 
-# TODO port query
+// TODO port query
 async def db_usage_top10_tv_episode(self, db_connection=None):
     """
     Top 10 TV episode

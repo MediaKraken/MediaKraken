@@ -76,8 +76,8 @@ async def db_meta_music_video_count(self, imvdb_id=None, search_value=None, db_c
     """
     Return count of music video metadata
     """
-    if imvdb_id is None:
-        if search_value is not None:
+    if imvdb_id == None:
+        if search_value != None:
             return await db_conn.fetchval('select count(*) from mm_metadata_music_video'
                                           ' where mm_media_music_video_song % $1',
                                           search_value)

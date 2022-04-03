@@ -4,12 +4,12 @@ use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 /*
 
-# TODO port query
+// TODO port query
 async def db_iradio_insert(self, radio_channel, db_connection=None):
     """
     Insert iradio channel
     """
-    # TODO exists
+    // TODO exists
     if await db_conn.fetchval('select count(*) from mm_radio'
                               ' where mm_radio_address = $1',
                               radio_channel) == 0:
@@ -21,7 +21,7 @@ async def db_iradio_insert(self, radio_channel, db_connection=None):
                                new_guid, radio_channel)
         return new_guid
 
-# TODO port query
+// TODO port query
 async def db_iradio_list(self, offset=0, records=None, active_station=True,
                          search_value=None, db_connection=None):
     """
@@ -50,7 +50,7 @@ async def db_iradio_list(self, offset=0, records=None, active_station=True,
                                    ' order by LOWER(mm_radio_name)',
                                    active_station, offset, records)
 
-# TODO port query
+// TODO port query
 pub async fn mk_lib_database_media_iradio_count(pool: &sqlx::PgPool,
                                                   search_value: String)
                                                   -> Result<i32, sqlx::Error> {
@@ -68,7 +68,7 @@ pub async fn mk_lib_database_media_iradio_count(pool: &sqlx::PgPool,
     }
 }
 
-# TODO port query
+// TODO port query
 async def db_iradio_list_count(self, active_station=True, search_value=None, db_connection=None):
     """
     Iradio count

@@ -171,7 +171,7 @@ fi
 if [ "$FACTORIO_SERVER_PORT" ]; then
     sed -i -s "s/^port=.*/port=${FACTORIO_SERVER_PORT}/" /opt/factorio/config/config.ini
 fi
-# TODO Adding this because of bug, will need to be removed once bug in factorio is fixed
+// TODO Adding this because of bug, will need to be removed once bug in factorio is fixed
 cd /opt/factorio/saves
 # Handling save settings
 save_dir="/opt/factorio/saves"

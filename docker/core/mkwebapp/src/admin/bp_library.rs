@@ -30,7 +30,7 @@ async def url_bp_admin_library(request):
                                                   rabbit_host_name='mkstack_rabbitmq',
                                                   exchange_name='mkque_ex',
                                                   route_key='mkque')
-            # TODO request['flash']('Scheduled media scan.', 'success')
+            // TODO request['flash']('Scheduled media scan.', 'success')
             await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                              message_text={
                                                                                  'stuff': 'scheduled media scan'})
@@ -125,11 +125,11 @@ async def url_bp_admin_library_edit(request):
                             request.app.url_for(
                                 'name_blueprint_admin_library.url_bp_admin_library_edit'))
                     smb_stuff.com_cifs_close()
-                # TODO these should be mounted under mkmount on docker host
+                // TODO these should be mounted under mkmount on docker host
                 # which will break docker swarm....when master moves
                 # # smb/cifs mounts
                 # elif request.form['library_path'][0:3] == "smb":
-                #     # TODO
+                #     // TODO
                 #     smb_stuff = common_network_cifs.CommonCIFSShare()
                 #     smb_stuff.com_cifs_connect(
                 #         ip_addr, user_name='guest', user_password='')

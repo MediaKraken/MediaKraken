@@ -149,7 +149,7 @@ async def db_meta_person_as_seen_in(self, person_guid, db_connection=None):
     row_data = await self.db_meta_person_by_guid(guid=person_guid, db_connection=db_conn)
     if row_data is None:  # exit on not found person
         return None
-    # TODO jin index the credits
+    // TODO jin index the credits
     return await db_conn.fetch('select mm_metadata_guid,mm_metadata_name,'
                                ' mm_metadata_localimage_json->'Poster''
                                ' from mm_metadata_movie'
@@ -177,7 +177,7 @@ async def db_meta_person_insert_cast_crew(self, meta_type, person_json, db_conne
     """
     # batch insert from json of crew/cast
     """
-    # TODO failing due to only one person in json?  hence pulling id, etc as the for loop
+    // TODO failing due to only one person in json?  hence pulling id, etc as the for loop
     let mut multiple_person = false
     try:
         for person_data in person_json:
@@ -196,7 +196,7 @@ async def db_meta_person_insert_cast_crew(self, meta_type, person_json, db_conne
                 person_id = None
                 person_name = None
             if person_id != None:
-                # TODO do an upsert instead
+                // TODO do an upsert instead
                 if await self.db_meta_person_id_count(person_id) == true:
                     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(
                         message_type='info',
@@ -234,7 +234,7 @@ async def db_meta_person_insert_cast_crew(self, meta_type, person_json, db_conne
             person_id = None
             person_name = None
         if person_id is not None:
-            # TODO upsert instead
+            // TODO upsert instead
             if await self.db_meta_person_id_count(person_id) is True:
                 await common_logging_elasticsearch_httpx.com_es_httpx_post_async(
                     message_type='info',

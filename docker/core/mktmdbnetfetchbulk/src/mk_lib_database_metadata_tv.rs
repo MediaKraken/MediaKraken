@@ -64,8 +64,8 @@ async def db_meta_tv_epsisode_by_id(self, show_guid, show_episode_id, db_connect
     """
     # grab episode detail by eps id
     """
-    # TODO tvmaze
-    # TODO injection fix
+    // TODO tvmaze
+    // TODO injection fix
     return await db_conn.fetchrow('select eps_data->'EpisodeName' as eps_name,'
                                   ' eps_data->'FirstAired' as eps_first_air,'
                                   ' eps_data->'Runtime' as eps_runtime,'
@@ -106,7 +106,7 @@ async def db_meta_tv_list(self, offset=0, records=None, search_value=None, db_co
     """
     # return list of tvshows
     """
-    # TODO order by release date
+    // TODO order by release date
     return await db_conn.fetch('select mm_metadata_tvshow_guid,'
                                ' mm_metadata_tvshow_name,'
                                ' mm_metadata_tvshow_json->'first_air_date''
@@ -138,7 +138,7 @@ async def db_meta_tv_season_eps_list(self, show_guid, season_number, db_connecti
     # grab episodes within the season
     """
     episode_data = {}
-    # TODO security check the seasonumber since from webpage addy - injection
+    // TODO security check the seasonumber since from webpage addy - injection
     await db_conn.fetch(
         'select eps_data->'id' as eps_id, eps_data->'EpisodeNumber' as eps_num,'
         ' eps_data->'EpisodeName' as eps_name,'
@@ -202,8 +202,8 @@ def db_metatv_guid_by_tvshow_name(self, tvshow_name, tvshow_year=None):
                                ' where LOWER(mm_metadata_tvshow_name) = $1',
                                (tvshow_name.lower(),))
     else:
-        # TODO jin index firstaird and premiered
-        # TODO check tvmaze as well
+        // TODO jin index firstaird and premiered
+        // TODO check tvmaze as well
         self.db_cursor.execute('select mm_metadata_tvshow_guid from mm_metadata_tvshow'
                                ' where (LOWER(mm_metadata_tvshow_name) = $1)'
                                ' and (substring(mm_metadata_tvshow_json->'Meta'->'thetvdb'->'Meta''
@@ -301,7 +301,7 @@ def db_meta_tvshow_list(self, offset=0, records=None, search_value=None):
     """
     # return list of tvshows
     """
-    # TODO order by release date
+    // TODO order by release date
     # COALESCE - priority over one column
     self.db_cursor.execute('select mm_metadata_tvshow_guid,mm_metadata_tvshow_name,'
                            ' COALESCE(mm_metadata_tvshow_json->'Meta'->'tvmaze'->'premiered','
@@ -417,7 +417,7 @@ def db_read_tvmeta_season_eps_list(self, show_guid, season_number):
     #     '->'_embedded'->'episodes')b->'id', mm_metadata_tvshow_localimage_json'
     #     '->'Images'->'tvmaze'->'Episodes','
 
-    # TODO security check the seasonumber since from webpage addy - injection
+    // TODO security check the seasonumber since from webpage addy - injection
     self.db_cursor.execute(
         'select eps_data->'id' as eps_id, eps_data->'EpisodeNumber' as eps_num,'
         ' eps_data->'EpisodeName' as eps_name,'
@@ -446,8 +446,8 @@ def db_read_tvmeta_epsisode_by_id(self, show_guid, show_episode_id):
     """
     # grab episode detail by eps id
     """
-    # TODO tvmaze
-    # TODO injection fix
+    // TODO tvmaze
+    // TODO injection fix
     self.db_cursor.execute('select eps_data->'EpisodeName' as eps_name,'
                            ' eps_data->'FirstAired' as eps_first_air,'
                            ' eps_data->'Runtime' as eps_runtime,'
@@ -507,7 +507,7 @@ def db_meta_tvshow_image_random(self, return_image_type='Poster'):
     """
     Find random tv show image
     """
-    # TODO little bobby tables
+    // TODO little bobby tables
     self.db_cursor.execute(
         'select mm_metadata_tvshow_localimage_json->'Images'->'thetvdb'->>''
         + return_image_type + '' as image_json,mm_metadata_guid from mm_media,mm_metadata_tvshow'

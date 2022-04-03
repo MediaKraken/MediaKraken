@@ -85,7 +85,7 @@ async def url_bp_user_search_media(request):
                 game.append(search_item)
     elif request.form['action_type'] == 'Search Metadata Providers':
         pass
-    # TODO
+    // TODO
     # search_primary_language
     # search_secondary_language
     # search_resolution
@@ -108,7 +108,7 @@ async def url_bp_user_search_nav_media(request):
     """
     determine what search results screen to show
     """
-    # TODO!
+    // TODO!
     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                      message_text={
                                                                          "search session":

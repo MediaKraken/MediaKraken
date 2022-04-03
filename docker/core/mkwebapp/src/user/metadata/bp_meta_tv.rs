@@ -51,7 +51,7 @@ async def url_bp_user_metadata_tvshow_detail(request, guid):
             data_runtime = data_metadata['mm_metadata_tvshow_json']['episode_run_time']
     else:
         data_runtime = None
-    # TODO there must be sum rating on stuff......
+    // TODO there must be sum rating on stuff......
     if 'rating' in data_metadata['mm_metadata_tvshow_json']:
         data_rating = data_metadata['mm_metadata_tvshow_json']['rating']
     else:

@@ -129,7 +129,7 @@ services:
   hardware:
     image: mediakraken/mkhardware:${BRANCH}
     volumes:
-      # TODO why not store this in the db with the device as postgresql crypt
+      // TODO why not store this in the db with the device as postgresql crypt
       # this stores the "push button" key
       - mediakraken_vol_phue:/mediakraken/phue
     entrypoint: python3 main_hardware.py

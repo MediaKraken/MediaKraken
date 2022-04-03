@@ -4,7 +4,7 @@ use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 /*
 
-# TODO port query
+// TODO port query
 async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                search_text=None,
                                list_type=None, list_genre='All',
@@ -257,7 +257,7 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    ' where mm_media_class_guid = $1'
                                                    ' and mm_media_metadata_guid = mm_metadata_sports_guid'
                                                    ' and (mm_metadata_sports_json->>'belongs_to_collection') is null'
-                                                   # TODO put back in
+                                                   // TODO put back in
                                                    #                        ' union select mm_metadata_collection_name as name,'
                                                    #                        ' mm_metadata_collection_guid as guid,'
                                                    #                        ' nullb as mediajson, nullb as metajson,'
@@ -278,7 +278,7 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                                    ' where mm_media_class_guid = $1'
                                                    ' and mm_media_metadata_guid = mm_metadata_sports_guid'
                                                    ' and (mm_metadata_sports_json->>'belongs_to_collection') is null'
-                                                   # TODO put back in
+                                                   // TODO put back in
                                                    #                        ' union select mm_metadata_collection_name as name,'
                                                    #                        ' mm_metadata_collection_guid as guid,'
                                                    #                        ' nullb as mediajson, nullb as metajson,'
@@ -486,7 +486,7 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                     return await db_conn.fetch('select 1')
 
 
-# TODO port query
+// TODO port query
 async def db_media_sports_list_count(self, class_guid, list_type=None,
                                      list_genre='All',
                                      group_collection=False, include_remote=False,
@@ -648,7 +648,7 @@ async def db_media_sports_list_count(self, class_guid, list_type=None,
                 return await db_conn.fetchval('select 1')
 
 
-# TODO port query
+// TODO port query
 def db_media_sports_random(self):
     """
     Find random sports
@@ -665,7 +665,7 @@ def db_media_sports_random(self):
         return None
 
 
-# TODO port query
+// TODO port query
 def db_media_sports_count_by_genre(self, class_guid):
     """
     # movie count by genre
@@ -689,7 +689,7 @@ def db_media_sports_count_by_genre(self, class_guid):
                            (class_guid, class_guid))
     return self.db_cursor.fetchall()
 
-# TODO port query
+// TODO port query
 def db_read_media_metadata_sports_both(self, media_guid):
     """
     # read in metadata and ffprobe by id
@@ -706,7 +706,7 @@ def db_read_media_metadata_sports_both(self, media_guid):
         return None
 
 
-# TODO port query
+// TODO port query
 def db_read_media_sports_list_by_uuid(self, media_guid):
     self.db_cursor.execute('select mm_media_ffprobe_json'
                            ' from mm_media'

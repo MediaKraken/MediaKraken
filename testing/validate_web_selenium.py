@@ -45,7 +45,7 @@ pid_proc.wait()
 # this sleep is here so that everything has time to fully start like pika
 time.sleep(60)
 
-# TODO simply kick off mkselenium container?
+// TODO simply kick off mkselenium container?
 
 #####################################
 # stop the application

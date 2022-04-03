@@ -219,7 +219,7 @@ def db_meta_game_image_random(self, return_image_type="Poster"):
     """
     Find random game image
     """
-    # TODO little bobby tables
+    // TODO little bobby tables
     self.db_cursor.execute("select gi_game_info_json->\"Images\"->\"thegamesdb\"->>\""
                            + return_image_type + "\" as image_json, gi_id"
                                                  " from mm_media, mm_metadata_game_software_info"

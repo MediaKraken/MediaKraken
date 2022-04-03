@@ -103,7 +103,7 @@ status() {
     if kill -0 $pid > /dev/null 2> /dev/null; then
       # process by this pid is running.
       # It may not be our pid, but that's what you get with just pidfiles.
-      # TODO(sissel): Check if this process seems to be the same as the one we
+      // TODO(sissel): Check if this process seems to be the same as the one we
       # expect. It'd be nice to use flock here, but flock uses fork, not exec,
       # so it makes it quite awkward to use in this case.
       return 0

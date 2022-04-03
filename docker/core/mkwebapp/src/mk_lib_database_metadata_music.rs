@@ -69,8 +69,8 @@ def db_music_lookup(self, artist_name, album_name, song_title):
     """
     # query to see if song is in local DB
     """
-    # TODO the following fields don't exist on the database (album and musician)
-    # TODO order by release year
+    // TODO the following fields don't exist on the database (album and musician)
+    // TODO order by release year
     self.db_cursor.execute('select mm_metadata_music_guid,'
                            ' mm_metadata_media_music_id->'Mbrainz' as mbrainz from '
                            'mm_metadata_music,'
@@ -186,8 +186,8 @@ def db_meta_album_list(self, offset=0, records=None, search_value=None):
     """
     # return albums metadatalist
     """
-    # TODO, only grab the poster locale from json
-    # TODO order by release year
+    // TODO, only grab the poster locale from json
+    // TODO order by release year
     if search_value is not None:
         self.db_cursor.execute('select mm_metadata_album_guid, mm_metadata_album_name,'
                                ' mm_metadata_album_json, mm_metadata_album_localimage'
@@ -209,7 +209,7 @@ def db_meta_musician_list(self, offset=0, records=None, search_value=None):
     """
     # return musician metadatalist
     """
-    # TODO, only grab the poster locale from json
+    // TODO, only grab the poster locale from json
     if search_value is not None:
         self.db_cursor.execute('select mm_metadata_musician_guid, mm_metadata_musician_name,'
                                ' mm_metadata_musician_json from mm_metadata_musician'
@@ -235,7 +235,7 @@ def db_meta_album_image_random(self):
     #     ' and (mm_metadata_localimage_json->'Images'->'themoviedb'->>''
     #     + return_image_type + ''' + ')::text != 'null' order by random() limit 1')
     try:
-        # then if no results.....a None will except which will then pass None, None
+        // then if no results.....a None will except which will then pass None, None
         image_json, metadata_id = self.db_cursor.fetchone()
         return image_json, metadata_id
     except:

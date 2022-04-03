@@ -68,7 +68,7 @@ pub async fn mk_lib_database_status_update_scan(pool: &sqlx::PgPool,
 }
 
 /*
-# TODO port query
+// TODO port query
 def db_opt_status_update_scan_rec(self, dir_path, scan_status, scan_percent):
     """
     Update scan data

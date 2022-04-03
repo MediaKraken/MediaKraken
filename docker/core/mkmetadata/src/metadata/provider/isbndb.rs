@@ -77,7 +77,7 @@ async def metadata_periodicals_search_isbndb(db_connection, lookup_name):
                                                                          message_text={
                                                                              'response': api_response})
         if api_response.status_code == 200:
-            # TODO verify decent results before insert
+            // TODO verify decent results before insert
             await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                              message_text={
                                                                                  'resp json': api_response.json()})

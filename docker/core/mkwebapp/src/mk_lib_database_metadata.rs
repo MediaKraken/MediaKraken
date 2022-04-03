@@ -242,7 +242,7 @@ def db_find_metadata_guid(self, media_name, media_release_year):
                                ' or LOWER(mm_metadata_json->>'original_title') = $2)',
                                (media_name.lower(), media_name.lower()))
     for row_data in self.db_cursor.fetchall():
-        # TODO should probably handle multiple results better.   Perhaps a notification?
+        // TODO should probably handle multiple results better.   Perhaps a notification?
         metadata_guid = row_data['mm_metadata_guid']
         common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text={
             "db find metadata guid": metadata_guid})
@@ -309,8 +309,8 @@ def db_meta_update_media_id_from_scudlee(self, media_tvid, media_imdbid,
 
 // TODO port query
 def db_meta_queue_list(self, user_id, offset=0, records=None, search_value=None):
-    # TODO sort by release date as well
-    # TODO use the search value
+    // TODO sort by release date as well
+    // TODO use the search value
     self.db_cursor.execute('(select mm_metadata_guid,'
                            ' mm_metadata_name'
                            ' from mm_metadata_movie '

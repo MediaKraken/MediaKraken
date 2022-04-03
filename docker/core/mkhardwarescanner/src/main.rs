@@ -73,7 +73,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         LOGGING_INDEX_NAME).await;
 
 // dlna devices
-// # TODO looks like debugging shows up if run from this program
+// // TODO looks like debugging shows up if run from this program
 // # for dlna_devices in common_network_dlna.com_net_dlna_discover():
 // #     if dlna_devices.find('No compatible devices found.') != -1:
 // #         break

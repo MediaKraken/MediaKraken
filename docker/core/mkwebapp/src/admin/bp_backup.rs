@@ -38,7 +38,7 @@ async def url_bp_admin_backup(request):
         for backup_local in local_file_backups:
             backup_files.append((backup_local[0], 'Local',
                                  common_string.com_string_bytes2human(backup_local[1])))
-    # TODO
+    // TODO
     # # cloud backup list
     # if len(g.option_config_json['Cloud']) > 0:  # to see if the json has been populated
     #     cloud_handle = common_network_cloud.CommonLibCloud(g.option_config_json)
@@ -78,7 +78,7 @@ async def url_bp_admin_backup_delete(request):
         os.remove(file_path)
     else:
         pass
-        # TODO, do the actual delete
+        // TODO, do the actual delete
     return json.dumps({'status': 'OK'})
 
 

@@ -279,7 +279,7 @@ async def movie_search_tmdb(db_connection, file_name):
     """
     # search tmdb
     """
-    # TODO aren't I doing two guessits per file name then?
+    // TODO aren't I doing two guessits per file name then?
     file_name = guessit(file_name)
     if type(file_name['title']) == list:
         file_name['title'] = common_string.com_string_guessit_list(file_name['title'])
@@ -384,7 +384,7 @@ async def movie_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid):
             await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                              message_text={
                                                                                  "meta movie tmdb 404": tmdb_id})
-            # TODO handle 404's better
+            // TODO handle 404's better
             metadata_uuid = None
     else:  # is this is None....
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',

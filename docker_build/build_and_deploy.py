@@ -36,7 +36,7 @@ except ModuleNotFoundError:
 import docker_images_list
 import network_email
 
-# TODO proxy docker build -t mediakraken/mkbase38py3 --build-arg http_proxy="http://proxyip:8080"
+// TODO proxy docker build -t mediakraken/mkbase38py3 --build-arg http_proxy="http://proxyip:8080"
 #  --build-arg ALPMIRROR=dl-cdn.alpinelinux.org --build-arg PIPMIRROR=pypi.python.org .
 
 parser = argparse.ArgumentParser(description='This program builds and deploys MediaKraken')
@@ -74,7 +74,7 @@ def build_email_push(build_group, email_subject, branch_tag, push_hub_image=Fals
                                   'MediaKraken/docker',
                                   build_group[docker_images][2],
                                   docker_images))
-            # TODO check for errors/warnings and stop if found
+            // TODO check for errors/warnings and stop if found
             # Let the mirror's be passed, if not used it will just throw a warning
             pid_build_proc = subprocess.Popen(shlex.split('docker build %s'
                                                           ' -t mediakraken/%s:%s'

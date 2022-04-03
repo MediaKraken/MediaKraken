@@ -14,9 +14,6 @@ pub async fn mk_lib_database_remote_media_count(pool: &sqlx::PgPool)
 // TODO port query
 def db_insert_remote_media(self, media_link_uuid, media_uuid, media_class_uuid,
                            media_metadata_uuid, media_ffprobe_json):
-    """
-    # insert media into database
-    """
     new_guid = uuid.uuid4()
     self.db_cursor.execute('insert into mm_media_remote (mmr_media_guid,'
                            ' mmr_media_link_id,'
@@ -33,9 +30,6 @@ def db_insert_remote_media(self, media_link_uuid, media_uuid, media_class_uuid,
 
 // TODO port query
 def db_read_remote_media(self, media_guid=None):
-    """
-    # read in all media unless guid specified
-    """
     if media_guid is not None:
         self.db_cursor.execute('select * from mm_media_remote where mmr_media_guid = $1',
                                (media_guid,))
@@ -94,7 +88,7 @@ def db_media_remote_read_new(self, date_last_sync, sync_movie=None, sync_tv=None
     """
     # new media for link
     """
-    # TODO add games to this
+    // TODO add games to this
     let mut first_query = true;
     let mut sync_query = "".to_string();
     if sync_movie != None:

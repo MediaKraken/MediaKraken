@@ -5,7 +5,7 @@ Run the following tests from under the MediaKraken_CI
     python3 validate_code.py
 #        Bandit (https://github.com/PyCQA/bandit) to find unsecured code - against MediaKraken source
 #            pip3 install bandit==1.7.0
-        # TODO FIX Graudit (https://github.com/wireghoul/graudit) - against MediaKraken_Deployment source
+        // TODO FIX Graudit (https://github.com/wireghoul/graudit) - against MediaKraken_Deployment source
             cd ~
             git clone https://github.com/wireghoul/graudit
             ln -s ~/graudit/graudit /bin/graudit
@@ -34,7 +34,7 @@ Run the following tests from under the MediaKraken_CI
             nikto - https://github.com/sullo/nikto Nikto web server scanner
                 git clone https://github.com/sullo/nikto
             mablanco/rapidscan - https://github.com/skavngr/rapidscan
-            # TODO Sitadel - https://github.com/shenril/Sitadel
+            // TODO Sitadel - https://github.com/shenril/Sitadel
             Wapiti - https://wapiti.sourceforge.io/ - Wapiti allows you to audit the security of your websites or web applications.
                 apt-get install wapiti
     python3 validate_web_selenium

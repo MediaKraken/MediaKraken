@@ -60,14 +60,14 @@ async def url_bp_user_movie_detail(request, user, guid):
             return redirect(
                 request.app.url_for('name_blueprint_user_sync.url_bp_user_sync_edit', guid=guid))
         elif request.form['status'] == 'Cast':
-            # TODO submit cast comment via rabbitmq
+            // TODO submit cast comment via rabbitmq
             # grab the guid from the comboindex
             media_guid_index = request.form["Video_Track"]
             # call ffpmeg with the play_data
             audio_track_index = request.form["Video_Play_Audio_Track"]
             subtitle_track_index = request.form["Video_Play_Subtitles"]
             # launch ffmpeg to ffserver procecss
-            # TODO fire up node cast container!
+            // TODO fire up node cast container!
             proc_ffserver = subprocess.Popen(split('ffmpeg  -i \"',
                                                    await
                                                    request.app.db_functions.db_media_path_by_uuid(
@@ -139,7 +139,7 @@ async def url_bp_user_movie_detail(request, user, guid):
 
         # check to see if there are other version(s) of this video file (dvd, hddvd, etc)
         ffprobe_data = {}
-        # TODO  the following does alot of repeats sumhow.   due to dict it stomps over itself
+        // TODO  the following does alot of repeats sumhow.   due to dict it stomps over itself
         for video_version in await request.app.db_functions.db_media_ffprobe_all_guid(guid,
                                                                                       common_global.DLMediaType.Movie.value,
                                                                                       db_connection=db_connection):
@@ -162,7 +162,7 @@ async def url_bp_user_movie_detail(request, user, guid):
                     hours = 0
                     minutes = 0
                     seconds = 0
-                # TODO will need to be able to loop through streams...for those with multiple videos in container
+                // TODO will need to be able to loop through streams...for those with multiple videos in container
                 try:
                     data_resolution = str(
                         video_version['mm_media_ffprobe_json']['streams'][0]['width']) + 'x' \
@@ -216,7 +216,7 @@ async def url_bp_user_movie_detail(request, user, guid):
         #     pass
 
         # find all devices to playback media on
-        # TODO have reactor return client list?
+        // TODO have reactor return client list?
         playback_devices = []
         for device_item in await request.app.db_functions.db_device_list(
                 db_connection=db_connection):

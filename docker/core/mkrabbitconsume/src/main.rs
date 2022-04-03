@@ -81,7 +81,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                      stdout=subprocess.PIPE, shell=False)
             elif json_message["Type"] == "Library Scan":
                 # This is split out since can be done via admin website and cron jobs
-                # TODO launch a container to do this.....so, if it gets stuck the others still go
+                // TODO launch a container to do this.....so, if it gets stuck the others still go
                 subprocess.Popen(["python3", "/mediakraken/subprogram_file_scan.py"],
                                  stdout=subprocess.PIPE, shell=False)
             elif json_message["Type"] == "Playback":
@@ -92,7 +92,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type="info",
                                                                          message_text={
                                                                              "cont": name_container})
-                    # TODO only for now until I get the device for websessions (cookie perhaps?)
+                    // TODO only for now until I get the device for websessions (cookie perhaps?)
                     if "Device" in json_message:
                         define_new_container = (name_container, json_message["Device"])
                     else:
@@ -125,8 +125,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             video_codec=None,
                             audio_codec=None,
                             audio_channels=None)
-                        # TODO take number of channels into account
-                        # TODO take the video codec into account
+                        // TODO take number of channels into account
+                        // TODO take the video codec into account
                         container_command = "castnow --tomp4 --ffmpeg-acodec ac3 --ffmpeg-movflags " \
                                             "frag_keyframe+empty_moov+faststart --address " \
                                             + json_message["Target"] + " --myip " \
@@ -146,7 +146,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                             json_message["Channel"] + ".m3u8"
                     elif json_message["Device"] == "HLS":
                         # stream to hls
-                        # TODO take the video codec into account
+                        // TODO take the video codec into account
                         container_command = "ffmpeg -i \"" + json_message["Input File"] \
                                             + "\" -vcodec libx264 -preset veryfast" \
                                             + " -acodec aac -ac:a:0 2 -vbr 5 " \

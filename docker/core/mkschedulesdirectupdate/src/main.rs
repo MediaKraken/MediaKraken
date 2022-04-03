@@ -51,7 +51,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 //     sys.exit(0)
 // # version check
 // # version_json = sd.com_Schedules_Direct_Client_Version()
-// # TODO
+// // TODO
 // # if version_json != "MediaKraken_0.1.0":
 // #    common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='critical', message_text= {'stuff':"Outdated Client Version! Upgrade MediaKraken_")
 // #    sys.exit(0)
@@ -81,7 +81,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 // # json.dumps(channel_meta))
 //
 //
-// # TODO downloading a generic description of a program
+// // TODO downloading a generic description of a program
 // # - good for what the show is......not an episode itself
 //
 // station_fetch = []
@@ -123,9 +123,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 //                 mk_schedules_direct_program_info_fetch(meta_program_fetch)
 //                 meta_program_fetch = []
 //
-// # TODO check to see if meta array has unstored data
+// // TODO check to see if meta array has unstored data
 // if len(meta_program_fetch) > 0:
 //     mk_schedules_direct_program_info_fetch(meta_program_fetch)
 //
-// # TODO, go grab images for blank logos
+// // TODO, go grab images for blank logos
 }

@@ -26,8 +26,8 @@ pub async fn mk_lib_database_media_movie_genre_count(pool: &sqlx::PgPool)
 }
 
 pub async fn mk_lib_database_media_movie_random(pool: &sqlx::PgPool)
-                                                -> Result<PgRow, sqlx::Error> {
-    let row: PgRow = sqlx::query_as("select mm_metadata_guid, mm_media_guid \
+                                                -> Result<(Uuid, Uuid), sqlx::Error> {
+    let row: (Uuid, Uuid) = sqlx::query_as("select mm_metadata_guid, mm_media_guid \
         from mm_media, mm_metadata_movie \
         where mm_media_metadata_guid = mm_metadata_guid \
         and random() < 0.01 limit 1")
@@ -99,7 +99,7 @@ def db_read_media_list_by_uuid(self, media_guid):
                                                                              'stuff': 'subtitle'})
     return video_data
 
-# TODO port query
+// TODO port query
 async def db_media_movie_list(self, class_guid, list_type=None, list_genre='all',
                               list_limit=0, group_collection=False, offset=None,
                               include_remote=False,
@@ -368,7 +368,7 @@ async def db_media_movie_list(self, class_guid, list_type=None, list_genre='all'
                                                    ' where mm_media_class_guid = $1'
                                                    ' and mm_media_metadata_guid = mm_metadata_guid'
                                                    ' and (mm_metadata_json->>'belongs_to_collection') is null'
-                                                   # TODO put back in
+                                                   // TODO put back in
                                                    #                        ' union select mm_metadata_collection_name as name,'
                                                    #                        ' mm_metadata_collection_guid as guid,'
                                                    #                        ' nullb as mediajson, nullb as metajson,'
@@ -392,7 +392,7 @@ async def db_media_movie_list(self, class_guid, list_type=None, list_genre='all'
                                                    ' where mm_media_class_guid = $1'
                                                    ' and mm_media_metadata_guid = mm_metadata_guid'
                                                    ' and (mm_metadata_json->>'belongs_to_collection') is null'
-                                                   # TODO put back in
+                                                   // TODO put back in
                                                    #                        ' union select mm_metadata_collection_name as name,'
                                                    #                        ' mm_metadata_collection_guid as guid,'
                                                    #                        ' nullb as mediajson, nullb as metajson,'
@@ -634,7 +634,7 @@ async def db_media_movie_list(self, class_guid, list_type=None, list_genre='all'
                     return await db_conn.fetch('select 1')
 
 
-# TODO port query
+// TODO port query
 async def db_media_movie_list_count(self, class_guid, list_type=None,
                                     list_genre='all',
                                     group_collection=False, include_remote=False, search_text=None,

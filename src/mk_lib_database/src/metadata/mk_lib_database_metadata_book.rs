@@ -111,8 +111,8 @@ def db_meta_book_guid_by_name(self, book_name):
     """
     # metadata guid by name
     """
-    # TODO can be more than one by name
-    # TODO sort by release date
+    // TODO can be more than one by name
+    // TODO sort by release date
     self.db_cursor.execute('select mm_metadata_book_guid'
                            ' from mm_metadata_book'
                            ' where mm_metadata_book_name = $1', (book_name,))
@@ -127,7 +127,7 @@ def db_meta_book_image_random(self, return_image_type='Cover'):
     """
     Find random book image
     """
-    # TODO little bobby tables
+    // TODO little bobby tables
     self.db_cursor.execute(
         'select mm_metadata_book_localimage_json->'Images'->'themoviedb'->>''
         + return_image_type + '' as image_json,mm_metadata_book_guid'

@@ -31,7 +31,7 @@ def db_meta_anime_title_search(self, title_to_search):
     """
     search for title
     """
-    # TODO hit movie and tv db's as well?
+    // TODO hit movie and tv db's as well?
     self.db_cursor.execute('select mm_metadata_anime_guid'
                            ' from mm_metadata_anime'
                            ' where mm_media_anime_name = $1', (title_to_search,))

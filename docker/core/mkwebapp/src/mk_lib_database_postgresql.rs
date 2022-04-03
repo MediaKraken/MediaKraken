@@ -63,7 +63,7 @@ pub async fn mk_lib_database_parallel_workers(pool: &sqlx::PgPool)
 
 /*
 
-# TODO port query
+// TODO port query
 async def db_pgsql_vacuum_stat_by_day(self, days=1, db_connection=None):
     """
     # vacuum stats by day list
@@ -86,7 +86,7 @@ async def db_pgsql_vacuum_stat_by_day(self, days=1, db_connection=None):
 
 
 
-# TODO port query
+// TODO port query
 def db_pgsql_vacuum_table(self, table_name):
     """
     # vacuum table
@@ -100,7 +100,7 @@ def db_pgsql_vacuum_table(self, table_name):
             'Vacuum table missing': table_name})
 
 
-# TODO port query
+// TODO port query
 def db_pgsql_set_iso_level(self, isolation_level):
     """
     # set isolation level
@@ -108,7 +108,7 @@ def db_pgsql_set_iso_level(self, isolation_level):
     self.sql3_conn.set_isolation_level(isolation_level)
 
 
-# TODO port query
+// TODO port query
 def db_pgsql_table_exits(self, table_name):
     """
     Check to see if table exits. Will return NULL if not.
@@ -116,15 +116,15 @@ def db_pgsql_table_exits(self, table_name):
     self.db_cursor.execute('SELECT to_regclass(%s)::text', (table_name,))
     return self.db_cursor.fetchone()[0]
 
-# TODO - see last analynze, etc
+// TODO - see last analynze, etc
 # SELECT schemaname, relname, last_analyze FROM pg_stat_all_tables WHERE relname = 'city';
 
-# TODO port query
+// TODO port query
 async def db_table_index_check(self, resource_name, db_connection=None):
     """
     # check for table or index
     """
-    # TODO little bobby tables
+    // TODO little bobby tables
     await self.db_cursor.execute("SELECT to_regclass('public.$1')", resource_name)
     return await self.db_cursor.fetchval()
  */

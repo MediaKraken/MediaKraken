@@ -120,7 +120,7 @@ async def db_meta_movie_status_update(self, metadata_guid, user_id, status_text,
     """
     # do before the select to save db lock time
     if status_text == 'watched' or status_text == 'requested':
-        status_setting = True
+        status_setting = true
     else:
         status_setting = status_text
         status_text = 'Rating'
@@ -160,7 +160,7 @@ def db_meta_movie_image_random(self, return_image_type='Poster'):
     """
     Find random movie image
     """
-    # TODO little bobby tables
+    // TODO little bobby tables
     self.db_cursor.execute('select mm_metadata_localimage_json->'Images'->'themoviedb'->>''
                            + return_image_type + '' as image_json,mm_metadata_guid'
                                                  ' from mm_media,mm_metadata_movie'
@@ -169,7 +169,7 @@ def db_meta_movie_image_random(self, return_image_type='Poster'):
                            + return_image_type + ''' + ')::text != 'null''
                                                         ' order by random() limit 1')
     try:
-        # then if no results.....a None will except which will then pass None, None
+        // then if no results.....a None will except which will then pass None, None
         image_json, metadata_id = self.db_cursor.fetchone()
         return image_json, metadata_id
     except:
@@ -189,10 +189,10 @@ def db_meta_movie_update_castcrew(self, cast_crew_json, metadata_id):
     cast_crew_json_row = self.db_cursor.fetchone()[0]
     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text={
         'castrow': cast_crew_json_row})
-    # TODO for dumping 'meta'
+    // TODO for dumping 'meta'
     if 'cast' in cast_crew_json:
         cast_crew_json_row.update({'Cast': cast_crew_json['cast']})
-    # TODO for dumping 'meta'
+    // TODO for dumping 'meta'
     if 'crew' in cast_crew_json:
         cast_crew_json_row.update({'Crew': cast_crew_json['crew']})
     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',

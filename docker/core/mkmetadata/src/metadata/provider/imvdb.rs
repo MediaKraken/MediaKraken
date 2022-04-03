@@ -83,7 +83,7 @@ async def movie_fetch_save_imvdb(db_connection, imvdb_id, metadata_uuid):
         # redo fetch due to 502
         await movie_fetch_save_imvdb(db_connection, imvdb_id, metadata_uuid)
     elif result_json.status_code == 404:
-        # TODO handle 404's better
+        // TODO handle 404's better
         metadata_uuid = None
     else:  # is this is None....
         metadata_uuid = None
