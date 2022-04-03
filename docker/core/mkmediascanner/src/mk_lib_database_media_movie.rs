@@ -26,11 +26,11 @@ pub async fn mk_lib_database_media_movie_genre_count(pool: &sqlx::PgPool)
 
 pub async fn mk_lib_database_media_movie_random(pool: &sqlx::PgPool)
                                                 -> Result<PgRow, sqlx::Error> {
-    let row: PgRow = sqlx::query("select mm_metadata_guid, mm_media_guid \
+    let row: PgRow = sqlx::query_as("select mm_metadata_guid, mm_media_guid \
         from mm_media, mm_metadata_movie \
         where mm_media_metadata_guid = mm_metadata_guid \
         and random() < 0.01 limit 1")
-        .fetch_all(pool)
+        .fetch_one(pool)
         .await?;
     Ok(row)
 }

@@ -46,33 +46,35 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let fetch_result = mk_lib_network::mk_data_from_url(
         format!("{}{}", libtro_url, ".index-extended")).await.unwrap();
     for libretro_core in fetch_result.split('\n') {
-        let mut download_core = false;
-        let mut iter = libretro_core.splitn(3, " ");
-        let core_date = iter.next().unwrap();
-        let core_crc32 = iter.next().unwrap();
-        let core_name = iter.next().unwrap();
-        println!("line: {} {} {}", core_date, core_crc32, core_name);
-        let path_core_name = format!("/mediakraken/emulation/cores/{}", core_name.replace(".zip", ""));
-        println!("path: {}", path_core_name);
-        if emulation_cores.contains_key(&path_core_name) {
-            // we have the core, check to see if crc32 changed\
-            println!("emu: {}", emulation_cores[&path_core_name]);
-            println!("md5: {}", core_crc32);
-            if emulation_cores[&path_core_name] != core_crc32 {
+        if libretro_core.len() > 0 {
+            let mut download_core = false;
+            let mut iter = libretro_core.splitn(3, " ");
+            let core_date = iter.next().unwrap();
+            let core_crc32 = iter.next().unwrap();
+            let core_name = iter.next().unwrap();
+            println!("line: {} {} {}", core_date, core_crc32, core_name);
+            let path_core_name = format!("/mediakraken/emulation/cores/{}", core_name.replace(".zip", ""));
+            println!("path: {}", path_core_name);
+            if emulation_cores.contains_key(&path_core_name) {
+                // we have the core, check to see if crc32 changed\
+                println!("emu: {}", emulation_cores[&path_core_name]);
+                println!("md5: {}", core_crc32);
+                if emulation_cores[&path_core_name] != core_crc32 {
+                    download_core = true;
+                }
+            } else {
                 download_core = true;
             }
-        } else {
-            download_core = true;
-        }
-        if download_core {
-            // download the missing or newer core
-            mk_lib_network::mk_download_file_from_url(format!("{}{}", libtro_url, core_name),
-                                                      &format!("/mediakraken/emulation/cores/{}", core_name)).await;
-            // unzip the core for use
-            mk_lib_compression::mk_decompress_zip(&format!("/mediakraken/emulation/cores/{}", core_name),
-                                                  true,
-                                                  false,
-                                                  "/mediakraken/emulation/cores/");
+            if download_core {
+                // download the missing or newer core
+                mk_lib_network::mk_download_file_from_url(format!("{}{}", libtro_url, core_name),
+                                                          &format!("/mediakraken/emulation/cores/{}", core_name)).await;
+                // unzip the core for use
+                mk_lib_compression::mk_decompress_zip(&format!("/mediakraken/emulation/cores/{}", core_name),
+                                                      true,
+                                                      false,
+                                                      "/mediakraken/emulation/cores/");
+            }
         }
     }
 
