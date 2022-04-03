@@ -1,3 +1,4 @@
+use sqlx::{FromRow, Row};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Uuid, types::Json};
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
@@ -15,7 +16,7 @@ pub async fn mk_lib_database_sync_delete(pool: &sqlx::PgPool,
 }
 
 pub async fn mk_lib_database_sync_process_update(pool: &sqlx::PgPool,
-                                                 sync_guid: UUid,
+                                                 sync_guid: Uuid,
                                                  sync_percent: f32)
                                                  -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
@@ -42,7 +43,7 @@ pub async fn mk_lib_database_sync_insert(pool: &sqlx::PgPool,
                                          sync_path_to: String,
                                          sync_json: serde_json::Value)
                                          -> Result<Uuid, sqlx::Error> {
-    new_guid = Uuid::new_v4();
+    let new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_sync (mm_sync_guid, mm_sync_path, \
         mm_sync_path_to, mm_sync_options_json) \
@@ -62,7 +63,7 @@ pub struct DBSyncList {
     mm_sync_guid: uuid::Uuid,
     mm_sync_path: String,
     mm_sync_path_to: String,
-    mm_sync_options_json: Json,
+    mm_sync_options_json: serde_json::Value,
 }
 
 pub async fn mk_lib_database_sync_list(pool: &sqlx::PgPool,
