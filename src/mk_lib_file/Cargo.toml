@@ -5,6 +5,7 @@ edition = "2021"
 
 [profile.release]
 panic = 'abort'
+strip = "symbols"
 
 [dependencies]
 walkdir = "2.3.2"
