@@ -21,9 +21,9 @@ class CommonMetadataMusicbrainz:
     """
 
     def __init__(self, option_config_json):
-        # If you plan to submit data, authenticate
-        # musicbrainzngs.auth(option_config_json.get('MediaBrainz','User').strip(),
-        # option_config_json.get('MediaBrainz','Password').strip())
+        // If you plan to submit data, authenticate
+        // musicbrainzngs.auth(option_config_json.get('MediaBrainz','User').strip(),
+        // option_config_json.get('MediaBrainz','Password').strip())
         musicbrainzngs.set_useragent("MediaKraken_Server", common_version.APP_VERSION,
                                      "spootdev@gmail.com "
                                      "https://github.com/MediaKraken/MediaKraken_Deployment")
@@ -50,10 +50,10 @@ class CommonMetadataMusicbrainz:
                                                                              'caller':
                                                                                  inspect.stack()[1][
                                                                                      3]})
-        # "artist-credit-phrase" is a flat string of the credited artists
-        # joined with " + " or whatever is given by the server.
-        # You can also work with the "artist-credit" list manually.
-        # print "{}, by {}".format(rel['title'], rel["artist-credit-phrase"])
+        // "artist-credit-phrase" is a flat string of the credited artists
+        // joined with " + " or whatever is given by the server.
+        // You can also work with the "artist-credit" list manually.
+        // print "{}, by {}".format(rel['title'], rel["artist-credit-phrase"])
         if 'date' in rel:
             pass
         common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text={
@@ -173,7 +173,7 @@ async def music_fetch_save_musicbrainz(db_connection, tmdb_id, metadata_uuid):
     // 504	Your request to the backend server timed out. Try again.
     if result_json is None or result_json.status_code == 504:
         time.sleep(60)
-        # redo fetch due to 504
+        // redo fetch due to 504
         movie_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid)
     else if result_json.status_code == 200:
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',

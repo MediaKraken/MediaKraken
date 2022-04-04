@@ -25,6 +25,9 @@ mod mk_lib_network;
 #[path = "identification.rs"]
 mod mkmetadata_identification;
 
+#[path = "metadata/provider/tmdb.rs"]
+mod provider_tmdb;
+
 #[derive(Serialize, Deserialize)]
 struct MediaTitleYear {
     title: String,
@@ -43,6 +46,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
     mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
                                                            false).await;
+
+    // pull options/api keys and set structs to contain the data
+    let option_json: Value = mk_lib_database_option_status::mk_lib_database_option_read(&pool).await.unwrap();
+    provider_tmdb::TMDBAPI.tmdb_api_key = option_config_json["API"]["themoviedb"];
 
     // setup last used id's per thread
     let mut metadata_last_uuid: Uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000")?;

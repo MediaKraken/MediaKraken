@@ -19,7 +19,7 @@ class CommonMetadataTheSubDB:
                                         headers=self.headers,
                                         timeout=3.05)
         if response.status_code == 404:
-            # no subtitle found
+            // no subtitle found
             return []
         subtitles = []
         for lang in response.text.splitlines()[0].split(','):
