@@ -34,7 +34,7 @@ async def metadata_game_lookup(db_connection, download_data):
     """
     Lookup game metadata
     """
-    metadata_uuid = None  # so not found checks verify later
+    metadata_uuid = None  // so not found checks verify later
     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                      message_text={
                                                                          'game filename':
@@ -55,7 +55,7 @@ async def metadata_game_lookup(db_connection, download_data):
         await db_connection.db_download_update(guid=download_data['mdq_id'],
                                                status='Search')
         // set provider last so it's not picked up by the wrong thread
-        await db_connection.db_download_update_provider('giantbomb', download_data['mdq_id'])
+        await db_connection.db_download_update_provider("giantbomb", download_data["mdq_id"])
         await db_connection.db_commit()
     return metadata_uuid
 

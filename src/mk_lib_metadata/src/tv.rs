@@ -80,7 +80,7 @@ async def metadata_tv_lookup(db_connection, download_data, file_name):
                 await db_connection.db_commit()
             else:
                 metadata_uuid = dl_meta
-        elif tvdb_id is not None:
+        else if tvdb_id is not None:
             dl_meta = await db_connection.db_download_que_exists(download_data['mdq_id'],
                                                                  common_global.DLMediaType.TV.value,
                                                                  'thetvdb', str(tvdb_id))
@@ -151,7 +151,7 @@ async def tv_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid):
         time.sleep(60)
         // redo fetch due to 504
         await tv_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid)
-    elif result_json.status_code == 200:
+    else if result_json.status_code == 200:
         series_id, result_json, image_json \
             = await common_global.api_instance.com_tmdb_meta_info_build(result_json.json())
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
@@ -173,11 +173,11 @@ async def tv_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid):
                                                                     result_json['credits'][
                                                                         'crew'])
     // 429	Your request count (#) is over the allowed limit of (40).
-    elif result_json.status_code == 429:
+    else if result_json.status_code == 429:
         time.sleep(20)
         // redo fetch due to 504
         await tv_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid)
-    elif result_json.status_code == 404:
+    else if result_json.status_code == 404:
         // TODO handle 404's better
         metadata_uuid = None
     else:  // is this is None....

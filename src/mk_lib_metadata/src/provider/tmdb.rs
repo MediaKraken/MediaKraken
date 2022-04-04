@@ -6,13 +6,13 @@
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;
 
+pub struct TMDBAPI {
+    tmdb_api_key: String,
+}
+
 /*
 
 class CommonMetadataTMDB:
-    """
-    Class for interfacing with TMDB
-    """
-
     def __init__(self, option_config_json):
         self.API_KEY = option_config_json['API']['themoviedb']
 
@@ -27,27 +27,27 @@ class CommonMetadataTMDB:
                                                '?api_key=%s&include_adult=1&query=%s'
                                                % (self.API_KEY, media_title.encode('utf-8')),
                                                timeout=3.05)
-        elif media_type == common_global.DLMediaType.TV.value:
+        else if media_type == common_global.DLMediaType.TV.value:
             async with httpx.AsyncClient() as client:
                 search_json = await client.get('https://api.themoviedb.org/3/search/tv'
                                                '?api_key=%s&include_adult=1&query=%s'
                                                % (self.API_KEY, media_title.encode('utf-8')),
                                                timeout=3.05)
-        elif media_type == common_global.DLMediaType.Person.value:
+        else if media_type == common_global.DLMediaType.Person.value:
             async with httpx.AsyncClient() as client:
                 search_json = await client.get('https://api.themoviedb.org/3/search/person'
                                                '?api_key=%s&include_adult=1&query=%s'
                                                % (self.API_KEY, media_title.encode('utf-8')),
                                                timeout=3.05)
-        else:  # invalid search type
+        else:  // invalid search type
             return None, None
-        # pull json since it's a coroutine above
+        // pull json since it's a coroutine above
         search_json = search_json.json()
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
                                                                              'search': str(
                                                                                  search_json)})
-        if search_json is not None and search_json['total_results'] > 0:
+        if search_json != None and search_json['total_results'] > 0:
             for res in search_json['results']:
                 await common_logging_elasticsearch_httpx.com_es_httpx_post_async(
                     message_type='info',
@@ -60,7 +60,7 @@ class CommonMetadataTMDB:
                                 '-',
                                 1)[
                                 0]})
-                if media_year is not None and type(media_year) is not list \
+                if media_year != None and type(media_year) is not list \
                         and (str(media_year) == res['release_date'].split('-', 1)[0]
                              or str(int(media_year) - 1) == res['release_date'].split('-', 1)[0]
                              or str(int(media_year) - 2) == res['release_date'].split('-', 1)[0]
@@ -155,7 +155,7 @@ class CommonMetadataTMDB:
         """
         # download info and set data to be ready for insert into database
         """
-        # create file path for poster
+        // create file path for poster
         image_file_path = await common_metadata.com_meta_image_file_path(result_json['name'],
                                                                          'person')
         if 'profile_path' in result_json and result_json['profile_path'] is not None:
@@ -165,7 +165,7 @@ class CommonMetadataTMDB:
                         await common_network_async.mk_network_fetch_from_url_async(
                             'https://image.tmdb.org/t/p/original' + result_json['profile_path'],
                             image_file_path + result_json['profile_path'])
-        # set local image json
+        // set local image json
         return image_file_path.replace(common_global.static_data_directory, '')
 
     async def com_tmdb_metadata_id_max(self):
@@ -220,7 +220,7 @@ class CommonMetadataTMDB:
         """
         # download info and set data to be ready for insert into database
         """
-        # create file path for poster
+        // create file path for poster
         if 'title' in result_json:  # movie
             image_file_path = await common_metadata.com_meta_image_file_path(result_json['title'],
                                                                              'poster')
@@ -244,7 +244,7 @@ class CommonMetadataTMDB:
                     # not found...so, none the image_file_path, which resets the poster_file_path
                     image_file_path = None
             poster_file_path = image_file_path
-        # create file path for backdrop
+        // create file path for backdrop
         if 'title' in result_json:  # movie
             image_file_path = await common_metadata.com_meta_image_file_path(result_json['title'],
                                                                              'backdrop')
@@ -264,10 +264,10 @@ class CommonMetadataTMDB:
                     # not found...so, none the image_file_path, which resets the backdrop_file_path
                     image_file_path = None
             backdrop_file_path = image_file_path
-        # set local image json
-        if poster_file_path is not None:
+        // set local image json
+        if poster_file_path != None:
             poster_file_path = poster_file_path.replace(common_global.static_data_directory, '')
-        if backdrop_file_path is not None:
+        if backdrop_file_path != None:
             backdrop_file_path = backdrop_file_path.replace(common_global.static_data_directory, '')
         image_json = (
             {'Backdrop': backdrop_file_path,
@@ -284,7 +284,7 @@ async def movie_search_tmdb(db_connection, file_name):
     if type(file_name['title']) == list:
         file_name['title'] = common_string.com_string_guessit_list(file_name['title'])
     metadata_uuid = None
-    # try to match ID ONLY
+    // try to match ID ONLY
     if 'year' in file_name:
         match_response, match_result = await common_global.api_instance.com_tmdb_search(
             file_name['title'], file_name['year'], id_only=True,
@@ -299,19 +299,19 @@ async def movie_search_tmdb(db_connection, file_name):
                                                                              match_response,
                                                                          'res': match_result})
     if match_response == 'idonly':
-        # check to see if metadata exists for TMDB id
+        // check to see if metadata exists for TMDB id
         metadata_uuid = await db_connection.db_meta_guid_by_tmdb(match_result)
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
                                                                              "meta movie db result": metadata_uuid})
-    elif match_response == 'info':
-        # store new metadata record and set uuid
+    else if match_response == 'info':
+        // store new metadata record and set uuid
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
                                                                              "meta movie movielookup info "
                                                                              "results": match_result})
-    elif match_response == 're':
-        # multiple results
+    else if match_response == 're':
+        // multiple results
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
                                                                              "movielookup multiple results":
@@ -327,25 +327,25 @@ async def movie_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid):
     """
     # fetch from tmdb
     """
-    # fetch and save json data via tmdb id
+    // fetch and save json data via tmdb id
     result_json = await common_global.api_instance.com_tmdb_metadata_by_id(tmdb_id)
     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                      message_text={
                                                                          "meta fetch result": result_json})
-    if result_json is not None:
+    if result_json != None:
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
                                                                              "meta movie code": result_json.status_code,
                                                                              "header": result_json.headers})
-        # 504	Your request to the backend server timed out. Try again.
+        // 504	Your request to the backend server timed out. Try again.
         if result_json.status_code == 504:
             await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                              message_text={
                                                                                  "meta movie tmdb 504": tmdb_id})
             await asyncio.sleep(60)
-            # redo fetch due to 504
+            // redo fetch due to 504
             await movie_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid)
-        elif result_json.status_code == 200:
+        else if result_json.status_code == 200:
             await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                              message_text={
                                                                                  "meta movie save fetch result":
@@ -355,14 +355,14 @@ async def movie_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid):
             await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                              message_text={
                                                                                  "series": series_id_json})
-            # set and insert the record if doesn't exist
+            // set and insert the record if doesn't exist
             if await db_connection.db_meta_movie_guid_count(metadata_uuid) == 0:
                 await db_connection.db_meta_insert_tmdb(metadata_uuid,
                                                         series_id_json,
                                                         result_json['title'],
                                                         result_json,
                                                         image_json)
-                # under guid check as don't need to insert them if already exist
+                // under guid check as don't need to insert them if already exist
                 if 'credits' in result_json:  # cast/crew doesn't exist on all media
                     if 'cast' in result_json['credits']:
                         await db_connection.db_meta_person_insert_cast_crew('themoviedb',
@@ -372,15 +372,15 @@ async def movie_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid):
                         await db_connection.db_meta_person_insert_cast_crew('themoviedb',
                                                                             result_json['credits'][
                                                                                 'crew'])
-        # 429	Your request count (#) is over the allowed limit of (40).
-        elif result_json.status_code == 429:
+        // 429	Your request count (#) is over the allowed limit of (40).
+        else if result_json.status_code == 429:
             await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                              message_text={
                                                                                  "meta movie tmdb 429": tmdb_id})
             await asyncio.sleep(30)
-            # redo fetch due to 429
+            // redo fetch due to 429
             await movie_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid)
-        elif result_json.status_code == 404:
+        else if result_json.status_code == 404:
             await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                              message_text={
                                                                                  "meta movie tmdb 404": tmdb_id})
@@ -468,7 +468,7 @@ async def metadata_fetch_tmdb_person(db_connection, provider_name, download_data
         if result_json is None or result_json.status_code == 502:
             await asyncio.sleep(60)
             await metadata_fetch_tmdb_person(db_connection, provider_name, download_data)
-        elif result_json.status_code == 200:
+        else if result_json.status_code == 200:
             await db_connection.db_meta_person_update(provider_name=provider_name,
                                                       provider_uuid=download_data['mdq_provider_id'],
                                                       person_bio=result_json.json(),

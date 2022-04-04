@@ -78,11 +78,11 @@ async def url_bp_user_movie_page(request, user, genre):
                 = row_data['mm_metadata_user_json']['UserStats'][user.id]['Rating']
             if rating_status == 'favorite':
                 rating_status = 'favorite-mark.png'
-            elif rating_status == 'like':
+            else if rating_status == 'like':
                 rating_status = 'thumbs-up.png'
-            elif rating_status == 'dislike':
+            else if rating_status == 'dislike':
                 rating_status = 'dislike-thumb.png'
-            elif rating_status == 'poo':
+            else if rating_status == 'poo':
                 rating_status = 'pile-of-dung.png'
         else:
             rating_status = None

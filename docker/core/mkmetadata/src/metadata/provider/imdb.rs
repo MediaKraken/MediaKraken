@@ -9,7 +9,7 @@ class CommonMetadataIMDB:
     """
 
     def __init__(self, cache=True, cache_dir=None):
-        # open connection to imdb
+        // open connection to imdb
         if cache is not None:
             if cache_dir is not None:
                 self.imdb = Imdb(cache=True, cache_dir=cache_dir)

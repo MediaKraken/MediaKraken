@@ -39,7 +39,7 @@ pub static API_LIMIT: phf::Map<&'static str, i16, i16> = phf_map! {
 "theaudiodb" => 9999, 1,  // no mention of limits 7/29/2016
 "thegamesdb" => 9999, 1,  // no mention of limits 7/29/2016
 //  "thelogodb" => 9999, 1,  // no mention of limits 7/29/2016
-"themoviedb" => 35, 10,  // We currently rate limit requests to 40
+"themoviedb" => 9999, 1,  // limit has been listed 4/3/2022
 // requests every 10 seconds. 12-05-2016)
 "thesportsdb" => 9999, 1,  // no mention of limits 7/29/2016
 //  "thetvdb" => 9999, 1,  // no mention of limits besides play nice 4-16-2016)

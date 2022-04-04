@@ -52,54 +52,54 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         message_type='error',
                         message_text={
                             'fail bif': json_message})
-        elif json_message['Type'] == 'HDHomeRun':
+        else if json_message['Type'] == 'HDHomeRun':
             pass
-        elif json_message['Type'] == 'FFMPEG':
+        else if json_message['Type'] == 'FFMPEG':
             if json_message['Subtype'] == 'Probe':
                 # scan media file via ffprobe
                 ffprobe_data = common_ffmpeg.com_ffmpeg_media_attr(json_message['Media Path'])
                 db_connection.db_media_ffmeg_update(json_message['Media UUID'],
                                                     ffprobe_data)
-            elif json_message['Subtype'] == 'Cast':
+            else if json_message['Subtype'] == 'Cast':
                 if json_message['Command'] == "Chapter Back":
                     pass
-                elif json_message['Command'] == "Chapter Forward":
+                else if json_message['Command'] == "Chapter Forward":
                     pass
-                elif json_message['Command'] == "Fast Forward":
+                else if json_message['Command'] == "Fast Forward":
                     pass
-                elif json_message['Command'] == "Mute":
+                else if json_message['Command'] == "Mute":
                     subprocess.Popen(
                         ('python3', '/mediakraken/stream2chromecast/stream2chromecast.py',
                          '-devicename', json_message['Device'], '-mute'),
                         stdout=subprocess.PIPE, shell=False)
-                elif json_message['Command'] == "Pause":
+                else if json_message['Command'] == "Pause":
                     subprocess.Popen(
                         ('python3', '/mediakraken/stream2chromecast/stream2chromecast.py',
                          '-devicename', json_message['Device'], '-pause'),
                         stdout=subprocess.PIPE, shell=False)
-                elif json_message['Command'] == "Rewind":
+                else if json_message['Command'] == "Rewind":
                     pass
-                elif json_message['Command'] == 'Stop':
+                else if json_message['Command'] == 'Stop':
                     subprocess.Popen(
                         ('python3', '/mediakraken/stream2chromecast/stream2chromecast.py',
                          '-devicename', json_message['Device'], '-stop'),
                         stdout=subprocess.PIPE, shell=False)
-                elif json_message['Command'] == "Volume Down":
+                else if json_message['Command'] == "Volume Down":
                     subprocess.Popen(
                         ('python3', '/mediakraken/stream2chromecast/stream2chromecast.py',
                          '-devicename', json_message['Device'], '-voldown'),
                         stdout=subprocess.PIPE, shell=False)
-                elif json_message['Command'] == "Volume Set":
+                else if json_message['Command'] == "Volume Set":
                     subprocess.Popen(
                         ('python3', '/mediakraken/stream2chromecast/stream2chromecast.py',
                          '-devicename', json_message['Device'], '-setvol', json_message['Data']),
                         stdout=subprocess.PIPE, shell=False)
-                elif json_message['Command'] == "Volume Up":
+                else if json_message['Command'] == "Volume Up":
                     subprocess.Popen(
                         ('python3', '/mediakraken/stream2chromecast/stream2chromecast.py',
                          '-devicename', json_message['Device'], '-volup'),
                         stdout=subprocess.PIPE, shell=False)
-            elif json_message['Subtype'] == 'ChapterImage':
+            else if json_message['Subtype'] == 'ChapterImage':
                 ffprobe_data = json_message['Data']
                 # begin image generation
                 chapter_image_list = {}
@@ -153,7 +153,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 db_connection.db_update_media_json(json_message['Media UUID'],
                                                    {'ChapterImages': chapter_image_list})
 
-            elif json_message['Subtype'] == 'Sync':
+            else if json_message['Subtype'] == 'Sync':
                 ffmpeg_params = ['./bin/ffmpeg', '-i', db_connection.db_media_path_by_uuid(
                     row_data['mm_sync_options_json']['Media GUID'])[0]]
                 if row_data['mm_sync_options_json']['Options']['Size'] != "Clone":
@@ -193,7 +193,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         if line.find('Duration:') != -1:
                             media_duration = timedelta(
                                 float(line.split(': ', 1)[1].split(',', 1)[0]))
-                        elif line[0:5] == "frame":
+                        else if line[0:5] == "frame":
                             time_string = timedelta(float(line.split('=', 5)[5].split(' ', 1)[0]))
                             time_percent = time_string.total_seconds() \
                                            / media_duration.total_seconds()
@@ -207,7 +207,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 if row_data['mm_sync_options_json']['Type'] == 'Local File System':
                     # just go along merry way as ffmpeg shoulda output to mm_sync_path_to
                     pass
-                elif row_data['mm_sync_options_json']['Type'] == 'Remote Client':
+                else if row_data['mm_sync_options_json']['Type'] == 'Remote Client':
                     XFER_THREAD = common_xfer.FileSenderThread(
                         row_data['mm_sync_options_json']['TargetIP'],
                         row_data['mm_sync_options_json']['TargetPort'],

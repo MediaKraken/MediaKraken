@@ -128,7 +128,7 @@ async def url_bp_admin_library_edit(request):
                 // TODO these should be mounted under mkmount on docker host
                 # which will break docker swarm....when master moves
                 # # smb/cifs mounts
-                # elif request.form['library_path'][0:3] == "smb":
+                # else if request.form['library_path'][0:3] == "smb":
                 #     // TODO
                 #     smb_stuff = common_network_cifs.CommonCIFSShare()
                 #     smb_stuff.com_cifs_connect(
@@ -137,9 +137,9 @@ async def url_bp_admin_library_edit(request):
                 #         share_name, dir_path)
                 #     smb_stuff.com_cifs_close()
                 # # nfs mount
-                # elif request.form['library_path'][0:3] == "nfs":
+                # else if request.form['library_path'][0:3] == "nfs":
                 #     pass
-                elif not os.path.isdir(os.path.join('/mediakraken/mnt',
+                else if not os.path.isdir(os.path.join('/mediakraken/mnt',
                                                     request.form['library_path'])):
                     request['flash']("Invalid library path.", 'error')
                     return redirect(
@@ -161,10 +161,10 @@ async def url_bp_admin_library_edit(request):
                     return redirect(
                         request.app.url_for(
                             'name_blueprint_admin_library.url_bp_admin_library_edit'))
-            elif request.form['action_type'] == 'Browse...':  # popup browse form
+            else if request.form['action_type'] == 'Browse...':  # popup browse form
                 pass
             # popup browse form for synology
-            elif request.form['action_type'] == 'Synology':
+            else if request.form['action_type'] == 'Synology':
                 pass
         else:
             flash_errors(form)

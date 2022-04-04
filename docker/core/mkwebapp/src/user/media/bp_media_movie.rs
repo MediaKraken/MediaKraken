@@ -50,16 +50,16 @@ async def url_bp_user_movie_detail(request, user, guid):
             return redirect(
                 request.app.url_for('name_blueprint_user_movie.url_bp_user_movie_detail',
                                     guid=guid))
-        elif request.form['status'] == 'Unwatched':
+        else if request.form['status'] == 'Unwatched':
             await request.app.db_functions.db_meta_movie_status_update(guid, user.id, True,
                                                                        db_connection=db_connection)
             return redirect(
                 request.app.url_for('name_blueprint_user_movie.url_bp_user_movie_detail',
                                     guid=guid))
-        elif request.form['status'] == 'Sync':
+        else if request.form['status'] == 'Sync':
             return redirect(
                 request.app.url_for('name_blueprint_user_sync.url_bp_user_sync_edit', guid=guid))
-        elif request.form['status'] == 'Cast':
+        else if request.form['status'] == 'Cast':
             // TODO submit cast comment via rabbitmq
             # grab the guid from the comboindex
             media_guid_index = request.form["Video_Track"]
@@ -194,7 +194,7 @@ async def url_bp_user_movie_detail(request, user, guid):
                             except KeyError:
                                 stream_codec = 'NA'
                         audio_streams.append((stream_codec, stream_language, stream_title))
-                    elif stream_info['codec_type'] == 'subtitle':
+                    else if stream_info['codec_type'] == 'subtitle':
                         try:
                             subtitle_streams.append(
                                 common_internationalization.com_inter_country_name(
@@ -222,7 +222,7 @@ async def url_bp_user_movie_detail(request, user, guid):
                 db_connection=db_connection):
             if device_item['mm_device_type'] == 'Chromecast':
                 playback_devices.append(device_item['mm_device_json']['Name'])
-            elif device_item['mm_device_type'] == 'Roku':
+            else if device_item['mm_device_type'] == 'Roku':
                 playback_devices.append(device_item)
 
         await request.app.db_pool.release(db_connection)

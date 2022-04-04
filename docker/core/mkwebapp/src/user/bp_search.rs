@@ -42,16 +42,16 @@ async def url_bp_user_search_media(request):
                 image_search = True
                 publication_search = True
                 game_search = True
-            elif request.form['search_media_type'] == 'video':
+            else if request.form['search_media_type'] == 'video':
                 movie_search = True
                 tvshow_search = True
-            elif request.form['search_media_type'] == 'audio':
+            else if request.form['search_media_type'] == 'audio':
                 album_search = True
-            elif request.form['search_media_type'] == 'image':
+            else if request.form['search_media_type'] == 'image':
                 image_search = True
-            elif request.form['search_media_type'] == 'publication':
+            else if request.form['search_media_type'] == 'publication':
                 publication_search = True
-            elif request.form['search_media_type'] == 'game':
+            else if request.form['search_media_type'] == 'game':
                 game_search = True
             db_connection = await request.app.db_pool.acquire()
             json_data = await request.app.db_functions.db_metadata_search(
@@ -83,7 +83,7 @@ async def url_bp_user_search_media(request):
         if 'Game' in json_data:
             for search_item in json_data['Game']:
                 game.append(search_item)
-    elif request.form['action_type'] == 'Search Metadata Providers':
+    else if request.form['action_type'] == 'Search Metadata Providers':
         pass
     // TODO
     # search_primary_language
@@ -117,53 +117,53 @@ async def url_bp_user_search_nav_media(request):
     request.ctx.session['search_text'] = request.form.get('nav_search').strip()
     if request.ctx.session['search_page'] == 'media_3d':
         return redirect(request.app.url_for('name_blueprint_user_media_3d.url_bp_user_media_3d'))
-    elif request.ctx.session['search_page'] == 'media_album':
+    else if request.ctx.session['search_page'] == 'media_album':
         return redirect(request.app.url_for('name_blueprint_user_music.url_bp_user_album_list'))
-    elif request.ctx.session['search_page'] == 'media_games':
+    else if request.ctx.session['search_page'] == 'media_games':
         return redirect(request.app.url_for('name_blueprint_user_game.url_bp_user_game'))
-    elif request.ctx.session['search_page'] == 'media_movie':
+    else if request.ctx.session['search_page'] == 'media_movie':
         return redirect(
             request.app.url_for('name_blueprint_user_media_genre.url_bp_user_media_genre',
                                 genre='All'))
-    elif request.ctx.session['search_page'] == 'media_music_video':
+    else if request.ctx.session['search_page'] == 'media_music_video':
         return redirect(
             request.app.url_for('name_blueprint_user_music_video.url_bp_user_music_video_list'))
-    elif request.ctx.session['search_page'] == 'media_periodicals':
+    else if request.ctx.session['search_page'] == 'media_periodicals':
         return redirect(
             request.app.url_for('name_blueprint_user_periodical.url_bp_user_periodical_list'))
-    elif request.ctx.session['search_page'] == 'media_sports':
+    else if request.ctx.session['search_page'] == 'media_sports':
         return redirect(request.app.url_for('name_blueprint_user_sports.url_bp_user_sports'))
-    elif request.ctx.session['search_page'] == 'media_tv':
+    else if request.ctx.session['search_page'] == 'media_tv':
         return redirect(request.app.url_for('name_blueprint_user_tv.url_bp_user_tv'))
     # begin metadata section
-    elif request.ctx.session['search_page'] == 'meta_album':
+    else if request.ctx.session['search_page'] == 'meta_album':
         return redirect(request.app.url_for(
             'name_blueprint_user_metadata_music.url_bp_user_metadata_music_album_list'))
-    elif request.ctx.session['search_page'] == 'meta_game':
+    else if request.ctx.session['search_page'] == 'meta_game':
         return redirect(
             request.app.url_for('name_blueprint_user_metadata_game.url_bp_user_metadata_game'))
-    elif request.ctx.session['search_page'] == 'meta_game_system':
+    else if request.ctx.session['search_page'] == 'meta_game_system':
         return redirect(request.app.url_for(
             'name_blueprint_user_metadata_game_system.url_bp_user_metadata_game_system'))
-    elif request.ctx.session['search_page'] == 'meta_movie':
+    else if request.ctx.session['search_page'] == 'meta_movie':
         return redirect(request.app.url_for(
             'name_blueprint_user_metadata_movie.url_bp_user_metadata_movie_list'))
-    elif request.ctx.session['search_page'] == 'meta_movie_collection':
+    else if request.ctx.session['search_page'] == 'meta_movie_collection':
         return redirect(request.app.url_for(
             'name_blueprint_user_media_collection.url_bp_user_metadata_movie_collection'))
-    elif request.ctx.session['search_page'] == 'meta_music_video':
+    else if request.ctx.session['search_page'] == 'meta_music_video':
         return redirect(request.app.url_for(
             'name_blueprint_user_metadata_music_video.url_bp_user_metadata_music_video'))
-    elif request.ctx.session['search_page'] == 'meta_people':
+    else if request.ctx.session['search_page'] == 'meta_people':
         return redirect(request.app.url_for(
             'name_blueprint_user_metadata_people.url_bp_user_metadata_person_list'))
-    elif request.ctx.session['search_page'] == 'meta_periodical':
+    else if request.ctx.session['search_page'] == 'meta_periodical':
         return redirect(request.app.url_for(
             'name_blueprint_user_metadata_periodical.url_bp_user_metadata_periodical'))
-    elif request.ctx.session['search_page'] == 'meta_sports':
+    else if request.ctx.session['search_page'] == 'meta_sports':
         return redirect(request.app.url_for(
             'name_blueprint_user_metadata_sports.url_bp_user_metadata_sports_list'))
-    elif request.ctx.session['search_page'] == 'meta_tv':
+    else if request.ctx.session['search_page'] == 'meta_tv':
         return redirect(
             request.app.url_for('name_blueprint_user_metadata_tv.url_bp_user_metadata_tvshow_list'))
 

@@ -58,20 +58,20 @@ def db_read_remote_media(self, media_guid=None):
 #                metadata_guid = db_meta_guid_by_imdb(row_data[3]['imdb'])
 #            if metadata_guid is None and 'thetvdb' in row_data[3]:
 #                metadata_guid = db_meta_guid_by_tvdb(row_data[3]['thetvdb'])
-#        elif row_data[1] == 'TV Show':
+#        else if row_data[1] == 'TV Show':
 #            if 'imdb' in row_data[3]
 #                metadata_guid = db_metaTV_guid_by_imdb(row_data[3]['imdb'])
 #            if metadata_guid is None and 'thetvdb' in row_data[3]:
 #                metadata_guid = db_metatv_guid_by_tvdb(row_data[3]['thetvdb'])
 #            if metadata_guid is None and 'tvmaze' in row_data[3]:
 #                metadata_guid = db_metaTV_guid_by_tvmaze(row_data[3]['tvmaze'])
-#        elif row_data[1] == 'Sports':
+#        else if row_data[1] == 'Sports':
 #            pass
-#        elif row_data[1] == 'Music':
+#        else if row_data[1] == 'Music':
 #            pass
-#        elif row_data[1] == 'Music Video':
+#        else if row_data[1] == 'Music Video':
 #            pass
-#        elif row_data[1] == 'Book':
+#        else if row_data[1] == 'Book':
 #            pass
 #        else:
 #            common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='error', message_text={'stuff':'Link bad data type: %s', row_data[1])

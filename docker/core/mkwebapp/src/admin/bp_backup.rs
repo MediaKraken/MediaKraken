@@ -22,7 +22,7 @@ async def url_bp_admin_backup(request):
             print(request.form['backup'], flush=True)
             if request.form['backup'] == ['Update Backup']:
                 pass
-            elif request.form['backup'] == ['Submit Backup']:
+            else if request.form['backup'] == ['Submit Backup']:
                 print('startbackup', flush=True)
                 common_database.com_database_backup()
                 request['flash']("Postgresql Database Backup Task Submitted.", "success")

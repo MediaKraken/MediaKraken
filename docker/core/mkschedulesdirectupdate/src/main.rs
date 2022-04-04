@@ -98,7 +98,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 // if len(station_fetch) > 5000:
 //     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='critical', message_text=
 //                                             {'stuff': 'Too many channels!!!!  Exiting...'})
-// elif len(station_fetch) > 0:
+// else if len(station_fetch) > 0:
 //     schedule_json = sd.com_schedules_direct_schedules_by_stationid(
 //         json.dumps(station_fetch))
 //     # for each station in schedules results

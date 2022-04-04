@@ -62,7 +62,7 @@ pub async fn metadata_movie_lookup(pool: &sqlx::PgPool, dl_row, guessit_data) {
                 db_connection.db_download_update(guid = dl_row.get("mdq_id"),
                                                  status = "Fetch",
                                                  provider_guid = provider_id);
-                // set provider last so it"s not picked up by the wrong thread too early
+                // set provider last so it's not picked up by the wrong thread too early
                 db_connection.db_download_update_provider("themoviedb",
                                                           dl_row.get("mdq_id"));
                 db_connection.db_commit();

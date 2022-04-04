@@ -745,7 +745,7 @@ def db_read_media_sports_list_by_uuid(self, media_guid):
                                                                              'stuff': 'audio'})
                     audio_streams.append((stream_codec + stream_language
                                           + stream_title)[:-3])
-                elif stream_info['codec_type'] == 'subtitle':
+                else if stream_info['codec_type'] == 'subtitle':
                     subtitle_streams.append(stream_language)
                     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
                                                                          message_text={

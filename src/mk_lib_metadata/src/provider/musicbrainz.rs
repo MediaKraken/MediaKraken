@@ -137,7 +137,7 @@ async def music_search_musicbrainz(db_connection, ffmpeg_data_json):
                                                                              inspect.stack()[1][
                                                                                  3]})
     metadata_uuid = None
-    # look at musicbrainz server
+    // look at musicbrainz server
     music_data = await common_global.api_instance.com_mediabrainz_get_recordings(
         ffmpeg_data_json['format']['tags']['ARTIST'],
         ffmpeg_data_json['format']['tags']['ALBUM'],
@@ -163,31 +163,31 @@ async def music_fetch_save_musicbrainz(db_connection, tmdb_id, metadata_uuid):
                                                                          'caller':
                                                                              inspect.stack()[1][
                                                                                  3]})
-    # fetch and save json data via tmdb id
+    // fetch and save json data via tmdb id
     result_json = TMDB_CONNECTION.com_tmdb_metadata_by_id(tmdb_id)
     if result_json is not None:
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
                                                                              "meta movie code": result_json.status_code,
                                                                              "header": result_json.headers})
-    # 504	Your request to the backend server timed out. Try again.
+    // 504	Your request to the backend server timed out. Try again.
     if result_json is None or result_json.status_code == 504:
         time.sleep(60)
         # redo fetch due to 504
         movie_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid)
-    elif result_json.status_code == 200:
+    else if result_json.status_code == 200:
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
                                                                              "meta movie save fetch result":
                                                                                  result_json.json()})
         series_id_json, result_json, image_json \
             = TMDB_CONNECTION.com_tmdb_meta_info_build(result_json.json())
-        # set and insert the record
+        // set and insert the record
         meta_json = ({'Meta': {'themoviedb': {'Meta': result_json}}})
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
                                                                              "series": series_id_json})
-        # set and insert the record
+        // set and insert the record
         try:
             await db_connection.db_meta_insert_tmdb(metadata_uuid, series_id_json,
                                                     result_json['title'], meta_json,
@@ -201,16 +201,16 @@ async def music_fetch_save_musicbrainz(db_connection, tmdb_id, metadata_uuid):
                     await db_connection.db_meta_person_insert_cast_crew('themoviedb',
                                                                         result_json['credits'][
                                                                             'crew'])
-        # this except is to check duplicate keys for mm_metadata_pk
+        // this except is to check duplicate keys for mm_metadata_pk
         except psycopg2.IntegrityError:
             // TODO technically I could be missing cast/crew if the above doesn't finish after the insert
             pass
-    # 429	Your request count (#) is over the allowed limit of (40).
-    elif result_json.status_code == 429:
+    // 429	Your request count (#) is over the allowed limit of (40).
+    else if result_json.status_code == 429:
         time.sleep(10)
-        # redo fetch due to 504
+        // redo fetch due to 504
         await movie_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid)
-    elif result_json.status_code == 404:
+    else if result_json.status_code == 404:
         // TODO handle 404's better
         metadata_uuid = None
     else:  # is this is None....

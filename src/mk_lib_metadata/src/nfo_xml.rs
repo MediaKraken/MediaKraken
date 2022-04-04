@@ -8,7 +8,7 @@ async def nfo_file_tv(media_file_path):
     // check for NFO or XML as no need to do lookup if ID found in it
     // TODO should check for one dir back too I suppose
     nfo_file_check = media_file_path.rsplit('/', 1)[0] + 'tvinfo.nfo'
-    if os.path.isfile(nfo_file_check):  # check for nfo
+    if os.path.isfile(nfo_file_check):  // check for nfo
         try:
             nfo_data = xmltodict.parse(common_file.com_file_load_data(nfo_file_check, False))
         except xml.parsers.expat.ExpatError:
@@ -17,7 +17,7 @@ async def nfo_file_tv(media_file_path):
             pass
     else:
         nfo_file_check = media_file_path.rsplit('/', 1)[0] + 'tvshow.nfo'
-        if os.path.isfile(nfo_file_check):  # check for nfo
+        if os.path.isfile(nfo_file_check):  // check for nfo
             try:
                 nfo_data = xmltodict.parse(common_file.com_file_load_data(nfo_file_check, False))
             except xml.parsers.expat.ExpatError:
@@ -65,14 +65,14 @@ async def nfo_xml_id_lookup(nfo_data, xml_data):
                     pass
         else:  // movie.xml
             if imdb_id is None:
-                try:  # not all xmls's will have the imdb
+                try:  // not all xmls's will have the imdb
                     imdb_id = xml_data['Title']['IMDB']
                     if len(imdb_id) == 0:
                         imdb_id = None
                 except KeyError:
                     pass
             if tmdb_id is None:
-                try:  # not all xml's have the movie/tmdb
+                try:  // not all xml's have the movie/tmdb
                     tmdb_id = xml_data['Title']['TMDbId']
                     if len(tmdb_id) == 0:
                         tmdb_id = None

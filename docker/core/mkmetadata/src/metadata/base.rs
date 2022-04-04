@@ -182,14 +182,14 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
         await db_connection.db_download_update_provider(update_provider, download_data["mdq_id"])
         await db_connection.db_commit()
         return metadata_uuid  # no need to continue with checks
-    // if lookup halt set to ZZ so it doesn"t get picked up by metadata dl queue
+    // if lookup halt set to ZZ so it doesn't get picked up by metadata dl queue
     if lookup_halt == true:
         await db_connection.db_download_update_provider("ZZ", download_data["mdq_id"]);
         await db_connection.db_commit();
         return metadata_uuid  # no need to continue with checks
     // if set fetch, set provider id and status on dl record
     if set_fetch == true:
-        // first verify a download queue record doesn"t exist for this id
+        // first verify a download queue record doesn't exist for this id
         metadata_uuid = await db_connection.db_download_que_exists(download_data["mdq_id"],
                                                                    provider_name, str(match_result));
         if metadata_uuid == None:

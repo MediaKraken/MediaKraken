@@ -217,7 +217,7 @@ async def url_bp_user_metadata_tvshow_season_detail(request, guid, season):
         if 'genres' in data_metadata['mm_metadata_tvshow_json']['Meta']['tvmaze']:
             for ndx in data_metadata['mm_metadata_tvshow_json']['Meta']['tvmaze']['genres']:
                 data_genres_list += (ndx + ', ')
-    elif 'thetvdb' in data_metadata['mm_metadata_tvshow_json']['Meta']:
+    else if 'thetvdb' in data_metadata['mm_metadata_tvshow_json']['Meta']:
         if 'Runtime' in data_metadata['mm_metadata_tvshow_json']['Meta']['thetvdb']['Meta'][
             'Series']:
             data_runtime = \

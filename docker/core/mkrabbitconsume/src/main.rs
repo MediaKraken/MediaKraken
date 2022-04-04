@@ -79,12 +79,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 else:
                     subprocess.Popen(["/usr/sbin", json_message["JSON"]["program"]],
                                      stdout=subprocess.PIPE, shell=False)
-            elif json_message["Type"] == "Library Scan":
+            else if json_message["Type"] == "Library Scan":
                 # This is split out since can be done via admin website and cron jobs
                 // TODO launch a container to do this.....so, if it gets stuck the others still go
                 subprocess.Popen(["python3", "/mediakraken/subprogram_file_scan.py"],
                                  stdout=subprocess.PIPE, shell=False)
-            elif json_message["Type"] == "Playback":
+            else if json_message["Type"] == "Playback":
                 if json_message["Subtype"] == "Play":
                     # to address the 30 char name limit for container
                     name_container = (json_message["User"] + "_"
@@ -136,7 +136,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         docker_inst.com_docker_run_cast(hwaccel=hwaccel,
                                                         name_container=name_container,
                                                         container_command=container_command)
-                    elif json_message["Device"] == "HDHomerun":
+                    else if json_message["Device"] == "HDHomerun":
                         # stream from hdhomerun
                         container_command = "ffmpeg -i http://" + json_message["IP"] \
                                             + ":5004/auto/v" + json_message["Channel"] \
@@ -144,7 +144,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                 "Quality"] + "-vcodec copy" \
                                             + "./static/streams/" + \
                                             json_message["Channel"] + ".m3u8"
-                    elif json_message["Device"] == "HLS":
+                    else if json_message["Device"] == "HLS":
                         # stream to hls
                         // TODO take the video codec into account
                         container_command = "ffmpeg -i \"" + json_message["Input File"] \
@@ -154,9 +154,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                             + "-vf " + json_message["Subtitle Track"] \
                                             + " yadif=0:0:0 " \
                                             + json_message["Target UUID"]
-                    elif json_message["Device"] == "Roku":
+                    else if json_message["Device"] == "Roku":
                         pass
-                    elif json_message["Device"] == "Web":
+                    else if json_message["Device"] == "Web":
                         # stream to web
                         container_command = "ffmpeg -v fatal {ss_string}" \
                                             + " -i ".format(**locals()) \
@@ -188,7 +188,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                              message_text=
                                                                              {
                                                                                  "stuff": "after docker run"})
-                elif json_message["Subtype"] == "Stop":
+                else if json_message["Subtype"] == "Stop":
                     # this will force stop the container and then delete it
                     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type="info",
                                                                          message_text={
@@ -198,7 +198,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                          "User"]]})
                     docker_inst.com_docker_delete_container(
                         container_image_name=mk_containers[json_message["User"]])
-                elif json_message["Subtype"] == "Pause":
+                else if json_message["Subtype"] == "Pause":
                     if json_message["Device"] == "Cast":
                         pass
 
@@ -207,17 +207,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     # if json_message["Device Type"] == "Slave":
                     #     if json_message["Command"] == "Chapter Back":
                     #         pass
-                    #     elif json_message["Command"] == "Chapter Forward":
+                    #     else if json_message["Command"] == "Chapter Forward":
                     #         pass
-                    #     elif json_message["Command"] == "Fast Forward":
+                    #     else if json_message["Command"] == "Fast Forward":
                     #         pass
-                    #     elif json_message["Command"] == "Pause":
+                    #     else if json_message["Command"] == "Pause":
                     #         pass
-                    #     elif json_message["Command"] == "Play":
+                    #     else if json_message["Command"] == "Play":
                     #         pass
-                    #     elif json_message["Command"] == "Rewind":
+                    #     else if json_message["Command"] == "Rewind":
                     #         pass
-                    #     elif json_message["Command"] == "Stop":
+                    #     else if json_message["Command"] == "Stop":
                     #         os.killpg(self.proc_ffmpeg_stream.pid, signal.SIGTERM)
                      */
                     println!("({:>3}) Received [{}]", i, json_message);

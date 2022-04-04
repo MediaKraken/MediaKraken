@@ -37,13 +37,13 @@ async def metadata_sports_lookup(db_connection, download_data):
                                                                          message_text={
                                                                              "sports return": thesportsdb_data})
         // "valid" key returned in case of null response........or event none
-        if thesportsdb_data is not None:
+        if thesportsdb_data != None:
             thesportsdb_data = json.loads(thesportsdb_data)
-            if thesportsdb_data['event'] is not None:
+            if thesportsdb_data['event'] != None:
                 // TODO "find" the right event by name?  if multiples?
                 metadata_uuid = await db_connection.db_meta_sports_guid_by_thesportsdb(
                     thesportsdb_data['event'][0]['idEvent'])
-                if metadata_uuid is None:
+                if metadata_uuid == None:
                     image_json = {'Images': {'thesportsdb': {'Characters': {}, 'Banner': None,
                                                              'Poster': None, 'Backdrop': None,
                                                              "Redo": True}}}

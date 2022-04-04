@@ -16,7 +16,7 @@ class CommonMetadataANIdb:
         """
         Fetch the tarball of anime titles
         """
-        # check to see if local titles file is older than 24 hours
+        // check to see if local titles file is older than 24 hours
         if common_file.com_file_modification_timestamp('./cache/anidb_titles.gz') \
                 < (time.time() - 86400):
             await common_network_async.mk_network_fetch_from_url_async(
@@ -30,36 +30,27 @@ class CommonMetadataANIdb:
         Save anidb title data to database
         """
         file_handle = gzip.open(title_file, 'rb')
-        # file_handle = gzip.open(title_file, 'rt', encoding='utf-8') # python 3.3+
         anime_aid = None
         anime_title = None
         anime_title_ja = None
         for file_line in file_handle.readlines():
-            # common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text=
-            # {'stuff':'line: %s', file_line.decode('utf-8'))
             if file_line.decode('utf-8').find('<anime aid="') != -1:
                 anime_aid = file_line.decode(
                     'utf-8').split('"', 1)[1].rsplit('"', 1)[0]
-                # common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text=
-                # {'stuff':'aid: %s', anime_aid)
-            elif file_line.decode('utf-8').find('title xml:lang="ja"') != -1:
+            else if file_line.decode('utf-8').find('title xml:lang="ja"') != -1:
                 anime_title_ja = file_line.decode(
                     'utf-8').split('>', 1)[1].rsplit('<', 1)[0]
-                # common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text=
-                # {'stuff':'title: %s', anime_title_ja)
-            elif file_line.decode('utf-8').find('title xml:lang="en"') != -1:
+            else if file_line.decode('utf-8').find('title xml:lang="en"') != -1:
                 anime_title = file_line.decode(
                     'utf-8').split('>', 1)[1].rsplit('<', 1)[0]
-                # common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text=
-                # {'stuff':'title: %s', anime_title)
-            elif file_line.decode('utf-8').find('</anime>') != -1:
+            else if file_line.decode('utf-8').find('</anime>') != -1:
                 if self.db_connection.db_meta_anime_meta_by_id(anime_aid) is None:
                     if anime_title is None:
                         anime_title = anime_title_ja
                     self.db_connection.db_meta_anime_title_insert(
                         {'anidb': anime_aid}, anime_title,
                         None, None, None, None, None)
-                # reset each time to handle ja when this doesn't exist
+                // reset each time to handle ja when this doesn't exist
                 anime_title = None
         file_handle.close()
         common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
@@ -69,7 +60,7 @@ class CommonMetadataANIdb:
         """
         Find AID by title
         """
-        # check the local DB
+        // check the local DB
         local_db_result = self.db_connection.db_meta_anime_title_search(
             title_to_search)
         if local_db_result is None:

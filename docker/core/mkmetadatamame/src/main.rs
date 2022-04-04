@@ -142,7 +142,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         //                             db_connection.db_meta_game_insert(game_short_name_guid,
         //                                                               json_game["@name"],
         //                                                               json_game["@name"], json_game)
-        //             elif ext == ".hsi":
+        //             else if ext == ".hsi":
         // could be no games in list
         //                 if "hash" in json_data["hashfile"]:
         //                     if "@name" in json_data["hashfile"]["hash"]:
@@ -192,7 +192,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         //                 system_name = None
         //                 game_titles = line.split("=", 1)[1].split(",")
         // end of info block for game
-        //             elif line.find("$end") == 0:  // goes by position if found
+        //             else if line.find("$end") == 0:  // goes by position if found
         //                 add_to_desc = false
         //                 for game in game_titles:
         //                     game_data = db_connection.db_meta_game_by_name_and_system(game, system_name)[0]
@@ -208,7 +208,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         //                                                                                  "gi_game_info_json"]))
         //                 game_desc = ""
         // this line can be skipped and is basically the "start" of game info
-        //             elif line.find("$bio") == 0:  // goes by position if found
+        //             else if line.find("$bio") == 0:  // goes by position if found
         //                 line = history_file.readline()  // skip blank line
         //                 new_title = history_file.readline().strip()  // grab the "real" game name
         //                 add_to_desc = true
@@ -246,7 +246,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         //         if line.find("[") == 0:
         //             category = line.replace("[", "").replace("]", "").replace(" ", "").rstrip("\n").rstrip(
         //                 "\r")  # wipe out space to make the category table
-        //         elif len(line) > 1:
+        //         else if len(line) > 1:
         //             result_value = db_connection.db_meta_game_category_by_name(category)
         //             if result_value == None:
         //                 result_value = db_connection.db_meta_game_category_add(category)

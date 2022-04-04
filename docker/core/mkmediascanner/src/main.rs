@@ -297,7 +297,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                     json!({"worker dir done": media_path.to_str(),
                                                         "media class": media_class_type_uuid}),
                                                     LOGGING_INDEX_NAME).await;
-                // set to none so it doesn"t show up anymore in admin status page
+                // set to none so it doesn't show up anymore in admin status page
                 mk_lib_database_library::mk_lib_database_library_path_status_update(&sqlx_pool,
                                                                                     row_data.get("mm_media_dir_guid"),
                                                                                     json!({"Status": "File scan complete", "Pct": 100}));

@@ -48,11 +48,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         if json_message['Action'] == 'OnOff':
                             hardware_hue.com_hardware_hue_light_set(json_message['LightList'], 'on',
                                                                     json_message['Setting'])
-                        elif json_message['Action'] == 'Bright':
+                        else if json_message['Action'] == 'Bright':
                             hardware_hue.com_hardware_hue_light_set(json_message['LightList'],
                                                                     'bri',
                                                                     json_message['Setting'])
-            elif json_message['Type'] == 'Hardware Scan':
+            else if json_message['Type'] == 'Hardware Scan':
                 hardware_proc = subprocess.Popen('/mediakraken/main_hardware_discover.py',
                                                  stdout=subprocess.PIPE,
                                                  shell=False)

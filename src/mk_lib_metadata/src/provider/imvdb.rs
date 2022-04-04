@@ -22,8 +22,6 @@ class CommonMetadataIMVdb:
                              + "?include=sources,credits,bts,featured,popularity,countries",
                              headers=self.headers)
         try:
-            # common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info', message_text= {"imvdb Info Status":
-            #                                                      resp.status_code, 'json': resp.json()})
             return resp.json()
         except:
             return None
@@ -37,8 +35,6 @@ class CommonMetadataIMVdb:
                                 + song_title.replace(' ', '+')),
                              headers=self.headers)
         try:
-            # common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info', message_text= {"imvdb Video Status":
-            #                                                      resp.status_code, 'json': resp.json()})
             return resp.json()
         except:
             return None
@@ -61,7 +57,7 @@ async def movie_fetch_save_imvdb(db_connection, imvdb_id, metadata_uuid):
     """
     # fetch from imvdb
     """
-    # fetch and save json data via tmdb id
+    // fetch and save json data via tmdb id
     result_json = await common_global.api_instance.com_imvdb_video_info(imvdb_id)
     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                      message_text={
@@ -71,18 +67,18 @@ async def movie_fetch_save_imvdb(db_connection, imvdb_id, metadata_uuid):
                                                                          message_text={
                                                                              "meta imvdb save fetch result":
                                                                                  result_json.json()})
-        # set and insert the record
+        // set and insert the record
         await db_connection.db_meta_music_video_add(metadata_uuid,
                                                     {'imvdb': str(result_json['id'])},
                                                     result_json['artists'][0]['slug'],
                                                     result_json['song_slug'],
                                                     result_json,
                                                     None)
-    elif result_json.status_code == 502:
+    else if result_json.status_code == 502:
         time.sleep(300)
         # redo fetch due to 502
         await movie_fetch_save_imvdb(db_connection, imvdb_id, metadata_uuid)
-    elif result_json.status_code == 404:
+    else if result_json.status_code == 404:
         // TODO handle 404's better
         metadata_uuid = None
     else:  # is this is None....

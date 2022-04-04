@@ -337,7 +337,7 @@ def db_meta_tvshow_images_to_update(self, image_type):
         self.db_cursor.execute("select mm_metadata_tvshow_json->'Meta'->'tvmaze','\
             'mm_metadata_tvshow_guid from mm_metadata_tvshow'\
             ' where mm_metadata_tvshow_localimage_json->'Images'->'tvmaze'->'Redo' = 'true'")
-    elif image_type == 'thetvdb':
+    else if image_type == 'thetvdb':
         self.db_cursor.execute("select mm_metadata_tvshow_json->'Meta'->'thetvdb','\
             'mm_metadata_tvshow_guid from mm_metadata_tvshow'\
             ' where mm_metadata_tvshow_localimage_json->'Images'->'thetvdb'->'Redo' = 'true'")

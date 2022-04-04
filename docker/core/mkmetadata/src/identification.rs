@@ -159,7 +159,7 @@ async def metadata_identification(&sqlx_pool, dl_row, guessit_data):
     Determine which provider to start lookup via class text
     """
     # else if class_text == "TV Extras":
-    #     // include end slash so media doesn"t get chopped up
+    #     // include end slash so media doesn't get chopped up
     #     metadata_uuid = await &sqlx_pool.db_read_media_path_like(os.path.abspath(
     #         download_que_json["Path"].replace("/extras/", "/").rsplit("/", 1)[0]))
     #     if metadata_uuid is not None:

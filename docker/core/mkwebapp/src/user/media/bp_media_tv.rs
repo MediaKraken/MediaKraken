@@ -85,7 +85,7 @@ async def url_bp_user_tv_show_detail(request, user, guid):
                                                                     db_connection=db_connection)
             return redirect(
                 request.app.url_for('name_blueprint_user_tv.url_bp_user_tv_show_detail', guid=guid))
-        elif request.form['status'] == 'Unwatched':
+        else if request.form['status'] == 'Unwatched':
             await request.app.db_functions.db_meta_tv_status_update(guid, user.id, True,
                                                                     db_connection=db_connection)
             return redirect(
@@ -120,7 +120,7 @@ async def url_bp_user_tv_show_detail(request, user, guid):
             if 'genres' in json_metadata['Meta']['tvmaze']:
                 for ndx in json_metadata['Meta']['tvmaze']['genres']:
                     data_genres_list += (ndx + ', ')
-        elif 'thetvdb' in json_metadata['Meta']:
+        else if 'thetvdb' in json_metadata['Meta']:
             if 'Runtime' in json_metadata['Meta']['thetvdb']['Meta']['Series']:
                 data_runtime = json_metadata['Meta']['thetvdb']['Meta']['Series']['Runtime']
             else:
@@ -238,7 +238,7 @@ async def url_bp_user_tv_show_season_detail_page(request, guid, season):
         if 'genres' in json_metadata['Meta']['tvmaze']:
             for ndx in json_metadata['Meta']['tvmaze']['genres']:
                 data_genres_list += (ndx + ', ')
-    elif 'thetvdb' in json_metadata['Meta']:
+    else if 'thetvdb' in json_metadata['Meta']:
         if 'Runtime' in json_metadata['Meta']['thetvdb']['Meta']['Series']:
             data_runtime = json_metadata['Meta']['thetvdb']['Meta']['Series']['Runtime']
         else:

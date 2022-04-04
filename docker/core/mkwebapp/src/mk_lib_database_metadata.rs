@@ -260,10 +260,10 @@ def db_meta_update_media_id_from_scudlee(self, media_tvid, media_imdbid,
     if media_tvid is not None:
         media_type = 'thetvdb'
         media_id = media_tvid
-    elif media_imdbid is not None:
+    else if media_imdbid is not None:
         media_type = 'imdb'
         media_id = media_imdbid
-    elif media_aniid is not None:
+    else if media_aniid is not None:
         media_type = 'anidb'
         media_id = media_aniid
     # lookup id from metadata json or collections
