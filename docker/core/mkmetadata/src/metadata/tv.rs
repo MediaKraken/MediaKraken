@@ -38,21 +38,21 @@ async def metadata_tv_lookup(db_connection, download_data, file_name):
                                                                          'themoviedb': tmdb_id})
     // if same as last, return last id and save lookup
     // check these dupes as the nfo/xml files might not exist to pull the metadata id from
-    if imdb_id is not None and imdb_id == metadata_tv_lookup.metadata_last_imdb:
+    if imdb_id != None and imdb_id == metadata_tv_lookup.metadata_last_imdb:
         // don't need to set last......since they are equal
         return metadata_tv_lookup.metadata_last_id
-    if tvdb_id is not None and tvdb_id == metadata_tv_lookup.metadata_last_tvdb:
+    if tvdb_id != None and tvdb_id == metadata_tv_lookup.metadata_last_tvdb:
         // don't need to set last......since they are equal
         return metadata_tv_lookup.metadata_last_id
-    if tmdb_id is not None and tmdb_id == metadata_tv_lookup.metadata_last_tmdb:
+    if tmdb_id != None and tmdb_id == metadata_tv_lookup.metadata_last_tmdb:
         // don't need to set last......since they are equal
         return metadata_tv_lookup.metadata_last_id
     // if ids from nfo/xml, query local db to see if exist
-    if tmdb_id is not None:
+    if tmdb_id != None:
         metadata_uuid = await db_connection.db_metatv_guid_by_tmdb(tmdb_id)
-    if tvdb_id is not None and metadata_uuid is None:
+    if tvdb_id != None and metadata_uuid is None:
         metadata_uuid = await db_connection.db_metatv_guid_by_tvdb(tvdb_id)
-    if imdb_id is not None and metadata_uuid is None:
+    if imdb_id != None and metadata_uuid is None:
         metadata_uuid = await db_connection.db_metatv_guid_by_imdb(imdb_id)
     // if ids from nfo/xml on local db
     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
@@ -60,8 +60,8 @@ async def metadata_tv_lookup(db_connection, download_data, file_name):
                                                                          "meta tv metadata_uuid A": metadata_uuid})
     if metadata_uuid is None:
         // id is known from nfo/xml but not in db yet so fetch data
-        if tmdb_id is not None or imdb_id is not None:
-            if tmdb_id is not None:
+        if tmdb_id != None or imdb_id != None:
+            if tmdb_id != None:
                 provider_id = str(tmdb_id)
             else:
                 provider_id = imdb_id
@@ -80,7 +80,7 @@ async def metadata_tv_lookup(db_connection, download_data, file_name):
                 await db_connection.db_commit()
             else:
                 metadata_uuid = dl_meta
-        else if tvdb_id is not None:
+        else if tvdb_id != None:
             dl_meta = await db_connection.db_download_que_exists(download_data['mdq_id'],
                                                                  common_global.DLMediaType.TV.value,
                                                                  'thetvdb', str(tvdb_id))

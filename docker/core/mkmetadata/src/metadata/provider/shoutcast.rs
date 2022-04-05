@@ -14,11 +14,11 @@ class CommonMetadataShoutcast:
 
     async def com_shoutcast_generate_options(self, rec_limit=None, bit_rate=None, media_type=None):
         options = ''
-        if rec_limit is not None:
+        if rec_limit != None:
             options += '&limit=%s' % rec_limit
-        if bit_rate is not None:
+        if bit_rate != None:
             options += '&br=%s' % bit_rate
-        if media_type is not None:
+        if media_type != None:
             # MP3 = audio/mpeg and AAC+ = audio/aacp
             if media_type.lower() == 'mp3':
                 media_type = 'audio/mpeg'

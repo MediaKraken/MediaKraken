@@ -64,7 +64,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // crestron device discover
 // # crestron_devices = common_hardware_crestron.com_hardware_crestron_discover()
-// # if crestron_devices is not None:
+// # if crestron_devices != None:
 // #     for crestron in crestron_devices:
 // #         common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text= {'crestron out': crestron})
 // #         media_devices.append({'Crestron': crestron})
@@ -144,7 +144,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
 // soco discover
 // soco_devices = common_hardware_soco.com_hardware_soco_discover()
-// if soco_devices is not None:
+// if soco_devices != None:
 //     for soco in soco_devices:
 //         common_logging_elasticsearch_httpx.com_es_httpx_post(
 //             message_type='info',

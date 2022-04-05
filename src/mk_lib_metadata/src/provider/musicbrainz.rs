@@ -31,7 +31,7 @@ class CommonMetadataMusicbrainz:
             musicbrainzngs.set_hostname('mkstack_mkmusicbrainz:5000')
         else:
             # If you are connecting to a development server
-            if option_config_json['Metadata']['MusicBrainz']['Host'] is not None:
+            if option_config_json['Metadata']['MusicBrainz']['Host'] != None:
                 if option_config_json['Metadata']['MusicBrainz']['Host'] != 'Docker':
                     musicbrainzngs.set_hostname(
                         option_config_json['Metadata']['MusicBrainz']['Host'] + ':'
@@ -74,7 +74,7 @@ class CommonMetadataMusicbrainz:
                                                                              'caller':
                                                                                  inspect.stack()[1][
                                                                                      3]})
-        if disc_id is not None:
+        if disc_id != None:
             result = musicbrainzngs.get_releases_by_discid(disc_id,
                                                            includes=["artists", "recordings"])
         else:
@@ -142,7 +142,7 @@ async def music_search_musicbrainz(db_connection, ffmpeg_data_json):
         ffmpeg_data_json['format']['tags']['ARTIST'],
         ffmpeg_data_json['format']['tags']['ALBUM'],
         ffmpeg_data_json['format']['tags']['TITLE'], return_limit=1)
-    if music_data is not None:
+    if music_data != None:
         if metadata_uuid is None:
             metadata_uuid = db_connection.db_meta_song_add(
                 ffmpeg_data_json['format']['tags']['TITLE'],
@@ -165,7 +165,7 @@ async def music_fetch_save_musicbrainz(db_connection, tmdb_id, metadata_uuid):
                                                                                  3]})
     // fetch and save json data via tmdb id
     result_json = TMDB_CONNECTION.com_tmdb_metadata_by_id(tmdb_id)
-    if result_json is not None:
+    if result_json != None:
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
                                                                              "meta movie code": result_json.status_code,

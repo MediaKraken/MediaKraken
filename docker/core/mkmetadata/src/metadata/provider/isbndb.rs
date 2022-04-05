@@ -71,7 +71,7 @@ async def metadata_periodicals_search_isbndb(db_connection, lookup_name):
     search isbndb
     """
     metadata_uuid = None
-    if common_global.api_instance is not None:
+    if common_global.api_instance != None:
         api_response = await common_global.api_instance.com_isbndb_books(lookup_name)
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={

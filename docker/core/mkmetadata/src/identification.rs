@@ -162,7 +162,7 @@ async def metadata_identification(&sqlx_pool, dl_row, guessit_data):
     #     // include end slash so media doesn't get chopped up
     #     metadata_uuid = await &sqlx_pool.db_read_media_path_like(os.path.abspath(
     #         download_que_json["Path"].replace("/extras/", "/").rsplit("/", 1)[0]))
-    #     if metadata_uuid is not None:
+    #     if metadata_uuid != None:
     #         &sqlx_pool.db_download_delete(download_que_id)
     #     else:
     #         metadata_uuid = await metadata_tv.metadata_tv_lookup(&pool,
@@ -178,7 +178,7 @@ async def metadata_identification(&sqlx_pool, dl_row, guessit_data):
     #             "/theme/", "/").replace("/backdrops/", "/")
     #             .rsplit("/", 1)[0]))
     #     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type="info", message_text= {"stuff": "tv theme ident 3"})
-    #     if metadata_uuid is not None:
+    #     if metadata_uuid != None:
     #         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type="info", message_text= {"stuff": "tv theme ident 4"})
     #         &sqlx_pool.db_download_delete(download_que_id)
     #     else:
@@ -196,7 +196,7 @@ async def metadata_identification(&sqlx_pool, dl_row, guessit_data):
     #     // include end slash so theme.mp3 doesn't get chopped up
     #     metadata_uuid = &sqlx_pool.db_read_media_path_like(os.path.abspath(
     #         download_que_json["Path"].replace("/trailers/", "/").rsplit("/", 1)[0]))
-    #     if metadata_uuid is not None:
+    #     if metadata_uuid != None:
     #         &sqlx_pool.db_download_delete(download_que_id)
     #     else:
     #         metadata_uuid = metadata_tv.metadata_tv_lookup(&pool,

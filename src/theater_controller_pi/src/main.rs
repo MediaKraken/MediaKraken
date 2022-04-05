@@ -12,22 +12,22 @@ use tokio::net::TcpStream;
 use tokio_rustls::{rustls::ClientConfig, webpki::DNSNameRef, TlsConnector};
 use crossbeam_channel::unbounded;
 
-/// Tokio Rustls client
+// Tokio Rustls client
 #[derive(FromArgs)]
 struct Options {
-    /// host
+    // host
     #[argh(positional)]
     host: String,
 
-    /// port
+    // port
     #[argh(option, short = 'p', default = "443")]
     port: u16,
 
-    /// domain
+    // domain
     #[argh(option, short = 'd')]
     domain: Option<String>,
 
-    /// cafile
+    // cafile
     #[argh(option, short = 'c')]
     cafile: Option<PathBuf>,
 }

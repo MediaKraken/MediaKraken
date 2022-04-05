@@ -233,7 +233,7 @@ async def db_meta_person_insert_cast_crew(self, meta_type, person_json, db_conne
         else:
             person_id = None
             person_name = None
-        if person_id is not None:
+        if person_id != None:
             // TODO upsert instead
             if await self.db_meta_person_id_count(person_id) is True:
                 await common_logging_elasticsearch_httpx.com_es_httpx_post_async(

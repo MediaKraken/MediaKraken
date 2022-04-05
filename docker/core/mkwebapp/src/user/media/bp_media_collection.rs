@@ -78,7 +78,7 @@ async def url_bp_user_metadata_movie_collection_detail(request, guid):
     json_imagedata = data_metadata['mm_metadata_collection_imagelocal_json']
     # poster image
     try:
-        if json_imagedata['Poster'] is not None:
+        if json_imagedata['Poster'] != None:
             data_poster_image = json_imagedata['Poster']
         else:
             data_poster_image = None
@@ -86,7 +86,7 @@ async def url_bp_user_metadata_movie_collection_detail(request, guid):
         data_poster_image = None
     # background image
     try:
-        if json_imagedata['Backdrop'] is not None:
+        if json_imagedata['Backdrop'] != None:
             data_background_image = json_imagedata['Backdrop']
         else:
             data_background_image = None

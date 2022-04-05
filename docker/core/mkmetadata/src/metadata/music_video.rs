@@ -51,13 +51,13 @@ async def metadata_music_video_lookup(db_connection, file_name):
         if metadata_uuid == []:
             metadata_uuid = None
         if metadata_uuid is None:
-            if IMVDB_CONNECTION is not None:
+            if IMVDB_CONNECTION != None:
                 imvdb_json = IMVDB_CONNECTION.com_imvdb_search_video(band_name, song_name)
                 await common_logging_elasticsearch_httpx.com_es_httpx_post_async(
                     message_type='info',
                     message_text={
                         "imvdb return": imvdb_json})
-                if imvdb_json is not None:
+                if imvdb_json != None:
                     # parse the results and insert/update
                     for video_data in imvdb_json['results']:
                         // the results are bit crazy....hence the breakup and insert

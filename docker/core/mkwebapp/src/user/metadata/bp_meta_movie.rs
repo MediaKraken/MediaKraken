@@ -56,7 +56,7 @@ async def url_bp_user_metadata_movie_detail(request, guid):
             += (data['mm_metadata_json']['production_companies'][ndx]['name'] + ', ')
     # poster image
     try:
-        if data['mm_metadata_localimage_json']['Poster'] is not None:
+        if data['mm_metadata_localimage_json']['Poster'] != None:
             data_poster_image = data['mm_metadata_localimage_json']['Poster']
         else:
             data_poster_image = None
@@ -64,7 +64,7 @@ async def url_bp_user_metadata_movie_detail(request, guid):
         data_poster_image = None
     # background image
     try:
-        if data['mm_metadata_localimage_json']['Backdrop'] is not None:
+        if data['mm_metadata_localimage_json']['Backdrop'] != None:
             data_background_image = data['mm_metadata_localimage_json']['Backdrop']
         else:
             data_background_image = None
@@ -105,7 +105,7 @@ async def url_bp_user_metadata_movie_list(request, user):
                                                                       request.ctx.session[
                                                                           'search_text'],
                                                                       db_connection):
-        if row_data['mm_metadata_user_json'] is not None:
+        if row_data['mm_metadata_user_json'] != None:
             user_json = row_data['mm_metadata_user_json']
         else:
             user_json = None
@@ -115,7 +115,7 @@ async def url_bp_user_metadata_movie_list(request, user):
         except (KeyError, TypeError):
             watched_status = False
         # set rating
-        if user_json is not None \
+        if user_json != None \
                 and 'UserStats' in user_json \
                 and str(user.id) in user_json['UserStats'] \
                 and 'Rating' in user_json['UserStats'][str(user.id)]:

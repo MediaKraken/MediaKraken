@@ -22,7 +22,7 @@ async def url_bp_user_internet_youtube(request):
     Display youtube page
     """
     youtube_videos = []
-    if request.ctx.session['search_text'] is not None:
+    if request.ctx.session['search_text'] != None:
         // TODO - ytpy search instead
         videos, channels, playlists = g.google_instance.com_google_youtube_search(
             request.ctx.session['search_text'])

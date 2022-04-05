@@ -30,7 +30,7 @@ def db_insert_remote_media(self, media_link_uuid, media_uuid, media_class_uuid,
 
 // TODO port query
 def db_read_remote_media(self, media_guid=None):
-    if media_guid is not None:
+    if media_guid != None:
         self.db_cursor.execute('select * from mm_media_remote where mmr_media_guid = $1',
                                (media_guid,))
         try:
@@ -76,7 +76,7 @@ def db_read_remote_media(self, media_guid=None):
 #        else:
 #            common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='error', message_text={'stuff':'Link bad data type: %s', row_data[1])
 #            return None
-#        if metadata_guid is not None:
+#        if metadata_guid != None:
 #            self.db_insert_remote_media(link_uuid, row_data[0], \
 # self.db_media_uuid_by_class(row_data[1]), metadata_guid[0], json.dumps(row_data[2]))
 

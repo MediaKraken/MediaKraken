@@ -102,7 +102,7 @@ async def db_user_login(self, user_name, user_password, db_connection=None):
                                     ' from mm_user where username = $1'
                                     ' and password = crypt($2, password)',
                                     user_name, user_password)
-    if result is not None:
+    if result != None:
         print(result, flush=True)
         if result['active'] is False:
             return 'inactive_account', None, None

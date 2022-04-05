@@ -122,7 +122,7 @@ async def url_bp_user_movie_detail(request, user, guid):
         # # grab reviews
         # review = []
         # review_json = await request.app.db_functions.db_review_list_by_tmdb_guid(json_metaid['themoviedb'], db_connection)
-        # if review_json is not None and len(review_json) > 0:
+        # if review_json != None and len(review_json) > 0:
         #     review_json = review_json[0]
         #     for review_data in review_json[1]['themoviedb']['results']:
         #         review.append(
@@ -173,7 +173,7 @@ async def url_bp_user_movie_detail(request, user, guid):
             # audio and sub streams
             audio_streams = []
             subtitle_streams = []
-            if video_version['mm_media_ffprobe_json'] is not None:
+            if video_version['mm_media_ffprobe_json'] != None:
                 for stream_info in video_version['mm_media_ffprobe_json']['streams']:
                     if stream_info['codec_type'] == 'audio':
                         try:

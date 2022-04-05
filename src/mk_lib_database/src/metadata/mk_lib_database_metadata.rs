@@ -137,7 +137,7 @@ def db_meta_tmdb_count(self, tmdb_id):
 
 // TODO port query
 def db_meta_movie_count(self, search_value=None):
-    if search_value is not None:
+    if search_value != None:
         self.db_cursor.execute('select count(*) from mm_metadata_movie '
                                ' where mm_metadata_name %% $1',
                                (search_value,))
@@ -151,7 +151,7 @@ def db_meta_movie_list(self, offset=0, records=None, search_value=None):
     """
     # return list of movies
     """
-    if search_value is not None:
+    if search_value != None:
         self.db_cursor.execute('select mm_metadata_guid,mm_metadata_name,'
                                'mm_metadata_json->'release_date' as mm_date,'
                                'mm_metadata_localimage_json->'Poster' as mm_poster,'
@@ -222,7 +222,7 @@ def db_find_metadata_guid(self, media_name, media_release_year):
     Lookup id by name/year
     """
     metadata_guid = None
-    if media_release_year is not None:
+    if media_release_year != None:
         # for year and -3/+3 year as well
         self.db_cursor.execute('select mm_metadata_guid from mm_metadata_movie'
                                ' where (LOWER(mm_metadata_name) = $1'
@@ -257,30 +257,30 @@ def db_meta_update_media_id_from_scudlee(self, media_tvid, media_imdbid,
     # update the mediaid in metadata
     """
     # do tvdb first due to datadump
-    if media_tvid is not None:
+    if media_tvid != None:
         media_type = 'thetvdb'
         media_id = media_tvid
-    else if media_imdbid is not None:
+    else if media_imdbid != None:
         media_type = 'imdb'
         media_id = media_imdbid
-    else if media_aniid is not None:
+    else if media_aniid != None:
         media_type = 'anidb'
         media_id = media_aniid
     # lookup id from metadata json or collections
     row_data = self.db_meta_fetch_media_id_json(media_id, False)
     # do the update if a record is found
-    if row_data is not None:
+    if row_data != None:
         # update json data
         common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
                                                              message_text={"id": media_tvid,
                                                                            'imdb': media_imdbid,
                                                                            'ani': media_aniid})
         json_data = json.loads(row_data['mm_metadata_media_id'])
-        if media_imdbid is not None:
+        if media_imdbid != None:
             json_data.update({'imdb': media_imdbid})
-        if media_tvid is not None:
+        if media_tvid != None:
             json_data.update({'thetvdb': media_tvid})
-        if media_aniid is not None:
+        if media_aniid != None:
             json_data.update({'anidb': media_aniid})
         self.db_cursor.execute('update mm_metadata_movie set mm_metadata_media_id = $1'
                                ' where mm_metadata_guid = $2',
@@ -288,18 +288,18 @@ def db_meta_update_media_id_from_scudlee(self, media_tvid, media_imdbid,
     # lookup id from series
     row_data = self.db_meta_fetch_series_media_id_json(media_type, media_id)
     # do the update if a record is found
-    if row_data is not None:
+    if row_data != None:
         # update json data
         common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
                                                              message_text={"id2": media_tvid,
                                                                            'imdb': media_imdbid,
                                                                            'anidb': media_aniid})
         json_data = json.loads(row_data['mm_metadata_media_tvshow_id'])
-        if media_imdbid is not None:
+        if media_imdbid != None:
             json_data.update({'imdb': media_imdbid})
-        if media_tvid is not None:
+        if media_tvid != None:
             json_data.update({'thetvdb': media_tvid})
-        if media_aniid is not None:
+        if media_aniid != None:
             json_data.update({'anidb': media_aniid})
         self.db_cursor.execute('update mm_metadata_tvshow set mm_metadata_media_tvshow_id = $1'
                                ' where mm_metadata_tvshow_guid = $2', (json.dumps(json_data),

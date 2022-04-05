@@ -62,7 +62,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // println!("tmdb{:?}", option_config_json["API"]["themoviedb"]);
     // println!("huh {:?}", format!("https://api.themoviedb.org/3/movie/changes?api_key={}",
     //                              option_config_json["API"]["themoviedb"]).replace("\"", ""));
-    // TODO this should go through the limiter
     // process movie changes
     let url_result = mk_lib_network::mk_data_from_url(
         format!("https://api.themoviedb.org/3/movie/changes?api_key={}",
@@ -108,8 +107,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         // }
     }
 
-    // // TODO this should go through the limiter
-    // // process tv changes
+
+    // process tv changes
     // let url_result = mk_lib_network::mk_download_file_from_url(
     //     format!("https://api.themoviedb.org/3/tv/changes?api_key={}",
     //             option_config_json["API"]["themoviedb"]).replace("\"", "")).await?;

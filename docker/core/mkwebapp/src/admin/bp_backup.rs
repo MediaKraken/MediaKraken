@@ -34,7 +34,7 @@ async def url_bp_admin_backup(request):
                                                        filter_text='dump', walk_dir=False,
                                                        skip_junk=False, file_size=True,
                                                        directory_only=False, file_modified=False)
-    if local_file_backups is not None:
+    if local_file_backups != None:
         for backup_local in local_file_backups:
             backup_files.append((backup_local[0], 'Local',
                                  common_string.com_string_bytes2human(backup_local[1])))

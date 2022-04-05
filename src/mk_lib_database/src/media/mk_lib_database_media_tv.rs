@@ -11,7 +11,7 @@ async def db_media_tv_list(self, genre_type=None, list_limit=None,
     """
     # grab tv data
     """
-    if search_value is not None:
+    if search_value != None:
         return await db_conn.fetch('select mm_metadata_tvshow_name,'
                                    ' mm_metadata_tvshow_guid,'
                                    ' count(*) as mm_count,'

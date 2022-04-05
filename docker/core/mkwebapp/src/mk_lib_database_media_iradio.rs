@@ -27,7 +27,7 @@ async def db_iradio_list(self, offset=0, records=None, active_station=True,
     """
     Iradio list
     """
-    if search_value is not None:
+    if search_value != None:
         return await db_conn.fetch('select mm_radio_guid,'
                                    ' mm_radio_name,'
                                    ' mm_radio_address'
@@ -73,7 +73,7 @@ async def db_iradio_list_count(self, active_station=True, search_value=None, db_
     """
     Iradio count
     """
-    if search_value is not None:
+    if search_value != None:
         return await db_conn.fetchval('select count(*) from mm_radio '
                                       'where mm_radio_active = $1'
                                       ' and mm_radio_name = $2',

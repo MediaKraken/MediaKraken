@@ -34,7 +34,7 @@ async def nfo_xml_id_lookup(nfo_data, xml_data):
     imdb_id = None
     tmdb_id = None
     // load both fields for more data in media_id_json on db
-    if nfo_data is not None:
+    if nfo_data != None:
         try:  // not all will have imdb
             imdb_id = nfo_data['movie']['imdbid']
             if len(imdb_id) == 0:
@@ -47,7 +47,7 @@ async def nfo_xml_id_lookup(nfo_data, xml_data):
                 tmdb_id = None
         except KeyError:
             pass
-    if xml_data is not None:
+    if xml_data != None:
         if 'movie' in xml_data:  # standard nfo/xml file
             if imdb_id is None:
                 try:  # not all xmls's will have the imdb
@@ -89,7 +89,7 @@ async def nfo_id_lookup_tv(nfo_data):
     tvdb_id = None
     tmdb_id = None
     // load both fields for more data in media_id_json on db
-    if nfo_data is not None:
+    if nfo_data != None:
         try:
             tvdb_id = nfo_data['episodedetails']['tvdbid']
             if len(tvdb_id) == 0:

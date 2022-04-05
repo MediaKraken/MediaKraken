@@ -76,7 +76,7 @@ async def url_bp_user_metadata_tvshow_detail(request, guid):
         data_poster_image = None
     # background image
     try:
-        if data_metadata['mm_metadata_tvshow_json']['Backdrop'] is not None:
+        if data_metadata['mm_metadata_tvshow_json']['Backdrop'] != None:
             data_background_image = data_metadata['mm_metadata_tvshow_json']['Backdrop']
         else:
             data_background_image = None
@@ -123,7 +123,7 @@ async def url_bp_user_metadata_tvshow_episode_detail(request, guid, eps_id):
         data_poster_image = None
     # background image
     try:
-        if data_metadata['Backdrop'] is not None:
+        if data_metadata['Backdrop'] != None:
             data_background_image = data_metadata['Backdrop']
         else:
             data_background_image = None
@@ -250,7 +250,7 @@ async def url_bp_user_metadata_tvshow_season_detail(request, guid, season):
         data_genres_list = ''
         if 'Genre' in data_metadata['mm_metadata_tvshow_json']['Meta']['thetvdb']['Meta']['Series'] \
                 and data_metadata['mm_metadata_tvshow_json']['Meta']['thetvdb']['Meta']['Series'][
-            'Genre'] is not None:
+            'Genre'] != None:
             for ndx in \
             data_metadata['mm_metadata_tvshow_json']['Meta']['thetvdb']['Meta']['Series'][
                 'Genre'].split("|"):
@@ -274,7 +274,7 @@ async def url_bp_user_metadata_tvshow_season_detail(request, guid, season):
         data_poster_image = None
     # background image
     try:
-        if data_metadata['mm_metadata_tvshow_json']['Backdrop'] is not None:
+        if data_metadata['mm_metadata_tvshow_json']['Backdrop'] != None:
             data_background_image = data_metadata['mm_metadata_tvshow_json']['Backdrop']
         else:
             data_background_image = None

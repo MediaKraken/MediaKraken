@@ -158,9 +158,9 @@ class CommonMetadataTMDB:
         // create file path for poster
         image_file_path = await common_metadata.com_meta_image_file_path(result_json['name'],
                                                                          'person')
-        if 'profile_path' in result_json and result_json['profile_path'] is not None:
+        if 'profile_path' in result_json and result_json['profile_path'] != None:
             if not os.path.isfile(image_file_path + result_json['profile_path']):
-                if result_json['profile_path'] is not None:
+                if result_json['profile_path'] != None:
                     if not os.path.isfile(image_file_path):
                         await common_network_async.mk_network_fetch_from_url_async(
                             'https://image.tmdb.org/t/p/original' + result_json['profile_path'],
@@ -232,7 +232,7 @@ class CommonMetadataTMDB:
                                                                              'tmdb image path':
                                                                                  image_file_path})
         poster_file_path = None
-        if result_json['poster_path'] is not None:
+        if result_json['poster_path'] != None:
             image_file_path += result_json['poster_path']
             if not os.path.isfile(image_file_path):
                 if await common_network_async.mk_network_fetch_from_url_async(
@@ -252,7 +252,7 @@ class CommonMetadataTMDB:
             image_file_path = await common_metadata.com_meta_image_file_path(result_json['name'],
                                                                              'backdrop')
         backdrop_file_path = None
-        if result_json['backdrop_path'] is not None:
+        if result_json['backdrop_path'] != None:
             image_file_path += result_json['backdrop_path']
             if not os.path.isfile(image_file_path):
                 if await common_network_async.mk_network_fetch_from_url_async(
@@ -404,7 +404,7 @@ async def movie_fetch_save_tmdb_review(db_connection, tmdb_id):
     """
     review_json = await common_global.api_instance.com_tmdb_meta_review_by_id(tmdb_id)
     # review record doesn't exist on all media
-    if review_json is not None and review_json['total_results'] > 0:
+    if review_json != None and review_json['total_results'] > 0:
         review_json_id = ({'themoviedb': str(review_json['id'])})
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
@@ -432,14 +432,14 @@ async def movie_fetch_save_tmdb_collection(db_connection, tmdb_collection_id, do
                                                                          message_text={
                                                                              "col": collection_meta})
         # poster path
-        if download_data['Poster'] is not None:
+        if download_data['Poster'] != None:
             image_poster_path = common_metadata.com_meta_image_path(download_data['Name'],
                                                                     'poster', 'themoviedb',
                                                                     download_data['Poster'])
         else:
             image_poster_path = None
         # backdrop path
-        if download_data['Backdrop'] is not None:
+        if download_data['Backdrop'] != None:
             image_backdrop_path = common_metadata.com_meta_image_path(download_data['Name'],
                                                                       'backdrop', 'themoviedb',
                                                                       download_data['Backdrop'])
@@ -461,7 +461,7 @@ async def metadata_fetch_tmdb_person(db_connection, provider_name, download_data
     """
     fetch person bio
     """
-    if common_global.api_instance is not None:
+    if common_global.api_instance != None:
         # fetch and save json data via tmdb id
         result_json = await common_global.api_instance.com_tmdb_metadata_bio_by_id(
             download_data['mdq_provider_id'])

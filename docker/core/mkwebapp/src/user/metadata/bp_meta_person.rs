@@ -30,7 +30,7 @@ async def url_bp_user_metadata_person_detail(request, guid):
     db_connection = await request.app.db_pool.acquire()
     person_data = await request.app.db_functions.db_meta_person_by_guid(guid=guid,
                                                                         db_connection=db_connection)
-    if person_data['mmp_person_image'] is not None:
+    if person_data['mmp_person_image'] != None:
         try:
             person_image = person_data['mmp_person_image'] + person_data['mmp_meta']
         except:
@@ -71,7 +71,7 @@ async def url_bp_user_metadata_person_list(request):
                                                                                      'mmp_person_image'],
                                                                              'meta': person_data[
                                                                                  'mmp_meta']})
-        if person_data['mmp_person_image'] is not None:
+        if person_data['mmp_person_image'] != None:
             try:
                 person_image = person_data['mmp_person_image'] + person_data['mmp_meta']
             except:

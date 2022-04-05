@@ -221,7 +221,7 @@ def db_read_media(self, media_guid=None):
     """
     # read in all media unless guid specified
     """
-    if media_guid is not None:
+    if media_guid != None:
         self.db_cursor.execute(
             'select * from mm_media'
             ' where mm_media_guid = $1', (media_guid,))

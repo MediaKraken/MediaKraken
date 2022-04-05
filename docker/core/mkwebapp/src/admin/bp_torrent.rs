@@ -22,7 +22,7 @@ async def url_bp_admin_torrent(request):
         await request.app.db_functions.db_opt_json_read(db_connection=db_connection))
     await request.app.db_pool.release(db_connection)
     transmission_data = []
-    if trans_connection is not None:
+    if trans_connection != None:
         torrent_no = 1
         for torrent in trans_connection.com_trans_get_torrent_list():
             transmission_data.append(

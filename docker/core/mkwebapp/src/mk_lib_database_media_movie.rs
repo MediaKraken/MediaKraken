@@ -64,7 +64,7 @@ def db_read_media_list_by_uuid(self, media_guid):
         # go through streams
         audio_streams = []
         subtitle_streams = ['None']
-        if 'streams' in file_data['FFprobe'] and file_data['FFprobe']['streams'] is not None:
+        if 'streams' in file_data['FFprobe'] and file_data['FFprobe']['streams'] != None:
             for stream_info in file_data['FFprobe']['streams']:
                 common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
                                                                      message_text={

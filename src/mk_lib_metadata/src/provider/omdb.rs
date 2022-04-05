@@ -7,10 +7,6 @@ class CommonMetadataOMDB:
     """
     Class for interfacing with omdb
     """
-
-    def __init__(self):
-        pass
-
     async def com_omdb_get(self, media_title, media_year, media_fullplot, media_tomatoes):
         omdb.get(title=media_title, year=media_year, fullplot=media_fullplot,
                  tomatoes=media_tomatoes)

@@ -37,40 +37,40 @@ async def metadata_anime_lookup(db_connection, download_data, file_name):
                                                                          'tmdb': tmdb_id,
                                                                          'ani': anidb_id})
     // if same as last, return last id and save lookup
-    if imdb_id is not None and imdb_id == metadata_anime_lookup.metadata_last_imdb:
+    if imdb_id != None and imdb_id == metadata_anime_lookup.metadata_last_imdb:
         await db_connection.db_download_delete(download_data['mdq_id'])
         await db_connection.db_commit()
         # don't need to set last......since they are equal
         return metadata_anime_lookup.metadata_last_id
-    if tmdb_id is not None and tmdb_id == metadata_anime_lookup.metadata_last_tmdb:
+    if tmdb_id != None and tmdb_id == metadata_anime_lookup.metadata_last_tmdb:
         await db_connection.db_download_delete(download_data['mdq_id'])
         await db_connection.db_commit()
         # don't need to set last......since they are equal
         return metadata_anime_lookup.metadata_last_id
-    if anidb_id is not None and anidb_id == metadata_anime_lookup.metadata_last_anidb:
+    if anidb_id != None and anidb_id == metadata_anime_lookup.metadata_last_anidb:
         await db_connection.db_download_delete(download_data['mdq_id'])
         await db_connection.db_commit()
         # don't need to set last......since they are equal
         return metadata_anime_lookup.metadata_last_id
     // if ids from nfo/xml, query local db to see if exist
-    if tmdb_id is not None:
+    if tmdb_id != None:
         metadata_uuid = await db_connection.db_meta_guid_by_tmdb(tmdb_id)
-    if imdb_id is not None and metadata_uuid is None:
+    if imdb_id != None and metadata_uuid is None:
         metadata_uuid = await db_connection.db_meta_guid_by_imdb(imdb_id)
-    if anidb_id is not None and metadata_uuid is None:
+    if anidb_id != None and metadata_uuid is None:
         metadata_uuid = await db_connection.db_meta_guid_by_anidb(anidb_id)
     // if ids from nfo/xml on local db
     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                      message_text={
                                                                          "meta anime metadata_uuid A": metadata_uuid})
-    if metadata_uuid is not None:
+    if metadata_uuid != None:
         await db_connection.db_download_delete(download_data['mdq_id'])
         await db_connection.db_commit()
         // fall through here to set last name/year id's
     else:
         // id is known from nfo/xml but not in db yet so fetch data
-        if tmdb_id is not None or imdb_id is not None:
-            if tmdb_id is not None:
+        if tmdb_id != None or imdb_id != None:
+            if tmdb_id != None:
                 dl_meta = db_connection.db_download_que_exists(download_data['mdq_id'],
                                                                common_global.DLMediaType.Movie.value,
                                                                'themoviedb', str(tmdb_id))
@@ -106,7 +106,7 @@ async def metadata_anime_lookup(db_connection, download_data, file_name):
                     await db_connection.db_download_delete(download_data['mdq_id'])
                     await db_connection.db_commit()
                     metadata_uuid = dl_meta
-        if metadata_uuid is None and anidb_id is not None:
+        if metadata_uuid is None and anidb_id != None:
             dl_meta = await db_connection.db_download_que_exists(download_data['mdq_id'],
                                                                  common_global.DLMediaType.Movie.value,
                                                                  'anidb', str(anidb_id))

@@ -68,7 +68,7 @@ async def url_bp_user_sports_detail(request, guid):
     media_data = await request.app.db_functions.db_meta_thesportsdb_select_by_guid(guid,
                                                                                    db_connection=db_connection)
     try:
-        if json_metadata['LocalImages']['Poster'] is not None:
+        if json_metadata['LocalImages']['Poster'] != None:
             data_poster_image = json_metadata['LocalImages']['Poster']
         else:
             data_poster_image = None
@@ -76,7 +76,7 @@ async def url_bp_user_sports_detail(request, guid):
         data_poster_image = None
     # background image
     try:
-        if json_metadata['LocalImages']['Backdrop'] is not None:
+        if json_metadata['LocalImages']['Backdrop'] != None:
             data_background_image = json_metadata['LocalImages']['Backdrop']
         else:
             data_background_image = None

@@ -160,7 +160,7 @@ async def url_bp_user_tv_show_detail(request, user, guid):
             data_poster_image = None
         # background image
         try:
-            if json_metadata['LocalImages']['Backdrop'] is not None:
+            if json_metadata['LocalImages']['Backdrop'] != None:
                 data_background_image = json_metadata['LocalImages']['Backdrop']
             else:
                 data_background_image = None
@@ -280,7 +280,7 @@ async def url_bp_user_tv_show_season_detail_page(request, guid, season):
         data_poster_image = None
     # background image
     try:
-        if json_metadata['LocalImages']['Backdrop'] is not None:
+        if json_metadata['LocalImages']['Backdrop'] != None:
             data_background_image = json_metadata['LocalImages']['Backdrop']
         else:
             data_background_image = None
@@ -320,7 +320,7 @@ async def url_bp_user_tv_show_episode_detail_page(request, guid, season, episode
         data_poster_image = None
     # background image
     try:
-        if data_episode_detail['LocalImages']['Backdrop'] is not None:
+        if data_episode_detail['LocalImages']['Backdrop'] != None:
             data_background_image = data_episode_detail['LocalImages']['Backdrop']
         else:
             data_background_image = None

@@ -188,7 +188,7 @@ def db_meta_album_list(self, offset=0, records=None, search_value=None):
     """
     // TODO, only grab the poster locale from json
     // TODO order by release year
-    if search_value is not None:
+    if search_value != None:
         self.db_cursor.execute('select mm_metadata_album_guid, mm_metadata_album_name,'
                                ' mm_metadata_album_json, mm_metadata_album_localimage'
                                ' from mm_metadata_album'
@@ -210,7 +210,7 @@ def db_meta_musician_list(self, offset=0, records=None, search_value=None):
     # return musician metadatalist
     """
     // TODO, only grab the poster locale from json
-    if search_value is not None:
+    if search_value != None:
         self.db_cursor.execute('select mm_metadata_musician_guid, mm_metadata_musician_name,'
                                ' mm_metadata_musician_json from mm_metadata_musician'
                                ' where mm_metadata_musician_name %% $1'

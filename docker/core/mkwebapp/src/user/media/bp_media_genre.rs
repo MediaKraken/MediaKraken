@@ -70,7 +70,7 @@ async def url_bp_user_movie_page(request, user, genre):
         except (KeyError, TypeError):
             sync_status = False
         # set rating
-        if row_data['mm_metadata_user_json'] is not None \
+        if row_data['mm_metadata_user_json'] != None \
                 and 'UserStats' in row_data['mm_metadata_user_json'] \
                 and user.id in row_data['mm_metadata_user_json']['UserStats'] \
                 and 'Rating' in row_data['mm_metadata_user_json']['UserStats'][user.id]:

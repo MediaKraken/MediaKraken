@@ -52,7 +52,7 @@ async def metadata_music_lookup(db_connection, download_json):
         db_result = await db_connection.db_music_lookup(ffmpeg_data_json['format']['tags']['ARTIST'],
                                                   ffmpeg_data_json['format']['tags']['ALBUM'],
                                                   ffmpeg_data_json['format']['tags']['TITLE'])
-        if db_result is not None:
+        if db_result != None:
             metadata_uuid = db_result['mm_metadata_music_guid']
     if metadata_uuid is None:
         metadata_uuid = download_json['mdq_new_uuid']

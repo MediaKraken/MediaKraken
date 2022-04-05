@@ -27,7 +27,7 @@ async def metadata_sports_lookup(db_connection, download_data):
     stripped_name = os.path.basename(
         download_data['mdq_path'].replace('_', ' ').rsplit('(', 1)[0].strip())
     metadata_uuid = await db_connection.db_meta_sports_guid_by_event_name(stripped_name)
-    if metadata_uuid is None and THESPORTSDB_CONNECTION is not None:
+    if metadata_uuid is None and THESPORTSDB_CONNECTION != None:
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
                                                                              "searching": stripped_name})
@@ -37,9 +37,9 @@ async def metadata_sports_lookup(db_connection, download_data):
                                                                          message_text={
                                                                              "sports return": thesportsdb_data})
         // "valid" key returned in case of null response........or event none
-        if thesportsdb_data is not None:
+        if thesportsdb_data != None:
             thesportsdb_data = json.loads(thesportsdb_data)
-            if thesportsdb_data['event'] is not None:
+            if thesportsdb_data['event'] != None:
                 // TODO "find" the right event by name?  if multiples?
                 metadata_uuid = await db_connection.db_meta_sports_guid_by_thesportsdb(
                     thesportsdb_data['event'][0]['idEvent'])

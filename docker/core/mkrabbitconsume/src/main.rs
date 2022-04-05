@@ -65,7 +65,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         wget -qO http://download.blender.org/peach/bigbuckbunny_movies/big_buck_bunny_1080p_surround.avi
         The minimum required Nvidia driver for nvenc is 378.13 or newer from ffmpeg error
         """
-        if body is not None:
+        if body != None:
             common_logging_elasticsearch_httpx.com_es_httpx_post(message_type="info",
                                                                  message_text={"body": body})
             json_message = json.loads(body)
@@ -173,7 +173,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         common_logging_elasticsearch_httpx.com_es_httpx_post(
                             message_type="critical", message_text=
                             {"stuff": "unknown subtype"})
-                    if container_command is not None:
+                    if container_command != None:
                         common_logging_elasticsearch_httpx.com_es_httpx_post(message_type="info",
                                                                              message_text=
                                                                              {
