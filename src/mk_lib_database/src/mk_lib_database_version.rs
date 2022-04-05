@@ -14,7 +14,7 @@ pub async fn mk_lib_database_postgresql_version(pool: &sqlx::PgPool)
 }
 
 pub async fn mk_lib_database_version(pool: &sqlx::PgPool)
-                                     -> Result<(i32), sqlx::Error> {
+                                     -> Result<i32, sqlx::Error> {
     let row: (i32, ) = sqlx::query_as("select mm_version_number from mm_version")
         .fetch_one(pool)
         .await?;

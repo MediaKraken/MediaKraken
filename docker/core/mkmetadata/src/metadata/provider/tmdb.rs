@@ -8,58 +8,58 @@ pub struct TMDBAPI {
 pub async fn provider_tmdb_movie_id_max() {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/movie/latest?api_key = {}",
-                TMDBAPI.tmdb_api_key)).await;
+                TMDBAPI::tmdb_api_key)).await;
 }
 
 pub async fn provider_tmdb_person_id_max() {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/person/latest?api_key = {}",
-                TMDBAPI.tmdb_api_key)).await;
+                TMDBAPI::tmdb_api_key)).await;
 }
 
 pub async fn provider_tmdb_tv_id_max() {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/tv/latest?api_key = {}",
-                TMDBAPI.tmdb_api_key)).await;
+                TMDBAPI::tmdb_api_key)).await;
 }
 
 pub async fn provider_tmdb_collection_fetch_by_id(tmdb_id: i32) {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/collection/{}?api_key={}",
-                tmdb_id, TMDBAPI.tmdb_api_key)).await;
+                tmdb_id, TMDBAPI::tmdb_api_key)).await;
 }
 
 pub async fn provider_tmdb_movie_fetch_by_id(tmdb_id: i32) {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/movie/{}?api_key={}\
         &append_to_response=credits,reviews,release_dates,videos",
-                tmdb_id, TMDBAPI.tmdb_api_key)).await;
+                tmdb_id, TMDBAPI::tmdb_api_key)).await;
 }
 
 pub async fn provider_tmdb_person_changes() {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/person/changes?api_key={}",
-                TMDBAPI.tmdb_api_key)).await;
+                TMDBAPI::tmdb_api_key)).await;
 }
 
 pub async fn provider_tmdb_person_fetch_by_id(tmdb_id: i32) {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/person/{}?api_key={}\
         &append_to_response=combined_credits,external_ids,images",
-                tmdb_id, TMDBAPI.tmdb_api_key)).await;
+                tmdb_id, TMDBAPI::tmdb_api_key)).await;
 }
 
 pub async fn provider_tmdb_review_fetch_by_id(tmdb_id: i32) {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/review/{}?api_key={}",
-                tmdb_id, TMDBAPI.tmdb_api_key)).await;
+                tmdb_id, TMDBAPI::tmdb_api_key)).await;
 }
 
 pub async fn provider_tmdb_tv_fetch_by_id(tmdb_id: i32) {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/tv/{}?api_key={}\
         &append_to_response=credits,reviews,release_dates,videos",
-                tmdb_id, TMDBAPI.tmdb_api_key)).await;
+                tmdb_id, TMDBAPI::tmdb_api_key)).await;
 }
 
 /*

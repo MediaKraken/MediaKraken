@@ -49,7 +49,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // pull options/api keys and set structs to contain the data
     let option_json: Value = mk_lib_database_option_status::mk_lib_database_option_read(&pool).await.unwrap();
-    provider_tmdb::TMDBAPI.tmdb_api_key = option_config_json["API"]["themoviedb"];
+    provider_tmdb::TMDBAPI::tmdb_api_key = option_json["API"]["themoviedb"];
 
     // setup last used id's per thread
     let mut metadata_last_uuid: Uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000")?;

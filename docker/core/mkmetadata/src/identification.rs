@@ -11,28 +11,20 @@ mod mk_lib_hash_sha1;
 
 #[path = "metadata/adult.rs"]
 mod metadata_adult;
-
 #[path = "metadata/anime.rs"]
 mod metadata_anime;
-
 #[path = "metadata/book.rs"]
 mod metadata_book;
-
 #[path = "metadata/game.rs"]
 mod metadata_game;
-
 #[path = "metadata/movie.rs"]
 mod metadata_movie;
-
 #[path = "metadata/music.rs"]
 mod metadata_music;
-
 #[path = "metadata/music_video.rs"]
 mod metadata_music_video;
-
 #[path = "metadata/sports.rs"]
 mod metadata_sports;
-
 #[path = "metadata/tv.rs"]
 mod metadata_music_tv;
 
