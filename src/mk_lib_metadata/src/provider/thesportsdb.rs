@@ -3,6 +3,10 @@
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;
 
+pub struct TheSportsDBAPI {
+    pub thesportsdb_api_key: String,
+}
+
 /*
 
 # http://www.thesportsdb.com/forum/viewtopic.php?f=6&t=5
