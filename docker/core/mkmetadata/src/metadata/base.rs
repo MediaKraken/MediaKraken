@@ -2,25 +2,18 @@ use sqlx::types::Uuid;
 
 #[path = "anime.rs"]
 mod mk_anime;
-
 #[path = "book.rs"]
 mod mk_book;
-
 #[path = "game.rs"]
 mod mk_game;
-
 #[path = "movie.rs"]
 mod mk_movie;
-
 #[path = "music.rs"]
 mod mk_music;
-
 #[path = "music_video.rs"]
 mod mk_music_video;
-
 #[path = "sports.rs"]
 mod mk_sports;
-
 #[path = "tv.rs"]
 mod mk_tv;
 

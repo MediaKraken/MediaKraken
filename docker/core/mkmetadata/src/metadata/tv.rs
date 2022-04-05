@@ -13,21 +13,14 @@ pub struct MetadataTVLastLookup {
 pub async fn metadata_tv_lookup(pool: &sqlx::PgPool,
                                    download_data: serde_json::Value,
                                    file_name: String) {
-
+    // don't bother checking title/year as the main_server_metadata_api_worker does it already
+    let mut metadata_uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000")?;  // so not found checks verify later
 }
 
 /*
 
 async def metadata_tv_lookup(db_connection, download_data, file_name):
-    """
-    Lookup tv metadata
-    """
-    // don't bother checking title/year as the main_server_metadata_api_worker does it already
-    metadata_uuid = None  # so not found checks verify later
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'metadata_tv_lookup': str(
-                                                                             file_name)})
+
     // determine provider id's from nfo/xml if they exist
     nfo_data = await metadata_nfo_xml.nfo_file_tv(download_data['Path'])
     imdb_id, tvdb_id, tmdb_id = await metadata_nfo_xml.nfo_id_lookup_tv(nfo_data)

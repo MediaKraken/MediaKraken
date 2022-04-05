@@ -1,3 +1,5 @@
+// https://www.thesportsdb.com/api.php
+
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;
 
@@ -14,7 +16,7 @@ class CommonMetadataTheSportsDB:
 
     async def com_meta_thesportsdb_search_team_by_name(self, team_name):
         """
-        Team and player looksup
+        Team and player lookup
         """
         return await common_network_async.mk_network_fetch_from_url_async(
             'http://www.thesportsdb.com/api/v1/json/'

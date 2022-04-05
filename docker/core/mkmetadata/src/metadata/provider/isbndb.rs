@@ -1,3 +1,5 @@
+// https://isbndb.com/apidocs/v2
+
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;
 

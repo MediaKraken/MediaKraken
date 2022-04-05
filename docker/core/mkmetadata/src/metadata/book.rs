@@ -8,16 +8,14 @@ mod mk_provider_open_library;
 
 pub async fn metadata_book_lookup(pool: &sqlx::PgPool,
                                    download_data: serde_json::Value) {
-
+    let mut metadata_uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000")?;  // so not found checks verify later
 }
 
 /*
 
 async def metadata_periodicals_lookup(db_connection, download_data):
-    """
-    Lookup via isbn and then name
-    """
-    metadata_uuid = None  # so not found checks verify later
+
+
     // check if isbn in metaid
     if download_data['ProviderMetaID'] != None:
         // check local database

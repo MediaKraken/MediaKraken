@@ -1,3 +1,5 @@
+// https://anidb.net/
+
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;
 
@@ -10,7 +12,6 @@ class CommonMetadataANIdb:
 
     def __init__(self, db_connection):
         self.adba_connection = None
-        self.db_connection = db_connection
 
     async def com_net_anidb_fetch_titles_file(self):
         """

@@ -1,3 +1,5 @@
+// https://imvdb.com/developers/api
+
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;
 
@@ -76,7 +78,7 @@ async def movie_fetch_save_imvdb(db_connection, imvdb_id, metadata_uuid):
                                                     None)
     else if result_json.status_code == 502:
         time.sleep(300)
-        # redo fetch due to 502
+        // redo fetch due to 502
         await movie_fetch_save_imvdb(db_connection, imvdb_id, metadata_uuid)
     else if result_json.status_code == 404:
         // TODO handle 404's better

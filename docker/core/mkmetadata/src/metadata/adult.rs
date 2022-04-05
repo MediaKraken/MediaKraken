@@ -9,19 +9,17 @@ pub struct MetadataAdultLastLookup {
     metadata_last_tmdb: String,
 }
 
+pub async fn metadata_adult_lookup(pool: &sqlx::PgPool,
+                                   download_data: serde_json::Value,
+                                   file_name: String) {
+    // don't bother checking title/year as the main_server_metadata_api_worker does it already
+    let mut metadata_uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000")?;  // so not found checks verify later
+}
+
 /*
 
 async def metadata_adult_lookup(db_connection, download_data, file_name):
-    """
-    Adult lookup
-    This is the main function called from metadata_identification
-    """
-    // don't bother checking title/year as the main_server_metadata_api_worker does it already
-    metadata_uuid = None  # so not found checks verify later
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'metadata_adult_lookup': str(
-                                                                             file_name)})
+
     // determine provider id's from nfo/xml if they exist
     nfo_data, xml_data = await metadata_nfo_xml.nfo_xml_file(download_data['Path'])
     imdb_id, tmdb_id = await metadata_nfo_xml.nfo_xml_id_lookup(nfo_data, xml_data)

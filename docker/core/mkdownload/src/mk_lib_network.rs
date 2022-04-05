@@ -11,7 +11,6 @@ pub async fn mk_data_from_url_to_json(url: String)
     Box<dyn std::error::Error>> {
     // Build the client using the builder pattern
     let client = reqwest::Client::builder().build()?;
-    println!("2");
     // Perform the actual execution of the network request
     let res: serde_json::Value = client
         .get(url)
@@ -20,7 +19,6 @@ pub async fn mk_data_from_url_to_json(url: String)
         .await?
         .json()
         .await?;
-    println!("3 {:#?}", res);
     Ok(res)
 }
 

@@ -18,13 +18,13 @@ pub struct MetadataMovieLastLookup {
 pub async fn metadata_movie_lookup(pool: &sqlx::PgPool,
                                    download_data: serde_json::Value,
                                    file_name: String) {
-
+    // don't bother checking title/year as the main_server_metadata_api_worker does it already
+    let mut metadata_uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000")?;  // so not found checks verify later
 }
 
 /*
 pub async fn metadata_movie_lookup(pool: &sqlx::PgPool, dl_row, guessit_data) {
-    // don"t bother checking title/year as the main_server_metadata_api_worker does it already
-    let mut metadata_uuid = None;  // so not found checks verify later
+
     // determine provider id's from nfo/xml if they exist
     (nfo_data, xml_data) = metadata_nfo_xml.nfo_xml_file(dl_row.get("mdq_path"));
     (imdb_id, tmdb_id) = metadata_nfo_xml.nfo_xml_id_lookup(nfo_data, xml_data);
@@ -62,7 +62,7 @@ pub async fn metadata_movie_lookup(pool: &sqlx::PgPool, dl_row, guessit_data) {
                 db_connection.db_download_update(guid = dl_row.get("mdq_id"),
                                                  status = "Fetch",
                                                  provider_guid = provider_id);
-                // set provider last so it"s not picked up by the wrong thread too early
+                // set provider last so it's not picked up by the wrong thread too early
                 db_connection.db_download_update_provider("themoviedb",
                                                           dl_row.get("mdq_id"));
                 db_connection.db_commit();

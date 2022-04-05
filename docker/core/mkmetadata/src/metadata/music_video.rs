@@ -11,7 +11,7 @@ pub struct MetadataMusicVideoLastLookup {
 
 pub async fn metadata_music_video_lookup(pool: &sqlx::PgPool,
                                    file_name: String) {
-
+    let mut metadata_uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000")?;  // so not found checks verify later
 }
 
 /*
@@ -22,9 +22,8 @@ async def metadata_music_video_lookup(db_connection, file_name):
     Lookup by name on music video database
     """
     // check for same variables
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'mv file': file_name})
+
+
     // determine names
     if file_name.find('-') != -1:
         band_name, song_name = os.path.splitext(

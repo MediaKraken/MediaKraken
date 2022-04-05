@@ -13,20 +13,14 @@ pub struct MetadataAnimeLastLookup {
 pub async fn metadata_anime_lookup(pool: &sqlx::PgPool,
                                    download_data: serde_json::Value,
                                    file_name: String) {
-
+    let mut metadata_uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000")?;  // so not found checks verify later
 }
 
 /*
 
 async def metadata_anime_lookup(db_connection, download_data, file_name):
-    """
-    Check for anime in tv sections of the metadata providers
-    """
-    metadata_uuid = None  # so not found checks verify later
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'meta anime look filename': str(
-                                                                             file_name)})
+
+
     // determine provider id's from nfo/xml if they exist
     nfo_data, xml_data = await metadata_nfo_xml.nfo_xml_file(file_name)
     imdb_id, tmdb_id, anidb_id = await metadata_nfo_xml.nfo_xml_id_lookup(
@@ -40,17 +34,17 @@ async def metadata_anime_lookup(db_connection, download_data, file_name):
     if imdb_id != None and imdb_id == metadata_anime_lookup.metadata_last_imdb:
         await db_connection.db_download_delete(download_data['mdq_id'])
         await db_connection.db_commit()
-        # don't need to set last......since they are equal
+        // don't need to set last......since they are equal
         return metadata_anime_lookup.metadata_last_id
     if tmdb_id != None and tmdb_id == metadata_anime_lookup.metadata_last_tmdb:
         await db_connection.db_download_delete(download_data['mdq_id'])
         await db_connection.db_commit()
-        # don't need to set last......since they are equal
+        // don't need to set last......since they are equal
         return metadata_anime_lookup.metadata_last_id
     if anidb_id != None and anidb_id == metadata_anime_lookup.metadata_last_anidb:
         await db_connection.db_download_delete(download_data['mdq_id'])
         await db_connection.db_commit()
-        # don't need to set last......since they are equal
+        // don't need to set last......since they are equal
         return metadata_anime_lookup.metadata_last_id
     // if ids from nfo/xml, query local db to see if exist
     if tmdb_id != None:
@@ -142,14 +136,14 @@ async def metadata_anime_lookup(db_connection, download_data, file_name):
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
                                                                              "meta movie db meta": metadata_uuid})
-        if metadata_uuid is None:
-            # no matches by name/year
-            # search themoviedb since not matched above via DB or nfo/xml
-            # save the updated status
+        if metadata_uuid == None:
+            // no matches by name/year
+            // search themoviedb since not matched above via DB or nfo/xml
+            // save the updated status
             await db_connection.db_begin()
             await db_connection.db_download_update(guid=download_data['mdq_id'],
                                                    status='Search')
-            # set provider last so it's not picked up by the wrong thread
+            // set provider last so it's not picked up by the wrong thread
             await db_connection.db_download_update_provider('themoviedb', download_data['mdq_id'])
             await db_connection.db_commit()
     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',

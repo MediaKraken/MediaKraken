@@ -12,17 +12,14 @@ pub struct MetadataSportsLastLookup {
 
 pub async fn metadata_sports_lookup(pool: &sqlx::PgPool,
                                    download_data: serde_json::Value) {
-
+    // don't bother checking title/year as the main_server_metadata_api_worker does it already
+    let mut metadata_uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000")?;  // so not found checks verify later
 }
 
 /*
 
 async def metadata_sports_lookup(db_connection, download_data):
-    """
-    Lookup sporting event by name
-    """
-    // don't bother checking title/year as the main_server_metadata_api_worker does it already
-    metadata_uuid = None  # so not found checks verify later
+
 
     stripped_name = os.path.basename(
         download_data['mdq_path'].replace('_', ' ').rsplit('(', 1)[0].strip())
@@ -43,7 +40,7 @@ async def metadata_sports_lookup(db_connection, download_data):
                 // TODO "find" the right event by name?  if multiples?
                 metadata_uuid = await db_connection.db_meta_sports_guid_by_thesportsdb(
                     thesportsdb_data['event'][0]['idEvent'])
-                if metadata_uuid is None:
+                if metadata_uuid == None:
                     image_json = {'Images': {'thesportsdb': {'Characters': {}, 'Banner': None,
                                                              'Poster': None, 'Backdrop': None,
                                                              "Redo": True}}}
