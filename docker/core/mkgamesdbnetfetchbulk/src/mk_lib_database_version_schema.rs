@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use serde_json::{json, Value};
 use sqlx::{types::Uuid, types::Json};
 

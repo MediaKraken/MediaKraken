@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use sqlx::types::Uuid;
 
 #[path = "provider/musicbrainz.rs"]

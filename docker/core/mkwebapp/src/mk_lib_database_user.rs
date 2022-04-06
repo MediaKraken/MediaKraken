@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use sqlx::postgres::PgRow;
 use sqlx::{types::Uuid, types::Json};
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
@@ -80,10 +82,10 @@ async def db_user_insert(self, user_name, user_email, user_password):
     """
     # insert user
     """
-    if await self.db_user_count(user_name=None, db_connection=db_conn) == 0:
-        user_admin = True
+    if await self.db_user_count(user_name=None) == 0:
+        user_admin = true
     else:
-        user_admin = False
+        user_admin = false
     return await db_conn.execute(
         'insert into mm_user (username, email, password, active, is_admin, user_json, created_at)'
         ' values ($1, $2, crypt($3, gen_salt('bf', 10)), True, $4, '{"per_page": 30}','

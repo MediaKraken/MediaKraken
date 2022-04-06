@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use chrono::prelude::*;
 
 pub async fn mk_logging_post_elk(message_type: &str,

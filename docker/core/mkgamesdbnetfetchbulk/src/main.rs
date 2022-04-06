@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use sqlx::Row;
 use uuid::Uuid;
 use serde_json::json;

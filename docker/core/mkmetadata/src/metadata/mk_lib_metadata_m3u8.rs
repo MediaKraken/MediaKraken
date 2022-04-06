@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 // https://github.com/sile/hls_m3u8
 
 use hls_m3u8::MediaPlaylist;

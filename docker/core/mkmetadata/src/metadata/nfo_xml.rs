@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 /*
 
 async def nfo_file_tv(media_file_path):

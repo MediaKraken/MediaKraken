@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use sqlx::{types::Uuid, types::Json};
 use sqlx::postgres::PgRow;
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
@@ -13,7 +15,7 @@ pub async fn mk_lib_database_metadata_genre_count_read(pool: &sqlx::PgPool)
     let select_query = sqlx::query("select \
         jsonb_array_elements_text(mm_metadata_json->'genres')b as gen, \
         count(mm_metadata_json->'genres') as mm_count from mm_metadata_movie group by gen \
-        order by jsonb_array_elements_text(mm_metadata_json->'genres')b")
+        order by jsonb_array_elements_text(mm_metadata_json->'genres')b");
     let table_rows: Vec<DBMetadataGenreCountList> = select_query
 		.map(|row: PgRow| DBMetadataGenreCountList {
 			gen: row.get("gen"),

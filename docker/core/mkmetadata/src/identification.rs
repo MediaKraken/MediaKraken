@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::Row;

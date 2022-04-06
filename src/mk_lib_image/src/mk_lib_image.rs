@@ -1,3 +1,4 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
 pub fn mk_image_file_resize(base_image_path: &str,
                             image_save_path: &str,

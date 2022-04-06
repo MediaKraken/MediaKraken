@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use tokio::time::{Duration, sleep};
 
 pub static DATABASE_VERSION: i32 = 45;

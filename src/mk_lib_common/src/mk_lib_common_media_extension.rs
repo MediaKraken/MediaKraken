@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 pub static MEDIA_EXTENSION: [&str; 32] = [
     "webm",
     "mkv",

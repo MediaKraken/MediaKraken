@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
 use sqlx::{types::Uuid, types::Json};
@@ -44,7 +46,7 @@ pub async fn mk_lib_database_meta_music_video_lookup(pool: &sqlx::PgPool,
                                                      artist_name: String,
                                                      song_title: String)
                                                      -> Result<uuid::Uuid, sqlx::Error> {
-    let row: PgRow = sqlx::query_as("select mm_metadata_music_video_guid \
+    let row: (Uuid, ) = sqlx::query_as("select mm_metadata_music_video_guid \
         from mm_metadata_music_video \
         where lower(mm_media_music_video_band) = $1 \
         and lower(mm_media_music_video_song) = $2")
@@ -56,7 +58,7 @@ pub async fn mk_lib_database_meta_music_video_lookup(pool: &sqlx::PgPool,
 }
 
 pub async fn mk_lib_database_meta_music_video_count(pool: &sqlx::PgPool,
-                                                    imvdb_id: Uuid,
+                                                    imvdb_id: i32,
                                                     search_value: String)
                                                     -> Result<i32, sqlx::Error> {
     if imvdb_id == 0 {
@@ -102,7 +104,7 @@ pub async fn mk_lib_database_meta_music_video_insert(pool: &sqlx::PgPool,
                                                      id_json: serde_json::Value,
                                                      data_json: serde_json::Value,
                                                      image_json: serde_json::Value)
-                                                     -> Result<(Uuid), sqlx::Error> {
+                                                     -> Result<Uuid, sqlx::Error> {
     let new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_metadata_music_video (mm_metadata_music_video_guid, \

@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use std::ffi::OsStr;
 use std::os::unix::ffi::OsStrExt;
 use std::collections::HashMap;

@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 // https://github.com/knsd/tokio-ping/releases
 
 use futures::{Future, Stream};

@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use md5::{Md5, Digest};
 use std::fs;
 use std::error::Error;

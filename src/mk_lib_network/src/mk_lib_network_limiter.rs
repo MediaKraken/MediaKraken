@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use governor::{Quota, RateLimiter};
 use nonzero_ext::*;
 use phf::phf_map;

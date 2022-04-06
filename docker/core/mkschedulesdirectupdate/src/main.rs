@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use chrono::prelude::*;
 use std::error::Error;
 use tokio::time::{Duration, sleep};

@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 // https://github.com/LesnyRumcajs/wakey/releases/tag/v0.1.1
 
 pub async fn mk_lib_network_wol(mac_addr: String) {  // "01:02:03:04:05:06"

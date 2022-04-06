@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 // ftp = { version = "<version>", features = ["secure"] }
 // https://github.com/mattnenterprise/rust-ftp
 

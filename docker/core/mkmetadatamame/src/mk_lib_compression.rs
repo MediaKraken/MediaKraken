@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use std::io::Read;
 use std::fs::File;
 use std::path::PathBuf;

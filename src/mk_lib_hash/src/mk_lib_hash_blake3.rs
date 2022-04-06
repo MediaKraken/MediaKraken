@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 // https://docs.rs/blake3/1.0.0/blake3/
 
 use blake3;

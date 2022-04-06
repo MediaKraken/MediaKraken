@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use sqlx::{FromRow, Row};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Uuid, types::Json};
@@ -5,7 +7,7 @@ use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_metadata_image_count(pool: &sqlx::PgPool,
                                                   class_id: i32)
-                                                  -> Result<(i32), sqlx::Error> {
+                                                  -> Result<i32, sqlx::Error> {
     let row: (i32, ) = sqlx::query_as("select count(*) from mm_media \
         where mm_media_class_guid = $1")
         .bind(class_id)

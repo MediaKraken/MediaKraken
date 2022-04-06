@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use rascam::*;
 use rppal::gpio::Gpio;
 use rppal::i2c::I2c;

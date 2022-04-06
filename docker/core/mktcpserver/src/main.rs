@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use argh::FromArgs;
 use rustls_pemfile::{certs, rsa_private_keys};
 use std::fs::File;

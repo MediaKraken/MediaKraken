@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 // crc32fast = "1.2.1"
 use crc32fast::Hasher;
 use std::fs;

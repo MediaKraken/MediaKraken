@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use std::io;
 use std::io::prelude::*;
 use walkdir::{DirEntry, WalkDir};

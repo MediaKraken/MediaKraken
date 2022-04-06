@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use sha1::{Sha1, Digest};
 use std::fs;
 use std::io;

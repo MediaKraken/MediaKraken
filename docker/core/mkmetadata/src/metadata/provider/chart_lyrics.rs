@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 // http://www.chartlyrics.com/api.aspx
 
 #[path = "../../mk_lib_network.rs"]

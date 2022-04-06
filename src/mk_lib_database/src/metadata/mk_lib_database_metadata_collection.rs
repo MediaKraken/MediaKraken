@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
 use sqlx::{types::Uuid, types::Json};
@@ -89,7 +91,7 @@ pub async fn mk_lib_database_meta_collection_by_name(pool: &sqlx::PgPool,
     let select_query = sqlx::query("select mm_metadata_guid, mm_metadata_json \
          from mm_metadata_movie where mm_metadata_json->'belongs_to_collection'::text \
          <> '{}'::text order by mm_metadata_json->'belongs_to_collection'")
-        .bind(person_name);
+        .bind(collection_name);
     let table_rows: Vec<DBMetaCollectionByNameList> = select_query
 		.map(|row: PgRow| DBMetaCollectionByNameList {
 			mm_metadata_guid: row.get("mm_metadata_guid"),
