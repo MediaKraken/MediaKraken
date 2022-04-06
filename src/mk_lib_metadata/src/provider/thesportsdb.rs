@@ -224,28 +224,4 @@ class CommonMetadataTheSportsDB:
 # http://www.thesportsdb.com/api/v1/json/1/latestsoccer.php
 # NOTE: Updated every 5mins
 
-async def search_thesportsdb(db_connection, file_name):
-    """
-    # search thesportsdb
-    """
-    try:
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text=
-                                                                         {
-                                                                             "meta movie search thesportsdb": str(
-                                                                                 file_name)})
-    except:
-        pass
-
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'search_thesportsdb': str(
-                                                                             file_name)})
-
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'meta thesportsdb uuid': metadata_uuid,
-                                                                         'result': match_result})
-    return metadata_uuid, match_result
-
  */

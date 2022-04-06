@@ -42,13 +42,13 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
         mk_lib_common_enum_media_type::DLMediaType::ADULT => {
             metadata_uuid = metadata_adult::metadata_adult_lookup(&pool,
                                                                   dl_row,
-                                                                  guessit_data);
+                                                                  guessit_data).await;
         }
 
         mk_lib_common_enum_media_type::DLMediaType::ANIME => {
             metadata_uuid = metadata_anime::metadata_anime_lookup(&pool,
                                                                   dl_row,
-                                                                  guessit_data);
+                                                                  guessit_data).await;
         }
 
         mk_lib_common_enum_media_type::DLMediaType::GAME_CHD => {
@@ -87,7 +87,7 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
         mk_lib_common_enum_media_type::DLMediaType::PUBLICATION_MAGAZINE |
         mk_lib_common_enum_media_type::DLMediaType::PUBLICATION_GRAPHIC_NOVEL => {
             metadata_uuid = metadata_periodicals::metadata_periodicals_lookup(&pool,
-                                                                              dl_row);
+                                                                              dl_row).await;
         }
 
         mk_lib_common_enum_media_type::DLMediaType::MOVIE |
@@ -97,7 +97,7 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
         mk_lib_common_enum_media_type::DLMediaType::MOVIE_TRAILER => {
             metadata_uuid = metadata_movie::metadata_movie_lookup(&pool,
                                                                   dl_row,
-                                                                  guessit_data);
+                                                                  guessit_data).await;
         }
 
         mk_lib_common_enum_media_type::DLMediaType::MOVIE_HOME |
@@ -109,17 +109,17 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
         mk_lib_common_enum_media_type::DLMediaType::MUSIC_ALBUM |
         mk_lib_common_enum_media_type::DLMediaType::MUSIC_SONG => {
             metadata_uuid = metadata_music::metadata_music_lookup(&pool,
-                                                                  dl_row);
+                                                                  dl_row).await;
         }
 
         mk_lib_common_enum_media_type::DLMediaType::MUSIC_VIDEO => {
             metadata_uuid = metadata_music_video::metadata_music_video_lookup(&pool,
-                                                                              dl_row);
+                                                                              dl_row).await;
         }
 
         mk_lib_common_enum_media_type::DLMediaType::SPORTS => {
             metadata_uuid = metadata_sports::metadata_sports_lookup(&pool,
-                                                                    dl_row);
+                                                                    dl_row).await;
         }
 
         mk_lib_common_enum_media_type::DLMediaType::TV |
@@ -131,7 +131,7 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
         mk_lib_common_enum_media_type::DLMediaType::TV_TRAILER => {
             metadata_uuid = metadata_tv::metadata_tv_lookup(&pool,
                                                             dl_row,
-                                                            guessit_data);
+                                                            guessit_data).await;
         }
 
         _ => println!("que type does not equal any value"),
@@ -195,7 +195,7 @@ async def metadata_identification(&sqlx_pool, dl_row, guessit_data):
     #                                                        dl_row,
     #                                                        guessit_data)
     else if dl_row["mdq_que_type"] == common_global.DLMediaType.Game.value {
-        metadata_uuid = await metadata_game.metadata_game_lookup(&pool,
+        metadata_uuid = metadata_game.metadata_game_lookup(&pool,
                                                                  dl_row);
                                                                  }
     else if dl_row["mdq_que_type"] == common_global.DLMediaType.Game_Intro.value {

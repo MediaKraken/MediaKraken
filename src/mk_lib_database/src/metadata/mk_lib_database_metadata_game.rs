@@ -145,7 +145,7 @@ async def db_meta_game_update(self, game_system_id, game_short_name, game_name, 
 
 
 // TODO port query
-async def db_meta_game_by_name(self, game_short_name, game_name, db_connection=None):
+async def db_meta_game_by_name(self, game_short_name, game_name):
     """
     # return game info by name
     """
@@ -157,7 +157,7 @@ async def db_meta_game_by_name(self, game_short_name, game_name, db_connection=N
 
 
 // TODO port query
-async def db_meta_game_update_by_guid(self, game_id, game_json, db_connection=None):
+async def db_meta_game_update_by_guid(self, game_id, game_json):
     """
     Update game by uuid
     """

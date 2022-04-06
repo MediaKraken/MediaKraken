@@ -57,6 +57,6 @@ async def metadata_periodicals_cover(db_connection, isbn):
     common_metadata.com_meta_image_path(download_data['Name'],
                                         'poster', 'themoviedb', download_data['Poster'])
 
-    return False
+    return false
 
  */

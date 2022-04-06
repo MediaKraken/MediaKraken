@@ -5,7 +5,7 @@ use rocket_dyn_templates::serde::{Serialize, Deserialize};
 /*
 
 // TODO port query
-async def db_iradio_insert(self, radio_channel, db_connection=None):
+async def db_iradio_insert(self, radio_channel):
     """
     Insert iradio channel
     """
@@ -23,7 +23,7 @@ async def db_iradio_insert(self, radio_channel, db_connection=None):
 
 // TODO port query
 async def db_iradio_list(self, offset=0, records=None, active_station=True,
-                         search_value=None, db_connection=None):
+                         search_value=None):
     """
     Iradio list
     """
@@ -69,7 +69,7 @@ pub async fn mk_lib_database_media_iradio_count(pool: &sqlx::PgPool,
 }
 
 // TODO port query
-async def db_iradio_list_count(self, active_station=True, search_value=None, db_connection=None):
+async def db_iradio_list_count(self, active_station=True, search_value=None):
     """
     Iradio count
     """

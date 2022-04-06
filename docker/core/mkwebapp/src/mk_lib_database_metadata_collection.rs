@@ -80,7 +80,7 @@ pub async fn mk_lib_database_meta_collection_uuid(pool: &sqlx::PgPool,
 /*
 
 // TODO port query
-async def db_media_collection_scan(self, db_connection=None):
+async def db_media_collection_scan(self):
     """
     Returns a list of movies that belong in a collection specifified by tmdb
     """
@@ -92,7 +92,7 @@ async def db_media_collection_scan(self, db_connection=None):
 
 
 // TODO port query
-async def db_collection_guid_by_name(self, collection_name, db_connection=None):
+async def db_collection_guid_by_name(self, collection_name):
     """
     Return uuid from collection name
     """
@@ -103,7 +103,7 @@ async def db_collection_guid_by_name(self, collection_name, db_connection=None):
 
 
 // TODO port query
-async def db_collection_by_tmdb(self, tmdb_id, db_connection=None):
+async def db_collection_by_tmdb(self, tmdb_id):
     """
     Return uuid via tmdb id
     """
@@ -114,7 +114,7 @@ async def db_collection_by_tmdb(self, tmdb_id, db_connection=None):
 
 // TODO port query
 async def db_collection_insert(self, collection_name, guid_json, metadata_json,
-                               localimage_json, db_connection=None):
+                               localimage_json):
     """
     Insert collection into the database
     """
@@ -131,7 +131,7 @@ async def db_collection_insert(self, collection_name, guid_json, metadata_json,
 
 
 // TODO port query
-async def db_collection_update(self, collection_guid, guid_json, db_connection=None):
+async def db_collection_update(self, collection_guid, guid_json):
     """
     Update the ids listed within a collection
     """

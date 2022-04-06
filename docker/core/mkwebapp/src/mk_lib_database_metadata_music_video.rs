@@ -43,7 +43,7 @@ pub async fn mk_lib_database_metadata_music_video_read(pool: &sqlx::PgPool,
 /*
 
 // TODO port query
-async def db_meta_music_video_lookup(self, artist_name, song_title, db_connection=None):
+async def db_meta_music_video_lookup(self, artist_name, song_title):
     """
     # query to see if song is in local DB
     """
@@ -55,7 +55,7 @@ async def db_meta_music_video_lookup(self, artist_name, song_title, db_connectio
 
 // TODO port query
 async def db_meta_music_video_add(self, new_guid, artist_name, artist_song, id_json,
-                                  data_json, image_json, db_connection=None):
+                                  data_json, image_json):
     """
     Add metadata for music video
     """
@@ -72,7 +72,7 @@ async def db_meta_music_video_add(self, new_guid, artist_name, artist_song, id_j
 
 
 // TODO port query
-async def db_meta_music_video_count(self, imvdb_id=None, search_value=None, db_connection=None):
+async def db_meta_music_video_count(self, imvdb_id=None, search_value=None):
     """
     Return count of music video metadata
     """

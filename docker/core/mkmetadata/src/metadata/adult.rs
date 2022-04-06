@@ -32,12 +32,12 @@ async def metadata_adult_lookup(db_connection, download_data, file_name):
     if imdb_id != None and imdb_id == metadata_adult_lookup.metadata_last_imdb:
         await db_connection.db_download_delete(download_data['mdq_id'])
         await db_connection.db_commit()
-        # don't need to set last......since they are equal
+        // don't need to set last......since they are equal
         return metadata_adult_lookup.metadata_last_id
     if tmdb_id != None and tmdb_id == metadata_adult_lookup.metadata_last_tmdb:
         await db_connection.db_download_delete(download_data['mdq_id'])
         await db_connection.db_commit()
-        # don't need to set last......since they are equal
+        // don't need to set last......since they are equal
         return metadata_adult_lookup.metadata_last_id
     // doesn't match last id's so continue lookup
     // if ids from nfo/xml, query local db to see if exist
@@ -46,9 +46,6 @@ async def metadata_adult_lookup(db_connection, download_data, file_name):
     if imdb_id != None and metadata_uuid is None:
         metadata_uuid = await db_connection.db_meta_guid_by_imdb(imdb_id)
     // if ids from nfo/xml on local db
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         "meta adult metadata_uuid A": metadata_uuid})
     if metadata_uuid != None:
         await db_connection.db_download_delete(download_data['mdq_id'])
         await db_connection.db_commit()
@@ -76,16 +73,10 @@ async def metadata_adult_lookup(db_connection, download_data, file_name):
                 await db_connection.db_download_delete(download_data['mdq_id'])
                 await db_connection.db_commit()
                 metadata_uuid = dl_meta
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         "meta adult metadata_uuid B": metadata_uuid})
     if metadata_uuid is None:
         // no ids found on the local database so begin name/year searches
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'stuff': "meta adult db lookup"})
         // db lookup by name and year (if available)
-        if 'year' in file_name:
+        if file_name.contains_key("year"):
             metadata_uuid = await db_connection.db_find_metadata_guid(file_name['title'],
                                                                       file_name['year'])
         else:
@@ -104,9 +95,6 @@ async def metadata_adult_lookup(db_connection, download_data, file_name):
             // set provider last so it's not picked up by the wrong thread
             await db_connection.db_download_update_provider('pornhub', download_data['mdq_id'])
             await db_connection.db_commit()
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         "metadata_adult return uuid": metadata_uuid})
     // set last values to negate lookups for same title/show
     metadata_adult_lookup.metadata_last_id = metadata_uuid
     metadata_adult_lookup.metadata_last_imdb = imdb_id

@@ -8,7 +8,7 @@ use rocket_dyn_templates::serde::{Serialize, Deserialize};
 async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
                                search_text=None,
                                list_type=None, list_genre='All',
-                               group_collection=False, include_remote=False, db_connection=None):
+                               group_collection=False, include_remote=False):
     """
     # sports media return
     """
@@ -490,7 +490,7 @@ async def db_media_sports_list(self, class_guid, offset=None, list_limit=0,
 async def db_media_sports_list_count(self, class_guid, list_type=None,
                                      list_genre='All',
                                      group_collection=False, include_remote=False,
-                                     search_text=None, db_connection=None):
+                                     search_text=None):
     """
     # sports media count
     """

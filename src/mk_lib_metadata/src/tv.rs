@@ -24,11 +24,6 @@ async def metadata_tv_lookup(db_connection, download_data, file_name):
     // determine provider id's from nfo/xml if they exist
     nfo_data = await metadata_nfo_xml.nfo_file_tv(download_data['Path'])
     imdb_id, tvdb_id, tmdb_id = await metadata_nfo_xml.nfo_id_lookup_tv(nfo_data)
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         "tv look": imdb_id,
-                                                                         'tbdb': tvdb_id,
-                                                                         'themoviedb': tmdb_id})
     // if same as last, return last id and save lookup
     // check these dupes as the nfo/xml files might not exist to pull the metadata id from
     if imdb_id != None and imdb_id == metadata_tv_lookup.metadata_last_imdb:
@@ -48,9 +43,6 @@ async def metadata_tv_lookup(db_connection, download_data, file_name):
     if imdb_id != None and metadata_uuid is None:
         metadata_uuid = await db_connection.db_metatv_guid_by_imdb(imdb_id)
     // if ids from nfo/xml on local db
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         "meta tv metadata_uuid A": metadata_uuid})
     if metadata_uuid is None:
         // id is known from nfo/xml but not in db yet so fetch data
         if tmdb_id != None or imdb_id != None:
@@ -88,9 +80,6 @@ async def metadata_tv_lookup(db_connection, download_data, file_name):
                 await db_connection.db_commit()
             else:
                 metadata_uuid = dl_meta
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         "meta tv metadata_uuid B": metadata_uuid})
     if metadata_uuid is None:
         // no ids found on the local database so begin name/year searches
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
@@ -112,10 +101,10 @@ async def metadata_tv_lookup(db_connection, download_data, file_name):
             // search themoviedb since not matched above via DB or nfo/xml
             // save the updated status
             await db_connection.db_begin()
-            await db_connection.db_download_update(guid=download_data['mdq_id'],
-                                                   status='Search')
+            await db_connection.db_download_update(guid=download_data["mdq_id"],
+                                                   status="Search")
             // set provider last so it's not picked up by the wrong thread
-            await db_connection.db_download_update_provider('themoviedb', download_data['mdq_id'])
+            await db_connection.db_download_update_provider("themoviedb", download_data["mdq_id"])
             await db_connection.db_commit()
     // set last values to negate lookups for same show
     metadata_tv_lookup.metadata_last_id = metadata_uuid
@@ -132,13 +121,7 @@ async def tv_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid):
     """
     # tmdb data fetch for tv
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         "meta tv themoviedb save fetch": tmdb_id})
     result_json = await common_global.api_instance.com_tmdb_metadata_tv_by_id(tmdb_id)
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'tv fetch save themoviedb show': result_json})
     // 504	Your request to the backend server timed out. Try again.
     if result_json is None or result_json.status_code == 504:
         time.sleep(60)
@@ -147,24 +130,21 @@ async def tv_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid):
     else if result_json.status_code == 200:
         series_id, result_json, image_json \
             = await common_global.api_instance.com_tmdb_meta_info_build(result_json.json())
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             "series": series_id})
         await db_connection.db_metatv_insert_tmdb(metadata_uuid,
                                                   series_id,
-                                                  result_json['name'],
+                                                  result_json["name"],
                                                   result_json,
                                                   image_json)
         // store the cast and crew
-        if 'credits' in result_json:  // cast/crew doesn't exist on all media
-            if 'cast' in result_json['credits']:
-                await db_connection.db_meta_person_insert_cast_crew('themoviedb',
-                                                                    result_json['credits'][
-                                                                        'cast'])
-            if 'crew' in result_json['credits']:
-                await db_connection.db_meta_person_insert_cast_crew('themoviedb',
-                                                                    result_json['credits'][
-                                                                        'crew'])
+        if result_json.contains_key("credits"):  // cast/crew doesn't exist on all media
+            if result_json["credits"].contains_key("cast"):
+                await db_connection.db_meta_person_insert_cast_crew("themoviedb",
+                                                                    result_json["credits"][
+                                                                        "cast"])
+            if result_json["credits"].contains_key("crew"):
+                await db_connection.db_meta_person_insert_cast_crew("themoviedb",
+                                                                    result_json["credits"][
+                                                                        "crew"])
     // 429	Your request count (#) is over the allowed limit of (40).
     else if result_json.status_code == 429:
         time.sleep(20)

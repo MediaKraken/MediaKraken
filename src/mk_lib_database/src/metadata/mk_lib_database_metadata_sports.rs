@@ -62,7 +62,7 @@ pub async fn mk_lib_database_metadata_sports_read(pool: &sqlx::PgPool,
 /*
 
 // TODO port query
-async def db_meta_sports_guid_by_thesportsdb(self, thesports_uuid, db_connection=None):
+async def db_meta_sports_guid_by_thesportsdb(self, thesports_uuid):
     """
     # metadata guid by thesportsdb id
     """

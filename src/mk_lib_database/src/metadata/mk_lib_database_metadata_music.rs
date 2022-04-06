@@ -44,7 +44,7 @@ pub async fn mk_lib_database_metadata_music_album_read(pool: &sqlx::PgPool,
 
 /*
 // TODO port query
-async def db_meta_music_album_by_guid(self, guid, db_connection=None):
+async def db_meta_music_album_by_guid(self, guid):
     """
     # return album data by guid
     """
@@ -54,7 +54,7 @@ async def db_meta_music_album_by_guid(self, guid, db_connection=None):
 
 
 // TODO port query
-async def db_meta_music_songs_by_album_guid(self, guid, db_connection=None):
+async def db_meta_music_songs_by_album_guid(self, guid):
     """
     # return song list from album guid
     """

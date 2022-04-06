@@ -103,7 +103,7 @@ def db_read_media_list_by_uuid(self, media_guid):
 async def db_media_movie_list(self, class_guid, list_type=None, list_genre='all',
                               list_limit=0, group_collection=False, offset=None,
                               include_remote=False,
-                              search_text=None, db_connection=None):
+                              search_text=None):
     """
     # web media return
     """

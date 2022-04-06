@@ -5,7 +5,7 @@ use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_metadata_exists_person(pool: &sqlx::PgPool,
                                                     metadata_id: i32)
-                                                    -> Result<(i32), sqlx::Error> {
+                                                    -> Result<i32, sqlx::Error> {
     let row: (i32, ) = sqlx::query_as("select exists(select 1 from mm_metadata_person \
         where mm_metadata_person_media_id = $1 limit 1) as found_record limit 1")
         .bind(metadata_id)
@@ -104,7 +104,7 @@ pub async fn mk_lib_database_meta_person_by_name(pool: &sqlx::PgPool,
         mmp_person_image, \
         mmp_person_name \
         from mm_metadata_person \
-        where mmp_person_name = %s")
+        where mmp_person_name = $1")
         .bind(person_name);
     let table_rows: Vec<DBMetaPersonNameList> = select_query
 		.map(|row: PgRow| DBMetaPersonNameList {
@@ -145,9 +145,9 @@ pub async fn mk_lib_database_metadata_person_insert(pool: &sqlx::PgPool,
 /*
 
 // TODO port query
-async def db_meta_person_as_seen_in(self, person_guid, db_connection=None):
+async def db_meta_person_as_seen_in(self, person_guid):
     row_data = await self.db_meta_person_by_guid(guid=person_guid, db_connection=db_conn)
-    if row_data is None:  # exit on not found person
+    if row_data == None:  // exit on not found person
         return None
     // TODO jin index the credits
     return await db_conn.fetch('select mm_metadata_guid,mm_metadata_name,'
@@ -173,29 +173,10 @@ async def db_meta_person_update(self, provider_name, provider_uuid, person_bio, 
 
 
 // TODO port query
-async def db_meta_person_insert_cast_crew(self, meta_type, person_json, db_connection=None):
-    """
-    # batch insert from json of crew/cast
-    """
-    // TODO failing due to only one person in json?  hence pulling id, etc as the for loop
-    let mut multiple_person = false
-    try:
+async def db_meta_person_insert_cast_crew(self, person_json):
         for person_data in person_json:
-            multiple_person = true
-    except:
-        pass
-    if multiple_person:
-        for person_data in person_json:
-            await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                             message_text={
-                                                                                 "person data": person_data})
-            if meta_type == "themoviedb":
-                person_id = person_data['id']
-                person_name = person_data['name']
-            else:
-                person_id = None
-                person_name = None
-            if person_id != None:
+                person_id = person_data["id"]
+                person_name = person_data["name"]
                 // TODO do an upsert instead
                 if await self.db_meta_person_id_count(person_id) == true:
                     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(
@@ -221,42 +202,4 @@ async def db_meta_person_insert_cast_crew(self, meta_type, person_json, db_conne
                                                      person_json=None,
                                                      image_path=None,
                                                      db_connection=db_connection)
-    else:
-        if meta_type == "themoviedb":
-            // cast/crew can exist but be blank
-            try:
-                person_id = person_json['id']
-                person_name = person_json['name']
-            except:
-                person_id = None
-                person_name = None
-        else:
-            person_id = None
-            person_name = None
-        if person_id != None:
-            // TODO upsert instead
-            if await self.db_meta_person_id_count(person_id) is True:
-                await common_logging_elasticsearch_httpx.com_es_httpx_post_async(
-                    message_type='info',
-                    message_text={'stuff': "skippy"})
-            else:
-                new_guid = uuid.uuid4()
-                // Shouldn't need to verify fetch doesn't exist as the person insert
-                // is right below.  As then the next person record read will find
-                // the inserted record.
-                // insert download record for bio/info
-                await self.db_download_insert(provider=meta_type,
-                                              que_type=common_global.DLMediaType.Person.value,
-                                              down_json={"Status": "Fetch",
-                                                         "ProviderMetaID": person_id},
-                                              down_new_uuid=new_guid,
-                                              db_connection=db_connection)
-                // insert person record
-                await self.db_meta_person_insert(uuid_id=new_guid,
-                                                 person_name=person_name,
-                                                 media_id=person_id,
-                                                 person_json=None,
-                                                 image_path=None,
-                                                 db_connection=db_connection)
-
  */

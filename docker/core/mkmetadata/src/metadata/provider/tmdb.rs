@@ -1,3 +1,5 @@
+use sqlx::{types::Uuid, types::Json};
+
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;
 
@@ -5,21 +7,64 @@ pub struct TMDBAPI {
     pub tmdb_api_key: String,
 }
 
+pub async fn provider_tmdb_movie_fetch(tmdb_id: i32, metadata_uuid: Uuid) {
+    // fetch and save json data via tmdb id
+    let result_json = provider_tmdb_movie_fetch_by_id(tmdb_id).await;
+    // series_id_json, result_json, image_json \
+    //     = com_tmdb_meta_info_build(result_json.json());
+    db_connection.db_meta_insert_tmdb(metadata_uuid,
+                                      series_id_json,
+                                      result_json["title"],
+                                      result_json,
+                                      image_json);
+    if result_json.contains_key("credits") {  // cast/crew doesn't exist on all media
+        if result_json["credits"].contains_key("cast") {
+            db_connection.db_meta_person_insert_cast_crew("themoviedb",
+                                                          result_json["credits"][
+                                                              "cast"]);
+        }
+        if result_json["credits"].contains_key("crew") {
+            db_connection.db_meta_person_insert_cast_crew("themoviedb",
+                                                          result_json["credits"][
+                                                              "crew"]);
+        }
+    }
+}
+
+/*
+        // 504	Your request to the backend server timed out. Try again.
+        if result_json.status_code == 504 {
+            await asyncio.sleep(60)
+            // redo fetch due to 504
+            await movie_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid)
+            }
+        else if result_json.status_code == 200 {
+
+        else if result_json.status_code == 404 {
+            // TODO handle 404's better
+            metadata_uuid = None
+            }
+    else {  // is this is None....
+        metadata_uuid = None
+        }
+    return metadata_uuid
+ */
+
 pub async fn provider_tmdb_movie_id_max() {
     return mk_lib_network::mk_data_from_url_to_json(
-        format!("https://api.themoviedb.org/3/movie/latest?api_key = {}",
+        format!("https://api.themoviedb.org/3/movie/latest?api_key={}",
                 TMDBAPI::tmdb_api_key)).await;
 }
 
 pub async fn provider_tmdb_person_id_max() {
     return mk_lib_network::mk_data_from_url_to_json(
-        format!("https://api.themoviedb.org/3/person/latest?api_key = {}",
+        format!("https://api.themoviedb.org/3/person/latest?api_key={}",
                 TMDBAPI::tmdb_api_key)).await;
 }
 
 pub async fn provider_tmdb_tv_id_max() {
     return mk_lib_network::mk_data_from_url_to_json(
-        format!("https://api.themoviedb.org/3/tv/latest?api_key = {}",
+        format!("https://api.themoviedb.org/3/tv/latest?api_key={}",
                 TMDBAPI::tmdb_api_key)).await;
 }
 
@@ -144,23 +189,19 @@ pub async fn provider_tmdb_tv_fetch_by_id(tmdb_id: i32) {
         # download info and set data to be ready for insert into database
         """
         // create file path for poster
-        if 'title' in result_json:  // movie
-            image_file_path = await common_metadata.com_meta_image_file_path(result_json['title'],
-                                                                             'poster')
-        else:  # tv
-            image_file_path = await common_metadata.com_meta_image_file_path(result_json['name'],
-                                                                             'poster')
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'tmdb image path':
-                                                                                 image_file_path})
+        if "title" in result_json:  // movie
+            image_file_path = await common_metadata.com_meta_image_file_path(result_json["title"],
+                                                                             "poster")
+        else:  // tv
+            image_file_path = await common_metadata.com_meta_image_file_path(result_json["name"],
+                                                                             "poster")
         poster_file_path = None
-        if result_json['poster_path'] != None:
-            image_file_path += result_json['poster_path']
+        if result_json["poster_path"] != None:
+            image_file_path += result_json["poster_path"]
             if not os.path.isfile(image_file_path):
                 if await common_network_async.mk_network_fetch_from_url_async(
-                        'https://image.tmdb.org/t/p/original'
-                        + result_json['poster_path'],
+                        "https://image.tmdb.org/t/p/original"
+                        + result_json["poster_path"],
                         image_file_path):
                     pass  // download is successful
                 else:
@@ -168,19 +209,19 @@ pub async fn provider_tmdb_tv_fetch_by_id(tmdb_id: i32) {
                     image_file_path = None
             poster_file_path = image_file_path
         // create file path for backdrop
-        if 'title' in result_json:  // movie
-            image_file_path = await common_metadata.com_meta_image_file_path(result_json['title'],
-                                                                             'backdrop')
-        else:  # tv
-            image_file_path = await common_metadata.com_meta_image_file_path(result_json['name'],
-                                                                             'backdrop')
+        if "title" in result_json:  // movie
+            image_file_path = await common_metadata.com_meta_image_file_path(result_json["title"],
+                                                                             "backdrop")
+        else:  // tv
+            image_file_path = await common_metadata.com_meta_image_file_path(result_json["name"],
+                                                                             "backdrop")
         backdrop_file_path = None
-        if result_json['backdrop_path'] != None:
-            image_file_path += result_json['backdrop_path']
+        if result_json["backdrop_path"] != None:
+            image_file_path += result_json["backdrop_path"]
             if not os.path.isfile(image_file_path):
                 if await common_network_async.mk_network_fetch_from_url_async(
-                        'https://image.tmdb.org/t/p/original'
-                        + result_json['backdrop_path'],
+                        "https://image.tmdb.org/t/p/original"
+                        + result_json["backdrop_path"],
                         image_file_path):
                     pass  // download is successful
                 else:
@@ -189,9 +230,9 @@ pub async fn provider_tmdb_tv_fetch_by_id(tmdb_id: i32) {
             backdrop_file_path = image_file_path
         // set local image json
         if poster_file_path != None:
-            poster_file_path = poster_file_path.replace(common_global.static_data_directory, '')
+            poster_file_path = poster_file_path.replace(common_global.static_data_directory, "")
         if backdrop_file_path != None:
-            backdrop_file_path = backdrop_file_path.replace(common_global.static_data_directory, '')
+            backdrop_file_path = backdrop_file_path.replace(common_global.static_data_directory, "")
         image_json = (
             {'Backdrop': backdrop_file_path,
              'Poster': poster_file_path})
@@ -244,82 +285,6 @@ async def movie_search_tmdb(db_connection, file_name):
                                                                          'meta movie uuid': metadata_uuid,
                                                                          'result': match_result})
     return metadata_uuid, match_result
-
-
-async def movie_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid):
-    """
-    # fetch from tmdb
-    """
-    // fetch and save json data via tmdb id
-    result_json = await common_global.api_instance.com_tmdb_metadata_by_id(tmdb_id)
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         "meta fetch result": result_json})
-    if result_json != None:
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             "meta movie code": result_json.status_code,
-                                                                             "header": result_json.headers})
-        // 504	Your request to the backend server timed out. Try again.
-        if result_json.status_code == 504:
-            await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                             message_text={
-                                                                                 "meta movie tmdb 504": tmdb_id})
-            await asyncio.sleep(60)
-            // redo fetch due to 504
-            await movie_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid)
-        else if result_json.status_code == 200:
-            await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                             message_text={
-                                                                                 "meta movie save fetch result":
-                                                                                     result_json.json()})
-            series_id_json, result_json, image_json \
-                = await common_global.api_instance.com_tmdb_meta_info_build(result_json.json())
-            await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                             message_text={
-                                                                                 "series": series_id_json})
-            // set and insert the record if doesn't exist
-            if await db_connection.db_meta_movie_guid_count(metadata_uuid) == 0:
-                await db_connection.db_meta_insert_tmdb(metadata_uuid,
-                                                        series_id_json,
-                                                        result_json['title'],
-                                                        result_json,
-                                                        image_json)
-                // under guid check as don't need to insert them if already exist
-                if 'credits' in result_json:  // cast/crew doesn't exist on all media
-                    if 'cast' in result_json['credits']:
-                        await db_connection.db_meta_person_insert_cast_crew('themoviedb',
-                                                                            result_json['credits'][
-                                                                                'cast'])
-                    if 'crew' in result_json['credits']:
-                        await db_connection.db_meta_person_insert_cast_crew('themoviedb',
-                                                                            result_json['credits'][
-                                                                                'crew'])
-        // 429	Your request count (#) is over the allowed limit of (40).
-        else if result_json.status_code == 429:
-            await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                             message_text={
-                                                                                 "meta movie tmdb 429": tmdb_id})
-            await asyncio.sleep(30)
-            // redo fetch due to 429
-            await movie_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid)
-        else if result_json.status_code == 404:
-            await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                             message_text={
-                                                                                 "meta movie tmdb 404": tmdb_id})
-            // TODO handle 404's better
-            metadata_uuid = None
-    else:  // is this is None....
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             "meta movie tmdb misc": tmdb_id})
-        metadata_uuid = None
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'meta movie save fetch return uuid':
-                                                                             metadata_uuid})
-    return metadata_uuid
-
 
 async def movie_fetch_save_tmdb_review(db_connection, tmdb_id):
     """

@@ -25,11 +25,6 @@ async def metadata_anime_lookup(db_connection, download_data, file_name):
     nfo_data, xml_data = await metadata_nfo_xml.nfo_xml_file(file_name)
     imdb_id, tmdb_id, anidb_id = await metadata_nfo_xml.nfo_xml_id_lookup(
         nfo_data, xml_data)
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         "meta anime look": imdb_id,
-                                                                         'tmdb': tmdb_id,
-                                                                         'ani': anidb_id})
     // if same as last, return last id and save lookup
     if imdb_id != None and imdb_id == metadata_anime_lookup.metadata_last_imdb:
         await db_connection.db_download_delete(download_data['mdq_id'])
@@ -54,9 +49,6 @@ async def metadata_anime_lookup(db_connection, download_data, file_name):
     if anidb_id != None and metadata_uuid is None:
         metadata_uuid = await db_connection.db_meta_guid_by_anidb(anidb_id)
     // if ids from nfo/xml on local db
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         "meta anime metadata_uuid A": metadata_uuid})
     if metadata_uuid != None:
         await db_connection.db_download_delete(download_data['mdq_id'])
         await db_connection.db_commit()
@@ -65,11 +57,11 @@ async def metadata_anime_lookup(db_connection, download_data, file_name):
         // id is known from nfo/xml but not in db yet so fetch data
         if tmdb_id != None or imdb_id != None:
             if tmdb_id != None:
-                dl_meta = db_connection.db_download_que_exists(download_data['mdq_id'],
+                dl_meta = db_connection.db_download_que_exists(download_data["mdq_id"],
                                                                common_global.DLMediaType.Movie.value,
-                                                               'themoviedb', str(tmdb_id))
+                                                               "themoviedb", str(tmdb_id))
                 if dl_meta is None:
-                    metadata_uuid = download_data['mdq_new_uuid']
+                    metadata_uuid = download_data["mdq_new_uuid"]
                     await db_connection.db_begin()
                     await db_connection.db_download_update(guid=download_data['mdq_id'],
                                                            status='Fetch',
@@ -123,32 +115,23 @@ async def metadata_anime_lookup(db_connection, download_data, file_name):
                                                                          "meta anime metadata_uuid B": metadata_uuid})
     if metadata_uuid is None:
         // no ids found on the local database so begin name/year searches
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'stuff': "meta anime db lookup"})
         // db lookup by name and year (if available)
-        if 'year' in file_name:
-            metadata_uuid = await db_connection.db_find_metadata_guid(file_name['title'],
-                                                                      file_name['year'])
+        if file_name.contains_key("year"):
+            metadata_uuid = await db_connection.db_find_metadata_guid(file_name["title"],
+                                                                      file_name["year"])
         else:
             metadata_uuid = await db_connection.db_find_metadata_guid(
-                file_name['title'], None)
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             "meta movie db meta": metadata_uuid})
+                file_name["title"], None)
         if metadata_uuid == None:
             // no matches by name/year
             // search themoviedb since not matched above via DB or nfo/xml
             // save the updated status
             await db_connection.db_begin()
-            await db_connection.db_download_update(guid=download_data['mdq_id'],
-                                                   status='Search')
+            await db_connection.db_download_update(guid=download_data["mdq_id"],
+                                                   status="Search")
             // set provider last so it's not picked up by the wrong thread
-            await db_connection.db_download_update_provider('themoviedb', download_data['mdq_id'])
+            await db_connection.db_download_update_provider("themoviedb", download_data["mdq_id"])
             await db_connection.db_commit()
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         "meta anime metadata_uuid c": metadata_uuid})
     // set last values to negate lookups for same title/show
     metadata_anime_lookup.metadata_last_id = metadata_uuid
     metadata_anime_lookup.metadata_last_imdb = imdb_id

@@ -1,5 +1,5 @@
 // https://github.com/sile/hls_m3u8
-// hls_m3u8 = 0.4.1
+
 use hls_m3u8::MediaPlaylist;
 
 pub fn mk_lib_metadata_m3u8_validate_playlist(playlist: &str) {
@@ -10,8 +10,8 @@ pub fn mk_lib_metadata_m3u8_validate_playlist(playlist: &str) {
 
 /*
 // global statics
-M3U_HEADER = 'EXTM3U\n'
-M3U_LINE_HEADER = 'EXTINF:'
+M3U_HEADER = "EXTM3U\n"
+M3U_LINE_HEADER = "EXTINF:"
 
 '''
 #EXTM3U

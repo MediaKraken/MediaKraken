@@ -49,8 +49,8 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
                              download_data: serde_json::Value) {
     let mut metadata_uuid: Uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000")?;
     let mut match_result = None;
-    let mut set_fetch = false;
-    let mut lookup_halt = false;
+    let mut set_fetch: bool = false;
+    let mut lookup_halt: bool = false;
     let mut update_provider = None;
     if provider_name == "anidb" {
         metadata_uuid = mk_anime::metadata_anime_lookup(&pool,

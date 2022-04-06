@@ -4,8 +4,6 @@ use std::io::Read;
 use std::collections::HashMap;
 use reqwest::header::CONTENT_TYPE;
 
-//type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
-
 pub async fn mk_data_from_url_to_json(url: String)
     -> Result<serde_json::Value,
     Box<dyn std::error::Error>> {
