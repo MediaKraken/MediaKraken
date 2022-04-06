@@ -77,25 +77,33 @@ pub async fn mk_lib_database_meta_collection_uuid(pool: &sqlx::PgPool,
     Ok(row)
 }
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMetaCollectionByNameList {
+	mm_metadata_guid: uuid::Uuid,
+	mm_metadata_json: serde_json::Value,
+}
+
+pub async fn mk_lib_database_meta_collection_by_name(pool: &sqlx::PgPool,
+                                                     collection_name: String)
+                                                     -> Result<Vec<DBMetaCollectionByNameList>, sqlx::Error> {
+    let select_query = sqlx::query("select mm_metadata_guid, mm_metadata_json \
+         from mm_metadata_movie where mm_metadata_json->'belongs_to_collection'::text \
+         <> '{}'::text order by mm_metadata_json->'belongs_to_collection'")
+        .bind(person_name);
+    let table_rows: Vec<DBMetaCollectionByNameList> = select_query
+		.map(|row: PgRow| DBMetaCollectionByNameList {
+			mm_metadata_guid: row.get("mm_metadata_guid"),
+			mm_metadata_json: row.get("mm_metadata_json"),
+		})
+        .fetch_all(pool)
+        .await?;
+    Ok(table_rows)
+}
+
 /*
 
 // TODO port query
-async def db_media_collection_scan(self):
-    """
-    Returns a list of movies that belong in a collection specifified by tmdb
-    """
-    return await db_conn.fetch('select mm_metadata_guid, mm_metadata_json'
-                               ' from mm_metadata_movie'
-                               ' where mm_metadata_json->'belongs_to_collection'::text'
-                               ' <> '{}'::text'
-                               ' order by mm_metadata_json->'belongs_to_collection'')
-
-
-// TODO port query
 async def db_collection_guid_by_name(self, collection_name):
-    """
-    Return uuid from collection name
-    """
     return await db_conn.fetchval(
         'select mm_metadata_collection_guid from mm_metadata_collection'
         ' where mm_metadata_collection_name->>'name' = $1',
@@ -113,24 +121,6 @@ async def db_collection_by_tmdb(self, tmdb_id):
 
 
 // TODO port query
-async def db_collection_insert(self, collection_name, guid_json, metadata_json,
-                               localimage_json):
-    """
-    Insert collection into the database
-    """
-    new_guid = uuid.uuid4()
-    await db_conn.execute(
-        'insert into mm_metadata_collection (mm_metadata_collection_guid,'
-        ' mm_metadata_collection_name, mm_metadata_collection_media_ids,'
-        ' mm_metadata_collection_json, mm_metadata_collection_imagelocal_json)'
-        ' values ($1,$2,$3,$4,$5)', new_guid, json.dumps(collection_name),
-        json.dumps(guid_json),
-        json.dumps(metadata_json),
-        json.dumps(localimage_json))
-    return new_guid
-
-
-// TODO port query
 async def db_collection_update(self, collection_guid, guid_json):
     """
     Update the ids listed within a collection
@@ -142,3 +132,26 @@ async def db_collection_update(self, collection_guid, guid_json):
                           TODOfield, json.dumps(guid_json), collection_guid)
 
  */
+
+pub async fn mk_lib_database_meta_collection_insert(pool: &sqlx::PgPool,
+                                                    collection_name: String,
+                                                    guid_json: serde_json::Value,
+                                                    metadata_json: serde_json::Value,
+                                                    local_image_json: serde_json::Value)
+                                                    -> Result<(Uuid), sqlx::Error> {
+    let new_guid = Uuid::new_v4();
+    let mut transaction = pool.begin().await?;
+    sqlx::query("insert into mm_metadata_collection (mm_metadata_collection_guid, \
+        mm_metadata_collection_name, mm_metadata_collection_media_ids, \
+        mm_metadata_collection_json, mm_metadata_collection_imagelocal_json) \
+        values ($1,$2,$3,$4,$5)")
+        .bind(new_guid)
+        .bind(collection_name)
+        .bind(guid_json)
+        .bind(metadata_json)
+        .bind(local_image_json)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(new_guid)
+}

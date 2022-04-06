@@ -146,7 +146,7 @@ pub async fn mk_lib_database_metadata_person_insert(pool: &sqlx::PgPool,
 
 // TODO port query
 async def db_meta_person_as_seen_in(self, person_guid):
-    row_data = await self.db_meta_person_by_guid(guid=person_guid, db_connection=db_conn)
+    row_data = await self.db_meta_person_by_guid(guid=person_guid)
     if row_data == None:  // exit on not found person
         return None
     // TODO jin index the credits
@@ -160,8 +160,7 @@ async def db_meta_person_as_seen_in(self, person_guid):
 
 
 // TODO port query
-async def db_meta_person_update(self, provider_name, provider_uuid, person_bio, person_image,
-                                db_connection=None):
+async def db_meta_person_update(self, provider_name, provider_uuid, person_bio, person_image):
     """
     update the person bio/etc
     """
@@ -193,13 +192,11 @@ async def db_meta_person_insert_cast_crew(self, person_json):
                                                   que_type=common_global.DLMediaType.Person.value,
                                                   down_json={"Status": "Fetch",
                                                              "ProviderMetaID": person_id},
-                                                  down_new_uuid=new_guid,
-                                                  db_connection=db_connection)
+                                                  down_new_uuid=new_guid)
                     // insert person record
                     await self.db_meta_person_insert(uuid_id=new_guid,
                                                      person_name=person_name,
                                                      media_id=person_id,
                                                      person_json=None,
-                                                     image_path=None,
-                                                     db_connection=db_connection)
+                                                     image_path=None)
  */

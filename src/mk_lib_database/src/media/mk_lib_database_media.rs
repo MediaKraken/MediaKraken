@@ -200,6 +200,19 @@ pub async fn mk_lib_database_media_duplicate_detail(pool: &sqlx::PgPool,
     Ok(table_rows)
 }
 
+pub async fn mk_lib_database_media_image_path(pool: &sqlx::PgPool,
+                                              mm_media_guid: Uuid)
+                                              -> Result<String, sqlx::Error> {
+    let row: String = sqlx::query_as("select mm_metadata_localimage_json->'Images' as mm_image \
+        from mm_media, mm_metadata_movie \
+        where mm_media_metadata_guid = mm_metadata_guid \
+        and mm_media_guid = $1")
+        .bind(mm_media_guid)
+        .fetch_one(pool)
+        .await?;
+    Ok(row.0)
+}
+
 pub async fn mk_lib_database_media_ffmpeg_update(pool: &sqlx::PgPool,
                                                 mm_media_guid: Uuid,
                                                 ffmpeg_json: serder_json::Value)
@@ -306,15 +319,7 @@ def db_media_by_metadata_guid(self, metadata_guid, media_class_uuid):
                            (metadata_guid, media_class_uuid))
     return self.db_cursor.fetchall()
 
-// TODO port query
-def db_media_image_path(self, media_id):
-    """
-    # grab image path for media id NOT metadataid
-    """
-    self.db_cursor.execute('select mm_metadata_localimage_json->'Images' as mm_image'
-                           ' from mm_media, mm_metadata_movie'
-                           ' where mm_media_metadata_guid = mm_metadata_guid'
-                           ' and mm_media_guid = $1', (media_id,))
+
 
 // TODO port query
 def db_read_media_metadata_both(self, media_guid):

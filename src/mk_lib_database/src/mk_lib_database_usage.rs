@@ -11,7 +11,7 @@ pub async fn mk_lib_database_usage_top10_movie(pool: &sqlx::PgPool)
 }
 
 pub async fn mk_lib_database_usage_top10_tv(pool: &sqlx::PgPool)
-                                               -> Result<Vec<PgRow>, sqlx::Error> {
+                                            -> Result<Vec<PgRow>, sqlx::Error> {
     let rows: Vec<PgRow> = sqlx::query("select mm_metadata_tvshow_user_json->'Watched'->'Times' \
         from mm_metadata_tvshow order by mm_metadata_tvshow_user_json->'Watched'->'Times' \
         desc limit 10")
