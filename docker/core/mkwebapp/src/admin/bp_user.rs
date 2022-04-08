@@ -3,7 +3,8 @@ use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
 use uuid::Uuid;
-use paginate::Pages;
+use paginator::{Paginator, PageItem};
+use core::fmt::Write;
 
 #[get("/admin_user")]
 pub async fn admin_user(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {

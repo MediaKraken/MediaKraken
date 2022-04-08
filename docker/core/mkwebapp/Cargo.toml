@@ -11,7 +11,7 @@ strip = "symbols"
 amiquip = { version = "0.4.2", default-features = false }
 chrono = { version = "0.4.19", features = ["serde"] }
 lazy_static = "1.4.0"
-paginate = "1.1.8"
+paginator = "0.2.3"
 rcgen = "0.9.2"
 reqwest = { version = "0.11.10", default-features = false, features = ["json", "rustls-tls"] }
 ring = "0.16.20"

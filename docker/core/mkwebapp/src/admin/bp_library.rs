@@ -2,7 +2,8 @@ use rocket::Request;
 use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
-use paginate::Pages;
+use paginator::{Paginator, PageItem};
+use core::fmt::Write;
 
 #[get("/admin_library")]
 pub async fn admin_library(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
