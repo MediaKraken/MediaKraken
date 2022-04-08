@@ -29,6 +29,8 @@ mod mk_lib_database_metadata_download_queue;
 mod mk_lib_database_library;
 #[path = "mk_lib_database_version.rs"]
 mod mk_lib_database_version;
+#[path = "mk_lib_database_media.rs"]
+mod mk_lib_database_media;
 #[path = "mk_lib_database_media_movie.rs"]
 mod mk_lib_database_media_movie;
 #[path = "mk_lib_database_media_tv.rs"]

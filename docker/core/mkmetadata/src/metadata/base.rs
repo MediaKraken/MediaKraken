@@ -56,8 +56,8 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
     let mut update_provider = None;
     if provider_name == "anidb" {
         metadata_uuid = mk_anime::metadata_anime_lookup(&pool,
-                                                             download_data,
-                                                             guessit(download_data["Path"])["title"]);
+                                                        download_data,
+                                                        guessit(download_data["Path"])["title"]);
         if metadata_uuid == None {
             if match_result == None {
                 // do lookup halt as we'll start all movies in tmdb
@@ -71,16 +71,13 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
         lookup_halt = true;
     } else if provider_name == "comicvine" {
         lookup_halt = true;
-    } else if provider_name == "discogs" {
-        lookup_halt = true;
     } else if provider_name == "giantbomb" {
         lookup_halt = true;
     } else if provider_name == "imdb" {
         lookup_halt = true;
     } else if provider_name == "imvdb" {
-        metadata_uuid, match_result = metadata_music_video.metadata_music_video_lookup(
-            db_connection,
-            download_data["mdq_path"]);
+        metadata_uuid, match_result = metadata_music_video::metadata_music_video_lookup(
+            &pool, download_data["mdq_path"]);
         if metadata_uuid == None {
             if match_result == None {
                 update_provider = "theaudiodb";
@@ -89,16 +86,16 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
             }
         }
     } else if provider_name == "isbndb" {
-        metadata_uuid, match_result = metadata_provider_isbndb.metadata_periodicals_search_isbndb(
-            db_connection, download_data["mdq_provider_id"]);
+        metadata_uuid, match_result = metadata_provider_isbndb::metadata_periodicals_search_isbndb(
+            &pool, download_data["mdq_provider_id"]);
         if metadata_uuid == None {
             lookup_halt = true;
         }
     } else if provider_name == "lastfm" {
         lookup_halt = true;
     } else if provider_name == "musicbrainz" {
-        metadata_uuid, match_result = metadata_music.metadata_music_lookup(db_connection,
-                                             download_data);
+        metadata_uuid, match_result = metadata_music::metadata_music_lookup(&pool,
+                                                                            download_data);
         if metadata_uuid == None {
             lookup_halt = true;
         }

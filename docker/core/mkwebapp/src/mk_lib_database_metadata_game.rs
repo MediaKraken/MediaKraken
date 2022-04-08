@@ -106,6 +106,53 @@ pub async fn mk_lib_database_metadata_game_read(pool: &sqlx::PgPool,
     Ok(table_rows)
 }
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMetaGameNameMatchList {
+	gi_id: Uuid,
+	gi_game_info_json: String,
+}
+
+pub async fn mk_lib_database_metadata_game_by_name_and_system(pool: &sqlx::PgPool,
+                                                game_name: String,
+                                                game_system_short_name: String,
+                                                offset: i32, limit: i32)
+                                                -> Result<Vec<DBMetaGameNameMatchList>, sqlx::Error> {
+    let mut select_query;
+    if game_system_short_name != "" {
+        select_query = sqlx::query("select gi_id, gi_game_info_json \
+            from mm_metadata_game_software_info \
+            where gi_game_info_name = $1 and gi_system_id = $2")
+            .bind(game_name)
+            .bind(game_system_short_name)
+            .bind(offset)
+            .bind(limit);
+    } else {
+        select_query = sqlx::query("select gi_id, gi_game_info_json \
+            from mm_metadata_game_software_info \
+            where gi_game_info_name = $1 and gi_system_id IS NULL")
+            .bind(game_name)
+            .bind(offset)
+            .bind(limit);
+    }
+    let table_rows: Vec<DBMetaGameNameMatchList> = select_query
+        .map(|row: PgRow| DBMetaGameNameMatchList {
+            gi_id: row.get("gi_id"),
+            gi_game_info_json: row.get("gi_game_info_json"),
+        })
+        .fetch_all(pool)
+        .await?;
+    Ok(table_rows)
+}
+
+/*
+    if game_system_short_name is None:
+        self.db_cursor.execute("",
+                               (game_name,))
+    else:
+        self.db_cursor.execute("",
+                               (game_name, game_system_short_name))
+*/
+
 pub async fn mk_lib_database_metadata_game_insert(pool: &sqlx::PgPool,
                                                   game_system_id: uuid::Uuid,
                                                   game_short_name: String,
@@ -195,25 +242,6 @@ def db_meta_game_by_system(self, guid, offset=0, records=None):
         return self.db_cursor.fetchone()
     except:
         return None
-
-
-// TODO port query
-def db_meta_game_by_name_and_system(self, game_name, game_system_short_name):
-    """
-    # game by name and system short name
-    """
-    if game_system_short_name is None:
-        self.db_cursor.execute("select gi_id, gi_game_info_json"
-                               " from mm_metadata_game_software_info"
-                               " where gi_game_info_name = $1 and gi_system_id IS NULL",
-                               (game_name,))
-    else:
-        self.db_cursor.execute("select gi_id, gi_game_info_json"
-                               " from mm_metadata_game_software_info"
-                               " where gi_game_info_name = $1 and gi_system_id = $2",
-                               (game_name, game_system_short_name))
-    return self.db_cursor.fetchall()
-
 
 # poster, backdrop, etc
 // TODO port query

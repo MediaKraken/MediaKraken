@@ -3,6 +3,8 @@
 use sqlx::Row;
 use uuid::Uuid;
 use serde_json::json;
+use serde_json::Value;
+use std::error::Error;
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -10,6 +12,8 @@ mod mk_lib_logging;
 mod mk_lib_database;
 #[path = "mk_lib_database_version.rs"]
 mod mk_lib_database_version;
+#[path = "mk_lib_database_option_status.rs"]
+mod mk_lib_database_option_status;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {

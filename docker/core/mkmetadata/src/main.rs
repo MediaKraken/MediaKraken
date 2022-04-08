@@ -11,6 +11,8 @@ use sqlx::Row;
 
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
+#[path = "mk_lib_database_media.rs"]
+mod mk_lib_database_media;
 #[path = "mk_lib_database_metadata_movie.rs"]
 mod mk_lib_database_metadata_movie;
 #[path = "mk_lib_database_metadata_tv.rs"]
@@ -19,6 +21,8 @@ mod mk_lib_database_metadata_tv;
 mod mk_lib_database_metadata_download_queue;
 #[path = "mk_lib_database_version.rs"]
 mod mk_lib_database_version;
+#[path = "mk_lib_database_option_status.rs"]
+mod mk_lib_database_option_status;
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 #[path = "mk_lib_network.rs"]
@@ -50,7 +54,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                            false).await;
 
     // pull options/api keys and set structs to contain the data
-    let option_json: Value = mk_lib_database_option_status::mk_lib_database_option_read(&pool).await.unwrap();
+    let option_json: serde_json::Value = mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool).await.unwrap();
     provider_tmdb::TMDBAPI::tmdb_api_key = option_json["API"]["themoviedb"];
 
     // setup last used id's per thread
@@ -111,14 +115,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
             // update the media row with the json media id and the proper name
             if metadata_uuid != Uuid::parse_str("00000000-0000-0000-0000-000000000000")? {
-                continue;
-                /*
-                await db_connection.db_begin()
-                await db_connection.db_update_media_id(row_data["mdq_provider_id"],
-                                                           metadata_uuid)
-                await db_connection.db_download_delete(row_data["mdq_id"])
-                await db_connection.db_commit()
-                 */
+                mk_lib_database_media::mk_lib_database_media_update_metadata_guid(&sqlx_pool,
+                                                                                  row_data["mdq_provider_id"],
+                                                                                  metadata_uuid,
+                                                                                  row_data["mdq_id"]);
             }
         }
         sleep(Duration::from_secs(1)).await;

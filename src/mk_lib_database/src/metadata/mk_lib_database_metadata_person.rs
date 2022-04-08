@@ -126,7 +126,7 @@ pub async fn mk_lib_database_metadata_person_insert(pool: &sqlx::PgPool,
                                                     media_id: String,
                                                     person_json: serde_json::Value,
                                                     person_image_path: String)
-                                                    -> Result<(Uuid), sqlx::Error> {
+                                                    -> Result<Uuid, sqlx::Error> {
     let new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_metadata_person (mmp_id, mmp_person_name, \
@@ -180,7 +180,7 @@ async def db_meta_person_insert_cast_crew(self, person_json):
                 person_name = person_data["name"]
                 // TODO do an upsert instead
                 if await self.db_meta_person_id_count(person_id) == true:
-                    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(
+                    common_logging_elasticsearch_httpx.com_es_httpx_post_async(
                         message_type='info',
                         message_text={
                             'db_meta_person_insert_cast_crew': "skip insert as person exists"})
@@ -190,13 +190,13 @@ async def db_meta_person_insert_cast_crew(self, person_json):
                     // is right below.  As then the next person record read will find
                     // the inserted record.
                     // insert download record for bio/info
-                    await self.db_download_insert(provider=meta_type,
+                    self.db_download_insert(provider=meta_type,
                                                   que_type=common_global.DLMediaType.Person.value,
                                                   down_json={"Status": "Fetch",
                                                              "ProviderMetaID": person_id},
                                                   down_new_uuid=new_guid)
                     // insert person record
-                    await self.db_meta_person_insert(uuid_id=new_guid,
+                    self.db_meta_person_insert(uuid_id=new_guid,
                                                      person_name=person_name,
                                                      media_id=person_id,
                                                      person_json=None,

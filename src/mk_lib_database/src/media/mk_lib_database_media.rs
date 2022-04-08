@@ -1,12 +1,14 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+use sqlx::{FromRow, Row};
 use sqlx::{types::Uuid, types::Json};
 use sqlx::postgres::PgRow;
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_media_update_metadata_guid(pool: &sqlx::PgPool,
                                                         mm_media_guid: Uuid,
-                                                        mm_metadata_guid: Uuid,)
+                                                        mm_metadata_guid: Uuid,
+                                                        mm_download_uuid: Uuid)
                                                         -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
     sqlx::query("update mm_media set mm_media_metadata_guid = $1 \
@@ -15,6 +17,12 @@ pub async fn mk_lib_database_media_update_metadata_guid(pool: &sqlx::PgPool,
         .bind(mm_media_guid)
         .execute(&mut transaction)
         .await?;
+    if mm_download_uuid != Uuid::parse_str("00000000-0000-0000-0000-000000000000")? {
+        sqlx::query("delete from mm_metadata_download_que where mm_download_guid = $1")
+            .bind(mm_download_uuid)
+            .execute(&mut transaction)
+            .await?;
+    }
     transaction.commit().await?;
     Ok(())
 }
@@ -30,8 +38,8 @@ pub async fn mk_lib_database_media_unmatched_count(pool: &sqlx::PgPool)
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaUnmatchedList {
-	mm_media_guid: uuid::Uuid,
-	mm_media_path: String,
+    mm_media_guid: uuid::Uuid,
+    mm_media_path: String,
 }
 
 pub async fn mk_lib_database_media_unmatched_read(pool: &sqlx::PgPool,
@@ -43,13 +51,13 @@ pub async fn mk_lib_database_media_unmatched_read(pool: &sqlx::PgPool,
         order by mm_media_path offset $1 limit $2")
         .bind(offset)
         .bind(limit);
-    let table_rows: Vec<DBCronList> = select_query
-		.map(|row: PgRow| DBCronList {
-			mm_media_guid: row.get("mm_media_guid"),
-			mm_media_path: row.get("mm_media_path"),
-		})
-		.fetch_all(pool)
-		.await?;
+    let table_rows: Vec<DBMediaUnmatchedList> = select_query
+        .map(|row: PgRow| DBMediaUnmatchedList {
+            mm_media_guid: row.get("mm_media_guid"),
+            mm_media_path: row.get("mm_media_path"),
+        })
+        .fetch_all(pool)
+        .await?;
     Ok(table_rows)
 }
 
@@ -76,11 +84,11 @@ pub async fn mk_lib_database_media_known(pool: &sqlx::PgPool,
         .bind(offset)
         .bind(limit);
     let table_rows: Vec<DBMediaKnownList> = select_query
-		.map(|row: PgRow| DBMediaKnownList {
-			mm_media_path: row.get("mm_media_path"),
-		})
-		.fetch_all(pool)
-		.await?;
+        .map(|row: PgRow| DBMediaKnownList {
+            mm_media_path: row.get("mm_media_path"),
+        })
+        .fetch_all(pool)
+        .await?;
     Ok(table_rows)
 }
 
@@ -132,7 +140,7 @@ pub async fn mk_lib_database_media_duplicate_count(pool: &sqlx::PgPool)
 
 pub async fn mk_lib_database_media_path_by_uuid(pool: &sqlx::PgPool,
                                                 mm_media_guid: Uuid)
-                                                -> Result<(String), sqlx::Error> {
+                                                -> Result<String, sqlx::Error> {
     let row: (String, ) = sqlx::query_as("select mm_media_path from mm_media \
         where mm_media_guid = $1")
         .bind(mm_media_guid)
@@ -143,13 +151,13 @@ pub async fn mk_lib_database_media_path_by_uuid(pool: &sqlx::PgPool,
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaDuplicateList {
-	mm_media_metadata_guid: uuid::Uuid,
-	mm_media_name: String,
-	mm_count: i64,
+    mm_media_metadata_guid: uuid::Uuid,
+    mm_media_name: String,
+    mm_count: i64,
 }
 
 pub async fn mk_lib_database_media_duplicate(pool: &sqlx::PgPool, offset: i32, limit: i32)
-                                             -> Result<(DBMediaDuplicateList), sqlx::Error> {
+                                             -> Result<DBMediaDuplicateList, sqlx::Error> {
     // TODO technically this will "dupe" things like subtitles atm
     let select_query = sqlx::query("select mm_media_metadata_guid, \
         mm_media_name, count(*) as mm_count \
@@ -174,15 +182,15 @@ pub async fn mk_lib_database_media_duplicate(pool: &sqlx::PgPool, offset: i32, l
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaDuplicateDetailList {
-	mm_media_guid: uuid::Uuid,
-	mm_media_path: String,
-	mm_media_ffprobe_json: Json,
+    mm_media_guid: uuid::Uuid,
+    mm_media_path: String,
+    mm_media_ffprobe_json: serde_json::Value,
 }
 
 pub async fn mk_lib_database_media_duplicate_detail(pool: &sqlx::PgPool,
                                                     mm_metadata_guid: Uuid,
                                                     offset: i32, limit: i32)
-                                                    -> Result<(DBMediaDuplicateDetailList), sqlx::Error> {
+                                                    -> Result<DBMediaDuplicateDetailList, sqlx::Error> {
     let select_query = sqlx::query("select mm_media_guid, \
         mm_media_path, mm_media_ffprobe_json \
         from mm_media where mm_media_guid \
@@ -216,9 +224,9 @@ pub async fn mk_lib_database_media_image_path(pool: &sqlx::PgPool,
 }
 
 pub async fn mk_lib_database_media_ffmpeg_update(pool: &sqlx::PgPool,
-                                                mm_media_guid: Uuid,
-                                                ffmpeg_json: serder_json::Value)
-                                                -> Result<(), sqlx::Error>{
+                                                 mm_media_guid: Uuid,
+                                                 ffmpeg_json: serde_json::Value)
+                                                 -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
     sqlx::query("update mm_media set mm_media_ffprobe_json = $1 \
         where mm_media_guid = $2")

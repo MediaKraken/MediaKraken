@@ -5,6 +5,13 @@ use sqlx::{types::Uuid, types::Json};
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;
 
+#[path = "../../mk_lib_database_metadata_movie.rs"]
+mod mk_lib_database_metadata_movie;
+#[path = "../../mk_lib_database_metadata_person.rs"]
+mod mk_lib_database_metadata_person;
+#[path = "../../mk_lib_database_metadata_tv.rs"]
+mod mk_lib_database_metadata_tv;
+
 pub struct TMDBAPI {
     pub tmdb_api_key: String,
 }
@@ -14,19 +21,19 @@ pub async fn provider_tmdb_movie_fetch(tmdb_id: i32, metadata_uuid: Uuid) {
     let result_json = provider_tmdb_movie_fetch_by_id(tmdb_id).await;
     // series_id_json, result_json, image_json \
     //     = com_tmdb_meta_info_build(result_json.json());
-    db_connection.db_meta_insert_tmdb(metadata_uuid,
+    mk_lib_database_metadata_movie::db_meta_insert_tmdb(metadata_uuid,
                                       series_id_json,
                                       result_json["title"],
                                       result_json,
                                       image_json);
     if result_json.contains_key("credits") {  // cast/crew doesn't exist on all media
         if result_json["credits"].contains_key("cast") {
-            db_connection.db_meta_person_insert_cast_crew("themoviedb",
+            mk_lib_database_metadata_person::db_meta_person_insert_cast_crew("themoviedb",
                                                           result_json["credits"][
                                                               "cast"]);
         }
         if result_json["credits"].contains_key("crew") {
-            db_connection.db_meta_person_insert_cast_crew("themoviedb",
+            mk_lib_database_metadata_person::db_meta_person_insert_cast_crew("themoviedb",
                                                           result_json["credits"][
                                                               "crew"]);
         }
@@ -201,7 +208,7 @@ pub async fn provider_tmdb_tv_fetch_by_id(tmdb_id: i32) {
         if result_json["poster_path"] != None:
             image_file_path += result_json["poster_path"]
             if not os.path.isfile(image_file_path):
-                if await common_network_async.mk_network_fetch_from_url_async(
+                if common_network_async.mk_network_fetch_from_url_async(
                         "https://image.tmdb.org/t/p/original"
                         + result_json["poster_path"],
                         image_file_path):
@@ -212,16 +219,16 @@ pub async fn provider_tmdb_tv_fetch_by_id(tmdb_id: i32) {
             poster_file_path = image_file_path
         // create file path for backdrop
         if "title" in result_json:  // movie
-            image_file_path = await common_metadata.com_meta_image_file_path(result_json["title"],
+            image_file_path = common_metadata.com_meta_image_file_path(result_json["title"],
                                                                              "backdrop")
         else:  // tv
-            image_file_path = await common_metadata.com_meta_image_file_path(result_json["name"],
+            image_file_path = common_metadata.com_meta_image_file_path(result_json["name"],
                                                                              "backdrop")
         backdrop_file_path = None
         if result_json["backdrop_path"] != None:
             image_file_path += result_json["backdrop_path"]
             if not os.path.isfile(image_file_path):
-                if await common_network_async.mk_network_fetch_from_url_async(
+                if common_network_async.mk_network_fetch_from_url_async(
                         "https://image.tmdb.org/t/p/original"
                         + result_json["backdrop_path"],
                         image_file_path):
@@ -253,11 +260,11 @@ async def movie_search_tmdb(db_connection, file_name):
     // try to match ID ONLY
     if 'year' in file_name:
         match_response, match_result = await common_global.api_instance.com_tmdb_search(
-            file_name['title'], file_name['year'], id_only=True,
+            file_name["title"], file_name["year"], id_only=true,
             media_type=common_global.DLMediaType.Movie.value)
     else:
         match_response, match_result = await common_global.api_instance.com_tmdb_search(
-            file_name['title'], None, id_only=True,
+            file_name['title'], None, id_only=true,
             media_type=common_global.DLMediaType.Movie.value)
     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                      message_text={
@@ -282,10 +289,6 @@ async def movie_search_tmdb(db_connection, file_name):
                                                                          message_text={
                                                                              "movielookup multiple results":
                                                                                  match_result})
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'meta movie uuid': metadata_uuid,
-                                                                         'result': match_result})
     return metadata_uuid, match_result
 
 async def movie_fetch_save_tmdb_review(db_connection, tmdb_id):
@@ -294,7 +297,7 @@ async def movie_fetch_save_tmdb_review(db_connection, tmdb_id):
     """
     review_json = await common_global.api_instance.com_tmdb_meta_review_by_id(tmdb_id)
     // review record doesn't exist on all media
-    if review_json != None and review_json['total_results'] > 0:
+    if review_json != None and review_json["total_results"] > 0:
         review_json_id = ({'themoviedb': str(review_json['id'])})
         await db_connection.db_review_insert(review_json_id,
                                              {'themoviedb': review_json})
@@ -313,26 +316,26 @@ async def movie_fetch_save_tmdb_collection(db_connection, tmdb_collection_id, do
                                                                          'guid': collection_guid})
     if collection_guid is None:
         // insert
-        collection_meta = await common_global.api_instance.com_tmdb_meta_collection_by_id(
+        collection_meta = common_global.api_instance.com_tmdb_meta_collection_by_id(
             tmdb_collection_id)
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
                                                                              "col": collection_meta})
         // poster path
-        if download_data['Poster'] != None:
+        if download_data["Poster"] != None:
             image_poster_path = common_metadata.com_meta_image_path(download_data['Name'],
                                                                     'poster', 'themoviedb',
                                                                     download_data['Poster'])
         else:
             image_poster_path = None
         // backdrop path
-        if download_data['Backdrop'] != None:
+        if download_data["Backdrop"] != None:
             image_backdrop_path = common_metadata.com_meta_image_path(download_data['Name'],
                                                                       'backdrop', 'themoviedb',
                                                                       download_data['Backdrop'])
         else:
             image_backdrop_path = None
-        await db_connection.db_collection_insert(download_data['Name'], download_data['GUID'],
+        await db_connection.db_collection_insert(download_data["Name"], download_data["GUID"],
                                                  collection_meta, {'Poster': image_poster_path,
                                                                    'Backdrop': image_backdrop_path})
         // commit all changes to db
@@ -351,17 +354,17 @@ async def metadata_fetch_tmdb_person(db_connection, provider_name, download_data
     if common_global.api_instance != None:
         // fetch and save json data via tmdb id
         result_json = await common_global.api_instance.com_tmdb_metadata_bio_by_id(
-            download_data['mdq_provider_id'])
-        if result_json is None or result_json.status_code == 502:
-            await asyncio.sleep(60)
-            await metadata_fetch_tmdb_person(db_connection, provider_name, download_data)
+            download_data["mdq_provider_id"])
+        if result_json == None or result_json.status_code == 502:
+            asyncio.sleep(60)
+            metadata_fetch_tmdb_person(db_connection, provider_name, download_data)
         else if result_json.status_code == 200:
-            await db_connection.db_meta_person_update(provider_name=provider_name,
+            db_connection.db_meta_person_update(provider_name=provider_name,
                                                       provider_uuid=download_data['mdq_provider_id'],
                                                       person_bio=result_json.json(),
                                                       person_image=await common_global.api_instance.com_tmdb_meta_bio_image_build(
                                                           result_json.json()))
-            await db_connection.db_download_delete(download_data['mdq_id'])
-            await db_connection.db_commit()
+            db_connection.db_download_delete(download_data['mdq_id'])
+            db_connection.db_commit()
 
  */

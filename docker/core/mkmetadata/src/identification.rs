@@ -1,5 +1,6 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+use std::path::Path;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::Row;
@@ -28,7 +29,10 @@ mod metadata_music_video;
 #[path = "metadata/sports.rs"]
 mod metadata_sports;
 #[path = "metadata/tv.rs"]
-mod metadata_music_tv;
+mod metadata_tv;
+
+#[path = "mk_lib_database_metadata_game.rs"]
+mod mk_lib_database_metadata_game;
 
 #[derive(Serialize, Deserialize)]
 struct MediaTitleYear {
@@ -54,30 +58,33 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
         }
 
         mk_lib_common_enum_media_type::DLMediaType::GAME_CHD => {
-            metadata_uuid = &sqlx_pool::db_meta_game_by_name_and_system(os.path.basename(
-                os.path.splitext(dl_row.get("mdq_path"))[0]), lookup_system_id);
+            // TODO remove the file extension
+            metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_name_and_system(&pool,
+                                                                                                            Path::new(dl_row.get("mdq_path")).file_name(), lookup_system_id);
             if metadata_uuid == None {
                 let sha1_value = mk_lib_hash_sha1::mk_file_hash_sha1(dl_row.get("mdq_path"));
-                metadata_uuid = &sqlx_pool::db_meta_game_by_sha1(sha1_value);
+                metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(&pool, sha1_value);
             }
         }
 
         mk_lib_common_enum_media_type::DLMediaType::GAME_ISO => {
-            metadata_uuid = &sqlx_pool::db_meta_game_by_name_and_system(os.path.basename(
-                os.path.splitext(dl_row.get("mdq_path"))[0]), lookup_system_id);
+            // TODO remove the file extension
+            metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_name_and_system(&pool,
+                                                                                                            Path::new(dl_row.get("mdq_path")).file_name(), lookup_system_id);
             if metadata_uuid == None {
                 let sha1_value = mk_lib_hash_sha1::mk_file_hash_sha1(dl_row.get("mdq_path"));
-                metadata_uuid = &sqlx_pool::db_meta_game_by_sha1(sha1_value);
+                metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(&pool, sha1_value);
             }
         }
 
         mk_lib_common_enum_media_type::DLMediaType::GAME_ROM => {
-            metadata_uuid = &sqlx_pool.db_meta_game_by_name_and_system(os.path.basename(
-                os.path.splitext(dl_row.get("mdq_path"))[0]), lookup_system_id);
+            // TODO remove the file extension
+            metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_name_and_system(&pool,
+                                                                                                            Path::new(dl_row.get("mdq_path")).file_name(), lookup_system_id);
             if metadata_uuid == None {
                 let sha1_hash = mk_lib_hash_sha1::mk_file_hash_sha1(dl_row.get("mdq_path"));
                 if sha1_hash != None {
-                    metadata_uuid = &sqlx_pool::db_meta_game_by_sha1(sha1_hash);
+                    metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(&pool, sha1_hash);
                 }
             }
         }
@@ -88,8 +95,8 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
         mk_lib_common_enum_media_type::DLMediaType::PUBLICATION_COMIC_STRIP |
         mk_lib_common_enum_media_type::DLMediaType::PUBLICATION_MAGAZINE |
         mk_lib_common_enum_media_type::DLMediaType::PUBLICATION_GRAPHIC_NOVEL => {
-            metadata_uuid = metadata_periodicals::metadata_periodicals_lookup(&pool,
-                                                                              dl_row).await;
+            metadata_uuid = metadata_book::metadata_book_lookup(&pool,
+                                                                dl_row).await;
         }
 
         mk_lib_common_enum_media_type::DLMediaType::MOVIE |
