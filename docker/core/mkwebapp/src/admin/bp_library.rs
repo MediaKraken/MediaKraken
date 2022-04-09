@@ -7,6 +7,9 @@ use rocket::serde::{Serialize, Deserialize, json::Json};
 #[path = "../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;
 
+#[path = "../mk_lib_database_library.rs"]
+mod mk_lib_database_library;
+
 #[get("/admin_library/<page>")]
 pub async fn admin_library(sqlx_pool: &rocket::State<sqlx::PgPool>, page: i8) -> Template {
     let total_pages: i32 = mk_lib_database_library::mk_lib_database_library_count(&sqlx_pool, "".to_string()).await.unwrap() / 30;

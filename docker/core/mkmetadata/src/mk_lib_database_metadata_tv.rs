@@ -1,6 +1,7 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
 use sqlx::{types::Uuid, types::Json};
+use sqlx::{FromRow, Row};
 use sqlx::postgres::PgRow;
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
@@ -15,6 +16,39 @@ pub async fn mk_lib_database_metadata_exists_tv(pool: &sqlx::PgPool,
     Ok(row.0)
 }
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMetaTVShowList {
+    mm_metadata_tvshow_guid: uuid::Uuid,
+    mm_metadata_tvshow_name: String,
+    air_date: String,
+    image_json: serde_json::Value,
+}
+
+pub async fn mk_lib_database_metadata_tv_read(pool: &sqlx::PgPool,
+                                              search_value: String,
+                                              offset: i32, limit: i32)
+                                              -> Result<Vec<DBMetaTVShowList>, sqlx::Error> {
+    let select_query = sqlx::query("elect mm_metadata_tvshow_guid, \
+        mm_metadata_tvshow_name, \
+        mm_metadata_tvshow_json->'first_air_date' as air_date, \
+        mm_metadata_tvshow_localimage_json->'Poster' \
+        as image_json from mm_metadata_tvshow \
+        order by LOWER(mm_metadata_tvshow_name), \
+        mm_metadata_tvshow_json->'first_air_date' \
+        offset $1 limit $2")
+        .bind(offset)
+        .bind(limit);
+    let table_rows: Vec<DBMetaTVShowList> = select_query
+        .map(|row: PgRow| DBMetaTVShowList {
+            mm_metadata_tvshow_guid: row.get("mm_metadata_tvshow_guid"),
+            mm_metadata_tvshow_name: row.get("mm_metadata_tvshow_name"),
+            air_date: row.get("air_date"),
+            image_json: row.get("image_json"),
+        })
+        .fetch_all(pool)
+        .await?;
+    Ok(table_rows)
+}
 /*
 
 // TODO port query
@@ -101,24 +135,6 @@ async def db_meta_tv_eps_season(self, show_guid):
         #     season_data[row_data[0]] = row_data[1]
         season_data[int(row_data['season_num'])] = row_data['ep_count']
     return season_data
-
-
-// TODO port query
-async def db_meta_tv_list(self, offset=0, records=None, search_value=None):
-    """
-    # return list of tvshows
-    """
-    // TODO order by release date
-    return await db_conn.fetch('select mm_metadata_tvshow_guid,'
-                               ' mm_metadata_tvshow_name,'
-                               ' mm_metadata_tvshow_json->'first_air_date''
-                               ' as air_date,'
-                               ' mm_metadata_tvshow_localimage_json->'Poster''
-                               ' as image_json from mm_metadata_tvshow'
-                               ' order by LOWER(mm_metadata_tvshow_name),'
-                               ' mm_metadata_tvshow_json->'first_air_date''
-                               ' offset $1 limit $2',
-                               offset, records)
 
 
 // TODO port query

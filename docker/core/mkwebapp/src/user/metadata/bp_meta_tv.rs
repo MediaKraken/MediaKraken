@@ -29,14 +29,6 @@ pub async fn user_metadata_tv_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, gu
 
 /*
 import natsort
-from common import common_global
-from common import common_logging_elasticsearch_httpx
-from common import common_pagination_bootstrap
-from sanic import Blueprint
-
-blueprint_user_metadata_tv = Blueprint('name_blueprint_user_metadata_tv',
-                                       url_prefix='/user')
-
 
 @blueprint_user_metadata_tv.route('/user_meta_tvshow_detail/<guid>')
 @common_global.jinja_template.template('bss_user/metadata/bss_user_metadata_tv_detail.html')

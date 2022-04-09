@@ -16,30 +16,35 @@ pub struct DBMetaMusicVideoList {
 pub async fn mk_lib_database_metadata_music_video_read(pool: &sqlx::PgPool,
                                                        search_value: String,
                                                        offset: i32, limit: i32)
-                                                       -> Result<Vec<PgRow>, sqlx::Error> {
+                                                       -> Result<Vec<DBMetaMusicVideoList>, sqlx::Error> {
+    let mut select_query;
     if search_value != "" {
-        let rows = sqlx::query("select mm_metadata_music_video_guid, mm_media_music_video_band, \
+        select_query = sqlx::query("select mm_metadata_music_video_guid, mm_media_music_video_band, \
             mm_media_music_video_song, mm_metadata_music_video_localimage_json \
             from mm_metadata_music_video where mm_media_music_video_song % $1 \
             order by LOWER(mm_media_music_video_band), LOWER(mm_media_music_video_song) \
             offset $2 limit $3")
             .bind(search_value)
             .bind(offset)
-            .bind(limit)
-            .fetch_all(pool)
-            .await?;
-        Ok(rows)
+            .bind(limit);
     } else {
-        let rows = sqlx::query("select mm_metadata_music_video_guid, mm_media_music_video_band, \
+        select_query = sqlx::query("select mm_metadata_music_video_guid, mm_media_music_video_band, \
             mm_media_music_video_song, mm_metadata_music_video_localimage_json \
             from mm_metadata_music_video order by LOWER(mm_media_music_video_band), \
             LOWER(mm_media_music_video_song) offset $1 limit $2")
             .bind(offset)
-            .bind(limit)
-            .fetch_all(pool)
-            .await?;
-        Ok(rows)
+            .bind(limit);
     }
+    let table_rows: Vec<DBMetaMusicVideoList> = select_query
+        .map(|row: PgRow| DBMetaMusicVideoList {
+            mm_metadata_music_video_guid: row.get("mm_metadata_music_video_guid"),
+            mm_media_music_video_band: row.get("mm_media_music_video_band"),
+            mm_media_music_video_song: row.get("mm_media_music_video_song"),
+            mm_metadata_music_video_localimage_json: row.get("mm_metadata_music_video_localimage_json"),
+        })
+        .fetch_all(pool)
+        .await?;
+    Ok(table_rows)
 }
 
 pub async fn mk_lib_database_metadata_music_video_lookup(pool: &sqlx::PgPool,

@@ -7,41 +7,46 @@ use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaMusicList {
-	mm_metadata_album_guid: uuid::Uuid,
-	mm_metadata_album_name: String,
-	mm_metadata_album_json: serde_json::Value,
-	mm_metadata_album_localimage: String,
+    mm_metadata_album_guid: uuid::Uuid,
+    mm_metadata_album_name: String,
+    mm_metadata_album_json: serde_json::Value,
+    mm_metadata_album_localimage: String,
 }
 
 pub async fn mk_lib_database_metadata_music_read(pool: &sqlx::PgPool,
                                                  search_value: String,
                                                  offset: i32, limit: i32)
-                                                 -> Result<Vec<PgRow>, sqlx::Error> {
+                                                 -> Result<Vec<DBMetaMusicList>, sqlx::Error> {
     // TODO, only grab the poster locale from json
     // TODO order by release year
+    let mut select_query;
     if search_value != "" {
-        let rows = sqlx::query("select mm_metadata_album_guid, mm_metadata_album_name, \
+        select_query = sqlx::query("select mm_metadata_album_guid, mm_metadata_album_name, \
             mm_metadata_album_json, mm_metadata_album_localimage \
             from mm_metadata_album where mm_metadata_album_name % $1 \
             order by LOWER(mm_metadata_album_name) \
             offset $2 limit $3")
             .bind(search_value)
             .bind(offset)
-            .bind(limit)
-            .fetch_all(pool)
-            .await?;
-        Ok(rows)
+            .bind(limit);
     } else {
-        let rows = sqlx::query("select mm_metadata_album_guid, mm_metadata_album_name, \
+        select_query = sqlx::query("select mm_metadata_album_guid, mm_metadata_album_name, \
             mm_metadata_album_json, mm_metadata_album_localimage \
             from mm_metadata_album order by LOWER(mm_metadata_album_name) \
             offset $1 limit $2")
             .bind(offset)
-            .bind(limit)
-            .fetch_all(pool)
-            .await?;
-        Ok(rows)
+            .bind(limit);
     }
+    let table_rows: Vec<DBMetaMusicList> = select_query
+        .map(|row: PgRow| DBMetaMusicList {
+            mm_metadata_album_guid: row.get("mm_metadata_album_guid"),
+            mm_metadata_album_name: row.get("mm_metadata_album_name"),
+            mm_metadata_album_json: row.get("mm_metadata_album_json"),
+            mm_metadata_album_localimage: row.get("mm_metadata_album_localimage"),
+        })
+        .fetch_all(pool)
+        .await?;
+    Ok(table_rows)
 }
 
 /*
