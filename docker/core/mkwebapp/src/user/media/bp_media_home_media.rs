@@ -3,15 +3,21 @@ use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 use uuid::Uuid;
-use paginator::{Paginator, PageItem};
-use core::fmt::Write;
+use rocket::serde::{Serialize, Deserialize, json::Json};
+
+#[path = "../../mk_lib_common_pagination.rs"]
+mod mk_lib_common_pagination;
 
 #[path = "../../mk_lib_database_media_home_media.rs"]
 mod mk_lib_database_media_home_media;
 
-#[get("/media/home_media")]
-pub async fn user_media_home_media(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
-    Template::render("bss_user/media/bss_user_media_home_movie", context! {})
+#[get("/media/home_media/<page>")]
+pub async fn user_media_home_media(sqlx_pool: &rocket::State<sqlx::PgPool>, page: i8) -> Template {
+    let total_pages: i32 = mk_lib_database_media_home_media::mk_lib_database_media_home_media_count(&sqlx_pool, "".to_string()).await.unwrap() / 30;
+    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page).await.unwrap();
+    Template::render("bss_user/media/bss_user_media_home_movie", context! {
+        pagination_bar: pagination_html,
+    })
 }
 
 #[get("/media/home_media_detail/<guid>")]

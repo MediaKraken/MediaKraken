@@ -3,12 +3,18 @@ use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera, context};
 use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
 use uuid::Uuid;
-use paginator::{Paginator, PageItem};
-use core::fmt::Write;
+use rocket::serde::{Serialize, Deserialize, json::Json};
 
-#[get("/admin_user")]
-pub async fn admin_user(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
-    Template::render("bss_admin/bss_admin_user", context! {})
+#[path = "../mk_lib_common_pagination.rs"]
+mod mk_lib_common_pagination;
+
+#[get("/admin_user/<page>")]
+pub async fn admin_user(sqlx_pool: &rocket::State<sqlx::PgPool>, page: i8) -> Template {
+    let total_pages: i32 = mk_lib_database_user::mk_lib_database_user_count(&sqlx_pool, "".to_string()).await.unwrap() / 30;
+    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page).await.unwrap();
+    Template::render("bss_admin/bss_admin_user", context! {
+        pagination_bar: pagination_html,
+    })
 }
 
 #[get("/admin_user_detail/<guid>")]

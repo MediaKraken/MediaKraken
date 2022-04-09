@@ -5,9 +5,9 @@ use sqlx::{FromRow, Row};
 use sqlx::{types::Uuid, types::Json};
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
-pub async fn mk_lib_database_metadata_collections_count(pool: &sqlx::PgPool,
-                                                        search_value: String)
-                                                        -> Result<i32, sqlx::Error> {
+pub async fn mk_lib_database_metadata_collection_count(pool: &sqlx::PgPool,
+                                                       search_value: String)
+                                                       -> Result<i32, sqlx::Error> {
     if search_value != "" {
         let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_collection \
             where mm_metadata_collection_name = $1")

@@ -249,19 +249,6 @@ def db_metatv_guid_by_imdb(self, imdb_uuid):
 
 
 // TODO port query
-def db_metatv_guid_by_tvmaze(self, tvmaze_uuid):
-    """
-    # metadata guid by tvmaze id
-    """
-    self.db_cursor.execute('select mm_metadata_tvshow_guid from mm_metadata_tvshow'
-                           ' where mm_metadata_media_tvshow_id->'tvmaze' ? $1', (tvmaze_uuid,))
-    try:
-        return self.db_cursor.fetchone()['mm_metadata_tvshow_guid']
-    except:
-        return None
-
-
-// TODO port query
 def db_metatv_guid_by_tmdb(self, tmdb_uuid):
     """
     # metadata guid by tmdb id
@@ -273,21 +260,6 @@ def db_metatv_guid_by_tmdb(self, tmdb_uuid):
         return self.db_cursor.fetchone()['mm_metadata_tvshow_guid']
     except:
         return None
-
-
-// TODO port query
-def db_metatv_guid_by_rt(self, rt_uuid):
-    """
-    # metadata guid by rt id
-    """
-    self.db_cursor.execute('select mm_metadata_tvshow_guid from mm_metadata_tvshow'
-                           ' where mm_metadata_media_tvshow_id->'rottentomatoes' ? $1',
-                           (rt_uuid,))
-    try:
-        return self.db_cursor.fetchone()['mm_metadata_tvshow_guid']
-    except:
-        return None
-
 
 // TODO port query
 def db_meta_tvshow_list_count(self, search_value=None):

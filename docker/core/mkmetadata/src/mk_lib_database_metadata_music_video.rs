@@ -42,10 +42,10 @@ pub async fn mk_lib_database_metadata_music_video_read(pool: &sqlx::PgPool,
     }
 }
 
-pub async fn mk_lib_database_meta_music_video_lookup(pool: &sqlx::PgPool,
-                                                     artist_name: String,
-                                                     song_title: String)
-                                                     -> Result<uuid::Uuid, sqlx::Error> {
+pub async fn mk_lib_database_metadata_music_video_lookup(pool: &sqlx::PgPool,
+                                                         artist_name: String,
+                                                         song_title: String)
+                                                         -> Result<uuid::Uuid, sqlx::Error> {
     let row: (Uuid, ) = sqlx::query_as("select mm_metadata_music_video_guid \
         from mm_metadata_music_video \
         where lower(mm_media_music_video_band) = $1 \
@@ -57,10 +57,10 @@ pub async fn mk_lib_database_meta_music_video_lookup(pool: &sqlx::PgPool,
     Ok(row.0)
 }
 
-pub async fn mk_lib_database_meta_music_video_count(pool: &sqlx::PgPool,
-                                                    imvdb_id: i32,
-                                                    search_value: String)
-                                                    -> Result<i32, sqlx::Error> {
+pub async fn mk_lib_database_metadata_music_video_count(pool: &sqlx::PgPool,
+                                                        search_value: String,
+                                                        imvdb_id: i32)
+                                                        -> Result<i32, sqlx::Error> {
     if imvdb_id == 0 {
         if search_value != "" {
             let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_music_video \
@@ -85,9 +85,9 @@ pub async fn mk_lib_database_meta_music_video_count(pool: &sqlx::PgPool,
     }
 }
 
-pub async fn mk_lib_database_meta_music_video_detail_uuid(pool: &sqlx::PgPool,
-                                                          music_video_uuid: uuid::Uuid)
-                                                          -> Result<PgRow, sqlx::Error> {
+pub async fn mk_lib_database_metadata_music_video_detail_uuid(pool: &sqlx::PgPool,
+                                                              music_video_uuid: uuid::Uuid)
+                                                              -> Result<PgRow, sqlx::Error> {
     let row: PgRow = sqlx::query("select mm_media_music_video_band, \
         mm_media_music_video_song, mm_metadata_music_video_json, \
         mm_metadata_music_video_localimage_json from mm_metadata_music_video \
@@ -98,13 +98,13 @@ pub async fn mk_lib_database_meta_music_video_detail_uuid(pool: &sqlx::PgPool,
     Ok(row)
 }
 
-pub async fn mk_lib_database_meta_music_video_insert(pool: &sqlx::PgPool,
-                                                     artist_name: String,
-                                                     artist_song: String,
-                                                     id_json: serde_json::Value,
-                                                     data_json: serde_json::Value,
-                                                     image_json: serde_json::Value)
-                                                     -> Result<Uuid, sqlx::Error> {
+pub async fn mk_lib_database_metadata_music_video_insert(pool: &sqlx::PgPool,
+                                                         artist_name: String,
+                                                         artist_song: String,
+                                                         id_json: serde_json::Value,
+                                                         data_json: serde_json::Value,
+                                                         image_json: serde_json::Value)
+                                                         -> Result<Uuid, sqlx::Error> {
     let new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_metadata_music_video (mm_metadata_music_video_guid, \
