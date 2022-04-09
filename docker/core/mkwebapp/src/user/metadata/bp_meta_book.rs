@@ -23,8 +23,11 @@ pub async fn user_metadata_book(sqlx_pool: &rocket::State<sqlx::PgPool>, page: i
 }
 
 #[get("/metadata/book_detail/<guid>")]
-pub async fn user_metadata_book_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: &str) -> Template {
-    Template::render("bss_user/metadata/bss_user_metadata_periodical_detail", context! {})
+pub async fn user_metadata_book_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: String) -> Template {
+    let book_data = mk_lib_database_metadata_book::mk_lib_database_metadata_book_detail(&sqlx_pool, guid).await.unwrap();
+    Template::render("bss_user/metadata/bss_user_metadata_periodical_detail", context! {
+        book_meta: book_data,
+    })
 }
 
 

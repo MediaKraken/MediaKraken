@@ -67,7 +67,7 @@ pub async fn mk_lib_database_metadata_collection_read(pool: &sqlx::PgPool,
     Ok(table_rows)
 }
 
-pub async fn mk_lib_database_meta_collection_uuid(pool: &sqlx::PgPool,
+pub async fn mk_lib_database_meta_collection_detail(pool: &sqlx::PgPool,
                                                   collection_uuid: uuid::Uuid)
                                                   -> Result<PgRow, sqlx::Error> {
     let row: PgRow = sqlx::query("select mm_metadata_collection_json, \

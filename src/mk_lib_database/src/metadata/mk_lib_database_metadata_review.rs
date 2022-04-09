@@ -32,9 +32,9 @@ pub async fn mk_lib_database_metadata_review_count(pool: &sqlx::PgPool,
     Ok(row.0)
 }
 
-pub async fn mk_lib_database_metadata_review_by_uuid(pool: &sqlx::PgPool,
-                                                     metadata_uuid: Uuid)
-                                                     -> Result<Vec<PgRow>, sqlx::Error> {
+pub async fn mk_lib_database_metadata_review_list_metadata(pool: &sqlx::PgPool,
+                                                           metadata_uuid: Uuid)
+                                                           -> Result<Vec<PgRow>, sqlx::Error> {
     // TODO order by release date
     // TODO order by rating? (optional?)
     let rows: Vec<PgRow> = sqlx::query("select mm_review_guid, mm_review_json \

@@ -33,7 +33,7 @@ pub struct MetaTVStationList {
     mm_tv_station_channel: String,
 }
 
-pub async fn mk_lib_database_cron_service_read(pool: &sqlx::PgPool)
+pub async fn mk_lib_database_meta_tv_live_station_read(pool: &sqlx::PgPool)
                                                -> Result<Vec<MetaTVStationList>, sqlx::Error> {
     let select_query = sqlx::query("select mm_tv_stations_id, mm_tv_station_name, \
         mm_tv_station_id, mm_tv_station_channel \
@@ -50,7 +50,7 @@ pub async fn mk_lib_database_cron_service_read(pool: &sqlx::PgPool)
     Ok(table_rows)
 }
 
-pub async fn mk_lib_database_tv_station_exists(pool: &sqlx::PgPool,
+pub async fn mk_lib_database_meta_tv_station_exists(pool: &sqlx::PgPool,
 											   station_id: String,
 											   channel_id: String)
 											   -> Result<i32, sqlx::Error> {

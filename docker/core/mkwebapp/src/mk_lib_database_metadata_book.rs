@@ -5,8 +5,9 @@ use sqlx::{FromRow, Row};
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 use sqlx::{types::Uuid, types::Json};
 
-pub async fn mk_lib_database_metadata_book_by_uuid(pool: &sqlx::PgPool, book_uuid: uuid::Uuid)
-                                                   -> Result<PgRow, sqlx::Error> {
+pub async fn mk_lib_database_metadata_book_detail(pool: &sqlx::PgPool,
+                                                  book_uuid: uuid::Uuid)
+                                                  -> Result<PgRow, sqlx::Error> {
     let row: PgRow = sqlx::query("select mm_metadata_book_json from mm_metadata_book \
         where mm_metadata_book_guid = $1")
         .bind(book_uuid)

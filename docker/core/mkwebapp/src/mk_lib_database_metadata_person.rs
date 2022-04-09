@@ -76,9 +76,9 @@ pub async fn mk_lib_database_metadata_person_read(pool: &sqlx::PgPool,
     Ok(table_rows)
 }
 
-pub async fn mk_lib_database_meta_person_by_guid(pool: &sqlx::PgPool,
-                                                 person_uuid: Uuid)
-                                                 -> Result<PgRow, sqlx::Error> {
+pub async fn mk_lib_database_meta_person_detail(pool: &sqlx::PgPool,
+                                                person_uuid: Uuid)
+                                                -> Result<PgRow, sqlx::Error> {
     let row: PgRow = sqlx::query("select mmp_id, mmp_person_media_id, \
         mmp_person_meta_json, mmp_person_image, mmp_person_name, \
         mmp_person_meta_json->'profile_path' as mmp_meta \
