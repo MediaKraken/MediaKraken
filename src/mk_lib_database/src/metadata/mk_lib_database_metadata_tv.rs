@@ -49,8 +49,25 @@ pub async fn mk_lib_database_metadata_tv_read(pool: &sqlx::PgPool,
         .await?;
     Ok(table_rows)
 }
-/*
 
+pub async fn mk_lib_database_metadata_tv_count(pool: &sqlx::PgPool,
+                                                  search_value: String)
+                                                  -> Result<i32, sqlx::Error> {
+    if search_value != "" {
+        let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_tvshow \
+            where mm_metadata_tvshow_name % $1")
+            .bind(search_value)
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    } else {
+        let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_tvshow")
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    }
+}
+/*
 // TODO port query
 async def db_metatv_guid_by_tmdb(self, tmdb_uuid):
     """
@@ -135,20 +152,6 @@ async def db_meta_tv_eps_season(self, show_guid):
         #     season_data[row_data[0]] = row_data[1]
         season_data[int(row_data['season_num'])] = row_data['ep_count']
     return season_data
-
-
-// TODO port query
-async def db_meta_tv_list_count(self, search_value=None):
-    """
-    # tvshow count
-    """
-    if search_value is None:
-        return await db_conn.fetchval('select count(*) from mm_metadata_tvshow '
-                                      'where mm_metadata_tvshow_name % $1',
-                                      search_value)
-    else:
-        return await db_conn.fetchval('select count(*) from mm_metadata_tvshow')
-
 
 // TODO port query
 async def db_meta_tv_season_eps_list(self, show_guid, season_number):

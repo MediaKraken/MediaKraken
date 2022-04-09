@@ -20,25 +20,26 @@ pub async fn mk_lib_database_game_server_delete(pool: &sqlx::PgPool,
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBGameServerList {
-	mm_game_server_guid: uuid::Uuid,
-	mm_game_server_name: String,
+    mm_game_server_guid: uuid::Uuid,
+    mm_game_server_name: String,
     mm_game_server_json: serde_json::Value,
 }
 
-pub async fn mk_lib_database_dedicated_server_read(pool: &sqlx::PgPool,
-                                                   offset: i32, limit: i32)
-                                                   -> Result<Vec<DBGameServerList>, sqlx::Error> {
+pub async fn mk_lib_database_game_server_read(pool: &sqlx::PgPool,
+                                              search_value: String,
+                                              offset: i32, limit: i32)
+                                              -> Result<Vec<DBGameServerList>, sqlx::Error> {
     let select_query = sqlx::query("select mm_game_server_guid, mm_game_server_name, \
         mm_game_server_json from mm_game_dedicated_servers \
         order by mm_game_server_name offset $1 limit $2")
         .bind(offset)
         .bind(limit);
     let table_rows: Vec<DBGameServerList> = select_query
-		.map(|row: PgRow| DBGameServerList {
-			mm_game_server_guid: row.get("mm_game_server_guid"),
-			mm_game_server_name: row.get("mm_game_server_name"),
-			mm_game_server_json: row.get("mm_game_server_json"),
-		})
+        .map(|row: PgRow| DBGameServerList {
+            mm_game_server_guid: row.get("mm_game_server_guid"),
+            mm_game_server_name: row.get("mm_game_server_name"),
+            mm_game_server_json: row.get("mm_game_server_json"),
+        })
         .fetch_all(pool)
         .await?;
     Ok(table_rows)
@@ -55,9 +56,9 @@ pub async fn mk_lib_database_game_server_detail(pool: &sqlx::PgPool,
     Ok(row)
 }
 
-pub async fn mk_lib_database_game_server_list_count(pool: &sqlx::PgPool,
-                                                    search_value: String)
-                                                    -> Result<i32, sqlx::Error> {
+pub async fn mk_lib_database_game_server_count(pool: &sqlx::PgPool,
+                                               search_value: String)
+                                               -> Result<i32, sqlx::Error> {
     if search_value != "" {
         let row: (i32, ) = sqlx::query_as("select count(*) from mm_game_dedicated_servers \
             where mm_game_server_name = $1")
