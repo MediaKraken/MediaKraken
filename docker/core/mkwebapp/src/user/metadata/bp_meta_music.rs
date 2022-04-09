@@ -11,7 +11,10 @@ mod mk_lib_database_metadata_music;
 
 #[get("/metadata/music")]
 pub async fn user_metadata_music(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
-    Template::render("bss_user/metadata/bss_user_metadata_music_album", context! {})
+    let music_list = mk_lib_database_metadata_music::mk_lib_database_metadata_music_read(&sqlx_pool, "".to_string(), 0, 30).await.unwrap();
+    Template::render("bss_user/metadata/bss_user_metadata_music_album", context! {
+        media_music: music_list,
+    })
 }
 
 #[get("/metadata/music_detail/<guid>")]

@@ -11,7 +11,10 @@ mod mk_lib_database_metadata_book;
 
 #[get("/metadata/book")]
 pub async fn user_metadata_book(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
-    Template::render("bss_user/metadata/bss_user_metadata_periodical", context! {})
+    let book_list = mk_lib_database_metadata_book::mk_lib_database_metadata_book_read(&sqlx_pool, "".to_string(), 0, 30).await.unwrap();
+    Template::render("bss_user/metadata/bss_user_metadata_periodical", context! {
+        media_book: book_list,
+    })
 }
 
 #[get("/metadata/book_detail/<guid>")]

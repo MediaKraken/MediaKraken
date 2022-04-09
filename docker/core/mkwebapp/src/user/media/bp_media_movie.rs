@@ -11,7 +11,10 @@ mod mk_lib_database_media_movie;
 
 #[get("/media/movie")]
 pub async fn user_media_movie(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
-    Template::render("bss_user/media/bss_user_media_movie", context! {})
+    let movie_list = mk_lib_database_media_movie::mk_lib_database_media_movie_read(&sqlx_pool, "".to_string(), 0, 30).await.unwrap();
+    Template::render("bss_user/media/bss_user_media_movie", context! {
+        media_movie: movie_list,
+    })
 }
 
 #[get("/media/movie_detail/<guid>")]

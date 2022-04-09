@@ -5,13 +5,17 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 use uuid::Uuid;
 use paginator::{Paginator, PageItem};
 use core::fmt::Write;
+use rocket::serde::{Serialize, Deserialize, json::Json};
 
 #[path = "../../mk_lib_database_metadata_music_video.rs"]
 mod mk_lib_database_metadata_music_video;
 
 #[get("/metadata/music_video")]
 pub async fn user_metadata_music_video(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
-    Template::render("bss_user/metadata/bss_user_metadata_music_video", context! {})
+    let music_video_list = mk_lib_database_metadata_music_video::mk_lib_database_metadata_music_video_read(&sqlx_pool, "".to_string(), 0, 30).await.unwrap();
+    Template::render("bss_user/metadata/bss_user_metadata_music_video", context! {
+        media_music_video: music_video_list,
+    })
 }
 
 #[get("/metadata/music_video_detail/<guid>")]

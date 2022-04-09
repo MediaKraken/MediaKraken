@@ -13,10 +13,10 @@ pub struct DBMetaMusicList {
 	mm_metadata_album_localimage: String,
 }
 
-pub async fn mk_lib_database_metadata_music_album_read(pool: &sqlx::PgPool,
-                                                     search_value: String,
-                                                     offset: i32, limit: i32)
-                                                     -> Result<Vec<PgRow>, sqlx::Error> {
+pub async fn mk_lib_database_metadata_music_read(pool: &sqlx::PgPool,
+                                                 search_value: String,
+                                                 offset: i32, limit: i32)
+                                                 -> Result<Vec<PgRow>, sqlx::Error> {
     // TODO, only grab the poster locale from json
     // TODO order by release year
     if search_value != "" {

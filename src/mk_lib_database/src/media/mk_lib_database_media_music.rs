@@ -5,7 +5,7 @@ use sqlx::{FromRow, Row};
 use sqlx::{types::Uuid, types::Json};
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
-pub async fn mk_lib_database_media_album_count(pool: &sqlx::PgPool,
+pub async fn mk_lib_database_media_music_count(pool: &sqlx::PgPool,
                                                search_value: String)
                                                -> Result<i32, sqlx::Error> {
     if search_value != "" {
@@ -33,7 +33,7 @@ pub struct DBMediaMusicList {
 	mm_metadata_album_json: serde_json::Value,
 }
 
-pub async fn mk_lib_database_media_album_read(pool: &sqlx::PgPool,
+pub async fn mk_lib_database_media_music_read(pool: &sqlx::PgPool,
                                               search_value: String,
                                               offset: i32, limit: i32)
                                               -> Result<Vec<DBMediaMusicList>, sqlx::Error> {

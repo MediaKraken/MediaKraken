@@ -167,6 +167,7 @@
 \cp -f --remove-destination ../src/mk_lib_database/src/media/mk_lib_database_media_book.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/media/mk_lib_database_media_game.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/media/mk_lib_database_media_game_system.rs ../docker/core/mkwebapp/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_game_servers.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/media/mk_lib_database_media_home_media.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/media/mk_lib_database_media_images.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/media/mk_lib_database_media_iradio.rs ../docker/core/mkwebapp/src/.

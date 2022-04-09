@@ -11,7 +11,10 @@ mod mk_lib_database_metadata_person;
 
 #[get("/metadata/person")]
 pub async fn user_metadata_person(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
-    Template::render("bss_user/metadata/bss_user_metadata_person", context! {})
+    let person_list = mk_lib_database_metadata_person::mk_lib_database_metadata_person_read(&sqlx_pool, "".to_string(), 0, 30).await.unwrap();
+    Template::render("bss_user/metadata/bss_user_metadata_person", context! {
+        media_person: person_list,
+    })
 }
 
 #[get("/metadata/person_detail/<guid>")]

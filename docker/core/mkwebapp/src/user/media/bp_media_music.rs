@@ -11,7 +11,10 @@ mod mk_lib_database_media_music;
 
 #[get("/media/music")]
 pub async fn user_media_music(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
-    Template::render("bss_user/media/bss_user_media_music_album", context! {})
+    let music_list = mk_lib_database_media_music::mk_lib_database_media_music_read(&sqlx_pool, "".to_string(), 0, 30).await.unwrap();
+    Template::render("bss_user/media/bss_user_media_music_album", context! {
+        media_music: music_list,
+    })
 }
 
 #[get("/media/music_detail/<guid>")]

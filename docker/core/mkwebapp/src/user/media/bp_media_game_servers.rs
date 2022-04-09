@@ -11,7 +11,10 @@ mod mk_lib_database_game_servers;
 
 #[get("/media/game_servers")]
 pub async fn user_media_game_servers(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
-    Template::render("bss_user/media/bss_user_media_game_server", context! {})
+    let game_server_list = mk_lib_database_game_servers::mk_lib_database_game_servers_read(&sqlx_pool, "".to_string(), 0, 30).await.unwrap();
+    Template::render("bss_user/media/bss_user_media_game_server", context! {
+        media_game_server: game_server_list,
+    })
 }
 
 #[get("/media/game_servers_detail/<guid>")]

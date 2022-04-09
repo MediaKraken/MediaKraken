@@ -11,7 +11,10 @@ mod mk_lib_database_metadata_tv;
 
 #[get("/metadata/tv")]
 pub async fn user_metadata_tv(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
-    Template::render("bss_user/metadata/bss_user_metadata_tv", context! {})
+    let tv_list = mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_read(&sqlx_pool, "".to_string(), 0, 30).await.unwrap();
+    Template::render("bss_user/metadata/bss_user_metadata_tv", context! {
+        media_tv: tv_list,
+    })
 }
 
 #[get("/metadata/tv_detail/<guid>")]

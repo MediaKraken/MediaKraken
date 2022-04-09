@@ -11,7 +11,10 @@ mod mk_lib_database_metadata_sports;
 
 #[get("/metadata/sports")]
 pub async fn user_metadata_sports(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
-    Template::render("bss_user/metadata/bss_user_metadata_sports", context! {})
+    let sports_list = mk_lib_database_metadata_sports::mk_lib_database_metadata_sports_read(&sqlx_pool, "".to_string(), 0, 30).await.unwrap();
+    Template::render("bss_user/metadata/bss_user_metadata_sports", context! {
+        media_sports: sports_list,
+    })
 }
 
 #[get("/metadata/sports_detail/<guid>")]

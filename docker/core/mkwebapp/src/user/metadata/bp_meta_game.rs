@@ -11,7 +11,10 @@ mod mk_lib_database_metadata_game;
 
 #[get("/metadata/game")]
 pub async fn user_metadata_game(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
-    Template::render("bss_user/metadata/bss_user_metadata_game", context! {})
+    let game_list = mk_lib_database_metadata_game::mk_lib_database_metadata_game_read(&sqlx_pool, "".to_string(), 0, 30).await.unwrap();
+    Template::render("bss_user/metadata/bss_user_metadata_game", context! {
+        media_game: game_list,
+    })
 }
 
 #[get("/metadata/game_detail/<guid>")]
