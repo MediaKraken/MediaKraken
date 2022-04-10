@@ -8,8 +8,8 @@ use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBLibraryList {
-	mm_media_dir_guid: uuid::Uuid,
-	mm_media_dir_path: String,
+    mm_media_dir_guid: uuid::Uuid,
+    mm_media_dir_path: String,
 }
 
 pub async fn mk_lib_database_library_read(pool: &sqlx::PgPool)
@@ -17,10 +17,10 @@ pub async fn mk_lib_database_library_read(pool: &sqlx::PgPool)
     let select_query = sqlx::query("select mm_media_dir_guid, mm_media_dir_path \
         from mm_library_dir");
     let table_rows: Vec<DBLibraryList> = select_query
-		.map(|row: PgRow| DBLibraryList {
-			mm_media_dir_guid: row.get("mm_media_dir_guid"),
-			mm_media_dir_path: row.get("mm_media_dir_path"),
-		})
+        .map(|row: PgRow| DBLibraryList {
+            mm_media_dir_guid: row.get("mm_media_dir_guid"),
+            mm_media_dir_path: row.get("mm_media_dir_path"),
+        })
         .fetch_all(pool)
         .await?;
     Ok(table_rows)
@@ -38,8 +38,8 @@ pub async fn mk_lib_database_library_path_audit(pool: &sqlx::PgPool)
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBLibraryPathStatus {
-	mm_media_dir_path: String,
-	mm_media_dir_status: String,
+    mm_media_dir_path: String,
+    mm_media_dir_status: String,
 }
 
 pub async fn mk_lib_database_library_path_status(pool: &sqlx::PgPool)
@@ -48,10 +48,10 @@ pub async fn mk_lib_database_library_path_status(pool: &sqlx::PgPool)
         from mm_library_dir where mm_media_dir_status IS NOT NULL \
         order by mm_media_dir_path");
     let table_rows: Vec<DBLibraryPathStatus> = select_query
-		.map(|row: PgRow| DBLibraryPathStatus {
-			mm_media_dir_path: row.get("mm_media_dir_path"),
-			mm_media_dir_status: row.get("mm_media_dir_status"),
-		})
+        .map(|row: PgRow| DBLibraryPathStatus {
+            mm_media_dir_path: row.get("mm_media_dir_path"),
+            mm_media_dir_status: row.get("mm_media_dir_status"),
+        })
         .fetch_all(pool)
         .await?;
     Ok(table_rows)
@@ -92,6 +92,14 @@ pub async fn mk_lib_database_library_file_exists(pool: &sqlx::PgPool,
         where mm_media_path = $1 limit 1) \
         as found_record limit 1")
         .bind(file_name)
+        .fetch_one(pool)
+        .await?;
+    Ok(row.0)
+}
+
+pub async fn mk_lib_database_library_count(pool: &sqlx::PgPool)
+                                           -> Result<i32, sqlx::Error> {
+    let row: (i32, ) = sqlx::query_as("select count(*) from mm_library_dir")
         .fetch_one(pool)
         .await?;
     Ok(row.0)

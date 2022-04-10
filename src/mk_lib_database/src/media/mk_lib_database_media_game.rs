@@ -38,3 +38,49 @@ pub async fn mk_lib_database_media_game_category_update(pool: &sqlx::PgPool,
     transaction.commit().await?;
     Ok(())
 }
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMediaGameList {
+    mm_metadata_music_video_guid: uuid::Uuid,
+}
+
+pub async fn mk_lib_database_media_game_read(pool: &sqlx::PgPool,
+                                             search_value: String,
+                                             offset: i32, limit: i32)
+                                             -> Result<Vec<DBMediaGameList>, sqlx::Error> {
+    let mut select_query;
+    if search_value != "" {
+        select_query = sqlx::query("")
+            .bind(search_value)
+            .bind(offset)
+            .bind(limit);
+    } else {
+        select_query = sqlx::query("")
+            .bind(offset)
+            .bind(limit);
+    }
+    let table_rows: Vec<DBMediaGameList> = select_query
+        .map(|row: PgRow| DBMediaGameList {
+            mm_metadata_music_video_guid: row.get("mm_metadata_music_video_guid"),
+        })
+        .fetch_all(pool)
+        .await?;
+    Ok(table_rows)
+}
+
+pub async fn mk_lib_database_media_game_count(pool: &sqlx::PgPool,
+                                              search_value: String)
+                                              -> Result<i32, sqlx::Error> {
+    if search_value != "" {
+        let row: (i32, ) = sqlx::query_as("")
+            .bind(search_value)
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    } else {
+        let row: (i32, ) = sqlx::query_as("")
+            .fetch_one(pool)
+            .await?;
+        Ok(row.0)
+    }
+}

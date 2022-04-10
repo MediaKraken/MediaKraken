@@ -7,13 +7,13 @@ use sqlx::{types::Uuid, types::Json};
 
 pub async fn mk_lib_database_metadata_book_detail(pool: &sqlx::PgPool,
                                                   book_uuid: String)
-                                                  -> Result<PgRow, sqlx::Error> {
-    let row: PgRow = sqlx::query("select mm_metadata_book_json from mm_metadata_book \
+                                                  -> Result<serde_json::Value, sqlx::Error> {
+    let row: (serde_json::Value, ) = sqlx::query_as("select mm_metadata_book_json from mm_metadata_book \
         where mm_metadata_book_guid = $1")
         .bind(book_uuid)
         .fetch_one(pool)
         .await?;
-    Ok(row)
+    Ok(row.0)
 }
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
