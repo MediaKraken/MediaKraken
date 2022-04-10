@@ -23,7 +23,7 @@ pub async fn user_metadata_music(sqlx_pool: &rocket::State<sqlx::PgPool>, page: 
 }
 
 #[get("/metadata/music_detail/<guid>")]
-pub async fn user_metadata_music_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: &str) -> Template {
+pub async fn user_metadata_music_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: String) -> Template {
     Template::render("bss_user/metadata/bss_user_metadata_music_album_detail", context! {})
 }
 

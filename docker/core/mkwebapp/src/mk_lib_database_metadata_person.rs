@@ -77,7 +77,7 @@ pub async fn mk_lib_database_metadata_person_read(pool: &sqlx::PgPool,
 }
 
 pub async fn mk_lib_database_meta_person_detail(pool: &sqlx::PgPool,
-                                                person_uuid: Uuid)
+                                                person_uuid: String)
                                                 -> Result<PgRow, sqlx::Error> {
     let row: PgRow = sqlx::query("select mmp_id, mmp_person_media_id, \
         mmp_person_meta_json, mmp_person_image, mmp_person_name, \

@@ -6,7 +6,7 @@ use sqlx::{types::Uuid, types::Json};
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_metadata_game_detail(pool: &sqlx::PgPool,
-                                                  game_uuid: uuid::Uuid)
+                                                  game_uuid: String)
                                                   -> Result<uuid::Uuid, sqlx::Error> {
     let row: (uuid::Uuid, ) = sqlx::query_as("select gi_game_info_id, \
         gi_game_info_system_id, gi_game_info_json \

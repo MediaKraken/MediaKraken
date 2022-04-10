@@ -21,7 +21,7 @@ pub async fn admin_user(sqlx_pool: &rocket::State<sqlx::PgPool>, page: i8) -> Te
 }
 
 #[get("/admin_user_detail/<guid>")]
-pub async fn admin_user_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: &str) -> Template {
+pub async fn admin_user_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: String) -> Template {
     Template::render("bss_admin/bss_admin_user_detail", context! {})
 }
 

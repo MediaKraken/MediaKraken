@@ -3,6 +3,7 @@
 use sqlx::{types::Uuid, types::Json};
 use sqlx::postgres::PgRow;
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
+use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_meta_queue_count(pool: &sqlx::PgPool,
                                               user_uuid: uuid::Uuid,

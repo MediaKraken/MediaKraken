@@ -21,7 +21,7 @@ pub async fn user_media_home_media(sqlx_pool: &rocket::State<sqlx::PgPool>, page
 }
 
 #[get("/media/home_media_detail/<guid>")]
-pub async fn user_media_home_media_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: &str) -> Template {
+pub async fn user_media_home_media_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: String) -> Template {
     Template::render("bss_user/media/bss_user_media_home_movie_detail", context! {})
 }
 

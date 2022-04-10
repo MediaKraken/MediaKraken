@@ -2,6 +2,7 @@
 
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 use sqlx::{types::Uuid, types::Json};
+use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_link_delete(pool: &sqlx::PgPool,
                                          link_uuid: uuid::Uuid)
@@ -22,7 +23,7 @@ pub struct DBLinkList {
 	mm_link_json: Json,
 }
 
-pub async fn mk_lib_database_link_list(pool: &sqlx::PgPool,
+pub async fn mk_lib_database_link_read(pool: &sqlx::PgPool,
                                        offset: i32,
                                        records: i32)
                                        -> Result<Vec<DBLinkList>, sqlx::Error> {

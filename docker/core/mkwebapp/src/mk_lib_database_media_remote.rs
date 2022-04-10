@@ -3,6 +3,7 @@
 use sqlx::{types::Uuid, types::Json};
 use sqlx::postgres::PgRow;
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
+use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_remote_media_count(pool: &sqlx::PgPool)
                                                 -> Result<i32, sqlx::Error> {

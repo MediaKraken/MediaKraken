@@ -91,7 +91,7 @@ pub async fn mk_lib_database_metadata_music_video_count(pool: &sqlx::PgPool,
 }
 
 pub async fn mk_lib_database_metadata_music_video_detail(pool: &sqlx::PgPool,
-                                                         music_video_uuid: uuid::Uuid)
+                                                         music_video_uuid: String)
                                                          -> Result<PgRow, sqlx::Error> {
     let row: PgRow = sqlx::query("select mm_media_music_video_band, \
         mm_media_music_video_song, mm_metadata_music_video_json, \

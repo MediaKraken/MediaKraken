@@ -46,7 +46,7 @@ pub async fn mk_lib_database_game_server_read(pool: &sqlx::PgPool,
 }
 
 pub async fn mk_lib_database_game_server_detail(pool: &sqlx::PgPool,
-                                                game_server_uuid: uuid::Uuid)
+                                                game_server_uuid: String)
                                                 -> Result<PgRow, sqlx::Error> {
     let row: PgRow = sqlx::query("select mm_game_server_name, mm_game_server_json \
         from mm_game_dedicated_servers where mm_game_server_guid = $1")

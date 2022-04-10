@@ -3,6 +3,7 @@
 use sqlx::postgres::PgRow;
 use sqlx::{types::Uuid, types::Json};
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
+use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_media_music_video_count(pool: &sqlx::PgPool,
                                                      search_value: String)

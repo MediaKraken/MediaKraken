@@ -5,9 +5,9 @@ use sqlx::{FromRow, Row};
 use sqlx::{types::Uuid, types::Json};
 use rocket_dyn_templates::serde::{Serialize, Deserialize};
 
-pub async fn mk_lib_database_metadata_game_system_by_uuid(pool: &sqlx::PgPool,
-                                                          game_sys_uuid: Uuid)
-                                                          -> Result<PgRow, sqlx::Error> {
+pub async fn mk_lib_database_metadata_game_system_detail(pool: &sqlx::PgPool,
+                                                         game_sys_uuid: String)
+                                                         -> Result<PgRow, sqlx::Error> {
     let row: PgRow = sqlx::query("select * from mm_metadata_game_systems_info \
         where gs_id = $1")
         .bind(game_sys_uuid)

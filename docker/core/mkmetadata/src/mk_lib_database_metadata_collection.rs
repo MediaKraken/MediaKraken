@@ -68,8 +68,8 @@ pub async fn mk_lib_database_metadata_collection_read(pool: &sqlx::PgPool,
 }
 
 pub async fn mk_lib_database_meta_collection_detail(pool: &sqlx::PgPool,
-                                                  collection_uuid: uuid::Uuid)
-                                                  -> Result<PgRow, sqlx::Error> {
+                                                    collection_uuid: String)
+                                                    -> Result<PgRow, sqlx::Error> {
     let row: PgRow = sqlx::query("select mm_metadata_collection_json, \
         mm_metadata_collection_imagelocal_json from mm_metadata_collection \
         where mm_metadata_collection_guid = $1")

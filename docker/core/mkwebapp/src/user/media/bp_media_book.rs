@@ -23,7 +23,7 @@ pub async fn user_media_book(sqlx_pool: &rocket::State<sqlx::PgPool>, page: i8) 
 }
 
 #[get("/media/book_detail/<guid>")]
-pub async fn user_media_book_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: &str) -> Template {
+pub async fn user_media_book_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: String) -> Template {
     Template::render("bss_user/media/bss_user_media_periodical_detail", context! {})
 }
 
