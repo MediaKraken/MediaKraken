@@ -1,15 +1,42 @@
 use rocket::Request;
-use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera, context};
-use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
+use rocket_auth::{Users, Error, Auth, Signup, Login, User, AdminUser};
 use uuid::Uuid;
 use rocket::serde::{Serialize, Deserialize, json::Json};
+use rocket::{form::*, get, post, response::Redirect, routes, State};
+use serde_json::json;
+use rocket::request::{self, FromRequest};
 
 #[path = "../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;
 
 #[path = "../mk_lib_database_user.rs"]
 mod mk_lib_database_user;
+
+#[get("/special-content")]
+fn special_content(option: Option<User>) -> String {
+    if let Some(user) = option {
+        format!("hello, {}.", user.email())
+    } else {
+        "hello, anonymous user".into()
+    }
+}
+
+#[get("/admin-panel")]
+fn admin_panel(user: AdminUser) -> String {
+   format!("Hello {}.", user.email())
+}
+
+#[get("/private-content")]
+fn private_content(user: User) -> &'static str {
+    "If you can see this, you are logged in."
+}
+
+#[get("/see-user/<id>")]
+async fn see_user(id: i32, users: &State<Users>) -> String {
+    let user = users.get_by_id(id).await.unwrap();
+    format!("{}", json!(user))
+}
 
 #[get("/admin_user/<page>")]
 pub async fn admin_user(sqlx_pool: &rocket::State<sqlx::PgPool>, page: i8) -> Template {
@@ -21,7 +48,7 @@ pub async fn admin_user(sqlx_pool: &rocket::State<sqlx::PgPool>, page: i8) -> Te
 }
 
 #[get("/admin_user_detail/<guid>")]
-pub async fn admin_user_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: String) -> Template {
+pub async fn admin_user_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: Uuid) -> Template {
     Template::render("bss_admin/bss_admin_user_detail", context! {})
 }
 

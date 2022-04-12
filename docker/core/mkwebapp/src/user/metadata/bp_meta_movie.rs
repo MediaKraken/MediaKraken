@@ -23,7 +23,7 @@ pub async fn user_metadata_movie(sqlx_pool: &rocket::State<sqlx::PgPool>, page: 
 }
 
 #[get("/metadata/movie_detail/<guid>")]
-pub async fn user_metadata_movie_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: String) -> Template {
+pub async fn user_metadata_movie_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: Uuid) -> Template {
     Template::render("bss_user/metadata/bss_user_metadata_movie_detail", context! {})
 }
 

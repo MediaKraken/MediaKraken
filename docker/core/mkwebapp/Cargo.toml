@@ -26,7 +26,7 @@ tokio = { version = "1.17.0", features = ["full"] }
 uuid = { version = "0.8.2", features = ["serde", "v4"] }
 walkdir = "2.3.2"
 
-rocket = { git = "https://github.com/SergioBenitez/Rocket/", features = ["json", "secrets"]}
+rocket = { git = "https://github.com/SergioBenitez/Rocket/", features = ["json", "secrets", "uuid"]}
 rocket_dyn_templates = { git = "https://github.com/SergioBenitez/Rocket/", features = ["tera"]}
 
 [dev-dependencies]
