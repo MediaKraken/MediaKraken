@@ -3,7 +3,7 @@
 use sqlx::{FromRow, Row};
 use sqlx::{types::Uuid, types::Json};
 use sqlx::postgres::PgRow;
-use rocket_dyn_templates::serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize};
 use chrono::prelude::*;
 
 pub async fn mk_lib_database_metadata_exists_movie(pool: &sqlx::PgPool,

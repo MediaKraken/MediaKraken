@@ -1,6 +1,6 @@
 use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_dyn_templates::{Template, tera::Tera};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 use uuid::Uuid;
 use rocket::serde::{Serialize, Deserialize, json::Json};
@@ -11,20 +11,26 @@ mod mk_lib_common_pagination;
 #[path = "../../mk_lib_database_metadata_music.rs"]
 mod mk_lib_database_metadata_music;
 
+#[derive(Serialize)]
+struct TemplateMetaMusicContext<> {
+    template_data: Vec<mk_lib_database_metadata_music::DBMetaMusicList>,
+    pagination_bar: String,
+}
+
 #[get("/metadata/music/<page>")]
-pub async fn user_metadata_music(sqlx_pool: &rocket::State<sqlx::PgPool>, page: i8) -> Template {
+pub async fn user_metadata_music(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, page: i8) -> Template {
     let total_pages: i32 = mk_lib_database_metadata_music::mk_lib_database_metadata_music_count(&sqlx_pool, "".to_string()).await.unwrap() / 30;
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page).await.unwrap();
     let music_list = mk_lib_database_metadata_music::mk_lib_database_metadata_music_read(&sqlx_pool, "".to_string(), 0, 30).await.unwrap();
-    Template::render("bss_user/metadata/bss_user_metadata_music_album", context! {
-        media_music: music_list,
+    Template::render("bss_user/metadata/bss_user_metadata_music_album", &TemplateMetaMusicContext {
+        template_data: music_list,
         pagination_bar: pagination_html,
     })
 }
 
 #[get("/metadata/music_detail/<guid>")]
-pub async fn user_metadata_music_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: Uuid) -> Template {
-    Template::render("bss_user/metadata/bss_user_metadata_music_album_detail", context! {})
+pub async fn user_metadata_music_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, guid: Uuid) -> Template {
+    Template::render("bss_user/metadata/bss_user_metadata_music_album_detail", {})
 }
 
 /*
@@ -88,7 +94,7 @@ async def url_bp_user_metadata_music_album_list(request):
     await request.app.db_pool.release(db_connection)
     return {
         'media': media,
-        'pagination_links': pagination,
+        'pagination_bar': pagination,
     }
 
 
@@ -121,7 +127,7 @@ async def metadata_music_album_song_list(request):
     await request.app.db_pool.release(db_connection)
     return {
         'media': media_data,
-        'pagination_links': pagination,
+        'pagination_bar': pagination,
     }
 
  */

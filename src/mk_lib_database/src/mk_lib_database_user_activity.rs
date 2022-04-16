@@ -3,7 +3,7 @@
 use sqlx::{FromRow, Row};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Uuid, types::Json};
-use rocket_dyn_templates::serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize};
 use chrono::prelude::*;
 
 pub async fn mk_lib_database_activity_insert(pool: &sqlx::PgPool,

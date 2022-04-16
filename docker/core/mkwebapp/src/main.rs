@@ -12,7 +12,6 @@ use std::fs::File;
 use std::path::Path;
 use rocket::fs::{FileServer, relative};
 use rocket::{Rocket, Request, Build};
-use rocket::response::content::RawHtml;
 use rocket::response::{content, status};
 use rocket::http::Status;
 use std::collections::{HashMap, BTreeMap};

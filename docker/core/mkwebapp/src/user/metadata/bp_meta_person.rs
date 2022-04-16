@@ -1,6 +1,6 @@
 use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_dyn_templates::{Template, tera::Tera};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 use uuid::Uuid;
 use rocket::serde::{Serialize, Deserialize, json::Json};
@@ -11,20 +11,26 @@ mod mk_lib_common_pagination;
 #[path = "../../mk_lib_database_metadata_person.rs"]
 mod mk_lib_database_metadata_person;
 
+#[derive(Serialize)]
+struct TemplateMetaPersonContext<> {
+    template_data: Vec<mk_lib_database_metadata_person::DBMetaPersonList>,
+    pagination_bar: String,
+}
+
 #[get("/metadata/person/<page>")]
-pub async fn user_metadata_person(sqlx_pool: &rocket::State<sqlx::PgPool>, page: i8) -> Template {
+pub async fn user_metadata_person(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, page: i8) -> Template {
     let total_pages: i32 = mk_lib_database_metadata_person::mk_lib_database_metadata_person_count(&sqlx_pool, "".to_string()).await.unwrap() / 30;
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page).await.unwrap();
     let person_list = mk_lib_database_metadata_person::mk_lib_database_metadata_person_read(&sqlx_pool, "".to_string(), 0, 30).await.unwrap();
-    Template::render("bss_user/metadata/bss_user_metadata_person", context! {
-        media_person: person_list,
+    Template::render("bss_user/metadata/bss_user_metadata_person", &TemplateMetaPersonContext {
+        template_data: person_list,
         pagination_bar: pagination_html,
     })
 }
 
 #[get("/metadata/person_detail/<guid>")]
-pub async fn user_metadata_person_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: Uuid) -> Template {
-    Template::render("bss_user/metadata/bss_user_metadata_person_detail", context! {})
+pub async fn user_metadata_person_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, guid: Uuid) -> Template {
+    Template::render("bss_user/metadata/bss_user_metadata_person_detail", {})
 }
 
 /*
@@ -103,7 +109,7 @@ async def url_bp_user_metadata_person_list(request):
     await request.app.db_pool.release(db_connection)
     return {
         'media_person': person_list,
-        'pagination_links': pagination,
+        'pagination_bar': pagination,
     }
 
  */

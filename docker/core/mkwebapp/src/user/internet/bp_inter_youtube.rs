@@ -1,16 +1,16 @@
 use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_dyn_templates::{Template, tera::Tera};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 
 #[get("/internet/youtube")]
-pub async fn user_inter_youtube() -> Template {
-    Template::render("bss_user/internet/bss_user_internet_youtube", context! {})
+pub async fn user_inter_youtube(user: User) -> Template {
+    Template::render("bss_user/internet/bss_user_internet_youtube", {})
 }
 
 #[get("/internet/youtube_detail/<guid>")]
-pub async fn user_inter_youtube_detail(guid: &str) -> Template {
-    Template::render("bss_user/internet/bss_user_internet_youtube_detail", context! {})
+pub async fn user_inter_youtube_detail(user: User, guid: &str) -> Template {
+    Template::render("bss_user/internet/bss_user_internet_youtube_detail", {})
 }
 
 /*

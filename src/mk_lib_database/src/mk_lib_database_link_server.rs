@@ -1,6 +1,6 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use rocket_dyn_templates::serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize};
 use sqlx::{types::Uuid, types::Json};
 use sqlx::{FromRow, Row};
 

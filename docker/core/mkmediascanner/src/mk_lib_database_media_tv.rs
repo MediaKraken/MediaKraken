@@ -3,7 +3,7 @@
 use sqlx::{types::Uuid, types::Json};
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
-use rocket_dyn_templates::serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaTVShowList {

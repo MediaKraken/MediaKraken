@@ -1,11 +1,11 @@
 use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_dyn_templates::{Template, tera::Tera};
 use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
 
 #[get("/admin_docker")]
-pub async fn admin_docker() -> Template {
-    Template::render("bss_admin/bss_admin_docker", context! {})
+pub async fn admin_docker(user: AdminUser) -> Template {
+    Template::render("bss_admin/bss_admin_docker", {})
 }
 
 /*

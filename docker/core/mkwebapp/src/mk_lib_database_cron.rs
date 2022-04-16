@@ -5,7 +5,7 @@ use serde_json::{Map, Value};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Uuid, types::Json};
 use std::num::NonZeroU8;
-use rocket_dyn_templates::serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize};
 use chrono::prelude::*;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]

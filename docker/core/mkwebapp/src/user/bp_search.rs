@@ -1,14 +1,14 @@
 use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_dyn_templates::{Template, tera::Tera};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 
 #[path = "../mk_lib_database_search.rs"]
 mod mk_lib_database_search;
 
 #[get("/search")]
-pub async fn user_search(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
-    Template::render("bss_user/bss_user_media_search", context! {})
+pub async fn user_search(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
+    Template::render("bss_user/bss_user_media_search", {})
 }
 
 /*

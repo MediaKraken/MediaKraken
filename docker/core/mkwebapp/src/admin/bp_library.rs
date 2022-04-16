@@ -1,6 +1,6 @@
 use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_dyn_templates::{Template, tera::Tera};
 use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
 use rocket::serde::{Serialize, Deserialize, json::Json};
 
@@ -10,11 +10,19 @@ mod mk_lib_common_pagination;
 #[path = "../mk_lib_database_library.rs"]
 mod mk_lib_database_library;
 
+#[derive(Serialize)]
+struct TemplateAdminLibraryContext<> {
+    template_data: Vec<mk_lib_database_library::DBLibraryList>,
+    pagination_bar: String,
+}
+
 #[get("/admin_library/<page>")]
-pub async fn admin_library(sqlx_pool: &rocket::State<sqlx::PgPool>, page: i8) -> Template {
+pub async fn admin_library(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser, page: i8) -> Template {
     let total_pages: i32 = mk_lib_database_library::mk_lib_database_library_count(&sqlx_pool).await.unwrap() / 30;
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page).await.unwrap();
-    Template::render("bss_admin/bss_admin_library", context! {
+    let library_list = mk_lib_database_library::mk_lib_database_library_read(&sqlx_pool, 0, 30).await.unwrap();
+    Template::render("bss_admin/bss_admin_library", &TemplateAdminLibraryContext {
+        template_data: library_list,
         pagination_bar: pagination_html,
     })
 }
@@ -68,7 +76,7 @@ async def url_bp_admin_library(request):
     await request.app.db_pool.release(db_connection)
     return {
         'media_dir': return_media,
-        'pagination_links': pagination,
+        'pagination_bar': pagination,
         'page': page,
         'per_page': int(request.ctx.session['per_page'])
     }

@@ -1,9 +1,11 @@
+use rocket::{get, post, form::Form, routes};
 use rocket::Request;
-use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_dyn_templates::{Template, tera::Tera};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User, AdminUser};
 use uuid::Uuid;
-use rocket::serde::{Serialize, Deserialize, json::Json};
-use rocket::{form::*, get, post, response::Redirect, routes, State};
+use serde::{Serialize, Deserialize};
+use rocket::serde::json;
+use rocket::{form::*, response::Redirect, State};
 use serde_json::json;
 use rocket::request::{self, FromRequest};
 
@@ -38,18 +40,26 @@ async fn see_user(id: i32, users: &State<Users>) -> String {
     format!("{}", json!(user))
 }
 
+#[derive(Serialize)]
+struct TemplateAdminUserContext<> {
+    template_data: Vec<mk_lib_database_user::DBUserList>,
+    pagination_bar: String,
+}
+
 #[get("/admin_user/<page>")]
-pub async fn admin_user(sqlx_pool: &rocket::State<sqlx::PgPool>, page: i8) -> Template {
+pub async fn admin_user(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser, page: i8) -> Template {
     let total_pages: i32 = mk_lib_database_user::mk_lib_database_user_count(&sqlx_pool, "".to_string()).await.unwrap() / 30;
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page).await.unwrap();
-    Template::render("bss_admin/bss_admin_user", context! {
+    let user_list = mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool, 0, 30).await.unwrap();
+    Template::render("bss_admin/bss_admin_user", &TemplateAdminUserContext {
+        template_data: user_list,
         pagination_bar: pagination_html,
     })
 }
 
 #[get("/admin_user_detail/<guid>")]
-pub async fn admin_user_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: Uuid) -> Template {
-    Template::render("bss_admin/bss_admin_user_detail", context! {})
+pub async fn admin_user_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser, guid: Uuid) -> Template {
+    Template::render("bss_admin/bss_admin_user_detail", {})
 }
 
 /*
@@ -103,7 +113,7 @@ async def url_bp_admin_user(request):
     await request.app.db_pool.release(db_connection)
     return {
         'users': data_users,
-        'pagination_links': pagination,
+        'pagination_bar': pagination,
         'page': page,
         'per_page': int(request.ctx.session['per_page'])
     }

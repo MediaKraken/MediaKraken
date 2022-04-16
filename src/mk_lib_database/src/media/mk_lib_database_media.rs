@@ -3,7 +3,7 @@
 use sqlx::{FromRow, Row};
 use sqlx::{types::Uuid, types::Json};
 use sqlx::postgres::PgRow;
-use rocket_dyn_templates::serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_media_update_metadata_guid(pool: &sqlx::PgPool,
                                                         mm_media_guid: Uuid,

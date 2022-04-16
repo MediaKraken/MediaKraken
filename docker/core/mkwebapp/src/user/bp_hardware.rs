@@ -1,16 +1,16 @@
 use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_dyn_templates::{Template, tera::Tera};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 
 #[get("/hardware")]
-pub async fn user_hardware(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
-    Template::render("bss_user/hardware/bss_user_hardware", context! {})
+pub async fn user_hardware(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
+    Template::render("bss_user/hardware/bss_user_hardware", {})
 }
 
 #[get("/hardware_phue")]
-pub async fn user_hardware_phue() -> Template {
-    Template::render("bss_user/hardware/bss_user_hardware_phue", context! {})
+pub async fn user_hardware_phue(user: User) -> Template {
+    Template::render("bss_user/hardware/bss_user_hardware_phue", {})
 }
 
 /*

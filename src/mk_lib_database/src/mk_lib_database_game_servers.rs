@@ -4,7 +4,7 @@ use sqlx::{FromRow, Row};
 use serde_json::{Map, Value};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Uuid, types::Json};
-use rocket_dyn_templates::serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_game_server_delete(pool: &sqlx::PgPool,
                                                 game_server_uuid: uuid::Uuid)

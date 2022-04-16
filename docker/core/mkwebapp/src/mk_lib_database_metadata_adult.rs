@@ -2,7 +2,7 @@
 
 use sqlx::{types::Uuid, types::Json};
 use sqlx::postgres::PgRow;
-use rocket_dyn_templates::serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize};
 use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_metadata_adult_read(pool: &sqlx::PgPool,

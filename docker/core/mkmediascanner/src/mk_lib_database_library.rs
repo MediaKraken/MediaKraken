@@ -4,7 +4,7 @@ use sqlx::{FromRow, Row};
 use serde_json::{Map, Value};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Uuid, types::Json};
-use rocket_dyn_templates::serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBLibraryList {
@@ -12,10 +12,13 @@ pub struct DBLibraryList {
     mm_media_dir_path: String,
 }
 
-pub async fn mk_lib_database_library_read(pool: &sqlx::PgPool)
+pub async fn mk_lib_database_library_read(pool: &sqlx::PgPool,
+                                          offset: i32, limit: i32)
                                           -> Result<Vec<DBLibraryList>, sqlx::Error> {
     let select_query = sqlx::query("select mm_media_dir_guid, mm_media_dir_path \
-        from mm_library_dir");
+        from mm_library_dir offset $1 limit $2")
+        .bind(offset)
+        .bind(limit);
     let table_rows: Vec<DBLibraryList> = select_query
         .map(|row: PgRow| DBLibraryList {
             mm_media_dir_guid: row.get("mm_media_dir_guid"),

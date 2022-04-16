@@ -1,14 +1,24 @@
 use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_dyn_templates::{Template, tera::Tera};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
+use serde::{Serialize, Deserialize};
+use uuid::Uuid;
 
 #[path = "../mk_lib_database_sync.rs"]
 mod mk_lib_database_sync;
 
+#[derive(Serialize)]
+struct TemplateSyncContext<> {
+    template_data: Vec<mk_lib_database_sync::DBSyncList>
+}
+
 #[get("/sync")]
-pub async fn user_sync(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
-    Template::render("bss_user/media/bss_user_media_sync", context! {})
+pub async fn user_sync(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
+    let sync_list = mk_lib_database_sync::mk_lib_database_sync_list(&sqlx_pool, Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap(), 0, 30).await.unwrap();
+    Template::render("bss_user/media/bss_user_media_sync", &TemplateSyncContext {
+        template_data: sync_list,
+    })
 }
 
 /*
@@ -39,7 +49,7 @@ async def url_bp_user_sync_display_all(request):
     await request.app.db_pool.release(db_connection)
     return {
         'media_sync': media_data,
-        'pagination_links': pagination,
+        'pagination_bar': pagination,
     }
 
 

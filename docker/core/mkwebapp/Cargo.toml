@@ -19,15 +19,15 @@ rocket_auth = { version = "0.4.0", features = ["sqlx-postgres"] }
 serde = { version = "1.0.136", features = ["derive"] }
 serde_json = "1.0.79"
 shiplift = { version = "0.7", default-features = false, features = ["unix-socket"] }
-sqlx = { version = "0.5.11", features = [ "chrono", "json", "runtime-tokio-rustls", "postgres", "uuid" ] }
+sqlx = { version = "0.5.12", features = [ "chrono", "json", "runtime-tokio-rustls", "postgres", "uuid" ] }
 sys-info = "0.9.1"
 tera = "1.15.0"
 tokio = { version = "1.17.0", features = ["full"] }
 uuid = { version = "0.8.2", features = ["serde", "v4"] }
 walkdir = "2.3.2"
 
-rocket = { git = "https://github.com/SergioBenitez/Rocket/", features = ["json", "secrets", "uuid"]}
-rocket_dyn_templates = { git = "https://github.com/SergioBenitez/Rocket/", features = ["tera"]}
+rocket = { version = "0.5.0-rc.1", features = ["json", "secrets", "uuid"]}
+rocket_dyn_templates = { version = "0.1.0-rc.1", features = ["tera"]}
 
 [dev-dependencies]
 tokio-test = "*"

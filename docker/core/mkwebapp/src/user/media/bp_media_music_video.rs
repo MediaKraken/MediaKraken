@@ -1,6 +1,6 @@
 use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_dyn_templates::{Template, tera::Tera};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 use uuid::Uuid;
 use rocket::serde::{Serialize, Deserialize, json::Json};
@@ -11,20 +11,26 @@ mod mk_lib_common_pagination;
 #[path = "../../mk_lib_database_media_music_video.rs"]
 mod mk_lib_database_media_music_video;
 
+#[derive(Serialize)]
+struct TemplateMediaMusicVideoContext<> {
+    template_data: Vec<mk_lib_database_media_music_video::DBMediaMusicVideoList>,
+    pagination_bar: String,
+}
+
 #[get("/media/music_video/<page>")]
-pub async fn user_media_music_video(sqlx_pool: &rocket::State<sqlx::PgPool>, page: i8) -> Template {
+pub async fn user_media_music_video(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, page: i8) -> Template {
     let total_pages: i32 = mk_lib_database_media_music_video::mk_lib_database_media_music_video_count(&sqlx_pool, "".to_string()).await.unwrap() / 30;
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page).await.unwrap();
     let music_video_list = mk_lib_database_media_music_video::mk_lib_database_media_music_video_read(&sqlx_pool, "".to_string(), 0, 30).await.unwrap();
-    Template::render("bss_user/media/bss_user_media_music_video", context! {
-        media_music_video: music_video_list,
+    Template::render("bss_user/media/bss_user_media_music_video", &TemplateMediaMusicVideoContext {
+        template_data: music_video_list,
         pagination_bar: pagination_html,
     })
 }
 
 #[get("/media/music_video_detail/<guid>")]
-pub async fn user_media_music_video_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: Uuid) -> Template {
-    Template::render("bss_user/media/bss_user_media_music_video_detail", context! {})
+pub async fn user_media_music_video_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, guid: Uuid) -> Template {
+    Template::render("bss_user/media/bss_user_media_music_video_detail", {})
 }
 
 /*
@@ -57,7 +63,7 @@ async def url_bp_user_music_video_list(request):
     await request.app.db_pool.release(db_connection)
     return {
         'media_person': media_data,
-        'pagination_links': pagination,
+        'pagination_bar': pagination,
     }
 
 

@@ -8,6 +8,7 @@ use std::path::Path;
 use tokio::time::{Duration, sleep};
 use sqlx::types::Uuid;
 use sqlx::Row;
+use torrent_name_parser::Metadata;
 
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;

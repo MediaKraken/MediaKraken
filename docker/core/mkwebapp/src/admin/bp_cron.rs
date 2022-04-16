@@ -1,17 +1,22 @@
 use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_dyn_templates::{Template, tera::Tera};
 use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
 use rocket::serde::{Serialize, Deserialize, json::Json};
 
 #[path = "../mk_lib_database_cron.rs"]
 mod mk_lib_database_cron;
 
+#[derive(Serialize)]
+struct TemplateCronContext<> {
+    template_data: Vec<mk_lib_database_cron::DBCronList>,
+}
+
 #[get("/admin_cron")]
-pub async fn admin_cron(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
+pub async fn admin_cron(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
     let cron_list = mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool).await.unwrap();
-    Template::render("bss_admin/bss_admin_cron", context! {
-        media_cron: cron_list,
+    Template::render("bss_admin/bss_admin_cron", &TemplateCronContext {
+        template_data: cron_list,
     })
 }
 

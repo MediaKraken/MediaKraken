@@ -1,13 +1,29 @@
 use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_dyn_templates::{Template, tera::Tera};
 use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
 use paginator::{Paginator, PageItem};
 use core::fmt::Write;
+use chrono::prelude::*;
+use rocket::serde::{Serialize, Deserialize, json::Json};
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct BackupList {
+	mm_backup_name: String,
+	mm_backup_description: String,
+	mm_backup_start_time: DateTime<Utc>,
+	mm_backup_end_time: DateTime<Utc>,
+    mm_backup_json: serde_json::Value,
+}
+
+#[derive(Serialize)]
+struct TemplateBackupContext<> {
+    template_data: Vec<BackupList>
+}
 
 #[get("/admin_backup")]
-pub async fn admin_backup(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
-    Template::render("bss_admin/bss_admin_backup", context! {})
+pub async fn admin_backup(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
+    Template::render("bss_admin/bss_admin_backup", {})
 }
 
 /*
@@ -62,7 +78,7 @@ async def url_bp_admin_backup(request):
         'data_interval': ('Hours', 'Days', 'Weekly'),
         'data_class': common_network_cloud.com_libcloud_storage_provider_list(),
         'data_enabled': backup_enabled,
-        'pagination_links': pagination,
+        'pagination_bar': pagination,
         'page': page,
         'per_page': int(request.ctx.session['per_page'])
     }

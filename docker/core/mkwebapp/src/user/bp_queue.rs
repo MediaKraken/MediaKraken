@@ -1,14 +1,14 @@
 use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_dyn_templates::{Template, tera::Tera};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 
 #[path = "../mk_lib_database_user_queue.rs"]
 mod mk_lib_database_user_queue;
 
 #[get("/queue")]
-pub async fn user_queue(sqlx_pool: &rocket::State<sqlx::PgPool>) -> Template {
-    Template::render("bss_user/bss_user_queue", context! {})
+pub async fn user_queue(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
+    Template::render("bss_user/bss_user_queue", {})
 }
 
 /*
@@ -46,7 +46,7 @@ async def url_bp_user_queue(request):
     await request.app.db_pool.release(db_connection)
     return {
         'media': media_data,
-        'pagination_links': pagination,
+        'pagination_bar': pagination,
     }
 
  */

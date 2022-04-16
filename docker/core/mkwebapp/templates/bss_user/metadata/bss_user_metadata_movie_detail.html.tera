@@ -3,16 +3,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>MediaKraken</title>
-    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
-    <link href="/static/fonts/fontawesome-all.min.css" rel="stylesheet">
-    <link href="/static/css/styles.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.min.css">
 </head>
 
 <body>
     {% include "bss_user/bss_user_include_menu" %}
     <div><div>
-    {% if data_name %}
+    {% if template_data %}
     <div>
         <div class="container">
             <div class="row">
@@ -112,7 +112,7 @@
     </div></div>
     <footer class="bg-white sticky-footer">
         <div class="container my-auto">
-            <div class="text-center my-auto copyright"><span>Copyright © Quinn D Granfor 2020</span></div>
+            <div class="text-center my-auto copyright"><span>Copyright © Quinn D Granfor 2022</span></div>
         </div>
     </footer>
     <script src="/static/js/jquery.min.js"></script>

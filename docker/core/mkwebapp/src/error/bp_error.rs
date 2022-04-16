@@ -1,28 +1,27 @@
 use rocket::fs::{FileServer, relative};
 use rocket::{Rocket, Request, Build};
-use rocket::response::content::RawHtml;
 use rocket::response::{content, status};
 use rocket::http::Status;
-use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_dyn_templates::{Template, tera::Tera};
 
 #[catch(401)]
 pub async fn general_not_authorized() -> Template {
-    Template::render("bss_error/bss_error_401", context! {})
+    Template::render("bss_error/bss_error_401", tera::Context::new().into_json())
 }
 
 #[catch(403)]
 pub async fn general_not_administrator() -> Template {
-    Template::render("bss_error/bss_error_403", context! {})
+    Template::render("bss_error/bss_error_403", tera::Context::new().into_json())
 }
 
 #[catch(404)]
 pub async fn general_not_found() -> Template {
-    Template::render("bss_error/bss_error_404", context! {})
+    Template::render("bss_error/bss_error_404", tera::Context::new().into_json())
 }
 
 #[catch(500)]
 pub async fn general_security() -> Template {
-    Template::render("bss_error/bss_error_500", context! {})
+    Template::render("bss_error/bss_error_500", tera::Context::new().into_json())
 }
 
 #[catch(default)]

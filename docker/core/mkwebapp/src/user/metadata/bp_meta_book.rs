@@ -1,6 +1,6 @@
 use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_dyn_templates::{Template, tera::Tera};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 use uuid::Uuid;
 use rocket::serde::{Serialize, Deserialize, json::Json};
@@ -11,22 +11,33 @@ mod mk_lib_common_pagination;
 #[path = "../../mk_lib_database_metadata_book.rs"]
 mod mk_lib_database_metadata_book;
 
+#[derive(Serialize)]
+struct TemplateMetaBookContext<> {
+    template_data: Vec<mk_lib_database_metadata_book::DBMetaBookList>,
+    pagination_bar: String,
+}
+
 #[get("/metadata/book/<page>")]
-pub async fn user_metadata_book(sqlx_pool: &rocket::State<sqlx::PgPool>, page: i8) -> Template {
+pub async fn user_metadata_book(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, page: i8) -> Template {
     let total_pages: i32 = mk_lib_database_metadata_book::mk_lib_database_metadata_book_count(&sqlx_pool, "".to_string()).await.unwrap() / 30;
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page).await.unwrap();
     let book_list = mk_lib_database_metadata_book::mk_lib_database_metadata_book_read(&sqlx_pool, "".to_string(), 0, 30).await.unwrap();
-    Template::render("bss_user/metadata/bss_user_metadata_periodical", context! {
-        media_book: book_list,
+    Template::render("bss_user/metadata/bss_user_metadata_book", &TemplateMetaBookContext {
+        template_data: book_list,
         pagination_bar: pagination_html,
     })
 }
 
+#[derive(Serialize)]
+struct TemplateMetaBookDetailContext<> {
+    template_data: serde_json::Value,
+}
+
 #[get("/metadata/book_detail/<guid>")]
-pub async fn user_metadata_book_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: Uuid) -> Template {
+pub async fn user_metadata_book_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, guid: Uuid) -> Template {
     let book_data = mk_lib_database_metadata_book::mk_lib_database_metadata_book_detail(&sqlx_pool, guid).await.unwrap();
-    Template::render("bss_user/metadata/bss_user_metadata_periodical_detail", context! {
-        book_meta: book_data,
+    Template::render("bss_user/metadata/bss_user_metadata_book_detail", &TemplateMetaBookDetailContext {
+        template_data: book_data,
     })
 }
 
@@ -69,7 +80,7 @@ async def url_bp_user_metadata_periodical(request):
     await request.app.db_pool.release(db_connection)
     return {
         'media_person': item_list,
-        'pagination_links': pagination,
+        'pagination_bar': pagination,
     }
 
 

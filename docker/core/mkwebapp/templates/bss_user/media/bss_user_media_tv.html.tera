@@ -3,16 +3,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>MediaKraken</title>
-    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
-    <link href="/static/fonts/fontawesome-all.min.css" rel="stylesheet">
-    <link href="/static/css/styles.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.min.css">
 </head>
 
 <body>
     {% include "bss_user/bss_user_include_menu" %}
     <!-- this div is needed to show up between pagination correctly -->
-    {% if media %}
+    {% if template_data %}
     <div id="filter_tv_div">
         <form name="media_filter" action="/user/media/bss_user_tv_genre" method="post">
             <p>Media Filters:
@@ -27,12 +27,12 @@
             </p>
         </form>
     </div>
-    {% if pagination_links != None %}
-        {{ pagination_links }}
+    {% if pagination_bar != None %}
+        {{ pagination_bar }}
     {% endif %}
     <!-- this div is needed to show up between pagination correctly -->
     <div id="the-tv-node">
-        {% for row_data in media %}
+        {% for row_data in template_data %}
         <!-- 0 mm_media_name, 1 mm_media_guid, 2 mm_metadata_json (poster only), 3 = watched or not -->
         <div class="main_photo">
             <div data-id={{row_data[1]}}>
@@ -75,15 +75,15 @@
         </div>
         {% endfor %}
     </div>
-    {% if pagination_links != None %}
-        {{ pagination_links }}
+    {% if pagination_bar != None %}
+        {{ pagination_bar }}
     {% endif %}
     {% else %}
     <p id="general_text">No TV media found.</p>
     {% endif %}
     <footer class="bg-white sticky-footer">
         <div class="container my-auto">
-            <div class="text-center my-auto copyright"><span>Copyright © Quinn D Granfor 2020</span></div>
+            <div class="text-center my-auto copyright"><span>Copyright © Quinn D Granfor 2022</span></div>
         </div>
     </footer>
     <script src="/static/js/jquery.min.js"></script>

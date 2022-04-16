@@ -1,6 +1,6 @@
 use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera, context};
+use rocket_dyn_templates::{Template, tera::Tera};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 use uuid::Uuid;
 use rocket::serde::{Serialize, Deserialize, json::Json};
@@ -11,20 +11,26 @@ mod mk_lib_common_pagination;
 #[path = "../../mk_lib_database_media_game.rs"]
 mod mk_lib_database_media_game;
 
+#[derive(Serialize)]
+struct TemplateMediaGameContext<> {
+    template_data: Vec<mk_lib_database_media_game::DBMediaGameList>,
+    pagination_bar: String,
+}
+
 #[post("/media/game/<page>")]
-pub async fn user_media_game(sqlx_pool: &rocket::State<sqlx::PgPool>, page: i8) -> Template {
+pub async fn user_media_game(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, page: i8) -> Template {
     let total_pages: i32 = mk_lib_database_media_game::mk_lib_database_media_game_count(&sqlx_pool, "".to_string()).await.unwrap() / 30;
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page).await.unwrap();
     let game_list = mk_lib_database_media_game::mk_lib_database_media_game_read(&sqlx_pool, "".to_string(), 0, 30).await.unwrap();
-    Template::render("bss_user/media/bss_user_media_game", context! {
-        media_game: game_list,
+    Template::render("bss_user/media/bss_user_media_game", &TemplateMediaGameContext {
+        template_data: game_list,
         pagination_bar: pagination_html,
     })
 }
 
 #[post("/media/game_detail/<guid>")]
-pub async fn user_media_game_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, guid: Uuid) -> Template {
-    Template::render("bss_user/media/bss_user_media_game_detail", context! {})
+pub async fn user_media_game_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, guid: Uuid) -> Template {
+    Template::render("bss_user/media/bss_user_media_game_detail", {})
 }
 
 /*
@@ -55,7 +61,7 @@ async def url_bp_user_game(request):
     await request.app.db_pool.release(db_connection)
     return {
         'media': media_data,
-        'pagination_links': pagination,
+        'pagination_bar': pagination,
     }
 
 

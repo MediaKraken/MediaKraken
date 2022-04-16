@@ -10,7 +10,7 @@ use tokio::time::{Duration, sleep};
 use quickxml_to_serde::{xml_string_to_json, Config, JsonArray, JsonType, NullValue};
 use std::io::{self, prelude::*, BufReader};
 use uuid::Uuid;
-use rocket_dyn_templates::serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize};
 
 // https://www.progettosnaps.net/download/?tipo=dat_mame&file=/dats/MAME/packs/MAME_Dats_236.7z
 
