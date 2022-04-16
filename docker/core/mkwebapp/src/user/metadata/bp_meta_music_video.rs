@@ -17,7 +17,7 @@ struct TemplateMetaMusicVideoContext<> {
     pagination_bar: String,
 }
 
-#[get("/metadata/music_video/<page>")]
+#[get("/metadata/music_video?<page>")]
 pub async fn user_metadata_music_video(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, page: i8) -> Template {
     let total_pages: i32 = mk_lib_database_metadata_music_video::mk_lib_database_metadata_music_video_count(&sqlx_pool, "".to_string(), 0).await.unwrap() / 30;
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page).await.unwrap();

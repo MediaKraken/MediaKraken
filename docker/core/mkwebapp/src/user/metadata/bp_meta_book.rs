@@ -17,7 +17,7 @@ struct TemplateMetaBookContext<> {
     pagination_bar: String,
 }
 
-#[get("/metadata/book/<page>")]
+#[get("/metadata/book?<page>")]
 pub async fn user_metadata_book(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, page: i8) -> Template {
     let total_pages: i32 = mk_lib_database_metadata_book::mk_lib_database_metadata_book_count(&sqlx_pool, "".to_string()).await.unwrap() / 30;
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page).await.unwrap();

@@ -17,7 +17,7 @@ struct TemplateMediaMovieContext<> {
     pagination_bar: String,
 }
 
-#[get("/media/movie/<page>")]
+#[get("/media/movie?<page>")]
 pub async fn user_media_movie(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, page: i8) -> Template {
     let total_pages: i32 = mk_lib_database_media_movie::mk_lib_database_media_movie_count(&sqlx_pool, "".to_string()).await.unwrap() / 30;
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page).await.unwrap();
