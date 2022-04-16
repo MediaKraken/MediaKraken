@@ -197,11 +197,13 @@ async fn main() -> Result<(), Error> {
             bp_admin_library::admin_library,
             bp_admin_settings::admin_settings,
             bp_admin_torrent::admin_torrent,
-            bp_admin_user::admin_user])
+            bp_admin_user::admin_user,])
         .mount("/public", routes![bp_public_about::public_about,
             bp_public_forgot_password::public_forgot_password,
             bp_public_login::public_login,
-            bp_public_register::public_register])
+            bp_public_login::public_login_post,
+            bp_public_register::public_register,
+            bp_public_register::public_register_post,])
         .mount("/user", routes![
             bp_user_internet_bp_inter_flickr::user_inter_flickr,
             bp_user_internet_bp_inter_home::user_inter_home,
@@ -237,12 +239,12 @@ async fn main() -> Result<(), Error> {
             bp_user_profile::user_profile,
             bp_user_queue::user_queue,
             bp_user_search::user_search,
-            bp_user_sync::user_sync])
+            bp_user_sync::user_sync,])
         .register("/", catchers![bp_error::general_not_authorized,
             bp_error::general_not_administrator,
             bp_error::general_not_found,
             bp_error::general_security,
-            bp_error::default_catcher])
+            bp_error::default_catcher,])
         .manage::<sqlx::PgPool>(sqlx_pool)
         .manage(users)
         .attach(Template::fairing())

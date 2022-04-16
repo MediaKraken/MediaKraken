@@ -1,4 +1,3 @@
-{% import "form_input_macro" as m %}
 {% block content %}
 <head>
     <meta charset="utf-8">
@@ -16,38 +15,26 @@
             <div class="card-body p-0">
                 <div class="row">
                     <div class="col-lg-5 d-none d-lg-flex">
-                        <div class="flex-grow-1 bg-register-image" style="background-image: url(&quot;/static/img/K3.png&quot;);"></div>
+                        <div class="flex-grow-1 bg-register-image" style="background-image: url(&quot;/static/image/K3.png&quot;);"></div>
                     </div>
                     <div class="col-lg-7">
                         <div class="p-5">
                             <div class="text-center">
                                 <h4 class="text-dark mb-4">Create an Account!</h4>
                             </div>
-                            <form action="/register" class="user" method="post">
+                            <form action="/public/register" class="user" method="post">
                                 <div class="form-group">
-                                    {{ m::input(label="Name", type="text", name="account.name") }}
-                                    <!-- required -->
-                                </div>
-                                <div class="form-group">
-                                    {{ m::input(label="Email Address", type="text", name="account.email") }}
-                                    <!-- required pattern=".*@.*"/> -->
+                                     <input type="email" class="form-control" name="email" required>
                                 </div>
                                 <div class="form-group row">
                                     <div class="col-sm-6 mb-3 mb-sm-0">
-                                        {{ m::input(label="Password", type="password", name="account.password.first") }}
-                                        <!--   required minlength="6" value="" /> -->
-                                    </div>
-                                    <div class="col-sm-6">
-                                        {{ m::input(label="Confirm Password", type="password", name="account.password.second")}}
-                                        <!--   required minlength="6" value="" /> -->
+                                        <input type="password" class="form-control" name="password" required>
                                     </div>
                                 </div>
                                 <button class="btn btn-primary btn-block text-white btn-user" type="submit">Register Account</button>
-                                <hr><a class="btn btn-primary btn-block text-white btn-google btn-user" role="button"><i class="fab fa-google"></i>&nbsp; Register with Google</a><a class="btn btn-primary btn-block text-white btn-github btn-user" role="button"><i class="fab fa-github"></i>&nbsp; Register with Github</a>
-                                <hr>
                             </form>
-                            <div class="text-center"><a class="small" href="/forgot">Forgot Password?</a></div>
-                            <div class="text-center"><a class="small" href="/login">Already have an account? Login!</a></div>
+                            <div class="text-center"><a class="small" href="/public/forgot">Forgot Password?</a></div>
+                            <div class="text-center"><a class="small" href="/public/login">Already have an account? Login!</a></div>
                         </div>
                     </div>
                 </div>

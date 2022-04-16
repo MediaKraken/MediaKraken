@@ -15,31 +15,6 @@ mod mk_lib_common_pagination;
 #[path = "../mk_lib_database_user.rs"]
 mod mk_lib_database_user;
 
-#[get("/special-content")]
-fn special_content(option: Option<User>) -> String {
-    if let Some(user) = option {
-        format!("hello, {}.", user.email())
-    } else {
-        "hello, anonymous user".into()
-    }
-}
-
-#[get("/admin-panel")]
-fn admin_panel(user: AdminUser) -> String {
-   format!("Hello {}.", user.email())
-}
-
-#[get("/private-content")]
-fn private_content(user: User) -> &'static str {
-    "If you can see this, you are logged in."
-}
-
-#[get("/see-user/<id>")]
-async fn see_user(id: i32, users: &State<Users>) -> String {
-    let user = users.get_by_id(id).await.unwrap();
-    format!("{}", json!(user))
-}
-
 #[derive(Serialize)]
 struct TemplateAdminUserContext<> {
     template_data: Vec<mk_lib_database_user::DBUserList>,

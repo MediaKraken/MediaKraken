@@ -1,14 +1,23 @@
 use rocket::Request;
 use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera};
-//use rocket_auth::{Users, Auth, Signup, Login, User};
 use rocket_auth::{prelude::Error, *};
 use rocket::{get, post, form::Form, routes};
 use rocket::{form::*, State};
+use rocket::serde::{Serialize, Deserialize, json::Json};
+
+#[derive(Serialize)]
+struct TemplateUserHomeContext<> {
+    template_data_new_media: bool,
+    template_data_user_media_queue: bool,
+}
 
 #[get("/home")]
 pub async fn user_home(user: User) -> Template {
-    Template::render("bss_user/bss_user_home", {})
+    Template::render("bss_user/bss_user_home", &TemplateUserHomeContext {
+        template_data_new_media: false,
+        template_data_user_media_queue: false,
+    })
 }
 
 /*
