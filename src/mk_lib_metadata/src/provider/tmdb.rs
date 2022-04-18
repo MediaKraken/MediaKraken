@@ -22,21 +22,24 @@ pub async fn provider_tmdb_movie_fetch(pool: &sqlx::PgPool, tmdb_id: i32, metada
     // series_id_json, result_json, image_json \
     //     = com_tmdb_meta_info_build(result_json.json());
     mk_lib_database_metadata_movie::db_meta_insert_tmdb(pool, metadata_uuid,
-                                      series_id_json,
-                                      result_json["title"],
-                                      result_json,
-                                      image_json);
+                                                        series_id_json,
+                                                        result_json["title"],
+                                                        result_json,
+                                                        image_json);
     if result_json.contains_key("credits") {  // cast/crew doesn't exist on all media
         if result_json["credits"].contains_key("cast") {
-            mk_lib_database_metadata_person::db_meta_person_insert_cast_crew(pool, "themoviedb",
-                                                          result_json["credits"]["cast"]);
+            mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert_cast_crew(pool,
+                                                                                              "themoviedb",
+                                                                                              result_json["credits"]["cast"]);
         }
         if result_json["credits"].contains_key("crew") {
-            mk_lib_database_metadata_person::db_meta_person_insert_cast_crew(pool, "themoviedb",
-                                                          result_json["credits"]["crew"]);
+            mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert_cast_crew(pool,
+                                                                                              "themoviedb",
+                                                                                              result_json["credits"]["crew"]);
         }
     }
 }
+
 
 /*
         // 504	Your request to the backend server timed out. Try again.

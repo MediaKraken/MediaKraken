@@ -174,7 +174,7 @@ async def db_meta_person_update(self, provider_name, provider_uuid, person_bio, 
 
 
 // TODO port query
-async def db_meta_person_insert_cast_crew(self, person_json):
+async def mk_lib_database_metadata_person_insert_cast_crew(self, person_json):
         for person_data in person_json:
                 person_id = person_data["id"]
                 person_name = person_data["name"]
