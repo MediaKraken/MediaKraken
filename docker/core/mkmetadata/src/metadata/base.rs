@@ -19,6 +19,18 @@ mod mk_sports;
 #[path = "tv.rs"]
 mod mk_tv;
 
+#[path = "provider/anidb.rs"]
+mod provider_anidb;
+#[path = "provider/chart_lyrics.rs"]
+mod provider_chart_lyrics;
+#[path = "provider/musicbrainz.rs"]
+mod provider_musicbrainz;
+#[path = "provider/televisiontunes.rs"]
+mod provider_televisiontunes;
+
+#[path = "../mk_lib_database_metadata_download_queue.rs"]
+mod mk_lib_database_metadata_download_queue;
+
 pub async fn metadata_process(pool: &sqlx::PgPool,
                               provider_name: String,
                               download_data: serde_json::Value) {
@@ -57,7 +69,7 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
     if provider_name == "anidb" {
         metadata_uuid = mk_anime::metadata_anime_lookup(&pool,
                                                         download_data,
-                                                        guessit(download_data["Path"])["title"]);
+                                                        download_data["Path"])["title"];
         if metadata_uuid == None {
             if match_result == None {
                 // do lookup halt as we'll start all movies in tmdb
@@ -67,7 +79,7 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
             }
         }
     } else if provider_name == "chart_lyrics" {
-        common_metadata_provider_chart_lyrics.com_meta_chart_lyrics(artist_name, song_name);
+        provider_chart_lyrics::provider_chart_lyrics_fetch(&pool, artist_name, song_name);
         lookup_halt = true;
     } else if provider_name == "comicvine" {
         lookup_halt = true;
@@ -110,12 +122,11 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
     } else if provider_name == "televisiontunes" {
         // if download succeeds remove dl
         // TODO....handle list return for title?
-        metadata_uuid = common_metadata_tv_theme.com_tvtheme_download(
-            guessit(download_data["Path"])["title"]);
+        metadata_uuid = provider_televisiontunes::provider_televisiontunes_theme_fetch(
+            download_data["Path"]["title"]);
         if metadata_uuid != None {
             // TODO add theme.mp3 dl"d above to media table
-            db_connection.db_download_delete(download_data["mdq_id"]);
-            db_connection.db_commit();
+            mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(download_data["mdq_id"]);
             return;  // since it"s a search/fetch/insert in one shot
         } else {
             lookup_halt = true;
@@ -124,11 +135,14 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
         lookup_halt = true;
     } else if provider_name == "thegamesdb" {
         lookup_halt = true;
+    } else if provider_name == "tv_intros" {
+        lookup_halt = true;
+    } else if provider_name == "twitch" {
+        lookup_halt = true;
     }
 }
 
 /*
-
     else if provider_name == "themoviedb":
         if download_data["mdq_que_type"] == common_global.DLMediaType.Movie.value:
             metadata_uuid, match_result = await metadata_provider_themoviedb.movie_search_tmdb(
@@ -162,12 +176,7 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
                 update_provider = "themoviedb";
             else:
                 set_fetch = true;
-    else if provider_name == "tv_intros" {
-        lookup_halt = true;
-        }
-    else if provider_name == "twitch" {
-        lookup_halt = true;
-        }
+
 
     // if search is being updated to new provider
     if update_provider != None:
@@ -193,8 +202,12 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
                                                    provider_guid=match_result);
             await db_connection.db_commit();
     return metadata_uuid
+*/
 
-
+pub async fn metadata_fetch(pool: &sqlx::PgPool,
+                            provider_name: String,
+                            download_data: serde_json::Value) {}
+/*
 async def metadata_fetch(db_connection, provider_name, download_data):
     """
     Fetch main metadata for specified provider
@@ -222,7 +235,13 @@ async def metadata_fetch(db_connection, provider_name, download_data):
                                                       download_data["mdq_new_uuid"]);
     await db_connection.db_download_delete(download_data["mdq_id"]);
     await db_connection.db_commit();
+*/
 
+pub async fn metadata_castcrew(pool: &sqlx::PgPool,
+                               provider_name: String,
+                               download_data: serde_json::Value) {}
+
+/*
 
 async def metadata_castcrew(db_connection, provider_name, download_data):
     """
@@ -233,16 +252,28 @@ async def metadata_castcrew(db_connection, provider_name, download_data):
     await db_connection.db_download_update(guid=download_data["mdq_id"],
                                            status="FetchReview");
     await db_connection.db_commit();
+*/
 
+pub async fn metadata_image(pool: &sqlx::PgPool,
+                            provider_name: String,
+                            download_data: serde_json::Value) {}
 
+/*
 async def metadata_image(db_connection, provider_name, download_data):
     """
     Fetch image from specified provider
     """
     await db_connection.db_download_delete(download_data["mdq_id"]);
     await db_connection.db_commit();
+*/
 
 
+pub async fn metadata_review(pool: &sqlx::PgPool,
+                             provider_name: String,
+                             download_data: serde_json::Value) {}
+
+
+/*
 async def metadata_review(db_connection, provider_name, download_data):
     """
     Fetch reviews from specified provider
@@ -255,8 +286,14 @@ async def metadata_review(db_connection, provider_name, download_data):
     // review is last.....so can delete download que
     await db_connection.db_download_delete(download_data["mdq_id"]);
     await db_connection.db_commit();
+*/
+
+pub async fn metadata_collection(pool: &sqlx::PgPool,
+                                 provider_name: String,
+                                 download_data: serde_json::Value) {}
 
 
+/*
 async def metadata_collection(db_connection, provider_name, download_data):
     """
     Fetch collection from specified provider

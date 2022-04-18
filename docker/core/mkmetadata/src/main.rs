@@ -30,16 +30,19 @@ mod mk_lib_logging;
 mod mk_lib_network;
 
 #[path = "identification.rs"]
-mod mkmetadata_identification;
+mod metadata_identification;
 
 #[path = "metadata/provider/tmdb.rs"]
-mod provider_tmdb;
+mod metadata_provider_tmdb;
 
-#[derive(Serialize, Deserialize)]
-struct MediaTitleYear {
-    title: String,
-    year: Option<i8>,
-}
+#[path = "metadata/base.rs"]
+mod metadata_base;
+
+// #[derive(Serialize, Deserialize)]
+// struct MediaTitleYear {
+//     title: String,
+//     year: Option<i8>,
+// }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -56,7 +59,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // pull options/api keys and set structs to contain the data
     let option_json: serde_json::Value = mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool).await.unwrap();
-    provider_tmdb::TMDBAPI::tmdb_api_key = option_json["API"]["themoviedb"];
+
+    // launch thread per provider
+    let handle_tmdb = tokio::spawn(async move {
+        metadata_provider_tmdb::TMDBAPI::tmdb_api_key = option_json["API"]["themoviedb"];
+        loop {
+            let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "themoviedb").await.unwrap();
+            for row_data in metadata_to_process {
+                metadata_base::metadata_process(&sqlx_pool, "themoviedb", row_data)
+            };
+        }
+    });
 
     // setup last used id's per thread
     let mut metadata_last_uuid: Uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000")?;
@@ -74,13 +87,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             println!("Path: {:?}", row_data_path);
             let file_name = Path::new(&row_data_path).file_name().unwrap().to_os_string().into_string().unwrap();
             println!("File: {:?}", file_name);
-            // fetch data from guessit container
-            let url_link = format!("http://th-docker-1:5000/?filename={:}", file_name);
-            println!("URL: {:?}", url_link);
-            let buff = mk_lib_network::mk_data_from_url(url_link).await?;
-            let guessit_data: MediaTitleYear = serde_json::from_str(&buff).unwrap();
-            println!("Guess: {:?}", guessit_data.title);
-            println!("GuessYear: {:?}", guessit_data.year);
+
+            let guessit_data: Metadata = file_name;
+            // // fetch data from guessit container
+            // let url_link = format!("http://th-docker-1:5000/?filename={:}", file_name);
+            // println!("URL: {:?}", url_link);
+            // let buff = mk_lib_network::mk_data_from_url(url_link).await?;
+            // let guessit_data: MediaTitleYear = serde_json::from_str(&buff).unwrap();
+            // println!("Guess: {:?}", guessit_data.title);
+            // println!("GuessYear: {:?}", guessit_data.year);
             //     if (file_name["title"]) == list {
             //         file_name["title"] = common_string.com_string_guessit_list(file_name["title"]);
             //     }
@@ -97,7 +112,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
                 if metadata_uuid == Uuid::parse_str("00000000-0000-0000-0000-000000000000")? {
                     // begin id process
-                    metadata_uuid = mkmetadata_identification::metadata_identification(&sqlx_pool,
+                    metadata_uuid = metadata_identification::metadata_identification(&sqlx_pool,
                                                                                        row_data,
                                                                                        guessit_data);
                 }
@@ -124,4 +139,5 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
         sleep(Duration::from_secs(1)).await;
     }
+    handle_tmdb.join().unwrap();
 }
