@@ -60,7 +60,8 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
         mk_lib_common_enum_media_type::DLMediaType::GAME_CHD => {
             // TODO remove the file extension
             metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_name_and_system(&pool,
-                                                                                                            Path::new(dl_row.get("mdq_path")).file_name(), lookup_system_id);
+                                                                                                            Path::new(dl_row.get("mdq_path")).file_name(),
+                                                                                                            lookup_system_id);
             if metadata_uuid == None {
                 let sha1_value = mk_lib_hash_sha1::mk_file_hash_sha1(dl_row.get("mdq_path"));
                 metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(&pool, sha1_value);
@@ -70,7 +71,8 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
         mk_lib_common_enum_media_type::DLMediaType::GAME_ISO => {
             // TODO remove the file extension
             metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_name_and_system(&pool,
-                                                                                                            Path::new(dl_row.get("mdq_path")).file_name(), lookup_system_id);
+                                                                                                            Path::new(dl_row.get("mdq_path")).file_name(),
+                                                                                                            lookup_system_id);
             if metadata_uuid == None {
                 let sha1_value = mk_lib_hash_sha1::mk_file_hash_sha1(dl_row.get("mdq_path"));
                 metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(&pool, sha1_value);
@@ -80,7 +82,8 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
         mk_lib_common_enum_media_type::DLMediaType::GAME_ROM => {
             // TODO remove the file extension
             metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_name_and_system(&pool,
-                                                                                                            Path::new(dl_row.get("mdq_path")).file_name(), lookup_system_id);
+                                                                                                            Path::new(dl_row.get("mdq_path")).file_name(),
+                                                                                                            lookup_system_id);
             if metadata_uuid == None {
                 let sha1_hash = mk_lib_hash_sha1::mk_file_hash_sha1(dl_row.get("mdq_path"));
                 if sha1_hash != None {

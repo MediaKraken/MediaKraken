@@ -3,7 +3,7 @@
 use sqlx::types::Uuid;
 
 #[path = "provider/tmdb.rs"]
-mod mk_provider_tmdb;
+mod provider_tmdb;
 
 pub struct MetadataTVLastLookup {
     metadata_last_id: Uuid,

@@ -3,7 +3,7 @@
 use sqlx::types::Uuid;
 
 #[path = "provider/anidb.rs"]
-mod mk_provider_anidb;
+mod provider_anidb;
 
 pub struct MetadataAnimeLastLookup {
     metadata_last_id: Uuid,

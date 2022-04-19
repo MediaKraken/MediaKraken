@@ -3,13 +3,13 @@
 use sqlx::types::Uuid;
 
 #[path = "provider/imdb.rs"]
-mod mk_provider_imdb;
+mod provider_imdb;
 
 #[path = "provider/omdb.rs"]
-mod mk_provider_omdb;
+mod provider_omdb;
 
 #[path = "provider/tmdb.rs"]
-mod mk_provider_tmdb;
+mod provider_tmdb;
 
 pub struct MetadataMovieLastLookup {
     metadata_last_id: Uuid,

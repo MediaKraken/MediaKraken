@@ -1,5 +1,7 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+// https://directory.shoutcast.com/Developer
+
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;
 

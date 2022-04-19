@@ -3,19 +3,19 @@
 use sqlx::types::Uuid;
 
 #[path = "provider/isbndb.rs"]
-mod mk_provider_isbndb;
+mod provider_isbndb;
 
 #[path = "provider/open_library.rs"]
 mod mk_provider_open_library;
 
 pub async fn metadata_book_lookup(pool: &sqlx::PgPool,
-                                   download_data: serde_json::Value) {
+                                  download_data: serde_json::Value) {
     let mut metadata_uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000")?;  // so not found checks verify later
 }
 
 /*
 
-async def metadata_periodicals_lookup(db_connection, download_data):
+async def metadata_book_lookup(db_connection, download_data):
 
 
     // check if isbn in metaid

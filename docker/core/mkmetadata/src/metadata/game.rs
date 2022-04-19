@@ -3,7 +3,7 @@
 use sqlx::types::Uuid;
 
 #[path = "provider/giant_bomb.rs"]
-mod mk_provider_giant_bomb;
+mod provider_giant_bomb;
 
 #[path = "provider/thegamesdb.rs"]
 mod mk_provider_thegamesdb;

@@ -3,13 +3,13 @@
 use sqlx::types::Uuid;
 
 #[path = "provider/musicbrainz.rs"]
-mod mk_provider_musicbrainz;
+mod provider_musicbrainz;
 
 #[path = "provider/pitchfork.rs"]
-mod mk_provider_pitchfork;
+mod provider_pitchfork;
 
 #[path = "provider/shoutcast.rs"]
-mod mk_provider_shoutcast;
+mod provider_shoutcast;
 
 pub async fn metadata_music_lookup(pool: &sqlx::PgPool,
                                    download_data: serde_json::Value) {

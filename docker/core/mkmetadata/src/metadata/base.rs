@@ -23,6 +23,8 @@ mod mk_tv;
 mod provider_anidb;
 #[path = "provider/chart_lyrics.rs"]
 mod provider_chart_lyrics;
+#[path = "provider/isbndb.rs"]
+mod provider_isbndb;
 #[path = "provider/musicbrainz.rs"]
 mod provider_musicbrainz;
 #[path = "provider/televisiontunes.rs"]
@@ -88,7 +90,7 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
     } else if provider_name == "imdb" {
         lookup_halt = true;
     } else if provider_name == "imvdb" {
-        metadata_uuid, match_result = metadata_music_video::metadata_music_video_lookup(
+        (metadata_uuid, match_result) = metadata_music_video::metadata_music_video_lookup(
             &pool, download_data["mdq_path"]);
         if metadata_uuid == None {
             if match_result == None {
@@ -98,7 +100,7 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
             }
         }
     } else if provider_name == "isbndb" {
-        metadata_uuid, match_result = metadata_provider_isbndb::metadata_periodicals_search_isbndb(
+        (metadata_uuid, match_result) = provider_isbndb::metadata_book_search_isbndb(
             &pool, download_data["mdq_provider_id"]);
         if metadata_uuid == None {
             lookup_halt = true;
@@ -106,7 +108,7 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
     } else if provider_name == "lastfm" {
         lookup_halt = true;
     } else if provider_name == "musicbrainz" {
-        metadata_uuid, match_result = metadata_music::metadata_music_lookup(&pool,
+        (metadata_uuid, match_result) = metadata_music::metadata_music_lookup(&pool,
                                                                             download_data);
         if metadata_uuid == None {
             lookup_halt = true;
@@ -206,31 +208,33 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
 
 pub async fn metadata_fetch(pool: &sqlx::PgPool,
                             provider_name: String,
-                            download_data: serde_json::Value) {}
+                            download_data: serde_json::Value) {
+        if provider_name == "imvdb" {
+            let imvdb_id = metadata_provider_imvdb::movie_fetch_save_imvdb(pool,
+                                                                           download_data[
+                                                                               "mdq_provider_id"],
+                                                                           download_data[
+                                                                               "mdq_new_uuid"]);
+        }
+}
 /*
 async def metadata_fetch(db_connection, provider_name, download_data):
     """
     Fetch main metadata for specified provider
     """
-    if provider_name == "imvdb":
-        imvdb_id = await metadata_provider_imvdb.movie_fetch_save_imvdb(db_connection,
-                                                                        download_data[
-                                                                            "mdq_provider_id"],
-                                                                        download_data[
-                                                                            "mdq_new_uuid"]);
     else if provider_name == "themoviedb":
         if download_data["mdq_que_type"] == common_global.DLMediaType.Person.value:
-            await metadata_provider_themoviedb.metadata_fetch_tmdb_person(
+            metadata_provider_themoviedb.metadata_fetch_tmdb_person(
                 db_connection, provider_name, download_data);
         else if download_data["mdq_que_type"] == common_global.DLMediaType.Movie.value:
             // removing the imdb check.....as com_tmdb_metadata_by_id converts it
-            await metadata_provider_themoviedb.movie_fetch_save_tmdb(db_connection,
+            metadata_provider_themoviedb.movie_fetch_save_tmdb(db_connection,
                                                                      download_data[
                                                                          "mdq_provider_id"],
                                                                      download_data[
                                                                          "mdq_new_uuid"]);
         else if download_data["mdq_que_type"] == common_global.DLMediaType.TV.value:
-            await metadata_tv_tmdb.tv_fetch_save_tmdb(db_connection,
+            metadata_tv_tmdb.tv_fetch_save_tmdb(db_connection,
                                                       download_data["mdq_provider_id"],
                                                       download_data["mdq_new_uuid"]);
     await db_connection.db_download_delete(download_data["mdq_id"]);
@@ -249,9 +253,9 @@ async def metadata_castcrew(db_connection, provider_name, download_data):
     """
     // removed themoviedb call as it should be done during the initial fetch
     // setup for FetchReview
-    await db_connection.db_download_update(guid=download_data["mdq_id"],
+    db_connection.db_download_update(guid=download_data["mdq_id"],
                                            status="FetchReview");
-    await db_connection.db_commit();
+    db_connection.db_commit();
 */
 
 pub async fn metadata_image(pool: &sqlx::PgPool,
@@ -279,13 +283,13 @@ async def metadata_review(db_connection, provider_name, download_data):
     Fetch reviews from specified provider
     """
     if provider_name == "themoviedb" {
-        await metadata_provider_themoviedb.movie_fetch_save_tmdb_review(db_connection,
+        metadata_provider_themoviedb.movie_fetch_save_tmdb_review(db_connection,
                                                                         download_data[
                                                                             "mdq_provider_id"]);
                                                                             }
     // review is last.....so can delete download que
-    await db_connection.db_download_delete(download_data["mdq_id"]);
-    await db_connection.db_commit();
+    db_connection.db_download_delete(download_data["mdq_id"]);
+    db_connection.db_commit();
 */
 
 pub async fn metadata_collection(pool: &sqlx::PgPool,
@@ -299,13 +303,13 @@ async def metadata_collection(db_connection, provider_name, download_data):
     Fetch collection from specified provider
     """
     if provider_name == "themoviedb" {
-        await metadata_provider_themoviedb.movie_fetch_save_tmdb_collection(db_connection,
+        metadata_provider_themoviedb.movie_fetch_save_tmdb_collection(db_connection,
                                                                             download_data[
                                                                                 "mdq_provider_id"],
                                                                             download_data);
                                                                             }
     // only one record for this so nuke it
-    await db_connection.db_download_delete(download_data["mdq_id"]);
-    await db_connection.db_commit();
+    db_connection.db_download_delete(download_data["mdq_id"]);
+    db_connection.db_commit();
 
  */
