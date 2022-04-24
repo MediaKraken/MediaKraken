@@ -37,7 +37,7 @@ pub async fn user_media_game_servers_detail(sqlx_pool: &rocket::State<sqlx::PgPo
 @blueprint_user_game_servers.route('/user_game_server', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_game_server.html')
 @common_global.auth.login_required
-async def url_bp_user_game_server_list(request):
+pub async fn url_bp_user_game_server_list(request):
     """
     Display game server page
     """

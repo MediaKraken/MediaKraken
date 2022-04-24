@@ -15,7 +15,7 @@ pub async fn user_queue(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> 
 @blueprint_user_queue.route("/user_queue", methods=['GET'])
 @common_global.jinja_template.template('bss_user/user_queue.html')
 @common_global.auth.login_required()
-async def url_bp_user_queue(request):
+pub async fn url_bp_user_queue(request):
     """
     Display queue page
     """

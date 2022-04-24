@@ -24,7 +24,7 @@ pub async fn user_home(user: User) -> Template {
 @blueprint_user_homepage.route('/user_home', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/bss_user_home.html')
 @common_global.auth.login_required
-async def url_bp_user_homepage(request):
+pub async fn url_bp_user_homepage(request):
     """
     Display user home page
     """

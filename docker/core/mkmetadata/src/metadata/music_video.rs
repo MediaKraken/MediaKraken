@@ -19,7 +19,7 @@ pub async fn metadata_music_video_lookup(pool: &sqlx::PgPool,
 /*
 
 // imvdb lookup
-async def metadata_music_video_lookup(db_connection, file_name):
+pub async fn metadata_music_video_lookup(db_connection, file_name):
     """
     Lookup by name on music video database
     """

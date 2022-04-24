@@ -147,7 +147,7 @@ def db_read_media_list_by_uuid(self, media_guid):
     return video_data
 
 // TODO port query
-async def db_media_movie_list(self, class_guid, list_type=None, list_genre='all',
+pub async fn db_media_movie_list(self, class_guid, list_type=None, list_genre='all',
                               list_limit=0, group_collection=False, offset=None,
                               include_remote=False,
                               search_text=None):
@@ -682,7 +682,7 @@ async def db_media_movie_list(self, class_guid, list_type=None, list_genre='all'
 
 
 // TODO port query
-async def db_media_movie_list_count(self, class_guid, list_type=None,
+pub async fn db_media_movie_list_count(self, class_guid, list_type=None,
                                     list_genre='all',
                                     group_collection=False, include_remote=False, search_text=None,
                                     db_connection=None):

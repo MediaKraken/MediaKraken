@@ -120,7 +120,7 @@ pub async fn provider_tmdb_tv_fetch_by_id(tmdb_id: i32) {
 }
 
 /*
-    async def com_tmdb_search(self, media_title, media_year=None, id_only=True,
+    pub async fn com_tmdb_search(self, media_title, media_year=None, id_only=True,
                               media_type=common_global.DLMediaType.Movie.value):
         """
         # search for media title and year
@@ -178,7 +178,7 @@ pub async fn provider_tmdb_tv_fetch_by_id(tmdb_id: i32) {
 
 
 
-    async def com_tmdb_meta_bio_image_build(self, result_json):
+    pub async fn com_tmdb_meta_bio_image_build(self, result_json):
         """
         # download info and set data to be ready for insert into database
         """
@@ -196,7 +196,7 @@ pub async fn provider_tmdb_tv_fetch_by_id(tmdb_id: i32) {
         return image_file_path.replace(common_global.static_data_directory, '')
 
 
-    async def com_tmdb_meta_info_build(self, result_json):
+    pub async fn com_tmdb_meta_info_build(self, result_json):
         """
         # download info and set data to be ready for insert into database
         """
@@ -251,7 +251,7 @@ pub async fn provider_tmdb_tv_fetch_by_id(tmdb_id: i32) {
         return result_json['id'], result_json, image_json
 
 
-async def movie_search_tmdb(db_connection, file_name):
+pub async fn movie_search_tmdb(db_connection, file_name):
     """
     # search tmdb
     """
@@ -269,11 +269,6 @@ async def movie_search_tmdb(db_connection, file_name):
         match_response, match_result = await common_global.api_instance.com_tmdb_search(
             file_name['title'], None, id_only=true,
             media_type=common_global.DLMediaType.Movie.value)
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         "meta movie response":
-                                                                             match_response,
-                                                                         'res': match_result})
     if match_response == 'idonly':
         // check to see if metadata exists for TMDB id
         metadata_uuid = await db_connection.db_meta_guid_by_tmdb(match_result)
@@ -294,7 +289,7 @@ async def movie_search_tmdb(db_connection, file_name):
                                                                                  match_result})
     return metadata_uuid, match_result
 
-async def movie_fetch_save_tmdb_review(db_connection, tmdb_id):
+pub async fn movie_fetch_save_tmdb_review(db_connection, tmdb_id):
     """
     # grab reviews
     """
@@ -306,7 +301,7 @@ async def movie_fetch_save_tmdb_review(db_connection, tmdb_id):
                                              {'themoviedb': review_json})
 
 
-async def movie_fetch_save_tmdb_collection(db_connection, tmdb_collection_id, download_data):
+pub async fn movie_fetch_save_tmdb_collection(db_connection, tmdb_collection_id, download_data):
     """
     # grab collection
     """
@@ -350,24 +345,20 @@ async def movie_fetch_save_tmdb_collection(db_connection, tmdb_collection_id, do
         return 0  # to add totals later
 
 
-async def metadata_fetch_tmdb_person(db_connection, provider_name, download_data):
-    """
-    fetch person bio
-    """
-    if common_global.api_instance != None:
-        // fetch and save json data via tmdb id
-        result_json = await common_global.api_instance.com_tmdb_metadata_bio_by_id(
-            download_data["mdq_provider_id"])
-        if result_json == None or result_json.status_code == 502:
-            asyncio.sleep(60)
-            metadata_fetch_tmdb_person(db_connection, provider_name, download_data)
-        else if result_json.status_code == 200:
-            db_connection.db_meta_person_update(provider_name=provider_name,
-                                                      provider_uuid=download_data['mdq_provider_id'],
-                                                      person_bio=result_json.json(),
-                                                      person_image=await common_global.api_instance.com_tmdb_meta_bio_image_build(
-                                                          result_json.json()))
-            db_connection.db_download_delete(download_data['mdq_id'])
-            db_connection.db_commit()
+pub async fn metadata_fetch_tmdb_person(db_connection, provider_name, download_data):
+    // fetch and save json data via tmdb id
+    result_json = await common_global.api_instance.com_tmdb_metadata_bio_by_id(
+        download_data["mdq_provider_id"])
+    if result_json == None or result_json.status_code == 502:
+        asyncio.sleep(60)
+        metadata_fetch_tmdb_person(db_connection, provider_name, download_data)
+    else if result_json.status_code == 200:
+        db_connection.db_meta_person_update(provider_name=provider_name,
+                                                  provider_uuid=download_data['mdq_provider_id'],
+                                                  person_bio=result_json.json(),
+                                                  person_image=await common_global.api_instance.com_tmdb_meta_bio_image_build(
+                                                      result_json.json()))
+        db_connection.db_download_delete(download_data['mdq_id'])
+        db_connection.db_commit()
 
  */

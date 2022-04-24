@@ -41,7 +41,7 @@ for platform in \
     if platform != 'Platform':
         for game_systems in platform:
             print(game_systems, flush=True)
-            if db_connection.db_meta_games_system_guid_by_short_name(game_systems['name']) is None:
+            if db_connection.db_meta_games_system_guid_by_short_name(game_systems['name']) == None:
                 # fetch platform info
                 platform_json = GAMESDB_INST.com_meta_gamesdb_platform_by_id(game_systems['id'])
                 # store record

@@ -37,7 +37,7 @@ pub async fn user_metadata_game_system_detail(sqlx_pool: &rocket::State<sqlx::Pg
 @blueprint_user_metadata_game_system.route('/user_meta_game_system', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/metadata/bss_user_metadata_game_system.html')
 @common_global.auth.login_required
-async def url_bp_user_metadata_game_system(request):
+pub async fn url_bp_user_metadata_game_system(request):
     """
     Display list of game system metadata
     """
@@ -69,7 +69,7 @@ async def url_bp_user_metadata_game_system(request):
 @common_global.jinja_template.template(
     'bss_user/metadata/bss_user_metadata_game_system_detail.html')
 @common_global.auth.login_required
-async def url_bp_user_metadata_game_system_detail(request, guid):
+pub async fn url_bp_user_metadata_game_system_detail(request, guid):
     """
     Display metadata game detail
     """

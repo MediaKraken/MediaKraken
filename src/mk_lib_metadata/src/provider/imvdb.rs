@@ -1,4 +1,5 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+use sqlx::types::Uuid;
 
 // https://imvdb.com/developers/api
 
@@ -14,16 +15,12 @@ pub struct IMVDBAPI {
 /*
 
 class CommonMetadataIMVdb:
-    """
-    Class for interfacing with imvdb
-    """
-
     def __init__(self, option_config_json):
         self.headers = {'User-Agent': 'MediaKraken_0.1.6',
                         'IMVDB-APP-KEY': option_config_json['API']['imvdb'],
                         'Accept': 'application/json'}
 
-    async def com_imvdb_video_info(self, video_id):
+    pub async fn com_imvdb_video_info(self, video_id):
         """
         Video info
         """
@@ -35,7 +32,7 @@ class CommonMetadataIMVdb:
         except:
             return None
 
-    async def com_imvdb_search_video(self, artist_name, song_title):
+    pub async fn com_imvdb_search_video(self, artist_name, song_title):
         """
         Search for video by band name and song title
         """
@@ -48,7 +45,7 @@ class CommonMetadataIMVdb:
         except:
             return None
 
-    async def com_imvdb_search_entities(self, artist_name):
+    pub async fn com_imvdb_search_entities(self, artist_name):
         """
         Search by band name
         """
@@ -60,7 +57,7 @@ class CommonMetadataIMVdb:
             return None
 
 
-async def movie_fetch_save_imvdb(db_connection, imvdb_id, metadata_uuid):
+pub async fn meta_fetch_save_imvdb(db_connection, imvdb_id, metadata_uuid):
     """
     # fetch from imvdb
     """
@@ -86,3 +83,7 @@ async def movie_fetch_save_imvdb(db_connection, imvdb_id, metadata_uuid):
     return metadata_uuid
 
  */
+
+pub async fn meta_fetch_save_imvdb(pool: &sqlx::PgPool,
+                                   imvdb_id: i32,
+                                   metadata_uuid: Uuid) {}

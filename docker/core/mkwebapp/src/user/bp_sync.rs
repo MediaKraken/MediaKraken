@@ -26,7 +26,7 @@ pub async fn user_sync(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> T
 @blueprint_user_sync.route('/user_sync')
 @common_global.jinja_template.template('bss_user/media/bss_user_media_sync.html')
 @common_global.auth.login_required
-async def url_bp_user_sync_display_all(request):
+pub async fn url_bp_user_sync_display_all(request):
     """
     Display sync page
     """
@@ -55,7 +55,7 @@ async def url_bp_user_sync_display_all(request):
 
 @blueprint_user_sync.route('/user_sync_delete', methods=["POST"])
 @common_global.auth.login_required
-async def url_bp_user_admin_sync_delete_page(request):
+pub async fn url_bp_user_admin_sync_delete_page(request):
     """
     Display sync delete action 'page'
     """
@@ -68,7 +68,7 @@ async def url_bp_user_admin_sync_delete_page(request):
 @blueprint_user_sync.route('/user_sync_edit/<guid>', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/user_sync_edit.html')
 @common_global.auth.login_required
-async def url_bp_user_sync_edit(request, guid):
+pub async fn url_bp_user_sync_edit(request, guid):
     """
     Allow user to edit sync page
     """

@@ -39,7 +39,7 @@ import natsort
 @blueprint_user_metadata_tv.route('/user_meta_tvshow_detail/<guid>')
 @common_global.jinja_template.template('bss_user/metadata/bss_user_metadata_tv_detail.html')
 @common_global.auth.login_required
-async def url_bp_user_metadata_tvshow_detail(request, guid):
+pub async fn url_bp_user_metadata_tvshow_detail(request, guid):
     """
     Display metadata of tvshow
     """
@@ -115,7 +115,7 @@ async def url_bp_user_metadata_tvshow_detail(request, guid):
                                   methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/metadata/bss_metadata_tv_episode_detail.html')
 @common_global.auth.login_required
-async def url_bp_user_metadata_tvshow_episode_detail(request, guid, eps_id):
+pub async fn url_bp_user_metadata_tvshow_episode_detail(request, guid, eps_id):
     """
     Display tvshow episode metadata detail
     """
@@ -151,7 +151,7 @@ async def url_bp_user_metadata_tvshow_episode_detail(request, guid, eps_id):
 @blueprint_user_metadata_tv.route('/user_meta_tvshow_list', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/metadata/bss_user_metadata_tv.html')
 @common_global.auth.login_required
-async def url_bp_user_metadata_tvshow_list(request):
+pub async fn url_bp_user_metadata_tvshow_list(request):
     """
     Display tvshow metadata list
     """
@@ -191,7 +191,7 @@ async def url_bp_user_metadata_tvshow_list(request):
                                   methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/metadata/bss_user_metadata_tv_season_detail.html')
 @common_global.auth.login_required
-async def url_bp_user_metadata_tvshow_season_detail(request, guid, season):
+pub async fn url_bp_user_metadata_tvshow_season_detail(request, guid, season):
     """
     Display metadata of tvshow season detail
     """

@@ -15,7 +15,7 @@ class CommonMetadataANIdb:
     def __init__(self, db_connection):
         self.adba_connection = None
 
-    async def com_net_anidb_fetch_titles_file(self):
+    pub async fn com_net_anidb_fetch_titles_file(self):
         """
         Fetch the tarball of anime titles
         """
@@ -28,7 +28,7 @@ class CommonMetadataANIdb:
             return True  # new file
         return False
 
-    async def com_net_anidb_save_title_data_to_db(self, title_file='./cache/anidb_titles.gz'):
+    pub async fn com_net_anidb_save_title_data_to_db(self, title_file='./cache/anidb_titles.gz'):
         """
         Save anidb title data to database
         """
@@ -59,7 +59,7 @@ class CommonMetadataANIdb:
         common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
                                                              message_text={'stuff': 'end'})
 
-    async def com_net_anidb_aid_by_title(self, title_to_search):
+    pub async fn com_net_anidb_aid_by_title(self, title_to_search):
         """
         Find AID by title
         """
@@ -76,7 +76,7 @@ class CommonMetadataANIdb:
         else:
             return local_db_result
 
-    async def com_net_anidb_connect(self, user_name, user_password):
+    pub async fn com_net_anidb_connect(self, user_name, user_password):
         """
         Remote api calls
         """
@@ -89,13 +89,13 @@ class CommonMetadataANIdb:
                                                                                    err_code})
         return self.adba_connection
 
-    async def com_net_anidb_logout(self):
+    pub async fn com_net_anidb_logout(self):
         """
         Logout of anidb
         """
         self.adba_connection.logout()
 
-    async def com_net_anidb_stop(self):
+    pub async fn com_net_anidb_stop(self):
         """
         Close the anidb connect and stop the thread
         """

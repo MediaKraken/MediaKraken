@@ -10,7 +10,7 @@ pub async fn provider_chart_lyrics_fetch(pool: &sqlx::PgPool,
                                          song_name: String) {}
 
 /*
-async def com_meta_chart_lyrics(artist_name, song_name):
+pub async fn com_meta_chart_lyrics(artist_name, song_name):
     """
     Generate url link and fetch lyrics
     """

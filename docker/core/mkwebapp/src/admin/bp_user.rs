@@ -40,7 +40,7 @@ pub async fn admin_user_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, user: Ad
 /*
 @blueprint_admin_users.route('/admin_user_delete', methods=["POST"])
 @common_global.auth.login_required
-async def url_bp_admin_user_delete(request):
+pub async fn url_bp_admin_user_delete(request):
     """
     Delete user action 'page'
     """
@@ -53,7 +53,7 @@ async def url_bp_admin_user_delete(request):
 @blueprint_admin_users.route("/admin_user_detail/<guid>")
 @common_global.jinja_template.template('bss_admin/bss_admin_user_detail.html')
 @common_global.auth.login_required
-async def url_bp_admin_user_detail(request, guid):
+pub async fn url_bp_admin_user_detail(request, guid):
     """
     Display user details
     """
@@ -66,7 +66,7 @@ async def url_bp_admin_user_detail(request, guid):
 @blueprint_admin_users.route("/admin_users")
 @common_global.jinja_template.template('bss_admin/bss_admin_user.html')
 @common_global.auth.login_required
-async def url_bp_admin_user(request):
+pub async fn url_bp_admin_user(request):
     """
     Display user list
     """

@@ -105,7 +105,7 @@ pub async fn mk_lib_database_meta_collection_by_name(pool: &sqlx::PgPool,
 /*
 
 // TODO port query
-async def db_collection_guid_by_name(self, collection_name):
+pub async fn db_collection_guid_by_name(self, collection_name):
     return await db_conn.fetchval(
         'select mm_metadata_collection_guid from mm_metadata_collection'
         ' where mm_metadata_collection_name->>'name' = $1',
@@ -113,7 +113,7 @@ async def db_collection_guid_by_name(self, collection_name):
 
 
 // TODO port query
-async def db_collection_by_tmdb(self, tmdb_id):
+pub async fn db_collection_by_tmdb(self, tmdb_id):
     """
     Return uuid via tmdb id
     """
@@ -123,7 +123,7 @@ async def db_collection_by_tmdb(self, tmdb_id):
 
 
 // TODO port query
-async def db_collection_update(self, collection_guid, guid_json):
+pub async fn db_collection_update(self, collection_guid, guid_json):
     """
     Update the ids listed within a collection
     """

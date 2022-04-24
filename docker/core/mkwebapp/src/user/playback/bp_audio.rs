@@ -12,7 +12,7 @@ pub async fn user_playback_audio(user: User) -> Template {
 @blueprint_user_playback_audio.route('/user_play_album/<guid>', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/bss_user_album_playback.html')
 @common_global.auth.login_required
-async def url_bp_user_playback_album(request, guid):
+pub async fn url_bp_user_playback_album(request, guid):
     """
     Obsolete?
     """

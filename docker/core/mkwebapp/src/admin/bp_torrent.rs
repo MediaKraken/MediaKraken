@@ -14,7 +14,7 @@ pub async fn admin_torrent(user: AdminUser) -> Template {
 @blueprint_admin_torrent.route("/admin_torrent")
 @common_global.jinja_template.template('bss_admin/bss_admin_torrent.html')
 @common_global.auth.login_required
-async def url_bp_admin_torrent(request):
+pub async fn url_bp_admin_torrent(request):
     """
     Display torrent page
     """
@@ -38,7 +38,7 @@ async def url_bp_admin_torrent(request):
 
 @blueprint_admin_torrent.route('/admin_torrent_delete', methods=["POST"])
 @common_global.auth.login_required
-async def url_bp_admin_torrent_delete(request):
+pub async fn url_bp_admin_torrent_delete(request):
     """
     Delete torrent
     """
@@ -48,7 +48,7 @@ async def url_bp_admin_torrent_delete(request):
 
 @blueprint_admin_torrent.route('/admin_torrent_edit', methods=["POST"])
 @common_global.auth.login_required
-async def url_bp_admin_torrent_edit(request):
+pub async fn url_bp_admin_torrent_edit(request):
     """
     Edit a torrent
     """

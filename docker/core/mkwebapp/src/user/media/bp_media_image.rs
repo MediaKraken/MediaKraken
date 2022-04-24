@@ -15,7 +15,7 @@ pub async fn user_media_image(sqlx_pool: &rocket::State<sqlx::PgPool>, user: Use
 @blueprint_user_image.route('/user_imagegallery')
 @common_global.jinja_template.template('bss_user/media/bss_user_media_image_gallery.html')
 @common_global.auth.login_required
-async def url_bp_user_image_gallery(request):
+pub async fn url_bp_user_image_gallery(request):
     """
     Display image gallery page
     """

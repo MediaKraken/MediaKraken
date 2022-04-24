@@ -17,7 +17,7 @@ class CommonMetadataGamesDB:
         self.httpheaders = {'Accept': 'application/json',
                             'Content-Type': 'application/x-www-form-urlencoded'}
 
-    async def com_meta_gamesdb_platform_list(self):
+    pub async fn com_meta_gamesdb_platform_list(self):
         """
         Get platform list
         """
@@ -26,7 +26,7 @@ class CommonMetadataGamesDB:
                                                     headers=self.httpheaders,
                                                     timeout=3.05))
 
-    async def com_meta_gamesdb_platform_by_id(self, platform_id):
+    pub async fn com_meta_gamesdb_platform_by_id(self, platform_id):
         """
         Platform info by id
         """
@@ -35,7 +35,7 @@ class CommonMetadataGamesDB:
                                                     headers=self.httpheaders,
                                                     timeout=3.05))
 
-    async def com_meta_gamesdb_games_by_name(self, game_name):
+    pub async fn com_meta_gamesdb_games_by_name(self, game_name):
         """
         # 'mega man'
         """
@@ -45,7 +45,7 @@ class CommonMetadataGamesDB:
                                                     headers=self.httpheaders,
                                                     timeout=3.05))
 
-    async def com_meta_gamesdb_games_by_id(self, game_id):
+    pub async fn com_meta_gamesdb_games_by_id(self, game_id):
         """
         # game by id
         """
@@ -54,7 +54,7 @@ class CommonMetadataGamesDB:
                                                     headers=self.httpheaders,
                                                     timeout=3.05))
 
-    async def com_meta_gamesdb_games_art_by_id(self, game_id):
+    pub async fn com_meta_gamesdb_games_art_by_id(self, game_id):
         """
         # game by id
         """
@@ -63,7 +63,7 @@ class CommonMetadataGamesDB:
                                                     headers=self.httpheaders,
                                                     timeout=3.05))
 
-    async def com_meta_gamesdb_games_by_platform_id(self, platform_id):
+    pub async fn com_meta_gamesdb_games_by_platform_id(self, platform_id):
         """
         Games by platform id
         """
@@ -73,7 +73,7 @@ class CommonMetadataGamesDB:
                                                     headers=self.httpheaders,
                                                     timeout=3.05))
 
-    async def com_meta_gamesdb_games_by_platform_name(self, platform_name):
+    pub async fn com_meta_gamesdb_games_by_platform_name(self, platform_name):
         """
         Games by platform id
         """
@@ -83,7 +83,7 @@ class CommonMetadataGamesDB:
                                                     headers=self.httpheaders,
                                                     timeout=3.05))
 
-    async def com_meta_gamesdb_games_updated_seconds(self, update_time):
+    pub async fn com_meta_gamesdb_games_updated_seconds(self, update_time):
         """
         Games updated in last n seconds
         """
@@ -92,7 +92,7 @@ class CommonMetadataGamesDB:
                                                     headers=self.httpheaders,
                                                     timeout=3.05))
 
-    async def com_meta_gamesdb_bulk_json(self, update_time):
+    pub async fn com_meta_gamesdb_bulk_json(self, update_time):
         """
         Grab the json database dump and process
         """

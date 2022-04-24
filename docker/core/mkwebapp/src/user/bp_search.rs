@@ -16,7 +16,7 @@ pub async fn user_search(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) ->
 @blueprint_user_search.route("/user_search", methods=["GET", "POST"])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_search.html')
 @common_global.auth.login_required
-async def url_bp_user_search_media(request):
+pub async fn url_bp_user_search_media(request):
     """
     Display search page
     """
@@ -104,7 +104,7 @@ async def url_bp_user_search_media(request):
 
 @blueprint_user_search.route("/user_search_nav", methods=["GET", "POST"])
 @common_global.auth.login_required
-async def url_bp_user_search_nav_media(request):
+pub async fn url_bp_user_search_nav_media(request):
     """
     determine what search results screen to show
     """

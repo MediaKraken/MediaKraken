@@ -12,7 +12,7 @@ pub async fn admin_hardware(sqlx_pool: &rocket::State<sqlx::PgPool>, user: Admin
 @blueprint_admin_hardware.route("/admin_hardware", methods=["GET", "POST"])
 @common_global.jinja_template.template('bss_admin/bss_admin_hardware.html')
 @common_global.auth.login_required
-async def url_bp_admin_hardware(request):
+pub async fn url_bp_admin_hardware(request):
     if request.method == 'POST':
         # submit the message
         common_network_pika.com_net_pika_send({'Type': 'Hardware Scan'},
@@ -51,7 +51,7 @@ async def url_bp_admin_hardware(request):
 
 @blueprint_admin_hardware.route('/admin_hardware_chromecast_delete', methods=["POST"])
 @common_global.auth.login_required
-async def url_bp_admin_hardware_chromecast_delete(request):
+pub async fn url_bp_admin_hardware_chromecast_delete(request):
     """
     Delete action 'page'
     """
@@ -64,7 +64,7 @@ async def url_bp_admin_hardware_chromecast_delete(request):
 @blueprint_admin_hardware.route("/admin_hardware_chromecast_edit", methods=["GET", "POST"])
 @common_global.jinja_template.template('bss_admin/bss_admin_hardware_chromecast_edit.html')
 @common_global.auth.login_required
-async def url_bp_admin_hardware_chromecast_edit(request):
+pub async fn url_bp_admin_hardware_chromecast_edit(request):
     """
     allow user to edit chromecast
     """
@@ -100,7 +100,7 @@ async def url_bp_admin_hardware_chromecast_edit(request):
 @blueprint_admin_hardware.route("/admin_hardware_tvtuner_edit", methods=["GET", "POST"])
 @common_global.jinja_template.template('bss_admin/bss_admin_hardware_tuner_edit.html')
 @common_global.auth.login_required
-async def url_bp_admin_hardware_tvtuner_edit(request):
+pub async fn url_bp_admin_hardware_tvtuner_edit(request):
     """
     allow user to edit tuner
     """
@@ -137,7 +137,7 @@ async def url_bp_admin_hardware_tvtuner_edit(request):
 
 @blueprint_admin_hardware.route('/admin_hardware_tvtuner_delete', methods=["POST"])
 @common_global.auth.login_required
-async def url_bp_admin_hardware_tvtuner_delete(request):
+pub async fn url_bp_admin_hardware_tvtuner_delete(request):
     """
     Delete action 'page'
     """

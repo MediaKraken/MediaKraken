@@ -15,7 +15,7 @@ pub async fn metadata_game_lookup(pool: &sqlx::PgPool,
 
 /*
 
-async def game_system_update():
+pub async fn game_system_update():
     data = await common_global.api_instance.com_meta_gamesdb_platform_list()[
         'Data']['Platforms']['Platform']
     print((type(data)), flush=True)
@@ -32,7 +32,7 @@ async def game_system_update():
         break
 
 
-async def metadata_game_lookup(db_connection, download_data):
+pub async fn metadata_game_lookup(db_connection, download_data):
     """
     Lookup game metadata
     """

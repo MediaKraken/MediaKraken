@@ -38,7 +38,7 @@ pub async fn user_media_sports_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, u
 @blueprint_user_sports.route("/user_sports", methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_sports.html')
 @common_global.auth.login_required
-async def url_bp_user_sports(request):
+pub async fn url_bp_user_sports(request):
     """
     Display sporting events page
     """
@@ -74,7 +74,7 @@ async def url_bp_user_sports(request):
 @blueprint_user_sports.route("/user_sports_detail/<guid>", methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_sports_detail.html')
 @common_global.auth.login_required
-async def url_bp_user_sports_detail(request, guid):
+pub async fn url_bp_user_sports_detail(request, guid):
     """
     Display sports detail page
     """

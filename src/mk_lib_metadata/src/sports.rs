@@ -20,7 +20,7 @@ pub async fn metadata_sports_lookup(pool: &sqlx::PgPool,
 
 /*
 
-async def metadata_sports_lookup(db_connection, download_data):
+pub async fn metadata_sports_lookup(db_connection, download_data):
 
 
     stripped_name = os.path.basename(

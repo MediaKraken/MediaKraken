@@ -17,7 +17,7 @@ pub async fn user_inter_youtube_detail(user: User, guid: &str) -> Template {
 @blueprint_user_internet_youtube.route('/user_internet/youtube', methods=["GET", "POST"])
 @common_global.jinja_template.template('bss_user/internet/bss_user_internet_youtube.html')
 @common_global.auth.login_required
-async def url_bp_user_internet_youtube(request):
+pub async fn url_bp_user_internet_youtube(request):
     """
     Display youtube page
     """
@@ -50,7 +50,7 @@ async def url_bp_user_internet_youtube(request):
 @blueprint_user_internet_youtube.route('/user_internet/youtube_detail/<uuid>')
 @common_global.jinja_template.template('bss_user/internet/bss_user_internet_youtube_detail.html')
 @common_global.auth.login_required
-async def url_bp_user_internet_youtube_detail(request, uuid):
+pub async fn url_bp_user_internet_youtube_detail(request, uuid):
     """
     Display youtube details page
     """

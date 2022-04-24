@@ -14,7 +14,7 @@ outside_ip = None
 @blueprint_admin.route("/admin_home")
 @common_global.jinja_template.template('bss_admin/bss_admin_home.html')
 @common_global.auth.login_required
-async def url_bp_admin(request):
+pub async fn url_bp_admin(request):
     """
     Display main server page
     """
@@ -93,7 +93,7 @@ async def url_bp_admin(request):
 # @blueprint_admin.route("/admin_sidenav")
 # @common_global.jinja_template.template('admin/admin_sidenav.html')
 # @common_global.auth.login_required
-# async def url_bp_admin_sidenav(request):
+# pub async fn url_bp_admin_sidenav(request):
 #     return {}
 
  */

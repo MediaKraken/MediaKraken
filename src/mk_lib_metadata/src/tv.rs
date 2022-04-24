@@ -21,7 +21,7 @@ pub async fn metadata_tv_lookup(pool: &sqlx::PgPool,
 
 /*
 
-async def metadata_tv_lookup(db_connection, download_data, file_name):
+pub async fn metadata_tv_lookup(db_connection, download_data, file_name):
 
     // determine provider id's from nfo/xml if they exist
     nfo_data = await metadata_nfo_xml.nfo_file_tv(download_data['Path'])
@@ -119,7 +119,7 @@ async def metadata_tv_lookup(db_connection, download_data, file_name):
 
 /*
 
-async def tv_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid):
+pub async fn tv_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid):
     """
     # tmdb data fetch for tv
     """

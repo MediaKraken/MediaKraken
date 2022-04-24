@@ -6,7 +6,7 @@ use sqlx::types::Uuid;
 mod provider_isbndb;
 
 #[path = "provider/open_library.rs"]
-mod mk_provider_open_library;
+mod provider_open_library;
 
 pub async fn metadata_book_lookup(pool: &sqlx::PgPool,
                                   download_data: serde_json::Value) {
@@ -15,7 +15,7 @@ pub async fn metadata_book_lookup(pool: &sqlx::PgPool,
 
 /*
 
-async def metadata_book_lookup(db_connection, download_data):
+pub async fn metadata_book_lookup(db_connection, download_data):
 
 
     // check if isbn in metaid
@@ -50,7 +50,7 @@ async def metadata_book_lookup(db_connection, download_data):
     return metadata_uuid
 
 
-async def metadata_periodicals_cover(db_connection, isbn):
+pub async fn metadata_periodicals_cover(db_connection, isbn):
     """
     pull and save the cover image for periodical
     """

@@ -24,7 +24,7 @@ pub async fn admin_cron(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser
 
 @blueprint_admin_cron.route('/admin_cron_delete', methods=["POST"])
 @common_global.auth.login_required
-async def url_bp_admin_cron_delete(request):
+pub async fn url_bp_admin_cron_delete(request):
     """
     Delete action 'page'
     """
@@ -37,7 +37,7 @@ async def url_bp_admin_cron_delete(request):
 @blueprint_admin_cron.route('/admin_cron_edit/<guid>', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_admin/bss_admin_cron_edit.html')
 @common_global.auth.login_required
-async def url_bp_admin_cron_edit(request, guid):
+pub async fn url_bp_admin_cron_edit(request, guid):
     """
     Edit cron job page
     """
@@ -57,7 +57,7 @@ async def url_bp_admin_cron_edit(request, guid):
 
 @blueprint_admin_cron.route('/admin_cron_run/<guid>', methods=['GET', 'POST'])
 @common_global.auth.login_required(user_keyword='user')
-async def url_bp_admin_cron_run(request, user, guid):
+pub async fn url_bp_admin_cron_run(request, user, guid):
     """
     Run cron jobs
     """

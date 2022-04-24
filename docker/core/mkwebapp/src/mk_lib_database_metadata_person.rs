@@ -147,7 +147,7 @@ pub async fn mk_lib_database_metadata_person_insert(pool: &sqlx::PgPool,
 /*
 
 // TODO port query
-async def db_meta_person_as_seen_in(self, person_guid):
+pub async fn db_meta_person_as_seen_in(self, person_guid):
     row_data = await self.db_meta_person_by_guid(guid=person_guid)
     if row_data == None:  // exit on not found person
         return None
@@ -162,7 +162,7 @@ async def db_meta_person_as_seen_in(self, person_guid):
 
 
 // TODO port query
-async def db_meta_person_update(self, provider_name, provider_uuid, person_bio, person_image):
+pub async fn db_meta_person_update(self, provider_name, provider_uuid, person_bio, person_image):
     """
     update the person bio/etc
     """
@@ -174,7 +174,7 @@ async def db_meta_person_update(self, provider_name, provider_uuid, person_bio, 
 
 
 // TODO port query
-async def mk_lib_database_metadata_person_insert_cast_crew(self, person_json):
+pub async fn mk_lib_database_metadata_person_insert_cast_crew(self, person_json):
         for person_data in person_json:
                 person_id = person_data["id"]
                 person_name = person_data["name"]

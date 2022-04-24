@@ -69,7 +69,7 @@ pub async fn mk_lib_database_metadata_tv_count(pool: &sqlx::PgPool,
 }
 /*
 // TODO port query
-async def db_metatv_guid_by_tmdb(self, tmdb_uuid):
+pub async fn db_metatv_guid_by_tmdb(self, tmdb_uuid):
     """
     # metadata guid by tmdb id
     """
@@ -79,7 +79,7 @@ async def db_metatv_guid_by_tmdb(self, tmdb_uuid):
 
 
 // TODO port query
-async def db_meta_tv_detail(self, guid):
+pub async fn db_meta_tv_detail(self, guid):
     """
     # return metadata for tvshow
     """
@@ -96,7 +96,7 @@ async def db_meta_tv_detail(self, guid):
 
 
 // TODO port query
-async def db_meta_tv_episode(self, show_guid, season_number, episode_number):
+pub async fn db_meta_tv_episode(self, show_guid, season_number, episode_number):
     """
     # grab episode detail
     """
@@ -113,7 +113,7 @@ async def db_meta_tv_episode(self, show_guid, season_number, episode_number):
 
 
 // TODO port query
-async def db_meta_tv_epsisode_by_id(self, show_guid, show_episode_id):
+pub async fn db_meta_tv_epsisode_by_id(self, show_guid, show_episode_id):
     """
     # grab episode detail by eps id
     """
@@ -135,7 +135,7 @@ async def db_meta_tv_epsisode_by_id(self, show_guid, show_episode_id):
 
 
 // TODO port query
-async def db_meta_tv_eps_season(self, show_guid):
+pub async fn db_meta_tv_eps_season(self, show_guid):
     """
     # grab tvmaze ep data for eps per season
     """
@@ -154,7 +154,7 @@ async def db_meta_tv_eps_season(self, show_guid):
     return season_data
 
 // TODO port query
-async def db_meta_tv_season_eps_list(self, show_guid, season_number):
+pub async fn db_meta_tv_season_eps_list(self, show_guid, season_number):
     """
     # grab episodes within the season
     """
@@ -184,7 +184,7 @@ async def db_meta_tv_season_eps_list(self, show_guid, season_number):
 
 
 // TODO port query
-async def db_meta_tv_count_by_id(self, guid):
+pub async fn db_meta_tv_count_by_id(self, guid):
     """
     # does movie exist already by provider id
     """

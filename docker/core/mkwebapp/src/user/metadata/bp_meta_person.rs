@@ -38,7 +38,7 @@ pub async fn user_metadata_person_detail(sqlx_pool: &rocket::State<sqlx::PgPool>
 @blueprint_user_metadata_people.route('/user_meta_person_detail/<guid>')
 @common_global.jinja_template.template('bss_user/metadata/bss_user_metadata_person_detail.html')
 @common_global.auth.login_required
-async def url_bp_user_metadata_person_detail(request, guid):
+pub async fn url_bp_user_metadata_person_detail(request, guid):
     """
     Display person detail page
     """
@@ -65,7 +65,7 @@ async def url_bp_user_metadata_person_detail(request, guid):
 @blueprint_user_metadata_people.route('/user_meta_person_list', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/metadata/bss_user_metadata_person.html')
 @common_global.auth.login_required
-async def url_bp_user_metadata_person_list(request):
+pub async fn url_bp_user_metadata_person_list(request):
     """
     Display person list page
     """

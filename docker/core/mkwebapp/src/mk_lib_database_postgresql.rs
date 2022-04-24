@@ -66,7 +66,7 @@ pub async fn mk_lib_database_parallel_workers(pool: &sqlx::PgPool)
 /*
 
 // TODO port query
-async def db_pgsql_vacuum_stat_by_day(self, days=1):
+pub async fn db_pgsql_vacuum_stat_by_day(self, days=1):
     """
     # vacuum stats by day list
     """
@@ -122,7 +122,7 @@ def db_pgsql_table_exits(self, table_name):
 # SELECT schemaname, relname, last_analyze FROM pg_stat_all_tables WHERE relname = 'city';
 
 // TODO port query
-async def db_table_index_check(self, resource_name):
+pub async fn db_table_index_check(self, resource_name):
     """
     # check for table or index
     """

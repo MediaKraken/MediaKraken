@@ -38,7 +38,7 @@ pub async fn user_media_collection_detail(sqlx_pool: &rocket::State<sqlx::PgPool
 @blueprint_user_media_collection.route('/user_media_movie_collection', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/metadata/bss_user_metadata_movie_collection.html')
 @common_global.auth.login_required
-async def url_bp_user_metadata_movie_collection(request):
+pub async fn url_bp_user_metadata_movie_collection(request):
     """
     Display movie collection metadata
     """
@@ -81,7 +81,7 @@ async def url_bp_user_metadata_movie_collection(request):
 @common_global.jinja_template.template(
     'bss_user/metadata/bss_user_metadata_movie_collection_detail.html')
 @common_global.auth.login_required
-async def url_bp_user_metadata_movie_collection_detail(request, guid):
+pub async fn url_bp_user_metadata_movie_collection_detail(request, guid):
     """
     Display movie collection metadata detail
     """

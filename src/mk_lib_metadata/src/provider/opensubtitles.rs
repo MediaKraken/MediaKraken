@@ -16,16 +16,16 @@ class CommonMetadataOpenSubtitles:
         self.opensubtitles_inst = OpenSubtitles()
         self.token = self.opensubtitles_inst.login(user_name, user_password)
 
-    async def com_meta_opensub_search(self, file_name):
+    pub async fn com_meta_opensub_search(self, file_name):
         f = File(file_name)
         return self.opensubtitles_inst.search_subtitles([{'sublanguageid': 'all',
                                                           'moviehash': f.get_hash(),
                                                           'moviebytesize': f.size}])
 
-    async def com_meta_opensub_ping(self):
+    pub async fn com_meta_opensub_ping(self):
         self.opensubtitles_inst.no_operation()
 
-    async def com_meta_opensub_logoff(self):
+    pub async fn com_meta_opensub_logoff(self):
         self.opensubtitles_inst.logout()
 
  */

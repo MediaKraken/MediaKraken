@@ -80,7 +80,7 @@ pub async fn mk_lib_database_user_delete(pool: &sqlx::PgPool,
 /*
 
 // TODO port query
-async def db_user_insert(self, user_name, user_email, user_password):
+pub async fn db_user_insert(self, user_name, user_email, user_password):
     """
     # insert user
     """
@@ -97,7 +97,7 @@ async def db_user_insert(self, user_name, user_email, user_password):
 
 
 // TODO port query
-async def db_user_login(self, user_name, user_password):
+pub async fn db_user_login(self, user_name, user_password):
     """
     # verify user logon
     """
@@ -114,7 +114,7 @@ async def db_user_login(self, user_name, user_password):
     return 'invalid_password', None, None
 
 // TODO port query
-async def db_user_detail(self, guid):
+pub async fn db_user_detail(self, guid):
     return await db_conn.fetchrow('select * from mm_user'
                                   ' where id = $1', guid)
  */

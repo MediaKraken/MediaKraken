@@ -2,7 +2,7 @@
 
 /*
 
-async def nfo_file_tv(media_file_path):
+pub async fn nfo_file_tv(media_file_path):
     """
     Find and load nfo and xml file(s) if they exist
     """
@@ -29,7 +29,7 @@ async def nfo_file_tv(media_file_path):
     return nfo_data
 
 
-async def nfo_xml_id_lookup(nfo_data, xml_data):
+pub async fn nfo_xml_id_lookup(nfo_data, xml_data):
     """
     Lookup by id's in nfo/xml files
     """
@@ -83,7 +83,7 @@ async def nfo_xml_id_lookup(nfo_data, xml_data):
     return imdb_id, tmdb_id
 
 
-async def nfo_id_lookup_tv(nfo_data):
+pub async fn nfo_id_lookup_tv(nfo_data):
     """
     Look up id's in nfo/xml lookup for tv
     """

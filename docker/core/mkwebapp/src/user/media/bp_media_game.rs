@@ -37,7 +37,7 @@ pub async fn user_media_game_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, use
 @blueprint_user_game.route('/user_game', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_game.html')
 @common_global.auth.login_required
-async def url_bp_user_game(request):
+pub async fn url_bp_user_game(request):
     """
     Display game page
     """
@@ -68,7 +68,7 @@ async def url_bp_user_game(request):
 @blueprint_user_game.route('/user_game_detail/<guid>', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_game_detail.html')
 @common_global.auth.login_required
-async def url_bp_user_game_detail(request, guid):
+pub async fn url_bp_user_game_detail(request, guid):
     """
     Display game detail page
     """

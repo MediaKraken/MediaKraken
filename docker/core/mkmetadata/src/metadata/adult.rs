@@ -5,6 +5,9 @@ use sqlx::types::Uuid;
 #[path = "provider/pornhub.rs"]
 mod provider_pornhub;
 
+#[path = "provider/tmdb.rs"]
+mod provider_tmdb;
+
 pub struct MetadataAdultLastLookup {
     metadata_last_id: Uuid,
     metadata_last_imdb: String,
@@ -20,7 +23,7 @@ pub async fn metadata_adult_lookup(pool: &sqlx::PgPool,
 
 /*
 
-async def metadata_adult_lookup(db_connection, download_data, file_name):
+pub async fn metadata_adult_lookup(db_connection, download_data, file_name):
 
     // determine provider id's from nfo/xml if they exist
     nfo_data, xml_data = await metadata_nfo_xml.nfo_xml_file(download_data['Path'])
@@ -75,7 +78,7 @@ async def metadata_adult_lookup(db_connection, download_data, file_name):
                 await db_connection.db_download_delete(download_data['mdq_id'])
                 await db_connection.db_commit()
                 metadata_uuid = dl_meta
-    if metadata_uuid is None:
+    if metadata_uuid == None:
         // no ids found on the local database so begin name/year searches
         // db lookup by name and year (if available)
         if file_name.contains_key("year"):
@@ -86,7 +89,7 @@ async def metadata_adult_lookup(db_connection, download_data, file_name):
         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
                                                                          message_text={
                                                                              "meta adult db meta": metadata_uuid})
-        if metadata_uuid is None:
+        if metadata_uuid == None:
             metadata_uuid = download_data['mdq_new_uuid']
             // no matches by name/year on local database
             // search themoviedb since not matched above via DB or nfo/xml

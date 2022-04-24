@@ -158,7 +158,7 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
 //     pass;
 // }
 
-async def metadata_identification(&sqlx_pool, dl_row, guessit_data):
+pub async fn metadata_identification(&sqlx_pool, dl_row, guessit_data):
     """
     Determine which provider to start lookup via class text
     """

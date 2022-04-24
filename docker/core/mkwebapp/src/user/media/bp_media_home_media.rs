@@ -38,7 +38,7 @@ pub async fn user_media_home_media_detail(sqlx_pool: &rocket::State<sqlx::PgPool
 @blueprint_user_home_media.route('/user_home_media', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_home_movie.html')
 @common_global.auth.login_required
-async def url_bp_user_home_media_list(request):
+pub async fn url_bp_user_home_media_list(request):
     """
     Display home page for home media
     """
@@ -72,7 +72,7 @@ async def url_bp_user_home_media_list(request):
 @blueprint_user_home_media.route('/user_home_media_detail/<guid>')
 @common_global.jinja_template.template('bss_user/media/bss_user_media_home_movie_detail.html')
 @common_global.auth.login_required
-async def url_bp_user_home_media_detail(request, guid):
+pub async fn url_bp_user_home_media_detail(request, guid):
     """
     Display home page for home media
     """

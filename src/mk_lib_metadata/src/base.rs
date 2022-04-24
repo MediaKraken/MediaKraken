@@ -3,26 +3,28 @@
 use sqlx::types::Uuid;
 
 #[path = "anime.rs"]
-mod mk_anime;
+mod metadata_anime;
 #[path = "book.rs"]
-mod mk_book;
+mod metadata_book;
 #[path = "game.rs"]
-mod mk_game;
+mod metadata_game;
 #[path = "movie.rs"]
-mod mk_movie;
+mod metadata_movie;
 #[path = "music.rs"]
-mod mk_music;
+mod metadata_music;
 #[path = "music_video.rs"]
-mod mk_music_video;
+mod metadata_music_video;
 #[path = "sports.rs"]
-mod mk_sports;
+mod metadata_sports;
 #[path = "tv.rs"]
-mod mk_tv;
+mod metadata_tv;
 
 #[path = "provider/anidb.rs"]
 mod provider_anidb;
 #[path = "provider/chart_lyrics.rs"]
 mod provider_chart_lyrics;
+#[path = "provider/imvdb.rs"]
+mod provider_imvdb;
 #[path = "provider/isbndb.rs"]
 mod provider_isbndb;
 #[path = "provider/musicbrainz.rs"]
@@ -69,9 +71,9 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
     let mut lookup_halt: bool = false;
     let mut update_provider = None;
     if provider_name == "anidb" {
-        metadata_uuid = mk_anime::metadata_anime_lookup(&pool,
-                                                        download_data,
-                                                        download_data["Path"])["title"];
+        metadata_uuid = metadata_anime::metadata_anime_lookup(&pool,
+                                                              download_data,
+                                                              download_data["Path"])["title"];
         if metadata_uuid == None {
             if match_result == None {
                 // do lookup halt as we'll start all movies in tmdb
@@ -109,7 +111,7 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
         lookup_halt = true;
     } else if provider_name == "musicbrainz" {
         (metadata_uuid, match_result) = metadata_music::metadata_music_lookup(&pool,
-                                                                            download_data);
+                                                                              download_data);
         if metadata_uuid == None {
             lookup_halt = true;
         }
@@ -137,6 +139,16 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
         lookup_halt = true;
     } else if provider_name == "thegamesdb" {
         lookup_halt = true;
+    } else if provider_name == "thesportsdb" {
+        (metadata_uuid, match_result) = metadata_sports::metadata_sports_lookup(&pool,
+                                                                              download_data);
+        if metadata_uuid == None {
+            if match_result == None {
+                update_provider = "themoviedb";
+            } else {
+                set_fetch = true;
+            }
+        }
     } else if provider_name == "tv_intros" {
         lookup_halt = true;
     } else if provider_name == "twitch" {
@@ -170,14 +182,6 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
                 lookup_halt = true;
             else if metadata_uuid != None:
                     set_fetch = true;
-    else if provider_name == "thesportsdb":
-        metadata_uuid, match_result = await metadata_sports.metadata_sports_lookup(db_connection,
-                                                                                   download_data);
-        if metadata_uuid == None:
-            if match_result == None:
-                update_provider = "themoviedb";
-            else:
-                set_fetch = true;
 
 
     // if search is being updated to new provider
@@ -209,19 +213,13 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
 pub async fn metadata_fetch(pool: &sqlx::PgPool,
                             provider_name: String,
                             download_data: serde_json::Value) {
-        if provider_name == "imvdb" {
-            let imvdb_id = metadata_provider_imvdb::movie_fetch_save_imvdb(pool,
-                                                                           download_data[
-                                                                               "mdq_provider_id"],
-                                                                           download_data[
-                                                                               "mdq_new_uuid"]);
-        }
+    if provider_name == "imvdb" {
+        let imvdb_id = provider_imvdb::meta_fetch_save_imvdb(pool,
+                                                             download_data["mdq_provider_id"],
+                                                             download_data["mdq_new_uuid"]);
+    }
 }
 /*
-async def metadata_fetch(db_connection, provider_name, download_data):
-    """
-    Fetch main metadata for specified provider
-    """
     else if provider_name == "themoviedb":
         if download_data["mdq_que_type"] == common_global.DLMediaType.Person.value:
             metadata_provider_themoviedb.metadata_fetch_tmdb_person(
@@ -235,8 +233,8 @@ async def metadata_fetch(db_connection, provider_name, download_data):
                                                                          "mdq_new_uuid"]);
         else if download_data["mdq_que_type"] == common_global.DLMediaType.TV.value:
             metadata_tv_tmdb.tv_fetch_save_tmdb(db_connection,
-                                                      download_data["mdq_provider_id"],
-                                                      download_data["mdq_new_uuid"]);
+                                                download_data["mdq_provider_id"],
+                                                download_data["mdq_new_uuid"]);
     await db_connection.db_download_delete(download_data["mdq_id"]);
     await db_connection.db_commit();
 */
@@ -247,7 +245,7 @@ pub async fn metadata_castcrew(pool: &sqlx::PgPool,
 
 /*
 
-async def metadata_castcrew(db_connection, provider_name, download_data):
+pub async fn metadata_castcrew(db_connection, provider_name, download_data):
     """
     Fetch cast/crew from specified provider
     """
@@ -263,7 +261,7 @@ pub async fn metadata_image(pool: &sqlx::PgPool,
                             download_data: serde_json::Value) {}
 
 /*
-async def metadata_image(db_connection, provider_name, download_data):
+pub async fn metadata_image(db_connection, provider_name, download_data):
     """
     Fetch image from specified provider
     """
@@ -278,7 +276,7 @@ pub async fn metadata_review(pool: &sqlx::PgPool,
 
 
 /*
-async def metadata_review(db_connection, provider_name, download_data):
+pub async fn metadata_review(db_connection, provider_name, download_data):
     """
     Fetch reviews from specified provider
     """
@@ -298,7 +296,7 @@ pub async fn metadata_collection(pool: &sqlx::PgPool,
 
 
 /*
-async def metadata_collection(db_connection, provider_name, download_data):
+pub async fn metadata_collection(db_connection, provider_name, download_data):
     """
     Fetch collection from specified provider
     """

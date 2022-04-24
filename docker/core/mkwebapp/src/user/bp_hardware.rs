@@ -17,7 +17,7 @@ pub async fn user_hardware_phue(user: User) -> Template {
 @blueprint_user_hardware.route('/user_hardware', methods=['GET'])
 @common_global.jinja_template.template('bss_user/hardware/bss_user_hardware.html')
 @common_global.auth.login_required
-async def url_bp_user_hardware(request):
+pub async fn url_bp_user_hardware(request):
     """
     Display hardware page
     """

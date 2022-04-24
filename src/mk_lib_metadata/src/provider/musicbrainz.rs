@@ -39,7 +39,7 @@ class CommonMetadataMusicbrainz:
                         option_config_json['Metadata']['MusicBrainz']['Host'] + ':'
                         + option_config_json['Metadata']['MusicBrainz']['Port'])
 
-    async def show_release_details(self, rel):
+    pub async fn show_release_details(self, rel):
         """
         Get release details
         """
@@ -61,7 +61,7 @@ class CommonMetadataMusicbrainz:
         common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text={
             "musicbrainz ID": "{}".format(rel['id'])})
 
-    async def com_mediabrainz_get_releases(self, disc_id=None, artist_name=None,
+    pub async fn com_mediabrainz_get_releases(self, disc_id=None, artist_name=None,
                                            artist_recording=None, return_limit=5,
                                            strict_flag=False):
         """
@@ -96,20 +96,11 @@ class CommonMetadataMusicbrainz:
                 self.show_release_details(release)
             return release['id']
 
-    async def com_mediabrainz_get_recordings(self, artist_name=None, release_name=None,
+    pub async fn com_mediabrainz_get_recordings(self, artist_name=None, release_name=None,
                                              song_name=None, return_limit=5, strict_flag=False):
         """
         # search by artist and song name
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         result = musicbrainzngs.search_recordings(artist=artist_name, release=release_name,
                                                   recording=song_name, limit=return_limit,
                                                   strict=strict_flag)
@@ -128,16 +119,7 @@ class CommonMetadataMusicbrainz:
             return release['id']
 
 
-async def music_search_musicbrainz(db_connection, ffmpeg_data_json):
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
+pub async fn music_search_musicbrainz(db_connection, ffmpeg_data_json):
     metadata_uuid = None
     // look at musicbrainz server
     music_data = await common_global.api_instance.com_mediabrainz_get_recordings(
@@ -152,7 +134,7 @@ async def music_search_musicbrainz(db_connection, ffmpeg_data_json):
     return metadata_uuid, music_data
 
 
-async def music_fetch_save_musicbrainz(db_connection, tmdb_id, metadata_uuid):
+pub async fn music_fetch_save_musicbrainz(db_connection, tmdb_id, metadata_uuid):
     """
     # fetch from musicbrainz
     """
@@ -217,10 +199,6 @@ async def music_fetch_save_musicbrainz(db_connection, tmdb_id, metadata_uuid):
         metadata_uuid = None
     else:  # is this is None....
         metadata_uuid = None
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'meta movie save fetch uuid':
-                                                                             metadata_uuid})
     return metadata_uuid
 
  */

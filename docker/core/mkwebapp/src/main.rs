@@ -247,6 +247,7 @@ async fn main() -> Result<(), Error> {
             bp_error::default_catcher,])
         .manage::<sqlx::PgPool>(sqlx_pool)
         .manage(users)
+        //.attach(rocket_csrf::Fairing::default())
         .attach(Template::fairing())
         .launch().await;
  Ok(())

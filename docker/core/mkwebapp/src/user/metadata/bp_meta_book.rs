@@ -47,7 +47,7 @@ pub async fn user_metadata_book_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, 
 @blueprint_user_metadata_periodical.route('/user_meta_periodical', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/metadata/bss_user_metadata_periodical.html')
 @common_global.auth.login_required
-async def url_bp_user_metadata_periodical(request):
+pub async fn url_bp_user_metadata_periodical(request):
     """
     Display periodical list page
     """
@@ -87,7 +87,7 @@ async def url_bp_user_metadata_periodical(request):
 @blueprint_user_metadata_periodical.route('/user_meta_periodical_detail/<guid>')
 @common_global.jinja_template.template('bss_user/metadata/bss_user_metadata_periodical_detail.html')
 @common_global.auth.login_required
-async def url_bp_user_metadata_periodical_detail(request, guid):
+pub async fn url_bp_user_metadata_periodical_detail(request, guid):
     """
     Display periodical detail page
     """

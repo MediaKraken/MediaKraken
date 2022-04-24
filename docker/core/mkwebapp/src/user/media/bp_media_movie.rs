@@ -37,7 +37,7 @@ pub async fn user_media_movie_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, us
 @blueprint_user_movie.route('/user_movie_detail/<guid>', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_movie_detail.html')
 @common_global.auth.login_required(user_keyword='user')
-async def url_bp_user_movie_detail(request, user, guid):
+pub async fn url_bp_user_movie_detail(request, user, guid):
     """
     Display move detail page
     """
@@ -162,7 +162,7 @@ async def url_bp_user_movie_detail(request, user, guid):
                                                                              message_text={
                                                                                  "vid_version": video_version})
             # not all files have ffprobe
-            if video_version['mm_media_ffprobe_json'] is None:
+            if video_version['mm_media_ffprobe_json'] == None:
                 hours = 0
                 minutes = 0
                 seconds = 0

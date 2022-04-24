@@ -13,7 +13,7 @@ pub async fn admin_docker(user: AdminUser) -> Template {
 @blueprint_admin_docker.route("/admin_docker_stat")
 @common_global.jinja_template.template('bss_admin/bss_admin_docker.html')
 @common_global.auth.login_required
-async def url_bp_admin_docker_stat(request):
+pub async fn url_bp_admin_docker_stat(request):
     """
     Docker statistics including swarm
     """

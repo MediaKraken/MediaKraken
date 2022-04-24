@@ -12,7 +12,7 @@ pub async fn user_inter_twitchtv(user: User) -> Template {
 @blueprint_user_internet_twitch.route('/user_internet/twitch')
 @common_global.jinja_template.template('bss_user/internet/bss_user_internet_twitch.html')
 @common_global.auth.login_required
-async def url_bp_user_internet_twitch(request):
+pub async fn url_bp_user_internet_twitch(request):
     """
     Display twitchtv page
     """
@@ -52,7 +52,7 @@ async def url_bp_user_internet_twitch(request):
 @common_global.jinja_template.template(
     'bss_user/internet/bss_user_internet_twitch_stream_detail.html')
 @common_global.auth.login_required
-async def url_bp_user_internet_twitch_stream_detail(request, stream_name):
+pub async fn url_bp_user_internet_twitch_stream_detail(request, stream_name):
     """
     Show twitch stream detail page
     """

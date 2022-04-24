@@ -11,7 +11,7 @@ class CommonMetadataTheSubDB:
                        % common_version.APP_VERSION)
     }
 
-    async def com_meta_thesubdb_search(self, filename, langs):
+    pub async fn com_meta_thesubdb_search(self, filename, langs):
         filehash = common_hash.com_hash_thesubdb(filename)
         async with httpx.AsyncClient() as client:
             response = await client.get(self.url,
@@ -31,7 +31,7 @@ class CommonMetadataTheSubDB:
                 subtitles.append({'lang': lang, 'link': sublink})
         return subtitles
 
-    async def com_meta_thesubdb_download(self, subtitle, stream):
+    pub async fn com_meta_thesubdb_download(self, subtitle, stream):
         async with httpx.AsyncClient() as client:
             response = await client.get(subtitle["link"], headers=self.headers, timeout=5)
         stream.write(response.content)

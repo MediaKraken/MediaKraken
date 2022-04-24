@@ -38,7 +38,7 @@ pub async fn user_metadata_music_video_detail(sqlx_pool: &rocket::State<sqlx::Pg
 @blueprint_user_metadata_music_video.route('/user_meta_music_video', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/metadata/bss_user_metadata_music_video.html')
 @common_global.auth.login_required
-async def url_bp_user_metadata_music_video(request):
+pub async fn url_bp_user_metadata_music_video(request):
     """
     Display metadata music video
     """
@@ -72,7 +72,7 @@ async def url_bp_user_metadata_music_video(request):
 @common_global.jinja_template.template(
     'bss_user/metadata/bss_user_metadata_music_video_detail.html')
 @common_global.auth.login_required
-async def url_bp_user_metadata_music_video_detail(request, guid):
+pub async fn url_bp_user_metadata_music_video_detail(request, guid):
     """
     Display metadata music video detail
     """

@@ -37,7 +37,7 @@ pub async fn user_media_music_video_detail(sqlx_pool: &rocket::State<sqlx::PgPoo
 @blueprint_user_music_video.route('/user_music_video', methods=['GET'])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_music_video.html')
 @common_global.auth.login_required
-async def url_bp_user_music_video_list(request):
+pub async fn url_bp_user_music_video_list(request):
     """
     Display music video page
     """
@@ -69,7 +69,7 @@ async def url_bp_user_music_video_list(request):
 
 @blueprint_user_music_video.route('/user_music_video_detail/<guid>', methods=['GET'])
 @common_global.auth.login_required
-async def url_bp_user_music_video_detail(request, guid):
+pub async fn url_bp_user_music_video_detail(request, guid):
     """
     Display music video detail page
     """

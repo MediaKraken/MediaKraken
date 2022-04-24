@@ -13,7 +13,7 @@ pub async fn user_media_genre(sqlx_pool: &rocket::State<sqlx::PgPool>, user: Use
 @blueprint_user_media_genre.route("/user_media_genre", methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_genre_video.html')
 @common_global.auth.login_required
-async def url_bp_user_media_genre(request):
+pub async fn url_bp_user_media_genre(request):
     """
     Display media split up by genre
     """
@@ -34,7 +34,7 @@ async def url_bp_user_media_genre(request):
 @blueprint_user_media_genre.route("/user_movie/<genre>", methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_movie.html')
 @common_global.auth.login_required(user_keyword='user')
-async def url_bp_user_movie_page(request, user, genre):
+pub async fn url_bp_user_movie_page(request, user, genre):
     """
     Display movie page
     """

@@ -18,10 +18,10 @@ class CommonMetadataPornhub:
         else:
             self.pornhub_inst = pornhub.PornHub(proxy_ip, proxy_port)
 
-    async def com_meta_pornhub_stars(self, star_limit):
+    pub async fn com_meta_pornhub_stars(self, star_limit):
         return self.pornhub_inst.getStars(star_limit)
 
-    async def com_meta_pornhub_search(self, search_keywords, quantity, page):
+    pub async fn com_meta_pornhub_search(self, search_keywords, quantity, page):
         self.pornhub_inst = pornhub.PornHub(search_keywords)
         return self.pornhub_inst.getVideos(quantity, page=page)
 

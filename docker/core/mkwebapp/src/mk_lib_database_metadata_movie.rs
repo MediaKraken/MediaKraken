@@ -87,7 +87,7 @@ pub async fn mk_lib_database_metadata_movie_count(pool: &sqlx::PgPool,
 /*
 
 // TODO port query
-async def db_meta_movie_by_media_uuid(self, media_guid):
+pub async fn db_meta_movie_by_media_uuid(self, media_guid):
     """
     # read in metadata via media id
     """
@@ -99,7 +99,7 @@ async def db_meta_movie_by_media_uuid(self, media_guid):
 
 
 // TODO port query
-async def db_meta_movie_detail(self, media_guid):
+pub async fn db_meta_movie_detail(self, media_guid):
     """
     # read in the media with corresponding metadata
     """
@@ -115,7 +115,7 @@ async def db_meta_movie_detail(self, media_guid):
 
 
 // TODO port query
-async def db_meta_movie_status_update(self, metadata_guid, user_id, status_text,
+pub async fn db_meta_movie_status_update(self, metadata_guid, user_id, status_text,
                                       db_connection=None):
     """
     # set status's for metadata
@@ -145,7 +145,7 @@ async def db_meta_movie_status_update(self, metadata_guid, user_id, status_text,
 
 
 // TODO port query
-async def db_meta_movie_json_update(self, media_guid, metadata_json):
+pub async fn db_meta_movie_json_update(self, media_guid, metadata_json):
     """
     # update the metadata json
     """

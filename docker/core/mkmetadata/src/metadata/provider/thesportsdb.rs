@@ -20,7 +20,7 @@ class CommonMetadataTheSportsDB:
     def __init__(self, option_config_json):
         self.thesportsdb_api_key = option_config_json['API']['thesportsdb']
 
-    async def com_meta_thesportsdb_search_team_by_name(self, team_name):
+    pub async fn com_meta_thesportsdb_search_team_by_name(self, team_name):
         """
         Team and player lookup
         """
@@ -30,7 +30,7 @@ class CommonMetadataTheSportsDB:
             + '/searchteams.php?t='
             + team_name.replace(' ', '%20'), None)
 
-    async def com_meta_thesportsdb_search_players_by_team(self, team_name):
+    pub async fn com_meta_thesportsdb_search_players_by_team(self, team_name):
         """
         Get players list by team
         """
@@ -40,7 +40,7 @@ class CommonMetadataTheSportsDB:
             + '/searchplayers.php?t='
             + team_name.replace(' ', '%20'), None)
 
-    async def com_meta_thesportsdb_search_players_by_name(self, player_name):
+    pub async fn com_meta_thesportsdb_search_players_by_name(self, player_name):
         """
         Get players by name
         """
@@ -50,7 +50,7 @@ class CommonMetadataTheSportsDB:
             + '/searchplayers.php?p='
             + player_name.replace(' ', '%20'), None)
 
-    async def com_meta_thesportsdb_search_players_by_team_and_player_name(self, team_name,
+    pub async fn com_meta_thesportsdb_search_players_by_team_and_player_name(self, team_name,
                                                                           player_name):
         """
         Search plays by team and player name
@@ -67,7 +67,7 @@ class CommonMetadataTheSportsDB:
 
     # event lookups
 
-    async def com_meta_thesportsdb_search_event_by_name(self, event_name):
+    pub async fn com_meta_thesportsdb_search_event_by_name(self, event_name):
         """
         Search for events by name
         """

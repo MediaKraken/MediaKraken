@@ -31,7 +31,7 @@ pub async fn admin_library(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminU
 @blueprint_admin_library.route("/admin_library", methods=["GET", "POST"])
 @common_global.jinja_template.template('bss_admin/bss_admin_library.html')
 @common_global.auth.login_required
-async def url_bp_admin_library(request):
+pub async fn url_bp_admin_library(request):
     """
     List all media libraries
     """
@@ -84,7 +84,7 @@ async def url_bp_admin_library(request):
 
 @blueprint_admin_library.route('/admin_library_by_id', methods=['POST'])
 @common_global.auth.login_required
-async def url_bp_admin_library_by_id(request):
+pub async fn url_bp_admin_library_by_id(request):
     db_connection = await request.app.db_pool.acquire()
     result = await request.app.db_functions.db_library_path_by_uuid(request.form['id'],
                                                                     db_connection=db_connection)
@@ -96,7 +96,7 @@ async def url_bp_admin_library_by_id(request):
 
 @blueprint_admin_library.route('/admin_library_delete', methods=["POST"])
 @common_global.auth.login_required
-async def url_bp_admin_library_delete(request):
+pub async fn url_bp_admin_library_delete(request):
     """
     Delete library action 'page'
     """
@@ -110,7 +110,7 @@ async def url_bp_admin_library_delete(request):
 @blueprint_admin_library.route("/admin_library_edit", methods=["GET", "POST"])
 @common_global.jinja_template.template('bss_admin/bss_admin_library_edit.html')
 @common_global.auth.login_required
-async def url_bp_admin_library_edit(request):
+pub async fn url_bp_admin_library_edit(request):
     """
     allow user to edit lib
     """
@@ -212,7 +212,7 @@ async def url_bp_admin_library_edit(request):
 
 @blueprint_admin_library.route('/admin_library_update', methods=['POST'])
 @common_global.auth.login_required
-async def url_bp_admin_library_update(request):
+pub async fn url_bp_admin_library_update(request):
     db_connection = await request.app.db_pool.acquire()
     await request.app.db_functions.db_library_path_update_by_uuid(request.form['new_path'],
                                                                   request.form['new_class'],

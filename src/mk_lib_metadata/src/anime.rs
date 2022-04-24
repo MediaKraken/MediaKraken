@@ -5,6 +5,9 @@ use sqlx::types::Uuid;
 #[path = "provider/anidb.rs"]
 mod provider_anidb;
 
+#[path = "provider/tmdb.rs"]
+mod provider_tmdb;
+
 pub struct MetadataAnimeLastLookup {
     metadata_last_id: Uuid,
     metadata_last_imdb: String,
@@ -20,7 +23,7 @@ pub async fn metadata_anime_lookup(pool: &sqlx::PgPool,
 
 /*
 
-async def metadata_anime_lookup(db_connection, download_data, file_name):
+pub async fn metadata_anime_lookup(db_connection, download_data, file_name):
 
 
     // determine provider id's from nfo/xml if they exist

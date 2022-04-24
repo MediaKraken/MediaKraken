@@ -38,7 +38,7 @@ pub async fn user_media_tv_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, user:
 @blueprint_user_tv.route("/user_tv", methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_tv.html')
 @common_global.auth.login_required
-async def url_bp_user_tv(request):
+pub async fn url_bp_user_tv(request):
     """
     Display tv shows page
     """
@@ -87,7 +87,7 @@ async def url_bp_user_tv(request):
 @blueprint_user_tv.route("/user_tv_show_detail/<guid>", methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_tv_show_detail.html')
 @common_global.auth.login_required(user_keyword='user')
-async def url_bp_user_tv_show_detail(request, user, guid):
+pub async fn url_bp_user_tv_show_detail(request, user, guid):
     """
     Display tv show detail page
     """
@@ -222,7 +222,7 @@ async def url_bp_user_tv_show_detail(request, user, guid):
 @blueprint_user_tv.route("/user_tv_show_season_detail/<guid>/<season>", methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_tv_show_season_detail.html')
 @common_global.auth.login_required
-async def url_bp_user_tv_show_season_detail_page(request, guid, season):
+pub async fn url_bp_user_tv_show_season_detail_page(request, guid, season):
     """
     Display tv season detail page
     """
@@ -320,7 +320,7 @@ async def url_bp_user_tv_show_season_detail_page(request, guid, season):
                          methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/media/bss_user_media_tv_show_episode_detail.html')
 @common_global.auth.login_required
-async def url_bp_user_tv_show_episode_detail_page(request, guid, season, episode):
+pub async fn url_bp_user_tv_show_episode_detail_page(request, guid, season, episode):
     """
     Display tv episode detail page
     """

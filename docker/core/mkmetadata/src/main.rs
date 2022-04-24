@@ -89,16 +89,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             println!("File: {:?}", file_name);
 
             let guessit_data: Metadata = file_name;
-            // // fetch data from guessit container
-            // let url_link = format!("http://th-docker-1:5000/?filename={:}", file_name);
-            // println!("URL: {:?}", url_link);
-            // let buff = mk_lib_network::mk_data_from_url(url_link).await?;
-            // let guessit_data: MediaTitleYear = serde_json::from_str(&buff).unwrap();
-            // println!("Guess: {:?}", guessit_data.title);
-            // println!("GuessYear: {:?}", guessit_data.year);
-            //     if (file_name["title"]) == list {
-            //         file_name["title"] = common_string.com_string_guessit_list(file_name["title"]);
-            //     }
             if guessit_data.title.len() > 0 {
                 if guessit_data.year.is_some() {
                     if guessit_data.title.to_lowercase() == metadata_last_title

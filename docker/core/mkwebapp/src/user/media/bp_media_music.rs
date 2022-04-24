@@ -38,7 +38,7 @@ pub async fn user_media_music_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, us
 @blueprint_user_music.route("/user_album_detail/<guid>")
 @common_global.jinja_template.template('bss_user/media/bss_user_media_music_album_detail.html')
 @common_global.auth.login_required
-async def url_bp_user_album_detail(request, guid):
+pub async fn url_bp_user_album_detail(request, guid):
     """
     Display album detail page
     """
@@ -48,7 +48,7 @@ async def url_bp_user_album_detail(request, guid):
 @blueprint_user_music.route("/user_album_list")
 @common_global.jinja_template.template('bss_user/media/bss_user_media_music_album.html')
 @common_global.auth.login_required
-async def url_bp_user_album_list(request):
+pub async fn url_bp_user_album_list(request):
     """
     Display album page
     """

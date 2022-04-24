@@ -30,7 +30,7 @@ pub async fn admin_backup(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUs
 @blueprint_admin_backup.route("/admin_backup", methods=["GET", "POST"])
 @common_global.jinja_template.template('bss_admin/bss_admin_backup.html.tera')
 @common_global.auth.login_required
-async def url_bp_admin_backup(request):
+pub async fn url_bp_admin_backup(request):
     form = BSSBackupEditForm(request)
     errors = {}
     if request.method == 'POST':
@@ -86,7 +86,7 @@ async def url_bp_admin_backup(request):
 
 @blueprint_admin_backup.route('/admin_backup_delete', methods=["POST"])
 @common_global.auth.login_required
-async def url_bp_admin_backup_delete(request):
+pub async fn url_bp_admin_backup_delete(request):
     """
     Delete backup file action 'page'
     """
@@ -101,7 +101,7 @@ async def url_bp_admin_backup_delete(request):
 
 @blueprint_admin_backup.route('/admin_backup_restore/<backup_filename>', methods=["POST"])
 @common_global.auth.login_required
-async def url_bp_admin_backup_restore(request, backup_filename):
+pub async fn url_bp_admin_backup_restore(request, backup_filename):
     """
     run restore script on db container
     """
