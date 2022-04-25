@@ -83,7 +83,7 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
             }
         }
     } else if provider_name == "chart_lyrics" {
-        provider_chart_lyrics::provider_chart_lyrics_fetch(&pool, artist_name, song_name);
+        //provider_chart_lyrics::provider_chart_lyrics_fetch(&pool, artist_name, song_name);
         lookup_halt = true;
     } else if provider_name == "comicvine" {
         lookup_halt = true;
@@ -144,7 +144,7 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
                                                                               download_data);
         if metadata_uuid == None {
             if match_result == None {
-                update_provider = "themoviedb";
+                update_provider = "themoviedb".to_string();
             } else {
                 set_fetch = true;
             }

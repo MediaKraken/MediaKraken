@@ -4,6 +4,13 @@ use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
 use sqlx::{types::Uuid, types::Json};
 use serde::{Serialize, Deserialize};
+use serde_json::json;
+
+#[path = "mk_lib_common_enum_media_type.rs"]
+mod mk_lib_common_enum_media_type;
+
+#[path = "mk_lib_database_metadata_download_queue.rs"]
+mod mk_lib_database_metadata_download_queue;
 
 pub async fn mk_lib_database_metadata_exists_person(pool: &sqlx::PgPool,
                                                     metadata_id: i32)
@@ -36,10 +43,10 @@ pub async fn mk_lib_database_metadata_person_count(pool: &sqlx::PgPool,
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaPersonList {
-	mmp_id: Uuid,
-	mmp_person_name: String,
-	mmp_person_image: String,
-	mmp_profile: String,
+    mmp_id: Uuid,
+    mmp_person_name: String,
+    mmp_person_image: String,
+    mmp_profile: String,
 }
 
 pub async fn mk_lib_database_metadata_person_read(pool: &sqlx::PgPool,
@@ -91,10 +98,10 @@ pub async fn mk_lib_database_meta_person_detail(pool: &sqlx::PgPool,
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaPersonNameList {
-	mmp_id: Uuid,
-	mmp_person_media_id: String,
-	mmp_person_meta_json: String,
-	mmp_person_image: String,
+    mmp_id: Uuid,
+    mmp_person_media_id: String,
+    mmp_person_meta_json: String,
+    mmp_person_image: String,
     mmp_person_name: String,
 }
 
@@ -109,13 +116,13 @@ pub async fn mk_lib_database_meta_person_by_name(pool: &sqlx::PgPool,
         where mmp_person_name = $1")
         .bind(person_name);
     let table_rows: Vec<DBMetaPersonNameList> = select_query
-		.map(|row: PgRow| DBMetaPersonNameList {
-			mmp_id: row.get("mmp_id"),
-			mmp_person_media_id: row.get("mmp_person_media_id"),
-			mmp_person_meta_json: row.get("mmp_person_meta_json"),
-			mmp_person_image: row.get("mmp_person_image"),
-			mmp_person_name: row.get("mmp_person_name"),
-		})
+        .map(|row: PgRow| DBMetaPersonNameList {
+            mmp_id: row.get("mmp_id"),
+            mmp_person_media_id: row.get("mmp_person_media_id"),
+            mmp_person_meta_json: row.get("mmp_person_meta_json"),
+            mmp_person_image: row.get("mmp_person_image"),
+            mmp_person_name: row.get("mmp_person_name"),
+        })
         .fetch_all(pool)
         .await?;
     Ok(table_rows)
@@ -144,6 +151,39 @@ pub async fn mk_lib_database_metadata_person_insert(pool: &sqlx::PgPool,
     Ok(new_guid)
 }
 
+pub async fn mk_lib_database_metadata_person_insert_cast_crew(pool: &sqlx::PgPool,
+                                                              person_json: serde_json::Value) {
+    for person_data in person_json {
+        let person_id = person_data["id"];
+        let person_name = person_data["name"];
+        // TODO do an upsert instead
+        if mk_lib_database_metadata_exists_person(pool, person_id) == false
+        {
+            let new_guid = Uuid::new_v4();
+            // Shouldn't need to verify fetch doesn't exist as the person insert
+            // is right below.  As then the next person record read will find
+            // the inserted record.
+            // insert download record for bio/info
+            mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(
+                pool,
+                "themoviedb",
+                mk_lib_common_enum_media_type::DLMediaType::PERSON,
+                person_id,
+                new_guid,
+                json! ({
+                    "Status": "Fetch",
+                    "ProviderMetaID": person_id
+                }),
+            );
+            // insert person record
+            mk_lib_database_metadata_person_insert(pool,
+                                                   person_name,
+                                                   person_id,
+                                                   None,
+                                                   None);
+        }
+    }
+}
 /*
 
 // TODO port query
@@ -171,34 +211,4 @@ pub async fn db_meta_person_update(self, provider_name, provider_uuid, person_bi
                           ' where mmp_person_media_id = $3',
                           person_bio, person_image, provider_uuid)
     await db_conn.execute('commit')
-
-
-// TODO port query
-pub async fn mk_lib_database_metadata_person_insert_cast_crew(self, person_json):
-        for person_data in person_json:
-                person_id = person_data["id"]
-                person_name = person_data["name"]
-                // TODO do an upsert instead
-                if await self.db_meta_person_id_count(person_id) == true:
-                    common_logging_elasticsearch_httpx.com_es_httpx_post_async(
-                        message_type='info',
-                        message_text={
-                            'db_meta_person_insert_cast_crew': "skip insert as person exists"})
-                else:
-                    new_guid = uuid.uuid4()
-                    // Shouldn't need to verify fetch doesn't exist as the person insert
-                    // is right below.  As then the next person record read will find
-                    // the inserted record.
-                    // insert download record for bio/info
-                    self.db_download_insert(provider=meta_type,
-                                                  que_type=common_global.DLMediaType.Person.value,
-                                                  down_json={"Status": "Fetch",
-                                                             "ProviderMetaID": person_id},
-                                                  down_new_uuid=new_guid)
-                    // insert person record
-                    self.db_meta_person_insert(uuid_id=new_guid,
-                                                     person_name=person_name,
-                                                     media_id=person_id,
-                                                     person_json=None,
-                                                     image_path=None)
  */

@@ -111,23 +111,6 @@ def db_meta_guid_by_tmdb(self, tmdb_uuid):
     except:
         return None
 
-
-// TODO port query
-def db_meta_insert_tmdb(self, uuid_id, series_id, data_title, data_json,
-                        data_image_json):
-    """
-    # insert metadata from themoviedb
-    """
-    self.db_cursor.execute('insert into mm_metadata_movie (mm_metadata_guid,'
-                           ' mm_metadata_media_id,'
-                           ' mm_metadata_name,'
-                           ' mm_metadata_json,'
-                           ' mm_metadata_localimage_json)'
-                           ' values ($1,$2,$3,$4,$5)', (uuid_id, series_id, data_title,
-                                                        data_json, data_image_json))
-    self.db_commit()
-
-
 // TODO port query
 def db_meta_tmdb_count(self, tmdb_id):
     """

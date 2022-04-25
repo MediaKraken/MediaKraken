@@ -41,7 +41,7 @@ struct MediaTitleYear {
 }
 
 pub async fn metadata_identification(pool: &sqlx::PgPool,
-                                     dl_row: sqlx::Row,
+                                     dl_row: sqlx::postgres::PgRow,
                                      guessit_data: MediaTitleYear) {
     let mut metadata_uuid: Uuid;
     match dl_row.get("mdq_que_type") {
@@ -61,7 +61,7 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
             // TODO remove the file extension
             metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_name_and_system(&pool,
                                                                                                             Path::new(dl_row.get("mdq_path")).file_name(),
-                                                                                                            lookup_system_id);
+                                                                                                            0);
             if metadata_uuid == None {
                 let sha1_value = mk_lib_hash_sha1::mk_file_hash_sha1(dl_row.get("mdq_path"));
                 metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(&pool, sha1_value);
@@ -72,7 +72,7 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
             // TODO remove the file extension
             metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_name_and_system(&pool,
                                                                                                             Path::new(dl_row.get("mdq_path")).file_name(),
-                                                                                                            lookup_system_id);
+                                                                                                            0);
             if metadata_uuid == None {
                 let sha1_value = mk_lib_hash_sha1::mk_file_hash_sha1(dl_row.get("mdq_path"));
                 metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(&pool, sha1_value);
@@ -83,7 +83,7 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
             // TODO remove the file extension
             metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_name_and_system(&pool,
                                                                                                             Path::new(dl_row.get("mdq_path")).file_name(),
-                                                                                                            lookup_system_id);
+                                                                                                            0);
             if metadata_uuid == None {
                 let sha1_hash = mk_lib_hash_sha1::mk_file_hash_sha1(dl_row.get("mdq_path"));
                 if sha1_hash != None {

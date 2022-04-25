@@ -62,11 +62,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // launch thread per provider
     let handle_tmdb = tokio::spawn(async move {
-        metadata_provider_tmdb::TMDBAPI::tmdb_api_key = option_json["API"]["themoviedb"];
+        metadata_provider_tmdb::TMDBAPI.tmdb_api_key = option_json["API"]["themoviedb"];
         loop {
             let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "themoviedb").await.unwrap();
             for row_data in metadata_to_process {
-                metadata_base::metadata_process(&sqlx_pool, "themoviedb", row_data)
+                metadata_base::metadata_process(&sqlx_pool, "themoviedb".to_string(), row_data)
             };
         }
     });
@@ -74,7 +74,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // setup last used id's per thread
     let mut metadata_last_uuid: Uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000")?;
     let mut metadata_last_title: String = "".to_string();
-    let mut metadata_last_year: i8 = 0;
+    let mut metadata_last_year: i32 = 0;
 
     // process all the "Z" records
     loop {
@@ -88,15 +88,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let file_name = Path::new(&row_data_path).file_name().unwrap().to_os_string().into_string().unwrap();
             println!("File: {:?}", file_name);
 
-            let guessit_data: Metadata = file_name;
-            if guessit_data.title.len() > 0 {
-                if guessit_data.year.is_some() {
-                    if guessit_data.title.to_lowercase() == metadata_last_title
-                        && guessit_data.year.unwrap() == metadata_last_year {
+            let guessit_data: Metadata = Metadata::from(&file_name);
+            if guessit_data.title().len() > 0 {
+                if guessit_data.year().is_some() {
+                    if guessit_data.title().to_lowercase() == metadata_last_title
+                        && guessit_data.year().unwrap() == metadata_last_year {
                         // matches last media scanned, so set with that metadata id
                         metadata_uuid = metadata_last_uuid
                     }
-                } else if guessit_data.title.to_lowercase() == metadata_last_title {
+                } else if guessit_data.title().to_lowercase() == metadata_last_title {
                     // matches last media scanned, so set with that metadata id
                     metadata_uuid = metadata_last_uuid
                 }
@@ -108,9 +108,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
                 // allow none to be set so unmatched stuff can work for skipping
                 metadata_last_uuid = metadata_uuid;
-                metadata_last_title = guessit_data.title.to_lowercase();
-                if guessit_data.year.is_some() {
-                    metadata_last_year = guessit_data.year.unwrap();
+                metadata_last_title = guessit_data.title().to_lowercase();
+                if guessit_data.year().is_some() {
+                    metadata_last_year = guessit_data.year().unwrap();
                 } else {
                     metadata_last_year = 0;
                 }

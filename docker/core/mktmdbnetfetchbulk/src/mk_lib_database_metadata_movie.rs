@@ -19,11 +19,11 @@ pub async fn mk_lib_database_metadata_exists_movie(pool: &sqlx::PgPool,
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaMovieList {
-	mm_metadata_guid: uuid::Uuid,
-	mm_metadata_name: String,
-	mm_date: DateTime<Utc>,
-	mm_poster: String,
-	mm_metadata_user_json: serde_json::Value,
+    mm_metadata_guid: uuid::Uuid,
+    mm_metadata_name: String,
+    mm_date: DateTime<Utc>,
+    mm_poster: String,
+    mm_metadata_user_json: serde_json::Value,
 }
 
 pub async fn mk_lib_database_metadata_movie_read(pool: &sqlx::PgPool,
@@ -82,6 +82,30 @@ pub async fn mk_lib_database_metadata_movie_count(pool: &sqlx::PgPool,
             .await?;
         Ok(row.0)
     }
+}
+
+pub async fn mk_lib_database_metadata_movie_insert(pool: &sqlx::PgPool,
+                                                   uuid_id: Uuid,
+                                                   series_id: i32,
+                                                   data_title: String,
+                                                   data_json: serde_json::Value,
+                                                   data_image_json: serde_json::Value) {
+    let mut transaction = pool.begin().await?;
+    sqlx::query("insert into mm_metadata_movie (mm_metadata_guid, \
+        mm_metadata_media_id, \
+        mm_metadata_name, \
+        mm_metadata_json, \
+        mm_metadata_localimage_json) \
+        values ($1,$2,$3,$4,$5)")
+        .bind(uuid_id)
+        .bind(series_id)
+        .bind(data_title)
+        .bind(data_json)
+        .bind(data_image_json)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok()
 }
 
 /*

@@ -1,5 +1,7 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+use substring::Substring;
+
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;
 
@@ -11,7 +13,7 @@ pub async fn provider_televisiontunes_theme_fetch(tv_show_name: String,
     let response = reqwest::get(show_url).await?;
     if response.status().is_success() {
         let content = response.bytes().await?;
-        let content_string = str::from_utf8(&content).unwrap().to_string();
+        let content_string = std::str::from_utf8(&content).unwrap().to_string();
         let dl_position = content_string.find("href=\"/song/download/").unwrap();
         let data_content = content_string.substring(dl_position + 21, dl_position + 50);
         let dl_end_position = data_content.find("\"").unwrap();

@@ -2,7 +2,12 @@
 
 // https://developers.themoviedb.org/3
 
+use std::path::Path;
 use sqlx::{types::Uuid, types::Json};
+use serde_json::json;
+
+#[path = "../image_path.rs"]
+mod image_path;
 
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;
@@ -21,13 +26,15 @@ pub struct TMDBAPI {
 pub async fn provider_tmdb_movie_fetch(pool: &sqlx::PgPool, tmdb_id: i32, metadata_uuid: Uuid) {
     // fetch and save json data via tmdb id
     let result_json = provider_tmdb_movie_fetch_by_id(tmdb_id).await;
-    // series_id_json, result_json, image_json \
-    //     = com_tmdb_meta_info_build(result_json.json());
-    mk_lib_database_metadata_movie::db_meta_insert_tmdb(pool, metadata_uuid,
-                                                        series_id_json,
-                                                        result_json["title"],
-                                                        result_json,
-                                                        image_json);
+    let mut series_id: serde_json::Value;
+    let mut image_json: serde_json::Value;
+    (series_id, result_json, image_json) = provider_tmdb_meta_info_build(result_json.json());
+    mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_insert(pool,
+                                                                          metadata_uuid,
+                                                                          series_id,
+                                                                          result_json["title"],
+                                                                          result_json,
+                                                                          image_json);
     if result_json.contains_key("credits") {  // cast/crew doesn't exist on all media
         if result_json["credits"].contains_key("cast") {
             mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert_cast_crew(pool,
@@ -65,58 +72,118 @@ pub async fn provider_tmdb_movie_fetch(pool: &sqlx::PgPool, tmdb_id: i32, metada
 pub async fn provider_tmdb_movie_id_max() {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/movie/latest?api_key={}",
-                TMDBAPI::tmdb_api_key)).await;
+                TMDBAPI.tmdb_api_key)).await;
 }
 
 pub async fn provider_tmdb_person_id_max() {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/person/latest?api_key={}",
-                TMDBAPI::tmdb_api_key)).await;
+                TMDBAPI.tmdb_api_key)).await;
 }
 
 pub async fn provider_tmdb_tv_id_max() {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/tv/latest?api_key={}",
-                TMDBAPI::tmdb_api_key)).await;
+                TMDBAPI.tmdb_api_key)).await;
 }
 
 pub async fn provider_tmdb_collection_fetch_by_id(tmdb_id: i32) {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/collection/{}?api_key={}",
-                tmdb_id, TMDBAPI::tmdb_api_key)).await;
+                tmdb_id, TMDBAPI.tmdb_api_key)).await;
 }
 
 pub async fn provider_tmdb_movie_fetch_by_id(tmdb_id: i32) {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/movie/{}?api_key={}\
         &append_to_response=credits,reviews,release_dates,videos",
-                tmdb_id, TMDBAPI::tmdb_api_key)).await;
+                tmdb_id, TMDBAPI.tmdb_api_key)).await;
 }
 
 pub async fn provider_tmdb_person_changes() {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/person/changes?api_key={}",
-                TMDBAPI::tmdb_api_key)).await;
+                TMDBAPI.tmdb_api_key)).await;
 }
 
 pub async fn provider_tmdb_person_fetch_by_id(tmdb_id: i32) {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/person/{}?api_key={}\
         &append_to_response=combined_credits,external_ids,images",
-                tmdb_id, TMDBAPI::tmdb_api_key)).await;
+                tmdb_id, TMDBAPI.tmdb_api_key)).await;
 }
 
 pub async fn provider_tmdb_review_fetch_by_id(tmdb_id: i32) {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/review/{}?api_key={}",
-                tmdb_id, TMDBAPI::tmdb_api_key)).await;
+                tmdb_id, TMDBAPI.tmdb_api_key)).await;
 }
 
 pub async fn provider_tmdb_tv_fetch_by_id(tmdb_id: i32) {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/tv/{}?api_key={}\
         &append_to_response=credits,reviews,release_dates,videos",
-                tmdb_id, TMDBAPI::tmdb_api_key)).await;
+                tmdb_id, TMDBAPI.tmdb_api_key)).await;
+}
+
+pub async fn provider_tmdb_meta_info_build(result_json: serde_json::Value) {
+    let mut image_file_path = None;
+    // create file path for poster
+    if result_json.contains_key("title") {  // movie
+        image_file_path = image_path::meta_image_file_path(result_json["title"],
+                                                           "poster");
+    } else {  // tv
+        image_file_path = image_path::meta_image_file_path(result_json["name"],
+                                                           "poster");
+    }
+    let mut poster_file_path = None;
+    if result_json["poster_path"] != None {
+        image_file_path += result_json["poster_path"];
+        if !Path::new(&image_file_path).exists() {
+            if !mk_lib_network::mk_download_file_from_url(
+                "https://image.tmdb.org/t/p/original"
+                    + result_json["poster_path"],
+                image_file_path) {
+                // not found...so, none the image_file_path, which resets the poster_file_path
+                image_file_path = None;
+            }
+        }
+        poster_file_path = image_file_path;
+    }
+    // create file path for backdrop
+    if result_json.contains_keey("title") {  // movie
+        image_file_path = image_path::meta_image_file_path(result_json["title"],
+                                                           "backdrop");
+    } else {  // tv
+        image_file_path = image_path::meta_image_file_path(result_json["name"],
+                                                           "backdrop");
+    }
+    let mut backdrop_file_path = None;
+    if result_json["backdrop_path"] != None {
+        image_file_path += result_json["backdrop_path"];
+        if !Path::new(&image_file_path).exists() {
+            if !mk_lib_network::mk_download_file_from_url(
+                "https://image.tmdb.org/t/p/original"
+                    + result_json["backdrop_path"],
+                image_file_path) {
+                // not found...so, none the image_file_path, which resets the backdrop_file_path
+                image_file_path = None;
+            }
+            backdrop_file_path = image_file_path;
+        }
+    }
+    // set local image json
+    if poster_file_path != None {
+        poster_file_path = poster_file_path.replace("/mediakraken/web_app/static", "");
+    }
+    if backdrop_file_path != None {
+        backdrop_file_path = backdrop_file_path.replace("/mediakraken/web_app/static", "");
+    }
+    let image_json = json!({
+                            "Backdrop": backdrop_file_path,
+                            "Poster": poster_file_path
+                            });
+    return (result_json["id"], image_json);
 }
 
 /*
@@ -194,62 +261,6 @@ pub async fn provider_tmdb_tv_fetch_by_id(tmdb_id: i32) {
                             image_file_path + result_json['profile_path'])
         // set local image json
         return image_file_path.replace(common_global.static_data_directory, '')
-
-
-    pub async fn com_tmdb_meta_info_build(self, result_json):
-        """
-        # download info and set data to be ready for insert into database
-        """
-        // create file path for poster
-        if "title" in result_json:  // movie
-            image_file_path = await common_metadata.com_meta_image_file_path(result_json["title"],
-                                                                             "poster")
-        else:  // tv
-            image_file_path = await common_metadata.com_meta_image_file_path(result_json["name"],
-                                                                             "poster")
-        poster_file_path = None
-        if result_json["poster_path"] != None:
-            image_file_path += result_json["poster_path"]
-            if not os.path.isfile(image_file_path):
-                if common_network_async.mk_network_fetch_from_url_async(
-                        "https://image.tmdb.org/t/p/original"
-                        + result_json["poster_path"],
-                        image_file_path):
-                    pass  // download is successful
-                else:
-                    // not found...so, none the image_file_path, which resets the poster_file_path
-                    image_file_path = None
-            poster_file_path = image_file_path
-        // create file path for backdrop
-        if "title" in result_json:  // movie
-            image_file_path = common_metadata.com_meta_image_file_path(result_json["title"],
-                                                                             "backdrop")
-        else:  // tv
-            image_file_path = common_metadata.com_meta_image_file_path(result_json["name"],
-                                                                             "backdrop")
-        backdrop_file_path = None
-        if result_json["backdrop_path"] != None:
-            image_file_path += result_json["backdrop_path"]
-            if not os.path.isfile(image_file_path):
-                if common_network_async.mk_network_fetch_from_url_async(
-                        "https://image.tmdb.org/t/p/original"
-                        + result_json["backdrop_path"],
-                        image_file_path):
-                    pass  // download is successful
-                else:
-                    // not found...so, none the image_file_path, which resets the backdrop_file_path
-                    image_file_path = None
-            backdrop_file_path = image_file_path
-        // set local image json
-        if poster_file_path != None:
-            poster_file_path = poster_file_path.replace(common_global.static_data_directory, "")
-        if backdrop_file_path != None:
-            backdrop_file_path = backdrop_file_path.replace(common_global.static_data_directory, "")
-        image_json = (
-            {'Backdrop': backdrop_file_path,
-             'Poster': poster_file_path})
-        return result_json['id'], result_json, image_json
-
 
 pub async fn movie_search_tmdb(db_connection, file_name):
     """
