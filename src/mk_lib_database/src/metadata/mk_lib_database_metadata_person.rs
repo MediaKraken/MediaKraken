@@ -166,7 +166,7 @@ pub async fn mk_lib_database_metadata_person_insert_cast_crew(pool: &sqlx::PgPoo
             // insert download record for bio/info
             mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(
                 pool,
-                "themoviedb",
+                "themoviedb".to_string(),
                 mk_lib_common_enum_media_type::DLMediaType::PERSON,
                 person_id,
                 new_guid,

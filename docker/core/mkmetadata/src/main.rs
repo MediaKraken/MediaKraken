@@ -88,7 +88,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let file_name = Path::new(&row_data_path).file_name().unwrap().to_os_string().into_string().unwrap();
             println!("File: {:?}", file_name);
 
-            let guessit_data: Metadata = Metadata::from(&file_name);
+            let guessit_data: Metadata = Metadata::from(&file_name).unwrap();
             if guessit_data.title().len() > 0 {
                 if guessit_data.year().is_some() {
                     if guessit_data.title().to_lowercase() == metadata_last_title

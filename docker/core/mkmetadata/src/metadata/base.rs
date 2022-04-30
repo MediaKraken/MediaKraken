@@ -130,7 +130,7 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
             download_data["Path"]["title"]);
         if metadata_uuid != None {
             // TODO add theme.mp3 dl"d above to media table
-            mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(download_data["mdq_id"]);
+            mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(&pool, download_data["mdq_id"]);
             return;  // since it"s a search/fetch/insert in one shot
         } else {
             lookup_halt = true;

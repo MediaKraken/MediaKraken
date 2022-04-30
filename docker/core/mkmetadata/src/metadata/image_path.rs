@@ -12,7 +12,7 @@ pub async fn meta_image_file_path(media_type: String) {
             CHARSET[idx] as char
         })
         .collect();
-    let file_path = "/meta/".to_string() + media_type + "/" + file_path_random;
+    let file_path = "/meta/" + &media_type + "/" + &file_path_random;
     // This is the SAVE path.  Do NOT shorten the path to static.
     // This is the SAVE path.  Do NOT shorten the path to static.
     Ok(file_path)

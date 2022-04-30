@@ -1,6 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
 use substring::Substring;
+use std::str;
+use std::error::Error;
 
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;
