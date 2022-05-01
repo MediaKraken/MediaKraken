@@ -64,8 +64,9 @@ pub async fn metadata_update(pool: &sqlx::PgPool,
 
 pub async fn metadata_search(pool: &sqlx::PgPool,
                              provider_name: String,
-                             download_data: serde_json::Value) {
-    let mut metadata_uuid: Uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000")?;
+                             download_data: serde_json::Value)
+                             -> Result<(), sqlx::Error> {
+    let mut metadata_uuid: Uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap();
     let mut match_result = None;
     let mut set_fetch: bool = false;
     let mut lookup_halt: bool = false;
@@ -73,8 +74,8 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
     if provider_name == "anidb" {
         metadata_uuid = metadata_anime::metadata_anime_lookup(&pool,
                                                               download_data,
-                                                              download_data["Path"])["title"];
-        if metadata_uuid == None {
+                                                              download_data["Path"])["title"].to_string();
+        if metadata_uuid == Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap() {
             if match_result == None {
                 // do lookup halt as we'll start all movies in tmdb
                 lookup_halt = true;
@@ -93,18 +94,18 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
         lookup_halt = true;
     } else if provider_name == "imvdb" {
         (metadata_uuid, match_result) = metadata_music_video::metadata_music_video_lookup(
-            &pool, download_data["mdq_path"]);
-        if metadata_uuid == None {
+            &pool, download_data["mdq_path"].to_string());
+        if metadata_uuid == Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap() {
             if match_result == None {
-                update_provider = "theaudiodb";
+                update_provider = "theaudiodb".to_string();
             } else {
                 set_fetch = true;
             }
         }
     } else if provider_name == "isbndb" {
         (metadata_uuid, match_result) = provider_isbndb::metadata_book_search_isbndb(
-            &pool, download_data["mdq_provider_id"]);
-        if metadata_uuid == None {
+            &pool, download_data["mdq_provider_id"].to_string());
+        if metadata_uuid == Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap() {
             lookup_halt = true;
         }
     } else if provider_name == "lastfm" {
@@ -112,7 +113,7 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
     } else if provider_name == "musicbrainz" {
         (metadata_uuid, match_result) = metadata_music::metadata_music_lookup(&pool,
                                                                               download_data);
-        if metadata_uuid == None {
+        if metadata_uuid == Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap() {
             lookup_halt = true;
         }
     } else if provider_name == "omdb" {
@@ -128,10 +129,10 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
         // TODO....handle list return for title?
         metadata_uuid = provider_televisiontunes::provider_televisiontunes_theme_fetch(
             download_data["Path"]["title"]);
-        if metadata_uuid != None {
+        if metadata_uuid != Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap() {
             // TODO add theme.mp3 dl"d above to media table
             mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(&pool, download_data["mdq_id"]);
-            return;  // since it"s a search/fetch/insert in one shot
+            Ok(());  // since it"s a search/fetch/insert in one shot
         } else {
             lookup_halt = true;
         }
@@ -142,7 +143,7 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
     } else if provider_name == "thesportsdb" {
         (metadata_uuid, match_result) = metadata_sports::metadata_sports_lookup(&pool,
                                                                               download_data);
-        if metadata_uuid == None {
+        if metadata_uuid == Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap() {
             if match_result == None {
                 update_provider = "themoviedb".to_string();
             } else {
@@ -154,6 +155,7 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
     } else if provider_name == "twitch" {
         lookup_halt = true;
     }
+    Ok(())
 }
 
 /*

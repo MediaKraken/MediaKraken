@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::Row;
 use sqlx::types::Uuid;
+use torrent_name_parser::Metadata;
 
 #[path = "mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;
@@ -34,15 +35,9 @@ mod metadata_tv;
 #[path = "mk_lib_database_metadata_game.rs"]
 mod mk_lib_database_metadata_game;
 
-#[derive(Serialize, Deserialize)]
-struct MediaTitleYear {
-    title: String,
-    year: Option<i8>,
-}
-
 pub async fn metadata_identification(pool: &sqlx::PgPool,
                                      dl_row: sqlx::postgres::PgRow,
-                                     guessit_data: MediaTitleYear) {
+                                     guessit_data: Metadata) {
     let mut metadata_uuid: Uuid;
     match dl_row.get("mdq_que_type") {
         mk_lib_common_enum_media_type::DLMediaType::ADULT => {
@@ -99,7 +94,7 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
         mk_lib_common_enum_media_type::DLMediaType::PUBLICATION_MAGAZINE |
         mk_lib_common_enum_media_type::DLMediaType::PUBLICATION_GRAPHIC_NOVEL => {
             metadata_uuid = metadata_book::metadata_book_lookup(&pool,
-                                                                dl_row).await;
+                                                                dl_row).await.unwrap();
         }
 
         mk_lib_common_enum_media_type::DLMediaType::MOVIE |
@@ -109,7 +104,7 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
         mk_lib_common_enum_media_type::DLMediaType::MOVIE_TRAILER => {
             metadata_uuid = metadata_movie::metadata_movie_lookup(&pool,
                                                                   dl_row,
-                                                                  guessit_data).await;
+                                                                  guessit_data).await.unwrap();
         }
 
         mk_lib_common_enum_media_type::DLMediaType::MOVIE_HOME |
@@ -121,17 +116,17 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
         mk_lib_common_enum_media_type::DLMediaType::MUSIC_ALBUM |
         mk_lib_common_enum_media_type::DLMediaType::MUSIC_SONG => {
             metadata_uuid = metadata_music::metadata_music_lookup(&pool,
-                                                                  dl_row).await;
+                                                                  dl_row).await.unwrap();
         }
 
         mk_lib_common_enum_media_type::DLMediaType::MUSIC_VIDEO => {
             metadata_uuid = metadata_music_video::metadata_music_video_lookup(&pool,
-                                                                              dl_row).await;
+                                                                              dl_row).await.unwrap();
         }
 
         mk_lib_common_enum_media_type::DLMediaType::SPORTS => {
             metadata_uuid = metadata_sports::metadata_sports_lookup(&pool,
-                                                                    dl_row).await;
+                                                                    dl_row).await.unwrap();
         }
 
         mk_lib_common_enum_media_type::DLMediaType::TV |
@@ -143,7 +138,7 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
         mk_lib_common_enum_media_type::DLMediaType::TV_TRAILER => {
             metadata_uuid = metadata_tv::metadata_tv_lookup(&pool,
                                                             dl_row,
-                                                            guessit_data).await;
+                                                            guessit_data).await.unwrap();
         }
 
         _ => println!("que type does not equal any value"),

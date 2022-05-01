@@ -69,81 +69,84 @@ pub async fn provider_tmdb_movie_fetch(pool: &sqlx::PgPool, tmdb_id: i32, metada
     return metadata_uuid
  */
 
-pub async fn provider_tmdb_movie_id_max() {
+pub async fn provider_tmdb_movie_id_max()
+    -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/movie/latest?api_key={}",
-                TMDBAPI.tmdb_api_key)).await;
+                TMDBAPI.tmdb_api_key)).await.unwrap();
 }
 
-pub async fn provider_tmdb_person_id_max() {
+pub async fn provider_tmdb_person_id_max()
+    -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/person/latest?api_key={}",
-                TMDBAPI.tmdb_api_key)).await;
+                TMDBAPI.tmdb_api_key)).await.unwrap();
 }
 
-pub async fn provider_tmdb_tv_id_max() {
+pub async fn provider_tmdb_tv_id_max()
+    -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/tv/latest?api_key={}",
-                TMDBAPI.tmdb_api_key)).await;
+                TMDBAPI.tmdb_api_key)).await.unwrap();
 }
 
-pub async fn provider_tmdb_collection_fetch_by_id(tmdb_id: i32) {
+pub async fn provider_tmdb_collection_fetch_by_id(tmdb_id: i32)
+    -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/collection/{}?api_key={}",
-                tmdb_id, TMDBAPI.tmdb_api_key)).await;
+                tmdb_id, TMDBAPI.tmdb_api_key)).await.unwrap();
 }
 
-pub async fn provider_tmdb_movie_fetch_by_id(tmdb_id: i32) {
+pub async fn provider_tmdb_movie_fetch_by_id(tmdb_id: i32)
+    -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/movie/{}?api_key={}\
         &append_to_response=credits,reviews,release_dates,videos",
-                tmdb_id, TMDBAPI.tmdb_api_key)).await;
+                tmdb_id, TMDBAPI.tmdb_api_key)).await.unwrap();
 }
 
-pub async fn provider_tmdb_person_changes() {
+pub async fn provider_tmdb_person_changes()
+    -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/person/changes?api_key={}",
-                TMDBAPI.tmdb_api_key)).await;
+                TMDBAPI.tmdb_api_key)).await.unwrap();
 }
 
-pub async fn provider_tmdb_person_fetch_by_id(tmdb_id: i32) {
+pub async fn provider_tmdb_person_fetch_by_id(tmdb_id: i32)
+    -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/person/{}?api_key={}\
         &append_to_response=combined_credits,external_ids,images",
-                tmdb_id, TMDBAPI.tmdb_api_key)).await;
+                tmdb_id, TMDBAPI.tmdb_api_key)).await.unwrap();
 }
 
-pub async fn provider_tmdb_review_fetch_by_id(tmdb_id: i32) {
+pub async fn provider_tmdb_review_fetch_by_id(tmdb_id: i32)
+    -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/review/{}?api_key={}",
-                tmdb_id, TMDBAPI.tmdb_api_key)).await;
+                tmdb_id, TMDBAPI.tmdb_api_key)).await.unwrap();
 }
 
-pub async fn provider_tmdb_tv_fetch_by_id(tmdb_id: i32) {
+pub async fn provider_tmdb_tv_fetch_by_id(tmdb_id: i32)
+    -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     return mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/tv/{}?api_key={}\
         &append_to_response=credits,reviews,release_dates,videos",
-                tmdb_id, TMDBAPI.tmdb_api_key)).await;
+                tmdb_id, TMDBAPI.tmdb_api_key)).await.unwrap();
 }
 
 pub async fn provider_tmdb_meta_info_build(result_json: serde_json::Value) {
     let mut image_file_path = None;
     // create file path for poster
-    if result_json.contains_key("title") {  // movie
-        image_file_path = image_path::meta_image_file_path(result_json["title"],
-                                                           "poster");
-    } else {  // tv
-        image_file_path = image_path::meta_image_file_path(result_json["name"],
-                                                           "poster");
-    }
+    image_file_path = image_path::meta_image_file_path("poster".to_string());
     let mut poster_file_path = None;
     if result_json["poster_path"] != None {
         image_file_path += result_json["poster_path"];
         if !Path::new(&image_file_path).exists() {
-            if !mk_lib_network::mk_download_file_from_url(
+            if mk_lib_network::mk_download_file_from_url(
                 "https://image.tmdb.org/t/p/original"
                     + result_json["poster_path"],
-                image_file_path) {
+                image_file_path).await.unwrap() == false {
                 // not found...so, none the image_file_path, which resets the poster_file_path
                 image_file_path = None;
             }
@@ -151,21 +154,15 @@ pub async fn provider_tmdb_meta_info_build(result_json: serde_json::Value) {
         poster_file_path = image_file_path;
     }
     // create file path for backdrop
-    if result_json.contains_keey("title") {  // movie
-        image_file_path = image_path::meta_image_file_path(result_json["title"],
-                                                           "backdrop");
-    } else {  // tv
-        image_file_path = image_path::meta_image_file_path(result_json["name"],
-                                                           "backdrop");
-    }
+    image_file_path = image_path::meta_image_file_path("backdrop".to_string());
     let mut backdrop_file_path = None;
     if result_json["backdrop_path"] != None {
-        image_file_path += result_json["backdrop_path"];
+        image_file_path += result_json["backdrop_path"].to_string();
         if !Path::new(&image_file_path).exists() {
-            if !mk_lib_network::mk_download_file_from_url(
+            if mk_lib_network::mk_download_file_from_url(
                 "https://image.tmdb.org/t/p/original"
                     + result_json["backdrop_path"],
-                image_file_path) {
+                image_file_path).await.unwrap() == false {
                 // not found...so, none the image_file_path, which resets the backdrop_file_path
                 image_file_path = None;
             }

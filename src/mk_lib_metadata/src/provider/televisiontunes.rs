@@ -23,7 +23,7 @@ pub async fn provider_televisiontunes_theme_fetch(tv_show_name: String,
         let dl_url = format!("{}{}{}", base_url, "song/download/",
                              data_content.substring(0, dl_end_position));
         println!("{}", dl_url);
-        mk_lib_network::mk_download_file_from_url(dl_url, tv_show_theme_path);
+        mk_lib_network::mk_download_file_from_url(dl_url, &tv_show_theme_path);
         Ok(true)
     }
     else {

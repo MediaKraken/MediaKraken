@@ -89,7 +89,8 @@ pub async fn mk_lib_database_metadata_movie_insert(pool: &sqlx::PgPool,
                                                    series_id: i32,
                                                    data_title: String,
                                                    data_json: serde_json::Value,
-                                                   data_image_json: serde_json::Value) {
+                                                   data_image_json: serde_json::Value)
+                                                   -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_metadata_movie (mm_metadata_guid, \
         mm_metadata_media_id, \
@@ -105,7 +106,7 @@ pub async fn mk_lib_database_metadata_movie_insert(pool: &sqlx::PgPool,
         .execute(&mut transaction)
         .await?;
     transaction.commit().await?;
-    Ok()
+    Ok(())
 }
 
 /*

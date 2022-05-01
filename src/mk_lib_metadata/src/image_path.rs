@@ -1,6 +1,7 @@
 use rand::{Rng, thread_rng};
 
-pub async fn meta_image_file_path(media_type: String) {
+pub async fn meta_image_file_path(media_type: String)
+                                  -> Result<String, Box<dyn std::error::Error>> {
     // This is the SAVE path.  Do NOT shorten the path to static.
     // This is the SAVE path.  Do NOT shorten the path to static.
     const CHARSET: &[u8] = b"abcdefghijklmnopqrstuvwxyz";
@@ -12,7 +13,7 @@ pub async fn meta_image_file_path(media_type: String) {
             CHARSET[idx] as char
         })
         .collect();
-    let file_path = "/meta/" + &media_type + "/" + &file_path_random;
+    let file_path = format!("/meta/{}/{}", &media_type, &file_path_random);
     // This is the SAVE path.  Do NOT shorten the path to static.
     // This is the SAVE path.  Do NOT shorten the path to static.
     Ok(file_path)

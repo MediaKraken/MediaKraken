@@ -19,9 +19,11 @@ pub struct MetadataMovieLastLookup {
 
 pub async fn metadata_movie_lookup(pool: &sqlx::PgPool,
                                    download_data: serde_json::Value,
-                                   file_name: String) {
+                                   file_name: String)
+                                   -> Result<(), sqlx::Error> {
     // don't bother checking title/year as the main_server_metadata_api_worker does it already
-    let mut metadata_uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000")?;  // so not found checks verify later
+    let mut metadata_uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap();  // so not found checks verify later
+    Ok(())
 }
 
 /*

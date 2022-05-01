@@ -157,7 +157,7 @@ pub async fn mk_lib_database_metadata_person_insert_cast_crew(pool: &sqlx::PgPoo
         let person_id = person_data["id"];
         let person_name = person_data["name"];
         // TODO do an upsert instead
-        if mk_lib_database_metadata_exists_person(pool, person_id) == false
+        if mk_lib_database_metadata_exists_person(pool, person_id).await.unwrap() == 0
         {
             let new_guid = Uuid::new_v4();
             // Shouldn't need to verify fetch doesn't exist as the person insert
