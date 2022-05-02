@@ -71,68 +71,77 @@ pub async fn provider_tmdb_movie_fetch(pool: &sqlx::PgPool, tmdb_id: i32, metada
 
 pub async fn provider_tmdb_movie_id_max()
     -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    return mk_lib_network::mk_data_from_url_to_json(
+    let url_result = mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/movie/latest?api_key={}",
                 TMDBAPI.tmdb_api_key)).await.unwrap();
+    Ok(url_result)
 }
 
 pub async fn provider_tmdb_person_id_max()
     -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    return mk_lib_network::mk_data_from_url_to_json(
+    let url_result =  mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/person/latest?api_key={}",
                 TMDBAPI.tmdb_api_key)).await.unwrap();
+    Ok(url_result)
 }
 
 pub async fn provider_tmdb_tv_id_max()
     -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    return mk_lib_network::mk_data_from_url_to_json(
+    let url_result =  mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/tv/latest?api_key={}",
                 TMDBAPI.tmdb_api_key)).await.unwrap();
+    Ok(url_result)
 }
 
 pub async fn provider_tmdb_collection_fetch_by_id(tmdb_id: i32)
     -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    return mk_lib_network::mk_data_from_url_to_json(
+    let url_result =  mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/collection/{}?api_key={}",
                 tmdb_id, TMDBAPI.tmdb_api_key)).await.unwrap();
+    Ok(url_result)
 }
 
 pub async fn provider_tmdb_movie_fetch_by_id(tmdb_id: i32)
     -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    return mk_lib_network::mk_data_from_url_to_json(
+    let url_result =  mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/movie/{}?api_key={}\
         &append_to_response=credits,reviews,release_dates,videos",
                 tmdb_id, TMDBAPI.tmdb_api_key)).await.unwrap();
+    Ok(url_result)
 }
 
 pub async fn provider_tmdb_person_changes()
     -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    return mk_lib_network::mk_data_from_url_to_json(
+    let url_result =  mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/person/changes?api_key={}",
                 TMDBAPI.tmdb_api_key)).await.unwrap();
+    Ok(url_result)
 }
 
 pub async fn provider_tmdb_person_fetch_by_id(tmdb_id: i32)
     -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    return mk_lib_network::mk_data_from_url_to_json(
+    let url_result =  mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/person/{}?api_key={}\
         &append_to_response=combined_credits,external_ids,images",
                 tmdb_id, TMDBAPI.tmdb_api_key)).await.unwrap();
+    Ok(url_result)
 }
 
 pub async fn provider_tmdb_review_fetch_by_id(tmdb_id: i32)
     -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    return mk_lib_network::mk_data_from_url_to_json(
+    let url_result =  mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/review/{}?api_key={}",
                 tmdb_id, TMDBAPI.tmdb_api_key)).await.unwrap();
+    Ok(url_result)
 }
 
 pub async fn provider_tmdb_tv_fetch_by_id(tmdb_id: i32)
     -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    return mk_lib_network::mk_data_from_url_to_json(
+    let url_result =  mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/tv/{}?api_key={}\
         &append_to_response=credits,reviews,release_dates,videos",
                 tmdb_id, TMDBAPI.tmdb_api_key)).await.unwrap();
+    Ok(url_result)
 }
 
 pub async fn provider_tmdb_meta_info_build(result_json: serde_json::Value) {
