@@ -66,7 +66,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         loop {
             let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "themoviedb").await.unwrap();
             for row_data in metadata_to_process {
-                metadata_base::metadata_process(&sqlx_pool, "themoviedb".to_string(), row_data)
+                metadata_base::metadata_process(&sqlx_pool, "themoviedb".to_string(), row_data).await.unwrap();
             };
         }
     });
