@@ -130,9 +130,9 @@ pub async fn mk_lib_database_meta_person_by_name(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_metadata_person_insert(pool: &sqlx::PgPool,
                                                     person_name: String,
-                                                    media_id: String,
+                                                    media_id: i32,
                                                     person_json: serde_json::Value,
-                                                    person_image_path: String)
+                                                    person_image_path: serde_json::Value)
                                                     -> Result<Uuid, sqlx::Error> {
     let new_guid = Uuid::new_v4();
     let mut transaction = pool.begin().await?;
@@ -168,8 +168,8 @@ pub async fn mk_lib_database_metadata_person_insert_cast_crew(pool: &sqlx::PgPoo
                 pool,
                 "themoviedb".to_string(),
                 mk_lib_common_enum_media_type::DLMediaType::PERSON,
-                person_id,
                 new_guid,
+                person_id,
                 json! ({
                     "Status": "Fetch",
                     "ProviderMetaID": person_id

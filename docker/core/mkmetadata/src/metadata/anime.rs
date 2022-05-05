@@ -18,9 +18,9 @@ pub struct MetadataAnimeLastLookup {
 pub async fn metadata_anime_lookup(pool: &sqlx::PgPool,
                                    download_data: serde_json::Value,
                                    file_name: String)
-                                   -> Result<(), sqlx::Error> {
+                                   -> Result<Uuid, sqlx::Error> {
     let mut metadata_uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap();  // so not found checks verify later
-    Ok(())
+    Ok(metadata_uuid)
 }
 
 /*

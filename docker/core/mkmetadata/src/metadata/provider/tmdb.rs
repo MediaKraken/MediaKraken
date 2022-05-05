@@ -147,7 +147,7 @@ pub async fn provider_tmdb_tv_fetch_by_id(tmdb_id: i32)
 pub async fn provider_tmdb_meta_info_build(result_json: serde_json::Value) {
     let mut image_file_path = None;
     // create file path for poster
-    image_file_path = image_path::meta_image_file_path("poster".to_string());
+    image_file_path = image_path::meta_image_file_path("poster".to_string()).await.unwrap();
     let mut poster_file_path = None;
     if result_json["poster_path"] != None {
         image_file_path += result_json["poster_path"];
@@ -163,7 +163,7 @@ pub async fn provider_tmdb_meta_info_build(result_json: serde_json::Value) {
         poster_file_path = image_file_path;
     }
     // create file path for backdrop
-    image_file_path = image_path::meta_image_file_path("backdrop".to_string());
+    image_file_path = image_path::meta_image_file_path("backdrop".to_string()).await.unwrap();
     let mut backdrop_file_path = None;
     if result_json["backdrop_path"] != None {
         image_file_path += result_json["backdrop_path"].to_string();
