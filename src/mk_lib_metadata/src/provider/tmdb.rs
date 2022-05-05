@@ -28,7 +28,7 @@ pub async fn provider_tmdb_movie_fetch(pool: &sqlx::PgPool, tmdb_id: i32, metada
     let result_json = provider_tmdb_movie_fetch_by_id(tmdb_id).await;
     let mut series_id: serde_json::Value;
     let mut image_json: serde_json::Value;
-    (series_id, result_json, image_json) = provider_tmdb_meta_info_build(result_json.json());
+    (series_id, result_json, image_json) = provider_tmdb_meta_info_build(result_json.json()).await.unwrap();
     mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_insert(pool,
                                                                           metadata_uuid,
                                                                           series_id,
@@ -39,12 +39,12 @@ pub async fn provider_tmdb_movie_fetch(pool: &sqlx::PgPool, tmdb_id: i32, metada
         if result_json["credits"].contains_key("cast") {
             mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert_cast_crew(pool,
                                                                                               "themoviedb",
-                                                                                              result_json["credits"]["cast"]);
+                                                                                              result_json["credits"]["cast"]).await;
         }
         if result_json["credits"].contains_key("crew") {
             mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert_cast_crew(pool,
                                                                                               "themoviedb",
-                                                                                              result_json["credits"]["crew"]);
+                                                                                              result_json["credits"]["crew"]).await;
         }
     }
 }
@@ -145,44 +145,44 @@ pub async fn provider_tmdb_tv_fetch_by_id(tmdb_id: i32)
 }
 
 pub async fn provider_tmdb_meta_info_build(result_json: serde_json::Value) {
-    let mut image_file_path = None;
+    let mut image_file_path = String::new();
     // create file path for poster
-    image_file_path = image_path::meta_image_file_path("poster".to_string()).await.unwrap();
-    let mut poster_file_path = None;
-    if result_json["poster_path"] != None {
+    let mut image_file_path = image_path::meta_image_file_path("poster".to_string()).await.unwrap();
+    let mut poster_file_path = String::new();
+    if !result_json["poster_path"].trim().is_empty(){
         image_file_path += result_json["poster_path"];
         if !Path::new(&image_file_path).exists() {
             if mk_lib_network::mk_download_file_from_url(
                 "https://image.tmdb.org/t/p/original"
                     + result_json["poster_path"],
-                image_file_path).await.unwrap() == false {
+                &image_file_path).await.unwrap() == false {
                 // not found...so, none the image_file_path, which resets the poster_file_path
-                image_file_path = None;
+                image_file_path = String::new();
             }
         }
         poster_file_path = image_file_path;
     }
     // create file path for backdrop
     image_file_path = image_path::meta_image_file_path("backdrop".to_string()).await.unwrap();
-    let mut backdrop_file_path = None;
-    if result_json["backdrop_path"] != None {
+    let mut backdrop_file_path = String::new();
+    if !result_json["backdrop_path"].trim().is_empty() {
         image_file_path += result_json["backdrop_path"].to_string();
         if !Path::new(&image_file_path).exists() {
             if mk_lib_network::mk_download_file_from_url(
                 "https://image.tmdb.org/t/p/original"
                     + result_json["backdrop_path"],
-                image_file_path).await.unwrap() == false {
+                &image_file_path).await.unwrap() == false {
                 // not found...so, none the image_file_path, which resets the backdrop_file_path
-                image_file_path = None;
+                image_file_path = String::new();
             }
             backdrop_file_path = image_file_path;
         }
     }
     // set local image json
-    if poster_file_path != None {
+    if !poster_file_path.trim().is_empty() {
         poster_file_path = poster_file_path.replace("/mediakraken/web_app/static", "");
     }
-    if backdrop_file_path != None {
+    if !backdrop_file_path.trim().is_empty() {
         backdrop_file_path = backdrop_file_path.replace("/mediakraken/web_app/static", "");
     }
     let image_json = json!({

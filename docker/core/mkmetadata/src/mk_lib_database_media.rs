@@ -157,7 +157,7 @@ pub struct DBMediaDuplicateList {
 }
 
 pub async fn mk_lib_database_media_duplicate(pool: &sqlx::PgPool, offset: i32, limit: i32)
-                                             -> Result<DBMediaDuplicateList, sqlx::Error> {
+                                             -> Result<Vec<DBMediaDuplicateList>, sqlx::Error> {
     // TODO technically this will "dupe" things like subtitles atm
     let select_query = sqlx::query("select mm_media_metadata_guid, \
         mm_media_name, count(*) as mm_count \
@@ -190,7 +190,8 @@ pub struct DBMediaDuplicateDetailList {
 pub async fn mk_lib_database_media_duplicate_detail(pool: &sqlx::PgPool,
                                                     mm_metadata_guid: Uuid,
                                                     offset: i32, limit: i32)
-                                                    -> Result<DBMediaDuplicateDetailList, sqlx::Error> {
+                                                    -> Result<Vec<DBMediaDuplicateDetailList>,
+                                                        sqlx::Error> {
     let select_query = sqlx::query("select mm_media_guid, \
         mm_media_path, mm_media_ffprobe_json \
         from mm_media where mm_media_guid \

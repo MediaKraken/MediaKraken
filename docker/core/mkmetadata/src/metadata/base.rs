@@ -70,7 +70,7 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
     let mut match_result = None;
     let mut set_fetch: bool = false;
     let mut lookup_halt: bool = false;
-    let mut update_provider = None;
+    let mut update_provider = String::new();
     if provider_name == "anidb" {
         metadata_uuid = metadata_anime::metadata_anime_lookup(&pool,
                                                               download_data,

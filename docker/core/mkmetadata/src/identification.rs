@@ -80,10 +80,8 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
                                                                                                             Path::new(dl_row.get("mdq_path")).file_name(),
                                                                                                             0).await.unwrap();
             if metadata_uuid == Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap() {
-                let sha1_hash = mk_lib_hash_sha1::mk_file_hash_sha1(dl_row.get("mdq_path")).await.unwrap();
-                if sha1_hash != None {
-                    metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(&pool, sha1_hash).await.unwrap();
-                }
+                let sha1_hash = mk_lib_hash_sha1::mk_file_hash_sha1(dl_row.get("mdq_path")).unwrap();
+                metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(&pool, sha1_hash).await.unwrap();
             }
         }
 
