@@ -151,11 +151,10 @@ pub async fn provider_tmdb_meta_info_build(result_json: serde_json::Value) {
     let mut image_file_path = image_path::meta_image_file_path("poster".to_string()).await.unwrap();
     let mut poster_file_path = String::new();
     if !result_json["poster_path"].to_string().trim().is_empty(){
-        image_file_path += result_json["poster_path"];
+        image_file_path += &result_json["poster_path"].to_string();
         if !Path::new(&image_file_path).exists() {
             if mk_lib_network::mk_download_file_from_url(
-                "https://image.tmdb.org/t/p/original"
-                    + result_json["poster_path"],
+                format!("https://image.tmdb.org/t/p/original{}", &result_json["poster_path"].to_string()),
                 &image_file_path).await.unwrap() == false {
                 // not found...so, none the image_file_path, which resets the poster_file_path
                 image_file_path = String::new();
@@ -167,11 +166,10 @@ pub async fn provider_tmdb_meta_info_build(result_json: serde_json::Value) {
     image_file_path = image_path::meta_image_file_path("backdrop".to_string()).await.unwrap();
     let mut backdrop_file_path = String::new();
     if !result_json["backdrop_path"].to_string().trim().is_empty() {
-        image_file_path += result_json["backdrop_path"].to_string();
+        image_file_path += &result_json["backdrop_path"].to_string();
         if !Path::new(&image_file_path).exists() {
             if mk_lib_network::mk_download_file_from_url(
-                "https://image.tmdb.org/t/p/original"
-                    + result_json["backdrop_path"],
+                format!("https://image.tmdb.org/t/p/original{}", &result_json["backdrop_path"].to_string()),
                 &image_file_path).await.unwrap() == false {
                 // not found...so, none the image_file_path, which resets the backdrop_file_path
                 image_file_path = String::new();
