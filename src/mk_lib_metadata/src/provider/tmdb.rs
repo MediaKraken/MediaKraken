@@ -5,6 +5,7 @@
 use std::path::Path;
 use sqlx::{types::Uuid, types::Json};
 use serde_json::json;
+use std::error::Error;
 
 #[path = "../image_path.rs"]
 mod image_path;

@@ -2,6 +2,8 @@
 
 // https://www.thesportsdb.com/api.php
 
+use std::error::Error;
+
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;
 

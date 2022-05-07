@@ -1,5 +1,6 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+use std::error::Error;
 use sqlx::types::Uuid;
 
 #[path = "provider/imvdb.rs"]

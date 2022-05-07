@@ -224,7 +224,7 @@ pub async fn metadata_fetch(pool: &sqlx::PgPool,
     if provider_name == "imvdb" {
         let imvdb_id = provider_imvdb::meta_fetch_save_imvdb(pool,
                                                              download_data["mdq_provider_id"],
-                                                             download_data["mdq_new_uuid"]).await.unwrap();
+                                                             Uuid::parse_str(&download_data["mdq_new_uuid"].to_string()).unwrap()).await.unwrap();
     }
     Ok(())
 }

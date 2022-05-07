@@ -9,7 +9,8 @@ mod mk_lib_network;
 
 pub async fn provider_televisiontunes_theme_fetch(tv_show_name: String,
                                                   tv_show_theme_path: String)
-                                                  -> Result<bool, Box<dyn std::error::Error>>{
+                                                  -> Result<Uuid, Box<dyn std::error::Error>>{
+    let mut metadata_uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap();
     let base_url = "https://www.televisiontunes.com/".to_string();
     let show_url = format!("{}{}", base_url, tv_show_name.replace(" ", "_"));
     let response = reqwest::get(show_url).await?;
@@ -24,9 +25,7 @@ pub async fn provider_televisiontunes_theme_fetch(tv_show_name: String,
                              data_content.substring(0, dl_end_position));
         println!("{}", dl_url);
         mk_lib_network::mk_download_file_from_url(dl_url, &tv_show_theme_path);
-        Ok(true)
+        metadata_uuid = Uuid::new_v4();
     }
-    else {
-        Ok(false)
-    }
+    Ok(metadata_uuid)
 }

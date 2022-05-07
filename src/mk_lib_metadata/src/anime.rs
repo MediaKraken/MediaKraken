@@ -1,6 +1,7 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
 use sqlx::types::Uuid;
+use std::error::Error;
 
 #[path = "provider/anidb.rs"]
 mod provider_anidb;

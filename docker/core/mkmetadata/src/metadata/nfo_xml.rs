@@ -1,5 +1,7 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+use std::error::Error;
+
 /*
 
 pub async fn nfo_file_tv(media_file_path):

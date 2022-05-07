@@ -1,4 +1,6 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
+use std::error::Error;
 use sqlx::types::Uuid;
 
 // https://imvdb.com/developers/api
@@ -86,4 +88,8 @@ pub async fn meta_fetch_save_imvdb(db_connection, imvdb_id, metadata_uuid):
 
 pub async fn meta_fetch_save_imvdb(pool: &sqlx::PgPool,
                                    imvdb_id: i32,
-                                   metadata_uuid: Uuid) {}
+                                   metadata_uuid: Uuid)
+                                   -> Result<Uuid, Box<dyn Error>> {
+    let mut metadata_uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap();  // so not found checks verify later
+    Ok(metadata_uuid)
+}

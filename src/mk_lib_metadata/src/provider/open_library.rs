@@ -8,6 +8,8 @@
 // covers?
 // https://archive.org/details/amazon_2007_covers
 
+use std::error::Error;
+
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;
 
