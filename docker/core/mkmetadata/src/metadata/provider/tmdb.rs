@@ -149,7 +149,7 @@ pub async fn provider_tmdb_meta_info_build(result_json: serde_json::Value) {
     // create file path for poster
     let mut image_file_path = image_path::meta_image_file_path("poster".to_string()).await.unwrap();
     let mut poster_file_path = String::new();
-    if !result_json["poster_path"].trim().is_empty(){
+    if !result_json["poster_path"].to_string().trim().is_empty(){
         image_file_path += result_json["poster_path"];
         if !Path::new(&image_file_path).exists() {
             if mk_lib_network::mk_download_file_from_url(
@@ -165,7 +165,7 @@ pub async fn provider_tmdb_meta_info_build(result_json: serde_json::Value) {
     // create file path for backdrop
     image_file_path = image_path::meta_image_file_path("backdrop".to_string()).await.unwrap();
     let mut backdrop_file_path = String::new();
-    if !result_json["backdrop_path"].trim().is_empty() {
+    if !result_json["backdrop_path"].to_string().trim().is_empty() {
         image_file_path += result_json["backdrop_path"].to_string();
         if !Path::new(&image_file_path).exists() {
             if mk_lib_network::mk_download_file_from_url(

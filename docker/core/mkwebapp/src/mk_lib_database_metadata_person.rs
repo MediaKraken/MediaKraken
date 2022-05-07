@@ -170,17 +170,14 @@ pub async fn mk_lib_database_metadata_person_insert_cast_crew(pool: &sqlx::PgPoo
                 mk_lib_common_enum_media_type::DLMediaType::PERSON,
                 new_guid,
                 person_id,
-                json! ({
-                    "Status": "Fetch",
-                    "ProviderMetaID": person_id
-                }),
-            );
+                "Fetch".to_string(),
+            ).await;
             // insert person record
             mk_lib_database_metadata_person_insert(pool,
                                                    person_name,
                                                    person_id,
-                                                   None,
-                                                   None);
+                                                   json!({}),
+                                                   json!({})).await;
         }
     }
 }

@@ -1,5 +1,6 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+use std::error::Error;
 use sqlx::types::Uuid;
 
 #[path = "anime.rs"]
@@ -37,29 +38,33 @@ mod mk_lib_database_metadata_download_queue;
 
 pub async fn metadata_process(pool: &sqlx::PgPool,
                               provider_name: String,
-                              download_data: serde_json::Value) {
+                              download_data: serde_json::Value)
+                              -> Result<(), Box<dyn Error>> {
     // TODO art, posters, trailers, etc in here as well
     if download_data["mdq_status"] == "Search" {
-        metadata_search(&pool, provider_name, download_data);
+        metadata_search(&pool, provider_name, download_data).await;
     } else if download_data["mdq_status"] == "Update" {
-        metadata_update(&pool, provider_name, download_data);
+        metadata_update(&pool, provider_name, download_data).await;
     } else if download_data["mdq_status"] == "Fetch" {
-        metadata_fetch(&pool, provider_name, download_data);
+        metadata_fetch(&pool, provider_name, download_data).await;
     } else if download_data["mdq_status"] == "FetchCastCrew" {
-        metadata_castcrew(&pool, provider_name, download_data);
+        metadata_castcrew(&pool, provider_name, download_data).await;
     } else if download_data["mdq_status"] == "FetchReview" {
-        metadata_review(&pool, provider_name, download_data);
+        metadata_review(&pool, provider_name, download_data).await;
     } else if download_data["mdq_status"] == "FetchImage" {
-        metadata_image(&pool, provider_name, download_data);
+        metadata_image(&pool, provider_name, download_data).await;
     } else if download_data["mdq_status"] == "FetchCollection" {
-        metadata_collection(&pool, provider_name, download_data);
+        metadata_collection(&pool, provider_name, download_data).await;
     }
+    Ok(())
 }
 
 pub async fn metadata_update(pool: &sqlx::PgPool,
                              provider_name: String,
-                             download_data: serde_json::Value) {
+                             download_data: serde_json::Value)
+                             -> Result<(), Box<dyn Error>> {
     // TODO horribly broken.  Need to add the dlid, that to update, etc
+    Ok(())
 }
 
 pub async fn metadata_search(pool: &sqlx::PgPool,
@@ -142,7 +147,7 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
         lookup_halt = true;
     } else if provider_name == "thesportsdb" {
         (metadata_uuid, match_result) = metadata_sports::metadata_sports_lookup(&pool,
-                                                                              download_data).await.unwrap();
+                                                                                download_data).await.unwrap();
         if metadata_uuid == Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap() {
             if match_result == None {
                 update_provider = "themoviedb".to_string();
@@ -214,12 +219,14 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
 
 pub async fn metadata_fetch(pool: &sqlx::PgPool,
                             provider_name: String,
-                            download_data: serde_json::Value) {
+                            download_data: serde_json::Value)
+                            -> Result<(), Box<dyn Error>> {
     if provider_name == "imvdb" {
         let imvdb_id = provider_imvdb::meta_fetch_save_imvdb(pool,
                                                              download_data["mdq_provider_id"],
-                                                             download_data["mdq_new_uuid"]);
+                                                             download_data["mdq_new_uuid"]).await.unwrap();
     }
+    Ok(())
 }
 /*
     else if provider_name == "themoviedb":
@@ -243,7 +250,10 @@ pub async fn metadata_fetch(pool: &sqlx::PgPool,
 
 pub async fn metadata_castcrew(pool: &sqlx::PgPool,
                                provider_name: String,
-                               download_data: serde_json::Value) {}
+                               download_data: serde_json::Value)
+                               -> Result<(), Box<dyn Error>> {
+    Ok(())
+}
 
 /*
 
@@ -260,7 +270,10 @@ pub async fn metadata_castcrew(db_connection, provider_name, download_data):
 
 pub async fn metadata_image(pool: &sqlx::PgPool,
                             provider_name: String,
-                            download_data: serde_json::Value) {}
+                            download_data: serde_json::Value)
+                            -> Result<(), Box<dyn Error>> {
+    Ok(())
+}
 
 /*
 pub async fn metadata_image(db_connection, provider_name, download_data):
@@ -274,7 +287,10 @@ pub async fn metadata_image(db_connection, provider_name, download_data):
 
 pub async fn metadata_review(pool: &sqlx::PgPool,
                              provider_name: String,
-                             download_data: serde_json::Value) {}
+                             download_data: serde_json::Value)
+                             -> Result<(), Box<dyn Error>> {
+    Ok(())
+}
 
 
 /*
@@ -294,7 +310,10 @@ pub async fn metadata_review(db_connection, provider_name, download_data):
 
 pub async fn metadata_collection(pool: &sqlx::PgPool,
                                  provider_name: String,
-                                 download_data: serde_json::Value) {}
+                                 download_data: serde_json::Value)
+                                 -> Result<(), Box<dyn Error>> {
+    Ok(())
+}
 
 
 /*

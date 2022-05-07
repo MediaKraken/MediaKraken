@@ -1,5 +1,6 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+use std::error::Error;
 use std::path::Path;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -37,7 +38,8 @@ mod mk_lib_database_metadata_game;
 
 pub async fn metadata_identification(pool: &sqlx::PgPool,
                                      dl_row: sqlx::postgres::PgRow,
-                                     guessit_data: Metadata) {
+                                     guessit_data: Metadata)
+                                     -> Result<Uuid, Box<dyn Error>> {
     let mut metadata_uuid: Uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap();
     match dl_row.get("mdq_que_type") {
         mk_lib_common_enum_media_type::DLMediaType::ADULT => {
@@ -58,7 +60,7 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
                                                                                                             Path::new(dl_row.get("mdq_path")).file_name(),
                                                                                                             0).await.unwrap();
             if metadata_uuid == Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap() {
-                let sha1_value = mk_lib_hash_sha1::mk_file_hash_sha1(dl_row.get("mdq_path")).await.unwrap();
+                let sha1_value = mk_lib_hash_sha1::mk_file_hash_sha1(dl_row.get("mdq_path")).unwrap();
                 metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(&pool, sha1_value).await.unwrap();
             }
         }
@@ -69,7 +71,7 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
                                                                                                             Path::new(dl_row.get("mdq_path")).file_name(),
                                                                                                             0).await.unwrap();
             if metadata_uuid == Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap() {
-                let sha1_value = mk_lib_hash_sha1::mk_file_hash_sha1(dl_row.get("mdq_path")).await.unwrap();
+                let sha1_value = mk_lib_hash_sha1::mk_file_hash_sha1(dl_row.get("mdq_path")).unwrap();
                 metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(&pool, sha1_value).await.unwrap();
             }
         }
@@ -141,6 +143,7 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
 
         _ => println!("que type does not equal any value"),
     }
+    Ok(metadata_uuid)
 }
 
 
