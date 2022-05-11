@@ -87,7 +87,7 @@ pub async fn meta_fetch_save_imvdb(db_connection, imvdb_id, metadata_uuid):
  */
 
 pub async fn meta_fetch_save_imvdb(pool: &sqlx::PgPool,
-                                   imvdb_id: i32,
+                                   imvdb_id: i64,
                                    metadata_uuid: Uuid)
                                    -> Result<Uuid, Box<dyn Error>> {
     let mut metadata_uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap();  // so not found checks verify later
