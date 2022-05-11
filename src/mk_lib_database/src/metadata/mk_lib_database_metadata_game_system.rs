@@ -48,7 +48,7 @@ pub async fn mk_lib_database_metadata_game_system_read(pool: &sqlx::PgPool,
                                                        offset: i32, limit: i32)
                                                        -> Result<Vec<DBMetaGameSystemList>, sqlx::Error> {
     // TODO might need to sort by release year as well for machines with multiple releases
-    let mut select_query;
+    let select_query;
     if search_value != "" {
         select_query = sqlx::query("select gs_id, gs_game_system_name, \
             gs_game_system_json->'description' as gs_description, \

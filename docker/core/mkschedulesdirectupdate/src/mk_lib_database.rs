@@ -8,8 +8,7 @@ use sqlx::postgres::PgPoolOptions;
 pub async fn mk_lib_database_open_pool() -> Result<sqlx::PgPool, sqlx::Error> {
     // trim is get rid of the \r returned in hostname
     let hostname: String = sys_info::hostname().unwrap().trim().to_string();
-    println!("Host: {}", hostname);
-    let mut connection_string: String;
+    let connection_string: String;
     if hostname == "wsripper2" || hostname == "th-hplaptop-1" || hostname == "th-hplap-1"
         || hostname == "th-linuxgui-1" || hostname == "mkstage" {
          connection_string = "postgresql://postgres:metaman@mkstage/postgres".to_string();
@@ -22,7 +21,6 @@ pub async fn mk_lib_database_open_pool() -> Result<sqlx::PgPool, sqlx::Error> {
          connection_string = format!("postgresql://postgres:{}@mkdatabase/postgres",
                                     dp_pass);
     }
-    println!("Connection String {:?}", connection_string);
     let pool = PgPoolOptions::new()
         .max_connections(25)
         .connect(&connection_string).await?;

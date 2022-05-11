@@ -72,7 +72,7 @@ pub async fn mk_lib_database_metadata_game_read(pool: &sqlx::PgPool,
                                                 search_value: String,
                                                 offset: i32, limit: i32)
                                                 -> Result<Vec<DBMetaGameList>, sqlx::Error> {
-    let mut select_query;
+    let select_query;
     if search_value != "" {
         select_query = sqlx::query("select gi_game_info_id, gi_game_info_short_name, \
              gi_game_info_name, \
@@ -120,7 +120,7 @@ pub async fn mk_lib_database_metadata_game_by_name_and_system(pool: &sqlx::PgPoo
                                                 game_system_short_name: String,
                                                 offset: i32, limit: i32)
                                                 -> Result<Vec<DBMetaGameNameMatchList>, sqlx::Error> {
-    let mut select_query;
+    let select_query;
     if game_system_short_name != "" {
         select_query = sqlx::query("select gi_id, gi_game_info_json \
             from mm_metadata_game_software_info \

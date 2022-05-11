@@ -30,7 +30,7 @@ pub async fn mk_lib_database_metadata_movie_read(pool: &sqlx::PgPool,
                                                  search_value: String,
                                                  offset: i32, limit: i32)
                                                  -> Result<Vec<DBMetaMovieList>, sqlx::Error> {
-    let mut select_query;
+    let select_query;
     if search_value != "" {
         select_query = sqlx::query("select mm_metadata_guid, mm_metadata_name, \
              mm_metadata_json->'release_date' as mm_date, \

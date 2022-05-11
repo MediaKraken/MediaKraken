@@ -38,7 +38,7 @@ pub async fn mk_lib_database_media_music_read(pool: &sqlx::PgPool,
                                               offset: i32, limit: i32)
                                               -> Result<Vec<DBMediaMusicList>, sqlx::Error> {
     // TODO only grab the image part of the json for list, might want runtime, etc as well
-    let mut select_query;
+    let select_query;
     if search_value != "" {
         select_query = sqlx::query("select mm_metadata_album_guid, mm_metadata_album_name, \
             mm_metadata_album_json from mm_metadata_album, mm_media \

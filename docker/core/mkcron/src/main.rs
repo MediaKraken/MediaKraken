@@ -26,8 +26,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
-    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
-                                                           false).await;
+    let _db_check = mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
+                                                                           false).await.unwrap();
 
     // open rabbit connection
     let mut rabbit_connection = Connection::insecure_open(
@@ -42,7 +42,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     loop {
         let cron_row = mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool).await.unwrap();
         for row_data in cron_row {
-            let mut time_delta: chrono::Duration;
+            let time_delta: chrono::Duration;
             if row_data.mm_cron_schedule_type == "Week(s)" {
                 time_delta = chrono::Duration::weeks(i64::from(row_data.mm_cron_schedule_time));
             } else if row_data.mm_cron_schedule_type == "Day(s)" {

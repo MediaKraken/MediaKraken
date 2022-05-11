@@ -34,7 +34,7 @@ pub async fn mk_lib_database_metadata_sports_read(pool: &sqlx::PgPool,
                                                  offset: i32, limit: i32)
                                                  -> Result<Vec<DBMetaSportsList>, sqlx::Error> {
     // TODO order by year
-    let mut select_query;
+    let select_query;
     if search_value != "" {
         select_query = sqlx::query("select mm_metadata_sports_guid, mm_metadata_sports_name \
             from mm_metadata_sports where mm_metadata_sports_guid \

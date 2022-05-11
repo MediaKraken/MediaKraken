@@ -37,7 +37,7 @@ pub async fn mk_lib_database_metadata_music_read(pool: &sqlx::PgPool,
                                                  -> Result<Vec<DBMetaMusicList>, sqlx::Error> {
     // TODO, only grab the poster locale from json
     // TODO order by release year
-    let mut select_query;
+    let select_query;
     if search_value != "" {
         select_query = sqlx::query("select mm_metadata_album_guid, mm_metadata_album_name, \
             mm_metadata_album_json, mm_metadata_album_localimage \

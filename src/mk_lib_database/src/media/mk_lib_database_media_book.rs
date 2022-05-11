@@ -15,7 +15,7 @@ pub async fn mk_lib_database_media_book_read(pool: &sqlx::PgPool,
                                               search_value: String,
                                               offset: i32, limit: i32)
                                               -> Result<Vec<DBMediaBookList>, sqlx::Error> {
-    let mut select_query;
+    let select_query;
     if search_value != "" {
         select_query = sqlx::query("select mm_metadata_book_guid, mm_metadata_book_name \
             from mm_metadata_book, mm_media \

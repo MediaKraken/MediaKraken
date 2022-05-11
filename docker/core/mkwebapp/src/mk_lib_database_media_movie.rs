@@ -47,7 +47,7 @@ pub async fn mk_lib_database_media_movie_read(pool: &sqlx::PgPool,
                                               search_value: String,
                                               offset: i32, limit: i32)
                                               -> Result<Vec<DBMediaMovieList>, sqlx::Error> {
-    let mut select_query;
+    let select_query;
     if search_value != "" {
         select_query = sqlx::query("")
             .bind(search_value)

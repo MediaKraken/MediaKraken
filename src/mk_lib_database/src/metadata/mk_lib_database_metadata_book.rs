@@ -27,7 +27,7 @@ pub async fn mk_lib_database_metadata_book_read(pool: &sqlx::PgPool,
                                                 offset: i32, limit: i32)
                                                 -> Result<Vec<DBMetaBookList>, sqlx::Error> {
     // TODO sort by release date
-    let mut select_query;
+    let select_query;
     if search_value != "" {
         select_query = sqlx::query("select mm_metadata_book_guid, mm_metadata_book_name \
             from mm_metadata_book where mm_metadata_book_name % $1 \

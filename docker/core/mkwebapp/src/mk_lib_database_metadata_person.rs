@@ -153,33 +153,33 @@ pub async fn mk_lib_database_metadata_person_insert(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_metadata_person_insert_cast_crew(pool: &sqlx::PgPool,
                                                               person_json: serde_json::Value) {
-    for person_data in person_json {
-        let person_id = person_data["id"];
-        let person_name = person_data["name"];
-        // TODO do an upsert instead
-        if mk_lib_database_metadata_exists_person(pool, person_id).await.unwrap() == 0
-        {
-            let new_guid = Uuid::new_v4();
-            // Shouldn't need to verify fetch doesn't exist as the person insert
-            // is right below.  As then the next person record read will find
-            // the inserted record.
-            // insert download record for bio/info
-            mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(
-                pool,
-                "themoviedb".to_string(),
-                mk_lib_common_enum_media_type::DLMediaType::PERSON,
-                new_guid,
-                person_id,
-                "Fetch".to_string(),
-            ).await;
-            // insert person record
-            mk_lib_database_metadata_person_insert(pool,
-                                                   person_name,
-                                                   person_id,
-                                                   json!({}),
-                                                   json!({})).await;
-        }
-    }
+    // for person_data in person_json {
+    //     let person_id = person_data["id"];
+    //     let person_name = person_data["name"];
+    //     // TODO do an upsert instead
+    //     if mk_lib_database_metadata_exists_person(pool, person_id).await.unwrap() == 0
+    //     {
+    //         let new_guid = Uuid::new_v4();
+    //         // Shouldn't need to verify fetch doesn't exist as the person insert
+    //         // is right below.  As then the next person record read will find
+    //         // the inserted record.
+    //         // insert download record for bio/info
+    //         mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(
+    //             pool,
+    //             "themoviedb".to_string(),
+    //             mk_lib_common_enum_media_type::DLMediaType::PERSON,
+    //             new_guid,
+    //             person_id,
+    //             "Fetch".to_string(),
+    //         ).await;
+    //         // insert person record
+    //         mk_lib_database_metadata_person_insert(pool,
+    //                                                person_name,
+    //                                                person_id,
+    //                                                json!({}),
+    //                                                json!({})).await;
+    //     }
+    // }
 }
 /*
 
