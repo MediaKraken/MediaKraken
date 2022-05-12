@@ -71,7 +71,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                   "/mediakraken/emulation/").unwrap();
             let file = File::open(&unzip_file_name)?;
             let reader = BufReader::new(file);
-            let mut xml_data: String = "".to_string();
+            let mut xml_data: String = "".to_owned();
             let conf = Config::new_with_custom_values(true, "", "text", NullValue::Ignore)
                 .add_json_type_override("/machine/@name", JsonArray::Infer(JsonType::AlwaysString))
                 .add_json_type_override("/year", JsonArray::Infer(JsonType::AlwaysString))
@@ -81,7 +81,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 if xml_line.starts_with("<machine") == true {
                     xml_data = xml_line.to_string();
                 } else if xml_line.starts_with("</machine") == true {
-                    xml_data += xml_line;
+                    xml_data.push_str(xml_line);
                     let json_data = xml_string_to_json(xml_data.to_string(), &conf).unwrap();
                     // TODO this really needs to be an upsert
                     mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
@@ -90,7 +90,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         json_data["machine"]["description"].to_string(),
                         json_data).await;
                 } else {
-                    xml_data += xml_line;
+                    xml_data.push_str(xml_line);
                 }
             }
         }

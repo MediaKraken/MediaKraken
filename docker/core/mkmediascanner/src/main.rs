@@ -92,7 +92,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             mk_lib_database_notification::mk_lib_database_notification_insert(&sqlx_pool,
                                                                               format!("Library path not found: {}",
                                                                                       row_data.get("mm_media_dir_path")),
-                                                                              true).await.unwrap();
+                                                                              true).await;
             scan_path = false;
         }
 
@@ -103,7 +103,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if last_modified > row_data.get("mm_media_dir_last_scanned") {
                 mk_lib_database_library::mk_lib_database_library_path_status_update(&sqlx_pool,
                                                                                     row_data.get("mm_media_dir_guid"),
-                                                                                    json!({"Status": "Added to scan", "Pct": 100})).await.unwrap();
+                                                                                    json!({"Status": "Added to scan", "Pct": 100})).await;
 
                 mk_lib_logging::mk_logging_post_elk("info",
                                                     json!({"worker dir": media_path}),
@@ -112,14 +112,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let original_media_class = row_data.get("mm_media_dir_class_enum");
                 // update the timestamp now so any other media added DURING this scan don"t get skipped
                 mk_lib_database_library::mk_lib_database_library_path_timestamp_update(&sqlx_pool,
-                                                                                       row_data.get("mm_media_dir_guid")).await.unwrap();
+                                                                                       row_data.get("mm_media_dir_guid")).await;
                 mk_lib_database_library::mk_lib_database_library_path_status_update(&sqlx_pool,
                                                                                     row_data.get("mm_media_dir_guid"),
-                                                                                    json!({"Status": "File search scan", "Pct": 0.0})).await.unwrap();
+                                                                                    json!({"Status": "File search scan", "Pct": 0.0})).await;
 
-                let mut file_data = mk_lib_file::mk_directory_walk(&media_path.to_str());
+                let mut file_data = mk_lib_file::mk_directory_walk(&media_path.to_str()).await;
 
-                let total_file_in_dir = file_data.len;
+                let total_file_in_dir = file_data.len();
                 let mut total_scanned: u64 = 0;
                 let mut total_files: u64 = 0;
                 for file_name in file_data {
@@ -257,7 +257,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                 file_name,
                                                                                                 None,
                                                                                                 None,
-                                                                                                media_json);
+                                                                                                media_json).await;
                                             // verify ffprobe and bif should run on the data
                                             if ffprobe_bif_data == true && mk_lib_common_media_extension::MEDIA_EXTENSION_SKIP_FFMPEG.contains(&file_extension) == false
                                                 && mk_lib_common_media_extension::MEDIA_EXTENSION.contains(&file_extension) {
@@ -280,7 +280,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                                         new_class_type_uuid,
                                                                                                                                         Uuid::new_v4(),
                                                                                                                                         media_id,
-                                                                                                                                        "".to_string());
+                                                                                                                                        "".to_string()).await;
                                             }
                                         }
                                     }
@@ -293,7 +293,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                             json!({format!("Status": "File scan: {:?}/{:?}",
                                                                                                 total_scanned.to_formatted_string(&Locale::en),
                                                                                                      total_file_in_dir.to_formatted_string(&Locale::en)),
-                                                                                           "Pct": (total_scanned / total_file_in_dir) * 100}));
+                                                                                           "Pct": (total_scanned / total_file_in_dir) * 100})).await;
                     }
                 }
                 // end of for loop for each file in library
@@ -304,14 +304,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // set to none so it doesn't show up anymore in admin status page
                 mk_lib_database_library::mk_lib_database_library_path_status_update(&sqlx_pool,
                                                                                     row_data.get("mm_media_dir_guid"),
-                                                                                    json!({"Status": "File scan complete", "Pct": 100}));
+                                                                                    json!({"Status": "File scan complete", "Pct": 100})).await;
                 if total_files > 0 {
                     // add notification to admin status page
                     mk_lib_database_notification::mk_lib_database_notification_insert(&sqlx_pool,
                                                                                       format!("{} file(s) added from {}",
                                                                                               total_files.to_formatted_string(&Locale::en),
                                                                                               row_data.get("mm_media_dir_path")),
-                                                                                      true);
+                                                                                      true).await;
                 }
             }
         }
