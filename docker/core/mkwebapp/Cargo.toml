@@ -27,8 +27,8 @@ tokio = { version = "1.17.0", features = ["full"] }
 uuid = { version = "0.8.2", features = ["serde", "v4"] }
 walkdir = "2.3.2"
 
-rocket = { version = "0.5.0-rc.1", features = ["json", "secrets", "uuid"]}
-rocket_dyn_templates = { version = "0.1.0-rc.1", features = ["tera"]}
+rocket = { version = "0.5.0-rc.2", features = ["json", "secrets", "uuid"]}
+rocket_dyn_templates = { version = "0.1.0-rc.2", features = ["tera"]}
 
 [dev-dependencies]
 tokio-test = "*"

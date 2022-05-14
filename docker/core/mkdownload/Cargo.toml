@@ -17,7 +17,7 @@ sqlx = { version = "0.5.12", features = [ "chrono", "json", "runtime-tokio-rustl
 sys-info = "0.9.1"
 tokio = { version = "1.17.0", features = ["full"] }
 uuid = { version = "0.8.2", features = ["serde", "v4"] }
-validator = { version = "0.14", features = ["derive"] }
+validator = { version = "0.15.0", features = ["derive"] }
 
 [dev-dependencies]
 tokio-test = "*"

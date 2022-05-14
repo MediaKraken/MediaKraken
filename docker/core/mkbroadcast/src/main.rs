@@ -12,7 +12,8 @@ async fn main() -> io::Result<()> {
     let mut mediakraken_ip: String = "127.0.0.1".to_string();
     // loop through interfaces
     for iface in datalink::interfaces() {
-        if iface.name == "ens18" {
+        // Debian 10/11, CentOS 6/7, CentOS 8
+        if iface.name == "ens18" || iface.name == "eth0" or || iface.name == "ens192" {
             for source_ip in iface.ips.iter() {
                 if source_ip.is_ipv4() {
                     // println!("{:?}", source_ip);
@@ -44,6 +45,7 @@ async fn main() -> io::Result<()> {
         }
         Err(e) => eprintln!("Error: {}", e),
     }
+    
     // Begin the broadcast receive loop
     let sock = UdpSocket::bind("0.0.0.0:9101").await?;
     let mut buf = [0; 1024];

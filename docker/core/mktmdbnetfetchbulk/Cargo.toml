@@ -18,7 +18,7 @@ sys-info = "0.9.1"
 tar = "0.4.38"
 tokio = { version = "1.17.0", features = ["full"] }
 uuid = { version = "0.8.2", features = ["serde", "v4"] }
-zip = "0.5.13"
+zip = "0.6.2"
 
 rocket_dyn_templates = { git = "https://github.com/SergioBenitez/Rocket/", features = ["tera"]}
 

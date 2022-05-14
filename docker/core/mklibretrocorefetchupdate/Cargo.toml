@@ -19,7 +19,7 @@ tar = "0.4.38"
 tokio = { version = "1.17.0", features = ["full"] }
 walkdir = "2.3.2"
 uuid = { version = "0.8.2", features = ["serde", "v4"] }
-zip = "0.5.13"
+zip = "0.6.2"
 
 [dev-dependencies]
 tokio-test = "*"
