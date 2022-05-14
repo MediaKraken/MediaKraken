@@ -87,7 +87,7 @@ pub async fn mk_lib_database_metadata_game_system_upsert(pool: &sqlx::PgPool,
                                                          system_alias: String,
                                                          system_json: serde_json::Value)
                                                          -> Result<uuid::Uuid, sqlx::Error> {
-    let new_guid = Uuid::new_v4();
+    let new_guid = uuid::Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query("INSERT INTO mm_metadata_game_systems_info \
         (gs_game_system_id, \

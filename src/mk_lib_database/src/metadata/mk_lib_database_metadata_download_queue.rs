@@ -79,7 +79,7 @@ pub async fn mk_lib_database_metadata_download_queue_insert(pool: &sqlx::PgPool,
         mm_download_provider_id, \
         mm_download_status) \
         values ($1, $2, $3, $4, $5, $6)")
-        .bind(Uuid::new_v4())
+        .bind(uuid::Uuid::new_v4())
         .bind(metadata_provider)
         .bind(metadata_que_type)
         .bind(metadata_new_uuid)

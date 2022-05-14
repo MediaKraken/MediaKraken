@@ -110,7 +110,7 @@ pub async fn mk_lib_database_metadata_music_video_insert(pool: &sqlx::PgPool,
                                                          data_json: serde_json::Value,
                                                          image_json: serde_json::Value)
                                                          -> Result<Uuid, sqlx::Error> {
-    let new_guid = Uuid::new_v4();
+    let new_guid = uuid::Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_metadata_music_video (mm_metadata_music_video_guid, \
         mm_metadata_music_video_media_id, \

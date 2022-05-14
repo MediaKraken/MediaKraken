@@ -61,7 +61,7 @@ pub async fn mk_lib_database_metadata_game_count(pool: &sqlx::PgPool,
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaGameList {
-	gi_game_info_id: Uuid,
+	gi_game_info_id: uuid::Uuid,
 	gi_game_info_short_name: String,
 	gi_game_info_name: String,
 	gi_year: String,
@@ -111,7 +111,7 @@ pub async fn mk_lib_database_metadata_game_read(pool: &sqlx::PgPool,
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaGameNameMatchList {
-	gi_id: Uuid,
+	gi_id: uuid::Uuid,
 	gi_game_info_json: String,
 }
 
@@ -282,7 +282,7 @@ def db_meta_game_category_by_name(self, category_name):
 pub async fn mk_lib_database_metadata_game_category_insert(pool: &sqlx::PgPool,
                                                            category_name:String)
                                                            -> Result<uuid::Uuid, sqlx::Error> {
-    let new_guid = Uuid::new_v4();
+    let new_guid = uuid::Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_game_category (gc_id, gc_category)
         values ($1, $2)")

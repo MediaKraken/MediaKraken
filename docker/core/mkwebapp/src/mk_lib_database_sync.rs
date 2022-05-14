@@ -45,7 +45,7 @@ pub async fn mk_lib_database_sync_insert(pool: &sqlx::PgPool,
                                          sync_path_to: String,
                                          sync_json: serde_json::Value)
                                          -> Result<Uuid, sqlx::Error> {
-    let new_guid = Uuid::new_v4();
+    let new_guid = uuid::Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_sync (mm_sync_guid, mm_sync_path, \
         mm_sync_path_to, mm_sync_options_json) \
