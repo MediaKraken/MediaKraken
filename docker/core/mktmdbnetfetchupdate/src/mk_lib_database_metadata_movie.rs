@@ -87,7 +87,6 @@ pub async fn mk_lib_database_metadata_movie_count(pool: &sqlx::PgPool,
 pub async fn mk_lib_database_metadata_movie_insert(pool: &sqlx::PgPool,
                                                    uuid_id: Uuid,
                                                    series_id: i32,
-                                                   data_title: String,
                                                    data_json: serde_json::Value,
                                                    data_image_json: serde_json::Value)
                                                    -> Result<(), sqlx::Error> {
@@ -100,7 +99,7 @@ pub async fn mk_lib_database_metadata_movie_insert(pool: &sqlx::PgPool,
         values ($1,$2,$3,$4,$5)")
         .bind(uuid_id)
         .bind(series_id)
-        .bind(data_title)
+        .bind(data_json["title"].to_string())
         .bind(data_json)
         .bind(data_image_json)
         .execute(&mut transaction)

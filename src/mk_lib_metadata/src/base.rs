@@ -133,7 +133,7 @@ pub async fn metadata_search(pool: &sqlx::PgPool,
         // if download succeeds remove dl
         // TODO....handle list return for title?
         metadata_uuid = provider_televisiontunes::provider_televisiontunes_theme_fetch(
-            download_data["Path"]["title"]).await.unwrap();
+            download_data["Path"]["title"].to_string(), "TODO Fake Path".to_string()).await.unwrap();
         if metadata_uuid != Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap() {
             // TODO add theme.mp3 dl"d above to media table
             mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(&pool, download_data["mdq_id"]).await.unwrap();

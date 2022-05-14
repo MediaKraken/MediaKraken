@@ -8,8 +8,8 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBLibraryList {
-    mm_media_dir_guid: uuid::Uuid,
-    mm_media_dir_path: String,
+    pub mm_media_dir_guid: uuid::Uuid,
+    pub mm_media_dir_path: String,
 }
 
 pub async fn mk_lib_database_library_read(pool: &sqlx::PgPool,

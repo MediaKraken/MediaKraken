@@ -26,25 +26,23 @@ pub struct TMDBAPI {
 
 pub async fn provider_tmdb_movie_fetch(pool: &sqlx::PgPool, tmdb_id: i32, metadata_uuid: Uuid) {
     // fetch and save json data via tmdb id
-    let result_json = provider_tmdb_movie_fetch_by_id(tmdb_id).await;
+    let result_json = provider_tmdb_movie_fetch_by_id(tmdb_id).await.unwrap();
     let mut series_id: serde_json::Value;
     let mut image_json: serde_json::Value;
-    (series_id, result_json, image_json) = provider_tmdb_meta_info_build(result_json.json()).await.unwrap();
+    (series_id, result_json, image_json) = provider_tmdb_meta_info_build(result_json).await.unwrap();
     mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_insert(pool,
                                                                           metadata_uuid,
                                                                           series_id,
-                                                                          result_json["title"],
                                                                           result_json,
                                                                           image_json);
     if result_json.contains_key("credits") {  // cast/crew doesn't exist on all media
         if result_json["credits"].contains_key("cast") {
             mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert_cast_crew(pool,
-                                                                                              "themoviedb",
                                                                                               result_json["credits"]["cast"]).await;
         }
+
         if result_json["credits"].contains_key("crew") {
             mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert_cast_crew(pool,
-                                                                                              "themoviedb",
                                                                                               result_json["credits"]["crew"]).await;
         }
     }
