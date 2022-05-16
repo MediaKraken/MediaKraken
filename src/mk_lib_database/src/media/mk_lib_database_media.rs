@@ -17,7 +17,7 @@ pub async fn mk_lib_database_media_update_metadata_guid(pool: &sqlx::PgPool,
         .bind(mm_media_guid)
         .execute(&mut transaction)
         .await?;
-    if mm_download_uuid != Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap() {
+    if mm_download_uuid != uuid::Uuid::nil() {
         sqlx::query("delete from mm_metadata_download_que where mm_download_guid = $1")
             .bind(mm_download_uuid)
             .execute(&mut transaction)

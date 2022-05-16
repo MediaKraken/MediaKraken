@@ -72,7 +72,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     });
 
     // setup last used id's per thread
-    let mut metadata_last_uuid: Uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap();
+    let mut metadata_last_uuid: Uuid = uuid::Uuid::nil();
     let mut metadata_last_title: String = "".to_string();
     let mut metadata_last_year: i32 = 0;
 
@@ -81,7 +81,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         // grab new batch of records to process by content provider
         let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "Z").await.unwrap();
         for row_data in metadata_to_process {
-            let mut metadata_uuid: Uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap();
+            let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
             // check for dupes by name/year
             let row_data_path: String = row_data.get("mm_download_path");
             println!("Path: {:?}", row_data_path);
@@ -100,7 +100,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     // matches last media scanned, so set with that metadata id
                     metadata_uuid = metadata_last_uuid
                 }
-                if metadata_uuid == Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap() {
+                if metadata_uuid == uuid::Uuid::nil() {
                     // begin id process
                     metadata_uuid = metadata_identification::metadata_identification(&sqlx_pool,
                                                                                        row_data,
@@ -120,7 +120,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                  row_data.get("mdq_id")).await.unwrap();
             }
             // update the media row with the json media id and the proper name
-            if metadata_uuid != Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap() {
+            if metadata_uuid != uuid::Uuid::nil() {
                 mk_lib_database_media::mk_lib_database_media_update_metadata_guid(&sqlx_pool,
                                                                                   row_data["mdq_provider_id"],
                                                                                   metadata_uuid,

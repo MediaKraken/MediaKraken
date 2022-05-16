@@ -74,7 +74,7 @@ pub async fn mk_lib_database_sync_list(pool: &sqlx::PgPool,
                                        limit: i32)
                                        -> Result<Vec<DBSyncList>, sqlx::Error> {
     let select_query;
-    if user_id != Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap() {
+    if user_id != uuid::Uuid::nil() {
         select_query = sqlx::query("select mm_sync_guid, mm_sync_path, \
             mm_sync_path_to, mm_sync_options_json \
             from mm_sync where mm_sync_guid in (select mm_sync_guid \

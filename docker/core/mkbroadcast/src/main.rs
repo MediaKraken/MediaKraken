@@ -13,7 +13,7 @@ async fn main() -> io::Result<()> {
     // loop through interfaces
     for iface in datalink::interfaces() {
         // Debian 10/11, CentOS 6/7, CentOS 8
-        if iface.name == "ens18" || iface.name == "eth0" or || iface.name == "ens192" {
+        if iface.name == "ens18" || iface.name == "eth0" || iface.name == "ens192" {
             for source_ip in iface.ips.iter() {
                 if source_ip.is_ipv4() {
                     // println!("{:?}", source_ip);

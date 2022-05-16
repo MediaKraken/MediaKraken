@@ -14,7 +14,7 @@ pub struct MetadataMusicVideoLastLookup {
 
 pub async fn metadata_music_video_lookup(pool: &sqlx::PgPool,
                                    file_name: String) -> Result<Uuid, sqlx::Error>  {
-    let mut metadata_uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap();  // so not found checks verify later
+    let mut metadata_uuid = uuid::Uuid::nil();  // so not found checks verify later
     Ok(metadata_uuid)
 }
 

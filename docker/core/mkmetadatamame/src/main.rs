@@ -85,7 +85,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     let json_data = xml_string_to_json(xml_data.to_string(), &conf).unwrap();
                     // TODO this really needs to be an upsert
                     mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
-                        &sqlx_pool, uuid::Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap(),
+                        &sqlx_pool, uuid::uuid::Uuid::nil(),
                         json_data["machine"]["@name"].to_string(),
                         json_data["machine"]["description"].to_string(),
                         json_data).await;

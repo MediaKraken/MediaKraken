@@ -20,7 +20,7 @@ pub async fn metadata_anime_lookup(pool: &sqlx::PgPool,
                                    download_data: serde_json::Value,
                                    file_name: String)
                                    -> Result<Uuid, sqlx::Error> {
-    let mut metadata_uuid = Uuid::parse_str("00000000-0000-0000-0000-000000000000").unwrap();  // so not found checks verify later
+    let mut metadata_uuid = uuid::Uuid::nil();  // so not found checks verify later
     Ok(metadata_uuid)
 }
 
