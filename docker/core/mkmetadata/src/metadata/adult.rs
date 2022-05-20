@@ -2,6 +2,8 @@
 
 use sqlx::types::Uuid;
 use std::error::Error;
+use torrent_name_parser::Metadata;
+use sqlx::postgres::PgRow;
 
 #[path = "provider/pornhub.rs"]
 mod provider_pornhub;
@@ -16,8 +18,8 @@ pub struct MetadataAdultLastLookup {
 }
 
 pub async fn metadata_adult_lookup(pool: &sqlx::PgPool,
-                                   download_data: serde_json::Value,
-                                   file_name: String)
+                                   download_data: PgRow,
+                                   file_name: Metadata)
                                    -> Result<Uuid, sqlx::Error> {
     // don't bother checking title/year as the main_server_metadata_api_worker does it already
     let mut metadata_uuid = uuid::Uuid::nil();  // so not found checks verify later

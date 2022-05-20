@@ -213,8 +213,8 @@ pub async fn mk_lib_database_media_duplicate_detail(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_media_image_path(pool: &sqlx::PgPool,
                                               mm_media_guid: Uuid)
-                                              -> Result<String, sqlx::Error> {
-    let row: String = sqlx::query_as("select mm_metadata_localimage_json->'Images' as mm_image \
+                                              -> Result<serde_json::Value, sqlx::Error> {
+    let row: (serde_json::Value, ) = sqlx::query_as("select mm_metadata_localimage_json \
         from mm_media, mm_metadata_movie \
         where mm_media_metadata_guid = mm_metadata_guid \
         and mm_media_guid = $1")

@@ -122,9 +122,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
             // update the media row with the json media id and the proper name
             if metadata_uuid != uuid::Uuid::nil() {
                 mk_lib_database_media::mk_lib_database_media_update_metadata_guid(&sqlx_pool,
-                                                                                  row_data["mdq_provider_id"],
+                                                                                  row_data.get("mdq_provider_id"),
                                                                                   metadata_uuid,
-                                                                                  row_data["mdq_id"]).await.unwrap();
+                                                                                  row_data.get("mdq_id")).await.unwrap();
             }
         }
         sleep(Duration::from_secs(1)).await;

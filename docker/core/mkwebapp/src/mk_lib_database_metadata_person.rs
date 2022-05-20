@@ -54,7 +54,7 @@ pub async fn mk_lib_database_metadata_person_read(pool: &sqlx::PgPool,
                                                   offset: i32, limit: i32)
                                                   -> Result<Vec<DBMetaPersonList>, sqlx::Error> {
     // TODO order by birth date
-    let mut select_query;
+    let select_query;
     if search_value != "" {
         select_query = sqlx::query("select mmp_id, mmp_person_name, mmp_person_image, \
             mmp_person_meta_json->'profile_path' as mmp_profile \
