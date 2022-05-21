@@ -3,6 +3,7 @@
 use std::error::Error;
 use sqlx::types::Uuid;
 use torrent_name_parser::Metadata;
+use sqlx::postgres::PgRow;
 
 #[path = "provider/imdb.rs"]
 mod provider_imdb;
@@ -20,7 +21,7 @@ pub struct MetadataMovieLastLookup {
 }
 
 pub async fn metadata_movie_lookup(pool: &sqlx::PgPool,
-                                   download_data: serde_json::Value,
+                                   download_data: PgRow,
                                    file_name: Metadata)
                                    -> Result<Uuid, sqlx::Error> {
     // don't bother checking title/year as the main_server_metadata_api_worker does it already
