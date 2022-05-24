@@ -73,7 +73,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // setup last used id's per thread
     let mut metadata_last_uuid: Uuid = uuid::Uuid::nil();
-    let mut metadata_last_title: String = "".to_string();
+    let mut metadata_last_title: String = String::new();
     let mut metadata_last_year: i32 = 0;
 
     // process all the "Z" records

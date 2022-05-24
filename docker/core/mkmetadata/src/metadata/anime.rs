@@ -3,6 +3,7 @@
 use sqlx::types::Uuid;
 use std::error::Error;
 use torrent_name_parser::Metadata;
+use sqlx::postgres::PgRow;
 
 #[path = "provider/anidb.rs"]
 mod provider_anidb;
@@ -18,7 +19,7 @@ pub struct MetadataAnimeLastLookup {
 }
 
 pub async fn metadata_anime_lookup(pool: &sqlx::PgPool,
-                                   download_data: serde_json::Value,
+                                   download_data: PgRow,
                                    file_name: Metadata)
                                    -> Result<Uuid, sqlx::Error> {
     let mut metadata_uuid = uuid::Uuid::nil();  // so not found checks verify later

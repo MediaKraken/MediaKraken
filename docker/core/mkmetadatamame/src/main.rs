@@ -85,7 +85,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     let json_data = xml_string_to_json(xml_data.to_string(), &conf).unwrap();
                     // TODO this really needs to be an upsert
                     mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
-                        &sqlx_pool, uuid::uuid::Uuid::nil(),
+                        &sqlx_pool, uuid::Uuid::nil(),
                         json_data["machine"]["@name"].to_string(),
                         json_data["machine"]["description"].to_string(),
                         json_data).await;
@@ -173,11 +173,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
             format!("https://www.arcade-history.com/dats/historydat{}.zip",
                     option_config_json["MAME"]["Version"]),
             &file_name);
-        let mut game_titles = Vec::new();;
-        let mut game_desc = "".to_string();
+        let mut game_titles = Vec::new();
+        let mut game_desc = String::new();
         let mut add_to_desc = false;
-        let mut new_title = "".to_string();
-        let mut system_name = "".to_string();
+        let mut new_title = String::new();
+        let mut system_name = String::new();
         // do this all the time, since could be a new one
         //     with zipfile.ZipFile(file_name, "r") as zf:
         //         zf.extract("history.dat", "/mediakraken/emulation/")
@@ -288,20 +288,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let mut wip_in_progress = false;
         let mut romset_in_progress = false;
         // store args to sql
-        let mut sys_short_name = "".to_string();
-        let mut sys_longname = "".to_string();
-        let mut sys_manufacturer = "".to_string();
+        let mut sys_short_name = String::new();
+        let mut sys_longname = String::new();
+        let mut sys_manufacturer = String::new();
         let mut sys_year: i8 = 0;
-        let mut sys_desc = "".to_string();
-        let mut sys_emulation = "".to_string();
-        let mut sys_color = "".to_string();
-        let mut sys_sound = "".to_string();
-        let mut sys_graphics = "".to_string();
-        let mut sys_save_state = "".to_string();
-        let mut sys_wip = "".to_string();
-        let mut sys_romset = "".to_string();
+        let mut sys_desc = String::new();
+        let mut sys_emulation = String::new();
+        let mut sys_color = String::new();
+        let mut sys_sound = String::new();
+        let mut sys_graphics = String::new();
+        let mut sys_save_state = String::new();
+        let mut sys_wip = String::new();
+        let mut sys_romset = String::new();
 
-        let mut sql_string = "".to_string();
+        let mut sql_string = String::new();
         //     while 1:
         //         line = infile.readline()
         //         if not line:

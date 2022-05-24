@@ -93,7 +93,7 @@ def db_media_remote_read_new(self, date_last_sync, sync_movie=None, sync_tv=None
     """
     // TODO add games to this
     let mut first_query = true;
-    let mut sync_query = "".to_string();
+    let mut sync_query = String::new();
     if sync_movie != None:
         sync_query += ('select mm_media_guid, 'Movie','
                        ' mm_media_ffprobe_json,'

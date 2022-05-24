@@ -54,37 +54,11 @@ pub async fn metadata_identification(pool: &sqlx::PgPool,
                                                                   guessit_data).await.unwrap();
         }
 
-        mk_lib_common_enum_media_type::DLMediaType::GAME_CHD => {
-            // TODO remove the file extension
-            metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_name_and_system(&pool,
-                                                                                                            Path::new(dl_row.get("mdq_path")).file_name(),
-                                                                                                            0).await.unwrap();
-            if metadata_uuid == uuid::Uuid::nil() {
-                let sha1_value = mk_lib_hash_sha1::mk_file_hash_sha1(dl_row.get("mdq_path")).unwrap();
-                metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(&pool, sha1_value).await.unwrap();
-            }
-        }
-
-        mk_lib_common_enum_media_type::DLMediaType::GAME_ISO => {
-            // TODO remove the file extension
-            metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_name_and_system(&pool,
-                                                                                                            Path::new(dl_row.get("mdq_path")).file_name(),
-                                                                                                            0).await.unwrap();
-            if metadata_uuid == uuid::Uuid::nil() {
-                let sha1_value = mk_lib_hash_sha1::mk_file_hash_sha1(dl_row.get("mdq_path")).unwrap();
-                metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(&pool, sha1_value).await.unwrap();
-            }
-        }
-
+        mk_lib_common_enum_media_type::DLMediaType::GAME_CHD |
+        mk_lib_common_enum_media_type::DLMediaType::GAME_ISO |
         mk_lib_common_enum_media_type::DLMediaType::GAME_ROM => {
-            // TODO remove the file extension
-            metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_name_and_system(&pool,
-                                                                                                            Path::new(dl_row.get("mdq_path")).file_name(),
-                                                                                                            0).await.unwrap();
-            if metadata_uuid == uuid::Uuid::nil() {
-                let sha1_hash = mk_lib_hash_sha1::mk_file_hash_sha1(dl_row.get("mdq_path")).unwrap();
-                metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(&pool, sha1_hash).await.unwrap();
-            }
+            metadata_uuid = metadata_game::metadata_game_lookup(&pool,
+                                                                dl_row).await.unwrap();
         }
 
         mk_lib_common_enum_media_type::DLMediaType::PUBLICATION |

@@ -2,6 +2,7 @@
 
 use std::error::Error;
 use sqlx::types::Uuid;
+use sqlx::postgres::PgRow;
 
 #[path = "provider/imvdb.rs"]
 mod provider_imvdb;
@@ -13,7 +14,7 @@ pub struct MetadataMusicVideoLastLookup {
 }
 
 pub async fn metadata_music_video_lookup(pool: &sqlx::PgPool,
-                                   file_name: String) -> Result<Uuid, sqlx::Error>  {
+                                   file_data: PgRow) -> Result<uuid::Uuid, sqlx::Error>  {
     let mut metadata_uuid = uuid::Uuid::nil();  // so not found checks verify later
     Ok(metadata_uuid)
 }

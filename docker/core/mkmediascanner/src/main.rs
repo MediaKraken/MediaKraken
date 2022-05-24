@@ -12,6 +12,7 @@ use std::path::Path;
 use tokio::time::{Duration, sleep};
 use uuid::Uuid;
 use sqlx::Row;
+use std::ffi::OsStr;
 
 #[path = "mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;
@@ -123,7 +124,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     if mk_lib_database_library::mk_lib_database_library_file_exists(&sqlx_pool,
                                                                                     file_name).await.unwrap() == false {
                         // set lower here so I can remove a lot of .lower() in the code below
-                        let file_extension = Path::new(&file_name).extension().to_lowercase();
+                        let file_extension = Path::new(&file_name.to_lowercase()).extension().and_then(OsStr::to_str).unwrap();
                         // checking subtitles for parts as need multiple files for multiple media files
                         if mk_lib_common_media_extension::MEDIA_EXTENSION.contains(&file_extension)
                             || mk_lib_common_media_extension::SUBTITLE_EXTENSION.contains(&file_extension)
@@ -134,7 +135,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             // set here which MIGHT be overrode later
                             let mut new_class_type_uuid = media_class_type_uuid;
                             // check for "stacked" media file
-                            let base_file_name = Path::new(&file_name).file_name().to_str().unwrap();
+                            let base_file_name = Path::new(&file_name).file_name().and_then(OsStr::to_str).unwrap();
                             // check to see if it"s a "stacked" file
                             // including games since some are two or more discs
                             if stack_cd.is_match(&base_file_name)
@@ -277,7 +278,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                                         new_class_type_uuid,
                                                                                                                                         Uuid::new_v4(),
                                                                                                                                         media_id,
-                                                                                                                                        "".to_string()).await;
+                                                                                                                                        String::new()).await;
                                             }
                                         }
                                     }
