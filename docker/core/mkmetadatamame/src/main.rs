@@ -49,7 +49,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
     mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
-                                                           false).await;
+                                                           false).await.unwrap();
     let option_config_json: Value = mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool).await.unwrap();
 
     // create mame game list
@@ -61,7 +61,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         mk_lib_network::mk_download_file_from_url(
             format!("https://github.com/mamedev/mame/releases/download/mame0{}/mame0{}lx.zip",
                     option_config_json["MAME"]["Version"],
-                    option_config_json["MAME"]["Version"]), &file_name).await;
+                    option_config_json["MAME"]["Version"]), &file_name).await.unwrap();
         let unzip_file_name = format!("/mediakraken/emulation/mame0{}.xml", option_config_json["MAME"]["Version"]);
         if !Path::new(&unzip_file_name).exists()
         {
@@ -88,7 +88,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         &sqlx_pool, uuid::Uuid::nil(),
                         json_data["machine"]["@name"].to_string(),
                         json_data["machine"]["description"].to_string(),
-                        json_data).await;
+                        json_data).await.unwrap();
                 } else {
                     xml_data.push_str(xml_line);
                 }
@@ -104,7 +104,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         mk_lib_network::mk_download_file_from_url(
             format!("https://github.com/mamedev/mame/archive/mame0{}.zip",
                     option_config_json["MAME"]["Version"]),
-            &file_name);
+            &file_name).await.unwrap();
         //     zip_handle = zipfile.ZipFile(file_name, "r")  # issues if u do RB
         //     zip_handle.extractall("/mediakraken/emulation/")
         //     zip_handle.close()
@@ -172,8 +172,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         mk_lib_network::mk_download_file_from_url(
             format!("https://www.arcade-history.com/dats/historydat{}.zip",
                     option_config_json["MAME"]["Version"]),
-            &file_name);
-        let mut game_titles = Vec::new();
+            &file_name).await.unwrap();
+        let mut game_titles: Vec<String> = Vec::new();
         let mut game_desc = String::new();
         let mut add_to_desc = false;
         let mut new_title = String::new();
@@ -232,7 +232,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         mk_lib_network::mk_download_file_from_url(
                 format!("https://www.progettosnaps.net/download?tipo=category&file=/renameset/packs/pS_category_{}.zip",
                         option_config_json["MAME"]["Version"]),
-            &file_name);
+            &file_name).await.unwrap();
 
         //     with zipfile.ZipFile(file_name, "r") as zf:
         //         zf.extract("folders/category.ini", "/mediakraken/emulation/")
@@ -276,7 +276,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             format!(
                 "https://www.progettosnaps.net/download?tipo=messinfo&file=pS_messinfo_{}.zip",
                 option_config_json["MAME"]["Version"]),
-            &file_name);
+            &file_name).await.unwrap();
         //     with zipfile.ZipFile(file_name, "r") as zf:
         //         zf.extract("messinfo.dat", "/mediakraken/emulation/")
         //     infile = open("/mediakraken/emulation/messinfo.dat", "r",
