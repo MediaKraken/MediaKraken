@@ -17,15 +17,14 @@ reqwest = { version = "0.11.10", default-features = false, features = ["json", "
 ring = "0.16.20"
 rocket_auth = { version = "0.4.0", features = ["sqlx-postgres"] }
 # rocket_csrf = "0.3.0" - requires nightly
-serde = { version = "1.0.136", features = ["derive"] }
-serde_json = "1.0.79"
+serde = { version = "1.0.137", features = ["derive"] }
+serde_json = "1.0.81"
 shiplift = { version = "0.7", default-features = false, features = ["unix-socket"] }
 sqlx = { version = "0.5.13", features = [ "chrono", "json", "runtime-tokio-rustls", "postgres", "uuid" ] }
 sys-info = "0.9.1"
 tera = "1.15.0"
-tokio = { version = "1.17.0", features = ["full"] }
-# uuid = { version = "0.8.2", features = ["serde", "v4"] }
-uuid = { version = "1.0.0", features = ["serde", "v4"] }
+tokio = { version = "1.18.2", features = ["full"] }
+uuid = { version = "1.1.0", features = ["serde", "v4"] }
 walkdir = "2.3.2"
 
 rocket = { version = "0.5.0-rc.2", features = ["json", "secrets", "uuid"]}

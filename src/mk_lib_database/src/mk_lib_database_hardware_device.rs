@@ -92,7 +92,7 @@ pub async fn mk_lib_database_hardware_insert(pool: &sqlx::PgPool,
 }
 
 pub async fn mk_lib_database_hardware_delete(pool: &sqlx::PgPool,
-                                             hardware_uuid: uuid::Uuid)
+                                             hardware_uuid: Uuid)
                                              -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
     sqlx::query("delete from mm_hardware_json where mm_hardware_id = $1")

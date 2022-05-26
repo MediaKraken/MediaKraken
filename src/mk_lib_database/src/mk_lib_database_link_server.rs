@@ -5,7 +5,7 @@ use sqlx::{types::Uuid, types::Json};
 use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_link_delete(pool: &sqlx::PgPool,
-                                         link_uuid: uuid::Uuid)
+                                         link_uuid: Uuid)
                                          -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
     sqlx::query("delete from mm_link where mm_link_guid = $1")

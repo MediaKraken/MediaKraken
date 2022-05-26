@@ -56,7 +56,7 @@ pub async fn mk_lib_database_notification_insert(pool: &sqlx::PgPool,
 
 
 pub async fn mk_lib_database_notification_delete(pool: &sqlx::PgPool,
-                                                 mk_notification_guid: uuid::Uuid)
+                                                 mk_notification_guid: Uuid)
                                                  -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
     sqlx::query("delete from mm_notification where mm_notification_guid = $1")

@@ -6,7 +6,7 @@ use serde::{Serialize, Deserialize};
 use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_meta_queue_count(pool: &sqlx::PgPool,
-                                              user_uuid: uuid::Uuid,
+                                              user_uuid: Uuid,
                                               search_value: String)
                                               -> Result<i32, sqlx::Error> {
     if search_value != "" {

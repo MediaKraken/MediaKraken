@@ -6,7 +6,7 @@ use sqlx::{types::Uuid, types::Json};
 use serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_sync_delete(pool: &sqlx::PgPool,
-                                         sync_guid: uuid::Uuid)
+                                         sync_guid: Uuid)
                                          -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
     sqlx::query("delete from mm_sync where mm_sync_guid = $1")
