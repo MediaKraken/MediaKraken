@@ -14,9 +14,6 @@ mod mk_lib_database_hardware_device;
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
 mod mk_lib_database_version;
 
-#[path = "../../../../src/mk_lib_file/src/mk_lib_file.rs"]
-mod mk_lib_file;
-
 #[path = "../../../../src/mk_lib_network/src/mk_lib_network.rs"]
 mod mk_lib_network;
 
@@ -27,17 +24,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
     mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
                                                            false).await;
     // grab the manufacturer's from Global Cache
-    let fetch_result = mk_lib_network::mk_data_from_url_to_json(
+    let fetch_result = mk_lib_network::mk_data_from_url(
         "https://irdb.globalcache.com:8081/api/brands/".to_string()).await.unwrap();
     print!("{:?}", fetch_result);
 
     let v: Vec<Value> = serde_json::from_str(&fetch_result)?;
-    for item in &v {
+    for item in v.iter() {
         println!("here 100");
         // println!("{:?}\n", item);
         // println!("{:?} {:?}\n", item["$id"].to_string().replace("\"", ""), item["Name"].to_string().replace("\"", ""));
         let result = mk_lib_database_hardware_device::mk_lib_database_hardware_manufacturer_upsert(&sqlx_pool,
-                                                                                     item["Name"].to_string().to_string().replace("\"", ""),
+                                                                                                   item["Name"].to_string().to_string().replace("\"", ""),
                                                                                                    item["$id"].to_string().replace("\"", "").parse::<i32>().unwrap()).await?;
         // fetch types for the manufacturer
         //let fetch_result_type = mk_lib_network::mk_data_from_url(format!("https://irdb.globalcache.com:8081/api/brands/{:?}/types",

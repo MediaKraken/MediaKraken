@@ -13,7 +13,7 @@ pub async fn mk_lib_database_hardware_manufacturer_upsert(pool: &sqlx::PgPool,
     sqlx::query("insert into mm_hardware_manufacturer (mm_hardware_manu_guid, \
         mm_hardware_manu_name, mm_hardware_manu_gc_id) values ($1, $2, $3) \
         ON CONFLICT (mm_hardware_manu_name) DO NOTHING")
-        .bind(Uuid::new_v4())
+        .bind(uuid::Uuid::new_v4())
         .bind(manufacturer_name)
         .bind(manufacturer_id)
         .execute(&mut transaction)
@@ -29,7 +29,7 @@ pub async fn mk_lib_database_hardware_type_upsert(pool: &sqlx::PgPool,
     sqlx::query("insert into mm_hardware_type (mm_hardware_type_guid, \
         mm_hardware_type_name) values ($1, $2) \
         ON CONFLICT (mm_hardware_manu_name) DO NOTHING")
-        .bind(Uuid::new_v4())
+        .bind(uuid::Uuid::new_v4())
         .bind(hardware_type)
         .execute(&mut transaction)
         .await?;
@@ -75,9 +75,9 @@ pub async fn mk_lib_database_hardware_json_read(pool: &sqlx::PgPool,
 pub async fn mk_lib_database_hardware_insert(pool: &sqlx::PgPool,
                                              manufacturer: String,
                                              model_name: String,
-                                             json_data: serder_json::Value)
+                                             json_data: serde_json::Value)
                                              -> Result<uuid::Uuid, sqlx::Error> {
-    let new_guid = Uuid::new_v4();
+    let new_guid = uuid::Uuid::new_v4();
     let mut transaction = pool.begin().await?;
     sqlx::query("insert into mm_hardware_json(mm_hardware_id, mm_hardware_manufacturer, \
         mm_hardware_model, mm_hardware_json) values($1, $2, $3, $4)")
