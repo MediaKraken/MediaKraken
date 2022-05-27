@@ -70,12 +70,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if download_core {
                 // download the missing or newer core
                 mk_lib_network::mk_download_file_from_url(format!("{}{}", libtro_url, core_name),
-                                                          &format!("/mediakraken/emulation/cores/{}", core_name)).await;
+                                                          &format!("/mediakraken/emulation/cores/{}", core_name)).await.unwrap();
                 // unzip the core for use
                 mk_lib_compression::mk_decompress_zip(&format!("/mediakraken/emulation/cores/{}", core_name),
                                                       true,
                                                       false,
-                                                      "/mediakraken/emulation/cores/");
+                                                      "/mediakraken/emulation/cores/").unwrap();
             }
         }
     }

@@ -79,7 +79,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     let result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                             "themoviedb".to_string(),
                                                                                                             mk_lib_common_enum_media_type::DLMediaType::MOVIE,
-                                                                                                            Uuid::new_v4(),
+                                                                                                            uuid::Uuid::new_v4(),
                                                                                                             metadata_struct.id,
                                                                                                             "Fetch".to_string()).await.unwrap();
                     //println!("result {:?}", result);
@@ -107,7 +107,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     let result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                             "themoviedb".to_string(),
                                                                                                             mk_lib_common_enum_media_type::DLMediaType::TV,
-                                                                                                            Uuid::new_v4(),
+                                                                                                            uuid::Uuid::new_v4(),
                                                                                                             metadata_struct.id,
                                                                                                             "Fetch".to_string()).await.unwrap();
                     //println!("tv result {:?}", result)
