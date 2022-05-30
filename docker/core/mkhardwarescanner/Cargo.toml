@@ -11,6 +11,8 @@ codegen-units = 1
 
 [dependencies]
 chrono = { version = "0.4.19", features = ["serde"] }
+crab-dlna = "0.1.0"
+futures-util = "0.3.21"
 huelib = "0.13.2"  # https://github.com/nn1ks/huelib-rs
 mdns = "3.0.0"
 # onvif = { git = "https://github.com/lumeohq/onvif-rs" }   # has request with default

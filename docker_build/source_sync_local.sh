@@ -33,10 +33,13 @@
 # mkhardwarecontrol
 \cp -f --remove-destination ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkhardwarecontrol/src/.
 \cp -f --remove-destination ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mkhardwarecontrol/src/.
+\cp -f --remove-destination ../src/mk_lib_network/src/mk_lib_network_serial.rs ../docker/core/mkhardwarecontrol/src/.
+\cp -f --remove-destination ../src/mk_lib_network/src/mk_lib_network_telnet.rs ../docker/core/mkhardwarecontrol/src/.
 
 # mkhardwarescanner
 \cp -f --remove-destination ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkhardwarescanner/src/.
 \cp -f --remove-destination ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mkhardwarescanner/src/.
+\cp -f --remove-destination ../src/mk_lib_network/src/mk_lib_network_dlna.rs ../docker/core/mkhardwarescanner/src/.
 
 # mkinotify
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkinotify/src/.

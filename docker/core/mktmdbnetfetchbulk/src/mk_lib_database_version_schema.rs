@@ -14,7 +14,7 @@ pub async fn mk_lib_database_update_schema(pool: &sqlx::PgPool,
         let option_json: Value = mk_lib_database_option_status::mk_lib_database_option_read(&pool).await.unwrap();
         // option_json["MAME"]["Version"] = 240;
         // mk_lib_database_option_status::mk_lib_database_option_update(&pool, option_json).await?;
-        mk_lib_database_version_update(&pool,44).await?;
+        mk_lib_database_version_update(&pool, 44).await?;
     }
     if version_no < 45 {
         let mut transaction = pool.begin().await?;
@@ -27,7 +27,7 @@ pub async fn mk_lib_database_update_schema(pool: &sqlx::PgPool,
             .execute(&mut transaction)
             .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&pool,45).await?;
+        mk_lib_database_version_update(&pool, 45).await?;
     }
     Ok(true)
 }

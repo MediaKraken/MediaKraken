@@ -7,13 +7,16 @@ use huelib::resource::sensor;
 use huelib::{bridge, Bridge};
 use tokio::time::{Duration, sleep};
 use futures_util::{pin_mut, stream::StreamExt};
-use mdns::{Error, Record, RecordKind};
-use std::{net::IpAddr, time::Duration};
+use mdns::{Record, RecordKind};
+use std::{net::IpAddr};
 
 const CHROMECAST_SERVICE_NAME: &'static str = "_googlecast._tcp.local";
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
+
+#[path = "mk_lib_network_dlna.rs"]
+mod mk_lib_network_dlna;
 
 fn to_ip_addr(record: &Record) -> Option<IpAddr> {
     match record.kind {
@@ -39,7 +42,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         LOGGING_INDEX_NAME).await;
 
     // chromecast discover
-    let stream = mdns::discover::all(SERVICE_NAME, Duration::from_secs(15))?.listen();
+    let stream = mdns::discover::all(CHROMECAST_SERVICE_NAME, Duration::from_secs(15))?.listen();
     pin_mut!(stream);
     while let Some(Ok(response)) = stream.next().await {
         let addr = response.records()
