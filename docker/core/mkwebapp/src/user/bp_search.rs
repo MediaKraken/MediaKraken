@@ -8,7 +8,7 @@ mod mk_lib_database_search;
 
 #[get("/search")]
 pub async fn user_search(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
-    Template::render("bss_user/bss_user_media_search", {})
+    Template::render("bss_user/bss_user_media_search", tera::Context::new().into_json())
 }
 
 /*

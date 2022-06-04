@@ -5,7 +5,7 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
 
 #[get("/admin_home")]
 pub async fn admin_home(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
-    Template::render("bss_admin/bss_admin_home", {})
+    Template::render("bss_admin/bss_admin_home", tera::Context::new().into_json())
 }
 
 /*

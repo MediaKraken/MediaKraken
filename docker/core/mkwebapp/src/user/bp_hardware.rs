@@ -5,12 +5,12 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 
 #[get("/hardware")]
 pub async fn user_hardware(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
-    Template::render("bss_user/hardware/bss_user_hardware", {})
+    Template::render("bss_user/hardware/bss_user_hardware", tera::Context::new().into_json())
 }
 
 #[get("/hardware_phue")]
 pub async fn user_hardware_phue(user: User) -> Template {
-    Template::render("bss_user/hardware/bss_user_hardware_phue", {})
+    Template::render("bss_user/hardware/bss_user_hardware_phue", tera::Context::new().into_json())
 }
 
 /*

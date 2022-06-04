@@ -5,7 +5,7 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 
 #[get("/internet/twitchtv")]
 pub async fn user_inter_twitchtv(user: User) -> Template {
-    Template::render("bss_user/internet/bss_user_internet_twitch", {})
+    Template::render("bss_user/internet/bss_user_internet_twitch", tera::Context::new().into_json())
 }
 
 /*

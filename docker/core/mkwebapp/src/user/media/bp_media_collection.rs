@@ -31,7 +31,7 @@ pub async fn user_media_collection(sqlx_pool: &rocket::State<sqlx::PgPool>, user
 pub async fn user_media_collection_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
      user: User, guid: rocket::serde::uuid::Uuid) -> Template {
         let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
-        Template::render("bss_user/metadata/bss_user_metadata_movie_collection_detail", {})
+        Template::render("bss_user/metadata/bss_user_metadata_movie_collection_detail", tera::Context::new().into_json())
 }
 
 /*

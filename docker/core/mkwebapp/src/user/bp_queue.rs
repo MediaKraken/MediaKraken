@@ -8,7 +8,7 @@ mod mk_lib_database_user_queue;
 
 #[get("/queue")]
 pub async fn user_queue(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
-    Template::render("bss_user/bss_user_queue", {})
+    Template::render("bss_user/bss_user_queue", tera::Context::new().into_json())
 }
 
 /*

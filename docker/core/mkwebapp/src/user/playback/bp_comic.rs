@@ -5,7 +5,7 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, User};
 
 #[get("/playback/comic")]
 pub async fn user_playback_comic(user: User) -> Template {
-    Template::render("bss_user/playback/bss_user_playback_comic", {})
+    Template::render("bss_user/playback/bss_user_playback_comic", tera::Context::new().into_json())
 }
 
 /*

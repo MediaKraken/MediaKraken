@@ -29,11 +29,11 @@
     <a href="/user/media/iradio"><img src="/static/image/radio.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/media/home_video"><img src="/static/image/vid_camera.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/media/3d"><img src="/static/image/3D.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/internet/bss_user_internet"><img src="/static/image/earth.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/internet"><img src="/static/image/earth.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/media/music_video"><img src="/static/image/listening-music-video-clip-with-auricular.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/media/cctv"><img src="/static/image/surveillance-cctv-symbol-in-rounded-triangle.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/media/search"><img src="/static/image/magnifying-glass.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/hardware/hardware"><img src="/static/image/circuit-board.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/hardware"><img src="/static/image/circuit-board.png" width="200" height="200" loading="lazy"></a>
     </div>
     <footer
         class="bg-white sticky-footer">

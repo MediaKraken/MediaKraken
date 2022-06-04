@@ -34,7 +34,7 @@ pub async fn admin_user(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser
 #[get("/admin_user_detail/<guid>")]
 pub async fn admin_user_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
      user: AdminUser, guid: rocket::serde::uuid::Uuid) -> Template {
-    Template::render("bss_admin/bss_admin_user_detail", {})
+    Template::render("bss_admin/bss_admin_user_detail", tera::Context::new().into_json())
 }
 
 /*

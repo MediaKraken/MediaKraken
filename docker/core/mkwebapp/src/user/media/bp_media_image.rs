@@ -8,7 +8,7 @@ mod mk_lib_database_media_images;
 
 #[get("/media/image")]
 pub async fn user_media_image(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
-    Template::render("bss_user/media/bss_user_media_image_gallery", {})
+    Template::render("bss_user/media/bss_user_media_image_gallery", tera::Context::new().into_json())
 }
 
 /*

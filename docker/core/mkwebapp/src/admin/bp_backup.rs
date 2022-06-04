@@ -23,7 +23,7 @@ struct TemplateBackupContext<> {
 
 #[get("/admin_backup")]
 pub async fn admin_backup(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
-    Template::render("bss_admin/bss_admin_backup", {})
+    Template::render("bss_admin/bss_admin_backup", tera::Context::new().into_json())
 }
 
 /*

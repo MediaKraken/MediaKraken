@@ -8,7 +8,7 @@ mod mk_lib_database_user_profile;
 
 #[get("/profile")]
 pub async fn user_profile(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
-    Template::render("bss_user/bss_user_profile", {})
+    Template::render("bss_user/bss_user_profile", tera::Context::new().into_json())
 }
 
 /*

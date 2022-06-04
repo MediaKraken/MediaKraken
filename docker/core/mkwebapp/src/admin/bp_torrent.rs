@@ -7,7 +7,7 @@ use core::fmt::Write;
 
 #[get("/admin_torrent")]
 pub async fn admin_torrent(user: AdminUser) -> Template {
-    Template::render("bss_admin/bss_admin_torrent", {})
+    Template::render("bss_admin/bss_admin_torrent", tera::Context::new().into_json())
 }
 
 /*

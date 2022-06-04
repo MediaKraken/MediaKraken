@@ -5,7 +5,7 @@ use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
 
 #[get("/admin_docker")]
 pub async fn admin_docker(user: AdminUser) -> Template {
-    Template::render("bss_admin/bss_admin_docker", {})
+    Template::render("bss_admin/bss_admin_docker", tera::Context::new().into_json())
 }
 
 /*
