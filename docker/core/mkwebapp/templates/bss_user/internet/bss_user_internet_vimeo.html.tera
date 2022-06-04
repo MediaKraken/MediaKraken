@@ -16,9 +16,9 @@
             <div>
                 {% for row_data in media %}
                     {% if row_data[2] == None %}
-                        <a href= "/user/internet/bss_user_vimeo_detail/{{row_data[1]}}" > {{row_data[0]}}</a>
+                        <a href= "/user/internet/vimeo_detail/{{row_data[1]}}" > {{row_data[0]}}</a>
                     {% else %}
-                        <a href= "/user/internet/bss_user_vimeo_detail/{{row_data[1]}}" >
+                        <a href= "/user/internet/vimeo_detail/{{row_data[1]}}" >
                         <img src= "/static/meta/images/{{row_data[2] | replace(from='/mediakraken/web_app/MediaKraken/static/meta/images/', to='')}}" height="300" width="200">
                         </a>
                     {% endif %}
@@ -28,11 +28,7 @@
             <p id="general_text">No Vimeo media found.</p>
         {% endif %}
     </div>
-    <footer class="bg-white sticky-footer">
-        <div class="container my-auto">
-            <div class="text-center my-auto copyright"><span>Copyright © Quinn D Granfor 2022</span></div>
-        </div>
-    </footer>
+    {% include "bss_public/bss_public_footer" %}
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
     <script src="/static/js/jquery-easing.min.js"></script>

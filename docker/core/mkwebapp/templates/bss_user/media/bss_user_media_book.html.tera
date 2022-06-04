@@ -14,7 +14,7 @@
     <div><div>
     {% if template_data %}
     <div id="filter_media_div">
-        <form name="media_filter" action="/user/media/bss_user_media_book_genre" method="post">
+        <form name="media_filter" action="/user/media/book_genre" method="post">
             <p>Media Filters:
             <button type="submit" value="movie_genre">Genre</button>
             Rating:
@@ -92,11 +92,7 @@
     <p id="general_text">No book media found.</p>
     {% endif %}
 </div></div>
-    <footer class="bg-white sticky-footer">
-        <div class="container my-auto">
-            <div class="text-center my-auto copyright"><span>Copyright © Quinn D Granfor 2022</span></div>
-        </div>
-    </footer>
+{% include "bss_public/bss_public_footer" %}
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
     <script src="/static/js/jquery-easing.min.js"></script>

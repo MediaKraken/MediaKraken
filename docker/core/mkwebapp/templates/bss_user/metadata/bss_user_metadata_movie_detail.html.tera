@@ -67,7 +67,7 @@
                     <div class="grid">
                         {% for chapter_info in data_json_media_cast %}
                         <div class="col-1-4">
-                            <a href="/user/media/bss_user_media_playback/hls/{{data_guid}}/{{chapter_info[0]|replace(from=' ', to='%20')}}/0/0">
+                            <a href="/user/media/playback/hls/{{data_guid}}/{{chapter_info[0]|replace(from=' ', to='%20')}}/0/0">
                                 <img src="/static/meta/images/{{chapter_info[1]}}" height="150" width="150">
                             </a>
                         </div>
@@ -110,11 +110,7 @@
     <p id="general_text">No info found. ERROR! You should never see this message.</p>
     {% endif %}
     </div></div>
-    <footer class="bg-white sticky-footer">
-        <div class="container my-auto">
-            <div class="text-center my-auto copyright"><span>Copyright © Quinn D Granfor 2022</span></div>
-        </div>
-    </footer>
+    {% include "bss_public/bss_public_footer" %}
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
     <script src="/static/js/jquery-easing.min.js"></script>

@@ -22,11 +22,7 @@
             <source src="http://www.youtube.com/watch?v="{{data_guid}} type="video/youtube">
         </video>
     </div>
-    <footer class="bg-white sticky-footer">
-        <div class="container my-auto">
-            <div class="text-center my-auto copyright"><span>Copyright © Quinn D Granfor 2022</span></div>
-        </div>
-    </footer>
+    {% include "bss_public/bss_public_footer" %}
     <script src="/static/videojs/video.min.js"></script>
     <script src="/static/videojs/Youtube.min.js"></script>
     <script src="/static/js/jquery.min.js"></script>

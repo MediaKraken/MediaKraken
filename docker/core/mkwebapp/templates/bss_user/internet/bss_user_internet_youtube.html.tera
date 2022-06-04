@@ -16,7 +16,7 @@
     <div>
         {% for row_data in media %}
             <div class="main_photo">
-                <a href= "/user/internet/bss_user_internet_youtube_detail/{{row_data['items'][0]['id']}}" >
+                <a href= "/user/internet/youtube_detail/{{row_data['items'][0]['id']}}" >
                 <img src="{{ row_data['items'][0]['snippet']['thumbnails']['default']['url'] }}" height="300" width="200">
                 </a>
                 <div class="description">
@@ -29,11 +29,7 @@
         <p id="general_text">No YouTube media found.</p>
     {% endif %}
     </div>
-    <footer class="bg-white sticky-footer">
-        <div class="container my-auto">
-            <div class="text-center my-auto copyright"><span>Copyright © Quinn D Granfor 2022</span></div>
-        </div>
-    </footer>
+    {% include "bss_public/bss_public_footer" %}
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
     <script src="/static/js/jquery-easing.min.js"></script>

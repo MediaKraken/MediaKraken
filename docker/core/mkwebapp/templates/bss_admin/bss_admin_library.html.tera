@@ -22,7 +22,7 @@
                                 <form method="post">
                                     <input class="btn btn-large btn-primary" type="submit" name="scan" value="Submit Media Scan">
                                 </form>
-                                <a href="/admin/bss_admin_library_edit" class="btn btn-large">Add Media Directory</a>
+                                <a href="/admin/library_edit" class="btn btn-large">Add Media Directory</a>
                             </fieldset>
                         </div>
                     </div>
@@ -125,11 +125,7 @@
                     </div>
                 </div>
             </div>
-            <footer class="bg-white sticky-footer">
-                <div class="container my-auto">
-                    <div class="text-center my-auto copyright"><span>Copyright © Quinn D Granfor 2022</span></div>
-                </div>
-            </footer>
+            {% include "bss_public/bss_public_footer" %}
         </div>
     </div>
     <script src="/static/js/jquery.tmpl.min.js"></script>

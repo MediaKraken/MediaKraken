@@ -21,7 +21,7 @@
         {% for row_data in template_data %}
         <div class="main_photo">
             <div class="media_context_right" data-id={{row_data[0]}}>
-                <a href= "/user/metadata/bss_user_metadata_game_system_detail/{{row_data[0]}}">
+                <a href= "/user/metadata/game_system_detail/{{row_data[0]}}">
                 {% if row_data[2] == "" or row_data[2] == None %}
                 <img src= "/static/image/vid_game.png" loading="lazy" height="200" width="300"></a>
                 <div class="description">
@@ -42,11 +42,7 @@
     <p id="general_text">No game system metadata found.</p>
     {% endif %}
 </div></div>
-    <footer class="bg-white sticky-footer">
-        <div class="container my-auto">
-            <div class="text-center my-auto copyright"><span>Copyright © Quinn D Granfor 2022</span></div>
-        </div>
-    </footer>
+    {% include "bss_public/bss_public_footer" %}
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
     <script src="/static/js/jquery-easing.min.js"></script>

@@ -16,7 +16,7 @@
         <div class="d-flex flex-column" id="content-wrapper">
             <div id="content">
                 <div class="container-fluid">
-                    <form action="/admin/bss_admin_backup" method="post">
+                    <form action="/admin/backup" method="post">
                         {{ errors.token_errors }}
                         <span style="color: red;">{{errors.validate_errors}}</span>
                         <div class="row flex-wrap">
@@ -113,11 +113,7 @@
                     </form>
                 </div>
             </div>
-            <footer class="bg-white sticky-footer">
-                <div class="container my-auto">
-                    <div class="text-center my-auto copyright"><span>Copyright © Quinn D Granfor 2022</span></div>
-                </div>
-            </footer>
+            {% include "bss_public/bss_public_footer" %}
         </div>
     </div>
     <script src="/static/js/jquery.min.js"></script>

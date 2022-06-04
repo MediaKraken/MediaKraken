@@ -16,7 +16,7 @@
             <div>
                 {% for row_data in media %}
                     <div class="main_photo">
-                        <a href= "/user/internet/bss_user_internet_flickr_detail", guid=row_data[0]) }}" }} >
+                        <a href= "/user/internet/flickr_detail", guid=row_data[0]) }}" }} >
                         <img src="{{ row_data[1] | replace(from='/mediakraken/web_app/MediaKraken/static/meta/images/', to='') }}" height="180" width="320">
                         </a>
                         <div class="description">
@@ -29,11 +29,7 @@
             <p id="general_text">No Flickr media found.</p>
         {% endif %}
     </div>
-    <footer class="bg-white sticky-footer">
-        <div class="container my-auto">
-            <div class="text-center my-auto copyright"><span>Copyright © Quinn D Granfor 2022</span></div>
-        </div>
-    </footer>
+    {% include "bss_public/bss_public_footer" %}
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
     <script src="/static/js/jquery-easing.min.js"></script>
