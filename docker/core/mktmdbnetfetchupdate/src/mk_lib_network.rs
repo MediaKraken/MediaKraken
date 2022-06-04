@@ -24,6 +24,7 @@ pub async fn mk_data_from_url_to_json(url: String)
 
 pub async fn mk_data_from_url(url: String) -> Result<String, Box<dyn std::error::Error>> {
     let response = reqwest::get(url).await?;
+    println!("response: {:?}", response);
     let content = response.bytes().await?;
     Ok(str::from_utf8(&content).unwrap().to_string())
 }

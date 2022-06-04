@@ -2,9 +2,9 @@
 
 use serde::{Deserialize, Serialize};
 use std::error::Error;
-use uuid::Uuid;
 use serde_json::json;
 use sqlx::Row;
+use sqlx::{types::Uuid, types::Json};
 
 #[path = "mk_lib_common.rs"]
 mod mk_lib_common;
@@ -56,7 +56,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
     mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
-                                                           false).await;
+                                                           false).await.unwrap();
 
     // grab the movie id's
     // files.tmdb.org = 13.227.42.62
@@ -79,7 +79,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     let result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                             "themoviedb".to_string(),
                                                                                                             mk_lib_common_enum_media_type::DLMediaType::MOVIE,
-                                                                                                            uuid::Uuid::new_v4(),
+                                                                                                            Uuid::new_v4(),
                                                                                                             metadata_struct.id,
                                                                                                             "Fetch".to_string()).await.unwrap();
                     //println!("result {:?}", result);
@@ -107,7 +107,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     let result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                             "themoviedb".to_string(),
                                                                                                             mk_lib_common_enum_media_type::DLMediaType::TV,
-                                                                                                            uuid::Uuid::new_v4(),
+                                                                                                            Uuid::new_v4(),
                                                                                                             metadata_struct.id,
                                                                                                             "Fetch".to_string()).await.unwrap();
                     //println!("tv result {:?}", result)

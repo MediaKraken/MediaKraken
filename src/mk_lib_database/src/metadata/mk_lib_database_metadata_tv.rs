@@ -28,7 +28,7 @@ pub async fn mk_lib_database_metadata_tv_read(pool: &sqlx::PgPool,
                                               search_value: String,
                                               offset: i32, limit: i32)
                                               -> Result<Vec<DBMetaTVShowList>, sqlx::Error> {
-    let select_query = sqlx::query("elect mm_metadata_tvshow_guid, \
+    let select_query = sqlx::query("select mm_metadata_tvshow_guid, \
         mm_metadata_tvshow_name, \
         mm_metadata_tvshow_json->'first_air_date' as air_date, \
         mm_metadata_tvshow_localimage_json->'Poster' \

@@ -62,7 +62,7 @@ pub async fn mk_lib_database_hardware_device_count(pool: &sqlx::PgPool,
 pub async fn mk_lib_database_hardware_json_read(pool: &sqlx::PgPool,
                                                 manufacturer: String,
                                                 model_name: String)
-                                                -> Result<(serde_json::Value), sqlx::Error> {
+                                                -> Result<serde_json::Value, sqlx::Error> {
     let row: (serde_json::Value, ) = sqlx::query_as("select mm_hardware_json \
         from mm_hardware_json where mm_hardware_manufacturer = $1 and mm_hardware_model = $2")
         .bind(manufacturer)

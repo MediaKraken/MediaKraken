@@ -2,7 +2,6 @@ use rocket::Request;
 use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
-use uuid::Uuid;
 use rocket::serde::{Serialize, Deserialize, json::Json};
 
 #[path = "../../mk_lib_common_pagination.rs"]
@@ -29,8 +28,10 @@ pub async fn user_metadata_music_video(sqlx_pool: &rocket::State<sqlx::PgPool>, 
 }
 
 #[get("/metadata/music_video_detail/<guid>")]
-pub async fn user_metadata_music_video_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, guid: Uuid) -> Template {
-    Template::render("bss_user/metadata/bss_user_metadata_music_video_detail", {})
+pub async fn user_metadata_music_video_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
+     user: User, guid: rocket::serde::uuid::Uuid) -> Template {
+        let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
+        Template::render("bss_user/metadata/bss_user_metadata_music_video_detail", {})
 }
 
 /*

@@ -2,7 +2,6 @@ use rocket::Request;
 use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
-use uuid::Uuid;
 use rocket::serde::{Serialize, Deserialize, json::Json};
 
 #[path = "../../mk_lib_common_pagination.rs"]
@@ -34,8 +33,10 @@ struct TemplateMetaBookDetailContext<> {
 }
 
 #[get("/metadata/book_detail/<guid>")]
-pub async fn user_metadata_book_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, guid: Uuid) -> Template {
-    let book_data = mk_lib_database_metadata_book::mk_lib_database_metadata_book_detail(&sqlx_pool, guid).await.unwrap();
+pub async fn user_metadata_book_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
+     user: User, guid: rocket::serde::uuid::Uuid) -> Template {
+    let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
+    let book_data = mk_lib_database_metadata_book::mk_lib_database_metadata_book_detail(&sqlx_pool, tmp_uuid).await.unwrap();
     Template::render("bss_user/metadata/bss_user_metadata_book_detail", &TemplateMetaBookDetailContext {
         template_data: book_data,
     })

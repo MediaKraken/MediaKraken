@@ -2,7 +2,6 @@ use rocket::{get, post, form::Form, routes};
 use rocket::Request;
 use rocket_dyn_templates::{Template, tera::Tera};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User, AdminUser};
-use uuid::Uuid;
 use serde::{Serialize, Deserialize};
 use rocket::serde::json;
 use rocket::{form::*, response::Redirect, State};
@@ -33,7 +32,8 @@ pub async fn admin_user(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser
 }
 
 #[get("/admin_user_detail/<guid>")]
-pub async fn admin_user_detail(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser, guid: Uuid) -> Template {
+pub async fn admin_user_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
+     user: AdminUser, guid: rocket::serde::uuid::Uuid) -> Template {
     Template::render("bss_admin/bss_admin_user_detail", {})
 }
 
