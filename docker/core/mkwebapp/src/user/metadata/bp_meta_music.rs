@@ -27,6 +27,11 @@ pub async fn user_metadata_music(sqlx_pool: &rocket::State<sqlx::PgPool>, user: 
     })
 }
 
+#[derive(Serialize)]
+struct TemplateMetaMusicDetailContext<> {
+    template_data: serde_json::Value,
+}
+
 #[get("/metadata/music_detail/<guid>")]
 pub async fn user_metadata_music_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
      user: User, guid: rocket::serde::uuid::Uuid) -> Template {

@@ -2,10 +2,18 @@ use rocket::Request;
 use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera};
 use rocket_auth::{Users, Error, Auth, Signup, Login, User};
+use rocket::serde::{Serialize, Deserialize, json::Json};
+
+#[derive(Serialize)]
+struct TemplateUserHardwareContext<> {
+    template_data_phue: i32,
+}
 
 #[get("/hardware")]
 pub async fn user_hardware(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
-    Template::render("bss_user/hardware/bss_user_hardware", tera::Context::new().into_json())
+    Template::render("bss_user/hardware/bss_user_hardware", &TemplateUserHardwareContext {
+        template_data_phue: 0,
+    })
 }
 
 #[get("/hardware_phue")]

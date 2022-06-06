@@ -27,6 +27,11 @@ pub async fn user_media_book(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User
     })
 }
 
+#[derive(Serialize)]
+struct TemplateMediaBookDetailContext<> {
+    template_data: serde_json::Value,
+}
+
 #[get("/media/book_detail/<guid>")]
 pub async fn user_media_book_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
      user: User, guid: rocket::serde::uuid::Uuid) -> Template {

@@ -27,6 +27,11 @@ pub async fn user_metadata_game(sqlx_pool: &rocket::State<sqlx::PgPool>, user: U
     })
 }
 
+#[derive(Serialize)]
+struct TemplateMetaGameDetailContext<> {
+    template_data: serde_json::Value,
+}
+
 #[get("/metadata/game_detail/<guid>")]
 pub async fn user_metadata_game_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
      user: User, guid: rocket::serde::uuid::Uuid) -> Template {

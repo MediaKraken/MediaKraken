@@ -27,6 +27,11 @@ pub async fn user_media_game_servers(sqlx_pool: &rocket::State<sqlx::PgPool>, us
     })
 }
 
+#[derive(Serialize)]
+struct TemplateMediaGameServerDetailContext<> {
+    template_data: serde_json::Value,
+}
+
 #[get("/media/game_servers_detail/<guid>")]
 pub async fn user_media_game_servers_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
      user: User, guid: rocket::serde::uuid::Uuid) -> Template {

@@ -7,14 +7,14 @@ use serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_metadata_game_detail(pool: &sqlx::PgPool,
                                                   game_uuid: String)
-                                                  -> Result<uuid::Uuid, sqlx::Error> {
-    let row: (uuid::Uuid, ) = sqlx::query_as("select gi_game_info_id, \
+                                                  -> Result<(uuid::Uuid, serde_json::Value), sqlx::Error> {
+    let row: (uuid::Uuid, serde_json::Value) = sqlx::query_as("select \
         gi_game_info_system_id, gi_game_info_json \
         from mm_metadata_game_software_info where gi_game_info_id = $1")
         .bind(game_uuid)
         .fetch_one(pool)
         .await?;
-    Ok(row.0)
+    Ok(row)
 }
 
 pub async fn mk_lib_database_metadata_game_by_sha1(pool: &sqlx::PgPool,

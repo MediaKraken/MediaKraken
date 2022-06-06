@@ -36,9 +36,9 @@ struct TemplateMetaBookDetailContext<> {
 pub async fn user_metadata_book_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
      user: User, guid: rocket::serde::uuid::Uuid) -> Template {
     let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
-    let book_data = mk_lib_database_metadata_book::mk_lib_database_metadata_book_detail(&sqlx_pool, tmp_uuid).await.unwrap();
+    let detail_data = mk_lib_database_metadata_book::mk_lib_database_metadata_book_detail(&sqlx_pool, tmp_uuid).await.unwrap();
     Template::render("bss_user/metadata/bss_user_metadata_book_detail", &TemplateMetaBookDetailContext {
-        template_data: book_data,
+        template_data: detail_data,
     })
 }
 

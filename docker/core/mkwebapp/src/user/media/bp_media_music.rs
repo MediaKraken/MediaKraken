@@ -27,6 +27,11 @@ pub async fn user_media_music(sqlx_pool: &rocket::State<sqlx::PgPool>, user: Use
     })
 }
 
+#[derive(Serialize)]
+struct TemplateMediaMusicDetailContext<> {
+    template_data: serde_json::Value,
+}
+
 #[get("/media/music_detail/<guid>")]
 pub async fn user_media_music_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
      user: User, guid: rocket::serde::uuid::Uuid) -> Template {
@@ -35,16 +40,6 @@ pub async fn user_media_music_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
 }
 
 /*
-
-@blueprint_user_music.route("/user_album_detail/<guid>")
-@common_global.jinja_template.template('bss_user/media/bss_user_media_music_album_detail.html')
-@common_global.auth.login_required
-pub async fn url_bp_user_album_detail(request, guid):
-    """
-    Display album detail page
-    """
-    return {}
-
 
 @blueprint_user_music.route("/user_album_list")
 @common_global.jinja_template.template('bss_user/media/bss_user_media_music_album.html')

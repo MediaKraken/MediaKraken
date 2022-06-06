@@ -27,6 +27,11 @@ pub async fn user_metadata_person(sqlx_pool: &rocket::State<sqlx::PgPool>, user:
     })
 }
 
+#[derive(Serialize)]
+struct TemplateMetaPersonDetailContext<> {
+    template_data: serde_json::Value,
+}
+
 #[get("/metadata/person_detail/<guid>")]
 pub async fn user_metadata_person_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
      user: User, guid: rocket::serde::uuid::Uuid) -> Template {

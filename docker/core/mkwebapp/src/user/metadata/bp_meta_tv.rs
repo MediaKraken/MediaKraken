@@ -27,6 +27,11 @@ pub async fn user_metadata_tv(sqlx_pool: &rocket::State<sqlx::PgPool>, user: Use
     })
 }
 
+#[derive(Serialize)]
+struct TemplateMetaTVDetailContext<> {
+    template_data: serde_json::Value,
+}
+
 #[get("/metadata/tv_detail/<guid>")]
 pub async fn user_metadata_tv_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
      user: User, guid: rocket::serde::uuid::Uuid) -> Template {

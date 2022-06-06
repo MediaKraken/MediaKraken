@@ -1,3 +1,4 @@
+use sqlx::postgres::PgRow;
 use rocket::Request;
 use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera};
@@ -27,11 +28,19 @@ pub async fn user_metadata_game_system(sqlx_pool: &rocket::State<sqlx::PgPool>, 
     })
 }
 
+#[derive(Serialize)]
+struct TemplateMetaGameSystemDetailContext<> {
+    template_data: PgRow,
+}
+
 #[get("/metadata/game_system_detail/<guid>")]
 pub async fn user_metadata_game_system_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
      user: User, guid: rocket::serde::uuid::Uuid) -> Template {
-        let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
-        Template::render("bss_user/metadata/bss_user_metadata_game_system_detail", tera::Context::new().into_json())
+    let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
+    let detail_data = mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_detail(&sqlx_pool, tmp_uuid).await.unwrap();
+    Template::render("bss_user/metadata/bss_user_metadata_game_system_detail", &TemplateMetaGameSystemDetailContext {
+        template_data: detail_data,
+    })
 }
 
 /*

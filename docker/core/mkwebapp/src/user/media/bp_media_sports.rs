@@ -27,6 +27,11 @@ pub async fn user_media_sports(sqlx_pool: &rocket::State<sqlx::PgPool>, user: Us
     })
 }
 
+#[derive(Serialize)]
+struct TemplateMediaSportsDetailContext<> {
+    template_data: serde_json::Value,
+}
+
 #[get("/media/sports_detail/<guid>")]
 pub async fn user_media_sports_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
      user: User, guid: rocket::serde::uuid::Uuid) -> Template {

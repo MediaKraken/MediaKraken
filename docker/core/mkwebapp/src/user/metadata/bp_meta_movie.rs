@@ -27,6 +27,11 @@ pub async fn user_metadata_movie(sqlx_pool: &rocket::State<sqlx::PgPool>, user: 
     })
 }
 
+#[derive(Serialize)]
+struct TemplateMetaMovieDetailContext<> {
+    template_data: serde_json::Value,
+}
+
 #[get("/metadata/movie_detail/<guid>")]
 pub async fn user_metadata_movie_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
      user: User, guid: rocket::serde::uuid::Uuid) -> Template {
