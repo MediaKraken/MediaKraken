@@ -29,15 +29,15 @@ pub async fn mk_lib_database_media_adult_read(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_media_adult_count(pool: &sqlx::PgPool,
                                                search_value: String)
-                                               -> Result<i32, sqlx::Error> {
+                                               -> Result<i64, sqlx::Error> {
     if search_value != "" {
-        let row: (i32, ) = sqlx::query("")
+        let row: (i64, ) = sqlx::query("")
             .bind(search_value)
             .fetch_one(pool)
             .await?;
         Ok(row.0)
     } else {
-        let row: (i32, ) = sqlx::query("")
+        let row: (i64, ) = sqlx::query("")
             .fetch_one(pool)
             .await?;
         Ok(row.0)

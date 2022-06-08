@@ -25,16 +25,16 @@ pub async fn mk_lib_database_metadata_exists_person(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_metadata_person_count(pool: &sqlx::PgPool,
                                                    search_value: String)
-                                                   -> Result<i32, sqlx::Error> {
+                                                   -> Result<i64, sqlx::Error> {
     if search_value != "" {
-        let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_person \
+        let row: (i64, ) = sqlx::query_as("select count(*) from mm_metadata_person \
             where mmp_person_name % $1")
             .bind(search_value)
             .fetch_one(pool)
             .await?;
         Ok(row.0)
     } else {
-        let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_person")
+        let row: (i64, ) = sqlx::query_as("select count(*) from mm_metadata_person")
             .fetch_one(pool)
             .await?;
         Ok(row.0)

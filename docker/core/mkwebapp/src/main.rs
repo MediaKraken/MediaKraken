@@ -213,6 +213,7 @@ async fn main() -> Result<(), Error> {
             bp_user_media_bp_media_book::user_media_book,
             bp_user_media_bp_media_collection::user_media_collection,
             bp_user_media_bp_media_game::user_media_game,
+            bp_user_media_bp_media_game::user_media_game_detail,
             bp_user_media_bp_media_game_servers::user_media_game_servers,
             bp_user_media_bp_media_genre::user_media_genre,
             bp_user_media_bp_media_home_media::user_media_home_media,

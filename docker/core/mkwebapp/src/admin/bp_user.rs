@@ -20,9 +20,9 @@ struct TemplateAdminUserContext<> {
     pagination_bar: String,
 }
 
-#[get("/admin_user?<page>")]
+#[get("/admin_user/<page>")]
 pub async fn admin_user(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser, page: i8) -> Template {
-    let total_pages: i32 = mk_lib_database_user::mk_lib_database_user_count(&sqlx_pool, String::new()).await.unwrap() / 30;
+    let total_pages: i64 = mk_lib_database_user::mk_lib_database_user_count(&sqlx_pool, String::new()).await.unwrap() / 30;
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page).await.unwrap();
     let user_list = mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool, 0, 30).await.unwrap();
     Template::render("bss_admin/bss_admin_user", &TemplateAdminUserContext {

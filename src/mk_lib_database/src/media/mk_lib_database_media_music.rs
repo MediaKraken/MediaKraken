@@ -7,9 +7,9 @@ use serde::{Serialize, Deserialize};
 
 pub async fn mk_lib_database_media_music_count(pool: &sqlx::PgPool,
                                                search_value: String)
-                                               -> Result<i32, sqlx::Error> {
+                                               -> Result<i64, sqlx::Error> {
     if search_value != "" {
-        let row: (i32, ) = sqlx::query_as("elect count(*) from mm_metadata_album, mm_media \
+        let row: (i64, ) = sqlx::query_as("elect count(*) from mm_metadata_album, mm_media \
             where mm_media_metadata_guid = mm_metadata_album_guid \
             and mm_metadata_album_name % $1")
             .bind(search_value)
@@ -17,7 +17,7 @@ pub async fn mk_lib_database_media_music_count(pool: &sqlx::PgPool,
             .await?;
         Ok(row.0)
     } else {
-        let row: (i32, ) = sqlx::query_as("select count(*) from \
+        let row: (i64, ) = sqlx::query_as("select count(*) from \
             (select distinct mm_metadata_album_guid from mm_metadata_album, mm_media \
             where mm_media_metadata_guid = mm_metadata_album_guid) as temp")
             .fetch_one(pool)

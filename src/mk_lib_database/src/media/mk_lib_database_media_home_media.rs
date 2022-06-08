@@ -41,9 +41,9 @@ pub async fn mk_lib_database_media_home_media_read(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_media_home_media_count(pool: &sqlx::PgPool,
                                                     search_value: String)
-                                                    -> Result<i32, sqlx::Error> {
+                                                    -> Result<i64, sqlx::Error> {
     if search_value != "" {
-        let row: (i32, ) = sqlx::query_as("select count(*) from mm_media \
+        let row: (i64, ) = sqlx::query_as("select count(*) from mm_media \
             where mmr_media_class_guid = $1
             and mm_media_path % $2")
             .bind(mk_lib_common_enum_media_type::DLMediaType::MOVIE_HOME)
@@ -52,7 +52,7 @@ pub async fn mk_lib_database_media_home_media_count(pool: &sqlx::PgPool,
             .await?;
         Ok(row.0)
     } else {
-        let row: (i32, ) = sqlx::query_as("select count(*) from mm_media \
+        let row: (i64, ) = sqlx::query_as("select count(*) from mm_media \
             where mmr_media_class_guid = $1")
             .bind(mk_lib_common_enum_media_type::DLMediaType::MOVIE_HOME)
             .fetch_one(pool)

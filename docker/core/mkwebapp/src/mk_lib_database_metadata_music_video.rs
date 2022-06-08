@@ -65,23 +65,23 @@ pub async fn mk_lib_database_metadata_music_video_lookup(pool: &sqlx::PgPool,
 pub async fn mk_lib_database_metadata_music_video_count(pool: &sqlx::PgPool,
                                                         search_value: String,
                                                         imvdb_id: i32)
-                                                        -> Result<i32, sqlx::Error> {
+                                                        -> Result<i64, sqlx::Error> {
     if imvdb_id == 0 {
         if search_value != "" {
-            let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_music_video \
+            let row: (i64, ) = sqlx::query_as("select count(*) from mm_metadata_music_video \
                 where mm_media_music_video_song % $1")
                 .bind(search_value)
                 .fetch_one(pool)
                 .await?;
             Ok(row.0)
         } else {
-            let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_music_video")
+            let row: (i64, ) = sqlx::query_as("select count(*) from mm_metadata_music_video")
                 .fetch_one(pool)
                 .await?;
             Ok(row.0)
         }
     } else {
-        let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_music_video \
+        let row: (i64, ) = sqlx::query_as("select count(*) from mm_metadata_music_video \
             where mm_metadata_music_video_media_id->'imvdb' ? $1")
             .bind(imvdb_id)
             .fetch_one(pool)

@@ -16,9 +16,9 @@ struct TemplateAdminGameServersContext<> {
     pagination_bar: String,
 }
 
-#[get("/admin_game_servers?<page>")]
+#[get("/admin_game_servers/<page>")]
 pub async fn admin_game_servers(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser, page: i8) -> Template {
-    let total_pages: i32 = mk_lib_database_game_servers::mk_lib_database_game_server_count(&sqlx_pool, String::new()).await.unwrap() / 30;
+    let total_pages: i64 = mk_lib_database_game_servers::mk_lib_database_game_server_count(&sqlx_pool, String::new()).await.unwrap() / 30;
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page).await.unwrap();
     let dedicated_server_list =
         mk_lib_database_game_servers::mk_lib_database_game_server_read(&sqlx_pool, String::new(), 0 ,30).await.unwrap();

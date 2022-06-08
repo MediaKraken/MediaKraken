@@ -2,7 +2,7 @@ use paginator::{Paginator, PageItem};
 use core::fmt::Write;
 use std::error::Error;
 
-pub async fn mk_lib_common_paginate(total_pages: i32, page: i8)
+pub async fn mk_lib_common_paginate(total_pages: i64, page: i8)
                                     -> Result<String, Box<dyn Error>>{
     let paginator = Paginator::builder(total_pages as usize).current_page(page as usize).build_paginator().unwrap();
     let mut pagination_html = String::new();

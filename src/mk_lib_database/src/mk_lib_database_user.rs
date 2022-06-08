@@ -51,14 +51,14 @@ pub async fn mk_lib_database_user_read(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_user_count(pool: &sqlx::PgPool,
                                         user_name: String)
-                                        -> Result<i32, sqlx::Error> {
+                                        -> Result<i64, sqlx::Error> {
     if user_name != "" {
-        let row: (i32, ) = sqlx::query_as("select count(*) from mm_user")
+        let row: (i64, ) = sqlx::query_as("select count(*) from mm_user")
             .fetch_one(pool)
             .await?;
         Ok(row.0)
     } else {
-        let row: (i32, ) = sqlx::query_as("select count(*) from mm_user where username = $1")
+        let row: (i64, ) = sqlx::query_as("select count(*) from mm_user where username = $1")
             .bind(user_name)
             .fetch_one(pool)
             .await?;

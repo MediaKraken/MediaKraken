@@ -60,9 +60,9 @@ pub async fn mk_lib_database_media_tv_read(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_media_tv_count(pool: &sqlx::PgPool,
                                             search_string: String)
-                                            -> Result<i32, sqlx::Error> {
+                                            -> Result<i64, sqlx::Error> {
     if search_string != "" {
-        let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_tvshow, \
+        let row: (i64, ) = sqlx::query_as("select count(*) from mm_metadata_tvshow, \
         mm_media where mm_media_metadata_guid = mm_metadata_tvshow_guid \
         mm_metadata_tvshow_name = %1")
             .bind(search_string)
@@ -71,7 +71,7 @@ pub async fn mk_lib_database_media_tv_count(pool: &sqlx::PgPool,
         Ok(row.0)
     }
     else {
-        let row: (i32, ) = sqlx::query_as("select count(*) from mm_metadata_tvshow, \
+        let row: (i64, ) = sqlx::query_as("select count(*) from mm_metadata_tvshow, \
         mm_media where mm_media_metadata_guid = mm_metadata_tvshow_guid")
             .fetch_one(pool)
             .await?;

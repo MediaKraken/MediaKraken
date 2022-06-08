@@ -101,8 +101,8 @@ pub async fn mk_lib_database_library_file_exists(pool: &sqlx::PgPool,
 }
 
 pub async fn mk_lib_database_library_count(pool: &sqlx::PgPool)
-                                           -> Result<i32, sqlx::Error> {
-    let row: (i32, ) = sqlx::query_as("select count(*) from mm_library_dir")
+                                           -> Result<i64, sqlx::Error> {
+    let row: (i64, ) = sqlx::query_as("select count(*) from mm_library_dir")
         .fetch_one(pool)
         .await?;
     Ok(row.0)

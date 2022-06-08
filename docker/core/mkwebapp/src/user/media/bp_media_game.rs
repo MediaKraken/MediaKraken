@@ -16,9 +16,9 @@ struct TemplateMediaGameContext<> {
     pagination_bar: String,
 }
 
-#[post("/media/game?<page>")]
+#[get("/media/game/<page>")]
 pub async fn user_media_game(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, page: i8) -> Template {
-    let total_pages: i32 = mk_lib_database_media_game::mk_lib_database_media_game_count(&sqlx_pool, String::new()).await.unwrap() / 30;
+    let total_pages: i64 = mk_lib_database_media_game::mk_lib_database_media_game_count(&sqlx_pool, String::new()).await.unwrap() / 30;
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page).await.unwrap();
     let game_list = mk_lib_database_media_game::mk_lib_database_media_game_read(&sqlx_pool, String::new(), 0, 30).await.unwrap();
     Template::render("bss_user/media/bss_user_media_game", &TemplateMediaGameContext {
@@ -32,7 +32,7 @@ struct TemplateMediaGameDetailContext<> {
     template_data: serde_json::Value,
 }
 
-#[post("/media/game_detail/<guid>")]
+#[get("/media/game_detail/<guid>")]
 pub async fn user_media_game_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
      user: User, guid: rocket::serde::uuid::Uuid) -> Template {
         let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();

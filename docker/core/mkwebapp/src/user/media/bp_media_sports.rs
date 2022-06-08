@@ -16,9 +16,9 @@ struct TemplateMediaSportsContext<> {
     pagination_bar: String,
 }
 
-#[get("/media/sports?<page>")]
+#[get("/media/sports/<page>")]
 pub async fn user_media_sports(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, page: i8) -> Template {
-    let total_pages: i32 = mk_lib_database_media_sports::mk_lib_database_media_sports_count(&sqlx_pool, String::new()).await.unwrap() / 30;
+    let total_pages: i64 = mk_lib_database_media_sports::mk_lib_database_media_sports_count(&sqlx_pool, String::new()).await.unwrap() / 30;
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page).await.unwrap();
     let sports_list = mk_lib_database_media_sports::mk_lib_database_media_sports_read(&sqlx_pool, String::new(), 0, 30).await.unwrap();
     Template::render("bss_user/media/bss_user_media_sports", &TemplateMediaSportsContext {
