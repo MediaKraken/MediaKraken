@@ -50,7 +50,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
     mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
                                                            false).await.unwrap();
-    let option_config_json: Value = mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool).await.unwrap();
+    let option_config_json: serde_json::Value = mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool).await.unwrap();
 
     // create mame game list
     let file_name = format!("/mediakraken/emulation/mame0{}lx.zip",
@@ -83,9 +83,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 } else if xml_line.starts_with("</machine") == true {
                     xml_data.push_str(xml_line);
                     let json_data = xml_string_to_json(xml_data.to_string(), &conf).unwrap();
-                    // TODO this really needs to be an upsert
-                    mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
-                        &sqlx_pool, uuid::Uuid::nil(),
+                    mk_lib_database_metadata_game::mk_lib_database_metadata_game_upsert(
+                        &sqlx_pool,
                         json_data["machine"]["@name"].to_string(),
                         json_data["machine"]["description"].to_string(),
                         json_data).await.unwrap();
@@ -105,12 +104,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             format!("https://github.com/mamedev/mame/archive/mame0{}.zip",
                     option_config_json["MAME"]["Version"]),
             &file_name).await.unwrap();
-        //     zip_handle = zipfile.ZipFile(file_name, "r")  # issues if u do RB
-        //     zip_handle.extractall("/mediakraken/emulation/")
-        //     zip_handle.close()
-        //     for zippedfile in os.listdir(format!("/mediakraken/emulation/mame-mame0{}/hash",
-        //                                  option_config_json["MAME"]["Version"])):
-        // find system id from mess
+        mk_lib_compression.mk_decompress_zip(&file_name, false, &"/mediakraken/emulation/");
+        for zippedfile in mk_lib_file.mk_directory_walk(format!("/mediakraken/emulation/mame-mame0{}/hash",
+                                                               option_config_json["MAME"]["Version"])) {
+            // find system id from mess
         //         file_name, ext = os.path.splitext(zippedfile)
         //         if ext == ".xml" or ext == ".hsi":
         //             file_handle = open(os.path.join(format!("/mediakraken/emulation/mame-mame0{}/hash",
@@ -162,6 +159,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         //                             db_connection.db_meta_game_insert(game_short_name_guid,
         //                                                               json_game["@name"],
         //                                                               json_game["@name"], json_game)
+        }
     }
 
     // update mame game descriptions from history dat
