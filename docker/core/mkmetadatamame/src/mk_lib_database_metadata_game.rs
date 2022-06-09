@@ -124,7 +124,7 @@ pub async fn mk_lib_database_metadata_game_by_name_and_system(pool: &sqlx::PgPoo
     if game_system_short_name != "" {
         select_query = sqlx::query("select gi_id, gi_game_info_json \
             from mm_metadata_game_software_info \
-            where gi_game_info_name = $1 and gi_system_id = $2")
+            where gi_game_info_name = $1 and gi_game_info_system_id = $2")
             .bind(game_name)
             .bind(game_system_short_name)
             .bind(offset)
@@ -132,7 +132,7 @@ pub async fn mk_lib_database_metadata_game_by_name_and_system(pool: &sqlx::PgPoo
     } else {
         select_query = sqlx::query("select gi_id, gi_game_info_json \
             from mm_metadata_game_software_info \
-            where gi_game_info_name = $1 and gi_system_id IS NULL")
+            where gi_game_info_name = $1 and gi_game_info_system_id IS NULL")
             .bind(game_name)
             .bind(offset)
             .bind(limit);
@@ -156,8 +156,8 @@ pub async fn mk_lib_database_metadata_game_by_name_and_system(pool: &sqlx::PgPoo
                                (game_name, game_system_short_name))
 */
 
-pub async fn mk_lib_database_metadata_game_insert(pool: &sqlx::PgPool,
-                                                  game_system_id: uuid::Uuid,
+pub async fn mk_lib_database_metadata_game_upsert(pool: &sqlx::PgPool,
+                                                  game_system_id: Uuid,
                                                   game_short_name: String,
                                                   game_name: String,
                                                   game_json: serde_json::Value)
@@ -169,12 +169,14 @@ pub async fn mk_lib_database_metadata_game_insert(pool: &sqlx::PgPool,
         gi_game_info_short_name, \
         gi_game_info_name, \
         gi_game_info_json) \
-        values ($1, $2, $3, $4, $5)")
+        values ($1, $2, $3, $4, $5)\
+        ON CONFLICT (gi_game_info_short_name) DO UPDATE set gi_game_info_json = $6")
         .bind(new_guid)
         .bind(game_system_id)
         .bind(game_short_name)
         .bind(game_name)
-        .bind(game_json)
+        .bind(&game_json)
+        .bind(&game_json)
         .execute(&mut transaction)
         .await?;
     transaction.commit().await?;

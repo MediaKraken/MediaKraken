@@ -6,6 +6,8 @@ edition = "2021"
 [profile.release]
 panic = 'abort'
 strip = "symbols"
+lto = true
+codegen-units = 1
 
 [dependencies]
 argh = "0.1.7"

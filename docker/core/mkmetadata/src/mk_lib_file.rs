@@ -2,6 +2,7 @@
 
 use std::io;
 use std::io::prelude::*;
+use std::error::Error;
 use walkdir::{DirEntry, WalkDir};
 
 pub fn mk_read_file_data(file_to_read: &str) -> io::Result<String> {
@@ -28,10 +29,13 @@ pub fn mk_file_is_hidden(entry: &DirEntry) -> bool {
 
 // "C:\\Users\\spoot\\Documents\\MediaKraken_Deployment\\source_rust\\bulk_themoviedb_netfetch"
 // TODO allow ext filters and such
-pub fn mk_directory_walk(dir_path: &str) {
+pub fn mk_directory_walk(dir_path: &str) -> Result<Vec<String>, Box<dyn Error>> {
+    let mut file_list = Vec::new();
     let walker = WalkDir::new(dir_path).into_iter();
     for entry in walker.filter_entry(|e| !mk_file_is_hidden(e)) {
         let entry = entry.unwrap();
-        println!("{}", entry.path().display());
+        //println!("{}", entry.path().display());
+        file_list.push(entry.path().display().to_string());
     }
+    Ok(file_list)
 }
