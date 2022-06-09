@@ -5,8 +5,8 @@
 
 use openweathermap::weather;
 
-pub async fn network_openweather_current() {
-    match &weather("Berlin,DE", "metric", "en", "<APIKEY>") {
+pub async fn network_openweather_current(api_key: String) {
+    match &weather("Berlin,DE", "metric", "en", api_key) {
         Ok(current) => println!(
             "Today's weather in {} is {}",
             current.name.as_str(),

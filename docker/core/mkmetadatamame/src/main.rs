@@ -106,60 +106,56 @@ async fn main() -> Result<(), Box<dyn Error>> {
             &file_name).await.unwrap();
         mk_lib_compression.mk_decompress_zip(&file_name, false, &"/mediakraken/emulation/");
         for zippedfile in mk_lib_file.mk_directory_walk(format!("/mediakraken/emulation/mame-mame0{}/hash",
-                                                               option_config_json["MAME"]["Version"])) {
+                                                                option_config_json["MAME"]["Version"])) {
             // find system id from mess
-        //         file_name, ext = os.path.splitext(zippedfile)
-        //         if ext == ".xml" or ext == ".hsi":
-        //             file_handle = open(os.path.join(format!("/mediakraken/emulation/mame-mame0{}/hash",
-        //                                              option_config_json["MAME"]["Version"]), zippedfile),
-        //                                "r",
-        //                                encoding="utf-8")
-        //             json_data = xmltodict.parse(file_handle.read())
-        //             file_handle.close()
-        //             game_short_name_guid \
-        //                 = db_connection.db_meta_games_system_guid_by_short_name(file_name)
-        //             if game_short_name_guid == None:
-        //                 game_short_name_guid = db_connection.db_meta_games_system_insert(
-        //                     None, file_name, None)
-        //             if ext == ".xml":
-        // could be no games in list
-        //                 if "software" in json_data["softwarelist"]:
-        // TODO this fails if only one game
-        //                     if "@name" in json_data["softwarelist"]["software"]:
-        // TODO check to see if exists....upsert instead
-        //                         db_connection.db_meta_game_insert(game_short_name_guid,
-        //                                                           json_data["softwarelist"]["software"][
-        //                                                               "@name"],
-        //                                                           json_data["softwarelist"]["software"][
-        //                                                               "@name"],
-        //                                                           json_data["softwarelist"]["software"])
-        //                     else:
-        //                         for json_game in json_data["softwarelist"]["software"]:
-        // json_game = json.loads(json_game)
-        // TODO check to see if exists....upsert instead
-        // build args and insert the record
-        //                             db_connection.db_meta_game_insert(game_short_name_guid,
-        //                                                               json_game["@name"],
-        //                                                               json_game["@name"], json_game)
-        //             else if ext == ".hsi":
-        // could be no games in list
-        //                 if "hash" in json_data["hashfile"]:
-        //                     if "@name" in json_data["hashfile"]["hash"]:
-        // TODO check to see if exists....upsert instead
-        //                         db_connection.db_meta_game_insert(game_short_name_guid,
-        //                                                           json_data["hashfile"]["hash"][
-        //                                                               "@name"],
-        //                                                           json_data["hashfile"]["hash"][
-        //                                                               "@name"],
-        //                                                           json_data["hashfile"]["hash"])
-        //                     else:
-        //                         for json_game in json_data["hashfile"]["hash"]:
-        // TODO check to see if exists....upsert instead
-        // build args and insert the record
-        //                             db_connection.db_meta_game_insert(game_short_name_guid,
-        //                                                               json_game["@name"],
-        //                                                               json_game["@name"], json_game)
+            let file_name = Path::new(zippedfile).file_stem().unwrap();
+            let ext = Path::new(zippedfile).extension().unwrap();
+            if ext == ".xml" || ext == ".hsi" {
+            //             file_handle = open(os.path.join(format!("/mediakraken/emulation/mame-mame0{}/hash",
+            //                                              option_config_json["MAME"]["Version"]), zippedfile),
+            //                                "r",
+            //                                encoding="utf-8")
+            //             json_data = xmltodict.parse(file_handle.read())
+            //             file_handle.close()
+            //             let mut game_short_name_guid = db_connection.db_meta_games_system_guid_by_short_name(file_name)
+            //             if game_short_name_guid == None:
+            //                 game_short_name_guid = db_connection.db_meta_games_system_insert(None, file_name, None)
+            //             if ext == ".xml":
+            // could be no games in list
+            //                 if "software" in json_data["softwarelist"]:
+            // TODO this fails if only one game
+            //                     if "@name" in json_data["softwarelist"]["software"]:
+            //                         db_connection.db_meta_game_insert(game_short_name_guid,
+            //                                                           json_data["softwarelist"]["software"][
+            //                                                               "@name"],
+            //                                                           json_data["softwarelist"]["software"][
+            //                                                               "@name"],
+            //                                                           json_data["softwarelist"]["software"])
+            //                     else:
+            //                         for json_game in json_data["softwarelist"]["software"]:
+            // json_game = json.loads(json_game)
+            // build args and insert the record
+            //                             db_connection.db_meta_game_upsert(game_short_name_guid,
+            //                                                               json_game["@name"],
+            //                                                               json_game["@name"], json_game)
+            //             else if ext == ".hsi":
+            // could be no games in list
+            //                 if "hash" in json_data["hashfile"]:
+            //                     if "@name" in json_data["hashfile"]["hash"]:
+            //                         db_connection.db_meta_game_upsert(game_short_name_guid,
+            //                                                           json_data["hashfile"]["hash"][
+            //                                                               "@name"],
+            //                                                           json_data["hashfile"]["hash"][
+            //                                                               "@name"],
+            //                                                           json_data["hashfile"]["hash"])
+            //                     else:
+            //                         for json_game in json_data["hashfile"]["hash"]:
+            // build args and insert the record
+            //                             db_connection.db_meta_game_upsert(game_short_name_guid,
+            //                                                               json_game["@name"],
+            //                                                               json_game["@name"], json_game)
         }
+    }
     }
 
     // update mame game descriptions from history dat

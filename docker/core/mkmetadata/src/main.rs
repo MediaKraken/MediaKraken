@@ -38,12 +38,6 @@ mod metadata_provider_tmdb;
 #[path = "metadata/base.rs"]
 mod metadata_base;
 
-// #[derive(Serialize, Deserialize)]
-// struct MediaTitleYear {
-//     title: String,
-//     year: Option<i8>,
-// }
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // start logging
