@@ -29,6 +29,23 @@ pub async fn mk_lib_database_update_schema(pool: &sqlx::PgPool,
         transaction.commit().await?;
         mk_lib_database_version_update(&pool, 45).await?;
     }
+    if version_no < 46 {
+        let mut transaction = pool.begin().await?;
+        sqlx::query("ALTER TABLE mm_metadata_game_systems_info \
+            RENAME COLUMN gs_id TO gs_game_system_id;")
+            .execute(&mut transaction)
+            .await?;
+        sqlx::query("INSERT INTO mm_metadata_game_systems_info \
+            (gs_game_system_id, \
+            gs_game_system_name, \
+            gs_game_system_alias) \
+            VALUES ($1, 'Arcade', 'Arcade')")
+            .bind(uuid::Uuid::nil())
+            .execute(&mut transaction)
+            .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&pool, 46).await?;
+    }    
     Ok(true)
 }
 

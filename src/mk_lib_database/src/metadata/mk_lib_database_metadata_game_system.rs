@@ -36,7 +36,7 @@ pub async fn mk_lib_database_metadata_game_system_count(pool: &sqlx::PgPool,
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaGameSystemList {
-    gs_id: uuid::Uuid,
+    gs_game_system_id: uuid::Uuid,
     gs_game_system_name: String,
     gs_description: String,
     gs_year: String,
@@ -50,7 +50,7 @@ pub async fn mk_lib_database_metadata_game_system_read(pool: &sqlx::PgPool,
     // TODO might need to sort by release year as well for machines with multiple releases
     let select_query;
     if search_value != "" {
-        select_query = sqlx::query("select gs_id, gs_game_system_name, \
+        select_query = sqlx::query("select gs_game_system_id, gs_game_system_name, \
             gs_game_system_json->'description' as gs_description, \
             gs_game_system_json->'year' as gs_year, \
             gs_game_system_alias from mm_metadata_game_systems_info \
@@ -61,7 +61,7 @@ pub async fn mk_lib_database_metadata_game_system_read(pool: &sqlx::PgPool,
             .bind(offset)
             .bind(limit);
     } else {
-        select_query = sqlx::query("select gs_id,gs_game_system_name, \
+        select_query = sqlx::query("select gs_game_system_id, gs_game_system_name, \
             gs_game_system_json->'description' as gs_description, \
             gs_game_system_json->'year' as gs_year, \
             gs_game_system_alias from mm_metadata_game_systems_info \
@@ -71,7 +71,7 @@ pub async fn mk_lib_database_metadata_game_system_read(pool: &sqlx::PgPool,
     }
     let table_rows: Vec<DBMetaGameSystemList> = select_query
         .map(|row: PgRow| DBMetaGameSystemList {
-            gs_id: row.get("gs_id"),
+            gs_game_system_id: row.get("gs_game_system_id"),
             gs_game_system_name: row.get("gs_game_system_name"),
             gs_description: row.get("gs_description"),
             gs_year: row.get("gs_year"),

@@ -76,10 +76,10 @@ pub async fn mk_lib_database_metadata_game_read(pool: &sqlx::PgPool,
     if search_value != "" {
         select_query = sqlx::query("select gi_game_info_id, gi_game_info_short_name, \
              gi_game_info_name, \
-             gi_game_info_json->'year' as gi_year, \
+             gi_game_info_json->'machine'->>'year' as gi_year, \
              gs_game_system_json->'description' as gi_description \
              from mm_metadata_game_software_info, mm_metadata_game_systems_info \
-             where gi_game_info_system_id = gs_id and gi_game_info_name % $1 \
+             where gi_game_info_system_id = gs_game_system_id and gi_game_info_name % $1 \
              order by gi_game_info_name, gi_game_info_json->'year' \
              offset $2 limit $3")
             .bind(search_value)
@@ -88,10 +88,10 @@ pub async fn mk_lib_database_metadata_game_read(pool: &sqlx::PgPool,
     } else {
         select_query = sqlx::query("select gi_game_info_id, gi_game_info_short_name, \
             gi_game_info_name, \
-            gi_game_info_json->'year' as gi_year, \
+            gi_game_info_json->'machine'->>'year' as gi_year, \
             gs_game_system_json->'description' as gi_description \
             from mm_metadata_game_software_info, mm_metadata_game_systems_info \
-            where gi_game_info_system_id = gs_id order by gi_game_info_name, gi_game_info_json->'year' \
+            where gi_game_info_system_id = gs_game_system_id order by gi_game_info_name, gi_game_info_json->'year' \
             offset $1 limit $2")
             .bind(offset)
             .bind(limit);

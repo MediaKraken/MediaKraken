@@ -2,7 +2,7 @@
 
 use tokio::time::{Duration, sleep};
 
-pub static DATABASE_VERSION: i32 = 45;
+pub static DATABASE_VERSION: i32 = 46;
 
 #[path = "./mk_lib_database_version_schema.rs"]
 mod mk_lib_database_version_schema;
