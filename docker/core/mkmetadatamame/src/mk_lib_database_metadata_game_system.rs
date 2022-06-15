@@ -51,8 +51,8 @@ pub async fn mk_lib_database_metadata_game_system_read(pool: &sqlx::PgPool,
     let select_query;
     if search_value != "" {
         select_query = sqlx::query("select gs_game_system_id, gs_game_system_name, \
-            gs_game_system_json->'description' as gs_description, \
-            gs_game_system_json->'year' as gs_year, \
+            gs_game_system_json->>'description' as gs_description, \
+            gs_game_system_json->>'year' as gs_year, \
             gs_game_system_alias from mm_metadata_game_systems_info \
             where gs_game_system_name % $1 \
             order by gs_game_system_json->'description' \
@@ -62,8 +62,8 @@ pub async fn mk_lib_database_metadata_game_system_read(pool: &sqlx::PgPool,
             .bind(limit);
     } else {
         select_query = sqlx::query("select gs_game_system_id, gs_game_system_name, \
-            gs_game_system_json->'description' as gs_description, \
-            gs_game_system_json->'year' as gs_year, \
+            gs_game_system_json->>'description' as gs_description, \
+            gs_game_system_json->>'year' as gs_year, \
             gs_game_system_alias from mm_metadata_game_systems_info \
             order by gs_game_system_json->'description' offset $1 limit $2")
             .bind(offset)

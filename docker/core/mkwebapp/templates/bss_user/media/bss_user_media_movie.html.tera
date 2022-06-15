@@ -38,7 +38,7 @@
             </p>
         </form>
     </div>
-    {% if pagination_bar != None %}
+    {% if pagination_bar != "" %}
         {{ pagination_bar }}
     {% endif %}
     <!-- this div is needed to show up between pagination correctly -->
@@ -86,7 +86,7 @@
         </div>
         {% endfor %}
     </div>
-    {% if pagination_bar != None %}
+    {% if pagination_bar != "" %}
         {{ pagination_bar }}
     {% endif %}
     {% else %}

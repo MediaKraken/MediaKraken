@@ -14,7 +14,7 @@
     {% include "bss_user/bss_user_include_menu" %}
     <div><div>
         {% if template_data %}
-    {% if pagination_bar != None %}
+    {% if pagination_bar != "" %}
         {{ pagination_bar }}
     {% endif %}
     <div id="the-node">
@@ -45,7 +45,7 @@
         </div>
         {% endfor %}
     </div>
-    {% if pagination_bar != None %}
+    {% if pagination_bar != "" %}
         {{ pagination_bar }}
     {% endif %}
     {% else %}

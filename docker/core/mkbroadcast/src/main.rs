@@ -31,7 +31,7 @@ async fn main() -> io::Result<()> {
     }
     let mut host_port: u64 = 8903;
 
-    // Grab public port that the reactor is running on
+    // Grab public port that the web app is running on
     let docker = Docker::new();
     let result = docker.containers().list(&Default::default()).await;
     match result {

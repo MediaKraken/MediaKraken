@@ -64,8 +64,9 @@ pub struct DBMetaGameList {
 	gi_game_info_id: uuid::Uuid,
 	gi_game_info_short_name: String,
 	gi_game_info_name: String,
-	gi_year: String,
-	gi_description: String,
+	gi_year: Option<String>,
+	gi_game_info_localimage: Option<serde_json::Value>,
+    gs_game_system_name: String,
 }
 
 pub async fn mk_lib_database_metadata_game_read(pool: &sqlx::PgPool,
@@ -77,10 +78,10 @@ pub async fn mk_lib_database_metadata_game_read(pool: &sqlx::PgPool,
         select_query = sqlx::query("select gi_game_info_id, gi_game_info_short_name, \
              gi_game_info_name, \
              gi_game_info_json->'machine'->>'year' as gi_year, \
-             gs_game_system_json->'description' as gi_description \
+             gi_game_info_localimage, gs_game_system_name \
              from mm_metadata_game_software_info, mm_metadata_game_systems_info \
              where gi_game_info_system_id = gs_game_system_id and gi_game_info_name % $1 \
-             order by gi_game_info_name, gi_game_info_json->'year' \
+             order by gi_game_info_name, gi_year \
              offset $2 limit $3")
             .bind(search_value)
             .bind(offset)
@@ -89,9 +90,9 @@ pub async fn mk_lib_database_metadata_game_read(pool: &sqlx::PgPool,
         select_query = sqlx::query("select gi_game_info_id, gi_game_info_short_name, \
             gi_game_info_name, \
             gi_game_info_json->'machine'->>'year' as gi_year, \
-            gs_game_system_json->'description' as gi_description \
+            gi_game_info_localimage, gs_game_system_name \
             from mm_metadata_game_software_info, mm_metadata_game_systems_info \
-            where gi_game_info_system_id = gs_game_system_id order by gi_game_info_name, gi_game_info_json->'year' \
+            where gi_game_info_system_id = gs_game_system_id order by gi_game_info_name, gi_year \
             offset $1 limit $2")
             .bind(offset)
             .bind(limit);
@@ -102,7 +103,8 @@ pub async fn mk_lib_database_metadata_game_read(pool: &sqlx::PgPool,
             gi_game_info_short_name: row.get("gi_game_info_short_name"),
             gi_game_info_name: row.get("gi_game_info_name"),
             gi_year: row.get("gi_year"),
-            gi_description: row.get("gi_description"),
+            gi_game_info_localimage: row.get("gi_game_info_localimage"),
+            gs_game_system_name: row.get("gs_game_system_name"),
         })
         .fetch_all(pool)
         .await?;

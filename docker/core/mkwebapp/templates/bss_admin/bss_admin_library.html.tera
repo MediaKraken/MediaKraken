@@ -30,7 +30,7 @@
                         <div class="col">
                             <fieldset><div>
                                 {% if media_dir %}
-                                {% if pagination_bar != None %}
+                                {% if pagination_bar != "" %}
                                     {{ pagination_bar }}
                                 {% endif %}
                                 <div class="table-responsive">
@@ -113,7 +113,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                {% if pagination_bar != None %}
+                                {% if pagination_bar != "" %}
                                     {{ pagination_bar }}
                                 {% endif %}
                                 {% else %}

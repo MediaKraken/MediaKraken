@@ -9,16 +9,16 @@
                     <li class="nav-item" role="presentation"><a class="nav-link" href="/user/sync">Sync</a></li>
                     <li class="nav-item dropdown"><a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false" href="#">Metadata</a>
                         <div class="dropdown-menu" role="menu">
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/movie">Movie</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/movie_collection">Movie Collection</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/tv">TV Show</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/music">Music</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/sports">Sports</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/game">Games</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/game_system">Game Systems</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/person">Person</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/book">Book/Periodical</a>
-                            <a class="dropdown-item" role="presentation" href="/user/metadata/music_video">Music Video</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/movie/1">Movie</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/movie_collection/1">Movie Collection</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/tv/1">TV Show</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/music/1">Music</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/sports/1">Sports</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/game/1">Games</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/game_system/1">Game Systems</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/person/1">Person</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/book/1">Book/Periodical</a>
+                            <a class="dropdown-item" role="presentation" href="/user/metadata/music_video/1">Music Video</a>
                         </div>
                     </li>
                     <li class="nav-item" role="presentation"><a class="nav-link" href="/user/profile">Profile</a></li>

@@ -17,11 +17,15 @@ struct TemplateAdminGameServersContext<> {
 }
 
 #[get("/admin_game_servers/<page>")]
-pub async fn admin_game_servers(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser, page: i8) -> Template {
-    let total_pages: i64 = mk_lib_database_game_servers::mk_lib_database_game_server_count(&sqlx_pool, String::new()).await.unwrap() / 30;
-    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page).await.unwrap();
+pub async fn admin_game_servers(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser, page: i32) -> Template {
+    let db_offset: i32 = (page * 30) - 30;
+    let mut total_pages: i64 = mk_lib_database_game_servers::mk_lib_database_game_server_count(&sqlx_pool, String::new()).await.unwrap();
+    if total_pages > 0 {
+        total_pages = total_pages / 30;
+    }
+    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page, "/admin/admin_game_servers".to_string()).await.unwrap();
     let dedicated_server_list =
-        mk_lib_database_game_servers::mk_lib_database_game_server_read(&sqlx_pool, String::new(), 0 ,30).await.unwrap();
+        mk_lib_database_game_servers::mk_lib_database_game_server_read(&sqlx_pool, String::new(), db_offset ,30).await.unwrap();
     Template::render("bss_admin/bss_admin_game_servers", &TemplateAdminGameServersContext {
         template_data: dedicated_server_list,
         pagination_bar: pagination_html,

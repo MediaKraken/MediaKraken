@@ -17,10 +17,14 @@ struct TemplateMetaMovieContext<> {
 }
 
 #[get("/metadata/movie/<page>")]
-pub async fn user_metadata_movie(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, page: i8) -> Template {
-    let total_pages: i64 = mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(&sqlx_pool, String::new()).await.unwrap() / 30;
-    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page).await.unwrap();
-    let movie_list = mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(&sqlx_pool, String::new(), 0, 30).await.unwrap();
+pub async fn user_metadata_movie(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, page: i32) -> Template {
+    let db_offset: i32 = (page * 30) - 30;
+    let mut total_pages: i64 = mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(&sqlx_pool, String::new()).await.unwrap();
+    if total_pages > 0 {
+        total_pages = total_pages / 30;
+    }
+    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page, "/user/metadata/movie".to_string()).await.unwrap();
+    let movie_list = mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(&sqlx_pool, String::new(), db_offset, 30).await.unwrap();
     Template::render("bss_user/metadata/bss_user_metadata_movie", &TemplateMetaMovieContext {
         template_data: movie_list,
         pagination_bar: pagination_html,

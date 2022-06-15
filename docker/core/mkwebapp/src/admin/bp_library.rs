@@ -17,10 +17,14 @@ struct TemplateAdminLibraryContext<> {
 }
 
 #[get("/admin_library/<page>")]
-pub async fn admin_library(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser, page: i8) -> Template {
-    let total_pages: i64 = mk_lib_database_library::mk_lib_database_library_count(&sqlx_pool).await.unwrap() / 30;
-    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page).await.unwrap();
-    let library_list = mk_lib_database_library::mk_lib_database_library_read(&sqlx_pool, 0, 30).await.unwrap();
+pub async fn admin_library(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser, page: i32) -> Template {
+    let db_offset: i32 = (page * 30) - 30;
+    let mut total_pages: i64 = mk_lib_database_library::mk_lib_database_library_count(&sqlx_pool).await.unwrap();
+    if total_pages > 0 {
+        total_pages = total_pages / 30;
+    }
+    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page, "/admin/admin_library".to_string()).await.unwrap();
+    let library_list = mk_lib_database_library::mk_lib_database_library_read(&sqlx_pool, db_offset, 30).await.unwrap();
     Template::render("bss_admin/bss_admin_library", &TemplateAdminLibraryContext {
         template_data: library_list,
         pagination_bar: pagination_html,

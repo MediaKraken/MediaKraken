@@ -18,7 +18,7 @@
                 <fieldset>
                     <legend><strong>Media Sync Jobs</strong><br></legend><div>
     {% if template_data %}
-    {% if pagination_bar != None %}
+    {% if pagination_bar != "" %}
         {{ pagination_bar }}
     {% endif %}
     <div class="table-responsive">
@@ -119,7 +119,7 @@
             </div>
         </div>
     </div>
-    {% if pagination_bar != None %}
+    {% if pagination_bar != "" %}
         {{ pagination_bar }}
     {% endif %}
     {% else %}

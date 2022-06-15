@@ -43,9 +43,9 @@ pub async fn mk_lib_database_metadata_person_count(pool: &sqlx::PgPool,
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaPersonList {
-    mmp_id: uuid::Uuid,
-    mmp_person_name: String,
-    mmp_person_image: String,
+    mm_metadata_person_guid: uuid::Uuid,
+    mm_metadata_person_name: String,
+    mm_metadata_person_image: String,
     mmp_profile: String,
 }
 
@@ -56,26 +56,28 @@ pub async fn mk_lib_database_metadata_person_read(pool: &sqlx::PgPool,
     // TODO order by birth date
     let select_query;
     if search_value != "" {
-        select_query = sqlx::query("select mmp_id, mmp_person_name, mmp_person_image, \
-            mmp_person_meta_json->'profile_path' as mmp_profile \
-            from mm_metadata_person where mmp_person_name % $1 \
-            order by LOWER(mmp_person_name) offset $2 limit $3")
+        select_query = sqlx::query("select mm_metadata_person_guid, \
+            mm_metadata_person_name, mm_metadata_person_image, \
+            mm_metadata_person_meta_json->>'profile_path' as mmp_profile \
+            from mm_metadata_person where mm_metadata_person_name % $1 \
+            order by LOWER(mm_metadata_person_name) offset $2 limit $3")
             .bind(search_value)
             .bind(offset)
             .bind(limit);
     } else {
-        select_query = sqlx::query("select mmp_id,mmp_person_name, mmp_person_image, \
-            mmp_person_meta_json->'profile_path' as mmp_profile \
-            from mm_metadata_person order by LOWER(mmp_person_name) \
+        select_query = sqlx::query("select mm_metadata_person_guid, \
+            mm_metadata_person_name, mm_metadata_person_image, \
+            mm_metadata_person_meta_json->>'profile_path' as mmp_profile \
+            from mm_metadata_person order by LOWER(mm_metadata_person_name) \
             offset $1 limit $2")
             .bind(offset)
             .bind(limit);
     }
     let table_rows: Vec<DBMetaPersonList> = select_query
         .map(|row: PgRow| DBMetaPersonList {
-            mmp_id: row.get("mmp_id"),
-            mmp_person_name: row.get("mmp_person_name"),
-            mmp_person_image: row.get("mmp_person_image"),
+            mm_metadata_person_guid: row.get("mm_metadata_person_guid"),
+            mm_metadata_person_name: row.get("mm_metadata_person_name"),
+            mm_metadata_person_image: row.get("mm_metadata_person_image"),
             mmp_profile: row.get("mmp_profile"),
         })
         .fetch_all(pool)
