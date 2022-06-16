@@ -9,7 +9,7 @@ pub async fn mk_lib_database_sync_delete(pool: &sqlx::PgPool,
                                          sync_guid: Uuid)
                                          -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
-    sqlx::query("delete from mm_sync where mm_sync_guid = $1")
+    sqlx::query("delete from mm_media_sync where mm_sync_guid = $1")
         .bind(sync_guid)
         .execute(&mut transaction)
         .await?;
@@ -22,7 +22,7 @@ pub async fn mk_lib_database_sync_process_update(pool: &sqlx::PgPool,
                                                  sync_percent: f32)
                                                  -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
-    sqlx::query("update mm_sync set mm_sync_options_json->'Progress' = $1
+    sqlx::query("update mm_media_sync set mm_sync_options_json->'Progress' = $1
         where mm_sync_guid = $2")
         .bind(sync_percent)
         .bind(sync_guid)
@@ -34,7 +34,7 @@ pub async fn mk_lib_database_sync_process_update(pool: &sqlx::PgPool,
 
 pub async fn mk_lib_database_sync_count(pool: &sqlx::PgPool)
                                         -> Result<i32, sqlx::Error> {
-    let row: (i32, ) = sqlx::query_as("select count(*) from mm_syn")
+    let row: (i32, ) = sqlx::query_as("select count(*) from mm_media_sync")
         .fetch_one(pool)
         .await?;
     Ok(row.0)
@@ -47,7 +47,7 @@ pub async fn mk_lib_database_sync_insert(pool: &sqlx::PgPool,
                                          -> Result<Uuid, sqlx::Error> {
     let new_guid = uuid::Uuid::new_v4();
     let mut transaction = pool.begin().await?;
-    sqlx::query("insert into mm_sync (mm_sync_guid, mm_sync_path, \
+    sqlx::query("insert into mm_media_sync (mm_sync_guid, mm_sync_path, \
         mm_sync_path_to, mm_sync_options_json) \
         values ($1, $2, $3, $4)")
         .bind(new_guid)
@@ -74,24 +74,24 @@ pub async fn mk_lib_database_sync_list(pool: &sqlx::PgPool,
                                        limit: i32)
                                        -> Result<Vec<DBSyncList>, sqlx::Error> {
     let select_query;
-    if user_id != uuid::Uuid::nil() {
+    if user_id == uuid::Uuid::nil() {
         select_query = sqlx::query("select mm_sync_guid, mm_sync_path, \
             mm_sync_path_to, mm_sync_options_json \
-            from mm_sync where mm_sync_guid in (select mm_sync_guid \
-            from mm_sync order by mm_sync_options_json->'Priority' desc, \
+            from mm_media_sync where mm_sync_guid in (select mm_sync_guid \
+            from mm_media_sync order by mm_sync_options_json->'Priority' desc, \
             mm_sync_path offset $1 limit $2) \
             order by mm_sync_options_json->'Priority' desc, mm_sync_path")
-            .bind(user_id)
             .bind(offset)
             .bind(limit);
     } else {
         select_query = sqlx::query("select mm_sync_guid, mm_sync_path, \
             mm_sync_path_to, mm_sync_options_json \
-            from mm_sync where mm_sync_guid in (select mm_sync_guid \
-            from mm_sync where mm_sync_options_json->'User'::text = $1 \
+            from mm_media_sync where mm_sync_guid in (select mm_sync_guid \
+            from mm_media_sync where mm_sync_options_json->'User'::text = $1 \
             order by mm_sync_options_json->'Priority' desc, \
             mm_sync_path offset $2 limit $3) \
             order by mm_sync_options_json->'Priority' desc, mm_sync_path")
+            .bind(user_id)
             .bind(offset)
             .bind(limit);
     }

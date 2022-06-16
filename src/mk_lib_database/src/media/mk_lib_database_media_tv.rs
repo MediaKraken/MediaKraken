@@ -22,7 +22,7 @@ pub async fn mk_lib_database_media_tv_read(pool: &sqlx::PgPool,
         select_query = sqlx::query("elect mm_metadata_tvshow_guid, \
             mm_metadata_tvshow_name, \
             count(*) as mm_count, \
-            mm_metadata_tvshow_localimage_json->'Images'->>'Poster' as mm_poster, \
+            mm_metadata_tvshow_localimage_json->'Images'->>'Poster' as mm_poster \
             from mm_metadata_tvshow, \
             mm_media where mm_media_metadata_guid = mm_metadata_tvshow_guid \
             and mm_metadata_tvshow_name % $1 \
@@ -36,7 +36,7 @@ pub async fn mk_lib_database_media_tv_read(pool: &sqlx::PgPool,
         select_query = sqlx::query("select mm_metadata_tvshow_guid, \
             mm_metadata_tvshow_name, \
             count(*) as mm_count, \
-            mm_metadata_tvshow_localimage_json->'Images'->>'Poster' as mm_poster, \
+            mm_metadata_tvshow_localimage_json->'Images'->>'Poster' as mm_poster \
             from mm_metadata_tvshow, \
             mm_media where mm_media_metadata_guid \
             = mm_metadata_tvshow_guid \

@@ -8,8 +8,8 @@ use serde::{Serialize, Deserialize};
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaMusicVideoList {
     mm_metadata_music_video_guid: uuid::Uuid,
-    mm_media_music_video_band: String,
-    mm_media_music_video_song: String,
+    mm_metadata_music_video_band: String,
+    mm_metadata_music_video_song: String,
     mm_metadata_music_video_localimage_json: String,
 }
 
@@ -19,27 +19,29 @@ pub async fn mk_lib_database_metadata_music_video_read(pool: &sqlx::PgPool,
                                                        -> Result<Vec<DBMetaMusicVideoList>, sqlx::Error> {
     let select_query;
     if search_value != "" {
-        select_query = sqlx::query("select mm_metadata_music_video_guid, mm_media_music_video_band, \
-            mm_media_music_video_song, mm_metadata_music_video_localimage_json \
-            from mm_metadata_music_video where mm_media_music_video_song % $1 \
-            order by LOWER(mm_media_music_video_band), LOWER(mm_media_music_video_song) \
+        select_query = sqlx::query("select mm_metadata_music_video_guid, \
+            mm_metadata_music_video_band, \
+            mm_metadata_music_video_song, mm_metadata_music_video_localimage_json \
+            from mm_metadata_music_video where mm_metadata_music_video_song % $1 \
+            order by LOWER(mm_metadata_music_video_band), LOWER(mm_metadata_music_video_song) \
             offset $2 limit $3")
             .bind(search_value)
             .bind(offset)
             .bind(limit);
     } else {
-        select_query = sqlx::query("select mm_metadata_music_video_guid, mm_media_music_video_band, \
-            mm_media_music_video_song, mm_metadata_music_video_localimage_json \
-            from mm_metadata_music_video order by LOWER(mm_media_music_video_band), \
-            LOWER(mm_media_music_video_song) offset $1 limit $2")
+        select_query = sqlx::query("select mm_metadata_music_video_guid, \
+            mm_metadata_music_video_band, \
+            mm_metadata_music_video_song, mm_metadata_music_video_localimage_json \
+            from mm_metadata_music_video order by LOWER(mm_metadata_music_video_band), \
+            LOWER(mm_metadata_music_video_song) offset $1 limit $2")
             .bind(offset)
             .bind(limit);
     }
     let table_rows: Vec<DBMetaMusicVideoList> = select_query
         .map(|row: PgRow| DBMetaMusicVideoList {
             mm_metadata_music_video_guid: row.get("mm_metadata_music_video_guid"),
-            mm_media_music_video_band: row.get("mm_media_music_video_band"),
-            mm_media_music_video_song: row.get("mm_media_music_video_song"),
+            mm_metadata_music_video_band: row.get("mm_metadata_music_video_band"),
+            mm_metadata_music_video_song: row.get("mm_metadata_music_video_song"),
             mm_metadata_music_video_localimage_json: row.get("mm_metadata_music_video_localimage_json"),
         })
         .fetch_all(pool)

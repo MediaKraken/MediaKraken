@@ -19,18 +19,18 @@
         <a href="/user/media/queue"><img src="/static/image/rectangles_black.png" width="200" height="200" loading="lazy"></a>
     {% endif %}
     <a href="/user/media/movie_genre/all"><img src="/static/image/movie_ticket.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/music"><img src="/static/image/headphone.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/tv"><img src="/static/image/television.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/sports"><img src="/static/image/stadium.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/music/1"><img src="/static/image/headphone.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/tv/1"><img src="/static/image/television.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/sports/1"><img src="/static/image/stadium.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/media/live_tv/20170716/213500"><img src="/static/image/television_live.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/media/images"><img src="/static/image/photo.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/game"><img src="/static/image/vid_game.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/book"><img src="/static/image/books.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/game/1"><img src="/static/image/vid_game.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/book/1"><img src="/static/image/books.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/media/iradio"><img src="/static/image/radio.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/home_video"><img src="/static/image/vid_camera.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/home_video/1"><img src="/static/image/vid_camera.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/media/3d"><img src="/static/image/3D.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/internet"><img src="/static/image/earth.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/music_video"><img src="/static/image/listening-music-video-clip-with-auricular.png" width="200" height="200" loading="lazy"></a>
+    <a href="/user/media/music_video/1"><img src="/static/image/listening-music-video-clip-with-auricular.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/media/cctv"><img src="/static/image/surveillance-cctv-symbol-in-rounded-triangle.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/media/search"><img src="/static/image/magnifying-glass.png" width="200" height="200" loading="lazy"></a>
     <a href="/user/hardware"><img src="/static/image/circuit-board.png" width="200" height="200" loading="lazy"></a>
