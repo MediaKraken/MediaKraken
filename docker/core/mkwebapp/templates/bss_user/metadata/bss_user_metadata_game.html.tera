@@ -14,7 +14,7 @@
     {% include "bss_user/bss_user_include_menu" %}
     {% if template_data %}
     {% if pagination_bar != "" %}
-        {{ pagination_bar }}
+        {{ pagination_bar|safe }}
     {% endif %}
     <div class="table-responsive">
         <table class="table table-striped table-hover">
@@ -39,7 +39,7 @@
         </table>
     </div>
     {% if pagination_bar != "" %}
-        {{ pagination_bar }}
+        {{ pagination_bar|safe }}
     {% endif %}
     {% else %}
     <p id="general_text">No game metadata found.</p>

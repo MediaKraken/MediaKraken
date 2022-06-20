@@ -8,7 +8,7 @@ use sqlx::{FromRow, Row};
 /*
 
 // TODO port query
-def db_meta_anime_title_insert(self, ani_media_id_json, ani_name, ani_json,
+def db_metadata_anime_insert(self, ani_media_id_json, ani_name, ani_json,
                                ani_image_local, ani_user_json, mapping_data, before_data):
     """
     Insert new anidb entries into database
@@ -30,7 +30,7 @@ def db_meta_anime_title_insert(self, ani_media_id_json, ani_name, ani_json,
 
 
 // TODO port query
-def db_meta_anime_title_search(self, title_to_search):
+def db_meta_anime_search(self, title_to_search):
     """
     search for title
     """

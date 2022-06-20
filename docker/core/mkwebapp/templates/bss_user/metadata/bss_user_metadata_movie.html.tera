@@ -16,7 +16,7 @@
     <div><div>
     {% if template_data %}
     {% if pagination_bar != "" %}
-        {{ pagination_bar }}
+        {{ pagination_bar|safe }}
     {% endif %}
     <div id="the-movie-metadata-node">
         {% for row_data in template_data %}
@@ -62,7 +62,7 @@
         {% endfor %}
     </div>
     {% if pagination_bar != "" %}
-        {{ pagination_bar }}
+        {{ pagination_bar|safe }}
     {% endif %}
     {% else %}
     <p id="general_text">No movie metadata found.</p>

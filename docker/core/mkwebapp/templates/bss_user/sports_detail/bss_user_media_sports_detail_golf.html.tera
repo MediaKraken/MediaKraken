@@ -12,7 +12,7 @@
 
 <body>
     {% include "bss_user/bss_user_include_menu" %}
-    <div><div></div></div>
+    <div></div>
     {% include "bss_public/bss_public_footer" %}
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>

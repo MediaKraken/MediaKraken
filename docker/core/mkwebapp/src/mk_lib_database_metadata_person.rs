@@ -191,7 +191,7 @@ pub async fn db_meta_person_as_seen_in(self, person_guid):
     if row_data == None:  // exit on not found person
         return None
     // TODO jin index the credits
-    return await db_conn.fetch('select mm_metadata_guid,mm_metadata_name,'
+    return await db_conn.fetch('select mm_metadata_guid, mm_metadata_name,'
                                ' mm_metadata_localimage_json->'Poster''
                                ' from mm_metadata_movie'
                                ' where mm_metadata_json->'credits'->'cast''
@@ -199,15 +199,20 @@ pub async fn db_meta_person_as_seen_in(self, person_guid):
                                + str(row_data['mmp_person_media_id'])
                                + '}]' order by LOWER(mm_metadata_name)')
 
-
-// TODO port query
-pub async fn db_meta_person_update(self, provider_name, provider_uuid, person_bio, person_image):
-    """
-    update the person bio/etc
-    """
-    await db_conn.execute('update mm_metadata_person set mmp_person_meta_json = $1,'
-                          ' mmp_person_image = $2'
-                          ' where mmp_person_media_id = $3',
-                          person_bio, person_image, provider_uuid)
-    await db_conn.execute('commit')
  */
+
+pub async fn mk_lib_database_metadata_person_update(pool: &sqlx::PgPool,
+                                                    person_media_id: Uuid,
+                                                    person_bio: serde_json::Value,
+                                                    person_image: serde_json::Value)
+                                                    -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
+    sqlx::query("update mm_metadata_person set mmp_person_meta_json = $1, mmp_person_image = $2 where mmp_person_media_id = $3")
+        .bind(person_bio)
+        .bind(person_image)
+        .bind(person_media_id)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(())
+}

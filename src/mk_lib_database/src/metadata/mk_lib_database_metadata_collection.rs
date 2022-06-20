@@ -102,15 +102,19 @@ pub async fn mk_lib_database_meta_collection_by_name(pool: &sqlx::PgPool,
     Ok(table_rows)
 }
 
+pub async fn mk_lib_database_metadata_collection_guid_by_name(pool: &sqlx::PgPool,
+                                                              collection_name: String)
+                                                              -> Result<uuid::Uuid, sqlx::Error> {
+    let row: (uuid::Uuid, ) = sqlx::query_as("select mm_metadata_collection_guid \
+        from mm_metadata_collection \
+        where mm_metadata_collection_name->>'name' = $1")
+        .bind(collection_name)
+        .fetch_one(pool)
+        .await?;
+    Ok(row.0)
+}
+
 /*
-
-// TODO port query
-pub async fn db_collection_guid_by_name(self, collection_name):
-    return await db_conn.fetchval(
-        'select mm_metadata_collection_guid from mm_metadata_collection'
-        ' where mm_metadata_collection_name->>'name' = $1',
-        collection_name)
-
 
 // TODO port query
 pub async fn db_collection_by_tmdb(self, tmdb_id):

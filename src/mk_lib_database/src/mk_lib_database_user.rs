@@ -77,41 +77,18 @@ pub async fn mk_lib_database_user_delete(pool: &sqlx::PgPool,
     transaction.commit().await?;
     Ok(())
 }
+
+pub async fn mk_lib_database_user_set_admin(pool: &sqlx::PgPool)
+                                            -> Result<(), sqlx::Error> {
+    let mut transaction = pool.begin().await?;
+    sqlx::query("update users set is_admin = true")
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(())
+}
+
 /*
-
-// TODO port query
-pub async fn db_user_insert(self, user_name, user_email, user_password):
-    """
-    # insert user
-    """
-    if await self.db_user_count(user_name=None) == 0:
-        user_admin = true
-    else:
-        user_admin = false
-    return await db_conn.execute(
-        'insert into mm_user (username, email, password, active, is_admin, user_json, created_at)'
-        ' values ($1, $2, crypt($3, gen_salt('bf', 10)), True, $4, '{"per_page": 30}','
-        ' current_timestamp)'
-        ' returning id',
-        user_name, user_email, user_password, user_admin), user_admin, 30
-
-
-// TODO port query
-pub async fn db_user_login(self, user_name, user_password):
-    """
-    # verify user logon
-    """
-    result = await db_conn.fetchrow('select id, active, is_admin,'
-                                    ' user_json->'per_page' as per_page'
-                                    ' from mm_user where username = $1'
-                                    ' and password = crypt($2, password)',
-                                    user_name, user_password)
-    if result != None:
-        print(result, flush=True)
-        if result['active'] is False:
-            return 'inactive_account', None, None
-        return result['id'], result['is_admin'], result['per_page']
-    return 'invalid_password', None, None
 
 // TODO port query
 pub async fn db_user_detail(self, guid):

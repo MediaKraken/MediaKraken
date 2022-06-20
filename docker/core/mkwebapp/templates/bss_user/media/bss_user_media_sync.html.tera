@@ -19,7 +19,7 @@
                     <legend><strong>Media Sync Jobs</strong><br></legend><div>
     {% if template_data %}
     {% if pagination_bar != "" %}
-        {{ pagination_bar }}
+        {{ pagination_bar|safe }}
     {% endif %}
     <div class="table-responsive">
         <table class="table table-hover">
@@ -120,7 +120,7 @@
         </div>
     </div>
     {% if pagination_bar != "" %}
-        {{ pagination_bar }}
+        {{ pagination_bar|safe }}
     {% endif %}
     {% else %}
     <p id="general_text">No sync jobs found.</p>

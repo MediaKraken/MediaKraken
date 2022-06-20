@@ -107,23 +107,21 @@ pub async fn mk_lib_database_metadata_book_insert(pool: &sqlx::PgPool,
     Ok(new_guid)
 }
 
-/*
-
-// TODO port query
-def db_meta_book_guid_by_name(self, book_name):
-    """
-    # metadata guid by name
-    """
+pub async fn mk_lib_database_metadata_book_guid_by_name(pool: &sqlx::PgPool,
+                                                        book_name: String)
+                                                        -> Result<uuid::Uuid, sqlx::Error> {
     // TODO can be more than one by name
     // TODO sort by release date
-    self.db_cursor.execute('select mm_metadata_book_guid'
-                           ' from mm_metadata_book'
-                           ' where mm_metadata_book_name = $1', (book_name,))
-    try:
-        return self.db_cursor.fetchone()['mm_metadata_book_guid']
-    except:
-        return None
+    let row: (uuid::Uuid, ) = sqlx::query_as("select mm_metadata_book_guid \
+        from mm_metadata_book \
+        where mm_metadata_book_name = $1")
+        .bind(book_name)
+        .fetch_one(pool)
+        .await?;
+    Ok(row.0)
+}
 
+/*
 
 // TODO port query
 def db_meta_book_image_random(self, return_image_type='Cover'):

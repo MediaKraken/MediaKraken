@@ -6,6 +6,7 @@ pub async fn mk_lib_common_paginate(total_pages: i64, page: i32, base_url: Strin
                                     -> Result<String, Box<dyn Error>>{
     let mut pagination_html = String::new();
     if total_pages != 0 {
+        pagination_html.push_str("<div>");
         let paginator = Paginator::builder(total_pages as usize).current_page(page as usize).build_paginator().unwrap();
         for page_item in paginator.paginate() {
             match page_item {
@@ -31,6 +32,7 @@ pub async fn mk_lib_common_paginate(total_pages: i64, page: i32, base_url: Strin
                 }
             }
         }
+        pagination_html.push_str("</div>");        
     }
     Ok(pagination_html)
 }

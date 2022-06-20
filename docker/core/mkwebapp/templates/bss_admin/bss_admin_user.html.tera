@@ -21,7 +21,7 @@
                                 <legend>User information</legend><div>
                                 {% if template_data %}
                                 {% if pagination_bar != "" %}
-                                    {{ pagination_bar }}
+                                    {{ pagination_bar|safe }}
                                 {% endif %}
                                 <div class="table-responsive">
                                     <table class="table table-hover">
@@ -79,7 +79,7 @@
                                     </div>
                                 </div>
                                 {% if pagination_bar != "" %}
-                                    {{ pagination_bar }}
+                                    {{ pagination_bar|safe }}
                                 {% endif %}
                                 {% else %}
                                 <p>No users found. Contact administrator.</p>

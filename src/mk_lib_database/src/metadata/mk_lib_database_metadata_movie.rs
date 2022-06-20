@@ -108,7 +108,47 @@ pub async fn mk_lib_database_metadata_movie_insert(pool: &sqlx::PgPool,
     Ok(())
 }
 
+pub async fn mk_lib_database_metadata_movie_guid_by_tmdb(pool: &sqlx::PgPool,
+                                                         uuid_id: Uuid,)
+                                                         -> Result<uuid::Uuid, sqlx::Error> {
+    let row: (uuid::Uuid, ) = sqlx::query_as("select mm_metadata_guid from mm_metadata_movie where mm_metadata_media_id = $1")
+        .bind(uuid_id)
+        .fetch_one(pool)
+        .await?;
+    Ok(row.0)
+}
+
 /*
+
+// TODO port query
+def db_meta_tmdb_count(self, tmdb_id):
+    """
+    # see if metadata exists via themovedbid
+    """
+    self.db_cursor.execute('select exists(select 1 from mm_metadata_movie'
+                           ' where mm_metadata_media_id = $1 limit 1) limit 1', (tmdb_id,))
+    return self.db_cursor.fetchone()[0]
+
+
+
+// TODO port query
+def db_read_media_metadata(self, media_guid):
+    """
+    # read in the media with corresponding metadata
+    """
+    self.db_cursor.execute('select mm_metadata_guid,'
+                           ' mm_metadata_media_id,'
+                           ' mm_metadata_name,'
+                           ' mm_metadata_json,'
+                           ' mm_metadata_localimage_json,'
+                           ' mm_metadata_user_json'
+                           ' from mm_metadata_movie'
+                           ' where mm_metadata_guid = $1', (media_guid,))
+    try:
+        return self.db_cursor.fetchone()
+    except:
+        return None
+
 
 // TODO port query
 pub async fn db_meta_movie_by_media_uuid(self, media_guid):
@@ -226,6 +266,22 @@ def db_meta_movie_update_castcrew(self, cast_crew_json, metadata_id):
     self.db_cursor.execute('update mm_metadata_movie set mm_metadata_json = $1'
                            ' where mm_metadata_guid = $2',
                            (json.dumps(cast_crew_json_row), metadata_id))
+    self.db_commit()
+
+    // TODO port query
+def db_meta_update(self, series_id_json, result_json, image_json):
+    """
+    # update record by tmdb
+    """
+    // um, mm_metadata_media_id is wrong
+    self.db_cursor.execute('update mm_metadata_movie set mm_metadata_media_id = $1,'
+                           ' mm_metadata_name = $2,'
+                           ' mm_metadata_json = $3,'
+                           ' mm_metadata_localimage_json = $4'
+                           ' where mm_metadata_media_id = $5',
+                           (series_id_json, result_json['title'],
+                            json.dumps(result_json), json.dumps(image_json),
+                            result_json['id']))
     self.db_commit()
 
  */

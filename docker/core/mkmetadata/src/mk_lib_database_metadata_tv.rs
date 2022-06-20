@@ -68,6 +68,25 @@ pub async fn mk_lib_database_metadata_tv_count(pool: &sqlx::PgPool,
     }
 }
 /*
+
+// TODO port query
+def db_meta_fetch_series_media_id_json(self, media_id_id,
+                                       collection_media=False):
+    """
+    Fetch series json by id
+    """
+    if not collection_media:
+        self.db_cursor.execute('select mm_metadata_tvshow_guid,'
+                               ' mm_metadata_media_tvshow_id'
+                               ' from mm_metadata_tvshow'
+                               ' where mm_metadata_media_tvshow_id = $1',
+                               (media_id_id,))
+        try:
+            return self.db_cursor.fetchone()
+        except:
+            return None
+
+            
 // TODO port query
 pub async fn db_metatv_guid_by_tmdb(self, tmdb_uuid):
     """

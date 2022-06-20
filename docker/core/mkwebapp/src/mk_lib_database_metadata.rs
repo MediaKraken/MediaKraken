@@ -14,12 +14,12 @@ pub struct DBMetadataGenreCountList {
 pub async fn mk_lib_database_metadata_genre_count_read(pool: &sqlx::PgPool)
                                                        -> Result<Vec<DBMetadataGenreCountList>, sqlx::Error> {
     let select_query = sqlx::query("select \
-        jsonb_array_elements_text(mm_metadata_json->'genres')b as gen, \
-        count(mm_metadata_json->'genres') as mm_count from mm_metadata_movie group by gen \
+        jsonb_array_elements_text(mm_metadata_json->'genres')b as genre, \
+        count(mm_metadata_json->'genres') as mm_count from mm_metadata_movie group by genre \
         order by jsonb_array_elements_text(mm_metadata_json->'genres')b");
     let table_rows: Vec<DBMetadataGenreCountList> = select_query
 		.map(|row: PgRow| DBMetadataGenreCountList {
-			gen: row.get("gen"),
+			gen: row.get("genre"),
             mm_count: row.get("mm_count"),
 		})
 		.fetch_all(pool)
@@ -36,128 +36,32 @@ pub async fn mk_lib_database_metadata_genre_read(pool: &sqlx::PgPool,
                                                   offset: i32, limit: i32)
                                                   -> Result<Vec<DBMetadataGenreList>, sqlx::Error> {
     let select_query = sqlx::query("select distinct \
-        jsonb_array_elements_text(mm_metadata_json->'genres')b as gen from mm_metadata_movie \
+        jsonb_array_elements_text(mm_metadata_json->'genres')b as genre from mm_metadata_movie \
         order by jsonb_array_elements_text(mm_metadata_json->'genres')b offset $1 limit $2")
         .bind(offset)
         .bind(limit);
     let table_rows: Vec<DBMetadataGenreList> = select_query
 		.map(|row: PgRow| DBMetadataGenreList {
-			gen: row.get("gen"),
+			gen: row.get("genre"),
 		})
 		.fetch_all(pool)
 		.await?;
     Ok(table_rows)
 }
 
+pub async fn mk_lib_database_metadata_genre_count(pool: &sqlx::PgPool)
+                                                 -> Result<i64, sqlx::Error> {
+    let row: (i64, ) = sqlx::query_as("select distinct jsonb_array_elements_text(mm_metadata_json->'genres')b \
+        from mm_metadata_movie")
+        .fetch_one(pool)
+        .await?;
+    Ok(row.0)
+}
+
+
 /*
 
-// TODO port query
-def db_read_media_metadata(self, media_guid):
-    """
-    # read in the media with corresponding metadata
-    """
-    self.db_cursor.execute('select mm_metadata_guid,'
-                           ' mm_metadata_media_id,'
-                           ' mm_metadata_name,'
-                           ' mm_metadata_json,'
-                           ' mm_metadata_localimage_json,'
-                           ' mm_metadata_user_json'
-                           ' from mm_metadata_movie'
-                           ' where mm_metadata_guid = $1', (media_guid,))
-    try:
-        return self.db_cursor.fetchone()
-    except:
-        return None
 
-
-// TODO port query
-def db_meta_update(self, series_id_json, result_json, image_json):
-    """
-    # update record by tmdb
-    """
-    self.db_cursor.execute('update mm_metadata_movie set mm_metadata_media_id = $1,'
-                           ' mm_metadata_name = $2,'
-                           ' mm_metadata_json = $3,'
-                           ' mm_metadata_localimage_json = $4'
-                           ' where mm_metadata_media_id = $5',
-                           (series_id_json, result_json['title'],
-                            json.dumps(result_json), json.dumps(image_json),
-                            result_json['id']))
-    self.db_commit()
-
-
-// TODO port query
-def db_meta_genre_list_count(self):
-    """
-    # count all the generes
-    """
-    self.db_cursor.execute('select distinct jsonb_array_elements_text(mm_metadata_json'
-                           '->'genres')b'
-                           ' from mm_metadata_movie')
-    return len(self.db_cursor.fetchall())
-
-
-// TODO port query
-def db_meta_guid_by_tmdb(self, tmdb_uuid):
-    """
-    # see if metadata exists type and id
-    """
-    self.db_cursor.execute('select mm_metadata_guid'
-                           ' from mm_metadata_movie'
-                           ' where mm_metadata_media_id = $1',
-                           (tmdb_uuid,))
-    try:
-        return self.db_cursor.fetchone()['mm_metadata_guid']
-    except:
-        return None
-
-// TODO port query
-def db_meta_tmdb_count(self, tmdb_id):
-    """
-    # see if metadata exists via themovedbid
-    """
-    self.db_cursor.execute('select exists(select 1 from mm_metadata_movie'
-                           ' where mm_metadata_media_id = $1 limit 1) limit 1', (tmdb_id,))
-    return self.db_cursor.fetchone()[0]
-
-
-// TODO port query
-def db_meta_movie_count(self, search_value=None):
-    if search_value != None:
-        self.db_cursor.execute('select count(*) from mm_metadata_movie '
-                               ' where mm_metadata_name %% $1',
-                               (search_value,))
-    else:
-        self.db_cursor.execute('select count(*) from mm_metadata_movie')
-    return self.db_cursor.fetchone()[0]
-
-
-// TODO port query
-def db_meta_movie_list(self, offset=0, records=None, search_value=None):
-    """
-    # return list of movies
-    """
-    if search_value != None:
-        self.db_cursor.execute('select mm_metadata_guid,mm_metadata_name,'
-                               'mm_metadata_json->'release_date' as mm_date,'
-                               'mm_metadata_localimage_json->'Poster' as mm_poster,'
-                               'mm_metadata_user_json'
-                               ' from mm_metadata_movie where mm_metadata_guid'
-                               ' in (select mm_metadata_guid'
-                               ' from mm_metadata_movie where mm_metadata_name %% $1'
-                               ' order by mm_metadata_name offset $2 limit $3)'
-                               ' order by mm_metadata_name, mm_date',
-                               (search_value, offset, records))
-    else:
-        self.db_cursor.execute('select mm_metadata_guid,mm_metadata_name,'
-                               'mm_metadata_json->'release_date' as mm_date,'
-                               'mm_metadata_localimage_json->'Poster' as mm_poster,'
-                               'mm_metadata_user_json'
-                               ' from mm_metadata_movie '
-                               'where mm_metadata_guid in (select mm_metadata_guid'
-                               ' from mm_metadata_movie order by mm_metadata_name offset $1 limit $2)'
-                               ' order by mm_metadata_name, mm_date', (offset, records))
-    return self.db_cursor.fetchall()
 
 
 // TODO port query
@@ -184,22 +88,6 @@ def db_meta_fetch_media_id_json(self, media_id_id,
         return None
 
 
-// TODO port query
-def db_meta_fetch_series_media_id_json(self, media_id_id,
-                                       collection_media=False):
-    """
-    Fetch series json by id
-    """
-    if not collection_media:
-        self.db_cursor.execute('select mm_metadata_tvshow_guid,'
-                               ' mm_metadata_media_tvshow_id'
-                               ' from mm_metadata_tvshow'
-                               ' where mm_metadata_media_tvshow_id = $1',
-                               (media_id_id,))
-        try:
-            return self.db_cursor.fetchone()
-        except:
-            return None
 
 
 // TODO port query

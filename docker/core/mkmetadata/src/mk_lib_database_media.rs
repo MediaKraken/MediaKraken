@@ -240,23 +240,6 @@ pub async fn mk_lib_database_media_ffmpeg_update(pool: &sqlx::PgPool,
 }
 
 /*
-// TODO port query
-def db_read_media(self, media_guid=None):
-    """
-    # read in all media unless guid specified
-    """
-    if media_guid != None:
-        self.db_cursor.execute(
-            'select * from mm_media'
-            ' where mm_media_guid = $1', (media_guid,))
-        try:
-            return self.db_cursor.fetchone()
-        except:
-            return None
-    else:
-        self.db_cursor.execute('select * from mm_media')
-        return self.db_cursor.fetchall()
-
 
 // TODO port query
 def db_media_rating_update(self, media_guid, user_id, status_text):

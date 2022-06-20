@@ -126,7 +126,7 @@ pub async fn mk_lib_database_metadata_game_by_name_and_system(pool: &sqlx::PgPoo
     if game_system_short_name != "" {
         select_query = sqlx::query("select gi_id, gi_game_info_json \
             from mm_metadata_game_software_info \
-            where gi_game_info_name = $1 and gi_game_info_system_id = $2")
+            where gi_game_info_name = $1 and game_system_short_name = $2")
             .bind(game_name)
             .bind(game_system_short_name)
             .bind(offset)
@@ -148,15 +148,6 @@ pub async fn mk_lib_database_metadata_game_by_name_and_system(pool: &sqlx::PgPoo
         .await?;
     Ok(table_rows)
 }
-
-/*
-    if game_system_short_name is None:
-        self.db_cursor.execute("",
-                               (game_name,))
-    else:
-        self.db_cursor.execute("",
-                               (game_name, game_system_short_name))
-*/
 
 pub async fn mk_lib_database_metadata_game_upsert(pool: &sqlx::PgPool,
                                                   game_system_id: Uuid,

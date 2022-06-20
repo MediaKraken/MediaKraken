@@ -14,7 +14,7 @@ mod provider_pitchfork;
 mod provider_shoutcast;
 
 pub async fn metadata_music_lookup(pool: &sqlx::PgPool,
-                                   download_data: PgRow)
+                                   download_data: serde_json::Value)
                                    -> Result<Uuid, sqlx::Error> {
     let mut metadata_uuid = uuid::Uuid::nil();  // so not found checks verify later
     Ok(metadata_uuid)

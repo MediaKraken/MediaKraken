@@ -12,7 +12,7 @@ pub async fn db_iradio_insert(self, radio_channel):
     """
     Insert iradio channel
     """
-    // TODO exists
+    // TODO exists upsert!
     if await db_conn.fetchval('select count(*) from mm_radio'
                               ' where mm_radio_address = $1',
                               radio_channel) == 0:

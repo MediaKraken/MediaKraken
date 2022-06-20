@@ -15,13 +15,13 @@
     <div><div>
     {% if template_data %}
     {% if pagination_bar != "" %}
-        {{ pagination_bar }}
+        {{ pagination_bar|safe }}
     {% endif %}
     <div id="the-node">
         {% for row_data in template_data %}
         <div class="main_photo">
             <div class="media_context_right" data-id={{row_data[0]}}>
-                <a href= "/user/metadata/music_video_detail, guid=row_data[0]) }}" >
+                <a href= "/user/metadata/music_video_detail/{{row_data[0]}}" >
                 {% if row_data[3] == None %}
                 <img src= "/static/image/Movie-icon.png" loading="lazy" height="300" width="200">
                 </a>
@@ -46,7 +46,7 @@
         {% endfor %}
     </div>
     {% if pagination_bar != "" %}
-        {{ pagination_bar }}
+        {{ pagination_bar|safe }}
     {% endif %}
     {% else %}
     <p id="general_text">No music video metadata found.</p>
