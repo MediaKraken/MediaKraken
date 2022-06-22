@@ -18,7 +18,7 @@ pub struct MetadataAdultLastLookup {
 }
 
 pub async fn metadata_adult_lookup(pool: &sqlx::PgPool,
-                                   download_data: serde_json::Value,
+                                   download_data: PgRow,
                                    file_name: Metadata)
                                    -> Result<Uuid, sqlx::Error> {
     // don't bother checking title/year as the main_server_metadata_api_worker does it already

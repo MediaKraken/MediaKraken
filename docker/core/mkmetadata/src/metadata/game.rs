@@ -11,7 +11,7 @@ mod provider_giant_bomb;
 mod mk_provider_thegamesdb;
 
 pub async fn metadata_game_lookup(pool: &sqlx::PgPool,
-                                  download_data: serde_json::Value)
+                                  download_data: PgRow)
                                   -> Result<Uuid, sqlx::Error> {
     let mut metadata_uuid = uuid::Uuid::nil();  // so not found checks verify later
     // TODO remove the file extension

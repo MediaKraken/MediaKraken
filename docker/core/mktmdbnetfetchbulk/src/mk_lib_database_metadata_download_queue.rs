@@ -5,9 +5,19 @@ use sqlx::{FromRow, Row};
 use sqlx::{types::Uuid, types::Json};
 use serde::{Serialize, Deserialize};
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBDownloadQueueByProviderList {
+	pub mm_download_guid: uuid::Uuid,
+	pub mm_download_que_type: i8,
+	pub mm_download_new_uuid: uuid::Uuid,
+    pub mm_download_provider_id: i32,
+	pub mm_download_status: String,
+	pub mm_download_path: String,
+}
+
 pub async fn mk_lib_database_download_queue_by_provider(pool: &sqlx::PgPool, provider_name: &str)
-                                                        -> Result<Vec<PgRow>, sqlx::Error> {
-    let rows = sqlx::query("select mm_download_guid, \
+                                                        -> Result<Vec<DBDownloadQueueByProviderList>, sqlx::Error> {
+    let select_query = sqlx::query("select mm_download_guid, \
         mm_download_que_type, \
         mm_download_new_uuid, \
         mm_download_provider_id, \
@@ -16,10 +26,19 @@ pub async fn mk_lib_database_download_queue_by_provider(pool: &sqlx::PgPool, pro
         from mm_metadata_download_que \
         where mm_download_provider = $1 \
         order by mm_download_que_type limit 50")
-        .bind(provider_name)
+        .bind(provider_name);
+    let table_rows: Vec<DBDownloadQueueByProviderList> = select_query
+        .map(|row: PgRow| DBDownloadQueueByProviderList {
+            mm_download_guid: row.get("mm_download_guid"),
+            mm_download_que_type: row.get("mm_download_que_type"),
+            mm_download_new_uuid: row.get("mm_download_new_uuid"),
+            mm_download_provider_id: row.get("mm_download_provider_id"),
+            mm_download_status: row.get("mm_download_status"),
+            mm_download_path: row.get("mm_download_path"),
+        })
         .fetch_all(pool)
         .await?;
-    Ok(rows)
+    Ok(table_rows)
 }
 
 pub async fn mk_lib_database_download_queue_delete(pool: &sqlx::PgPool, download_guid: uuid::Uuid)

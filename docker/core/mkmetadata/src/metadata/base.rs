@@ -38,31 +38,23 @@ mod mk_lib_database_metadata_download_queue;
 
 pub async fn metadata_process(pool: &sqlx::PgPool,
                               provider_name: String,
-                              dl_row: sqlx::postgres::PgRow)
+                              download_data: serde_json::Value)
                               -> Result<(), Box<dyn Error>> {
     // TODO art, posters, trailers, etc in here as well
-    match dl_row.get("mdq_status") {
-        "Search" => {
-            metadata_search(&pool, provider_name, dl_row).await;
-        } 
-        "Update" => {
-            metadata_update(&pool, provider_name, dl_row).await;
-        } 
-        "Fetch" => {
-            metadata_fetch(&pool, provider_name, dl_row).await;
-        } 
-        "FetchCastCrew" => {
-            metadata_castcrew(&pool, provider_name, dl_row).await;
-        } 
-        "FetchReview" => {
-            metadata_review(&pool, provider_name, dl_row).await;
-        } 
-        "FetchImage" => {
-            metadata_image(&pool, provider_name, dl_row).await;
-        } 
-        "FetchCollection" => {
-            metadata_collection(&pool, provider_name, dl_row).await;
-        }
+    if download_data["mdq_status"] == "Search" {
+        metadata_search(&pool, provider_name, download_data).await;
+    } else if download_data["mdq_status"] == "Update" {
+        metadata_update(&pool, provider_name, download_data).await;
+    } else if download_data["mdq_status"] == "Fetch" {
+        metadata_fetch(&pool, provider_name, download_data).await;
+    } else if download_data["mdq_status"] == "FetchCastCrew" {
+        metadata_castcrew(&pool, provider_name, download_data).await;
+    } else if download_data["mdq_status"] == "FetchReview" {
+        metadata_review(&pool, provider_name, download_data).await;
+    } else if download_data["mdq_status"] == "FetchImage" {
+        metadata_image(&pool, provider_name, download_data).await;
+    } else if download_data["mdq_status"] == "FetchCollection" {
+        metadata_collection(&pool, provider_name, download_data).await;
     }
     Ok(())
 }

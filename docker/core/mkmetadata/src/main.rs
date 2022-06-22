@@ -77,7 +77,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         for row_data in metadata_to_process {
             let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
             // check for dupes by name/year
-            let row_data_path: String = row_data.get("mm_download_path");
+            let row_data_path: String = row_data.mm_download_path;
             println!("Path: {:?}", row_data_path);
             let file_name = Path::new(&row_data_path).file_name().unwrap().to_os_string().into_string().unwrap();
             println!("File: {:?}", file_name);
@@ -111,15 +111,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             } else {
                 mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_update_provider(&sqlx_pool,
                                                                                                                  "ZZ".to_string(),
-                                                                                                                 row_data.get("mdq_id")).await.unwrap();
+                                                                                                                 row_data.mm_download_guid).await.unwrap();
             }
-            // update the media row with the json media id and the proper name
-            if metadata_uuid != uuid::Uuid::nil() {
-                mk_lib_database_media::mk_lib_database_media_update_metadata_guid(&sqlx_pool,
-                                                                                  row_data.get("mdq_provider_id"),
-                                                                                  metadata_uuid,
-                                                                                  row_data.get("mdq_id")).await.unwrap();
-            }
+            // // update the media row with the json media id and the proper name
+            // if metadata_uuid != uuid::Uuid::nil() {
+            //     mk_lib_database_media::mk_lib_database_media_update_metadata_guid(&sqlx_pool,
+            //                                                                       row_data.mm_download_provider_id,
+            //                                                                       metadata_uuid,
+            //                                                                       row_data.mm_download_guid).await.unwrap();
+            // }
         }
         sleep(Duration::from_secs(1)).await;
     }
