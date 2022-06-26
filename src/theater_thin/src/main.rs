@@ -1,7 +1,6 @@
 use fltk::{enums::Color, prelude::*, *};
 use fltk::{app, button::Button, frame::Frame, image::SharedImage, prelude::*, window::Window};
 use std::error::Error;
-use argh::FromArgs;
 use std::fs::File;
 use std::io;
 use std::io::BufReader;

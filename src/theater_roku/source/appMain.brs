@@ -22,4 +22,3 @@ Sub initTheme()
     theme.OverhangLogoHD  = "pkg:/images/Overhang_Logo_HD.png"
     app.SetTheme(theme)
 End Sub
-
