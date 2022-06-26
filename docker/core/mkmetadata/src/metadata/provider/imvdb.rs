@@ -10,10 +10,6 @@ mod mk_lib_network;
 
 const BASE_API_URL: String = "http://imvdb.com/api/v1".to_string();
 
-pub struct IMVDBAPI {
-    pub imvdb_api_key: String,
-}
-
 /*
 
 class CommonMetadataIMVdb:

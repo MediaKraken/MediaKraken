@@ -20,14 +20,10 @@ mod mk_lib_database_metadata_person;
 #[path = "../../mk_lib_database_metadata_tv.rs"]
 mod mk_lib_database_metadata_tv;
 
-pub struct TMDBAPI {
-    pub tmdb_api_key: String,
-}
-
 pub async fn provider_tmdb_movie_fetch(pool: &sqlx::PgPool, tmdb_id: i32, metadata_uuid: Uuid) {
     // fetch and save json data via tmdb id
     let result_json = provider_tmdb_movie_fetch_by_id(tmdb_id).await.unwrap();
-    let mut series_id: serde_json::Value;
+    let mut series_id: i32;
     let mut image_json: serde_json::Value;
     (series_id, result_json, image_json) = provider_tmdb_meta_info_build(result_json).await.unwrap();
     mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_insert(pool,
@@ -35,13 +31,13 @@ pub async fn provider_tmdb_movie_fetch(pool: &sqlx::PgPool, tmdb_id: i32, metada
                                                                           series_id,
                                                                           result_json,
                                                                           image_json);
-    if result_json.contains_key("credits") {  // cast/crew doesn't exist on all media
-        if result_json["credits"].contains_key("cast") {
+    if result_json.get("credits") != None {  // cast/crew doesn't exist on all media
+        if result_json["credits"].get("cast") != None {
             mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert_cast_crew(pool,
                                                                                               result_json["credits"]["cast"]).await;
         }
 
-        if result_json["credits"].contains_key("crew") {
+        if result_json["credits"].get("crew") != None {
             mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert_cast_crew(pool,
                                                                                               result_json["credits"]["crew"]).await;
         }
@@ -68,78 +64,78 @@ pub async fn provider_tmdb_movie_fetch(pool: &sqlx::PgPool, tmdb_id: i32, metada
     return metadata_uuid
  */
 
-pub async fn provider_tmdb_movie_id_max()
+pub async fn provider_tmdb_movie_id_max(api_key: String)
     -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result = mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/movie/latest?api_key={}",
-                TMDBAPI.tmdb_api_key)).await.unwrap();
+        api_key)).await.unwrap();
     Ok(url_result)
 }
 
-pub async fn provider_tmdb_person_id_max()
+pub async fn provider_tmdb_person_id_max(api_key: String)
     -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result =  mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/person/latest?api_key={}",
-                TMDBAPI.tmdb_api_key)).await.unwrap();
+        api_key)).await.unwrap();
     Ok(url_result)
 }
 
-pub async fn provider_tmdb_tv_id_max()
+pub async fn provider_tmdb_tv_id_max(api_key: String)
     -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result =  mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/tv/latest?api_key={}",
-                TMDBAPI.tmdb_api_key)).await.unwrap();
+        api_key)).await.unwrap();
     Ok(url_result)
 }
 
-pub async fn provider_tmdb_collection_fetch_by_id(tmdb_id: i32)
+pub async fn provider_tmdb_collection_fetch_by_id(api_key: String, tmdb_id: i32)
     -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result =  mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/collection/{}?api_key={}",
-                tmdb_id, TMDBAPI.tmdb_api_key)).await.unwrap();
+        tmdb_id, api_key)).await.unwrap();
     Ok(url_result)
 }
 
-pub async fn provider_tmdb_movie_fetch_by_id(tmdb_id: i32)
+pub async fn provider_tmdb_movie_fetch_by_id(api_key: String, tmdb_id: i32)
     -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result =  mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/movie/{}?api_key={}\
         &append_to_response=credits,reviews,release_dates,videos",
-                tmdb_id, TMDBAPI.tmdb_api_key)).await.unwrap();
+                tmdb_id, api_key)).await.unwrap();
     Ok(url_result)
 }
 
-pub async fn provider_tmdb_person_changes()
+pub async fn provider_tmdb_person_changes(api_key: String)
     -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result =  mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/person/changes?api_key={}",
-                TMDBAPI.tmdb_api_key)).await.unwrap();
+        api_key)).await.unwrap();
     Ok(url_result)
 }
 
-pub async fn provider_tmdb_person_fetch_by_id(tmdb_id: i32)
+pub async fn provider_tmdb_person_fetch_by_id(api_key: String, tmdb_id: i32)
     -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result =  mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/person/{}?api_key={}\
         &append_to_response=combined_credits,external_ids,images",
-                tmdb_id, TMDBAPI.tmdb_api_key)).await.unwrap();
+                tmdb_id, api_key)).await.unwrap();
     Ok(url_result)
 }
 
-pub async fn provider_tmdb_review_fetch_by_id(tmdb_id: i32)
+pub async fn provider_tmdb_review_fetch_by_id(api_key: String, tmdb_id: i32)
     -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result =  mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/review/{}?api_key={}",
-                tmdb_id, TMDBAPI.tmdb_api_key)).await.unwrap();
+                tmdb_id, api_key)).await.unwrap();
     Ok(url_result)
 }
 
-pub async fn provider_tmdb_tv_fetch_by_id(tmdb_id: i32)
+pub async fn provider_tmdb_tv_fetch_by_id(api_key: String, tmdb_id: i32)
     -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result =  mk_lib_network::mk_data_from_url_to_json(
         format!("https://api.themoviedb.org/3/tv/{}?api_key={}\
         &append_to_response=credits,reviews,release_dates,videos",
-                tmdb_id, TMDBAPI.tmdb_api_key)).await.unwrap();
+                tmdb_id, api_key)).await.unwrap();
     Ok(url_result)
 }
 
