@@ -12,12 +12,6 @@ pub struct PGTableRows {
 	table_rows: f32,
 }
 
-#[derive(Debug, FromRow, Deserialize, Serialize)]
-pub struct PGTableSize {
-	table_name: String,
-	table_size: i64,
-}
-
 pub async fn mk_lib_database_table_rows(pool: &sqlx::PgPool)
                                         -> Result<Vec<PGTableRows>, sqlx::Error> {
     // query provided by postgresql wiki
@@ -34,6 +28,12 @@ pub async fn mk_lib_database_table_rows(pool: &sqlx::PgPool)
 		.fetch_all(pool)
 		.await?;
     Ok(table_rows)
+}
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct PGTableSize {
+	table_name: String,
+	table_size: i64,
 }
 
 pub async fn mk_lib_database_table_size(pool: &sqlx::PgPool)

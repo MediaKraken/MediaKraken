@@ -7,10 +7,10 @@ use huelib::resource::sensor;
 use huelib::{bridge, Bridge};
 use tokio::time::{Duration, sleep};
 use futures_util::{pin_mut, stream::StreamExt};
-use mdns::{Record, RecordKind};
 use std::{net::IpAddr};
 
-const CHROMECAST_SERVICE_NAME: &'static str = "_googlecast._tcp.local";
+#[path = "mk_lib_hardware_chromecast.rs"]
+mod mk_lib_hardware_chromecast;
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -42,18 +42,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         LOGGING_INDEX_NAME).await;
 
     // chromecast discover
-    let stream = mdns::discover::all(CHROMECAST_SERVICE_NAME, Duration::from_secs(15))?.listen();
-    pin_mut!(stream);
-    while let Some(Ok(response)) = stream.next().await {
-        let addr = response.records()
-                           .filter_map(self::to_ip_addr)
-                           .next();
-        if let Some(addr) = addr {
-            println!("found cast device at {}", addr);
-        } else {
-            println!("cast device does not advertise address");
-        }
-    }
+    mk_lib_hardware_chromecast::mk_hardware_chromecast_discover();
 
 // for chromecast_ip, model_name, friendly_name \
 //         in common_hardware_chromecast.com_hard_chrome_discover():

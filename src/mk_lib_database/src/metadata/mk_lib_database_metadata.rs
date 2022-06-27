@@ -7,7 +7,7 @@ use sqlx::{FromRow, Row};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetadataGenreCountList {
-	gen: String,
+	genre: String,
     mm_count: i64,
 }
 
@@ -19,7 +19,7 @@ pub async fn mk_lib_database_metadata_genre_count_read(pool: &sqlx::PgPool)
         order by jsonb_array_elements_text(mm_metadata_json->'genres')b");
     let table_rows: Vec<DBMetadataGenreCountList> = select_query
 		.map(|row: PgRow| DBMetadataGenreCountList {
-			gen: row.get("genre"),
+			genre: row.get("genre"),
             mm_count: row.get("mm_count"),
 		})
 		.fetch_all(pool)
@@ -29,7 +29,7 @@ pub async fn mk_lib_database_metadata_genre_count_read(pool: &sqlx::PgPool)
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetadataGenreList {
-	gen: String,
+	genre: String,
 }
 
 pub async fn mk_lib_database_metadata_genre_read(pool: &sqlx::PgPool,
@@ -42,7 +42,7 @@ pub async fn mk_lib_database_metadata_genre_read(pool: &sqlx::PgPool,
         .bind(limit);
     let table_rows: Vec<DBMetadataGenreList> = select_query
 		.map(|row: PgRow| DBMetadataGenreList {
-			gen: row.get("genre"),
+			genre: row.get("genre"),
 		})
 		.fetch_all(pool)
 		.await?;
