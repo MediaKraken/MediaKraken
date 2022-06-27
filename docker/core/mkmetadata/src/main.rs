@@ -56,7 +56,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // launch thread per provider
     let handle_tmdb = tokio::spawn(async move {
-        metadata_provider_tmdb::TMDBAPI.tmdb_api_key = option_json["API"]["themoviedb"];
+        let tmdb_api_key = option_json["API"]["themoviedb"];
         loop {
             let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "themoviedb").await.unwrap();
             for row_data in metadata_to_process {

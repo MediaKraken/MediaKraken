@@ -4,6 +4,9 @@
 
 use hls_m3u8::MediaPlaylist;
 
+const M3U_HEADER: String = "EXTM3U\n";
+const M3U_LINE_HEADER: String = "EXTINF:";
+
 pub fn mk_lib_metadata_m3u8_validate_playlist(playlist: &str) {
     let valid_playlist = playlist.parse::<MediaPlaylist>().is_ok();
     valid_playlist
@@ -11,9 +14,6 @@ pub fn mk_lib_metadata_m3u8_validate_playlist(playlist: &str) {
 
 
 /*
-// global statics
-M3U_HEADER = "EXTM3U\n"
-M3U_LINE_HEADER = "EXTINF:"
 
 '''
 #EXTM3U
