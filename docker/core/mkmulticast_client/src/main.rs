@@ -1,5 +1,7 @@
 use std::net::UdpSocket;
 
+// firewalld can't be running! Or allow multicast in firewalld?
+
 fn main() {
     let socket = UdpSocket::bind("0.0.0.0:9999").unwrap();
     let buf = [1u8; 15000];
@@ -18,9 +20,4 @@ fn main() {
             println!("client: had a problem: {}", err);
         }
     }
-
-    // let mut receive_buf = [0u8; 65535];
-    // let (amt, remote_addr) = socket.recv_from(&mut receive_buf).unwrap();
-    // println!("received {} bytes from {:?}", amt, remote_addr);
-    // println!("buf {:?}", receive_buf);
 }
