@@ -10,6 +10,12 @@ lto = true
 codegen-units = 1
 
 [dependencies]
+pnet = "0.30.0"
+#lazy_static = "1.4.0"
+shiplift = { version = "0.7", default-features = false, features = ["unix-socket"] }
+#socket2 = { version = "0.4.4", features = ["all"] }
+socket2 = { version = "0.3.4", features = ["reuseport"] }
+tokio = { version = "1.18.2", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"
