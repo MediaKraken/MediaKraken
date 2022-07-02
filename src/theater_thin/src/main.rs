@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use fltk::{enums::Color, prelude::*, *};
 use fltk::{app, button::Button, frame::Frame, image::SharedImage, prelude::*, window::Window};
 use std::error::Error;
@@ -8,7 +10,14 @@ use std::net::ToSocketAddrs;
 use std::path::PathBuf;
 use std::sync::Arc;
 
+#[path = "../../mk_lib_network/src/mk_lib_network.rs"]
+mod mk_lib_network;
+
+#[path = "../../mk_lib_network/src/mk_lib_network_mediakraken.rs"]
+mod mk_lib_network_mediakraken;
+
 fn main() {
+    let server_list = mk_lib_network_mediakraken::mk_lib_network_find_mediakraken_server();
     let app = app::App::default().with_scheme(app::AppScheme::Gtk);
     let mut win = window::Window::new(100, 100, 800, 600, "Media Player");
 

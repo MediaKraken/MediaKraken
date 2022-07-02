@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use fltk::{app, button::Button, frame::Frame, image::SharedImage, prelude::*, window::Window};
 use std::error::Error;
 use std::fs::File;
@@ -6,11 +8,16 @@ use std::io::BufReader;
 use std::net::ToSocketAddrs;
 use std::path::PathBuf;
 use std::sync::Arc;
+use crossbeam_channel::unbounded;
 
 #[path = "../../mk_lib_network/src/mk_lib_network.rs"]
 mod mk_lib_network;
 
+#[path = "../../mk_lib_network/src/mk_lib_network_mediakraken.rs"]
+mod mk_lib_network_mediakraken;
+
 fn main() -> Result<(), Box<dyn Error>> {
+    let server_list = mk_lib_network_mediakraken::mk_lib_network_find_mediakraken_server();
     let app = app::App::default().with_scheme(app::Scheme::Gleam);
     let mut window_main = Window::default().with_size(800, 480); // pi 7" screen default
     let mut window_menu = Window::default().with_size(800, 480);

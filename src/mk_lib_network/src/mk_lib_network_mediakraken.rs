@@ -1,8 +1,11 @@
-use std::net::UdpSocket;
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-// firewalld can't be running! Or allow multicast in firewalld?
+use std::net::UdpSocket;
+use std::error::Error;
 
 /*
+firewalld can't be running! Or allow multicast in firewalld
+
 firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT 0 -m pkttype --pkt-type multicast -j ACCEPT
 
 firewall-cmd --permanent --direct --add-rule ipv6 filter INPUT 0 -m pkttype --pkt-type multicast -j ACCEPT
@@ -10,7 +13,8 @@ firewall-cmd --permanent --direct --add-rule ipv6 filter INPUT 0 -m pkttype --pk
 firewall-cmd --reload
  */
 
-fn main() {
+pub async fn mk_lib_network_find_mediakraken_server()
+                                                    -> Result<String, std::Error> {
     let socket = UdpSocket::bind("0.0.0.0:9999").unwrap();
     let buf = [1u8; 15000];
     let mut count = 1473;
@@ -23,9 +27,11 @@ fn main() {
             let data = &buf[..len];
             let response = String::from_utf8_lossy(data);
             println!("{} - client: got data: {}", remote_addr, response);
+            return response;
         }
         Err(err) => {
             println!("client: had a problem: {}", err);
+            return "Invalid";
         }
     }
 }
