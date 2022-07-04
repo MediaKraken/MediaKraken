@@ -1,7 +1,6 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
 use std::net::UdpSocket;
-use std::error::Error;
 
 /*
 firewalld can't be running! Or allow multicast in firewalld
@@ -14,7 +13,7 @@ firewall-cmd --reload
  */
 
 pub async fn mk_lib_network_find_mediakraken_server()
-                                                    -> Result<String, std::Error> {
+                                                    -> Result<String, std::error::Error> {
     let socket = UdpSocket::bind("0.0.0.0:9999").unwrap();
     let buf = [1u8; 15000];
     let mut count = 1473;

@@ -30,6 +30,8 @@ mod mk_lib_database_version;
 mod mk_lib_network;
 #[path = "mk_lib_database_metadata_game.rs"]
 mod mk_lib_database_metadata_game;
+#[path = "mk_lib_database_metadata_game_system.rs"]
+mod mk_lib_database_metadata_game_system;
 
 // technically arcade games are "systems"....
 // they just don"t have @isdevice = "yes" like mess hardware does
@@ -66,7 +68,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         if !Path::new(&unzip_file_name).exists()
         {
             mk_lib_compression::mk_decompress_zip(&file_name,
-                                                  true,
                                                   false,
                                                   "/mediakraken/emulation/").unwrap();
             let file = File::open(&unzip_file_name)?;
@@ -83,8 +84,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 } else if xml_line.starts_with("</machine") == true {
                     xml_data.push_str(xml_line);
                     let json_data = xml_string_to_json(xml_data.to_string(), &conf).unwrap();
+                    // name is short name
+                    // description is long name
                     mk_lib_database_metadata_game::mk_lib_database_metadata_game_upsert(
                         &sqlx_pool,
+                        uuid::Uuid::nil(),
                         json_data["machine"]["@name"].to_string(),
                         json_data["machine"]["description"].to_string(),
                         json_data).await.unwrap();
@@ -104,118 +108,71 @@ async fn main() -> Result<(), Box<dyn Error>> {
             format!("https://github.com/mamedev/mame/archive/mame0{}.zip",
                     option_config_json["MAME"]["Version"]),
             &file_name).await.unwrap();
-        mk_lib_compression.mk_decompress_zip(&file_name, false, &"/mediakraken/emulation/");
-        for zippedfile in mk_lib_file.mk_directory_walk(format!("/mediakraken/emulation/mame-mame0{}/hash",
-                                                                option_config_json["MAME"]["Version"])) {
-            // find system id from mess
-            let file_name = Path::new(zippedfile).file_stem().unwrap();
-            let ext = Path::new(zippedfile).extension().unwrap();
-            if ext == ".xml" || ext == ".hsi" {
-            //             file_handle = open(os.path.join(format!("/mediakraken/emulation/mame-mame0{}/hash",
-            //                                              option_config_json["MAME"]["Version"]), zippedfile),
-            //                                "r",
-            //                                encoding="utf-8")
-            //             json_data = xmltodict.parse(file_handle.read())
-            //             file_handle.close()
-            //             let mut game_short_name_guid = db_connection.db_meta_games_system_guid_by_short_name(file_name)
-            //             if game_short_name_guid == None:
-            //                 game_short_name_guid = db_connection.db_meta_games_system_insert(None, file_name, None)
-            //             if ext == ".xml":
-            // could be no games in list
-            //                 if "software" in json_data["softwarelist"]:
-            // TODO this fails if only one game
-            //                     if "@name" in json_data["softwarelist"]["software"]:
-            //                         db_connection.db_meta_game_insert(game_short_name_guid,
-            //                                                           json_data["softwarelist"]["software"][
-            //                                                               "@name"],
-            //                                                           json_data["softwarelist"]["software"][
-            //                                                               "@name"],
-            //                                                           json_data["softwarelist"]["software"])
-            //                     else:
-            //                         for json_game in json_data["softwarelist"]["software"]:
-            // json_game = json.loads(json_game)
-            // build args and insert the record
-            //                             db_connection.db_meta_game_upsert(game_short_name_guid,
-            //                                                               json_game["@name"],
-            //                                                               json_game["@name"], json_game)
-            //             else if ext == ".hsi":
-            // could be no games in list
-            //                 if "hash" in json_data["hashfile"]:
-            //                     if "@name" in json_data["hashfile"]["hash"]:
-            //                         db_connection.db_meta_game_upsert(game_short_name_guid,
-            //                                                           json_data["hashfile"]["hash"][
-            //                                                               "@name"],
-            //                                                           json_data["hashfile"]["hash"][
-            //                                                               "@name"],
-            //                                                           json_data["hashfile"]["hash"])
-            //                     else:
-            //                         for json_game in json_data["hashfile"]["hash"]:
-            // build args and insert the record
-            //                             db_connection.db_meta_game_upsert(game_short_name_guid,
-            //                                                               json_game["@name"],
-            //                                                               json_game["@name"], json_game)
+        mk_lib_compression::mk_decompress_zip(&file_name, 
+            false, &"/mediakraken/emulation/").unwrap();
+        for zippedfile in mk_lib_file::mk_directory_walk(format!("/mediakraken/emulation/mame-mame0{}/hash",
+                                                                option_config_json["MAME"]["Version"])).unwrap() {
+            //let file_name = Path::new(&zippedfile).file_stem().unwrap();
+            let ext = Path::new(&zippedfile).extension().unwrap();
+            if ext == ".xml" {
+                let file = File::open(&zippedfile)?;
+                let reader = BufReader::new(file);
+                let mut xml_data: String = "".to_owned();
+                let conf = Config::new_with_custom_values(true, "", "text", NullValue::Ignore)
+                    .add_json_type_override("/software/@name", JsonArray::Infer(JsonType::AlwaysString))
+                    .add_json_type_override("/software/year", JsonArray::Infer(JsonType::AlwaysString))
+                    .add_json_type_override("/software/publisher", JsonArray::Infer(JsonType::AlwaysString));
+                let mut game_system_uuid = uuid::Uuid::nil();
+                for line in reader.lines() {
+                    let xml_line = &line.unwrap().trim().to_string();
+                    // fetch sytem id from /softwarelist/@name
+                    if xml_line.starts_with("<softwarelist") == true {
+                        let system_string_split: Vec<&str> = xml_line.split("\"").collect();                        
+                        game_system_uuid = mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(&sqlx_pool, system_string_split[1].to_string()).await.unwrap();
+                        if game_system_uuid == uuid::Uuid::nil() {
+                            game_system_uuid = mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool, system_string_split[1].to_string(), String::new(), json!({})).await.unwrap(); 
+                        }
+                    } else if xml_line.starts_with("<software") == true {
+                        xml_data = xml_line.to_string();
+                    } else if xml_line.starts_with("</software") == true {
+                        xml_data.push_str(xml_line);
+                        let json_data = xml_string_to_json(xml_data.to_string(), &conf).unwrap();
+                        // name is short name
+                        // description is long name
+                        mk_lib_database_metadata_game::mk_lib_database_metadata_game_upsert(
+                            &sqlx_pool,
+                            game_system_uuid,
+                            json_data["software"]["@name"].to_string(),
+                            json_data["software"]["description"].to_string(),
+                            json_data).await.unwrap();
+                    } else {
+                        xml_data.push_str(xml_line);
+                    }
+                }
+            }
         }
-    }
     }
 
     // update mame game descriptions from history dat
-    let file_name = format!("/mediakraken/emulation/history{}.zip",
+    let file_name = format!("/mediakraken/emulation/historyxml{}.zip",
                             option_config_json["MAME"]["Version"]);
     // only do the parse/import if not processed before
     if !Path::new(&file_name).exists() {
         mk_lib_network::mk_download_file_from_url(
-            format!("https://www.arcade-history.com/dats/historydat{}.zip",
+            format!("https://www.arcade-history.com/dats/historyxml{}.zip",
                     option_config_json["MAME"]["Version"]),
             &file_name).await.unwrap();
-        let mut game_titles: Vec<String> = Vec::new();
-        let mut game_desc = String::new();
-        let mut add_to_desc = false;
-        let mut new_title = String::new();
-        let mut system_name = String::new();
-        // do this all the time, since could be a new one
-        //     with zipfile.ZipFile(file_name, "r") as zf:
-        //         zf.extract("history.dat", "/mediakraken/emulation/")
+        mk_lib_compression::mk_decompress_zip(&file_name, 
+            false, &"/mediakraken/emulation/").unwrap();
+    
         //     history_file = open("/mediakraken/emulation/history.dat", "r",
         //                         encoding="utf-8")
-        //     while 1:
-        //         line = history_file.readline()
-        //         // print("line: %s" % line, flush=True)
-        //         if not line:
-        //             break
-        //         if line[0] == "$" and line[-1:] == ",":  // this could be a new system/game item
-        // MAME "system"....generally a PCB game
-        //             if line.find("$info=") == 0:  # goes by position if found
-        //                 system_name = None
-        //                 game_titles = line.split("=", 1)[1].split(",")
-        // end of info block for game
-        //             else if line.find("$end") == 0:  // goes by position if found
-        //                 add_to_desc = false
-        //                 for game in game_titles:
-        //                     game_data = db_connection.db_meta_game_by_name_and_system(game, system_name)[0]
-        //                     if game_data == None:
-        //                         db_connection.db_meta_game_insert(
-        //                             db_connection.db_meta_games_system_guid_by_short_name(
-        //                                 system_name),
-        //                             new_title, game, json.dumps({"overview": game_desc}))
-        //                     else:
-        //                         game_data["gi_game_info_json"]["overview"] = game_desc
-        //                         db_connection.db_meta_game_update_by_guid(game_data["gi_id"],
-        //                                                                   json.dumps(game_data[
-        //                                                                                  "gi_game_info_json"]))
-        //                 game_desc = ""
-        // this line can be skipped and is basically the "start" of game info
-        //             else if line.find("$bio") == 0:  // goes by position if found
-        //                 line = history_file.readline()  // skip blank line
-        //                 new_title = history_file.readline().strip()  // grab the "real" game name
-        //                 add_to_desc = true
-        //             else:
-        // should be a system/game
-        //                 system_name = line[1:].split("=", 1)[0]
-        //                 game_titles = line.split("=", 1)[1].split(",")
-        //         else:
-        //             if add_to_desc:
-        //                 game_desc += line
-        //     history_file.close()
+        let file = File::open(&format!("/mediakraken/emulation/historyxml{}/historyxml{}.xml", option_config_json["MAME"]["Version"], option_config_json["MAME"]["Version"]))?;
+        let reader = BufReader::new(file);
+        let mut xml_data: String = "".to_owned();
+        for line in reader.lines() {
+            let xml_line = &line.unwrap().trim().to_string();
+        }
     }
 
     // read the category file and create dict/list for it

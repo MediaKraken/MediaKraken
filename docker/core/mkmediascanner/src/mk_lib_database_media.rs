@@ -211,7 +211,7 @@ pub async fn mk_lib_database_media_duplicate_detail(pool: &sqlx::PgPool,
     Ok(table_rows)
 }
 
-pub async fn mk_lib_database_media_image_path(pool: &sqlx::PgPool,
+pub async fn mk_lib_database_media_image_path_by_uuid(pool: &sqlx::PgPool,
                                               mm_media_guid: Uuid)
                                               -> Result<serde_json::Value, sqlx::Error> {
     let row: (serde_json::Value, ) = sqlx::query_as("select mm_metadata_localimage_json \
@@ -224,7 +224,7 @@ pub async fn mk_lib_database_media_image_path(pool: &sqlx::PgPool,
     Ok(row.0)
 }
 
-pub async fn mk_lib_database_media_ffmpeg_update(pool: &sqlx::PgPool,
+pub async fn mk_lib_database_media_ffmpeg_update_by_uuid(pool: &sqlx::PgPool,
                                                  mm_media_guid: Uuid,
                                                  ffmpeg_json: serde_json::Value)
                                                  -> Result<(), sqlx::Error> {

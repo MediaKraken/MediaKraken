@@ -10,8 +10,8 @@ mod mk_lib_common_enum_media_type;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaHomeMediaList {
-    mm_metadata_book_guid: uuid::Uuid,
-    mm_metadata_book_name: String,
+    mm_metadata_home_guid: uuid::Uuid,
+    mm_metadata_home_name: String,
 }
 
 pub async fn mk_lib_database_media_home_media_read(pool: &sqlx::PgPool,
@@ -31,8 +31,8 @@ pub async fn mk_lib_database_media_home_media_read(pool: &sqlx::PgPool,
     }
     let table_rows: Vec<DBMediaHomeMediaList> = select_query
         .map(|row: PgRow| DBMediaHomeMediaList {
-            mm_metadata_book_guid: row.get("mm_metadata_book_guid"),
-            mm_metadata_book_name: row.get("mm_metadata_book_name"),
+            mm_metadata_home_guid: row.get("mm_metadata_home_guid"),
+            mm_metadata_home_name: row.get("mm_metadata_home_name"),
         })
         .fetch_all(pool)
         .await?;

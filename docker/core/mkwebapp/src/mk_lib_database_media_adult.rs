@@ -5,10 +5,16 @@ use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
 use serde::{Serialize, Deserialize};
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMediaAdultList {
+	mm_metadata_adult_guid: uuid::Uuid,
+	mm_metadata_adult_name: String,
+}
+
 pub async fn mk_lib_database_media_adult_read(pool: &sqlx::PgPool,
                                               search_value: String,
                                               offset: i32, limit: i32)
-                                              -> Result<Vec<PgRow>, sqlx::Error> {
+                                              -> Result<Vec<DBMediaAdultList>, sqlx::Error> {
     if search_value != "" {
         let rows = sqlx::query("")
             .bind(search_value)

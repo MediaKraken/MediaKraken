@@ -29,11 +29,22 @@ pub async fn mk_lib_database_game_server_read(pool: &sqlx::PgPool,
                                               search_value: String,
                                               offset: i32, limit: i32)
                                               -> Result<Vec<DBGameServerList>, sqlx::Error> {
-    let select_query = sqlx::query("select mm_game_server_guid, mm_game_server_name, \
-        mm_game_server_json from mm_game_dedicated_servers \
-        order by mm_game_server_name offset $1 limit $2")
-        .bind(offset)
-        .bind(limit);
+    let select_query;
+    if search_value != "" {
+        select_query = sqlx::query("select mm_game_server_guid, mm_game_server_name, \
+            mm_game_server_json from mm_game_dedicated_servers \
+            where mm_game_server_name = $1 \
+            order by mm_game_server_name offset $2 limit $3")
+            .bind(search_value)
+            .bind(offset)
+            .bind(limit);
+     } else {
+        select_query = sqlx::query("select mm_game_server_guid, mm_game_server_name, \
+            mm_game_server_json from mm_game_dedicated_servers \
+            order by mm_game_server_name offset $1 limit $2")
+            .bind(offset)
+            .bind(limit);
+    }
     let table_rows: Vec<DBGameServerList> = select_query
         .map(|row: PgRow| DBGameServerList {
             mm_game_server_guid: row.get("mm_game_server_guid"),

@@ -1,5 +1,6 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+use std::net::UdpSocket;
 use std::io::Cursor;
 use std::str;
 use std::io::Read;

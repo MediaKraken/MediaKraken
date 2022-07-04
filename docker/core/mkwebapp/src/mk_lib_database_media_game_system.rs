@@ -5,6 +5,12 @@ use sqlx::postgres::PgRow;
 use serde::{Serialize, Deserialize};
 use sqlx::{FromRow, Row};
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMediaBookList {
+	mm_metadata_book_guid: uuid::Uuid,
+	mm_metadata_book_name: String,
+}
+
 pub async fn mk_lib_database_media_game_system_read(pool: &sqlx::PgPool,
                                                     search_value: String,
                                                     offset: i32, limit: i32)
