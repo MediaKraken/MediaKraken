@@ -162,7 +162,7 @@ pub async fn mk_lib_database_metadata_game_upsert(pool: &sqlx::PgPool,
         gi_game_info_short_name, \
         gi_game_info_name, \
         gi_game_info_json) \
-        values ($1, $2, $3, $4, $5)\
+        values ($1, $2, $3, $4, $5) \
         ON CONFLICT (gi_game_info_short_name) DO UPDATE set gi_game_info_json = $6")
         .bind(new_guid)
         .bind(game_system_id)

@@ -165,45 +165,62 @@ async fn main() -> Result<(), Box<dyn Error>> {
         mk_lib_compression::mk_decompress_zip(&file_name, 
             false, &"/mediakraken/emulation/").unwrap();
     
-        //     history_file = open("/mediakraken/emulation/history.dat", "r",
-        //                         encoding="utf-8")
         let file = File::open(&format!("/mediakraken/emulation/historyxml{}/historyxml{}.xml", option_config_json["MAME"]["Version"], option_config_json["MAME"]["Version"]))?;
         let reader = BufReader::new(file);
         let mut xml_data: String = "".to_owned();
+        let conf = Config::new_with_custom_values(true, "", "text", NullValue::Ignore)
+            .add_json_type_override("/entry/software/item/@name", JsonArray::Infer(JsonType::AlwaysString));
         for line in reader.lines() {
             let xml_line = &line.unwrap().trim().to_string();
+            if xml_line.starts_with("<entry") == true {
+                xml_data = xml_line.to_string();
+            } else if xml_line.starts_with("</entry") == true {
+                xml_data.push_str(xml_line);
+                let json_data = xml_string_to_json(xml_data.to_string(), &conf).unwrap();
+                let mut game_system_uuid = mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(&sqlx_pool, json_data["entry"]["software"]["item"]["@list"].to_string()).await.unwrap();
+                if game_system_uuid == uuid::Uuid::nil() {
+                    game_system_uuid = mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool, json_data["entry"]["software"]["item"]["@list"].to_string(), String::new(), json!({})).await.unwrap(); 
+                }
+                mk_lib_database_metadata_game::mk_lib_database_metadata_game_upsert(
+                    &sqlx_pool,
+                    game_system_uuid,
+                    json_data["entry"]["software"]["item"]["@name"].to_string(),
+                    json_data["entry"]["text"].to_string(),
+                    json_data).await.unwrap();
+            } else {
+                xml_data.push_str(xml_line);
+            }
         }
     }
 
     // read the category file and create dict/list for it
-    let file_name = format!("/mediakraken/emulation/category{}.zip",
+    let file_name = format!("/mediakraken/emulation/pS_CatVer_{}.zip",
                             option_config_json["MAME"]["Version"]);
     // only do the parse/import if not processed before
     if !Path::new(&file_name).exists() {
         mk_lib_network::mk_download_file_from_url(
-                format!("https://www.progettosnaps.net/download?tipo=category&file=/renameset/packs/pS_category_{}.zip",
+                format!("https://www.progettosnaps.net/download/?tipo=catver&file=pS_CatVer_{}.zip",
                         option_config_json["MAME"]["Version"]),
             &file_name).await.unwrap();
-
-        //     with zipfile.ZipFile(file_name, "r") as zf:
-        //         zf.extract("folders/category.ini", "/mediakraken/emulation/")
-        //     history_file = open("/mediakraken/emulation/category.ini", "r",
-        //                         encoding="utf-8")
-        //     cat_file = open("category.ini", "r", encoding="utf-8")
-        //     cat_dictionary = {}
-        //     category = ""
-        //     while 1:
-        //         line = cat_file.readline()
-        //         if not line:
-        //             break
-        //         if line.find("[") == 0:
-        //             category = line.replace("[", "").replace("]", "").replace(" ", "").rstrip("\n").rstrip(
-        //                 "\r")  # wipe out space to make the category table
-        //         else if len(line) > 1:
-        //             result_value = db_connection.db_meta_game_category_by_name(category)
-        //             if result_value == None:
-        //                 result_value = db_connection.db_meta_game_category_add(category)
-        //             cat_dictionary[line.strip()] = result_value
+        mk_lib_compression::mk_decompress_zip(&file_name, 
+            false, &"/mediakraken/emulation/").unwrap();
+        let file = File::open(&format!("/mediakraken/emulation/pS_CatVer_{}/catver.ini", option_config_json["MAME"]["Version"]))?;
+        let reader = BufReader::new(file);
+        let mut category_found = false;
+        for line in reader.lines() {
+            let xml_line = &line.unwrap().trim().to_string();  
+            if xml_line.len() > 1  {
+                if category_found == true {
+                    // everything here on out is a game / cat
+                }
+                if xml_line.starts_with("[Category]") == true {
+                    category_found = true;
+                }
+            }          
+        //  result_value = db_connection.db_meta_game_category_by_name(category)
+        //  if result_value == None:
+        //        result_value = db_connection.db_meta_game_category_add(category)
+        //        cat_dictionary[line.strip()] = result_value
         //
         // grab all system null in db as those are mame
         //     for sql_row in db_connection.db_media_mame_game_list():
@@ -216,10 +233,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
         //             db_connection.db_media_game_category_update(sql_cat_row["gi_gc_category"],
         //                                                         sql_row["gi_id"])
         //
+        }
     }
 
     // update mess system description
-    let file_name = format!("/mediakraken/emulation/messinfo{}.zip",
+    let file_name = format!("/mediakraken/emulation/pS_messinfo_{}.zip",
                             option_config_json["MAME"]["Version"]);
     // only do the parse/import if not processed before
     if !Path::new(&file_name).exists() {
@@ -228,10 +246,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 "https://www.progettosnaps.net/download?tipo=messinfo&file=pS_messinfo_{}.zip",
                 option_config_json["MAME"]["Version"]),
             &file_name).await.unwrap();
-        //     with zipfile.ZipFile(file_name, "r") as zf:
-        //         zf.extract("messinfo.dat", "/mediakraken/emulation/")
-        //     infile = open("/mediakraken/emulation/messinfo.dat", "r",
-        //                   encoding="utf-8")
+        mk_lib_compression::mk_decompress_zip(&file_name, 
+            false, &"/mediakraken/emulation/").unwrap();
+        let file = File::open(&format!("/mediakraken/emulation/pS_messinfo_{}/messinfo.dat", option_config_json["MAME"]["Version"]))?;
+        let reader = BufReader::new(file);
+
         let mut start_system_read = false;
         let mut skip_next_line = false;
         let mut long_name_next = false;
