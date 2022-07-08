@@ -40,6 +40,8 @@
 \cp -f --remove-destination ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkhardwarescanner/src/.
 \cp -f --remove-destination ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mkhardwarescanner/src/.
 \cp -f --remove-destination ../src/mk_lib_network/src/mk_lib_network_dlna.rs ../docker/core/mkhardwarescanner/src/.
+\cp -f --remove-destination ../src/mk_lib_hardware/src/mk_lib_hardware_chromecast.rs ../docker/core/mkhardwarescanner/src/.
+\cp -f --remove-destination ../src/mk_lib_hardware/src/mk_lib_hardware_phue.rs ../docker/core/mkhardwarescanner/src/.
 
 # mkinotify
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkinotify/src/.

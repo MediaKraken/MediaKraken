@@ -44,15 +44,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // chromecast discover
     mk_lib_hardware_chromecast::mk_hardware_chromecast_discover();
-
-// for chromecast_ip, model_name, friendly_name \
-//         in common_hardware_chromecast.com_hard_chrome_discover():
-//     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
-//                                                          message_text={
-//                                                              'chromecast out': chromecast_ip})
-//     media_devices.append({'IP': chromecast_ip,
-//                           'Model': model_name,
-//                           'Name': friendly_name})
     mk_lib_logging::mk_logging_post_elk("info",
                                         json!({"HWScan": "After Chromcast"}),
                                         LOGGING_INDEX_NAME).await;
@@ -67,12 +58,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         json!({"HWScan": "After Crestron"}),
                                         LOGGING_INDEX_NAME).await;
 
-// dlna devices
-// // TODO looks like debugging shows up if run from this program
-// # for dlna_devices in common_network_dlna.com_net_dlna_discover():
-// #     if dlna_devices.find('No compatible devices found.') != -1:
-// #         break
-// #     media_devices.append({'DLNA': dlna_devices})
+    // dlna devices
+    mk_lib_network_dlna::mk_lib_network_dlna_discover();
     mk_lib_logging::mk_logging_post_elk("info",
                                         json!({"HWScan": "After DLNA"}),
                                         LOGGING_INDEX_NAME).await;
