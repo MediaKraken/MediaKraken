@@ -10,6 +10,3 @@ pub fn mk_file_hash_sha1(file_to_read: &str) -> io::Result<String> {
     let hash = hasher.finalize();
     Ok(format!("{:x}", hash))
 }
-
-
-

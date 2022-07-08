@@ -31,18 +31,17 @@ pub async fn mk_lib_hardware_pi_led_flash(gpio_pin: u8, milliseconds: u32)
     }
 }
 
-pub async fn mk_lib_hardware_pi_take_image() {
+pub async fn mk_lib_hardware_pi_take_image(image_file_name: String) {
     let info = info().unwrap();
     if info.cameras.len() > 0 {
         println!("{}", info);
-        simple_sync(&info.cameras[0]);
+        simple_sync(&info.cameras[0], image_file_name);
     }
 }
 
-fn simple_sync(info: &CameraInfo) {
+fn simple_sync(info: &CameraInfo, image_file_name String) {
     let mut camera = SimpleCamera::new(info.clone()).unwrap();
     camera.activate().unwrap();
     let b = camera.take_one().unwrap();
-    File::create("image.jpg").unwrap().write_all(&b).unwrap();
-    println!("Saved image as image.jpg");
+    File::create(image_file_name).unwrap().write_all(&b).unwrap();
 }
