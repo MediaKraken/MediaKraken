@@ -3,14 +3,15 @@
 use serde_json::json;
 use std::error::Error;
 //use onvif::discovery;
-use huelib::resource::sensor;
-use huelib::{bridge, Bridge};
 use tokio::time::{Duration, sleep};
 use futures_util::{pin_mut, stream::StreamExt};
 use std::{net::IpAddr};
 
 #[path = "mk_lib_hardware_chromecast.rs"]
 mod mk_lib_hardware_chromecast;
+
+#[path = "mk_lib_hardware_phue.rs"]
+mod mk_lib_hardware_phue;
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -114,15 +115,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         LOGGING_INDEX_NAME).await;
 
     // phillips hue hub discover
-    let hub_ip_addresses = bridge::discover_nupnp().unwrap();
-    for bridge_ip in hub_ip_addresses {
-        println!("{}", bridge_ip);
-        // Register a new user.
-        let username = bridge::register_user(bridge_ip, "huelib-rs example").unwrap();
-        let bridge = Bridge::new(bridge_ip, username);
-        let lights = bridge.get_all_lights().unwrap();
-        println!("{:?}", lights);
-    }
+    mk_lib_hardware_phue::mk_hardware_phue_discover();
     mk_lib_logging::mk_logging_post_elk("info",
                                         json!({"HWScan": "After PHue"}),
                                         LOGGING_INDEX_NAME).await;
