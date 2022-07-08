@@ -1,8 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+use std::error::Error;
 use std::io;
 use std::io::prelude::*;
-use std::error::Error;
 use walkdir::{DirEntry, WalkDir};
 
 pub fn mk_read_file_data(file_to_read: &str) -> io::Result<String> {
@@ -21,7 +21,8 @@ pub fn mk_save_file_data(file_data: &str, file_to_save: &str) -> io::Result<()> 
 }
 
 pub fn mk_file_is_hidden(entry: &DirEntry) -> bool {
-    entry.file_name()
+    entry
+        .file_name()
         .to_str()
         .map(|s| s.starts_with("."))
         .unwrap_or(false)

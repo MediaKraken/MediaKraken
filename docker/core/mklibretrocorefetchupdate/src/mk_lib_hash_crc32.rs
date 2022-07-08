@@ -2,8 +2,8 @@
 
 // crc32fast = "1.2.1"
 use crc32fast::Hasher;
-use std::fs;
 use std::error::Error;
+use std::fs;
 
 #[path = "mk_lib_file.rs"]
 mod mk_lib_file;

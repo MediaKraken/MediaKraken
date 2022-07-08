@@ -1,8 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use md5::{Md5, Digest};
-use std::fs;
+use md5::{Digest, Md5};
 use std::error::Error;
+use std::fs;
 
 #[path = "mk_lib_file.rs"]
 mod mk_lib_file;

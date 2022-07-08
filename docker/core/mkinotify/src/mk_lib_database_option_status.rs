@@ -1,37 +1,45 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
 use sqlx::postgres::PgRow;
-use sqlx::{types::Uuid, types::Json};
+use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 
-pub async fn mk_lib_database_option_read(pool: &sqlx::PgPool)
-                                         -> Result<serde_json::Value, sqlx::Error> {
-    let row: (serde_json::Value, ) = sqlx::query_as("select mm_options_json from mm_options_and_status")
-        .fetch_one(pool)
-        .await?;
+pub async fn mk_lib_database_option_read(
+    pool: &sqlx::PgPool,
+) -> Result<serde_json::Value, sqlx::Error> {
+    let row: (serde_json::Value,) =
+        sqlx::query_as("select mm_options_json from mm_options_and_status")
+            .fetch_one(pool)
+            .await?;
     Ok(row.0)
 }
 
-pub async fn mk_lib_database_status_read(pool: &sqlx::PgPool)
-                                         -> Result<serde_json::Value, sqlx::Error> {
-    let row: (serde_json::Value, ) = sqlx::query_as("select mm_status_json from mm_options_and_status")
-        .fetch_one(pool)
-        .await?;
+pub async fn mk_lib_database_status_read(
+    pool: &sqlx::PgPool,
+) -> Result<serde_json::Value, sqlx::Error> {
+    let row: (serde_json::Value,) =
+        sqlx::query_as("select mm_status_json from mm_options_and_status")
+            .fetch_one(pool)
+            .await?;
     Ok(row.0)
 }
 
-pub async fn mk_lib_database_option_status_read(pool: &sqlx::PgPool)
-                                                -> Result<Vec<PgRow>, sqlx::Error> {
-    let rows = sqlx::query("select mm_options_json, mm_status_json \
-        from mm_options_and_status")
-        .fetch_all(pool)
-        .await?;
+pub async fn mk_lib_database_option_status_read(
+    pool: &sqlx::PgPool,
+) -> Result<Vec<PgRow>, sqlx::Error> {
+    let rows = sqlx::query(
+        "select mm_options_json, mm_status_json \
+        from mm_options_and_status",
+    )
+    .fetch_all(pool)
+    .await?;
     Ok(rows)
 }
 
-pub async fn mk_lib_database_option_update(pool: &sqlx::PgPool,
-                                           option_json: serde_json::Value)
-                                           -> Result<(), sqlx::Error> {
+pub async fn mk_lib_database_option_update(
+    pool: &sqlx::PgPool,
+    option_json: serde_json::Value,
+) -> Result<(), sqlx::Error> {
     // no need for where clause as it's only the one record
     let mut transaction = pool.begin().await?;
     sqlx::query("update mm_options_and_status set mm_options_json = $1")
@@ -42,10 +50,11 @@ pub async fn mk_lib_database_option_update(pool: &sqlx::PgPool,
     Ok(())
 }
 
-pub async fn mk_lib_database_option_status_update(pool: &sqlx::PgPool,
-                                           option_json: serde_json::Value,
-                                           status_json: serde_json::Value)
-                                           -> Result<(), sqlx::Error> {
+pub async fn mk_lib_database_option_status_update(
+    pool: &sqlx::PgPool,
+    option_json: serde_json::Value,
+    status_json: serde_json::Value,
+) -> Result<(), sqlx::Error> {
     // no need for where clause as it's only the one record
     let mut transaction = pool.begin().await?;
     sqlx::query("update mm_options_and_status set mm_options_json = $1, mm_status_json = $2")
@@ -57,9 +66,10 @@ pub async fn mk_lib_database_option_status_update(pool: &sqlx::PgPool,
     Ok(())
 }
 
-pub async fn mk_lib_database_status_update_scan(pool: &sqlx::PgPool,
-                                           status_json: serde_json::Value)
-                                           -> Result<(), sqlx::Error> {
+pub async fn mk_lib_database_status_update_scan(
+    pool: &sqlx::PgPool,
+    status_json: serde_json::Value,
+) -> Result<(), sqlx::Error> {
     // no need for where clause as it's only the one record
     let mut transaction = pool.begin().await?;
     sqlx::query("update mm_options_and_status set mm_status_json = $1")

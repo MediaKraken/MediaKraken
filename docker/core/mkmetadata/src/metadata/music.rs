@@ -1,8 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use std::error::Error;
-use sqlx::types::Uuid;
 use sqlx::postgres::PgRow;
+use sqlx::types::Uuid;
+use std::error::Error;
 
 #[path = "provider/musicbrainz.rs"]
 mod provider_musicbrainz;
@@ -13,10 +13,11 @@ mod provider_pitchfork;
 #[path = "provider/shoutcast.rs"]
 mod provider_shoutcast;
 
-pub async fn metadata_music_lookup(pool: &sqlx::PgPool,
-                                   download_data: PgRow)
-                                   -> Result<Uuid, sqlx::Error> {
-    let mut metadata_uuid = uuid::Uuid::nil();  // so not found checks verify later
+pub async fn metadata_music_lookup(
+    pool: &sqlx::PgPool,
+    download_data: PgRow,
+) -> Result<Uuid, sqlx::Error> {
+    let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
     Ok(metadata_uuid)
 }
 

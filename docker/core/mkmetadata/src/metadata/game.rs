@@ -1,8 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use std::error::Error;
-use sqlx::types::Uuid;
 use sqlx::postgres::PgRow;
+use sqlx::types::Uuid;
+use std::error::Error;
 
 #[path = "provider/giant_bomb.rs"]
 mod provider_giant_bomb;
@@ -16,16 +16,26 @@ mod mk_lib_database_metadata_game;
 #[path = "../mk_lib_hash_sha1.rs"]
 mod mk_lib_hash_sha1;
 
-pub async fn metadata_game_lookup(pool: &sqlx::PgPool,
-                                  download_data: PgRow)
-                                  -> Result<Uuid, sqlx::Error> {
-    let mut metadata_uuid = uuid::Uuid::nil();  // so not found checks verify later
-    // TODO remove the file extension
-    metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_name_and_system(&pool,
-        Path::new(download_data.mdq_path).file_name(), 0).await.unwrap();
+pub async fn metadata_game_lookup(
+    pool: &sqlx::PgPool,
+    download_data: PgRow,
+) -> Result<Uuid, sqlx::Error> {
+    let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
+                                               // TODO remove the file extension
+    metadata_uuid =
+        mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_name_and_system(
+            &pool,
+            Path::new(download_data.mdq_path).file_name(),
+            0,
+        )
+        .await
+        .unwrap();
     if metadata_uuid == uuid::Uuid::nil() {
         let sha1_hash = mk_lib_hash_sha1::mk_file_hash_sha1(download_data.get("mdq_path")).unwrap();
-        metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(&pool, sha1_hash).await.unwrap();
+        metadata_uuid =
+            mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(&pool, sha1_hash)
+                .await
+                .unwrap();
     }
     Ok(metadata_uuid)
 }

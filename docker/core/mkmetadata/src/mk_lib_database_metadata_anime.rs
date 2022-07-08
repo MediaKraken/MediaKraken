@@ -1,8 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use sqlx::{types::Uuid, types::Json};
+use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
-use serde::{Serialize, Deserialize};
+use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 
 /*

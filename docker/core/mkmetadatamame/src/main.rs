@@ -197,15 +197,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // only do the parse/import if not processed before
     if !Path::new(&file_name).exists() {
         mk_lib_network::mk_download_file_from_url(
-<<<<<<< HEAD
-            format!("https://www.arcade-history.com/dats/historyxml{}.zip",
-                    option_config_json["MAME"]["Version"]),
-            &file_name).await.unwrap();
-        mk_lib_compression::mk_decompress_zip(&file_name, 
-            false, &"/mediakraken/emulation/").unwrap();
-    
-        let file = File::open(&format!("/mediakraken/emulation/historyxml{}.xml", option_config_json["MAME"]["Version"]))?;
-=======
             format!(
                 "https://www.arcade-history.com/dats/historyxml{}.zip",
                 option_config_json["MAME"]["Version"]
@@ -221,7 +212,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             "/mediakraken/emulation/historyxml{}/historyxml{}.xml",
             option_config_json["MAME"]["Version"], option_config_json["MAME"]["Version"]
         ))?;
->>>>>>> e3049a244aab9d23c61e20c90e835a57edac2b5d
         let reader = BufReader::new(file);
         let mut xml_data: String = "".to_owned();
         let conf = Config::new_with_custom_values(true, "", "text", NullValue::Ignore)

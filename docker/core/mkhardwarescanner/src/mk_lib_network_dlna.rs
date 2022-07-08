@@ -7,14 +7,15 @@ use crab_dlna::{
 };
 use std::path::PathBuf;
 
-pub async fn dlna_discover() {
+pub async fn mk_lib_network_dlna_discover() {
     let discover_timeout_secs = 5;
     let renders_discovered = Render::discover(discover_timeout_secs).await.unwrap();
     for render in renders_discovered {
-        println!("{}", render);}
+        println!("{}", render);
+    }
 }
 
-pub async fn dlna_play(filename_to_play: String) -> Result<(), Error> {
+pub async fn mk_lib_network_dlna_play(filename_to_play: String) -> Result<(), Error> {
     let discover_timeout_secs = 5;
     let render_spec = RenderSpec::Query(discover_timeout_secs, "Kodi".to_string());
     let render = Render::new(render_spec).await?;

@@ -1,10 +1,10 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
-use sqlx::{types::Uuid, types::Json};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use serde_json::json;
+use sqlx::postgres::PgRow;
+use sqlx::{types::Json, types::Uuid};
+use sqlx::{FromRow, Row};
 
 #[path = "mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;
@@ -12,29 +12,35 @@ mod mk_lib_common_enum_media_type;
 #[path = "mk_lib_database_metadata_download_queue.rs"]
 mod mk_lib_database_metadata_download_queue;
 
-pub async fn mk_lib_database_metadata_exists_person(pool: &sqlx::PgPool,
-                                                    metadata_id: i32)
-                                                    -> Result<i32, sqlx::Error> {
-    let row: (i32, ) = sqlx::query_as("select exists(select 1 from mm_metadata_person \
-        where mm_metadata_person_media_id = $1 limit 1) as found_record limit 1")
-        .bind(metadata_id)
-        .fetch_one(pool)
-        .await?;
+pub async fn mk_lib_database_metadata_exists_person(
+    pool: &sqlx::PgPool,
+    metadata_id: i32,
+) -> Result<i32, sqlx::Error> {
+    let row: (i32,) = sqlx::query_as(
+        "select exists(select 1 from mm_metadata_person \
+        where mm_metadata_person_media_id = $1 limit 1) as found_record limit 1",
+    )
+    .bind(metadata_id)
+    .fetch_one(pool)
+    .await?;
     Ok(row.0)
 }
 
-pub async fn mk_lib_database_metadata_person_count(pool: &sqlx::PgPool,
-                                                   search_value: String)
-                                                   -> Result<i64, sqlx::Error> {
+pub async fn mk_lib_database_metadata_person_count(
+    pool: &sqlx::PgPool,
+    search_value: String,
+) -> Result<i64, sqlx::Error> {
     if search_value != "" {
-        let row: (i64, ) = sqlx::query_as("select count(*) from mm_metadata_person \
-            where mmp_person_name % $1")
-            .bind(search_value)
-            .fetch_one(pool)
-            .await?;
+        let row: (i64,) = sqlx::query_as(
+            "select count(*) from mm_metadata_person \
+            where mmp_person_name % $1",
+        )
+        .bind(search_value)
+        .fetch_one(pool)
+        .await?;
         Ok(row.0)
     } else {
-        let row: (i64, ) = sqlx::query_as("select count(*) from mm_metadata_person")
+        let row: (i64,) = sqlx::query_as("select count(*) from mm_metadata_person")
             .fetch_one(pool)
             .await?;
         Ok(row.0)
@@ -49,29 +55,35 @@ pub struct DBMetaPersonList {
     mmp_profile: String,
 }
 
-pub async fn mk_lib_database_metadata_person_read(pool: &sqlx::PgPool,
-                                                  search_value: String,
-                                                  offset: i32, limit: i32)
-                                                  -> Result<Vec<DBMetaPersonList>, sqlx::Error> {
+pub async fn mk_lib_database_metadata_person_read(
+    pool: &sqlx::PgPool,
+    search_value: String,
+    offset: i32,
+    limit: i32,
+) -> Result<Vec<DBMetaPersonList>, sqlx::Error> {
     // TODO order by birth date
     let select_query;
     if search_value != "" {
-        select_query = sqlx::query("select mm_metadata_person_guid, \
+        select_query = sqlx::query(
+            "select mm_metadata_person_guid, \
             mm_metadata_person_name, mm_metadata_person_image, \
             mm_metadata_person_meta_json->>'profile_path' as mmp_profile \
             from mm_metadata_person where mm_metadata_person_name % $1 \
-            order by LOWER(mm_metadata_person_name) offset $2 limit $3")
-            .bind(search_value)
-            .bind(offset)
-            .bind(limit);
+            order by LOWER(mm_metadata_person_name) offset $2 limit $3",
+        )
+        .bind(search_value)
+        .bind(offset)
+        .bind(limit);
     } else {
-        select_query = sqlx::query("select mm_metadata_person_guid, \
+        select_query = sqlx::query(
+            "select mm_metadata_person_guid, \
             mm_metadata_person_name, mm_metadata_person_image, \
             mm_metadata_person_meta_json->>'profile_path' as mmp_profile \
             from mm_metadata_person order by LOWER(mm_metadata_person_name) \
-            offset $1 limit $2")
-            .bind(offset)
-            .bind(limit);
+            offset $1 limit $2",
+        )
+        .bind(offset)
+        .bind(limit);
     }
     let table_rows: Vec<DBMetaPersonList> = select_query
         .map(|row: PgRow| DBMetaPersonList {
@@ -85,16 +97,19 @@ pub async fn mk_lib_database_metadata_person_read(pool: &sqlx::PgPool,
     Ok(table_rows)
 }
 
-pub async fn mk_lib_database_meta_person_detail(pool: &sqlx::PgPool,
-                                                person_uuid: String)
-                                                -> Result<PgRow, sqlx::Error> {
-    let row: PgRow = sqlx::query("select mmp_id, mmp_person_media_id, \
+pub async fn mk_lib_database_meta_person_detail(
+    pool: &sqlx::PgPool,
+    person_uuid: String,
+) -> Result<PgRow, sqlx::Error> {
+    let row: PgRow = sqlx::query(
+        "select mmp_id, mmp_person_media_id, \
         mmp_person_meta_json, mmp_person_image, mmp_person_name, \
         mmp_person_meta_json->'profile_path' as mmp_meta \
-        from mm_metadata_person where mmp_id = $1")
-        .bind(person_uuid)
-        .fetch_one(pool)
-        .await?;
+        from mm_metadata_person where mmp_id = $1",
+    )
+    .bind(person_uuid)
+    .fetch_one(pool)
+    .await?;
     Ok(row)
 }
 
@@ -107,16 +122,19 @@ pub struct DBMetaPersonNameList {
     mmp_person_name: String,
 }
 
-pub async fn mk_lib_database_meta_person_by_name(pool: &sqlx::PgPool,
-                                                 person_name: String)
-                                                 -> Result<Vec<DBMetaPersonNameList>, sqlx::Error> {
-    let select_query = sqlx::query("select mmp_id, mmp_person_media_id, \
+pub async fn mk_lib_database_meta_person_by_name(
+    pool: &sqlx::PgPool,
+    person_name: String,
+) -> Result<Vec<DBMetaPersonNameList>, sqlx::Error> {
+    let select_query = sqlx::query(
+        "select mmp_id, mmp_person_media_id, \
         mmp_person_meta_json, \
         mmp_person_image, \
         mmp_person_name \
         from mm_metadata_person \
-        where mmp_person_name = $1")
-        .bind(person_name);
+        where mmp_person_name = $1",
+    )
+    .bind(person_name);
     let table_rows: Vec<DBMetaPersonNameList> = select_query
         .map(|row: PgRow| DBMetaPersonNameList {
             mmp_id: row.get("mmp_id"),
@@ -130,31 +148,36 @@ pub async fn mk_lib_database_meta_person_by_name(pool: &sqlx::PgPool,
     Ok(table_rows)
 }
 
-pub async fn mk_lib_database_metadata_person_insert(pool: &sqlx::PgPool,
-                                                    person_name: String,
-                                                    media_id: i32,
-                                                    person_json: serde_json::Value,
-                                                    person_image_path: serde_json::Value)
-                                                    -> Result<Uuid, sqlx::Error> {
+pub async fn mk_lib_database_metadata_person_insert(
+    pool: &sqlx::PgPool,
+    person_name: String,
+    media_id: i32,
+    person_json: serde_json::Value,
+    person_image_path: serde_json::Value,
+) -> Result<Uuid, sqlx::Error> {
     let new_guid = uuid::Uuid::new_v4();
     let mut transaction = pool.begin().await?;
-    sqlx::query("insert into mm_metadata_person (mmp_id, mmp_person_name, \
+    sqlx::query(
+        "insert into mm_metadata_person (mmp_id, mmp_person_name, \
         mmp_person_media_id, mmp_person_meta_json, \
         mmp_person_image) \
-        values ($1,$2,$3,$4,$5)")
-        .bind(new_guid)
-        .bind(person_name)
-        .bind(media_id)
-        .bind(person_json)
-        .bind(person_image_path)
-        .execute(&mut transaction)
-        .await?;
+        values ($1,$2,$3,$4,$5)",
+    )
+    .bind(new_guid)
+    .bind(person_name)
+    .bind(media_id)
+    .bind(person_json)
+    .bind(person_image_path)
+    .execute(&mut transaction)
+    .await?;
     transaction.commit().await?;
     Ok(new_guid)
 }
 
-pub async fn mk_lib_database_metadata_person_insert_cast_crew(pool: &sqlx::PgPool,
-                                                              person_json: serde_json::Value) {
+pub async fn mk_lib_database_metadata_person_insert_cast_crew(
+    pool: &sqlx::PgPool,
+    person_json: serde_json::Value,
+) {
     // for person_data in person_json {
     //     let person_id = person_data["id"];
     //     let person_name = person_data["name"];
@@ -201,11 +224,12 @@ pub async fn db_meta_person_as_seen_in(self, person_guid):
 
  */
 
-pub async fn mk_lib_database_metadata_person_update(pool: &sqlx::PgPool,
-                                                    person_media_id: Uuid,
-                                                    person_bio: serde_json::Value,
-                                                    person_image: serde_json::Value)
-                                                    -> Result<(), sqlx::Error> {
+pub async fn mk_lib_database_metadata_person_update(
+    pool: &sqlx::PgPool,
+    person_media_id: Uuid,
+    person_bio: serde_json::Value,
+    person_image: serde_json::Value,
+) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
     sqlx::query("update mm_metadata_person set mmp_person_meta_json = $1, mmp_person_image = $2 where mmp_person_media_id = $3")
         .bind(person_bio)

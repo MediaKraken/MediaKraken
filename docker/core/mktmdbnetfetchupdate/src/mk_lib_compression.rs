@@ -1,7 +1,7 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use std::io::Read;
 use std::fs::File;
+use std::io::Read;
 use std::path::PathBuf;
 
 pub fn mk_decompress_tar_gz_file(archive_file: &str) -> Result<(), std::io::Error> {
@@ -20,10 +20,11 @@ pub fn mk_decompress_gz_data(archive_file: &str) -> Result<String, std::io::Erro
     Ok(gz_data)
 }
 
-pub fn mk_decompress_zip(archive_file: &str,
-                         remove_zip: bool,
-                         output_path: &str)
-                         -> Result<String, std::io::Error> {
+pub fn mk_decompress_zip(
+    archive_file: &str,
+    remove_zip: bool,
+    output_path: &str,
+) -> Result<String, std::io::Error> {
     let fname = std::path::Path::new(archive_file);
     let file = std::fs::File::open(&fname).unwrap();
     let mut archive = zip::ZipArchive::new(file).unwrap();

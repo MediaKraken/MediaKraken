@@ -1,19 +1,22 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use sqlx::{FromRow, Row};
-use sqlx::{types::Uuid, types::Json};
-use sqlx::postgres::PgRow;
-use serde::{Serialize, Deserialize};
 use chrono::prelude::*;
+use serde::{Deserialize, Serialize};
+use sqlx::postgres::PgRow;
+use sqlx::{types::Json, types::Uuid};
+use sqlx::{FromRow, Row};
 
-pub async fn mk_lib_database_metadata_exists_movie(pool: &sqlx::PgPool,
-                                                   metadata_id: i32)
-                                                   -> Result<bool, sqlx::Error> {
-    let row: (bool, ) = sqlx::query_as("select exists(select 1 from mm_metadata_movie \
-        where mm_metadata_movie_media_id = $1 limit 1) as found_record limit 1")
-        .bind(metadata_id)
-        .fetch_one(pool)
-        .await?;
+pub async fn mk_lib_database_metadata_exists_movie(
+    pool: &sqlx::PgPool,
+    metadata_id: i32,
+) -> Result<bool, sqlx::Error> {
+    let row: (bool,) = sqlx::query_as(
+        "select exists(select 1 from mm_metadata_movie \
+        where mm_metadata_movie_media_id = $1 limit 1) as found_record limit 1",
+    )
+    .bind(metadata_id)
+    .fetch_one(pool)
+    .await?;
     Ok(row.0)
 }
 
@@ -26,32 +29,38 @@ pub struct DBMetaMovieList {
     mm_metadata_user_json: serde_json::Value,
 }
 
-pub async fn mk_lib_database_metadata_movie_read(pool: &sqlx::PgPool,
-                                                 search_value: String,
-                                                 offset: i32, limit: i32)
-                                                 -> Result<Vec<DBMetaMovieList>, sqlx::Error> {
+pub async fn mk_lib_database_metadata_movie_read(
+    pool: &sqlx::PgPool,
+    search_value: String,
+    offset: i32,
+    limit: i32,
+) -> Result<Vec<DBMetaMovieList>, sqlx::Error> {
     let select_query;
     if search_value != "" {
-        select_query = sqlx::query("select mm_metadata_guid, mm_metadata_name, \
+        select_query = sqlx::query(
+            "select mm_metadata_guid, mm_metadata_name, \
              mm_metadata_json->>'release_date' as mm_date, \
              mm_metadata_localimage_json->>'Poster' as mm_poster, \
              mm_metadata_user_json \
              from mm_metadata_movie \
              where mm_metadata_name % $1 \
-             order by mm_metadata_name, mm_date offset $2 limit $3)")
-            .bind(search_value)
-            .bind(offset)
-            .bind(limit);
+             order by mm_metadata_name, mm_date offset $2 limit $3)",
+        )
+        .bind(search_value)
+        .bind(offset)
+        .bind(limit);
     } else {
-        select_query = sqlx::query("select mm_metadata_guid, mm_metadata_name, \
+        select_query = sqlx::query(
+            "select mm_metadata_guid, mm_metadata_name, \
             mm_metadata_json->>'release_date' as mm_date, \
             mm_metadata_localimage_json->>'Poster' as mm_poster, \
             mm_metadata_user_json \
             from mm_metadata_movie \
             order by mm_metadata_name, mm_date \
-            offset $1 limit $2)")
-            .bind(offset)
-            .bind(limit);
+            offset $1 limit $2)",
+        )
+        .bind(offset)
+        .bind(limit);
     }
     let table_rows: Vec<DBMetaMovieList> = select_query
         .map(|row: PgRow| DBMetaMovieList {
@@ -66,55 +75,64 @@ pub async fn mk_lib_database_metadata_movie_read(pool: &sqlx::PgPool,
     Ok(table_rows)
 }
 
-pub async fn mk_lib_database_metadata_movie_count(pool: &sqlx::PgPool,
-                                                  search_value: String)
-                                                  -> Result<i64, sqlx::Error> {
+pub async fn mk_lib_database_metadata_movie_count(
+    pool: &sqlx::PgPool,
+    search_value: String,
+) -> Result<i64, sqlx::Error> {
     if search_value != "" {
-        let row: (i64, ) = sqlx::query_as("select count(*) from mm_metadata_movie \
-            where mm_metadata_name % $1")
-            .bind(search_value)
-            .fetch_one(pool)
-            .await?;
+        let row: (i64,) = sqlx::query_as(
+            "select count(*) from mm_metadata_movie \
+            where mm_metadata_name % $1",
+        )
+        .bind(search_value)
+        .fetch_one(pool)
+        .await?;
         Ok(row.0)
     } else {
-        let row: (i64, ) = sqlx::query_as("select count(*) from mm_metadata_movie")
+        let row: (i64,) = sqlx::query_as("select count(*) from mm_metadata_movie")
             .fetch_one(pool)
             .await?;
         Ok(row.0)
     }
 }
 
-pub async fn mk_lib_database_metadata_movie_insert(pool: &sqlx::PgPool,
-                                                   uuid_id: Uuid,
-                                                   series_id: i32,
-                                                   data_json: serde_json::Value,
-                                                   data_image_json: serde_json::Value)
-                                                   -> Result<(), sqlx::Error> {
+pub async fn mk_lib_database_metadata_movie_insert(
+    pool: &sqlx::PgPool,
+    uuid_id: Uuid,
+    series_id: i32,
+    data_json: serde_json::Value,
+    data_image_json: serde_json::Value,
+) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
-    sqlx::query("insert into mm_metadata_movie (mm_metadata_guid, \
+    sqlx::query(
+        "insert into mm_metadata_movie (mm_metadata_guid, \
         mm_metadata_media_id, \
         mm_metadata_name, \
         mm_metadata_json, \
         mm_metadata_localimage_json) \
-        values ($1,$2,$3,$4,$5)")
-        .bind(uuid_id)
-        .bind(series_id)
-        .bind(data_json["title"].to_string())
-        .bind(data_json)
-        .bind(data_image_json)
-        .execute(&mut transaction)
-        .await?;
+        values ($1,$2,$3,$4,$5)",
+    )
+    .bind(uuid_id)
+    .bind(series_id)
+    .bind(data_json["title"].to_string())
+    .bind(data_json)
+    .bind(data_image_json)
+    .execute(&mut transaction)
+    .await?;
     transaction.commit().await?;
     Ok(())
 }
 
-pub async fn mk_lib_database_metadata_movie_guid_by_tmdb(pool: &sqlx::PgPool,
-                                                         uuid_id: Uuid,)
-                                                         -> Result<uuid::Uuid, sqlx::Error> {
-    let row: (uuid::Uuid, ) = sqlx::query_as("select mm_metadata_guid from mm_metadata_movie where mm_metadata_media_id = $1")
-        .bind(uuid_id)
-        .fetch_one(pool)
-        .await?;
+pub async fn mk_lib_database_metadata_movie_guid_by_tmdb(
+    pool: &sqlx::PgPool,
+    uuid_id: Uuid,
+) -> Result<uuid::Uuid, sqlx::Error> {
+    let row: (uuid::Uuid,) = sqlx::query_as(
+        "select mm_metadata_guid from mm_metadata_movie where mm_metadata_media_id = $1",
+    )
+    .bind(uuid_id)
+    .fetch_one(pool)
+    .await?;
     Ok(row.0)
 }
 

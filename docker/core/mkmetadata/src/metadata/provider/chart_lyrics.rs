@@ -7,9 +7,12 @@ use std::error::Error;
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;
 
-pub async fn provider_chart_lyrics_fetch(pool: &sqlx::PgPool,
-                                         artist_name: String,
-                                         song_name: String) {}
+pub async fn provider_chart_lyrics_fetch(
+    pool: &sqlx::PgPool,
+    artist_name: String,
+    song_name: String,
+) {
+}
 
 /*
 pub async fn com_meta_chart_lyrics(artist_name, song_name):
