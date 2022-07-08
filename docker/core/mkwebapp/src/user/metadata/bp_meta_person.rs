@@ -1,8 +1,8 @@
-use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera};
-use rocket_auth::{Users, Error, Auth, Signup, Login, User};
-use rocket::serde::{Serialize, Deserialize, json::Json};
+use rocket::serde::{json::Json, Deserialize, Serialize};
+use rocket::Request;
+use rocket_auth::{Auth, Error, Login, Signup, User, Users};
+use rocket_dyn_templates::{tera::Tera, Template};
 
 #[path = "../../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;
@@ -11,36 +11,68 @@ mod mk_lib_common_pagination;
 mod mk_lib_database_metadata_person;
 
 #[derive(Serialize)]
-struct TemplateMetaPersonContext<> {
+struct TemplateMetaPersonContext {
     template_data: Vec<mk_lib_database_metadata_person::DBMetaPersonList>,
     pagination_bar: String,
 }
 
 #[get("/metadata/person/<page>")]
-pub async fn user_metadata_person(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, page: i32) -> Template {
+pub async fn user_metadata_person(
+    sqlx_pool: &rocket::State<sqlx::PgPool>,
+    user: User,
+    page: i32,
+) -> Template {
     let db_offset: i32 = (page * 30) - 30;
-    let mut total_pages: i64 = mk_lib_database_metadata_person::mk_lib_database_metadata_person_count(&sqlx_pool, String::new()).await.unwrap();
+    let mut total_pages: i64 =
+        mk_lib_database_metadata_person::mk_lib_database_metadata_person_count(
+            &sqlx_pool,
+            String::new(),
+        )
+        .await
+        .unwrap();
     if total_pages > 0 {
         total_pages = total_pages / 30;
     }
-    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page, "/user/metadata/person".to_string()).await.unwrap();
-    let person_list = mk_lib_database_metadata_person::mk_lib_database_metadata_person_read(&sqlx_pool, String::new(), db_offset, 30).await.unwrap();
-    Template::render("bss_user/metadata/bss_user_metadata_person", &TemplateMetaPersonContext {
-        template_data: person_list,
-        pagination_bar: pagination_html,
-    })
+    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
+        total_pages,
+        page,
+        "/user/metadata/person".to_string(),
+    )
+    .await
+    .unwrap();
+    let person_list = mk_lib_database_metadata_person::mk_lib_database_metadata_person_read(
+        &sqlx_pool,
+        String::new(),
+        db_offset,
+        30,
+    )
+    .await
+    .unwrap();
+    Template::render(
+        "bss_user/metadata/bss_user_metadata_person",
+        &TemplateMetaPersonContext {
+            template_data: person_list,
+            pagination_bar: pagination_html,
+        },
+    )
 }
 
 #[derive(Serialize)]
-struct TemplateMetaPersonDetailContext<> {
+struct TemplateMetaPersonDetailContext {
     template_data: serde_json::Value,
 }
 
 #[get("/metadata/person_detail/<guid>")]
-pub async fn user_metadata_person_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
-     user: User, guid: rocket::serde::uuid::Uuid) -> Template {
-        let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
-        Template::render("bss_user/metadata/bss_user_metadata_person_detail", tera::Context::new().into_json())
+pub async fn user_metadata_person_detail(
+    sqlx_pool: &rocket::State<sqlx::PgPool>,
+    user: User,
+    guid: rocket::serde::uuid::Uuid,
+) -> Template {
+    let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
+    Template::render(
+        "bss_user/metadata/bss_user_metadata_person_detail",
+        tera::Context::new().into_json(),
+    )
 }
 
 /*

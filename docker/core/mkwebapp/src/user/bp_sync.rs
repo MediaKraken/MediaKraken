@@ -1,24 +1,30 @@
-use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera};
-use rocket_auth::{Users, Error, Auth, Signup, Login, User};
-use serde::{Serialize, Deserialize};
+use rocket::Request;
+use rocket_auth::{Auth, Error, Login, Signup, User, Users};
+use rocket_dyn_templates::{tera::Tera, Template};
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[path = "../mk_lib_database_sync.rs"]
 mod mk_lib_database_sync;
 
 #[derive(Serialize)]
-struct TemplateSyncContext<> {
-    template_data: Vec<mk_lib_database_sync::DBSyncList>
+struct TemplateSyncContext {
+    template_data: Vec<mk_lib_database_sync::DBSyncList>,
 }
 
 #[get("/sync")]
 pub async fn user_sync(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
-    let sync_list = mk_lib_database_sync::mk_lib_database_sync_list(&sqlx_pool, uuid::Uuid::nil(), 0, 30).await.unwrap();
-    Template::render("bss_user/media/bss_user_media_sync", &TemplateSyncContext {
-        template_data: sync_list,
-    })
+    let sync_list =
+        mk_lib_database_sync::mk_lib_database_sync_list(&sqlx_pool, uuid::Uuid::nil(), 0, 30)
+            .await
+            .unwrap();
+    Template::render(
+        "bss_user/media/bss_user_media_sync",
+        &TemplateSyncContext {
+            template_data: sync_list,
+        },
+    )
 }
 
 /*

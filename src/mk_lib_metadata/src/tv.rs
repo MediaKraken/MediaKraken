@@ -1,9 +1,9 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use std::error::Error;
-use sqlx::types::Uuid;
-use torrent_name_parser::Metadata;
 use sqlx::postgres::PgRow;
+use sqlx::types::Uuid;
+use std::error::Error;
+use torrent_name_parser::Metadata;
 
 #[path = "provider/tmdb.rs"]
 mod provider_tmdb;
@@ -15,12 +15,13 @@ pub struct MetadataTVLastLookup {
     metadata_last_tmdb: String,
 }
 
-pub async fn metadata_tv_lookup(pool: &sqlx::PgPool,
-                                download_data: PgRow,
-                                file_name: Metadata)
-                                -> Result<Uuid, Box<dyn Error>> {
+pub async fn metadata_tv_lookup(
+    pool: &sqlx::PgPool,
+    download_data: PgRow,
+    file_name: Metadata,
+) -> Result<Uuid, Box<dyn Error>> {
     // don't bother checking title/year as the main_server_metadata_api_worker does it already
-    let mut metadata_uuid = uuid::Uuid::nil();  // so not found checks verify later
+    let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
     Ok(metadata_uuid)
 }
 

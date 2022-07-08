@@ -1,8 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use std::error::Error;
-use sqlx::types::Uuid;
 use sqlx::postgres::PgRow;
+use sqlx::types::Uuid;
+use std::error::Error;
 
 #[path = "provider/thesportsdb.rs"]
 mod provider_thesportsdb;
@@ -14,11 +14,12 @@ pub struct MetadataSportsLastLookup {
     metadata_last_thesportsdb: String,
 }
 
-pub async fn metadata_sports_lookup(pool: &sqlx::PgPool,
-                                    download_data: PgRow)
-                                    -> Result<Uuid, sqlx::Error> {
+pub async fn metadata_sports_lookup(
+    pool: &sqlx::PgPool,
+    download_data: PgRow,
+) -> Result<Uuid, sqlx::Error> {
     // don't bother checking title/year as the main_server_metadata_api_worker does it already
-    let mut metadata_uuid = uuid::Uuid::nil();  // so not found checks verify later
+    let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
     Ok(metadata_uuid)
 }
 

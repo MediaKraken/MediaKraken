@@ -12,7 +12,6 @@ pub fn mk_lib_metadata_m3u8_validate_playlist(playlist: &str) {
     valid_playlist
 }
 
-
 /*
 
 '''

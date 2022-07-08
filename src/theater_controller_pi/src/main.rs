@@ -1,5 +1,6 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+use crossbeam_channel::unbounded;
 use fltk::{app, button::Button, frame::Frame, image::SharedImage, prelude::*, window::Window};
 use std::error::Error;
 use std::fs::File;
@@ -8,7 +9,6 @@ use std::io::BufReader;
 use std::net::ToSocketAddrs;
 use std::path::PathBuf;
 use std::sync::Arc;
-use crossbeam_channel::unbounded;
 
 #[path = "../../mk_lib_network/src/mk_lib_network.rs"]
 mod mk_lib_network;
@@ -23,7 +23,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut window_menu = Window::default().with_size(800, 480);
     // window_menu - left side buttons
     let mut button_in_progress = Button::new(0, 0, 133, 96, "In Progress");
-    let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/rectangles_black.png")?;
+    let mut image =
+        SharedImage::load("../../docker/core/mkwebapp/static/image/rectangles_black.png")?;
     image.scale(133, 96, true, true);
     button_in_progress.set_image(Some(image));
     let mut button_new = Button::new(0, 96, 133, 96, "New");
@@ -53,7 +54,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     image.scale(133, 96, true, true);
     button_music.set_image(Some(image));
     let mut button_live_tv = Button::new(266, 384, 133, 96, "Live TV");
-    let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/television_live.png")?;
+    let mut image =
+        SharedImage::load("../../docker/core/mkwebapp/static/image/television_live.png")?;
     image.scale(133, 96, true, true);
     button_live_tv.set_image(Some(image));
     let mut button_home_video = Button::new(399, 384, 133, 96, "Home Video");
@@ -66,7 +68,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     button_internet.set_image(Some(image));
     // window_menu - right side buttons
     let mut button_music_video = Button::new(666, 0, 133, 96, "Music Video");
-    let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/listening-music-video-clip-with-auricular.png")?;
+    let mut image = SharedImage::load(
+        "../../docker/core/mkwebapp/static/image/listening-music-video-clip-with-auricular.png",
+    )?;
     image.scale(133, 96, true, true);
     button_music_video.set_image(Some(image));
     let mut button_pictures = Button::new(666, 96, 133, 96, "Pictures");
@@ -91,14 +95,14 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut window_settings = Window::default().with_size(800, 480);
     let mut button_settings_back = Button::new(666, 384, 133, 96, "Back");
-    let mut image = SharedImage::load("../../docker/core/mkwebapp/static/image/navigation/return.png")?;
+    let mut image =
+        SharedImage::load("../../docker/core/mkwebapp/static/image/navigation/return.png")?;
     image.scale(133, 96, true, true);
     button_settings_back.set_image(Some(image));
     window_settings.end();
     window_settings.make_resizable(true);
     window_settings.fullscreen(true);
     window_settings.hide();
-
 
     let mut window_media = Window::default().with_size(800, 480);
 

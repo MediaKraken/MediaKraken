@@ -1,23 +1,26 @@
-use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera};
-use rocket_auth::{prelude::Error, *};
-use rocket::{get, post, form::Form, routes};
+use rocket::serde::{json::Json, Deserialize, Serialize};
+use rocket::Request;
+use rocket::{form::Form, get, post, routes};
 use rocket::{form::*, State};
-use rocket::serde::{Serialize, Deserialize, json::Json};
+use rocket_auth::{prelude::Error, *};
+use rocket_dyn_templates::{tera::Tera, Template};
 
 #[derive(Serialize)]
-struct TemplateUserHomeContext<> {
+struct TemplateUserHomeContext {
     template_data_new_media: bool,
     template_data_user_media_queue: bool,
 }
 
 #[get("/home")]
 pub async fn user_home(user: User) -> Template {
-    Template::render("bss_user/bss_user_home", &TemplateUserHomeContext {
-        template_data_new_media: false,
-        template_data_user_media_queue: false,
-    })
+    Template::render(
+        "bss_user/bss_user_home",
+        &TemplateUserHomeContext {
+            template_data_new_media: false,
+            template_data_user_media_queue: false,
+        },
+    )
 }
 
 /*

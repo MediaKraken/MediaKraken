@@ -1,51 +1,50 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
 use amiquip::{AmqpProperties, Connection, Exchange, Publish, Result};
-use std::path::PathBuf;
 use chrono::prelude::*;
 use num_format::{Locale, ToFormattedString};
 use regex::Regex;
 use serde_json::{json, Value};
+use sqlx::Row;
 use std::error::Error;
+use std::ffi::OsStr;
 use std::fs;
 use std::path::Path;
-use tokio::time::{Duration, sleep};
+use std::path::PathBuf;
+use tokio::time::{sleep, Duration};
 use uuid::Uuid;
-use sqlx::Row;
-use std::ffi::OsStr;
 
 #[path = "mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;
 #[path = "mk_lib_common_media_extension.rs"]
 mod mk_lib_common_media_extension;
-#[path = "mk_lib_file.rs"]
-mod mk_lib_file;
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
-#[path = "mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
 #[path = "mk_lib_database_library.rs"]
 mod mk_lib_database_library;
-#[path = "mk_lib_database_version.rs"]
-mod mk_lib_database_version;
 #[path = "mk_lib_database_media.rs"]
 mod mk_lib_database_media;
 #[path = "mk_lib_database_media_movie.rs"]
 mod mk_lib_database_media_movie;
 #[path = "mk_lib_database_media_tv.rs"]
 mod mk_lib_database_media_tv;
+#[path = "mk_lib_database_metadata_download_queue.rs"]
+mod mk_lib_database_metadata_download_queue;
 #[path = "mk_lib_database_notification.rs"]
 mod mk_lib_database_notification;
+#[path = "mk_lib_database_version.rs"]
+mod mk_lib_database_version;
+#[path = "mk_lib_file.rs"]
+mod mk_lib_file;
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // start logging
     const LOGGING_INDEX_NAME: &str = "mkmediascanner";
-    mk_lib_logging::mk_logging_post_elk("info",
-                                        json!({"START": "START"}),
-                                        LOGGING_INDEX_NAME).await;
+    mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}), LOGGING_INDEX_NAME)
+        .await;
 
     // setup regex for finding media parts
     let stack_cd = Regex::new(r"(?i)-cd\d").unwrap();
@@ -63,12 +62,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
-    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
-                                                           false).await;
+    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
 
     // open rabbit connection
-    let mut rabbit_connection = Connection::insecure_open(
-        "amqp://guest:guest@mkstack_rabbitmq:5672")?;
+    let mut rabbit_connection =
+        Connection::insecure_open("amqp://guest:guest@mkstack_rabbitmq:5672")?;
 
     // Open a channel - None says let the library choose the channel ID.
     let rabbit_channel = rabbit_connection.open_channel(None)?;
@@ -77,23 +75,35 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let rabbit_exchange = Exchange::direct(&rabbit_channel);
 
     // determine directories to audit
-    for row_data in mk_lib_database_library::mk_lib_database_library_path_audit(&sqlx_pool).await.unwrap() {
-        mk_lib_logging::mk_logging_post_elk("info",
-                                            json!({ "Audit Path": row_data }),
-                                            LOGGING_INDEX_NAME).await;
+    for row_data in mk_lib_database_library::mk_lib_database_library_path_audit(&sqlx_pool)
+        .await
+        .unwrap()
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            "info",
+            json!({ "Audit Path": row_data }),
+            LOGGING_INDEX_NAME,
+        )
+        .await;
         let mut media_path: PathBuf;
         let mut scan_path: bool = true;
         // shouldn't need to care  let unc_slice = &row_data.get("mm_media_dir_path")[..1];
         // obviously this would mean we mount unc to below as well when defining libraries
         // make sure the path still exists
-        let media_path: PathBuf = ["/mediakraken/mnt",
-            row_data.get("mm_media_dir_path")].iter().collect();
+        let media_path: PathBuf = ["/mediakraken/mnt", row_data.get("mm_media_dir_path")]
+            .iter()
+            .collect();
 
         if !Path::new(&media_path).exists() {
-            mk_lib_database_notification::mk_lib_database_notification_insert(&sqlx_pool,
-                                                                              format!("Library path not found: {}",
-                                                                                      row_data.get("mm_media_dir_path")),
-                                                                              true).await;
+            mk_lib_database_notification::mk_lib_database_notification_insert(
+                &sqlx_pool,
+                format!(
+                    "Library path not found: {}",
+                    row_data.get("mm_media_dir_path")
+                ),
+                true,
+            )
+            .await;
             scan_path = false;
         }
 
@@ -102,40 +112,70 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let metadata = fs::metadata(&media_path)?;
             let last_modified = metadata.modified()?.elapsed()?.as_secs();
             if last_modified > row_data.get("mm_media_dir_last_scanned") {
-                mk_lib_database_library::mk_lib_database_library_path_status_update(&sqlx_pool,
-                                                                                    row_data.get("mm_media_dir_guid"),
-                                                                                    json!({"Status": "Added to scan", "Pct": 100:i32})).await.unwrap();
-                mk_lib_logging::mk_logging_post_elk("info",
-                                                    json!({"worker dir": media_path}),
-                                                    LOGGING_INDEX_NAME).await;
+                mk_lib_database_library::mk_lib_database_library_path_status_update(
+                    &sqlx_pool,
+                    row_data.get("mm_media_dir_guid"),
+                    json!({"Status": "Added to scan", "Pct": 100:i32}),
+                )
+                .await
+                .unwrap();
+                mk_lib_logging::mk_logging_post_elk(
+                    "info",
+                    json!({ "worker dir": media_path }),
+                    LOGGING_INDEX_NAME,
+                )
+                .await;
 
                 let original_media_class = row_data.get("mm_media_dir_class_enum");
                 // update the timestamp now so any other media added DURING this scan don"t get skipped
-                mk_lib_database_library::mk_lib_database_library_path_timestamp_update(&sqlx_pool,
-                                                                                       row_data.get("mm_media_dir_guid")).await;
-                mk_lib_database_library::mk_lib_database_library_path_status_update(&sqlx_pool,
-                                                                                    row_data.get("mm_media_dir_guid"),
-                                                                                    json!({"Status": "File search scan", "Pct": 0.0:f32})).await.unwrap();
-                let mut file_data = mk_lib_file::mk_directory_walk(&media_path.to_str()).await.unwrap();
+                mk_lib_database_library::mk_lib_database_library_path_timestamp_update(
+                    &sqlx_pool,
+                    row_data.get("mm_media_dir_guid"),
+                )
+                .await;
+                mk_lib_database_library::mk_lib_database_library_path_status_update(
+                    &sqlx_pool,
+                    row_data.get("mm_media_dir_guid"),
+                    json!({"Status": "File search scan", "Pct": 0.0:f32}),
+                )
+                .await
+                .unwrap();
+                let mut file_data = mk_lib_file::mk_directory_walk(&media_path.to_str())
+                    .await
+                    .unwrap();
                 let total_file_in_dir = file_data.len();
                 let mut total_scanned: u64 = 0;
                 let mut total_files: u64 = 0;
                 for file_name in file_data {
-                    if mk_lib_database_library::mk_lib_database_library_file_exists(&sqlx_pool,
-                                                                                    file_name).await.unwrap() == false {
+                    if mk_lib_database_library::mk_lib_database_library_file_exists(
+                        &sqlx_pool, file_name,
+                    )
+                    .await
+                    .unwrap()
+                        == false
+                    {
                         // set lower here so I can remove a lot of .lower() in the code below
-                        let file_extension = Path::new(&file_name.to_lowercase()).extension().and_then(OsStr::to_str).unwrap();
+                        let file_extension = Path::new(&file_name.to_lowercase())
+                            .extension()
+                            .and_then(OsStr::to_str)
+                            .unwrap();
                         // checking subtitles for parts as need multiple files for multiple media files
                         if mk_lib_common_media_extension::MEDIA_EXTENSION.contains(&file_extension)
-                            || mk_lib_common_media_extension::SUBTITLE_EXTENSION.contains(&file_extension)
-                            || mk_lib_common_media_extension::GAME_EXTENSION.contains(&file_extension) {
+                            || mk_lib_common_media_extension::SUBTITLE_EXTENSION
+                                .contains(&file_extension)
+                            || mk_lib_common_media_extension::GAME_EXTENSION
+                                .contains(&file_extension)
+                        {
                             let mut ffprobe_bif_data = true;
                             let mut save_dl_record = true;
                             total_files += 1;
                             // set here which MIGHT be overrode later
                             let mut new_class_type_uuid = media_class_type_uuid;
                             // check for "stacked" media file
-                            let base_file_name = Path::new(&file_name).file_name().and_then(OsStr::to_str).unwrap();
+                            let base_file_name = Path::new(&file_name)
+                                .file_name()
+                                .and_then(OsStr::to_str)
+                                .unwrap();
                             // check to see if it"s a "stacked" file
                             // including games since some are two or more discs
                             if stack_cd.is_match(&base_file_name)
@@ -143,36 +183,47 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 || stack_dvd.is_match(&base_file_name)
                                 || stack_pt.is_match(&base_file_name)
                                 || stack_disk.is_match(&base_file_name)
-                                || stack_disc.is_match(&base_file_name) {
+                                || stack_disc.is_match(&base_file_name)
+                            {
                                 // check to see if it"s part one or not
                                 if stack_cd1.is_match(&base_file_name) == false
                                     && stack_part1.is_match(&base_file_name) == false
                                     && stack_dvd1.is_match(&base_file_name) == false
                                     && stack_pt1.is_match(&base_file_name) == false
                                     && stack_disk1.is_match(&base_file_name) == false
-                                    && stack_disc1.is_match(&base_file_name) == false {
+                                    && stack_disc1.is_match(&base_file_name) == false
+                                {
                                     // it's not a part one here so, no DL record needed
                                     save_dl_record = false;
                                 }
                             }
                             // video game data
                             // TODO look for cue/bin data as well
-                            if original_media_class == mk_lib_common_enum_media_type::DLMediaType::GAME {
+                            if original_media_class
+                                == mk_lib_common_enum_media_type::DLMediaType::GAME
+                            {
                                 if file_extension == "iso" {
-                                    new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::GAME_ISO;
+                                    new_class_type_uuid =
+                                        mk_lib_common_enum_media_type::DLMediaType::GAME_ISO;
                                 } else {
                                     if file_extension == "chd" {
-                                        new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::GAME_CHD;
+                                        new_class_type_uuid =
+                                            mk_lib_common_enum_media_type::DLMediaType::GAME_CHD;
                                     } else {
-                                        new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::GAME_ROM;
+                                        new_class_type_uuid =
+                                            mk_lib_common_enum_media_type::DLMediaType::GAME_ROM;
                                     }
                                 }
                                 ffprobe_bif_data = false;
                             }
                             // set new media class for subtitles
                             else {
-                                if mk_lib_common_media_extension::SUBTITLE_EXTENSION.contains(&file_extension) {
-                                    if original_media_class == mk_lib_common_enum_media_type::DLMediaType::MOVIE {
+                                if mk_lib_common_media_extension::SUBTITLE_EXTENSION
+                                    .contains(&file_extension)
+                                {
+                                    if original_media_class
+                                        == mk_lib_common_enum_media_type::DLMediaType::MOVIE
+                                    {
                                         new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::MOVIE_SUBTITLE;
                                     } else {
                                         if original_media_class == mk_lib_common_enum_media_type::DLMediaType::TV
@@ -190,9 +241,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         || file_name.contains("/theme.mp3")
                                         || file_name.contains("\\theme.mp3")
                                         || file_name.contains("/theme.mp4")
-                                        || file_name.contains("\\theme.mp4") {
-                                        if original_media_class == mk_lib_common_enum_media_type::DLMediaType::MOVIE {
-                                            if file_name.contains("/trailers/") || file_name.contains("\\trailers\\") {
+                                        || file_name.contains("\\theme.mp4")
+                                    {
+                                        if original_media_class
+                                            == mk_lib_common_enum_media_type::DLMediaType::MOVIE
+                                        {
+                                            if file_name.contains("/trailers/")
+                                                || file_name.contains("\\trailers\\")
+                                            {
                                                 new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::MOVIE_TRAILER;
                                             } else {
                                                 new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::MOVIE_THEME;
@@ -211,8 +267,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     }
                                     // set new media class for extras
                                     else {
-                                        if file_name.contains("/extras/") || file_name.contains("\\extras\\") {
-                                            if original_media_class == mk_lib_common_enum_media_type::DLMediaType::MOVIE {
+                                        if file_name.contains("/extras/")
+                                            || file_name.contains("\\extras\\")
+                                        {
+                                            if original_media_class
+                                                == mk_lib_common_enum_media_type::DLMediaType::MOVIE
+                                            {
                                                 new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::MOVIE_EXTRAS;
                                             } else {
                                                 if original_media_class == mk_lib_common_enum_media_type::DLMediaType::TV
@@ -225,12 +285,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         // set new media class for backdrops (usually themes)
                                         else {
                                             if file_name.contains("/backdrops/")
-                                                || file_name.contains("\\backdrops\\") {
+                                                || file_name.contains("\\backdrops\\")
+                                            {
                                                 media_class_text = new_class_type_uuid;
                                                 if file_name.contains("/theme.mp3")
                                                     || file_name.contains("\\theme.mp3")
                                                     || file_name.contains("/theme.mp4")
-                                                    || file_name.contains("\\theme.mp4") {
+                                                    || file_name.contains("\\theme.mp4")
+                                                {
                                                     if original_media_class == mk_lib_common_enum_media_type::DLMediaType::MOVIE {
                                                         new_class_type_uuid = mk_lib_common_enum_media_type::DLMediaType::MOVIE_THEME;
                                                     } else {
@@ -244,18 +306,23 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                             }
                                             // flip around slashes for smb paths
                                             if file_name == "\\" {
-                                                let file_name = file_name.replace("\\\\", "smb://guest:\"\"@").replace("\\", "/");
+                                                let file_name = file_name
+                                                    .replace("\\\\", "smb://guest:\"\"@")
+                                                    .replace("\\", "/");
                                             }
                                             // create media_json data
-                                            let media_json = json!({ "Added": Utc::now().to_string() });
+                                            let media_json =
+                                                json!({ "Added": Utc::now().to_string() });
                                             let media_id = Uuid::new_v4();
-                                            mk_lib_database_media::mk_lib_database_media_insert(&sqlx_pool,
-                                                                                                media_id,
-                                                                                                new_class_type_uuid,
-                                                                                                file_name,
-                                                                                                None,
-                                                                                                json!({}),
-                                                                                                media_json);
+                                            mk_lib_database_media::mk_lib_database_media_insert(
+                                                &sqlx_pool,
+                                                media_id,
+                                                new_class_type_uuid,
+                                                file_name,
+                                                None,
+                                                json!({}),
+                                                media_json,
+                                            );
                                             // verify ffprobe and bif should run on the data
                                             if ffprobe_bif_data == true && mk_lib_common_media_extension::MEDIA_EXTENSION_SKIP_FFMPEG.contains(&file_extension) == false
                                                 && mk_lib_common_media_extension::MEDIA_EXTENSION.contains(&file_extension) {
@@ -295,21 +362,31 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     }
                 }
                 // end of for loop for each file in library
-                mk_lib_logging::mk_logging_post_elk("info",
-                                                    json!({"worker dir done": media_path.to_str(),
+                mk_lib_logging::mk_logging_post_elk(
+                    "info",
+                    json!({"worker dir done": media_path.to_str(),
                                                         "media class": media_class_type_uuid}),
-                                                    LOGGING_INDEX_NAME).await;
+                    LOGGING_INDEX_NAME,
+                )
+                .await;
                 // set to none so it doesn't show up anymore in admin status page
-                mk_lib_database_library::mk_lib_database_library_path_status_update(&sqlx_pool,
-                                                                                    row_data.get("mm_media_dir_guid"),
-                                                                                    json!({"Status": "File scan complete", "Pct": 100:i32}));
+                mk_lib_database_library::mk_lib_database_library_path_status_update(
+                    &sqlx_pool,
+                    row_data.get("mm_media_dir_guid"),
+                    json!({"Status": "File scan complete", "Pct": 100:i32}),
+                );
                 if total_files > 0 {
                     // add notification to admin status page
-                    mk_lib_database_notification::mk_lib_database_notification_insert(&sqlx_pool,
-                                                                                      format!("{} file(s) added from {}",
-                                                                                              total_files.to_formatted_string(&Locale::en),
-                                                                                              row_data.get("mm_media_dir_path")),
-                                                                                      true).await;
+                    mk_lib_database_notification::mk_lib_database_notification_insert(
+                        &sqlx_pool,
+                        format!(
+                            "{} file(s) added from {}",
+                            total_files.to_formatted_string(&Locale::en),
+                            row_data.get("mm_media_dir_path")
+                        ),
+                        true,
+                    )
+                    .await;
                 }
             }
         }
@@ -318,8 +395,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // close rabbitmq
     rabbit_connection.close();
 
-    mk_lib_logging::mk_logging_post_elk("info",
-                                        json!({"STOP": "STOP"}),
-                                        LOGGING_INDEX_NAME).await;
+    mk_lib_logging::mk_logging_post_elk("info", json!({"STOP": "STOP"}), LOGGING_INDEX_NAME).await;
     Ok(())
 }

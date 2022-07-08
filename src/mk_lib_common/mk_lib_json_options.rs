@@ -7,7 +7,6 @@ struct MediaKrakenOptions {
     city: String,
 }
 
-
 /*
 {
   "API": {

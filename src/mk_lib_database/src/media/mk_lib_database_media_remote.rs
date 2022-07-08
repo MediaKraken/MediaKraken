@@ -1,13 +1,12 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use sqlx::{types::Uuid, types::Json};
+use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
-use serde::{Serialize, Deserialize};
+use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 
-pub async fn mk_lib_database_remote_media_count(pool: &sqlx::PgPool)
-                                                -> Result<i32, sqlx::Error> {
-    let row: (i32, ) = sqlx::query_as("select count(*) from mm_media_remote")
+pub async fn mk_lib_database_remote_media_count(pool: &sqlx::PgPool) -> Result<i32, sqlx::Error> {
+    let row: (i32,) = sqlx::query_as("select count(*) from mm_media_remote")
         .fetch_one(pool)
         .await?;
     Ok(row.0)

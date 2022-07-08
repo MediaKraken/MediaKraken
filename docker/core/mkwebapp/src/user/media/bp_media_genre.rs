@@ -1,11 +1,14 @@
-use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera};
-use rocket_auth::{Users, Error, Auth, Signup, Login, User};
+use rocket::Request;
+use rocket_auth::{Auth, Error, Login, Signup, User, Users};
+use rocket_dyn_templates::{tera::Tera, Template};
 
 #[post("/media/genre")]
 pub async fn user_media_genre(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
-    Template::render("bss_user/media/bss_user_media_genre_video", tera::Context::new().into_json())
+    Template::render(
+        "bss_user/media/bss_user_media_genre_video",
+        tera::Context::new().into_json(),
+    )
 }
 
 /*

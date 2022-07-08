@@ -1,7 +1,7 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use serde::{Serialize, Deserialize};
-use sqlx::{types::Uuid, types::Json};
+use serde::{Deserialize, Serialize};
+use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
@@ -10,11 +10,14 @@ pub struct DBMUsageMovieList {
     mm_metadata_times: i64,
 }
 
-pub async fn mk_lib_database_usage_top10_movie(pool: &sqlx::PgPool)
-                                               -> Result<Vec<DBMUsageMovieList>, sqlx::Error> {
-    let select_query = sqlx::query("select mm_metadata_name, \
+pub async fn mk_lib_database_usage_top10_movie(
+    pool: &sqlx::PgPool,
+) -> Result<Vec<DBMUsageMovieList>, sqlx::Error> {
+    let select_query = sqlx::query(
+        "select mm_metadata_name, \
         mm_metadata_user_json->'Watched'->'Times' as mm_metadata_times \
-        from mm_metadata_movie order by mm_metadata_user_json->'Watched'->'Times' desc limit 10");
+        from mm_metadata_movie order by mm_metadata_user_json->'Watched'->'Times' desc limit 10",
+    );
     let table_rows: Vec<DBMUsageMovieList> = select_query
         .map(|row: PgRow| DBMUsageMovieList {
             mm_metadata_name: row.get("mm_metadata_name"),
@@ -31,12 +34,15 @@ pub struct DBUsageTVList {
     mm_metadata_times: i64,
 }
 
-pub async fn mk_lib_database_usage_top10_tv(pool: &sqlx::PgPool)
-                                            -> Result<Vec<DBUsageTVList>, sqlx::Error> {
-    let select_query = sqlx::query("select mm_metadata_tvshow_name, \
+pub async fn mk_lib_database_usage_top10_tv(
+    pool: &sqlx::PgPool,
+) -> Result<Vec<DBUsageTVList>, sqlx::Error> {
+    let select_query = sqlx::query(
+        "select mm_metadata_tvshow_name, \
         mm_metadata_tvshow_user_json->'Watched'->'Times' as mm_metadata_times \
         from mm_metadata_tvshow order by mm_metadata_tvshow_user_json->'Watched'->'Times' \
-        desc limit 10");
+        desc limit 10",
+    );
     let table_rows: Vec<DBUsageTVList> = select_query
         .map(|row: PgRow| DBUsageTVList {
             mm_metadata_tvshow_name: row.get("mm_metadata_tvshow_name"),

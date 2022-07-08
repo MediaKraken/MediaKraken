@@ -1,8 +1,8 @@
-use rocket::fs::{FileServer, relative};
-use rocket::{Rocket, Request, Build};
-use rocket::response::{content, status};
+use rocket::fs::{relative, FileServer};
 use rocket::http::Status;
-use rocket_dyn_templates::{Template, tera::Tera};
+use rocket::response::{content, status};
+use rocket::{Build, Request, Rocket};
+use rocket_dyn_templates::{tera::Tera, Template};
 
 #[catch(401)]
 pub async fn general_not_authorized() -> Template {

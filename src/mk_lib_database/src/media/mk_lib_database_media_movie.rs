@@ -1,16 +1,18 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use sqlx::{FromRow, Row};
+use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
-use sqlx::{types::Uuid, types::Json};
-use serde::{Serialize, Deserialize};
+use sqlx::{types::Json, types::Uuid};
+use sqlx::{FromRow, Row};
 
 #[path = "mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;
 
-pub async fn mk_lib_database_media_movie_genre_count(pool: &sqlx::PgPool)
-                                                     -> Result<Vec<PgRow>, sqlx::Error> {
-    let rows: Vec<PgRow> = sqlx::query("select mm_metadata_json->'genres' as gen, \
+pub async fn mk_lib_database_media_movie_genre_count(
+    pool: &sqlx::PgPool,
+) -> Result<Vec<PgRow>, sqlx::Error> {
+    let rows: Vec<PgRow> = sqlx::query(
+        "select mm_metadata_json->'genres' as gen, \
         count(mm_metadata_json->'genres') as gen_count \
         from ((select distinct on (mm_media_metadata_guid) \
         mm_metadata_json from mm_media, mm_metadata_movie \
@@ -19,22 +21,26 @@ pub async fn mk_lib_database_media_movie_genre_count(pool: &sqlx::PgPool)
         on (mmr_media_metadata_guid) mm_metadata_json from mm_media_remote, \
         mm_metadata_movie where mmr_media_class_guid = $2 \
         and mmr_media_metadata_guid = mm_metadata_guid)) \
-        as temp group by gen")
-        .bind(mk_lib_common_enum_media_type::DLMediaType::MOVIE)
-        .bind(mk_lib_common_enum_media_type::DLMediaType::MOVIE)
-        .fetch_all(pool)
-        .await?;
+        as temp group by gen",
+    )
+    .bind(mk_lib_common_enum_media_type::DLMediaType::MOVIE)
+    .bind(mk_lib_common_enum_media_type::DLMediaType::MOVIE)
+    .fetch_all(pool)
+    .await?;
     Ok(rows)
 }
 
-pub async fn mk_lib_database_media_movie_random(pool: &sqlx::PgPool)
-                                                -> Result<(Uuid, Uuid), sqlx::Error> {
-    let row: (Uuid, Uuid) = sqlx::query_as("select mm_metadata_guid, mm_media_guid \
+pub async fn mk_lib_database_media_movie_random(
+    pool: &sqlx::PgPool,
+) -> Result<(Uuid, Uuid), sqlx::Error> {
+    let row: (Uuid, Uuid) = sqlx::query_as(
+        "select mm_metadata_guid, mm_media_guid \
         from mm_media, mm_metadata_movie \
         where mm_media_metadata_guid = mm_metadata_guid \
-        and random() < 0.01 limit 1")
-        .fetch_one(pool)
-        .await?;
+        and random() < 0.01 limit 1",
+    )
+    .fetch_one(pool)
+    .await?;
     Ok(row)
 }
 
@@ -43,20 +49,17 @@ pub struct DBMediaMovieList {
     mm_metadata_music_video_guid: uuid::Uuid,
 }
 
-pub async fn mk_lib_database_media_movie_read(pool: &sqlx::PgPool,
-                                              search_value: String,
-                                              offset: i32, limit: i32)
-                                              -> Result<Vec<DBMediaMovieList>, sqlx::Error> {
+pub async fn mk_lib_database_media_movie_read(
+    pool: &sqlx::PgPool,
+    search_value: String,
+    offset: i32,
+    limit: i32,
+) -> Result<Vec<DBMediaMovieList>, sqlx::Error> {
     let select_query;
     if search_value != "" {
-        select_query = sqlx::query("")
-            .bind(search_value)
-            .bind(offset)
-            .bind(limit);
+        select_query = sqlx::query("").bind(search_value).bind(offset).bind(limit);
     } else {
-        select_query = sqlx::query("")
-            .bind(offset)
-            .bind(limit);
+        select_query = sqlx::query("").bind(offset).bind(limit);
     }
     let table_rows: Vec<DBMediaMovieList> = select_query
         .map(|row: PgRow| DBMediaMovieList {
@@ -67,19 +70,18 @@ pub async fn mk_lib_database_media_movie_read(pool: &sqlx::PgPool,
     Ok(table_rows)
 }
 
-pub async fn mk_lib_database_media_movie_count(pool: &sqlx::PgPool,
-                                               search_value: String)
-                                               -> Result<i64, sqlx::Error> {
+pub async fn mk_lib_database_media_movie_count(
+    pool: &sqlx::PgPool,
+    search_value: String,
+) -> Result<i64, sqlx::Error> {
     if search_value != "" {
-        let row: (i64, ) = sqlx::query_as("")
+        let row: (i64,) = sqlx::query_as("")
             .bind(search_value)
             .fetch_one(pool)
             .await?;
         Ok(row.0)
     } else {
-        let row: (i64, ) = sqlx::query_as("")
-            .fetch_one(pool)
-            .await?;
+        let row: (i64,) = sqlx::query_as("").fetch_one(pool).await?;
         Ok(row.0)
     }
 }

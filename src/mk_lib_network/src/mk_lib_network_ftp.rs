@@ -3,12 +3,16 @@
 // ftp = { version = "<version>", features = ["secure"] }
 // https://github.com/mattnenterprise/rust-ftp
 
-use std::str;
-use std::io::Cursor;
 use ftp::FtpStream;
+use std::io::Cursor;
+use std::str;
 
-pub fn mk_lib_network_ftp_connect(host_ip: &str, host_port: &str,
-                                  user_name: &str, user_password: &str) {
+pub fn mk_lib_network_ftp_connect(
+    host_ip: &str,
+    host_port: &str,
+    user_name: &str,
+    user_password: &str,
+) {
     // Create a connection to an FTP server and authenticate to it.
     let mut ftp_stream = FtpStream::connect(format! {"{}:{}}"}, host_ip, host_port).unwrap();
     let _ = ftp_stream.login(user_name, user_password).unwrap();

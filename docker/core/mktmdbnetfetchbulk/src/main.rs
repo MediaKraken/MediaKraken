@@ -1,10 +1,10 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
 use serde::{Deserialize, Serialize};
-use std::error::Error;
 use serde_json::json;
 use sqlx::Row;
-use sqlx::{types::Uuid, types::Json};
+use sqlx::{types::Json, types::Uuid};
+use std::error::Error;
 
 #[path = "mk_lib_common.rs"]
 mod mk_lib_common;
@@ -47,29 +47,38 @@ struct MetadataTV {
 async fn main() -> Result<(), Box<dyn Error>> {
     // start logging
     const LOGGING_INDEX_NAME: &str = "mktmdbnetfetchbulk";
-    mk_lib_logging::mk_logging_post_elk("info",
-                                        json!({"START": "START"}),
-                                        LOGGING_INDEX_NAME).await;
+    mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}), LOGGING_INDEX_NAME)
+        .await;
 
     let fetch_date: String = "03_30_2022".to_string();
 
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
-    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
-                                                           false).await.unwrap();
+    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+        .await
+        .unwrap();
 
     // grab the movie id's
     // files.tmdb.org = 13.227.42.62
     let _fetch_result_movie = mk_lib_network::mk_download_file_from_url(
-        format!("http://files.tmdb.org/p/exports/movie_ids_{}.json.gz", fetch_date),
-        &"/mediakraken/movie.gz".to_string()).await;
+        format!(
+            "http://files.tmdb.org/p/exports/movie_ids_{}.json.gz",
+            fetch_date
+        ),
+        &"/mediakraken/movie.gz".to_string(),
+    )
+    .await;
     let json_result = mk_lib_compression::mk_decompress_gz_data("/mediakraken/movie.gz").unwrap();
     // Please note that the data is NOT in id order
     for json_item in json_result.split('\n') {
         if !json_item.trim().is_empty() {
             let metadata_struct: MetadataMovie = serde_json::from_str(json_item.trim())?;
-            let result = mk_lib_database_metadata_movie::mk_lib_database_metadata_exists_movie(&sqlx_pool,
-                                                                                         metadata_struct.id).await.unwrap();
+            let result = mk_lib_database_metadata_movie::mk_lib_database_metadata_exists_movie(
+                &sqlx_pool,
+                metadata_struct.id,
+            )
+            .await
+            .unwrap();
             if result == false {
                 let download_result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
                                                                                                                               "themoviedb".to_string(),
@@ -90,14 +99,23 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // grab the TV id's
     let _fetch_result_tv = mk_lib_network::mk_download_file_from_url(
-        format!("http://files.tmdb.org/p/exports/tv_series_ids_{}.json.gz", fetch_date),
-        &"/mediakraken/tv.gz".to_string()).await;
+        format!(
+            "http://files.tmdb.org/p/exports/tv_series_ids_{}.json.gz",
+            fetch_date
+        ),
+        &"/mediakraken/tv.gz".to_string(),
+    )
+    .await;
     let json_result = mk_lib_compression::mk_decompress_gz_data("/mediakraken/tv.gz").unwrap();
     for json_item in json_result.split('\n') {
         if !json_item.trim().is_empty() {
             let metadata_struct: MetadataTV = serde_json::from_str(json_item.trim())?;
-            let result = mk_lib_database_metadata_tv::mk_lib_database_metadata_exists_tv(&sqlx_pool,
-                                                                                      metadata_struct.id).await.unwrap();
+            let result = mk_lib_database_metadata_tv::mk_lib_database_metadata_exists_tv(
+                &sqlx_pool,
+                metadata_struct.id,
+            )
+            .await
+            .unwrap();
             if result == false {
                 let download_result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
                                                                                                                               "themoviedb".to_string(),
@@ -116,8 +134,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
     }
     // stop logging
-    mk_lib_logging::mk_logging_post_elk("info",
-                                        json!({"STOP": "STOP"}),
-                                        LOGGING_INDEX_NAME).await;
+    mk_lib_logging::mk_logging_post_elk("info", json!({"STOP": "STOP"}), LOGGING_INDEX_NAME).await;
     Ok(())
 }

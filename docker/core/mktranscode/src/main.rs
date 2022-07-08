@@ -1,6 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use amiquip::{Connection, ConsumerMessage, ConsumerOptions, Exchange, QueueDeclareOptions, Result};
+use amiquip::{
+    Connection, ConsumerMessage, ConsumerOptions, Exchange, QueueDeclareOptions, Result,
+};
 use serde_json::{json, Value};
 use std::error::Error;
 
@@ -11,13 +13,12 @@ mod mk_lib_logging;
 async fn main() -> Result<(), Box<dyn Error>> {
     // start logging
     const LOGGING_INDEX_NAME: &str = "mktranscode";
-    mk_lib_logging::mk_logging_post_elk("info",
-                                        json!({"START": "START"}),
-                                        LOGGING_INDEX_NAME).await;
+    mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}), LOGGING_INDEX_NAME)
+        .await;
 
     // open rabbit connection
-    let mut rabbit_connection = Connection::insecure_open(
-        "amqp://guest:guest@mkstack_rabbitmq:5672")?;
+    let mut rabbit_connection =
+        Connection::insecure_open("amqp://guest:guest@mkstack_rabbitmq:5672")?;
     // Open a channel - None says let the library choose the channel ID.
     let rabbit_channel = rabbit_connection.open_channel(None)?;
 
@@ -34,199 +35,202 @@ async fn main() -> Result<(), Box<dyn Error>> {
         for (i, message) in consumer.receiver().iter().enumerate() {
             match message {
                 ConsumerMessage::Delivery(delivery) => {
-                    let json_message: Value = serde_json::from_str(
-                        &String::from_utf8_lossy(&delivery.body))?;
-                    mk_lib_logging::mk_logging_post_elk("info",
-                                                        json!({ "msg body": json_message }),
-                                                        LOGGING_INDEX_NAME).await;
+                    let json_message: Value =
+                        serde_json::from_str(&String::from_utf8_lossy(&delivery.body))?;
+                    mk_lib_logging::mk_logging_post_elk(
+                        "info",
+                        json!({ "msg body": json_message }),
+                        LOGGING_INDEX_NAME,
+                    )
+                    .await;
                     // if json_message["Type"].to_string() == "File" {
                     //     // do NOT remove the header.....this is the SAVE location
                     //     mk_lib_network::mk_download_file_from_url(json_message["URL"].to_string(),
                     //                                               json_message["Local Save Path"].to_string());
                     // }
                     /*
-                     if json_message['Type'] == 'Roku':
-            if json_message['Subtype'] == 'Thumbnail':
-                try:
-                    common_hardware_roku_bif.com_roku_create_bif(json_message['Media Path'])
-                except struct.error:
-                    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(
-                        message_type='error',
-                        message_text={
-                            'fail bif': json_message})
-        else if json_message['Type'] == 'HDHomeRun':
-            pass
-        else if json_message['Type'] == 'FFMPEG':
-            if json_message['Subtype'] == 'Probe':
-                # scan media file via ffprobe
-                ffprobe_data = common_ffmpeg.com_ffmpeg_media_attr(json_message['Media Path'])
-                db_connection.db_media_ffmeg_update(json_message['Media UUID'],
-                                                    ffprobe_data)
-            else if json_message['Subtype'] == 'Cast':
-                if json_message['Command'] == "Chapter Back":
-                    pass
-                else if json_message['Command'] == "Chapter Forward":
-                    pass
-                else if json_message['Command'] == "Fast Forward":
-                    pass
-                else if json_message['Command'] == "Mute":
-                    subprocess.Popen(
-                        ('python3', '/mediakraken/stream2chromecast/stream2chromecast.py',
-                         '-devicename', json_message['Device'], '-mute'),
-                        stdout=subprocess.PIPE, shell=False)
-                else if json_message['Command'] == "Pause":
-                    subprocess.Popen(
-                        ('python3', '/mediakraken/stream2chromecast/stream2chromecast.py',
-                         '-devicename', json_message['Device'], '-pause'),
-                        stdout=subprocess.PIPE, shell=False)
-                else if json_message['Command'] == "Rewind":
-                    pass
-                else if json_message['Command'] == 'Stop':
-                    subprocess.Popen(
-                        ('python3', '/mediakraken/stream2chromecast/stream2chromecast.py',
-                         '-devicename', json_message['Device'], '-stop'),
-                        stdout=subprocess.PIPE, shell=False)
-                else if json_message['Command'] == "Volume Down":
-                    subprocess.Popen(
-                        ('python3', '/mediakraken/stream2chromecast/stream2chromecast.py',
-                         '-devicename', json_message['Device'], '-voldown'),
-                        stdout=subprocess.PIPE, shell=False)
-                else if json_message['Command'] == "Volume Set":
-                    subprocess.Popen(
-                        ('python3', '/mediakraken/stream2chromecast/stream2chromecast.py',
-                         '-devicename', json_message['Device'], '-setvol', json_message['Data']),
-                        stdout=subprocess.PIPE, shell=False)
-                else if json_message['Command'] == "Volume Up":
-                    subprocess.Popen(
-                        ('python3', '/mediakraken/stream2chromecast/stream2chromecast.py',
-                         '-devicename', json_message['Device'], '-volup'),
-                        stdout=subprocess.PIPE, shell=False)
-            else if json_message['Subtype'] == 'ChapterImage':
-                ffprobe_data = json_message['Data']
-                # begin image generation
-                chapter_image_list = {}
-                chapter_count = 0
-                first_image = True
-                # do this check as not all media has chapters....like LD rips
-                if 'chapters' in ffprobe_data:
-                    for chapter_data in ffprobe_data['chapters']:
-                        chapter_count += 1
-                        # file path, time, output name
-                        # check image save option whether to
-                        # save this in media folder or metadata folder
-                        if option_config_json['MetadataImageLocal'] is False:
-                            image_file_path = os.path.join(
-                                common_metadata.com_meta_image_file_path(
-                                    json_message['Media Path'],
-                                    'chapter'),
-                                json_message['Media UUID']
-                                + '_' + str(chapter_count)
-                                + '.png')
-                        else:
-                            image_file_path = os.path.join(
-                                os.path.dirname(json_message['Media Path']),
-                                'chapters')
-                            # have this bool so I don't hit the os looking for path each time
-                            if first_image is True and not os.path.isdir(image_file_path):
-                                os.makedirs(image_file_path)
-                            image_file_path = os.path.join(
-                                image_file_path, (str(chapter_count) + '.png'))
-                        # if ss is before the input it seeks
-                        # and doesn't convert every frame like after input
-                        command_list = ['ffmpeg', '-ss']
-                        # format the seconds to what ffmpeg is looking for
-                        minutes, seconds = divmod(float(chapter_data['start_time']), 60)
-                        hours, minutes = divmod(minutes, 60)
-                        command_list.append("%02d:%02d:%02f" % (hours, minutes, seconds))
-                        command_list.append('-i')
-                        command_list.append('\"' + json_message['Media Path'] + '\"')
-                        command_list.append('-vframes')
-                        command_list.append('1')
-                        command_list.append('\"' + image_file_path + '\"')
-                        ffmpeg_proc = subprocess.Popen(command_list,
-                                                       stdout=subprocess.PIPE,
-                                                       shell=False)
-                        # wait for subprocess to finish to not flood with ffmpeg processes
-                        ffmpeg_proc.wait()
+                                 if json_message['Type'] == 'Roku':
+                        if json_message['Subtype'] == 'Thumbnail':
+                            try:
+                                common_hardware_roku_bif.com_roku_create_bif(json_message['Media Path'])
+                            except struct.error:
+                                await common_logging_elasticsearch_httpx.com_es_httpx_post_async(
+                                    message_type='error',
+                                    message_text={
+                                        'fail bif': json_message})
+                    else if json_message['Type'] == 'HDHomeRun':
+                        pass
+                    else if json_message['Type'] == 'FFMPEG':
+                        if json_message['Subtype'] == 'Probe':
+                            # scan media file via ffprobe
+                            ffprobe_data = common_ffmpeg.com_ffmpeg_media_attr(json_message['Media Path'])
+                            db_connection.db_media_ffmeg_update(json_message['Media UUID'],
+                                                                ffprobe_data)
+                        else if json_message['Subtype'] == 'Cast':
+                            if json_message['Command'] == "Chapter Back":
+                                pass
+                            else if json_message['Command'] == "Chapter Forward":
+                                pass
+                            else if json_message['Command'] == "Fast Forward":
+                                pass
+                            else if json_message['Command'] == "Mute":
+                                subprocess.Popen(
+                                    ('python3', '/mediakraken/stream2chromecast/stream2chromecast.py',
+                                     '-devicename', json_message['Device'], '-mute'),
+                                    stdout=subprocess.PIPE, shell=False)
+                            else if json_message['Command'] == "Pause":
+                                subprocess.Popen(
+                                    ('python3', '/mediakraken/stream2chromecast/stream2chromecast.py',
+                                     '-devicename', json_message['Device'], '-pause'),
+                                    stdout=subprocess.PIPE, shell=False)
+                            else if json_message['Command'] == "Rewind":
+                                pass
+                            else if json_message['Command'] == 'Stop':
+                                subprocess.Popen(
+                                    ('python3', '/mediakraken/stream2chromecast/stream2chromecast.py',
+                                     '-devicename', json_message['Device'], '-stop'),
+                                    stdout=subprocess.PIPE, shell=False)
+                            else if json_message['Command'] == "Volume Down":
+                                subprocess.Popen(
+                                    ('python3', '/mediakraken/stream2chromecast/stream2chromecast.py',
+                                     '-devicename', json_message['Device'], '-voldown'),
+                                    stdout=subprocess.PIPE, shell=False)
+                            else if json_message['Command'] == "Volume Set":
+                                subprocess.Popen(
+                                    ('python3', '/mediakraken/stream2chromecast/stream2chromecast.py',
+                                     '-devicename', json_message['Device'], '-setvol', json_message['Data']),
+                                    stdout=subprocess.PIPE, shell=False)
+                            else if json_message['Command'] == "Volume Up":
+                                subprocess.Popen(
+                                    ('python3', '/mediakraken/stream2chromecast/stream2chromecast.py',
+                                     '-devicename', json_message['Device'], '-volup'),
+                                    stdout=subprocess.PIPE, shell=False)
+                        else if json_message['Subtype'] == 'ChapterImage':
+                            ffprobe_data = json_message['Data']
+                            # begin image generation
+                            chapter_image_list = {}
+                            chapter_count = 0
+                            first_image = True
+                            # do this check as not all media has chapters....like LD rips
+                            if 'chapters' in ffprobe_data:
+                                for chapter_data in ffprobe_data['chapters']:
+                                    chapter_count += 1
+                                    # file path, time, output name
+                                    # check image save option whether to
+                                    # save this in media folder or metadata folder
+                                    if option_config_json['MetadataImageLocal'] is False:
+                                        image_file_path = os.path.join(
+                                            common_metadata.com_meta_image_file_path(
+                                                json_message['Media Path'],
+                                                'chapter'),
+                                            json_message['Media UUID']
+                                            + '_' + str(chapter_count)
+                                            + '.png')
+                                    else:
+                                        image_file_path = os.path.join(
+                                            os.path.dirname(json_message['Media Path']),
+                                            'chapters')
+                                        # have this bool so I don't hit the os looking for path each time
+                                        if first_image is True and not os.path.isdir(image_file_path):
+                                            os.makedirs(image_file_path)
+                                        image_file_path = os.path.join(
+                                            image_file_path, (str(chapter_count) + '.png'))
+                                    # if ss is before the input it seeks
+                                    # and doesn't convert every frame like after input
+                                    command_list = ['ffmpeg', '-ss']
+                                    # format the seconds to what ffmpeg is looking for
+                                    minutes, seconds = divmod(float(chapter_data['start_time']), 60)
+                                    hours, minutes = divmod(minutes, 60)
+                                    command_list.append("%02d:%02d:%02f" % (hours, minutes, seconds))
+                                    command_list.append('-i')
+                                    command_list.append('\"' + json_message['Media Path'] + '\"')
+                                    command_list.append('-vframes')
+                                    command_list.append('1')
+                                    command_list.append('\"' + image_file_path + '\"')
+                                    ffmpeg_proc = subprocess.Popen(command_list,
+                                                                   stdout=subprocess.PIPE,
+                                                                   shell=False)
+                                    # wait for subprocess to finish to not flood with ffmpeg processes
+                                    ffmpeg_proc.wait()
 
-                        # as the worker might see it as finished if allowed to continue
-                        chapter_image_list[chapter_data['tags']['title']] = image_file_path
-                        first_image = False
-                db_connection.db_update_media_json(json_message['Media UUID'],
-                                                   {'ChapterImages': chapter_image_list})
+                                    # as the worker might see it as finished if allowed to continue
+                                    chapter_image_list[chapter_data['tags']['title']] = image_file_path
+                                    first_image = False
+                            db_connection.db_update_media_json(json_message['Media UUID'],
+                                                               {'ChapterImages': chapter_image_list})
 
-            else if json_message['Subtype'] == 'Sync':
-                ffmpeg_params = ['./bin/ffmpeg', '-i', db_connection.db_media_path_by_uuid(
-                    row_data['mm_sync_options_json']['Media GUID'])[0]]
-                if row_data['mm_sync_options_json']['Options']['Size'] != "Clone":
-                    ffmpeg_params.extend(('-fs',
-                                          row_data['mm_sync_options_json']['Options']['Size']))
-                if row_data['mm_sync_options_json']['Options']['VCodec'] != "Copy":
-                    ffmpeg_params.extend(
-                        ('-vcodec', row_data['mm_sync_options_json']['Options']['VCodec']))
-                if row_data['mm_sync_options_json']['Options']['AudioChannels'] != "Copy":
-                    ffmpeg_params.extend(('-ac',
-                                          row_data['mm_sync_options_json']['Options'][
-                                              'AudioChannels']))
-                if row_data['mm_sync_options_json']['Options']['ACodec'] != "Copy":
-                    ffmpeg_params.extend(('-acodec',
-                                          row_data['mm_sync_options_json']['Options']['ACodec']))
-                if row_data['mm_sync_options_json']['Options']['ASRate'] != 'Default':
-                    ffmpeg_params.extend(
-                        ('-ar', row_data['mm_sync_options_json']['Options']['ASRate']))
-                ffmpeg_params.append(row_data['mm_sync_path_to'] + "."
-                                     + row_data['mm_sync_options_json']['Options']['VContainer'])
-                common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
-                                                                     message_text={
-                                                                         'ffmpeg': ffmpeg_params})
-                ffmpeg_pid = subprocess.Popen(shlex.split(ffmpeg_params),
-                                              stdout=subprocess.PIPE, shell=False)
-                # output after it gets started
-                #  Duration: 01:31:10.10, start: 0.000000, bitrate: 4647 kb/s
-                # frame= 1091 fps= 78 q=-1.0 Lsize=    3199kB time=00:00:36.48
-                # bitrate= 718.4kbits/s dup=197 drop=0 speed= 2.6x
-                media_duration = None
-                while True:
-                    line = ffmpeg_pid.stdout.readline()
-                    if line != '':
-                        common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
-                                                                             message_text={
-                                                                                 'ffmpeg out': line.rstrip()})
-                        if line.find('Duration:') != -1:
-                            media_duration = timedelta(
-                                float(line.split(': ', 1)[1].split(',', 1)[0]))
-                        else if line[0:5] == "frame":
-                            time_string = timedelta(float(line.split('=', 5)[5].split(' ', 1)[0]))
-                            time_percent = time_string.total_seconds() \
-                                           / media_duration.total_seconds()
-                            db_connection.db_sync_progress_update(row_data['mm_sync_guid'],
-                                                                  time_percent)
-                            db_connection.db_commit()
-                    else:
-                        break
-                ffmpeg_pid.wait()
-                # deal with converted file
-                if row_data['mm_sync_options_json']['Type'] == 'Local File System':
-                    # just go along merry way as ffmpeg shoulda output to mm_sync_path_to
-                    pass
-                else if row_data['mm_sync_options_json']['Type'] == 'Remote Client':
-                    XFER_THREAD = common_xfer.FileSenderThread(
-                        row_data['mm_sync_options_json']['TargetIP'],
-                        row_data['mm_sync_options_json']['TargetPort'],
-                        row_data['mm_sync_path_to'] + "."
-                        + row_data['mm_sync_options_json']['Options'][
-                            'VContainer'],
-                        row_data['mm_sync_path_to'])
-                else:  # cloud item
-                    CLOUD_HANDLE = common_cloud.CommonCloud(option_config_json)
-                    CLOUD_HANDLE.com_cloud_file_store(row_data['mm_sync_options_json']['Type'],
-                                                      row_data['mm_sync_path_to'],
-                                                      row_data['mm_sync_path_to'] + "."
-                                                      + row_data['mm_sync_options_json']['Options'][
-                                                          'VContainer'].split('/', 1)[1], False)
-                db_connection.db_sync_delete(row_data[0])  # guid of sync record
+                        else if json_message['Subtype'] == 'Sync':
+                            ffmpeg_params = ['./bin/ffmpeg', '-i', db_connection.db_media_path_by_uuid(
+                                row_data['mm_sync_options_json']['Media GUID'])[0]]
+                            if row_data['mm_sync_options_json']['Options']['Size'] != "Clone":
+                                ffmpeg_params.extend(('-fs',
+                                                      row_data['mm_sync_options_json']['Options']['Size']))
+                            if row_data['mm_sync_options_json']['Options']['VCodec'] != "Copy":
+                                ffmpeg_params.extend(
+                                    ('-vcodec', row_data['mm_sync_options_json']['Options']['VCodec']))
+                            if row_data['mm_sync_options_json']['Options']['AudioChannels'] != "Copy":
+                                ffmpeg_params.extend(('-ac',
+                                                      row_data['mm_sync_options_json']['Options'][
+                                                          'AudioChannels']))
+                            if row_data['mm_sync_options_json']['Options']['ACodec'] != "Copy":
+                                ffmpeg_params.extend(('-acodec',
+                                                      row_data['mm_sync_options_json']['Options']['ACodec']))
+                            if row_data['mm_sync_options_json']['Options']['ASRate'] != 'Default':
+                                ffmpeg_params.extend(
+                                    ('-ar', row_data['mm_sync_options_json']['Options']['ASRate']))
+                            ffmpeg_params.append(row_data['mm_sync_path_to'] + "."
+                                                 + row_data['mm_sync_options_json']['Options']['VContainer'])
+                            common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
+                                                                                 message_text={
+                                                                                     'ffmpeg': ffmpeg_params})
+                            ffmpeg_pid = subprocess.Popen(shlex.split(ffmpeg_params),
+                                                          stdout=subprocess.PIPE, shell=False)
+                            # output after it gets started
+                            #  Duration: 01:31:10.10, start: 0.000000, bitrate: 4647 kb/s
+                            # frame= 1091 fps= 78 q=-1.0 Lsize=    3199kB time=00:00:36.48
+                            # bitrate= 718.4kbits/s dup=197 drop=0 speed= 2.6x
+                            media_duration = None
+                            while True:
+                                line = ffmpeg_pid.stdout.readline()
+                                if line != '':
+                                    common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
+                                                                                         message_text={
+                                                                                             'ffmpeg out': line.rstrip()})
+                                    if line.find('Duration:') != -1:
+                                        media_duration = timedelta(
+                                            float(line.split(': ', 1)[1].split(',', 1)[0]))
+                                    else if line[0:5] == "frame":
+                                        time_string = timedelta(float(line.split('=', 5)[5].split(' ', 1)[0]))
+                                        time_percent = time_string.total_seconds() \
+                                                       / media_duration.total_seconds()
+                                        db_connection.db_sync_progress_update(row_data['mm_sync_guid'],
+                                                                              time_percent)
+                                        db_connection.db_commit()
+                                else:
+                                    break
+                            ffmpeg_pid.wait()
+                            # deal with converted file
+                            if row_data['mm_sync_options_json']['Type'] == 'Local File System':
+                                # just go along merry way as ffmpeg shoulda output to mm_sync_path_to
+                                pass
+                            else if row_data['mm_sync_options_json']['Type'] == 'Remote Client':
+                                XFER_THREAD = common_xfer.FileSenderThread(
+                                    row_data['mm_sync_options_json']['TargetIP'],
+                                    row_data['mm_sync_options_json']['TargetPort'],
+                                    row_data['mm_sync_path_to'] + "."
+                                    + row_data['mm_sync_options_json']['Options'][
+                                        'VContainer'],
+                                    row_data['mm_sync_path_to'])
+                            else:  # cloud item
+                                CLOUD_HANDLE = common_cloud.CommonCloud(option_config_json)
+                                CLOUD_HANDLE.com_cloud_file_store(row_data['mm_sync_options_json']['Type'],
+                                                                  row_data['mm_sync_path_to'],
+                                                                  row_data['mm_sync_path_to'] + "."
+                                                                  + row_data['mm_sync_options_json']['Options'][
+                                                                      'VContainer'].split('/', 1)[1], False)
+                            db_connection.db_sync_delete(row_data[0])  # guid of sync record
 
-                     */
+                                 */
                     println!("({:>3}) Received [{}]", i, json_message);
                     consumer.ack(delivery)?;
                 }

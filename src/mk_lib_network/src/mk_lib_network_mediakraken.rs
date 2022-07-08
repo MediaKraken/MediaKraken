@@ -12,8 +12,7 @@ firewall-cmd --permanent --direct --add-rule ipv6 filter INPUT 0 -m pkttype --pk
 firewall-cmd --reload
  */
 
-pub async fn mk_lib_network_find_mediakraken_server()
-                                                    -> Result<String, std::error::Error> {
+pub async fn mk_lib_network_find_mediakraken_server() -> Result<String, std::error::Error> {
     let socket = UdpSocket::bind("0.0.0.0:9999").unwrap();
     let buf = [1u8; 15000];
     let mut count = 1473;

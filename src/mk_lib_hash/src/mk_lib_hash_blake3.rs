@@ -3,8 +3,8 @@
 // https://docs.rs/blake3/1.0.0/blake3/
 
 use blake3;
-use std::fs;
 use std::error::Error;
+use std::fs;
 
 #[path = "mk_lib_file.rs"]
 mod mk_lib_file;
