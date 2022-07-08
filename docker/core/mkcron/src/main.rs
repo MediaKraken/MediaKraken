@@ -43,16 +43,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let cron_row = mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool).await.unwrap();
         for row_data in cron_row {
             let time_delta: chrono::Duration;
-            if row_data.mm_cron_schedule_type == "Week(s)" {
-                time_delta = chrono::Duration::weeks(i64::from(row_data.mm_cron_schedule_time));
-            } else if row_data.mm_cron_schedule_type == "Day(s)" {
-                time_delta = chrono::Duration::days(i64::from(row_data.mm_cron_schedule_time));
-            } else if row_data.mm_cron_schedule_type == "Hour(s)" {
-                time_delta = chrono::Duration::hours(i64::from(row_data.mm_cron_schedule_time));
-            } else if row_data.mm_cron_schedule_type == "Minute(s)" {
-                time_delta = chrono::Duration::minutes(i64::from(row_data.mm_cron_schedule_time));
-            } else {
-                time_delta = chrono::Duration::seconds(i64::from(row_data.mm_cron_schedule_time));
+            match row_data.mm_cron_schedule_type.as_str() {
+                "Week(s)" => time_delta = chrono::Duration::weeks(i64::from(row_data.mm_cron_schedule_time)),
+                "Day(s)" => time_delta = chrono::Duration::days(i64::from(row_data.mm_cron_schedule_time)),
+                "Hour(s)" => time_delta = chrono::Duration::hours(i64::from(row_data.mm_cron_schedule_time)),
+                "Minute(s)" => time_delta = chrono::Duration::minutes(i64::from(row_data.mm_cron_schedule_time)),
+                _ => time_delta = chrono::Duration::seconds(i64::from(row_data.mm_cron_schedule_time)),
             }
             let date_check: DateTime<Utc> = Utc::now() - time_delta;
             if row_data.mm_cron_last_run < date_check {
