@@ -2,13 +2,18 @@
 
 // https://github.com/lettre/lettre/releases
 
-use lettre::{Message, SmtpTransport, Transport};
 use lettre::transport::smtp::authentication::Credentials;
+use lettre::{Message, SmtpTransport, Transport};
 
-pub async fn mk_lib_network_email_send(email_from: String, email_reply_to: String,
-                                        email_to: String, email_subject: String,
-                                        email_body: String, user_name: String,
-                                        user_password: String) {
+pub async fn mk_lib_network_email_send(
+    email_from: String,
+    email_reply_to: String,
+    email_to: String,
+    email_subject: String,
+    email_body: String,
+    user_name: String,
+    user_password: String,
+) {
     let email = Message::builder()
         .from(email_from.parse().unwrap())
         .reply_to(email_reply_to.parse().unwrap())

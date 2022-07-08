@@ -7,17 +7,17 @@ extern crate lazy_static;
 
 use rcgen::generate_simple_self_signed;
 use ring::digest;
-use std::io::Write;
-use std::fs::File;
-use std::path::Path;
-use rocket::fs::{FileServer, relative};
-use rocket::{Rocket, Request, Build};
-use rocket::response::{content, status};
+use rocket::fs::{relative, FileServer};
 use rocket::http::Status;
-use std::collections::{HashMap, BTreeMap};
+use rocket::response::{content, status};
+use rocket::{Build, Request, Rocket};
+use rocket_auth::{prelude::Error, *};
 use rocket_dyn_templates::Template;
 use serde_json::json;
-use rocket_auth::{prelude::Error, *};
+use std::collections::{BTreeMap, HashMap};
+use std::fs::File;
+use std::io::Write;
+use std::path::Path;
 
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
@@ -142,29 +142,38 @@ mod bp_user_sync;
 async fn main() -> Result<(), Error> {
     // start logging
     const LOGGING_INDEX_NAME: &str = "mkwebapp";
-    mk_lib_logging::mk_logging_post_elk("info",
-                                        json!({"START": "START"}),
-                                        LOGGING_INDEX_NAME).await;
+    mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}), LOGGING_INDEX_NAME)
+        .await;
 
     // check for and create ssl certs if needed
     if Path::new("/mediakraken/key/cacert.pem").exists() == false {
-        mk_lib_logging::mk_logging_post_elk("info",
-                                            json!({"stuff": "Cert not found, generating."}),
-                                            LOGGING_INDEX_NAME).await;
+        mk_lib_logging::mk_logging_post_elk(
+            "info",
+            json!({"stuff": "Cert not found, generating."}),
+            LOGGING_INDEX_NAME,
+        )
+        .await;
         // generate certs/keys
         let subject_alt_names = vec!["www.mediakraken.org".to_string(), "localhost".to_string()];
         let cert = generate_simple_self_signed(subject_alt_names).unwrap();
         let mut file_pem = File::create("/mediakraken/key/cacert.pem").unwrap();
-        file_pem.write_all(cert.serialize_pem().unwrap().as_bytes()).unwrap();
+        file_pem
+            .write_all(cert.serialize_pem().unwrap().as_bytes())
+            .unwrap();
         let mut file_key_pem = File::create("/mediakraken/key/privkey.pem").unwrap();
-        file_key_pem.write_all(cert.serialize_private_key_pem().as_bytes()).unwrap();
+        file_key_pem
+            .write_all(cert.serialize_private_key_pem().as_bytes())
+            .unwrap();
     }
 
     // create crypto salt if needed
     if Path::new("/mediakraken/secure/data.zip").exists() == false {
-        mk_lib_logging::mk_logging_post_elk("info",
-                                            json!({"stuff": "data.zip not found, generating."}),
-                                            LOGGING_INDEX_NAME).await;
+        mk_lib_logging::mk_logging_post_elk(
+            "info",
+            json!({"stuff": "data.zip not found, generating."}),
+            LOGGING_INDEX_NAME,
+        )
+        .await;
         // create the hash salt
         if Path::new("/mediakraken/secure/data.zip").exists() == false {
             let mut file_salt = File::create("/mediakraken/secure/data.zip").unwrap();
@@ -177,8 +186,7 @@ async fn main() -> Result<(), Error> {
 
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
-    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
-                                                           true).await;
+    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, true).await;
 
     // setup auth
     let users: Users = sqlx_pool.clone().into();
@@ -187,85 +195,105 @@ async fn main() -> Result<(), Error> {
     // setup rocket
     rocket::build()
         .mount("/static", FileServer::from(relative!("static")))
-        .mount("/admin", routes![bp_admin_backup::admin_backup,
-            bp_admin_cron::admin_cron,
-            bp_admin_database::admin_database,
-            bp_admin_docker::admin_docker,
-            bp_admin_game_servers::admin_game_servers,
-            bp_admin_hardware::admin_hardware,
-            bp_admin_home::admin_home,
-            bp_admin_library::admin_library,
-            bp_admin_settings::admin_settings,
-            bp_admin_torrent::admin_torrent,
-            bp_admin_user::admin_user,])
-        .mount("/public", routes![bp_public_about::public_about,
-            bp_public_forgot_password::public_forgot_password,
-            bp_public_login::public_login,
-            bp_public_login::public_login_post,
-            bp_public_register::public_register,
-            bp_public_register::public_register_post,])
-        .mount("/user", routes![
-            bp_user_internet_bp_inter_flickr::user_inter_flickr,
-            bp_user_internet_bp_inter_home::user_inter_home,
-            bp_user_internet_bp_inter_twitchtv::user_inter_twitchtv,
-            bp_user_internet_bp_inter_vimeo::user_inter_vimeo,
-            bp_user_internet_bp_inter_youtube::user_inter_youtube,
-            bp_user_media_bp_media_book::user_media_book,
-            bp_user_media_bp_media_book::user_media_book_detail,
-            bp_user_media_bp_media_collection::user_media_collection,
-            bp_user_media_bp_media_collection::user_media_collection_detail,
-            bp_user_media_bp_media_game::user_media_game,
-            bp_user_media_bp_media_game::user_media_game_detail,
-            bp_user_media_bp_media_game_servers::user_media_game_servers,
-            bp_user_media_bp_media_genre::user_media_genre,
-            bp_user_media_bp_media_home_media::user_media_home_media,
-            bp_user_media_bp_media_image::user_media_image,
-            bp_user_media_bp_media_movie::user_media_movie,
-            bp_user_media_bp_media_movie::user_media_movie_detail,
-            bp_user_media_bp_media_music::user_media_music,
-            bp_user_media_bp_media_music::user_media_music_detail,
-            bp_user_media_bp_media_music_video::user_media_music_video,
-            bp_user_media_bp_media_music_video::user_media_music_video_detail,
-            bp_user_media_bp_media_sports::user_media_sports,
-            bp_user_media_bp_media_sports::user_media_sports_detail,
-            bp_user_media_bp_media_tv::user_media_tv,
-            bp_user_media_bp_media_tv::user_media_tv_detail,
-            bp_user_metadata_bp_meta_book::user_metadata_book,
-            bp_user_metadata_bp_meta_book::user_metadata_book_detail,
-            bp_user_metadata_bp_meta_game::user_metadata_game,
-            bp_user_metadata_bp_meta_game::user_metadata_game_detail,
-            bp_user_metadata_bp_meta_game_system::user_metadata_game_system,
-            bp_user_metadata_bp_meta_game_system::user_metadata_game_system_detail,
-            bp_user_metadata_bp_meta_movie::user_metadata_movie,
-            bp_user_metadata_bp_meta_movie::user_metadata_movie_detail,
-            bp_user_metadata_bp_meta_music::user_metadata_music,
-            bp_user_metadata_bp_meta_music::user_metadata_music_detail,
-            bp_user_metadata_bp_meta_music_video::user_metadata_music_video,
-            bp_user_metadata_bp_meta_music_video::user_metadata_music_video_detail,
-            bp_user_metadata_bp_meta_person::user_metadata_person,
-            bp_user_metadata_bp_meta_person::user_metadata_person_detail,
-            bp_user_metadata_bp_meta_sports::user_metadata_sports,
-            bp_user_metadata_bp_meta_sports::user_metadata_sports_detail,
-            bp_user_metadata_bp_meta_tv::user_metadata_tv,
-            bp_user_metadata_bp_meta_tv::user_metadata_tv_detail,
-            bp_user_playback_bp_audio::user_playback_audio,
-            bp_user_playback_bp_comic::user_playback_comic,
-            bp_user_playback_bp_video::user_playback_video,
-            bp_user_hardware::user_hardware,
-            bp_user_home::user_home,
-            bp_user_profile::user_profile,
-            bp_user_queue::user_queue,
-            bp_user_search::user_search,
-            bp_user_sync::user_sync,])
-        .register("/", catchers![bp_error::general_not_authorized,
-            bp_error::general_not_administrator,
-            bp_error::general_not_found,
-            bp_error::general_security,
-            bp_error::default_catcher,])
+        .mount(
+            "/admin",
+            routes![
+                bp_admin_backup::admin_backup,
+                bp_admin_cron::admin_cron,
+                bp_admin_database::admin_database,
+                bp_admin_docker::admin_docker,
+                bp_admin_game_servers::admin_game_servers,
+                bp_admin_hardware::admin_hardware,
+                bp_admin_home::admin_home,
+                bp_admin_library::admin_library,
+                bp_admin_settings::admin_settings,
+                bp_admin_torrent::admin_torrent,
+                bp_admin_user::admin_user,
+            ],
+        )
+        .mount(
+            "/public",
+            routes![
+                bp_public_about::public_about,
+                bp_public_forgot_password::public_forgot_password,
+                bp_public_login::public_login,
+                bp_public_login::public_login_post,
+                bp_public_register::public_register,
+                bp_public_register::public_register_post,
+            ],
+        )
+        .mount(
+            "/user",
+            routes![
+                bp_user_internet_bp_inter_flickr::user_inter_flickr,
+                bp_user_internet_bp_inter_home::user_inter_home,
+                bp_user_internet_bp_inter_twitchtv::user_inter_twitchtv,
+                bp_user_internet_bp_inter_vimeo::user_inter_vimeo,
+                bp_user_internet_bp_inter_youtube::user_inter_youtube,
+                bp_user_media_bp_media_book::user_media_book,
+                bp_user_media_bp_media_book::user_media_book_detail,
+                bp_user_media_bp_media_collection::user_media_collection,
+                bp_user_media_bp_media_collection::user_media_collection_detail,
+                bp_user_media_bp_media_game::user_media_game,
+                bp_user_media_bp_media_game::user_media_game_detail,
+                bp_user_media_bp_media_game_servers::user_media_game_servers,
+                bp_user_media_bp_media_genre::user_media_genre,
+                bp_user_media_bp_media_home_media::user_media_home_media,
+                bp_user_media_bp_media_image::user_media_image,
+                bp_user_media_bp_media_movie::user_media_movie,
+                bp_user_media_bp_media_movie::user_media_movie_detail,
+                bp_user_media_bp_media_music::user_media_music,
+                bp_user_media_bp_media_music::user_media_music_detail,
+                bp_user_media_bp_media_music_video::user_media_music_video,
+                bp_user_media_bp_media_music_video::user_media_music_video_detail,
+                bp_user_media_bp_media_sports::user_media_sports,
+                bp_user_media_bp_media_sports::user_media_sports_detail,
+                bp_user_media_bp_media_tv::user_media_tv,
+                bp_user_media_bp_media_tv::user_media_tv_detail,
+                bp_user_metadata_bp_meta_book::user_metadata_book,
+                bp_user_metadata_bp_meta_book::user_metadata_book_detail,
+                bp_user_metadata_bp_meta_game::user_metadata_game,
+                bp_user_metadata_bp_meta_game::user_metadata_game_detail,
+                bp_user_metadata_bp_meta_game_system::user_metadata_game_system,
+                bp_user_metadata_bp_meta_game_system::user_metadata_game_system_detail,
+                bp_user_metadata_bp_meta_movie::user_metadata_movie,
+                bp_user_metadata_bp_meta_movie::user_metadata_movie_detail,
+                bp_user_metadata_bp_meta_music::user_metadata_music,
+                bp_user_metadata_bp_meta_music::user_metadata_music_detail,
+                bp_user_metadata_bp_meta_music_video::user_metadata_music_video,
+                bp_user_metadata_bp_meta_music_video::user_metadata_music_video_detail,
+                bp_user_metadata_bp_meta_person::user_metadata_person,
+                bp_user_metadata_bp_meta_person::user_metadata_person_detail,
+                bp_user_metadata_bp_meta_sports::user_metadata_sports,
+                bp_user_metadata_bp_meta_sports::user_metadata_sports_detail,
+                bp_user_metadata_bp_meta_tv::user_metadata_tv,
+                bp_user_metadata_bp_meta_tv::user_metadata_tv_detail,
+                bp_user_playback_bp_audio::user_playback_audio,
+                bp_user_playback_bp_comic::user_playback_comic,
+                bp_user_playback_bp_video::user_playback_video,
+                bp_user_hardware::user_hardware,
+                bp_user_home::user_home,
+                bp_user_profile::user_profile,
+                bp_user_queue::user_queue,
+                bp_user_search::user_search,
+                bp_user_sync::user_sync,
+            ],
+        )
+        .register(
+            "/",
+            catchers![
+                bp_error::general_not_authorized,
+                bp_error::general_not_administrator,
+                bp_error::general_not_found,
+                bp_error::general_security,
+                bp_error::default_catcher,
+            ],
+        )
         .manage::<sqlx::PgPool>(sqlx_pool)
         .manage(users)
         //.attach(rocket_csrf::Fairing::default())
         .attach(Template::fairing())
-        .launch().await;
- Ok(())
+        .launch()
+        .await;
+    Ok(())
 }

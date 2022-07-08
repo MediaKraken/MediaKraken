@@ -1,9 +1,9 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use sqlx::{types::Uuid, types::Json};
-use sqlx::{FromRow, Row};
+use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
-use serde::{Serialize, Deserialize};
+use sqlx::{types::Json, types::Uuid};
+use sqlx::{FromRow, Row};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaMusicList {
@@ -13,47 +13,56 @@ pub struct DBMetaMusicList {
     mm_metadata_album_localimage: String,
 }
 
-pub async fn mk_lib_database_metadata_music_count(pool: &sqlx::PgPool,
-                                                 search_value: String)
-                                                 -> Result<i64, sqlx::Error> {
+pub async fn mk_lib_database_metadata_music_count(
+    pool: &sqlx::PgPool,
+    search_value: String,
+) -> Result<i64, sqlx::Error> {
     if search_value != "" {
-        let row: (i64, ) = sqlx::query_as("select count(*) from mm_metadata_album \
-            where mm_metadata_album_name % $1")
-            .bind(search_value)
-            .fetch_one(pool)
-            .await?;
+        let row: (i64,) = sqlx::query_as(
+            "select count(*) from mm_metadata_album \
+            where mm_metadata_album_name % $1",
+        )
+        .bind(search_value)
+        .fetch_one(pool)
+        .await?;
         Ok(row.0)
     } else {
-        let row: (i64, ) = sqlx::query_as("select count(*) from mm_metadata_album")
+        let row: (i64,) = sqlx::query_as("select count(*) from mm_metadata_album")
             .fetch_one(pool)
             .await?;
         Ok(row.0)
     }
 }
 
-pub async fn mk_lib_database_metadata_music_read(pool: &sqlx::PgPool,
-                                                 search_value: String,
-                                                 offset: i32, limit: i32)
-                                                 -> Result<Vec<DBMetaMusicList>, sqlx::Error> {
+pub async fn mk_lib_database_metadata_music_read(
+    pool: &sqlx::PgPool,
+    search_value: String,
+    offset: i32,
+    limit: i32,
+) -> Result<Vec<DBMetaMusicList>, sqlx::Error> {
     // TODO, only grab the poster locale from json
     // TODO order by release year
     let select_query;
     if search_value != "" {
-        select_query = sqlx::query("select mm_metadata_album_guid, mm_metadata_album_name, \
+        select_query = sqlx::query(
+            "select mm_metadata_album_guid, mm_metadata_album_name, \
             mm_metadata_album_json, mm_metadata_album_localimage \
             from mm_metadata_album where mm_metadata_album_name % $1 \
             order by LOWER(mm_metadata_album_name) \
-            offset $2 limit $3")
-            .bind(search_value)
-            .bind(offset)
-            .bind(limit);
+            offset $2 limit $3",
+        )
+        .bind(search_value)
+        .bind(offset)
+        .bind(limit);
     } else {
-        select_query = sqlx::query("select mm_metadata_album_guid, mm_metadata_album_name, \
+        select_query = sqlx::query(
+            "select mm_metadata_album_guid, mm_metadata_album_name, \
             mm_metadata_album_json, mm_metadata_album_localimage \
             from mm_metadata_album order by LOWER(mm_metadata_album_name) \
-            offset $1 limit $2")
-            .bind(offset)
-            .bind(limit);
+            offset $1 limit $2",
+        )
+        .bind(offset)
+        .bind(limit);
     }
     let table_rows: Vec<DBMetaMusicList> = select_query
         .map(|row: PgRow| DBMetaMusicList {

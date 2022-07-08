@@ -1,63 +1,70 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use sqlx::{types::Uuid, types::Json};
+use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
-use serde::{Serialize, Deserialize};
+use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetadataGenreCountList {
-	genre: String,
+    genre: String,
     mm_count: i64,
 }
 
-pub async fn mk_lib_database_metadata_genre_count_read(pool: &sqlx::PgPool)
-                                                       -> Result<Vec<DBMetadataGenreCountList>, sqlx::Error> {
-    let select_query = sqlx::query("select \
+pub async fn mk_lib_database_metadata_genre_count_read(
+    pool: &sqlx::PgPool,
+) -> Result<Vec<DBMetadataGenreCountList>, sqlx::Error> {
+    let select_query = sqlx::query(
+        "select \
         jsonb_array_elements_text(mm_metadata_json->'genres')b as genre, \
         count(mm_metadata_json->'genres') as mm_count from mm_metadata_movie group by genre \
-        order by jsonb_array_elements_text(mm_metadata_json->'genres')b");
+        order by jsonb_array_elements_text(mm_metadata_json->'genres')b",
+    );
     let table_rows: Vec<DBMetadataGenreCountList> = select_query
-		.map(|row: PgRow| DBMetadataGenreCountList {
-			genre: row.get("genre"),
+        .map(|row: PgRow| DBMetadataGenreCountList {
+            genre: row.get("genre"),
             mm_count: row.get("mm_count"),
-		})
-		.fetch_all(pool)
-		.await?;
+        })
+        .fetch_all(pool)
+        .await?;
     Ok(table_rows)
 }
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetadataGenreList {
-	genre: String,
+    genre: String,
 }
 
-pub async fn mk_lib_database_metadata_genre_read(pool: &sqlx::PgPool,
-                                                  offset: i32, limit: i32)
-                                                  -> Result<Vec<DBMetadataGenreList>, sqlx::Error> {
-    let select_query = sqlx::query("select distinct \
+pub async fn mk_lib_database_metadata_genre_read(
+    pool: &sqlx::PgPool,
+    offset: i32,
+    limit: i32,
+) -> Result<Vec<DBMetadataGenreList>, sqlx::Error> {
+    let select_query = sqlx::query(
+        "select distinct \
         jsonb_array_elements_text(mm_metadata_json->'genres')b as genre from mm_metadata_movie \
-        order by jsonb_array_elements_text(mm_metadata_json->'genres')b offset $1 limit $2")
-        .bind(offset)
-        .bind(limit);
+        order by jsonb_array_elements_text(mm_metadata_json->'genres')b offset $1 limit $2",
+    )
+    .bind(offset)
+    .bind(limit);
     let table_rows: Vec<DBMetadataGenreList> = select_query
-		.map(|row: PgRow| DBMetadataGenreList {
-			genre: row.get("genre"),
-		})
-		.fetch_all(pool)
-		.await?;
+        .map(|row: PgRow| DBMetadataGenreList {
+            genre: row.get("genre"),
+        })
+        .fetch_all(pool)
+        .await?;
     Ok(table_rows)
 }
 
-pub async fn mk_lib_database_metadata_genre_count(pool: &sqlx::PgPool)
-                                                 -> Result<i64, sqlx::Error> {
-    let row: (i64, ) = sqlx::query_as("select distinct jsonb_array_elements_text(mm_metadata_json->'genres')b \
-        from mm_metadata_movie")
-        .fetch_one(pool)
-        .await?;
+pub async fn mk_lib_database_metadata_genre_count(pool: &sqlx::PgPool) -> Result<i64, sqlx::Error> {
+    let row: (i64,) = sqlx::query_as(
+        "select distinct jsonb_array_elements_text(mm_metadata_json->'genres')b \
+        from mm_metadata_movie",
+    )
+    .fetch_one(pool)
+    .await?;
     Ok(row.0)
 }
-
 
 /*
 

@@ -1,9 +1,9 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use sqlx::{types::Uuid, types::Json};
+use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
+use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
-use serde::{Serialize, Deserialize};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaTVShowList {
@@ -13,13 +13,16 @@ pub struct DBMediaTVShowList {
     mm_poster: serde_json::Value,
 }
 
-pub async fn mk_lib_database_media_tv_read(pool: &sqlx::PgPool,
-                                           search_value: String,
-                                            offset: i32, limit: i32)
-                                           -> Result<Vec<DBMediaTVShowList>, sqlx::Error> {
+pub async fn mk_lib_database_media_tv_read(
+    pool: &sqlx::PgPool,
+    search_value: String,
+    offset: i32,
+    limit: i32,
+) -> Result<Vec<DBMediaTVShowList>, sqlx::Error> {
     let select_query;
     if search_value != "" {
-        select_query = sqlx::query("elect mm_metadata_tvshow_guid, \
+        select_query = sqlx::query(
+            "elect mm_metadata_tvshow_guid, \
             mm_metadata_tvshow_name, \
             count(*) as mm_count, \
             mm_metadata_tvshow_localimage_json->'Images'->>'Poster' as mm_poster \
@@ -28,12 +31,14 @@ pub async fn mk_lib_database_media_tv_read(pool: &sqlx::PgPool,
             and mm_metadata_tvshow_name % $1 \
             group by mm_metadata_tvshow_guid \
             order by LOWER(mm_metadata_tvshow_name) \
-            offset $2 limit $3")
-            .bind(search_value)
-            .bind(offset)
-            .bind(limit);
+            offset $2 limit $3",
+        )
+        .bind(search_value)
+        .bind(offset)
+        .bind(limit);
     } else {
-        select_query = sqlx::query("select mm_metadata_tvshow_guid, \
+        select_query = sqlx::query(
+            "select mm_metadata_tvshow_guid, \
             mm_metadata_tvshow_name, \
             count(*) as mm_count, \
             mm_metadata_tvshow_localimage_json->'Images'->>'Poster' as mm_poster \
@@ -42,9 +47,10 @@ pub async fn mk_lib_database_media_tv_read(pool: &sqlx::PgPool,
             = mm_metadata_tvshow_guid \
             group by mm_metadata_tvshow_guid \
             order by LOWER(mm_metadata_tvshow_name) \
-            offset $1 limit $2")
-            .bind(offset)
-            .bind(limit);
+            offset $1 limit $2",
+        )
+        .bind(offset)
+        .bind(limit);
     }
     let table_rows: Vec<DBMediaTVShowList> = select_query
         .map(|row: PgRow| DBMediaTVShowList {
@@ -58,23 +64,27 @@ pub async fn mk_lib_database_media_tv_read(pool: &sqlx::PgPool,
     Ok(table_rows)
 }
 
-pub async fn mk_lib_database_media_tv_count(pool: &sqlx::PgPool,
-                                            search_string: String)
-                                            -> Result<i64, sqlx::Error> {
+pub async fn mk_lib_database_media_tv_count(
+    pool: &sqlx::PgPool,
+    search_string: String,
+) -> Result<i64, sqlx::Error> {
     if search_string != "" {
-        let row: (i64, ) = sqlx::query_as("select count(*) from mm_metadata_tvshow, \
+        let row: (i64,) = sqlx::query_as(
+            "select count(*) from mm_metadata_tvshow, \
         mm_media where mm_media_metadata_guid = mm_metadata_tvshow_guid \
-        mm_metadata_tvshow_name = %1")
-            .bind(search_string)
-            .fetch_one(pool)
-            .await?;
+        mm_metadata_tvshow_name = %1",
+        )
+        .bind(search_string)
+        .fetch_one(pool)
+        .await?;
         Ok(row.0)
-    }
-    else {
-        let row: (i64, ) = sqlx::query_as("select count(*) from mm_metadata_tvshow, \
-        mm_media where mm_media_metadata_guid = mm_metadata_tvshow_guid")
-            .fetch_one(pool)
-            .await?;
+    } else {
+        let row: (i64,) = sqlx::query_as(
+            "select count(*) from mm_metadata_tvshow, \
+        mm_media where mm_media_metadata_guid = mm_metadata_tvshow_guid",
+        )
+        .fetch_one(pool)
+        .await?;
         Ok(row.0)
     }
 }

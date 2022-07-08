@@ -2,13 +2,13 @@
 
 use pnet::datalink;
 use shiplift::Docker;
+use socket2::{Domain, Protocol, SockAddr, Socket, Type};
 use std::io;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, UdpSocket};
-use std::sync::{Arc, Barrier};
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Arc, Barrier};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
-use socket2::{Domain, Protocol, SockAddr, Socket, Type};
 
 fn new_socket(addr: &SocketAddr) -> io::Result<Socket> {
     let domain = if addr.is_ipv4() {
@@ -48,11 +48,15 @@ async fn main() {
             for source_ip in iface.ips.iter() {
                 if source_ip.is_ipv4() {
                     // println!("{:?}", source_ip);
-                    let source_ip = iface.ips.iter().find(|ip| ip.is_ipv4())
-                    .map(|ip| match ip.ip() {
-                        IpAddr::V4(ip) => ip,
-                        _ => unreachable!(),
-                    }).unwrap();
+                    let source_ip = iface
+                        .ips
+                        .iter()
+                        .find(|ip| ip.is_ipv4())
+                        .map(|ip| match ip.ip() {
+                            IpAddr::V4(ip) => ip,
+                            _ => unreachable!(),
+                        })
+                        .unwrap();
                     mediakraken_ip = source_ip.to_string();
                     // println!("{:?}", mediakraken_ip);
                     break;
@@ -79,8 +83,8 @@ async fn main() {
     let mut socket = UdpSocket::bind("0.0.0.0:8888").unwrap();
     let mut buf = [0u8; 65535];
     let multi_addr = Ipv4Addr::new(234, 2, 2, 2);
-    let inter = Ipv4Addr::new(0,0,0,0);
-    socket.join_multicast_v4(&multi_addr,&inter);
+    let inter = Ipv4Addr::new(0, 0, 0, 0);
+    socket.join_multicast_v4(&multi_addr, &inter);
     loop {
         let (amt, remote_addr) = socket.recv_from(&mut buf).unwrap();
         println!("received {} bytes from {:?}", amt, remote_addr);
@@ -95,6 +99,6 @@ async fn main() {
             .send_to(response.as_bytes(), &remote_addr)
             .expect("failed to respond");
 
-        println!("{} - sent response to: {}", response, remote_addr);        
+        println!("{} - sent response to: {}", response, remote_addr);
     }
 }

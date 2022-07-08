@@ -1,66 +1,75 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use sqlx::{types::Uuid, types::Json};
+use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
+use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
-use serde::{Serialize, Deserialize};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaTVLiveList {
-	mm_tv_station_name: String,
-	mm_tv_station_channel: String,
-	mm_tv_schedule_json: Json,
+    mm_tv_station_name: String,
+    mm_tv_station_channel: String,
+    mm_tv_schedule_json: Json,
 }
 
-pub async fn mk_lib_database_meta_tv_live_read(pool: &sqlx::PgPool,
-                                               broadcast_time: chrono::DateTime)
-                                               -> Result<Vec<PgRow>, sqlx::Error> {
-    let rows: Vec<PgRow> = sqlx::query("select mm_tv_station_name, mm_tv_station_channel, \
+pub async fn mk_lib_database_meta_tv_live_read(
+    pool: &sqlx::PgPool,
+    broadcast_time: chrono::DateTime,
+) -> Result<Vec<PgRow>, sqlx::Error> {
+    let rows: Vec<PgRow> = sqlx::query(
+        "select mm_tv_station_name, mm_tv_station_channel, \
         mm_tv_schedule_json from mm_tv_stations, mm_tv_schedule \
         where mm_tv_schedule_station_id = mm_tv_station_id and mm_tv_schedule_date = $1 \
-        order by LOWER(mm_tv_station_name), mm_tv_schedule_json->'airDateTime'")
-        .bind(broadcast_time)
-        .fetch_all(pool)
-        .await?;
+        order by LOWER(mm_tv_station_name), mm_tv_schedule_json->'airDateTime'",
+    )
+    .bind(broadcast_time)
+    .fetch_all(pool)
+    .await?;
     Ok(rows)
 }
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct MetaTVStationList {
-	pub mm_tv_stations_id: uuid::Uuid,
-	mm_tv_station_name: String,
-	mm_tv_station_id: String,
+    pub mm_tv_stations_id: uuid::Uuid,
+    mm_tv_station_name: String,
+    mm_tv_station_id: String,
     mm_tv_station_channel: String,
 }
 
-pub async fn mk_lib_database_meta_tv_live_station_read(pool: &sqlx::PgPool)
-                                               -> Result<Vec<MetaTVStationList>, sqlx::Error> {
-    let select_query = sqlx::query("select mm_tv_stations_id, mm_tv_station_name, \
+pub async fn mk_lib_database_meta_tv_live_station_read(
+    pool: &sqlx::PgPool,
+) -> Result<Vec<MetaTVStationList>, sqlx::Error> {
+    let select_query = sqlx::query(
+        "select mm_tv_stations_id, mm_tv_station_name, \
         mm_tv_station_id, mm_tv_station_channel \
-        from mm_tv_stations");
+        from mm_tv_stations",
+    );
     let table_rows: Vec<MetaTVStationList> = select_query
-		.map(|row: PgRow| MetaTVStationList {
-			mm_tv_stations_id: row.get("mm_tv_stations_id"),
-			mm_tv_station_name: row.get("mm_tv_station_name"),
-			mm_tv_station_id: row.get("mm_tv_station_id"),
-			mm_tv_station_channel: row.get("mm_tv_station_channel"),
-		})
-		.fetch_all(pool)
-		.await?;
+        .map(|row: PgRow| MetaTVStationList {
+            mm_tv_stations_id: row.get("mm_tv_stations_id"),
+            mm_tv_station_name: row.get("mm_tv_station_name"),
+            mm_tv_station_id: row.get("mm_tv_station_id"),
+            mm_tv_station_channel: row.get("mm_tv_station_channel"),
+        })
+        .fetch_all(pool)
+        .await?;
     Ok(table_rows)
 }
 
-pub async fn mk_lib_database_meta_tv_station_exists(pool: &sqlx::PgPool,
-											   station_id: String,
-											   channel_id: String)
-											   -> Result<i32, sqlx::Error> {
-    let row: (i32, ) = sqlx::query_as("select exists(select 1 from mm_tv_stations \
+pub async fn mk_lib_database_meta_tv_station_exists(
+    pool: &sqlx::PgPool,
+    station_id: String,
+    channel_id: String,
+) -> Result<i32, sqlx::Error> {
+    let row: (i32,) = sqlx::query_as(
+        "select exists(select 1 from mm_tv_stations \
         where mm_tv_station_id = $1 \
-        and mm_tv_station_channel = $2 limit 1) limit 1")
-        .bind(station_id)
-        .bind(channel_id)
-        .fetch_one(pool)
-        .await?;
+        and mm_tv_station_channel = $2 limit 1) limit 1",
+    )
+    .bind(station_id)
+    .bind(channel_id)
+    .fetch_one(pool)
+    .await?;
     Ok(row.0)
 }
 /*

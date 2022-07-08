@@ -1,8 +1,8 @@
-use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera};
-use rocket_auth::{Users, Error, Auth, Signup, Login, User};
-use rocket::serde::{Serialize, Deserialize, json::Json};
+use rocket::serde::{json::Json, Deserialize, Serialize};
+use rocket::Request;
+use rocket_auth::{Auth, Error, Login, Signup, User, Users};
+use rocket_dyn_templates::{tera::Tera, Template};
 
 #[path = "../../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;
@@ -11,36 +11,69 @@ mod mk_lib_common_pagination;
 mod mk_lib_database_metadata_collection;
 
 #[derive(Serialize)]
-struct TemplateMediaCollectionContext<> {
+struct TemplateMediaCollectionContext {
     template_data: Vec<mk_lib_database_metadata_collection::DBMetaCollectionList>,
     pagination_bar: String,
 }
 
 #[get("/media/collection/<page>")]
-pub async fn user_media_collection(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, page: i32) -> Template {
+pub async fn user_media_collection(
+    sqlx_pool: &rocket::State<sqlx::PgPool>,
+    user: User,
+    page: i32,
+) -> Template {
     let db_offset: i32 = (page * 30) - 30;
-    let mut total_pages: i64 = mk_lib_database_metadata_collection::mk_lib_database_metadata_collection_count(&sqlx_pool, String::new()).await.unwrap();
+    let mut total_pages: i64 =
+        mk_lib_database_metadata_collection::mk_lib_database_metadata_collection_count(
+            &sqlx_pool,
+            String::new(),
+        )
+        .await
+        .unwrap();
     if total_pages > 0 {
         total_pages = total_pages / 30;
     }
-    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page, "/user/media/collection".to_string()).await.unwrap();
-    let collection_list = mk_lib_database_metadata_collection::mk_lib_database_metadata_collection_read(&sqlx_pool, String::new(), db_offset, 30).await.unwrap();
-    Template::render("bss_user/metadata/bss_user_metadata_movie_collection", &TemplateMediaCollectionContext {
-        template_data: collection_list,
-        pagination_bar: pagination_html,
-    })
+    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
+        total_pages,
+        page,
+        "/user/media/collection".to_string(),
+    )
+    .await
+    .unwrap();
+    let collection_list =
+        mk_lib_database_metadata_collection::mk_lib_database_metadata_collection_read(
+            &sqlx_pool,
+            String::new(),
+            db_offset,
+            30,
+        )
+        .await
+        .unwrap();
+    Template::render(
+        "bss_user/metadata/bss_user_metadata_movie_collection",
+        &TemplateMediaCollectionContext {
+            template_data: collection_list,
+            pagination_bar: pagination_html,
+        },
+    )
 }
 
 #[derive(Serialize)]
-struct TemplateMediaCollectionDetailContext<> {
+struct TemplateMediaCollectionDetailContext {
     template_data: serde_json::Value,
 }
 
 #[get("/media/collection_detail/<guid>")]
-pub async fn user_media_collection_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
-     user: User, guid: rocket::serde::uuid::Uuid) -> Template {
-        let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
-        Template::render("bss_user/metadata/bss_user_metadata_movie_collection_detail", tera::Context::new().into_json())
+pub async fn user_media_collection_detail(
+    sqlx_pool: &rocket::State<sqlx::PgPool>,
+    user: User,
+    guid: rocket::serde::uuid::Uuid,
+) -> Template {
+    let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
+    Template::render(
+        "bss_user/metadata/bss_user_metadata_movie_collection_detail",
+        tera::Context::new().into_json(),
+    )
 }
 
 /*

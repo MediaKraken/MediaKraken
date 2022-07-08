@@ -1,18 +1,21 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use sqlx::{types::Uuid, types::Json};
-use sqlx::{FromRow, Row};
+use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
-use serde::{Serialize, Deserialize};
+use sqlx::{types::Json, types::Uuid};
+use sqlx::{FromRow, Row};
 
-pub async fn mk_lib_database_metadata_exists_tv(pool: &sqlx::PgPool,
-                                                metadata_id: i32)
-                                                -> Result<bool, sqlx::Error> {
-    let row: (bool, ) = sqlx::query_as("select exists(select 1 from mm_metadata_tvshow \
-        where mm_metadata_media_tvshow_id = $1 limit 1) as found_record limit 1")
-        .bind(metadata_id)
-        .fetch_one(pool)
-        .await?;
+pub async fn mk_lib_database_metadata_exists_tv(
+    pool: &sqlx::PgPool,
+    metadata_id: i32,
+) -> Result<bool, sqlx::Error> {
+    let row: (bool,) = sqlx::query_as(
+        "select exists(select 1 from mm_metadata_tvshow \
+        where mm_metadata_media_tvshow_id = $1 limit 1) as found_record limit 1",
+    )
+    .bind(metadata_id)
+    .fetch_one(pool)
+    .await?;
     Ok(row.0)
 }
 
@@ -24,20 +27,24 @@ pub struct DBMetaTVShowList {
     image_json: serde_json::Value,
 }
 
-pub async fn mk_lib_database_metadata_tv_read(pool: &sqlx::PgPool,
-                                              search_value: String,
-                                              offset: i32, limit: i32)
-                                              -> Result<Vec<DBMetaTVShowList>, sqlx::Error> {
-    let select_query = sqlx::query("select mm_metadata_tvshow_guid, \
+pub async fn mk_lib_database_metadata_tv_read(
+    pool: &sqlx::PgPool,
+    search_value: String,
+    offset: i32,
+    limit: i32,
+) -> Result<Vec<DBMetaTVShowList>, sqlx::Error> {
+    let select_query = sqlx::query(
+        "select mm_metadata_tvshow_guid, \
         mm_metadata_tvshow_name, \
         mm_metadata_tvshow_json->'first_air_date' as air_date, \
         mm_metadata_tvshow_localimage_json->'Poster' \
         as image_json from mm_metadata_tvshow \
         order by LOWER(mm_metadata_tvshow_name), \
         mm_metadata_tvshow_json->'first_air_date' \
-        offset $1 limit $2")
-        .bind(offset)
-        .bind(limit);
+        offset $1 limit $2",
+    )
+    .bind(offset)
+    .bind(limit);
     let table_rows: Vec<DBMetaTVShowList> = select_query
         .map(|row: PgRow| DBMetaTVShowList {
             mm_metadata_tvshow_guid: row.get("mm_metadata_tvshow_guid"),
@@ -50,18 +57,21 @@ pub async fn mk_lib_database_metadata_tv_read(pool: &sqlx::PgPool,
     Ok(table_rows)
 }
 
-pub async fn mk_lib_database_metadata_tv_count(pool: &sqlx::PgPool,
-                                                  search_value: String)
-                                                  -> Result<i64, sqlx::Error> {
+pub async fn mk_lib_database_metadata_tv_count(
+    pool: &sqlx::PgPool,
+    search_value: String,
+) -> Result<i64, sqlx::Error> {
     if search_value != "" {
-        let row: (i64, ) = sqlx::query_as("select count(*) from mm_metadata_tvshow \
-            where mm_metadata_tvshow_name % $1")
-            .bind(search_value)
-            .fetch_one(pool)
-            .await?;
+        let row: (i64,) = sqlx::query_as(
+            "select count(*) from mm_metadata_tvshow \
+            where mm_metadata_tvshow_name % $1",
+        )
+        .bind(search_value)
+        .fetch_one(pool)
+        .await?;
         Ok(row.0)
     } else {
-        let row: (i64, ) = sqlx::query_as("select count(*) from mm_metadata_tvshow")
+        let row: (i64,) = sqlx::query_as("select count(*) from mm_metadata_tvshow")
             .fetch_one(pool)
             .await?;
         Ok(row.0)
@@ -86,7 +96,7 @@ def db_meta_fetch_series_media_id_json(self, media_id_id,
         except:
             return None
 
-            
+
 // TODO port query
 pub async fn db_metatv_guid_by_tmdb(self, tmdb_uuid):
     """

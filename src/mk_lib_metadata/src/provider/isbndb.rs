@@ -7,25 +7,23 @@ use std::error::Error;
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;
 
-pub async fn metadata_book_search_isbndb(pool: &sqlx::PgPool,
-                                         lookup_name: String) {
-}
+pub async fn metadata_book_search_isbndb(pool: &sqlx::PgPool, lookup_name: String) {}
 
 /*
-    metadata_uuid = None
-    if common_global.api_instance != None:
-        api_response = common_global.api_instance.com_isbndb_books(lookup_name)
-        if api_response.status_code == 200:
-            // TODO verify decent results before insert
-            if 'error' in api_response.json():
-                common_logging_elasticsearch_httpx.com_es_httpx_post_async(
-                    message_type='info',
-                    message_text={
-                        'stuff': 'error skip'})
-            else:
-                metadata_uuid = await db_connection.db_meta_book_insert(api_response.json())
-    return metadata_uuid
- */
+   metadata_uuid = None
+   if common_global.api_instance != None:
+       api_response = common_global.api_instance.com_isbndb_books(lookup_name)
+       if api_response.status_code == 200:
+           // TODO verify decent results before insert
+           if 'error' in api_response.json():
+               common_logging_elasticsearch_httpx.com_es_httpx_post_async(
+                   message_type='info',
+                   message_text={
+                       'stuff': 'error skip'})
+           else:
+               metadata_uuid = await db_connection.db_meta_book_insert(api_response.json())
+   return metadata_uuid
+*/
 
 /*
 class CommonMetadataISBNdb:

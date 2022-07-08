@@ -3,8 +3,8 @@
 // https://github.com/jakobhellermann/rupnp
 
 use futures::prelude::*;
-use std::time::Duration;
 use rupnp::ssdp::{SearchTarget, URN};
+use std::time::Duration;
 
 pub async fn upnp_discover() -> Result<(), rupnp::Error> {
     let devices = rupnp::discover(&SearchTarget::RootDevice, Duration::from_secs(3)).await?;

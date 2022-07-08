@@ -1,11 +1,14 @@
-use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera};
-use rocket_auth::{Users, Error, Auth, Signup, Login, User};
+use rocket::Request;
+use rocket_auth::{Auth, Error, Login, Signup, User, Users};
+use rocket_dyn_templates::{tera::Tera, Template};
 
 #[get("/playback/audio")]
 pub async fn user_playback_audio(user: User) -> Template {
-    Template::render("bss_user/playback/bss_user_album_playback", tera::Context::new().into_json())
+    Template::render(
+        "bss_user/playback/bss_user_album_playback",
+        tera::Context::new().into_json(),
+    )
 }
 
 /*

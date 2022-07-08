@@ -1,13 +1,16 @@
-use rocket::Request;
-use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera};
-use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
-use paginator::{Paginator, PageItem};
 use core::fmt::Write;
+use paginator::{PageItem, Paginator};
+use rocket::response::Redirect;
+use rocket::Request;
+use rocket_auth::{AdminUser, Auth, Error, Login, Signup, Users};
+use rocket_dyn_templates::{tera::Tera, Template};
 
 #[get("/admin_torrent")]
 pub async fn admin_torrent(user: AdminUser) -> Template {
-    Template::render("bss_admin/bss_admin_torrent", tera::Context::new().into_json())
+    Template::render(
+        "bss_admin/bss_admin_torrent",
+        tera::Context::new().into_json(),
+    )
 }
 
 /*

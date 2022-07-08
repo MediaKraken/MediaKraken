@@ -1,8 +1,8 @@
-use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera};
-use rocket_auth::{Users, Error, Auth, Signup, Login, User};
-use rocket::serde::{Serialize, Deserialize, json::Json};
+use rocket::serde::{json::Json, Deserialize, Serialize};
+use rocket::Request;
+use rocket_auth::{Auth, Error, Login, Signup, User, Users};
+use rocket_dyn_templates::{tera::Tera, Template};
 
 #[path = "../../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;
@@ -11,38 +11,69 @@ mod mk_lib_common_pagination;
 mod mk_lib_database_media_home_media;
 
 #[derive(Serialize)]
-struct TemplateMediaHomeContext<> {
+struct TemplateMediaHomeContext {
     template_data: Vec<mk_lib_database_media_home_media::DBMediaHomeMediaList>,
     pagination_bar: String,
 }
 
 #[get("/media/home_media/<page>")]
-pub async fn user_media_home_media(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User, page: i32) -> Template {
+pub async fn user_media_home_media(
+    sqlx_pool: &rocket::State<sqlx::PgPool>,
+    user: User,
+    page: i32,
+) -> Template {
     let db_offset: i32 = (page * 30) - 30;
-    let mut total_pages: i64 = mk_lib_database_media_home_media::mk_lib_database_media_home_media_count(&sqlx_pool, String::new()).await.unwrap();
+    let mut total_pages: i64 =
+        mk_lib_database_media_home_media::mk_lib_database_media_home_media_count(
+            &sqlx_pool,
+            String::new(),
+        )
+        .await
+        .unwrap();
     if total_pages > 0 {
         total_pages = total_pages / 30;
     }
-    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(total_pages, page, "/user/media/home_media".to_string()).await.unwrap();
-    let home_list = mk_lib_database_media_home_media::mk_lib_database_media_home_media_read(&sqlx_pool, String::new(), db_offset, 30).await.unwrap();
-    Template::render("bss_user/media/bss_user_media_home_movie", &TemplateMediaHomeContext {
-        template_data: home_list,
-        pagination_bar: pagination_html,
-    })
+    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
+        total_pages,
+        page,
+        "/user/media/home_media".to_string(),
+    )
+    .await
+    .unwrap();
+    let home_list = mk_lib_database_media_home_media::mk_lib_database_media_home_media_read(
+        &sqlx_pool,
+        String::new(),
+        db_offset,
+        30,
+    )
+    .await
+    .unwrap();
+    Template::render(
+        "bss_user/media/bss_user_media_home_movie",
+        &TemplateMediaHomeContext {
+            template_data: home_list,
+            pagination_bar: pagination_html,
+        },
+    )
 }
 
 #[derive(Serialize)]
-struct TemplateMediaHomeDetailContext<> {
+struct TemplateMediaHomeDetailContext {
     template_data: serde_json::Value,
 }
 
 #[get("/media/home_media_detail/<guid>")]
-pub async fn user_media_home_media_detail(sqlx_pool: &rocket::State<sqlx::PgPool>,
-     user: User, guid: rocket::serde::uuid::Uuid) -> Template {
-        let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
-        Template::render("bss_user/media/bss_user_media_home_movie_detail", tera::Context::new().into_json())
+pub async fn user_media_home_media_detail(
+    sqlx_pool: &rocket::State<sqlx::PgPool>,
+    user: User,
+    guid: rocket::serde::uuid::Uuid,
+) -> Template {
+    let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
+    Template::render(
+        "bss_user/media/bss_user_media_home_movie_detail",
+        tera::Context::new().into_json(),
+    )
 }
-
 
 /*
 @blueprint_user_home_media.route('/user_home_media', methods=['GET', 'POST'])

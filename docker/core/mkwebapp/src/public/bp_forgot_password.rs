@@ -1,10 +1,13 @@
-use rocket::Request;
+use rocket::form::{Context, Contextual, Form, FromForm, FromFormField};
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera};
-use rocket_auth::{Users, Error, Auth, Signup, Login, User};
-use rocket::form::{Form, Contextual, FromForm, FromFormField, Context};
+use rocket::Request;
+use rocket_auth::{Auth, Error, Login, Signup, User, Users};
+use rocket_dyn_templates::{tera::Tera, Template};
 
 #[get("/forgot_password")]
 pub async fn public_forgot_password() -> Template {
-    Template::render("bss_public/bss_public_forgot_password", tera::Context::new().into_json())
+    Template::render(
+        "bss_public/bss_public_forgot_password",
+        tera::Context::new().into_json(),
+    )
 }

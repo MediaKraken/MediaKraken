@@ -1,7 +1,7 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use fltk::{enums::Color, prelude::*, *};
 use fltk::{app, button::Button, frame::Frame, image::SharedImage, prelude::*, window::Window};
+use fltk::{enums::Color, prelude::*, *};
 use std::error::Error;
 use std::fs::File;
 use std::io;

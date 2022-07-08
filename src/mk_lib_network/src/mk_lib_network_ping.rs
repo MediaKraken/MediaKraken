@@ -16,7 +16,5 @@ pub async fn mk_lib_network_ping(addr: String) {
             Ok(())
         })
     });
-    tokio::run(future.map_err(|err| {
-        eprintln!("Error: {}", err)
-    }))
+    tokio::run(future.map_err(|err| eprintln!("Error: {}", err)))
 }

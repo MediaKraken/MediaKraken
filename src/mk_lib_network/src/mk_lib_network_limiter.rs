@@ -49,5 +49,3 @@ pub static API_LIMIT: phf::Map<&'static str, i16, i16> = phf_map! {
     "twitch" => 1, 1,  // 12-10-2017)
     "Z" => None, None,  // catch all for limiter api program
 };
-
-

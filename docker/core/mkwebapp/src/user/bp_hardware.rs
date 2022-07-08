@@ -1,24 +1,30 @@
-use rocket::Request;
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera};
-use rocket_auth::{Users, Error, Auth, Signup, Login, User};
-use rocket::serde::{Serialize, Deserialize, json::Json};
+use rocket::serde::{json::Json, Deserialize, Serialize};
+use rocket::Request;
+use rocket_auth::{Auth, Error, Login, Signup, User, Users};
+use rocket_dyn_templates::{tera::Tera, Template};
 
 #[derive(Serialize)]
-struct TemplateUserHardwareContext<> {
+struct TemplateUserHardwareContext {
     template_data_phue: i32,
 }
 
 #[get("/hardware")]
 pub async fn user_hardware(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
-    Template::render("bss_user/hardware/bss_user_hardware", &TemplateUserHardwareContext {
-        template_data_phue: 0,
-    })
+    Template::render(
+        "bss_user/hardware/bss_user_hardware",
+        &TemplateUserHardwareContext {
+            template_data_phue: 0,
+        },
+    )
 }
 
 #[get("/hardware_phue")]
 pub async fn user_hardware_phue(user: User) -> Template {
-    Template::render("bss_user/hardware/bss_user_hardware_phue", tera::Context::new().into_json())
+    Template::render(
+        "bss_user/hardware/bss_user_hardware_phue",
+        tera::Context::new().into_json(),
+    )
 }
 
 /*

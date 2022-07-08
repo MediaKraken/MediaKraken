@@ -1,8 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use std::error::Error;
-use sqlx::types::Uuid;
 use sqlx::postgres::PgRow;
+use sqlx::types::Uuid;
+use std::error::Error;
 
 #[path = "provider/isbndb.rs"]
 mod provider_isbndb;
@@ -10,10 +10,11 @@ mod provider_isbndb;
 #[path = "provider/open_library.rs"]
 mod provider_open_library;
 
-pub async fn metadata_book_lookup(pool: &sqlx::PgPool,
-                                  download_data: PgRow)
-                                  -> Result<Uuid, sqlx::Error> {
-    let mut metadata_uuid = uuid::Uuid::nil();  // so not found checks verify later
+pub async fn metadata_book_lookup(
+    pool: &sqlx::PgPool,
+    download_data: PgRow,
+) -> Result<Uuid, sqlx::Error> {
+    let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
     Ok(metadata_uuid)
 }
 

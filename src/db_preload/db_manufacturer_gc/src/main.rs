@@ -1,9 +1,9 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
 use serde::{Deserialize, Serialize};
+use serde_json::{json, Value};
 use std::error::Error;
 use uuid::Uuid;
-use serde_json::{json, Value};
 
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
 mod mk_lib_database;
@@ -21,10 +21,9 @@ mod mk_lib_network;
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
-    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool,
-                                                           false).await.unwrap();
-
-
+    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+        .await
+        .unwrap();
 
     let body = reqwest::get("https://irdb.globalcache.com:8081/api/brands")
         .await?
