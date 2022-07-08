@@ -80,7 +80,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             mk_lib_logging::mk_logging_post_elk("info",
                                                                 json!({ "item": item }),
                                                                 LOGGING_INDEX_NAME).await;
-                            let mut download_link = String::new();
                             if (item["title"].to_string().contains("(Trailer") &&
                                 option_config_json["Metadata"]["Trailer"]["Trailer"] == true)
                                 || (item["title"].to_string().contains("(Behind")
@@ -92,9 +91,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 || (item["title"].to_string().contains("(Carpool")
                                 && option_config_json["Metadata"]["Trailer"]["Carpool"] == true)
                             {
-                                download_link = item["enclosure"]["@url"].to_string();
-                            }
-                            if download_link != String::new() {
+                                let download_link = item["enclosure"]["@url"].to_string();
                                 // do NOT remove the header.....this is the SAVE location
                                 let file_save_name = format!("/mediakraken/web_app/static/meta/trailer/{:?}",
                                                              download_link.rsplitn(1, "/"));
