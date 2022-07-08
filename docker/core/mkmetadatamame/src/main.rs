@@ -113,7 +113,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         for zippedfile in mk_lib_file::mk_directory_walk(format!("/mediakraken/emulation/mame-mame0{}/hash",
                                                                 option_config_json["MAME"]["Version"])).unwrap() {
             //let file_name = Path::new(&zippedfile).file_stem().unwrap();
-            let ext = Path::new(&zippedfile).extension().unwrap();
+            let ext = Path::new(&zippedfile).extension().unwrap_or(&std::ffi::OsStr::new("no_extension"));
             if ext == ".xml" {
                 let file = File::open(&zippedfile)?;
                 let reader = BufReader::new(file);
@@ -165,7 +165,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         mk_lib_compression::mk_decompress_zip(&file_name, 
             false, &"/mediakraken/emulation/").unwrap();
     
-        let file = File::open(&format!("/mediakraken/emulation/historyxml{}/historyxml{}.xml", option_config_json["MAME"]["Version"], option_config_json["MAME"]["Version"]))?;
+        let file = File::open(&format!("/mediakraken/emulation/historyxml{}.xml", option_config_json["MAME"]["Version"]))?;
         let reader = BufReader::new(file);
         let mut xml_data: String = "".to_owned();
         let conf = Config::new_with_custom_values(true, "", "text", NullValue::Ignore)
