@@ -1,5 +1,6 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use sqlx::postgres::PgRow;
@@ -33,17 +34,33 @@ pub async fn mk_lib_database_library_read(
     Ok(table_rows)
 }
 
-pub async fn mk_lib_database_library_path_audit(
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBLibraryAuditList {
+    pub mm_media_dir_guid: uuid::Uuid,
+    pub mm_media_dir_path: String,
+    pub mm_media_dir_class_enum: i16,
+    pub mm_media_dir_last_scanned: DateTime<Utc>,
+}
+
+pub async fn mk_lib_database_library_path_audit_read(
     pool: &sqlx::PgPool,
-) -> Result<Vec<PgRow>, sqlx::Error> {
-    let rows = sqlx::query(
+) -> Result<Vec<DBLibraryAuditList>, sqlx::Error> {
+    let select_query = sqlx::query(
         "select mm_media_dir_guid, mm_media_dir_path, \
         mm_media_dir_class_enum, \
-        mm_media_dir_last_scanned from mm_library_dir",
-    )
-    .fetch_all(pool)
-    .await?;
-    Ok(rows)
+        mm_media_dir_last_scanned \
+        from mm_library_dir",
+    );
+    let table_rows: Vec<DBLibraryAuditList> = select_query
+        .map(|row: PgRow| DBLibraryAuditList {
+            mm_media_dir_guid: row.get("mm_media_dir_guid"),
+            mm_media_dir_path: row.get("mm_media_dir_path"),
+            mm_media_dir_class_enum: row.get("mm_media_dir_class_enum"),
+            mm_media_dir_last_scanned: row.get("mm_media_dir_last_scanned"),
+        })
+        .fetch_all(pool)
+        .await?;
+    Ok(table_rows)
 }
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
@@ -72,7 +89,7 @@ pub async fn mk_lib_database_library_path_status(
 
 pub async fn mk_lib_database_library_path_status_update(
     pool: &sqlx::PgPool,
-    library_uuid: Uuid,
+    library_uuid: uuid::Uuid,
     library_status_json: serde_json::Value,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;

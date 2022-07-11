@@ -75,7 +75,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let rabbit_exchange = Exchange::direct(&rabbit_channel);
 
     // determine directories to audit
-    for row_data in mk_lib_database_library::mk_lib_database_library_path_audit(&sqlx_pool)
+    for row_data in mk_lib_database_library::mk_lib_database_library_path_audit_read(&sqlx_pool)
         .await
         .unwrap()
     {
@@ -90,7 +90,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         // shouldn't need to care  let unc_slice = &row_data.get("mm_media_dir_path")[..1];
         // obviously this would mean we mount unc to below as well when defining libraries
         // make sure the path still exists
-        let media_path: PathBuf = ["/mediakraken/mnt", row_data.get("mm_media_dir_path")]
+        let media_path: PathBuf = ["/mediakraken/mnt", &row_data.mm_media_dir_path]
             .iter()
             .collect();
 
@@ -99,7 +99,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 &sqlx_pool,
                 format!(
                     "Library path not found: {}",
-                    row_data.get("mm_media_dir_path")
+                    row_data.mm_media_dir_path
                 ),
                 true,
             )
@@ -111,11 +111,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
             // verify the directory inodes has changed
             let metadata = fs::metadata(&media_path)?;
             let last_modified = metadata.modified()?.elapsed()?.as_secs();
-            if last_modified > row_data.get("mm_media_dir_last_scanned") {
+            if last_modified > row_data.mm_media_dir_last_scanned {
                 mk_lib_database_library::mk_lib_database_library_path_status_update(
                     &sqlx_pool,
-                    row_data.get("mm_media_dir_guid"),
-                    json!({"Status": "Added to scan", "Pct": 100:i32}),
+                    row_data.mm_media_dir_guid,
+                    json!({"Status": "Added to scan", "Pct": 100}),
                 )
                 .await
                 .unwrap();
@@ -126,24 +126,24 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 )
                 .await;
 
-                let original_media_class = row_data.get("mm_media_dir_class_enum");
+                let original_media_class = row_data.mm_media_dir_class_enum;
                 // update the timestamp now so any other media added DURING this scan don"t get skipped
                 mk_lib_database_library::mk_lib_database_library_path_timestamp_update(
                     &sqlx_pool,
-                    row_data.get("mm_media_dir_guid"),
+                    row_data.mm_media_dir_guid,
                 )
                 .await;
                 mk_lib_database_library::mk_lib_database_library_path_status_update(
                     &sqlx_pool,
-                    row_data.get("mm_media_dir_guid"),
-                    json!({"Status": "File search scan", "Pct": 0.0:f32}),
+                    row_data.mm_media_dir_guid,
+                    json!({"Status": "File search scan", "Pct": 0.0}),
                 )
                 .await
                 .unwrap();
-                let mut file_data = mk_lib_file::mk_directory_walk(&media_path.to_str())
+                let mut file_data = mk_lib_file::mk_directory_walk(media_path.display().to_string())
                     .await
                     .unwrap();
-                let total_file_in_dir = file_data.len();
+                let total_file_in_dir = file_data.len().into(); // convert to u64
                 let mut total_scanned: u64 = 0;
                 let mut total_files: u64 = 0;
                 for file_name in file_data {
@@ -170,7 +170,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             let mut save_dl_record = true;
                             total_files += 1;
                             // set here which MIGHT be overrode later
-                            let mut new_class_type_uuid = media_class_type_uuid;
+                            let mut new_class_type_uuid = original_media_class;
                             // check for "stacked" media file
                             let base_file_name = Path::new(&file_name)
                                 .file_name()
@@ -287,7 +287,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                             if file_name.contains("/backdrops/")
                                                 || file_name.contains("\\backdrops\\")
                                             {
-                                                media_class_text = new_class_type_uuid;
                                                 if file_name.contains("/theme.mp3")
                                                     || file_name.contains("\\theme.mp3")
                                                     || file_name.contains("/theme.mp4")
@@ -354,26 +353,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         }
                         total_scanned += 1;
                         mk_lib_database_library::mk_lib_database_library_path_status_update(&sqlx_pool,
-                                                                                            row_data.get("mm_media_dir_guid"),
-                                                                                            json!({format!("Status": "File scan: {:?}/{:?}",
+                                                                                            row_data.mm_media_dir_guid,
+                                                                                            json!({"Status": format!("File scan: {:?}/{:?}",
                                                                                                 total_scanned.to_formatted_string(&Locale::en),
                                                                                                      total_file_in_dir.to_formatted_string(&Locale::en)),
                                                                                            "Pct": (total_scanned / total_file_in_dir) * 100})).await;
                     }
                 }
                 // end of for loop for each file in library
-                mk_lib_logging::mk_logging_post_elk(
-                    "info",
-                    json!({"worker dir done": media_path.to_str(),
-                                                        "media class": media_class_type_uuid}),
-                    LOGGING_INDEX_NAME,
-                )
-                .await;
                 // set to none so it doesn't show up anymore in admin status page
                 mk_lib_database_library::mk_lib_database_library_path_status_update(
                     &sqlx_pool,
-                    row_data.get("mm_media_dir_guid"),
-                    json!({"Status": "File scan complete", "Pct": 100:i32}),
+                    row_data.mm_media_dir_guid,
+                    json!({"Status": "File scan complete", "Pct": 100}),
                 );
                 if total_files > 0 {
                     // add notification to admin status page
@@ -382,7 +374,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         format!(
                             "{} file(s) added from {}",
                             total_files.to_formatted_string(&Locale::en),
-                            row_data.get("mm_media_dir_path")
+                            row_data.mm_media_dir_path
                         ),
                         true,
                     )

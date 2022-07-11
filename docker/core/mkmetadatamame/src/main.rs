@@ -137,7 +137,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .unwrap()
         {
             //let file_name = Path::new(&zippedfile).file_stem().unwrap();
-            let ext = Path::new(&zippedfile).extension().unwrap_or(&std::ffi::OsStr::new("no_extension"));
+            let ext = Path::new(&zippedfile)
+                .extension()
+                .unwrap_or(&std::ffi::OsStr::new("no_extension"));
             if ext == ".xml" {
                 let file = File::open(&zippedfile)?;
                 let reader = BufReader::new(file);
