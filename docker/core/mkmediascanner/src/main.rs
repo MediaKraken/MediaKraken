@@ -97,10 +97,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         if !Path::new(&media_path).exists() {
             mk_lib_database_notification::mk_lib_database_notification_insert(
                 &sqlx_pool,
-                format!(
-                    "Library path not found: {}",
-                    row_data.mm_media_dir_path
-                ),
+                format!("Library path not found: {}", row_data.mm_media_dir_path),
                 true,
             )
             .await;
@@ -111,7 +108,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
             // verify the directory inodes has changed
             let metadata = fs::metadata(&media_path)?;
             let last_modified = metadata.modified()?.elapsed()?.as_secs();
-            if last_modified > row_data.mm_media_dir_last_scanned {
+            let diff = chrono::offset::Utc::now() - row_data.mm_media_dir_last_scanned;
+            if last_modified > diff.num_seconds() as u64 {
                 mk_lib_database_library::mk_lib_database_library_path_status_update(
                     &sqlx_pool,
                     row_data.mm_media_dir_guid,
@@ -140,9 +138,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 )
                 .await
                 .unwrap();
-                let mut file_data = mk_lib_file::mk_directory_walk(media_path.display().to_string())
-                    .await
-                    .unwrap();
+                let mut file_data =
+                    mk_lib_file::mk_directory_walk(media_path.display().to_string())
+                        .await
+                        .unwrap();
                 let total_file_in_dir = file_data.len().into(); // convert to u64
                 let mut total_scanned: u64 = 0;
                 let mut total_files: u64 = 0;
@@ -343,7 +342,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                                         "Z".to_string(),
                                                                                                                                         new_class_type_uuid,
                                                                                                                                         Uuid::new_v4(),
-                                                                                                                                        media_id,
+                                                                                                                                        None,
                                                                                                                                         String::new()).await;
                                             }
                                         }
