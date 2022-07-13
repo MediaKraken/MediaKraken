@@ -123,7 +123,7 @@ pub async fn mk_lib_database_library_path_timestamp_update(
 
 pub async fn mk_lib_database_library_file_exists(
     pool: &sqlx::PgPool,
-    file_name: String,
+    file_name: &String,
 ) -> Result<bool, sqlx::Error> {
     let row: (bool,) = sqlx::query_as(
         "select exists(select 1 from mm_media \

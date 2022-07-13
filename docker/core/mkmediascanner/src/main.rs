@@ -138,14 +138,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 )
                 .await
                 .unwrap();
-                let mut file_data =
+                let file_data =
                     mk_lib_file::mk_directory_walk(media_path.display().to_string())
                         .await
                         .unwrap();
-                let total_file_in_dir = file_data.len().into(); // convert to u64
+                let total_file_in_dir: u64 = file_data.len() as u64;
                 let mut total_scanned: u64 = 0;
                 let mut total_files: u64 = 0;
-                for file_name in file_data {
+                for file_name in file_data.iter() {
                     if mk_lib_database_library::mk_lib_database_library_file_exists(
                         &sqlx_pool, file_name,
                     )
@@ -154,7 +154,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         == false
                     {
                         // set lower here so I can remove a lot of .lower() in the code below
-                        let file_extension = Path::new(&file_name.to_lowercase())
+                        let file_lower = &file_name.to_lowercase();
+                        let file_extension = Path::new(&file_lower)
                             .extension()
                             .and_then(OsStr::to_str)
                             .unwrap();
@@ -325,12 +326,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                             if ffprobe_bif_data == true && mk_lib_common_media_extension::MEDIA_EXTENSION_SKIP_FFMPEG.contains(&file_extension) == false
                                                 && mk_lib_common_media_extension::MEDIA_EXTENSION.contains(&file_extension) {
                                                 // Send a message so ffprobe runs
-                                                rabbit_exchange.publish(Publish::with_properties(json!({"Type": "FFProbe", "Media UUID": media_id, "Media Path": file_name}),
+                                                rabbit_exchange.publish(Publish::with_properties(json!({"Type": "FFProbe", "Media UUID": media_id, "Media Path": file_name}).to_string().as_bytes(),
                                                                                                  "mk_ffmpeg".to_string(),
                                                                                                  AmqpProperties::default().with_delivery_mode(2).with_content_type("text/plain".to_string())))?;
                                                 if original_media_class != mk_lib_common_enum_media_type::DLMediaType::MUSIC {
                                                     // Send a message so roku thumbnail is generated
-                                                    rabbit_exchange.publish(Publish::with_properties(json!({"Type": "Roku", "Media UUID": media_id, "Media Path": file_name}),
+                                                    rabbit_exchange.publish(Publish::with_properties(json!({"Type": "Roku", "Media UUID": media_id, "Media Path": file_name}).to_string().as_bytes(),
                                                                                                      "mk_ffmpeg".to_string(),
                                                                                                      AmqpProperties::default().with_delivery_mode(2).with_content_type("text/plain".to_string())))?;
                                                 }
