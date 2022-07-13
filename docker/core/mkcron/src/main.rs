@@ -67,7 +67,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let date_check: DateTime<Utc> = Utc::now() - time_delta;
             if row_data.mm_cron_last_run < date_check {
                 rabbit_exchange.publish(Publish::with_properties(
-                    "hello there".as_bytes(),
+                    row_data.mm_cron_json.to_string().as_bytes(),
                     row_data.mm_cron_json["route_key"].to_string(),
                     AmqpProperties::default()
                         .with_delivery_mode(2)
