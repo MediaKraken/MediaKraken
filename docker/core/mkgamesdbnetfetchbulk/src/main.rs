@@ -30,27 +30,30 @@ async fn main() -> Result<(), Box<dyn Error>> {
         mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
             .await
             .unwrap();
+
+    /*
+
+    GAMESDB_INST = metadata_provider_thegamesdb.CommonMetadataGamesDB()
+
+    # grab and insert all platforms
+    for platform in list(GAMESDB_INST.com_meta_gamesdb_platform_list()['Data']['Platforms'].items())[0]:
+        if platform != 'Platform':
+            for game_systems in platform:
+                print(game_systems, flush=True)
+                if db_connection.db_meta_games_system_guid_by_short_name(game_systems['name']) == None:
+                    # fetch platform info
+                    platform_json = GAMESDB_INST.com_meta_gamesdb_platform_by_id(game_systems['id'])
+                    # store record
+                    try:
+                        system_alias = game_systems['alias']
+                    except KeyError:
+                        system_alias = None
+                    db_connection.db_meta_games_system_upsert(game_systems['id'],
+                                                              game_systems['name'],
+                                                              system_alias,
+                                                              json.dumps(platform_json))
+    */
+
+    mk_lib_logging::mk_logging_post_elk("info", json!({"STOP": "STOP"}), LOGGING_INDEX_NAME).await;
+    Ok(())
 }
-
-/*
-
-GAMESDB_INST = metadata_provider_thegamesdb.CommonMetadataGamesDB()
-
-# grab and insert all platforms
-for platform in list(GAMESDB_INST.com_meta_gamesdb_platform_list()['Data']['Platforms'].items())[0]:
-    if platform != 'Platform':
-        for game_systems in platform:
-            print(game_systems, flush=True)
-            if db_connection.db_meta_games_system_guid_by_short_name(game_systems['name']) == None:
-                # fetch platform info
-                platform_json = GAMESDB_INST.com_meta_gamesdb_platform_by_id(game_systems['id'])
-                # store record
-                try:
-                    system_alias = game_systems['alias']
-                except KeyError:
-                    system_alias = None
-                db_connection.db_meta_games_system_upsert(game_systems['id'],
-                                                          game_systems['name'],
-                                                          system_alias,
-                                                          json.dumps(platform_json))
- */
