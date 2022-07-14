@@ -150,6 +150,7 @@
 \cp -f --remove-destination ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mktranscode/src/.
 
 # mkwebapp
+\cp -f --remove-destination ../src/mk_lib_common/src/mk_lib_common_docker.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_common/src/mk_lib_common_enum_media_type.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_common/src/mk_lib_common_pagination.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkwebapp/src/.
