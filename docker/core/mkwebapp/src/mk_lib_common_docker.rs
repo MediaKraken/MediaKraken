@@ -7,6 +7,8 @@ use docker_api::api::ContainerListOpts;
 use docker_api::api::LogsOpts;
 use docker_api::api::ServiceListOpts;
 use docker_api::{conn::TtyChunk, Docker, Result};
+use crate::rocket::futures::StreamExt;
+use crate::rocket::futures::FutureExt;
 
 #[cfg(unix)]
 pub fn new_docker() -> Result<Docker> {
@@ -18,7 +20,7 @@ pub fn new_docker() -> Result<Docker> {
     Docker::new("tcp://127.0.0.1:8080")
 }
 
-pub async fn mk_common_docker_container_inspect(id: String) -> Result<Vec<String>, std::io::Error> {
+pub async fn mk_common_docker_container_inspect(id: String) -> Result<Vec<String>> {
     let docker = new_docker()?;
     let mut logs_list: Vec<String> = Vec::new();
     match docker.containers().get(&id).inspect().await {
@@ -28,14 +30,10 @@ pub async fn mk_common_docker_container_inspect(id: String) -> Result<Vec<String
     Ok(logs_list)
 }
 
-pub async fn mk_common_docker_container_list() -> Result<Vec<String>, std::io::Error> {
+pub async fn mk_common_docker_container_list() -> Result<Vec<String>> {
     let docker = new_docker()?;
     let mut container_list: Vec<String> = Vec::new();
-    let opts = if all {
-        ContainerListOpts::builder().all(true).build()
-    } else {
-        Default::default()
-    };
+    let opts = ContainerListOpts::builder().all(true).build();
     match docker.containers().list(&opts).await {
         Ok(containers) => {
             containers.into_iter().for_each(|container| {
@@ -54,12 +52,12 @@ pub async fn mk_common_docker_container_list() -> Result<Vec<String>, std::io::E
     Ok(container_list)
 }
 
-pub async fn mk_common_docker_container_logs(id: String) -> Result<Vec<String>, std::io::Error> {
+pub async fn mk_common_docker_container_logs(id: String) -> Result<Vec<String>> {
     let docker = new_docker()?;
     let mut logs_list: Vec<String> = Vec::new();
     let container = docker.containers().get(&id);
     let logs_stream =
-        container.logs(&LogsOpts::builder().stdout(stdout).stderr(stderr).build());
+        container.logs(&LogsOpts::builder().stdout(true).stderr(true).build());
     let logs: Vec<_> = logs_stream
         .map(|chunk| match chunk {
             Ok(chunk) => chunk.to_vec(),
@@ -77,7 +75,7 @@ pub async fn mk_common_docker_container_logs(id: String) -> Result<Vec<String>, 
     Ok(logs_list)
 }
 
-pub async fn mk_common_docker_container_stats(id: String) -> Result<Vec<String>, std::io::Error> {
+pub async fn mk_common_docker_container_stats(id: String) -> Result<Vec<String>> {
     let docker = new_docker()?;
     let mut stats_list: Vec<String> = Vec::new();
     while let Some(result) = docker.containers().get(&id).stats().next().await {
@@ -89,7 +87,7 @@ pub async fn mk_common_docker_container_stats(id: String) -> Result<Vec<String>,
     Ok(stats_list)
 }
 
-pub async fn mk_common_docker_service_inspect(service: String) -> Result<Vec<String>, std::io::Error> {
+pub async fn mk_common_docker_service_inspect(service: String) -> Result<Vec<String>> {
     let docker = new_docker()?;
     let mut logs_list: Vec<String> = Vec::new();
     match docker.services().get(&service).inspect().await {
@@ -99,12 +97,12 @@ pub async fn mk_common_docker_service_inspect(service: String) -> Result<Vec<Str
     Ok(logs_list)
 }
 
-pub async fn mk_common_docker_service_list() -> Result<Vec<String>, std::io::Error> {
+pub async fn mk_common_docker_service_list() -> Result<Vec<String>> {
     let docker = new_docker()?;
     let mut logs_list: Vec<String> = Vec::new();
     match docker
         .services()
-        .list(&ServiceListOpts::builder().status(with_status).build())
+        .list(&ServiceListOpts::builder().status(true).build())
         .await
     {
         Ok(services) => {
@@ -117,12 +115,12 @@ pub async fn mk_common_docker_service_list() -> Result<Vec<String>, std::io::Err
     Ok(logs_list)
 }
 
-pub async fn mk_common_docker_service_logs(service: String) -> Result<Vec<String>, std::io::Error> {
+pub async fn mk_common_docker_service_logs(service: String) -> Result<Vec<String>> {
     let docker = new_docker()?;
     let mut logs_list: Vec<String> = Vec::new();
     let service = docker.services().get(&service);
     let logs_stream =
-        service.logs(&LogsOpts::builder().stdout(stdout).stderr(stderr).build());
+        service.logs(&LogsOpts::builder().stdout(true).stderr(true).build());
     let logs: Vec<_> = logs_stream
         .map(|chunk| match chunk {
             Ok(chunk) => chunk.to_vec(),
@@ -140,7 +138,7 @@ pub async fn mk_common_docker_service_logs(service: String) -> Result<Vec<String
     Ok(logs_list)
 }
 
-pub async fn mk_common_docker_volume_inspect(volume: Strings) -> Result<Vec<String>, std::io::Error> {
+pub async fn mk_common_docker_volume_inspect(volume: String) -> Result<Vec<String>> {
     let docker = new_docker()?;
     let mut logs_list: Vec<String> = Vec::new();
     match docker.volumes().get(&volume).inspect().await {
@@ -150,7 +148,7 @@ pub async fn mk_common_docker_volume_inspect(volume: Strings) -> Result<Vec<Stri
     Ok(logs_list)
 }
 
-pub async fn mk_common_docker_volume_list() -> Result<Vec<String>, std::io::Error> {
+pub async fn mk_common_docker_volume_list() -> Result<Vec<String>> {
     let docker = new_docker()?;
     let mut logs_list: Vec<String> = Vec::new();
     match docker.volumes().list(&Default::default()).await {
@@ -163,3 +161,14 @@ pub async fn mk_common_docker_volume_list() -> Result<Vec<String>, std::io::Erro
     };
     Ok(logs_list)
 }
+
+pub async fn mk_common_docker_info() -> Result<Vec<String>> {
+    let docker = new_docker()?;
+    let mut logs_list: Vec<String> = Vec::new();
+    match docker.info().await {
+        Ok(info) => println!("{:#?}", info),
+        Err(e) => eprintln!("Error: {}", e),
+    };
+    Ok(logs_list)
+}
+

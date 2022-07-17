@@ -3,8 +3,12 @@ use rocket::Request;
 use rocket_auth::{AdminUser, Auth, Error, Login, Signup, Users};
 use rocket_dyn_templates::{tera::Tera, Template};
 
+#[path = "../mk_lib_common_docker.rs"]
+mod mk_lib_common_docker;
+
 #[get("/admin_docker")]
 pub async fn admin_docker(user: AdminUser) -> Template {
+    let docker_results = mk_lib_common_docker::mk_common_docker_info().await.unwrap();
     Template::render(
         "bss_admin/bss_admin_docker",
         tera::Context::new().into_json(),

@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use core::fmt::Write;
 use paginator::{PageItem, Paginator};
 use std::error::Error;
