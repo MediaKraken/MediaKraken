@@ -25,7 +25,7 @@
                                 <div class="card-body">
                                     <p class="card-text">Server Name: {{ data_server_info_server_name }}</p>
                                     <p>Host Uptime:&nbsp;{{ data_server_uptime }}</p>
-                                    <p>Host IP:&nbsp;{{ data_host_ip }}</p>
+                                    <p>Host IP:&nbsp;{{ data_server_host_ip }}</p>
                                     <p>IP External: {{ data_server_info_server_ip_external }}</p>
                                     <p>Version:&nbsp;{{ data_server_info_server_version }}</p>
                                 </div>
