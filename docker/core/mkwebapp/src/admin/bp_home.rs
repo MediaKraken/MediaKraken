@@ -4,8 +4,8 @@ use rocket_auth::{AdminUser, Auth, Error, Login, Signup, Users};
 use rocket_dyn_templates::{tera::Tera, Template};
 use rocket::serde::{Serialize, Deserialize, json::Json};
 
-#[path = "../mk_lib_database_cron.rs"]
-mod mk_lib_database_cron;
+#[path = "../mk_lib_database_user.rs"]
+mod mk_lib_database_user;
 
 #[derive(Serialize)]
 struct TemplateHomeContext<> {
@@ -18,19 +18,15 @@ struct TemplateHomeContext<> {
     data_count_matched_media: i64,
     data_count_meta_fetch: i64,
     data_count_streamed_media: i64,
-    server_streams: ,
-    template_data: Vec<mk_lib_database_cron::DBCronList>,
-    server_users: ,
-    template_data: Vec<mk_lib_database_cron::DBCronList>,
-    data_scan_info: ,
-    template_data: Vec<mk_lib_database_cron::DBCronList>,
+    server_streams: Vec<mk_lib_database_cron::DBCronList>,
+    server_users: Vec<mk_lib_database_user::DBUserList>,
+    data_scan_info: Vec<mk_lib_database_cron::DBCronList>,
 }
 
 #[get("/admin_home")]
 pub async fn admin_home(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
     let cron_list = mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool).await.unwrap();    
     Template::render("bss_admin/bss_admin_home", &TemplateHomeContext {
-        template_data: cron_list,
         data_server_info_server_name: ,
         data_server_uptime: sys_info::boottime().unwrap(),
         data_server_host_ip: ,
