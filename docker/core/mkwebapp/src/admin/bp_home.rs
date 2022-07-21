@@ -4,8 +4,20 @@ use rocket_auth::{AdminUser, Auth, Error, Login, Signup, Users};
 use rocket_dyn_templates::{tera::Tera, Template};
 use rocket::serde::{Serialize, Deserialize, json::Json};
 
+#[path = "../mk_lib_database_media.rs"]
+mod mk_lib_database_media;
+
+#[path = "../mk_lib_database_metadata_download_queue.rs"]
+mod mk_lib_database_metadata_download_queue;
+
+#[path = "../mk_lib_database_option_status.rs"]
+mod mk_lib_database_option_status;
+
 #[path = "../mk_lib_database_user.rs"]
 mod mk_lib_database_user;
+
+#[path = "../mk_lib_network_external_ip.rs"]
+mod mk_lib_network_external_ip;
 
 #[derive(Serialize)]
 struct TemplateHomeContext<> {
@@ -14,10 +26,10 @@ struct TemplateHomeContext<> {
     data_server_host_ip: String,
     data_server_info_server_ip_external: String,
     data_server_info_server_version: String,
-    data_count_media_files: i64,
-    data_count_matched_media: i64,
-    data_count_meta_fetch: i64,
-    data_count_streamed_media: i64,
+    data_count_media_files: i32,
+    data_count_matched_media: i32,
+    data_count_meta_fetch: i32,
+    data_count_streamed_media: i32,
     server_streams: Vec<mk_lib_database_cron::DBCronList>,
     server_users: Vec<mk_lib_database_user::DBUserList>,
     data_scan_info: Vec<mk_lib_database_cron::DBCronList>,
@@ -25,36 +37,26 @@ struct TemplateHomeContext<> {
 
 #[get("/admin_home")]
 pub async fn admin_home(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
-    let cron_list = mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool).await.unwrap();    
+    let user_list = mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool).await.unwrap();    
+    let (options_json: Value, status_json: Value) = mk_lib_database_option_status::mk_lib_database_option_status_read(&sqlx_pool).await.unwrap();
     Template::render("bss_admin/bss_admin_home", &TemplateHomeContext {
-        data_server_info_server_name: ,
+        data_server_info_server_name: options_json['MediaKrakenServer']['Server Name'].to_string(),
         data_server_uptime: sys_info::boottime().unwrap(),
-        data_server_host_ip: ,
-        data_server_info_server_ip_external: ,
+        data_server_host_ip: '255.255.255.255',
+        data_server_info_server_ip_external: mk_lib_network_external_ip::mk_lib_network_external_ip().await,
         data_server_info_server_version: ,
-        data_count_media_files: ,
-        data_count_matched_media: ,
-        data_count_meta_fetch: ,
-        data_count_streamed_media: ,
+        data_count_media_files: mk_lib_database_media::mk_lib_database_media_known_count(&sqlx_pool).await.unwrap(),
+        data_count_matched_media: mk_lib_database_media::mk_lib_database_media_matched_count(&sqlx_pool).await.unwrap(),
+        data_count_meta_fetch: mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(&sqlx_pool).await.unwrap(),
+        data_count_streamed_media: 0,
         server_streams: ,
-        server_users: ,
+        server_users: user_list,
         data_scan_info: ,
     })
 }
 
 /*
-outside_ip = None
-
-@blueprint_admin.route("/admin_home")
-@common_global.jinja_template.template('bss_admin/bss_admin_home.html')
-@common_global.auth.login_required
 pub async fn url_bp_admin(request):
-    """
-    Display main server page
-    """
-    global outside_ip
-    if outside_ip is None:
-        outside_ip = common_network.mk_network_get_outside_ip()
     data_server_info_server_name = 'Spoots Media'
     nic_data = []
     for key, value in common_network.mk_network_ip_addr().items():
@@ -123,11 +125,4 @@ pub async fn url_bp_admin(request):
         'data_scan_info': data_scan_info,
         'data_count_meta_fetch': metadata_to_fetch,
     }
-
-# @blueprint_admin.route("/admin_sidenav")
-# @common_global.jinja_template.template('admin/admin_sidenav.html')
-# @common_global.auth.login_required
-# pub async fn url_bp_admin_sidenav(request):
-#     return {}
-
  */

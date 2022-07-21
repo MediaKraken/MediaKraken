@@ -81,6 +81,15 @@ pub async fn mk_lib_database_media_matched_count(pool: &sqlx::PgPool) -> Result<
     Ok(row.0)
 }
 
+pub async fn mk_lib_database_media_known_count(pool: &sqlx::PgPool) -> Result<i32, sqlx::Error> {
+    let row: (i32,) = sqlx::query_as(
+        "select count(*) from mm_media",
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(row.0)
+}
+
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaKnownList {
     mm_media_path: String,

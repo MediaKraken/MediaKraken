@@ -203,4 +203,5 @@
 \cp -f --remove-destination ../src/mk_lib_database/src/metadata/mk_lib_database_metadata_tv_live.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_file/src/mk_lib_file.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkwebapp/src/.
+\cp -f --remove-destination ../src/mk_lib_network/src/mk_lib_network_external_ip.rs ../docker/core/mkwebapp/src/.
 
