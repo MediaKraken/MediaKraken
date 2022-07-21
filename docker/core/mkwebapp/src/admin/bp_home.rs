@@ -1,8 +1,8 @@
 use rocket::response::Redirect;
+use rocket::serde::{json::Json, Deserialize, Serialize};
 use rocket::Request;
 use rocket_auth::{AdminUser, Auth, Error, Login, Signup, Users};
 use rocket_dyn_templates::{tera::Tera, Template};
-use rocket::serde::{Serialize, Deserialize, json::Json};
 
 #[path = "../mk_lib_database_media.rs"]
 mod mk_lib_database_media;
@@ -16,43 +16,69 @@ mod mk_lib_database_option_status;
 #[path = "../mk_lib_database_user.rs"]
 mod mk_lib_database_user;
 
-#[path = "../mk_lib_network_external_ip.rs"]
-mod mk_lib_network_external_ip;
+#[path = "../mk_lib_network.rs"]
+mod mk_lib_network;
 
 #[derive(Serialize)]
-struct TemplateHomeContext<> {
-    data_server_info_server_name: String,
-    data_server_uptime: libc::timeval,
-    data_server_host_ip: String,
-    data_server_info_server_ip_external: String,
-    data_server_info_server_version: String,
-    data_count_media_files: i32,
-    data_count_matched_media: i32,
-    data_count_meta_fetch: i32,
-    data_count_streamed_media: i32,
-    server_streams: Vec<mk_lib_database_cron::DBCronList>,
-    server_users: Vec<mk_lib_database_user::DBUserList>,
-    data_scan_info: Vec<mk_lib_database_cron::DBCronList>,
+struct TemplateHomeContext {
+    template_data_server_info_server_name: String,
+    template_data_server_uptime: libc::timeval,
+    template_data_server_host_ip: String,
+    template_data_server_info_server_ip_external: String,
+    template_data_server_info_server_version: String,
+    template_data_count_media_files: i32,
+    template_data_count_matched_media: i32,
+    template_data_count_meta_fetch: i32,
+    template_data_count_streamed_media: i32,
+    template_server_streams: vec![],
+    template_server_users: Vec<mk_lib_database_user::DBUserList>,
+    template_data_scan_info: vec![],
 }
 
 #[get("/admin_home")]
 pub async fn admin_home(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
-    let user_list = mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool).await.unwrap();    
-    let (options_json: Value, status_json: Value) = mk_lib_database_option_status::mk_lib_database_option_status_read(&sqlx_pool).await.unwrap();
-    Template::render("bss_admin/bss_admin_home", &TemplateHomeContext {
-        data_server_info_server_name: options_json['MediaKrakenServer']['Server Name'].to_string(),
-        data_server_uptime: sys_info::boottime().unwrap(),
-        data_server_host_ip: '255.255.255.255',
-        data_server_info_server_ip_external: mk_lib_network_external_ip::mk_lib_network_external_ip().await,
-        data_server_info_server_version: ,
-        data_count_media_files: mk_lib_database_media::mk_lib_database_media_known_count(&sqlx_pool).await.unwrap(),
-        data_count_matched_media: mk_lib_database_media::mk_lib_database_media_matched_count(&sqlx_pool).await.unwrap(),
-        data_count_meta_fetch: mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(&sqlx_pool).await.unwrap(),
-        data_count_streamed_media: 0,
-        server_streams: ,
-        server_users: user_list,
-        data_scan_info: ,
-    })
+    let user_list = mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool)
+        .await
+        .unwrap();
+    let option_status_row =
+        mk_lib_database_option_status::mk_lib_database_option_status_read(&sqlx_pool)
+            .await
+            .unwrap();
+    let option_json = option_status_row.get("mm_options_json");
+    let status_json = option_status_row.get("mm_status_json");
+    Template::render(
+        "bss_admin/bss_admin_home",
+        &TemplateHomeContext {
+            template_data_server_info_server_name: option_json["MediaKrakenServer"]["Server Name"]
+                .to_string(),
+            // following boottime only compiles #[cfg(not(windows))] in this case is fine
+            template_data_server_uptime: sys_info::boottime().unwrap(),
+            template_data_server_host_ip: "255.255.255.255".to_string(),
+            template_data_server_info_server_ip_external: mk_lib_network::mk_data_from_url(
+                "https://myexternalip.com/raw",
+            )
+            .await,
+            template_data_server_info_server_version: "Fake Version".to_string(),
+            template_data_count_media_files:
+                mk_lib_database_media::mk_lib_database_media_known_count(&sqlx_pool)
+                    .await
+                    .unwrap(),
+            template_data_count_matched_media:
+                mk_lib_database_media::mk_lib_database_media_matched_count(&sqlx_pool)
+                    .await
+                    .unwrap(),
+            template_data_count_meta_fetch:
+                mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(
+                    &sqlx_pool,
+                )
+                .await
+                .unwrap(),
+            template_data_count_streamed_media: 0,
+            template_server_streams: vec![],
+            template_server_users: user_list,
+            template_data_scan_info: vec![],
+        },
+    )
 }
 
 /*
