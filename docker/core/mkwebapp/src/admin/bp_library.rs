@@ -16,7 +16,7 @@ struct TemplateAdminLibraryContext {
     pagination_bar: String,
 }
 
-#[get("/admin_library/<page>")]
+#[get("/library/<page>")]
 pub async fn admin_library(
     sqlx_pool: &rocket::State<sqlx::PgPool>,
     user: AdminUser,

@@ -23,10 +23,10 @@
                                     <h5 class="mb-0">Docker Info</h5>
                                 </div>
                                 <div class="card-body">
-                                    <p class="card-text">Operating System: {{data_host['OperatingSystem']}}</p>
-                                    <p>Kernel: {{data_host['KernelVersion']}}</p>
+                                    <p class="card-text">Operating System: {{data_host['operating_system']}}</p>
+                                    <p>Kernel: {{data_host['kernel_version']}}</p>
                                     <p>Host IP: {{data_host['Swarm']['NodeAddr']}}</p>
-                                    <p>Docker Engine: {{data_host['ServerVersion']}}</p>
+                                    <p>Docker Engine: {{data_host['server_version']}}</p>
                                 </div>
                             </div>
                         </div>

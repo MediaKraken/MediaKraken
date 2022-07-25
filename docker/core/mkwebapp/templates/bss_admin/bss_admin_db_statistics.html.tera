@@ -18,7 +18,7 @@
                     <div class="card shadow">
                         <div class="card-header py-3">
                             <p class="text-primary m-0 font-weight-bold"><strong>PostgreSQL Version: {{template_data_db_version}}</strong></p>
-                            <p class="text-primary m-0 font-weight-bold"><strong>Parallel Workers: {{template_data_workers}}</strong></p>
+                            <p class="text-primary m-0 font-weight-bold"><strong>Parallel Workers: {{template_data_db_workers}}</strong></p>
                         </div>
                         <div class="card-body">
                             <fieldset>
@@ -33,7 +33,7 @@
                                     </thead>
                                     {% set_global total_rows = 0 %}
                                     <tbody>
-                                        {% for row_data in template_data_count %}
+                                        {% for row_data in template_data_db_count %}
                                         <tr>
                                             <td>{{ row_data.table_name }}</td>
                                             <td>{{ row_data.table_rows }}</td>
@@ -61,7 +61,7 @@
                                 </thead>
                                     {% set_global total_size = 0 %}
                                 <tbody>
-                                    {% for row_data in template_data_size %}
+                                    {% for row_data in template_data_db_size %}
                                     <tr>
                                         <td>{{ row_data.table_name }}</td>
                                         <td>{{ row_data.table_size }}</td>

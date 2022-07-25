@@ -20,7 +20,7 @@ struct TemplateAdminUserContext {
     pagination_bar: String,
 }
 
-#[get("/admin_user/<page>")]
+#[get("/user/<page>")]
 pub async fn admin_user(
     sqlx_pool: &rocket::State<sqlx::PgPool>,
     user: AdminUser,

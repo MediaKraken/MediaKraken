@@ -21,7 +21,7 @@ struct TemplateBackupContext<> {
     template_data: Vec<BackupList>
 }
 
-#[get("/admin_backup")]
+#[get("/backup")]
 pub async fn admin_backup(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
     Template::render("bss_admin/bss_admin_backup", tera::Context::new().into_json())
 }

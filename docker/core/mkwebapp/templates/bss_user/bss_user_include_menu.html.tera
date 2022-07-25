@@ -22,7 +22,7 @@
                         </div>
                     </li>
                     <li class="nav-item" role="presentation"><a class="nav-link" href="/user/profile">Profile</a></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="/admin/admin_home">Admin</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link" href="/admin/home">Admin</a></li>
                     <li class="nav-item" role="presentation"><a class="nav-link" href="/public/about">About</a></li>
                 </ul><span class="navbar-text actions"> <a class="login" href="/logout">Log Out</a></span>
             </div>

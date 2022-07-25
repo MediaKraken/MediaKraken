@@ -71,8 +71,8 @@ pub async fn mk_lib_database_media_unmatched_read(
     Ok(table_rows)
 }
 
-pub async fn mk_lib_database_media_matched_count(pool: &sqlx::PgPool) -> Result<i32, sqlx::Error> {
-    let row: (i32,) = sqlx::query_as(
+pub async fn mk_lib_database_media_matched_count(pool: &sqlx::PgPool) -> Result<i64, sqlx::Error> {
+    let row: (i64,) = sqlx::query_as(
         "select count(*) from mm_media \
         where mm_media_metadata_guid is not NULL",
     )
@@ -81,8 +81,8 @@ pub async fn mk_lib_database_media_matched_count(pool: &sqlx::PgPool) -> Result<
     Ok(row.0)
 }
 
-pub async fn mk_lib_database_media_known_count(pool: &sqlx::PgPool) -> Result<i32, sqlx::Error> {
-    let row: (i32,) = sqlx::query_as(
+pub async fn mk_lib_database_media_known_count(pool: &sqlx::PgPool) -> Result<i64, sqlx::Error> {
+    let row: (i64,) = sqlx::query_as(
         "select count(*) from mm_media",
     )
     .fetch_one(pool)
@@ -146,8 +146,8 @@ pub async fn mk_lib_database_media_insert(
 pub async fn mk_lib_database_media_duplicate_detail_count(
     pool: &sqlx::PgPool,
     mm_metadata_guid: Uuid,
-) -> Result<i32, sqlx::Error> {
-    let row: (i32,) = sqlx::query_as(
+) -> Result<i64, sqlx::Error> {
+    let row: (i64,) = sqlx::query_as(
         "select count(*) from mm_media \
         where mm_media_metadata_guid = $1",
     )
@@ -159,9 +159,9 @@ pub async fn mk_lib_database_media_duplicate_detail_count(
 
 pub async fn mk_lib_database_media_duplicate_count(
     pool: &sqlx::PgPool,
-) -> Result<i32, sqlx::Error> {
+) -> Result<i64, sqlx::Error> {
     // TODO technically this will "dupe" things like subtitles atm
-    let row: (i32,) = sqlx::query_as(
+    let row: (i64,) = sqlx::query_as(
         "select count(*) from (select mm_media_metadata_guid \
         from mm_media where mm_media_metadata_guid is not null \
         group by mm_media_metadata_guid HAVING count(*) > 1) as total",

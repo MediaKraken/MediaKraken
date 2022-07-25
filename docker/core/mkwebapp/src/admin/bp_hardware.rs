@@ -3,7 +3,7 @@ use rocket::response::Redirect;
 use rocket_dyn_templates::{Template, tera::Tera};
 use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
 
-#[get("/admin_hardware")]
+#[get("/hardware")]
 pub async fn admin_hardware(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
     Template::render("bss_admin/bss_admin_hardware", tera::Context::new().into_json())
 }

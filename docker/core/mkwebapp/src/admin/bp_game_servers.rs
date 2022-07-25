@@ -16,7 +16,7 @@ struct TemplateAdminGameServersContext<> {
     pagination_bar: String,
 }
 
-#[get("/admin_game_servers/<page>")]
+#[get("/game_servers/<page>")]
 pub async fn admin_game_servers(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser, page: i32) -> Template {
     let db_offset: i32 = (page * 30) - 30;
     let mut total_pages: i64 = mk_lib_database_game_servers::mk_lib_database_game_server_count(&sqlx_pool, String::new()).await.unwrap();

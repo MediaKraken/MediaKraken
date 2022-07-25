@@ -23,11 +23,11 @@
                                     <h5 class="mb-0">Server Info</h5>
                                 </div>
                                 <div class="card-body">
-                                    <p class="card-text">Server Name: {{ data_server_info_server_name }}</p>
-                                    <p>Host Uptime:&nbsp;{{ data_server_uptime }}</p>
-                                    <p>Host IP:&nbsp;{{ data_server_host_ip }}</p>
-                                    <p>IP External: {{ data_server_info_server_ip_external }}</p>
-                                    <p>Version:&nbsp;{{ data_server_info_server_version }}</p>
+                                    <p class="card-text">Server Name: {{ template_data_server_info_server_name }}</p>
+                                    <p>Host Uptime:&nbsp;{{ template_data_server_uptime }}</p>
+                                    <p>Host IP:&nbsp;{{ template_data_server_host_ip }}</p>
+                                    <p>IP External: {{ template_data_server_info_server_ip_external }}</p>
+                                    <p>Version:&nbsp;{{ template_data_server_info_server_version }}</p>
                                 </div>
                             </div>
                         </div>
@@ -47,10 +47,10 @@
                                     <h5 class="mb-0">Media Counts</h5>
                                 </div>
                                 <div class="card-body">
-                                    <p class="card-text">Media Files:&nbsp;{{ data_count_media_files }}</p>
-                                    <p>Matched Media:&nbsp;{{ data_count_matched_media }}</p>
-                                    <p>Metadata to Download:&nbsp;{{ data_count_meta_fetch }}</p>
-                                    <p>Streamed:&nbsp;{{ data_count_streamed_media }}</p>
+                                    <p class="card-text">Media Files:&nbsp;{{ template_data_count_media_files }}</p>
+                                    <p>Matched Media:&nbsp;{{ template_data_count_matched_media }}</p>
+                                    <p>Metadata to Download:&nbsp;{{ template_data_count_meta_fetch }}</p>
+                                    <p>Streamed:&nbsp;{{ template_data_count_streamed_media }}</p>
                                 </div>
                             </div>
                         </div>
@@ -74,19 +74,19 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% for row_data in server_streams %}
+                                {% for row_data in template_server_streams %}
                                 <tr>
-                                    <td>{{ loop.index + (page - 1) * per_page }}</td>
-                                    <td>{{ row_data[0] }}</td>
-                                    <td>{{ row_data[1] }}</td>
-                                    <td>{{ row_data[2] }}</td>
-                                    <td>{{ row_data[3] }}</td>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ row_data.template_stream_user }}</td>
+                                    <td>{{ row_data.template_stream_media }}</td>
+                                    <td>{{ row_data.template_stream_device }}</td>
+                                    <td>{{ row_data.template_stream_time }}</td>
                                     <div class="pull-right action-buttons">
                                         <td>
                                             <p data-placement="top" data-toggle="tooltip"
                                                title="Delete">
                                                 <button class="btn btn-danger btn-xs"
-                                                <a data-id={{ row_data[4] }}
+                                                <a data-id={{ row_data.template_stream_user }}
                                                    onclick="ConfirmLibraryDelete(this)"><i class="fas fa-trash-alt" height="20" width="20"></i></a>
                                         </td>
                                     </div>
@@ -116,18 +116,18 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% for row_data in server_users %}
+                                {% for row_data in template_server_users %}
                                 <tr>
-                                    <td>{{ loop.index + (page - 1) * per_page }}</td>
-                                    <td>{{ row_data[0] }}</td>
-                                    <td>{{ row_data[1] }}</td>
-                                    <td>{{ row_data[2] }}</td>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ row_data.email }}</td>
+                                    <td>{{ row_data.email }}</td>
+                                    <td>{{ row_data.email }}</td>
                                     <div class="pull-right action-buttons">
                                         <td>
                                             <p data-placement="top" data-toggle="tooltip"
                                                title="Delete">
                                                 <button class="btn btn-danger btn-xs"
-                                                <a data-id={{ row_data[4] }}
+                                                <a data-id={{ row_data.email }}
                                                    onclick="ConfirmLibraryDelete(this)"><i class="fas fa-trash-alt" height="20" width="20"></i></a>
                                         </td>
                                     </div>
@@ -155,11 +155,11 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% for row_data in data_scan_info %}
+                                {% for row_data in template_data_scan_info %}
                                 <tr>
-                                    <td>{{ row_data[0] }}</td>
-                                    <td>{{ row_data[1] }}</td>
-                                    <td>{{ row_data[2] }}</td>
+                                    <td>{{ row_data.template_scan_path }}</td>
+                                    <td>{{ row_data.template_scan_status }}</td>
+                                    <td>{{ row_data.template_scan_percentage }}</td>
                                 </tr>
                                 {% endfor %}
                                 </tbody>

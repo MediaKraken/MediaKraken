@@ -131,7 +131,8 @@ pub async fn mk_lib_database_metadata_download_status_update(
     metadata_status: String,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
-    sqlx::query("update mm_download_que set mdq_status = $1 where mdq_id = $2")
+    sqlx::query("update mm_metadata_download_que \
+        set mm_download_status = $1 where mm_download_guid = $2")
         .bind(metadata_status)
         .bind(metadata_download_uuid)
         .execute(&mut transaction)
@@ -142,8 +143,8 @@ pub async fn mk_lib_database_metadata_download_status_update(
 
 pub async fn mk_lib_database_metadata_download_count(
     pool: &sqlx::PgPool,
-) -> Result<i32, sqlx::Error> {
-    let row: (i32,) = sqlx::query_as("select count(*) from mm_download_que")
+) -> Result<i64, sqlx::Error> {
+    let row: (i64,) = sqlx::query_as("select count(*) from mm_metadata_download_que")
         .fetch_one(pool)
         .await?;
     Ok(row.0)

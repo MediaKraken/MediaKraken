@@ -26,12 +26,12 @@ pub async fn mk_lib_database_status_read(
 
 pub async fn mk_lib_database_option_status_read(
     pool: &sqlx::PgPool,
-) -> Result<Vec<PgRow>, sqlx::Error> {
+) -> Result<PgRow, sqlx::Error> {
     let rows = sqlx::query(
         "select mm_options_json, mm_status_json \
         from mm_options_and_status",
     )
-    .fetch_all(pool)
+    .fetch_one(pool)
     .await?;
     Ok(rows)
 }

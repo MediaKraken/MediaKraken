@@ -1,3 +1,4 @@
+use sqlx::Row;
 use rocket::response::Redirect;
 use rocket::serde::{json::Json, Deserialize, Serialize};
 use rocket::Request;
@@ -20,44 +21,64 @@ mod mk_lib_database_user;
 mod mk_lib_network;
 
 #[derive(Serialize)]
+struct TemplateHomeStreamListContext {
+    template_stream_user: String,
+    template_stream_media: String,
+    template_stream_device: String,
+    template_stream_time: String,
+}
+
+#[derive(Serialize)]
+struct TemplateHomeScanListContext {
+    template_scan_path: String,
+    template_scan_status: String,
+    template_scan_percentage: String,
+}
+
+#[derive(Serialize)]
 struct TemplateHomeContext {
     template_data_server_info_server_name: String,
-    template_data_server_uptime: libc::timeval,
+    template_data_server_uptime: String,
     template_data_server_host_ip: String,
     template_data_server_info_server_ip_external: String,
     template_data_server_info_server_version: String,
-    template_data_count_media_files: i32,
-    template_data_count_matched_media: i32,
-    template_data_count_meta_fetch: i32,
+    template_data_count_media_files: i64,
+    template_data_count_matched_media: i64,
+    template_data_count_meta_fetch: i64,
     template_data_count_streamed_media: i32,
-    template_server_streams: vec![],
+    template_server_streams: Vec<TemplateHomeStreamListContext>,
     template_server_users: Vec<mk_lib_database_user::DBUserList>,
-    template_data_scan_info: vec![],
+    template_data_scan_info: Vec<TemplateHomeScanListContext>,
 }
 
-#[get("/admin_home")]
+#[get("/home")]
 pub async fn admin_home(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
-    let user_list = mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool)
+    let user_list = mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool, 0, 9999)
         .await
         .unwrap();
     let option_status_row =
         mk_lib_database_option_status::mk_lib_database_option_status_read(&sqlx_pool)
             .await
             .unwrap();
-    let option_json = option_status_row.get("mm_options_json");
-    let status_json = option_status_row.get("mm_status_json");
+    let option_json: serde_json::Value = option_status_row.get("mm_options_json");
+    let status_json: serde_json::Value = option_status_row.get("mm_status_json");
+    let boot_seconds: libc::timeval = sys_info::boottime().unwrap();
+    let boot_duration = chrono::Duration::seconds(i64::from(boot_seconds.tv_sec));
+    let external_ip = mk_lib_network::mk_data_from_url(
+        "https://myexternalip.com/raw".to_string(),
+    )
+    .await.unwrap();
+    let mut server_streams = Vec::new();
+    let mut server_scans = Vec::new();
     Template::render(
         "bss_admin/bss_admin_home",
         &TemplateHomeContext {
             template_data_server_info_server_name: option_json["MediaKrakenServer"]["Server Name"]
                 .to_string(),
             // following boottime only compiles #[cfg(not(windows))] in this case is fine
-            template_data_server_uptime: sys_info::boottime().unwrap(),
+            template_data_server_uptime: format!("{:02}:{:02}:{:02}", boot_duration.num_hours(), boot_duration.num_minutes() % 60, boot_duration.num_seconds() % 60),
             template_data_server_host_ip: "255.255.255.255".to_string(),
-            template_data_server_info_server_ip_external: mk_lib_network::mk_data_from_url(
-                "https://myexternalip.com/raw",
-            )
-            .await,
+            template_data_server_info_server_ip_external: external_ip,
             template_data_server_info_server_version: "Fake Version".to_string(),
             template_data_count_media_files:
                 mk_lib_database_media::mk_lib_database_media_known_count(&sqlx_pool)
@@ -74,9 +95,9 @@ pub async fn admin_home(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser
                 .await
                 .unwrap(),
             template_data_count_streamed_media: 0,
-            template_server_streams: vec![],
+            template_server_streams: server_streams,
             template_server_users: user_list,
-            template_data_scan_info: vec![],
+            template_data_scan_info: server_scans,
         },
     )
 }

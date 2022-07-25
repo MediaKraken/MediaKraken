@@ -5,7 +5,7 @@ use rocket::Request;
 use rocket_auth::{AdminUser, Auth, Error, Login, Signup, Users};
 use rocket_dyn_templates::{tera::Tera, Template};
 
-#[get("/admin_torrent")]
+#[get("/torrent")]
 pub async fn admin_torrent(user: AdminUser) -> Template {
     Template::render(
         "bss_admin/bss_admin_torrent",

@@ -16,10 +16,10 @@ struct TemplateDatabaseContext {
     template_data_db_version: String,
     template_data_db_size: Vec<mk_lib_database_postgresql::PGTableSize>,
     template_data_db_count: Vec<mk_lib_database_postgresql::PGTableRows>,
-    template_data_workers: String,
+    template_data_db_workers: String,
 }
 
-#[get("/admin_database")]
+#[get("/database")]
 pub async fn admin_database(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
     let pg_version = mk_lib_database_version::mk_lib_database_postgresql_version(&sqlx_pool)
         .await
@@ -39,7 +39,7 @@ pub async fn admin_database(sqlx_pool: &rocket::State<sqlx::PgPool>, user: Admin
             template_data_db_version: pg_version,
             template_data_db_size: pg_table_size,
             template_data_db_count: pg_table_row_count,
-            template_data_workers: pg_worker_count,
+            template_data_db_workers: pg_worker_count,
         },
     )
 }

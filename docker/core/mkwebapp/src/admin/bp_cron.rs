@@ -12,7 +12,7 @@ struct TemplateCronContext<> {
     template_data: Vec<mk_lib_database_cron::DBCronList>,
 }
 
-#[get("/admin_cron")]
+#[get("/cron")]
 pub async fn admin_cron(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
     let cron_list = mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool).await.unwrap();
     Template::render("bss_admin/bss_admin_cron", &TemplateCronContext {
@@ -20,20 +20,12 @@ pub async fn admin_cron(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser
     })
 }
 
+#[post("/cron_delete/<guid>")]
+pub async fn admin_cron_delete(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser, guid: rocket::serde::uuid::Uuid) -> Template {
+    mk_lib_database_cron::mk_lib_database_cron_delete(&sqlx_pool, guid).await.unwrap();
+}
+
 /*
-
-@blueprint_admin_cron.route('/admin_cron_delete', methods=["POST"])
-@common_global.auth.login_required
-pub async fn url_bp_admin_cron_delete(request):
-    """
-    Delete action 'page'
-    """
-    db_connection = await request.app.db_pool.acquire()
-    await request.app.db_functions.db_cron_delete(request.form['id'], db_connection=db_connection)
-    await request.app.db_pool.release(db_connection)
-    return json.dumps({'status': 'OK'})
-
-
 @blueprint_admin_cron.route('/admin_cron_edit/<guid>', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_admin/bss_admin_cron_edit.html')
 @common_global.auth.login_required
@@ -55,7 +47,7 @@ pub async fn url_bp_admin_cron_edit(request, guid):
     }
 
 
-@blueprint_admin_cron.route('/admin_cron_run/<guid>', methods=['GET', 'POST'])
+@blueprint_admin_cron.route('/cron_run/<guid>', methods=['GET', 'POST'])
 @common_global.auth.login_required(user_keyword='user')
 pub async fn url_bp_admin_cron_run(request, user, guid):
     """
