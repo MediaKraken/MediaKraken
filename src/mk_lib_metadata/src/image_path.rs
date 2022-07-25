@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use rand::{thread_rng, Rng};
 
 pub async fn meta_image_file_path(
