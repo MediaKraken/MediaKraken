@@ -86,7 +86,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         )
         .await;
         let mut media_path: PathBuf;
-        let mut scan_path: bool = true;
         // shouldn't need to care  let unc_slice = &row_data.get("mm_media_dir_path")[..1];
         // obviously this would mean we mount unc to below as well when defining libraries
         // make sure the path still exists
@@ -100,11 +99,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 format!("Library path not found: {}", row_data.mm_media_dir_path),
                 true,
             )
-            .await;
-            scan_path = false;
-        }
-
-        if scan_path == true {
+            .await
+            .unwrap();
+        } else {
             // verify the directory inodes has changed
             let metadata = fs::metadata(&media_path)?;
             let last_modified = metadata.modified()?.elapsed()?.as_secs();
@@ -130,7 +127,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     &sqlx_pool,
                     row_data.mm_media_dir_guid,
                 )
-                .await;
+                .await
+                .unwrap();
                 mk_lib_database_library::mk_lib_database_library_path_status_update(
                     &sqlx_pool,
                     row_data.mm_media_dir_guid,
@@ -138,14 +136,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 )
                 .await
                 .unwrap();
-                let file_data =
-                    mk_lib_file::mk_directory_walk(media_path.display().to_string())
-                        .await
-                        .unwrap();
+                let file_data = mk_lib_file::mk_directory_walk(media_path.display().to_string())
+                    .await
+                    .unwrap();
                 let total_file_in_dir: u64 = file_data.len() as u64;
                 let mut total_scanned: u64 = 0;
                 let mut total_files: u64 = 0;
-                for file_name in file_data.iter() {
+                for mut file_name in file_data.iter() {
                     if mk_lib_database_library::mk_lib_database_library_file_exists(
                         &sqlx_pool, file_name,
                     )
@@ -304,11 +301,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                 }
                                             }
                                             // flip around slashes for smb paths
-                                            if file_name == "\\" {
-                                                let file_name = file_name
-                                                    .replace("\\\\", "smb://guest:\"\"@")
-                                                    .replace("\\", "/");
-                                            }
+                                            // if file_name == "\\" {
+                                            //     file_name = &file_name
+                                            //         .replace("\\\\", "smb://guest:\"\"@")
+                                            //         .replace("\\", "/");
+                                            // }
                                             // create media_json data
                                             let media_json =
                                                 json!({ "Added": Utc::now().to_string() });
@@ -321,15 +318,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                 None,
                                                 json!({}),
                                                 media_json,
-                                            );
+                                            )
+                                            .await
+                                            .unwrap();
                                             // verify ffprobe and bif should run on the data
-                                            if ffprobe_bif_data == true && mk_lib_common_media_extension::MEDIA_EXTENSION_SKIP_FFMPEG.contains(&file_extension) == false
+                                            if mk_lib_common_media_extension::MEDIA_EXTENSION_SKIP_FFMPEG.contains(&file_extension) == false
                                                 && mk_lib_common_media_extension::MEDIA_EXTENSION.contains(&file_extension) {
                                                 // Send a message so ffprobe runs
                                                 rabbit_exchange.publish(Publish::with_properties(json!({"Type": "FFProbe", "Media UUID": media_id, "Media Path": file_name}).to_string().as_bytes(),
                                                                                                  "mk_ffmpeg".to_string(),
                                                                                                  AmqpProperties::default().with_delivery_mode(2).with_content_type("text/plain".to_string())))?;
-                                                if original_media_class != mk_lib_common_enum_media_type::DLMediaType::MUSIC {
+                                                if ffprobe_bif_data == true && original_media_class != mk_lib_common_enum_media_type::DLMediaType::MUSIC {
                                                     // Send a message so roku thumbnail is generated
                                                     rabbit_exchange.publish(Publish::with_properties(json!({"Type": "Roku", "Media UUID": media_id, "Media Path": file_name}).to_string().as_bytes(),
                                                                                                      "mk_ffmpeg".to_string(),
@@ -344,7 +343,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                                         new_class_type_uuid,
                                                                                                                                         Uuid::new_v4(),
                                                                                                                                         None,
-                                                                                                                                        String::new()).await;
+                                                                                                                                        String::new()).await.unwrap();
                                             }
                                         }
                                     }
@@ -357,7 +356,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                             json!({"Status": format!("File scan: {:?}/{:?}",
                                                                                                 total_scanned.to_formatted_string(&Locale::en),
                                                                                                      total_file_in_dir.to_formatted_string(&Locale::en)),
-                                                                                           "Pct": (total_scanned / total_file_in_dir) * 100})).await;
+                                                                                           "Pct": (total_scanned / total_file_in_dir) * 100})).await.unwrap();
                     }
                 }
                 // end of for loop for each file in library
@@ -366,7 +365,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     &sqlx_pool,
                     row_data.mm_media_dir_guid,
                     json!({"Status": "File scan complete", "Pct": 100}),
-                );
+                )
+                .await
+                .unwrap();
                 if total_files > 0 {
                     // add notification to admin status page
                     mk_lib_database_notification::mk_lib_database_notification_insert(
@@ -378,14 +379,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         ),
                         true,
                     )
-                    .await;
+                    .await
+                    .unwrap();
                 }
             }
         }
     }
 
     // close rabbitmq
-    rabbit_connection.close();
+    rabbit_connection.close().unwrap();
 
     mk_lib_logging::mk_logging_post_elk("info", json!({"STOP": "STOP"}), LOGGING_INDEX_NAME).await;
     Ok(())
