@@ -96,6 +96,9 @@ STAGE_CORE_IMAGES = {
     # process metadata for mame and other game xml
     'mkmetadatamame': ('mkmetadatamame', 'busybox:1.35.0-uclibc', 'core'),
 
+    # "broadcast" multicast for discovery
+    'mkmulticast': ('mkmulticast', 'busybox:1.35.0-uclibc', 'core'),
+
     # nginx proxy for http to https and some bot blocking
     'mknginx': ('mknginx', 'alpine:3.13', 'core'),
 
@@ -131,6 +134,9 @@ STAGE_CORE_IMAGES = {
 
     # website via rust and rocket
     'mkwebapp': ('mkwebapp', 'busybox:1.35.0-uclibc', 'core'),
+
+    # website for nut
+    'mkwebnut': ('mkwebnut', 'ubuntu:18.04', 'core'),
 }
 
 STAGE_ONE_GAME_SERVERS = {

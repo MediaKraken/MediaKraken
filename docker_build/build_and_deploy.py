@@ -36,10 +36,11 @@ except ModuleNotFoundError:
 import docker_images_list
 import network_email
 
-// TODO proxy docker build -t mediakraken/mkbase38py3 --build-arg http_proxy="http://proxyip:8080"
+# TODO proxy docker build -t mediakraken/mkbase38py3 --build-arg http_proxy="http://proxyip:8080"
 #  --build-arg ALPMIRROR=dl-cdn.alpinelinux.org --build-arg PIPMIRROR=pypi.python.org .
 
-parser = argparse.ArgumentParser(description='This program builds and deploys MediaKraken')
+parser = argparse.ArgumentParser(
+    description='This program builds and deploys MediaKraken')
 parser.add_argument('-b', '--base', required=False,
                     help='Base images only', action="store_true")
 # set args.image variable if entered - ex. ComposeMediaKrakenBaseFFMPEG
@@ -64,7 +65,8 @@ print('Argument List:', args)
 
 def build_email_push(build_group, email_subject, branch_tag, push_hub_image=False):
     if args.rebuild:
-        docker_no_cache = '--pull --no-cache'  # include pull to force update to new image
+        # include pull to force update to new image
+        docker_no_cache = '--pull --no-cache'
     else:
         docker_no_cache = ''
     for docker_images in build_group:
@@ -74,7 +76,7 @@ def build_email_push(build_group, email_subject, branch_tag, push_hub_image=Fals
                                   'MediaKraken/docker',
                                   build_group[docker_images][2],
                                   docker_images))
-            // TODO check for errors/warnings and stop if found
+            # TODO check for errors/warnings and stop if found
             # Let the mirror's be passed, if not used it will just throw a warning
             pid_build_proc = subprocess.Popen(shlex.split('docker build %s'
                                                           ' -t mediakraken/%s:%s'
