@@ -21,6 +21,7 @@ mod mk_lib_network_dlna;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // start logging
+    println!("Here 1");
     const LOGGING_INDEX_NAME: &str = "mkhardwarescanner";
     mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}), LOGGING_INDEX_NAME)
         .await;
@@ -34,8 +35,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     )
     .await;
 
+    println!("Here 2");
     // chromecast discover
-    mk_lib_hardware_chromecast::mk_hardware_chromecast_discover().await;
+    mk_lib_hardware_chromecast::mk_hardware_chromecast_discover().await.unwrap();
     mk_lib_logging::mk_logging_post_elk(
         "info",
         json!({"HWScan": "After Chromcast"}),
@@ -56,6 +58,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     )
     .await;
 
+    println!("Here 3");
     // dlna devices
     mk_lib_network_dlna::mk_lib_network_dlna_discover().await;
     mk_lib_logging::mk_logging_post_elk(
@@ -108,8 +111,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     )
     .await;
 
+    println!("Here 4");
     // phillips hue hub discover
-    mk_lib_hardware_phue::mk_hardware_phue_discover().await;
+    mk_lib_hardware_phue::mk_hardware_phue_discover().await.unwrap();
     mk_lib_logging::mk_logging_post_elk(
         "info",
         json!({"HWScan": "After PHue"}),

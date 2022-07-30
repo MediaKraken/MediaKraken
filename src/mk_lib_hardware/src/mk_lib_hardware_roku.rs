@@ -3,38 +3,51 @@
 // https://github.com/RoseSecurity/Abusing-Roku-APIs
 // http://sdkdocs.roku.com/display/sdkdoc/External+Control+Guide
 
-/*
-def com_roku_network_command(roku_addr, roku_port, roku_command, roku_command_seconds):
-    """
-    Send command to roku device
-    """
-    # urllib2.post('http://' + self.roku_address + "/keypress/" + roku_command)
-    if roku_command_seconds > 0:
-        urllib.request.urlopen(
+#[path = "mk_lib_network.rs"]
+mod mk_lib_network;
+
+pub async fn mk_lib_hardware_roku_discover() {
+
+}
+
+pub async fn mk_lib_hardware_roku_command(roku_addr: String,
+                                            roku_port: i8,
+                                            roku_command: String,
+                                            roku_command_seconds i8) {
+    let roku_url = format!("http://{}:{}/", roku_addr, roku_port);
+    let mut request_url: String = String::new();
+    let mut request_json: serde_json::json = json!({});
+    if roku_command_seconds > 0 {
+        /*
+                urllib.request.urlopen(
             roku_addr + ':' + roku_port + '/keydown/' + roku_command)
         time.sleep(roku_command_seconds)
         response = urllib.request.urlopen(
             roku_addr + ':' + roku_port + '/keyup/' + roku_command)
-    else:
-        response = urllib.request.urlopen(
-            roku_addr + ':' + roku_port + '/keypress/' + roku_command)
-    return response
+ */
+    }
+    else {
+        request_json = mk_lib_network::mk_data_from_url_to_json(
+            format!("{}keypress/{}", roku_url, roku_command)).await.unwrap();
+    }
+    Ok(request_json)
+}
 
+pub async fn mk_lib_hardware_roku_app_list(roku_addr: String,
+    roku_port: i8) {
+        let request_json: serde_json::json = mk_lib_network::mk_data_from_url_to_json(
+            format!("{}:{}/query/apps", roku_addr, roku_port)).await.unwrap();
+    Ok(request_json)
+}
 
-def com_roku_network_app_query(roku_addr, roku_port):
-    """
-    Get list of apps installed
-    """
-    return urllib.request.urlopen(roku_addr + ':' + roku_port + '/query/apps')
+pub async fn mk_lib_hardware_roku_app_launch(roku_addr: String,
+    roku_port: i8, roku_app_id: String) {
+        let request_json: serde_json::json = mk_lib_network::mk_data_from_url_to_json(
+            format!("{}:{}/launch/{}", roku_addr, roku_port, roku_app_id)).await.unwrap();
+    Ok(request_json)
+}
 
-
-def com_roku_network_app_launch(roku_addr, roku_port, roku_app_id):
-    """
-    Launch app by id
-    """
-    return urllib.request.urlopen(roku_addr + ':' + roku_port + '/launch/' + roku_app_id)
-
-
+/*
 def com_roku_network_app_icon(roku_addr, roku_port, roku_app_id):
     """
     Grab app icon
