@@ -2,8 +2,9 @@
 
 use huelib::resource::sensor;
 use huelib::{bridge, Bridge};
+use serde_json::json;
 
-pub fn mk_hardware_phue_discover() -> Result<String> {
+pub async fn mk_hardware_phue_discover() -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let hub_ip_addresses = bridge::discover_nupnp().unwrap();
     for bridge_ip in hub_ip_addresses {
         println!("{}", bridge_ip);
@@ -13,4 +14,5 @@ pub fn mk_hardware_phue_discover() -> Result<String> {
         let lights = bridge.get_all_lights().unwrap();
         println!("{:?}", lights);
     }
+    Ok(json!({}))
 }

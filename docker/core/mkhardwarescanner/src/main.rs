@@ -4,7 +4,6 @@ use serde_json::json;
 use std::error::Error;
 //use onvif::discovery;
 use futures_util::{pin_mut, stream::StreamExt};
-use std::net::IpAddr;
 use tokio::time::{sleep, Duration};
 
 #[path = "mk_lib_hardware_chromecast.rs"]
@@ -18,14 +17,6 @@ mod mk_lib_logging;
 
 #[path = "mk_lib_network_dlna.rs"]
 mod mk_lib_network_dlna;
-
-fn to_ip_addr(record: &Record) -> Option<IpAddr> {
-    match record.kind {
-        RecordKind::A(addr) => Some(addr.into()),
-        RecordKind::AAAA(addr) => Some(addr.into()),
-        _ => None,
-    }
-}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -44,7 +35,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     .await;
 
     // chromecast discover
-    mk_lib_hardware_chromecast::mk_hardware_chromecast_discover();
+    mk_lib_hardware_chromecast::mk_hardware_chromecast_discover().await;
     mk_lib_logging::mk_logging_post_elk(
         "info",
         json!({"HWScan": "After Chromcast"}),
@@ -66,7 +57,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     .await;
 
     // dlna devices
-    mk_lib_network_dlna::mk_lib_network_dlna_discover();
+    mk_lib_network_dlna::mk_lib_network_dlna_discover().await;
     mk_lib_logging::mk_logging_post_elk(
         "info",
         json!({"HWScan": "After DLNA"}),
@@ -118,7 +109,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     .await;
 
     // phillips hue hub discover
-    mk_lib_hardware_phue::mk_hardware_phue_discover();
+    mk_lib_hardware_phue::mk_hardware_phue_discover().await;
     mk_lib_logging::mk_logging_post_elk(
         "info",
         json!({"HWScan": "After PHue"}),
