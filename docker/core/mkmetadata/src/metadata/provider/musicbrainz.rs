@@ -1,5 +1,10 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+// https://github.com/oknozor/musicbrainz_rs
+
+use musicbrainz_rs::entity::artist;
+use musicbrainz_rs::entity::artist::*;
+use musicbrainz_rs::prelude::*;
 use std::error::Error;
 
 #[path = "../../mk_lib_network.rs"]

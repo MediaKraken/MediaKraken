@@ -30,10 +30,14 @@ pub fn mk_file_is_hidden(entry: &DirEntry) -> bool {
 
 // "C:\\Users\\spoot\\Documents\\MediaKraken_Deployment\\source_rust\\bulk_themoviedb_netfetch"
 // TODO allow ext filters and such
+// .filter(|d| d.path().extension() == Some(OsStr::from_bytes(b"zip")))
 pub async fn mk_directory_walk(dir_path: String) -> Result<Vec<String>, Box<dyn Error>> {
     let mut file_list: Vec<String> = Vec::new();
     let walker = WalkDir::new(dir_path).into_iter();
-    for entry in walker.filter_entry(|e| !mk_file_is_hidden(e)) {
+    for entry in walker
+        .filter_entry(|e| !mk_file_is_hidden(e))
+        .filter_map(Result::ok)
+        .filter(|e| !e.file_type().is_dir()) {
         let entry = entry.unwrap();
         //println!("{}", entry.path().display());
         file_list.push(entry.path().display().to_string());
