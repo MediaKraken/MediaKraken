@@ -3,6 +3,7 @@
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
 use std::error::Error;
+use std::path::Path;
 
 #[path = "provider/giant_bomb.rs"]
 mod provider_giant_bomb;

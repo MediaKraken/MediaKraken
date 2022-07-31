@@ -50,20 +50,7 @@ pub async fn admin_library(
 }
 
 /*
-@blueprint_admin_library.route("/admin_library", methods=["GET", "POST"])
-@common_global.jinja_template.template('bss_admin/bss_admin_library.html')
-@common_global.auth.login_required
-pub async fn url_bp_admin_library(request):
-    """
-    List all media libraries
-    """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'lib': request.method})
     if request.method == 'POST':
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'lib': request.form})
         if "scan" in request.form:
             # submit the message
             common_network_pika.com_net_pika_send({'Type': 'Library Scan'},
@@ -71,38 +58,6 @@ pub async fn url_bp_admin_library(request):
                                                   exchange_name='mkque_ex',
                                                   route_key='mkque')
             // TODO request['flash']('Scheduled media scan.', 'success')
-            await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                             message_text={
-                                                                                 'stuff': 'scheduled media scan'})
-    db_connection = await request.app.db_pool.acquire()
-    page, offset = common_pagination_bootstrap.com_pagination_page_calc(request)
-    pagination = common_pagination_bootstrap.com_pagination_boot_html(page,
-                                                                      url='/admin/admin_library',
-                                                                      item_count=await request.app.db_functions.db_table_count(
-                                                                          table_name='mm_media_dir',
-                                                                          db_connection=db_connection),
-                                                                      client_items_per_page=
-                                                                      int(request.ctx.session[
-                                                                              'per_page']),
-                                                                      format_number=True)
-    return_media = []
-    for row_data in await request.app.db_functions.db_library_paths(offset,
-                                                                    int(request.ctx.session[
-                                                                            'per_page']),
-                                                                    db_connection):
-        return_media.append((row_data['mm_media_dir_guid'],
-                             row_data['mm_media_dir_path'],
-                             common_global.DLMediaType(row_data['mm_media_dir_class_type']).name,
-                             row_data['mm_media_dir_last_scanned'],
-                             ))
-    await request.app.db_pool.release(db_connection)
-    return {
-        'media_dir': return_media,
-        'pagination_bar': pagination,
-        'page': page,
-        'per_page': int(request.ctx.session['per_page'])
-    }
-
 
 @blueprint_admin_library.route('/admin_library_by_id', methods=['POST'])
 @common_global.auth.login_required
@@ -114,20 +69,6 @@ pub async fn url_bp_admin_library_by_id(request):
     return json.dumps({'Id': result['mm_media_dir_guid'],
                        'Path': result['mm_media_dir_path'],
                        'Media Class': result['mm_media_dir_class_type']})
-
-
-@blueprint_admin_library.route('/admin_library_delete', methods=["POST"])
-@common_global.auth.login_required
-pub async fn url_bp_admin_library_delete(request):
-    """
-    Delete library action 'page'
-    """
-    db_connection = await request.app.db_pool.acquire()
-    await request.app.db_functions.db_library_path_delete(request.form['id'],
-                                                          db_connection=db_connection)
-    await request.app.db_pool.release(db_connection)
-    return json.dumps({'status': 'OK'})
-
 
 @blueprint_admin_library.route("/admin_library_edit", methods=["GET", "POST"])
 @common_global.jinja_template.template('bss_admin/bss_admin_library_edit.html')

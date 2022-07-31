@@ -20,10 +20,10 @@ pub async fn admin_cron(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser
     })
 }
 
-#[post("/cron_delete/<guid>")]
-pub async fn admin_cron_delete(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser, guid: rocket::serde::uuid::Uuid) -> Template {
-    mk_lib_database_cron::mk_lib_database_cron_delete(&sqlx_pool, guid).await.unwrap();
-}
+// #[post("/cron_delete/<guid>")]
+// pub async fn admin_cron_delete(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser, guid: rocket::serde::uuid::Uuid) -> Template {
+//     mk_lib_database_cron::mk_lib_database_cron_delete(&sqlx_pool, guid).await.unwrap();
+// }
 
 /*
 @blueprint_admin_cron.route('/admin_cron_edit/<guid>', methods=['GET', 'POST'])

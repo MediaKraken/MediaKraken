@@ -1,5 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+// https://github.com/nn1ks/huelib-rs
+// huelib = "0.13.2"
+
 use huelib::resource::sensor;
 use huelib::{bridge, Bridge};
 use serde_json::json;

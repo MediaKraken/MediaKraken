@@ -3,12 +3,12 @@
 // https://github.com/vv9k/docker-api-rs
 // docker-api = { version = "0.9.1", features = ["swarm"] }
 
+use crate::rocket::futures::FutureExt;
+use crate::rocket::futures::StreamExt;
 use docker_api::api::ContainerListOpts;
 use docker_api::api::LogsOpts;
 use docker_api::api::ServiceListOpts;
 use docker_api::{conn::TtyChunk, Docker, Result};
-use crate::rocket::futures::StreamExt;
-use crate::rocket::futures::FutureExt;
 
 #[cfg(unix)]
 pub fn new_docker() -> Result<Docker> {
@@ -56,8 +56,7 @@ pub async fn mk_common_docker_container_logs(id: String) -> Result<Vec<String>> 
     let docker = new_docker()?;
     let mut logs_list: Vec<String> = Vec::new();
     let container = docker.containers().get(&id);
-    let logs_stream =
-        container.logs(&LogsOpts::builder().stdout(true).stderr(true).build());
+    let logs_stream = container.logs(&LogsOpts::builder().stdout(true).stderr(true).build());
     let logs: Vec<_> = logs_stream
         .map(|chunk| match chunk {
             Ok(chunk) => chunk.to_vec(),
@@ -119,8 +118,7 @@ pub async fn mk_common_docker_service_logs(service: String) -> Result<Vec<String
     let docker = new_docker()?;
     let mut logs_list: Vec<String> = Vec::new();
     let service = docker.services().get(&service);
-    let logs_stream =
-        service.logs(&LogsOpts::builder().stdout(true).stderr(true).build());
+    let logs_stream = service.logs(&LogsOpts::builder().stdout(true).stderr(true).build());
     let logs: Vec<_> = logs_stream
         .map(|chunk| match chunk {
             Ok(chunk) => chunk.to_vec(),
@@ -162,13 +160,15 @@ pub async fn mk_common_docker_volume_list() -> Result<Vec<String>> {
     Ok(logs_list)
 }
 
-pub async fn mk_common_docker_info() -> Result<Vec<String>> {
+pub async fn mk_common_docker_info() -> Result<serde_json::Value> {
     let docker = new_docker()?;
-    let mut logs_list: Vec<String> = Vec::new();
+    let mut logs_list: serde_json::Value = serde_json::json!({});
     match docker.info().await {
-        Ok(info) => println!("{:#?}", info),
+        Ok(info) => {
+            println!("{:#?}", info);
+            logs_list = serde_json::from_str(&format!("{:#?}", info)).unwrap();
+        }
         Err(e) => eprintln!("Error: {}", e),
     };
     Ok(logs_list)
 }
-
