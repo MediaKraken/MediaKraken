@@ -11,6 +11,10 @@ mod provider_giant_bomb;
 #[path = "provider/thegamesdb.rs"]
 mod mk_provider_thegamesdb;
 
+#[path = "../mk_lib_database_metadata_download_queue.rs"]
+mod mk_lib_database_metadata_download_queue;
+use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+
 #[path = "../mk_lib_database_metadata_game.rs"]
 mod mk_lib_database_metadata_game;
 
@@ -19,7 +23,7 @@ mod mk_lib_hash_sha1;
 
 pub async fn metadata_game_lookup(
     pool: &sqlx::PgPool,
-    download_data: PgRow,
+    download_data: DBDownloadQueueByProviderList,
 ) -> Result<Uuid, sqlx::Error> {
     let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
                                                // TODO remove the file extension

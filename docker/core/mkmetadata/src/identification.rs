@@ -36,13 +36,17 @@ mod metadata_tv;
 #[path = "mk_lib_database_metadata_game.rs"]
 mod mk_lib_database_metadata_game;
 
+#[path = "mk_lib_database_metadata_download_queue.rs"]
+mod mk_lib_database_metadata_download_queue;
+use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+
 pub async fn metadata_identification(
     pool: &sqlx::PgPool,
-    dl_row: sqlx::postgres::PgRow,
+    dl_row: DBDownloadQueueByProviderList,
     guessit_data: Metadata,
 ) -> Result<uuid::Uuid, Box<dyn Error>> {
     let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
-    match dl_row.get("mdq_que_type") {
+    match dl_row.mm_download_que_type {
         mk_lib_common_enum_media_type::DLMediaType::ADULT => {
             metadata_uuid = metadata_adult::metadata_adult_lookup(&pool, dl_row, guessit_data)
                 .await

@@ -11,6 +11,10 @@ mod provider_pornhub;
 #[path = "provider/tmdb.rs"]
 mod provider_tmdb;
 
+#[path = "../mk_lib_database_metadata_download_queue.rs"]
+mod mk_lib_database_metadata_download_queue;
+use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+
 pub struct MetadataAdultLastLookup {
     metadata_last_id: Uuid,
     metadata_last_imdb: String,
@@ -19,7 +23,7 @@ pub struct MetadataAdultLastLookup {
 
 pub async fn metadata_adult_lookup(
     pool: &sqlx::PgPool,
-    download_data: PgRow,
+    download_data: DBDownloadQueueByProviderList,
     file_name: Metadata,
 ) -> Result<Uuid, sqlx::Error> {
     // don't bother checking title/year as the main_server_metadata_api_worker does it already

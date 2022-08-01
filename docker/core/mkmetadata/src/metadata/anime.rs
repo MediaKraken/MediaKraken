@@ -11,6 +11,10 @@ mod provider_anidb;
 #[path = "provider/tmdb.rs"]
 mod provider_tmdb;
 
+#[path = "../mk_lib_database_metadata_download_queue.rs"]
+mod mk_lib_database_metadata_download_queue;
+use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+
 pub struct MetadataAnimeLastLookup {
     metadata_last_id: Uuid,
     metadata_last_imdb: String,
@@ -20,7 +24,7 @@ pub struct MetadataAnimeLastLookup {
 
 pub async fn metadata_anime_lookup(
     pool: &sqlx::PgPool,
-    download_data: PgRow,
+    download_data: DBDownloadQueueByProviderList,
     file_name: Metadata,
 ) -> Result<Uuid, sqlx::Error> {
     let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later

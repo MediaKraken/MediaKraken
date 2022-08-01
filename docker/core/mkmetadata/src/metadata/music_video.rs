@@ -4,6 +4,10 @@ use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
 use std::error::Error;
 
+#[path = "../mk_lib_database_metadata_download_queue.rs"]
+mod mk_lib_database_metadata_download_queue;
+use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+
 #[path = "provider/imvdb.rs"]
 mod provider_imvdb;
 
@@ -15,7 +19,7 @@ pub struct MetadataMusicVideoLastLookup {
 
 pub async fn metadata_music_video_lookup(
     pool: &sqlx::PgPool,
-    file_data: PgRow,
+    file_data: DBDownloadQueueByProviderList,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
     Ok(metadata_uuid)
