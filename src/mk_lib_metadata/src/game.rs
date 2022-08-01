@@ -30,13 +30,13 @@ pub async fn metadata_game_lookup(
     metadata_uuid =
         mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_name_and_system(
             &pool,
-            Path::new(download_data.mdq_path).file_name(),
+            Path::new(&download_data.mm_download_path).file_name(),
             0,
         )
         .await
         .unwrap();
     if metadata_uuid == uuid::Uuid::nil() {
-        let sha1_hash = mk_lib_hash_sha1::mk_file_hash_sha1(download_data.get("mdq_path")).unwrap();
+        let sha1_hash = mk_lib_hash_sha1::mk_file_hash_sha1(&download_data.mm_download_path).unwrap();
         metadata_uuid =
             mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(&pool, sha1_hash)
                 .await
