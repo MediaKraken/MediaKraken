@@ -20,7 +20,7 @@ mod mk_lib_database_metadata_person;
 #[path = "../../mk_lib_database_metadata_tv.rs"]
 mod mk_lib_database_metadata_tv;
 
-pub async fn provider_tmdb_movie_fetch(pool: &sqlx::PgPool, tmdb_id: i32, metadata_uuid: Uuid) {
+pub async fn provider_tmdb_movie_fetch_by_id(pool: &sqlx::PgPool, tmdb_id: i32, metadata_uuid: Uuid) {
     // fetch and save json data via tmdb id
     let result_json = provider_tmdb_movie_fetch_by_id(tmdb_id).await.unwrap();
     let mut series_id: i32;

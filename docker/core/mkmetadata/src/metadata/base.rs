@@ -32,6 +32,11 @@ mod provider_isbndb;
 mod provider_musicbrainz;
 #[path = "provider/televisiontunes.rs"]
 mod provider_televisiontunes;
+#[path = "provider/tmdb.rs"]
+mod provider_tmdb;
+
+#[path = "../mk_lib_common_enum_media_type.rs"]
+mod mk_lib_common_enum_media_type;
 
 #[path = "../mk_lib_database_metadata_download_queue.rs"]
 mod mk_lib_database_metadata_download_queue;
@@ -88,8 +93,8 @@ pub async fn metadata_search(
             download_data.mm_download_path,
         )
         .await
-        .unwrap()["title"]
-            .to_string();
+        .unwrap()
+        .to_string();
         if metadata_uuid == uuid::Uuid::nil() {
             if match_result == None {
                 // do lookup halt as we'll start all movies in tmdb
@@ -108,7 +113,7 @@ pub async fn metadata_search(
     } else if provider_name == "imdb" {
         lookup_halt = true;
     } else if provider_name == "imvdb" {
-        (metadata_uuid, match_result) = metadata_music_video::metadata_music_video_lookup(
+        metadata_uuid = metadata_music_video::metadata_music_video_lookup(
             &pool,
             download_data.mm_download_path,
         )
@@ -122,7 +127,7 @@ pub async fn metadata_search(
             }
         }
     } else if provider_name == "isbndb" {
-        (metadata_uuid, match_result) = provider_isbndb::metadata_book_search_isbndb(
+        metadata_uuid = provider_isbndb::metadata_book_search_isbndb(
             &pool,
             download_data.mm_download_provider_id,
         )
@@ -134,7 +139,7 @@ pub async fn metadata_search(
     } else if provider_name == "lastfm" {
         lookup_halt = true;
     } else if provider_name == "musicbrainz" {
-        (metadata_uuid, match_result) = metadata_music::metadata_music_lookup(&pool, download_data)
+        metadata_uuid = metadata_music::metadata_music_lookup(&pool, download_data)
             .await
             .unwrap();
         if metadata_uuid == uuid::Uuid::nil() {
@@ -152,7 +157,7 @@ pub async fn metadata_search(
         // if download succeeds remove dl
         // TODO....handle list return for title?
         metadata_uuid = provider_televisiontunes::provider_televisiontunes_theme_fetch(
-            download_data["Path"]["title"].to_string(),
+            download_data.mm_download_path,
             "TODO Fake Path".to_string(),
         )
         .await
@@ -174,7 +179,7 @@ pub async fn metadata_search(
     } else if provider_name == "thegamesdb" {
         lookup_halt = true;
     } else if provider_name == "thesportsdb" {
-        (metadata_uuid, match_result) =
+        metadata_uuid =
             metadata_sports::metadata_sports_lookup(&pool, download_data)
                 .await
                 .unwrap();
@@ -260,28 +265,39 @@ pub async fn metadata_fetch(
         )
         .await
         .unwrap();
+    } else if provider_name == "themoviedb" {
+        if download_data.mm_download_que_type == mk_lib_common_enum_media_type::DLMediaType::PERSON
+        {
+            provider_tmdb::provider_tmdb_person_fetch_by_id(
+                pool,
+                provider_name,
+                download_data,
+            );
+        } else if download_data.mm_download_que_type
+            == mk_lib_common_enum_media_type::DLMediaType::MOVIE
+        {
+            // removing the imdb check.....as com_tmdb_metadata_by_id converts it
+            provider_tmdb::provider_tmdb_movie_fetch_by_id(
+                pool,
+                download_data.mm_download_provider_id,
+                download_data.mm_download_new_uuid,
+            );
+        } else if download_data.mm_download_que_type
+            == mk_lib_common_enum_media_type::DLMediaType::TV
+        {
+            provider_tmdb::provider_tmdb_tv_fetch_by_id(
+                pool,
+                download_data.mm_download_provider_id,
+                download_data.mm_download_new_uuid,
+            );
+        }
     }
+    mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+        pool, download_data.mm_download_guid,
+    )
+    .await;
     Ok(())
 }
-/*
-    else if provider_name == "themoviedb":
-        if download_data["mdq_que_type"] == common_global.DLMediaType.Person.value:
-            metadata_provider_themoviedb.metadata_fetch_tmdb_person(
-                db_connection, provider_name, download_data);
-        else if download_data["mdq_que_type"] == common_global.DLMediaType.Movie.value:
-            // removing the imdb check.....as com_tmdb_metadata_by_id converts it
-            metadata_provider_themoviedb.movie_fetch_save_tmdb(db_connection,
-                                                                     download_data[
-                                                                         "mdq_provider_id"],
-                                                                     download_data[
-                                                                         "mdq_new_uuid"]);
-        else if download_data["mdq_que_type"] == common_global.DLMediaType.TV.value:
-            metadata_tv_tmdb.tv_fetch_save_tmdb(db_connection,
-                                                download_data["mdq_provider_id"],
-                                                download_data["mdq_new_uuid"]);
-    await db_connection.db_download_delete(download_data["mdq_id"]);
-    await db_connection.db_commit();
-*/
 
 pub async fn metadata_castcrew(
     pool: &sqlx::PgPool,

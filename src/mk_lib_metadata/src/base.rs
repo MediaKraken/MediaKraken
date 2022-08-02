@@ -32,8 +32,10 @@ mod provider_isbndb;
 mod provider_musicbrainz;
 #[path = "provider/televisiontunes.rs"]
 mod provider_televisiontunes;
+#[path = "provider/tmdb.rs"]
+mod provider_tmdb;
 
-#[path = "mk_lib_common_enum_media_type.rs"]
+#[path = "../mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;
 
 #[path = "../mk_lib_database_metadata_download_queue.rs"]
@@ -137,7 +139,7 @@ pub async fn metadata_search(
     } else if provider_name == "lastfm" {
         lookup_halt = true;
     } else if provider_name == "musicbrainz" {
-        (metadata_uuid, match_result) = metadata_music::metadata_music_lookup(&pool, download_data)
+        metadata_uuid = metadata_music::metadata_music_lookup(&pool, download_data)
             .await
             .unwrap();
         if metadata_uuid == uuid::Uuid::nil() {
@@ -177,7 +179,7 @@ pub async fn metadata_search(
     } else if provider_name == "thegamesdb" {
         lookup_halt = true;
     } else if provider_name == "thesportsdb" {
-        (metadata_uuid, match_result) =
+        metadata_uuid =
             metadata_sports::metadata_sports_lookup(&pool, download_data)
                 .await
                 .unwrap();
@@ -266,8 +268,8 @@ pub async fn metadata_fetch(
     } else if provider_name == "themoviedb" {
         if download_data.mm_download_que_type == mk_lib_common_enum_media_type::DLMediaType::PERSON
         {
-            metadata_provider_themoviedb.metadata_fetch_tmdb_person(
-                db_connection,
+            provider_tmdb::provider_tmdb_person_fetch_by_id(
+                pool,
                 provider_name,
                 download_data,
             );
@@ -275,23 +277,23 @@ pub async fn metadata_fetch(
             == mk_lib_common_enum_media_type::DLMediaType::MOVIE
         {
             // removing the imdb check.....as com_tmdb_metadata_by_id converts it
-            metadata_provider_themoviedb.metadata_fetch_tmdb_movie(
-                db_connection,
+            provider_tmdb::provider_tmdb_movie_fetch_by_id(
+                pool,
                 download_data.mm_download_provider_id,
                 download_data.mm_download_new_uuid,
             );
         } else if download_data.mm_download_que_type
             == mk_lib_common_enum_media_type::DLMediaType::TV
         {
-            metadata_provider_themoviedb.metadata_fetch_tmdb_tv(
-                db_connection,
+            provider_tmdb::provider_tmdb_tv_fetch_by_id(
+                pool,
                 download_data.mm_download_provider_id,
                 download_data.mm_download_new_uuid,
             );
         }
     }
     mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
-        download_data.mm_download_guid,
+        pool, download_data.mm_download_guid,
     )
     .await;
     Ok(())
