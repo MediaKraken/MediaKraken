@@ -1,11 +1,16 @@
-use rocket::Request;
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera};
-use rocket_auth::{Users, Error, Auth, Signup, Login, User};
+use rocket::Request;
+use rocket_auth::{Auth, Error, Login, Signup, User, Users};
+use rocket_dyn_templates::{tera::Tera, Template};
 
 #[get("/internet/twitchtv")]
 pub async fn user_inter_twitchtv(user: User) -> Template {
-    Template::render("bss_user/internet/bss_user_internet_twitch", tera::Context::new().into_json())
+    Template::render(
+        "bss_user/internet/bss_user_internet_twitch",
+        tera::Context::new().into_json(),
+    )
 }
 
 /*

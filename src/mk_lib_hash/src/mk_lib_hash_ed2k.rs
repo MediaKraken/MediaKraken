@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 // https://github.com/runfalk/ed2k-rs
 
 pub fn mk_file_hash_ed2k(file_to_read: &str) -> Result<String, Box<dyn Error>> {

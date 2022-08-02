@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use rocket::request::{self, FromRequest};
 use rocket::serde::json;
 use rocket::Request;
@@ -37,7 +39,7 @@ pub async fn admin_user(
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
         total_pages,
         page,
-        "/admin/admin_user".to_string(),
+        "/admin/user".to_string(),
     )
     .await
     .unwrap();
