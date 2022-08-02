@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 // https://www.gutenberg.org/
 
 // feed of new books

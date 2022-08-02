@@ -1,29 +1,34 @@
-use rocket::Request;
-use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera};
-use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
-use paginator::{Paginator, PageItem};
-use core::fmt::Write;
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use chrono::prelude::*;
-use rocket::serde::{Serialize, Deserialize, json::Json};
+use core::fmt::Write;
+use paginator::{PageItem, Paginator};
+use rocket::response::Redirect;
+use rocket::serde::{json::Json, Deserialize, Serialize};
+use rocket::Request;
+use rocket_auth::{AdminUser, Auth, Error, Login, Signup, Users};
+use rocket_dyn_templates::{tera::Tera, Template};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct BackupList {
-	mm_backup_name: String,
-	mm_backup_description: String,
-	mm_backup_start_time: DateTime<Utc>,
-	mm_backup_end_time: DateTime<Utc>,
+    mm_backup_name: String,
+    mm_backup_description: String,
+    mm_backup_start_time: DateTime<Utc>,
+    mm_backup_end_time: DateTime<Utc>,
     mm_backup_json: serde_json::Value,
 }
 
 #[derive(Serialize)]
-struct TemplateBackupContext<> {
-    template_data: Vec<BackupList>
+struct TemplateBackupContext {
+    template_data: Vec<BackupList>,
 }
 
 #[get("/backup")]
 pub async fn admin_backup(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
-    Template::render("bss_admin/bss_admin_backup", tera::Context::new().into_json())
+    Template::render(
+        "bss_admin/bss_admin_backup",
+        tera::Context::new().into_json(),
+    )
 }
 
 /*

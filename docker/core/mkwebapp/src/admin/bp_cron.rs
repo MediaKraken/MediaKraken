@@ -1,23 +1,30 @@
-use rocket::Request;
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera};
-use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
-use rocket::serde::{Serialize, Deserialize, json::Json};
+use rocket::serde::{json::Json, Deserialize, Serialize};
+use rocket::Request;
+use rocket_auth::{AdminUser, Auth, Error, Login, Signup, Users};
+use rocket_dyn_templates::{tera::Tera, Template};
 
 #[path = "../mk_lib_database_cron.rs"]
 mod mk_lib_database_cron;
 
 #[derive(Serialize)]
-struct TemplateCronContext<> {
+struct TemplateCronContext {
     template_data: Vec<mk_lib_database_cron::DBCronList>,
 }
 
 #[get("/cron")]
 pub async fn admin_cron(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
-    let cron_list = mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool).await.unwrap();
-    Template::render("bss_admin/bss_admin_cron", &TemplateCronContext {
-        template_data: cron_list,
-    })
+    let cron_list = mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool)
+        .await
+        .unwrap();
+    Template::render(
+        "bss_admin/bss_admin_cron",
+        &TemplateCronContext {
+            template_data: cron_list,
+        },
+    )
 }
 
 // #[post("/cron_delete/<guid>")]

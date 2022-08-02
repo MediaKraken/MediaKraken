@@ -1,3 +1,5 @@
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use rocket::response::Redirect;
 use rocket::Request;
 use rocket_dyn_templates::{tera::Tera, Template};

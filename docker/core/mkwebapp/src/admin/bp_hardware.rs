@@ -1,11 +1,16 @@
-use rocket::Request;
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use rocket::response::Redirect;
-use rocket_dyn_templates::{Template, tera::Tera};
-use rocket_auth::{Users, Error, Auth, Signup, Login, AdminUser};
+use rocket::Request;
+use rocket_auth::{AdminUser, Auth, Error, Login, Signup, Users};
+use rocket_dyn_templates::{tera::Tera, Template};
 
 #[get("/hardware")]
 pub async fn admin_hardware(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
-    Template::render("bss_admin/bss_admin_hardware", tera::Context::new().into_json())
+    Template::render(
+        "bss_admin/bss_admin_hardware",
+        tera::Context::new().into_json(),
+    )
 }
 
 /*

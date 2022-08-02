@@ -1,9 +1,11 @@
-use sqlx::Row;
+#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+
 use rocket::response::Redirect;
 use rocket::serde::{json::Json, Deserialize, Serialize};
 use rocket::Request;
 use rocket_auth::{AdminUser, Auth, Error, Login, Signup, Users};
 use rocket_dyn_templates::{tera::Tera, Template};
+use sqlx::Row;
 
 #[path = "../mk_lib_database_media.rs"]
 mod mk_lib_database_media;
@@ -64,10 +66,9 @@ pub async fn admin_home(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser
     let status_json: serde_json::Value = option_status_row.get("mm_status_json");
     let boot_seconds: libc::timeval = sys_info::boottime().unwrap();
     let boot_duration = chrono::Duration::seconds(i64::from(boot_seconds.tv_sec));
-    let external_ip = mk_lib_network::mk_data_from_url(
-        "https://myexternalip.com/raw".to_string(),
-    )
-    .await.unwrap();
+    let external_ip = mk_lib_network::mk_data_from_url("https://myexternalip.com/raw".to_string())
+        .await
+        .unwrap();
     let mut server_streams = Vec::new();
     let mut server_scans = Vec::new();
     Template::render(
@@ -76,7 +77,12 @@ pub async fn admin_home(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser
             template_data_server_info_server_name: option_json["MediaKrakenServer"]["Server Name"]
                 .to_string(),
             // following boottime only compiles #[cfg(not(windows))] in this case is fine
-            template_data_server_uptime: format!("{:02}:{:02}:{:02}", boot_duration.num_hours(), boot_duration.num_minutes() % 60, boot_duration.num_seconds() % 60),
+            template_data_server_uptime: format!(
+                "{:02}:{:02}:{:02}",
+                boot_duration.num_hours(),
+                boot_duration.num_minutes() % 60,
+                boot_duration.num_seconds() % 60
+            ),
             template_data_server_host_ip: "255.255.255.255".to_string(),
             template_data_server_info_server_ip_external: external_ip,
             template_data_server_info_server_version: "Fake Version".to_string(),
