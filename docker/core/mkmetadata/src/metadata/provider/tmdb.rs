@@ -20,9 +20,16 @@ mod mk_lib_database_metadata_person;
 #[path = "../../mk_lib_database_metadata_tv.rs"]
 mod mk_lib_database_metadata_tv;
 
-pub async fn provider_tmdb_movie_fetch_by_id(pool: &sqlx::PgPool, tmdb_id: i32, metadata_uuid: Uuid) {
+pub async fn provider_tmdb_movie_fetch(
+    pool: &sqlx::PgPool,
+    tmdb_id: i32,
+    metadata_uuid: Uuid,
+    tmdb_api_key: String,
+) {
     // fetch and save json data via tmdb id
-    let result_json = provider_tmdb_movie_fetch_by_id(tmdb_id).await.unwrap();
+    let result_json = provider_tmdb_movie_fetch_by_id(tmdb_id, tmdb_api_key)
+        .await
+        .unwrap();
     let mut series_id: i32;
     let mut image_json: serde_json::Value;
     (series_id, result_json, image_json) =
@@ -110,8 +117,8 @@ pub async fn provider_tmdb_tv_id_max(
 }
 
 pub async fn provider_tmdb_collection_fetch_by_id(
-    api_key: String,
     tmdb_id: i32,
+    api_key: String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/collection/{}?api_key={}",
@@ -123,8 +130,8 @@ pub async fn provider_tmdb_collection_fetch_by_id(
 }
 
 pub async fn provider_tmdb_movie_fetch_by_id(
-    api_key: String,
     tmdb_id: i32,
+    api_key: String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/movie/{}?api_key={}\
@@ -149,8 +156,8 @@ pub async fn provider_tmdb_person_changes(
 }
 
 pub async fn provider_tmdb_person_fetch_by_id(
-    api_key: String,
     tmdb_id: i32,
+    api_key: String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/person/{}?api_key={}\
@@ -163,8 +170,8 @@ pub async fn provider_tmdb_person_fetch_by_id(
 }
 
 pub async fn provider_tmdb_review_fetch_by_id(
-    api_key: String,
     tmdb_id: i32,
+    api_key: String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/review/{}?api_key={}",
@@ -176,8 +183,8 @@ pub async fn provider_tmdb_review_fetch_by_id(
 }
 
 pub async fn provider_tmdb_tv_fetch_by_id(
-    api_key: String,
     tmdb_id: i32,
+    api_key: String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/tv/{}?api_key={}\

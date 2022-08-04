@@ -256,6 +256,7 @@ pub async fn metadata_fetch(
     pool: &sqlx::PgPool,
     provider_name: String,
     download_data: DBDownloadQueueByProviderList,
+    api_key: String,
 ) -> Result<(), Box<dyn Error>> {
     if provider_name == "imvdb" {
         let imvdb_id = provider_imvdb::meta_fetch_save_imvdb(
@@ -268,27 +269,27 @@ pub async fn metadata_fetch(
     } else if provider_name == "themoviedb" {
         if download_data.mm_download_que_type == mk_lib_common_enum_media_type::DLMediaType::PERSON
         {
-            provider_tmdb::provider_tmdb_person_fetch_by_id(
-                pool,
-                provider_name,
-                download_data,
+            provider_tmdb::provider_tmdb_person_fetch(
+                download_data.mm_download_provider_id,
+                download_data.mm_download_new_uuid,
+                api_key,
             );
         } else if download_data.mm_download_que_type
             == mk_lib_common_enum_media_type::DLMediaType::MOVIE
         {
             // removing the imdb check.....as com_tmdb_metadata_by_id converts it
-            provider_tmdb::provider_tmdb_movie_fetch_by_id(
-                pool,
+            provider_tmdb::provider_tmdb_movie_fetch(
                 download_data.mm_download_provider_id,
                 download_data.mm_download_new_uuid,
+                api_key,
             );
         } else if download_data.mm_download_que_type
             == mk_lib_common_enum_media_type::DLMediaType::TV
         {
-            provider_tmdb::provider_tmdb_tv_fetch_by_id(
-                pool,
+            provider_tmdb::provider_tmdb_tv_fetch(
                 download_data.mm_download_provider_id,
                 download_data.mm_download_new_uuid,
+                api_key,
             );
         }
     }
