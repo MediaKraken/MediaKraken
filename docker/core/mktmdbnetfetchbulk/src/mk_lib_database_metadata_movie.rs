@@ -7,7 +7,7 @@ use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_metadata_exists_movie(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     metadata_id: i32,
 ) -> Result<bool, sqlx::Error> {
     let row: (bool,) = sqlx::query_as(
@@ -15,7 +15,7 @@ pub async fn mk_lib_database_metadata_exists_movie(
         where mm_metadata_movie_media_id = $1 limit 1) as found_record limit 1",
     )
     .bind(metadata_id)
-    .fetch_one(pool)
+    .fetch_one(sqlx_pool)
     .await?;
     Ok(row.0)
 }
@@ -30,7 +30,7 @@ pub struct DBMetaMovieList {
 }
 
 pub async fn mk_lib_database_metadata_movie_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
     offset: i32,
     limit: i32,
@@ -70,13 +70,13 @@ pub async fn mk_lib_database_metadata_movie_read(
             mm_poster: row.get("mm_poster"),
             mm_metadata_user_json: row.get("mm_metadata_user_json"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }
 
 pub async fn mk_lib_database_metadata_movie_count(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
     if search_value != "" {
@@ -85,25 +85,25 @@ pub async fn mk_lib_database_metadata_movie_count(
             where mm_metadata_name % $1",
         )
         .bind(search_value)
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     } else {
         let row: (i64,) = sqlx::query_as("select count(*) from mm_metadata_movie")
-            .fetch_one(pool)
+            .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
     }
 }
 
 pub async fn mk_lib_database_metadata_movie_insert(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     uuid_id: Uuid,
     series_id: i32,
-    data_json: serde_json::Value,
+    data_json: &serde_json::Value,
     data_image_json: serde_json::Value,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_metadata_movie (mm_metadata_guid, \
         mm_metadata_media_id, \
@@ -124,14 +124,14 @@ pub async fn mk_lib_database_metadata_movie_insert(
 }
 
 pub async fn mk_lib_database_metadata_movie_guid_by_tmdb(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     uuid_id: Uuid,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let row: (uuid::Uuid,) = sqlx::query_as(
         "select mm_metadata_guid from mm_metadata_movie where mm_metadata_media_id = $1",
     )
     .bind(uuid_id)
-    .fetch_one(pool)
+    .fetch_one(sqlx_pool)
     .await?;
     Ok(row.0)
 }

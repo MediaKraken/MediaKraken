@@ -14,7 +14,7 @@ pub struct DBMediaTVShowList {
 }
 
 pub async fn mk_lib_database_media_tv_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
     offset: i32,
     limit: i32,
@@ -59,13 +59,13 @@ pub async fn mk_lib_database_media_tv_read(
             mm_count: row.get("mm_count"),
             mm_poster: row.get("mm_poster"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }
 
 pub async fn mk_lib_database_media_tv_count(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_string: String,
 ) -> Result<i64, sqlx::Error> {
     if search_string != "" {
@@ -75,7 +75,7 @@ pub async fn mk_lib_database_media_tv_count(
         mm_metadata_tvshow_name = %1",
         )
         .bind(search_string)
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     } else {
@@ -83,7 +83,7 @@ pub async fn mk_lib_database_media_tv_count(
             "select count(*) from mm_metadata_tvshow, \
         mm_media where mm_media_metadata_guid = mm_metadata_tvshow_guid",
         )
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     }

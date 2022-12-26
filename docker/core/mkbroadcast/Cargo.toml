@@ -10,8 +10,11 @@ lto = true
 codegen-units = 1
 
 [dependencies]
+# 0.31.0 breaks datalink
 pnet = "0.30.0"
-shiplift = { version = "0.7", default-features = false, features = ["unix-socket"] }
+shiplift = { version = "0.7", default-features = false, features = [
+    "unix-socket",
+] }
 tokio = { version = "1.18.2", features = ["full"] }
 
 [dev-dependencies]

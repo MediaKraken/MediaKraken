@@ -6,7 +6,7 @@ use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_metadata_exists_tv(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     metadata_id: i32,
 ) -> Result<bool, sqlx::Error> {
     let row: (bool,) = sqlx::query_as(
@@ -14,7 +14,7 @@ pub async fn mk_lib_database_metadata_exists_tv(
         where mm_metadata_media_tvshow_id = $1 limit 1) as found_record limit 1",
     )
     .bind(metadata_id)
-    .fetch_one(pool)
+    .fetch_one(sqlx_pool)
     .await?;
     Ok(row.0)
 }
@@ -28,7 +28,7 @@ pub struct DBMetaTVShowList {
 }
 
 pub async fn mk_lib_database_metadata_tv_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
     offset: i32,
     limit: i32,
@@ -52,13 +52,13 @@ pub async fn mk_lib_database_metadata_tv_read(
             air_date: row.get("air_date"),
             image_json: row.get("image_json"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }
 
 pub async fn mk_lib_database_metadata_tv_count(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
     if search_value != "" {
@@ -67,16 +67,45 @@ pub async fn mk_lib_database_metadata_tv_count(
             where mm_metadata_tvshow_name % $1",
         )
         .bind(search_value)
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     } else {
         let row: (i64,) = sqlx::query_as("select count(*) from mm_metadata_tvshow")
-            .fetch_one(pool)
+            .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
     }
 }
+
+pub async fn mk_lib_database_metadata_tv_insert(
+    sqlx_pool: &sqlx::PgPool,
+    uuid_id: Uuid,
+    series_id: i32,
+    data_json: &serde_json::Value,
+    data_image_json: serde_json::Value,
+) -> Result<(), sqlx::Error> {
+    let mut transaction = sqlx_pool.begin().await?;
+    sqlx::query(
+        "insert into mm_metadata_tvshow (mm_metadata_tvshow_guid, \
+        mm_metadata_media_tvshow_id, \
+        mm_metadata_tvshow_name, \
+        mm_metadata_tvshow_json, \
+        mm_metadata_tvshow_localimage_json) \
+        values ($1,$2,$3,$4,$5)",
+    )
+    .bind(uuid_id)
+    .bind(series_id)
+    .bind(data_json["title"].to_string())
+    .bind(data_json)
+    .bind(data_image_json)
+    .execute(&mut transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(())
+}
+
+
 /*
 
 // TODO port query
@@ -219,23 +248,6 @@ pub async fn db_meta_tv_count_by_id(self, guid):
     """
     return await db_conn.fetchval('select exists(select 1 from mm_metadata_tvshow'
                                   ' where mm_metadata_media_tvshow_id = $1 limit 1) limit 1', guid)
-
-
-
-// TODO port query
-def db_metatv_insert_tmdb(self, uuid_id, series_id, data_title, data_json,
-                          data_image_json):
-    """
-    # insert metadata from themoviedb
-    """
-    self.db_cursor.execute('insert into mm_metadata_tvshow (mm_metadata_tvshow_guid,'
-                           ' mm_metadata_media_tvshow_id,'
-                           ' mm_metadata_tvshow_name,'
-                           ' mm_metadata_tvshow_json,'
-                           ' mm_metadata_tvshow_localimage_json)'
-                           ' values ($1,$2,$3,$4,$5)', (uuid_id, series_id, data_title,
-                                                        data_json, data_image_json))
-    self.db_commit()
 
 
 // TODO port query

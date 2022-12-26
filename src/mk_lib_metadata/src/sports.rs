@@ -19,8 +19,8 @@ pub struct MetadataSportsLastLookup {
 }
 
 pub async fn metadata_sports_lookup(
-    pool: &sqlx::PgPool,
-    download_data: DBDownloadQueueByProviderList,
+    sqlx_pool: &sqlx::PgPool,
+    download_data: &DBDownloadQueueByProviderList,
 ) -> Result<Uuid, sqlx::Error> {
     // don't bother checking title/year as the main_server_metadata_api_worker does it already
     let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later

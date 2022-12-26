@@ -7,7 +7,7 @@ use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_activity_insert(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     activity_name: String,
     activity_overview: String,
     activity_short_overview: String,
@@ -42,7 +42,7 @@ pub async fn mk_lib_database_activity_insert(
 }
 
 pub async fn mk_lib_database_activity_delete(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     day_range: i32,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;

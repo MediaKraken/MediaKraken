@@ -18,6 +18,8 @@ pub async fn mk_lib_database_open_pool() -> Result<sqlx::PgPool, sqlx::Error> {
         || hostname == "mkcode"
     {
         connection_string = "postgresql://postgres:metaman@mkstage/postgres".to_string();
+    } else if hostname == "ip-172-31-90-110" {
+        connection_string = "postgresql://postgres:metamanmetaman@database-1.cklzlsrpzbdf.us-east-1.rds.amazonaws.com/postgres".to_string();
     } else if Path::new("/run/secrets/db_password").exists() {
         let dp_pass = fs::read_to_string("/run/secrets/db_password").unwrap();
         connection_string = format!(
@@ -28,9 +30,9 @@ pub async fn mk_lib_database_open_pool() -> Result<sqlx::PgPool, sqlx::Error> {
         let dp_pass = env::var("POSTGRES_PASSWORD").unwrap();
         connection_string = format!("postgresql://postgres:{}@mkdatabase/postgres", dp_pass);
     }
-    let pool = PgPoolOptions::new()
+    let sqlx_pool = PgPoolOptions::new()
         .max_connections(25)
         .connect(&connection_string)
         .await?;
-    Ok(pool)
+    Ok(sqlx_pool)
 }

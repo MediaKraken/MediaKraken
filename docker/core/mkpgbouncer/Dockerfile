@@ -1,19 +1,16 @@
 # Download base image
-FROM alpine:3.14.3
+FROM alpine:3.16.2
 
 LABEL author="Quinn D Granfor, spootdev@gmail.com"
 LABEL description="This holds the image for pgbouncer"
 
-ARG ALPMIRROR
-
-RUN sed -i "s/dl-cdn.alpinelinux.org/${ALPMIRROR}/" /etc/apk/repositories \
-  && apk add --no-cache \
-  busybox==1.33.1-r6 \
-  c-ares==1.17.2-r0 \
-  libevent==2.1.12-r2 \
-  openssl \
-  pgbouncer==1.15.0-r0 \
-  postgresql-client \
+RUN apk add --no-cache \
+  busybox==1.35.0-r17 \
+  c-ares==1.18.1-r0 \
+  libevent==2.1.12-r4 \
+  openssl==1.1.1s-r0 \
+  pgbouncer==1.17.0-r0 \
+  postgresql14-client==14.5-r0 \
   && mkdir /run/postgresql \
   && chmod 777 /run/postgresql
 

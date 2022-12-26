@@ -14,7 +14,7 @@ pub struct DBMetaMusicVideoList {
 }
 
 pub async fn mk_lib_database_metadata_music_video_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
     offset: i32,
     limit: i32,
@@ -51,13 +51,13 @@ pub async fn mk_lib_database_metadata_music_video_read(
             mm_metadata_music_video_localimage_json: row
                 .get("mm_metadata_music_video_localimage_json"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }
 
 pub async fn mk_lib_database_metadata_music_video_lookup(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     artist_name: String,
     song_title: String,
 ) -> Result<uuid::Uuid, sqlx::Error> {
@@ -69,13 +69,13 @@ pub async fn mk_lib_database_metadata_music_video_lookup(
     )
     .bind(artist_name.to_lowercase())
     .bind(song_title.to_lowercase())
-    .fetch_one(pool)
+    .fetch_one(sqlx_pool)
     .await?;
     Ok(row.0)
 }
 
 pub async fn mk_lib_database_metadata_music_video_count(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
     imvdb_id: i32,
 ) -> Result<i64, sqlx::Error> {
@@ -86,12 +86,12 @@ pub async fn mk_lib_database_metadata_music_video_count(
                 where mm_media_music_video_song % $1",
             )
             .bind(search_value)
-            .fetch_one(pool)
+            .fetch_one(sqlx_pool)
             .await?;
             Ok(row.0)
         } else {
             let row: (i64,) = sqlx::query_as("select count(*) from mm_metadata_music_video")
-                .fetch_one(pool)
+                .fetch_one(sqlx_pool)
                 .await?;
             Ok(row.0)
         }
@@ -101,14 +101,14 @@ pub async fn mk_lib_database_metadata_music_video_count(
             where mm_metadata_music_video_media_id->'imvdb' ? $1",
         )
         .bind(imvdb_id)
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     }
 }
 
 pub async fn mk_lib_database_metadata_music_video_detail(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     music_video_uuid: String,
 ) -> Result<PgRow, sqlx::Error> {
     let row: PgRow = sqlx::query(
@@ -118,13 +118,13 @@ pub async fn mk_lib_database_metadata_music_video_detail(
         where mm_metadata_music_video_guid = $1",
     )
     .bind(music_video_uuid)
-    .fetch_one(pool)
+    .fetch_one(sqlx_pool)
     .await?;
     Ok(row)
 }
 
 pub async fn mk_lib_database_metadata_music_video_insert(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     artist_name: String,
     artist_song: String,
     id_json: serde_json::Value,
@@ -132,7 +132,7 @@ pub async fn mk_lib_database_metadata_music_video_insert(
     image_json: serde_json::Value,
 ) -> Result<Uuid, sqlx::Error> {
     let new_guid = uuid::Uuid::new_v4();
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_metadata_music_video (mm_metadata_music_video_guid, \
         mm_metadata_music_video_media_id, \

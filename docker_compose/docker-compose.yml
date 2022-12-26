@@ -2,21 +2,6 @@ version: '3.6'
 # Volumes are HOST directory and then CONTAINER directory
 
 services:
-  # start broadcast server (so clients can find server)
-  mkbroadcast:
-    image: mediakraken/mkbroadcast:${BRANCH}
-    environment:
-      - RUST_BACKTRACE=1
-    container_name: mkstack_broadcast
-    stop_grace_period: 30s
-    stop_signal: SIGUSR1
-    volumes:
-      # needs socket for running image list
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    # needs to run as host so clients can see it on their subnet
-    network_mode: host
-    restart: unless-stopped
-
   # runs the mumble chat server
   mkchatmumble:
     image: mediakraken/mkchatmumble:${BRANCH}
@@ -61,7 +46,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=${DBPASS}
       - RUST_BACKTRACE=1
-      - WAIT_HOSTS=mkpgbouncer:6432, mkrabbitmq:5672
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
     command: sh -c "/wait && /mediakraken/mkcron"
     container_name: mkstack_cron
     stop_grace_period: 30s
@@ -109,9 +94,20 @@ services:
     environment:
       - POSTGRES_PASSWORD=${DBPASS}
       - RUST_BACKTRACE=1
-      - WAIT_HOSTS=mkpgbouncer:6432, mkrabbitmq:5672
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
     command: sh -c "/wait && /mediakraken/mkinotify"
     container_name: mkstack_inotify
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
+    restart: unless-stopped
+
+  # multicast discover server
+  mkmulticast:
+    image: mediakraken/mkmulticast:${BRANCH}
+    command: sh -c "/mediakraken/mkmulticast"
+    container_name: mkstack_multicast
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     networks:
@@ -124,13 +120,13 @@ services:
     container_name: mkstack_nginx
     depends_on:
       - mkwebapp
-    entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh -h mkwebapp -p 8080 -t 120 -- nginx
+    entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh -h mkstack_webapp -p 8080 -t 120 -- nginx
     stop_grace_period: 30s
     stop_signal: SIGTERM
     volumes:
       - mediakraken_vol_nginx:/var/log/mediakraken/nginx
       - mediakraken_vol_certs:/etc/nginx/certs:ro
-      - mediakraken_vol_static:/mediakraken/web_app_sanic/static:ro
+      - mediakraken_vol_static:/mediakraken/static:ro
     ports:
       - "8900:8900"
     networks:
@@ -139,7 +135,7 @@ services:
 
   # database management tool
   mkpgadmin:
-    image: dpage/pgadmin4:6.5
+    image: dpage/pgadmin4:6.15
     stop_grace_period: 30s
     stop_signal: SIGTERM
     container_name: mkstack_pgadmin
@@ -168,7 +164,7 @@ services:
     container_name: mkstack_pgbouncer
     depends_on:
       - mkdatabase
-    entrypoint: ./wait-for-it-ash-busybox130.sh -h mkdatabase -p 5432 -t 60 -- ./entrypoint.sh
+    entrypoint: ./wait-for-it-ash-busybox130.sh -h mkstack_database -p 5432 -t 60 -- ./entrypoint.sh
     stop_grace_period: 30s
     stop_signal: SIGTERM
     networks:
@@ -177,7 +173,7 @@ services:
 
   # docker stats and management
   mkportainer:
-    image: portainer/portainer-ce:2.6.1-alpine
+    image: portainer/portainer-ce:2.16.1-alpine
     command: -H unix:///var/run/docker.sock
     container_name: mkstack_portainer
     ports:
@@ -237,7 +233,7 @@ services:
       - SECURE=${SECURE}
       - CSRF_SECRET_KEY=${CSRF_SECRET_KEY}
       - RUST_BACKTRACE=1
-      - WAIT_HOSTS=mkpgbouncer:6432, mkrabbitmq:5672
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
     command: sh -c "/wait && /mediakraken/mkwebapp"
     container_name: mkstack_webapp
     stop_grace_period: 30s

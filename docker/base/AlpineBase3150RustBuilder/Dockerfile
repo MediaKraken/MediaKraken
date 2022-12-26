@@ -1,4 +1,4 @@
-FROM rust:1.63.0 as cargo-build
+FROM rust:1.66.0 as cargo-build
 
 RUN apt-get update \
   && apt-get install --no-install-recommends musl-tools -y \
@@ -21,7 +21,7 @@ RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-li
 # Final Stage
 # ------------------------------------------------------------------------------
 
-FROM alpine:3.15.0
+FROM alpine:3.16.2
 
 RUN addgroup -g 1000 myapp \
   && adduser -D -s /bin/sh -u 1000 -G myapp myapp

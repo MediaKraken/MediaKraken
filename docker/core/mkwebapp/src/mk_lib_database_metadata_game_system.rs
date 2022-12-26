@@ -6,7 +6,7 @@ use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_metadata_game_system_detail(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     game_sys_uuid: Uuid,
 ) -> Result<serde_json::Value, sqlx::Error> {
     let row: (serde_json::Value,) = sqlx::query_as(
@@ -14,13 +14,13 @@ pub async fn mk_lib_database_metadata_game_system_detail(
         where gs_id = $1",
     )
     .bind(game_sys_uuid)
-    .fetch_one(pool)
+    .fetch_one(sqlx_pool)
     .await?;
     Ok(row.0)
 }
 
 pub async fn mk_lib_database_metadata_game_system_count(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
     if search_value != "" {
@@ -29,12 +29,12 @@ pub async fn mk_lib_database_metadata_game_system_count(
             where gs_game_system_name % $1",
         )
         .bind(search_value)
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     } else {
         let row: (i64,) = sqlx::query_as("select count(*) from mm_metadata_game_systems_info")
-            .fetch_one(pool)
+            .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
     }
@@ -50,7 +50,7 @@ pub struct DBMetaGameSystemList {
 }
 
 pub async fn mk_lib_database_metadata_game_system_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
     offset: i32,
     limit: i32,
@@ -89,19 +89,19 @@ pub async fn mk_lib_database_metadata_game_system_read(
             gs_year: row.get("gs_year"),
             gs_game_system_alias: row.get("gs_game_system_alias"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }
 
 pub async fn mk_lib_database_metadata_game_system_upsert(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     system_name: String,
     system_alias: String,
     system_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let new_guid = uuid::Uuid::new_v4();
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "INSERT INTO mm_metadata_game_systems_info \
         (gs_game_system_id, \
@@ -123,7 +123,7 @@ pub async fn mk_lib_database_metadata_game_system_upsert(
 }
 
 pub async fn mk_lib_database_metadata_game_system_guid_by_short_name(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     game_system_short_name: String,
 ) -> Result<Uuid, sqlx::Error> {
     let row: (Uuid,) = sqlx::query_as(
@@ -132,13 +132,13 @@ pub async fn mk_lib_database_metadata_game_system_guid_by_short_name(
         where gs_game_system_name = $1",
     )
     .bind(game_system_short_name)
-    .fetch_one(pool)
+    .fetch_one(sqlx_pool)
     .await?;
     Ok(row.0)
 }
 
 pub async fn mk_lib_database_metadata_game_system_game_count_by_short_name(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     game_system_short_name: String,
 ) -> Result<i32, sqlx::Error> {
     // TODO this query doesn't return game count.......
@@ -148,7 +148,7 @@ pub async fn mk_lib_database_metadata_game_system_game_count_by_short_name(
         where gs_game_system_name = $1",
     )
     .bind(game_system_short_name)
-    .fetch_one(pool)
+    .fetch_one(sqlx_pool)
     .await?;
     Ok(row.0)
 }

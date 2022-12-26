@@ -15,7 +15,7 @@ pub struct DBMediaHomeMediaList {
 }
 
 pub async fn mk_lib_database_media_home_media_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
     offset: i32,
     limit: i32,
@@ -31,13 +31,13 @@ pub async fn mk_lib_database_media_home_media_read(
             mm_metadata_home_guid: row.get("mm_metadata_home_guid"),
             mm_metadata_home_name: row.get("mm_metadata_home_name"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }
 
 pub async fn mk_lib_database_media_home_media_count(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
     if search_value != "" {
@@ -48,7 +48,7 @@ pub async fn mk_lib_database_media_home_media_count(
         )
         .bind(mk_lib_common_enum_media_type::DLMediaType::MOVIE_HOME)
         .bind(search_value)
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     } else {
@@ -57,7 +57,7 @@ pub async fn mk_lib_database_media_home_media_count(
             where mmr_media_class_guid = $1",
         )
         .bind(mk_lib_common_enum_media_type::DLMediaType::MOVIE_HOME)
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     }

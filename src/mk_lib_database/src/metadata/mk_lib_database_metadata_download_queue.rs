@@ -8,15 +8,15 @@ use sqlx::{FromRow, Row};
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBDownloadQueueByProviderList {
     pub mm_download_guid: uuid::Uuid,
-    pub mm_download_que_type: i8,
+    pub mm_download_que_type: i16,
     pub mm_download_new_uuid: uuid::Uuid,
     pub mm_download_provider_id: i32,
     pub mm_download_status: String,
-    pub mm_download_path: String,
+    pub mm_download_path: Option<String>,
 }
 
 pub async fn mk_lib_database_download_queue_by_provider(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     provider_name: &str,
 ) -> Result<Vec<DBDownloadQueueByProviderList>, sqlx::Error> {
     let select_query = sqlx::query(
@@ -40,24 +40,24 @@ pub async fn mk_lib_database_download_queue_by_provider(
             mm_download_status: row.get("mm_download_status"),
             mm_download_path: row.get("mm_download_path"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }
 
 pub async fn mk_lib_database_download_queue_delete(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     download_guid: uuid::Uuid,
 ) -> Result<(), sqlx::Error> {
     sqlx::query("delete from mm_metadata_download_que where mm_download_guid = $1")
         .bind(download_guid)
-        .execute(pool)
+        .execute(sqlx_pool)
         .await?;
     Ok(())
 }
 
 pub async fn mk_lib_database_metadata_download_queue_exists(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     metadata_provider: String,
     metadata_que_type: i16,
     metadata_provider_id: i32,
@@ -71,17 +71,17 @@ pub async fn mk_lib_database_metadata_download_queue_exists(
     .bind(metadata_provider_id)
     .bind(metadata_provider)
     .bind(metadata_que_type)
-    .fetch_one(pool)
+    .fetch_one(sqlx_pool)
     .await?;
     Ok(row.0)
 }
 
 pub async fn mk_lib_database_metadata_download_queue_update_provider(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     metadata_provider: String,
     metadata_queue_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "update mm_metadata_download_que \
         set mm_download_provider = $1 \
@@ -96,14 +96,14 @@ pub async fn mk_lib_database_metadata_download_queue_update_provider(
 }
 
 pub async fn mk_lib_database_metadata_download_queue_insert(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     metadata_provider: String,
     metadata_que_type: i16,
     metadata_new_uuid: Uuid,
-    metadata_provider_id: Option<i32>,
+    metadata_provider_id: i32,
     metadata_status: String,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_metadata_download_que (mm_download_guid, \
         mm_download_provider, \
@@ -126,26 +126,28 @@ pub async fn mk_lib_database_metadata_download_queue_insert(
 }
 
 pub async fn mk_lib_database_metadata_download_status_update(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     metadata_download_uuid: Uuid,
     metadata_status: String,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
-    sqlx::query("update mm_metadata_download_que \
-        set mm_download_status = $1 where mm_download_guid = $2")
-        .bind(metadata_status)
-        .bind(metadata_download_uuid)
-        .execute(&mut transaction)
-        .await?;
+    let mut transaction = sqlx_pool.begin().await?;
+    sqlx::query(
+        "update mm_metadata_download_que \
+        set mm_download_status = $1 where mm_download_guid = $2",
+    )
+    .bind(metadata_status)
+    .bind(metadata_download_uuid)
+    .execute(&mut transaction)
+    .await?;
     transaction.commit().await?;
     Ok(())
 }
 
 pub async fn mk_lib_database_metadata_download_count(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
 ) -> Result<i64, sqlx::Error> {
     let row: (i64,) = sqlx::query_as("select count(*) from mm_metadata_download_que")
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
     Ok(row.0)
 }

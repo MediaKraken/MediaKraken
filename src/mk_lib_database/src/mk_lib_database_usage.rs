@@ -11,7 +11,7 @@ pub struct DBMUsageMovieList {
 }
 
 pub async fn mk_lib_database_usage_top10_movie(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBMUsageMovieList>, sqlx::Error> {
     let select_query = sqlx::query(
         "select mm_metadata_name, \
@@ -23,7 +23,7 @@ pub async fn mk_lib_database_usage_top10_movie(
             mm_metadata_name: row.get("mm_metadata_name"),
             mm_metadata_times: row.get("mm_metadata_times"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }
@@ -35,7 +35,7 @@ pub struct DBUsageTVList {
 }
 
 pub async fn mk_lib_database_usage_top10_tv(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBUsageTVList>, sqlx::Error> {
     let select_query = sqlx::query(
         "select mm_metadata_tvshow_name, \
@@ -48,7 +48,7 @@ pub async fn mk_lib_database_usage_top10_tv(
             mm_metadata_tvshow_name: row.get("mm_metadata_tvshow_name"),
             mm_metadata_times: row.get("mm_metadata_times"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }

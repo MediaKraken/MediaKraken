@@ -6,7 +6,7 @@ use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_metadata_sports_count(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
     if search_value != "" {
@@ -15,12 +15,12 @@ pub async fn mk_lib_database_metadata_sports_count(
             where mm_metadata_sports_name % $1",
         )
         .bind(search_value)
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     } else {
         let row: (i64,) = sqlx::query_as("select count(*) from mm_metadata_sports")
-            .fetch_one(pool)
+            .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
     }
@@ -33,7 +33,7 @@ pub struct DBMetaSportsList {
 }
 
 pub async fn mk_lib_database_metadata_sports_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
     offset: i32,
     limit: i32,
@@ -66,7 +66,7 @@ pub async fn mk_lib_database_metadata_sports_read(
             mm_metadata_sports_guid: row.get("mm_metadata_sports_guid"),
             mm_metadata_sports_name: row.get("mm_metadata_sports_name"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }

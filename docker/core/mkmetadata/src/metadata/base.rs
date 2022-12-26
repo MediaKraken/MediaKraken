@@ -2,7 +2,10 @@
 
 use sqlx::types::Uuid;
 use std::error::Error;
+use torrent_name_parser::Metadata;
 
+#[path = "adult.rs"]
+mod metadata_adult;
 #[path = "anime.rs"]
 mod metadata_anime;
 #[path = "book.rs"]
@@ -35,6 +38,9 @@ mod provider_televisiontunes;
 #[path = "provider/tmdb.rs"]
 mod provider_tmdb;
 
+#[path = "guessit.rs"]
+mod metadata_guessit;
+
 #[path = "../mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;
 
@@ -43,68 +49,73 @@ mod mk_lib_database_metadata_download_queue;
 use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 
 pub async fn metadata_process(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     provider_name: String,
     download_data: DBDownloadQueueByProviderList,
-    provider_api_key: String,
+    provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
     // TODO art, posters, trailers, etc in here as well
+    println!("metadata_process status: {}, provider: {}, id: {}", download_data.mm_download_status, provider_name, download_data.mm_download_provider_id);
     if download_data.mm_download_status == "Search" {
-        metadata_search(&pool, provider_name, download_data).await;
+        metadata_search(&sqlx_pool, provider_name, download_data, provider_api_key).await;
     } else if download_data.mm_download_status == "Update" {
-        metadata_update(&pool, provider_name, download_data).await;
+        metadata_update(&sqlx_pool, provider_name, download_data, provider_api_key).await;
     } else if download_data.mm_download_status == "Fetch" {
-        metadata_fetch(&pool, provider_name, download_data).await;
+        metadata_fetch(&sqlx_pool, provider_name, download_data, provider_api_key).await;
     } else if download_data.mm_download_status == "FetchCastCrew" {
-        metadata_castcrew(&pool, provider_name, download_data).await;
+        metadata_castcrew(&sqlx_pool, provider_name, download_data, provider_api_key).await;
     } else if download_data.mm_download_status == "FetchReview" {
-        metadata_review(&pool, provider_name, download_data).await;
+        metadata_review(&sqlx_pool, provider_name, download_data, provider_api_key).await;
     } else if download_data.mm_download_status == "FetchImage" {
-        metadata_image(&pool, provider_name, download_data).await;
+        metadata_image(&sqlx_pool, provider_name, download_data, provider_api_key).await;
     } else if download_data.mm_download_status == "FetchCollection" {
-        metadata_collection(&pool, provider_name, download_data).await;
+        metadata_collection(&sqlx_pool, provider_name, download_data, provider_api_key).await;
     }
     Ok(())
 }
 
 pub async fn metadata_update(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     provider_name: String,
     download_data: DBDownloadQueueByProviderList,
+    provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
     // TODO horribly broken.  Need to add the dlid, that to update, etc
     Ok(())
 }
 
 pub async fn metadata_search(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     provider_name: String,
     download_data: DBDownloadQueueByProviderList,
+    provider_api_key: &String,
 ) -> Result<(), sqlx::Error> {
     let mut metadata_uuid: Uuid = uuid::Uuid::nil();
-    let mut match_result = None;
     let mut set_fetch: bool = false;
     let mut lookup_halt: bool = false;
     let mut update_provider = String::new();
+    let mut guessit_data: Metadata;
     if provider_name == "anidb" {
-        metadata_uuid = metadata_anime::metadata_anime_lookup(
-            &pool,
-            download_data,
-            download_data.mm_download_path,
-        )
-        .await
-        .unwrap()
-        .to_string();
+        (metadata_uuid, guessit_data) =
+            metadata_guessit::metadata_guessit(&sqlx_pool, &download_data)
+                .await
+                .unwrap();
         if metadata_uuid == uuid::Uuid::nil() {
-            if match_result == None {
-                // do lookup halt as we'll start all movies in tmdb
-                lookup_halt = true;
-            } else {
-                set_fetch = true;
-            }
+            metadata_uuid =
+                metadata_anime::metadata_anime_lookup(&sqlx_pool, &download_data, guessit_data)
+                    .await
+                    .unwrap();
+            // if metadata_uuid == uuid::Uuid::nil() {
+            //     if match_result == None {
+            //         // do lookup halt as we'll start all movies in tmdb
+            //         lookup_halt = true;
+            //     } else {
+            //         set_fetch = true;
+            //     }
+            // }
         }
     } else if provider_name == "chart_lyrics" {
-        //provider_chart_lyrics::provider_chart_lyrics_fetch(&pool, artist_name, song_name);
+        //provider_chart_lyrics::provider_chart_lyrics_fetch(&sqlx_pool, artist_name, song_name);
         lookup_halt = true;
     } else if provider_name == "comicvine" {
         lookup_halt = true;
@@ -113,33 +124,28 @@ pub async fn metadata_search(
     } else if provider_name == "imdb" {
         lookup_halt = true;
     } else if provider_name == "imvdb" {
-        metadata_uuid = metadata_music_video::metadata_music_video_lookup(
-            &pool,
-            download_data.mm_download_path,
-        )
-        .await
-        .unwrap();
-        if metadata_uuid == uuid::Uuid::nil() {
-            if match_result == None {
-                update_provider = "theaudiodb".to_string();
-            } else {
-                set_fetch = true;
-            }
-        }
+        metadata_uuid =
+            metadata_music_video::metadata_music_video_lookup(&sqlx_pool, &download_data)
+                .await
+                .unwrap();
+        // if metadata_uuid == uuid::Uuid::nil() {
+        //     if match_result == None {
+        //         update_provider = "theaudiodb".to_string();
+        //     } else {
+        //         set_fetch = true;
+        //     }
+        // }
     } else if provider_name == "isbndb" {
-        metadata_uuid = provider_isbndb::metadata_book_search_isbndb(
-            &pool,
-            download_data.mm_download_provider_id,
-        )
-        .await
-        .unwrap();
+        // metadata_uuid = provider_isbndb::metadata_book_search_isbndb(&sqlx_pool, download_data)
+        //     .await
+        //     .unwrap();
         if metadata_uuid == uuid::Uuid::nil() {
             lookup_halt = true;
         }
     } else if provider_name == "lastfm" {
         lookup_halt = true;
     } else if provider_name == "musicbrainz" {
-        metadata_uuid = metadata_music::metadata_music_lookup(&pool, download_data)
+        metadata_uuid = metadata_music::metadata_music_lookup(&sqlx_pool, &download_data)
             .await
             .unwrap();
         if metadata_uuid == uuid::Uuid::nil() {
@@ -157,7 +163,7 @@ pub async fn metadata_search(
         // if download succeeds remove dl
         // TODO....handle list return for title?
         metadata_uuid = provider_televisiontunes::provider_televisiontunes_theme_fetch(
-            download_data.mm_download_path,
+            download_data.mm_download_path.unwrap(),
             "TODO Fake Path".to_string(),
         )
         .await
@@ -165,12 +171,11 @@ pub async fn metadata_search(
         if metadata_uuid != uuid::Uuid::nil() {
             // TODO add theme.mp3 dl"d above to media table
             mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
-                &pool,
+                &sqlx_pool,
                 download_data.mm_download_guid,
             )
             .await
             .unwrap();
-            Ok(()); // since it"s a search/fetch/insert in one shot
         } else {
             lookup_halt = true;
         }
@@ -178,18 +183,62 @@ pub async fn metadata_search(
         lookup_halt = true;
     } else if provider_name == "thegamesdb" {
         lookup_halt = true;
-    } else if provider_name == "thesportsdb" {
-        metadata_uuid =
-            metadata_sports::metadata_sports_lookup(&pool, download_data)
+    } else if provider_name == "themoviedb" {
+        (metadata_uuid, guessit_data) =
+            metadata_guessit::metadata_guessit(&sqlx_pool, &download_data)
                 .await
                 .unwrap();
-        if metadata_uuid == uuid::Uuid::nil() {
-            if match_result == None {
-                update_provider = "themoviedb".to_string();
-            } else {
+        if download_data.mm_download_que_type == mk_lib_common_enum_media_type::DLMediaType::MOVIE {
+            if metadata_uuid == uuid::Uuid::nil() {
+                metadata_uuid = metadata_movie::metadata_movie_lookup(&sqlx_pool, &download_data, guessit_data)
+                    .await
+                    .unwrap();
+                // (metadata_uuid, match_result) = metadata_provider_themoviedb.movie_search_tmdb(
+                //     &sqlx_pool,
+                //     download_data);
+                // // if match_result is an int, that means the lookup found a match but isn't in db
+                // if metadata_uuid == uuid::Uuid::nil() && type(match_result) != int {
+                //     lookup_halt = true;
+                // }
+                // else if metadata_uuid != uuid::Uuid::nil() {
+                //         set_fetch = true;
+                // }
+            }
+        } else if download_data.mm_download_que_type
+            == mk_lib_common_enum_media_type::DLMediaType::TV
+        {
+            if metadata_uuid == uuid::Uuid::nil() {
+                metadata_uuid = metadata_tv::metadata_tv_lookup(&sqlx_pool, &download_data, guessit_data)
+                    .await
+                    .unwrap();
+                // (metadata_uuid, match_result) = metadata_tv.metadata_tv_lookup(&sqlx_pool, download_data);
+                // // if match_result is an int, that means the lookup found a match but isn"t in db
+                // if metadata_uuid == uuid::Uuid::nil() && type(match_result) != int {
+                //     lookup_halt = true;
+                // }
+                // else if metadata_uuid != uuid::Uuid::nil() {
+                //         set_fetch = true;
+                // }
+            }
+        } else {
+            // this will hit from type 0's (trailers, etc)
+            if metadata_uuid == uuid::Uuid::nil() {
+                lookup_halt = true;
+            } else if metadata_uuid != uuid::Uuid::nil() {
                 set_fetch = true;
             }
         }
+    } else if provider_name == "thesportsdb" {
+        metadata_uuid = metadata_sports::metadata_sports_lookup(&sqlx_pool, &download_data)
+            .await
+            .unwrap();
+        // if metadata_uuid == uuid::Uuid::nil() {
+        //     if match_result == None {
+        //         update_provider = "themoviedb".to_string();
+        //     } else {
+        //         set_fetch = true;
+        //     }
+        // }
     } else if provider_name == "tv_intros" {
         lookup_halt = true;
     } else if provider_name == "twitch" {
@@ -199,32 +248,6 @@ pub async fn metadata_search(
 }
 
 /*
-    else if provider_name == "themoviedb":
-        if download_data["mdq_que_type"] == common_global.DLMediaType.Movie.value:
-            metadata_uuid, match_result = await metadata_provider_themoviedb.movie_search_tmdb(
-                db_connection,
-                download_data["mdq_path"]);
-            // if match_result is an int, that means the lookup found a match but isn"t in db
-            if metadata_uuid == None and type(match_result) != int:
-                lookup_halt = true;
-            else if metadata_uuid != None:
-                    set_fetch = true;
-        else if download_data["mdq_que_type"] == common_global.DLMediaType.TV.value:
-            metadata_uuid, match_result = await metadata_tv.metadata_tv_lookup(db_connection,
-                                                                               download_data[
-                                                                                   "mdq_path"]);
-            // if match_result is an int, that means the lookup found a match but isn"t in db
-            if metadata_uuid == None and type(match_result) != int:
-                lookup_halt = true;
-            else if metadata_uuid != None:
-                    set_fetch = true;
-        else:
-            // this will hit from type 0"s (trailers, etc)
-            if metadata_uuid == None:
-                lookup_halt = true;
-            else if metadata_uuid != None:
-                    set_fetch = true;
-
 
     // if search is being updated to new provider
     if update_provider != None:
@@ -253,14 +276,14 @@ pub async fn metadata_search(
 */
 
 pub async fn metadata_fetch(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     provider_name: String,
     download_data: DBDownloadQueueByProviderList,
-    api_key: String,
+    provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
     if provider_name == "imvdb" {
         let imvdb_id = provider_imvdb::meta_fetch_save_imvdb(
-            pool,
+            sqlx_pool,
             download_data.mm_download_provider_id,
             download_data.mm_download_new_uuid,
         )
@@ -270,40 +293,45 @@ pub async fn metadata_fetch(
         if download_data.mm_download_que_type == mk_lib_common_enum_media_type::DLMediaType::PERSON
         {
             provider_tmdb::provider_tmdb_person_fetch(
+                sqlx_pool,
                 download_data.mm_download_provider_id,
                 download_data.mm_download_new_uuid,
-                api_key,
+                provider_api_key,
             );
         } else if download_data.mm_download_que_type
             == mk_lib_common_enum_media_type::DLMediaType::MOVIE
         {
             // removing the imdb check.....as com_tmdb_metadata_by_id converts it
             provider_tmdb::provider_tmdb_movie_fetch(
+                sqlx_pool,
                 download_data.mm_download_provider_id,
                 download_data.mm_download_new_uuid,
-                api_key,
+                provider_api_key,
             );
         } else if download_data.mm_download_que_type
             == mk_lib_common_enum_media_type::DLMediaType::TV
         {
             provider_tmdb::provider_tmdb_tv_fetch(
+                sqlx_pool,
                 download_data.mm_download_provider_id,
                 download_data.mm_download_new_uuid,
-                api_key,
+                provider_api_key,
             );
         }
     }
     mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
-        pool, download_data.mm_download_guid,
+        sqlx_pool,
+        download_data.mm_download_guid,
     )
     .await;
     Ok(())
 }
 
 pub async fn metadata_castcrew(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     provider_name: String,
     download_data: DBDownloadQueueByProviderList,
+    provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
@@ -322,66 +350,46 @@ pub async fn metadata_castcrew(db_connection, provider_name, download_data):
 */
 
 pub async fn metadata_image(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     provider_name: String,
     download_data: DBDownloadQueueByProviderList,
+    provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
+    // TODO grab the actual image
+    mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+        sqlx_pool,
+        download_data.mm_download_guid,
+    )
+    .await;
     Ok(())
 }
-
-/*
-pub async fn metadata_image(db_connection, provider_name, download_data):
-    """
-    Fetch image from specified provider
-    """
-    await db_connection.db_download_delete(download_data["mdq_id"]);
-    await db_connection.db_commit();
-*/
 
 pub async fn metadata_review(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     provider_name: String,
     download_data: DBDownloadQueueByProviderList,
+    provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
+    // review is last.....so can delete download que
+    mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+        sqlx_pool,
+        download_data.mm_download_guid,
+    )
+    .await;
     Ok(())
 }
-
-/*
-pub async fn metadata_review(db_connection, provider_name, download_data):
-    """
-    Fetch reviews from specified provider
-    """
-    if provider_name == "themoviedb" {
-        metadata_provider_themoviedb.movie_fetch_save_tmdb_review(db_connection,
-                                                                        download_data[
-                                                                            "mdq_provider_id"]);
-                                                                            }
-    // review is last.....so can delete download que
-    db_connection.db_download_delete(download_data["mdq_id"]);
-    db_connection.db_commit();
-*/
 
 pub async fn metadata_collection(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     provider_name: String,
     download_data: DBDownloadQueueByProviderList,
+    provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
+    // only one record for this so nuke it
+    mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+        sqlx_pool,
+        download_data.mm_download_guid,
+    )
+    .await;
     Ok(())
 }
-
-/*
-pub async fn metadata_collection(db_connection, provider_name, download_data):
-    """
-    Fetch collection from specified provider
-    """
-    if provider_name == "themoviedb" {
-        metadata_provider_themoviedb.movie_fetch_save_tmdb_collection(db_connection,
-                                                                            download_data[
-                                                                                "mdq_provider_id"],
-                                                                            download_data);
-                                                                            }
-    // only one record for this so nuke it
-    db_connection.db_download_delete(download_data["mdq_id"]);
-    db_connection.db_commit();
-
- */

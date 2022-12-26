@@ -7,7 +7,7 @@ use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_game_server_delete(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     game_server_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
@@ -27,7 +27,7 @@ pub struct DBGameServerList {
 }
 
 pub async fn mk_lib_database_game_server_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
     offset: i32,
     limit: i32,
@@ -58,13 +58,13 @@ pub async fn mk_lib_database_game_server_read(
             mm_game_server_name: row.get("mm_game_server_name"),
             mm_game_server_json: row.get("mm_game_server_json"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }
 
 pub async fn mk_lib_database_game_server_detail(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     game_server_uuid: Uuid,
 ) -> Result<PgRow, sqlx::Error> {
     let row: PgRow = sqlx::query(
@@ -72,13 +72,13 @@ pub async fn mk_lib_database_game_server_detail(
         from mm_game_dedicated_servers where mm_game_server_guid = $1",
     )
     .bind(game_server_uuid)
-    .fetch_one(pool)
+    .fetch_one(sqlx_pool)
     .await?;
     Ok(row)
 }
 
 pub async fn mk_lib_database_game_server_count(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
     if search_value != "" {
@@ -87,19 +87,19 @@ pub async fn mk_lib_database_game_server_count(
             where mm_game_server_name = $1",
         )
         .bind(search_value)
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     } else {
         let row: (i64,) = sqlx::query_as("select count(*) from mm_game_dedicated_servers")
-            .fetch_one(pool)
+            .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
     }
 }
 
 pub async fn mk_lib_database_game_server_upsert(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     server_name: String,
     server_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {

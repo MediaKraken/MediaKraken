@@ -7,3 +7,28 @@ use rsteam::steam_id::{SteamID2, SteamID3};
 use rsteam::steam_user::{BanData, Status};
 use rsteam::{SteamClient, SteamID};
 
+/*
+ISteamUser
+ResolveVanityURL
+GetPlayerSummaries
+GetPlayerBans
+GetFriendList
+GetUserGroupList
+ISteamUserStats
+GetGlobalAchievementPercentagesForApp
+GetNumberOfCurrentPlayers
+GetUserStatsForGame
+IPlayerService
+GetBadges
+GetCommunityBadgeProcess
+GetOwnedGames
+GetRecentlyPlayedGames
+GetSteamLevel
+IsPlayingSharedGame
+ISteamApps
+GetAppList
+ISteamNews
+GetNewsForApp
+ */
+
+ 

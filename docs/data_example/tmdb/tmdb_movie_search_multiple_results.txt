@@ -1,0 +1,326 @@
+
+https://api.themoviedb.org/3/search/movie?api_key=FAKEID&include_adult=1&query=robocop
+
+{
+   "page": 1,
+   "results": [
+      {
+         "adult": false,
+         "backdrop_path": "/hTDAWiohFTwJaKNcCNlsKs64bip.jpg",
+         "genre_ids": [
+            878,
+            28
+         ],
+         "id": 97020,
+         "original_language": "en",
+         "original_title": "RoboCop",
+         "overview": "In RoboCop, the year is 2028 and multinational conglomerate OmniCorp is at the center of robot technology.  Overseas, their drones have been used by the military for years, but have been forbidden for law enforcement in America.  Now OmniCorp wants to bring their controversial technology to the home front, and they see a golden opportunity to do it.  When Alex Murphy – a loving husband, father and good cop doing his best to stem the tide of crime and corruption in Detroit – is critically injured, OmniCorp sees their chance to build a part-man, part-robot police officer.  OmniCorp envisions a RoboCop in every city and even more billions for their shareholders, but they never counted on one thing: there is still a man inside the machine.",
+         "popularity": 25.782,
+         "poster_path": "/y6e3LFBrApa7zzS01EExfmQ6irY.jpg",
+         "release_date": "2014-01-30",
+         "title": "RoboCop",
+         "video": false,
+         "vote_average": 5.8,
+         "vote_count": 4856
+      },
+      {
+         "adult": false,
+         "backdrop_path": "/pRSTtNlcADoQkfeBGtFQNE1FDpb.jpg",
+         "genre_ids": [
+            28,
+            53,
+            878
+         ],
+         "id": 5548,
+         "original_language": "en",
+         "original_title": "RoboCop",
+         "overview": "In a violent, near-apocalyptic Detroit, evil corporation Omni Consumer Products wins a contract from the city government to privatize the police force. To test their crime-eradicating cyborgs, the company leads street cop Alex Murphy into an armed confrontation with crime lord Boddicker so they can use his body to support their untested RoboCop prototype. But when RoboCop learns of the company's nefarious plans, he turns on his masters.",
+         "popularity": 25.324,
+         "poster_path": "/hHtOgGb3NihlyRATHlKPaFApbrd.jpg",
+         "release_date": "1987-07-17",
+         "title": "RoboCop",
+         "video": false,
+         "vote_average": 7.3,
+         "vote_count": 4201
+      },
+      {
+         "adult": false,
+         "backdrop_path": "/cT0YCYCtAQC8wi56VWK1JRGgk3a.jpg",
+         "genre_ids": [
+            28,
+            12,
+            80,
+            878,
+            53
+         ],
+         "id": 5549,
+         "original_language": "en",
+         "original_title": "RoboCop 2",
+         "overview": "After a successful deployment of the Robocop Law Enforcement unit, OCP sees its goal of urban pacification come closer and closer, but as this develops, a new narcotic known as \"Nuke\" invades the streets led by God-delirious leader Cane. As this menace grows, it may prove to be too much for Murphy to handle. OCP tries to replicate the success of the first unit, but ends up with failed prototypes with suicidal issues... until Dr. Faxx, a scientist straying away from OCP's path, uses Cane as the new subject for the Robocop 2 project, a living God.",
+         "popularity": 20.286,
+         "poster_path": "/bmErS9eMqctVSpNaieU56SLfMEC.jpg",
+         "release_date": "1990-06-22",
+         "title": "RoboCop 2",
+         "video": false,
+         "vote_average": 5.9,
+         "vote_count": 1511
+      },
+      {
+         "adult": false,
+         "backdrop_path": "/oBDyiMDdJsxIYcN57JRfscGAo9f.jpg",
+         "genre_ids": [
+            28,
+            12,
+            80,
+            878,
+            53
+         ],
+         "id": 5550,
+         "original_language": "en",
+         "original_title": "RoboCop 3",
+         "overview": "The mega corporation Omni Consumer Products is still bent on creating their pet project, Delta City, to replace the rotting city of Detroit. Unfortunately, the inhabitants of the area have no intention of abandoning their homes simply for desires of the company. To this end, OCP have decided to force them to leave by employing a ruthless mercenary army to attack and harass them. An underground resistance begins and in this fight, Robocop must decide where his loyalties lie.",
+         "popularity": 15.405,
+         "poster_path": "/ppLSSwCuC5ERRWbu9H3R8SPL9AM.jpg",
+         "release_date": "1993-11-05",
+         "title": "RoboCop 3",
+         "video": false,
+         "vote_average": 4.7,
+         "vote_count": 1004
+      },
+      {
+         "adult": false,
+         "backdrop_path": "/4fDriPY4WaWKMqzHZipOCsWNOUt.jpg",
+         "genre_ids": [
+            28,
+            53,
+            80,
+            878
+         ],
+         "id": 74236,
+         "original_language": "en",
+         "original_title": "RoboCop: Prime Directives",
+         "overview": "Thirteen years after the original Robocop, Delta City, considered to be \"The Safest Place On Earth!\", has become a futuristic city owned and operated by OCP, and RoboCop, Alex Murphy has begun to feel his age. Murphy finds himself nearly obsolete, and must deal with the fact that his now-grown son James is an OCP executive, unaware that his father is still alive. Also, Murphy's former partner, John Cable, has returned to Delta City as its new Security Commander. But slowly, new enemies arise, and Murphy and Cable begin an investigation into a mysterious villain known as the Bone Machine, unaware that they are coming dangerously close to exposing an evil group of OCP executives known as The Trust... which James Murphy is a part of. Desperate to prevent their sinister plans from being revealed, The Trust programs Murphy to kill John Cable...",
+         "popularity": 4.757,
+         "poster_path": "/z5SU0GNhcIVPYaahJtqKzKqAb6T.jpg",
+         "release_date": "2001-01-04",
+         "title": "RoboCop: Prime Directives",
+         "video": false,
+         "vote_average": 4.4,
+         "vote_count": 42
+      },
+      {
+         "adult": false,
+         "backdrop_path": "/dGCsHciA1gmiSRl9HAmaMJ6tMYq.jpg",
+         "genre_ids": [
+            28,
+            878,
+            12,
+            80,
+            14,
+            53
+         ],
+         "id": 552497,
+         "original_language": "en",
+         "original_title": "RoboCop: The Future of Law Enforcement",
+         "overview": "While tracking a ruthless killer, RoboCop and Madigan uncover a conspiracy between insane genius Dr. Cray Mallardo and ruthless OCP executive Chip Chayken, to develop a computer system linked to a human brain. Neuro-brain is created, a system capable of running the public services of the entire city. There s just one glitch: a ghost named Diana inhabits the machine. As RoboCop gets too close to this kindred spirit, Chayken enlists the aid of a homicidal psychopath Pudface Morgan to kill him off.",
+         "popularity": 2.632,
+         "poster_path": "/sZDKf8UMAlKy8sVwAHmgCnjPnU9.jpg",
+         "release_date": "1994-03-14",
+         "title": "RoboCop: The Future of Law Enforcement",
+         "video": false,
+         "vote_average": 6.5,
+         "vote_count": 17
+      },
+      {
+         "adult": false,
+         "backdrop_path": "/qHSCU28NqiYFTE6ITzDdi8DChw8.jpg",
+         "genre_ids": [
+            28,
+            35,
+            80,
+            878
+         ],
+         "id": 254251,
+         "original_language": "en",
+         "original_title": "Our RoboCop Remake",
+         "overview": "Our RoboCop Remake is a crowd-sourced film project based on the 1987 Paul Verhoeven classic. Organized through Channel 101 and a bunch of other places, we're 50 filmmakers (amateur and professional)  from Los Angeles and New York who have split the original RoboCop up into individual pieces and have remade the movie ourselves.  Not necessarily a shot-for-shot remake, but a scene-for-scene retelling. As big fans of the original RoboCop, and as filmmakers and film fans admittedly rolling our eyes at the Hollywood remake machine, we've elected to do this remake thing our own way.",
+         "popularity": 2.178,
+         "poster_path": "/w9XzsfoMEFFdM1wanAC60RR5DXD.jpg",
+         "release_date": "2014-01-26",
+         "title": "Our RoboCop Remake",
+         "video": false,
+         "vote_average": 6.7,
+         "vote_count": 16
+      },
+      {
+         "adult": false,
+         "backdrop_path": null,
+         "genre_ids": [
+            28
+         ],
+         "id": 222209,
+         "original_language": "en",
+         "original_title": "WCW Capital Combat: The Return of RoboCop",
+         "overview": "WCW Capital Combat: The Return of Robocop was a one time professional wrestling PPV event from the NWA held under the WCW name. It took place on May 19, 1990 from the D.C. Armory in Washington, D.C.. It featured a promotional crossover with the upcoming release of RoboCop 2, with RoboCop appearing during the PPV.  The main event was Ric Flair versus Lex Luger in defense of Flair's NWA Heavy Weight Championship. Doom challenged the NWA Tag Team Champions, The Steiner Brothers, Rock 'n' Roll Express competed against The Freebirds in a Corporal Punishment match, Paul Ellering fought Teddy Long in a hair vs hair match, and Mark Callous (later to become The Undertaker) wrestled Johnny Ace (later to become the WWE's Exec. VP of Talent Relations).",
+         "popularity": 2.663,
+         "poster_path": "/cHe6EDhTl7f1gjmSNXdboiqOU8l.jpg",
+         "release_date": "1990-05-19",
+         "title": "WCW Capital Combat: The Return of RoboCop",
+         "video": true,
+         "vote_average": 4.5,
+         "vote_count": 3
+      },
+      {
+         "adult": false,
+         "backdrop_path": null,
+         "genre_ids": [
+            878,
+            28,
+            80
+         ],
+         "id": 535291,
+         "original_language": "en",
+         "original_title": "RoboCop Returns",
+         "overview": "Set in crime-ridden Detroit. Centers around the cyborg as he is forced to come back to the city and save it from the brink of anarchy.",
+         "popularity": 0.6,
+         "poster_path": null,
+         "title": "RoboCop Returns",
+         "video": false,
+         "vote_average": 0,
+         "vote_count": 0
+      },
+      {
+         "adult": false,
+         "backdrop_path": null,
+         "genre_ids": [
+            99
+         ],
+         "id": 574832,
+         "original_language": "en",
+         "original_title": "Flesh + Steel: The Making of 'RoboCop'",
+         "overview": "A look behind the scenes at the making of this science fiction classic about a policeman killed in the line of duty, only to be reborn as a half-man, half-machine supercop. Includes interviews with star Peter Weller and director Paul Verhoeven, who give their views on the efforts that went into making the film.",
+         "popularity": 1.244,
+         "poster_path": "/tgyvT6UKfBZcDWSiPVtAFHDiZfl.jpg",
+         "release_date": "2001-10-02",
+         "title": "Flesh + Steel: The Making of 'RoboCop'",
+         "video": false,
+         "vote_average": 7,
+         "vote_count": 2
+      },
+      {
+         "adult": false,
+         "backdrop_path": null,
+         "genre_ids": [],
+         "id": 1020892,
+         "original_language": "en",
+         "original_title": "RoboCop 2",
+         "overview": "Comic Book hero episode claim, where Delta City PD, OCPs law enforcement prototype robot  elites, de facto fight head to head. Amidst Delta City’s jacked -up, illicit RX pill dealing gang  chaos. Whereby drugs are industrially carted in by the sack load. Flooding Delta sci-fi city’s  gulley scum with illicit currency.  Narrative explainer  Robocops, one black#2 one steel#1. Murphy gets the original Beretta Auto 9 in his mould. The  9mm firing action is factually a hyped event in the gun world. The 9mm was chosen by Murphy,  and not OCP pre-programmed to him, unlike RC#2. He chooses the Auto 9 however, for more  reliability and multi-purpose, indoor tactical accuracy.",
+         "popularity": 0.6,
+         "poster_path": null,
+         "release_date": "",
+         "title": "RoboCop 2",
+         "video": false,
+         "vote_average": 0,
+         "vote_count": 0
+      },
+      {
+         "adult": false,
+         "backdrop_path": null,
+         "genre_ids": [
+            28,
+            53,
+            878
+         ],
+         "id": 1063072,
+         "original_language": "en",
+         "original_title": "RoboCop (Director's Cut)",
+         "overview": "In a violent, near-apocalyptic Detroit, evil corporation Omni Consumer Products wins a contract from the city government to privatize the police force. To test their crime-eradicating cyborgs, the company leads street cop Alex Murphy into an armed confrontation with crime lord Boddicker so they can use his body to support their untested RoboCop prototype. But when RoboCop learns of the company's nefarious plans, he turns on his masters.",
+         "popularity": 0.6,
+         "poster_path": null,
+         "release_date": "1995-01-01",
+         "title": "RoboCop (Director's Cut)",
+         "video": false,
+         "vote_average": 0,
+         "vote_count": 0
+      },
+      {
+         "adult": false,
+         "backdrop_path": null,
+         "genre_ids": [
+            99
+         ],
+         "id": 467067,
+         "original_language": "en",
+         "original_title": "RoboDoc: The Creation of Robocop",
+         "overview": "The new feature length retrospective into the making of RoboCop (1987), its sequels and cultural impact over the last 30 years. Supported with over 90 of the original cast and crew.  'RoboDoc' is made by fans for the fans of the franchise.",
+         "popularity": 1.08,
+         "poster_path": "/pNacu6hZz4YMiUjrs8Ji9Td7Ty5.jpg",
+         "title": "RoboDoc: The Creation of Robocop",
+         "video": false,
+         "vote_average": 8.7,
+         "vote_count": 3
+      },
+      {
+         "adult": false,
+         "backdrop_path": "/yZuUSQI9xPkq5MHzPbpfjEcIuOS.jpg",
+         "genre_ids": [
+            12,
+            28,
+            53,
+            878
+         ],
+         "id": 74779,
+         "original_language": "en",
+         "original_title": "Robotropolis",
+         "overview": "A group of reporters are covering the unveiling of a new facility that is completely maintained by robot prototypes. When one of the robots goes haywire, the reporters find themselves not just reporting on the malfunction, but fighting for their lives.",
+         "popularity": 4.5,
+         "poster_path": "/pvOHSqQcWzcLuZY9D1sg62hR5G8.jpg",
+         "release_date": "2011-09-02",
+         "title": "Robotropolis",
+         "video": false,
+         "vote_average": 3.2,
+         "vote_count": 46
+      },
+      {
+         "adult": false,
+         "backdrop_path": null,
+         "genre_ids": [
+            878,
+            28,
+            80
+         ],
+         "id": 557897,
+         "original_language": "bn",
+         "original_title": "Shoktir Lorai",
+         "overview": "Left for dead by the gangsters who murdered his daughter, Dr. Johan Buchi (Sidak) is injected with a special serum that not only saves his life but renders him superhuman.",
+         "popularity": 0.817,
+         "poster_path": null,
+         "release_date": "1996-01-01",
+         "title": "Shoktir Lorai",
+         "video": false,
+         "vote_average": 0,
+         "vote_count": 0
+      },
+      {
+         "adult": false,
+         "backdrop_path": null,
+         "genre_ids": [
+            28,
+            878
+         ],
+         "id": 258597,
+         "original_language": "en",
+         "original_title": "Robo-Kickboxer - Power of Justice",
+         "overview": "When a power enhancing drug has hallucinogenic side effects on kickboxer, Jack, he refuses to take it, and is then dropped by his manager. Desperate for money, he takes his teammate Kevin’s offer to deliver some cocaine. It is a set-up to take the business away from drug lord, Henry. Jack ends up in prison with Axel who was caught in the same deal.  Corrupt fight promoter, Parker, agrees to set up a fight between now blood rivals Kevin and Jack, and bets heavily on Jack. In order to ensure his success, he pumps Jack full of the experimental drug which brings out Jack’s ultimate fighting power while making Kevin appear as a fearsome robot to Jack. Crazed by the drug, Jack does win the fight, and is finally able to give up the ring and seek a peaceful life.",
+         "popularity": 0.6,
+         "poster_path": null,
+         "release_date": "1990-02-26",
+         "title": "Robo-Kickboxer - Power of Justice",
+         "video": false,
+         "vote_average": 6,
+         "vote_count": 1
+      }
+   ],
+   "total_pages": 1,
+   "total_results": 16
+}

@@ -6,6 +6,10 @@ use serde_json::json;
 use sqlx::{types::Json, types::Uuid};
 use std::error::Error;
 use std::path::Path;
+use torrent_name_parser::Metadata;
+
+#[path = "../../mk_lib_common_enum_media_type.rs"]
+mod mk_lib_common_enum_media_type;
 
 #[path = "../image_path.rs"]
 mod image_path;
@@ -21,10 +25,10 @@ mod mk_lib_database_metadata_person;
 mod mk_lib_database_metadata_tv;
 
 pub async fn provider_tmdb_movie_fetch(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     tmdb_id: i32,
     metadata_uuid: Uuid,
-    tmdb_api_key: String,
+    tmdb_api_key: &String,
 ) {
     // fetch and save json data via tmdb id
     let result_json = provider_tmdb_movie_fetch_by_id(tmdb_id, tmdb_api_key)
@@ -32,56 +36,90 @@ pub async fn provider_tmdb_movie_fetch(
         .unwrap();
     let mut series_id: i32;
     let mut image_json: serde_json::Value;
-    (series_id, result_json, image_json) =
-        provider_tmdb_meta_info_build(result_json).await.unwrap();
+    (series_id, image_json) = provider_tmdb_meta_info_build(&result_json).await.unwrap();
     mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_insert(
-        pool,
+        sqlx_pool,
         metadata_uuid,
         series_id,
-        result_json,
+        &result_json,
         image_json,
-    );
-    if result_json.get("credits") != None {
+    )
+    .await;
+    if result_json.get("credits").is_some() {
         // cast/crew doesn't exist on all media
-        if result_json["credits"].get("cast") != None {
+        if result_json["credits"].get("cast").is_some() {
             mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert_cast_crew(
-                pool,
-                result_json["credits"]["cast"],
+                sqlx_pool,
+                &result_json["credits"]["cast"],
             )
             .await;
         }
 
-        if result_json["credits"].get("crew") != None {
+        if result_json["credits"].get("crew").is_some() {
             mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert_cast_crew(
-                pool,
-                result_json["credits"]["crew"],
+                sqlx_pool,
+                &result_json["credits"]["crew"],
             )
             .await;
         }
     }
 }
 
-/*
-       // 504	Your request to the backend server timed out. Try again.
-       if result_json.status_code == 504 {
-           await asyncio.sleep(60)
-           // redo fetch due to 504
-           await movie_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid)
-           }
-       else if result_json.status_code == 200 {
+pub async fn provider_tmdb_person_fetch(
+    sqlx_pool: &sqlx::PgPool,
+    tmdb_id: i32,
+    metadata_uuid: Uuid,
+    tmdb_api_key: &String,
+) {
+    // fetch and save json data via tmdb id
+    let result_json = provider_tmdb_person_fetch_by_id(tmdb_id, tmdb_api_key)
+        .await
+        .unwrap();
+}
 
-       else if result_json.status_code == 404 {
-           // TODO handle 404's better
-           metadata_uuid = None
-           }
-   else {  // is this is None....
-       metadata_uuid = None
-       }
-   return metadata_uuid
-*/
+pub async fn provider_tmdb_tv_fetch(
+    sqlx_pool: &sqlx::PgPool,
+    tmdb_id: i32,
+    metadata_uuid: Uuid,
+    tmdb_api_key: &String,
+) {
+    // fetch and save json data via tmdb id
+    let result_json = provider_tmdb_tv_fetch_by_id(tmdb_id, tmdb_api_key)
+        .await
+        .unwrap();
+    let mut series_id: i32;
+    let mut image_json: serde_json::Value;
+    (series_id, image_json) = provider_tmdb_meta_info_build(&result_json).await.unwrap();
+    mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_insert(
+        sqlx_pool,
+        metadata_uuid,
+        series_id,
+        &result_json,
+        image_json,
+    )
+    .await;
+    if result_json.get("credits").is_some() {
+        // cast/crew doesn't exist on all media
+        if result_json["credits"].get("cast").is_some() {
+            mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert_cast_crew(
+                sqlx_pool,
+                &result_json["credits"]["cast"],
+            )
+            .await;
+        }
+
+        if result_json["credits"].get("crew").is_some() {
+            mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert_cast_crew(
+                sqlx_pool,
+                &result_json["credits"]["crew"],
+            )
+            .await;
+        }
+    }
+}
 
 pub async fn provider_tmdb_movie_id_max(
-    api_key: String,
+    api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/movie/latest?api_key={}",
@@ -93,7 +131,7 @@ pub async fn provider_tmdb_movie_id_max(
 }
 
 pub async fn provider_tmdb_person_id_max(
-    api_key: String,
+    api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/person/latest?api_key={}",
@@ -105,7 +143,7 @@ pub async fn provider_tmdb_person_id_max(
 }
 
 pub async fn provider_tmdb_tv_id_max(
-    api_key: String,
+    api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/tv/latest?api_key={}",
@@ -118,7 +156,7 @@ pub async fn provider_tmdb_tv_id_max(
 
 pub async fn provider_tmdb_collection_fetch_by_id(
     tmdb_id: i32,
-    api_key: String,
+    api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/collection/{}?api_key={}",
@@ -131,7 +169,7 @@ pub async fn provider_tmdb_collection_fetch_by_id(
 
 pub async fn provider_tmdb_movie_fetch_by_id(
     tmdb_id: i32,
-    api_key: String,
+    api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/movie/{}?api_key={}\
@@ -144,7 +182,7 @@ pub async fn provider_tmdb_movie_fetch_by_id(
 }
 
 pub async fn provider_tmdb_person_changes(
-    api_key: String,
+    api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/person/changes?api_key={}",
@@ -157,7 +195,7 @@ pub async fn provider_tmdb_person_changes(
 
 pub async fn provider_tmdb_person_fetch_by_id(
     tmdb_id: i32,
-    api_key: String,
+    api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/person/{}?api_key={}\
@@ -171,7 +209,7 @@ pub async fn provider_tmdb_person_fetch_by_id(
 
 pub async fn provider_tmdb_review_fetch_by_id(
     tmdb_id: i32,
-    api_key: String,
+    api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/review/{}?api_key={}",
@@ -184,7 +222,7 @@ pub async fn provider_tmdb_review_fetch_by_id(
 
 pub async fn provider_tmdb_tv_fetch_by_id(
     tmdb_id: i32,
-    api_key: String,
+    api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/tv/{}?api_key={}\
@@ -196,7 +234,9 @@ pub async fn provider_tmdb_tv_fetch_by_id(
     Ok(url_result)
 }
 
-pub async fn provider_tmdb_meta_info_build(result_json: serde_json::Value) {
+pub async fn provider_tmdb_meta_info_build(
+    result_json: &serde_json::Value,
+) -> Result<(i32, serde_json::Value), Box<dyn std::error::Error>> {
     let mut image_file_path = String::new();
     // create file path for poster
     let mut image_file_path = image_path::meta_image_file_path("poster".to_string())
@@ -259,36 +299,61 @@ pub async fn provider_tmdb_meta_info_build(result_json: serde_json::Value) {
     "Backdrop": backdrop_file_path,
     "Poster": poster_file_path
     });
-    return (result_json["id"], image_json);
+    Ok((result_json["id"].to_string().parse().unwrap(), image_json))
+}
+
+pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_api_key: &String) {
+    let mut search_text: String = guessit_data.title().to_string().replace(" ", "%20");
+    if guessit_data.year().is_some() {
+        search_text = format!(
+            "{}%20{}",
+            search_text,
+            guessit_data.year().unwrap().to_string()
+        );
+    }
+    match media_type {
+        mk_lib_common_enum_media_type::DLMediaType::MOVIE
+        | mk_lib_common_enum_media_type::DLMediaType::MOVIE_EXTRAS
+        | mk_lib_common_enum_media_type::DLMediaType::MOVIE_SUBTITLE
+        | mk_lib_common_enum_media_type::DLMediaType::MOVIE_THEME
+        | mk_lib_common_enum_media_type::DLMediaType::MOVIE_TRAILER => {
+            let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
+                "https://api.themoviedb.org/3/search/movie\
+                ?api_key={}&include_adult=1&query={}",
+                search_text, tmdb_api_key
+            ))
+            .await
+            .unwrap();
+        }
+        mk_lib_common_enum_media_type::DLMediaType::TV
+        | mk_lib_common_enum_media_type::DLMediaType::TV_EPISODE
+        | mk_lib_common_enum_media_type::DLMediaType::TV_EXTRAS
+        | mk_lib_common_enum_media_type::DLMediaType::TV_SEASON
+        | mk_lib_common_enum_media_type::DLMediaType::TV_SUBTITLE
+        | mk_lib_common_enum_media_type::DLMediaType::TV_THEME
+        | mk_lib_common_enum_media_type::DLMediaType::TV_TRAILER => {
+            let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
+                "https://api.themoviedb.org/3/search/tv\
+                ?api_key={}&include_adult=1&query={}",
+                search_text, tmdb_api_key
+            ))
+            .await
+            .unwrap();
+        }
+        mk_lib_common_enum_media_type::DLMediaType::PERSON => {
+            let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
+                "https://api.themoviedb.org/3/search/person\
+                ?api_key={}&include_adult=1&query={}",
+                search_text, tmdb_api_key
+            ))
+            .await
+            .unwrap();
+        }
+        _ => println!("provider_tmdb_search type does not equal any value"),
+    }
 }
 
 /*
-    pub async fn com_tmdb_search(self, media_title, media_year=None, id_only=True,
-                              media_type=common_global.DLMediaType.Movie.value):
-        """
-        # search for media title and year
-        """
-        if media_type == common_global.DLMediaType.Movie.value:
-            async with httpx.AsyncClient() as client:
-                search_json = await client.get('https://api.themoviedb.org/3/search/movie'
-                                               '?api_key=%s&include_adult=1&query=%s'
-                                               % (self.API_KEY, media_title.encode('utf-8')),
-                                               timeout=3.05)
-        else if media_type == common_global.DLMediaType.TV.value:
-            async with httpx.AsyncClient() as client:
-                search_json = await client.get('https://api.themoviedb.org/3/search/tv'
-                                               '?api_key=%s&include_adult=1&query=%s'
-                                               % (self.API_KEY, media_title.encode('utf-8')),
-                                               timeout=3.05)
-        else if media_type == common_global.DLMediaType.Person.value:
-            async with httpx.AsyncClient() as client:
-                search_json = await client.get('https://api.themoviedb.org/3/search/person'
-                                               '?api_key=%s&include_adult=1&query=%s'
-                                               % (self.API_KEY, media_title.encode('utf-8')),
-                                               timeout=3.05)
-        else:  // invalid search type
-            return None, None
-        // pull json since it's a coroutine above
         search_json = search_json.json()
         if search_json != None and search_json['total_results'] > 0:
             for res in search_json['results']:

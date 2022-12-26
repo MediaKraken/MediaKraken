@@ -1,4 +1,4 @@
-FROM rust:1.63.0 as cargo-build
+FROM rust:1.66.0 as cargo-build
 
 RUN rustup target add x86_64-unknown-linux-musl \
   &&  \apt-get update && apt-get install -y --no-install-recommends musl-tools musl-dev \
@@ -9,13 +9,13 @@ ENV USER=mediakraken
 ENV UID=10001
 
 RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "/nonexistent" \
-    --shell "/sbin/nologin" \
-    --no-create-home \
-    --uid "${UID}" \
-    "${USER}"
+  --disabled-password \
+  --gecos "" \
+  --home "/nonexistent" \
+  --shell "/sbin/nologin" \
+  --no-create-home \
+  --uid "${UID}" \
+  "${USER}"
 
 WORKDIR /mediakraken
 

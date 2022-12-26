@@ -5,7 +5,7 @@ use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_link_delete(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     link_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
@@ -25,7 +25,7 @@ pub struct DBLinkList {
 }
 
 pub async fn mk_lib_database_link_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     offset: i32,
     records: i32,
 ) -> Result<Vec<DBLinkList>, sqlx::Error> {
@@ -43,13 +43,13 @@ pub async fn mk_lib_database_link_read(
             mm_link_name: row.get("mm_link_name"),
             mm_link_json: row.get("mm_link_json"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }
 
 pub async fn mk_lib_database_link_insert(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     link_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     new_guid = Uuid::new_v4();
@@ -67,7 +67,7 @@ pub async fn mk_lib_database_link_insert(
 }
 
 pub async fn mk_lib_database_link_list_count(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i32, sqlx::Error> {
     if search_value != "" {
@@ -76,12 +76,12 @@ pub async fn mk_lib_database_link_list_count(
             where mm_link_name % $1",
         )
         .bind(search_value)
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     } else {
         let row: (i32,) = sqlx::query_as("select count(*) from mm_library_link")
-            .fetch_one(pool)
+            .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
     }

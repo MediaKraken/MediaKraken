@@ -11,7 +11,7 @@ pub struct DBMediaMusicVideoList {
 }
 
 pub async fn mk_lib_database_media_music_video_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
     offset: i32,
     limit: i32,
@@ -26,13 +26,13 @@ pub async fn mk_lib_database_media_music_video_read(
         .map(|row: PgRow| DBMediaMusicVideoList {
             mm_metadata_music_video_guid: row.get("mm_metadata_music_video_guid"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }
 
 pub async fn mk_lib_database_media_music_video_count(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
     if search_value != "" {
@@ -42,7 +42,7 @@ pub async fn mk_lib_database_media_music_video_count(
             and mm_media_music_video_song % $1",
         )
         .bind(search_value)
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     } else {
@@ -50,7 +50,7 @@ pub async fn mk_lib_database_media_music_video_count(
             "select count(*) from mm_metadata_music_video, mm_media \
             where mm_media_metadata_guid = mm_metadata_music_video_guid",
         )
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     }

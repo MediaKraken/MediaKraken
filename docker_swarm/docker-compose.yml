@@ -9,15 +9,15 @@ services:
       - db_password
     environment:
       - RUST_BACKTRACE=1
-      - WAIT_HOSTS=pgbouncer:6432, rabbit:5672
-    command: sh -c "/wait && /myapp/myapp"
+      - WAIT_HOSTS=database:5432, rabbit:5672
+    command: sh -c "/wait && /mediakraken/mkcon"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
+    deploy:
+      mode: replicated
+      replicas: 1
     networks:
       - mediakraken_network_backend
-    deploy:
-      placement:
-        constraints: [ node.role == manager ]
 
   # Postgresql server
   database:
@@ -36,6 +36,8 @@ services:
     stop_grace_period: 30s
     stop_signal: SIGTERM
     deploy:
+      mode: replicated
+      replicas: 1
       placement:
         constraints: [ node.role == manager ]
     volumes:
@@ -45,72 +47,24 @@ services:
     networks:
       - mediakraken_network_backend
 
-  #  # Postgresql server
-  #  database:
-  #    image: mediakraken/mkdatabase:${BRANCH}
-  #    environment:
-  #      - PGHOST=/tmp
-  #      - MAX_CONNECTIONS=20
-  #      - MAX_WAL_SENDERS=10
-  #      - PG_MODE=primary
-  #      - PG_PRIMARY_USER=${DBUSER}
-  #      - PG_PRIMARY_PASSWORD=${DBPASS}
-  #      - PG_ROOT_PASSWORD=${DBPASS}
-  #      - PG_PRIMARY_PORT=5432
-  #      - POSTGRES_DB=${DBDATABASE}
-  #      - POSTGRES_USER=${DBUSER}
-  #      - POSTGRES_PASSWORD=${DBPASS}
-  #    stop_grace_period: 30s
-  #    stop_signal: SIGTERM
-  #    networks:
-  #      - mediakraken_network_backend
-  #    deploy:
-  #      placement:
-  #        constraints:
-  #        - node.labels.type == primary
-  #        - node.role == worker
-  #
-  #  # Postgresql server replica
-  #  database-replica:
-  #    image: mediakraken/mkdatabase:${BRANCH}
-  #    environment:
-  #      - PGHOST=/tmp
-  #      - MAX_CONNECTIONS=20
-  #      - MAX_WAL_SENDERS=10
-  #      - PG_MODE=replica
-  #      - PG_PRIMARY_HOST=database
-  #      - PG_PRIMARY_PORT=5432
-  #      - PG_PRIMARY_USER=${DBUSER}
-  #      - PG_PRIMARY_PASSWORD=${DBPASS}
-  #      - PG_ROOT_PASSWORD=${DBPASS}
-  #      - POSTGRES_DB=${DBDATABASE}
-  #      - POSTGRES_USER=${DBUSER}
-  #      - POSTGRES_PASSWORD=${DBPASS}
-  #    stop_grace_period: 30s
-  #    stop_signal: SIGTERM
-  #    networks:
-  #      - mediakraken_network_backend
-  #    deploy:
-  #      placement:
-  #        constraints:
-  #        - node.labels.type != primary
-  #        - node.role == worker
-
   # Runs the download services
   download:
     image: mediakraken/mkdownload:${BRANCH}
     secrets:
       - db_password
-    entrypoint: ./wait-for-it-ash-busybox130.sh -h mkstack_pgbouncer -p 6432 -t 120 -- python3 main_download.py
+    environment:
+      - RUST_BACKTRACE=1
+      - WAIT_HOSTS=database:5432, rabbit:5672
+    command: sh -c "/wait && /mediakraken/mkdownload"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
-      - mediakraken_vol_static:/mediakraken/web_app_sanic/static
+      - mediakraken_vol_static:/mediakraken/static
+    deploy:
+      mode: replicated
+      replicas: 1
     networks:
       - mediakraken_network_backend
-    deploy:
-      placement:
-        constraints: [ node.role == manager ]
 
   filebeat:
     image: mediakraken/mkfilebeat:${BRANCH}
@@ -132,12 +86,17 @@ services:
       # TODO why not store this in the db with the device as postgresql crypt
       # this stores the "push button" key
       - mediakraken_vol_phue:/mediakraken/phue
-    entrypoint: python3 main_hardware.py
+    environment:
+      - RUST_BACKTRACE=1
+      - WAIT_HOSTS=database:5432, rabbit:5672
+    command: sh -c "/wait && /mediakraken/mkhardware"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     networks:
       - mediakraken_network_backend
     deploy:
+      mode: replicated
+      replicas: 1
       placement:
         constraints: [ node.role == manager ]
 
@@ -146,25 +105,15 @@ services:
     image: mediakraken/mkinotify:${BRANCH}
     environment:
       - RUST_BACKTRACE=1
-      - WAIT_HOSTS=pgbouncer:6432, rabbit:5672
-    command: sh -c "/wait && /myapp/myapp"
+      - WAIT_HOSTS=rabbit:5672
+    command: sh -c "/wait && /mediakraken/myinotify"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     networks:
       - mediakraken_network_backend
     deploy:
-      placement:
-        constraints: [ node.role == manager ]
-
-  #  logspout:
-  #    image: mediakraken/mklogspout:${BRANCH}
-  #    environment:
-  #      ROUTE_URIS: 'syslog+tcp://th-elk-1:5000'
-  #      LOGSTASH_FIELDS: 'environment=production'
-  #    volumes:
-  #      - /var/run/docker.sock:/var/run/docker.sock:ro
-  #    deploy:
-  #      mode: global
+      mode: replicated
+      replicas: 1
 
   # runs the server to fetch/process all metadata
   metadata:
@@ -177,40 +126,23 @@ services:
     volumes:
       - ./mkmount:/mediakraken/mnt
       # stores posters/etc so webserver can present
-      - mediakraken_vol_static:/mediakraken/web_app_sanic/static
+      - mediakraken_vol_static:/mediakraken/mkwebapp/static
       # stores the xml/json xref files for anime match
       - mediakraken_vol_cache:/mediakraken/cache
     networks:
       - mediakraken_network_backend
     deploy:
-      placement:
-        constraints: [ node.role == manager ]
+      mode: replicated
+      replicas: 1
 
-  #  moosefsmaster:
-  #    image: mediakraken/mkmoosemaster:${BRANCH}
-  #    networks:
-  #      - mediakraken_moosefsnet
-  #    ports:
-  #      - "9425:9425"
-  #    deploy:
-  #      mode: replicated
-  #      replicas: 1
-  #      placement:
-  #        constraints: [node.role == manager]
-  #
-  #  moosefschunkserver:
-  #    image: mediakraken/mkmoosechunkserver:${BRANCH}
-  #    environment:
-  #      - LABELS=M
-  #      - SIZE=1
-  #    networks:
-  #      - mediakraken_moosefsnet
-  #    volumes:
-  #      - ./data/moosehdd0:/mnt/hdd0
-  #    deploy:
-  #      mode: global
-  #      placement:
-  #        constraints: [node.platform.os == linux]
+  # multicast discover server
+  mkmulticast:
+    image: mediakraken/mkmulticast:${BRANCH}
+    command: sh -c "/mediakraken/mkmulticast"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network_frontend
 
   # runs the mumble chat server
   mumble:
@@ -229,8 +161,8 @@ services:
     networks:
       - mediakraken_network_backend
     deploy:
-      placement:
-        constraints: [ node.role == manager ]
+      mode: replicated
+      replicas: 0
 
   # runs the nginx proxy service
   nginx:
@@ -247,11 +179,11 @@ services:
     networks:
       - mediakraken_network_backend
     deploy:
-      placement:
-        constraints: [ node.role == manager ]
+      mode: replicated
+      replicas: 1
 
   pgadmin:
-    image: dpage/pgadmin4:6.5
+    image: dpage/pgadmin4:6.15
     stop_grace_period: 30s
     stop_signal: SIGTERM
     networks:
@@ -285,11 +217,11 @@ services:
     entrypoint: ./wait-for-it-ash-busybox130.sh -h mkstack_database -p 5432 -t 120 -- ./entrypoint.sh
     stop_grace_period: 30s
     stop_signal: SIGTERM
+    networks:
+      - mediakraken_network_backend
     deploy:
       mode: replicated
       replicas: 1
-    networks:
-      - mediakraken_network_backend
 
   # pika
   pika:
@@ -309,28 +241,26 @@ services:
     networks:
       - mediakraken_network_backend
     deploy:
-      placement:
-        constraints: [ node.role == manager ]
+      mode: replicated
+      replicas: 1
 
   portainer:
-    image: portainer/portainer-ce:2.6.1-alpine
+    image: portainer/portainer-ce:2.16.1-alpine
     command: -H tcp://tasks.portaineragent:9001 --tlsskipverify
     ports:
       - "9000:9000"
       - "8000:8000"
     volumes:
-      - portainer_data:/data
+      - mediakraken_vol_portainer_data:/data
     networks:
       - portaineragent_agent_network
       - mediakraken_network_frontend
     deploy:
       mode: replicated
       replicas: 1
-      placement:
-        constraints: [ node.role == manager ]
 
   portaineragent:
-    image: portainer/agent:linux-amd64-2.4.0-alpine
+    image: portainer/agent:linux-amd64-2.16.1-alpine
     environment:
       AGENT_CLUSTER_ADDR: tasks.portaineragent
       # AGENT_PORT: 9001
@@ -365,8 +295,8 @@ services:
       - mediakraken_network_backend
       - mediakraken_network_frontend
     deploy:
-      placement:
-        constraints: [ node.role == manager ]
+      mode: replicated
+      replicas: 1
 
   # Main reactor
   reactor:
@@ -395,8 +325,8 @@ services:
     networks:
       - mediakraken_network_backend
     deploy:
-      placement:
-        constraints: [ node.role == manager ]
+      mode: replicated
+      replicas: 1
 
   teamspeak:
     image: mediakraken/mkchatteamspeak:${BRANCH}
@@ -409,8 +339,6 @@ services:
     deploy:
       mode: replicated
       replicas: 0
-      placement:
-        constraints: [ node.role == manager ]
 
   # runs transcode
   transcode:
@@ -426,9 +354,7 @@ services:
       - mediakraken_network_backend
     deploy:
       mode: replicated
-      replicas: 1
-      placement:
-        constraints: [ node.role == manager ]
+      replicas: 0
 
   transmission:
     image: mediakraken/mktransmission:${BRANCH}
@@ -446,12 +372,10 @@ services:
     deploy:
       mode: replicated
       replicas: 0
-      placement:
-        constraints: [ node.role == manager ]
 
   # Runs the web service for the main server application
   webapp:
-    image: mediakraken/mkwebappsanic:${BRANCH}
+    image: mediakraken/mkwebapp:${BRANCH}
     secrets:
       - db_password
       - secure_key
@@ -464,7 +388,7 @@ services:
     volumes:
       - ./mkmount:/mediakraken/mnt
       # must not be read only as it stores cache here
-      - mediakraken_vol_static:/mediakraken/web_app_sanic/static
+      - mediakraken_vol_static:/mediakraken/static
       - mediakraken_vol_webkey:/mediakraken/key
       - ./data/uploads:/mediakraken/uploads
       # needed to show docker/swarm info
@@ -483,14 +407,10 @@ services:
     deploy:
       mode: replicated
       replicas: 1
-      placement:
-        constraints: [ node.role == manager ]
 
 # Docker private networks
 networks:
   # don't bother naming as swarm names as stackname_*
-  mediakraken_moosefsnet:
-    driver: overlay
   portaineragent_agent_network:
     driver: overlay
   mediakraken_network_backend:
@@ -500,7 +420,6 @@ networks:
     external: true
 
 volumes:
-  portainer_data:
   mediakraken_vol_cache:
   mediakraken_vol_certs:
   mediakraken_vol_devices:
@@ -510,6 +429,7 @@ volumes:
   mediakraken_vol_nginx:
   mediakraken_vol_pgadmin:
   mediakraken_vol_phue:
+  mediakraken_vol_portainer_data:
   mediakraken_vol_postgresql:
   mediakraken_vol_postgresql_backup:
   mediakraken_vol_postgresql_logging:

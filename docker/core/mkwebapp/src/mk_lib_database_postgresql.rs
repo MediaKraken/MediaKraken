@@ -13,7 +13,7 @@ pub struct PGTableRows {
 }
 
 pub async fn mk_lib_database_table_rows(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<PGTableRows>, sqlx::Error> {
     // query provided by postgresql wiki
     let select_query = sqlx::query(
@@ -28,7 +28,7 @@ pub async fn mk_lib_database_table_rows(
             table_name: row.get("relname"),
             table_rows: row.get("reltuples"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }
@@ -40,7 +40,7 @@ pub struct PGTableSize {
 }
 
 pub async fn mk_lib_database_table_size(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<PGTableSize>, sqlx::Error> {
     // query provided by postgresql wiki
     let select_query = sqlx::query(
@@ -56,14 +56,14 @@ pub async fn mk_lib_database_table_size(
             table_name: row.get("relation"),
             table_size: row.get("total_size"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }
 
-pub async fn mk_lib_database_parallel_workers(pool: &sqlx::PgPool) -> Result<String, sqlx::Error> {
+pub async fn mk_lib_database_parallel_workers(sqlx_pool: &sqlx::PgPool) -> Result<String, sqlx::Error> {
     let row: (String,) = sqlx::query_as("show max_parallel_workers_per_gather")
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
     Ok(row.0)
 }

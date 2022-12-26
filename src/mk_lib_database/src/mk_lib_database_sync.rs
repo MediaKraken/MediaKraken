@@ -6,7 +6,7 @@ use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_sync_delete(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     sync_guid: Uuid,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
@@ -19,7 +19,7 @@ pub async fn mk_lib_database_sync_delete(
 }
 
 pub async fn mk_lib_database_sync_process_update(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     sync_guid: Uuid,
     sync_percent: f32,
 ) -> Result<(), sqlx::Error> {
@@ -36,15 +36,15 @@ pub async fn mk_lib_database_sync_process_update(
     Ok(())
 }
 
-pub async fn mk_lib_database_sync_count(pool: &sqlx::PgPool) -> Result<i32, sqlx::Error> {
+pub async fn mk_lib_database_sync_count(sqlx_pool: &sqlx::PgPool) -> Result<i32, sqlx::Error> {
     let row: (i32,) = sqlx::query_as("select count(*) from mm_media_sync")
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
     Ok(row.0)
 }
 
 pub async fn mk_lib_database_sync_insert(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     sync_path: String,
     sync_path_to: String,
     sync_json: serde_json::Value,
@@ -75,7 +75,7 @@ pub struct DBSyncList {
 }
 
 pub async fn mk_lib_database_sync_list(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     user_id: Uuid,
     offset: i32,
     limit: i32,
@@ -113,7 +113,7 @@ pub async fn mk_lib_database_sync_list(
             mm_sync_path_to: row.get("mm_sync_path_to"),
             mm_sync_options_json: row.get("mm_sync_options_json"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }

@@ -7,7 +7,7 @@ use std::error::Error;
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;
 
-pub async fn metadata_book_search_isbndb(pool: &sqlx::PgPool, lookup_name: String) {}
+pub async fn metadata_book_search_isbndb(sqlx_pool: &sqlx::PgPool, lookup_name: String) {}
 
 /*
    metadata_uuid = None

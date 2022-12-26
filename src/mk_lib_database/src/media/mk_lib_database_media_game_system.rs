@@ -12,7 +12,7 @@ pub struct DBMediaBookList {
 }
 
 pub async fn mk_lib_database_media_game_system_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
     offset: i32,
     limit: i32,
@@ -31,7 +31,7 @@ pub async fn mk_lib_database_media_game_system_read(
         .bind(search_value)
         .bind(offset)
         .bind(limit)
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
         Ok(rows)
     } else {
@@ -45,14 +45,14 @@ pub async fn mk_lib_database_media_game_system_read(
         )
         .bind(offset)
         .bind(limit)
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
         Ok(rows)
     }
 }
 
 pub async fn mk_lib_database_media_game_system_count(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
     if search_value != "" {
@@ -60,12 +60,12 @@ pub async fn mk_lib_database_media_game_system_count(
             "select count(*) from mm_metadata_game_systems_info where gs_game_system_name = $1",
         )
         .bind(search_value)
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     } else {
         let row: (i64,) = sqlx::query("select count(*) from mm_metadata_game_systems_info")
-            .fetch_one(pool)
+            .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
     }

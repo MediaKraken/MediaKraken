@@ -8,7 +8,7 @@ use sqlx::types::Uuid;
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;
 
-const BASE_API_URL: String = "http://imvdb.com/api/v1".to_string();
+const BASE_API_URL: &str = "http://imvdb.com/api/v1";
 
 /*
 
@@ -82,7 +82,7 @@ pub async fn meta_fetch_save_imvdb(db_connection, imvdb_id, metadata_uuid):
 
  */
 
-pub async fn meta_fetch_save_imvdb(pool: &sqlx::PgPool,
+pub async fn meta_fetch_save_imvdb(sqlx_pool: &sqlx::PgPool,
                                    imvdb_id: i32,
                                    metadata_uuid: Uuid)
                                    -> Result<Uuid, Box<dyn Error>> {

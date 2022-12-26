@@ -5,9 +5,9 @@ use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 
-pub async fn mk_lib_database_remote_media_count(pool: &sqlx::PgPool) -> Result<i32, sqlx::Error> {
+pub async fn mk_lib_database_remote_media_count(sqlx_pool: &sqlx::PgPool) -> Result<i32, sqlx::Error> {
     let row: (i32,) = sqlx::query_as("select count(*) from mm_media_remote")
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
     Ok(row.0)
 }

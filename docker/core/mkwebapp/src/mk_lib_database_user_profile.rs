@@ -6,7 +6,7 @@ use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_user_profile_insert(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     profile_name: String,
     profile_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
@@ -26,7 +26,7 @@ pub async fn mk_lib_database_user_profile_insert(
 }
 
 pub async fn mk_lib_database_user_group_insert(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     group_name: String,
     group_desc: String,
     group_rights_json: serde_json::Value,

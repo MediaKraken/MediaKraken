@@ -1,7 +1,7 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
 // https://github.com/vv9k/docker-api-rs
-// docker-api = { version = "0.9.1", features = ["swarm"] }
+// docker-api = { version = "0.12.1", features = ["swarm"] }
 
 use crate::rocket::futures::FutureExt;
 use crate::rocket::futures::StreamExt;

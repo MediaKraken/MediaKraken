@@ -5,43 +5,43 @@ use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_option_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
 ) -> Result<serde_json::Value, sqlx::Error> {
     let row: (serde_json::Value,) =
         sqlx::query_as("select mm_options_json from mm_options_and_status")
-            .fetch_one(pool)
+            .fetch_one(sqlx_pool)
             .await?;
     Ok(row.0)
 }
 
 pub async fn mk_lib_database_status_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
 ) -> Result<serde_json::Value, sqlx::Error> {
     let row: (serde_json::Value,) =
         sqlx::query_as("select mm_status_json from mm_options_and_status")
-            .fetch_one(pool)
+            .fetch_one(sqlx_pool)
             .await?;
     Ok(row.0)
 }
 
 pub async fn mk_lib_database_option_status_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
 ) -> Result<PgRow, sqlx::Error> {
     let rows = sqlx::query(
         "select mm_options_json, mm_status_json \
         from mm_options_and_status",
     )
-    .fetch_one(pool)
+    .fetch_one(sqlx_pool)
     .await?;
     Ok(rows)
 }
 
 pub async fn mk_lib_database_option_update(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     option_json: serde_json::Value,
 ) -> Result<(), sqlx::Error> {
     // no need for where clause as it's only the one record
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("update mm_options_and_status set mm_options_json = $1")
         .bind(option_json)
         .execute(&mut transaction)
@@ -51,12 +51,12 @@ pub async fn mk_lib_database_option_update(
 }
 
 pub async fn mk_lib_database_option_status_update(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     option_json: serde_json::Value,
     status_json: serde_json::Value,
 ) -> Result<(), sqlx::Error> {
     // no need for where clause as it's only the one record
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("update mm_options_and_status set mm_options_json = $1, mm_status_json = $2")
         .bind(option_json)
         .bind(status_json)
@@ -67,11 +67,11 @@ pub async fn mk_lib_database_option_status_update(
 }
 
 pub async fn mk_lib_database_status_update_scan(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     status_json: serde_json::Value,
 ) -> Result<(), sqlx::Error> {
     // no need for where clause as it's only the one record
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("update mm_options_and_status set mm_status_json = $1")
         .bind(status_json)
         .execute(&mut transaction)

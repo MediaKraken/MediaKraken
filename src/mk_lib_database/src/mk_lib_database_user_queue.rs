@@ -6,7 +6,7 @@ use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_meta_queue_count(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     user_uuid: Uuid,
     search_value: String,
 ) -> Result<i32, sqlx::Error> {
@@ -17,7 +17,7 @@ pub async fn mk_lib_database_meta_queue_count(
         )
         .bind(search_value)
         .bind(user_uuid)
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     } else {
@@ -26,7 +26,7 @@ pub async fn mk_lib_database_meta_queue_count(
             where mm_user_queue_user_id = $1",
         )
         .bind(user_uuid)
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     }

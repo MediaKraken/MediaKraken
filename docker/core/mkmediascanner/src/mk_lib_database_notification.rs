@@ -15,7 +15,7 @@ pub struct DBNotificationList {
 }
 
 pub async fn mk_lib_database_notification_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     offset: i32,
     limit: i32,
 ) -> Result<Vec<DBNotificationList>, sqlx::Error> {
@@ -34,13 +34,13 @@ pub async fn mk_lib_database_notification_read(
             mm_notification_time: row.get("mm_notification_time"),
             mm_notification_dismissible: row.get("mm_notification_dismissible"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }
 
 pub async fn mk_lib_database_notification_insert(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     mm_notification_text: String,
     mm_notification_dismissable: bool,
 ) -> Result<(), sqlx::Error> {
@@ -62,7 +62,7 @@ pub async fn mk_lib_database_notification_insert(
 }
 
 pub async fn mk_lib_database_notification_delete(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     mk_notification_guid: Uuid,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;

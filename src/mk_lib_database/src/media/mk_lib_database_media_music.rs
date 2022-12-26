@@ -6,7 +6,7 @@ use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_media_music_count(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
     if search_value != "" {
@@ -16,7 +16,7 @@ pub async fn mk_lib_database_media_music_count(
             and mm_metadata_album_name % $1",
         )
         .bind(search_value)
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     } else {
@@ -25,7 +25,7 @@ pub async fn mk_lib_database_media_music_count(
             (select distinct mm_metadata_album_guid from mm_metadata_album, mm_media \
             where mm_media_metadata_guid = mm_metadata_album_guid) as temp",
         )
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     }
@@ -39,7 +39,7 @@ pub struct DBMediaMusicList {
 }
 
 pub async fn mk_lib_database_media_music_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
     offset: i32,
     limit: i32,
@@ -77,7 +77,7 @@ pub async fn mk_lib_database_media_music_read(
             mm_metadata_album_name: row.get("mm_metadata_album_name"),
             mm_metadata_album_json: row.get("mm_metadata_album_json"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }

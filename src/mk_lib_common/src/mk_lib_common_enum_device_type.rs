@@ -4,7 +4,7 @@
 #[non_exhaustive]
 pub struct DLDeviceType;
 
-// next number is 44
+// next number is 45
 impl DLDeviceType {
     pub const AMPLIFIER: [&'static str; 2] = ["Audio Amplifier", 1];
     pub const BETA: [&'static str; 2] = ["Beta VCR", 2];
@@ -25,6 +25,7 @@ impl DLDeviceType {
     pub const LASERDISK: [&'static str; 2] = ["Laser Disc Player", 17];
     pub const LASERDISKHD: [&'static str; 2] = ["MUSE Laser Disc Player", 43];
     pub const MINIDISC: [&'static str; 2] = ["MiniDisc Player", 42];
+    pub const MUSE: [&'static str; 2] = ["Hi Vision Muse Laserdisc Player", 44];
     pub const NETUSB: [&'static str; 2] = ["Net/USB", 18];
     pub const PHONOGRAPH: [&'static str; 2] = ["Phonograph Player", 19];
     pub const PREAMP: [&'static str; 2] = ["Audio Preamplifier", 20];

@@ -1,4 +1,4 @@
-FROM rust:1.63.0 as cargo-build
+FROM rust:1.66.0 as cargo-build
 
 RUN rustup target add x86_64-unknown-linux-musl \
   && apt-get update && apt-get install -y --no-install-recommends musl-tools musl-dev \
@@ -9,13 +9,13 @@ ENV USER=mediakraken
 ENV UID=10001
 
 RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "/nonexistent" \
-    --shell "/sbin/nologin" \
-    --no-create-home \
-    --uid "${UID}" \
-    "${USER}"
+  --disabled-password \
+  --gecos "" \
+  --home "/nonexistent" \
+  --shell "/sbin/nologin" \
+  --no-create-home \
+  --uid "${UID}" \
+  "${USER}"
 
 WORKDIR /mediakraken
 
@@ -28,7 +28,7 @@ RUN cargo build --target x86_64-unknown-linux-musl --release
 ####################################################################################################
 FROM busybox:1.35.0-uclibc
 RUN wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.9.0/wait &&\
-    chmod +x /wait
+  chmod +x /wait
 # Import from builder.
 COPY --from=cargo-build /etc/passwd /etc/passwd
 COPY --from=cargo-build /etc/group /etc/group

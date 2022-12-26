@@ -12,7 +12,7 @@ pub struct DBMetadataAdultList {
 }
 
 pub async fn mk_lib_database_metadata_adult_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
     offset: i32,
     limit: i32,
@@ -22,28 +22,28 @@ pub async fn mk_lib_database_metadata_adult_read(
             .bind(search_value)
             .bind(offset)
             .bind(limit)
-            .fetch_all(pool)
+            .fetch_all(sqlx_pool)
             .await?;
         Ok(rows)
     } else {
         let rows = sqlx::query("")
             .bind(offset)
             .bind(limit)
-            .fetch_all(pool)
+            .fetch_all(sqlx_pool)
             .await?;
         Ok(rows)
     }
 }
 
 pub async fn mk_lib_database_metadata_adult_count(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
     if search_value != "" {
-        let row: (i64,) = sqlx::query("").bind(search_value).fetch_one(pool).await?;
+        let row: (i64,) = sqlx::query("").bind(search_value).fetch_one(sqlx_pool).await?;
         Ok(row.0)
     } else {
-        let row: (i64,) = sqlx::query("").fetch_one(pool).await?;
+        let row: (i64,) = sqlx::query("").fetch_one(sqlx_pool).await?;
         Ok(row.0)
     }
 }

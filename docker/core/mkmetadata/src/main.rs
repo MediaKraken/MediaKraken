@@ -8,7 +8,6 @@ use std::error::Error;
 use std::path::Path;
 use std::process::Command;
 use tokio::time::{sleep, Duration};
-use torrent_name_parser::Metadata;
 
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
@@ -16,10 +15,6 @@ mod mk_lib_database;
 mod mk_lib_database_media;
 #[path = "mk_lib_database_metadata_download_queue.rs"]
 mod mk_lib_database_metadata_download_queue;
-#[path = "mk_lib_database_metadata_movie.rs"]
-mod mk_lib_database_metadata_movie;
-#[path = "mk_lib_database_metadata_tv.rs"]
-mod mk_lib_database_metadata_tv;
 #[path = "mk_lib_database_option_status.rs"]
 mod mk_lib_database_option_status;
 #[path = "mk_lib_database_version.rs"]
@@ -31,9 +26,6 @@ mod mk_lib_network;
 
 #[path = "identification.rs"]
 mod metadata_identification;
-
-#[path = "metadata/provider/tmdb.rs"]
-mod metadata_provider_tmdb;
 
 #[path = "metadata/base.rs"]
 mod metadata_base;
@@ -56,30 +48,69 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .unwrap();
 
     // launch thread per provider
+    let tmdb_api_key = option_json["API"]["themoviedb"].to_string();
     let handle_tmdb = tokio::spawn(async move {
-        let tmdb_api_key = option_json["API"]["themoviedb"].to_string();
         loop {
+            println!("Before themoviedb read");
+            let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
             let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "themoviedb").await.unwrap();
-            for row_data in metadata_to_process {
+            for download_data in metadata_to_process {
                 metadata_base::metadata_process(
                     &sqlx_pool,
                     "themoviedb".to_string(),
-                    row_data,
-                    tmdb_api_key,
+                    download_data,
+                    &tmdb_api_key,
                 )
                 .await
                 .unwrap();
             }
+            sleep(Duration::from_secs(1)).await;
+        }
+    });
+    if !option_json["API"]["musicbrainz"].is_null() {
+        let musicbrainz_api_key = option_json["API"]["musicbrainz"].to_string();
+        let handle_musicbrainz = tokio::spawn(async move {
+            loop {
+                println!("Before musicbrainz read");
+                let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
+                let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "musicbrainz").await.unwrap();
+                for download_data in metadata_to_process {
+                    metadata_base::metadata_process(
+                        &sqlx_pool,
+                        "musicbrainz".to_string(),
+                        download_data,
+                        &musicbrainz_api_key,
+                    )
+                    .await
+                    .unwrap();
+                }
+                sleep(Duration::from_secs(1)).await;
+            }
+        });
+    };
+    let thesportsdb_api_key = option_json["API"]["thesportsdb"].to_string();
+    let handle_thesportsdb = tokio::spawn(async move {
+        loop {
+            println!("Before thesportsdb read");
+            let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
+            let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "thesportsdb").await.unwrap();
+            for download_data in metadata_to_process {
+                metadata_base::metadata_process(
+                    &sqlx_pool,
+                    "thesportsdb".to_string(),
+                    download_data,
+                    &thesportsdb_api_key,
+                )
+                .await
+                .unwrap();
+            }
+            sleep(Duration::from_secs(1)).await;
         }
     });
 
-    // setup last used id's per thread
-    let mut metadata_last_uuid: Uuid = uuid::Uuid::nil();
-    let mut metadata_last_title: String = String::new();
-    let mut metadata_last_year: i32 = 0;
-
     // process all the "Z" records
     loop {
+        println!("Before Z read");
         // grab new batch of records to process by content provider
         let metadata_to_process =
             mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(
@@ -87,66 +118,39 @@ async fn main() -> Result<(), Box<dyn Error>> {
             )
             .await
             .unwrap();
-        for row_data in metadata_to_process {
+        for download_data in metadata_to_process {
+            // begin id process
             let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
-            // check for dupes by name/year
-            let row_data_path: String = row_data.mm_download_path;
-            println!("Path: {:?}", row_data_path);
-            let file_name = Path::new(&row_data_path)
-                .file_name()
-                .unwrap()
-                .to_os_string()
-                .into_string()
+            metadata_uuid = metadata_identification::metadata_identification(
+                &sqlx_pool,
+                &download_data,
+            )
+            .await
+            .unwrap();
+            // // guessit processing which includes identification
+            // let metadata_uuid: uuid::Uuid =
+            //     metadata_guessit::metadata_guessit(&sqlx_pool, download_data)
+            //         .await
+            //         .unwrap();
+            // update the media row with the json media id and the proper name
+            if metadata_uuid != uuid::Uuid::nil() {
+                mk_lib_database_media::mk_lib_database_media_update_metadata_guid(
+                    &sqlx_pool,
+                    &download_data.mm_download_provider_id,
+                    metadata_uuid,
+                    &download_data.mm_download_guid,
+                )
+                .await
                 .unwrap();
-            println!("File: {:?}", file_name);
-
-            let guessit_data: Metadata = Metadata::from(&file_name).unwrap();
-            if guessit_data.title().len() > 0 {
-                if guessit_data.year().is_some() {
-                    if guessit_data.title().to_lowercase() == metadata_last_title
-                        && guessit_data.year().unwrap() == metadata_last_year
-                    {
-                        // matches last media scanned, so set with that metadata id
-                        metadata_uuid = metadata_last_uuid
-                    }
-                } else if guessit_data.title().to_lowercase() == metadata_last_title {
-                    // matches last media scanned, so set with that metadata id
-                    metadata_uuid = metadata_last_uuid
-                }
-                if metadata_uuid == uuid::Uuid::nil() {
-                    // begin id process
-                    metadata_uuid = metadata_identification::metadata_identification(
-                        &sqlx_pool,
-                        row_data,
-                        guessit_data,
-                    )
-                    .await
-                    .unwrap();
-                }
-                // allow none to be set so unmatched stuff can work for skipping
-                metadata_last_uuid = metadata_uuid;
-                metadata_last_title = guessit_data.title().to_lowercase();
-                if guessit_data.year().is_some() {
-                    metadata_last_year = guessit_data.year().unwrap();
-                } else {
-                    metadata_last_year = 0;
-                }
-            } else {
-                mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_update_provider(&sqlx_pool,
-                                                                                                                 "ZZ".to_string(),
-                                                                                                                 row_data.mm_download_guid).await.unwrap();
             }
-            // // update the media row with the json media id and the proper name
-            // if metadata_uuid != uuid::Uuid::nil() {
-            //     mk_lib_database_media::mk_lib_database_media_update_metadata_guid(&sqlx_pool,
-            //                                                                       row_data.mm_download_provider_id,
-            //                                                                       metadata_uuid,
-            //                                                                       row_data.mm_download_guid).await.unwrap();
-            // }
         }
         sleep(Duration::from_secs(1)).await;
     }
     // TODO unreachable....so, do I care
     //handle_tmdb.join().unwrap();
     //handle_tmdb.take().map(JoinHandle::join);
+    //handle_musicbrainz.join().unwrap();
+    //handle_musicbrainz.take().map(JoinHandle::join);
+    //handle_thesportsdb.join().unwrap();
+    //handle_thesportsdb.take().map(JoinHandle::join);
 }

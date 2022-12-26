@@ -22,23 +22,24 @@ mod mk_lib_database_metadata_game;
 mod mk_lib_hash_sha1;
 
 pub async fn metadata_game_lookup(
-    pool: &sqlx::PgPool,
-    download_data: DBDownloadQueueByProviderList,
+    sqlx_pool: &sqlx::PgPool,
+    download_data: &DBDownloadQueueByProviderList,
 ) -> Result<Uuid, sqlx::Error> {
     let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
                                                // TODO remove the file extension
     metadata_uuid =
-        mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_name_and_system(
-            &pool,
-            Path::new(&download_data.mm_download_path).file_name(),
-            0,
+        mk_lib_database_metadata_game::mk_lib_database_metadata_game_uuid_by_name_and_system(
+            &sqlx_pool,
+            Path::new(&download_data.mm_download_path.as_ref().unwrap()).file_name().unwrap().to_os_string().into_string().unwrap(),
+            "systemfakeshortname".to_string(),
         )
         .await
         .unwrap();
     if metadata_uuid == uuid::Uuid::nil() {
-        let sha1_hash = mk_lib_hash_sha1::mk_file_hash_sha1(&download_data.mm_download_path).unwrap();
+        let sha1_hash =
+            mk_lib_hash_sha1::mk_file_hash_sha1(&download_data.mm_download_path.as_ref().unwrap()).unwrap();
         metadata_uuid =
-            mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(&pool, sha1_hash)
+            mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(&sqlx_pool, sha1_hash)
                 .await
                 .unwrap();
     }

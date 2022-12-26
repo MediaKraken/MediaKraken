@@ -13,7 +13,7 @@ pub struct DBMetaTVLiveList {
 }
 
 pub async fn mk_lib_database_meta_tv_live_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     broadcast_time: chrono::DateTime,
 ) -> Result<Vec<PgRow>, sqlx::Error> {
     let rows: Vec<PgRow> = sqlx::query(
@@ -23,7 +23,7 @@ pub async fn mk_lib_database_meta_tv_live_read(
         order by LOWER(mm_tv_station_name), mm_tv_schedule_json->'airDateTime'",
     )
     .bind(broadcast_time)
-    .fetch_all(pool)
+    .fetch_all(sqlx_pool)
     .await?;
     Ok(rows)
 }
@@ -37,7 +37,7 @@ pub struct MetaTVStationList {
 }
 
 pub async fn mk_lib_database_meta_tv_live_station_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<MetaTVStationList>, sqlx::Error> {
     let select_query = sqlx::query(
         "select mm_tv_stations_id, mm_tv_station_name, \
@@ -51,13 +51,13 @@ pub async fn mk_lib_database_meta_tv_live_station_read(
             mm_tv_station_id: row.get("mm_tv_station_id"),
             mm_tv_station_channel: row.get("mm_tv_station_channel"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }
 
 pub async fn mk_lib_database_meta_tv_station_exists(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     station_id: String,
     channel_id: String,
 ) -> Result<i32, sqlx::Error> {
@@ -68,7 +68,7 @@ pub async fn mk_lib_database_meta_tv_station_exists(
     )
     .bind(station_id)
     .bind(channel_id)
-    .fetch_one(pool)
+    .fetch_one(sqlx_pool)
     .await?;
     Ok(row.0)
 }

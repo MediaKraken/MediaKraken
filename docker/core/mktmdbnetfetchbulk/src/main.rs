@@ -50,7 +50,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}), LOGGING_INDEX_NAME)
         .await;
 
-    let fetch_date: String = "03_30_2022".to_string();
+    let fetch_date: String = "12_15_2022".to_string();
 
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();

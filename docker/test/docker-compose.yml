@@ -29,7 +29,7 @@ services:
 
   # database management tool
   mktestpgadmin:
-    image: dpage/pgadmin4:6.5
+    image: dpage/pgadmin4:6.15
     stop_grace_period: 30s
     stop_signal: SIGTERM
     container_name: mkpgadmin

@@ -25,8 +25,8 @@ pub struct MetadataMovieLastLookup {
 }
 
 pub async fn metadata_movie_lookup(
-    pool: &sqlx::PgPool,
-    download_data: DBDownloadQueueByProviderList,
+    sqlx_pool: &sqlx::PgPool,
+    download_data: &DBDownloadQueueByProviderList,
     file_name: Metadata,
 ) -> Result<Uuid, sqlx::Error> {
     // don't bother checking title/year as the main_server_metadata_api_worker does it already
@@ -35,7 +35,7 @@ pub async fn metadata_movie_lookup(
 }
 
 /*
-pub async fn metadata_movie_lookup(pool: &sqlx::PgPool, dl_row, guessit_data) {
+pub async fn metadata_movie_lookup(sqlx_pool: &sqlx::PgPool, dl_row, guessit_data) {
 
     // determine provider id's from nfo/xml if they exist
     (nfo_data, xml_data) = metadata_nfo_xml.nfo_xml_file(dl_row.get("mdq_path"));

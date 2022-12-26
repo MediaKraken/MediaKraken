@@ -15,8 +15,8 @@ mod provider_isbndb;
 mod provider_open_library;
 
 pub async fn metadata_book_lookup(
-    pool: &sqlx::PgPool,
-    download_data: DBDownloadQueueByProviderList,
+    sqlx_pool: &sqlx::PgPool,
+    download_data: &DBDownloadQueueByProviderList,
 ) -> Result<Uuid, sqlx::Error> {
     let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
     Ok(metadata_uuid)

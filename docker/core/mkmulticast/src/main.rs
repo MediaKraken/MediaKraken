@@ -12,11 +12,11 @@ use std::time::Duration;
 
 fn new_socket(addr: &SocketAddr) -> io::Result<Socket> {
     let domain = if addr.is_ipv4() {
-        Domain::ipv4()
+        Domain::IPV4
     } else {
-        Domain::ipv6()
+        Domain::IPV6
     };
-    let socket = Socket::new(domain, Type::dgram(), Some(Protocol::udp()))?;
+    let socket = Socket::new(domain, Type::DGRAM, Some(Protocol::UDP))?;
     // we're going to use read timeouts so that we don't hang waiting for packets
     socket.set_read_timeout(Some(Duration::from_millis(100)))?;
     Ok(socket)
@@ -90,9 +90,8 @@ async fn main() {
         println!("received {} bytes from {:?}", amt, remote_addr);
 
         // create a socket to send the response
-        let responder = new_socket(&remote_addr)
-            .expect("failed to create responder")
-            .into_udp_socket();
+        let responder =
+            UdpSocket::from(new_socket(&remote_addr).expect("failed to create responder"));
 
         // we send the response that was set at the method beginning
         responder

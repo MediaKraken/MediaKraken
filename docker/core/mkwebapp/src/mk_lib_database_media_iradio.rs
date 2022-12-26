@@ -54,18 +54,18 @@ pub async fn db_iradio_list(self, offset=0, records=None, active_station=True,
                                    active_station, offset, records)
 
 // TODO port query
-pub async fn mk_lib_database_media_iradio_count(pool: &sqlx::PgPool,
+pub async fn mk_lib_database_media_iradio_count(sqlx_pool: &sqlx::PgPool,
                                                   search_value: String)
                                                   -> Result<i32, sqlx::Error> {
     if search_value != "" {
         let row: (i32, ) = sqlx::query("")
             .bind(search_value)
-            .fetch_one(pool)
+            .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
     } else {
         let row: (i32, ) = sqlx::query("")
-            .fetch_one(pool)
+            .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
     }

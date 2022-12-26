@@ -18,8 +18,8 @@ pub struct MetadataMusicVideoLastLookup {
 }
 
 pub async fn metadata_music_video_lookup(
-    pool: &sqlx::PgPool,
-    file_data: DBDownloadQueueByProviderList,
+    sqlx_pool: &sqlx::PgPool,
+    file_data: &DBDownloadQueueByProviderList,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
     Ok(metadata_uuid)

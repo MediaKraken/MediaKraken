@@ -6,7 +6,7 @@ use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_metadata_image_count(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     class_id: i32,
 ) -> Result<i32, sqlx::Error> {
     let row: (i32,) = sqlx::query_as(
@@ -14,7 +14,7 @@ pub async fn mk_lib_database_metadata_image_count(
         where mm_media_class_guid = $1",
     )
     .bind(class_id)
-    .fetch_one(pool)
+    .fetch_one(sqlx_pool)
     .await?;
     Ok(row.0)
 }
@@ -25,7 +25,7 @@ pub struct MediaImageList {
 }
 
 pub async fn mk_lib_database_metadata_image_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     class_id: i32,
     offset: i32,
     limit: i32,
@@ -41,7 +41,7 @@ pub async fn mk_lib_database_metadata_image_read(
         .map(|row: PgRow| MediaImageList {
             image_path: row.get("mm_media_path"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }

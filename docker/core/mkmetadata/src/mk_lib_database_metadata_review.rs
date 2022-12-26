@@ -5,12 +5,12 @@ use sqlx::{types::Uuid, types::Json};
 use serde::{Serialize, Deserialize};
 use sqlx::{FromRow, Row};
 
-pub async fn mk_lib_database_metadata_review_insert(pool: &sqlx::PgPool,
+pub async fn mk_lib_database_metadata_review_insert(sqlx_pool: &sqlx::PgPool,
                                                     metadata_uuid: Uuid,
                                                     review_json: serde_json::Value)
                                                     -> Result<uuid::Uuid, sqlx::Error> {
     new_guid = Uuid::new_v4();
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("insert into mm_review(mm_review_guid, mm_review_metadata_guid, \
         mm_review_json) values($1, $2, $3)")
         .bind(new_guid)
@@ -22,13 +22,13 @@ pub async fn mk_lib_database_metadata_review_insert(pool: &sqlx::PgPool,
     Ok(new_guid)
 }
 
-pub async fn mk_lib_database_metadata_review_count(pool: &sqlx::PgPool,
+pub async fn mk_lib_database_metadata_review_count(sqlx_pool: &sqlx::PgPool,
                                                    metadata_uuid: Uuid)
                                                    -> Result<i32, sqlx::Error> {
     let row: (i32, ) = sqlx::query("select count(*) from mm_review \
         where mm_review_metadata_guid = $1")
         .bind(metadata_uuid)
-        .execute(pool)
+        .execute(sqlx_pool)
         .await?;
     Ok(row.0)
 }
@@ -39,7 +39,7 @@ pub struct DBMetaReviewList {
     mm_review_json: serde_json::Value,
 }
 
-pub async fn mk_lib_database_metadata_review_list_metadata(pool: &sqlx::PgPool,
+pub async fn mk_lib_database_metadata_review_list_metadata(sqlx_pool: &sqlx::PgPool,
                                                            metadata_uuid: Uuid)
                                                            -> Result<Vec<DBMetaReviewList>, sqlx::Error> {
     // TODO order by date
@@ -52,7 +52,7 @@ pub async fn mk_lib_database_metadata_review_list_metadata(pool: &sqlx::PgPool,
             mm_review_guid: row.get("mm_review_guid"),
             mm_review_json: row.get("mm_review_json"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }

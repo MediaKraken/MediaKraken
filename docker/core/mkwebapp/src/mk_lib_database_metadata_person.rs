@@ -13,7 +13,7 @@ mod mk_lib_common_enum_media_type;
 mod mk_lib_database_metadata_download_queue;
 
 pub async fn mk_lib_database_metadata_exists_person(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     metadata_id: i32,
 ) -> Result<i32, sqlx::Error> {
     let row: (i32,) = sqlx::query_as(
@@ -21,13 +21,13 @@ pub async fn mk_lib_database_metadata_exists_person(
         where mm_metadata_person_media_id = $1 limit 1) as found_record limit 1",
     )
     .bind(metadata_id)
-    .fetch_one(pool)
+    .fetch_one(sqlx_pool)
     .await?;
     Ok(row.0)
 }
 
 pub async fn mk_lib_database_metadata_person_count(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
     if search_value != "" {
@@ -36,12 +36,12 @@ pub async fn mk_lib_database_metadata_person_count(
             where mmp_person_name % $1",
         )
         .bind(search_value)
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     } else {
         let row: (i64,) = sqlx::query_as("select count(*) from mm_metadata_person")
-            .fetch_one(pool)
+            .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
     }
@@ -56,7 +56,7 @@ pub struct DBMetaPersonList {
 }
 
 pub async fn mk_lib_database_metadata_person_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     search_value: String,
     offset: i32,
     limit: i32,
@@ -92,13 +92,13 @@ pub async fn mk_lib_database_metadata_person_read(
             mm_metadata_person_image: row.get("mm_metadata_person_image"),
             mmp_profile: row.get("mmp_profile"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }
 
 pub async fn mk_lib_database_meta_person_detail(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     person_uuid: String,
 ) -> Result<PgRow, sqlx::Error> {
     let row: PgRow = sqlx::query(
@@ -108,7 +108,7 @@ pub async fn mk_lib_database_meta_person_detail(
         from mm_metadata_person where mmp_id = $1",
     )
     .bind(person_uuid)
-    .fetch_one(pool)
+    .fetch_one(sqlx_pool)
     .await?;
     Ok(row)
 }
@@ -123,7 +123,7 @@ pub struct DBMetaPersonNameList {
 }
 
 pub async fn mk_lib_database_meta_person_by_name(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     person_name: String,
 ) -> Result<Vec<DBMetaPersonNameList>, sqlx::Error> {
     let select_query = sqlx::query(
@@ -143,20 +143,20 @@ pub async fn mk_lib_database_meta_person_by_name(
             mmp_person_image: row.get("mmp_person_image"),
             mmp_person_name: row.get("mmp_person_name"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }
 
 pub async fn mk_lib_database_metadata_person_insert(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     person_name: String,
     media_id: i32,
     person_json: serde_json::Value,
     person_image_path: serde_json::Value,
 ) -> Result<Uuid, sqlx::Error> {
     let new_guid = uuid::Uuid::new_v4();
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_metadata_person (mmp_id, mmp_person_name, \
         mmp_person_media_id, mmp_person_meta_json, \
@@ -175,14 +175,14 @@ pub async fn mk_lib_database_metadata_person_insert(
 }
 
 pub async fn mk_lib_database_metadata_person_insert_cast_crew(
-    pool: &sqlx::PgPool,
-    person_json: serde_json::Value,
+    sqlx_pool: &sqlx::PgPool,
+    person_json: &serde_json::Value,
 ) {
     // for person_data in person_json {
     //     let person_id = person_data["id"];
     //     let person_name = person_data["name"];
     //     // TODO do an upsert instead
-    //     if mk_lib_database_metadata_exists_person(pool, person_id).await.unwrap() == 0
+    //     if mk_lib_database_metadata_exists_person(sqlx_pool, person_id).await.unwrap() == 0
     //     {
     //         let new_guid = Uuid::new_v4();
     //         // Shouldn't need to verify fetch doesn't exist as the person insert
@@ -190,7 +190,7 @@ pub async fn mk_lib_database_metadata_person_insert_cast_crew(
     //         // the inserted record.
     //         // insert download record for bio/info
     //         mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(
-    //             pool,
+    //             sqlx_pool,
     //             "themoviedb".to_string(),
     //             mk_lib_common_enum_media_type::DLMediaType::PERSON,
     //             new_guid,
@@ -198,7 +198,7 @@ pub async fn mk_lib_database_metadata_person_insert_cast_crew(
     //             "Fetch".to_string(),
     //         ).await;
     //         // insert person record
-    //         mk_lib_database_metadata_person_insert(pool,
+    //         mk_lib_database_metadata_person_insert(sqlx_pool,
     //                                                person_name,
     //                                                person_id,
     //                                                json!({}),
@@ -225,12 +225,12 @@ pub async fn db_meta_person_as_seen_in(self, person_guid):
  */
 
 pub async fn mk_lib_database_metadata_person_update(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     person_media_id: Uuid,
     person_bio: serde_json::Value,
     person_image: serde_json::Value,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("update mm_metadata_person set mmp_person_meta_json = $1, mmp_person_image = $2 where mmp_person_media_id = $3")
         .bind(person_bio)
         .bind(person_image)

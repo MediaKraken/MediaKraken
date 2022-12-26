@@ -6,7 +6,7 @@ use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_user_exists(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     user_name: String,
 ) -> Result<bool, sqlx::Error> {
     let row: (bool,) = sqlx::query_as(
@@ -14,7 +14,7 @@ pub async fn mk_lib_database_user_exists(
         where email = $1 limit 1) limit 1",
     )
     .bind(user_name)
-    .fetch_one(pool)
+    .fetch_one(sqlx_pool)
     .await?;
     Ok(row.0)
 }
@@ -27,7 +27,7 @@ pub struct DBUserList {
 }
 
 pub async fn mk_lib_database_user_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     offset: i32,
     limit: i32,
 ) -> Result<Vec<DBUserList>, sqlx::Error> {
@@ -42,31 +42,31 @@ pub async fn mk_lib_database_user_read(
             email: row.get("email"),
             is_admin: row.get("is_admin"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }
 
 pub async fn mk_lib_database_user_count(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     user_name: String,
 ) -> Result<i64, sqlx::Error> {
     if user_name != "" {
         let row: (i64,) = sqlx::query_as("select count(*) from users")
-            .fetch_one(pool)
+            .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
     } else {
         let row: (i64,) = sqlx::query_as("select count(*) from users where email = $1")
             .bind(user_name)
-            .fetch_one(pool)
+            .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
     }
 }
 
 pub async fn mk_lib_database_user_delete(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     user_uuid: uuid::Uuid,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
@@ -78,7 +78,7 @@ pub async fn mk_lib_database_user_delete(
     Ok(())
 }
 
-pub async fn mk_lib_database_user_set_admin(pool: &sqlx::PgPool) -> Result<(), sqlx::Error> {
+pub async fn mk_lib_database_user_set_admin(sqlx_pool: &sqlx::PgPool) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
     sqlx::query("update users set is_admin = true")
         .execute(&mut transaction)

@@ -21,7 +21,7 @@ pub struct DBCronList {
 }
 
 pub async fn mk_lib_database_cron_service_read(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBCronList>, sqlx::Error> {
     let select_query = sqlx::query(
         "select mm_cron_guid, \
@@ -41,13 +41,13 @@ pub async fn mk_lib_database_cron_service_read(
             mm_cron_last_run: row.get("mm_cron_last_run"),
             mm_cron_json: row.get("mm_cron_json"),
         })
-        .fetch_all(pool)
+        .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
 }
 
 pub async fn mk_lib_database_cron_time_update(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     cron_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
@@ -63,7 +63,7 @@ pub async fn mk_lib_database_cron_time_update(
 }
 
 pub async fn mk_lib_database_cron_delete(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     cron_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
@@ -76,7 +76,7 @@ pub async fn mk_lib_database_cron_delete(
 }
 
 pub async fn mk_lib_database_cron_insert(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     cron_name: String,
     cron_desc: String,
     cron_enabled: bool,
@@ -103,12 +103,12 @@ pub async fn mk_lib_database_cron_insert(
 }
 
 pub async fn mk_lib_database_cron_count(
-    pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     cron_enabled: bool,
 ) -> Result<i32, sqlx::Error> {
     let row: (i32,) = sqlx::query_as("select count(*) from mm_cron where mm_cron_enabled = $1")
         .bind(cron_enabled)
-        .fetch_one(pool)
+        .fetch_one(sqlx_pool)
         .await?;
     Ok(row.0)
 }

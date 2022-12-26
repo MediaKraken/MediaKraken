@@ -1,6 +1,7 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
 use reqwest::header::CONTENT_TYPE;
+use reqwest::header::USER_AGENT;
 use std::collections::HashMap;
 use std::io::Cursor;
 use std::io::Read;
@@ -16,6 +17,7 @@ pub async fn mk_data_from_url_to_json(
     let res: serde_json::Value = client
         .get(url)
         .header(CONTENT_TYPE, "Content-Type: application/json")
+        .header(USER_AGENT, "User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0")
         .send()
         .await?
         .json()

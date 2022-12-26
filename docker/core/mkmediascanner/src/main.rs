@@ -3,7 +3,8 @@
 use amiquip::{AmqpProperties, Connection, Exchange, Publish, Result};
 use chrono::prelude::*;
 use num_format::{Locale, ToFormattedString};
-use regex::Regex;
+// use regex::Regex;
+use fancy_regex::Regex;
 use serde_json::{json, Value};
 use sqlx::Row;
 use std::error::Error;
@@ -175,20 +176,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 .unwrap();
                             // check to see if it"s a "stacked" file
                             // including games since some are two or more discs
-                            if stack_cd.is_match(&base_file_name)
-                                || stack_part.is_match(&base_file_name)
-                                || stack_dvd.is_match(&base_file_name)
-                                || stack_pt.is_match(&base_file_name)
-                                || stack_disk.is_match(&base_file_name)
-                                || stack_disc.is_match(&base_file_name)
+                            if stack_cd.is_match(&base_file_name).unwrap()
+                                || stack_part.is_match(&base_file_name).unwrap()
+                                || stack_dvd.is_match(&base_file_name).unwrap()
+                                || stack_pt.is_match(&base_file_name).unwrap()
+                                || stack_disk.is_match(&base_file_name).unwrap()
+                                || stack_disc.is_match(&base_file_name).unwrap()
                             {
                                 // check to see if it"s part one or not
-                                if stack_cd1.is_match(&base_file_name) == false
-                                    && stack_part1.is_match(&base_file_name) == false
-                                    && stack_dvd1.is_match(&base_file_name) == false
-                                    && stack_pt1.is_match(&base_file_name) == false
-                                    && stack_disk1.is_match(&base_file_name) == false
-                                    && stack_disc1.is_match(&base_file_name) == false
+                                if stack_cd1.is_match(&base_file_name).unwrap() == false
+                                    && stack_part1.is_match(&base_file_name).unwrap() == false
+                                    && stack_dvd1.is_match(&base_file_name).unwrap() == false
+                                    && stack_pt1.is_match(&base_file_name).unwrap() == false
+                                    && stack_disk1.is_match(&base_file_name).unwrap() == false
+                                    && stack_disc1.is_match(&base_file_name).unwrap() == false
                                 {
                                     // it's not a part one here so, no DL record needed
                                     save_dl_record = false;
@@ -313,7 +314,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                             mk_lib_database_media::mk_lib_database_media_insert(
                                                 &sqlx_pool,
                                                 media_id,
-                                                new_class_type_uuid,
+                                                new_class_type_uuid as i16,
                                                 file_name,
                                                 None,
                                                 json!({}),
