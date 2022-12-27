@@ -29,7 +29,10 @@ pub async fn metadata_guessit(
         .to_os_string()
         .into_string()
         .unwrap();
-    println!("File: {:?}", file_name);
+    #[cfg(debug_assertions)]
+    {
+        println!("File: {:?}", file_name);
+    }
     let guessit_data: Metadata = Metadata::from(&file_name).unwrap();
     if guessit_data.title().len() > 0 {
         // if guessit_data.year().is_some() {

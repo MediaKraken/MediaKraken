@@ -12,7 +12,10 @@ pub async fn mk_lib_hardware_onvif_discovery() {
         .await
         .unwrap()
         .for_each_concurrent(MAX_CONCURRENT_JUMPERS, |addr| async move {
-            println!("Device found: {:?}", addr);
+            #[cfg(debug_assertions)]
+            {
+                println!("Device found: {:?}", addr);
+            }
         })
         .await;
 }

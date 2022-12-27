@@ -17,18 +17,24 @@ pub async fn mk_lib_network_find_mediakraken_server() -> Result<String, std::err
     let buf = [1u8; 15000];
     let mut count = 1473;
     socket.send_to(&buf[0..count], "234.2.2.2:8888").unwrap();
-    println!("before recv");
+    #[cfg(debug_assertions)]
+    {
+        println!("before recv");
+    }
 
     let mut buf = [0u8; 64];
     match socket.recv_from(&mut buf) {
         Ok((len, remote_addr)) => {
             let data = &buf[..len];
             let response = String::from_utf8_lossy(data);
-            println!("{} - client: got data: {}", remote_addr, response);
+            #[cfg(debug_assertions)]
+            {
+                println!("{} - client: got data: {}", remote_addr, response);
+            }
             return response;
         }
         Err(err) => {
-            println!("client: had a problem: {}", err);
+            eprintln!("client: had a problem: {}", err);
             return "Invalid";
         }
     }

@@ -14,7 +14,10 @@ pub async fn mk_network_share_scan(
         24,
     );
     for ip_address in subnets.iter() {
-        println!("{}", ip_address);
+        #[cfg(debug_assertions)]
+        {
+            println!("{}", ip_address);
+        }
         // scan for smb
         std::process::Command::new("nmap")
             .arg("-sU")

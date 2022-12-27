@@ -22,14 +22,20 @@ pub async fn provider_televisiontunes_theme_fetch(
         let dl_position = content_string.find("href=\"/song/download/").unwrap();
         let data_content = content_string.substring(dl_position + 21, dl_position + 50);
         let dl_end_position = data_content.find("\"").unwrap();
-        //println!("{:?}", data_content.substring(0, dl_end_position));
+        #[cfg(debug_assertions)]
+        {
+            println!("{:?}", data_content.substring(0, dl_end_position));
+        }
         let dl_url = format!(
             "{}{}{}",
             base_url,
             "song/download/",
             data_content.substring(0, dl_end_position)
         );
-        //println!("{}", dl_url);
+        #[cfg(debug_assertions)]
+        {
+            println!("{}", dl_url);
+        }
         mk_lib_network::mk_download_file_from_url(dl_url, &tv_show_theme_path);
         metadata_uuid = Uuid::new_v4();
     }

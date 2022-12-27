@@ -45,7 +45,10 @@ pub async fn mk_network_transmissions_list_torrents(
         .iter()
         .map(|it| it.name.as_ref().unwrap())
         .collect();
-    println!("{:#?}", names);
+    #[cfg(debug_assertions)]
+    {
+        println!("{:#?}", names);
+    }
 
     let res1: RpcResponse<Torrents<Torrent>> = transmission_client
         .torrent_get(
@@ -65,7 +68,10 @@ pub async fn mk_network_transmissions_list_torrents(
             )
         })
         .collect();
-    println!("{:#?}", first_three);
+    #[cfg(debug_assertions)]
+    {
+        println!("{:#?}", first_three);
+    }
 
     let res2: RpcResponse<Torrents<Torrent>> = transmission_client
         .torrent_get(
@@ -92,7 +98,10 @@ pub async fn mk_network_transmissions_list_torrents(
             )
         })
         .collect();
-    println!("{:#?}", info);
+    #[cfg(debug_assertions)]
+    {
+        println!("{:#?}", info);
+    }
 }
 
 pub async fn mk_network_transmissions_remove_torrent(
@@ -102,7 +111,10 @@ pub async fn mk_network_transmissions_remove_torrent(
     let res: RpcResponse<Nothing> = transmission_client
         .torrent_remove(vec![Id::Id(torrent_id)], false)
         .await?;
-    println!("Remove result: {:?}", &res.is_ok());
+    #[cfg(debug_assertions)]
+    {
+        println!("Remove result: {:?}", &res.is_ok());
+    }
     Ok(&res.is_ok())
 }
 

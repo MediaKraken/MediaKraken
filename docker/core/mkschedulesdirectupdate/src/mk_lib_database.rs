@@ -9,7 +9,10 @@ pub async fn mk_lib_database_open_pool() -> Result<sqlx::PgPool, sqlx::Error> {
     // trim is get rid of the \r returned in hostname
     let hostname: String = sys_info::hostname().unwrap().trim().to_string();
     let connection_string: String;
-    println!("hostname: {}", hostname);
+    #[cfg(debug_assertions)]
+    {
+        println!("hostname: {}", hostname);
+    }
     if hostname == "wsripper2"
         || hostname == "th-hplaptop-1"
         || hostname == "th-hplap-1"

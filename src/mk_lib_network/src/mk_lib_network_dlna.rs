@@ -11,7 +11,10 @@ pub async fn mk_lib_network_dlna_discover() {
     let discover_timeout_secs = 5;
     let renders_discovered = Render::discover(discover_timeout_secs).await.unwrap();
     for render in renders_discovered {
-        println!("{}", render);
+        #[cfg(debug_assertions)]
+        {
+            println!("{}", render);
+        }
     }
 }
 

@@ -26,7 +26,10 @@ pub async fn mk_lib_hardware_dht11_get_reading() {
                 humidity,
             }) => {
                 let (temperature, humidity) = (temperature as f64 / 10.0, humidity as f64 / 10.0);
-                println!("Temp: {temperature:.1}C Hum: {humidity:.1}");
+                #[cfg(debug_assertions)]
+                {
+                    println!("Temp: {temperature:.1}C Hum: {humidity:.1}");
+                }
             }
             Err(e) => eprintln!("Failed to perform measurement: {e:?}"),
         }

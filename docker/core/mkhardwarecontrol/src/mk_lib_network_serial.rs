@@ -10,7 +10,10 @@ use std::time::Duration;
 pub async fn serial_port_discover() -> Result<(), std::Error> {
     let ports = serialport::available_ports().expect("No ports found!");
     for p in ports {
-        println!("{} {}", p.port_name, p.port_type);
+        #[cfg(debug_assertions)]
+        {
+            println!("{} {}", p.port_name, p.port_type);
+        }
     }
     Ok(())
 }

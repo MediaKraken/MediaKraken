@@ -10,9 +10,12 @@ pub async fn mk_hardware_lenbrook_discovery() {
     d.query(lsdp::QueryMessage::new(vec![ClassID::All])).await?;
     tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
     for (_, d) in d.inventory().await.lock().await.iter() {
-        println!(
-            "Found {}: {:?} with data {:?}",
-            d.addr, d.records[0].cid, d.records[0].data
-        );
+        #[cfg(debug_assertions)]
+        {
+            println!(
+                "Found {}: {:?} with data {:?}",
+                d.addr, d.records[0].cid, d.records[0].data
+            );
+        }
     }
 }

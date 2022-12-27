@@ -349,7 +349,7 @@ pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_
             .await
             .unwrap();
         }
-        _ => println!("provider_tmdb_search type does not equal any value"),
+        _ => eprintln!("provider_tmdb_search type does not equal any value"),
     }
 }
 

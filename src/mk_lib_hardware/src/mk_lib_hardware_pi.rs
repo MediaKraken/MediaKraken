@@ -34,7 +34,9 @@ pub async fn mk_lib_hardware_pi_led_flash(gpio_pin: u8, milliseconds: u32)
 pub async fn mk_lib_hardware_pi_take_image(image_file_name: String) {
     let info = info().unwrap();
     if info.cameras.len() > 0 {
-        println!("{}", info);
+        #[cfg(debug_assertions)]
+        {
+        println!("{}", info);}
         simple_sync(&info.cameras[0], image_file_name);
     }
 }

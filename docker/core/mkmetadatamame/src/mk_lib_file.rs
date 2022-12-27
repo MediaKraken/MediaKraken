@@ -37,10 +37,12 @@ pub fn mk_file_is_hidden(entry: &DirEntry) -> bool {
 pub async fn mk_directory_walk(dir_path: String) -> Result<Vec<String>, Box<dyn Error>> {
     let mut file_list: Vec<String> = Vec::new();
     let walker = WalkDir::new(dir_path).into_iter();
-    for entry in walker
-        .filter_entry(|e| !mk_file_is_hidden(e)) {
+    for entry in walker.filter_entry(|e| !mk_file_is_hidden(e)) {
         let entry = entry.unwrap();
-        //println!("{}", entry.path().display());
+        #[cfg(debug_assertions)]
+        {
+            println!("{}", entry.path().display());
+        }
         file_list.push(entry.path().display().to_string());
     }
     Ok(file_list)

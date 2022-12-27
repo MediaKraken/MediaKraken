@@ -55,10 +55,13 @@ pub async fn metadata_process(
     provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
     // TODO art, posters, trailers, etc in here as well
-    println!(
-        "metadata_process status: {}, provider: {}, id: {}",
-        download_data.mm_download_status, provider_name, download_data.mm_download_provider_id
-    );
+    #[cfg(debug_assertions)]
+    {
+        println!(
+            "metadata_process status: {}, provider: {}, id: {}",
+            download_data.mm_download_status, provider_name, download_data.mm_download_provider_id
+        );
+    }
     if download_data.mm_download_status == "Search" {
         metadata_search(&sqlx_pool, provider_name, download_data, provider_api_key).await;
     } else if download_data.mm_download_status == "Update" {

@@ -55,7 +55,13 @@ pub async fn metadata_process(
     provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
     // TODO art, posters, trailers, etc in here as well
-    println!("metadata_process status: {}, provider: {}, id: {}", download_data.mm_download_status, provider_name, download_data.mm_download_provider_id);
+    #[cfg(debug_assertions)]
+    {
+        println!(
+            "metadata_process status: {}, provider: {}, id: {}",
+            download_data.mm_download_status, provider_name, download_data.mm_download_provider_id
+        );
+    }
     if download_data.mm_download_status == "Search" {
         metadata_search(&sqlx_pool, provider_name, download_data, provider_api_key).await;
     } else if download_data.mm_download_status == "Update" {
@@ -190,9 +196,10 @@ pub async fn metadata_search(
                 .unwrap();
         if download_data.mm_download_que_type == mk_lib_common_enum_media_type::DLMediaType::MOVIE {
             if metadata_uuid == uuid::Uuid::nil() {
-                metadata_uuid = metadata_movie::metadata_movie_lookup(&sqlx_pool, &download_data, guessit_data)
-                    .await
-                    .unwrap();
+                metadata_uuid =
+                    metadata_movie::metadata_movie_lookup(&sqlx_pool, &download_data, guessit_data)
+                        .await
+                        .unwrap();
                 // (metadata_uuid, match_result) = metadata_provider_themoviedb.movie_search_tmdb(
                 //     &sqlx_pool,
                 //     download_data);
@@ -208,9 +215,10 @@ pub async fn metadata_search(
             == mk_lib_common_enum_media_type::DLMediaType::TV
         {
             if metadata_uuid == uuid::Uuid::nil() {
-                metadata_uuid = metadata_tv::metadata_tv_lookup(&sqlx_pool, &download_data, guessit_data)
-                    .await
-                    .unwrap();
+                metadata_uuid =
+                    metadata_tv::metadata_tv_lookup(&sqlx_pool, &download_data, guessit_data)
+                        .await
+                        .unwrap();
                 // (metadata_uuid, match_result) = metadata_tv.metadata_tv_lookup(&sqlx_pool, download_data);
                 // // if match_result is an int, that means the lookup found a match but isn"t in db
                 // if metadata_uuid == uuid::Uuid::nil() && type(match_result) != int {

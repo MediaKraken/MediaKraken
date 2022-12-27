@@ -106,7 +106,9 @@ pub async fn mk_common_docker_service_list() -> Result<Vec<String>> {
     {
         Ok(services) => {
             for s in services {
-                println!("{:#?}", s)
+                #[cfg(debug_assertions)]
+                {
+                println!("{:#?}", s)}
             }
         }
         Err(e) => eprintln!("Error: {}", e),
@@ -152,7 +154,10 @@ pub async fn mk_common_docker_volume_list() -> Result<Vec<String>> {
     match docker.volumes().list(&Default::default()).await {
         Ok(volumes) => {
             for v in volumes.volumes {
-                println!("{:#?}", v)
+                #[cfg(debug_assertions)]
+                {
+                    println!("{:#?}", v)
+                }
             }
         }
         Err(e) => eprintln!("Error: {}", e),
@@ -165,7 +170,10 @@ pub async fn mk_common_docker_info() -> Result<serde_json::Value> {
     let mut logs_list: serde_json::Value = serde_json::json!({});
     match docker.info().await {
         Ok(info) => {
-            println!("{:#?}", info);
+            #[cfg(debug_assertions)]
+            {
+                println!("{:#?}", info);
+            }
             logs_list = serde_json::from_str(&format!("{:#?}", info)).unwrap();
         }
         Err(e) => eprintln!("Error: {}", e),

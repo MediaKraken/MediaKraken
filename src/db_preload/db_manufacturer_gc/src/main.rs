@@ -80,7 +80,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     .unwrap();
     // loop through all brands
     for brand_item in fetch_brand_result.iter() {
-        println!("{:?}\n", brand_item);
+        #[cfg(debug_assertions)]
+        {
+            println!("{:?}\n", brand_item);
+        }
         let _result =
             mk_lib_database_hardware_device::mk_lib_database_hardware_manufacturer_upsert(
                 &sqlx_pool,
@@ -113,7 +116,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         )
         .unwrap();
         for item_type in fetch_result_type.iter() {
-            println!("item_type: {:?}\n", item_type);
+            #[cfg(debug_assertions)]
+            {
+                println!("item_type: {:?}\n", item_type);
+            }
             let _result = mk_lib_database_hardware_device::mk_lib_database_hardware_type_upsert(
                 &sqlx_pool,
                 item_type.brand_type.replace("\"", ""),
@@ -152,7 +158,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .unwrap();
             // loop through all the models
             for item_model in fetch_model_type.iter() {
-                println!("model_item: {:?}\n", item_model);
+                #[cfg(debug_assertions)]
+                {
+                    println!("model_item: {:?}\n", item_model);
+                }
                 let device_count =
                     mk_lib_database_hardware_device::mk_lib_database_hardware_model_device_count(
                         &sqlx_pool,
@@ -172,22 +181,24 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         )
                         .await?;
                     /*
-                    let fetch_codeset: Vec<ApiBrandsTypeCodeset> = serde_json::from_str(
-                        &mk_lib_network::mk_data_from_url(
-                            format!(
-                                "https://irdb.globalcache.com:8081/api/codesets/{}",
-                                item_model.brand_model_id.replace("\"", "").replace("&", "%26")
-                            )
-                            .to_string(),
-                        )
-                        .await
-                        .unwrap(),
-                    )
-                    .unwrap();
-                    for item_codeset in fetch_codeset.iter() {
-                        println!("item_codeset: {?}\n", item_codeset);
-                    }
-                    */
+                                    let fetch_codeset: Vec<ApiBrandsTypeCodeset> = serde_json::from_str(
+                                        &mk_lib_network::mk_data_from_url(
+                                            format!(
+                                                "https://irdb.globalcache.com:8081/api/codesets/{}",
+                                                item_model.brand_model_id.replace("\"", "").replace("&", "%26")
+                                            )
+                                            .to_string(),
+                                        )
+                                        .await
+                                        .unwrap(),
+                                    )
+                                    .unwrap();
+                                    for item_codeset in fetch_codeset.iter() {
+                                            #[cfg(debug_assertions)]
+                    {
+                                        println!("item_codeset: {?}\n", item_codeset);}
+                                    }
+                                    */
                 }
             }
         }

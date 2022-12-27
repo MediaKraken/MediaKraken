@@ -6,9 +6,12 @@
 use discid::{DiscId, Features};
 
 fn print_disc_info(disc: DiscId) {
-    println!("DiscId: {}", disc.id());
-    println!("TOC   : {}", disc.toc_string());
-    println!("\nSubmit via {}", disc.submission_url());
+    #[cfg(debug_assertions)]
+    {
+        println!("DiscId: {}", disc.id());
+        println!("TOC   : {}", disc.toc_string());
+        println!("\nSubmit via {}", disc.submission_url());
+    }
 }
 
 pub async fn mk_metadata_biscid() {

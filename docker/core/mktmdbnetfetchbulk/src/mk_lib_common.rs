@@ -2,5 +2,8 @@
 #![allow(unused)]
 
 pub fn print_type_of_variable<T>(_: &T) {
-    println!("{}", std::any::type_name::<T>())
+    #[cfg(debug_assertions)]
+    {
+        println!("{}", std::any::type_name::<T>())
+    }
 }

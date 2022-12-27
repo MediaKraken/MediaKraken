@@ -17,7 +17,10 @@ pub async fn mk_data_from_url_to_json(
     let res: serde_json::Value = client
         .get(url)
         .header(CONTENT_TYPE, "Content-Type: application/json")
-        .header(USER_AGENT, "User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0")
+        .header(
+            USER_AGENT,
+            "User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0",
+        )
         .send()
         .await?
         .json()
@@ -27,7 +30,10 @@ pub async fn mk_data_from_url_to_json(
 
 pub async fn mk_data_from_url(url: String) -> Result<String, Box<dyn std::error::Error>> {
     let response = reqwest::get(url).await?;
-    println!("response: {:?}", response);
+    #[cfg(debug_assertions)]
+    {
+        println!("response: {:?}", response);
+    }
     let content = response.bytes().await?;
     Ok(str::from_utf8(&content).unwrap().to_string())
 }
@@ -36,7 +42,10 @@ pub async fn mk_download_file_from_url(
     url: String,
     file_name: &String,
 ) -> Result<bool, Box<dyn std::error::Error>> {
-    println!("waffles {}", url);
+    #[cfg(debug_assertions)]
+    {
+        println!("waffles {}", url);
+    }
     let response = reqwest::get(url).await?;
     let mut file = std::fs::File::create(file_name)?;
     let mut content = Cursor::new(response.bytes().await?);
