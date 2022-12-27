@@ -31,7 +31,7 @@ pub async fn metadata_guessit(
         .unwrap();
     #[cfg(debug_assertions)]
     {
-        println!("File: {:?}", file_name);
+        println!("Guessit File: {:?}", file_name);
     }
     let guessit_data: Metadata = Metadata::from(&file_name).unwrap();
     if guessit_data.title().len() > 0 {

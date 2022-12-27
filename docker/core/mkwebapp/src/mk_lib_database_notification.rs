@@ -44,7 +44,7 @@ pub async fn mk_lib_database_notification_insert(
     mm_notification_text: String,
     mm_notification_dismissable: bool,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_notification (mm_notification_guid, \
         mm_notification_text, \
@@ -65,7 +65,7 @@ pub async fn mk_lib_database_notification_delete(
     sqlx_pool: &sqlx::PgPool,
     mk_notification_guid: Uuid,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from mm_notification where mm_notification_guid = $1")
         .bind(mk_notification_guid)
         .execute(&mut transaction)

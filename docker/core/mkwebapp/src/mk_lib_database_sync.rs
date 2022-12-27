@@ -9,7 +9,7 @@ pub async fn mk_lib_database_sync_delete(
     sqlx_pool: &sqlx::PgPool,
     sync_guid: Uuid,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from mm_media_sync where mm_sync_guid = $1")
         .bind(sync_guid)
         .execute(&mut transaction)
@@ -23,7 +23,7 @@ pub async fn mk_lib_database_sync_process_update(
     sync_guid: Uuid,
     sync_percent: f32,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "update mm_media_sync set mm_sync_options_json->'Progress' = $1
         where mm_sync_guid = $2",
@@ -50,7 +50,7 @@ pub async fn mk_lib_database_sync_insert(
     sync_json: serde_json::Value,
 ) -> Result<Uuid, sqlx::Error> {
     let new_guid = uuid::Uuid::new_v4();
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_media_sync (mm_sync_guid, mm_sync_path, \
         mm_sync_path_to, mm_sync_options_json) \

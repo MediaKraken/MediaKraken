@@ -128,7 +128,7 @@ pub async fn mk_lib_database_metadata_collection_guid_by_name(
         where mm_metadata_collection_name->>'name' = $1",
     )
     .bind(collection_name)
-    .fetch_one(posqlx_poolol)
+    .fetch_one(sqlx_pool)
     .await?;
     Ok(row.0)
 }

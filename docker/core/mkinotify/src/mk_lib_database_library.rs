@@ -92,7 +92,7 @@ pub async fn mk_lib_database_library_path_status_update(
     library_uuid: uuid::Uuid,
     library_status_json: serde_json::Value,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "update mm_library_dir set mm_media_dir_status = $1 \
         where mm_media_dir_guid = $2",
@@ -109,7 +109,7 @@ pub async fn mk_lib_database_library_path_timestamp_update(
     sqlx_pool: &sqlx::PgPool,
     library_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "update mm_library_dir set mm_media_dir_last_scanned = NOW() \
         where mm_media_dir_guid = $1",

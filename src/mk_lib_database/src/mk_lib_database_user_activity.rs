@@ -17,7 +17,7 @@ pub async fn mk_lib_database_activity_insert(
     activity_severity: String,
 ) -> Result<Uuid, sqlx::Error> {
     new_guid = Uuid::new_v4();
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_user_activity (mm_activity_guid, mm_activity_name, \
         mm_activity_overview, mm_activity_short_overview, \
@@ -45,7 +45,7 @@ pub async fn mk_lib_database_activity_delete(
     sqlx_pool: &sqlx::PgPool,
     day_range: i32,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "delete from mm_user_activity \
         where mm_activity_datecreated < now() - interval $1 day;",

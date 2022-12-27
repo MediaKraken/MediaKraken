@@ -10,7 +10,7 @@ pub async fn mk_lib_database_hardware_manufacturer_upsert(
     manufacturer_name: String,
     manufacturer_id: i32,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_hardware_manufacturer (mm_hardware_manu_guid, \
         mm_hardware_manu_name, mm_hardware_manu_gc_id) values ($1, $2, $3) \
@@ -29,7 +29,7 @@ pub async fn mk_lib_database_hardware_type_upsert(
     sqlx_pool: &sqlx::PgPool,
     hardware_type: String,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_hardware_type (mm_hardware_type_guid, \
         mm_hardware_type_name) values ($1, $2) \
@@ -49,7 +49,7 @@ pub async fn mk_lib_database_hardware_model_insert(
     hardware_type: String,
     hardware_model: String,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_hardware_model (mm_hardware_model_guid, \
         mm_hardware_manufacturer, \
@@ -107,7 +107,7 @@ pub async fn mk_lib_database_hardware_insert(
     json_data: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let new_guid = uuid::Uuid::new_v4();
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_hardware_json(mm_hardware_id, mm_hardware_manufacturer, \
         mm_hardware_model, mm_hardware_json) values($1, $2, $3, $4)",
@@ -126,7 +126,7 @@ pub async fn mk_lib_database_hardware_delete(
     sqlx_pool: &sqlx::PgPool,
     hardware_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from mm_hardware_json where mm_hardware_id = $1")
         .bind(hardware_uuid)
         .execute(&mut transaction)

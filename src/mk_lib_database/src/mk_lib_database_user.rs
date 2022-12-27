@@ -69,7 +69,7 @@ pub async fn mk_lib_database_user_delete(
     sqlx_pool: &sqlx::PgPool,
     user_uuid: uuid::Uuid,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from users where id = $1")
         .bind(user_uuid)
         .execute(&mut transaction)
@@ -79,7 +79,7 @@ pub async fn mk_lib_database_user_delete(
 }
 
 pub async fn mk_lib_database_user_set_admin(sqlx_pool: &sqlx::PgPool) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("update users set is_admin = true")
         .execute(&mut transaction)
         .await?;

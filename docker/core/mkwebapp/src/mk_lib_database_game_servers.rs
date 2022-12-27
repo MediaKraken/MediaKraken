@@ -10,7 +10,7 @@ pub async fn mk_lib_database_game_server_delete(
     sqlx_pool: &sqlx::PgPool,
     game_server_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from mm_game_dedicated_servers where mm_game_server_guid = $1")
         .bind(game_server_uuid)
         .execute(&mut transaction)
@@ -105,7 +105,7 @@ pub async fn mk_lib_database_game_server_upsert(
 ) -> Result<uuid::Uuid, sqlx::Error> {
     // TODO um, would return "invalid" uuid on update
     let new_guid = uuid::Uuid::new_v4();
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "INSERT INTO mm_game_dedicated_servers(mm_game_server_guid, \
         mm_game_server_name, mm_game_server_json) VALUES($ 1, $2, $3) \

@@ -36,7 +36,7 @@ pub async fn mk_lib_database_media_game_category_update(
     category: String,
     game_id: uuid::Uuid,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("update mm_metadata_game_software_info set gi_gc_category = $1 where gi_id = $2")
         .bind(category)
         .bind(game_id)

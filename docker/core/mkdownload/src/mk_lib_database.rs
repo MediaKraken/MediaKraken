@@ -11,7 +11,7 @@ pub async fn mk_lib_database_open_pool() -> Result<sqlx::PgPool, sqlx::Error> {
     let connection_string: String;
     #[cfg(debug_assertions)]
     {
-        println!("hostname: {}", hostname);
+        println!("database open hostname: {}", hostname);
     }
     if hostname == "wsripper2"
         || hostname == "th-hplaptop-1"

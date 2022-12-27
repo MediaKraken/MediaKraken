@@ -11,7 +11,7 @@ pub async fn mk_lib_database_user_profile_insert(
     profile_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let new_guid = uuid::Uuid::new_v4();
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_user_profile(mm_user_profile_guid, \
         mm_user_profile_name, mm_user_profile_json) values($1, $2, $3)",
@@ -32,7 +32,7 @@ pub async fn mk_lib_database_user_group_insert(
     group_rights_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let new_guid = uuid::Uuid::new_v4();
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_user_group(mm_user_group_guid, \
         mm_user_group_name, mm_user_group_description, \

@@ -8,7 +8,7 @@ pub async fn mk_lib_database_link_delete(
     sqlx_pool: &sqlx::PgPool,
     link_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from mm_link where mm_link_guid = $1")
         .bind(link_uuid)
         .execute(&mut transaction)
@@ -53,7 +53,7 @@ pub async fn mk_lib_database_link_insert(
     link_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     new_guid = Uuid::new_v4();
-    let mut transaction = pool.begin().await?;
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_link (mm_link_guid, mm_link_json) \
         values ($1, $2)",
