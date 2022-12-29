@@ -3,11 +3,6 @@
 use chrono::prelude::*;
 use std::env;
 
-/*
-Since we created the document using the HTTP PUT method, we needed to set the id of the document, otherwise, we will get an error.
-
-If you don’t have a unique id, you can use HTTP POST then Elasticsearch will create a unique id for you.
-*/
 pub async fn mk_logging_post_elk(
     message_type: &str,
     message_text: serde_json::Value,
