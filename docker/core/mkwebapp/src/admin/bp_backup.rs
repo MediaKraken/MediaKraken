@@ -9,6 +9,9 @@ use rocket::Request;
 use rocket_auth::{AdminUser, Auth, Error, Login, Signup, Users};
 use rocket_dyn_templates::{tera::Tera, Template};
 
+#[path = "../mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct BackupList {
     mm_backup_name: String,

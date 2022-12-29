@@ -1,5 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 use rascam::*;
 use rppal::gpio::Gpio;
 use rppal::i2c::I2c;
@@ -36,7 +39,8 @@ pub async fn mk_lib_hardware_pi_take_image(image_file_name: String) {
     if info.cameras.len() > 0 {
         #[cfg(debug_assertions)]
         {
-        println!("{}", info);}
+            mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "info": info })).await;
+        }
         simple_sync(&info.cameras[0], image_file_name);
     }
 }

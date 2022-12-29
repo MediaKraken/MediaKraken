@@ -8,6 +8,9 @@ use mangadex::schema::manga::*;
 use mangadex::schema::LanguageCode;
 use mangadex::Client;
 
+#[path = "../../mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 pub async fn provider_mangadex_login(
     user_name: String,
     user_password: String,

@@ -2,6 +2,9 @@
 
 // https://github.com/gabrielmagno/crab-dlna
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 use crab_dlna::{
     get_serve_ip, infer_subtitle_from_video, play, Error, MediaStreamingServer, Render, RenderSpec,
 };
@@ -13,7 +16,8 @@ pub async fn mk_lib_network_dlna_discover() {
     for render in renders_discovered {
         #[cfg(debug_assertions)]
         {
-            println!("{}", render);
+            mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "render": render }))
+                .await;
         }
     }
 }

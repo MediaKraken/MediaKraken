@@ -3,6 +3,9 @@
 // https://github.com/RoseSecurity/Abusing-Roku-APIs
 // http://sdkdocs.roku.com/display/sdkdoc/External+Control+Guide
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 #[path = "mk_lib_network.rs"]
 mod mk_lib_network;
 

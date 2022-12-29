@@ -15,10 +15,11 @@ mod mk_lib_logging;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    // start logging
-    const LOGGING_INDEX_NAME: &str = "mk_schedules_direct_update";
-    mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}), LOGGING_INDEX_NAME)
-        .await;
+    #[cfg(debug_assertions)]
+    {
+        // start logging
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+    }
 
     // open the database
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();

@@ -6,6 +6,9 @@ use rocket::response::{content, status};
 use rocket::{Build, Request, Rocket};
 use rocket_dyn_templates::{tera::Tera, Template};
 
+#[path = "../mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 #[catch(401)]
 pub async fn general_not_authorized() -> Template {
     Template::render("bss_error/bss_error_401", tera::Context::new().into_json())

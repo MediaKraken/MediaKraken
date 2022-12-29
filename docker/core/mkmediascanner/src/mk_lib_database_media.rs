@@ -1,5 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
@@ -71,7 +74,9 @@ pub async fn mk_lib_database_media_unmatched_read(
     Ok(table_rows)
 }
 
-pub async fn mk_lib_database_media_matched_count(sqlx_pool: &sqlx::PgPool) -> Result<i64, sqlx::Error> {
+pub async fn mk_lib_database_media_matched_count(
+    sqlx_pool: &sqlx::PgPool,
+) -> Result<i64, sqlx::Error> {
     let row: (i64,) = sqlx::query_as(
         "select count(*) from mm_media \
         where mm_media_metadata_guid is not NULL",
@@ -81,12 +86,12 @@ pub async fn mk_lib_database_media_matched_count(sqlx_pool: &sqlx::PgPool) -> Re
     Ok(row.0)
 }
 
-pub async fn mk_lib_database_media_known_count(sqlx_pool: &sqlx::PgPool) -> Result<i64, sqlx::Error> {
-    let row: (i64,) = sqlx::query_as(
-        "select count(*) from mm_media",
-    )
-    .fetch_one(sqlx_pool)
-    .await?;
+pub async fn mk_lib_database_media_known_count(
+    sqlx_pool: &sqlx::PgPool,
+) -> Result<i64, sqlx::Error> {
+    let row: (i64,) = sqlx::query_as("select count(*) from mm_media")
+        .fetch_one(sqlx_pool)
+        .await?;
     Ok(row.0)
 }
 

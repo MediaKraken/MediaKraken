@@ -12,6 +12,9 @@ firewall-cmd --permanent --direct --add-rule ipv6 filter INPUT 0 -m pkttype --pk
 firewall-cmd --reload
  */
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 pub async fn mk_lib_network_find_mediakraken_server() -> Result<String, std::error::Error> {
     let socket = UdpSocket::bind("0.0.0.0:9999").unwrap();
     let buf = [1u8; 15000];
@@ -19,7 +22,7 @@ pub async fn mk_lib_network_find_mediakraken_server() -> Result<String, std::err
     socket.send_to(&buf[0..count], "234.2.2.2:8888").unwrap();
     #[cfg(debug_assertions)]
     {
-        println!("before recv");
+        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "before recv": 0 })).await;
     }
 
     let mut buf = [0u8; 64];
@@ -29,7 +32,11 @@ pub async fn mk_lib_network_find_mediakraken_server() -> Result<String, std::err
             let response = String::from_utf8_lossy(data);
             #[cfg(debug_assertions)]
             {
-                println!("{} - client: got data: {}", remote_addr, response);
+                mk_lib_logging::mk_logging_post_elk(
+                    std::module_path!(),
+                    json!({ "client got data remote_addr": remote_addr, "response": response }),
+                )
+                .await;
             }
             return response;
         }

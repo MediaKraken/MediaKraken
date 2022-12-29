@@ -5,6 +5,9 @@
 
 use discid::{DiscId, Features};
 
+#[path = "../../mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 fn print_disc_info(disc: DiscId) {
     #[cfg(debug_assertions)]
     {

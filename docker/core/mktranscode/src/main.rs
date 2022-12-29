@@ -11,10 +11,11 @@ mod mk_lib_logging;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    // start logging
-    const LOGGING_INDEX_NAME: &str = "mktranscode";
-    mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}), LOGGING_INDEX_NAME)
-        .await;
+    #[cfg(debug_assertions)]
+    {
+        // start logging
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+    }
 
     // open rabbit connection
     let mut rabbit_connection =
@@ -37,12 +38,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 ConsumerMessage::Delivery(delivery) => {
                     let json_message: Value =
                         serde_json::from_str(&String::from_utf8_lossy(&delivery.body))?;
-                    mk_lib_logging::mk_logging_post_elk(
-                        "info",
-                        json!({ "msg body": json_message }),
-                        LOGGING_INDEX_NAME,
-                    )
-                    .await;
+                    #[cfg(debug_assertions)]
+                    {
+                        mk_lib_logging::mk_logging_post_elk(
+                            std::module_path!(),
+                            json!({ "msg body": json_message }),
+                        )
+                        .await;
+                    }
                     // if json_message["Type"].to_string() == "File" {
                     //     // do NOT remove the header.....this is the SAVE location
                     //     mk_lib_network::mk_download_file_from_url(json_message["URL"].to_string(),

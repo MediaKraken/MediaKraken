@@ -5,6 +5,9 @@ use rocket::Request;
 use rocket_auth::{Auth, Error, Login, Signup, User, Users};
 use rocket_dyn_templates::{tera::Tera, Template};
 
+#[path = "../../mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 #[get("/playback/audio")]
 pub async fn user_playback_audio(user: User) -> Template {
     Template::render(

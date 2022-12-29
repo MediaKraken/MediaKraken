@@ -26,10 +26,11 @@ mod mk_lib_network;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    // start logging
-    const LOGGING_INDEX_NAME: &str = "mklibretrocorenetfetchupdate";
-    mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}), LOGGING_INDEX_NAME)
-        .await;
+    #[cfg(debug_assertions)]
+    {
+        // start logging
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+    }
 
     // populate current zipped cores into hashmap
     let mut emulation_cores = HashMap::new();
@@ -93,7 +94,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // unzip the core for use
                 mk_lib_compression::mk_decompress_zip(
                     &format!("/mediakraken/emulation/cores/{}", core_name),
-                    true,
                     false,
                     "/mediakraken/emulation/cores/",
                 )
@@ -102,7 +102,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
     }
 
-    // stop logging
-    mk_lib_logging::mk_logging_post_elk("info", json!({"STOP": "STOP"}), LOGGING_INDEX_NAME).await;
+    #[cfg(debug_assertions)]
+    {
+        // stop logging
+        mk_lib_logging::mk_logging_post_elk("info", json!({"STOP": "STOP"})).await;
+    }
     Ok(())
 }

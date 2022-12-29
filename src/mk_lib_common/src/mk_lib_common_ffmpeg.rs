@@ -1,5 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 use std::process::{Command, Stdio};
 
 pub fn mk_common_ffmpeg_get_info(media_file: &str) -> Result<(String), std::io::Error> {

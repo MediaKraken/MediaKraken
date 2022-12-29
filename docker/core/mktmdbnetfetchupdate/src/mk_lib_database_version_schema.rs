@@ -1,5 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 use serde_json::{json, Value};
 use sqlx::{types::Json, types::Uuid};
 
@@ -12,9 +15,10 @@ pub async fn mk_lib_database_update_schema(
 ) -> Result<bool, sqlx::Error> {
     if version_no < 44 {
         // set mame version to 240
-        let option_json: Value = mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
-            .await
-            .unwrap();
+        let option_json: Value =
+            mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
+                .await
+                .unwrap();
         // option_json["MAME"]["Version"] = 240;
         // mk_lib_database_option_status::mk_lib_database_option_update(&sqlx_pool, option_json).await?;
         mk_lib_database_version_update(&sqlx_pool, 44).await?;

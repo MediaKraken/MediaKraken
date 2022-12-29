@@ -1,5 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use std::fs;
@@ -11,7 +14,11 @@ pub async fn mk_lib_database_open_pool() -> Result<sqlx::PgPool, sqlx::Error> {
     let connection_string: String;
     #[cfg(debug_assertions)]
     {
-        println!("database open hostname: {}", hostname);
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "database open hostname": hostname }),
+        )
+        .await;
     }
     if hostname == "wsripper2"
         || hostname == "th-hplaptop-1"

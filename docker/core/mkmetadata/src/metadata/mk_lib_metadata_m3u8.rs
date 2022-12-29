@@ -4,6 +4,9 @@
 
 use hls_m3u8::MediaPlaylist;
 
+#[path = "../mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 const M3U_HEADER: String = "EXTM3U\n";
 const M3U_LINE_HEADER: String = "EXTINF:";
 

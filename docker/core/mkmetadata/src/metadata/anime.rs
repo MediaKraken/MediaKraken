@@ -5,6 +5,9 @@ use sqlx::types::Uuid;
 use std::error::Error;
 use torrent_name_parser::Metadata;
 
+#[path = "../mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 #[path = "provider/anidb.rs"]
 mod provider_anidb;
 

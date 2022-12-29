@@ -1,5 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
@@ -56,7 +59,9 @@ pub async fn mk_lib_database_metadata_genre_read(
     Ok(table_rows)
 }
 
-pub async fn mk_lib_database_metadata_genre_count(sqlx_pool: &sqlx::PgPool) -> Result<i64, sqlx::Error> {
+pub async fn mk_lib_database_metadata_genre_count(
+    sqlx_pool: &sqlx::PgPool,
+) -> Result<i64, sqlx::Error> {
     let row: (i64,) = sqlx::query_as(
         "select distinct jsonb_array_elements_text(mm_metadata_json->'genres')b \
         from mm_metadata_movie",

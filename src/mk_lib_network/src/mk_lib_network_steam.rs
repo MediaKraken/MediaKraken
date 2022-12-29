@@ -7,6 +7,9 @@ use rsteam::steam_id::{SteamID2, SteamID3};
 use rsteam::steam_user::{BanData, Status};
 use rsteam::{SteamClient, SteamID};
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 /*
 ISteamUser
 ResolveVanityURL
@@ -30,5 +33,3 @@ GetAppList
 ISteamNews
 GetNewsForApp
  */
-
- 

@@ -6,6 +6,9 @@ use rocket::Request;
 use rocket_auth::{Auth, Error, Login, Signup, User, Users};
 use rocket_dyn_templates::{tera::Tera, Template};
 
+#[path = "../mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 #[derive(Serialize)]
 struct TemplateUserHardwareContext {
     template_data_phue: i32,

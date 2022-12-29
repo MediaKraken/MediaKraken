@@ -5,6 +5,9 @@ use std::error::Error;
 use std::path::Path;
 use torrent_name_parser::Metadata;
 
+#[path = "../mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 #[path = "../mk_lib_database_metadata_download_queue.rs"]
 mod mk_lib_database_metadata_download_queue;
 use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
@@ -31,7 +34,11 @@ pub async fn metadata_guessit(
         .unwrap();
     #[cfg(debug_assertions)]
     {
-        println!("Guessit File: {:?}", file_name);
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Guessit File": file_name }),
+        )
+        .await;
     }
     let guessit_data: Metadata = Metadata::from(&file_name).unwrap();
     if guessit_data.title().len() > 0 {

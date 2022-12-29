@@ -3,16 +3,24 @@
 // https://github.com/serialport/serialport-rs
 // apt install pkg-config libudev-dev
 
+use serde_json::json;
 use serialport::{available_ports, DataBits, SerialPortType, StopBits};
 use std::io::{self, Write};
 use std::time::Duration;
+
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
 
 pub async fn serial_port_discover() -> Result<(), std::Error> {
     let ports = serialport::available_ports().expect("No ports found!");
     for p in ports {
         #[cfg(debug_assertions)]
         {
-            println!("{} {}", p.port_name, p.port_type);
+            mk_lib_logging::mk_logging_post_elk(
+                std::module_path!(),
+                json!({ "port": p.port_name, "type": p.port_type }),
+            )
+            .await;
         }
     }
     Ok(())
@@ -20,7 +28,7 @@ pub async fn serial_port_discover() -> Result<(), std::Error> {
 
 pub async fn serial_port_open(
     serial_device: String,
-    serial_speed: i8,
+    serial_speed: u32,
     serial_stop_bits: StopBits,
     serial_data_bits: DataBits,
 ) -> Result<(serialport), std::Error> {

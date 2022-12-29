@@ -22,10 +22,11 @@ mod mk_lib_network;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    // start logging
-    const LOGGING_INDEX_NAME: &str = "mkdownload";
-    mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}), LOGGING_INDEX_NAME)
-        .await;
+    #[cfg(debug_assertions)]
+    {
+        // start logging
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+    }
 
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
@@ -58,12 +59,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 ConsumerMessage::Delivery(delivery) => {
                     let json_message: Value =
                         serde_json::from_str(&String::from_utf8_lossy(&delivery.body))?;
-                    mk_lib_logging::mk_logging_post_elk(
-                        "info",
-                        json!({ "msg body": json_message }),
-                        LOGGING_INDEX_NAME,
-                    )
-                    .await;
+                    #[cfg(debug_assertions)]
+                    {
+                        mk_lib_logging::mk_logging_post_elk(
+                            std::module_path!(),
+                            json!({ "msg body": json_message }),
+                        )
+                        .await;
+                    }
                     if json_message["Type"].to_string() == "File" {
                         // do NOT remove the header.....this is the SAVE location
                         mk_lib_network::mk_download_file_from_url(
@@ -90,20 +93,24 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             .unwrap(),
                         )
                         .unwrap();
-                        mk_lib_logging::mk_logging_post_elk(
-                            "info",
-                            json!({ "download": { "hdtrailer_json": data } }),
-                            LOGGING_INDEX_NAME,
-                        )
-                        .await;
-                        let an_array = data["rss"]["channel"]["item"].as_array().unwrap();
-                        for item in an_array.iter() {
+                        #[cfg(debug_assertions)]
+                        {
                             mk_lib_logging::mk_logging_post_elk(
-                                "info",
-                                json!({ "item": item }),
-                                LOGGING_INDEX_NAME,
+                                std::module_path!(),
+                                json!({ "download": { "hdtrailer_json": data } }),
                             )
                             .await;
+                        }
+                        let an_array = data["rss"]["channel"]["item"].as_array().unwrap();
+                        for item in an_array.iter() {
+                            #[cfg(debug_assertions)]
+                            {
+                                mk_lib_logging::mk_logging_post_elk(
+                                    std::module_path!(),
+                                    json!({ "item": item }),
+                                )
+                                .await;
+                            }
                             if (item["title"].to_string().contains("(Trailer")
                                 && option_config_json["Metadata"]["Trailer"]["Trailer"] == true)
                                 || (item["title"].to_string().contains("(Behind")

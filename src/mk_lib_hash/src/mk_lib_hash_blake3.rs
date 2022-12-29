@@ -2,6 +2,9 @@
 
 // https://docs.rs/blake3/1.0.0/blake3/
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 use blake3;
 use std::error::Error;
 use std::fs;

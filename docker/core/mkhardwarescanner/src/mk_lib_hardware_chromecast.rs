@@ -1,5 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 // https://crates.io/crates/mdns
 
 use futures_util::{pin_mut, stream::StreamExt};

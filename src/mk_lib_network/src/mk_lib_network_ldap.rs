@@ -3,6 +3,9 @@
 // https://github.com/inejge/ldap3
 // ldap3 = "0.10.3"
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 use ldap3::result::Result;
 use ldap3::{LdapConn, LdapConnAsync, LdapConnSettings, Scope, SearchEntry};
 

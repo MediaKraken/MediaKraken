@@ -2,6 +2,9 @@
 
 use rand::{thread_rng, Rng};
 
+#[path = "../mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 pub async fn meta_image_file_path(
     media_type: String,
 ) -> Result<String, Box<dyn std::error::Error>> {

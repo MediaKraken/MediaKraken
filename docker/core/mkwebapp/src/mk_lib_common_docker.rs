@@ -3,6 +3,9 @@
 // https://github.com/vv9k/docker-api-rs
 // docker-api = { version = "0.12.1", features = ["swarm"] }
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 use crate::rocket::futures::FutureExt;
 use crate::rocket::futures::StreamExt;
 use docker_api::api::ContainerListOpts;
@@ -108,7 +111,8 @@ pub async fn mk_common_docker_service_list() -> Result<Vec<String>> {
             for s in services {
                 #[cfg(debug_assertions)]
                 {
-                println!("{:#?}", s)}
+                    println!("{:#?}", s)
+                }
             }
         }
         Err(e) => eprintln!("Error: {}", e),

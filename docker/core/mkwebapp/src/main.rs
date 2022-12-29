@@ -140,19 +140,22 @@ mod bp_user_sync;
 
 #[rocket::main]
 async fn main() -> Result<(), Error> {
-    // start logging
-    const LOGGING_INDEX_NAME: &str = "mkwebapp";
-    mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}), LOGGING_INDEX_NAME)
-        .await;
+    #[cfg(debug_assertions)]
+    {
+        // start logging
+        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"START": "START"})).await;
+    }
 
     // check for and create ssl certs if needed
     if Path::new("/mediakraken/key/cacert.pem").exists() == false {
-        mk_lib_logging::mk_logging_post_elk(
-            "info",
-            json!({"stuff": "Cert not found, generating."}),
-            LOGGING_INDEX_NAME,
-        )
-        .await;
+        #[cfg(debug_assertions)]
+        {
+            mk_lib_logging::mk_logging_post_elk(
+                std::module_path!(),
+                json!({"stuff": "Cert not found, generating."}),
+            )
+            .await;
+        }
         // generate certs/keys
         let subject_alt_names = vec!["www.mediakraken.org".to_string(), "localhost".to_string()];
         let cert = generate_simple_self_signed(subject_alt_names).unwrap();
@@ -168,12 +171,14 @@ async fn main() -> Result<(), Error> {
 
     // create crypto salt if needed
     if Path::new("/mediakraken/secure/data.zip").exists() == false {
-        mk_lib_logging::mk_logging_post_elk(
-            "info",
-            json!({"stuff": "data.zip not found, generating."}),
-            LOGGING_INDEX_NAME,
-        )
-        .await;
+        #[cfg(debug_assertions)]
+        {
+            mk_lib_logging::mk_logging_post_elk(
+                std::module_path!(),
+                json!({"stuff": "data.zip not found, generating."}),
+            )
+            .await;
+        }
         // create the hash salt
         if Path::new("/mediakraken/secure/data.zip").exists() == false {
             let mut file_salt = File::create("/mediakraken/secure/data.zip").unwrap();

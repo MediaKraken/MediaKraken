@@ -7,6 +7,9 @@ use rocket_auth::{AdminUser, Auth, Error, Login, Signup, Users};
 use rocket_dyn_templates::{tera::Tera, Template};
 use sqlx::postgres::PgRow;
 
+#[path = "../mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 #[path = "../mk_lib_database_version.rs"]
 mod mk_lib_database_version;
 

@@ -9,6 +9,9 @@ use std::net::ToSocketAddrs;
 use std::path::PathBuf;
 use std::sync::Arc;
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 #[path = "../../mk_lib_network/src/mk_lib_network.rs"]
 mod mk_lib_network;
 

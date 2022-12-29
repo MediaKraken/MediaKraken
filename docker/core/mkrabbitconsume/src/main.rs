@@ -20,10 +20,11 @@ mod mk_lib_network;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    // start logging
-    const LOGGING_INDEX_NAME: &str = "mkdownload";
-    mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}), LOGGING_INDEX_NAME)
-        .await;
+    #[cfg(debug_assertions)]
+    {
+        // start logging
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+    }
 
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
@@ -52,12 +53,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 ConsumerMessage::Delivery(delivery) => {
                     let json_message: Value =
                         serde_json::from_str(&String::from_utf8_lossy(&delivery.body))?;
-                    mk_lib_logging::mk_logging_post_elk(
-                        "info",
-                        json!({ "msg body": json_message }),
-                        LOGGING_INDEX_NAME,
-                    )
-                    .await;
+                    #[cfg(debug_assertions)]
+                    {
+                        mk_lib_logging::mk_logging_post_elk(
+                            std::module_path!(),
+                            json!({ "msg body": json_message }),
+                        )
+                        .await;
+                    }
                     /*
                                         Do I actually launch a docker swarm container that checks for cuda
                     and then that launches the slave container with ffmpeg

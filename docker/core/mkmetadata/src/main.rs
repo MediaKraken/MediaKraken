@@ -32,10 +32,11 @@ mod metadata_base;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    // start logging
-    const LOGGING_INDEX_NAME: &str = "mkmetadata";
-    mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}), LOGGING_INDEX_NAME)
-        .await;
+    #[cfg(debug_assertions)]
+    {
+        // start logging
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+    }
 
     // open the database
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
@@ -121,12 +122,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         for download_data in metadata_to_process {
             // begin id process
             let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
-            metadata_uuid = metadata_identification::metadata_identification(
-                &sqlx_pool,
-                &download_data,
-            )
-            .await
-            .unwrap();
+            metadata_uuid =
+                metadata_identification::metadata_identification(&sqlx_pool, &download_data)
+                    .await
+                    .unwrap();
             // // guessit processing which includes identification
             // let metadata_uuid: uuid::Uuid =
             //     metadata_guessit::metadata_guessit(&sqlx_pool, download_data)

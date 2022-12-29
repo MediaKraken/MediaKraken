@@ -7,6 +7,9 @@
 
 # \cp     is to unalias it
 
+# mkbroadcast
+\cp -f --remove-destination ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkbroadcast/src/.
+
 # mkcron
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkcron/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_cron.rs ../docker/core/mkcron/src/.
@@ -102,6 +105,9 @@
 \cp -f --remove-destination ../src/mk_lib_database/src/metadata/mk_lib_database_metadata_game.rs ../docker/core/mkmetadatamame/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/metadata/mk_lib_database_metadata_game_system.rs ../docker/core/mkmetadatamame/src/.
 
+# mkmulticast
+\cp -f --remove-destination ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkmulticast/src/.
+
 # mkrabbitconsume
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mkrabbitconsume/src/.
 \cp -f --remove-destination ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mkrabbitconsume/src/.
@@ -116,6 +122,9 @@
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mkschedulesdirectupdate/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mkschedulesdirectupdate/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_option_status.rs ../docker/core/mkschedulesdirectupdate/src/.
+
+# mktcpserver
+\cp -f --remove-destination ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mktcpserver/src/.
 
 # mktmdbnetfetchbulk
 \cp -f --remove-destination ../src/mk_lib_common/src/mk_lib_common.rs ../docker/core/mktmdbnetfetchbulk/src/.

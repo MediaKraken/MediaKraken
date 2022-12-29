@@ -2,11 +2,15 @@
 
 use reqwest::header::CONTENT_TYPE;
 use reqwest::header::USER_AGENT;
+use serde_json::json;
 use std::collections::HashMap;
 use std::io::Cursor;
 use std::io::Read;
 use std::net::UdpSocket;
 use std::str;
+
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
 
 pub async fn mk_data_from_url_to_json(
     url: String,
@@ -32,7 +36,8 @@ pub async fn mk_data_from_url(url: String) -> Result<String, Box<dyn std::error:
     let response = reqwest::get(url).await?;
     #[cfg(debug_assertions)]
     {
-        println!("response: {:?}", response);
+        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "response": response }))
+            .await;
     }
     let content = response.bytes().await?;
     Ok(str::from_utf8(&content).unwrap().to_string())
@@ -44,7 +49,7 @@ pub async fn mk_download_file_from_url(
 ) -> Result<bool, Box<dyn std::error::Error>> {
     #[cfg(debug_assertions)]
     {
-        println!("waffles {}", url);
+        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "url": url })).await;
     }
     let response = reqwest::get(url).await?;
     let mut file = std::fs::File::create(file_name)?;

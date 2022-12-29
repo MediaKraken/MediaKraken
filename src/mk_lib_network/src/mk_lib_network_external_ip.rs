@@ -1,5 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 pub async fn mk_lib_network_external_ip() {
     let response = reqwest::get("https://myexternalip.com/raw").await?;
     let content = response.bytes().await?;

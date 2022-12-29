@@ -4,3 +4,6 @@
 // soundcloud = "0.4"
 
 use soundcloud::Client;
+
+#[path = "../../mk_lib_logging.rs"]
+mod mk_lib_logging;

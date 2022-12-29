@@ -7,6 +7,9 @@ use rocket_dyn_templates::{tera::Tera, Template};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+#[path = "../mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 #[path = "../mk_lib_database_sync.rs"]
 mod mk_lib_database_sync;
 

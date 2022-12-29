@@ -6,6 +6,9 @@
 use transmission_rpc::types::{BasicAuth, FreeSpace, Result, RpcResponse};
 use transmission_rpc::TransClient;
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 pub async fn mk_network_transmissions_login(
     user_name: String,
     user_password: String,
@@ -47,7 +50,7 @@ pub async fn mk_network_transmissions_list_torrents(
         .collect();
     #[cfg(debug_assertions)]
     {
-        println!("{:#?}", names);
+        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "names": names })).await;
     }
 
     let res1: RpcResponse<Torrents<Torrent>> = transmission_client
@@ -70,7 +73,11 @@ pub async fn mk_network_transmissions_list_torrents(
         .collect();
     #[cfg(debug_assertions)]
     {
-        println!("{:#?}", first_three);
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "first_three": first_three }),
+        )
+        .await;
     }
 
     let res2: RpcResponse<Torrents<Torrent>> = transmission_client
@@ -100,7 +107,7 @@ pub async fn mk_network_transmissions_list_torrents(
         .collect();
     #[cfg(debug_assertions)]
     {
-        println!("{:#?}", info);
+        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "info": info })).await;
     }
 }
 
@@ -113,7 +120,11 @@ pub async fn mk_network_transmissions_remove_torrent(
         .await?;
     #[cfg(debug_assertions)]
     {
-        println!("Remove result: {:?}", &res.is_ok());
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Remove result": &res.is_ok() }),
+        )
+        .await;
     }
     Ok(&res.is_ok())
 }

@@ -3,6 +3,9 @@
 // ftp = { version = "<version>", features = ["secure"] }
 // https://github.com/mattnenterprise/rust-ftp
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 use ftp::FtpStream;
 use std::io::Cursor;
 use std::str;

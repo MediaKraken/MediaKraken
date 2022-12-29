@@ -1,5 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 use tokio::time::{sleep, Duration};
 
 pub static DATABASE_VERSION: i32 = 48;
@@ -10,7 +13,9 @@ mod mk_lib_database_version_schema;
 pub async fn mk_lib_database_postgresql_version(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<String, sqlx::Error> {
-    let row: (String,) = sqlx::query_as("SELECT version();").fetch_one(sqlx_pool).await?;
+    let row: (String,) = sqlx::query_as("SELECT version();")
+        .fetch_one(sqlx_pool)
+        .await?;
     Ok(row.0)
 }
 

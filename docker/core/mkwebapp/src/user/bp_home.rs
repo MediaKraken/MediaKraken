@@ -8,6 +8,9 @@ use rocket::{form::*, State};
 use rocket_auth::{prelude::Error, *};
 use rocket_dyn_templates::{tera::Tera, Template};
 
+#[path = "../mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 #[derive(Serialize)]
 struct TemplateUserHomeContext {
     template_data_new_media: bool,

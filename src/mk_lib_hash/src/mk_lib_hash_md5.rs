@@ -4,6 +4,9 @@ use md5::{Digest, Md5};
 use std::error::Error;
 use std::fs;
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 #[path = "mk_lib_file.rs"]
 mod mk_lib_file;
 

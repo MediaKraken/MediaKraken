@@ -1,5 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 // https://github.com/Xavientois/rppal-dht11-rs
 // rppal-dht11 = "0.4.0"
 

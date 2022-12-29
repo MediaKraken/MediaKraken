@@ -3,6 +3,9 @@
 // https://github.com/teppah/yeelib_rs
 // yeelib_rs = "0.1.1"
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 use yeelib_rs::fields::{PowerStatus, Transition};
 use yeelib_rs::{Light, YeeClient, YeeError};
 
@@ -25,7 +28,7 @@ pub async fn mk_hardware_yeelight_discover() {
     let light = res.get_mut(0).unwrap();
     #[cfg(debug_assertions)]
     {
-        println!("{:?}", light);
+        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "light": light })).await;
     }
 }
 

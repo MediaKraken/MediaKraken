@@ -2,7 +2,7 @@ mkalpinemirror - Mirror for Alpine linux
     docker/test/mkalpinemirror image
 mkaptmirror - Mirror for Apt
     docker/test/mkaptmirror image
-mkarcherysec
+mkarcherysec - Automate Your Application Security Orchestration And Correlation (ASOC)
 mkcode - VSS Code build/git
     accessible via SSH Key only
     docker installed
@@ -13,6 +13,8 @@ mkdim - Dim, a media manager fueled by dark forces.
     NOT USED
 mkelk - Elasticsearch, Logstash, Kibana (ELK)
     docker/test/mkelk image
+    Access at http://mkelk:5601
+    See all indexes: curl 'localhost:9200/_cat/indices?v'
 mkftpserver - FTP server for testing
     docker/test/mkftpserver - image
 mkgocd - https://www.gocd.org/  FREE & OPEN SOURCE CI/CD SERVER
@@ -28,7 +30,7 @@ mkselenium - Selenium python
     includes source of testing webserver code
 mksonatype - Security check, repo host, etc
     docker/test/mksonatype howto file
-mkstage
+mkstage - Test DB
 mktrac - Trac project tracking
     docker/test/mktrac image
     NOT USED

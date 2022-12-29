@@ -5,6 +5,9 @@ use sqlx::types::Uuid;
 use std::error::Error;
 use std::path::Path;
 
+#[path = "../mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 #[path = "provider/giant_bomb.rs"]
 mod provider_giant_bomb;
 
@@ -30,18 +33,25 @@ pub async fn metadata_game_lookup(
     metadata_uuid =
         mk_lib_database_metadata_game::mk_lib_database_metadata_game_uuid_by_name_and_system(
             &sqlx_pool,
-            Path::new(&download_data.mm_download_path.as_ref().unwrap()).file_name().unwrap().to_os_string().into_string().unwrap(),
+            Path::new(&download_data.mm_download_path.as_ref().unwrap())
+                .file_name()
+                .unwrap()
+                .to_os_string()
+                .into_string()
+                .unwrap(),
             "systemfakeshortname".to_string(),
         )
         .await
         .unwrap();
     if metadata_uuid == uuid::Uuid::nil() {
         let sha1_hash =
-            mk_lib_hash_sha1::mk_file_hash_sha1(&download_data.mm_download_path.as_ref().unwrap()).unwrap();
-        metadata_uuid =
-            mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(&sqlx_pool, sha1_hash)
-                .await
+            mk_lib_hash_sha1::mk_file_hash_sha1(&download_data.mm_download_path.as_ref().unwrap())
                 .unwrap();
+        metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(
+            &sqlx_pool, sha1_hash,
+        )
+        .await
+        .unwrap();
     }
     Ok(metadata_uuid)
 }

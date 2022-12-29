@@ -3,6 +3,9 @@
 // https://github.com/nn1ks/huelib-rs
 // huelib = "0.13.2"
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 use huelib::resource::sensor;
 use huelib::{bridge, Bridge};
 use serde_json::json;
@@ -12,7 +15,11 @@ pub async fn mk_hardware_phue_discover() -> Result<serde_json::Value, Box<dyn st
     for bridge_ip in hub_ip_addresses {
         #[cfg(debug_assertions)]
         {
-            println!("{}", bridge_ip);
+            mk_lib_logging::mk_logging_post_elk(
+                std::module_path!(),
+                json!({ "bridge_ip": bridge_ip }),
+            )
+            .await;
         }
         // Register a new user.
         let username = bridge::register_user(bridge_ip, "huelib-rs example").unwrap();

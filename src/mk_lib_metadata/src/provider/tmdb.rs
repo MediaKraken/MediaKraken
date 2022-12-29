@@ -8,6 +8,9 @@ use std::error::Error;
 use std::path::Path;
 use torrent_name_parser::Metadata;
 
+#[path = "../../mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 #[path = "../../mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;
 

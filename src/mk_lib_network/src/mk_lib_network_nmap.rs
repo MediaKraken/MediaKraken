@@ -5,6 +5,9 @@
 // nmap -sU -sS -p U:137,T:139 --script smb-enum-shares 192.168.1.122 -oX scan.xml 1>/dev/null 2>/dev/null
 // nmap -sS -sV -p 111,2049 --script nfs-showmount 192.168.1.122 -oX scan.xml 1>/dev/null 2>/dev/null
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 pub async fn mk_network_share_scan(
     subnet_prefix: String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
@@ -16,7 +19,11 @@ pub async fn mk_network_share_scan(
     for ip_address in subnets.iter() {
         #[cfg(debug_assertions)]
         {
-            println!("{}", ip_address);
+            mk_lib_logging::mk_logging_post_elk(
+                std::module_path!(),
+                json!({ "ip_address": ip_address }),
+            )
+            .await;
         }
         // scan for smb
         std::process::Command::new("nmap")

@@ -5,6 +5,9 @@ use std::error::Error;
 use std::str;
 use substring::Substring;
 
+#[path = "../../mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;
 
@@ -24,7 +27,11 @@ pub async fn provider_televisiontunes_theme_fetch(
         let dl_end_position = data_content.find("\"").unwrap();
         #[cfg(debug_assertions)]
         {
-            println!("{:?}", data_content.substring(0, dl_end_position));
+            mk_lib_logging::mk_logging_post_elk(
+                std::module_path!(),
+                json!({ "tvtunes response": data_content.substring(0, dl_end_position) }),
+            )
+            .await;
         }
         let dl_url = format!(
             "{}{}{}",
@@ -34,9 +41,10 @@ pub async fn provider_televisiontunes_theme_fetch(
         );
         #[cfg(debug_assertions)]
         {
-            println!("{}", dl_url);
+            mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "dl_url": dl_url }))
+                .await;
         }
-        mk_lib_network::mk_download_file_from_url(dl_url, &tv_show_theme_path);
+        mk_lib_network::mk_download_file_from_url(dl_url, &tv_show_theme_path).await;
         metadata_uuid = Uuid::new_v4();
     }
     Ok(metadata_uuid)

@@ -5,6 +5,9 @@
 use mini_telnet::Telnet;
 use std::time::Duration;
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 pub async fn telnet_connect(
     telnet_prompt: String,
     telnet_ip: String,

@@ -1,5 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
@@ -61,7 +64,9 @@ pub async fn mk_lib_database_table_size(
     Ok(table_rows)
 }
 
-pub async fn mk_lib_database_parallel_workers(sqlx_pool: &sqlx::PgPool) -> Result<String, sqlx::Error> {
+pub async fn mk_lib_database_parallel_workers(
+    sqlx_pool: &sqlx::PgPool,
+) -> Result<String, sqlx::Error> {
     let row: (String,) = sqlx::query_as("show max_parallel_workers_per_gather")
         .fetch_one(sqlx_pool)
         .await?;

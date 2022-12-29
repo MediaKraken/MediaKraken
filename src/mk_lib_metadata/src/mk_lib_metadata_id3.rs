@@ -5,6 +5,9 @@
 
 use id3::{Tag, TagLike};
 
+#[path = "../mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 pub async fn mk_lib_metadata_id3_get_tag_info(file_name: String) {
     et tag = Tag::read_from_path(file_name)?;
     if let Some(artist) = tag.artist() {

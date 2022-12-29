@@ -4,6 +4,9 @@ use sqlx::types::Uuid;
 use std::error::Error;
 use torrent_name_parser::Metadata;
 
+#[path = "../mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 #[path = "adult.rs"]
 mod metadata_adult;
 #[path = "anime.rs"]
@@ -305,7 +308,8 @@ pub async fn metadata_fetch(
                 download_data.mm_download_provider_id,
                 download_data.mm_download_new_uuid,
                 provider_api_key,
-            );
+            )
+            .await;
         } else if download_data.mm_download_que_type
             == mk_lib_common_enum_media_type::DLMediaType::MOVIE
         {
@@ -315,7 +319,8 @@ pub async fn metadata_fetch(
                 download_data.mm_download_provider_id,
                 download_data.mm_download_new_uuid,
                 provider_api_key,
-            );
+            )
+            .await;
         } else if download_data.mm_download_que_type
             == mk_lib_common_enum_media_type::DLMediaType::TV
         {
@@ -324,7 +329,8 @@ pub async fn metadata_fetch(
                 download_data.mm_download_provider_id,
                 download_data.mm_download_new_uuid,
                 provider_api_key,
-            );
+            )
+            .await;
         }
     }
     mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(

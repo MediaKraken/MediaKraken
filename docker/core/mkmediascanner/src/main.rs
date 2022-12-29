@@ -42,10 +42,11 @@ mod mk_lib_logging;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    // start logging
-    const LOGGING_INDEX_NAME: &str = "mkmediascanner";
-    mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}), LOGGING_INDEX_NAME)
-        .await;
+    #[cfg(debug_assertions)]
+    {
+        // start logging
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+    }
 
     // setup regex for finding media parts
     let stack_cd = Regex::new(r"(?i)-cd\d").unwrap();
@@ -80,12 +81,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await
         .unwrap()
     {
-        mk_lib_logging::mk_logging_post_elk(
-            "info",
-            json!({ "Audit Path": row_data }),
-            LOGGING_INDEX_NAME,
-        )
-        .await;
+        #[cfg(debug_assertions)]
+        {
+            mk_lib_logging::mk_logging_post_elk(
+                std::module_path!(),
+                json!({ "Audit Path": row_data }),
+            )
+            .await;
+        }
         let mut media_path: PathBuf;
         // shouldn't need to care  let unc_slice = &row_data.get("mm_media_dir_path")[..1];
         // obviously this would mean we mount unc to below as well when defining libraries
@@ -115,12 +118,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 )
                 .await
                 .unwrap();
-                mk_lib_logging::mk_logging_post_elk(
-                    "info",
-                    json!({ "worker dir": media_path }),
-                    LOGGING_INDEX_NAME,
-                )
-                .await;
+                #[cfg(debug_assertions)]
+                {
+                    mk_lib_logging::mk_logging_post_elk(
+                        std::module_path!(),
+                        json!({ "worker dir": media_path }),
+                    )
+                    .await;
+                }
 
                 let original_media_class = row_data.mm_media_dir_class_enum;
                 // update the timestamp now so any other media added DURING this scan don"t get skipped
@@ -390,6 +395,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // close rabbitmq
     rabbit_connection.close().unwrap();
 
-    mk_lib_logging::mk_logging_post_elk("info", json!({"STOP": "STOP"}), LOGGING_INDEX_NAME).await;
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk("info", json!({"STOP": "STOP"})).await;
+    }
     Ok(())
 }

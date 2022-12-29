@@ -7,21 +7,23 @@ use sqlx::Row;
 use std::error::Error;
 use tokio::time::{sleep, Duration};
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
 #[path = "mk_lib_database_cron.rs"]
 mod mk_lib_database_cron;
 #[path = "mk_lib_database_version.rs"]
 mod mk_lib_database_version;
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    // start logging
-    const LOGGING_INDEX_NAME: &str = "mkcron";
-    mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}), LOGGING_INDEX_NAME)
-        .await;
+    #[cfg(debug_assertions)]
+    {
+        // start logging
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+    }
 
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();

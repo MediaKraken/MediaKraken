@@ -4,6 +4,9 @@ use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
 use std::error::Error;
 
+#[path = "../mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 #[path = "../mk_lib_database_metadata_download_queue.rs"]
 mod mk_lib_database_metadata_download_queue;
 use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;

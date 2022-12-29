@@ -1,6 +1,7 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
 use pnet::datalink;
+use serde_json::json;
 use shiplift::Docker;
 use socket2::{Domain, Protocol, SockAddr, Socket, Type};
 use std::io;
@@ -9,6 +10,9 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Barrier};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
+
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
 
 fn new_socket(addr: &SocketAddr) -> io::Result<Socket> {
     let domain = if addr.is_ipv4() {
@@ -40,6 +44,12 @@ fn bind_multicast(socket: &Socket, addr: &SocketAddr) -> io::Result<()> {
 
 #[tokio::main]
 async fn main() {
+    #[cfg(debug_assertions)]
+    {
+        // start logging
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+    }
+
     let mut mediakraken_ip: String = "127.0.0.1".to_string();
     // loop through interfaces
     for iface in datalink::interfaces() {

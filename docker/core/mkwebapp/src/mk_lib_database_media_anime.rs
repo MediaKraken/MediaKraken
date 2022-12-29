@@ -1,5 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+#[path = "mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
@@ -40,7 +43,10 @@ pub async fn mk_lib_database_media_anime_count(
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
     if search_value != "" {
-        let row: (i64,) = sqlx::query("").bind(search_value).fetch_one(sqlx_pool).await?;
+        let row: (i64,) = sqlx::query("")
+            .bind(search_value)
+            .fetch_one(sqlx_pool)
+            .await?;
         Ok(row.0)
     } else {
         let row: (i64,) = sqlx::query("").fetch_one(sqlx_pool).await?;

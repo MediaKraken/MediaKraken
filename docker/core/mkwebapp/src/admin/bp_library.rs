@@ -6,6 +6,9 @@ use rocket::Request;
 use rocket_auth::{AdminUser, Auth, Error, Login, Signup, Users};
 use rocket_dyn_templates::{tera::Tera, Template};
 
+#[path = "../mk_lib_logging.rs"]
+mod mk_lib_logging;
+
 #[path = "../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;
 
