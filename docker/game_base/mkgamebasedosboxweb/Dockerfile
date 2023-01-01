@@ -1,6 +1,6 @@
 # https://github.com/theonemule/dos-game    2021/04/04
 
-FROM ubuntu:21.10
+FROM ubuntu:22.10
 ENV USER=root
 ENV PASSWORD=password1
 ENV DEBIAN_FRONTEND=noninteractive

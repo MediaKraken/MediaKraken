@@ -37,6 +37,7 @@ mkftpserver - FTP server for testing
 
 mkgocd - https://www.gocd.org/  FREE & OPEN SOURCE CI/CD SERVER
     docker_build/build_gocd_gomatic.py
+    chmod 666 /var/run/docker.sock
     npm install --save-dev htmlhint
     npm install -g --save-dev stylelint stylelint-config-standard
     http://mkgocd:8153/
