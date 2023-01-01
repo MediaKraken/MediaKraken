@@ -36,7 +36,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await;
     }
 
-    println!("Here 2");
     // chromecast discover
     mk_lib_hardware_chromecast::mk_hardware_chromecast_discover()
         .await

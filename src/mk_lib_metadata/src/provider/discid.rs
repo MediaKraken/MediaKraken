@@ -11,9 +11,8 @@ mod mk_lib_logging;
 fn print_disc_info(disc: DiscId) {
     #[cfg(debug_assertions)]
     {
-        println!("DiscId: {}", disc.id());
-        println!("TOC   : {}", disc.toc_string());
-        println!("\nSubmit via {}", disc.submission_url());
+        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "DiscId": disc.id(), "TOC": disc.toc_string(), "Submitvia": disc.submission_url() }))
+                .await;
     }
 }
 

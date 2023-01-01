@@ -14,7 +14,7 @@ pub async fn mk_lib_network_ping(addr: String) {
         stream.take(3).for_each(|mb_time| {
             match mb_time {
                 Some(time) => println!("time={}", time),
-                None => println!("timeout"),
+                None => eprintln!("timeout"),
             }
             Ok(())
         })

@@ -3,6 +3,7 @@
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
+use serde_json::json;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
@@ -44,24 +45,31 @@ pub fn mk_decompress_zip(
         if !comment.is_empty() {
             #[cfg(debug_assertions)]
             {
-                println!("File {} comment: {}", i, comment);
+                mk_lib_logging::mk_logging_post_elk(
+                    std::module_path!(),
+                    json!({ "File": i, "comment": comment }),
+                )
+                .await;
             }
         }
         if (&*file.name()).ends_with('/') {
             #[cfg(debug_assertions)]
             {
-                println!("File {} extracted to \"{}\"", i, outpath.display());
+                mk_lib_logging::mk_logging_post_elk(
+                    std::module_path!(),
+                    json!({ "File": i, "extracted to": outpath.display() }),
+                )
+                .await;
             }
             std::fs::create_dir_all(&outpath).unwrap();
         } else {
             #[cfg(debug_assertions)]
             {
-                println!(
-                    "File {} extracted to \"{}\" ({} bytes)",
-                    i,
-                    outpath.display(),
-                    file.size()
-                );
+                mk_lib_logging::mk_logging_post_elk(
+                    std::module_path!(),
+                    json!({ "File": i, "extracted to": outpath.display(), "bytes": file.size() }),
+                )
+                .await;
             }
             if let Some(p) = outpath.parent() {
                 if !p.exists() {

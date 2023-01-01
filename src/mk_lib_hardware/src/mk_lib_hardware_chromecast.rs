@@ -22,12 +22,20 @@ pub async fn mk_hardware_chromecast_discover(
         if let (Some(host), Some(addr)) = (host, addr) {
             #[cfg(debug_assertions)]
             {
-                println!("found cast device {} at {}", host, addr);
+                mk_lib_logging::mk_logging_post_elk(
+                    std::module_path!(),
+                    json!({ "found cast device": host, "at": addr }),
+                )
+                .await;
             }
         } else {
             #[cfg(debug_assertions)]
             {
-                println!("cast device does not advertise address");
+                mk_lib_logging::mk_logging_post_elk(
+                    std::module_path!(),
+                    json!({ "cast device does not advertise address": "" }),
+                )
+                .await;
             }
         }
     }

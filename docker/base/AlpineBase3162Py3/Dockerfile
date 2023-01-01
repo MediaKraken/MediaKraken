@@ -5,7 +5,6 @@ LABEL author="Quinn D Granfor, spootdev@gmail.com"
 LABEL description="This holds the base image"
 
 ARG ALPMIRROR
-ARG PIPMIRROR
 
 # create work dir
 RUN mkdir /mediakraken
@@ -23,7 +22,7 @@ RUN sed -i "2 s/^#//" /etc/apk/repositories \
   python3==3.10.5-r0 \
   py3-pip==22.1.1-r0 \
   && pip3 install --no-cache-dir --upgrade pip==22.3 \
-  && pip3 install --no-cache-dir --trusted-host ${PIPMIRROR} -i https://${PIPMIRROR}/simple -r requirements.txt \
+  && pip3 install --no-cache-dir --trusted-host mksonatype -i http://mksonatype:8081/repository/pypi/simple -r requirements.txt \
   && rm requirements.txt \
   && adduser -DHs /sbin/nologin metaman
 

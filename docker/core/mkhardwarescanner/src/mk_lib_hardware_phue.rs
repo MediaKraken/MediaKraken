@@ -27,7 +27,8 @@ pub async fn mk_hardware_phue_discover() -> Result<serde_json::Value, Box<dyn st
         let lights = bridge.get_all_lights().unwrap();
         #[cfg(debug_assertions)]
         {
-            println!("{:?}", lights);
+            mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "bridge": lights }))
+                .await;
         }
     }
     Ok(json!({}))

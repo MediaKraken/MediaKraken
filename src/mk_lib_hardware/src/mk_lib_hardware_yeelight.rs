@@ -19,7 +19,11 @@ pub async fn mk_hardware_yeelight_discover() {
         if lights.len() == 0 {
             #[cfg(debug_assertions)]
             {
-                println!("zero");
+                mk_lib_logging::mk_logging_post_elk(
+                    std::module_path!(),
+                    json!({ "YeeClient": "zero" }),
+                )
+                .await;
             }
         } else {
             break lights;

@@ -233,7 +233,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     consumer.ack(delivery)?;
                 }
                 other => {
-                    println!("Consumer ended: {:?}", other);
+                    eprintln!("Consumer ended: {:?}", other);
                     break;
                 }
             }

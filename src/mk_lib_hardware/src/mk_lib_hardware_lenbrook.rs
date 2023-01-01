@@ -15,10 +15,11 @@ pub async fn mk_hardware_lenbrook_discovery() {
     for (_, d) in d.inventory().await.lock().await.iter() {
         #[cfg(debug_assertions)]
         {
-            println!(
-                "Found {}: {:?} with data {:?}",
-                d.addr, d.records[0].cid, d.records[0].data
-            );
+            mk_lib_logging::mk_logging_post_elk(
+                std::module_path!(),
+                json!({ "found": d.addr, "records": d.records[0].cid, "data":, d.records[0].data }),
+            )
+            .await;
         }
     }
 }

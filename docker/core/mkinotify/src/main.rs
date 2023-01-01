@@ -67,7 +67,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             .with_delivery_mode(2)
                             .with_content_type("text/plain".to_string()),
                     ))?;
-                    println!("Directory created: {:?}", event.name);
+                    #[cfg(debug_assertions)]
+                    {
+                        mk_lib_logging::mk_logging_post_elk(
+                            std::module_path!(),
+                            json!({ "Directory created": event.name }),
+                        )
+                        .await;
+                    }
                 } else {
                     rabbit_exchange.publish(Publish::with_properties(
                         format!("{{'Type': 'File Create', 'JSON': {:?}}}", event.name).as_bytes(),
@@ -76,7 +83,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             .with_delivery_mode(2)
                             .with_content_type("text/plain".to_string()),
                     ))?;
-                    println!("File created: {:?}", event.name);
+                    #[cfg(debug_assertions)]
+                    {
+                        mk_lib_logging::mk_logging_post_elk(
+                            std::module_path!(),
+                            json!({ "File created": event.name }),
+                        )
+                        .await;
+                    }
                 }
             } else if event.mask.contains(EventMask::DELETE) {
                 if event.mask.contains(EventMask::ISDIR) {
@@ -87,7 +101,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             .with_delivery_mode(2)
                             .with_content_type("text/plain".to_string()),
                     ))?;
-                    println!("Directory deleted: {:?}", event.name);
+                    #[cfg(debug_assertions)]
+                    {
+                        mk_lib_logging::mk_logging_post_elk(
+                            std::module_path!(),
+                            json!({ "Directory deleted": event.name }),
+                        )
+                        .await;
+                    }
                 } else {
                     rabbit_exchange.publish(Publish::with_properties(
                         format!("{{'Type': 'File Delete', 'JSON': {:?}}}", event.name).as_bytes(),
@@ -96,7 +117,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             .with_delivery_mode(2)
                             .with_content_type("text/plain".to_string()),
                     ))?;
-                    println!("File deleted: {:?}", event.name);
+                    #[cfg(debug_assertions)]
+                    {
+                        mk_lib_logging::mk_logging_post_elk(
+                            std::module_path!(),
+                            json!({ "File deleted": event.name }),
+                        )
+                        .await;
+                    }
                 }
             } else if event.mask.contains(EventMask::MODIFY) {
                 if event.mask.contains(EventMask::ISDIR) {
@@ -107,7 +135,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             .with_delivery_mode(2)
                             .with_content_type("text/plain".to_string()),
                     ))?;
-                    println!("Directory modified: {:?}", event.name);
+                    #[cfg(debug_assertions)]
+                    {
+                        mk_lib_logging::mk_logging_post_elk(
+                            std::module_path!(),
+                            json!({ "Directory modified": event.name }),
+                        )
+                        .await;
+                    }
                 } else {
                     rabbit_exchange.publish(Publish::with_properties(
                         format!("{{'Type': 'File Modify', 'JSON': {:?}}}", event.name).as_bytes(),
@@ -116,7 +151,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             .with_delivery_mode(2)
                             .with_content_type("text/plain".to_string()),
                     ))?;
-                    println!("File modified: {:?}", event.name);
+                    #[cfg(debug_assertions)]
+                    {
+                        mk_lib_logging::mk_logging_post_elk(
+                            std::module_path!(),
+                            json!({ "File modified": event.name }),
+                        )
+                        .await;
+                    }
                 }
             }
         }

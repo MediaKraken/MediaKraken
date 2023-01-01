@@ -15,6 +15,6 @@ pub async fn network_openweather_current(city: String, country: String, api_key:
             current.name.as_str(),
             current.weather[0].main.as_str()
         ),
-        Err(e) => println!("Could not fetch weather because: {}", e),
+        Err(e) => eprintln!("Could not fetch weather because: {}", e),
     }
 }

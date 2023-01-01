@@ -60,10 +60,11 @@ pub async fn metadata_process(
     // TODO art, posters, trailers, etc in here as well
     #[cfg(debug_assertions)]
     {
-        println!(
-            "metadata_process status: {}, provider: {}, id: {}",
-            download_data.mm_download_status, provider_name, download_data.mm_download_provider_id
-        );
+        mk_lib_logging::mk_logging_post_elk(
+                std::module_path!(),
+                json!({ "metadata_process status": download_data.mm_download_status,  "provider": provider_name, "id": download_data.mm_download_provider_id }),
+            )
+            .await;
     }
     if download_data.mm_download_status == "Search" {
         metadata_search(&sqlx_pool, provider_name, download_data, provider_api_key).await;

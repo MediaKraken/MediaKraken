@@ -27,7 +27,7 @@ pub async fn mk_logging_post_elk(
         .await?
         .json()
         .await?;
-    // println!("{:#?}", data);
-    // println!("{:#?}", echo_json);
+    //println!("{:#?}", data);
+    //println!("{:#?}", echo_json);
     Ok(echo_json)
 }

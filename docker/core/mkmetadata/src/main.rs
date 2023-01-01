@@ -52,7 +52,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let tmdb_api_key = option_json["API"]["themoviedb"].to_string();
     let handle_tmdb = tokio::spawn(async move {
         loop {
-            println!("Before themoviedb read");
             let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
             let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "themoviedb").await.unwrap();
             for download_data in metadata_to_process {
@@ -72,7 +71,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let musicbrainz_api_key = option_json["API"]["musicbrainz"].to_string();
         let handle_musicbrainz = tokio::spawn(async move {
             loop {
-                println!("Before musicbrainz read");
                 let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
                 let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "musicbrainz").await.unwrap();
                 for download_data in metadata_to_process {
@@ -92,7 +90,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let thesportsdb_api_key = option_json["API"]["thesportsdb"].to_string();
     let handle_thesportsdb = tokio::spawn(async move {
         loop {
-            println!("Before thesportsdb read");
             let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
             let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "thesportsdb").await.unwrap();
             for download_data in metadata_to_process {
@@ -111,7 +108,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // process all the "Z" records
     loop {
-        println!("Before Z read");
         // grab new batch of records to process by content provider
         let metadata_to_process =
             mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(

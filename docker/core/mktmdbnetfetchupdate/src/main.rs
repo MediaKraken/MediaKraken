@@ -80,9 +80,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // println!("json_result: {:?}", json_result["results"]);
     // let vec_result: Vec<MetadataMovie> = json_result["results"];
     //println!("vec {:?}", vec_result);
-    println!("here");
     let resp: Response = serde_json::from_str(&url_result.trim()).unwrap();
-    println!("what");
     for json_item in resp.results {
         //for json_item in vec_result.iter() {
         //println!("item {}", json_item);

@@ -3,6 +3,7 @@
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
+use serde_json::json;
 use std::error::Error;
 use std::io;
 use std::io::prelude::*;
@@ -44,7 +45,11 @@ pub async fn mk_directory_walk(dir_path: String) -> Result<Vec<String>, Box<dyn 
         let entry = entry.unwrap();
         #[cfg(debug_assertions)]
         {
-            println!("{}", entry.path().display());
+            mk_lib_logging::mk_logging_post_elk(
+                std::module_path!(),
+                json!({ "walk file_name": entry.path().display() }),
+            )
+            .await;
         }
         file_list.push(entry.path().display().to_string());
     }

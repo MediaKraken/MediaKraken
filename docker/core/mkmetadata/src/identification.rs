@@ -159,7 +159,7 @@ pub async fn metadata_identification(
             }
         }
 
-        _ => println!("que type does not equal any value"),
+        _ => eprintln!("que type does not equal any value"),
     }
     Ok(metadata_uuid)
 }
