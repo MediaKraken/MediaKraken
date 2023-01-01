@@ -11,7 +11,7 @@ def test_main_index(driver):
 
 def test_main_login(driver):
     """
-    Login into main page
+    Login into main page.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('main_username').send_keys('metaman')
@@ -21,7 +21,7 @@ def test_main_login(driver):
 
 def test_main_menu(driver):
     """
-    Click home page link
+    Click home page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('menu_home').click()
@@ -30,7 +30,7 @@ def test_main_menu(driver):
 
 def test_main_menu_media(driver):
     """
-    Click media on nav menu
+    Click media on nav menu.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('menu_media').click()
@@ -39,7 +39,7 @@ def test_main_menu_media(driver):
 
 def test_main_menu_sync(driver):
     """
-    Click sync on nav menu
+    Click sync on nav menu.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('menu_sync').click()
@@ -48,7 +48,7 @@ def test_main_menu_sync(driver):
 
 def test_main_menu_server(driver):
     """
-    Click server on nav menu
+    Click server on nav menu.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('menu_server').click()
@@ -57,7 +57,7 @@ def test_main_menu_server(driver):
 
 def test_main_menu_about(driver):
     """
-    Click about on nav menu
+    Click about on nav menu.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('menu_about').click()
@@ -66,7 +66,7 @@ def test_main_menu_about(driver):
 
 def test_main_menu_contact(driver):
     """
-    Click contact on footer
+    Click contact on footer.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_link_text('Contact').click()

@@ -76,7 +76,7 @@ job.add_task(ExecTask(['bash', '-c', 'bashate $(git ls-files *.sh)']))
 
 job = stage.ensure_job("html_htmlhint")
 job.add_task(
-    ExecTask(['htmlhint', 'docker/core/mkwebapp/templates/**/*.html']))
+    ExecTask(['npx', 'htmlhint', 'docker/core/mkwebapp/templates/**/*.html']))
 
 job = stage.ensure_job("env_dotenv-linter")
 job.add_task(

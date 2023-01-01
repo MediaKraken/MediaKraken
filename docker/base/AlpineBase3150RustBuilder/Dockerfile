@@ -21,7 +21,7 @@ RUN RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-li
 # Final Stage
 # ------------------------------------------------------------------------------
 
-FROM alpine:3.16.2
+FROM alpine:3.15.0
 
 RUN addgroup -g 1000 myapp \
   && adduser -D -s /bin/sh -u 1000 -G myapp myapp

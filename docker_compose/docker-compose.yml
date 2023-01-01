@@ -1,3 +1,4 @@
+---
 version: '3.6'
 # Volumes are HOST directory and then CONTAINER directory
 
@@ -67,7 +68,13 @@ services:
       - MAX_PARALLEL_WORKERS_PER_GATHER=2
       - MAX_PARALLEL_WORKERS=4
       - POSTGRES_PASSWORD=${DBPASS}
-    command: postgres -c logging_collector=on -c log_directory='/var/log/postgresql' -c log_filename='postgresql-%Y-%m-%d_%H%M%S.log' -c log_statement='all' -c log_duration=on -c log_connections=off -c log_disconnections=off
+    command: postgres -c logging_collector=on \
+      -c log_directory='/var/log/postgresql' \
+      -c log_filename='postgresql-%Y-%m-%d_%H%M%S.log' \
+      -c log_statement='all' \
+      -c log_duration=on \
+      -c log_connections=off \
+      -c log_disconnections=off
     container_name: mkstack_database
     stop_grace_period: 30s
     stop_signal: SIGTERM
@@ -120,7 +127,8 @@ services:
     container_name: mkstack_nginx
     depends_on:
       - mkwebapp
-    entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh -h mkstack_webapp -p 8080 -t 120 -- nginx
+    entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh \
+      -h mkstack_webapp -p 8080 -t 120 -- nginx
     stop_grace_period: 30s
     stop_signal: SIGTERM
     volumes:
@@ -164,7 +172,8 @@ services:
     container_name: mkstack_pgbouncer
     depends_on:
       - mkdatabase
-    entrypoint: ./wait-for-it-ash-busybox130.sh -h mkstack_database -p 5432 -t 60 -- ./entrypoint.sh
+    entrypoint: ./wait-for-it-ash-busybox130.sh \
+      -h mkstack_database -p 5432 -t 60 -- ./entrypoint.sh
     stop_grace_period: 30s
     stop_signal: SIGTERM
     networks:

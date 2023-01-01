@@ -11,7 +11,8 @@ RUN sed -i "s/dl-cdn.alpinelinux.org/${ALPMIRROR}/" /etc/apk/repositories \
   && apk add --no-cache \
   alpine-sdk \
   python3-dev \
-  && pip3 install --no-cache-dir --trusted-host mksonatype -i http://mksonatype:8081/repository/pypi/simple -r requirements.txt
+  && pip3 install --no-cache-dir --trusted-host mksonatype -i http://mksonatype:8081/repository/pypi/simple -r requirements.txt \
+  && rm requirements.txt
 
 # Copy the source files for the app
 COPY src /mediakraken

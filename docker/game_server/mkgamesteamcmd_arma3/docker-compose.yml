@@ -1,5 +1,6 @@
+---
 version: '2'
- services:
+services:
   arma3-server:
     image: gameservers/arma3:latest
     ports:

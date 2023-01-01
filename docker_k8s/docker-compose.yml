@@ -101,7 +101,8 @@ services:
     image: mediakraken/mkdownload:${BRANCH}
     secrets:
       - db_password
-    entrypoint: ./wait-for-it-ash-busybox130.sh -h mkstack_pgbouncer -p 6432 -t 120 -- python3 main_download.py
+    entrypoint: ./wait-for-it-ash-busybox130.sh \
+      -h mkstack_pgbouncer -p 6432 -t 120 -- python3 main_download.py
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
@@ -171,7 +172,8 @@ services:
     image: mediakraken/mkmetadata:${BRANCH}
     secrets:
       - db_password
-    entrypoint: ./wait-for-it-ash-busybox130.sh -h mkstack_database -p 5432 -t 120 -- python3 main_server_metadata_api.py
+    entrypoint: ./wait-for-it-ash-busybox130.sh \
+      -h mkstack_database -p 5432 -t 120 -- python3 main_server_metadata_api.py
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
@@ -215,7 +217,8 @@ services:
   # runs the nginx proxy service
   nginx:
     image: mediakraken/mknginx:${BRANCH}
-    entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh -h mkstack_webapp -p 8080 -t 120 -- nginx
+    entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh \
+      -h mkstack_webapp -p 8080 -t 120 -- nginx
     stop_grace_period: 30s
     stop_signal: SIGTERM
     volumes:
@@ -262,7 +265,8 @@ services:
       - SERVER_RESET_QUERY=DISCARD ALL
     secrets:
       - db_password
-    entrypoint: ./wait-for-it-ash-busybox130.sh -h mkstack_database -p 5432 -t 120 -- ./entrypoint.sh
+    entrypoint: ./wait-for-it-ash-busybox130.sh \
+      -h mkstack_database -p 5432 -t 120 -- ./entrypoint.sh
     stop_grace_period: 30s
     stop_signal: SIGTERM
     deploy:
@@ -355,7 +359,8 @@ services:
       - db_password
       - secure_key
       - csrf_key
-    entrypoint: ./wait-for-it-ash-busybox130.sh -h mkstack_pgbouncer -p 6432 -t 120 -- python3 main_reactor_line.py
+    entrypoint: ./wait-for-it-ash-busybox130.sh \
+      -h mkstack_pgbouncer -p 6432 -t 120 -- python3 main_reactor_line.py
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     ports:
@@ -397,7 +402,8 @@ services:
     image: mediakraken/mktranscode:${BRANCH}
     secrets:
       - db_password
-    entrypoint: ./wait-for-it-ash-busybox130.sh -h mkstack_pgbouncer -p 6432 -t 120 -- python3 async_transcode.py
+    entrypoint: ./wait-for-it-ash-busybox130.sh \
+      -h mkstack_pgbouncer -p 6432 -t 120 -- python3 async_transcode.py
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
@@ -435,7 +441,9 @@ services:
       - db_password
       - secure_key
       - csrf_key
-    entrypoint: ./wait-for-it-ash-busybox130.sh -h pgbouncer -p 6432 -t 60 -- gunicorn web_app_sanic.app:app -b :8080 -w 1 -k uvicorn.workers.UvicornWorker
+    entrypoint: ./wait-for-it-ash-busybox130.sh \
+      -h pgbouncer -p 6432 -t 60 -- gunicorn web_app_sanic.app:app \
+      -b :8080 -w 1 -k uvicorn.workers.UvicornWorker
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     ports:

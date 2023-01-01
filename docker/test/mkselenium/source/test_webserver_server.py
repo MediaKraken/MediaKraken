@@ -3,7 +3,7 @@ from .test_webserver_base import *
 
 def test_main_menu_server(driver):
     """
-    Click server on nav menu
+    Click server on nav menu.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('menu_server').click()
@@ -12,7 +12,7 @@ def test_main_menu_server(driver):
 
 def test_admin_navmenu_backup(driver):
     """
-    Click admin_navmenu_backup page link
+    Click admin_navmenu_backup page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_backup').click()
@@ -21,7 +21,7 @@ def test_admin_navmenu_backup(driver):
 
 def test_admin_navmenu_book_add(driver):
     """
-    Click admin_navmenu_book_add page link
+    Click admin_navmenu_book_add page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_book_add').click()
@@ -30,7 +30,7 @@ def test_admin_navmenu_book_add(driver):
 
 def test_admin_navmenu_cron(driver):
     """
-    Click admin_navmenu_cron page link
+    Click admin_navmenu_cron page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_cron').click()
@@ -39,7 +39,7 @@ def test_admin_navmenu_cron(driver):
 
 def test_admin_navmenu_cloud(driver):
     """
-    Click admin_navmenu_cloud page link
+    Click admin_navmenu_cloud page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_cloud').click()
@@ -48,7 +48,7 @@ def test_admin_navmenu_cloud(driver):
 
 def test_admin_navmenu_database_stats(driver):
     """
-    Click admin_navmenu_cloud page link
+    Click admin_navmenu_cloud page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_database_stats').click()
@@ -57,7 +57,7 @@ def test_admin_navmenu_database_stats(driver):
 
 def test_admin_navmenu_docker_stats(driver):
     """
-    Click admin_navmenu_docker_stats page link
+    Click admin_navmenu_docker_stats page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_docker_stats').click()
@@ -66,7 +66,7 @@ def test_admin_navmenu_docker_stats(driver):
 
 def test_admin_navmenu_game_metadata(driver):
     """
-    Click admin_navmenu_game_metadata page link
+    Click admin_navmenu_game_metadata page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_game_metadata').click()
@@ -75,7 +75,7 @@ def test_admin_navmenu_game_metadata(driver):
 
 def test_admin_navmenu_hardware(driver):
     """
-    Click admin_navmenu_hardware page link
+    Click admin_navmenu_hardware page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_hardware').click()
@@ -84,7 +84,7 @@ def test_admin_navmenu_hardware(driver):
 
 def test_admin_navmenu_library(driver):
     """
-    Click admin_navmenu_library page link
+    Click admin_navmenu_library page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_library').click()
@@ -93,7 +93,7 @@ def test_admin_navmenu_library(driver):
 
 def test_admin_navmenu_messages(driver):
     """
-    Click admin_navmenu_messages page link
+    Click admin_navmenu_messages page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_messages').click()
@@ -102,7 +102,7 @@ def test_admin_navmenu_messages(driver):
 
 def test_admin_navmenu_chart_browser(driver):
     """
-    Click admin_navmenu_chart_browser page link
+    Click admin_navmenu_chart_browser page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_chart_browser').click()
@@ -111,7 +111,7 @@ def test_admin_navmenu_chart_browser(driver):
 
 def test_admin_navmenu_client_usage(driver):
     """
-    Click admin_navmenu_client_usage page link
+    Click admin_navmenu_client_usage page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_client_usage').click()
@@ -120,7 +120,7 @@ def test_admin_navmenu_client_usage(driver):
 
 def test_admin_navmenu_all_dup(driver):
     """
-    Click admin_navmenu_all_dup page link
+    Click admin_navmenu_all_dup page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_all_dup').click()
@@ -129,7 +129,7 @@ def test_admin_navmenu_all_dup(driver):
 
 def test_admin_navmenu_all_media(driver):
     """
-    Click admin_navmenu_all_media page link
+    Click admin_navmenu_all_media page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_all_media').click()
@@ -138,7 +138,7 @@ def test_admin_navmenu_all_media(driver):
 
 def test_admin_navmenu_all_matched(driver):
     """
-    Click admin_navmenu_all_matched page link
+    Click admin_navmenu_all_matched page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_all_matched').click()
@@ -147,7 +147,7 @@ def test_admin_navmenu_all_matched(driver):
 
 def test_admin_navmenu_all_unmatched(driver):
     """
-    Click admin_navmenu_all_unmatched page link
+    Click admin_navmenu_all_unmatched page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_all_unmatched').click()
@@ -156,7 +156,7 @@ def test_admin_navmenu_all_unmatched(driver):
 
 def test_admin_navmenu_top10_all_time(driver):
     """
-    Click admin_navmenu_top10_all_time page link
+    Click admin_navmenu_top10_all_time page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_top10_all_time').click()
@@ -165,7 +165,7 @@ def test_admin_navmenu_top10_all_time(driver):
 
 def test_admin_navmenu_top10_movie(driver):
     """
-    Click admin_navmenu_top10_movie page link
+    Click admin_navmenu_top10_movie page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_top10_movie').click()
@@ -174,7 +174,7 @@ def test_admin_navmenu_top10_movie(driver):
 
 def test_admin_navmenu_top10_tvshow(driver):
     """
-    Click admin_navmenu_top10_tvshow page link
+    Click admin_navmenu_top10_tvshow page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_top10_tvshow').click()
@@ -183,7 +183,7 @@ def test_admin_navmenu_top10_tvshow(driver):
 
 def test_admin_navmenu_top10_tveps(driver):
     """
-    Click admin_navmenu_top10_tveps page link
+    Click admin_navmenu_top10_tveps page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_top10_tveps').click()
@@ -192,7 +192,7 @@ def test_admin_navmenu_top10_tveps(driver):
 
 def test_admin_navmenu_server_settings(driver):
     """
-    Click admin_navmenu_server_settings page link
+    Click admin_navmenu_server_settings page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_server_settings').click()
@@ -201,7 +201,7 @@ def test_admin_navmenu_server_settings(driver):
 
 def test_admin_navmenu_server_link(driver):
     """
-    Click admin_navmenu_server_link page link
+    Click admin_navmenu_server_link page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_server_link').click()
@@ -210,7 +210,7 @@ def test_admin_navmenu_server_link(driver):
 
 def test_admin_navmenu_share(driver):
     """
-    Click admin_navmenu_share page link
+    Click admin_navmenu_share page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_share').click()
@@ -219,7 +219,7 @@ def test_admin_navmenu_share(driver):
 
 def test_admin_navmenu_media_import(driver):
     """
-    Click admin_navmenu_media_import page link
+    Click admin_navmenu_media_import page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_media_import').click()
@@ -228,7 +228,7 @@ def test_admin_navmenu_media_import(driver):
 
 def test_admin_navmenu_transmission(driver):
     """
-    Click admin_navmenu_transmission page link
+    Click admin_navmenu_transmission page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_transmission').click()
@@ -237,7 +237,7 @@ def test_admin_navmenu_transmission(driver):
 
 def test_admin_navmenu_users(driver):
     """
-    Click admin_navmenu_users page link
+    Click admin_navmenu_users page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('admin_navmenu_users').click()
@@ -246,7 +246,7 @@ def test_admin_navmenu_users(driver):
 
 def test_main_menu(driver):
     """
-    Click home page link
+    Click home page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('menu_home').click()

@@ -24,7 +24,7 @@ browsers = {
 @pytest.fixture(scope='session', params=browsers.keys())
 def driver(request):
     """
-    Determine if webdriver exists
+    Determine if webdriver exists.
     """
     if 'DISPLAY' not in os.environ:
         pytest.skip('Test requires display server')

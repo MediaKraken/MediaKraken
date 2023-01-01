@@ -3,7 +3,7 @@ from .test_webserver_base import *
 
 def test_main_internet(driver):
     """
-    Click internet
+    Click internet.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('user_internet_page').click()
@@ -12,7 +12,7 @@ def test_main_internet(driver):
 
 def test_main_internet_youtube(driver):
     """
-    Click youtube
+    Click youtube.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('user_internet_youtube_page').click()
@@ -21,7 +21,7 @@ def test_main_internet_youtube(driver):
 
 def test_main_internet_vimeo(driver):
     """
-    Click vimeo
+    Click vimeo.
     """
     driver.get(TEST_TARGET)
     driver.back()  # go back to main internet page
@@ -31,7 +31,7 @@ def test_main_internet_vimeo(driver):
 
 def test_main_internet_twitch(driver):
     """
-    Click vimeo
+    Click vimeo.
     """
     driver.get(TEST_TARGET)
     driver.back()  # go back to main internet page
@@ -41,7 +41,7 @@ def test_main_internet_twitch(driver):
 
 def test_main_internet_flickr(driver):
     """
-    Click vimeo
+    Click vimeo.
     """
     driver.get(TEST_TARGET)
     driver.back()  # go back to main internet page
@@ -51,7 +51,7 @@ def test_main_internet_flickr(driver):
 
 def test_main_menu(driver):
     """
-    Click home page link
+    Click home page link.
     """
     driver.get(TEST_TARGET)
     driver.find_element_by_id('menu_home').click()

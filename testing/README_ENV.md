@@ -37,8 +37,10 @@ mkftpserver - FTP server for testing
 
 mkgocd - https://www.gocd.org/  FREE & OPEN SOURCE CI/CD SERVER
     docker_build/build_gocd_gomatic.py
+    npm install --save-dev htmlhint
+    npm install -g --save-dev stylelint stylelint-config-standard
     http://mkgocd:8153/
-    
+
 mkjenkins - Jenkins is an open source automation server.
     docker/test/mkjenkins image
 
