@@ -9,7 +9,6 @@ services:
     secrets:
       - db_password
     environment:
-      - RUST_BACKTRACE=1
       - WAIT_HOSTS=database:5432, rabbit:5672
     command: sh -c "/wait && /mediakraken/mkcon"
     stop_grace_period: 30s
@@ -54,7 +53,6 @@ services:
     secrets:
       - db_password
     environment:
-      - RUST_BACKTRACE=1
       - WAIT_HOSTS=database:5432, rabbit:5672
     command: sh -c "/wait && /mediakraken/mkdownload"
     stop_grace_period: 30s
@@ -70,8 +68,8 @@ services:
   filebeat:
     image: mediakraken/mkfilebeat:${BRANCH}
     environment:
-      - ELASTICSEARCH_HOSTS=th-elk-1:9200
-      - KIBANA_HOSTS=th-elk-1:5601
+      - ELASTICSEARCH_HOSTS=mkelk:9200
+      - KIBANA_HOSTS=mkelk:5601
     volumes:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -88,7 +86,6 @@ services:
       # this stores the "push button" key
       - mediakraken_vol_phue:/mediakraken/phue
     environment:
-      - RUST_BACKTRACE=1
       - WAIT_HOSTS=database:5432, rabbit:5672
     command: sh -c "/wait && /mediakraken/mkhardware"
     stop_grace_period: 30s
@@ -105,7 +102,6 @@ services:
   inotify:
     image: mediakraken/mkinotify:${BRANCH}
     environment:
-      - RUST_BACKTRACE=1
       - WAIT_HOSTS=rabbit:5672
     command: sh -c "/wait && /mediakraken/myinotify"
     stop_grace_period: 30s
@@ -391,8 +387,6 @@ services:
       -b :8080 -w 1 -k uvicorn.workers.UvicornWorker
     stop_grace_period: 30s
     stop_signal: SIGUSR1
-    ports:
-      - "8080:8080"
     volumes:
       - ./mkmount:/mediakraken/mnt
       # must not be read only as it stores cache here

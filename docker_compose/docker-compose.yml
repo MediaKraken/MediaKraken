@@ -247,8 +247,6 @@ services:
     container_name: mkstack_webapp
     stop_grace_period: 30s
     stop_signal: SIGUSR1
-    ports:
-      - "8080:8080"
     volumes:
       # must not be read only as it stores cache here
       - mediakraken_vol_static:/mediakraken/static

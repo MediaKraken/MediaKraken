@@ -1,26 +1,9 @@
-"""
-  Copyright (C) 2018 Quinn D Granfor <spootdev@gmail.com>
-
-  This program is free software; you can redistribute it and/or
-  modify it under the terms of the GNU General Public License
-  version 2, as published by the Free Software Foundation.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-  General Public License version 2 for more details.
-
-  You should have received a copy of the GNU General Public License
-  version 2 along with this program; if not, write to the Free
-  Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-  MA 02110-1301, USA.
-"""
-
+import os
+import shlex
 import smtplib
-
-
-# For this to work with google smtp you must allow access from less secure apps
-# on google's account site.  Otherwise one will not be able to log in.
+import subprocess
+from dotenv import load_dotenv
+    
 def com_net_send_email(user, pwd, recipient, subject, body, smtp_server='smtp.gmail.com',
                        smtp_port=587):
     """
@@ -52,3 +35,14 @@ def com_net_send_email(user, pwd, recipient, subject, body, smtp_server='smtp.gm
             return True
         except:
             return False
+
+# load .env stats
+load_dotenv()
+    
+com_net_send_email(os.environ['MAILUSER'],
+                                os.environ['MAILPASS'],
+                                os.environ['MAILUSER'],
+                                "subject",
+                                "body",
+                                smtp_server=os.environ['MAILSERVER'],
+                                smtp_port=os.environ['MAILPORT'])

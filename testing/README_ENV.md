@@ -15,12 +15,18 @@ mkcode - VSS Code build/git
     accessible via SSH Key only
     docker installed
     apt install python3-pip
+    cd docker_build
+        python3 build_dev_environment.py
     standard rustup installed
         root@mkcode:~/.cargo# cat config
         [source.crates-io]
         replace-with = "kellnr-cratesio"
         [source.kellnr-cratesio]
         registry = "git://mkkellrn:9418/cratesio"    
+    nano /etc/docker/daemon.json
+        {
+        "insecure-registries" : ["mkregistry:5000"]
+        }
 
 mkdim - Dim, a media manager fueled by dark forces.
     DockerHub image
@@ -55,12 +61,18 @@ mkkillrn - Rust Cargo repo/proxy
         # Default port for Helm deployments is 30418
         registry = "git://mkkellrn:9418/cratesio"
 
+mkmailhog - fake email server to view mail via web interface (receives build and deploy emails)
+    http://mkmailhog:8025
+
 mkopenproject
 
 mkprod - Live production
     docker swarm from DockerHub
     docker installed
 
+mkregistry
+    docker registry
+    
 mkselenium - Selenium python
     docker/test/mkselenium image
     includes source of testing webserver code

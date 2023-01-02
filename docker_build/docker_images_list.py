@@ -16,23 +16,23 @@
   MA 02110-1301, USA.
 """
 
-
-#ALPINE_MIRROR = 'th-mkbuild-1.beaverbay.local'
+#ALPINE_MIRROR = 'mksonatype'
 ALPINE_MIRROR = 'dl-cdn.alpinelinux.org'
 
-#CENTOS_MIRROR = 'th-mkbuild-1.beaverbay.local'
-# CENTOS_MIRROR = 'http://mirror.centos.org/'
+#CENTOS_MIRROR = 'mksonatype:8081/repository/repo_yum/'
+CENTOS_MIRROR = 'http://mirror.centos.org/'
 
-#DEBIAN_MIRROR = 'th-mkbuild-1.beaverbay.local'
+#DEBIAN_MIRROR = 'mksonatype:8081/repository/repo_apt/'
 DEBIAN_MIRROR = 'ftp.us.debian.org'
 
 # pip3 install --trusted-host mksontatype -i http://mksonatype:8081/repository/pypi/simple -r requirements.txt
-#PYPI_MIRROR = 'th-mkbuild-1.beaverbay.local'
-PYPI_MIRROR = 'pypi.python.org'
+# PYPI_MIRROR = 'pypi.python.org'
+# PYPI_MIRROR_PORT = ''
+PYPI_MIRROR = 'mksontatype'
+PYPI_MIRROR_PORT = ':8081'
 
-# DOCKER_REPOSITORY = 'th-mkbuild-1.beaverbay.local'
-#
-# DOCKERHUB_REPOSITORY = 'index.docker.io:443'
+DOCKER_REPOSITORY = 'mkregistry'
+DOCKERHUB_REPOSITORY = 'index.docker.io:443'
 
 # PROXY_IP_PORT = '0.0.0.0:8080'
 # PROXY_USER_NAME = None
@@ -45,6 +45,8 @@ STAGE_ONE_IMAGES = {
     'AlpineBase3142Py3': ('mkbase_alpinepy3', 'alpine:3.14.2', 'base'),
     # 'AlpineBase3143Py3': ('mkbase_alpinepy3', 'alpine:3.14.3', 'base'),
     # 'AlpineBase3150Py3': ('mkbase_alpinepy3', 'alpine:3.15.0', 'base'),
+    # 'AlpineBase3162Py3': ('mkbase_alpinepy3', 'alpine:3.16.2', 'base'),
+    'DebianBase11Py3': ('mkbase_debianpy3', 'python:3.12.0a3-bullseye', 'base'),
 }
 
 STAGE_TWO_IMAGES = {}
@@ -141,7 +143,7 @@ STAGE_CORE_IMAGES = {
 
 STAGE_ONE_GAME_SERVERS = {
     # for hosting games via dosbox and web
-    'mkgamebasedosboxweb': ('mkgamebasedosboxweb', 'ubuntu:20.10', 'game_base'),
+    'mkgamebasedosboxweb': ('mkgamebasedosboxweb', 'ubuntu:22.10', 'game_base'),
 
     # for hosting games via retroarch and web
     'mkgamebaseretroarchweb': ('mkgamebaseretroarchweb', 'debian:buster-slim', 'game_base'),

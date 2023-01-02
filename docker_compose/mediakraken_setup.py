@@ -105,7 +105,7 @@ if not os.path.isfile('.env'):
     file_handle.write('\nCSRF_SECRET_KEY=')
     random_key = b64encode(os.urandom(32)).decode('utf-8')
     file_handle.write(random_key.replace('"', '').replace("'", ''))
-    file_handle.write('\nSWARMIP=None\nDEBUG=False')
+    file_handle.write('\nSWARMIP=None')
     file_handle.write('\nBRANCH=refactor')
     file_handle.write('\n')
     file_handle.close()

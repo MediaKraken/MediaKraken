@@ -57,7 +57,7 @@ subprocess_run('docker-compose -f ../docker/test/docker-compose.yml pull mktestp
 # subprocess_run('docker-compose -f ../docker/test/docker-compose.yml pull mktestteamcitydb')
 
 # pause user to setup sonatype
-print("Access and configure sonatype at http://th-mkbuild-1.beaverbay.local:8081")
+print("Access and configure sonatype at http://mksonatype:8081")
 input("Press Enter to continue...after configuration of Alpine, Debian, CentOS, PyPi are completed")
 
 # build out test images
@@ -71,5 +71,5 @@ subprocess_run('docker-compose -f docker-compose-archery.yml up -d')
 
 print("setup has completed. Access Jenkins at http://th-mkbuild-1.beaverbay.local:8080"
       " for build pipeline")
-print("setup has completed. Access TeamCity at http://th-mkbuild-1.beaverbay.local:8111"
-      " for build pipeline")
+# print("setup has completed. Access TeamCity at http://th-mkbuild-1.beaverbay.local:8111"
+#       " for build pipeline")

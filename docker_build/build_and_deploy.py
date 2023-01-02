@@ -39,10 +39,17 @@ import network_email
 # TODO proxy docker build -t mediakraken/mkbase38py3 --build-arg http_proxy="http://proxyip:8080"
 #  --build-arg ALPMIRROR=dl-cdn.alpinelinux.org --build-arg PIPMIRROR=pypi.python.org .
 
+# build BASE images - first...as required for rest of images
+# python3 build_and_deploy.py -b -v dev
+# build rest of images
+# python3 build_and_deploy.py -v dev
+
 parser = argparse.ArgumentParser(
     description='This program builds and deploys MediaKraken')
 parser.add_argument('-b', '--base', required=False,
                     help='Base images only', action="store_true")
+parser.add_argument('-e', '--email', required=False,
+                    help='Send results email', action="store_true")
 # set args.image variable if entered - ex. ComposeMediaKrakenBaseFFMPEG
 parser.add_argument('-i', '--image', metavar='image', required=False,
                     help='Image to build')
@@ -83,13 +90,15 @@ def build_email_push(build_group, email_subject, branch_tag, push_hub_image=Fals
                                                           ' --build-arg BRANCHTAG=%s'
                                                           ' --build-arg ALPMIRROR=%s'
                                                           ' --build-arg DEBMIRROR=%s'
-                                                          ' --build-arg PIPMIRROR=%s .' %
+                                                          ' --build-arg PIPMIRROR=%s'
+                                                          ' --build-arg PIPMIRRORPORT=%s .' %
                                                           (docker_no_cache,
                                                            build_group[docker_images][0],
                                                            branch_tag, branch_tag,
                                                            docker_images_list.ALPINE_MIRROR,
                                                            docker_images_list.DEBIAN_MIRROR,
-                                                           docker_images_list.PYPI_MIRROR)),
+                                                           docker_images_list.PYPI_MIRROR,
+                                                           docker_images_list.PYPI_MIRROR_PORT)),
                                               stdout=subprocess.PIPE, shell=False)
             email_body = ''
             while True:
@@ -115,16 +124,17 @@ def build_email_push(build_group, email_subject, branch_tag, push_hub_image=Fals
                             break
                         print(line.rstrip(), flush=True)
                     pid_push_proc.wait()
-            # send success/fail email
-            network_email.com_net_send_email(os.environ['MAILUSER'],
-                                             os.environ['MAILPASS'],
-                                             os.environ['MAILUSER'],
-                                             email_subject
-                                             + build_stages[docker_images][0]
-                                             + subject_text,
-                                             email_body,
-                                             smtp_server=os.environ['MAILSERVER'],
-                                             smtp_port=os.environ['MAILPORT'])
+            if args.email:                    
+                # send success/fail email
+                network_email.com_net_send_email(os.environ['MAILUSER'],
+                                                os.environ['MAILPASS'],
+                                                os.environ['MAILUSER'],
+                                                email_subject
+                                                + build_stages[docker_images][0]
+                                                + subject_text,
+                                                email_body.encode('utf-8'),
+                                                smtp_server=os.environ['MAILSERVER'],
+                                                smtp_port=os.environ['MAILPORT'])
 
 
 # start
@@ -168,7 +178,7 @@ else:
 os.chdir(os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken/docker_build'))
 # sync the latest code into the image locations for build
 pid_proc = subprocess.Popen(
-    [os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken', 'docker_build/source_sync.sh')])
+    [os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken', 'docker_build/source_sync_local.sh')])
 pid_proc.wait()
 
 # begin build process
@@ -176,7 +186,8 @@ if args.base:
     for build_stages in (docker_images_list.STAGE_ONE_IMAGES,
                          docker_images_list.STAGE_ONE_GAME_SERVERS,):
         build_email_push(build_stages, 'Build base dev image: ',
-                         branch_tag=git_branch, push_hub_image=True)
+                         branch_tag=git_branch, push_hub_image=False)
+        # TODO put back to push_hub_image=True
 
 if args.security:
     for build_stages in (docker_images_list.STAGE_ONE_SECURITY_TOOLS,

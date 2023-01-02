@@ -446,8 +446,6 @@ services:
       -b :8080 -w 1 -k uvicorn.workers.UvicornWorker
     stop_grace_period: 30s
     stop_signal: SIGUSR1
-    ports:
-      - "8080:8080"
     volumes:
       - ./mkmount:/mediakraken/mnt
       # must not be read only as it stores cache here
