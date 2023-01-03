@@ -8,11 +8,13 @@ use std::num::NonZeroU32;
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
-// https://docs.rs/governor/0.3.2/governor/struct.Quota.html
-// pub fn mk_network_rate_limiter {
-//     let mut lim = RateLimiter::direct(Quota::per_second(nonzero!(50u32))); // Allow 50 units per second
-//     assert_eq!(Ok(()), lim.check());
-// }
+// https://docs.rs/governor/0.5.1/governor/struct.Quota.html
+
+pub fn mk_network_rate_limiter {
+    let mut lim = RateLimiter::direct(Quota::per_second(nonzero!(50u32))); // Allow 50 units per second
+    assert_eq!(Ok(()), lim.check());
+}
+
 /*
 let lim = RateLimiter::direct(Quota::per_second(nonzero!(10u32)));
     // exhaust the limiter:

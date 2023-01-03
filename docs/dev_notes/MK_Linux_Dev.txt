@@ -5,7 +5,7 @@ apt-get install git nano
 # cd to home directy of user created during install
 git clone https://github.com/MediaKraken/MediaKraken
 cd MediaKraken
-git checkout refactor
+git checkout dev
 cd docker_build
 python3 build_dev_environment.py
 
@@ -44,7 +44,7 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
 git clone https://github.com/MediaKraken/MediaKraken
 cd ./MediaKraken/
-git checkout refactor
+git checkout dev
 git config --global user.email "spootdev@gmail.com"
 git config --global user.name "SpootDev"
 VSCode: rust-analyzer crates arduino docker python yaml 'even better toml' cargo vscode-rustfmt
@@ -57,7 +57,7 @@ sudo apt-get install pkg-config
 cargo install cargo-audit
 git clone https://github.com/MediaKraken/MediaKraken
 cd ./MediaKraken/
-git checkout refactor
+git checkout dev
 cd docker_compose
 -
 sudo docker run -d -p 5000:5000 --restart=always --name registry registry:2
@@ -88,7 +88,7 @@ sudo python3 mediakraken_setup.py
 all platforms
 git clone https://github.com/MediaKraken/MediaKraken
 cd ./MediaKraken/
-git checkout refactor
+git checkout dev
 cd docker_compose
 # as root/sudo/whatever so it can install things
 # no workie on raspbian......dirrent paths/packages of course

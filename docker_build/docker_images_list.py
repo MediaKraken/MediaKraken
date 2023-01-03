@@ -19,20 +19,22 @@
 #ALPINE_MIRROR = 'mksonatype'
 ALPINE_MIRROR = 'dl-cdn.alpinelinux.org'
 
+CARGO_CRATES = "crates.io"
+
 #CENTOS_MIRROR = 'mksonatype:8081/repository/repo_yum/'
 CENTOS_MIRROR = 'http://mirror.centos.org/'
 
 #DEBIAN_MIRROR = 'mksonatype:8081/repository/repo_apt/'
 DEBIAN_MIRROR = 'ftp.us.debian.org'
 
+DOCKER_REPOSITORY = 'mkregistry:5000'
+DOCKERHUB_REPOSITORY = 'index.docker.io:443'
+
 # pip3 install --trusted-host mksontatype -i http://mksonatype:8081/repository/pypi/simple -r requirements.txt
 # PYPI_MIRROR = 'pypi.python.org'
 # PYPI_MIRROR_PORT = ''
 PYPI_MIRROR = 'mksontatype'
 PYPI_MIRROR_PORT = ':8081'
-
-DOCKER_REPOSITORY = 'mkregistry'
-DOCKERHUB_REPOSITORY = 'index.docker.io:443'
 
 # PROXY_IP_PORT = '0.0.0.0:8080'
 # PROXY_USER_NAME = None
@@ -46,6 +48,7 @@ STAGE_ONE_IMAGES = {
     # 'AlpineBase3143Py3': ('mkbase_alpinepy3', 'alpine:3.14.3', 'base'),
     # 'AlpineBase3150Py3': ('mkbase_alpinepy3', 'alpine:3.15.0', 'base'),
     # 'AlpineBase3162Py3': ('mkbase_alpinepy3', 'alpine:3.16.2', 'base'),
+    # 'AlpineBase3170Py3': ('mkbase_alpinepy3', 'alpine:3.17.0', 'base'),
     'DebianBase11Py3': ('mkbase_debianpy3', 'python:3.12.0a3-bullseye', 'base'),
 }
 

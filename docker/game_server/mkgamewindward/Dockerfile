@@ -1,4 +1,4 @@
-FROM frolvlad/alpine-glibc:glibc-2.33
+FROM frolvlad/alpine-glibc:glibc-2.34
 # Note that we should be using frolvlad/alpine-mono (see note below) but can't because
 # glibc-2.26 requires a newer kernel than is available on a lot of hosts (old OpenVZ)
 
@@ -15,6 +15,7 @@ ENV WINDWARD_SERVER_NAME="Windward Server" \
     WINDWARD_SERVER_PUBLIC=0
 
 # Note - This line taken from frolvlad/alpine-mono since we have to build it ourselves here
+# TODO find the last mono download that builds with 2.34.....and include in git
 RUN apk add --no-cache --virtual=.build-dependencies wget ca-certificates tar zstd && \
     wget "https://www.archlinux.org/packages/extra/x86_64/mono/download/" -qO "/tmp/mono.pkg.tar.zst" && \
     tar -I zstd -xvf "/tmp/mono.pkg.tar.zst" && \

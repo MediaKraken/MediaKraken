@@ -3,7 +3,7 @@ version: '3.6'
 
 services:
   mkelk:
-    image: mediakraken/mkelk:refactor
+    image: mediakraken/mkelk:dev
     environment:
       - ELASTICSEARCH_START=1
       - LOGSTASH_START=1

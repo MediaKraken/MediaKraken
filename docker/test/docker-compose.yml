@@ -4,7 +4,7 @@ version: '3.6'
 services:
   # Postgresql server
   mktestdatabase:
-    image: mediakraken/mkdatabase:refactor
+    image: mediakraken/mkdatabase:dev
     environment:
       - MAX_CONNECTIONS=10
       - MAX_WAL_SENDERS=2
@@ -93,7 +93,7 @@ services:
 #      - mediakraken_vol_test_teamcity_db:/var/lib/postgresql/data
 
 #  mktesttrac:
-#    image: mediakraken/mktrac:refactor
+#    image: mediakraken/mktrac:dev
 #    stop_grace_period: 30s
 #    stop_signal: SIGTERM
 #    container_name: mktest_trac

@@ -124,7 +124,7 @@ for build_group in (docker_images_list.STAGE_ONE_IMAGES,
                     docker_images_list.STAGE_ONE_GAME_SERVERS,):
     for docker_images in build_group:
         job = stage.ensure_job("build_base_%s" % build_group[docker_images][0])
-        job.add_task(ExecTask(['bash', '-c', 'docker build -t mediakraken/%s:refactor'
+        job.add_task(ExecTask(['bash', '-c', 'docker build -t mediakraken/%s:dev'
                                              ' --build-arg ALPMIRROR=%s'
                                              ' --build-arg DEBMIRROR=%s'
                                              ' --build-arg PIPMIRROR=%s'
@@ -139,7 +139,7 @@ stage = pipeline.ensure_stage("docker_build_core")
 for build_group in (docker_images_list.STAGE_CORE_IMAGES,):
     for docker_images in build_group:
         job = stage.ensure_job("build_core_%s" % build_group[docker_images][0])
-        job.add_task(ExecTask(['bash', '-c', 'docker build -t mediakraken/%s:refactor'
+        job.add_task(ExecTask(['bash', '-c', 'docker build -t mediakraken/%s:dev'
                                              ' --build-arg ALPMIRROR=%s'
                                              ' --build-arg DEBMIRROR=%s'
                                              ' --build-arg PIPMIRROR=%s'
@@ -155,7 +155,7 @@ for build_group in (docker_images_list.STAGE_TWO_GAME_SERVERS,):
     for docker_images in build_group:
         job = stage.ensure_job("build_games_%s" %
                                build_group[docker_images][0])
-        job.add_task(ExecTask(['bash', '-c', 'docker build -t mediakraken/%s:refactor'
+        job.add_task(ExecTask(['bash', '-c', 'docker build -t mediakraken/%s:dev'
                                              ' --build-arg ALPMIRROR=%s'
                                              ' --build-arg DEBMIRROR=%s'
                                              ' --build-arg PIPMIRROR=%s'

@@ -3,7 +3,7 @@ version: '3.6'
 
 services:
   mkjenkins:
-    image: mediakraken/mkjenkins:refactor
+    image: mediakraken/mkjenkins:dev
     stop_grace_period: 30s
     stop_signal: SIGTERM
     container_name: mkjenkins
