@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+**/__pycache__/
+**/*.py[cod]
+.cache/
+.eggs/
+guessit_rest.egg-info/
+*.egg
+.tox/
+.coverage
+.python-version
+doc/
+*.log
+*.iml
+**/test/

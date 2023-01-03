@@ -1,0 +1,24 @@
+{% block content %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>MediaKraken - Torrent</title>
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.min.css">
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+        {% include "bss_admin/bss_admin_include_menu" %}
+        {% include "bss_public/bss_public_footer" %}
+    </div>
+    <script src="/static/js/jquery.tmpl.min.js"></script>
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/js/base_webapp_delete.js"></script>
+    <script src="/static/js/jquery-easing.min.js"></script>
+    <script src="/static/js/script.min.js"></script>
+</body>
+{% endblock %}

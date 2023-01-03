@@ -1,0 +1,21 @@
+[package]
+name = "db_manufacturer_gc"
+version = "0.0.1"
+edition = "2021"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+
+[dependencies]
+# do not use rust-tls below as it's incompatible with globalcache website
+reqwest = { version = "0.11.13", default-features = false, features = ["json", "native-tls"] }
+serde = { version = "1.0.137", features = ["derive"] }
+serde_json = "1.0.81"
+sqlx = { version = "0.5.13", features = [ "json", "runtime-tokio-rustls", "postgres", "uuid" ] }
+sys-info = "0.9.1"
+tokio = { version = "1.18.2", features = ["full"] }
+uuid = { version = "0.8.2", features = ["serde", "v4"] }
+
+[dev-dependencies]
+tokio-test = "*"

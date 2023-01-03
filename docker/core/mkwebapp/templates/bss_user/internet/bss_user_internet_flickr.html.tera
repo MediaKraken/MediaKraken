@@ -1,0 +1,38 @@
+{% block content %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>MediaKraken - Flickr</title>
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.min.css">
+</head>
+
+<body>
+    {% include "bss_user/bss_user_include_menu" %}
+    <div>
+        {% if media %}
+            <div>
+                {% for row_data in media %}
+                    <div class="main_photo">
+                        <a href= "/user/internet/flickr_detail", guid=row_data[0]) }}" }} >
+                        <img src="{{ row_data[1] | replace(from='/mediakraken/web_app/MediaKraken/static/meta/images/', to='') }}" height="180" width="320">
+                        </a>
+                        <div class="description">
+                            <p class="description_content_left">{{row_data[0]}}: {{row_data[2]}}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p id="general_text">No Flickr media found.</p>
+        {% endif %}
+    </div>
+    {% include "bss_public/bss_public_footer" %}
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery-easing.min.js"></script>
+    <script src="/static/js/script.min.js"></script>
+</body>
+{% endblock %}

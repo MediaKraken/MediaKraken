@@ -1,0 +1,4 @@
+[bandit]
+
+# B101 # assert used
+skips: B101

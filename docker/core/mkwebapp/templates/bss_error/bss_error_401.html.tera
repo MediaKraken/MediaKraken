@@ -1,0 +1,27 @@
+{% block content %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>MediaKraken - 401</title>
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.min.css">
+</head>
+
+<body>
+    {% include "bss_user/bss_user_include_menu" %}
+    <div>
+        <div class="jumbotron">
+            <h1 class="text-center">401 - Must be a verified user</h1>
+            <p class="text-center"><img src="/static/image/browser.png" loading="lazy"></p>
+            <p class="text-center">You are not authorized to see this page. Please <strong><a href="/public/login"</strong>log in</a></strong> or<br> <strong><a href="/public/register"</strong>create a new account</a></strong>.</p>
+        </div>
+    </div>
+    {% include "bss_public/bss_public_footer" %}
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery-easing.min.js"></script>
+    <script src="/static/js/script.min.js"></script>
+</body>
+{% endblock %}

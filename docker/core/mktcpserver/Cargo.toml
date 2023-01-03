@@ -1,0 +1,34 @@
+[package]
+name = "mktcpserver"
+version = "0.0.1"
+edition = "2021"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
+
+[dependencies]
+argh = "0.1.6"
+amiquip = { version = "0.4.2", default-features = false }
+chrono = { version = "0.4.19", features = ["serde"] }
+reqwest = { version = "0.11.13", default-features = false, features = ["json", "rustls-tls"] }
+rustls = "0.20.6"
+rustls-pemfile = "1.0.1"
+serde = { version = "1.0.137", features = ["derive"] }
+serde_json = "1.0.81"
+sqlx = { version = "0.5.13", features = [
+    "chrono",
+    "json",
+    "runtime-tokio-rustls",
+    "postgres",
+    "uuid",
+] }
+sys-info = "0.9.1"
+tokio = { version = "1.18.2", features = ["full"] }
+tokio-rustls = "0.23.2"
+validator = { version = "0.16.0", features = ["derive"] }
+
+[dev-dependencies]
+tokio-test = "*"

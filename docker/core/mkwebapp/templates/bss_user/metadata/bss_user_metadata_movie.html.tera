@@ -1,0 +1,78 @@
+{% block content %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>MediaKraken</title>
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.min.css">
+    <link rel="stylesheet" href="/static/css/base_webapp_layout.css">
+    <link rel="stylesheet" href="/static/contextmenu/jquery.contextMenu.min.css">
+</head>
+
+<body>
+    {% include "bss_user/bss_user_include_menu" %}
+    <div><div>
+    {% if template_data %}
+    {% if pagination_bar != "" %}
+        {{ pagination_bar|safe }}
+    {% endif %}
+    <div id="the-movie-metadata-node">
+        {% for row_data in template_data %}
+            <div class="main_photo">
+                <div data-id={{row_data[0]}}>
+                    <a href= "/user/metadata/movie_detail/{{row_data[0]}}" >
+                        {% if row_data[3] == None or row_data[3] == 'null' %}
+                            <img src="/static/image/Movie-icon.png" loading="lazy" height="300" width="200">
+                            {% if row_data[4] == True %}
+                            <img class="watched_icon" src="/static/image/eye.png" loading="lazy" height="25" width="25">
+                            {% endif %}
+                            {% if row_data[5] != None %}
+                            <img class="rating_icon" src="/static/image/{{row_data[5]}}" loading="lazy" height="25" width="25">
+                            {% endif %}
+                            {% if row_data[6] != None %}
+                            <img class="request_icon" src="/static/image/add-button.png" loading="lazy" height="25" width="25">
+                            {% endif %}
+                            {% if row_data[7] != None %}
+                            <img class="queue_icon" src="/static/image/rectangles.png" loading="lazy" height="25" width="25">
+                            {% endif %}
+                            </a>
+                            <div class="description">
+                                <p class="description_content_left">{{row_data[1]}}</p>
+                            </div>
+                        {% else %}
+                            <img src="{{row_data[3]|replace(from='\"', to='')}}" loading="lazy" height="300" width="200">
+                            {% if row_data[4] == True %}
+                            <img class="watched_icon" src="/static/image/eye.png" loading="lazy" height="25" width="25">
+                            {% endif %}
+                            {% if row_data[5] != None %}
+                            <img class="rating_icon" src="/static/image/{{row_data[5]}}" loading="lazy" height="25" width="25">
+                            {% endif %}
+                            {% if row_data[6] != None %}
+                            <img class="request_icon" src="/static/image/add-button.png" loading="lazy" height="25" width="25">
+                            {% endif %}
+                            {% if row_data[7] != None %}
+                            <img class="queue_icon" src="/static/image/rectangles.png" loading="lazy" height="25" width="25">
+                            {% endif %}
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% if pagination_bar != "" %}
+        {{ pagination_bar|safe }}
+    {% endif %}
+    {% else %}
+    <p id="general_text">No movie metadata found.</p>
+    {% endif %}</div></div>
+    {% include "bss_public/bss_public_footer" %}
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery-easing.min.js"></script>
+    <script src="/static/js/script.min.js"></script>
+    <script src="/static/contextmenu/jquery.contextMenu.min.js"></script>
+    <script src="/static/js/base_webapp.js"></script>
+</body>
+{% endblock %}

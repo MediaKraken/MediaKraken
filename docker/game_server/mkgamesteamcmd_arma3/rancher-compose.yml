@@ -1,0 +1,6 @@
+---
+version: '2'
+ services:
+  arma3-server:
+    scale: 1
+    start_on_create: true

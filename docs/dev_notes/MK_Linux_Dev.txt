@@ -1,0 +1,105 @@
+th-mkbuild-1
+debian 11
+apt-get update && apt upgrade
+apt-get install git nano
+# cd to home directy of user created during install
+git clone https://github.com/MediaKraken/MediaKraken
+cd MediaKraken
+git checkout dev
+cd docker_build
+python3 build_dev_environment.py
+
+
+Debian 11
+apt-get install curl build-essential libssl-dev
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# restart terminal!
+cargo install cargo-audit
+apt-get install python3-dotenv
+nano /etc/docker/daemon.json
+{
+  "insecure-registries" : ["th-registry-1.beaverbay.local:5000"]
+}
+
+EC2
+debian 11
+sudo apt update
+sudo apt upgrade
+sudo apt install git curl build-essential libssl-dev pkg-config
+sudo nano /etc/sysctl.conf
+  fs.inotify.max_user_watches=524288
+sudo sysctl -p
+sudo apt-get install \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null    
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+git clone https://github.com/MediaKraken/MediaKraken
+cd ./MediaKraken/
+git checkout dev
+git config --global user.email "spootdev@gmail.com"
+git config --global user.name "SpootDev"
+VSCode: rust-analyzer crates arduino docker python yaml 'even better toml' cargo vscode-rustfmt
+
+lightsail
+debian 10
+sudo apt-get install curl build-essential libssl-dev git
+source $HOME/.cargo/env
+sudo apt-get install pkg-config
+cargo install cargo-audit
+git clone https://github.com/MediaKraken/MediaKraken
+cd ./MediaKraken/
+git checkout dev
+cd docker_compose
+-
+sudo docker run -d -p 5000:5000 --restart=always --name registry registry:2
+
+
+# registry
+reaspian lite on pi4
+sudo apt-get update
+sudo apt upgrade
+curl -sSL https://get.docker.com | sh
+sudo apt-get install -y libffi-dev libssl-dev python3-dev
+sudo apt-get install -y python3 python3-pip
+sudo pip3 install docker-compose
+sudo systemctl enable docker
+sudo usermod -aG docker pi
+# restart terminal
+
+
+raspbian lite on pi4 (armv7-unknown-linux-gnueabihf)
+sudo apt-get install git libssl-dev
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# restart terminal
+cargo install cargo-audit
+sudo python3 mediakraken_setup.py
+
+
+
+all platforms
+git clone https://github.com/MediaKraken/MediaKraken
+cd ./MediaKraken/
+git checkout dev
+cd docker_compose
+# as root/sudo/whatever so it can install things
+# no workie on raspbian......dirrent paths/packages of course
+python3 mediakraken_setup.py
+
+
+# pi docker stuff
+sudo curl -sSL https://get.docker.com | sudo sh
+sudo apt-get install libffi-dev libssl-dev git python3-dev
+sudo apt-get install -y python3 python3-pip
+sudo pip3 install docker-compose
+sudo systemctl enable docker
+sudo usermod -aG docker pi
+# restart terminal

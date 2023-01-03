@@ -1,0 +1,6 @@
+[package]
+name = "myapp"
+version = "0.0.1"
+
+[profile.release]
+strip = "symbols"

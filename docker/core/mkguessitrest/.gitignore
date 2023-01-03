@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.cache/
+.eggs/
+*.egg-info/
+*.egg
+.tox/
+.coverage
+.python-version
+doc/
+*.log
+*.iml
