@@ -47,7 +47,7 @@ pub async fn mk_directory_walk(dir_path: String) -> Result<Vec<String>, Box<dyn 
         {
             mk_lib_logging::mk_logging_post_elk(
                 std::module_path!(),
-                json!({ "walk file_name": entry.path().display() }),
+                json!({ "walk file_name": entry.path().display().to_string() }),
             )
             .await;
         }

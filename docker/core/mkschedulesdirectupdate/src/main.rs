@@ -23,7 +23,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // open the database
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
-    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
+    let _db_check = mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+        .await
+        .unwrap();
 
     //
     // def mk_schedules_direct_program_info_fetch(meta_program_fetch):
@@ -129,4 +131,5 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //     mk_schedules_direct_program_info_fetch(meta_program_fetch)
     //
     // // TODO, go grab images for blank logos
+    Ok(())
 }

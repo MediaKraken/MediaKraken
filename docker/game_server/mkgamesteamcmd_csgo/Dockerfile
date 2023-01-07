@@ -2,7 +2,7 @@
 # Dockerfile that builds a CSGO Gameserver
 ###########################################################
 ARG BRANCHTAG
-FROM mediakraken/mkbasesteamcmdroot:${BRANCHTAG}
+FROM mediakraken/mkgamebasesteamcmdroot:${BRANCHTAG}
 
 LABEL maintainer="walentinlamonos@gmail.com"
 
@@ -17,7 +17,7 @@ ENV DLURL https://raw.githubusercontent.com/CM2Walki/CSGO
 RUN set -x \
 	&& apt-get update \
 	&& apt-get install -y --no-install-recommends --no-install-suggests \
-		lib32z1=1:1.2.11.dfsg-1 \
+		lib32z1=1:1.2.11.dfsg-1+deb10u2 \
 	&& mkdir -p "${STEAMAPPDIR}" \
 	&& wget --max-redirect=30 "${DLURL}/master/etc/entry.sh" -qO "${HOMEDIR}/entry.sh" \
 	&& { \

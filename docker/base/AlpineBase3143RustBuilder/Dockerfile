@@ -27,7 +27,7 @@ FROM alpine:3.14.3
 RUN addgroup -g 1000 myapp \
   && adduser -D -s /bin/sh -u 1000 -G myapp myapp
 
-WORKDIR /home/myapp/bin/
+WORKDIR /mediakraken
 
 COPY --from=cargo-build /usr/src/myapp/target/x86_64-unknown-linux-musl/release/myapp .
 

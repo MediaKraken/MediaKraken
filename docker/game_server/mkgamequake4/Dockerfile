@@ -1,4 +1,4 @@
-FROM ubuntu:20.10
+FROM ubuntu:20.04
 LABEL author="Quinn D Granfor, spootdev@gmail.com"
 
 RUN apt-get update \

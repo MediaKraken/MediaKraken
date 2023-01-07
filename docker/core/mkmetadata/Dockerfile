@@ -1,27 +1,17 @@
-FROM rust:1.66.0 as cargo-build
+FROM mediakraken/mkbase_rust:dev as cargo-build
 
-RUN rustup target add x86_64-unknown-linux-musl \
-  && apt-get update && apt-get install -y --no-install-recommends musl-tools musl-dev \
-  && update-ca-certificates
-
-# Create appuser
-ENV USER=mediakraken
-ENV UID=10001
-
-RUN adduser \
-  --disabled-password \
-  --gecos "" \
-  --home "/nonexistent" \
-  --shell "/sbin/nologin" \
-  --no-create-home \
-  --uid "${UID}" \
-  "${USER}"
+ARG BRANCHTAG
 
 WORKDIR /mediakraken
 
 COPY ./ .
 
-RUN cargo build --target x86_64-unknown-linux-musl --release
+RUN if [ "${BRANCHTAG}" = "prod" ]; \
+  then RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl \
+  && cp /mediakraken/target/x86_64-unknown-linux-musl/release/mk* /mediakraken/target/x86_64-unknown-linux-musl/.; \
+  else RUSTFLAGS=-Clinker=musl-gcc cargo build --target=x86_64-unknown-linux-musl \
+  && cp /mediakraken/target/x86_64-unknown-linux-musl/debug/mk* /mediakraken/target/x86_64-unknown-linux-musl/.; \
+  fi
 
 ####################################################################################################
 ## Final image
@@ -40,7 +30,7 @@ COPY --from=cargo-build /etc/group /etc/group
 WORKDIR /mediakraken
 
 # Copy our build
-COPY --from=cargo-build /mediakraken/target/x86_64-unknown-linux-musl/release/mkmetadata ./
+COPY --from=cargo-build /mediakraken/target/x86_64-unknown-linux-musl/mkmetadata ./
 
 # Use an unprivileged user.
 USER mediakraken:mediakraken

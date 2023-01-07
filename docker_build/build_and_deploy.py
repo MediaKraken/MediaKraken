@@ -60,7 +60,7 @@ parser.add_argument('-s', '--security', required=False,
 parser.add_argument('-t', '--testing', required=False,
                     help='Build testing images', action="store_true")
 parser.add_argument('-v', '--version', metavar='version', required=False,
-                    help='The build version dev/prod')
+                    help='The build version dev/prod or other branch')
 args = parser.parse_args()
 
 # load .env stats
@@ -124,39 +124,40 @@ def build_email_push(build_group, email_subject, branch_tag, push_hub_image=Fals
                             break
                         print(line.rstrip(), flush=True)
                     pid_push_proc.wait()
-            if args.email:                    
+            if args.email:
                 # send success/fail email
                 network_email.com_net_send_email(os.environ['MAILUSER'],
-                                                os.environ['MAILPASS'],
-                                                os.environ['MAILUSER'],
-                                                email_subject
-                                                + build_stages[docker_images][0]
-                                                + subject_text,
-                                                email_body.encode('utf-8'),
-                                                smtp_server=os.environ['MAILSERVER'],
-                                                smtp_port=os.environ['MAILPORT'])
+                                                 os.environ['MAILPASS'],
+                                                 os.environ['MAILUSER'],
+                                                 email_subject
+                                                 + build_stages[docker_images][0]
+                                                 + subject_text,
+                                                 email_body,
+                                                 smtp_server=os.environ['MAILSERVER'],
+                                                 smtp_port=os.environ['MAILPORT'])
 
 
 # start
 CWD_HOME_DIRECTORY = os.getcwd().rsplit('MediaKraken', 1)[0]
-# grab version to build via git branch
-pid_git_proc = subprocess.Popen(
-    shlex.split('git branch'), stdout=subprocess.PIPE, shell=False)
-git_branch = None
-while True:
-    line = pid_git_proc.stdout.readline()
-    if not line:
-        break
-    print(line.rstrip(), flush=True)
-    if line.rstrip().decode('utf-8').find('*') == 0:
-        git_branch = line.rstrip().decode('utf-8').split(' ')[1]
-        break
-pid_git_proc.wait()
-if git_branch is None:
-    print('Can\'t find Git branch!  Exiting!')
-    sys.exit()
-else:
-    print('Found Git branch: %s' % git_branch)
+# # grab version to build via git branch
+# pid_git_proc = subprocess.Popen(
+#     shlex.split('git branch'), stdout=subprocess.PIPE, shell=False)
+# git_branch = None
+# while True:
+#     line = pid_git_proc.stdout.readline()
+#     if not line:
+#         break
+#     print(line.rstrip(), flush=True)
+#     if line.rstrip().decode('utf-8').find('*') == 0:
+#         git_branch = line.rstrip().decode('utf-8').split(' ')[1]
+#         break
+# pid_git_proc.wait()
+# if git_branch is None:
+#     print('Can\'t find Git branch!  Exiting!')
+#     sys.exit()
+# else:
+#     print('Found Git branch: %s' % git_branch)
+git_branch = args.version
 
 if not os.path.exists(os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken')):
     # backup to main dir with checkouts
@@ -185,7 +186,7 @@ pid_proc.wait()
 if args.base:
     for build_stages in (docker_images_list.STAGE_ONE_IMAGES,
                          docker_images_list.STAGE_ONE_GAME_SERVERS,):
-        build_email_push(build_stages, 'Build base dev image: ',
+        build_email_push(build_stages, 'Build base image: ',
                          branch_tag=git_branch, push_hub_image=False)
         # TODO put back to push_hub_image=True
 
@@ -210,4 +211,10 @@ if args.version == 'dev' or args.version == 'prod':
                              branch_tag=git_branch, push_hub_image=False)
         else:
             build_email_push(build_stages, 'Build prod image: ',
-                             branch_tag=git_branch, push_hub_image=True)
+                             branch_tag=git_branch, push_hub_image=False)
+            # TODO put back to push_hub_image=True
+
+# purge the none images
+pid_proc = subprocess.Popen(
+    [os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken', 'docker_build/purge_images_none.sh')])
+pid_proc.wait()

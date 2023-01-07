@@ -34,12 +34,15 @@ pub async fn mk_data_from_url_to_json(
 
 pub async fn mk_data_from_url(url: String) -> Result<String, Box<dyn std::error::Error>> {
     let response = reqwest::get(url).await?;
+    let content = response.bytes().await?;
     #[cfg(debug_assertions)]
     {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "response": response }))
-            .await;
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "content": str::from_utf8(&content).unwrap().to_string() }),
+        )
+        .await;
     }
-    let content = response.bytes().await?;
     Ok(str::from_utf8(&content).unwrap().to_string())
 }
 

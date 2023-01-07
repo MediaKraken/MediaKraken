@@ -69,7 +69,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         &"/mediakraken/movie.gz".to_string(),
     )
     .await;
-    let json_result = mk_lib_compression::mk_decompress_gz_data("/mediakraken/movie.gz").unwrap();
+    let json_result = mk_lib_compression::mk_decompress_gz_data("/mediakraken/movie.gz").await.unwrap();
     // Please note that the data is NOT in id order
     for json_item in json_result.split('\n') {
         if !json_item.trim().is_empty() {
@@ -107,7 +107,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         &"/mediakraken/tv.gz".to_string(),
     )
     .await;
-    let json_result = mk_lib_compression::mk_decompress_gz_data("/mediakraken/tv.gz").unwrap();
+    let json_result = mk_lib_compression::mk_decompress_gz_data("/mediakraken/tv.gz").await.unwrap();
     for json_item in json_result.split('\n') {
         if !json_item.trim().is_empty() {
             let metadata_struct: MetadataTV = serde_json::from_str(json_item.trim())?;

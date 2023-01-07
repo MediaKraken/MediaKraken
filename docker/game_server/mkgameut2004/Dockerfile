@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM debian:bullseye
 
 ENV UT2004_DIR=/usr/src/ut2004 \
     UT2004_ARCH=32 \

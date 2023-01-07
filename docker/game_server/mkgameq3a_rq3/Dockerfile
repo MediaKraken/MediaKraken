@@ -1,4 +1,5 @@
-FROM th-registry-1.beaverbay.local:5000/mediakraken/mkgameq3a:dev
+ARG BRANCHTAG
+FROM mediakraken/mkgameq3a:${BRANCHTAG}
 
 LABEL maintainer="jberrenberg v1.0"
 

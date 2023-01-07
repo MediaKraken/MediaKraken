@@ -6,6 +6,7 @@
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
+use serde_json::json;
 use crate::rocket::futures::FutureExt;
 use crate::rocket::futures::StreamExt;
 use docker_api::api::ContainerListOpts;

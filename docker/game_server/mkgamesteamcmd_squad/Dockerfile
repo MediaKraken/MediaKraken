@@ -2,26 +2,28 @@
 # Dockerfile that builds a Squad Gameserver
 ############################################################
 ARG BRANCHTAG
-FROM mediakraken/mkbasesteamcmdroot:${BRANCHTAG}
+FROM mediakraken/mkgamebasesteamcmdroot:${BRANCHTAG}
 
 LABEL maintainer="walentinlamonos@gmail.com"
 
 ENV STEAMAPPID 403240
 ENV STEAMAPP squad
 ENV STEAMAPPDIR "${HOMEDIR}/${STEAMAPP}-dedicated"
-ENV DLURL https://raw.githubusercontent.com/CM2Walki/Squad
+
+ENV STEAM_BETA_APP 774961
+ENV STEAM_BETA_PASSWORD ""
+ENV STEAM_BETA_BRANCH ""
+
+ENV WORKSHOPID 393380
+ENV MODPATH "${STEAMAPPDIR}/SquadGame/Plugins/Mods"
+ENV MODS "()"
+
+COPY etc/entry.sh ${HOMEDIR}
 
 RUN set -x \
-	&& apt-get update \
-	&& wget "${DLURL}/master/etc/entry.sh" -qO "${HOMEDIR}/entry.sh" \
 	&& mkdir -p "${STEAMAPPDIR}" \
 	&& chmod 755 "${HOMEDIR}/entry.sh" "${STEAMAPPDIR}" \
-	&& chown "${USER}:${USER}" "${HOMEDIR}/entry.sh" "${STEAMAPPDIR}" \
-	&& apt-get remove --purge -y \
-		wget \
-	&& apt-get clean autoclean \
-	&& apt-get autoremove -y \
-	&& rm -rf /var/lib/apt/lists/*
+	&& chown "${USER}:${USER}" "${HOMEDIR}/entry.sh" "${STEAMAPPDIR}"
 
 ENV PORT=7787 \
 	QUERYPORT=27165 \
@@ -30,6 +32,7 @@ ENV PORT=7787 \
 	FIXEDMAXTICKRATE=50 \
 	RANDOM=NONE
 
+# Switch to user
 USER ${USER}
 
 WORKDIR ${HOMEDIR}

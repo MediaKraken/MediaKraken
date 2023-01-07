@@ -1,5 +1,5 @@
 # Dockerfile to run a linux quake live server
-FROM ubuntu:20.10
+FROM ubuntu:20.04
 LABEL author="Thomas T <tynor@hotmail.com>"
 
 RUN dpkg --add-architecture i386 \

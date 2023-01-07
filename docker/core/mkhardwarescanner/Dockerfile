@@ -1,4 +1,8 @@
-FROM rust:1.66.0 as cargo-build
+FROM mediakraken/mkbase_rust:dev as cargo-build
+
+ARG BRANCHTAG
+
+WORKDIR /mediakraken
 
 RUN rustup target add x86_64-unknown-linux-musl \
   && apt-get update && apt-get install -y --no-install-recommends musl-tools musl-dev \
@@ -21,7 +25,12 @@ WORKDIR /mediakraken
 
 COPY ./ .
 
-RUN cargo build --target x86_64-unknown-linux-musl --release
+RUN if [ "${BRANCHTAG}" = "prod" ]; \
+  then RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl \
+  && cp /mediakraken/target/x86_64-unknown-linux-musl/release/mk* /mediakraken/target/x86_64-unknown-linux-musl/.; \
+  else RUSTFLAGS=-Clinker=musl-gcc cargo build --target=x86_64-unknown-linux-musl \
+  && cp /mediakraken/target/x86_64-unknown-linux-musl/debug/mk* /mediakraken/target/x86_64-unknown-linux-musl/.; \
+  fi
 
 ####################################################################################################
 ## Final image
@@ -37,7 +46,7 @@ COPY --from=cargo-build /bin/sh /sh
 WORKDIR /mediakraken
 
 # Copy our build
-COPY --from=cargo-build /mediakraken/target/x86_64-unknown-linux-musl/release/mkhardwarescanner ./
+COPY --from=cargo-build /mediakraken/target/x86_64-unknown-linux-musl/mkhardwarescanner ./
 
 # Use an unprivileged user.
 USER mediakraken:mediakraken

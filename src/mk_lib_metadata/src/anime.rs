@@ -1,5 +1,6 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+use serde_json::json;
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
 use std::error::Error;

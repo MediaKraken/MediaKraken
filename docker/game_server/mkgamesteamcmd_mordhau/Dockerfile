@@ -2,7 +2,7 @@
 # Dockerfile that builds a Mordhau Gameserver
 ###########################################################
 ARG BRANCHTAG
-FROM mediakraken/mkbasesteamcmdroot:${BRANCHTAG}
+FROM mediakraken/mkgamebasesteamcmdroot:${BRANCHTAG}
 
 LABEL maintainer="walentinlamonos@gmail.com"
 
@@ -17,7 +17,7 @@ RUN set -x \
 	&& apt-get install -y --allow-downgrades --no-install-recommends --no-install-suggests \
 		libfontconfig1=2.13.1-2 \
 		libpangocairo-1.0-0=1.42.4-8~deb10u1 \
-		libnss3=2:3.42.1-1+deb10u3 \
+		libnss3=2:3.42.1-1+deb10u5 \
 		gconf-gsettings-backend=3.2.6-5 \
 		libxi6=2:1.7.9-1 \
 		libxcursor1=1:1.1.15-2 \

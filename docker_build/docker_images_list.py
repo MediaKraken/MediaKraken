@@ -16,15 +16,15 @@
   MA 02110-1301, USA.
 """
 
-#ALPINE_MIRROR = 'mksonatype'
+# ALPINE_MIRROR = 'mksonatype'
 ALPINE_MIRROR = 'dl-cdn.alpinelinux.org'
 
 CARGO_CRATES = "crates.io"
 
-#CENTOS_MIRROR = 'mksonatype:8081/repository/repo_yum/'
+# CENTOS_MIRROR = 'mksonatype:8081/repository/repo_yum/'
 CENTOS_MIRROR = 'http://mirror.centos.org/'
 
-#DEBIAN_MIRROR = 'mksonatype:8081/repository/repo_apt/'
+# DEBIAN_MIRROR = 'mksonatype:8081/repository/repo_apt/'
 DEBIAN_MIRROR = 'ftp.us.debian.org'
 
 DOCKER_REPOSITORY = 'mkregistry:5000'
@@ -45,11 +45,13 @@ PYPI_MIRROR_PORT = ':8081'
 # base OS images to build off of, meaning there is a 'from' in the docker file(s) that use these
 STAGE_ONE_IMAGES = {
     'AlpineBase3142Py3': ('mkbase_alpinepy3', 'alpine:3.14.2', 'base'),
+    'AlpineBase3142RustBuilder': ('mkbase_alpine_rust', 'alpine:3.14.2', 'base'),
     # 'AlpineBase3143Py3': ('mkbase_alpinepy3', 'alpine:3.14.3', 'base'),
     # 'AlpineBase3150Py3': ('mkbase_alpinepy3', 'alpine:3.15.0', 'base'),
     # 'AlpineBase3162Py3': ('mkbase_alpinepy3', 'alpine:3.16.2', 'base'),
     # 'AlpineBase3170Py3': ('mkbase_alpinepy3', 'alpine:3.17.0', 'base'),
     'DebianBase11Py3': ('mkbase_debianpy3', 'python:3.12.0a3-bullseye', 'base'),
+    'RustBase1660': ('mkbase_rust', 'rust:1.66.0', 'base'),
 }
 
 STAGE_TWO_IMAGES = {}
@@ -154,9 +156,15 @@ STAGE_ONE_GAME_SERVERS = {
     # for hosting games via steamcmd
     'mkgamebasesteamcmd': ('mkgamebasesteamcmd', 'debian:10.9-slim', 'game_base'),
 
+    # for hosting games via steamcmd
+    'mkgamebasesteamcmdbullseye': ('mkgamebasesteamcmdbullseye', 'debian:bullseye-slim', 'game_base'),
+    
     # for hosting games via steamcmd as root
     'mkgamebasesteamcmdroot': ('mkgamebasesteamcmdroot', 'debian:10.9-slim', 'game_base'),
 
+    # for hosting games via steamcmd as root
+    'mkgamebasesteamcmdrootbullseye': ('mkgamebasesteamcmdrootbullseye', 'debian:bullseye-slim', 'game_base'),
+    
     # for hosting software via wine
     'mkgamebasewine': ('mkgamebasewine', 'debian:10.9-slim', 'game_base'),
 }

@@ -27,6 +27,11 @@ mkcode - VSS Code build/git
         {
         "insecure-registries" : ["mkregistry:5000"]
         }
+    curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+    apt-get install git-lfs
+    in code repo
+        git lfs install
+        git lfs track --filename docker/game_server/mkgameq3a_cpma/cpma/cpma-mappack-full.zip
 
 mkdim - Dim, a media manager fueled by dark forces.
     DockerHub image
@@ -72,7 +77,7 @@ mkprod - Live production
 
 mkregistry
     docker registry
-    
+
 mkselenium - Selenium python
     docker/test/mkselenium image
     includes source of testing webserver code

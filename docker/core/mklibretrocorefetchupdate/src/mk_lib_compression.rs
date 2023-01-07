@@ -8,7 +8,7 @@ use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
 
-pub fn mk_decompress_tar_gz_file(archive_file: &str) -> Result<(), std::io::Error> {
+pub async fn mk_decompress_tar_gz_file(archive_file: &str) -> Result<(), std::io::Error> {
     let tar_gz = std::fs::File::open(archive_file)?;
     let tar = flate2::read::GzDecoder::new(tar_gz);
     let mut archive = tar::Archive::new(tar);
@@ -16,7 +16,7 @@ pub fn mk_decompress_tar_gz_file(archive_file: &str) -> Result<(), std::io::Erro
     Ok(())
 }
 
-pub fn mk_decompress_gz_data(archive_file: &str) -> Result<String, std::io::Error> {
+pub async fn mk_decompress_gz_data(archive_file: &str) -> Result<String, std::io::Error> {
     let file_handle = std::fs::File::open(archive_file)?;
     let mut gz = flate2::read::GzDecoder::new(file_handle);
     let mut gz_data = String::new();
@@ -24,7 +24,7 @@ pub fn mk_decompress_gz_data(archive_file: &str) -> Result<String, std::io::Erro
     Ok(gz_data)
 }
 
-pub fn mk_decompress_zip(
+pub async fn mk_decompress_zip(
     archive_file: &str,
     remove_zip: bool,
     output_path: &str,
@@ -57,7 +57,7 @@ pub fn mk_decompress_zip(
             {
                 mk_lib_logging::mk_logging_post_elk(
                     std::module_path!(),
-                    json!({ "File": i, "extracted to": outpath.display() }),
+                    json!({ "File": i, "extracted to": outpath.display().to_string() }),
                 )
                 .await;
             }
@@ -67,7 +67,7 @@ pub fn mk_decompress_zip(
             {
                 mk_lib_logging::mk_logging_post_elk(
                     std::module_path!(),
-                    json!({ "File": i, "extracted to": outpath.display(), "bytes": file.size() }),
+                    json!({ "File": i, "extracted to": outpath.display().to_string(), "bytes": file.size() }),
                 )
                 .await;
             }

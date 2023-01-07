@@ -80,7 +80,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         );
         if !Path::new(&unzip_file_name).exists() {
             mk_lib_compression::mk_decompress_zip(&file_name, false, "/mediakraken/emulation/")
-                .unwrap();
+                .await.unwrap();
             let file = File::open(&unzip_file_name)?;
             let reader = BufReader::new(file);
             let mut xml_data: String = "".to_owned();
@@ -130,7 +130,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await
         .unwrap();
         mk_lib_compression::mk_decompress_zip(&file_name, false, &"/mediakraken/emulation/")
-            .unwrap();
+            .await.unwrap();
         for zippedfile in mk_lib_file::mk_directory_walk(format!(
             "/mediakraken/emulation/mame-mame0{}/hash",
             option_config_json["MAME"]["Version"]
@@ -210,7 +210,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await
         .unwrap();
         mk_lib_compression::mk_decompress_zip(&file_name, false, &"/mediakraken/emulation/")
-            .unwrap();
+            .await.unwrap();
 
         let file = File::open(&format!(
             "/mediakraken/emulation/historyxml{}/historyxml{}.xml",
@@ -266,7 +266,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await
         .unwrap();
         mk_lib_compression::mk_decompress_zip(&file_name, false, &"/mediakraken/emulation/")
-            .unwrap();
+            .await.unwrap();
         let file = File::open(&format!(
             "/mediakraken/emulation/pS_CatVer_{}/catver.ini",
             option_config_json["MAME"]["Version"]
@@ -319,7 +319,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await
         .unwrap();
         mk_lib_compression::mk_decompress_zip(&file_name, false, &"/mediakraken/emulation/")
-            .unwrap();
+            .await.unwrap();
         let file = File::open(&format!(
             "/mediakraken/emulation/pS_messinfo_{}/messinfo.dat",
             option_config_json["MAME"]["Version"]

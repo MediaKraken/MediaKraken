@@ -97,6 +97,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     false,
                     "/mediakraken/emulation/cores/",
                 )
+                .await
                 .unwrap();
             }
         }

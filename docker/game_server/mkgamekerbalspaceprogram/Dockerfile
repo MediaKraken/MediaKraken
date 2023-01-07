@@ -1,6 +1,6 @@
 FROM mono:latest
 
-LABEL author=Jason Rivers <docker@jasonrivers.co.uk>
+LABEL maintainer="Jason Rivers <docker@jasonrivers.co.uk>"
 
 RUN apt-get update && apt-get install -y \
 	wget \
@@ -16,7 +16,7 @@ EXPOSE 6702
 
 USER ksp
 
-ENV SERVER_REMOTE_FILE https://d-mp.org/builds/release/v0.3.7.1/DMPServer.zip
+ENV SERVER_REMOTE_FILE https://d-mp.org/builds/release/v0.3.8.3/DMPServer.zip
 
 RUN cd /data/ksp && wget ${SERVER_REMOTE_FILE} && unzip DMPServer.zip \
   && mkdir -p /data/ksp/DMPServer/Universe && mkdir -p /data/ksp/config  \

@@ -3,6 +3,7 @@
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
+use serde_json::json;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use std::fs;
