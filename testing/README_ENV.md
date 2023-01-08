@@ -32,6 +32,7 @@ mkcode - VSS Code build/git
     in code repo
         git lfs install
         git lfs track --filename docker/game_server/mkgameq3a_cpma/cpma/cpma-mappack-full.zip
+        # git rm --cached docker/game_server/mkgameq3a_cpma/cpma/cpma-mappack-full.zip   fix the previous add
 
 mkdim - Dim, a media manager fueled by dark forces.
     DockerHub image
