@@ -1,13 +1,17 @@
 # ut99-server
 A dockerfile for a fully functional and easy configurable Unreal Tournament 99 server.
-This image is based on the original linux server 436 with all four bonus packs and the UTPGPatch451 patch for linux.
+This image is based on the original linux server 436 with all four bonus packs and the OldUnreal 469b patch for linux.
 It also includes some famous maps and mutators.
 All data can be adjusted with a `named volume` (host bind won't work) (see `Usage` for details).
 
 # Usage
 Just run the docker image with the following command:
 ```
-docker run --name ut99 -p 5580:5580 -p 7777:7777/udp -p 7778:7778/udp -v ut99-data:/ut-data roemer/ut99-server:latest
+docker run --name ut99 -p 5580:5580 -p 7777:7777/udp -p 7778:7778/udp -p 7779:7779/udp -p 7780:7780/udp -p 7781:7781/udp -p 8777:8777/udp -p 27900:27900 -p 27900:27900/udp -v ut99-data:/ut-data roemer/ut99-server:latest
+```
+Alternatively, you can use compose to run it:
+```
+docker compose up
 ```
 This will create and run the container, exposing the web-admin under port 5580 and the game under 7777.
 It will also create a docker volume named `ut99-data` which contains all the ini files and non-standard maps and mods.
@@ -22,11 +26,15 @@ This basically works by having this files in this volume and on start of the ser
 | UT_ADMINNAME | No | If this variable is set, it will always override the admin name in `UnrealTournament.ini` with this on startup. |
 | UT_ADMINEMAIL | No | If this variable is set, it will always override the admin email in `UnrealTournament.ini` with this on startup. |
 | UT_MOTD1 | No | If this variable is set, it will always override the MOTD1 in `UnrealTournament.ini` with this on startup. |
-| UT_DOUPLINK | No | If this variable is set, it will always override the DoUpLink in `UnrealTournament.ini` with this on startup. Default is `false`.|
+| UT_DOUPLINK | No | If this variable is set, it will always override the DoUpLink in `UnrealTournament.ini` with this on startup. Default is `true`.|
 | UT_ADMINPWD | No | If this variable is set, it will always override the admin password in `UnrealTournament.ini` with this on startup. |
 | UT_GAMEPWD | No | If this variable is set, it will always override the game password in `UnrealTournament.ini` with this on startup. |
 | UT_WEBADMINUSER | No | If this variable is set, it will always override the web admin username in `UnrealTournament.ini` with this on startup. |
 | UT_WEBADMINPWD | No | If this variable is set, it will always override the web admin password in `UnrealTournament.ini` with this on startup. |
+| UT_MINPLAYERS_DM | No | Set the minimum number of players in DeathMatchPlus.
+| UT_MINPLAYERS_CTF | No | Set the minimum number of players in CTF.
+| UT_INITIALBOTS_DM | No | Set the initial number of bots in DeathMatchPlus.
+| UT_INITIALBOTS_CTF | No | Set the initial number of bots in CTF.
 
 ## Volumes
 As mentioned above, there is one named volume that should point to `/ut-data` in the container.
@@ -67,3 +75,9 @@ When this mode is enabled, detects if someone is killed because someone else pus
 ## ZeroPingPlus103
 This mod is added as a mutator. So it must be added to the mutators list to work.
 When this mod is enabled, the clientside calculates if a hit was a hit or not and tells this the server, effectively leading to 0 ping.
+
+# Development
+To build the image yourself, just use
+```
+docker compose build --no-cache
+```

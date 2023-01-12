@@ -23,7 +23,7 @@ pub async fn mk_network_share_scan(
                 std::module_path!(),
                 json!({ "ip_address": ip_address }),
             )
-            .await;
+            .await.unwrap();
         }
         // scan for smb
         std::process::Command::new("nmap")

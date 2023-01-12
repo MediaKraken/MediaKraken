@@ -12,7 +12,7 @@ fn print_disc_info(disc: DiscId) {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "DiscId": disc.id(), "TOC": disc.toc_string(), "Submitvia": disc.submission_url() }))
-                .await;
+                .await.unwrap()
     }
 }
 

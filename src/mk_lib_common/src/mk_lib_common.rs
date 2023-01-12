@@ -13,6 +13,6 @@ pub async fn print_type_of_variable<T>(_: &T) {
             std::module_path!(),
             json!({ "data_type": std::any::type_name::<T>() }),
         )
-        .await;
+        .await.unwrap();
     }
 }

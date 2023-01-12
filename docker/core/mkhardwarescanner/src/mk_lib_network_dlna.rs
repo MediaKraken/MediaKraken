@@ -17,7 +17,7 @@ pub async fn mk_lib_network_dlna_discover() {
         #[cfg(debug_assertions)]
         {
             mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "render": render }))
-                .await;
+                .await.unwrap();
         }
     }
 }

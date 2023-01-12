@@ -18,7 +18,10 @@ RUN if [ "${BRANCHTAG}" = "prod" ]; \
 ####################################################################################################
 FROM busybox:1.35.0-uclibc
 RUN wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.9.0/wait &&\
-  chmod +x /wait
+  chmod +x /wait \
+  && wget -q https://github.com/yt-dlp/yt-dlp/releases/download/2023.01.06/yt-dlp_linux -O /bin/yt-dlp \
+  && chmod a+rx /bin/yt-dlp
+
 # Import from builder.
 COPY --from=cargo-build /etc/passwd /etc/passwd
 COPY --from=cargo-build /etc/group /etc/group

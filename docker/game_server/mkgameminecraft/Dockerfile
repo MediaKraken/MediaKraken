@@ -35,7 +35,7 @@ ARG TARGETOS=linux
 ARG TARGETARCH=amd64
 ARG TARGETVARIANT=""
 
-COPY https://github.com/itzg/easy-add/releases/download/0.7.1/easy-add_linux_amd64 /usr/bin/easy-add
+ADD https://github.com/itzg/easy-add/releases/download/0.7.1/easy-add_linux_amd64 /usr/bin/easy-add
 RUN chmod +x /usr/bin/easy-add
 
 RUN easy-add --var os=${TARGETOS} --var arch=${TARGETARCH}${TARGETVARIANT} \

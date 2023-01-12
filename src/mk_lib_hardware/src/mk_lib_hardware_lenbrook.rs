@@ -19,7 +19,7 @@ pub async fn mk_hardware_lenbrook_discovery() {
                 std::module_path!(),
                 json!({ "found": d.addr, "records": d.records[0].cid, "data":, d.records[0].data }),
             )
-            .await;
+            .await.unwrap();
         }
     }
 }

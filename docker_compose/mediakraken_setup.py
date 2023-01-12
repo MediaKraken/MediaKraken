@@ -82,10 +82,10 @@ if not os.path.isfile('/usr/bin/docker'):
     install_pid.wait()
 
 # verify docker-compose is installed
-if not os.path.isfile('/usr/local/bin/docker-compose'):
+if not os.path.isfile('/usr/local/bin/docker-compose'):    
     install_pid = subprocess.Popen(shlex.split('curl -L "https://github.com/docker/compose/'
-                                               'releases/download/1.29.2/docker-compose-'
-                                               'Linux-x86_64" '
+                                               'releases/download/v2.15.1/docker-compose-'
+                                               'linux-x86_64" '
                                                '-o /usr/local/bin/docker-compose'),
                                    stdout=subprocess.PIPE, shell=False)
     install_pid.wait()
@@ -106,7 +106,7 @@ if not os.path.isfile('.env'):
     random_key = b64encode(os.urandom(32)).decode('utf-8')
     file_handle.write(random_key.replace('"', '').replace("'", ''))
     file_handle.write('\nSWARMIP=None')
-    file_handle.write('\nBRANCH=dev')
+    file_handle.write('\nBRANCH=prod')
     file_handle.write('\n')
     file_handle.close()
 

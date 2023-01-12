@@ -21,7 +21,7 @@ pub async fn mk_lib_hardware_onvif_discovery() {
                     std::module_path!(),
                     json!({ "Device found": addr }),
                 )
-                .await;
+                .await.unwrap();
             }
         })
         .await;

@@ -261,7 +261,6 @@ services:
 
 # Docker private networks
 networks:
-  # Twisted, Database and AMQP communications network
   mediakraken_network:
     driver: bridge
     name: mk_mediakraken_network

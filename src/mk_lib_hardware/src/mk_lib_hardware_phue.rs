@@ -19,7 +19,7 @@ pub async fn mk_hardware_phue_discover() -> Result<serde_json::Value, Box<dyn st
                 std::module_path!(),
                 json!({ "bridge_ip": bridge_ip }),
             )
-            .await;
+            .await.unwrap();
         }
         // Register a new user.
         let username = bridge::register_user(bridge_ip, "huelib-rs example").unwrap();
@@ -28,7 +28,7 @@ pub async fn mk_hardware_phue_discover() -> Result<serde_json::Value, Box<dyn st
         #[cfg(debug_assertions)]
         {
             mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "bridge": lights }))
-                .await;
+                .await.unwrap();
         }
     }
     Ok(json!({}))

@@ -9,7 +9,7 @@ use std::io::Read;
 use std::net::UdpSocket;
 use std::str;
 
-#[path = "mk_lib_logging.rs"]
+#[path = "../../mk_lib_logging/src/mk_lib_logging.rs"]
 mod mk_lib_logging;
 
 pub async fn mk_data_from_url_to_json(
@@ -41,7 +41,7 @@ pub async fn mk_data_from_url(url: String) -> Result<String, Box<dyn std::error:
             std::module_path!(),
             json!({ "content": str::from_utf8(&content).unwrap().to_string() }),
         )
-        .await;
+        .await.unwrap();
     }
     Ok(str::from_utf8(&content).unwrap().to_string())
 }

@@ -35,7 +35,7 @@ pub async fn mk_lib_hardware_dht11_get_reading() {
                         std::module_path!(),
                         json!({ "Temp": temperature:.1, "Hum": humidity:.1 }),
                     )
-                    .await;
+                    .await.unwrap();
                 }
             }
             Err(e) => eprintln!("Failed to perform measurement: {e:?}"),

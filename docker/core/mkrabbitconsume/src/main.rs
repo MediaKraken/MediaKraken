@@ -62,7 +62,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .await;
                     }
                     /*
-                                        Do I actually launch a docker swarm container that checks for cuda
+                    Do I actually launch a docker swarm container that checks for cuda
                     and then that launches the slave container with ffmpeg
 
                     # this is for the debian one
@@ -71,44 +71,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     --device /dev/nvidia0:/dev/nvidia0 \
                     --device /dev/nvidiactl:/dev/nvidiactl \
 
-                    wget -qO http://download.blender.org/peach/bigbuckbunny_movies/big_buck_bunny_1080p_surround.avi
                     The minimum required Nvidia driver for nvenc is 378.13 or newer from ffmpeg error
                     """
                     if body != None:
-                        common_logging_elasticsearch_httpx.com_es_httpx_post(message_type="info",
-                                                                             message_text={"body": body})
                         json_message = json.loads(body)
-                        common_logging_elasticsearch_httpx.com_es_httpx_post(message_type="info",
-                                                                             message_text={
-                                                                                 "json body": json_message})
-                        if json_message["Type"] == "Cron Run":
-                            if os.path.splitext(json_message["JSON"]["program"])[1] == ".py":
-                                subprocess.Popen(["python3", json_message["JSON"]["program"]],
-                                                 stdout=subprocess.PIPE, shell=False)
-                            else:
-                                subprocess.Popen(["/usr/sbin", json_message["JSON"]["program"]],
-                                                 stdout=subprocess.PIPE, shell=False)
-                        else if json_message["Type"] == "Library Scan":
-                            # This is split out since can be done via admin website and cron jobs
-                            // TODO launch a container to do this.....so, if it gets stuck the others still go
-                            subprocess.Popen(["python3", "/mediakraken/subprogram_file_scan.py"],
-                                             stdout=subprocess.PIPE, shell=False)
-                        else if json_message["Type"] == "Playback":
+                        if json_message["Type"] == "Playback":
                             if json_message["Subtype"] == "Play":
                                 # to address the 30 char name limit for container
                                 name_container = (json_message["User"] + "_"
                                                   + str(uuid.uuid4()).replace("-", ""))[:30]
-                                common_logging_elasticsearch_httpx.com_es_httpx_post(message_type="info",
-                                                                                     message_text={
-                                                                                         "cont": name_container})
                                 // TODO only for now until I get the device for websessions (cookie perhaps?)
                                 if "Device" in json_message:
                                     define_new_container = (name_container, json_message["Device"])
                                 else:
                                     define_new_container = (name_container, None)
-                                common_logging_elasticsearch_httpx.com_es_httpx_post(message_type="info",
-                                                                                     message_text={
-                                                                                         "def": define_new_container})
                                 if json_message["User"] in mk_containers:
                                     user_activity_list = mk_containers[json_message["User"]]
                                     user_activity_list.append(define_new_container)
@@ -116,9 +92,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 else:
                                     # "double list" so each one is it"s own instance
                                     mk_containers[json_message["User"]] = (define_new_container)
-                                common_logging_elasticsearch_httpx.com_es_httpx_post(message_type="info",
-                                                                                     message_text={
-                                                                                         "dict": mk_containers})
                                 container_command = None
                                 if json_message["Device"] == "Cast":
                                     # should only need to check for subs on initial play command
@@ -183,20 +156,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         message_type="critical", message_text=
                                         {"stuff": "unknown subtype"})
                                 if container_command != None:
-                                    common_logging_elasticsearch_httpx.com_es_httpx_post(message_type="info",
-                                                                                         message_text=
-                                                                                         {
-                                                                                             "container_command": container_command,
-                                                                                             "name": name_container})
                                     hwaccel = False
                                     docker_inst.com_docker_run_slave(hwaccel=hwaccel,
                                                                      port_mapping=None,
                                                                      name_container=name_container,
                                                                      container_command=container_command)
-                                    common_logging_elasticsearch_httpx.com_es_httpx_post(message_type="info",
-                                                                                         message_text=
-                                                                                         {
-                                                                                             "stuff": "after docker run"})
                             else if json_message["Subtype"] == "Stop":
                                 # this will force stop the container and then delete it
                                 common_logging_elasticsearch_httpx.com_es_httpx_post(message_type="info",
@@ -210,8 +174,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             else if json_message["Subtype"] == "Pause":
                                 if json_message["Device"] == "Cast":
                                     pass
-
-
 
                                 # if json_message["Device Type"] == "Slave":
                                 #     if json_message["Command"] == "Chapter Back":

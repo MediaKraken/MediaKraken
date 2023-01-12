@@ -39,7 +39,7 @@ pub async fn mk_lib_hardware_pi_take_image(image_file_name: String) {
     if info.cameras.len() > 0 {
         #[cfg(debug_assertions)]
         {
-            mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "info": info })).await;
+            mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "info": info })).await.unwrap();
         }
         simple_sync(&info.cameras[0], image_file_name);
     }

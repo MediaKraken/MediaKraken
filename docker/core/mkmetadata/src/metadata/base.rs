@@ -65,7 +65,7 @@ pub async fn metadata_process(
                 std::module_path!(),
                 json!({ "metadata_process status": download_data.mm_download_status,  "provider": provider_name, "id": download_data.mm_download_provider_id }),
             )
-            .await;
+            .await.unwrap();
     }
     if download_data.mm_download_status == "Search" {
         metadata_search(&sqlx_pool, provider_name, download_data, provider_api_key).await;

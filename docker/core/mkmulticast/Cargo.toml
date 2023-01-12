@@ -20,7 +20,6 @@ shiplift = { version = "0.7", default-features = false, features = [
     "unix-socket",
 ] }
 socket2 = { version = "0.4.7", features = ["all"] }
-#socket2 = { version = "0.4.7", features = ["reuseport"] }
 tokio = { version = "1.21.2", features = ["full"] }
 
 [dev-dependencies]

@@ -32,7 +32,7 @@ pub async fn provider_televisiontunes_theme_fetch(
                 std::module_path!(),
                 json!({ "tvtunes response": data_content.substring(0, dl_end_position) }),
             )
-            .await;
+            .await.unwrap();
         }
         let dl_url = format!(
             "{}{}{}",
@@ -43,7 +43,7 @@ pub async fn provider_televisiontunes_theme_fetch(
         #[cfg(debug_assertions)]
         {
             mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "dl_url": dl_url }))
-                .await;
+                .await.unwrap();
         }
         mk_lib_network::mk_download_file_from_url(dl_url, &tv_show_theme_path).await;
         metadata_uuid = Uuid::new_v4();

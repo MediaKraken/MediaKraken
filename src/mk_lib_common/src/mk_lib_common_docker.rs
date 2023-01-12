@@ -116,7 +116,7 @@ pub async fn mk_common_docker_service_list() -> Result<Vec<String>> {
                         std::module_path!(),
                         json!({ "service": s }),
                     )
-                    .await;
+                    .await.unwrap();
                 }
             }
         }
@@ -169,7 +169,7 @@ pub async fn mk_common_docker_volume_list() -> Result<Vec<String>> {
                         std::module_path!(),
                         json!({ "volume": v }),
                     )
-                    .await;
+                    .await.unwrap();
                 }
             }
         }
@@ -186,7 +186,7 @@ pub async fn mk_common_docker_info() -> Result<serde_json::Value> {
             #[cfg(debug_assertions)]
             {
                 mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "info": info }))
-                    .await;
+                    .await.unwrap();
             }
             logs_list = serde_json::from_str(&format!("{:#?}", info)).unwrap();
         }

@@ -18,7 +18,7 @@ ENV HOME /home/quake
 ENV USER quake
 
 # download and extract steamcmd
-RUN wget -qO https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz \
+RUN wget -q https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz \
   && tar -xvzf steamcmd_linux.tar.gz
 
 # install the quake live server program
@@ -48,7 +48,7 @@ RUN ./download-workshop.sh
 
 # download and install latest minqlx
 # http://stackoverflow.com/a/26738019
-RUN wget -qO - https://api.github.com/repos/MinoMino/minqlx/releases | grep browser_download_url | head -n 1 | cut -d '"' -f 4 | xargs wget \
+RUN wget -q - https://api.github.com/repos/MinoMino/minqlx/releases | grep browser_download_url | head -n 1 | cut -d '"' -f 4 | xargs wget \
   && cd ql && tar xzf ~/minqlx_v*.tar.gz
 USER root
 COPY minqlx-plugins ql/minqlx-plugins

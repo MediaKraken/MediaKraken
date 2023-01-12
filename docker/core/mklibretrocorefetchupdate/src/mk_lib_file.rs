@@ -49,7 +49,7 @@ pub async fn mk_directory_walk(dir_path: String) -> Result<Vec<String>, Box<dyn 
                 std::module_path!(),
                 json!({ "walk file_name": entry.path().display().to_string() }),
             )
-            .await;
+            .await.unwrap();
         }
         file_list.push(entry.path().display().to_string());
     }

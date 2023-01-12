@@ -33,4 +33,4 @@ RUN chown -R mediakraken: /mediakraken
 COPY --from=cargo-build /mediakraken/target/x86_64-unknown-linux-musl/mkwebapp ./
 
 # Use an unprivileged user.
-# USER mediakraken:mediakraken
+USER mediakraken:mediakraken

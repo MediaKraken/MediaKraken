@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await.unwrap();
     }
 
     // connect to db and do a version check
@@ -65,7 +65,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             std::module_path!(),
                             json!({ "msg body": json_message }),
                         )
-                        .await;
+                        .await.unwrap();
                     }
                     if json_message["Type"].to_string() == "File" {
                         // do NOT remove the header.....this is the SAVE location
@@ -99,7 +99,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 std::module_path!(),
                                 json!({ "download": { "hdtrailer_json": data } }),
                             )
-                            .await;
+                            .await.unwrap();
                         }
                         let an_array = data["rss"]["channel"]["item"].as_array().unwrap();
                         for item in an_array.iter() {
@@ -109,7 +109,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     std::module_path!(),
                                     json!({ "item": item }),
                                 )
-                                .await;
+                                .await.unwrap();
                             }
                             if (item["title"].to_string().contains("(Trailer")
                                 && option_config_json["Metadata"]["Trailer"]["Trailer"] == true)
@@ -141,7 +141,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             }
                         }
                     }
-                    println!("({:>3}) Received [{}]", i, json_message);
+                    #[cfg(debug_assertions)]
+                    {
+                        mk_lib_logging::mk_logging_post_elk(
+                            std::module_path!(),
+                            json!({ "i": i, "json_message": json_message }),
+                        )
+                        .await.unwrap();
+                    }
                     consumer.ack(delivery)?;
                 }
                 other => {

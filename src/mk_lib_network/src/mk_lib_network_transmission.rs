@@ -50,7 +50,7 @@ pub async fn mk_network_transmissions_list_torrents(
         .collect();
     #[cfg(debug_assertions)]
     {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "names": names })).await;
+        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "names": names })).await.unwrap();
     }
 
     let res1: RpcResponse<Torrents<Torrent>> = transmission_client
@@ -77,7 +77,7 @@ pub async fn mk_network_transmissions_list_torrents(
             std::module_path!(),
             json!({ "first_three": first_three }),
         )
-        .await;
+        .await.unwrap();
     }
 
     let res2: RpcResponse<Torrents<Torrent>> = transmission_client
@@ -107,7 +107,7 @@ pub async fn mk_network_transmissions_list_torrents(
         .collect();
     #[cfg(debug_assertions)]
     {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "info": info })).await;
+        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "info": info })).await.unwrap();
     }
 }
 
@@ -124,7 +124,7 @@ pub async fn mk_network_transmissions_remove_torrent(
             std::module_path!(),
             json!({ "Remove result": &res.is_ok() }),
         )
-        .await;
+        .await.unwrap();
     }
     Ok(&res.is_ok())
 }

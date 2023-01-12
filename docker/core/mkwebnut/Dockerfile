@@ -35,7 +35,7 @@ RUN pip install setuptools \
     && pip install -e . 
 
 # Add run and set permissions
-COPY  run.sh /run.sh
+COPY run.sh /run.sh
 RUN chmod +x /run.sh
 
 WORKDIR /app/webNUT

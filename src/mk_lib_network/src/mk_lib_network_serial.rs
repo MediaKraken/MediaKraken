@@ -20,7 +20,7 @@ pub async fn serial_port_discover() -> Result<(), std::Error> {
                 std::module_path!(),
                 json!({ "port": p.port_name, "type": p.port_type }),
             )
-            .await;
+            .await.unwrap();
         }
     }
     Ok(())

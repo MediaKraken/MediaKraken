@@ -26,7 +26,7 @@ pub async fn mk_hardware_chromecast_discover(
                     std::module_path!(),
                     json!({ "found cast device": host, "at": addr }),
                 )
-                .await;
+                .await.unwrap();
             }
         } else {
             #[cfg(debug_assertions)]
@@ -35,7 +35,7 @@ pub async fn mk_hardware_chromecast_discover(
                     std::module_path!(),
                     json!({ "cast device does not advertise address": "" }),
                 )
-                .await;
+                .await.unwrap();
             }
         }
     }

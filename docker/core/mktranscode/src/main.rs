@@ -52,7 +52,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     //                                               json_message["Local Save Path"].to_string());
                     // }
                     /*
-                                 if json_message['Type'] == 'Roku':
+                    if json_message['Type'] == 'Roku':
                         if json_message['Subtype'] == 'Thumbnail':
                             try:
                                 common_hardware_roku_bif.com_roku_create_bif(json_message['Media Path'])
@@ -196,9 +196,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             while True:
                                 line = ffmpeg_pid.stdout.readline()
                                 if line != '':
-                                    common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
-                                                                                         message_text={
-                                                                                             'ffmpeg out': line.rstrip()})
                                     if line.find('Duration:') != -1:
                                         media_duration = timedelta(
                                             float(line.split(': ', 1)[1].split(',', 1)[0]))

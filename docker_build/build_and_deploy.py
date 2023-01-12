@@ -53,6 +53,8 @@ parser.add_argument('-e', '--email', required=False,
 # set args.image variable if entered - ex. ComposeMediaKrakenBaseFFMPEG
 parser.add_argument('-i', '--image', metavar='image', required=False,
                     help='Image to build')
+parser.add_argument('-p', '--push', required=False,
+                    help='Push images to Hub', action="store_true")
 parser.add_argument('-r', '--rebuild', required=False,
                     help='Force rebuild with no cached layers', action="store_true")
 parser.add_argument('-s', '--security', required=False,
@@ -187,32 +189,26 @@ if args.base:
     for build_stages in (docker_images_list.STAGE_ONE_IMAGES,
                          docker_images_list.STAGE_ONE_GAME_SERVERS,):
         build_email_push(build_stages, 'Build base image: ',
-                         branch_tag=git_branch, push_hub_image=False)
-        # TODO put back to push_hub_image=True
+                         branch_tag=git_branch, push_hub_image=args.push)
 
 if args.security:
     for build_stages in (docker_images_list.STAGE_ONE_SECURITY_TOOLS,
                          docker_images_list.STAGE_TWO_SECURITY_TOOLS,):
         build_email_push(build_stages, 'Build security image: ',
-                         branch_tag=git_branch, push_hub_image=False)
+                         branch_tag=git_branch, push_hub_image=args.push)
 
 if args.testing:
     for build_stages in (docker_images_list.STAGE_ONE_TESTING_TOOLS,
                          docker_images_list.STAGE_TWO_TESTING_TOOLS):
         build_email_push(build_stages, 'Build testing image: ',
-                         branch_tag=git_branch, push_hub_image=False)
+                         branch_tag=git_branch, push_hub_image=args.push)
 
 if args.version == 'dev' or args.version == 'prod':
     for build_stages in (docker_images_list.STAGE_TWO_IMAGES,
                          docker_images_list.STAGE_CORE_IMAGES,
                          docker_images_list.STAGE_TWO_GAME_SERVERS):
-        if args.version == 'dev':
-            build_email_push(build_stages, 'Build dev image: ',
-                             branch_tag=git_branch, push_hub_image=False)
-        else:
-            build_email_push(build_stages, 'Build prod image: ',
-                             branch_tag=git_branch, push_hub_image=False)
-            # TODO put back to push_hub_image=True
+        build_email_push(build_stages, 'Build ' + args.version + ' image: ',
+                         branch_tag=git_branch, push_hub_image=args.push)
 
 # purge the none images
 pid_proc = subprocess.Popen(

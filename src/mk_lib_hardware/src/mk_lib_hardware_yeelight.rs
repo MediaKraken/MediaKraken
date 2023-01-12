@@ -23,7 +23,7 @@ pub async fn mk_hardware_yeelight_discover() {
                     std::module_path!(),
                     json!({ "YeeClient": "zero" }),
                 )
-                .await;
+                .await.unwrap();
             }
         } else {
             break lights;
@@ -32,7 +32,7 @@ pub async fn mk_hardware_yeelight_discover() {
     let light = res.get_mut(0).unwrap();
     #[cfg(debug_assertions)]
     {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "light": light })).await;
+        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "light": light })).await.unwrap();
     }
 }
 

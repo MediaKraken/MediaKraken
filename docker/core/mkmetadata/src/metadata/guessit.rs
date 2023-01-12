@@ -39,7 +39,7 @@ pub async fn metadata_guessit(
             std::module_path!(),
             json!({ "Guessit File": file_name }),
         )
-        .await;
+        .await.unwrap();
     }
     let guessit_data: Metadata = Metadata::from(&file_name).unwrap();
     if guessit_data.title().len() > 0 {

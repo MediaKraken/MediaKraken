@@ -49,7 +49,7 @@ pub async fn mk_decompress_zip(
                     std::module_path!(),
                     json!({ "File": i, "comment": comment }),
                 )
-                .await;
+                .await.unwrap();
             }
         }
         if (&*file.name()).ends_with('/') {
@@ -59,7 +59,7 @@ pub async fn mk_decompress_zip(
                     std::module_path!(),
                     json!({ "File": i, "extracted to": outpath.display().to_string() }),
                 )
-                .await;
+                .await.unwrap();
             }
             std::fs::create_dir_all(&outpath).unwrap();
         } else {
@@ -69,7 +69,7 @@ pub async fn mk_decompress_zip(
                     std::module_path!(),
                     json!({ "File": i, "extracted to": outpath.display().to_string(), "bytes": file.size() }),
                 )
-                .await;
+                .await.unwrap();
             }
             if let Some(p) = outpath.parent() {
                 if !p.exists() {
