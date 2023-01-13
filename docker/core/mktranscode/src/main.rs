@@ -14,7 +14,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await.unwrap();
     }
 
     // open rabbit connection
@@ -44,7 +44,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             std::module_path!(),
                             json!({ "msg body": json_message }),
                         )
-                        .await;
+                        .await.unwrap();
                     }
                     // if json_message["Type"].to_string() == "File" {
                     //     // do NOT remove the header.....this is the SAVE location

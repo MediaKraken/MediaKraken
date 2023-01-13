@@ -48,6 +48,8 @@ parser = argparse.ArgumentParser(
     description='This program builds and deploys MediaKraken')
 parser.add_argument('-b', '--base', required=False,
                     help='Base images only', action="store_true")
+parser.add_argument('-c', '--core', required=False,
+                    help='Core images only', action="store_true")
 parser.add_argument('-e', '--email', required=False,
                     help='Send results email', action="store_true")
 # set args.image variable if entered - ex. ComposeMediaKrakenBaseFFMPEG
@@ -203,7 +205,8 @@ if args.testing:
         build_email_push(build_stages, 'Build testing image: ',
                          branch_tag=git_branch, push_hub_image=args.push)
 
-if args.version == 'dev' or args.version == 'prod':
+if args.core:
+# if args.version == 'dev' or args.version == 'prod':
     for build_stages in (docker_images_list.STAGE_TWO_IMAGES,
                          docker_images_list.STAGE_CORE_IMAGES,
                          docker_images_list.STAGE_TWO_GAME_SERVERS):

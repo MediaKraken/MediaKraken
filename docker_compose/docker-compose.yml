@@ -16,10 +16,7 @@ services:
       - "64738:64738/tcp"
       - "64738:64738/udp"
     volumes:
-      # stores mumble server data
       - mediakraken_vol_mumble:/etc/mumble
-    networks:
-      - mediakraken_network
     restart: unless-stopped
 
   # runs the teamspeak3 chat server
@@ -35,10 +32,7 @@ services:
       - "10011:10011"
       - "30033:30033"
     volumes:
-      # stores ts3 server data
       - mediakraken_vol_teamspeak:/var/ts3server/
-    networks:
-      - mediakraken_network
     restart: unless-stopped
 
   # runs cron
@@ -46,7 +40,6 @@ services:
     image: mediakraken/mkcron:${BRANCH}
     environment:
       - POSTGRES_PASSWORD=${DBPASS}
-      - RUST_BACKTRACE=1
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
     command: sh -c "/wait && /mediakraken/mkcron"
     container_name: mkstack_cron
@@ -68,22 +61,44 @@ services:
       - MAX_PARALLEL_WORKERS_PER_GATHER=2
       - MAX_PARALLEL_WORKERS=4
       - POSTGRES_PASSWORD=${DBPASS}
-    command: postgres -c logging_collector=on \
-      -c log_directory='/var/log/postgresql' \
-      -c log_filename='postgresql-%Y-%m-%d_%H%M%S.log' \
-      -c log_statement='all' \
-      -c log_duration=on \
-      -c log_connections=off \
-      -c log_disconnections=off
+    command: postgres -c logging_collector=on \ -c log_directory='/var/log/postgresql' \ -c log_filename='postgresql-%Y-%m-%d_%H%M%S.log' \ -c log_statement='all' \ -c log_duration=on \ -c log_connections=off \ -c log_disconnections=off
     container_name: mkstack_database
     stop_grace_period: 30s
     stop_signal: SIGTERM
     volumes:
       - mediakraken_vol_postgresql:/var/lib/postgresql/data
+      - mediakraken_vol_postgresql_backup:/mediakraken/backup
       - mediakraken_vol_postgresql_logging:/var/log/postgresql
     networks:
       - mediakraken_network
     restart: unless-stopped
+
+  # Runs the download services
+  mkdownload:
+    image: mediakraken/mkdownload:${BRANCH}
+    environment:
+      - POSTGRES_PASSWORD=${DBPASS}
+      - WAIT_HOSTS=database:5432, rabbit:5672
+    command: sh -c "/wait && /mediakraken/mkdownload"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      - mediakraken_vol_static:/mediakraken/static
+    networks:
+      - mediakraken_network
+
+  mkfilebeat:
+    image: mediakraken/mkfilebeat:${BRANCH}
+    environment:
+      - ELASTICSEARCH_HOSTS=mkelk:9200
+      - KIBANA_HOSTS=mkelk:5601
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - mediakraken_vol_postgresql_logging:/var/log/postgresql:ro
+      - mediakraken_vol_nginx:/var/log/mediakraken/nginx:ro
+    networks:
+      - mediakraken_network
 
   # guessit rest
   mkguessitrest:
@@ -127,8 +142,7 @@ services:
     container_name: mkstack_nginx
     depends_on:
       - mkwebapp
-    entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh \
-      -h mkstack_webapp -p 8080 -t 120 -- nginx
+    entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh \ -h mkstack_webapp -p 8080 -t 120 -- nginx
     stop_grace_period: 30s
     stop_signal: SIGTERM
     volumes:
@@ -172,8 +186,7 @@ services:
     container_name: mkstack_pgbouncer
     depends_on:
       - mkdatabase
-    entrypoint: ./wait-for-it-ash-busybox130.sh \
-      -h mkstack_database -p 5432 -t 60 -- ./entrypoint.sh
+    entrypoint: ./wait-for-it-ash-busybox130.sh \ -h mkstack_database -p 5432 -t 60 -- ./entrypoint.sh
     stop_grace_period: 30s
     stop_signal: SIGTERM
     networks:
@@ -272,6 +285,7 @@ volumes:
   mediakraken_vol_pgadmin:
   mediakraken_vol_portainer_data:
   mediakraken_vol_postgresql:
+  mediakraken_vol_postgresql_backup:
   mediakraken_vol_postgresql_logging:
   mediakraken_vol_rabbit:
   mediakraken_vol_secure:

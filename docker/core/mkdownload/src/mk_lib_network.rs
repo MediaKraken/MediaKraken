@@ -9,7 +9,7 @@ use std::io::Read;
 use std::net::UdpSocket;
 use std::str;
 
-#[path = "../../mk_lib_logging/src/mk_lib_logging.rs"]
+#[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
 pub async fn mk_data_from_url_to_json(
@@ -52,7 +52,7 @@ pub async fn mk_download_file_from_url(
 ) -> Result<bool, Box<dyn std::error::Error>> {
     #[cfg(debug_assertions)]
     {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "url": url })).await;
+        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "url": url })).await.unwrap();
     }
     let response = reqwest::get(url).await?;
     let mut file = std::fs::File::create(file_name)?;

@@ -3,6 +3,40 @@ version: '3.6'
 # Volumes are HOST directory and then CONTAINER directory
 
 services:
+  # runs the mumble chat server
+  mumble:
+    image: mediakraken/mkchatmumble:${BRANCH}
+    environment:
+      - SUPERUSER_PASSWORD=metaman
+      # - TZ=America/Phoenix   - left unset will default to UTC
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    ports:
+      - "64738:64738/tcp"
+      - "64738:64738/udp"
+    volumes:
+      - mediakraken_vol_mumble:/etc/mumble
+    deploy:
+      mode: replicated
+      replicas: 0
+
+  # runs the teamspeak3 chat server
+  teamspeak:
+    image: mediakraken/mkchatteamspeak:${BRANCH}
+    environment:
+      - TS3SERVER_LICENSE=accept
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    ports:
+      - "9987:9987/udp"
+      - "10011:10011"
+      - "30033:30033"
+    volumes:
+      - mediakraken_vol_teamspeak:/var/ts3server/
+    deploy:
+      mode: replicated
+      replicas: 0
+
   # runs cron
   cron:
     image: mediakraken/mkcron:${BRANCH}
@@ -78,6 +112,18 @@ services:
     deploy:
       mode: global
 
+  # guessit rest
+  guessitrest:
+    image: mediakraken/mkguessitrest:${BRANCH}
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network_backend
+    restart: unless-stopped
+    deploy:
+      mode: replicated
+      replicas: 1
+
   # runs hardware
   hardware:
     image: mediakraken/mkhardware:${BRANCH}
@@ -117,8 +163,7 @@ services:
     image: mediakraken/mkmetadata:${BRANCH}
     secrets:
       - db_password
-    entrypoint: ./wait-for-it-ash-busybox130.sh \
-      -h mkstack_database -p 5432 -t 120 -- python3 main_server_metadata_api.py
+    entrypoint: ./wait-for-it-ash-busybox130.sh \ -h mkstack_database -p 5432 -t 120 -- python3 main_server_metadata_api.py
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
@@ -139,34 +184,14 @@ services:
     command: sh -c "/mediakraken/mkmulticast"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
-    networks:
-      - mediakraken_network_frontend
-
-  # runs the mumble chat server
-  mumble:
-    image: mediakraken/mkchatmumble:${BRANCH}
-    environment:
-      - SUPERUSER_PASSWORD=metaman
-      # - TZ=America/Phoenix   - left unset will default to UTC
-    stop_grace_period: 30s
-    stop_signal: SIGUSR1
-    ports:
-      - "64738:64738/tcp"
-      - "64738:64738/udp"
-    volumes:
-      # stores mumble server data
-      - mediakraken_vol_mumble:/etc/mumble
-    networks:
-      - mediakraken_network_backend
     deploy:
       mode: replicated
-      replicas: 0
+      replicas: 1
 
   # runs the nginx proxy service
   nginx:
     image: mediakraken/mknginx:${BRANCH}
-    entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh \
-      -h mkstack_webapp -p 8080 -t 120 -- nginx
+    entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh \ -h mkstack_webapp -p 8080 -t 120 -- nginx
     stop_grace_period: 30s
     stop_signal: SIGTERM
     volumes:
@@ -213,8 +238,7 @@ services:
       - SERVER_RESET_QUERY=DISCARD ALL
     secrets:
       - db_password
-    entrypoint: ./wait-for-it-ash-busybox130.sh \
-      -h mkstack_database -p 5432 -t 120 -- ./entrypoint.sh
+    entrypoint: ./wait-for-it-ash-busybox130.sh \ -h mkstack_database -p 5432 -t 120 -- ./entrypoint.sh
     stop_grace_period: 30s
     stop_signal: SIGTERM
     networks:
@@ -305,8 +329,7 @@ services:
       - db_password
       - secure_key
       - csrf_key
-    entrypoint: ./wait-for-it-ash-busybox130.sh \
-      -h mkstack_pgbouncer -p 6432 -t 120 -- python3 main_reactor_line.py
+    entrypoint: ./wait-for-it-ash-busybox130.sh \ -h mkstack_pgbouncer -p 6432 -t 120 -- python3 main_reactor_line.py
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     ports:
@@ -329,25 +352,12 @@ services:
       mode: replicated
       replicas: 1
 
-  teamspeak:
-    image: mediakraken/mkchatteamspeak:${BRANCH}
-    ports:
-      - "9987:9987/udp"
-      - "10011:10011"
-      - "30033:30033"
-    volumes:
-      - mediakraken_vol_teamspeak:/var/ts3server/
-    deploy:
-      mode: replicated
-      replicas: 0
-
   # runs transcode
   transcode:
     image: mediakraken/mktranscode:${BRANCH}
     secrets:
       - db_password
-    entrypoint: ./wait-for-it-ash-busybox130.sh \
-      -h mkstack_pgbouncer -p 6432 -t 120 -- python3 async_transcode.py
+    entrypoint: ./wait-for-it-ash-busybox130.sh \ -h mkstack_pgbouncer -p 6432 -t 120 -- python3 async_transcode.py
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
@@ -382,9 +392,7 @@ services:
       - db_password
       - secure_key
       - csrf_key
-    entrypoint: ./wait-for-it-ash-busybox130.sh \
-      -h pgbouncer -p 6432 -t 60 -- gunicorn web_app_sanic.app:app \
-      -b :8080 -w 1 -k uvicorn.workers.UvicornWorker
+    entrypoint: ./wait-for-it-ash-busybox130.sh \ -h pgbouncer -p 6432 -t 60 -- gunicorn web_app_sanic.app:app \ -b :8080 -w 1 -k uvicorn.workers.UvicornWorker
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:

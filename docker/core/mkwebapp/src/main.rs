@@ -143,7 +143,7 @@ async fn main() -> Result<(), Error> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"START": "START"})).await;
+        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"START": "START"})).await.unwrap();
     }
 
     // check for and create ssl certs if needed
@@ -154,7 +154,7 @@ async fn main() -> Result<(), Error> {
                 std::module_path!(),
                 json!({"stuff": "Cert not found, generating."}),
             )
-            .await;
+            .await.unwrap();
         }
         // generate certs/keys
         let subject_alt_names = vec!["www.mediakraken.org".to_string(), "localhost".to_string()];
@@ -177,7 +177,7 @@ async fn main() -> Result<(), Error> {
                 std::module_path!(),
                 json!({"stuff": "data.zip not found, generating."}),
             )
-            .await;
+            .await.unwrap();
         }
         // create the hash salt
         if Path::new("/mediakraken/secure/data.zip").exists() == false {

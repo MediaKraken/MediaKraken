@@ -29,7 +29,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await.unwrap();
     }
 
     // populate current zipped cores into hashmap
@@ -106,7 +106,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         // stop logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"STOP": "STOP"})).await;
+        mk_lib_logging::mk_logging_post_elk("info", json!({"STOP": "STOP"})).await.unwrap();
     }
     Ok(())
 }

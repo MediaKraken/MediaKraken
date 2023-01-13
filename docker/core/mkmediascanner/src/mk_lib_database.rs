@@ -19,18 +19,15 @@ pub async fn mk_lib_database_open_pool() -> Result<sqlx::PgPool, sqlx::Error> {
             std::module_path!(),
             json!({ "database open hostname": hostname }),
         )
-        .await;
+        .await.unwrap();
     }
     if hostname == "wsripper2"
         || hostname == "th-hplaptop-1"
         || hostname == "th-hplap-1"
         || hostname == "th-linuxgui-1"
-        || hostname == "mkstage"
         || hostname == "mkcode"
     {
         connection_string = "postgresql://postgres:metaman@mkstage/postgres".to_string();
-    } else if hostname == "ip-172-31-90-110" {
-        connection_string = "postgresql://postgres:metamanmetaman@database-1.cklzlsrpzbdf.us-east-1.rds.amazonaws.com/postgres".to_string();
     } else if Path::new("/run/secrets/db_password").exists() {
         let dp_pass = fs::read_to_string("/run/secrets/db_password").unwrap();
         connection_string = format!(
