@@ -197,7 +197,7 @@ services:
   # runs the nginx proxy service
   nginx:
     image: mediakraken/mknginx:${BRANCH}
-    entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh \ -h mkstack_webapp -p 8080 -t 120 -- nginx
+    entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh -h mkstack_webapp -p 8080 -t 120 -- nginx
     stop_grace_period: 30s
     stop_signal: SIGTERM
     volumes:
@@ -244,7 +244,7 @@ services:
       - SERVER_RESET_QUERY=DISCARD ALL
     secrets:
       - db_password
-    entrypoint: ./wait-for-it-ash-busybox130.sh \ -h mkstack_database -p 5432 -t 120 -- ./entrypoint.sh
+    entrypoint: ./wait-for-it-ash-busybox130.sh -h mkstack_database -p 5432 -t 120 -- ./entrypoint.sh
     stop_grace_period: 30s
     stop_signal: SIGTERM
     networks:
