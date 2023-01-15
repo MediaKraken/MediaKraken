@@ -1,4 +1,4 @@
-FROM mediakraken/mkbase_rust:dev as cargo-build
+FROM mediakraken/mkbase_rust_alpine:dev as cargo-build
 
 ARG BRANCHTAG
 
@@ -7,27 +7,23 @@ WORKDIR /mediakraken
 COPY ./ .
 
 RUN if [ "${BRANCHTAG}" = "prod" ]; \
-  then RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl \
-  && cp /mediakraken/target/x86_64-unknown-linux-musl/release/mk* /mediakraken/target/x86_64-unknown-linux-musl/.; \
-  else RUSTFLAGS=-Clinker=musl-gcc cargo build --target=x86_64-unknown-linux-musl \
-  && cp /mediakraken/target/x86_64-unknown-linux-musl/debug/mk* /mediakraken/target/x86_64-unknown-linux-musl/.; \
+  then cargo build --release \
+  && cp /mediakraken/target/release/mk* /mediakraken/target/.; \
+  else cargo build \
+  && cp /mediakraken/target/debug/mk* /mediakraken/target/.; \
   fi
 
 ####################################################################################################
 ## Final image
 ####################################################################################################
-FROM scratch
+FROM alpine:3.17.1 AS runtime
 
 # Import from builder.
 COPY --from=cargo-build /etc/passwd /etc/passwd
 COPY --from=cargo-build /etc/group /etc/group
 
-WORKDIR /mediakraken
-
 # Copy our build
-COPY --from=cargo-build /mediakraken/target/x86_64-unknown-linux-musl/mkmulticast ./
+COPY --from=cargo-build /mediakraken/target/mkmulticast /mkmulticast
 
 # Use an unprivileged user.
 USER mediakraken:mediakraken
-
-CMD ["/mediakraken/mkmulticast"]

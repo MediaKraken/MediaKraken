@@ -1,4 +1,4 @@
-FROM mediakraken/mkbase_rust:dev as cargo-build
+FROM mediakraken/mkbase_rust_alpine:dev as cargo-build
 
 ARG BRANCHTAG
 
@@ -7,32 +7,23 @@ WORKDIR /mediakraken
 COPY ./ .
 
 RUN if [ "${BRANCHTAG}" = "prod" ]; \
-  then RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl \
-  && cp /mediakraken/target/x86_64-unknown-linux-musl/release/mk* /mediakraken/target/x86_64-unknown-linux-musl/.; \
-  else RUSTFLAGS=-Clinker=musl-gcc cargo build --target=x86_64-unknown-linux-musl \
-  && cp /mediakraken/target/x86_64-unknown-linux-musl/debug/mk* /mediakraken/target/x86_64-unknown-linux-musl/.; \
+  then cargo build --release \
+  && cp /mediakraken/target/release/mk* /mediakraken/target/.; \
+  else cargo build \
+  && cp /mediakraken/target/debug/mk* /mediakraken/target/.; \
   fi
 
 ####################################################################################################
 ## Final image
 ####################################################################################################
-#FROM busybox:1.36.0-uclibc
-FROM scratch
+FROM alpine:3.17.1 AS runtime
 
 # Import from builder.
 COPY --from=cargo-build /etc/passwd /etc/passwd
 COPY --from=cargo-build /etc/group /etc/group
 
-## copy the files
-#COPY --from=cargo-build /mediakraken/movie.gz /mediakraken/movie.gz
-#COPY --from=cargo-build /mediakraken/tv.gz /mediakraken/tv.gz
-
-WORKDIR /mediakraken
-
 # Copy our build
-COPY --from=cargo-build /mediakraken/target/x86_64-unknown-linux-musl/mktmdbnetfetchbulk ./
+COPY --from=cargo-build /mediakraken/target/mktmdbnetfetchbulk /mktmdbnetfetchbulk
 
 # Use an unprivileged user.
 USER mediakraken:mediakraken
-
-CMD ["/mediakraken/mktmdbnetfetchbulk"]

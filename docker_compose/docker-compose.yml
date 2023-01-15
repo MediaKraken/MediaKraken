@@ -79,12 +79,12 @@ services:
     environment:
       - POSTGRES_PASSWORD=${DBPASS}
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
-    command: sh -c "/wait && /mediakraken/mkdownload"
+    command: sh -c "/wait && /mkdownload"
     container_name: mkstack_download
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
-      - mediakraken_vol_static:/mediakraken/static
+      - mediakraken_vol_static:/static
     networks:
       - mediakraken_network
 
@@ -121,7 +121,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=${DBPASS}
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
-    command: sh -c "/wait && /mediakraken/mkhardwarecontrol"
+    command: sh -c "/wait && /mkhardwarecontrol"
     container_name: mkstack_hardwarecontrol
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -135,7 +135,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=${DBPASS}
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
-    command: sh -c "/wait && /mediakraken/mkinotify"
+    command: sh -c "/wait && /mkinotify"
     container_name: mkstack_inotify
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -155,9 +155,9 @@ services:
     volumes:
       - ./mkmount:/mediakraken/mnt
       # stores posters/etc so webserver can present
-      - mediakraken_vol_static:/mediakraken/mkwebapp/static
+      - mediakraken_vol_static:/static
       # stores the xml/json xref files for anime match
-      - mediakraken_vol_cache:/mediakraken/cache
+      - mediakraken_vol_cache:/cache
     networks:
       - mediakraken_network_backend
 
@@ -273,7 +273,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=${DBPASS}
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
-    command: sh -c "/wait && /mediakraken/mkrabbitconsume"    
+    command: sh -c "/wait && /mkrabbitconsume"    
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
@@ -287,7 +287,7 @@ services:
   #   image: mediakraken/mktranscode:${BRANCH}
   #   environment:
   #     - POSTGRES_PASSWORD=${DBPASS}
-  #   command: sh -c "/mediakraken/mktranscode"
+  #   command: sh -c "/mktranscode"
   #   stop_grace_period: 30s
   #   stop_signal: SIGUSR1
   #   volumes:
@@ -322,18 +322,18 @@ services:
       - SECURE=${SECURE}
       - CSRF_SECRET_KEY=${CSRF_SECRET_KEY}
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
-    command: sh -c "/wait && /mediakraken/mkwebapp"
+    command: sh -c "/wait && /mkwebapp"
     container_name: mkstack_webapp
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
       # must not be read only as it stores cache here
-      - mediakraken_vol_static:/mediakraken/static
-      - mediakraken_vol_webkey:/mediakraken/key
+      - mediakraken_vol_static:/static
+      - mediakraken_vol_webkey:/key
       # needed to show docker/swarm info
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # web server will generate salt/key
-      - mediakraken_vol_secure:/mediakraken/secure
+      - mediakraken_vol_secure:/secure
     networks:
       - mediakraken_network
     restart: unless-stopped

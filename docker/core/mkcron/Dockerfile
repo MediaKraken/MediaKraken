@@ -1,4 +1,4 @@
-FROM mediakraken/mkbase_rust:dev as cargo-build
+FROM mediakraken/mkbase_rust_alpine:dev as cargo-build
 
 ARG BRANCHTAG
 
@@ -7,16 +7,16 @@ WORKDIR /mediakraken
 COPY ./ .
 
 RUN if [ "${BRANCHTAG}" = "prod" ]; \
-  then RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl \
-  && cp /mediakraken/target/x86_64-unknown-linux-musl/release/mk* /mediakraken/target/x86_64-unknown-linux-musl/.; \
-  else RUSTFLAGS=-Clinker=musl-gcc cargo build --target=x86_64-unknown-linux-musl \
-  && cp /mediakraken/target/x86_64-unknown-linux-musl/debug/mk* /mediakraken/target/x86_64-unknown-linux-musl/.; \
+  then cargo build --release \
+  && cp /mediakraken/target/release/mk* /mediakraken/target/.; \
+  else cargo build \
+  && cp /mediakraken/target/debug/mk* /mediakraken/target/.; \
   fi
 
 ####################################################################################################
 ## Final image
 ####################################################################################################
-FROM busybox:1.36.0-musl
+FROM alpine:3.17.1 AS runtime
 RUN wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.9.0/wait &&\
   chmod +x /wait
 # Import from builder.
@@ -25,7 +25,7 @@ COPY --from=cargo-build /etc/group /etc/group
 COPY --from=cargo-build /bin/sh /sh
 
 # Copy our build
-COPY --from=cargo-build /mediakraken/target/x86_64-unknown-linux-musl/mkcron /mkcron
+COPY --from=cargo-build /mediakraken/target/mkcron /mkcron
 
 # Use an unprivileged user.
 USER mediakraken:mediakraken
