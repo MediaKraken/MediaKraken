@@ -22,12 +22,10 @@ FROM scratch
 COPY --from=cargo-build /etc/passwd /etc/passwd
 COPY --from=cargo-build /etc/group /etc/group
 
-WORKDIR /mediakraken
-
 # Copy our build
-COPY --from=cargo-build /mediakraken/target/x86_64-unknown-linux-musl/mkbroadcast ./
+COPY --from=cargo-build /mediakraken/target/x86_64-unknown-linux-musl/mkbroadcast /mkbroadcast
 
 # Use an unprivileged user.
 USER mediakraken:mediakraken
 
-CMD ["/mediakraken/mkbroadcast"]
+CMD ["/mkbroadcast"]

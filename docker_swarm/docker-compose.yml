@@ -44,7 +44,7 @@ services:
       - db_password
     environment:
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
-    command: sh -c "/wait && /mediakraken/mkcron"
+    command: sh -c "/wait && /mkcron"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     deploy:
