@@ -4,25 +4,6 @@ ARG BRANCHTAG
 
 WORKDIR /mediakraken
 
-RUN rustup target add x86_64-unknown-linux-musl \
-  && apt-get update && apt-get install -y --no-install-recommends musl-tools musl-dev \
-  && update-ca-certificates
-
-# Create appuser
-ENV USER=mediakraken
-ENV UID=10001
-
-RUN adduser \
-  --disabled-password \
-  --gecos "" \
-  --home "/nonexistent" \
-  --shell "/sbin/nologin" \
-  --no-create-home \
-  --uid "${UID}" \
-  "${USER}"
-
-WORKDIR /mediakraken
-
 COPY ./ .
 
 RUN if [ "${BRANCHTAG}" = "prod" ]; \
@@ -35,7 +16,7 @@ RUN if [ "${BRANCHTAG}" = "prod" ]; \
 ####################################################################################################
 ## Final image
 ####################################################################################################
-FROM busybox:1.35.0-uclibc
+FROM busybox:1.36.0-uclibc
 RUN wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.9.0/wait &&\
   chmod +x /wait
 # Import from builder.

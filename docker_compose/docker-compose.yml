@@ -88,7 +88,7 @@ services:
       - mediakraken_network
 
   mkfilebeat:
-    image: mediakraken/mkfilebeat:${BRANCH}
+    image: elastic/filebeat:7.17.8
     environment:
       - ELASTICSEARCH_HOSTS=mkelk:9200
       - KIBANA_HOSTS=mkelk:5601
@@ -110,12 +110,29 @@ services:
       - mediakraken_network
     restart: unless-stopped
 
+  # runs cron
+  mkhardwarecontrol:
+    image: mediakraken/mkhardwarecontrol:${BRANCH}
+    volumes:
+      # TODO why not store this in the db with the device as postgresql crypt
+      # this stores the "push button" key
+      - mediakraken_vol_phue:/mediakraken/phue
+    environment:
+      - POSTGRES_PASSWORD=${DBPASS}
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+    command: sh -c "/wait && /mediakraken/mkhardwarecontrol"
+    container_name: mkstack_hardwarecontrol
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
+    restart: unless-stopped
+
   # inotify
   mkinotify:
     image: mediakraken/mkinotify:${BRANCH}
     environment:
       - POSTGRES_PASSWORD=${DBPASS}
-      - RUST_BACKTRACE=1
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
     command: sh -c "/wait && /mediakraken/mkinotify"
     container_name: mkstack_inotify
@@ -125,15 +142,33 @@ services:
       - mediakraken_network
     restart: unless-stopped
 
+  # runs the server to fetch/process all metadata
+  mkmetadata:
+    image: mediakraken/mkmetadata:${BRANCH}
+    environment:
+      - POSTGRES_PASSWORD=${DBPASS}
+    entrypoint: sh -c "/wait && /mediakraken/mkmetadata"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      - ./mkmount:/mediakraken/mnt
+      # stores posters/etc so webserver can present
+      - mediakraken_vol_static:/mediakraken/mkwebapp/static
+      # stores the xml/json xref files for anime match
+      - mediakraken_vol_cache:/mediakraken/cache
+    networks:
+      - mediakraken_network_backend
+
   # multicast discover server
   mkmulticast:
     image: mediakraken/mkmulticast:${BRANCH}
     command: sh -c "/mediakraken/mkmulticast"
     container_name: mkstack_multicast
+    volumes:
+      # needed to get docker/swarm info
+      - /var/run/docker.sock:/var/run/docker.sock:ro        
     stop_grace_period: 30s
     stop_signal: SIGUSR1
-    networks:
-      - mediakraken_network
     restart: unless-stopped
 
   # runs the nginx proxy service
@@ -157,7 +192,7 @@ services:
 
   # database management tool
   mkpgadmin:
-    image: dpage/pgadmin4:6.15
+    image: dpage/pgadmin4:6.18
     stop_grace_period: 30s
     stop_signal: SIGTERM
     container_name: mkstack_pgadmin
@@ -195,7 +230,7 @@ services:
 
   # docker stats and management
   mkportainer:
-    image: portainer/portainer-ce:2.16.1-alpine
+    image: portainer/portainer-ce:2.16.2-alpine
     command: -H unix:///var/run/docker.sock
     container_name: mkstack_portainer
     ports:
@@ -214,17 +249,47 @@ services:
     container_name: mkstack_rabbitmq
     hostname: mkstack_rabbitmq
     environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
       - RABBITMQ_IO_THREAD_POOL_SIZE=256
     stop_grace_period: 30s
     stop_signal: SIGTERM
     ports:
       # https management port
-      - "15671:15671"
+      # - "15671:15671"
       # http management port
       - "15672:15672"
     volumes:
       - mediakraken_vol_rabbit:/var/lib/rabbitmq
     restart: unless-stopped
+    networks:
+      - mediakraken_network
+
+  mkrabbitconsume:
+    image: mediakraken/mkrabbitconsume:${BRANCH}
+    container_name: mkstack_rabbitconsume
+    environment:
+      - POSTGRES_PASSWORD=${DBPASS}
+      - WAIT_HOSTS=database:5432, rabbit:5672
+    command: sh -c "/wait && /mediakraken/mkrabbitconsume"    
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      # so it can start docker containers
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - mediakraken_network
+
+  # runs transcode
+  mktranscode:
+    image: mediakraken/mktranscode:${BRANCH}
+    environment:
+      - POSTGRES_PASSWORD=${DBPASS}
+    command: sh -c "/mediakraken/mktranscode"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      - ./mkmount:/mediakraken/mnt:ro
     networks:
       - mediakraken_network
 
@@ -254,7 +319,6 @@ services:
       - POSTGRES_PASSWORD=${DBPASS}
       - SECURE=${SECURE}
       - CSRF_SECRET_KEY=${CSRF_SECRET_KEY}
-      - RUST_BACKTRACE=1
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
     command: sh -c "/wait && /mediakraken/mkwebapp"
     container_name: mkstack_webapp

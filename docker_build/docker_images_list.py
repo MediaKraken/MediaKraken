@@ -67,29 +67,29 @@ STAGE_CORE_IMAGES = {
     'mkchatteamspeak': ('mkchatteamspeak', 'alpine:3.14.2', 'core'),
 
     # process cron jobs from the database to amqp or direct container launch
-    'mkcron': ('mkcron', 'busybox:1.35.0-uclibc', 'core'),
+    'mkcron': ('mkcron', 'busybox:1.36.0-uclibc', 'core'),
 
     # database via postgresql
     'mkdatabase': ('mkdatabase', 'debian:bullseye-slim', 'core'),
 
     # download files/etc trailers/etc from ampq records
-    'mkdownload': ('mkdownload', 'busybox:1.35.0-uclibc', 'core'),
+    'mkdownload': ('mkdownload', 'busybox:1.36.0-uclibc', 'core'),
 
     # thegamesdb bulk data fetch
-    'mkgamesdbnetfetchbulk': ('mkgamesdbnetfetchbulk', 'busybox:1.35.0-uclibc', 'core'),
+    'mkgamesdbnetfetchbulk': ('mkgamesdbnetfetchbulk', 'busybox:1.36.0-uclibc', 'core'),
 
     # guessit via web rest
     'mkguessitrest': ('mkguessitrest',
                       'tiangolo/uwsgi-nginx-flask:python3.8-alpine-2021-10-02', 'core'),
 
     # runs control network/ir/if/etc
-    'mkhardwarecontrol': ('mkhardwarecontrol', 'busybox:1.35.0-uclibc', 'core'),
+    'mkhardwarecontrol': ('mkhardwarecontrol', 'busybox:1.36.0-uclibc', 'core'),
 
     # runs as HOST to find new hardware - run and exit
-    'mkhardwarescanner': ('mkhardwarescanner', 'busybox:1.35.0-uclibc', 'core'),
+    'mkhardwarescanner': ('mkhardwarescanner', 'busybox:1.36.0-uclibc', 'core'),
 
     # inotify of file system changes to amqp
-    'mkinotify': ('mkinotify', 'busybox:1.35.0-uclibc', 'core'),
+    'mkinotify': ('mkinotify', 'busybox:1.36.0-uclibc', 'core'),
 
     # download libretro cores that are newer - run and exit
     'mklibretrocorefetchupdate': ('mklibretrocorefetchupdate', 'scratch', 'core'),
@@ -98,13 +98,13 @@ STAGE_CORE_IMAGES = {
     'mkmediascanner': ('mkmediascanner', 'scratch', 'core'),
 
     # process metadata for media
-    'mkmetadata': ('mkmetadata', 'busybox:1.35.0-uclibc', 'core'),
+    'mkmetadata': ('mkmetadata', 'busybox:1.36.0-uclibc', 'core'),
 
     # process metadata for mame and other game xml
-    'mkmetadatamame': ('mkmetadatamame', 'busybox:1.35.0-uclibc', 'core'),
+    'mkmetadatamame': ('mkmetadatamame', 'busybox:1.36.0-uclibc', 'core'),
 
     # "broadcast" multicast for discovery
-    'mkmulticast': ('mkmulticast', 'busybox:1.35.0-uclibc', 'core'),
+    'mkmulticast': ('mkmulticast', 'busybox:1.36.0-uclibc', 'core'),
 
     # nginx proxy for http to https and some bot blocking
     'mknginx': ('mknginx', 'alpine:3.13', 'core'),
@@ -113,16 +113,16 @@ STAGE_CORE_IMAGES = {
     'mkpgbouncer': ('mkpgbouncer', 'alpine:3.14.3', 'core'),
 
     # consume and process ampq records
-    'mkrabbitconsume': ('mkrabbitconsume', 'busybox:1.35.0-uclibc', 'core'),
+    'mkrabbitconsume': ('mkrabbitconsume', 'busybox:1.36.0-uclibc', 'core'),
 
     # amqp service (rabbitmq)
     'mkrabbitmq': ('mkrabbitmq', 'alpine:3.11', 'core'),
 
     # schedulesdirect update
-    'mkschedulesdirectupdate': ('mkschedulesdirectupdate', 'busybox:1.35.0-uclibc', 'core'),
+    'mkschedulesdirectupdate': ('mkschedulesdirectupdate', 'busybox:1.36.0-uclibc', 'core'),
 
     # server for "fat" clients to talk too (local server)
-    'mktcpserver': ('mktcpserver', 'busybox:1.35.0-uclibc', 'core'),
+    'mktcpserver': ('mktcpserver', 'busybox:1.36.0-uclibc', 'core'),
 
     # download tmdb dump of ids in database and insert into downloads - run and exit
     'mktmdbnetfetchbulk': ('mktmdbnetfetchbulk', 'scratch', 'core'),
@@ -131,7 +131,7 @@ STAGE_CORE_IMAGES = {
     'mktmdbnetfetchupdate': ('mktmdbnetfetchupdate', 'scratch', 'core'),
 
     # transcode/STREAM media to client - run and exit
-    'mktranscode': ('mktranscode', 'busybox:1.35.0-uclibc', 'core'),
+    'mktranscode': ('mktranscode', 'busybox:1.36.0-uclibc', 'core'),
 
     # transmission server
     'mktransmission': ('mktransmission', 'alpine:3.14.2', 'core'),
@@ -140,7 +140,7 @@ STAGE_CORE_IMAGES = {
     'mktvheadend': ('mktvheadend', 'alpine:3.12', 'core'),
 
     # website via rust and rocket
-    'mkwebapp': ('mkwebapp', 'busybox:1.35.0-uclibc', 'core'),
+    'mkwebapp': ('mkwebapp', 'busybox:1.36.0-uclibc', 'core'),
 
     # website for nut
     'mkwebnut': ('mkwebnut', 'ubuntu:18.04', 'core'),

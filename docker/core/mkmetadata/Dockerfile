@@ -16,16 +16,13 @@ RUN if [ "${BRANCHTAG}" = "prod" ]; \
 ####################################################################################################
 ## Final image
 ####################################################################################################
-#FROM busybox:1.35.0-uclibc
-FROM scratch
-
+FROM busybox:1.36.0-musl
+RUN wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.9.0/wait &&\
+  chmod +x /wait
 # Import from builder.
 COPY --from=cargo-build /etc/passwd /etc/passwd
 COPY --from=cargo-build /etc/group /etc/group
-
-## copy the files
-#COPY --from=cargo-build /mediakraken/movie.gz /mediakraken/movie.gz
-#COPY --from=cargo-build /mediakraken/tv.gz /mediakraken/tv.gz
+COPY --from=cargo-build /bin/sh /sh
 
 WORKDIR /mediakraken
 
@@ -34,5 +31,3 @@ COPY --from=cargo-build /mediakraken/target/x86_64-unknown-linux-musl/mkmetadata
 
 # Use an unprivileged user.
 USER mediakraken:mediakraken
-
-CMD ["/mediakraken/mkmetadata"]

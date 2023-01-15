@@ -16,7 +16,7 @@ RUN if [ "${BRANCHTAG}" = "prod" ]; \
 ####################################################################################################
 ## Final image
 ####################################################################################################
-FROM busybox:1.35.0-uclibc
+FROM busybox:1.36.0-uclibc
 RUN wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.9.0/wait &&\
   chmod +x /wait \
   && wget -q https://github.com/yt-dlp/yt-dlp/releases/download/2023.01.06/yt-dlp_linux -O /bin/yt-dlp \

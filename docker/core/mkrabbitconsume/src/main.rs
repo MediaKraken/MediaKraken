@@ -42,7 +42,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let _rabbit_exchange = Exchange::direct(&rabbit_channel);
 
     // Declare the queue.
-    let queue = rabbit_channel.queue_declare("mk_download", QueueDeclareOptions::default())?;
+    let queue = rabbit_channel.queue_declare("mk_consume", QueueDeclareOptions::default())?;
 
     // Start a consumer.
     let consumer = queue.consume(ConsumerOptions::default())?;

@@ -16,7 +16,7 @@ RUN if [ "${BRANCHTAG}" = "prod" ]; \
 ####################################################################################################
 ## Final image
 ####################################################################################################
-FROM busybox:1.35.0-uclibc
+FROM busybox:1.36.0-musl
 RUN wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.9.0/wait &&\
   chmod +x /wait
 # Import from builder.
