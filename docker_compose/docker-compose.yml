@@ -78,8 +78,9 @@ services:
     image: mediakraken/mkdownload:${BRANCH}
     environment:
       - POSTGRES_PASSWORD=${DBPASS}
-      - WAIT_HOSTS=database:5432, rabbit:5672
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
     command: sh -c "/wait && /mediakraken/mkdownload"
+    container_name: mkstack_download
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
@@ -147,6 +148,7 @@ services:
     image: mediakraken/mkmetadata:${BRANCH}
     environment:
       - POSTGRES_PASSWORD=${DBPASS}
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672      
     entrypoint: sh -c "/wait && /mediakraken/mkmetadata"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -270,7 +272,7 @@ services:
     container_name: mkstack_rabbitconsume
     environment:
       - POSTGRES_PASSWORD=${DBPASS}
-      - WAIT_HOSTS=database:5432, rabbit:5672
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
     command: sh -c "/wait && /mediakraken/mkrabbitconsume"    
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -281,17 +283,17 @@ services:
       - mediakraken_network
 
   # runs transcode
-  mktranscode:
-    image: mediakraken/mktranscode:${BRANCH}
-    environment:
-      - POSTGRES_PASSWORD=${DBPASS}
-    command: sh -c "/mediakraken/mktranscode"
-    stop_grace_period: 30s
-    stop_signal: SIGUSR1
-    volumes:
-      - ./mkmount:/mediakraken/mnt:ro
-    networks:
-      - mediakraken_network
+  # mktranscode:
+  #   image: mediakraken/mktranscode:${BRANCH}
+  #   environment:
+  #     - POSTGRES_PASSWORD=${DBPASS}
+  #   command: sh -c "/mediakraken/mktranscode"
+  #   stop_grace_period: 30s
+  #   stop_signal: SIGUSR1
+  #   volumes:
+  #     - ./mkmount:/mediakraken/mnt:ro
+  #   networks:
+  #     - mediakraken_network
 
   # hosts transmission server
   mktransmission:

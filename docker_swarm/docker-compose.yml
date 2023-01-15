@@ -43,7 +43,7 @@ services:
     secrets:
       - db_password
     environment:
-      - WAIT_HOSTS=database:5432, rabbit:5672
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
     command: sh -c "/wait && /mediakraken/mkcon"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -87,7 +87,7 @@ services:
     secrets:
       - db_password
     environment:
-      - WAIT_HOSTS=database:5432, rabbit:5672
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
     command: sh -c "/wait && /mediakraken/mkdownload"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -131,7 +131,7 @@ services:
       # this stores the "push button" key
       - mediakraken_vol_phue:/mediakraken/phue
     environment:
-      - WAIT_HOSTS=database:5432, rabbit:5672
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
     command: sh -c "/wait && /mediakraken/mkhardwarecontrol"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -149,7 +149,7 @@ services:
     secrets:
       - db_password
     environment:
-      - WAIT_HOSTS=rabbit:5672
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
     command: sh -c "/wait && /mediakraken/myinotify"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -165,7 +165,7 @@ services:
     secrets:
       - db_password
     environment:
-      - WAIT_HOSTS=database:5432, rabbit:5672
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
     command: sh -c "/wait && /mediakraken/mkmetadata"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -312,7 +312,7 @@ services:
     secrets:
       - db_password
     environment:
-      - WAIT_HOSTS=database:5432, rabbit:5672
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
     command: sh -c "/wait && /mediakraken/mkrabbitconsume"    
     stop_grace_period: 30s
     stop_signal: SIGUSR1
