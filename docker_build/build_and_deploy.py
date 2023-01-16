@@ -47,9 +47,9 @@ import network_email
 parser = argparse.ArgumentParser(
     description='This program builds and deploys MediaKraken')
 parser.add_argument('-b', '--base', required=False,
-                    help='Base images only', action="store_true")
+                    help='Base images', action="store_true")
 parser.add_argument('-c', '--core', required=False,
-                    help='Core images only', action="store_true")
+                    help='Core images', action="store_true")
 parser.add_argument('-e', '--email', required=False,
                     help='Send results email', action="store_true")
 # set args.image variable if entered - ex. ComposeMediaKrakenBaseFFMPEG
