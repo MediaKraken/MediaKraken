@@ -149,7 +149,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=${DBPASS}
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672      
-    entrypoint: sh -c "/wait && /mediakraken/mkmetadata"
+    entrypoint: sh -c "/wait && /mkmetadata"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
@@ -164,7 +164,7 @@ services:
   # multicast discover server
   mkmulticast:
     image: mediakraken/mkmulticast:${BRANCH}
-    command: sh -c "/mediakraken/mkmulticast"
+    command: sh -c "/mkmulticast"
     container_name: mkstack_multicast
     volumes:
       # needed to get docker/swarm info

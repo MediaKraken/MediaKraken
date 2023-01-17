@@ -184,7 +184,7 @@ services:
   # multicast discover server
   multicast:
     image: mediakraken/mkmulticast:${BRANCH}
-    command: sh -c "/mediakraken/mkmulticast"
+    command: sh -c "/mkmulticast"
     volumes:
       # needed to get docker/swarm info
       - /var/run/docker.sock:/var/run/docker.sock:ro       
