@@ -19,6 +19,7 @@ sys-info = "0.9.1"
 sqlx = { version = "0.5.13", features = [ "chrono", "json", "runtime-tokio-rustls", "postgres", "uuid" ] }
 tar = "0.4.38"
 tokio = { version = "1.18.2", features = ["full"] }
+urlencoding = "2.1.2"
 uuid = { version = "0.8.2", features = ["serde", "v4"] }
 zip = "0.6.2"
 

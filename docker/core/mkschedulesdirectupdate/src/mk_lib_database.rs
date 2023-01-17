@@ -8,6 +8,7 @@ use sqlx::postgres::PgPoolOptions;
 use std::env;
 use std::fs;
 use std::path::Path;
+use urlencoding::encode;
 
 pub async fn mk_lib_database_open_pool() -> Result<sqlx::PgPool, sqlx::Error> {
     // trim is get rid of the \r returned in hostname
@@ -32,11 +33,11 @@ pub async fn mk_lib_database_open_pool() -> Result<sqlx::PgPool, sqlx::Error> {
         let dp_pass = fs::read_to_string("/run/secrets/db_password").unwrap();
         connection_string = format!(
             "postgresql://postgres:{}@mkstack_database/postgres",
-            dp_pass
+            encode(&dp_pass)
         );
     } else {
         let dp_pass = env::var("POSTGRES_PASSWORD").unwrap();
-        connection_string = format!("postgresql://postgres:{}@mkdatabase/postgres", dp_pass);
+        connection_string = format!("postgresql://postgres:{}@mkdatabase/postgres", encode(&dp_pass));
     }
     let sqlx_pool = PgPoolOptions::new()
         .max_connections(25)

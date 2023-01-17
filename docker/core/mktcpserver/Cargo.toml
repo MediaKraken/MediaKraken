@@ -29,6 +29,7 @@ sys-info = "0.9.1"
 tokio = { version = "1.18.2", features = ["full"] }
 tokio-rustls = "0.23.2"
 validator = { version = "0.16.0", features = ["derive"] }
+urlencoding = "2.1.2"
 
 [dev-dependencies]
 tokio-test = "*"
