@@ -371,15 +371,11 @@ services:
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
-      - ./mkmount:/mediakraken/mnt
       # must not be read only as it stores cache here
       - mediakraken_vol_static:/static
       - mediakraken_vol_webkey:/key
-      - ./data/uploads:/uploads
       # needed to show docker/swarm info
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      # hold log files
-      - ./data/log:/log
       # this stores the "push button" key
       - mediakraken_vol_phue:/phue
       # server will generate salt/key
