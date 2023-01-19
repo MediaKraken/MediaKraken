@@ -143,27 +143,30 @@ async fn main() -> Result<(), Error> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"START": "START"})).await.unwrap();
+        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"START": "START"}))
+            .await
+            .unwrap();
     }
 
     // check for and create ssl certs if needed
-    if Path::new("/key/cacert.pem").exists() == false {
+    if Path::new("/mediakraken/certs/cacert.pem").exists() == false {
         #[cfg(debug_assertions)]
         {
             mk_lib_logging::mk_logging_post_elk(
                 std::module_path!(),
                 json!({"stuff": "Cert not found, generating."}),
             )
-            .await.unwrap();
+            .await
+            .unwrap();
         }
         // generate certs/keys
         let subject_alt_names = vec!["www.mediakraken.org".to_string(), "localhost".to_string()];
         let cert = generate_simple_self_signed(subject_alt_names).unwrap();
-        let mut file_pem = File::create("/key/cacert.pem").unwrap();
+        let mut file_pem = File::create("/mediakraken/certs/cacert.pem").unwrap();
         file_pem
             .write_all(cert.serialize_pem().unwrap().as_bytes())
             .unwrap();
-        let mut file_key_pem = File::create("/key/privkey.pem").unwrap();
+        let mut file_key_pem = File::create("/mediakraken/certs/privkey.pem").unwrap();
         file_key_pem
             .write_all(cert.serialize_private_key_pem().as_bytes())
             .unwrap();

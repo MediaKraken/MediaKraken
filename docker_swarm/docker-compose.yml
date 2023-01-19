@@ -187,7 +187,7 @@ services:
     command: sh -c "/mkmulticast"
     volumes:
       # needed to get docker/swarm info
-      - /var/run/docker.sock:/var/run/docker.sock:ro       
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     deploy:
@@ -203,7 +203,7 @@ services:
     volumes:
       - mediakraken_vol_nginx:/var/log/mediakraken/nginx
       - mediakraken_vol_certs:/etc/nginx/certs:ro
-      - mediakraken_vol_static:/mediakraken/web_app_sanic/static:ro
+      - mediakraken_vol_static:/mediakraken/static:ro
     ports:
       - "8900:8900"
     networks:
@@ -313,7 +313,7 @@ services:
       - db_password
     environment:
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
-    command: sh -c "/wait && /mkrabbitconsume"    
+    command: sh -c "/wait && /mkrabbitconsume"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
@@ -366,14 +366,14 @@ services:
       - secure_key
       - csrf_key
     environment:
-      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672      
-    command: sh -c "/wait && /mkwebapp"
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+    command: sh -c "/wait && /mediakraken/mkwebapp"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
       # must not be read only as it stores cache here
-      - mediakraken_vol_static:/static
-      - mediakraken_vol_webkey:/key
+      - mediakraken_vol_static:/mediakraken/static
+      - mediakraken_vol_certs:/mediakraken/certs
       # needed to show docker/swarm info
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # this stores the "push button" key
@@ -420,7 +420,6 @@ volumes:
   mediakraken_vol_transmission:
   mediakraken_vol_transmission_downloads:
   mediakraken_vol_transmission_incomplete:
-  mediakraken_vol_webkey:
 
 
 secrets:

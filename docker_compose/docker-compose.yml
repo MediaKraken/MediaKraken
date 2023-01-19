@@ -148,7 +148,7 @@ services:
     image: mediakraken/mkmetadata:${BRANCH}
     environment:
       - POSTGRES_PASSWORD=${DBPASS}
-      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672      
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
     entrypoint: sh -c "/wait && /mkmetadata"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -168,7 +168,7 @@ services:
     container_name: mkstack_multicast
     volumes:
       # needed to get docker/swarm info
-      - /var/run/docker.sock:/var/run/docker.sock:ro        
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     restart: unless-stopped
@@ -273,7 +273,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=${DBPASS}
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
-    command: sh -c "/wait && /mkrabbitconsume"    
+    command: sh -c "/wait && /mkrabbitconsume"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
@@ -322,14 +322,14 @@ services:
       - SECURE=${SECURE}
       - CSRF_SECRET_KEY=${CSRF_SECRET_KEY}
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
-    command: sh -c "/wait && /mkwebapp"
+    command: sh -c "/wait && /mediakraken/mkwebapp"
     container_name: mkstack_webapp
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
       # must not be read only as it stores cache here
-      - mediakraken_vol_static:/static
-      - mediakraken_vol_webkey:/key
+      - mediakraken_vol_static:/mediakraken/static
+      - mediakraken_vol_certs:/mediakraken/certs
       # needed to show docker/swarm info
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # web server will generate salt/key
@@ -360,4 +360,3 @@ volumes:
   mediakraken_vol_transmission:
   mediakraken_vol_transmission_downloads:
   mediakraken_vol_transmission_incomplete:
-  mediakraken_vol_webkey:
