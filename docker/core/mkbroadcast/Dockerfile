@@ -19,11 +19,11 @@ RUN if [ "${BRANCHTAG}" = "prod" ]; \
 FROM alpine:3.17.1 AS runtime
 
 # Import from builder.
-COPY --from=cargo-build /etc/passwd /etc/passwd
-COPY --from=cargo-build /etc/group /etc/group
+# COPY --from=cargo-build /etc/passwd /etc/passwd
+# COPY --from=cargo-build /etc/group /etc/group
 
 # Copy our build
 COPY --from=cargo-build /mediakraken/target/mkbroadcast /mkbroadcast
 
 # Use an unprivileged user.
-USER mediakraken:mediakraken
+# USER mediakraken:mediakraken

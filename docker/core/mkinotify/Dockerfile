@@ -20,12 +20,12 @@ FROM alpine:3.17.1 AS runtime
 RUN wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.9.0/wait &&\
   chmod +x /wait
 # Import from builder.
-COPY --from=cargo-build /etc/passwd /etc/passwd
-COPY --from=cargo-build /etc/group /etc/group
+# COPY --from=cargo-build /etc/passwd /etc/passwd
+# COPY --from=cargo-build /etc/group /etc/group
 COPY --from=cargo-build /bin/sh /sh
 
 # Copy our build
 COPY --from=cargo-build /mediakraken/target/mkinotify /mkinotify
 
 # Use an unprivileged user.
-USER mediakraken:mediakraken
+# USER mediakraken:mediakraken
