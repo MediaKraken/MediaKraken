@@ -333,7 +333,7 @@ services:
       # needed to show docker/swarm info
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # web server will generate salt/key
-      - mediakraken_vol_secure:/secure
+      #- mediakraken_vol_secure:/secure
     networks:
       - mediakraken_network
     restart: unless-stopped

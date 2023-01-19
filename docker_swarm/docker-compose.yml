@@ -379,7 +379,7 @@ services:
       # this stores the "push button" key
       - mediakraken_vol_phue:/phue
       # server will generate salt/key
-      - /var/opt/mediakraken/secure:/secure:ro
+      #- /var/opt/mediakraken/secure:/secure
       # db backups
       - mediakraken_vol_postgresql_backup:/backup
     networks:

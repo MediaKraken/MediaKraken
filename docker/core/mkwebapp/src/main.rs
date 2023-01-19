@@ -147,7 +147,7 @@ async fn main() -> Result<(), Error> {
     }
 
     // check for and create ssl certs if needed
-    if Path::new("/mediakraken/key/cacert.pem").exists() == false {
+    if Path::new("/key/cacert.pem").exists() == false {
         #[cfg(debug_assertions)]
         {
             mk_lib_logging::mk_logging_post_elk(
@@ -159,35 +159,36 @@ async fn main() -> Result<(), Error> {
         // generate certs/keys
         let subject_alt_names = vec!["www.mediakraken.org".to_string(), "localhost".to_string()];
         let cert = generate_simple_self_signed(subject_alt_names).unwrap();
-        let mut file_pem = File::create("/mediakraken/key/cacert.pem").unwrap();
+        let mut file_pem = File::create("/key/cacert.pem").unwrap();
         file_pem
             .write_all(cert.serialize_pem().unwrap().as_bytes())
             .unwrap();
-        let mut file_key_pem = File::create("/mediakraken/key/privkey.pem").unwrap();
+        let mut file_key_pem = File::create("/key/privkey.pem").unwrap();
         file_key_pem
             .write_all(cert.serialize_private_key_pem().as_bytes())
             .unwrap();
     }
 
     // create crypto salt if needed
-    if Path::new("/mediakraken/secure/data.zip").exists() == false {
-        #[cfg(debug_assertions)]
-        {
-            mk_lib_logging::mk_logging_post_elk(
-                std::module_path!(),
-                json!({"stuff": "data.zip not found, generating."}),
-            )
-            .await.unwrap();
-        }
-        // create the hash salt
-        if Path::new("/mediakraken/secure/data.zip").exists() == false {
-            let mut file_salt = File::create("/mediakraken/secure/data.zip").unwrap();
-            const CREDENTIAL_LEN: usize = digest::SHA512_OUTPUT_LEN;
-            let salt = [0u8; CREDENTIAL_LEN];
-            file_salt.write_all(&salt);
-        }
-        let salt = mk_lib_file::mk_read_file_data("/mediakraken/secure/data.zip");
-    }
+    // TODO what was this for?
+    // if Path::new("/secure/data.zip").exists() == false {
+    //     #[cfg(debug_assertions)]
+    //     {
+    //         mk_lib_logging::mk_logging_post_elk(
+    //             std::module_path!(),
+    //             json!({"stuff": "data.zip not found, generating."}),
+    //         )
+    //         .await.unwrap();
+    //     }
+    //     // create the hash salt
+    //     if Path::new("/secure/data.zip").exists() == false {
+    //         let mut file_salt = File::create("/secure/data.zip").unwrap();
+    //         const CREDENTIAL_LEN: usize = digest::SHA512_OUTPUT_LEN;
+    //         let salt = [0u8; CREDENTIAL_LEN];
+    //         file_salt.write_all(&salt);
+    //     }
+    //     let salt = mk_lib_file::mk_read_file_data("/secure/data.zip");
+    // }
 
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
@@ -198,7 +199,7 @@ async fn main() -> Result<(), Error> {
     users.create_table().await?;
 
     // setup rocket
-    rocket::build()
+    let _rocket_result = rocket::build()
         .mount("/static", FileServer::from(relative!("static")))
         .mount(
             "/admin",
