@@ -194,7 +194,7 @@ services:
 
   # database management tool
   mkpgadmin:
-    image: dpage/pgadmin4:6.18
+    image: dpage/pgadmin4:6.19
     stop_grace_period: 30s
     stop_signal: SIGTERM
     container_name: mkstack_pgadmin

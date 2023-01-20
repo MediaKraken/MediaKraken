@@ -25,6 +25,7 @@ RUN wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/down
 # COPY --from=cargo-build /etc/group /etc/group
 COPY --from=cargo-build /bin/sh /sh
 COPY --from=cargo-build /mediakraken/templates /mediakraken/templates
+COPY --from=cargo-build /mediakraken/static /mediakraken/static
 COPY --from=cargo-build /mediakraken/Rocket.toml /mediakraken/Rocket.toml
 
 # Copy our build

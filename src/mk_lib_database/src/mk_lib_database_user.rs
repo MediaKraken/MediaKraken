@@ -54,7 +54,7 @@ pub async fn mk_lib_database_user_count(
     sqlx_pool: &sqlx::PgPool,
     user_name: String,
 ) -> Result<i64, sqlx::Error> {
-    if user_name != "" {
+    if user_name == "" {
         let row: (i64,) = sqlx::query_as("select count(*) from users")
             .fetch_one(sqlx_pool)
             .await?;
