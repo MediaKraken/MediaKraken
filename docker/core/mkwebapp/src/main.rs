@@ -300,7 +300,6 @@ async fn main() -> Result<(), Error> {
         )
         .manage::<sqlx::PgPool>(sqlx_pool)
         .manage(users)
-        //.attach(rocket_csrf::Fairing::default())
         .attach(Template::fairing())
         .launch()
         .await;
