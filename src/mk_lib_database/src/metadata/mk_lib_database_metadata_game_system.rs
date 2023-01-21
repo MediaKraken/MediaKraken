@@ -47,7 +47,7 @@ pub async fn mk_lib_database_metadata_game_system_count(
 pub struct DBMetaGameSystemList {
     gs_game_system_id: uuid::Uuid,
     gs_game_system_name: String,
-    gs_description: String,
+    gs_description: Option<String>,
     gs_year: String,
     gs_game_system_alias: String,
 }

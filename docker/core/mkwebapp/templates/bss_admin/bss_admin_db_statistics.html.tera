@@ -36,8 +36,12 @@
                                         {% for row_data in template_data_db_count %}
                                         <tr>
                                             <td>{{ row_data.table_name }}</td>
-                                            <td>{{ row_data.table_rows }}</td>
-                                            {% set_global total_rows = total_rows + row_data.table_rows %}
+                                            {% if row_data.table_rows != -1 %}
+                                                <td>{{ row_data.table_rows }}</td>
+                                                {% set_global total_rows = total_rows + row_data.table_rows %}
+                                            {% else %}
+                                                <td>0</td>
+                                            {% endif %}
                                         </tr>
                                         {% endfor %}
                                         <tr>

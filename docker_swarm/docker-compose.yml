@@ -112,6 +112,23 @@ services:
     deploy:
       mode: global
 
+  gamesdbnetfetchbulk:
+    image: mediakraken/mkgamesdbnetfetchbulk:${BRANCH}
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432
+    command: sh -c "/mkgamesdbnetfetchbulk"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      - mediakraken_vol_static:/static
+    deploy:
+      mode: replicated
+      replicas: 0
+    networks:
+      - mediakraken_network_backend
+
   # guessit rest
   guessitrest:
     image: mediakraken/mkguessitrest:${BRANCH}
@@ -143,6 +160,25 @@ services:
       placement:
         constraints: [ node.role == manager ]
 
+  hardwarescanner:
+    image: mediakraken/mkhardwarescanner:${BRANCH}
+    volumes:
+      # TODO why not store this in the db with the device as postgresql crypt
+      # this stores the "push button" key
+      - mediakraken_vol_phue:/mediakraken/phue
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+    command: sh -c "/wait && /mkhardwarescanner"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network_backend
+    deploy:
+      mode: replicated
+      replicas: 0
+      placement:
+        constraints: [ node.role == manager ]
+
   # inotify
   inotify:
     image: mediakraken/mkinotify:${BRANCH}
@@ -158,6 +194,40 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+
+  libretrocorefetchupdate:
+    image: mediakraken/mklibretrocorefetchupdate:${BRANCH}
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432
+    command: sh -c "/mklibretrocorefetchupdate"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      - mediakraken_vol_static:/static
+    deploy:
+      mode: replicated
+      replicas: 0
+    networks:
+      - mediakraken_network_backend
+
+  mediascanner:
+    image: mediakraken/mkmediascanner:${BRANCH}
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432
+    command: sh -c "/mkmediascanner"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      - mediakraken_vol_static:/static
+    deploy:
+      mode: replicated
+      replicas: 0
+    networks:
+      - mediakraken_network_backend
 
   # runs the server to fetch/process all metadata
   metadata:
@@ -181,6 +251,25 @@ services:
       mode: replicated
       replicas: 1
 
+  metadatamame:
+    image: mediakraken/mkmetadatamame:${BRANCH}
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432
+    command: sh -c "/mkmetadatamame"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      - ./mkmount:/mediakraken/mnt
+      # stores posters/etc so webserver can present
+      - mediakraken_vol_static:/mkwebapp/static
+    networks:
+      - mediakraken_network_backend
+    deploy:
+      mode: replicated
+      replicas: 0
+  
   # multicast discover server
   multicast:
     image: mediakraken/mkmulticast:${BRANCH}
@@ -325,6 +414,51 @@ services:
       mode: replicated
       replicas: 1
 
+  schedulesdirectupdate:
+    image: mediakraken/mkschedulesdirectupdate:${BRANCH}
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432
+    command: sh -c "/mkschedulesdirectupdate"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network_backend
+    deploy:
+      mode: replicated
+      replicas: 0
+
+  tmdbnetfetchbulk:
+    image: mediakraken/mktmdbnetfetchbulk:${BRANCH}
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432
+    command: sh -c "/mktmdbnetfetchbulk"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network_backend
+    deploy:
+      mode: replicated
+      replicas: 0
+
+  tmdbnetfetchupdate:
+    image: mediakraken/mktmdbnetfetchupdate:${BRANCH}
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432
+    command: sh -c "/mktmdbnetfetchupdate"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network_backend
+    deploy:
+      mode: replicated
+      replicas: 0
+
   # runs transcode
   transcode:
     image: mediakraken/mktranscode:${BRANCH}
@@ -354,6 +488,20 @@ services:
       - mediakraken_vol_transmission:/etc/transmission-daemon
       - mediakraken_vol_transmission_downloads:/transmission/downloads
       - mediakraken_vol_transmission_incomplete:/transmission/incomplete
+    deploy:
+      mode: replicated
+      replicas: 0
+
+  # runs tvheadend
+  tvheadend:
+    image: mediakraken/mktvheadend:${BRANCH}
+    secrets:
+      - db_password
+    command: sh -c "/mktvheadend"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network_backend
     deploy:
       mode: replicated
       replicas: 0

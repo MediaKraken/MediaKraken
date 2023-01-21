@@ -181,16 +181,12 @@ pub async fn mk_common_docker_volume_list() -> Result<Vec<String>> {
 pub async fn mk_common_docker_info() -> Result<serde_json::Value> {
     let docker = new_docker()?;
     let mut logs_list: serde_json::Value = serde_json::json!({});
-    match docker.info().await {
-        Ok(info) => {
-            #[cfg(debug_assertions)]
-            {
-                mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "info": info }))
-                    .await.unwrap();
-            }
-            logs_list = serde_json::from_str(&format!("{:#?}", info)).unwrap();
-        }
-        Err(e) => eprintln!("Error: {}", e),
-    };
+    let info_result = docker.info().await;
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "info": info_result.as_ref().unwrap() }))
+            .await.unwrap();
+    }
+    logs_list = serde_json::from_str(&format!("{:#?}", info_result.unwrap())).unwrap();
     Ok(logs_list)
 }
