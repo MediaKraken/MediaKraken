@@ -9,9 +9,9 @@ mod mk_lib_logging;
 use serde_json::json;
 use crate::rocket::futures::FutureExt;
 use crate::rocket::futures::StreamExt;
-use docker_api::api::ContainerListOpts;
-use docker_api::api::LogsOpts;
-use docker_api::api::ServiceListOpts;
+use docker_api::opts::ContainerListOpts;
+use docker_api::opts::LogsOpts;
+use docker_api::opts::ServiceListOpts;
 use docker_api::{conn::TtyChunk, Docker, Result};
 
 #[cfg(unix)]
@@ -43,11 +43,11 @@ pub async fn mk_common_docker_container_list() -> Result<Vec<String>> {
             containers.into_iter().for_each(|container| {
                 println!(
                     "{}\t{}\t{:?}\t{}\t{}",
-                    &container.id[..12],
-                    container.image,
+                    &container.id.unwrap_or_default()[..12],
+                    container.image.unwrap_or_default(),
                     container.state,
-                    container.status,
-                    container.names[0]
+                    container.status.unwrap_or_default(),
+                    container.names.map(|n| n[0].to_owned()).unwrap_or_default()
                 );
             });
         }
@@ -181,12 +181,17 @@ pub async fn mk_common_docker_volume_list() -> Result<Vec<String>> {
 pub async fn mk_common_docker_info() -> Result<serde_json::Value> {
     let docker = new_docker()?;
     let mut logs_list: serde_json::Value = serde_json::json!({});
-    let info_result = docker.info().await;
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "info": info_result.as_ref().unwrap() }))
-            .await.unwrap();
-    }
-    logs_list = serde_json::from_str(&format!("{:#?}", info_result.unwrap())).unwrap();
+    match docker.info().await {
+        Ok(info) => {
+            #[cfg(debug_assertions)]
+            {
+                mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "info": &format!("{:#?}", info) }))
+                    .await.unwrap();
+            }
+            logs_list = json!(&format!("{:#?}", info));
+            //logs_list = serde_json::from_str(&format!("{:#?}", info)).unwrap();            
+        }
+        Err(e) => eprintln!("Error: {}", e),
+    };
     Ok(logs_list)
 }

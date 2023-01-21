@@ -12,7 +12,7 @@ codegen-units = 1
 [dependencies]
 amiquip = { version = "0.4.2", default-features = false }
 chrono = { version = "0.4.19", features = ["serde"] }
-docker-api = { version = "0.9.1", features = ["swarm"] }
+docker-api = { version = "0.12.1", features = ["swarm"] }
 lazy_static = "1.4.0"
 libc = "0.2.126"
 paginator = "0.2.3"
@@ -26,7 +26,6 @@ rocket_auth = { version = "0.4.0", features = ["sqlx-postgres"] }
 # rocket_csrf = "0.3.0" - requires nightly
 serde = { version = "1.0.137", features = ["derive"] }
 serde_json = "1.0.81"
-# shiplift = { version = "0.7", default-features = false, features = ["unix-socket"] }
 sqlx = { version = "0.5.13", features = [
     "chrono",
     "json",
