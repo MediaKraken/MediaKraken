@@ -234,7 +234,7 @@ services:
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
-      - ./mkmount:/mediakraken/mnt
+      #- ./mkmount:/mediakraken/mnt
       # stores posters/etc so webserver can present
       - mediakraken_vol_static:/mkwebapp/static
       # stores the xml/json xref files for anime match
