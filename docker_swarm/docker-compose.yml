@@ -102,8 +102,8 @@ services:
   filebeat:
     image: elastic/filebeat:7.17.8
     environment:
-      - ELASTICSEARCH_HOSTS=mkelk:9200
-      - KIBANA_HOSTS=mkelk:5601
+      - ELASTICSEARCH_HOSTS=mkelk.beaverbay.local:9200
+      - KIBANA_HOSTS=mkelk.beaverbay.local:5601
     volumes:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
