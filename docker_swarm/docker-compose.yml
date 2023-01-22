@@ -114,8 +114,6 @@ services:
     image: mediakraken/mkgamesdbnetfetchbulk:${BRANCH}
     secrets:
       - db_password
-    environment:
-      - WAIT_HOSTS=mkstack_database:5432
     command: sh -c "/mkgamesdbnetfetchbulk"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -192,10 +190,6 @@ services:
 
   libretrocorefetchupdate:
     image: mediakraken/mklibretrocorefetchupdate:${BRANCH}
-    secrets:
-      - db_password
-    environment:
-      - WAIT_HOSTS=mkstack_database:5432
     command: sh -c "/mklibretrocorefetchupdate"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -211,8 +205,6 @@ services:
     image: mediakraken/mkmediascanner:${BRANCH}
     secrets:
       - db_password
-    environment:
-      - WAIT_HOSTS=mkstack_database:5432
     command: sh -c "/mkmediascanner"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -249,8 +241,6 @@ services:
     image: mediakraken/mkmetadatamame:${BRANCH}
     secrets:
       - db_password
-    environment:
-      - WAIT_HOSTS=mkstack_database:5432
     command: sh -c "/mkmetadatamame"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -408,8 +398,6 @@ services:
     image: mediakraken/mkschedulesdirectupdate:${BRANCH}
     secrets:
       - db_password
-    environment:
-      - WAIT_HOSTS=mkstack_database:5432
     command: sh -c "/mkschedulesdirectupdate"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -423,8 +411,6 @@ services:
     image: mediakraken/mktmdbnetfetchbulk:${BRANCH}
     secrets:
       - db_password
-    environment:
-      - WAIT_HOSTS=mkstack_database:5432
     command: sh -c "/mktmdbnetfetchbulk"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -438,8 +424,6 @@ services:
     image: mediakraken/mktmdbnetfetchupdate:${BRANCH}
     secrets:
       - db_password
-    environment:
-      - WAIT_HOSTS=mkstack_database:5432
     command: sh -c "/mktmdbnetfetchupdate"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
