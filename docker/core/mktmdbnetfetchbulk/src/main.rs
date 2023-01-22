@@ -30,7 +30,7 @@ mod mk_lib_network;
 #[derive(Serialize, Deserialize)]
 struct MetadataMovie {
     adult: bool,
-    id: i32,
+    id: Option<i32>,
     original_title: String,
     popularity: f32,
     video: bool,
@@ -38,7 +38,7 @@ struct MetadataMovie {
 
 #[derive(Serialize, Deserialize)]
 struct MetadataTV {
-    id: i32,
+    id: Option<i32>,
     original_name: String,
     popularity: f32,
 }
@@ -51,7 +51,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
     }
 
-    let fetch_date: String = "12_15_2022".to_string();
+    let fetch_date: String = "01_18_2023".to_string();
 
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
@@ -69,14 +69,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
         &"/mediakraken/movie.gz".to_string(),
     )
     .await;
-    let json_result = mk_lib_compression::mk_decompress_gz_data("/mediakraken/movie.gz").await.unwrap();
+    let json_result = mk_lib_compression::mk_decompress_gz_data("/mediakraken/movie.gz")
+        .await
+        .unwrap();
     // Please note that the data is NOT in id order
     for json_item in json_result.split('\n') {
         if !json_item.trim().is_empty() {
             let metadata_struct: MetadataMovie = serde_json::from_str(json_item.trim())?;
             let result = mk_lib_database_metadata_movie::mk_lib_database_metadata_exists_movie(
                 &sqlx_pool,
-                metadata_struct.id,
+                metadata_struct.id.unwrap_or(0),
             )
             .await
             .unwrap();
@@ -84,7 +86,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let download_result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
                                                                                                                               "themoviedb".to_string(),
                                                                                                                               mk_lib_common_enum_media_type::DLMediaType::MOVIE,
-                                                                                                                              metadata_struct.id).await.unwrap();
+                                                                                                                              metadata_struct.id.unwrap_or(0)).await.unwrap();
                 if download_result == false {
                     let result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                             "themoviedb".to_string(),
@@ -107,13 +109,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
         &"/mediakraken/tv.gz".to_string(),
     )
     .await;
-    let json_result = mk_lib_compression::mk_decompress_gz_data("/mediakraken/tv.gz").await.unwrap();
+    let json_result = mk_lib_compression::mk_decompress_gz_data("/mediakraken/tv.gz")
+        .await
+        .unwrap();
     for json_item in json_result.split('\n') {
         if !json_item.trim().is_empty() {
             let metadata_struct: MetadataTV = serde_json::from_str(json_item.trim())?;
             let result = mk_lib_database_metadata_tv::mk_lib_database_metadata_exists_tv(
                 &sqlx_pool,
-                metadata_struct.id,
+                metadata_struct.id.unwrap_or(0),
             )
             .await
             .unwrap();
@@ -121,7 +125,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let download_result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
                                                                                                                               "themoviedb".to_string(),
                                                                                                                               mk_lib_common_enum_media_type::DLMediaType::TV,
-                                                                                                                              metadata_struct.id).await.unwrap();
+                                                                                                                              metadata_struct.id.unwrap_or(0)).await.unwrap();
                 if download_result == false {
                     let result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                             "themoviedb".to_string(),
