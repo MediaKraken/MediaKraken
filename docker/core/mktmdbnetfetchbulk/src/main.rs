@@ -66,10 +66,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             "http://files.tmdb.org/p/exports/movie_ids_{}.json.gz",
             fetch_date
         ),
-        &"/mediakraken/movie.gz".to_string(),
+        &"/movie.gz".to_string(),
     )
     .await;
-    let json_result = mk_lib_compression::mk_decompress_gz_data("/mediakraken/movie.gz")
+    let json_result = mk_lib_compression::mk_decompress_gz_data("/movie.gz")
         .await
         .unwrap();
     // Please note that the data is NOT in id order
@@ -106,10 +106,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             "http://files.tmdb.org/p/exports/tv_series_ids_{}.json.gz",
             fetch_date
         ),
-        &"/mediakraken/tv.gz".to_string(),
+        &"/tv.gz".to_string(),
     )
     .await;
-    let json_result = mk_lib_compression::mk_decompress_gz_data("/mediakraken/tv.gz")
+    let json_result = mk_lib_compression::mk_decompress_gz_data("/tv.gz")
         .await
         .unwrap();
     for json_item in json_result.split('\n') {
