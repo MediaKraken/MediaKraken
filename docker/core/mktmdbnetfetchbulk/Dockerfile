@@ -1,4 +1,4 @@
-FROM mediakraken/mkbase_rust_alpine:dev as cargo-build
+FROM mediakraken/mkbase_rust_debian:dev as cargo-build
 
 ARG BRANCHTAG
 
@@ -16,7 +16,7 @@ RUN if [ "${BRANCHTAG}" = "prod" ]; \
 ####################################################################################################
 ## Final image
 ####################################################################################################
-FROM alpine:3.17.1 AS runtime
+FROM debian:bullseye-20230109-slim AS runtime
 
 # Import from builder.
 COPY --from=cargo-build /etc/passwd /etc/passwd
@@ -26,4 +26,4 @@ COPY --from=cargo-build /etc/group /etc/group
 COPY --from=cargo-build /mediakraken/target/mktmdbnetfetchbulk /mktmdbnetfetchbulk
 
 # Use an unprivileged user.
-USER mediakraken:mediakraken
+#USER mediakraken:mediakraken

@@ -37,7 +37,6 @@ services:
       mode: replicated
       replicas: 0
 
-  # runs cron
   cron:
     image: mediakraken/mkcron:${BRANCH}
     secrets:
@@ -81,7 +80,6 @@ services:
     networks:
       - mediakraken_network_backend
 
-  # Runs the download services
   download:
     image: mediakraken/mkdownload:${BRANCH}
     secrets:
@@ -129,7 +127,6 @@ services:
     networks:
       - mediakraken_network_backend
 
-  # guessit rest
   guessitrest:
     image: mediakraken/mkguessitrest:${BRANCH}
     stop_grace_period: 30s
@@ -140,7 +137,6 @@ services:
       mode: replicated
       replicas: 1
 
-  # runs hardware
   hardwarecontrol:
     image: mediakraken/mkhardwarecontrol:${BRANCH}
     volumes:
@@ -179,7 +175,6 @@ services:
       placement:
         constraints: [ node.role == manager ]
 
-  # inotify
   inotify:
     image: mediakraken/mkinotify:${BRANCH}
     secrets:
@@ -229,7 +224,6 @@ services:
     networks:
       - mediakraken_network_backend
 
-  # runs the server to fetch/process all metadata
   metadata:
     image: mediakraken/mkmetadata:${BRANCH}
     secrets:
@@ -270,7 +264,6 @@ services:
       mode: replicated
       replicas: 0
   
-  # multicast discover server
   multicast:
     image: mediakraken/mkmulticast:${BRANCH}
     command: sh -c "/mkmulticast"
@@ -283,7 +276,6 @@ services:
       mode: replicated
       replicas: 1
 
-  # runs the nginx proxy service
   nginx:
     image: mediakraken/mknginx:${BRANCH}
     entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh -h mkstack_webapp -p 8080 -t 120 -- nginx
@@ -321,7 +313,6 @@ services:
       mode: replicated
       replicas: 1
 
-  # pgbouncer
   pgbouncer:
     image: mediakraken/mkpgbouncer:${BRANCH}
     environment:
@@ -373,7 +364,6 @@ services:
       placement:
         constraints: [ node.platform.os == linux ]
 
-  # rabbit
   rabbitmq:
     image: mediakraken/mkrabbitmq:${BRANCH}
     environment:
@@ -459,7 +449,6 @@ services:
       mode: replicated
       replicas: 0
 
-  # runs transcode
   transcode:
     image: mediakraken/mktranscode:${BRANCH}
     secrets:
@@ -492,7 +481,6 @@ services:
       mode: replicated
       replicas: 0
 
-  # runs tvheadend
   tvheadend:
     image: mediakraken/mktvheadend:${BRANCH}
     secrets:
@@ -506,7 +494,6 @@ services:
       mode: replicated
       replicas: 0
 
-  # Runs the web service for the main server application
   webapp:
     image: mediakraken/mkwebapp:${BRANCH}
     secrets:

@@ -1,7 +1,4 @@
-FROM rust:1.66.1-alpine
-
-RUN apk update && \
-  apk add alpine-sdk sqlite-dev openssl1.1-compat-dev
+FROM rust:1.66.1
 
 # Create appuser
 ENV USER=mediakraken
