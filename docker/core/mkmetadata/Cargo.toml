@@ -30,6 +30,7 @@ sqlx = { version = "0.5.13", features = [
     "postgres",
     "uuid",
 ] }
+stdext = "0.3.1"
 substring = "1.4.5"
 sys-info = "0.9.1"
 tar = "0.4.38"
