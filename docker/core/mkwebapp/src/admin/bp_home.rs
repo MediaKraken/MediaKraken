@@ -1,5 +1,6 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+use num_format::{Locale, SystemLocale, ToFormattedString};
 use rocket::response::Redirect;
 use rocket::serde::{json::Json, Deserialize, Serialize};
 use rocket::Request;
@@ -47,10 +48,10 @@ struct TemplateHomeContext {
     template_data_server_host_ip: String,
     template_data_server_info_server_ip_external: String,
     template_data_server_info_server_version: String,
-    template_data_count_media_files: i64,
-    template_data_count_matched_media: i64,
-    template_data_count_meta_fetch: i64,
-    template_data_count_streamed_media: i32,
+    template_data_count_media_files: String,
+    template_data_count_matched_media: String,
+    template_data_count_meta_fetch: String,
+    template_data_count_streamed_media: String,
     template_server_streams: Vec<TemplateHomeStreamListContext>,
     template_server_users: Vec<mk_lib_database_user::DBUserList>,
     template_data_scan_info: Vec<TemplateHomeScanListContext>,
@@ -74,6 +75,7 @@ pub async fn admin_home(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser
         .unwrap();
     let mut server_streams = Vec::new();
     let mut server_scans = Vec::new();
+    let locale = SystemLocale::default().unwrap();
     Template::render(
         "bss_admin/bss_admin_home",
         &TemplateHomeContext {
@@ -92,18 +94,21 @@ pub async fn admin_home(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser
             template_data_count_media_files:
                 mk_lib_database_media::mk_lib_database_media_known_count(&sqlx_pool)
                     .await
-                    .unwrap(),
+                    .unwrap()
+                    .to_formatted_string(&locale),
             template_data_count_matched_media:
                 mk_lib_database_media::mk_lib_database_media_matched_count(&sqlx_pool)
                     .await
-                    .unwrap(),
+                    .unwrap()
+                    .to_formatted_string(&locale),
             template_data_count_meta_fetch:
                 mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(
                     &sqlx_pool,
                 )
                 .await
-                .unwrap(),
-            template_data_count_streamed_media: 0,
+                .unwrap()
+                .to_formatted_string(&locale),
+            template_data_count_streamed_media: "0".to_string(),
             template_server_streams: server_streams,
             template_server_users: user_list,
             template_data_scan_info: server_scans,

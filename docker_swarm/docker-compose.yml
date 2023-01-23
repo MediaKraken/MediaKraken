@@ -194,7 +194,7 @@ services:
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
-      - mediakraken_vol_static:/static
+      - mediakraken_vol_static:/mediakraken/static
     deploy:
       mode: replicated
       replicas: 0
@@ -209,7 +209,7 @@ services:
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
-      - mediakraken_vol_static:/static
+      - mediakraken_vol_static:/mediakraken/static
     deploy:
       mode: replicated
       replicas: 0
@@ -228,7 +228,7 @@ services:
     volumes:
       #- ./mkmount:/mediakraken/mnt
       # stores posters/etc so webserver can present
-      - mediakraken_vol_static:/mkwebapp/static
+      - mediakraken_vol_static:/mediakraken/static
       # stores the xml/json xref files for anime match
       - mediakraken_vol_cache:/cache
     networks:

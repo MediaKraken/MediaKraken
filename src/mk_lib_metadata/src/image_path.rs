@@ -19,7 +19,16 @@ pub async fn meta_image_file_path(
             CHARSET[idx] as char
         })
         .collect();
-    let file_path = format!("/meta/{}/{}", &media_type, &file_path_random);
+    let file_path_random_two: String = (0..STRING_LEN)
+        .map(|_| {
+            let idx = rng.gen_range(0..CHARSET.len());
+            CHARSET[idx] as char
+        })
+        .collect();
+    let file_path = format!(
+        "/mediakraken/static/meta/{}/{}/{}",
+        &media_type, &file_path_random, &file_path_random_two
+    );
     // This is the SAVE path.  Do NOT shorten the path to static.
     // This is the SAVE path.  Do NOT shorten the path to static.
     Ok(file_path)

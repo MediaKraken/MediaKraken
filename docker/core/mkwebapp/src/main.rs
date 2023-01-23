@@ -15,6 +15,7 @@ use rocket_auth::{prelude::Error, *};
 use rocket_dyn_templates::Template;
 use serde_json::json;
 use std::collections::{BTreeMap, HashMap};
+use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
@@ -192,6 +193,20 @@ async fn main() -> Result<(), Error> {
     //     }
     //     let salt = mk_lib_file::mk_read_file_data("/secure/data.zip");
     // }
+
+    // create metadata paths, as before the db update will let it finish before
+    // other containers can use them   poster, backdrop, trailer
+    let vec_of_metadata = vec!["poster", "backdrop", "trailer"];
+    for metadata_type in vec_of_metadata.iter() {
+        let file_name = format!("/mediakraken/static/meta/{}/", metadata_type);
+        if !Path::new(&file_name).exists() {
+            for c in b'a'..=b'z' {
+                for d in b'a'..=b'z' {
+                    fs::create_dir(format!("{}{}{}", file_name, c as char, d as char))?;
+                }
+            }
+        }
+    }
 
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();

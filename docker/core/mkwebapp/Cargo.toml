@@ -15,6 +15,7 @@ chrono = { version = "0.4.19", features = ["serde"] }
 docker-api = { version = "0.12.1", features = ["swarm"] }
 lazy_static = "1.4.0"
 libc = "0.2.126"
+num-format = { version = "0.4.4", features = ["with-system-locale"] }
 paginator = "0.2.3"
 rcgen = "0.10.0"
 reqwest = { version = "0.11.13", default-features = false, features = [
