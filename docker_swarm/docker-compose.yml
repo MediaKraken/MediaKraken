@@ -247,13 +247,13 @@ services:
     volumes:
       - ./mkmount:/mediakraken/mnt
       # stores posters/etc so webserver can present
-      - mediakraken_vol_static:/mkwebapp/static
+      - mediakraken_vol_static:/mediakraken/static
     networks:
       - mediakraken_network_backend
     deploy:
       mode: replicated
       replicas: 0
-  
+
   multicast:
     image: mediakraken/mkmulticast:${BRANCH}
     command: sh -c "/mkmulticast"

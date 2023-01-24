@@ -61,7 +61,7 @@ STAGE_TWO_IMAGES = {}
 
 STAGE_CORE_IMAGES = {
     # broadcast server IP for web and client connectivity, must run from HOST
-    'mkbroadcast': ('mkbroadcast', 'scratch', 'core'),
+    # 'mkbroadcast': ('mkbroadcast', 'scratch', 'core'),   # retired!  mkmulticast instead
 
     # chat server via mumble
     'mkchatmumble': ('mkchatmumble', 'alpine:3.14.2', 'core'),
@@ -113,7 +113,7 @@ STAGE_CORE_IMAGES = {
     'mknginx': ('mknginx', 'alpine:3.13', 'core'),
 
     # database connection pooler
-    'mkpgbouncer': ('mkpgbouncer', 'alpine:3.14.3', 'core'),
+    'mkpgbouncer': ('mkpgbouncer', 'alpine:3.17.1', 'core'),
 
     # consume and process ampq records
     'mkrabbitconsume': ('mkrabbitconsume', 'busybox:1.36.0-uclibc', 'core'),
@@ -137,7 +137,7 @@ STAGE_CORE_IMAGES = {
     'mktranscode': ('mktranscode', 'busybox:1.36.0-uclibc', 'core'),
 
     # transmission server
-    'mktransmission': ('mktransmission', 'alpine:3.14.2', 'core'),
+    'mktransmission': ('mktransmission', 'alpine:3.16.2', 'core'),
 
     # tvheadend
     'mktvheadend': ('mktvheadend', 'alpine:3.12', 'core'),
@@ -161,13 +161,13 @@ STAGE_ONE_GAME_SERVERS = {
 
     # for hosting games via steamcmd
     'mkgamebasesteamcmdbullseye': ('mkgamebasesteamcmdbullseye', 'debian:bullseye-slim', 'game_base'),
-    
+
     # for hosting games via steamcmd as root
     'mkgamebasesteamcmdroot': ('mkgamebasesteamcmdroot', 'debian:10.9-slim', 'game_base'),
 
     # for hosting games via steamcmd as root
     'mkgamebasesteamcmdrootbullseye': ('mkgamebasesteamcmdrootbullseye', 'debian:bullseye-slim', 'game_base'),
-    
+
     # for hosting software via wine
     'mkgamebasewine': ('mkgamebasewine', 'debian:10.9-slim', 'game_base'),
 }
