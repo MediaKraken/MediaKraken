@@ -7,11 +7,22 @@ use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
+use stdext::function_name;
+use serde_json::json;
 
 pub async fn mk_lib_database_metadata_game_detail(
     sqlx_pool: &sqlx::PgPool,
     game_uuid: String,
 ) -> Result<(uuid::Uuid, serde_json::Value), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let row: (uuid::Uuid, serde_json::Value) = sqlx::query_as(
         "select \
         gi_game_info_system_id, gi_game_info_json \
@@ -27,6 +38,15 @@ pub async fn mk_lib_database_metadata_game_by_sha1(
     sqlx_pool: &sqlx::PgPool,
     sha1_hash: String,
 ) -> Result<uuid::Uuid, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let row: (uuid::Uuid,) = sqlx::query_as(
         "select gi_game_info_id \
         from mm_metadata_game_software_info \
@@ -42,6 +62,15 @@ pub async fn mk_lib_database_metadata_game_by_blake3(
     sqlx_pool: &sqlx::PgPool,
     blake3_hash: String,
 ) -> Result<uuid::Uuid, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let row: (uuid::Uuid,) = sqlx::query_as(
         "select gi_game_info_id \
         from mm_metadata_game_software_info \
@@ -57,6 +86,15 @@ pub async fn mk_lib_database_metadata_game_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_game_software_info \
@@ -90,6 +128,15 @@ pub async fn mk_lib_database_metadata_game_read(
     offset: i32,
     limit: i32,
 ) -> Result<Vec<DBMetaGameList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let select_query;
     if search_value != "" {
         select_query = sqlx::query(
@@ -137,6 +184,15 @@ pub async fn mk_lib_database_metadata_game_uuid_by_name_and_system(
     game_name: String,
     game_system_short_name: String,
 ) -> Result<uuid::Uuid, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     if game_system_short_name != "" {
         let row: (uuid::Uuid,) = sqlx::query_as(
             "select gi_id \
@@ -174,6 +230,15 @@ pub async fn mk_lib_database_metadata_game_by_name_and_system(
     offset: i32,
     limit: i32,
 ) -> Result<Vec<DBMetaGameNameMatchList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let select_query;
     if game_system_short_name != "" {
         select_query = sqlx::query(
@@ -212,6 +277,15 @@ pub async fn mk_lib_database_metadata_game_upsert(
     game_name: String,
     game_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let new_guid = uuid::Uuid::new_v4();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(

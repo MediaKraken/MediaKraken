@@ -12,6 +12,7 @@ use std::ffi::OsStr;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
+use stdext::function_name;
 use tokio::time::{sleep, Duration};
 use uuid::Uuid;
 

@@ -1,9 +1,10 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use serde_json::json;
 use sqlx::{types::Json, types::Uuid};
 use std::error::Error;
 use std::path::Path;
+use stdext::function_name;
+use serde_json::json;
 use torrent_name_parser::Metadata;
 
 #[path = "../mk_lib_logging.rs"]
@@ -25,6 +26,15 @@ pub async fn metadata_guessit(
     sqlx_pool: &sqlx::PgPool,
     download_data: &DBDownloadQueueByProviderList,
 ) -> Result<(uuid::Uuid, Metadata), Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
     // check for dupes by name/year
     let file_name = Path::new(&download_data.mm_download_path.as_ref().unwrap())
@@ -39,7 +49,8 @@ pub async fn metadata_guessit(
             std::module_path!(),
             json!({ "Guessit File": file_name }),
         )
-        .await.unwrap();
+        .await
+        .unwrap();
     }
     let guessit_data: Metadata = Metadata::from(&file_name).unwrap();
     if guessit_data.title().len() > 0 {

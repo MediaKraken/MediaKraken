@@ -2,11 +2,12 @@
 
 use pnet::datalink::Channel::Ethernet;
 use pnet::datalink::{self, NetworkInterface};
-use serde_json::json;
 use shiplift::Docker;
 use std::io;
 use std::net::IpAddr;
 use std::str;
+use stdext::function_name;
+use serde_json::json;
 use tokio::net::UdpSocket;
 
 #[path = "mk_lib_logging.rs"]
@@ -17,7 +18,9 @@ async fn main() -> io::Result<()> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await.unwrap();
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
+            .await
+            .unwrap();
     }
 
     let mut mediakraken_ip: String = "127.0.0.1".to_string();
@@ -33,7 +36,8 @@ async fn main() -> io::Result<()> {
                             std::module_path!(),
                             json!({ "source_ip": source_ip }),
                         )
-                        .await.unwrap();
+                        .await
+                        .unwrap();
                     }
                     let source_ip = iface
                         .ips
@@ -51,7 +55,8 @@ async fn main() -> io::Result<()> {
                             std::module_path!(),
                             json!({ "mediakraken_ip": mediakraken_ip }),
                         )
-                        .await.unwrap();
+                        .await
+                        .unwrap();
                     }
                     break;
                 }
@@ -92,12 +97,14 @@ async fn main() -> io::Result<()> {
                         std::module_path!(),
                         json!({"bytes received": len, "addr": addr, "net_string": net_string}),
                     )
-                    .await.unwrap();
+                    .await
+                    .unwrap();
                     mk_lib_logging::mk_logging_post_elk(
                         std::module_path!(),
                         json!({ "host_port": host_port }),
                     )
-                    .await.unwrap();
+                    .await
+                    .unwrap();
                 }
                 let mk_address = format!("{}:{}", mediakraken_ip, host_port);
                 #[cfg(debug_assertions)]
@@ -106,7 +113,8 @@ async fn main() -> io::Result<()> {
                         std::module_path!(),
                         json!({ "mk_address": mk_address }),
                     )
-                    .await.unwrap();
+                    .await
+                    .unwrap();
                 }
                 let _len = sock.send_to(&mk_address.into_bytes(), addr).await?;
                 #[cfg(debug_assertions)]
@@ -115,7 +123,8 @@ async fn main() -> io::Result<()> {
                         std::module_path!(),
                         json!({ "bytes sent": len }),
                     )
-                    .await.unwrap();
+                    .await
+                    .unwrap();
                 }
             }
         }

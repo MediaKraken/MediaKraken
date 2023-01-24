@@ -7,6 +7,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
+use stdext::function_name;
+use serde_json::json;
 
 #[path = "mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;
@@ -14,6 +16,15 @@ mod mk_lib_common_enum_media_type;
 pub async fn mk_lib_database_media_movie_genre_count(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<PgRow>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let rows: Vec<PgRow> = sqlx::query(
         "select mm_metadata_json->'genres' as gen, \
         count(mm_metadata_json->'genres') as gen_count \
@@ -36,6 +47,15 @@ pub async fn mk_lib_database_media_movie_genre_count(
 pub async fn mk_lib_database_media_movie_random(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<(Uuid, Uuid), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let row: (Uuid, Uuid) = sqlx::query_as(
         "select mm_metadata_guid, mm_media_guid \
         from mm_media, mm_metadata_movie \
@@ -58,6 +78,15 @@ pub async fn mk_lib_database_media_movie_read(
     offset: i32,
     limit: i32,
 ) -> Result<Vec<DBMediaMovieList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let select_query;
     if search_value != "" {
         select_query = sqlx::query("").bind(search_value).bind(offset).bind(limit);
@@ -77,6 +106,15 @@ pub async fn mk_lib_database_media_movie_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     if search_value != "" {
         let row: (i64,) = sqlx::query_as("")
             .bind(search_value)

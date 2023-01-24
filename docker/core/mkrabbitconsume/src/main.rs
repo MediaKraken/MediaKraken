@@ -6,6 +6,7 @@ use amiquip::{
 use serde_json::{json, Value};
 use sqlx::Row;
 use std::error::Error;
+use stdext::function_name;
 
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;

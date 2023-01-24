@@ -2,9 +2,10 @@
 
 use amiquip::{AmqpProperties, Connection, Exchange, Publish, Result};
 use inotify::{EventMask, Inotify, WatchMask};
-use serde_json::json;
 use sqlx::Row;
 use std::error::Error;
+use stdext::function_name;
+use serde_json::json;
 
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;

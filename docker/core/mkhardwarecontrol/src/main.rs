@@ -6,6 +6,7 @@ use amiquip::{
 use serde_json::{json, Value};
 use std::error::Error;
 //use std::process::Command;
+use stdext::function_name;
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -21,7 +22,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await.unwrap();
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
+            .await
+            .unwrap();
     }
 
     // open rabbit connection

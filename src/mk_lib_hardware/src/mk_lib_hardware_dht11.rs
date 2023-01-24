@@ -11,10 +11,21 @@ use rppal::{
     hal::Delay,
 };
 use rppal_dht11::{Dht11, Measurement};
+use stdext::function_name;
+use serde_json::json;
 
 const DHT11_PIN: u8 = 17;
 
 pub async fn mk_lib_hardware_dht11_get_reading() {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let pin = Gpio::new()
         .unwrap()
         .get(DHT11_PIN)
@@ -35,7 +46,8 @@ pub async fn mk_lib_hardware_dht11_get_reading() {
                         std::module_path!(),
                         json!({ "Temp": temperature:.1, "Hum": humidity:.1 }),
                     )
-                    .await.unwrap();
+                    .await
+                    .unwrap();
                 }
             }
             Err(e) => eprintln!("Failed to perform measurement: {e:?}"),

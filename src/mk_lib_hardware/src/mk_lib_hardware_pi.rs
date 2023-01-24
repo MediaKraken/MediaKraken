@@ -15,6 +15,8 @@ use rppal::uart::{Parity, Uart};
 use std::error::Error;
 use std::thread;
 use tokio::time::{Duration, sleep};
+use stdext::function_name;
+use serde_json::json;
 
 // let gpio = Gpio::new()?;
 // let i2c = I2c::new()?;
@@ -27,7 +29,16 @@ use tokio::time::{Duration, sleep};
 
 pub async fn mk_lib_hardware_pi_led_flash(gpio_pin: u8, milliseconds: u32)
                                           -> Result<(), Box<dyn Error>> {
-    let mut pin = Gpio::new()?.get(gpio_pin)?.into_output();
+                                            #[cfg(debug_assertions)]
+                                            {
+                                                mk_lib_logging::mk_logging_post_elk(
+                                                    std::module_path!(),
+                                                    json!({ "Function": function_name!() }),
+                                                )
+                                                .await
+                                                .unwrap();
+                                            }
+                                            let mut pin = Gpio::new()?.get(gpio_pin)?.into_output();
     loop {
         pin.toggle();
         sleep(Duration::from_milliseconds(milliseconds)).await;
@@ -35,6 +46,15 @@ pub async fn mk_lib_hardware_pi_led_flash(gpio_pin: u8, milliseconds: u32)
 }
 
 pub async fn mk_lib_hardware_pi_take_image(image_file_name: String) {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let info = info().unwrap();
     if info.cameras.len() > 0 {
         #[cfg(debug_assertions)]
@@ -46,6 +66,15 @@ pub async fn mk_lib_hardware_pi_take_image(image_file_name: String) {
 }
 
 fn simple_sync(info: &CameraInfo, image_file_name String) {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut camera = SimpleCamera::new(info.clone()).unwrap();
     camera.activate().unwrap();
     let b = camera.take_one().unwrap();

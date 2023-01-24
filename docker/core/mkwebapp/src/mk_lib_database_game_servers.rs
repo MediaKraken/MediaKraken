@@ -8,11 +8,22 @@ use serde_json::{Map, Value};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
+use stdext::function_name;
+use serde_json::json;
 
 pub async fn mk_lib_database_game_server_delete(
     sqlx_pool: &sqlx::PgPool,
     game_server_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from mm_game_dedicated_servers where mm_game_server_guid = $1")
         .bind(game_server_uuid)
@@ -35,6 +46,15 @@ pub async fn mk_lib_database_game_server_read(
     offset: i32,
     limit: i32,
 ) -> Result<Vec<DBGameServerList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let select_query;
     if search_value != "" {
         select_query = sqlx::query(
@@ -70,6 +90,15 @@ pub async fn mk_lib_database_game_server_detail(
     sqlx_pool: &sqlx::PgPool,
     game_server_uuid: Uuid,
 ) -> Result<PgRow, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let row: PgRow = sqlx::query(
         "select mm_game_server_name, mm_game_server_json \
         from mm_game_dedicated_servers where mm_game_server_guid = $1",
@@ -84,6 +113,15 @@ pub async fn mk_lib_database_game_server_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_game_dedicated_servers \
@@ -106,6 +144,15 @@ pub async fn mk_lib_database_game_server_upsert(
     server_name: String,
     server_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // TODO um, would return "invalid" uuid on update
     let new_guid = uuid::Uuid::new_v4();
     let mut transaction = sqlx_pool.begin().await?;

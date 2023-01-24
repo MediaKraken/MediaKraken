@@ -3,14 +3,24 @@
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
-use serde_json::json;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use std::fs;
 use std::path::Path;
+use stdext::function_name;
+use serde_json::json;
 use urlencoding::encode;
 
 pub async fn mk_lib_database_open_pool() -> Result<sqlx::PgPool, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // trim is get rid of the \r returned in hostname
     let hostname: String = sys_info::hostname().unwrap().trim().to_string();
     let connection_string: String;
@@ -20,7 +30,8 @@ pub async fn mk_lib_database_open_pool() -> Result<sqlx::PgPool, sqlx::Error> {
             std::module_path!(),
             json!({ "database open hostname": hostname }),
         )
-        .await.unwrap();
+        .await
+        .unwrap();
     }
     if hostname == "wsripper2"
         || hostname == "th-hplaptop-1"
@@ -37,7 +48,10 @@ pub async fn mk_lib_database_open_pool() -> Result<sqlx::PgPool, sqlx::Error> {
         );
     } else {
         let dp_pass = env::var("POSTGRES_PASSWORD").unwrap();
-        connection_string = format!("postgresql://postgres:{}@mkdatabase/postgres", encode(&dp_pass));
+        connection_string = format!(
+            "postgresql://postgres:{}@mkdatabase/postgres",
+            encode(&dp_pass)
+        );
     }
     let sqlx_pool = PgPoolOptions::new()
         .max_connections(25)

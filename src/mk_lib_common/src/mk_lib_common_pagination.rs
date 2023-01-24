@@ -6,12 +6,23 @@ mod mk_lib_logging;
 use core::fmt::Write;
 use paginator::{PageItem, Paginator};
 use std::error::Error;
+use stdext::function_name;
+use serde_json::json;
 
 pub async fn mk_lib_common_paginate(
     total_pages: i64,
     page: i32,
     base_url: String,
 ) -> Result<String, Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut pagination_html = String::new();
     if total_pages != 0 {
         pagination_html.push_str("<div><table><tr>");

@@ -2,10 +2,11 @@
 
 // https://developers.themoviedb.org/3
 
-use serde_json::json;
 use sqlx::{types::Json, types::Uuid};
 use std::error::Error;
 use std::path::Path;
+use stdext::function_name;
+use serde_json::json;
 use torrent_name_parser::Metadata;
 
 #[path = "../../mk_lib_logging.rs"]
@@ -33,6 +34,15 @@ pub async fn provider_tmdb_movie_fetch(
     metadata_uuid: Uuid,
     tmdb_api_key: &String,
 ) {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // fetch and save json data via tmdb id
     let result_json = provider_tmdb_movie_fetch_by_id(tmdb_id, tmdb_api_key)
         .await
@@ -74,6 +84,15 @@ pub async fn provider_tmdb_person_fetch(
     metadata_uuid: Uuid,
     tmdb_api_key: &String,
 ) {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // fetch and save json data via tmdb id
     let result_json = provider_tmdb_person_fetch_by_id(tmdb_id, tmdb_api_key)
         .await
@@ -86,6 +105,15 @@ pub async fn provider_tmdb_tv_fetch(
     metadata_uuid: Uuid,
     tmdb_api_key: &String,
 ) {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // fetch and save json data via tmdb id
     let result_json = provider_tmdb_tv_fetch_by_id(tmdb_id, tmdb_api_key)
         .await
@@ -124,6 +152,15 @@ pub async fn provider_tmdb_tv_fetch(
 pub async fn provider_tmdb_movie_id_max(
     api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/movie/latest?api_key={}",
         api_key
@@ -136,6 +173,15 @@ pub async fn provider_tmdb_movie_id_max(
 pub async fn provider_tmdb_person_id_max(
     api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/person/latest?api_key={}",
         api_key
@@ -148,6 +194,15 @@ pub async fn provider_tmdb_person_id_max(
 pub async fn provider_tmdb_tv_id_max(
     api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/tv/latest?api_key={}",
         api_key
@@ -161,6 +216,15 @@ pub async fn provider_tmdb_collection_fetch_by_id(
     tmdb_id: i32,
     api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/collection/{}?api_key={}",
         tmdb_id, api_key
@@ -174,6 +238,15 @@ pub async fn provider_tmdb_movie_fetch_by_id(
     tmdb_id: i32,
     api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/movie/{}?api_key={}\
         &append_to_response=credits,reviews,release_dates,videos",
@@ -187,6 +260,15 @@ pub async fn provider_tmdb_movie_fetch_by_id(
 pub async fn provider_tmdb_person_changes(
     api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/person/changes?api_key={}",
         api_key
@@ -200,6 +282,15 @@ pub async fn provider_tmdb_person_fetch_by_id(
     tmdb_id: i32,
     api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/person/{}?api_key={}\
         &append_to_response=combined_credits,external_ids,images",
@@ -214,6 +305,15 @@ pub async fn provider_tmdb_review_fetch_by_id(
     tmdb_id: i32,
     api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/review/{}?api_key={}",
         tmdb_id, api_key
@@ -227,6 +327,15 @@ pub async fn provider_tmdb_tv_fetch_by_id(
     tmdb_id: i32,
     api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.themoviedb.org/3/tv/{}?api_key={}\
         &append_to_response=credits,reviews,release_dates,videos",
@@ -240,6 +349,15 @@ pub async fn provider_tmdb_tv_fetch_by_id(
 pub async fn provider_tmdb_meta_info_build(
     result_json: &serde_json::Value,
 ) -> Result<(i32, serde_json::Value), Box<dyn std::error::Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut image_file_path = String::new();
     // create file path for poster
     let mut image_file_path = image_path::meta_image_file_path("poster".to_string())
@@ -306,6 +424,15 @@ pub async fn provider_tmdb_meta_info_build(
 }
 
 pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_api_key: &String) {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut search_text: String = guessit_data.title().to_string().replace(" ", "%20");
     if guessit_data.year().is_some() {
         search_text = format!(

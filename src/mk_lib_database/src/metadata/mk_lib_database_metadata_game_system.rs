@@ -7,11 +7,22 @@ use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
+use stdext::function_name;
+use serde_json::json;
 
 pub async fn mk_lib_database_metadata_game_system_detail(
     sqlx_pool: &sqlx::PgPool,
     game_sys_uuid: Uuid,
 ) -> Result<serde_json::Value, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let row: (serde_json::Value,) = sqlx::query_as(
         "select gs_game_system_json from mm_metadata_game_systems_info \
         where gs_id = $1",
@@ -26,6 +37,15 @@ pub async fn mk_lib_database_metadata_game_system_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_game_systems_info \
@@ -58,6 +78,15 @@ pub async fn mk_lib_database_metadata_game_system_read(
     offset: i32,
     limit: i32,
 ) -> Result<Vec<DBMetaGameSystemList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // TODO might need to sort by release year as well for machines with multiple releases
     let select_query;
     if search_value != "" {
@@ -103,6 +132,15 @@ pub async fn mk_lib_database_metadata_game_system_upsert(
     system_alias: String,
     system_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let new_guid = uuid::Uuid::new_v4();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
@@ -129,6 +167,15 @@ pub async fn mk_lib_database_metadata_game_system_guid_by_short_name(
     sqlx_pool: &sqlx::PgPool,
     game_system_short_name: String,
 ) -> Result<Uuid, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let row: (Uuid,) = sqlx::query_as(
         "select gs_game_system_id \
         from mm_metadata_game_systems_info \
@@ -144,6 +191,15 @@ pub async fn mk_lib_database_metadata_game_system_game_count_by_short_name(
     sqlx_pool: &sqlx::PgPool,
     game_system_short_name: String,
 ) -> Result<i32, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // TODO this query doesn't return game count.......
     let row: (i32,) = sqlx::query_as(
         "select count(*) \

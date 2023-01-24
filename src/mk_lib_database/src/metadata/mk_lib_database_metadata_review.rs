@@ -7,12 +7,23 @@ use sqlx::postgres::PgRow;
 use sqlx::{types::Uuid, types::Json};
 use serde::{Serialize, Deserialize};
 use sqlx::{FromRow, Row};
+use stdext::function_name;
+use serde_json::json;
 
 pub async fn mk_lib_database_metadata_review_insert(sqlx_pool: &sqlx::PgPool,
                                                     metadata_uuid: Uuid,
                                                     review_json: serde_json::Value)
                                                     -> Result<uuid::Uuid, sqlx::Error> {
-    new_guid = Uuid::new_v4();
+                                                        #[cfg(debug_assertions)]
+                                                        {
+                                                            mk_lib_logging::mk_logging_post_elk(
+                                                                std::module_path!(),
+                                                                json!({ "Function": function_name!() }),
+                                                            )
+                                                            .await
+                                                            .unwrap();
+                                                        }
+                                                        new_guid = Uuid::new_v4();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("insert into mm_review(mm_review_guid, mm_review_metadata_guid, \
         mm_review_json) values($1, $2, $3)")
@@ -28,7 +39,16 @@ pub async fn mk_lib_database_metadata_review_insert(sqlx_pool: &sqlx::PgPool,
 pub async fn mk_lib_database_metadata_review_count(sqlx_pool: &sqlx::PgPool,
                                                    metadata_uuid: Uuid)
                                                    -> Result<i32, sqlx::Error> {
-    let row: (i32, ) = sqlx::query("select count(*) from mm_review \
+                                                    #[cfg(debug_assertions)]
+                                                    {
+                                                        mk_lib_logging::mk_logging_post_elk(
+                                                            std::module_path!(),
+                                                            json!({ "Function": function_name!() }),
+                                                        )
+                                                        .await
+                                                        .unwrap();
+                                                    }
+                                                    let row: (i32, ) = sqlx::query("select count(*) from mm_review \
         where mm_review_metadata_guid = $1")
         .bind(metadata_uuid)
         .execute(sqlx_pool)
@@ -45,7 +65,16 @@ pub struct DBMetaReviewList {
 pub async fn mk_lib_database_metadata_review_list_metadata(sqlx_pool: &sqlx::PgPool,
                                                            metadata_uuid: Uuid)
                                                            -> Result<Vec<DBMetaReviewList>, sqlx::Error> {
-    // TODO order by date
+                                                            #[cfg(debug_assertions)]
+                                                            {
+                                                                mk_lib_logging::mk_logging_post_elk(
+                                                                    std::module_path!(),
+                                                                    json!({ "Function": function_name!() }),
+                                                                )
+                                                                .await
+                                                                .unwrap();
+                                                            }
+                                                            // TODO order by date
     // TODO order by rating? (optional?)
     let select_query = sqlx::query sqlx::query("select mm_review_guid, mm_review_json \
         from mm_review where mm_review_metadata_guid = $1")

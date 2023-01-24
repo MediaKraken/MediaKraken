@@ -3,12 +3,22 @@
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
-use serde_json::json;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
+use stdext::function_name;
+use serde_json::json;
 
 pub async fn mk_decompress_tar_gz_file(archive_file: &str) -> Result<(), std::io::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let tar_gz = std::fs::File::open(archive_file)?;
     let tar = flate2::read::GzDecoder::new(tar_gz);
     let mut archive = tar::Archive::new(tar);
@@ -17,6 +27,15 @@ pub async fn mk_decompress_tar_gz_file(archive_file: &str) -> Result<(), std::io
 }
 
 pub async fn mk_decompress_gz_data(archive_file: &str) -> Result<String, std::io::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let file_handle = std::fs::File::open(archive_file)?;
     let mut gz = flate2::read::GzDecoder::new(file_handle);
     let mut gz_data = String::new();
@@ -29,6 +48,15 @@ pub async fn mk_decompress_zip(
     remove_zip: bool,
     output_path: &str,
 ) -> Result<String, std::io::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let fname = std::path::Path::new(archive_file);
     let file = std::fs::File::open(&fname).unwrap();
     let mut archive = zip::ZipArchive::new(file).unwrap();
@@ -49,7 +77,8 @@ pub async fn mk_decompress_zip(
                     std::module_path!(),
                     json!({ "File": i, "comment": comment }),
                 )
-                .await.unwrap();
+                .await
+                .unwrap();
             }
         }
         if (&*file.name()).ends_with('/') {
@@ -59,7 +88,8 @@ pub async fn mk_decompress_zip(
                     std::module_path!(),
                     json!({ "File": i, "extracted to": outpath.display().to_string() }),
                 )
-                .await.unwrap();
+                .await
+                .unwrap();
             }
             std::fs::create_dir_all(&outpath).unwrap();
         } else {

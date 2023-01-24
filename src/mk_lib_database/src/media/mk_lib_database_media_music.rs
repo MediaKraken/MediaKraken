@@ -7,11 +7,22 @@ use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
+use stdext::function_name;
+use serde_json::json;
 
 pub async fn mk_lib_database_media_music_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
             "elect count(*) from mm_metadata_album, mm_media \
@@ -47,6 +58,15 @@ pub async fn mk_lib_database_media_music_read(
     offset: i32,
     limit: i32,
 ) -> Result<Vec<DBMediaMusicList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // TODO only grab the image part of the json for list, might want runtime, etc as well
     let select_query;
     if search_value != "" {

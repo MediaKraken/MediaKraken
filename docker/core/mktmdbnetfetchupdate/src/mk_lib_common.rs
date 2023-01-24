@@ -1,6 +1,7 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 #![allow(unused)]
 
+use stdext::function_name;
 use serde_json::json;
 
 #[path = "mk_lib_logging.rs"]
@@ -13,6 +14,7 @@ pub async fn print_type_of_variable<T>(_: &T) {
             std::module_path!(),
             json!({ "data_type": std::any::type_name::<T>() }),
         )
-        .await.unwrap();
+        .await
+        .unwrap();
     }
 }

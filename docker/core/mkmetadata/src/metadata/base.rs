@@ -1,8 +1,9 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use serde_json::json;
 use sqlx::types::Uuid;
 use std::error::Error;
+use stdext::function_name;
+use serde_json::json;
 use torrent_name_parser::Metadata;
 
 #[path = "../mk_lib_logging.rs"]
@@ -58,6 +59,15 @@ pub async fn metadata_process(
     download_data: DBDownloadQueueByProviderList,
     provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // TODO art, posters, trailers, etc in here as well
     #[cfg(debug_assertions)]
     {
@@ -91,6 +101,15 @@ pub async fn metadata_update(
     download_data: DBDownloadQueueByProviderList,
     provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // TODO horribly broken.  Need to add the dlid, that to update, etc
     Ok(())
 }
@@ -101,6 +120,15 @@ pub async fn metadata_search(
     download_data: DBDownloadQueueByProviderList,
     provider_api_key: &String,
 ) -> Result<(), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut metadata_uuid: Uuid = uuid::Uuid::nil();
     let mut set_fetch: bool = false;
     let mut lookup_halt: bool = false;
@@ -294,6 +322,15 @@ pub async fn metadata_fetch(
     download_data: DBDownloadQueueByProviderList,
     provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     if provider_name == "imvdb" {
         let imvdb_id = provider_imvdb::meta_fetch_save_imvdb(
             sqlx_pool,
@@ -349,6 +386,15 @@ pub async fn metadata_castcrew(
     download_data: DBDownloadQueueByProviderList,
     provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     Ok(())
 }
 
@@ -371,6 +417,15 @@ pub async fn metadata_image(
     download_data: DBDownloadQueueByProviderList,
     provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // TODO grab the actual image
     mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
@@ -386,6 +441,15 @@ pub async fn metadata_review(
     download_data: DBDownloadQueueByProviderList,
     provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // review is last.....so can delete download que
     mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
@@ -401,6 +465,15 @@ pub async fn metadata_collection(
     download_data: DBDownloadQueueByProviderList,
     provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // only one record for this so nuke it
     mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,

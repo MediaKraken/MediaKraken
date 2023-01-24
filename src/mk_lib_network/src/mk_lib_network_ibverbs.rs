@@ -3,10 +3,22 @@
 // https://github.com/jonhoo/rust-ibverbs
 // ibverbs = "0.7.0"
 
+use stdext::function_name;
+use serde_json::json;
+
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
 pub async fn mk_lib_network_ibverbs_discover() {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let ctx = ibverbs::devices()
         .unwrap()
         .iter()

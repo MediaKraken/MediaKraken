@@ -8,6 +8,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
+use stdext::function_name;
+use serde_json::json;
 
 pub async fn mk_lib_database_activity_insert(
     sqlx_pool: &sqlx::PgPool,
@@ -19,6 +21,15 @@ pub async fn mk_lib_database_activity_insert(
     activity_userid: Uuid,
     activity_severity: String,
 ) -> Result<Uuid, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     new_guid = Uuid::new_v4();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
@@ -48,6 +59,15 @@ pub async fn mk_lib_database_activity_delete(
     sqlx_pool: &sqlx::PgPool,
     day_range: i32,
 ) -> Result<(), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "delete from mm_user_activity \

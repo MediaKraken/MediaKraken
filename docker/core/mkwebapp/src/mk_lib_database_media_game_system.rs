@@ -7,6 +7,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
+use stdext::function_name;
+use serde_json::json;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaBookList {
@@ -20,6 +22,15 @@ pub async fn mk_lib_database_media_game_system_read(
     offset: i32,
     limit: i32,
 ) -> Result<Vec<PgRow>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // TODO this should only return systems where there are games for it since it's "media"
     if search_value != "" {
         let rows = sqlx::query(
@@ -58,6 +69,15 @@ pub async fn mk_lib_database_media_game_system_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     if search_value != "" {
         let row: (i64,) = sqlx::query(
             "select count(*) from mm_metadata_game_systems_info where gs_game_system_name = $1",

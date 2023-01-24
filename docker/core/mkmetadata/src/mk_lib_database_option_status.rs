@@ -6,10 +6,21 @@ mod mk_lib_logging;
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
+use stdext::function_name;
+use serde_json::json;
 
 pub async fn mk_lib_database_option_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<serde_json::Value, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let row: (serde_json::Value,) =
         sqlx::query_as("select mm_options_json from mm_options_and_status")
             .fetch_one(sqlx_pool)
@@ -20,6 +31,15 @@ pub async fn mk_lib_database_option_read(
 pub async fn mk_lib_database_status_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<serde_json::Value, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let row: (serde_json::Value,) =
         sqlx::query_as("select mm_status_json from mm_options_and_status")
             .fetch_one(sqlx_pool)
@@ -30,6 +50,15 @@ pub async fn mk_lib_database_status_read(
 pub async fn mk_lib_database_option_status_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<PgRow, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let rows = sqlx::query(
         "select mm_options_json, mm_status_json \
         from mm_options_and_status",
@@ -43,6 +72,15 @@ pub async fn mk_lib_database_option_update(
     sqlx_pool: &sqlx::PgPool,
     option_json: serde_json::Value,
 ) -> Result<(), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // no need for where clause as it's only the one record
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("update mm_options_and_status set mm_options_json = $1")
@@ -58,6 +96,15 @@ pub async fn mk_lib_database_option_status_update(
     option_json: serde_json::Value,
     status_json: serde_json::Value,
 ) -> Result<(), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // no need for where clause as it's only the one record
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("update mm_options_and_status set mm_options_json = $1, mm_status_json = $2")
@@ -73,6 +120,15 @@ pub async fn mk_lib_database_status_update_scan(
     sqlx_pool: &sqlx::PgPool,
     status_json: serde_json::Value,
 ) -> Result<(), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // no need for where clause as it's only the one record
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("update mm_options_and_status set mm_status_json = $1")

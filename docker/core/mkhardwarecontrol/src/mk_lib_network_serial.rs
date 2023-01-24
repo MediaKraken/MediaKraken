@@ -7,11 +7,22 @@ use serde_json::json;
 use serialport::{available_ports, DataBits, SerialPortType, StopBits};
 use std::io::{self, Write};
 use std::time::Duration;
+use stdext::function_name;
+use serde_json::json;
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
 pub async fn serial_port_discover() -> Result<(), std::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let ports = serialport::available_ports().expect("No ports found!");
     for p in ports {
         #[cfg(debug_assertions)]
@@ -20,7 +31,8 @@ pub async fn serial_port_discover() -> Result<(), std::Error> {
                 std::module_path!(),
                 json!({ "port": p.port_name, "type": p.port_type }),
             )
-            .await.unwrap();
+            .await
+            .unwrap();
         }
     }
     Ok(())
@@ -32,6 +44,15 @@ pub async fn serial_port_open(
     serial_stop_bits: StopBits,
     serial_data_bits: DataBits,
 ) -> Result<(serialport), std::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // "/dev/ttyUSB0"
     let port = serialport::new(serial_device, serial_speed) // 115_200
         .stop_bits(serial_stop_bits)
@@ -43,11 +64,29 @@ pub async fn serial_port_open(
 }
 
 pub async fn serial_port_write() -> Result<(), std::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let output = "This is a test. This is only a test.".as_bytes();
     port.write(output).expect("Write failed!");
 }
 
 pub async fn serial_port_read() -> Result<(), std::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut serial_buf: Vec<u8> = vec![0; 32];
     port.read(serial_buf.as_mut_slice())
         .expect("Found no data!");

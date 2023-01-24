@@ -7,6 +7,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
+use stdext::function_name;
+use serde_json::json;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaTVLiveList {
@@ -19,6 +21,15 @@ pub async fn mk_lib_database_meta_tv_live_read(
     sqlx_pool: &sqlx::PgPool,
     broadcast_time: chrono::DateTime,
 ) -> Result<Vec<PgRow>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let rows: Vec<PgRow> = sqlx::query(
         "select mm_tv_station_name, mm_tv_station_channel, \
         mm_tv_schedule_json from mm_tv_stations, mm_tv_schedule \
@@ -42,6 +53,15 @@ pub struct MetaTVStationList {
 pub async fn mk_lib_database_meta_tv_live_station_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<MetaTVStationList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let select_query = sqlx::query(
         "select mm_tv_stations_id, mm_tv_station_name, \
         mm_tv_station_id, mm_tv_station_channel \
@@ -64,6 +84,15 @@ pub async fn mk_lib_database_meta_tv_station_exists(
     station_id: String,
     channel_id: String,
 ) -> Result<i32, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let row: (i32,) = sqlx::query_as(
         "select exists(select 1 from mm_tv_stations \
         where mm_tv_station_id = $1 \

@@ -3,6 +3,8 @@
 // https://isbndb.com/apidocs/v2
 
 use std::error::Error;
+use stdext::function_name;
+use serde_json::json;
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -10,7 +12,17 @@ mod mk_lib_logging;
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;
 
-pub async fn metadata_book_search_isbndb(sqlx_pool: &sqlx::PgPool, lookup_name: String) {}
+pub async fn metadata_book_search_isbndb(sqlx_pool: &sqlx::PgPool, lookup_name: String) {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+}
 
 /*
    metadata_uuid = None

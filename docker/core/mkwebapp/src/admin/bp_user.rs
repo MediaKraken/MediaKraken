@@ -8,6 +8,7 @@ use rocket::{form::*, response::Redirect, State};
 use rocket_auth::{AdminUser, Auth, Error, Login, Signup, User, Users};
 use rocket_dyn_templates::{tera::Tera, Template};
 use serde::{Deserialize, Serialize};
+use stdext::function_name;
 use serde_json::json;
 
 #[path = "../mk_lib_logging.rs"]

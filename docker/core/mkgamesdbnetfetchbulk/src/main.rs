@@ -1,9 +1,10 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use serde_json::json;
 use serde_json::Value;
 use sqlx::Row;
 use std::error::Error;
+use stdext::function_name;
+use serde_json::json;
 use uuid::Uuid;
 
 #[path = "mk_lib_database.rs"]
@@ -20,7 +21,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await.unwrap();
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
+            .await
+            .unwrap();
     }
 
     // connect to db and do a version check
@@ -56,7 +59,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     */
     #[cfg(debug_assertions)]
     {
-        mk_lib_logging::mk_logging_post_elk("info", json!({"STOP": "STOP"})).await.unwrap();
+        mk_lib_logging::mk_logging_post_elk("info", json!({"STOP": "STOP"}))
+            .await
+            .unwrap();
     }
     Ok(())
 }

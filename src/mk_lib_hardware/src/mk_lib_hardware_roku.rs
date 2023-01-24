@@ -3,6 +3,9 @@
 // https://github.com/RoseSecurity/Abusing-Roku-APIs
 // http://sdkdocs.roku.com/display/sdkdoc/External+Control+Guide
 
+use stdext::function_name;
+use serde_json::json;
+
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
@@ -17,7 +20,16 @@ pub async fn mk_lib_hardware_roku_command(roku_addr: String,
                                             roku_port: i8,
                                             roku_command: String,
                                             roku_command_seconds i8) {
-    let roku_url = format!("http://{}:{}/", roku_addr, roku_port);
+                                                #[cfg(debug_assertions)]
+                                                {
+                                                    mk_lib_logging::mk_logging_post_elk(
+                                                        std::module_path!(),
+                                                        json!({ "Function": function_name!() }),
+                                                    )
+                                                    .await
+                                                    .unwrap();
+                                                }
+                                                let roku_url = format!("http://{}:{}/", roku_addr, roku_port);
     let mut request_url: String = String::new();
     let mut request_json: serde_json::json = json!({});
     if roku_command_seconds > 0 {
@@ -38,14 +50,32 @@ pub async fn mk_lib_hardware_roku_command(roku_addr: String,
 
 pub async fn mk_lib_hardware_roku_app_list(roku_addr: String,
     roku_port: i8) {
-        let request_json: serde_json::json = mk_lib_network::mk_data_from_url_to_json(
+        #[cfg(debug_assertions)]
+        {
+            mk_lib_logging::mk_logging_post_elk(
+                std::module_path!(),
+                json!({ "Function": function_name!() }),
+            )
+            .await
+            .unwrap();
+        }
+            let request_json: serde_json::json = mk_lib_network::mk_data_from_url_to_json(
             format!("{}:{}/query/apps", roku_addr, roku_port)).await.unwrap();
     Ok(request_json)
 }
 
 pub async fn mk_lib_hardware_roku_app_launch(roku_addr: String,
     roku_port: i8, roku_app_id: String) {
-        let request_json: serde_json::json = mk_lib_network::mk_data_from_url_to_json(
+        #[cfg(debug_assertions)]
+        {
+            mk_lib_logging::mk_logging_post_elk(
+                std::module_path!(),
+                json!({ "Function": function_name!() }),
+            )
+            .await
+            .unwrap();
+        }
+            let request_json: serde_json::json = mk_lib_network::mk_data_from_url_to_json(
             format!("{}:{}/launch/{}", roku_addr, roku_port, roku_app_id)).await.unwrap();
     Ok(request_json)
 }

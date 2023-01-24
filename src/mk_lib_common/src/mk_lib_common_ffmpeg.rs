@@ -4,8 +4,19 @@
 mod mk_lib_logging;
 
 use std::process::{Command, Stdio};
+use stdext::function_name;
+use serde_json::json;
 
 pub fn mk_common_ffmpeg_get_info(media_file: &str) -> Result<(String), std::io::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let output = Command::new("ffprobe")
         .args([
             "-hide_banner",

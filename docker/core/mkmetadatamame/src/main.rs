@@ -11,6 +11,7 @@ use std::io::{self, prelude::*, BufReader};
 use std::path::Path;
 use tokio::time::{sleep, Duration};
 use uuid::Uuid;
+use stdext::function_name;
 
 // https://www.progettosnaps.net/download/?tipo=dat_mame&file=/dats/MAME/packs/MAME_Dats_236.7z
 

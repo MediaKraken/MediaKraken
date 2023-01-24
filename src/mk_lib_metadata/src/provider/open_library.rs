@@ -15,6 +15,8 @@ use open_library::models::books::BibliographyKey;
 use open_library::models::books::BibliographyKey::{ISBN, LCCN, OCLC, OLID};
 use open_library::OpenLibraryClient;
 use std::error::Error;
+use stdext::function_name;
+use serde_json::json;
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;

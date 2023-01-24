@@ -1,9 +1,10 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use serde_json::json;
 use sqlx::types::Uuid;
 use std::error::Error;
 use std::str;
+use stdext::function_name;
+use serde_json::json;
 use substring::Substring;
 
 #[path = "../../mk_lib_logging.rs"]
@@ -16,6 +17,15 @@ pub async fn provider_televisiontunes_theme_fetch(
     tv_show_name: String,
     tv_show_theme_path: String,
 ) -> Result<Uuid, Box<dyn std::error::Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut metadata_uuid = uuid::Uuid::nil();
     let base_url = "https://www.televisiontunes.com/".to_string();
     let show_url = format!("{}{}", base_url, tv_show_name.replace(" ", "_"));
@@ -32,7 +42,8 @@ pub async fn provider_televisiontunes_theme_fetch(
                 std::module_path!(),
                 json!({ "tvtunes response": data_content.substring(0, dl_end_position) }),
             )
-            .await.unwrap();
+            .await
+            .unwrap();
         }
         let dl_url = format!(
             "{}{}{}",
@@ -43,7 +54,8 @@ pub async fn provider_televisiontunes_theme_fetch(
         #[cfg(debug_assertions)]
         {
             mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "dl_url": dl_url }))
-                .await.unwrap();
+                .await
+                .unwrap();
         }
         mk_lib_network::mk_download_file_from_url(dl_url, &tv_show_theme_path).await;
         metadata_uuid = Uuid::new_v4();

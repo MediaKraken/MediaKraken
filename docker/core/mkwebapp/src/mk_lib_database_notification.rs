@@ -8,6 +8,8 @@ use serde_json::{Map, Value};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
+use stdext::function_name;
+use serde_json::json;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBNotificationList {
@@ -22,6 +24,15 @@ pub async fn mk_lib_database_notification_read(
     offset: i32,
     limit: i32,
 ) -> Result<Vec<DBNotificationList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let select_query = sqlx::query(
         "select mm_notification_guid, mm_notification_text, \
         mm_notification_time, \
@@ -47,6 +58,15 @@ pub async fn mk_lib_database_notification_insert(
     mm_notification_text: String,
     mm_notification_dismissable: bool,
 ) -> Result<(), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_notification (mm_notification_guid, \
@@ -68,6 +88,15 @@ pub async fn mk_lib_database_notification_delete(
     sqlx_pool: &sqlx::PgPool,
     mk_notification_guid: Uuid,
 ) -> Result<(), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from mm_notification where mm_notification_guid = $1")
         .bind(mk_notification_guid)

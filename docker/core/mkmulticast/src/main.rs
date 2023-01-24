@@ -10,6 +10,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Barrier};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
+use stdext::function_name;
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;

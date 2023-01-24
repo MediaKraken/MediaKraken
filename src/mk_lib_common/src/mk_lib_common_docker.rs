@@ -6,13 +6,14 @@
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
-use serde_json::json;
 use crate::rocket::futures::FutureExt;
 use crate::rocket::futures::StreamExt;
 use docker_api::opts::ContainerListOpts;
 use docker_api::opts::LogsOpts;
 use docker_api::opts::ServiceListOpts;
 use docker_api::{conn::TtyChunk, Docker, Result};
+use stdext::function_name;
+use serde_json::json;
 
 #[cfg(unix)]
 pub fn new_docker() -> Result<Docker> {
@@ -25,6 +26,15 @@ pub fn new_docker() -> Result<Docker> {
 }
 
 pub async fn mk_common_docker_container_inspect(id: String) -> Result<Vec<String>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let docker = new_docker()?;
     let mut logs_list: Vec<String> = Vec::new();
     match docker.containers().get(&id).inspect().await {
@@ -35,6 +45,15 @@ pub async fn mk_common_docker_container_inspect(id: String) -> Result<Vec<String
 }
 
 pub async fn mk_common_docker_container_list() -> Result<Vec<String>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let docker = new_docker()?;
     let mut container_list: Vec<String> = Vec::new();
     let opts = ContainerListOpts::builder().all(true).build();
@@ -57,6 +76,15 @@ pub async fn mk_common_docker_container_list() -> Result<Vec<String>> {
 }
 
 pub async fn mk_common_docker_container_logs(id: String) -> Result<Vec<String>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let docker = new_docker()?;
     let mut logs_list: Vec<String> = Vec::new();
     let container = docker.containers().get(&id);
@@ -79,6 +107,15 @@ pub async fn mk_common_docker_container_logs(id: String) -> Result<Vec<String>> 
 }
 
 pub async fn mk_common_docker_container_stats(id: String) -> Result<Vec<String>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let docker = new_docker()?;
     let mut stats_list: Vec<String> = Vec::new();
     while let Some(result) = docker.containers().get(&id).stats().next().await {
@@ -91,6 +128,15 @@ pub async fn mk_common_docker_container_stats(id: String) -> Result<Vec<String>>
 }
 
 pub async fn mk_common_docker_service_inspect(service: String) -> Result<Vec<String>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let docker = new_docker()?;
     let mut logs_list: Vec<String> = Vec::new();
     match docker.services().get(&service).inspect().await {
@@ -101,6 +147,15 @@ pub async fn mk_common_docker_service_inspect(service: String) -> Result<Vec<Str
 }
 
 pub async fn mk_common_docker_service_list() -> Result<Vec<String>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let docker = new_docker()?;
     let mut logs_list: Vec<String> = Vec::new();
     match docker
@@ -116,7 +171,8 @@ pub async fn mk_common_docker_service_list() -> Result<Vec<String>> {
                         std::module_path!(),
                         json!({ "service": s }),
                     )
-                    .await.unwrap();
+                    .await
+                    .unwrap();
                 }
             }
         }
@@ -126,6 +182,15 @@ pub async fn mk_common_docker_service_list() -> Result<Vec<String>> {
 }
 
 pub async fn mk_common_docker_service_logs(service: String) -> Result<Vec<String>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let docker = new_docker()?;
     let mut logs_list: Vec<String> = Vec::new();
     let service = docker.services().get(&service);
@@ -148,6 +213,15 @@ pub async fn mk_common_docker_service_logs(service: String) -> Result<Vec<String
 }
 
 pub async fn mk_common_docker_volume_inspect(volume: String) -> Result<Vec<String>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let docker = new_docker()?;
     let mut logs_list: Vec<String> = Vec::new();
     match docker.volumes().get(&volume).inspect().await {
@@ -158,6 +232,15 @@ pub async fn mk_common_docker_volume_inspect(volume: String) -> Result<Vec<Strin
 }
 
 pub async fn mk_common_docker_volume_list() -> Result<Vec<String>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let docker = new_docker()?;
     let mut logs_list: Vec<String> = Vec::new();
     match docker.volumes().list(&Default::default()).await {
@@ -169,7 +252,8 @@ pub async fn mk_common_docker_volume_list() -> Result<Vec<String>> {
                         std::module_path!(),
                         json!({ "volume": v }),
                     )
-                    .await.unwrap();
+                    .await
+                    .unwrap();
                 }
             }
         }
@@ -179,17 +263,30 @@ pub async fn mk_common_docker_volume_list() -> Result<Vec<String>> {
 }
 
 pub async fn mk_common_docker_info() -> Result<serde_json::Value> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let docker = new_docker()?;
     let mut logs_list: serde_json::Value = serde_json::json!({});
     match docker.info().await {
         Ok(info) => {
             #[cfg(debug_assertions)]
             {
-                mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "info": &format!("{:#?}", info) }))
-                    .await.unwrap();
+                mk_lib_logging::mk_logging_post_elk(
+                    std::module_path!(),
+                    json!({ "info": &format!("{:#?}", info) }),
+                )
+                .await
+                .unwrap();
             }
             logs_list = json!(&format!("{:#?}", info));
-            //logs_list = serde_json::from_str(&format!("{:#?}", info)).unwrap();            
+            //logs_list = serde_json::from_str(&format!("{:#?}", info)).unwrap();
         }
         Err(e) => eprintln!("Error: {}", e),
     };

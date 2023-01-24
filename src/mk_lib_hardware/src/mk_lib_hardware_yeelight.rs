@@ -6,12 +6,23 @@
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
+use stdext::function_name;
+use serde_json::json;
 use yeelib_rs::fields::{PowerStatus, Transition};
 use yeelib_rs::{Light, YeeClient, YeeError};
 
 pub async fn mk_hardware_yeelight_brightness() {}
 
 pub async fn mk_hardware_yeelight_discover() {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let client = YeeClient::new()?;
     let mut res: Vec<Light> = loop {
         let lights = client.find_lights(Duration::from_secs(1));
@@ -23,7 +34,8 @@ pub async fn mk_hardware_yeelight_discover() {
                     std::module_path!(),
                     json!({ "YeeClient": "zero" }),
                 )
-                .await.unwrap();
+                .await
+                .unwrap();
             }
         } else {
             break lights;
@@ -32,7 +44,9 @@ pub async fn mk_hardware_yeelight_discover() {
     let light = res.get_mut(0).unwrap();
     #[cfg(debug_assertions)]
     {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "light": light })).await.unwrap();
+        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "light": light }))
+            .await
+            .unwrap();
     }
 }
 

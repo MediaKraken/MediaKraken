@@ -7,6 +7,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
+use stdext::function_name;
+use serde_json::json;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct PGTableRows {
@@ -18,6 +20,15 @@ pub struct PGTableRows {
 pub async fn mk_lib_database_table_rows(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<PGTableRows>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // query provided by postgresql wiki
     let select_query = sqlx::query(
         "SELECT nspname AS schemaname,relname,reltuples \
@@ -45,6 +56,15 @@ pub struct PGTableSize {
 pub async fn mk_lib_database_table_size(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<PGTableSize>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // query provided by postgresql wiki
     let select_query = sqlx::query(
         "SELECT nspname || '.' || relname AS \"relation\", \
@@ -67,6 +87,15 @@ pub async fn mk_lib_database_table_size(
 pub async fn mk_lib_database_parallel_workers(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<String, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let row: (String,) = sqlx::query_as("show max_parallel_workers_per_gather")
         .fetch_one(sqlx_pool)
         .await?;

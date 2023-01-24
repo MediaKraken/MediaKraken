@@ -5,6 +5,7 @@ use serde_json::json;
 use sqlx::Row;
 use sqlx::{types::Json, types::Uuid};
 use std::error::Error;
+use stdext::function_name;
 
 #[path = "mk_lib_common.rs"]
 mod mk_lib_common;

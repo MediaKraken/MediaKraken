@@ -2,9 +2,10 @@
 
 use amiquip::{AmqpProperties, Connection, Exchange, Publish, Result};
 use chrono::prelude::*;
-use serde_json::json;
 use sqlx::Row;
 use std::error::Error;
+use stdext::function_name;
+use serde_json::json;
 use tokio::time::{sleep, Duration};
 
 #[path = "mk_lib_logging.rs"]
@@ -22,7 +23,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await.unwrap();
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
+            .await
+            .unwrap();
     }
 
     // connect to db and do a version check

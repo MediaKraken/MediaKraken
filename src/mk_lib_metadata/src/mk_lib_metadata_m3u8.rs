@@ -3,6 +3,8 @@
 // https://github.com/sile/hls_m3u8
 
 use hls_m3u8::MediaPlaylist;
+use stdext::function_name;
+use serde_json::json;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -11,6 +13,15 @@ const M3U_HEADER: String = "EXTM3U\n";
 const M3U_LINE_HEADER: String = "EXTINF:";
 
 pub fn mk_lib_metadata_m3u8_validate_playlist(playlist: &str) {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let valid_playlist = playlist.parse::<MediaPlaylist>().is_ok();
     valid_playlist
 }

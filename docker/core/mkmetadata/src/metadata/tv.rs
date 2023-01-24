@@ -3,6 +3,8 @@
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
 use std::error::Error;
+use stdext::function_name;
+use serde_json::json;
 use torrent_name_parser::Metadata;
 
 #[path = "../mk_lib_logging.rs"]
@@ -27,6 +29,15 @@ pub async fn metadata_tv_lookup(
     download_data: &DBDownloadQueueByProviderList,
     file_name: Metadata,
 ) -> Result<Uuid, Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // don't bother checking title/year as the main_server_metadata_api_worker does it already
     let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
     Ok(metadata_uuid)

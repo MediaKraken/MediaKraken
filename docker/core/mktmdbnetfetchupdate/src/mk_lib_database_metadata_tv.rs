@@ -7,11 +7,22 @@ use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
+use stdext::function_name;
+use serde_json::json;
 
 pub async fn mk_lib_database_metadata_exists_tv(
     sqlx_pool: &sqlx::PgPool,
     metadata_id: i32,
 ) -> Result<bool, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let row: (bool,) = sqlx::query_as(
         "select exists(select 1 from mm_metadata_tvshow \
         where mm_metadata_media_tvshow_id = $1 limit 1) as found_record limit 1",
@@ -36,6 +47,15 @@ pub async fn mk_lib_database_metadata_tv_read(
     offset: i32,
     limit: i32,
 ) -> Result<Vec<DBMetaTVShowList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let select_query = sqlx::query(
         "select mm_metadata_tvshow_guid, \
         mm_metadata_tvshow_name, \
@@ -64,6 +84,15 @@ pub async fn mk_lib_database_metadata_tv_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_tvshow \
@@ -88,6 +117,15 @@ pub async fn mk_lib_database_metadata_tv_insert(
     data_json: &serde_json::Value,
     data_image_json: serde_json::Value,
 ) -> Result<(), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_metadata_tvshow (mm_metadata_tvshow_guid, \

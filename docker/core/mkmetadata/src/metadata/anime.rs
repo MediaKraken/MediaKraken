@@ -1,9 +1,10 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use serde_json::json;
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
 use std::error::Error;
+use stdext::function_name;
+use serde_json::json;
 use torrent_name_parser::Metadata;
 
 #[path = "../mk_lib_logging.rs"]
@@ -31,6 +32,15 @@ pub async fn metadata_anime_lookup(
     download_data: &DBDownloadQueueByProviderList,
     file_name: Metadata,
 ) -> Result<Uuid, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
     Ok(metadata_uuid)
 }

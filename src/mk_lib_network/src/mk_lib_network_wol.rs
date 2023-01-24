@@ -5,7 +5,19 @@
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
+use stdext::function_name;
+use serde_json::json;
+
 pub async fn mk_lib_network_wol(mac_addr: String) {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // "01:02:03:04:05:06"
     let wol = wakey::WolPacket::from_string(mac_addr, ':');
     let mut wol_worked: bool = false;

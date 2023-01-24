@@ -1,12 +1,13 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use sqlx::types::Uuid;
 use sqlx::Row;
 use std::error::Error;
 use std::path::Path;
 use std::process::Command;
+use stdext::function_name;
+use serde_json::json;
 use tokio::time::{sleep, Duration};
 
 #[path = "mk_lib_database.rs"]
@@ -35,7 +36,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await.unwrap();
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
+            .await
+            .unwrap();
     }
 
     // open the database

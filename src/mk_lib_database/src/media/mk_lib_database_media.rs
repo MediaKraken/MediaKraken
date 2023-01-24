@@ -7,6 +7,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
+use stdext::function_name;
+use serde_json::json;
 
 pub async fn mk_lib_database_media_update_metadata_guid(
     sqlx_pool: &sqlx::PgPool,
@@ -14,6 +16,15 @@ pub async fn mk_lib_database_media_update_metadata_guid(
     mm_metadata_guid: Uuid,
     mm_download_uuid: &Uuid,
 ) -> Result<(), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "update mm_media set mm_media_metadata_guid = $1 \
@@ -36,6 +47,15 @@ pub async fn mk_lib_database_media_update_metadata_guid(
 pub async fn mk_lib_database_media_unmatched_count(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<i32, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let row: (i32,) = sqlx::query_as(
         "select count(*) from mm_media \
         where mm_media_metadata_guid is NULL",
@@ -56,6 +76,15 @@ pub async fn mk_lib_database_media_unmatched_read(
     offset: i32,
     limit: i32,
 ) -> Result<Vec<DBMediaUnmatchedList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let select_query = sqlx::query(
         "select mm_media_guid, \
         mm_media_path from mm_media \
@@ -77,6 +106,15 @@ pub async fn mk_lib_database_media_unmatched_read(
 pub async fn mk_lib_database_media_matched_count(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<i64, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let row: (i64,) = sqlx::query_as(
         "select count(*) from mm_media \
         where mm_media_metadata_guid is not NULL",
@@ -89,6 +127,15 @@ pub async fn mk_lib_database_media_matched_count(
 pub async fn mk_lib_database_media_known_count(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<i64, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let row: (i64,) = sqlx::query_as("select count(*) from mm_media")
         .fetch_one(sqlx_pool)
         .await?;
@@ -105,6 +152,15 @@ pub async fn mk_lib_database_media_known(
     offset: i32,
     limit: i32,
 ) -> Result<Vec<DBMediaKnownList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let select_query = sqlx::query(
         "select mm_media_path \
         from mm_media where mm_media_guid \
@@ -130,6 +186,15 @@ pub async fn mk_lib_database_media_insert(
     mm_media_ffprobe_json: serde_json::Value,
     mm_media_json: serde_json::Value,
 ) -> Result<(), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_media (mm_media_guid, mm_media_class_enum, \
@@ -152,6 +217,15 @@ pub async fn mk_lib_database_media_duplicate_detail_count(
     sqlx_pool: &sqlx::PgPool,
     mm_metadata_guid: Uuid,
 ) -> Result<i64, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let row: (i64,) = sqlx::query_as(
         "select count(*) from mm_media \
         where mm_media_metadata_guid = $1",
@@ -165,6 +239,15 @@ pub async fn mk_lib_database_media_duplicate_detail_count(
 pub async fn mk_lib_database_media_duplicate_count(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<i64, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // TODO technically this will "dupe" things like subtitles atm
     let row: (i64,) = sqlx::query_as(
         "select count(*) from (select mm_media_metadata_guid \
@@ -180,6 +263,15 @@ pub async fn mk_lib_database_media_path_by_uuid(
     sqlx_pool: &sqlx::PgPool,
     mm_media_guid: Uuid,
 ) -> Result<String, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let row: (String,) = sqlx::query_as(
         "select mm_media_path from mm_media \
         where mm_media_guid = $1",
@@ -202,6 +294,15 @@ pub async fn mk_lib_database_media_duplicate(
     offset: i32,
     limit: i32,
 ) -> Result<Vec<DBMediaDuplicateList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // TODO technically this will "dupe" things like subtitles atm
     let select_query = sqlx::query(
         "select mm_media_metadata_guid, \
@@ -239,6 +340,15 @@ pub async fn mk_lib_database_media_duplicate_detail(
     offset: i32,
     limit: i32,
 ) -> Result<Vec<DBMediaDuplicateDetailList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let select_query = sqlx::query(
         "select mm_media_guid, \
         mm_media_path, mm_media_ffprobe_json \
@@ -264,6 +374,15 @@ pub async fn mk_lib_database_media_image_path_by_uuid(
     sqlx_pool: &sqlx::PgPool,
     mm_media_guid: Uuid,
 ) -> Result<serde_json::Value, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let row: (serde_json::Value,) = sqlx::query_as(
         "select mm_metadata_localimage_json \
         from mm_media, mm_metadata_movie \
@@ -281,6 +400,15 @@ pub async fn mk_lib_database_media_ffmpeg_update_by_uuid(
     mm_media_guid: Uuid,
     ffmpeg_json: serde_json::Value,
 ) -> Result<(), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "update mm_media set mm_media_ffprobe_json = $1 \

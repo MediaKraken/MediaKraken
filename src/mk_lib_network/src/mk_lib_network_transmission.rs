@@ -3,6 +3,8 @@
 // https://github.com/j0rsa/transmission-rpc
 // transmission-rpc = "0.3.6"
 
+use stdext::function_name;
+use serde_json::json;
 use transmission_rpc::types::{BasicAuth, FreeSpace, Result, RpcResponse};
 use transmission_rpc::TransClient;
 
@@ -13,6 +15,15 @@ pub async fn mk_network_transmissions_login(
     user_name: String,
     user_password: String,
 ) -> Result<transmission_rpc::TransClient, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut client;
     if let (Ok(user), Ok(password)) = (user_name, user_password) {
         client = TransClient::with_auth(url.parse()?, BasicAuth { user, password });
@@ -26,6 +37,15 @@ pub async fn mk_network_transmissions_add_torrent(
     transmission_client: transmission_rpc::TransClient,
     file_url: String,
 ) {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let add: TorrentAddArgs = TorrentAddArgs {
         // filename: Some(
         //     "https://releases.ubuntu.com/20.04/ubuntu-20.04.2.0-desktop-amd64.iso.torrent"
@@ -41,6 +61,15 @@ pub async fn mk_network_transmissions_add_torrent(
 pub async fn mk_network_transmissions_list_torrents(
     transmission_client: transmission_rpc::TransClient,
 ) {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let res: RpcResponse<Torrents<Torrent>> = transmission_client.torrent_get(None, None).await?;
     let names: Vec<&String> = res
         .arguments
@@ -50,7 +79,9 @@ pub async fn mk_network_transmissions_list_torrents(
         .collect();
     #[cfg(debug_assertions)]
     {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "names": names })).await.unwrap();
+        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "names": names }))
+            .await
+            .unwrap();
     }
 
     let res1: RpcResponse<Torrents<Torrent>> = transmission_client
@@ -77,7 +108,8 @@ pub async fn mk_network_transmissions_list_torrents(
             std::module_path!(),
             json!({ "first_three": first_three }),
         )
-        .await.unwrap();
+        .await
+        .unwrap();
     }
 
     let res2: RpcResponse<Torrents<Torrent>> = transmission_client
@@ -107,7 +139,9 @@ pub async fn mk_network_transmissions_list_torrents(
         .collect();
     #[cfg(debug_assertions)]
     {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "info": info })).await.unwrap();
+        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "info": info }))
+            .await
+            .unwrap();
     }
 }
 
@@ -115,6 +149,15 @@ pub async fn mk_network_transmissions_remove_torrent(
     transmission_client: transmission_rpc::TransClient,
     torrent_id: i32,
 ) {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let res: RpcResponse<Nothing> = transmission_client
         .torrent_remove(vec![Id::Id(torrent_id)], false)
         .await?;
@@ -124,7 +167,8 @@ pub async fn mk_network_transmissions_remove_torrent(
             std::module_path!(),
             json!({ "Remove result": &res.is_ok() }),
         )
-        .await.unwrap();
+        .await
+        .unwrap();
     }
     Ok(&res.is_ok())
 }
@@ -133,6 +177,15 @@ pub async fn mk_network_transmissions_start_torrent(
     transmission_client: transmission_rpc::TransClient,
     torrent_id: i32,
 ) {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let res: RpcResponse<Nothing> = transmission_client
         .torrent_action(TorrentAction::Start, vec![Id::Id(1)])
         .await?;
@@ -143,6 +196,15 @@ pub async fn mk_network_transmissions_stop_torrent(
     transmission_client: transmission_rpc::TransClient,
     torrent_id: i32,
 ) {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let res: RpcResponse<Nothing> = transmission_client
         .torrent_action(TorrentAction::Stop, vec![Id::Id(1)])
         .await?;
