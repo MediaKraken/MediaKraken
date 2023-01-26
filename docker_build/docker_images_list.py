@@ -173,76 +173,76 @@ STAGE_ONE_GAME_SERVERS = {
 }
 
 STAGE_TWO_GAME_SERVERS = {
-    # Dockerized battlefield 1942
+    # Battlefield 1942
     'mkgamebf42': ('mkgamebf42', 'ubuntu:14.04', 'game_server'),
 
-    # Factorio Server in docker
+    # Factorio
     'mkgamefactorio': ('mkgamefactorio', 'ubuntu:14.04', 'game_server'),
 
-    # FAKE Server in docker
+    # FAKE
     'mkgamekerbalspaceprogram': ('mkgamekerbalspaceprogram', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # Minecraft
     'mkgameminecraft': ('mkgameminecraft', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # Quake 3 Arena
     'mkgameq3a': ('mkgameq3a', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # FAKE
     'mkgameq3a_cpma': ('mkgameq3a_cpma', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # FAKE
     'mkgameq3a_osp': ('mkgameq3a_osp', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # FAKE
     'mkgameq3a_rq3': ('mkgameq3a_rq3', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # Quake 2
     'mkgamequake2': ('mkgamequake2', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # Quake 4
     'mkgamequake4': ('mkgamequake4', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # Quake Live
     'mkgamequakelive': ('mkgamequakelive', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # Arma 3
     'mkgamesteamcmd_arma3': ('mkgamesteamcmd_arma3', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # CS:Go
     'mkgamesteamcmd_csgo': ('mkgamesteamcmd_csgo', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # FAKE
     'mkgamesteamcmd_doubleaction': ('mkgamesteamcmd_doubleaction', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # Fist Full of Frags
     'mkgamesteamcmd_fistfuloffrags': ('mkgamesteamcmd_fistfuloffrags', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # FAKE
     'mkgamesteamcmd_holdfastnaw': ('mkgamesteamcmd_holdfastnaw', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # FAKE
     'mkgamesteamcmd_insurgency': ('mkgamesteamcmd_insurgency', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # FAKE
     'mkgamesteamcmd_mordhau': ('mkgamesteamcmd_mordhau', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # FAKE
     'mkgamesteamcmd_squad': ('mkgamesteamcmd_squad', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # Team Fortress II
     'mkgamesteamcmd_tf2': ('mkgamesteamcmd_tf2', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # Valheim
     'mkgamesteamcmd_valheim': ('mkgamesteamcmd_valheim', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # UT99
     'mkgameut99': ('mkgameut99', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # UT2004
     'mkgameut2004': ('mkgameut2004', 'FAKE', 'game_server'),
 
-    # FAKE Server in docker
+    # FAKE
     'mkgamewindward': ('mkgamewindward', 'FAKE', 'game_server'),
 }
 

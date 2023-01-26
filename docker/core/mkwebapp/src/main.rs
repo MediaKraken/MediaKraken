@@ -13,13 +13,13 @@ use rocket::response::{content, status};
 use rocket::{Build, Request, Rocket};
 use rocket_auth::{prelude::Error, *};
 use rocket_dyn_templates::Template;
+use serde_json::json;
 use std::collections::{BTreeMap, HashMap};
 use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use stdext::function_name;
-use serde_json::json;
 
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
@@ -196,11 +196,13 @@ async fn main() -> Result<(), Error> {
     // }
 
     // create metadata paths, as before the db update will let it finish before
-    // other containers can use them   poster, backdrop, trailer
-    let vec_of_metadata = vec!["poster", "backdrop", "trailer"];
-    for metadata_type in vec_of_metadata.iter() {
-        let file_name = format!("/mediakraken/static/meta/{}/", metadata_type);
-        if !Path::new(&file_name).exists() {
+    // other containers can use them
+    if !Path::new(&"/mediakraken/static/meta").exists() {
+        fs::create_dir("/mediakraken/static/meta")?;
+        let vec_of_metadata = vec!["poster", "backdrop", "trailer"];
+        for metadata_type in vec_of_metadata.iter() {
+            let file_name = format!("/mediakraken/static/meta/{}/", metadata_type);
+            fs::create_dir(&file_name)?;
             for c in b'a'..=b'z' {
                 for d in b'a'..=b'z' {
                     fs::create_dir(format!("{}{}{}", file_name, c as char, d as char))?;

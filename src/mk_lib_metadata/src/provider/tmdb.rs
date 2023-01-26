@@ -2,11 +2,11 @@
 
 // https://developers.themoviedb.org/3
 
+use serde_json::json;
 use sqlx::{types::Json, types::Uuid};
 use std::error::Error;
 use std::path::Path;
 use stdext::function_name;
-use serde_json::json;
 use torrent_name_parser::Metadata;
 
 #[path = "../../mk_lib_logging.rs"]
@@ -46,14 +46,12 @@ pub async fn provider_tmdb_movie_fetch(
     // fetch and save json data via tmdb id
     let result_json = provider_tmdb_movie_fetch_by_id(tmdb_id, tmdb_api_key)
         .await
-        .unwrap();
-    let mut series_id: i32;
-    let mut image_json: serde_json::Value;
-    (series_id, image_json) = provider_tmdb_meta_info_build(&result_json).await.unwrap();
+        .unwrap();    
+    let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
     mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_insert(
         sqlx_pool,
         metadata_uuid,
-        series_id,
+        tmdb_id,
         &result_json,
         image_json,
     )
@@ -118,13 +116,11 @@ pub async fn provider_tmdb_tv_fetch(
     let result_json = provider_tmdb_tv_fetch_by_id(tmdb_id, tmdb_api_key)
         .await
         .unwrap();
-    let mut series_id: i32;
-    let mut image_json: serde_json::Value;
-    (series_id, image_json) = provider_tmdb_meta_info_build(&result_json).await.unwrap();
+    let mut image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
     mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_insert(
         sqlx_pool,
         metadata_uuid,
-        series_id,
+        tmdb_id,
         &result_json,
         image_json,
     )
@@ -348,12 +344,21 @@ pub async fn provider_tmdb_tv_fetch_by_id(
 
 pub async fn provider_tmdb_meta_info_build(
     result_json: &serde_json::Value,
-) -> Result<(i32, serde_json::Value), Box<dyn std::error::Error>> {
+) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
             std::module_path!(),
             json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "result_json": result_json }),
         )
         .await
         .unwrap();
@@ -364,7 +369,9 @@ pub async fn provider_tmdb_meta_info_build(
         .await
         .unwrap();
     let mut poster_file_path = String::new();
-    if !result_json["poster_path"].to_string().trim().is_empty() {
+    if !result_json["poster_path"].to_string().trim().is_empty()
+        && result_json["poster_path"].to_string().trim() != "null"
+    {
         image_file_path += &result_json["poster_path"].to_string();
         if !Path::new(&image_file_path).exists() {
             if mk_lib_network::mk_download_file_from_url(
@@ -389,7 +396,9 @@ pub async fn provider_tmdb_meta_info_build(
         .await
         .unwrap();
     let mut backdrop_file_path = String::new();
-    if !result_json["backdrop_path"].to_string().trim().is_empty() {
+    if !result_json["backdrop_path"].to_string().trim().is_empty()
+        && result_json["backdrop_path"].to_string().trim() != "null"
+    {
         image_file_path += &result_json["backdrop_path"].to_string();
         if !Path::new(&image_file_path).exists() {
             if mk_lib_network::mk_download_file_from_url(
@@ -411,16 +420,16 @@ pub async fn provider_tmdb_meta_info_build(
     }
     // set local image json
     if !poster_file_path.trim().is_empty() {
-        poster_file_path = poster_file_path.replace("/mediakraken/web_app/static", "");
+        poster_file_path = poster_file_path.replace("/mediakraken/static", "");
     }
     if !backdrop_file_path.trim().is_empty() {
-        backdrop_file_path = backdrop_file_path.replace("/mediakraken/web_app/static", "");
+        backdrop_file_path = backdrop_file_path.replace("/mediakraken/static", "");
     }
     let image_json = json!({
     "Backdrop": backdrop_file_path,
     "Poster": poster_file_path
     });
-    Ok((result_json["id"].to_string().parse().unwrap(), image_json))
+    Ok(image_json)
 }
 
 pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_api_key: &String) {
