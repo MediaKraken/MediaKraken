@@ -5,8 +5,8 @@ use rocket::serde::{json::Json, Deserialize, Serialize};
 use rocket::Request;
 use rocket_auth::{Auth, Error, Login, Signup, User, Users};
 use rocket_dyn_templates::{tera::Tera, Template};
-use stdext::function_name;
 use serde_json::json;
+use stdext::function_name;
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -19,8 +19,20 @@ mod mk_lib_database_metadata_movie;
 
 #[derive(Serialize)]
 struct TemplateMetaMovieContext {
-    template_data: Vec<mk_lib_database_metadata_movie::DBMetaMovieList>,
+    template_data: Vec<TemplateMetaMovieList>,
     pagination_bar: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+struct TemplateMetaMovieList {
+    template_metadata_guid: uuid::Uuid,
+    template_metadata_name: String,
+    template_metadata_date: String,
+    template_metadata_poster: Option<String>,
+    template_metadata_user_watched: serde_json::Value,
+    template_metadata_user_rating: Option<serde_json::Value>,
+    template_metadata_user_request: serde_json::Value,
+    template_metadata_user_queue: serde_json::Value,
 }
 
 #[get("/metadata/movie/<page>")]
@@ -55,10 +67,42 @@ pub async fn user_metadata_movie(
     )
     .await
     .unwrap();
+    let mut template_data_vec: Vec<TemplateMetaMovieList> = Vec::new();
+    for row_data in movie_list.iter() {
+        let mut watched_status: serde_json::Value = json!(false);
+        let mut request_status: serde_json::Value = json!(false);
+        let mut rating_status: serde_json::Value = json!(null);
+        let mut queue_status: serde_json::Value = json!(false);
+        if !row_data.mm_metadata_user_json.is_none() && row_data
+            .mm_metadata_user_json
+            .as_ref()
+            .unwrap()
+            .get("UserStats")
+            .is_some()
+        {
+            let rating_json: serde_json::Value =
+                row_data.mm_metadata_user_json.as_ref().unwrap().clone();
+            rating_status = rating_json["UserStats"][user.id().to_string()]["Rating"].clone();
+            watched_status = rating_json["UserStats"][user.id().to_string()]["Watched"].clone();
+            request_status = rating_json["UserStats"][user.id().to_string()]["Request"].clone();
+            queue_status = rating_json["UserStats"][user.id().to_string()]["Queue"].clone();
+        }
+        let temp_meta_line = TemplateMetaMovieList {
+            template_metadata_guid: row_data.mm_metadata_guid,
+            template_metadata_name: row_data.mm_metadata_name.clone(),
+            template_metadata_date: row_data.mm_date.clone(),
+            template_metadata_poster: Some(row_data.mm_poster.clone()),
+            template_metadata_user_watched: watched_status,
+            template_metadata_user_rating: Some(rating_status),
+            template_metadata_user_request: request_status,
+            template_metadata_user_queue: queue_status,
+        };
+        template_data_vec.push(temp_meta_line);
+    }
     Template::render(
         "bss_user/metadata/bss_user_metadata_movie",
         &TemplateMetaMovieContext {
-            template_data: movie_list,
+            template_data: template_data_vec,
             pagination_bar: pagination_html,
         },
     )

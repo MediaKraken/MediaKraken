@@ -46,7 +46,7 @@ pub async fn provider_tmdb_movie_fetch(
     // fetch and save json data via tmdb id
     let result_json = provider_tmdb_movie_fetch_by_id(tmdb_id, tmdb_api_key)
         .await
-        .unwrap();    
+        .unwrap();
     let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
     mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_insert(
         sqlx_pool,
@@ -116,7 +116,8 @@ pub async fn provider_tmdb_tv_fetch(
     let result_json = provider_tmdb_tv_fetch_by_id(tmdb_id, tmdb_api_key)
         .await
         .unwrap();
-    let mut image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
+    let mut image_json: serde_json::Value =
+        provider_tmdb_meta_info_build(&result_json).await.unwrap();
     mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_insert(
         sqlx_pool,
         metadata_uuid,
@@ -356,39 +357,26 @@ pub async fn provider_tmdb_meta_info_build(
     }
     #[cfg(debug_assertions)]
     {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "result_json": result_json }),
-        )
-        .await
-        .unwrap();
+        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!(result_json))
+            .await
+            .unwrap();
     }
-    let mut image_file_path = String::new();
     // create file path for poster
     let mut image_file_path = image_path::meta_image_file_path("poster".to_string())
         .await
         .unwrap();
     let mut poster_file_path = String::new();
-    if !result_json["poster_path"].to_string().trim().is_empty()
-        && result_json["poster_path"].to_string().trim() != "null"
-    {
-        image_file_path += &result_json["poster_path"].to_string();
-        if !Path::new(&image_file_path).exists() {
-            if mk_lib_network::mk_download_file_from_url(
-                format!(
-                    "https://image.tmdb.org/t/p/original{}",
-                    &result_json["poster_path"].to_string()
-                ),
-                &image_file_path,
-            )
-            .await
-            .unwrap()
-                == false
-            {
-                // not found...so, none the image_file_path, which resets the poster_file_path
-                image_file_path = String::new();
-            }
-        }
+    if result_json.get("poster_path").is_some() && !result_json["poster_path"].is_null() {
+        image_file_path += &result_json["poster_path"].as_str().unwrap().to_string();
+        println!("ifilepath {}", image_file_path);
+        mk_lib_network::mk_download_file_from_url(
+            format!(
+                "https://image.tmdb.org/t/p/original{}",
+                &result_json["poster_path"].as_str().unwrap().to_string()
+            ),
+            &image_file_path,
+        )
+        .await;
         poster_file_path = image_file_path;
     }
     // create file path for backdrop
@@ -396,27 +384,18 @@ pub async fn provider_tmdb_meta_info_build(
         .await
         .unwrap();
     let mut backdrop_file_path = String::new();
-    if !result_json["backdrop_path"].to_string().trim().is_empty()
-        && result_json["backdrop_path"].to_string().trim() != "null"
-    {
-        image_file_path += &result_json["backdrop_path"].to_string();
-        if !Path::new(&image_file_path).exists() {
-            if mk_lib_network::mk_download_file_from_url(
-                format!(
-                    "https://image.tmdb.org/t/p/original{}",
-                    &result_json["backdrop_path"].to_string()
-                ),
-                &image_file_path,
-            )
-            .await
-            .unwrap()
-                == false
-            {
-                // not found...so, none the image_file_path, which resets the backdrop_file_path
-                image_file_path = String::new();
-            }
-            backdrop_file_path = image_file_path;
-        }
+    if result_json.get("backdrop_path").is_some() && !result_json["backdrop_path"].is_null() {
+        image_file_path += &result_json["backdrop_path"].as_str().unwrap().to_string();
+        println!("iifilepath {}", image_file_path);
+        mk_lib_network::mk_download_file_from_url(
+            format!(
+                "https://image.tmdb.org/t/p/original{}",
+                &result_json["backdrop_path"].as_str().unwrap().to_string()
+            ),
+            &image_file_path,
+        )
+        .await;
+        backdrop_file_path = image_file_path;
     }
     // set local image json
     if !poster_file_path.trim().is_empty() {

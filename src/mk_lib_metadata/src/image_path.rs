@@ -1,8 +1,8 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
 use rand::{thread_rng, Rng};
-use stdext::function_name;
 use serde_json::json;
+use stdext::function_name;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -36,7 +36,7 @@ pub async fn meta_image_file_path(
             CHARSET[idx] as char
         })
         .collect();
-    let file_path = format!(
+    let file_path: String = format!(
         "/mediakraken/static/meta/{}/{}/{}",
         &media_type, &file_path_random, &file_path_random_two
     );

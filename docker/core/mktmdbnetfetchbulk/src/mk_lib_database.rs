@@ -11,7 +11,7 @@ use stdext::function_name;
 use serde_json::json;
 use urlencoding::encode;
 
-pub async fn mk_lib_database_open_pool() -> Result<sqlx::PgPool, sqlx::Error> {
+pub async fn mk_lib_database_open_pool(pool_connections: u32) -> Result<sqlx::PgPool, sqlx::Error> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -54,7 +54,7 @@ pub async fn mk_lib_database_open_pool() -> Result<sqlx::PgPool, sqlx::Error> {
         );
     }
     let sqlx_pool = PgPoolOptions::new()
-        .max_connections(25)
+        .max_connections(pool_connections)
         .connect(&connection_string)
         .await?;
     Ok(sqlx_pool)

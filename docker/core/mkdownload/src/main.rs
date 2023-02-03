@@ -32,7 +32,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
+    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool(1).await.unwrap();
     mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
         .await
         .unwrap();

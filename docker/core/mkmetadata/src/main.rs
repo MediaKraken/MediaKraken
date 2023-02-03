@@ -1,13 +1,13 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::types::Uuid;
 use sqlx::Row;
 use std::error::Error;
 use std::path::Path;
 use std::process::Command;
 use stdext::function_name;
-use serde_json::json;
 use tokio::time::{sleep, Duration};
 
 #[path = "mk_lib_database.rs"]
@@ -42,7 +42,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // open the database
-    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
+    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool(1).await.unwrap();
     mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
 
     // pull options/api keys and set structs to contain the data
@@ -52,10 +52,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .unwrap();
 
     // launch thread per provider
-    let tmdb_api_key = option_json["API"]["themoviedb"].to_string();
+    let tmdb_api_key = option_json["API"]["themoviedb"]
+        .as_str()
+        .unwrap()
+        .to_string();
     let handle_tmdb = tokio::spawn(async move {
+        let sqlx_pool = mk_lib_database::mk_lib_database_open_pool(1).await.unwrap();
         loop {
-            let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
             let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "themoviedb").await.unwrap();
             for download_data in metadata_to_process {
                 metadata_base::metadata_process(
@@ -69,12 +72,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
             sleep(Duration::from_secs(1)).await;
         }
+        // sqlx_pool.close().await;
     });
     if !option_json["API"]["musicbrainz"].is_null() {
-        let musicbrainz_api_key = option_json["API"]["musicbrainz"].to_string();
+        let musicbrainz_api_key = option_json["API"]["musicbrainz"]
+            .as_str()
+            .unwrap()
+            .to_string();
         let handle_musicbrainz = tokio::spawn(async move {
+            let sqlx_pool = mk_lib_database::mk_lib_database_open_pool(1).await.unwrap();
             loop {
-                let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
                 let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "musicbrainz").await.unwrap();
                 for download_data in metadata_to_process {
                     metadata_base::metadata_process(
@@ -88,12 +95,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
                 sleep(Duration::from_secs(1)).await;
             }
+            // sqlx_pool.close().await;
         });
     };
-    let thesportsdb_api_key = option_json["API"]["thesportsdb"].to_string();
+    let thesportsdb_api_key = option_json["API"]["thesportsdb"]
+        .as_str()
+        .unwrap()
+        .to_string();
     let handle_thesportsdb = tokio::spawn(async move {
+        let sqlx_pool = mk_lib_database::mk_lib_database_open_pool(1).await.unwrap();
         loop {
-            let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
             let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "thesportsdb").await.unwrap();
             for download_data in metadata_to_process {
                 metadata_base::metadata_process(
@@ -107,6 +118,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
             sleep(Duration::from_secs(1)).await;
         }
+        // sqlx_pool.close().await;
     });
 
     // process all the "Z" records
@@ -145,6 +157,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         sleep(Duration::from_secs(1)).await;
     }
     // TODO unreachable....so, do I care
+    // sqlx_pool.close().await;
     //handle_tmdb.join().unwrap();
     //handle_tmdb.take().map(JoinHandle::join);
     //handle_musicbrainz.join().unwrap();

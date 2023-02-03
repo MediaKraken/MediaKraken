@@ -2,13 +2,13 @@
 
 use reqwest::header::CONTENT_TYPE;
 use reqwest::header::USER_AGENT;
+use serde_json::json;
 use std::collections::HashMap;
 use std::io::Cursor;
 use std::io::Read;
 use std::net::UdpSocket;
 use std::str;
 use stdext::function_name;
-use serde_json::json;
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -20,7 +20,7 @@ pub async fn mk_data_from_url_to_json(
     {
         mk_lib_logging::mk_logging_post_elk(
             std::module_path!(),
-            json!({ "Function": function_name!() }),
+            json!({ "Function": function_name!(), "URL": url }),
         )
         .await
         .unwrap();
@@ -47,7 +47,7 @@ pub async fn mk_data_from_url(url: String) -> Result<String, Box<dyn std::error:
     {
         mk_lib_logging::mk_logging_post_elk(
             std::module_path!(),
-            json!({ "Function": function_name!() }),
+            json!({ "Function": function_name!(), "URL": url }),
         )
         .await
         .unwrap();
@@ -69,7 +69,7 @@ pub async fn mk_data_from_url(url: String) -> Result<String, Box<dyn std::error:
 pub async fn mk_download_file_from_url(
     url: String,
     file_name: &String,
-) -> Result<bool, Box<dyn std::error::Error>> {
+) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -85,11 +85,12 @@ pub async fn mk_download_file_from_url(
             .await
             .unwrap();
     }
+    println!("url: {}", url);
     let response = reqwest::get(url).await?;
     let mut file = std::fs::File::create(file_name)?;
     let mut content = Cursor::new(response.bytes().await?);
     std::io::copy(&mut content, &mut file)?;
-    Ok(true)
+    Ok(())
 }
 
 // wait_seconds - 120 typically
