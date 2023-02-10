@@ -16,7 +16,7 @@
             <div>
                 {% for row_data in media %}
                     <div class="main_photo">
-                        <a href= "/user/internet/flickr_detail", guid=row_data[0]) }}" }} >
+                        <a href= "/user/internet/flickr_detail/{{row_data[0]}}">
                         <img src="{{ row_data[1] }}" height="180" width="320">
                         </a>
                         <div class="description">

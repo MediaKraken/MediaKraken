@@ -42,7 +42,7 @@
                                             {% for row_data in template_data %}
                                             <tr>
                                                 <td>{{ loop.index + (page - 1) * per_page }}</td>
-                                                <td><a href = "/admin/bss_admin_user_detail, guid=row_data[0]) }}">{{ row_data[1] }}</a></td>
+                                                <td><a href = "/admin/bss_admin_user_detail/{{row_data[0]}}">{{ row_data[1] }}</a></td>
                                                 <td>{{ row_data[2] }}</td>
                                                 <td>{{ row_data[3] }}</td>
                                                 <td>{{ row_data[4] }}</td>

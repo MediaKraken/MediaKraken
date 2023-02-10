@@ -5,9 +5,9 @@ mod mk_lib_logging;
 
 use core::fmt::Write;
 use paginator::{PageItem, Paginator};
+use serde_json::json;
 use std::error::Error;
 use stdext::function_name;
-use serde_json::json;
 
 pub async fn mk_lib_common_paginate(
     total_pages: i64,
@@ -25,7 +25,7 @@ pub async fn mk_lib_common_paginate(
     }
     let mut pagination_html = String::new();
     if total_pages != 0 {
-        pagination_html.push_str("<div><table><tr>");
+        pagination_html.push_str("<div><ul class=\"pagination\">");
         let paginator = Paginator::builder(total_pages as usize)
             .current_page(page as usize)
             .build_paginator()
@@ -36,7 +36,7 @@ pub async fn mk_lib_common_paginate(
                     // `PageItem::Prev` variant is used when the `has_prev` option is not set to `YesNoDepends::No`.
                     pagination_html
                         .write_fmt(format_args!(
-                            "<td><a href=\"{url}/{page}\">&laquo;</a></td>",
+                            "<li class=\"page-item\"><a class=\"page-link\" href=\"{url}/{page}\" aria-label=\"Previous\"><span aria-hidden=\"true\">&laquo;</span><span class=\"sr-only\">Previous</span></a></li>",
                             url = base_url,
                             page = page
                         ))
@@ -45,7 +45,7 @@ pub async fn mk_lib_common_paginate(
                 PageItem::Page(page) => {
                     pagination_html
                         .write_fmt(format_args!(
-                            "<td><a href=\"{url}/{page}\">{page}</a></td>",
+                            "<li class=\"page-item\"><a class=\"page-link\" href=\"{url}/{page}\">{page}</a></li>",
                             url = base_url,
                             page = page
                         ))
@@ -53,17 +53,19 @@ pub async fn mk_lib_common_paginate(
                 }
                 PageItem::CurrentPage(page) => {
                     pagination_html
-                        .write_fmt(format_args!("<td>{page}</td>", page = page))
+                        .write_fmt(format_args!(
+                            "<li class=\"page-item active\"><span class=\"page-link\">{page}<span class=\"sr-only\">(current)</span></span></li>",
+                            page = page
+                        ))
                         .unwrap();
                 }
                 PageItem::Ignore => {
-                    pagination_html.push_str("<td>...</td>");
+                    pagination_html.push_str("<li class=\"page-item\">...</li>");
                 }
                 PageItem::Next(page) => {
                     // `PageItem::Next` variant is used when the `has_next` option is not set to `YesNoDepends::No`.
                     pagination_html
-                        .write_fmt(format_args!(
-                            "<td><a href=\"{url}/{page}\">&raquo;</a></td>",
+                        .write_fmt(format_args!("<li class=\"page-item\"><a class=\"page-link\" href=\"{url}/{page}\" aria-label=\"Next\"><span aria-hidden=\"true\">&raquo;</span><span class=\"sr-only\">Next</span></a></li>",
                             url = base_url,
                             page = page
                         ))
@@ -74,7 +76,7 @@ pub async fn mk_lib_common_paginate(
                 }
             }
         }
-        pagination_html.push_str("</tr></table></div>");
+        pagination_html.push_str("</ul></div>");
     }
     Ok(pagination_html)
 }

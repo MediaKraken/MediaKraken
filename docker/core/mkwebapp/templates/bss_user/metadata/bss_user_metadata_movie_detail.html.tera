@@ -12,7 +12,7 @@
 <body>
     {% include "bss_user/bss_user_include_menu" %}
     <div><div>
-    {% if template_data %}
+    {% if template_data_json %}
     <div>
         <div class="container">
             <div class="row">
@@ -22,17 +22,17 @@
                         <div class="col-xl-9">
                             <div class="card"></div>
                             <div class="row">
-                                <div class="col-xl-7"><span>Title: {{json_metadata['title']}}</span></div>
-                                <div class="col"><span class="text-right">Release Date: {{json_metadata['release_date']}}</span></div>
+                                <div class="col-xl-7"><span>Title: {{template_data_json['title']}}</span></div>
+                                <div class="col"><span class="text-right">Release Date: {{template_data_json['release_date']}}</span></div>
                             </div>
                             <div class="row">
                                 <div class="col">
-                                    <p>Tagline: {{json_metadata['tagline']}}<br><br></p>
+                                    <p>Tagline: {{template_data_json['tagline']}}<br><br></p>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col">
-                                    <p>Alternate Title: {{json_metadata['original_title']}}<br><br></p>
+                                    <p>Alternate Title: {{template_data_json['original_title']}}<br><br></p>
                                 </div>
                             </div>
                             <div class="row">
@@ -51,12 +51,13 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <p>Overview: {{json_metadata['overview']}}</p>
+                    <p>Overview: {{template_data_json['overview']}}</p>
                 </div>
             </div>
             <div class="row">
                 <div class="col">
-                    <div><div>        {% if data_json_media_cast %}
+                    <div><div>
+        {% if template_data_json_media_ffmpeg %}
         <div class="row">
             <div class="card">
                 <div class="card-header">
@@ -65,7 +66,7 @@
                 <div class="card-body">
                     <p class="card-text">
                     <div class="grid">
-                        {% for chapter_info in data_json_media_cast %}
+                        {% for chapter_info in template_data_json_media_ffmpeg %}
                         <div class="col-1-4">
                             <a href="/user/media/playback/hls/{{data_guid}}/{{chapter_info[0]|replace(from=' ', to='%20')}}/0/0">
                                 <img src="/static/meta/images/{{chapter_info[1]}}" height="150" width="150">
@@ -77,9 +78,10 @@
                 </div>
             </div>
         </div>
-        {% endif %}</div>
+        {% endif %}
+    </div>
         <div>
-        {% if data_json_media_crew %}
+        {% if template_data_json_media_crew %}
         <div class="row">
             <div class="card">
                 <div class="card-header">
@@ -88,7 +90,7 @@
                 <div class="card-body">
                     <p class="card-text">
                     <div class="grid">
-                        {% for chapter_info in data_json_media_crew %}
+                        {% for chapter_info in template_data_json_media_crew %}
                         <div class="col-1-4">
                             <a href="/user/media/bss_user_media_playback/hls/{{data_guid}}/{{chapter_info[0]|replace(from=' ', to='%20')}}/0/0">
                                 <img src="/static/meta/images/{{chapter_info[1]}}" height="150" width="150">

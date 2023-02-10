@@ -21,7 +21,8 @@
                             <div>
                                 <fieldset>
                                     <legend>Alexa</legend>
-                                </fieldset>                            <table class="table table-bordered">
+                                </fieldset>
+                                <table class="table table-bordered">
                                 <thead>
                                 <tr>
                                     <th>#</th>
@@ -60,7 +61,8 @@
                             <div>
                                 <fieldset>
                                     <legend>Chromecast</legend>
-                                </fieldset>                            <table class="table table-bordered">
+                                </fieldset>
+                                <table class="table table-bordered">
                                 <thead>
                                 <tr>
                                     <th>#</th>
@@ -98,7 +100,8 @@
                             <div>
                                 <fieldset>
                                     <legend>Crestron</legend>
-                                </fieldset>                            <table class="table table-bordered">
+                                </fieldset>
+                                <table class="table table-bordered">
                                 <thead>
                                 <tr>
                                     <th>Directory</th>
@@ -124,7 +127,8 @@
                             <div>
                                 <fieldset>
                                     <legend>DLNA</legend>
-                                </fieldset>                            <table class="table table-bordered">
+                                </fieldset>
+                                <table class="table table-bordered">
                                 <thead>
                                 <tr>
                                     <th>Directory</th>
@@ -150,7 +154,8 @@
                             <div>
                                 <fieldset>
                                     <legend>HDHomeRun</legend>
-                                </fieldset>                            <table class="table table-bordered">
+                                </fieldset>
+                                <table class="table table-bordered">
                                 <thead>
                                 <tr>
                                     <th>Directory</th>
@@ -176,7 +181,8 @@
                             <div>
                                 <fieldset>
                                     <legend>Phillips Hue</legend>
-                                </fieldset>                            <table class="table table-bordered">
+                                </fieldset>
+                                <table class="table table-bordered">
                                 <thead>
                                 <tr>
                                     <th>Directory</th>
@@ -202,7 +208,8 @@
                             <div>
                                 <fieldset>
                                     <legend>Roku</legend>
-                                </fieldset>                            <table class="table table-bordered">
+                                </fieldset>
+                                <table class="table table-bordered">
                                 <thead>
                                 <tr>
                                     <th>Directory</th>
@@ -228,7 +235,8 @@
                             <div>
                                 <fieldset>
                                     <legend>Soco</legend>
-                                </fieldset>                            <table class="table table-bordered">
+                                </fieldset>
+                                <table class="table table-bordered">
                                 <thead>
                                 <tr>
                                     <th>Directory</th>

@@ -24,16 +24,16 @@
                 <a href= "/user/media/game_system_detail/{{row_data[1]}}">
                 {% if row_data[2] == None %}
                     <img src="/static/image/Movie-icon.png" height="300" width="200">
-                    {% if row_data[3] == True %}
+                    {% if row_data[3] == true %}
                     <img class="watched_icon" src="/static/image/eye.png" height="20" width="20">
                     {% endif %}
-                    {% if row_data[4] == True %}
+                    {% if row_data[4] == true %}
                     <img class="synced_icon" src="/static/image/synced.jpg" height="20" width="20">
                     {% endif %}
                     {% if row_data[5] != None %}
                     <img class="rating_icon" src="{{row_data[5]}}" height="20" width="20">
                     {% endif %}
-                    {% if row_data[6] == True %}
+                    {% if row_data[6] == true %}
                     <img class="exclamation_icon" src="/static/image/exclamation-circle-frame.png" height="20" width="20">
                     {% endif %}
                     </a>
@@ -42,16 +42,16 @@
                     </div>
                 {% else %}
                     <img src="/static/meta/images/{{row_data[2]}}" height="300" width="200">
-                    {% if row_data[3] == True %}
+                    {% if row_data[3] == true %}
                     <img class="watched_icon" src="/static/image/eye.png" height="20" width="20">
                     {% endif %}
-                    {% if row_data[4] == True %}
+                    {% if row_data[4] == true %}
                     <img class="synced_icon" src="/static/image/synced.jpg" height="20" width="20">
                     {% endif %}
                     {% if row_data[5] != None %}
                     <img class="rating_icon" src="{{row_data[5]}}" height="20" width="20">
                     {% endif %}
-                    {% if row_data[6] == True %}
+                    {% if row_data[6] == true %}
                     <img class="exclamation_icon" src="/static/image/exclamation-circle-frame.png" height="20" width="20">
                     {% endif %}
                     </a>

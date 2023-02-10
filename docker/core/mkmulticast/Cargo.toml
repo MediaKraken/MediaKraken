@@ -10,18 +10,18 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-chrono = { version = "0.4.19", features = ["serde"] }
+chrono = { version = "0.4.23", features = ["serde"] }
 # 0.31.0 breaks datalink
 pnet = "0.30.0"
 #lazy_static = "1.4.0"
 reqwest = { version = "0.11.13", default-features = false, features = ["json", "rustls-tls"] }
-serde_json = "1.0.81"
+serde_json = "1.0.91"
 shiplift = { version = "0.7", default-features = false, features = [
     "unix-socket",
 ] }
 socket2 = { version = "0.4.7", features = ["all"] }
 stdext = "0.3.1"
-tokio = { version = "1.21.2", features = ["full"] }
+tokio = { version = "1.24.1", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"

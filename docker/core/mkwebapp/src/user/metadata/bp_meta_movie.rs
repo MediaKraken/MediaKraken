@@ -28,9 +28,10 @@ struct TemplateMetaMovieList {
     template_metadata_guid: uuid::Uuid,
     template_metadata_name: String,
     template_metadata_date: String,
-    template_metadata_poster: Option<String>,
+    template_metadata_poster: String,
     template_metadata_user_watched: serde_json::Value,
-    template_metadata_user_rating: Option<serde_json::Value>,
+    template_metadata_user_rating_view: bool,
+    template_metadata_user_rating: serde_json::Value,
     template_metadata_user_request: serde_json::Value,
     template_metadata_user_queue: serde_json::Value,
 }
@@ -73,12 +74,13 @@ pub async fn user_metadata_movie(
         let mut request_status: serde_json::Value = json!(false);
         let mut rating_status: serde_json::Value = json!(null);
         let mut queue_status: serde_json::Value = json!(false);
-        if !row_data.mm_metadata_user_json.is_none() && row_data
-            .mm_metadata_user_json
-            .as_ref()
-            .unwrap()
-            .get("UserStats")
-            .is_some()
+        if !row_data.mm_metadata_user_json.is_none()
+            && row_data
+                .mm_metadata_user_json
+                .as_ref()
+                .unwrap()
+                .get("UserStats")
+                .is_some()
         {
             let rating_json: serde_json::Value =
                 row_data.mm_metadata_user_json.as_ref().unwrap().clone();
@@ -87,13 +89,18 @@ pub async fn user_metadata_movie(
             request_status = rating_json["UserStats"][user.id().to_string()]["Request"].clone();
             queue_status = rating_json["UserStats"][user.id().to_string()]["Queue"].clone();
         }
+        let mut mm_poster: String = "/image/Movie-icon.png".to_string();
+        if row_data.mm_poster.len() > 0 {
+            mm_poster = row_data.mm_poster.clone();
+        }
         let temp_meta_line = TemplateMetaMovieList {
             template_metadata_guid: row_data.mm_metadata_guid,
             template_metadata_name: row_data.mm_metadata_name.clone(),
             template_metadata_date: row_data.mm_date.clone(),
-            template_metadata_poster: Some(row_data.mm_poster.clone()),
+            template_metadata_poster: mm_poster,
             template_metadata_user_watched: watched_status,
-            template_metadata_user_rating: Some(rating_status),
+            template_metadata_user_rating_view: false,
+            template_metadata_user_rating: rating_status,
             template_metadata_user_request: request_status,
             template_metadata_user_queue: queue_status,
         };
@@ -110,7 +117,9 @@ pub async fn user_metadata_movie(
 
 #[derive(Serialize)]
 struct TemplateMetaMovieDetailContext {
-    template_data: serde_json::Value,
+    template_data_json: serde_json::Value,
+    template_data_json_media_ffmpeg: serde_json::Value,
+    template_data_json_media_crew: serde_json::Value,
 }
 
 #[get("/metadata/movie_detail/<guid>")]
@@ -120,6 +129,20 @@ pub async fn user_metadata_movie_detail(
     guid: rocket::serde::uuid::Uuid,
 ) -> Template {
     let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
+    let movie_metadata = mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_detail_by_guid(
+        &sqlx_pool,
+        tmp_uuid,
+    )
+    .await
+    .unwrap();
+    // Template::render(
+    //     "bss_user/metadata/bss_user_metadata_movie_detail",
+    //     &TemplateMetaMovieDetailContext {
+    //         template_data_json: movie_metadata.mm_metadata_movie_json,
+    //         template_data_json_media_ffmpeg: json!({None}),
+    //         template_data_json_media_crew: json!({None}),
+    //     },
+    // )
     Template::render(
         "bss_user/metadata/bss_user_metadata_movie_detail",
         tera::Context::new().into_json(),
@@ -127,15 +150,6 @@ pub async fn user_metadata_movie_detail(
 }
 
 /*
-from common import common_global
-from common import common_internationalization
-from common import common_logging_elasticsearch_httpx
-from common import common_pagination_bootstrap
-from sanic import Blueprint, response
-
-blueprint_user_metadata_movie = Blueprint('name_blueprint_user_metadata_movie',
-                                          url_prefix='/user')
-
 
 @blueprint_user_metadata_movie.route('/user_meta_movie_detail/<guid>')
 @common_global.jinja_template.template('bss_user/metadata/bss_user_metadata_movie_detail.html')

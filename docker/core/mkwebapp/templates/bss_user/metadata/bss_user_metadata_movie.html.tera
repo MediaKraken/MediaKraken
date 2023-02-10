@@ -23,25 +23,21 @@
             <div class="main_photo">
                 <div data-id={{row_data.template_metadata_guid}}>
                     <a href= "/user/metadata/movie_detail/{{row_data.template_metadata_guid}}" >
-                        {% if row_data.template_metadata_poster is none %}
-                            <img src="/static/image/Movie-icon.png" loading="lazy" height="300" width="200">
-                        {% else %}
-                            <img src="{{row_data.template_metadata_poster|replace(from='\"', to='')}}" loading="lazy" height="300" width="200">
-                        {% endif %}
-                        {% if row_data.template_metadata_user_watched == true %}
+                        <img src="/static{{row_data.template_metadata_poster|safe}}" loading="lazy" height="300" width="200">
+                        {% if row_data.template_metadata_user_watched == True %}
                             <img class="watched_icon" src="/static/image/eye.png" loading="lazy" height="25" width="25">
                         {% endif %}
-                        {% if row_data.template_metadata_user_rating is not none %}
+                        {% if row_data.template_metadata_user_rating_view == True %}
                             <img class="rating_icon" src="/static/image/{{row_data.template_metadata_user_rating}}" loading="lazy" height="25" width="25">
                         {% endif %}
-                        {% if row_data.template_metadata_user_request == true %}
+                        {% if row_data.template_metadata_user_request == True %}
                             <img class="request_icon" src="/static/image/add-button.png" loading="lazy" height="25" width="25">
                         {% endif %}
-                        {% if row_data.template_metadata_user_queue == true %}
+                        {% if row_data.template_metadata_user_queue == True %}
                             <img class="queue_icon" src="/static/image/rectangles.png" loading="lazy" height="25" width="25">
                         {% endif %}
                     </a>
-                    {% if row_data.template_metadata_poster is none %}
+                    {% if row_data.template_metadata_poster == "/image/Movie-icon.png" %}
                         <div class="description">
                             <p class="description_content_left">{{row_data.template_metadata_name}}</p>
                         </div>

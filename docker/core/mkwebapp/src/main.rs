@@ -205,14 +205,23 @@ async fn main() -> Result<(), Error> {
             fs::create_dir(&file_name)?;
             for c in b'a'..=b'z' {
                 for d in b'a'..=b'z' {
-                    fs::create_dir(format!("{}{}{}", file_name, c as char, d as char))?;
+                    for e in b'a'..=b'z' {
+                        for f in b'a'..=b'z' {
+                            fs::create_dir_all(format!(
+                                "{}{}{}/{}{}",
+                                file_name, c as char, d as char, e as char, f as char
+                            ))?;
+                        }
+                    }
                 }
             }
         }
     }
 
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool(50).await.unwrap();
+    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool(50)
+        .await
+        .unwrap();
     mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, true).await;
 
     // setup auth

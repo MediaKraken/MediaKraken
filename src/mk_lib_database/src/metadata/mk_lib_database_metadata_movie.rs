@@ -186,37 +186,36 @@ pub async fn mk_lib_database_metadata_movie_guid_by_tmdb(
     Ok(row.0)
 }
 
+pub async fn mk_lib_database_metadata_movie_detail_by_guid(
+    sqlx_pool: &sqlx::PgPool,
+    uuid_id: Uuid,
+) -> Result<PgRow, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let row = sqlx::query(
+        "select mm_metadata_movie_media_id, \
+        mm_metadata_movie_name, \
+        mm_metadata_movie_json, \
+        mm_metadata_movie_localimage_json, \
+        mm_metadata_movie_user_json \
+        from mm_metadata_movie \
+        where mm_metadata_movie_guid = $1",
+    )
+    .bind(uuid_id)
+    .fetch_one(sqlx_pool)
+    .await?;
+    Ok(row)
+}
+
+
 /*
-
-// TODO port query
-def db_meta_tmdb_count(self, tmdb_id):
-    """
-    # see if metadata exists via themovedbid
-    """
-    self.db_cursor.execute('select exists(select 1 from mm_metadata_movie'
-                           ' where mm_metadata_movie_media_id = $1 limit 1) limit 1', (tmdb_id,))
-    return self.db_cursor.fetchone()[0]
-
-
-
-// TODO port query
-def db_read_media_metadata(self, media_guid):
-    """
-    # read in the media with corresponding metadata
-    """
-    self.db_cursor.execute('select mm_metadata_movie_guid,'
-                           ' mm_metadata_movie_media_id,'
-                           ' mm_metadata_movie_name,'
-                           ' mm_metadata_movie_json,'
-                           ' mm_metadata_movie_localimage_json,'
-                           ' mm_metadata_movie_user_json'
-                           ' from mm_metadata_movie'
-                           ' where mm_metadata_movie_guid = $1', (media_guid,))
-    try:
-        return self.db_cursor.fetchone()
-    except:
-        return None
-
 
 // TODO port query
 pub async fn db_meta_movie_by_media_uuid(self, media_guid):
@@ -228,23 +227,6 @@ pub async fn db_meta_movie_by_media_uuid(self, media_guid):
                                   ' from mm_media, mm_metadata_movie'
                                   ' where mm_media_metadata_guid = mm_metadata_guid'
                                   ' and mm_media_guid = $1', media_guid)
-
-
-// TODO port query
-pub async fn db_meta_movie_detail(self, media_guid):
-    """
-    # read in the media with corresponding metadata
-    """
-    return await db_conn.fetchrow('select mm_metadata_movie_guid,'
-                                  ' mm_metadata_movie_media_id,'
-                                  ' mm_metadata_movie_name,'
-                                  ' mm_metadata__moviejson,'
-                                  ' mm_metadata_movie_localimage_json,'
-                                  ' mm_metadata_movie_user_json'
-                                  ' from mm_metadata_movie'
-                                  ' where mm_metadata_movie_guid = $1',
-                                  media_guid)
-
 
 // TODO port query
 pub async fn db_meta_movie_status_update(self, metadata_guid, user_id, status_text,

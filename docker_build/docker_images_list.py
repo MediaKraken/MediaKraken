@@ -112,6 +112,9 @@ STAGE_CORE_IMAGES = {
     # nginx proxy for http to https and some bot blocking
     'mknginx': ('mknginx', 'alpine:3.13', 'core'),
 
+    # download open library dump of ids in database and insert into downloads - run and exit
+    'mkopenlibrarynetfetchbulk': ('mkopenlibrarynetfetchbulk', 'scratch', 'core'),
+    
     # database connection pooler
     'mkpgbouncer': ('mkpgbouncer', 'alpine:3.17.1', 'core'),
 

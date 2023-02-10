@@ -10,8 +10,8 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-chrono = { version = "0.4.19", features = ["serde"] }
-flate2 = "1.0.22"
+chrono = { version = "0.4.23", features = ["serde"] }
+flate2 = "1.0.25"
 governor = "0.5.1"
 musicbrainz_rs = "0.4.0"
 open-library = "0.7.1"
@@ -20,10 +20,10 @@ reqwest = { version = "0.11.13", default-features = false, features = [
     "json",
     "native-tls",
 ] }
-roxmltree = "0.16.0"
-serde = { version = "1.0.137", features = ["derive"] }
-serde_json = "1.0.81"
-sqlx = { version = "0.5.13", features = [
+roxmltree = "0.17.0"
+serde = { version = "1.0.152", features = ["derive"] }
+serde_json = "1.0.91"
+sqlx = { version = "0.6.2", features = [
     "chrono",
     "json",
     "runtime-tokio-rustls",
@@ -34,16 +34,12 @@ stdext = "0.3.1"
 substring = "1.4.5"
 sys-info = "0.9.1"
 tar = "0.4.38"
-tokio = { version = "1.23.0", features = ["full"] }
+tokio = { version = "1.24.1", features = ["full"] }
 torrent-name-parser = "0.11.0"
 urlencoding = "2.1.2"
-uuid = { version = "0.8.2", features = ["serde", "v4"] }
+uuid = { version = "1.2.2", features = ["serde", "v4"] }
 md-5 = "0.10.5"
 sha-1 = "0.10.1"
-
-rocket_dyn_templates = { git = "https://github.com/SergioBenitez/Rocket/", features = [
-    "tera",
-] }
 
 [dev-dependencies]
 tokio-test = "*"

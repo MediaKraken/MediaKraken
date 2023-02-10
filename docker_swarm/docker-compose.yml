@@ -450,9 +450,6 @@ services:
 
   transmission:
     image: mediakraken/mktransmission:${BRANCH}
-    environment:
-      - USERNAME=metaman
-      - PASSWORD=metaman
     ports:
       - "9091:9091"
       - "51413:51413/tcp"
