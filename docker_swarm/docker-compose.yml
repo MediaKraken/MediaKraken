@@ -3,40 +3,6 @@ version: '3.8'
 # Volumes are HOST directory and then CONTAINER directory
 
 services:
-  # runs the mumble chat server
-  mumble:
-    image: mediakraken/mkchatmumble:${BRANCH}
-    environment:
-      - SUPERUSER_PASSWORD=metaman
-      # - TZ=America/Phoenix   - left unset will default to UTC
-    stop_grace_period: 30s
-    stop_signal: SIGUSR1
-    ports:
-      - "64738:64738/tcp"
-      - "64738:64738/udp"
-    volumes:
-      - mediakraken_vol_mumble:/etc/mumble
-    deploy:
-      mode: replicated
-      replicas: 0
-
-  # runs the teamspeak3 chat server
-  teamspeak:
-    image: mediakraken/mkchatteamspeak:${BRANCH}
-    environment:
-      - TS3SERVER_LICENSE=accept
-    stop_grace_period: 30s
-    stop_signal: SIGUSR1
-    ports:
-      - "9987:9987/udp"
-      - "10011:10011"
-      - "30033:30033"
-    volumes:
-      - mediakraken_vol_teamspeak:/var/ts3server/
-    deploy:
-      mode: replicated
-      replicas: 0
-
   cron:
     image: mediakraken/mkcron:${BRANCH}
     secrets:
@@ -254,6 +220,23 @@ services:
       mode: replicated
       replicas: 0
 
+  # runs the mumble chat server
+  mumble:
+    image: mediakraken/mkchatmumble:${BRANCH}
+    environment:
+      - SUPERUSER_PASSWORD=metaman
+      # - TZ=America/Phoenix   - left unset will default to UTC
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    ports:
+      - "64738:64738/tcp"
+      - "64738:64738/udp"
+    volumes:
+      - mediakraken_vol_mumble:/etc/mumble
+    deploy:
+      mode: replicated
+      replicas: 0
+
   multicast:
     image: mediakraken/mkmulticast:${BRANCH}
     command: sh -c "/mkmulticast"
@@ -354,6 +337,24 @@ services:
       placement:
         constraints: [ node.platform.os == linux ]
 
+  rabbitconsume:
+    image: mediakraken/mkrabbitconsume:${BRANCH}
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+    command: sh -c "/wait && /mkrabbitconsume"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      # so it can start docker containers
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - mediakraken_network_backend
+    deploy:
+      mode: replicated
+      replicas: 1
+
   rabbitmq:
     image: mediakraken/mkrabbitmq:${BRANCH}
     environment:
@@ -376,24 +377,6 @@ services:
       mode: replicated
       replicas: 1
 
-  rabbitconsume:
-    image: mediakraken/mkrabbitconsume:${BRANCH}
-    secrets:
-      - db_password
-    environment:
-      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
-    command: sh -c "/wait && /mkrabbitconsume"
-    stop_grace_period: 30s
-    stop_signal: SIGUSR1
-    volumes:
-      # so it can start docker containers
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - mediakraken_network_backend
-    deploy:
-      mode: replicated
-      replicas: 1
-
   schedulesdirectupdate:
     image: mediakraken/mkschedulesdirectupdate:${BRANCH}
     secrets:
@@ -403,6 +386,23 @@ services:
     stop_signal: SIGUSR1
     networks:
       - mediakraken_network_backend
+    deploy:
+      mode: replicated
+      replicas: 0
+
+  # runs the teamspeak3 chat server
+  teamspeak:
+    image: mediakraken/mkchatteamspeak:${BRANCH}
+    environment:
+      - TS3SERVER_LICENSE=accept
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    ports:
+      - "9987:9987/udp"
+      - "10011:10011"
+      - "30033:30033"
+    volumes:
+      - mediakraken_vol_teamspeak:/var/ts3server/
     deploy:
       mode: replicated
       replicas: 0
