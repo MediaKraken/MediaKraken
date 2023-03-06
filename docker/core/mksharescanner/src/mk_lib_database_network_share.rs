@@ -10,6 +10,7 @@ use sqlx::types::Uuid;
 use sqlx::{FromRow, Row};
 use std::num::NonZeroU8;
 use stdext::function_name;
+use serde_json::json;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBShareList {

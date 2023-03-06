@@ -12,6 +12,8 @@ use stdext::function_name;
 
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
+#[path = "mk_lib_database_network_share.rs"]
+mod mk_lib_database_network_share;
 #[path = "mk_lib_database_option_status.rs"]
 mod mk_lib_database_option_status;
 #[path = "mk_lib_database_version.rs"]
@@ -73,7 +75,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     }
                     // find and store all network shares
                     let share_vec = mk_lib_network_nmap::mk_network_share_scan("192.168.1.1".to_string()).await.unwrap();
-                    for share_info in share_vec.iter() {}
+                    for share_info in share_vec.iter() {
+                        mk_lib_database_network_share::mk_lib_database_network_share_insert(&sqlx_pool, share_info.mm_share_xml.clone()).await;
+                    }
                     consumer.ack(delivery)?;
                 }
                 other => {
