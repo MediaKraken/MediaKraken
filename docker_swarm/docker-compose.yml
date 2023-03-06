@@ -390,6 +390,19 @@ services:
       mode: replicated
       replicas: 0
 
+  sharescanner:
+    image: mediakraken/mksharescanner:${BRANCH}
+    secrets:
+      - db_password
+    command: sh -c "/mksharescanner"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network_backend
+    deploy:
+      mode: replicated
+      replicas: 0
+
   # runs the teamspeak3 chat server
   teamspeak:
     image: mediakraken/mkchatteamspeak:${BRANCH}
