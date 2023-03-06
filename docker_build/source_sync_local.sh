@@ -136,6 +136,7 @@
 
 # mksharescanner
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mksharescanner/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_network_share.rs ../docker/core/mksharescanner/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mksharescanner/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mksharescanner/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_option_status.rs ../docker/core/mksharescanner/src/.

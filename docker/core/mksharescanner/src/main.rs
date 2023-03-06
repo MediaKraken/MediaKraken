@@ -72,7 +72,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .unwrap();
                     }
                     // find and store all network shares
-                    mk_lib_network_nmap::mk_network_share_scan("192.168.1.1".to_string()).await;
+                    let share_vec = mk_lib_network_nmap::mk_network_share_scan("192.168.1.1".to_string()).await.unwrap();
+                    for share_info in share_vec.iter() {}
                     consumer.ack(delivery)?;
                 }
                 other => {

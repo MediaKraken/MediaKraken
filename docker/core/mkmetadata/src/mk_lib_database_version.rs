@@ -7,7 +7,7 @@ use stdext::function_name;
 use serde_json::json;
 use tokio::time::{sleep, Duration};
 
-pub static DATABASE_VERSION: i32 = 48;
+pub static DATABASE_VERSION: i32 = 49;
 
 #[path = "./mk_lib_database_version_schema.rs"]
 mod mk_lib_database_version_schema;

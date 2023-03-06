@@ -107,6 +107,18 @@ pub async fn mk_lib_database_update_schema(
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 48).await?;
     }
+    if version_no < 49 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(
+            "CREATE TABLE mm_network_shares (\
+            mm_network_share_guid uuid NOT NULL, \
+            mm_network_share_xml text);",
+        )
+        .execute(&mut transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 49).await?;
+    }
     Ok(true)
 }
 
