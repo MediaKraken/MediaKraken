@@ -131,6 +131,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             {
                                 let download_link = item["enclosure"]["@url"].to_string();
                                 // do NOT remove the header.....this is the SAVE location
+                                // TODO use image directory format
                                 let file_save_name = format!(
                                     "/mediakraken/static/meta/trailer/{:?}",
                                     download_link.rsplitn(1, "/")

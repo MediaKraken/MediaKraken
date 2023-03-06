@@ -134,6 +134,16 @@
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mkschedulesdirectupdate/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_option_status.rs ../docker/core/mkschedulesdirectupdate/src/.
 
+# mksharescanner
+\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database.rs ../docker/core/mksharescanner/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version.rs ../docker/core/mksharescanner/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_version_schema.rs ../docker/core/mksharescanner/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_option_status.rs ../docker/core/mksharescanner/src/.
+\cp -f --remove-destination ../src/mk_lib_file/src/mk_lib_file.rs ../docker/core/mksharescanner/src/.
+\cp -f --remove-destination ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mksharescanner/src/.
+\cp -f --remove-destination ../src/mk_lib_network/src/mk_lib_network.rs ../docker/core/mksharescanner/src/.
+\cp -f --remove-destination ../src/mk_lib_network/src/mk_lib_network_nmap.rs ../docker/core/mksharescanner/src/.
+
 # mktcpserver
 \cp -f --remove-destination ../src/mk_lib_logging/src/mk_lib_logging.rs ../docker/core/mktcpserver/src/.
 

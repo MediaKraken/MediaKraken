@@ -52,9 +52,9 @@ STAGE_ONE_IMAGES = {
     # 'AlpineBase3170Py3': ('mkbase_alpinepy3', 'alpine:3.17.0', 'base'),
     'AlpineBaseFFMPEG': ('mkbase_alpine_ffmpeg', 'alpine:3.17.1', 'base'),
     'DebianBase11Py3': ('mkbase_debianpy3', 'python:3.12.0a3-bullseye', 'base'),
-    'RustBase1660': ('mkbase_rust', 'rust:1.66.0', 'base'),
-    'RustBase1661Alpine': ('mkbase_rust_alpine', 'rust:1.66.1-alpine', 'base'),
-    'RustBase1661Debian': ('mkbase_rust_debian', 'rust:1.66.1', 'base'),
+    'RustBase1671': ('mkbase_rust', 'rust:1.67.1', 'base'),
+    'RustBase1671Alpine': ('mkbase_rust_alpine', 'rust:1.67.1-alpine', 'base'),
+    'RustBase1671Debian': ('mkbase_rust_debian', 'rust:1.67.1', 'base'),
 }
 
 STAGE_TWO_IMAGES = {}
@@ -126,6 +126,9 @@ STAGE_CORE_IMAGES = {
 
     # schedulesdirect update
     'mkschedulesdirectupdate': ('mkschedulesdirectupdate', 'busybox:1.36.0-uclibc', 'core'),
+
+    # scan for network shares
+    'mksharescanner': ('mksharescanner', 'busybox:1.36.0-uclibc', 'core'),
 
     # server for "fat" clients to talk too (local server)
     'mktcpserver': ('mktcpserver', 'busybox:1.36.0-uclibc', 'core'),
