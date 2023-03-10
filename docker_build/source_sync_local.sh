@@ -194,6 +194,7 @@
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_cron.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_game_servers.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_library.rs ../docker/core/mkwebapp/src/.
+\cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_network_share.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_notification.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_option_status.rs ../docker/core/mkwebapp/src/.
 \cp -f --remove-destination ../src/mk_lib_database/src/mk_lib_database_postgresql.rs ../docker/core/mkwebapp/src/.

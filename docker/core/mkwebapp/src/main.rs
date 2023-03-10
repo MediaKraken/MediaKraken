@@ -46,6 +46,8 @@ mod bp_admin_hardware;
 mod bp_admin_home;
 #[path = "admin/bp_library.rs"]
 mod bp_admin_library;
+#[path = "admin/bp_share.rs"]
+mod bp_admin_share;
 #[path = "admin/bp_settings.rs"]
 mod bp_admin_settings;
 #[path = "admin/bp_torrent.rs"]
@@ -242,6 +244,7 @@ async fn main() -> Result<(), Error> {
                 bp_admin_hardware::admin_hardware,
                 bp_admin_home::admin_home,
                 bp_admin_library::admin_library,
+                bp_admin_share::admin_share,
                 bp_admin_settings::admin_settings,
                 bp_admin_torrent::admin_torrent,
                 bp_admin_user::admin_user,

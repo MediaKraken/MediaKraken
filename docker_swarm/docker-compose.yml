@@ -398,7 +398,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 0
+      replicas: 1
 
   # runs the teamspeak3 chat server
   teamspeak:

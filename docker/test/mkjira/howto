@@ -1,0 +1,6 @@
+docker volume create --name jiraVolume
+docker run -v jiraVolume:/var/atlassian/application-data/jira --name="jira" -d -p 8080:8080 atlassian/jira-software
+
+Jira is now available on http://localhost:8080
+
+# free lic no longer covers this.....it's cloud only......so, not used

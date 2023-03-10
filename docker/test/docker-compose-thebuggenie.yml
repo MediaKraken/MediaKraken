@@ -1,5 +1,6 @@
 version: '3'
 
+# Access http://localhost:8080 via browser to install The Bug Genie. Set Database user to "root" (no password), set Database host to "localhost".
 services:
   webserver:
     image: romanyagodin/thebuggenie-docker

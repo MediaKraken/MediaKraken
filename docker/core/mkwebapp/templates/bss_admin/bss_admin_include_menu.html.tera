@@ -15,6 +15,7 @@
                 <a class="nav-link" href="/admin/library/1"><i class="fas fa-ticket-alt"></i><span>Library</span></a>
                 <a class="nav-link" href="/admin/reports"><i class="fas fa-clipboard-list"></i><span>Reports</span></a>
                 <a class="nav-link" href="/admin/servers"><i class="fas fa-cogs"></i><span>Server</span></a>
+                <a class="nav-link" href="/admin/share"><i class="fas fa-share-alt"></i><span>Share</span></a>
                 <a class="nav-link" href="/admin/server_links"><i class="fas fa-link"></i><span>Server Links</span></a>
                 <a class="nav-link" href="/admin/torrent"><i class="fas fa-bolt"></i><span>Torrent Management</span></a>
                 <a class="nav-link" href="/admin/user/1"><i class="fas fa-user-alt"></i><span>Users</span></a>
