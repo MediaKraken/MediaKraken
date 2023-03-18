@@ -149,7 +149,10 @@ STAGE_CORE_IMAGES = {
     'mktvheadend': ('mktvheadend', 'alpine:3.12', 'core'),
 
     # website via rust and rocket
-    'mkwebapp': ('mkwebapp', 'busybox:1.36.0-uclibc', 'core'),
+    #'mkwebapp': ('mkwebapp', 'busybox:1.36.0-uclibc', 'core'),
+
+    # website via rust and axum
+    'mkwebapp': ('mkwebaxum', 'busybox:1.36.0-uclibc', 'core'),
 
     # website for nut
     'mkwebnut': ('mkwebnut', 'ubuntu:18.04', 'core'),

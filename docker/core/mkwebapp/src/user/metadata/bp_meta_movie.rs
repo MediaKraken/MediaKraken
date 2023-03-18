@@ -135,18 +135,18 @@ pub async fn user_metadata_movie_detail(
     )
     .await
     .unwrap();
-    // Template::render(
-    //     "bss_user/metadata/bss_user_metadata_movie_detail",
-    //     &TemplateMetaMovieDetailContext {
-    //         template_data_json: movie_metadata.mm_metadata_movie_json,
-    //         template_data_json_media_ffmpeg: json!({None}),
-    //         template_data_json_media_crew: json!({None}),
-    //     },
-    // )
     Template::render(
         "bss_user/metadata/bss_user_metadata_movie_detail",
-        tera::Context::new().into_json(),
+        &TemplateMetaMovieDetailContext {
+            template_data_json: movie_metadata.mm_metadata_movie_json,
+            template_data_json_media_ffmpeg: json!({None}),
+            template_data_json_media_crew: json!({None}),
+        },
     )
+    // Template::render(
+    //     "bss_user/metadata/bss_user_metadata_movie_detail",
+    //     tera::Context::new().into_json(),
+    // )
 }
 
 /*

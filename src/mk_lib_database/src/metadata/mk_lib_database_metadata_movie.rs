@@ -201,7 +201,6 @@ pub async fn mk_lib_database_metadata_movie_detail_by_guid(
     }
     let row = sqlx::query(
         "select mm_metadata_movie_media_id, \
-        mm_metadata_movie_name, \
         mm_metadata_movie_json, \
         mm_metadata_movie_localimage_json, \
         mm_metadata_movie_user_json \

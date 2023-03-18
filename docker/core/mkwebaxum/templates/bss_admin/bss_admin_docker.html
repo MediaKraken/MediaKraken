@@ -1,0 +1,89 @@
+{% block content %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>MediaKraken - Docker</title>
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.min.css">
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+        {% include "bss_admin/bss_admin_include_menu.html" %}
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content">
+                <div class="container-fluid flex-fill">
+                    <div class="d-sm-flex justify-content-between align-items-center mb-4"></div>
+                    <div class="row">
+                        <div class="col-auto col-md-6 col-xl-3 flex-fill mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Docker Info</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">Operating System: {{data_host['operating_system']}}</p>
+                                    <p>Kernel: {{data_host['kernel_version']}}</p>
+                                    <p>Host IP: {{data_host['Swarm']['NodeAddr']}}</p>
+                                    <p>Docker Engine: {{data_host['server_version']}}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-xl-5 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Cluster Join Info</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">Token: {{data_swam}}</p>
+                                    <p>Run following on other node(s) to join swarm cluster.</p>
+                                    <p>docker swarm join --token {{data_swam}} {{data_host['Swarm']['NodeAddr']}}:2377</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xl-8">
+                            <div>
+                                <fieldset>
+                                    <legend>Active Swarm Node(s)</legend>
+                                </fieldset>
+                                <div class="table-responsive table-bordered">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Operating System</th>
+                                                <th>ID</th>
+                                                <th>Docker Engine</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for row_data in template_data %}
+                                            <tr>
+                                                <td>{{ row_data['Description']['Hostname'] }}</td>
+                                                <td>{{ row_data['Description']['Platform']['OS'] }}</td>
+                                                <td>{{ row_data['ID'] }}</td>
+                                                <td>{{ row_data['Description']['Engine']['EngineVersion'] }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% include "bss_public/bss_public_footer.html" %}
+        </div>
+    </div>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery-easing.min.js"></script>
+    <script src="/static/js/script.min.js"></script>
+</body>
+{% endblock %}
