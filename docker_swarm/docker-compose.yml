@@ -486,7 +486,7 @@ services:
       replicas: 0
 
   webapp:
-    image: mediakraken/mkwebapp:${BRANCH}
+    image: mediakraken/mkwebaxum:${BRANCH}
     secrets:
       - db_password
       - secure_key
