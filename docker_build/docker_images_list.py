@@ -152,7 +152,7 @@ STAGE_CORE_IMAGES = {
     'mkwebaxum': ('mkwebaxum', 'busybox:1.36.0-uclibc', 'core'),
 
     # website via rust and rocket
-    'mkwebrockets': ('mkwebrocket', 'busybox:1.36.0-uclibc', 'core'),
+    'mkwebrocket': ('mkwebrocket', 'busybox:1.36.0-uclibc', 'core'),
 
     # website for nut
     'mkwebnut': ('mkwebnut', 'ubuntu:18.04', 'core'),
