@@ -6,6 +6,8 @@ edition = "2021"
 [profile.release]
 panic = 'abort'
 strip = "symbols"
+lto = true
+codegen-units = 1
 
 [dependencies]
 rocket_auth = { version = "0.4.0", features = ["sqlx-postgres"] }

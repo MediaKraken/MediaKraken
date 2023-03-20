@@ -1,8 +1,17 @@
 [package]
 name = "myapp"
 version = "0.0.1"
-edition = "2018"
+edition = "2021"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
 
 [dependencies]
 shiplift = "0.7"
 tokio = { version = "1.6.0", features = ["full"] }
+
+[dev-dependencies]
+tokio-test = "*"

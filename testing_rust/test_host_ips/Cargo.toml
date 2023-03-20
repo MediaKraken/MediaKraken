@@ -1,7 +1,16 @@
 [package]
 name = "myapp"
 version = "0.0.1"
-edition = "2018"
+edition = "2021"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
 
 [dependencies]
 pnet = "0.28.0"
+
+[dev-dependencies]
+tokio-test = "*"
