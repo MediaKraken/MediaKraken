@@ -8,7 +8,7 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
 
 #[path = "../mk_lib_logging.rs"]
@@ -17,12 +17,14 @@ mod mk_lib_logging;
 #[path = "../mk_lib_database_user_profile.rs"]
 mod mk_lib_database_user_profile;
 
-#[get("/profile")]
-pub async fn user_profile(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
-    Template::render(
-        "bss_user/bss_user_profile",
-        tera::Context::new().into_json(),
-    )
+#[derive(Template)]
+#[template(path = "bss_user/bss_user_profile.html")]
+struct UserProfileTemplate;
+
+pub async fn user_profile() -> impl IntoResponse {
+    let template = UserProfileTemplate {};
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

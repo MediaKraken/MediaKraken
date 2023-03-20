@@ -8,7 +8,7 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
 
 #[path = "../mk_lib_logging.rs"]
@@ -17,12 +17,14 @@ mod mk_lib_logging;
 #[path = "../mk_lib_database_search.rs"]
 mod mk_lib_database_search;
 
-#[get("/search")]
-pub async fn user_search(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
-    Template::render(
-        "bss_user/bss_user_media_search",
-        tera::Context::new().into_json(),
-    )
+#[derive(Template)]
+#[template(path = "bss_user/bss_user_media_search.html")]
+struct UserSearchTemplate;
+
+pub async fn user_search() -> impl IntoResponse {
+    let template = UserSearchTemplate {};
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

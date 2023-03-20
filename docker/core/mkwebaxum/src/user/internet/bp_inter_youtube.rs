@@ -8,26 +8,30 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
 
-#[get("/internet/youtube")]
-pub async fn user_inter_youtube(user: User) -> Template {
-    Template::render(
-        "bss_user/internet/bss_user_internet_youtube",
-        tera::Context::new().into_json(),
-    )
+#[derive(Template)]
+#[template(path = "bss_user/internet/bss_user_internet_youtube.html")]
+struct UserInternetYoutubeTemplate;
+
+pub async fn user_inter_vimeo() -> impl IntoResponse {
+    let template = UserInternetYoutubeTemplate {};
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
-#[get("/internet/youtube_detail/<guid>")]
-pub async fn user_inter_youtube_detail(user: User, guid: &str) -> Template {
-    Template::render(
-        "bss_user/internet/bss_user_internet_youtube_detail",
-        tera::Context::new().into_json(),
-    )
+#[derive(Template)]
+#[template(path = "bss_user/internet/bss_user_internet_youtube_detail.html")]
+struct UserInternetYoutubeDetailTemplate;
+
+pub async fn user_inter_vimeo_detail() -> impl IntoResponse {
+    let template = UserInternetYoutubeDetailTemplate {};
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

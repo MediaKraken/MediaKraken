@@ -8,8 +8,9 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
+use sqlx::postgres::PgPool;
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -20,7 +21,8 @@ mod mk_lib_common_pagination;
 #[path = "../../mk_lib_database_media_home_media.rs"]
 mod mk_lib_database_media_home_media;
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/media/bss_user_media_home_movie.html")]
 struct TemplateMediaHomeContext {
     template_data: Vec<mk_lib_database_media_home_media::DBMediaHomeMediaList>,
     pagination_bar: String,
@@ -59,7 +61,7 @@ pub async fn user_media_home_media(
     .await
     .unwrap();
     Template::render(
-        "bss_user/media/bss_user_media_home_movie",
+        "bss_user/media/bss_user_media_home_movie.html",
         &TemplateMediaHomeContext {
             template_data: home_list,
             pagination_bar: pagination_html,
@@ -80,7 +82,7 @@ pub async fn user_media_home_media_detail(
 ) -> Template {
     let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
     Template::render(
-        "bss_user/media/bss_user_media_home_movie_detail",
+        "bss_user/media/bss_user_media_home_movie_detail.html",
         tera::Context::new().into_json(),
     )
 }

@@ -8,8 +8,9 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
+use sqlx::postgres::PgPool;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -17,22 +18,21 @@ mod mk_lib_logging;
 #[path = "../mk_lib_database_cron.rs"]
 mod mk_lib_database_cron;
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_admin/bss_admin_cron.html")]
 struct TemplateCronContext {
     template_data: Vec<mk_lib_database_cron::DBCronList>,
 }
 
-#[get("/cron")]
-pub async fn admin_cron(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
+pub async fn admin_cron(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
     let cron_list = mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool)
         .await
         .unwrap();
-    Template::render(
-        "bss_admin/bss_admin_cron",
-        &TemplateCronContext {
-            template_data: cron_list,
-        },
-    )
+    let template = TemplateCronContext {
+        template_data: &cron_list,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 // #[post("/cron_delete/<guid>")]

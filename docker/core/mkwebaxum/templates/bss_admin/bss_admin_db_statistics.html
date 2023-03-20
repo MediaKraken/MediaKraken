@@ -31,14 +31,14 @@
                                             <th>Record(s)</th>
                                         </tr>
                                     </thead>
-                                    {% set_global total_rows = 0 %}
+                                    {% let total_rows = 0.0 %}
                                     <tbody>
                                         {% for row_data in template_data_db_count %}
                                         <tr>
                                             <td>{{ row_data.table_name }}</td>
-                                            {% if row_data.table_rows != -1 %}
+                                            {% if row_data.table_rows != -1.0 %}
                                                 <td>{{ row_data.table_rows }}</td>
-                                                {% set_global total_rows = total_rows + row_data.table_rows %}
+                                                {% let total_rows = total_rows + row_data.table_rows %}
                                             {% else %}
                                                 <td>0</td>
                                             {% endif %}
@@ -63,13 +63,13 @@
                                         <th>Size</th>
                                     </tr>
                                 </thead>
-                                    {% set_global total_size = 0 %}
+                                    {% let total_size = 0 %}
                                 <tbody>
                                     {% for row_data in template_data_db_size %}
                                     <tr>
                                         <td>{{ row_data.table_name }}</td>
                                         <td>{{ row_data.table_size }}</td>
-                                        {% set_global total_size = total_size + row_data.table_size %}
+                                        {% let total_size = total_size + row_data.table_size %}
                                     </tr>
                                     {% endfor %}
                                     <tr>

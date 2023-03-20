@@ -6,8 +6,6 @@
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
-use crate::rocket::futures::FutureExt;
-use crate::rocket::futures::StreamExt;
 use docker_api::opts::ContainerListOpts;
 use docker_api::opts::LogsOpts;
 use docker_api::opts::ServiceListOpts;

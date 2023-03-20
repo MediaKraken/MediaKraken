@@ -10,8 +10,9 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
+use sqlx::postgres::PgPool;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -19,7 +20,8 @@ mod mk_lib_logging;
 #[path = "../mk_lib_database_sync.rs"]
 mod mk_lib_database_sync;
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/media/bss_user_media_sync.html")]
 struct TemplateSyncContext {
     template_data: Vec<mk_lib_database_sync::DBSyncList>,
 }
@@ -31,7 +33,7 @@ pub async fn user_sync(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> T
             .await
             .unwrap();
     Template::render(
-        "bss_user/media/bss_user_media_sync",
+        "bss_user/media/bss_user_media_sync.html",
         &TemplateSyncContext {
             template_data: sync_list,
         },

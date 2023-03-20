@@ -8,7 +8,7 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
 
 #[path = "../mk_lib_logging.rs"]
@@ -17,13 +17,15 @@ mod mk_lib_logging;
 #[path = "../mk_lib_common_docker.rs"]
 mod mk_lib_common_docker;
 
-#[get("/docker")]
-pub async fn admin_docker(user: AdminUser) -> Template {
+#[derive(Template)]
+#[template(path = "bss_admin/bss_admin_docker.html")]
+struct AdminDockerTemplate;
+
+pub async fn admin_docker() -> impl IntoResponse {
     let docker_results = mk_lib_common_docker::mk_common_docker_info().await.unwrap();
-    Template::render(
-        "bss_admin/bss_admin_docker",
-        tera::Context::new().into_json(),
-    )
+    let template = AdminDockerTemplate {};
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

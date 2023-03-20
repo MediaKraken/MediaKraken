@@ -8,16 +8,18 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
 
-#[get("/playback/video")]
-pub async fn user_playback_video(user: User) -> Template {
-    Template::render(
-        "bss_user/playback/bss_user_playback_video",
-        tera::Context::new().into_json(),
-    )
+#[derive(Template)]
+#[template(path = "bss_user/playback/bss_user_playback_video.html")]
+struct UserPlaybackVideoTemplate;
+
+pub async fn user_playback_video() -> impl IntoResponse {
+    let template = UserPlaybackVideoTemplate {};
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }

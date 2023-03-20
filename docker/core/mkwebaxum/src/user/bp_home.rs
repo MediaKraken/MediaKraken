@@ -8,13 +8,14 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/bss_user_home.html")]
 struct TemplateUserHomeContext {
     template_data_new_media: bool,
     template_data_user_media_queue: bool,
@@ -23,7 +24,7 @@ struct TemplateUserHomeContext {
 #[get("/home")]
 pub async fn user_home(user: User) -> Template {
     Template::render(
-        "bss_user/bss_user_home",
+        "bss_user/bss_user_home.html",
         &TemplateUserHomeContext {
             template_data_new_media: false,
             template_data_user_media_queue: false,

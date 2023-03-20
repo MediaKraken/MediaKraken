@@ -24,16 +24,16 @@
                 <div data-id={{row_data.template_metadata_guid}}>
                     <a href= "/user/metadata/movie_detail/{{row_data.template_metadata_guid}}" >
                         <img src="/static{{row_data.template_metadata_poster|safe}}" loading="lazy" height="300" width="200">
-                        {% if row_data.template_metadata_user_watched == True %}
+                        {% if row_data.template_metadata_user_watched == true %}
                             <img class="watched_icon" src="/static/image/eye.png" loading="lazy" height="25" width="25">
                         {% endif %}
-                        {% if row_data.template_metadata_user_rating_view == True %}
+                        {% if row_data.template_metadata_user_rating_view == true %}
                             <img class="rating_icon" src="/static/image/{{row_data.template_metadata_user_rating}}" loading="lazy" height="25" width="25">
                         {% endif %}
-                        {% if row_data.template_metadata_user_request == True %}
+                        {% if row_data.template_metadata_user_request == true %}
                             <img class="request_icon" src="/static/image/add-button.png" loading="lazy" height="25" width="25">
                         {% endif %}
-                        {% if row_data.template_metadata_user_queue == True %}
+                        {% if row_data.template_metadata_user_queue == true %}
                             <img class="queue_icon" src="/static/image/rectangles.png" loading="lazy" height="25" width="25">
                         {% endif %}
                     </a>

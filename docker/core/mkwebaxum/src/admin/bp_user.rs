@@ -9,8 +9,9 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
+use sqlx::postgres::PgPool;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -21,7 +22,8 @@ mod mk_lib_common_pagination;
 #[path = "../mk_lib_database_user.rs"]
 mod mk_lib_database_user;
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_admin/bss_admin_user.html")]
 struct TemplateAdminUserContext {
     template_data: Vec<mk_lib_database_user::DBUserList>,
     pagination_bar: String,
@@ -52,7 +54,7 @@ pub async fn admin_user(
         .await
         .unwrap();
     Template::render(
-        "bss_admin/bss_admin_user",
+        "bss_admin/bss_admin_user.html",
         &TemplateAdminUserContext {
             template_data: user_list,
             pagination_bar: pagination_html,

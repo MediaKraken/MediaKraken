@@ -8,8 +8,9 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
+use sqlx::postgres::PgPool;
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -20,7 +21,8 @@ mod mk_lib_common_pagination;
 #[path = "../../mk_lib_database_media_sports.rs"]
 mod mk_lib_database_media_sports;
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/media/bss_user_media_sports.html")]
 struct TemplateMediaSportsContext {
     template_data: Vec<mk_lib_database_media_sports::DBMediaSportsList>,
     pagination_bar: String,
@@ -56,7 +58,7 @@ pub async fn user_media_sports(
     .await
     .unwrap();
     Template::render(
-        "bss_user/media/bss_user_media_sports",
+        "bss_user/media/bss_user_media_sports.html",
         &TemplateMediaSportsContext {
             template_data: sports_list,
             pagination_bar: pagination_html,
@@ -77,7 +79,7 @@ pub async fn user_media_sports_detail(
 ) -> Template {
     let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
     Template::render(
-        "bss_user/media/bss_user_media_sports_detail",
+        "bss_user/media/bss_user_media_sports_detail.html",
         tera::Context::new().into_json(),
     )
 }

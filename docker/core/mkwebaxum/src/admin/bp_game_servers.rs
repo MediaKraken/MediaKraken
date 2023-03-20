@@ -8,8 +8,9 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
+use sqlx::postgres::PgPool;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -20,18 +21,14 @@ mod mk_lib_common_pagination;
 #[path = "../mk_lib_database_game_servers.rs"]
 mod mk_lib_database_game_servers;
 
-#[derive(Serialize)]
-struct TemplateAdminGameServersContext {
+#[derive(Template)]
+#[template(path = "bss_admin/bss_admin_game_servers.html")]
+struct TemplateAdminGameServers {
     template_data: Vec<mk_lib_database_game_servers::DBGameServerList>,
     pagination_bar: String,
 }
 
-#[get("/game_servers/<page>")]
-pub async fn admin_game_servers(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: AdminUser,
-    page: i32,
-) -> Template {
+pub async fn admin_game_servers(Extension(sqlx_pool): Extension<PgPool>, Path(page): Path<i32>,) -> impl IntoResponse {
     let db_offset: i32 = (page * 30) - 30;
     let mut total_pages: i64 =
         mk_lib_database_game_servers::mk_lib_database_game_server_count(&sqlx_pool, String::new())
@@ -55,11 +52,10 @@ pub async fn admin_game_servers(
     )
     .await
     .unwrap();
-    Template::render(
-        "bss_admin/bss_admin_game_servers",
-        &TemplateAdminGameServersContext {
-            template_data: dedicated_server_list,
-            pagination_bar: pagination_html,
-        },
-    )
+    let template = TemplateAdminGameServers {
+        template_data: &dedicated_server_list,
+        pagination_bar: &pagination_html,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }

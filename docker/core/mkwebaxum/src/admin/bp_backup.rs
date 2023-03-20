@@ -12,8 +12,9 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
+use sqlx::postgres::PgPool;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -27,17 +28,16 @@ pub struct BackupList {
     mm_backup_json: serde_json::Value,
 }
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_admin/bss_admin_backup.html")]
 struct TemplateBackupContext {
     template_data: Vec<BackupList>,
 }
 
-#[get("/backup")]
-pub async fn admin_backup(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
-    Template::render(
-        "bss_admin/bss_admin_backup",
-        tera::Context::new().into_json(),
-    )
+pub async fn admin_backup(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
+    let template = TemplateBackupContext { };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

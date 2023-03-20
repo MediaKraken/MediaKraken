@@ -8,8 +8,9 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
+use sqlx::postgres::PgPool;
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -20,7 +21,8 @@ mod mk_lib_common_pagination;
 #[path = "../../mk_lib_database_metadata_book.rs"]
 mod mk_lib_database_metadata_book;
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/metadata/bss_user_metadata_book.html")]
 struct TemplateMetaBookContext {
     template_data: Vec<mk_lib_database_metadata_book::DBMetaBookList>,
     pagination_bar: String,
@@ -58,7 +60,7 @@ pub async fn user_metadata_book(
     .await
     .unwrap();
     Template::render(
-        "bss_user/metadata/bss_user_metadata_book",
+        "bss_user/metadata/bss_user_metadata_book.html",
         &TemplateMetaBookContext {
             template_data: book_list,
             pagination_bar: pagination_html,
@@ -83,7 +85,7 @@ pub async fn user_metadata_book_detail(
             .await
             .unwrap();
     Template::render(
-        "bss_user/metadata/bss_user_metadata_book_detail",
+        "bss_user/metadata/bss_user_metadata_book_detail.html",
         &TemplateMetaBookDetailContext {
             template_data: detail_data,
         },

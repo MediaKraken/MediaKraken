@@ -8,13 +8,14 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/hardware/bss_user_hardware.html")]
 struct TemplateUserHardwareContext {
     template_data_phue: i32,
 }
@@ -22,7 +23,7 @@ struct TemplateUserHardwareContext {
 #[get("/hardware")]
 pub async fn user_hardware(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
     Template::render(
-        "bss_user/hardware/bss_user_hardware",
+        "bss_user/hardware/bss_user_hardware.html",
         &TemplateUserHardwareContext {
             template_data_phue: 0,
         },
@@ -32,7 +33,7 @@ pub async fn user_hardware(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) 
 #[get("/hardware_phue")]
 pub async fn user_hardware_phue(user: User) -> Template {
     Template::render(
-        "bss_user/hardware/bss_user_hardware_phue",
+        "bss_user/hardware/bss_user_hardware_phue.html",
         tera::Context::new().into_json(),
     )
 }

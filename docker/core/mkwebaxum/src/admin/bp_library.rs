@@ -3,13 +3,15 @@
 use stdext::function_name;
 use serde_json::json;
 use askama::Template;
+use askama_filters::filters;
 use axum::{
     extract::Path,
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
+use sqlx::postgres::PgPool;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -20,7 +22,8 @@ mod mk_lib_common_pagination;
 #[path = "../mk_lib_database_library.rs"]
 mod mk_lib_database_library;
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_admin/bss_admin_library.html")]
 struct TemplateAdminLibraryContext {
     template_data: Vec<mk_lib_database_library::DBLibraryList>,
     pagination_bar: String,
@@ -51,7 +54,7 @@ pub async fn admin_library(
             .await
             .unwrap();
     Template::render(
-        "bss_admin/bss_admin_library",
+        "bss_admin/bss_admin_library.html",
         &TemplateAdminLibraryContext {
             template_data: library_list,
             pagination_bar: pagination_html,

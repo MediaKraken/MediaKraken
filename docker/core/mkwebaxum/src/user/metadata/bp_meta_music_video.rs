@@ -8,8 +8,9 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
+use sqlx::postgres::PgPool;
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -20,7 +21,8 @@ mod mk_lib_common_pagination;
 #[path = "../../mk_lib_database_metadata_music_video.rs"]
 mod mk_lib_database_metadata_music_video;
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/metadata/bss_user_metadata_music_video.html")]
 struct TemplateMetaMusicVideoContext {
     template_data: Vec<mk_lib_database_metadata_music_video::DBMetaMusicVideoList>,
     pagination_bar: String,
@@ -61,7 +63,7 @@ pub async fn user_metadata_music_video(
         .await
         .unwrap();
     Template::render(
-        "bss_user/metadata/bss_user_metadata_music_video",
+        "bss_user/metadata/bss_user_metadata_music_video.html",
         &TemplateMetaMusicVideoContext {
             template_data: music_video_list,
             pagination_bar: pagination_html,
@@ -82,7 +84,7 @@ pub async fn user_metadata_music_video_detail(
 ) -> Template {
     let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
     Template::render(
-        "bss_user/metadata/bss_user_metadata_music_video_detail",
+        "bss_user/metadata/bss_user_metadata_music_video_detail.html",
         tera::Context::new().into_json(),
     )
 }

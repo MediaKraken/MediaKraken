@@ -8,8 +8,9 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
+use sqlx::postgres::PgPool;
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -20,7 +21,8 @@ mod mk_lib_common_pagination;
 #[path = "../../mk_lib_database_metadata_movie.rs"]
 mod mk_lib_database_metadata_movie;
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/metadata/bss_user_metadata_movie.html")]
 struct TemplateMetaMovieContext {
     template_data: Vec<TemplateMetaMovieList>,
     pagination_bar: String,
@@ -110,7 +112,7 @@ pub async fn user_metadata_movie(
         template_data_vec.push(temp_meta_line);
     }
     Template::render(
-        "bss_user/metadata/bss_user_metadata_movie",
+        "bss_user/metadata/bss_user_metadata_movie.html",
         &TemplateMetaMovieContext {
             template_data: template_data_vec,
             pagination_bar: pagination_html,
@@ -139,7 +141,7 @@ pub async fn user_metadata_movie_detail(
     .await
     .unwrap();
     Template::render(
-        "bss_user/metadata/bss_user_metadata_movie_detail",
+        "bss_user/metadata/bss_user_metadata_movie_detail.html",
         &TemplateMetaMovieDetailContext {
             template_data_json: movie_metadata.mm_metadata_movie_json,
             template_data_json_media_ffmpeg: json!({None}),

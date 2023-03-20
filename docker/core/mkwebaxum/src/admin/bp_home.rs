@@ -10,8 +10,9 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
+use sqlx::postgres::PgPool;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -82,7 +83,7 @@ pub async fn admin_home(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser
     let mut server_scans = Vec::new();
     let locale = SystemLocale::default().unwrap();
     Template::render(
-        "bss_admin/bss_admin_home",
+        "bss_admin/bss_admin_home.html",
         &TemplateHomeContext {
             template_data_server_info_server_name: option_json["MediaKrakenServer"]["Server Name"]
                 .to_string(),

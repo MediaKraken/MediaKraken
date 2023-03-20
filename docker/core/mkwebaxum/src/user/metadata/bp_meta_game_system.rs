@@ -9,8 +9,9 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
+use sqlx::postgres::PgPool;
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -21,7 +22,8 @@ mod mk_lib_common_pagination;
 #[path = "../../mk_lib_database_metadata_game_system.rs"]
 mod mk_lib_database_metadata_game_system;
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/metadata/bss_user_metadata_game_system.html")]
 struct TemplateMetaGameSystemContext {
     template_data: Vec<mk_lib_database_metadata_game_system::DBMetaGameSystemList>,
     pagination_bar: String,
@@ -61,7 +63,7 @@ pub async fn user_metadata_game_system(
         .await
         .unwrap();
     Template::render(
-        "bss_user/metadata/bss_user_metadata_game_system",
+        "bss_user/metadata/bss_user_metadata_game_system.html",
         &TemplateMetaGameSystemContext {
             template_data: game_system_list,
             pagination_bar: pagination_html,
@@ -88,7 +90,7 @@ pub async fn user_metadata_game_system_detail(
         .await
         .unwrap();
     Template::render(
-        "bss_user/metadata/bss_user_metadata_game_system_detail",
+        "bss_user/metadata/bss_user_metadata_game_system_detail.html",
         &TemplateMetaGameSystemDetailContext {
             template_data: detail_data,
         },

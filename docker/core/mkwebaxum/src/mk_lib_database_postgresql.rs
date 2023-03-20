@@ -13,8 +13,8 @@ use serde_json::json;
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct PGTableRows {
     table_schema_name: String,
-    table_name: String,
-    table_rows: f32,
+    pub table_name: String,
+    pub table_rows: f32,
 }
 
 pub async fn mk_lib_database_table_rows(
@@ -49,8 +49,8 @@ pub async fn mk_lib_database_table_rows(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct PGTableSize {
-    table_name: String,
-    table_size: i64,
+    pub table_name: String,
+    pub table_size: i64,
 }
 
 pub async fn mk_lib_database_table_size(

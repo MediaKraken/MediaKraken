@@ -8,24 +8,28 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
 
-#[get("/internet/vimeo")]
-pub async fn user_inter_vimeo(user: User) -> Template {
-    Template::render(
-        "bss_user/internet/bss_user_internet_vimeo",
-        tera::Context::new().into_json(),
-    )
+#[derive(Template)]
+#[template(path = "bss_user/internet/bss_user_internet_vimeo.html")]
+struct UserInternetVimeoTemplate;
+
+pub async fn user_inter_vimeo() -> impl IntoResponse {
+    let template = UserInternetVimeoTemplate {};
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
-#[get("/internet/vimeo_detail/<guid>")]
-pub async fn user_inter_vimeo_detail(user: User, guid: &str) -> Template {
-    Template::render(
-        "bss_user/internet/bss_user_internet_vimeo_detail",
-        tera::Context::new().into_json(),
-    )
+#[derive(Template)]
+#[template(path = "bss_user/internet/bss_user_internet_vimeo_detail.html")]
+struct UserInternetVimeoDetailTemplate;
+
+pub async fn user_inter_vimeo_detail() -> impl IntoResponse {
+    let template = UserInternetVimeoDetailTemplate {};
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }

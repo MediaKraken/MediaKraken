@@ -8,8 +8,9 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
+use sqlx::postgres::PgPool;
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -17,7 +18,7 @@ mod mk_lib_logging;
 #[post("/media/genre")]
 pub async fn user_media_genre(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
     Template::render(
-        "bss_user/media/bss_user_media_genre_video",
+        "bss_user/media/bss_user_media_genre_video.html",
         tera::Context::new().into_json(),
     )
 }

@@ -18,7 +18,7 @@
     <input type="{{ type }}"
            name="{{ name }}"
            id="{{ name }}"
-           value='{{ self::value_for(name=name) }}'
+           value="{{ self::value_for(name=name) }}"
            {% if name in errors %} class="error" {% endif %}
     />
     {{ self::errors_for(name=name) }}

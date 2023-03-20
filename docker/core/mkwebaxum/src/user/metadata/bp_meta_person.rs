@@ -8,8 +8,9 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
+use sqlx::postgres::PgPool;
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -20,7 +21,8 @@ mod mk_lib_common_pagination;
 #[path = "../../mk_lib_database_metadata_person.rs"]
 mod mk_lib_database_metadata_person;
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/metadata/bss_user_metadata_person.html")]
 struct TemplateMetaPersonContext {
     template_data: Vec<mk_lib_database_metadata_person::DBMetaPersonList>,
     pagination_bar: String,
@@ -59,7 +61,7 @@ pub async fn user_metadata_person(
     .await
     .unwrap();
     Template::render(
-        "bss_user/metadata/bss_user_metadata_person",
+        "bss_user/metadata/bss_user_metadata_person.html",
         &TemplateMetaPersonContext {
             template_data: person_list,
             pagination_bar: pagination_html,
@@ -80,7 +82,7 @@ pub async fn user_metadata_person_detail(
 ) -> Template {
     let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
     Template::render(
-        "bss_user/metadata/bss_user_metadata_person_detail",
+        "bss_user/metadata/bss_user_metadata_person_detail.html",
         tera::Context::new().into_json(),
     )
 }

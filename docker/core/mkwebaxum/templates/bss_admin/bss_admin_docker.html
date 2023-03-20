@@ -23,10 +23,10 @@
                                     <h5 class="mb-0">Docker Info</h5>
                                 </div>
                                 <div class="card-body">
-                                    <p class="card-text">Operating System: {{data_host['operating_system']}}</p>
-                                    <p>Kernel: {{data_host['kernel_version']}}</p>
-                                    <p>Host IP: {{data_host['Swarm']['NodeAddr']}}</p>
-                                    <p>Docker Engine: {{data_host['server_version']}}</p>
+                                    <p class="card-text">Operating System: {{data_host["operating_system"]}}</p>
+                                    <p>Kernel: {{data_host["kernel_version"]}}</p>
+                                    <p>Host IP: {{data_host["Swarm"]["NodeAddr"]}}</p>
+                                    <p>Docker Engine: {{data_host["server_version"]}}</p>
                                 </div>
                             </div>
                         </div>
@@ -38,7 +38,7 @@
                                 <div class="card-body">
                                     <p class="card-text">Token: {{data_swam}}</p>
                                     <p>Run following on other node(s) to join swarm cluster.</p>
-                                    <p>docker swarm join --token {{data_swam}} {{data_host['Swarm']['NodeAddr']}}:2377</p>
+                                    <p>docker swarm join --token {{data_swam}} {{data_host["Swarm"]["NodeAddr"]}}:2377</p>
                                 </div>
                             </div>
                         </div>
@@ -62,10 +62,10 @@
                                         <tbody>
                                             {% for row_data in template_data %}
                                             <tr>
-                                                <td>{{ row_data['Description']['Hostname'] }}</td>
-                                                <td>{{ row_data['Description']['Platform']['OS'] }}</td>
-                                                <td>{{ row_data['ID'] }}</td>
-                                                <td>{{ row_data['Description']['Engine']['EngineVersion'] }}</td>
+                                                <td>{{ row_data["Description"]["Hostname"] }}</td>
+                                                <td>{{ row_data["Description"]["Platform"]["OS"] }}</td>
+                                                <td>{{ row_data["ID"] }}</td>
+                                                <td>{{ row_data["Description"]["Engine"]["EngineVersion"] }}</td>
                                             </tr>
                                             {% endfor %}
                                         </tbody>

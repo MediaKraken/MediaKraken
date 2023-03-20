@@ -8,7 +8,7 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
 
 #[path = "../mk_lib_logging.rs"]
@@ -23,11 +23,3 @@ pub async fn public_about() -> impl IntoResponse {
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())
 }
-
-// #[get("/about")]
-// pub async fn public_about() -> Template {
-//     Template::render(
-//         "bss_public/bss_public_about",
-//         tera::Context::new().into_json(),
-//     )
-// }

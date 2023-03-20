@@ -8,18 +8,20 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
 
-#[get("/internet/twitchtv")]
-pub async fn user_inter_twitchtv(user: User) -> Template {
-    Template::render(
-        "bss_user/internet/bss_user_internet_twitch",
-        tera::Context::new().into_json(),
-    )
+#[derive(Template)]
+#[template(path = "bss_user/internet/bss_user_internet_twitch.html")]
+struct UserInternetTwitchTVTemplate;
+
+pub async fn user_inter_twitchtv() -> impl IntoResponse {
+    let template = UserInternetTwitchTVTemplate {};
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

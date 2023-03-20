@@ -8,18 +8,21 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
+use sqlx::postgres::PgPool;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
 
-#[get("/hardware")]
-pub async fn admin_hardware(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
-    Template::render(
-        "bss_admin/bss_admin_hardware",
-        tera::Context::new().into_json(),
-    )
+#[derive(Template)]
+#[template(path = "bss_admin/bss_admin_hardware.html")]
+struct AdminHardwareTemplate;
+
+pub async fn admin_hardware() -> impl IntoResponse {
+    let template = AdminHardwareTemplate {};
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

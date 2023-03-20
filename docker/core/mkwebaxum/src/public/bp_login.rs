@@ -8,7 +8,7 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
 
 #[path = "../mk_lib_logging.rs"]
@@ -17,7 +17,7 @@ mod mk_lib_logging;
 #[get("/login")]
 pub async fn public_login() -> Template {
     Template::render(
-        "bss_public/bss_public_login",
+        "bss_public/bss_public_login.html",
         tera::Context::new().into_json(),
     )
 }

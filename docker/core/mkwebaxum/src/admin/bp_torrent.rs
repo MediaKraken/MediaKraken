@@ -16,7 +16,7 @@ use axum::{
     http::{header, HeaderMap, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Router,
+    Extension, Router,
 };
 
 #[path = "../mk_lib_logging.rs"]
@@ -99,7 +99,7 @@ pub async fn admin_torrent(user: AdminUser) -> Template {
 
     let response: Result<RpcResponse<SessionClose>> = transmission_client.session_close().await;
     Template::render(
-        "bss_admin/bss_admin_torrent",
+        "bss_admin/bss_admin_torrent.html",
         tera::Context::new().into_json(),
     )
 }

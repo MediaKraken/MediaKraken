@@ -40,32 +40,32 @@
                                                     <td>{{data_ffprobe_data[stream_uuid][0]}}</td>
                                                     <td>{{data_ffprobe_data[stream_uuid][1]}}</td>
                                                     <td>
-                                                        <select id="audio{{loop.index|string}}" >
+                                                        <select id="audio{{loop.index}}" >
                                                             {% for audio_stream in data_ffprobe_data[stream_uuid][2] %}
-                                                                <option value="{{loop.index|string}}">{{audio_stream[2]}} ({{audio_stream[0]}}) {{audio_stream[1]}}</option>
+                                                                <option value="{{loop.index}}">{{audio_stream[2]}} ({{audio_stream[0]}}) {{audio_stream[1]}}</option>
                                                             {% endfor %}
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <select id="subtitle{{loop.index|string}}" >
+                                                        <select id="subtitle{{loop.index}}" >
                                                             <option value="None">None</option>
                                                             {% if data_ffprobe_data[stream_uuid][3]|length > 0 %}
                                                                 {% for subtitle_stream in data_ffprobe_data[stream_uuid][3] %}
-                                                                    <option value="{{loop.index|string}}">{{subtitle_stream}}</option>
+                                                                    <option value="{{loop.index}}">{{subtitle_stream}}</option>
                                                                 {% endfor %}
                                                             {% endif %}
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <select id="playback_device{{loop.index|string}}" >
+                                                        <select id="playback_device{{loop.index}}" >
                                                             <option value="web_viewer">Web Viewer</option>
                                                             {% for playback_device in data_playback_device %}
-                                                                <option value="{{loop.index|string}}">{{playback_device}}</option>
+                                                                <option value="{{loop.index}}">{{playback_device}}</option>
                                                             {% endfor %}
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <input type="button" id="play{{loop.index|string}}" value="Play" />
+                                                        <input type="button" id="play{{loop.index}}" value="Play" />
                                                     </td>
                                                 </tr>
                                             {% endfor %}
