@@ -1,0 +1,26 @@
+[package]
+name = "mkmetadatamame"
+version = "0.0.1"
+edition = "2021"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+
+[dependencies]
+async-std = "1.10.0"
+chrono = "0.4.19"
+flate2 = "1.0.22"
+quickxml_to_serde = { version = "0.5.0", features = ["json_types"] }
+reqwest = { version = "0.11.9", default-features = false, features = ["json", "rustls-tls"] }
+rustls = "0.20.2"
+serde = { version = "1.0.136", features = ["derive"] }
+serde_json = "1.0.79"
+sqlx = { version = "0.5.11", features = [ "chrono", "json", "runtime-tokio-rustls", "postgres", "uuid" ] }
+sys-info = "0.9.1"
+tar = "0.4.38"
+tokio = { version = "1.17.0", features = ["full"] }
+zip = "0.5.13"
+
+[dev-dependencies]
+tokio-test = "*"
