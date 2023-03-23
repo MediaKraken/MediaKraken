@@ -23,17 +23,14 @@ mod mk_lib_database_media_music_video;
 
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_music_video.html")]
-struct TemplateMediaMusicVideoContext {
-    template_data: Vec<mk_lib_database_media_music_video::DBMediaMusicVideoList>,
-    pagination_bar: String,
+struct TemplateMediaMusicVideoContext<'a> {
+    template_data: &'a Vec<mk_lib_database_media_music_video::DBMediaMusicVideoList>,
+    template_data_exists: &'a bool,
+    pagination_bar: &'a String,
+    page: &'a usize,
 }
 
-#[get("/media/music_video/<page>")]
-pub async fn user_media_music_video(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    page: i32,
-) -> Template {
+pub async fn user_media_music_video(Extension(sqlx_pool): Extension<PgPool>, Path(page): Path<i32>) -> impl IntoResponse {
     let db_offset: i32 = (page * 30) - 30;
     let mut total_pages: i64 =
         mk_lib_database_media_music_video::mk_lib_database_media_music_video_count(
@@ -61,31 +58,31 @@ pub async fn user_media_music_video(
         )
         .await
         .unwrap();
-    Template::render(
-        "bss_user/media/bss_user_media_music_video.html",
-        &TemplateMediaMusicVideoContext {
-            template_data: music_video_list,
-            pagination_bar: pagination_html,
-        },
-    )
+    let mut template_data_exists: bool = false;
+    if music_video_list.len() > 0 {template_data_exists = true;}
+    let page_usize = page as usize;
+    let template = TemplateMediaMusicVideoContext {
+        template_data: &music_video_list,
+        template_data_exists: &template_data_exists,
+        pagination_bar: &pagination_html,
+        page: &page_usize,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/media/bss_user_media_music_video_detail.html")]
 struct TemplateMediaMusicVideoDetailContext {
     template_data: serde_json::Value,
 }
 
-#[get("/media/music_video_detail/<guid>")]
-pub async fn user_media_music_video_detail(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    guid: rocket::serde::uuid::Uuid,
-) -> Template {
-    let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
-    Template::render(
-        "bss_user/media/bss_user_media_music_video_detail.html",
-        tera::Context::new().into_json(),
-    )
+pub async fn user_media_music_video_detail(Extension(sqlx_pool): Extension<PgPool>, Path(guid): Path<uuid::Uuid>) -> impl IntoResponse {
+    let template = TemplateMediaMusicVideoDetailContext {
+        template_data: json!({}),
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

@@ -1,6 +1,7 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
 use serde_json::json;
+use serde::{Serialize, Deserialize};
 use stdext::function_name;
 use askama::Template;
 use axum::{
@@ -12,6 +13,12 @@ use axum::{
 };
 use sqlx::postgres::PgPool;
 
+mod filters {
+    pub fn space_to_html(s: &str) -> ::askama::Result<String> {
+        Ok(s.replace(" ", "%20"))
+    }
+}
+
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
 
@@ -20,13 +27,6 @@ mod mk_lib_common_pagination;
 
 #[path = "../../mk_lib_database_metadata_movie.rs"]
 mod mk_lib_database_metadata_movie;
-
-#[derive(Template)]
-#[template(path = "bss_user/metadata/bss_user_metadata_movie.html")]
-struct TemplateMetaMovieContext {
-    template_data: Vec<TemplateMetaMovieList>,
-    pagination_bar: String,
-}
 
 #[derive(Debug, Deserialize, Serialize)]
 struct TemplateMetaMovieList {
@@ -41,12 +41,16 @@ struct TemplateMetaMovieList {
     template_metadata_user_queue: serde_json::Value,
 }
 
-#[get("/metadata/movie/<page>")]
-pub async fn user_metadata_movie(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    page: i32,
-) -> Template {
+#[derive(Template)]
+#[template(path = "bss_user/metadata/bss_user_metadata_movie.html")]
+struct TemplateMetaMovieContext<'a> {
+    template_data: &'a Vec<TemplateMetaMovieList>,
+    template_data_exists: &'a bool,
+    pagination_bar: &'a String,
+    page: &'a usize,
+}
+
+pub async fn user_metadata_movie(Extension(sqlx_pool): Extension<PgPool>, Path(page): Path<i32>) -> impl IntoResponse {
     let db_offset: i32 = (page * 30) - 30;
     let mut total_pages: i64 =
         mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(
@@ -89,10 +93,11 @@ pub async fn user_metadata_movie(
         {
             let rating_json: serde_json::Value =
                 row_data.mm_metadata_user_json.as_ref().unwrap().clone();
-            rating_status = rating_json["UserStats"][user.id().to_string()]["Rating"].clone();
-            watched_status = rating_json["UserStats"][user.id().to_string()]["Watched"].clone();
-            request_status = rating_json["UserStats"][user.id().to_string()]["Request"].clone();
-            queue_status = rating_json["UserStats"][user.id().to_string()]["Queue"].clone();
+                // TODO set status's
+            // rating_status = rating_json["UserStats"][user.id().to_string()]["Rating"].clone();
+            // watched_status = rating_json["UserStats"][user.id().to_string()]["Watched"].clone();
+            // request_status = rating_json["UserStats"][user.id().to_string()]["Request"].clone();
+            // queue_status = rating_json["UserStats"][user.id().to_string()]["Queue"].clone();
         }
         let mut mm_poster: String = "/image/Movie-icon.png".to_string();
         if row_data.mm_poster.len() > 0 {
@@ -111,47 +116,36 @@ pub async fn user_metadata_movie(
         };
         template_data_vec.push(temp_meta_line);
     }
-    Template::render(
-        "bss_user/metadata/bss_user_metadata_movie.html",
-        &TemplateMetaMovieContext {
-            template_data: template_data_vec,
-            pagination_bar: pagination_html,
-        },
-    )
+    let template = TemplateMetaMovieContext {
+        template_data: &template_data_vec,
+        pagination_bar: &pagination_html,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/metadata/bss_user_metadata_movie_detail.html")]
 struct TemplateMetaMovieDetailContext {
     template_data_json: serde_json::Value,
     template_data_json_media_ffmpeg: serde_json::Value,
     template_data_json_media_crew: serde_json::Value,
 }
 
-#[get("/metadata/movie_detail/<guid>")]
-pub async fn user_metadata_movie_detail(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    guid: rocket::serde::uuid::Uuid,
-) -> Template {
-    let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
+pub async fn user_metadata_movie_detail(Extension(sqlx_pool): Extension<PgPool>, Path(guid): Path<uuid::Uuid>) -> impl IntoResponse {
     let movie_metadata = mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_detail_by_guid(
         &sqlx_pool,
-        tmp_uuid,
+        guid,
     )
     .await
     .unwrap();
-    Template::render(
-        "bss_user/metadata/bss_user_metadata_movie_detail.html",
-        &TemplateMetaMovieDetailContext {
-            template_data_json: movie_metadata.mm_metadata_movie_json,
-            template_data_json_media_ffmpeg: json!({None}),
-            template_data_json_media_crew: json!({None}),
-        },
-    )
-    // Template::render(
-    //     "bss_user/metadata/bss_user_metadata_movie_detail",
-    //     tera::Context::new().into_json(),
-    // )
+    let template = TemplateMetaMovieDetailContext {
+        template_data_json: movie_metadata.mm_metadata_movie_json,
+        template_data_json_media_ffmpeg: json!({None}),
+        template_data_json_media_crew: json!({None}),
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

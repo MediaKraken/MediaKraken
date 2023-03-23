@@ -42,9 +42,9 @@ pub async fn mk_lib_database_metadata_collection_count(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaCollectionList {
-    mm_metadata_collection_guid: uuid::Uuid,
-    mm_metadata_collection_name: String,
-    mm_metadata_collection_imagelocal_json: serde_json::Value,
+    pub mm_metadata_collection_guid: uuid::Uuid,
+    pub mm_metadata_collection_name: String,
+    pub mm_metadata_collection_imagelocal_json: serde_json::Value,
 }
 
 pub async fn mk_lib_database_metadata_collection_read(

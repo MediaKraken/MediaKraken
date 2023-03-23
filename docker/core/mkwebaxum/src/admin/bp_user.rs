@@ -1,8 +1,5 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use serde::{Deserialize, Serialize};
-use stdext::function_name;
-use serde_json::json;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -11,7 +8,10 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgPool;
+use stdext::function_name;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -24,17 +24,16 @@ mod mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_user.html")]
-struct TemplateAdminUserContext {
-    template_data: Vec<mk_lib_database_user::DBUserList>,
-    pagination_bar: String,
+struct TemplateAdminUserContext<'a> {
+    template_data: &'a Vec<mk_lib_database_user::DBUserList>,
+    pagination_bar: &'a String,
+    page: &'a usize,
 }
 
-#[get("/user/<page>")]
 pub async fn admin_user(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: AdminUser,
-    page: i32,
-) -> Template {
+    Extension(sqlx_pool): Extension<PgPool>,
+    Path(page): Path<i32>,
+) -> impl IntoResponse {
     let db_offset: i32 = (page * 30) - 30;
     let mut total_pages: i64 =
         mk_lib_database_user::mk_lib_database_user_count(&sqlx_pool, String::new())
@@ -53,37 +52,38 @@ pub async fn admin_user(
     let user_list = mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool, db_offset, 30)
         .await
         .unwrap();
-    Template::render(
-        "bss_admin/bss_admin_user.html",
-        &TemplateAdminUserContext {
-            template_data: user_list,
-            pagination_bar: pagination_html,
-        },
-    )
+    let page_usize = page as usize;
+    let template = TemplateAdminUserContext {
+        template_data: &user_list,
+        pagination_bar: &pagination_html,
+        page: &page_usize,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
-#[get("/user_detail/<guid>")]
+#[derive(Template)]
+#[template(path = "bss_admin/bss_admin_user_detail.html")]
+struct TemplateAdminUserDetailContext {}
+
 pub async fn admin_user_detail(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: AdminUser,
-    guid: rocket::serde::uuid::Uuid,
-) -> Template {
-    Template::render(
-        "bss_admin/bss_admin_user_detail",
-        tera::Context::new().into_json(),
-    )
+    Extension(sqlx_pool): Extension<PgPool>,
+    Path(guid): Path<uuid::Uuid>,
+) -> impl IntoResponse {
+    let template = TemplateAdminUserDetailContext {};
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
-#[post("/user_delete/<guid>")]
+#[derive(Template)]
+#[template(path = "bss_admin/bss_admin_user_delete.html")]
+struct TemplateAdminUserDeleteContext {}
+
 pub async fn admin_user_delete(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: AdminUser,
-    guid: rocket::serde::uuid::Uuid,
-) -> Template {
-    let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
-    mk_lib_database_user::mk_lib_database_user_delete(&sqlx_pool, tmp_uuid).await;
-    Template::render(
-        "bss_admin/bss_admin_user_delete",
-        tera::Context::new().into_json(),
-    )
+    Extension(sqlx_pool): Extension<PgPool>,
+    Path(guid): Path<uuid::Uuid>,
+) -> impl IntoResponse {
+    let template = TemplateAdminUserDeleteContext {};
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }

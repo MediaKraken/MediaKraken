@@ -5,6 +5,7 @@ use chrono::prelude::*;
 use core::fmt::Write;
 use paginator::{PageItem, Paginator};
 use serde_json::json;
+use serde::{Serialize, Deserialize};
 use stdext::function_name;
 use askama::Template;
 use axum::{
@@ -15,6 +16,16 @@ use axum::{
     Extension, Router,
 };
 use sqlx::postgres::PgPool;
+
+mod filters {
+    pub fn space_to_html(s: &str) -> ::askama::Result<String> {
+        Ok(s.replace(" ", "%20"))
+    }
+
+    pub fn slash_to_asterik(s: &str) -> ::askama::Result<String> {
+        Ok(s.replace("/", "*"))
+    }
+}
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -30,12 +41,15 @@ pub struct BackupList {
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_backup.html")]
-struct TemplateBackupContext {
-    template_data: Vec<BackupList>,
+struct TemplateBackupContext<'a> {
+    template_data: &'a Vec<BackupList>,
+    pagination_bar: &'a String,
+    page: &'a usize,
 }
 
 pub async fn admin_backup(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
-    let template = TemplateBackupContext { };
+    let template = TemplateBackupContext {
+     };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())
 }

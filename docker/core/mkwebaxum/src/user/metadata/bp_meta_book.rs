@@ -23,17 +23,14 @@ mod mk_lib_database_metadata_book;
 
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_book.html")]
-struct TemplateMetaBookContext {
-    template_data: Vec<mk_lib_database_metadata_book::DBMetaBookList>,
-    pagination_bar: String,
+struct TemplateMetaBookContext<'a> {
+    template_data: &'a Vec<mk_lib_database_metadata_book::DBMetaBookList>,
+    template_data_exists: &'a bool,
+    pagination_bar: &'a String,
+    page: &'a usize,
 }
 
-#[get("/metadata/book/<page>")]
-pub async fn user_metadata_book(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    page: i32,
-) -> Template {
+pub async fn user_metadata_book(Extension(sqlx_pool): Extension<PgPool>, Path(page): Path<i32>) -> impl IntoResponse {
     let db_offset: i32 = (page * 30) - 30;
     let mut total_pages: i64 = mk_lib_database_metadata_book::mk_lib_database_metadata_book_count(
         &sqlx_pool,
@@ -59,39 +56,31 @@ pub async fn user_metadata_book(
     )
     .await
     .unwrap();
-    Template::render(
-        "bss_user/metadata/bss_user_metadata_book.html",
-        &TemplateMetaBookContext {
-            template_data: book_list,
-            pagination_bar: pagination_html,
-        },
-    )
+    let template = TemplateMetaBookContext {
+        template_data: &book_list,
+        pagination_bar: &pagination_html,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/metadata/bss_user_metadata_book_detail.html")]
 struct TemplateMetaBookDetailContext {
     template_data: serde_json::Value,
 }
 
-#[get("/metadata/book_detail/<guid>")]
-pub async fn user_metadata_book_detail(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    guid: rocket::serde::uuid::Uuid,
-) -> Template {
-    let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
+pub async fn user_metadata_book_detail(Extension(sqlx_pool): Extension<PgPool>, Path(guid): Path<uuid::Uuid>) -> impl IntoResponse {
     let detail_data =
-        mk_lib_database_metadata_book::mk_lib_database_metadata_book_detail(&sqlx_pool, tmp_uuid)
+        mk_lib_database_metadata_book::mk_lib_database_metadata_book_detail(&sqlx_pool, guid)
             .await
             .unwrap();
-    Template::render(
-        "bss_user/metadata/bss_user_metadata_book_detail.html",
-        &TemplateMetaBookDetailContext {
-            template_data: detail_data,
-        },
-    )
+    let template = TemplateMetaBookDetailContext {
+        template_data: detail_data,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
-
 /*
 
 @blueprint_user_metadata_periodical.route('/user_meta_periodical', methods=['GET', 'POST'])

@@ -36,7 +36,7 @@ pub async fn mk_lib_database_user_exists(
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBUserList {
     id: i32,
-    email: String,
+    pub email: String,
     is_admin: bool,
 }
 

@@ -18,12 +18,15 @@ mod mk_lib_logging;
 #[path = "../../mk_lib_database_media_images.rs"]
 mod mk_lib_database_media_images;
 
-#[get("/media/image")]
-pub async fn user_media_image(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
-    Template::render(
-        "bss_user/media/bss_user_media_image_gallery.html",
-        tera::Context::new().into_json(),
-    )
+#[derive(Template)]
+#[template(path = "bss_user/media/bss_user_media_image_gallery.html")]
+struct TemplateUserImageContext {}
+
+pub async fn user_media_image(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
+    let template = TemplateUserImageContext {
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

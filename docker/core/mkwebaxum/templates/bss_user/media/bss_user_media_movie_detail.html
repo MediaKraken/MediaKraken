@@ -49,7 +49,7 @@
                                                     <td>
                                                         <select id="subtitle{{loop.index}}" >
                                                             <option value="None">None</option>
-                                                            {% if data_ffprobe_data[stream_uuid][3]|length > 0 %}
+                                                            {% if data_ffprobe_data[stream_uuid][3]|wordcount  > 0 %}
                                                                 {% for subtitle_stream in data_ffprobe_data[stream_uuid][3] %}
                                                                     <option value="{{loop.index}}">{{subtitle_stream}}</option>
                                                                 {% endfor %}
@@ -76,18 +76,18 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-xl-7"><span>Title: {{json_metadata['mm_metadata_json']['title']}}</span></div>
-                                <div class="col"><span class="text-right">Release Date: {{json_metadata['mm_metadata_json']['release_date']}}</span></div>
+                                <div class="col-xl-7"><span>Title: {{json_metadata["mm_metadata_json"]["title"]}}</span></div>
+                                <div class="col"><span class="text-right">Release Date: {{json_metadata["mm_metadata_json"]["release_date"]}}</span></div>
                             </div>
                             <div class="row">
                                 <div class="col">
-                                    <p>Tagline: {{json_metadata['mm_metadata_json']['tagline']}}<br><br></p>
+                                    <p>Tagline: {{json_metadata["mm_metadata_json"]["tagline"]}}<br><br></p>
                                 </div>
                             </div>
-                            {% if json_metadata['mm_metadata_json']['title'] != json_metadata['mm_metadata_json']['original_title'] %}
+                            {% if json_metadata["mm_metadata_json"]["title"] != json_metadata["mm_metadata_json"]["original_title"] %}
                                 <div class="row">
                                     <div class="col">
-                                        <p>Alternate Title: {{json_metadata['mm_metadata_json']['original_title']}}<br><br></p>
+                                        <p>Alternate Title: {{json_metadata["mm_metadata_json"]["original_title"]}}<br><br></p>
                                     </div>
                                 </div>
                             {% endif %}
@@ -107,7 +107,7 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <p>Overview: {{json_metadata['mm_metadata_json']['overview']}}</p>
+                    <p>Overview: {{json_metadata["mm_metadata_json"]["overview"]}}</p>
                 </div>
             </div>
             <div class="row">
@@ -124,7 +124,7 @@
                     <div class="grid">
                         {% for chapter_info in data_json_media_chapters %}
                         <div class="col-1-4">
-                            <a href="/user/media/playback/hls/{{data_guid}}/{{chapter_info[0]|replace(from=' ', to='%20')}}/0/0">
+                            <a href="/user/media/playback/hls/{{data_guid}}/{{chapter_info[0]|space_to_html}}/0/0">
                                 <img src="/static/meta/images/{{chapter_info[1]}}" height="150" width="150">
                             </a>
                         </div>

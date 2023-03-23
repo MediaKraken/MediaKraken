@@ -1,5 +1,13 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
+use askama::Template;
+use axum::{
+    extract::Path,
+    http::{header, HeaderMap, StatusCode},
+    response::{Html, IntoResponse},
+    routing::{get, post},
+    Extension, Router,
+};
 use bytesize::ByteSize;
 use core::fmt::Write;
 use paginator::{PageItem, Paginator};
@@ -10,14 +18,6 @@ use transmission_rpc::types::{
     TorrentAddArgs, TorrentAddedOrDuplicate, TorrentGetField, Torrents,
 };
 use transmission_rpc::TransClient;
-use askama::Template;
-use axum::{
-    extract::Path,
-    http::{header, HeaderMap, StatusCode},
-    response::{Html, IntoResponse},
-    routing::{get, post},
-    Extension, Router,
-};
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -25,11 +25,14 @@ mod mk_lib_logging;
 #[path = "../mk_lib_network_transmission.rs"]
 mod mk_lib_network_transmission;
 
-#[get("/torrent")]
-pub async fn admin_torrent(user: AdminUser) -> Template {
-    let mut transmission_client = TransClient::new("mkstack_transmission".parse().unwrap());
+#[derive(Template)]
+#[template(path = "bss_admin/bss_admin_torrent.html")]
+struct AdminTorrentTemplate;
 
-    let res: RpcResponse<Torrents<Torrent>> = transmission_client.torrent_get(None, None).await.unwrap();
+pub async fn admin_torrent() -> impl IntoResponse {
+    let mut transmission_client = TransClient::new("mkstack_transmission".parse().unwrap());
+    let res: RpcResponse<Torrents<Torrent>> =
+        transmission_client.torrent_get(None, None).await.unwrap();
     let names: Vec<&String> = res
         .arguments
         .torrents
@@ -48,7 +51,8 @@ pub async fn admin_torrent(user: AdminUser) -> Template {
             Some(vec![TorrentGetField::Id, TorrentGetField::Name]),
             Some(vec![Id::Id(1), Id::Id(2), Id::Id(3)]),
         )
-        .await.unwrap();
+        .await
+        .unwrap();
     let first_three: Vec<String> = res1
         .arguments
         .torrents
@@ -82,7 +86,8 @@ pub async fn admin_torrent(user: AdminUser) -> Template {
                 "64b0d9a53ac9cd1002dad1e15522feddb00152fe",
             ))]),
         )
-        .await.unwrap();
+        .await
+        .unwrap();
     let info: Vec<String> = res2
         .arguments
         .torrents
@@ -98,10 +103,9 @@ pub async fn admin_torrent(user: AdminUser) -> Template {
         .collect();
 
     let response: Result<RpcResponse<SessionClose>> = transmission_client.session_close().await;
-    Template::render(
-        "bss_admin/bss_admin_torrent.html",
-        tera::Context::new().into_json(),
-    )
+    let template = AdminTorrentTemplate {};
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

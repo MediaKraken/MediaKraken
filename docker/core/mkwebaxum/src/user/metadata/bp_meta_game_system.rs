@@ -24,17 +24,14 @@ mod mk_lib_database_metadata_game_system;
 
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_game_system.html")]
-struct TemplateMetaGameSystemContext {
-    template_data: Vec<mk_lib_database_metadata_game_system::DBMetaGameSystemList>,
-    pagination_bar: String,
+struct TemplateMetaGameSystemContext<'a> {
+    template_data: &'a Vec<mk_lib_database_metadata_game_system::DBMetaGameSystemList>,
+    template_data_exists: &'a bool,
+    pagination_bar: &'a String,
+    page: &'a usize,
 }
 
-#[get("/metadata/game_system/<page>")]
-pub async fn user_metadata_game_system(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    page: i32,
-) -> Template {
+pub async fn user_metadata_game_system(Extension(sqlx_pool): Extension<PgPool>, Path(page): Path<i32>) -> impl IntoResponse {
     let db_offset: i32 = (page * 30) - 30;
     let mut total_pages: i64 =
         mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_count(
@@ -62,26 +59,21 @@ pub async fn user_metadata_game_system(
         )
         .await
         .unwrap();
-    Template::render(
-        "bss_user/metadata/bss_user_metadata_game_system.html",
-        &TemplateMetaGameSystemContext {
-            template_data: game_system_list,
-            pagination_bar: pagination_html,
-        },
-    )
+    let template = TemplateMetaGameSystemContext {
+        template_data: &game_system_list,
+        pagination_bar: &pagination_html,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/metadata/bss_user_metadata_game_system_detail.html")]
 struct TemplateMetaGameSystemDetailContext {
     template_data: serde_json::Value,
 }
 
-#[get("/metadata/game_system_detail/<guid>")]
-pub async fn user_metadata_game_system_detail(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    guid: rocket::serde::uuid::Uuid,
-) -> Template {
+pub async fn user_metadata_game_system_detail(Extension(sqlx_pool): Extension<PgPool>, Path(guid): Path<uuid::Uuid>) -> impl IntoResponse {
     let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
     let detail_data =
         mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_detail(
@@ -89,12 +81,11 @@ pub async fn user_metadata_game_system_detail(
         )
         .await
         .unwrap();
-    Template::render(
-        "bss_user/metadata/bss_user_metadata_game_system_detail.html",
-        &TemplateMetaGameSystemDetailContext {
-            template_data: detail_data,
-        },
-    )
+    let template = TemplateMetaGameSystemContext {
+        template_data: detail_data,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

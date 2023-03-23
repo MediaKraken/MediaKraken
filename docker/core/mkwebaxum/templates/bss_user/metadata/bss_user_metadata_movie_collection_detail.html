@@ -12,7 +12,7 @@
 <body>
     {% include "bss_user/bss_user_include_menu.html" %}
     <div><div>
-    {% if template_data %}
+    {% if template_data_exists %}
     <div id="movie_detail">
         <img alt="fs_bg_image" src= "/static/data_background_image.png" loading="lazy" id="fs_bg_image" />
         <div id="movie_image_div" class="table-responsive">
@@ -36,9 +36,9 @@
                         {% if data_genres %}
                         <p>Genres: {{data_genres}}</p>
                         {% endif %}
-                        {% if json_metadata['overview'] %}
+                        {% if json_metadata["overview"] %}
                         <div style="clear: both;"></div>
-                        <p>Overview: {{json_metadata['overview']}}</p>
+                        <p>Overview: {{json_metadata["overview"]}}</p>
                         {% endif %}
                     </tr>
                 </tbody>

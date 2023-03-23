@@ -24,17 +24,14 @@ mod mk_lib_database_library;
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_library.html")]
-struct TemplateAdminLibraryContext {
-    template_data: Vec<mk_lib_database_library::DBLibraryList>,
-    pagination_bar: String,
+struct TemplateAdminLibraryContext<'a> {
+    template_data: &'a Vec<mk_lib_database_library::DBLibraryAuditList>,
+    template_data_exists: &'a bool,
+    pagination_bar: &'a String,
+    page: &'a usize,
 }
 
-#[get("/library/<page>")]
-pub async fn admin_library(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: AdminUser,
-    page: i32,
-) -> Template {
+pub async fn admin_library(Extension(sqlx_pool): Extension<PgPool>, Path(page): Path<i32>) -> impl IntoResponse {
     let db_offset: i32 = (page * 30) - 30;
     let mut total_pages: i64 = mk_lib_database_library::mk_lib_database_library_count(&sqlx_pool)
         .await
@@ -50,16 +47,22 @@ pub async fn admin_library(
     .await
     .unwrap();
     let library_list =
-        mk_lib_database_library::mk_lib_database_library_read(&sqlx_pool, db_offset, 30)
+        mk_lib_database_library::mk_lib_database_library_path_audit_read(&sqlx_pool)
             .await
             .unwrap();
-    Template::render(
-        "bss_admin/bss_admin_library.html",
-        &TemplateAdminLibraryContext {
-            template_data: library_list,
-            pagination_bar: pagination_html,
-        },
-    )
+    let mut template_data_exists: bool = false;
+    if library_list.len() > 0 {
+        template_data_exists = true;
+    }
+    let page_usize = page as usize;
+    let template = TemplateAdminLibraryContext {
+        template_data: &library_list,
+        template_data_exists: &template_data_exists,
+        pagination_bar: &pagination_html,
+        page: &page_usize,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

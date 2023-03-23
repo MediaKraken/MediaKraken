@@ -12,15 +12,23 @@ use axum::{
 };
 use sqlx::postgres::PgPool;
 
+mod filters {
+    pub fn space_to_html(s: &str) -> ::askama::Result<String> {
+        Ok(s.replace(" ", "%20"))
+    }
+}
+
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
 
-#[post("/media/genre")]
-pub async fn user_media_genre(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
-    Template::render(
-        "bss_user/media/bss_user_media_genre_video.html",
-        tera::Context::new().into_json(),
-    )
+#[derive(Template)]
+#[template(path = "bss_user/media/bss_user_media_genre_video.html")]
+struct TemplateUserGenreContext {}
+
+pub async fn user_media_genre(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
+    let template = TemplateUserGenreContext {};
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

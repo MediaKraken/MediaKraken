@@ -12,7 +12,7 @@
 <body>
     {% include "bss_user/bss_user_include_menu.html" %}
     <div><div>
-    {% if template_data %}
+    {% if template_data_exists %}
     {% if pagination_bar != "" %}
         {{ pagination_bar|safe }}
     {% endif %}
@@ -28,7 +28,7 @@
             <tbody>
                 {% for row_data in template_data %}
                 <tr>
-                    <td>{{ loop.index + (page - 1) * per_page }}</td>
+                    <td>{{ loop.index + (page - 1) * 30 }}</td>
                     <td>{{ row_data[1] }}</td>
                 </tr>
                 {% endfor %}

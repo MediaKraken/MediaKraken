@@ -23,17 +23,14 @@ mod mk_lib_database_media_home_media;
 
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_home_movie.html")]
-struct TemplateMediaHomeContext {
-    template_data: Vec<mk_lib_database_media_home_media::DBMediaHomeMediaList>,
-    pagination_bar: String,
+struct TemplateMediaHomeContext<'a> {
+    template_data: &'a Vec<mk_lib_database_media_home_media::DBMediaHomeMediaList>,
+    template_data_exists: &'a bool,
+    pagination_bar: &'a String,
+    page: &'a usize,
 }
 
-#[get("/media/home_media/<page>")]
-pub async fn user_media_home_media(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    page: i32,
-) -> Template {
+pub async fn user_media_home_media(Extension(sqlx_pool): Extension<PgPool>, Path(page): Path<i32>) -> impl IntoResponse {
     let db_offset: i32 = (page * 30) - 30;
     let mut total_pages: i64 =
         mk_lib_database_media_home_media::mk_lib_database_media_home_media_count(
@@ -60,31 +57,26 @@ pub async fn user_media_home_media(
     )
     .await
     .unwrap();
-    Template::render(
-        "bss_user/media/bss_user_media_home_movie.html",
-        &TemplateMediaHomeContext {
-            template_data: home_list,
-            pagination_bar: pagination_html,
-        },
-    )
+    let template = TemplateMediaHomeContext {
+        template_data: &home_list,
+        pagination_bar: &pagination_html,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/media/bss_user_media_home_movie_detail.html")]
 struct TemplateMediaHomeDetailContext {
     template_data: serde_json::Value,
 }
 
-#[get("/media/home_media_detail/<guid>")]
-pub async fn user_media_home_media_detail(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    guid: rocket::serde::uuid::Uuid,
-) -> Template {
-    let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
-    Template::render(
-        "bss_user/media/bss_user_media_home_movie_detail.html",
-        tera::Context::new().into_json(),
-    )
+pub async fn user_media_home_media_detail(Extension(sqlx_pool): Extension<PgPool>, Path(guid): Path<uuid::Uuid>) -> impl IntoResponse {
+    let template = TemplateMediaHomeDetailContext {
+        template_data: json!({}),
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

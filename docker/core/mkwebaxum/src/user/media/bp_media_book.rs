@@ -23,17 +23,14 @@ mod mk_lib_database_media_book;
 
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_book.html")]
-struct TemplateMediaBookContext {
-    template_data: Vec<mk_lib_database_media_book::DBMediaBookList>,
-    pagination_bar: String,
+struct TemplateMediaBookContext<'a> {
+    template_data: &'a Vec<mk_lib_database_media_book::DBMediaBookList>,
+    template_data_exists: &'a bool,
+    pagination_bar: &'a String,
+    page: &'a usize,
 }
 
-#[get("/media/book/<page>")]
-pub async fn user_media_book(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    page: i32,
-) -> Template {
+pub async fn user_media_book(Extension(sqlx_pool): Extension<PgPool>, Path(page): Path<i32>) -> impl IntoResponse {
     let db_offset: i32 = (page * 30) - 30;
     let mut total_pages: i64 =
         mk_lib_database_media_book::mk_lib_database_media_book_count(&sqlx_pool, String::new())
@@ -57,31 +54,27 @@ pub async fn user_media_book(
     )
     .await
     .unwrap();
-    Template::render(
-        "bss_user/media/bss_user_media_book.html",
-        &TemplateMediaBookContext {
-            template_data: book_list,
-            pagination_bar: pagination_html,
-        },
-    )
+    let template = TemplateMediaBookContext {
+        template_data: &book_list,
+        pagination_bar: &pagination_html,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/media/bss_user_media_book_detail.html")]
 struct TemplateMediaBookDetailContext {
     template_data: serde_json::Value,
 }
 
-#[get("/media/book_detail/<guid>")]
-pub async fn user_media_book_detail(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    guid: rocket::serde::uuid::Uuid,
-) -> Template {
-    let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
-    Template::render(
-        "bss_user/media/bss_user_media_book_detail.html",
-        tera::Context::new().into_json(),
-    )
+pub async fn user_media_book_detail(Extension(sqlx_pool): Extension<PgPool>, Path(guid): Path<uuid::Uuid>) -> impl IntoResponse {
+    //let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
+    let template = TemplateMediaBookDetailContext {
+        template_data: json!({}),
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

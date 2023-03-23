@@ -10,32 +10,38 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use sqlx::postgres::PgPool;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
 
 #[derive(Template)]
 #[template(path = "bss_user/hardware/bss_user_hardware.html")]
-struct TemplateUserHardwareContext {
+struct TemplateUserHardwareContext<'a> {
+    template_data_phue_exists: &'a bool,
+}
+
+pub async fn user_hardware(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
+    let mut phue_exists:bool = true;
+    let template = TemplateUserHardwareContext {
+        template_data_phue_exists: &phue_exists,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
+}
+
+#[derive(Template)]
+#[template(path = "bss_user/hardware/bss_user_hardware_phue.html")]
+struct TemplateUserHardwarePhueContext {
     template_data_phue: i32,
 }
 
-#[get("/hardware")]
-pub async fn user_hardware(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
-    Template::render(
-        "bss_user/hardware/bss_user_hardware.html",
-        &TemplateUserHardwareContext {
-            template_data_phue: 0,
-        },
-    )
-}
-
-#[get("/hardware_phue")]
-pub async fn user_hardware_phue(user: User) -> Template {
-    Template::render(
-        "bss_user/hardware/bss_user_hardware_phue.html",
-        tera::Context::new().into_json(),
-    )
+pub async fn user_hardware_phue(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
+    let template = TemplateUserHardwarePhueContext {
+        template_data_phue: 0,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

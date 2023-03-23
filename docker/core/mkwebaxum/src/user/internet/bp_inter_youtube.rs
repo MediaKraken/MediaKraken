@@ -18,7 +18,7 @@ mod mk_lib_logging;
 #[template(path = "bss_user/internet/bss_user_internet_youtube.html")]
 struct UserInternetYoutubeTemplate;
 
-pub async fn user_inter_vimeo() -> impl IntoResponse {
+pub async fn user_inter_youtube() -> impl IntoResponse {
     let template = UserInternetYoutubeTemplate {};
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())
@@ -28,7 +28,7 @@ pub async fn user_inter_vimeo() -> impl IntoResponse {
 #[template(path = "bss_user/internet/bss_user_internet_youtube_detail.html")]
 struct UserInternetYoutubeDetailTemplate;
 
-pub async fn user_inter_vimeo_detail() -> impl IntoResponse {
+pub async fn user_inter_youtube_detail() -> impl IntoResponse {
     let template = UserInternetYoutubeDetailTemplate {};
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

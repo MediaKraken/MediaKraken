@@ -16,9 +16,9 @@ use serde_json::json;
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBCronList {
     pub mm_cron_guid: uuid::Uuid,
-    mm_cron_name: String,
-    mm_cron_description: String,
-    mm_cron_enabled: bool,
+    pub mm_cron_name: String,
+    pub mm_cron_description: String,
+    pub mm_cron_enabled: bool,
     pub mm_cron_schedule_type: String,
     pub mm_cron_schedule_time: i16,
     pub mm_cron_last_run: DateTime<Utc>,

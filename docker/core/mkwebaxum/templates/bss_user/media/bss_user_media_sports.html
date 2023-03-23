@@ -12,7 +12,7 @@
 <body>
     {% include "bss_user/bss_user_include_menu.html" %}
     <div></div>
-        {% if template_data %}
+        {% if template_data_exists %}
     <div id="filter_sports_div">
         <form name="media_filter" action="/user/media/ports_genre" method="post">
             <p>Media Filters:

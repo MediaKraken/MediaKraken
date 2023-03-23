@@ -23,17 +23,14 @@ mod mk_lib_database_media_sports;
 
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_sports.html")]
-struct TemplateMediaSportsContext {
-    template_data: Vec<mk_lib_database_media_sports::DBMediaSportsList>,
-    pagination_bar: String,
+struct TemplateMediaSportsContext<'a> {
+    template_data: &'a Vec<mk_lib_database_media_sports::DBMediaSportsList>,
+    template_data_exists: &'a bool,
+    pagination_bar: &'a String,
+    page: &'a usize,
 }
 
-#[get("/media/sports/<page>")]
-pub async fn user_media_sports(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    page: i32,
-) -> Template {
+pub async fn user_media_sports(Extension(sqlx_pool): Extension<PgPool>, Path(page): Path<i32>) -> impl IntoResponse {
     let db_offset: i32 = (page * 30) - 30;
     let mut total_pages: i64 =
         mk_lib_database_media_sports::mk_lib_database_media_sports_count(&sqlx_pool, String::new())
@@ -57,31 +54,26 @@ pub async fn user_media_sports(
     )
     .await
     .unwrap();
-    Template::render(
-        "bss_user/media/bss_user_media_sports.html",
-        &TemplateMediaSportsContext {
-            template_data: sports_list,
-            pagination_bar: pagination_html,
-        },
-    )
+    let template = TemplateMediaSportsContext {
+        template_data: &sports_list,
+        pagination_bar: &pagination_html,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/media/bss_user_media_sports_detail.html")]
 struct TemplateMediaSportsDetailContext {
     template_data: serde_json::Value,
 }
 
-#[get("/media/sports_detail/<guid>")]
-pub async fn user_media_sports_detail(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    guid: rocket::serde::uuid::Uuid,
-) -> Template {
-    let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
-    Template::render(
-        "bss_user/media/bss_user_media_sports_detail.html",
-        tera::Context::new().into_json(),
-    )
+pub async fn user_media_sports_detail(Extension(sqlx_pool): Extension<PgPool>, Path(guid): Path<uuid::Uuid>) -> impl IntoResponse {
+    let template = TemplateMediaSportsDetailContext {
+        template_data: json!({}),
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

@@ -12,6 +12,15 @@ use axum::{
 };
 use sqlx::postgres::PgPool;
 
+// #[path = "../../axum_custom_filters.rs"]
+// mod filters;
+
+mod filters {
+    pub fn space_to_html(s: &str) -> ::askama::Result<String> {
+        Ok(s.replace(" ", "%20"))
+    }
+}
+
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
 
@@ -23,17 +32,14 @@ mod mk_lib_database_media_tv;
 
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_tv.html")]
-struct TemplateMediaTVContext {
-    template_data: Vec<mk_lib_database_media_tv::DBMediaTVShowList>,
-    pagination_bar: String,
+struct TemplateMediaTVContext<'a> {
+    template_data: &'a Vec<mk_lib_database_media_tv::DBMediaTVShowList>,
+    template_data_exists: &'a bool,
+    pagination_bar: &'a String,
+    page: &'a usize,
 }
 
-#[get("/media/tv/<page>")]
-pub async fn user_media_tv(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    page: i32,
-) -> Template {
+pub async fn user_media_tv(Extension(sqlx_pool): Extension<PgPool>, Path(page): Path<i32>) -> impl IntoResponse {
     let db_offset: i32 = (page * 30) - 30;
     let mut total_pages: i64 =
         mk_lib_database_media_tv::mk_lib_database_media_tv_count(&sqlx_pool, String::new())
@@ -57,31 +63,26 @@ pub async fn user_media_tv(
     )
     .await
     .unwrap();
-    Template::render(
-        "bss_user/media/bss_user_media_tv.html",
-        &TemplateMediaTVContext {
-            template_data: tv_list,
-            pagination_bar: pagination_html,
-        },
-    )
+    let template = TemplateMediaTVContext {
+        template_data: &tv_list,
+        pagination_bar: &pagination_html,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/media/bss_user_media_tv_detail.html")]
 struct TemplateMediaTVDetailContext {
     template_data: serde_json::Value,
 }
 
-#[get("/media/tv_detail/<guid>")]
-pub async fn user_media_tv_detail(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    guid: rocket::serde::uuid::Uuid,
-) -> Template {
-    let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
-    Template::render(
-        "bss_user/media/bss_user_media_tv_detail.html",
-        tera::Context::new().into_json(),
-    )
+pub async fn user_media_tv_detail(Extension(sqlx_pool): Extension<PgPool>, Path(guid): Path<uuid::Uuid>) -> impl IntoResponse {
+    let template = TemplateMediaTVDetailContext {
+        template_data: json!({}),
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

@@ -1,4 +1,3 @@
-{% import "form_input_macro.html" as m %}
 {% block content %}
 <head>
     <meta charset="utf-8">
@@ -17,14 +16,12 @@
             <div id="content">
                 <div class="container-fluid">
                     <form action="/admin/backup" method="post">
-                        {{ errors.token_errors }}
-                        <span style="color: red;">{{errors.validate_errors}}</span>
                         <div class="row flex-wrap">
                             <div class="col">
                                 <fieldset>
                                     <legend>Backup Configuration</legend>
                                     <div class="form-group">
-                                        {{ m::checkbox(name="data_enabled", label="Enabled", value="True") }}
+                                        < input type=checkbox name="data_enabled" >
                                     </div>
                                     <select><optgroup label="This is a group">
                                         <option value="12" selected="">Daily</option>
@@ -64,12 +61,12 @@
                                             <tbody>
                                                 {% for row_data in template_data %}
                                                 <tr>
-                                                    <td>{{ loop.index + (page - 1) * per_page }}</td>
+                                                    <td>{{ loop.index + (page - 1) * 30 }}</td>
                                                     <td>{{ row_data[0] }}</td>
                                                     <td>{{ row_data[1] }}</td>
                                                     <td>{{ row_data[2] }}</td>
                                                     <td>
-                                                        <a href= "/admin/bss_admin_backup_restore/{{row_data[0]|replace(from='/', to='*')}}" id="play_button">
+                                                        <a href= "/admin/bss_admin_backup_restore/{{row_data[0]|slash_to_asterik}}" id="play_button">
                                                             <i class="fas fa-play" height="20" width="20"></i>
                                                         </a>
                                                     </td>

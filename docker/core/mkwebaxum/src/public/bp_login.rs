@@ -10,21 +10,24 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use validator::Validate;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
 
-#[get("/login")]
-pub async fn public_login() -> Template {
-    Template::render(
-        "bss_public/bss_public_login.html",
-        tera::Context::new().into_json(),
-    )
+#[derive(Template)]
+#[template(path = "bss_public/bss_public_login.html")]
+struct LoginTemplate;
+
+pub async fn public_login() -> impl IntoResponse {
+    let template = LoginTemplate {};
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
-#[post("/login", data = "<form>")]
-pub async fn public_login_post(auth: Auth<'_>, form: Form<Login>) -> Result<Redirect, Error> {
-    let result = auth.login(&form).await;
-    result?;
-    Ok(Redirect::to("/user/home"))
-}
+// #[post("/login", data = "<form>")]
+// pub async fn public_login_post(auth: Auth<'_>, form: Form<Login>) -> Result<Redirect, Error> {
+//     let result = auth.login(&form).await;
+//     result?;
+//     Ok(Redirect::to("/user/home"))
+// }

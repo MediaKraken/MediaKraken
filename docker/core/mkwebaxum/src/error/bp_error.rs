@@ -14,22 +14,45 @@ use axum::{
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
 
-#[catch(401)]
-pub async fn general_not_authorized() -> Template {
-    Template::render("bss_error/bss_error_401.html", tera::Context::new().into_json())
+// https://docs.rs/http/latest/http/status/struct.StatusCode.html#
+// possible status codes
+
+#[derive(Template)]
+#[template(path = "bss_error/bss_error_401.html")]
+struct TemplateError401Context {}
+
+pub async fn general_not_authorized() -> impl IntoResponse {
+    let template = TemplateError401Context {};
+    let reply_html = template.render().unwrap();
+    (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
 }
 
-#[catch(403)]
-pub async fn general_not_administrator() -> Template {
-    Template::render("bss_error/bss_error_403.html", tera::Context::new().into_json())
+#[derive(Template)]
+#[template(path = "bss_error/bss_error_403.html")]
+struct TemplateError403Context {}
+
+pub async fn general_not_administrator() -> impl IntoResponse {
+    let template = TemplateError403Context {};
+    let reply_html = template.render().unwrap();
+    (StatusCode::FORBIDDEN, Html(reply_html).into_response())
 }
 
-#[catch(404)]
-pub async fn general_not_found() -> Template {
-    Template::render("bss_error/bss_error_404.html", tera::Context::new().into_json())
+#[derive(Template)]
+#[template(path = "bss_error/bss_error_404.html")]
+struct TemplateError404Context {}
+
+pub async fn general_not_found() -> impl IntoResponse {
+    let template = TemplateError404Context {};
+    let reply_html = template.render().unwrap();
+    (StatusCode::NOT_FOUND, Html(reply_html).into_response())
 }
 
-#[catch(500)]
-pub async fn general_security() -> Template {
-    Template::render("bss_error/bss_error_500.html", tera::Context::new().into_json())
+#[derive(Template)]
+#[template(path = "bss_error/bss_error_500.html")]
+struct TemplateError500Context {}
+
+pub async fn general_security() -> impl IntoResponse {
+    let template = TemplateError500Context {};
+    let reply_html = template.render().unwrap();
+    (StatusCode::INTERNAL_SERVER_ERROR, Html(reply_html).into_response())
 }

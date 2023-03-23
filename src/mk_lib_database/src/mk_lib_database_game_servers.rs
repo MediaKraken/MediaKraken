@@ -35,9 +35,9 @@ pub async fn mk_lib_database_game_server_delete(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBGameServerList {
-    mm_game_server_guid: uuid::Uuid,
-    mm_game_server_name: String,
-    mm_game_server_json: serde_json::Value,
+    pub mm_game_server_guid: uuid::Uuid,
+    pub mm_game_server_name: String,
+    pub mm_game_server_json: serde_json::Value,
 }
 
 pub async fn mk_lib_database_game_server_read(

@@ -20,16 +20,22 @@ mod mk_lib_database_cron;
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_cron.html")]
-struct TemplateCronContext {
-    template_data: Vec<mk_lib_database_cron::DBCronList>,
+struct TemplateCronContext<'a> {
+    template_data: &'a Vec<mk_lib_database_cron::DBCronList>,
+    template_data_exists: &'a bool,
 }
 
 pub async fn admin_cron(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
     let cron_list = mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool)
         .await
         .unwrap();
+    let mut cron_data: bool = false;
+    if cron_list.len() > 0 {
+        cron_data = true;
+    }
     let template = TemplateCronContext {
         template_data: &cron_list,
+        template_data_exists: &cron_data,
     };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

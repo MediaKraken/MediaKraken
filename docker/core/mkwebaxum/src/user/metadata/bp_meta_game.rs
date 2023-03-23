@@ -23,19 +23,14 @@ mod mk_lib_database_metadata_game;
 
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_game.html")]
-struct TemplateMetaGameContext {
-    template_data: Vec<mk_lib_database_metadata_game::DBMetaGameList>,
-    pagination_bar: String,
-    page: i32,
-    per_page: i8,
+struct TemplateMetaGameContext<'a> {
+    template_data: &'a Vec<mk_lib_database_metadata_game::DBMetaGameList>,
+    template_data_exists: &'a bool,
+    pagination_bar: &'a String,
+    page: &'a usize,
 }
 
-#[get("/metadata/game/<page>")]
-pub async fn user_metadata_game(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    page: i32,
-) -> Template {
+pub async fn user_metadata_game(Extension(sqlx_pool): Extension<PgPool>, Path(page): Path<i32>) -> impl IntoResponse {
     let db_offset: i32 = (page * 30) - 30;
     let mut total_pages: i64 = mk_lib_database_metadata_game::mk_lib_database_metadata_game_count(
         &sqlx_pool,
@@ -61,33 +56,26 @@ pub async fn user_metadata_game(
     )
     .await
     .unwrap();
-    Template::render(
-        "bss_user/metadata/bss_user_metadata_game.html",
-        &TemplateMetaGameContext {
-            template_data: game_list,
-            pagination_bar: pagination_html,
-            page: page,
-            per_page: 30,
-        },
-    )
+    let template = TemplateMetaGameContext {
+        template_data: &game_list,
+        pagination_bar: &pagination_html,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/metadata/bss_user_metadata_game_detail.html")]
 struct TemplateMetaGameDetailContext {
     template_data: serde_json::Value,
 }
 
-#[get("/metadata/game_detail/<guid>")]
-pub async fn user_metadata_game_detail(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    guid: rocket::serde::uuid::Uuid,
-) -> Template {
-    let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
-    Template::render(
-        "bss_user/metadata/bss_user_metadata_game_detail.html",
-        tera::Context::new().into_json(),
-    )
+pub async fn user_metadata_game_detail(Extension(sqlx_pool): Extension<PgPool>, Path(guid): Path<uuid::Uuid>) -> impl IntoResponse {
+    let template = TemplateMetaGameDetailContext {
+        template_data: json!({}),
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

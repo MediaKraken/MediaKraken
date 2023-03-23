@@ -1,9 +1,5 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use num_format::{Locale, SystemLocale, ToFormattedString};
-use sqlx::Row;
-use stdext::function_name;
-use serde_json::json;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -12,7 +8,12 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use num_format::{Locale, SystemLocale, ToFormattedString};
+use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgPool;
+use sqlx::Row;
+use stdext::function_name;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -47,24 +48,24 @@ struct TemplateHomeScanListContext {
     template_scan_percentage: String,
 }
 
-#[derive(Serialize)]
-struct TemplateHomeContext {
-    template_data_server_info_server_name: String,
-    template_data_server_uptime: String,
-    template_data_server_host_ip: String,
-    template_data_server_info_server_ip_external: String,
-    template_data_server_info_server_version: String,
-    template_data_count_media_files: String,
-    template_data_count_matched_media: String,
-    template_data_count_meta_fetch: String,
-    template_data_count_streamed_media: String,
-    template_server_streams: Vec<TemplateHomeStreamListContext>,
-    template_server_users: Vec<mk_lib_database_user::DBUserList>,
-    template_data_scan_info: Vec<TemplateHomeScanListContext>,
+#[derive(Template)]
+#[template(path = "bss_admin/bss_admin_home.html")]
+struct TemplateHomeContext<'a> {
+    template_data_server_info_server_name: &'a String,
+    template_data_server_uptime: &'a String,
+    template_data_server_host_ip: &'a String,
+    template_data_server_info_server_ip_external: &'a String,
+    template_data_server_info_server_version: &'a String,
+    template_data_count_media_files: &'a String,
+    template_data_count_matched_media: &'a String,
+    template_data_count_meta_fetch: &'a String,
+    template_data_count_streamed_media: &'a String,
+    template_server_streams: &'a Vec<TemplateHomeStreamListContext>,
+    template_server_users: &'a Vec<mk_lib_database_user::DBUserList>,
+    template_data_scan_info: &'a Vec<TemplateHomeScanListContext>,
 }
 
-#[get("/home")]
-pub async fn admin_home(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
+pub async fn admin_home(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
     let user_list = mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool, 0, 9999)
         .await
         .unwrap();
@@ -82,44 +83,44 @@ pub async fn admin_home(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser
     let mut server_streams = Vec::new();
     let mut server_scans = Vec::new();
     let locale = SystemLocale::default().unwrap();
-    Template::render(
-        "bss_admin/bss_admin_home.html",
-        &TemplateHomeContext {
-            template_data_server_info_server_name: option_json["MediaKrakenServer"]["Server Name"]
-                .to_string(),
-            // following boottime only compiles #[cfg(not(windows))] in this case is fine
-            template_data_server_uptime: format!(
-                "{:02}:{:02}:{:02}",
-                boot_duration.num_hours(),
-                boot_duration.num_minutes() % 60,
-                boot_duration.num_seconds() % 60
-            ),
-            template_data_server_host_ip: "255.255.255.255".to_string(),
-            template_data_server_info_server_ip_external: external_ip,
-            template_data_server_info_server_version: "Fake Version".to_string(),
-            template_data_count_media_files:
-                mk_lib_database_media::mk_lib_database_media_known_count(&sqlx_pool)
-                    .await
-                    .unwrap()
-                    .to_formatted_string(&locale),
-            template_data_count_matched_media:
-                mk_lib_database_media::mk_lib_database_media_matched_count(&sqlx_pool)
-                    .await
-                    .unwrap()
-                    .to_formatted_string(&locale),
-            template_data_count_meta_fetch:
-                mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(
-                    &sqlx_pool,
-                )
+    let template = TemplateHomeContext {
+        template_data_server_info_server_name: &option_json["MediaKrakenServer"]["Server Name"]
+            .to_string(),
+        // following boottime only compiles #[cfg(not(windows))] in this case is fine
+        template_data_server_uptime: format!(
+            "{:02}:{:02}:{:02}",
+            boot_duration.num_hours(),
+            boot_duration.num_minutes() % 60,
+            boot_duration.num_seconds() % 60
+        ),
+        template_data_server_host_ip: &"255.255.255.255".to_string(),
+        template_data_server_info_server_ip_external: &external_ip,
+        template_data_server_info_server_version: &"Fake Version".to_string(),
+        template_data_count_media_files: &mk_lib_database_media::mk_lib_database_media_known_count(
+            &sqlx_pool,
+        )
+        .await
+        .unwrap()
+        .to_formatted_string(&locale),
+        template_data_count_matched_media:
+            &mk_lib_database_media::mk_lib_database_media_matched_count(&sqlx_pool)
                 .await
                 .unwrap()
                 .to_formatted_string(&locale),
-            template_data_count_streamed_media: "0".to_string(),
-            template_server_streams: server_streams,
-            template_server_users: user_list,
-            template_data_scan_info: server_scans,
-        },
-    )
+        template_data_count_meta_fetch:
+            &mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(
+                &sqlx_pool,
+            )
+            .await
+            .unwrap()
+            .to_formatted_string(&locale),
+        template_data_count_streamed_media: &"0".to_string(),
+        template_server_streams: &server_streams,
+        template_server_users: &user_list,
+        template_data_scan_info: &server_scans,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

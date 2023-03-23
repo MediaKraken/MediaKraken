@@ -36,7 +36,7 @@
                                 <tbody>
                                 {% for row_data in template_data %}
                                 <tr>
-                                    <td>{{ loop.index + (page - 1) * per_page }}</td>
+                                    <td>{{ loop.index + (page - 1) * 30 }}</td>
                                     <td>{{ row_data[0] }}</td>
                                     <td>{{ row_data[1] }}</td>
                                     <td>{{ row_data[2] }}</td>
@@ -75,7 +75,7 @@
                                 <tbody>
                                 {% for row_data in server_users %}
                                 <tr>
-                                    <td>{{ loop.index + (page - 1) * per_page }}</td>
+                                    <td>{{ loop.index + (page - 1) * 30 }}</td>
                                     <td>{{ row_data[0] }}</td>
                                     <td>{{ row_data[1] }}</td>
                                     <td>{{ row_data[2] }}</td>

@@ -13,7 +13,7 @@
 <body>
     {% include "bss_user/bss_user_include_menu.html" %}
     <div><div>
-    {% if template_data %}
+    {% if template_data_exists %}
     {% if pagination_bar != "" %}
         {{ pagination_bar|safe }}
     {% endif %}
@@ -22,7 +22,7 @@
         <div class="main_photo">
             <div class="media_context_right" data-id={{row_data[0]}}>
                 <a href= "/user/metadata/game_system_detail/{{row_data[0]}}">
-                {% if row_data[2] == "" or row_data[2] == None %}
+                {% if row_data[2] == "" || row_data[2] == None %}
                 <img src= "/static/image/vid_game.png" loading="lazy" height="200" width="300"></a>
                 <div class="description">
                     <p class="description_content_left">{{row_data[1]}}</p>

@@ -12,6 +12,12 @@ use axum::{
 };
 use sqlx::postgres::PgPool;
 
+mod filters {
+    pub fn space_to_html(s: &str) -> ::askama::Result<String> {
+        Ok(s.replace(" ", "%20"))
+    }
+}
+
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
 
@@ -23,17 +29,14 @@ mod mk_lib_database_metadata_tv;
 
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_tv.html")]
-struct TemplateMetaTVContext {
-    template_data: Vec<mk_lib_database_metadata_tv::DBMetaTVShowList>,
-    pagination_bar: String,
+struct TemplateMetaTVContext<'a> {
+    template_data: &'a Vec<mk_lib_database_metadata_tv::DBMetaTVShowList>,
+    template_data_exists: &'a bool,
+    pagination_bar: &'a String,
+    page: &'a usize,
 }
 
-#[get("/metadata/tv/<page>")]
-pub async fn user_metadata_tv(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    page: i32,
-) -> Template {
+pub async fn user_metadata_tv(Extension(sqlx_pool): Extension<PgPool>, Path(page): Path<i32>) -> impl IntoResponse {
     let db_offset: i32 = (page * 30) - 30;
     let mut total_pages: i64 =
         mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_count(&sqlx_pool, String::new())
@@ -57,31 +60,26 @@ pub async fn user_metadata_tv(
     )
     .await
     .unwrap();
-    Template::render(
-        "bss_user/metadata/bss_user_metadata_tv.html",
-        &TemplateMetaTVContext {
-            template_data: tv_list,
-            pagination_bar: pagination_html,
-        },
-    )
+    let template = TemplateMetaTVContext {
+        template_data: &tv_list,
+        pagination_bar: &pagination_html,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/metadata/bss_user_metadata_tv_detail.html")]
 struct TemplateMetaTVDetailContext {
     template_data: serde_json::Value,
 }
 
-#[get("/metadata/tv_detail/<guid>")]
-pub async fn user_metadata_tv_detail(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    guid: rocket::serde::uuid::Uuid,
-) -> Template {
-    let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
-    Template::render(
-        "bss_user/metadata/bss_user_metadata_tv_detail.html",
-        tera::Context::new().into_json(),
-    )
+pub async fn user_metadata_tv_detail(Extension(sqlx_pool): Extension<PgPool>, Path(guid): Path<uuid::Uuid>) -> impl IntoResponse {
+    let template = TemplateMetaTVDetailContext {
+        template_data: json!({}),
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

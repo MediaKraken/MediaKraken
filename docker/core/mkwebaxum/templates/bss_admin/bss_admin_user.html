@@ -19,7 +19,6 @@
                         <div class="card-header py-3">
                             <fieldset>
                                 <legend>User information</legend><div>
-                                {% if template_data %}
                                 {% if pagination_bar != "" %}
                                     {{ pagination_bar|safe }}
                                 {% endif %}
@@ -41,7 +40,7 @@
                                         <tbody>
                                             {% for row_data in template_data %}
                                             <tr>
-                                                <td>{{ loop.index + (page - 1) * per_page }}</td>
+                                                <td>{{ loop.index + (page - 1) * 30 }}</td>
                                                 <td><a href = "/admin/bss_admin_user_detail/{{row_data[0]}}">{{ row_data[1] }}</a></td>
                                                 <td>{{ row_data[2] }}</td>
                                                 <td>{{ row_data[3] }}</td>
@@ -81,9 +80,6 @@
                                 {% if pagination_bar != "" %}
                                     {{ pagination_bar|safe }}
                                 {% endif %}
-                                {% else %}
-                                <p>No users found. Contact administrator.</p>
-                                {% endif %}</div>
                             </fieldset>
                         </div>
                     </div>

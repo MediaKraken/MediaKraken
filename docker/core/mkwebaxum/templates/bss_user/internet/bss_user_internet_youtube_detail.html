@@ -1,4 +1,3 @@
-{% import "form_input_macro.html" as m %}
 {% block content %}
 <head>
     <meta charset="utf-8">
@@ -15,10 +14,10 @@
     <div>
         <form id="SearchForm" class="form form-youtube" method="POST" action="/user/internet/bss_user_internet_youtube" role="form">
             <div class="form-group">
-                {{ m::input(label="Search string", type="text", name="account.name") }}
+                < input label="Search string", type="text", name="search_string" >
             </div>
         </form>
-        <video id="vid1" src="" class="video-js vjs-default-skin" controls preload="auto" width="100%" height="100%" data-setup="{\"fluid\":\"true\",\"techOrder\":[\"youtube\"]}">
+        <video id="vid1" src="" class="video-js vjs-default-skin" controls preload="auto" width="100%" height="100%" data-setup="{"fluid":"true","techOrder":["youtube"]}">
             <source src="http://www.youtube.com/watch?v="{{data_guid}} type="video/youtube">
         </video>
     </div>

@@ -23,17 +23,14 @@ mod mk_lib_database_metadata_music;
 
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_music_album.html")]
-struct TemplateMetaMusicContext {
-    template_data: Vec<mk_lib_database_metadata_music::DBMetaMusicList>,
-    pagination_bar: String,
+struct TemplateMetaMusicContext<'a> {
+    template_data: &'a Vec<mk_lib_database_metadata_music::DBMetaMusicList>,
+    template_data_exists: &'a bool,
+    pagination_bar: &'a String,
+    page: &'a usize,
 }
 
-#[get("/metadata/music/<page>")]
-pub async fn user_metadata_music(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    page: i32,
-) -> Template {
+pub async fn user_metadata_music(Extension(sqlx_pool): Extension<PgPool>, Path(page): Path<i32>) -> impl IntoResponse {
     let db_offset: i32 = (page * 30) - 30;
     let mut total_pages: i64 =
         mk_lib_database_metadata_music::mk_lib_database_metadata_music_count(
@@ -60,31 +57,26 @@ pub async fn user_metadata_music(
     )
     .await
     .unwrap();
-    Template::render(
-        "bss_user/metadata/bss_user_metadata_music_album.html",
-        &TemplateMetaMusicContext {
-            template_data: music_list,
-            pagination_bar: pagination_html,
-        },
-    )
+    let template = TemplateMetaMusicContext {
+        template_data: &music_list,
+        pagination_bar: &pagination_html,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
-#[derive(Serialize)]
+#[derive(Template)]
+#[template(path = "bss_user/metadata/bss_user_metadata_music_album_detail.html")]
 struct TemplateMetaMusicDetailContext {
     template_data: serde_json::Value,
 }
 
-#[get("/metadata/music_detail/<guid>")]
-pub async fn user_metadata_music_detail(
-    sqlx_pool: &rocket::State<sqlx::PgPool>,
-    user: User,
-    guid: rocket::serde::uuid::Uuid,
-) -> Template {
-    let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
-    Template::render(
-        "bss_user/metadata/bss_user_metadata_music_album_detail.html",
-        tera::Context::new().into_json(),
-    )
+pub async fn user_metadata_music_detail(Extension(sqlx_pool): Extension<PgPool>, Path(guid): Path<uuid::Uuid>) -> impl IntoResponse {
+    let template = TemplateMetaMusicDetailContext {
+        template_data: json!({}),
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*

@@ -10,26 +10,25 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use sqlx::postgres::PgPool;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
 
 #[derive(Template)]
 #[template(path = "bss_user/bss_user_home.html")]
-struct TemplateUserHomeContext {
-    template_data_new_media: bool,
-    template_data_user_media_queue: bool,
+struct TemplateUserHomeContext<'a> {
+    template_data_new_media: &'a bool,
+    template_data_user_media_queue: &'a bool,
 }
 
-#[get("/home")]
-pub async fn user_home(user: User) -> Template {
-    Template::render(
-        "bss_user/bss_user_home.html",
-        &TemplateUserHomeContext {
-            template_data_new_media: false,
-            template_data_user_media_queue: false,
-        },
-    )
+pub async fn user_home(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
+    let template = TemplateUserHomeContext {
+        template_data_new_media: &true,
+        template_data_user_media_queue: &true,
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*
