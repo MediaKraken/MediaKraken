@@ -34,7 +34,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% for row_data in template_data %}
+                                {% for row_data in template_data_alexa %}
                                 <tr>
                                     <td>{{ loop.index + (page - 1) * 30 }}</td>
                                     <td>{{ row_data[0] }}</td>
@@ -73,7 +73,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% for row_data in server_users %}
+                                {% for row_data in template_data_chromecast %}
                                 <tr>
                                     <td>{{ loop.index + (page - 1) * 30 }}</td>
                                     <td>{{ row_data[0] }}</td>
@@ -110,7 +110,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% for row_data in data_scan_info %}
+                                {% for row_data in template_data_crestron %}
                                 <tr>
                                     <td>{{ row_data[0] }}</td>
                                     <td>{{ row_data[1] }}</td>
@@ -137,7 +137,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% for row_data in data_scan_info %}
+                                {% for row_data in template_data_dlna %}
                                 <tr>
                                     <td>{{ row_data[0] }}</td>
                                     <td>{{ row_data[1] }}</td>
@@ -164,7 +164,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% for row_data in data_scan_info %}
+                                {% for row_data in template_data_hdhomerun %}
                                 <tr>
                                     <td>{{ row_data[0] }}</td>
                                     <td>{{ row_data[1] }}</td>
@@ -191,7 +191,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% for row_data in data_scan_info %}
+                                {% for row_data in template_data_phue %}
                                 <tr>
                                     <td>{{ row_data[0] }}</td>
                                     <td>{{ row_data[1] }}</td>
@@ -218,7 +218,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% for row_data in data_scan_info %}
+                                {% for row_data in template_data_roku %}
                                 <tr>
                                     <td>{{ row_data[0] }}</td>
                                     <td>{{ row_data[1] }}</td>
@@ -245,7 +245,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% for row_data in data_scan_info %}
+                                {% for row_data in template_data_soco %}
                                 <tr>
                                     <td>{{ row_data[0] }}</td>
                                     <td>{{ row_data[1] }}</td>

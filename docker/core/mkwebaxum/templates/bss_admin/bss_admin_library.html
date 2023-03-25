@@ -51,7 +51,7 @@
                                                 <td>{{ loop.index + (page - 1) * 30 }}</td>
                                                 <td>{{ row_data.mm_media_dir_path }}</td>
                                                 <td>{{ row_data.mm_media_dir_class_enum }}</td>
-                                                {% if row_data.mm_media_dir_last_scanned == "1970-01-01 00:00:01" %}
+                                                {% if row_data.mm_media_dir_last_scanned.to_string() == "1970-01-01 00:00:01" %}
                                                 <td><i>Never Scanned</i></td>
                                                 {% else %}
                                                 <td>{{ row_data.mm_media_dir_last_scanned }}</td>

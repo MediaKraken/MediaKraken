@@ -12,8 +12,8 @@ use serde_json::json;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaTVShowList {
-    mm_metadata_tvshow_guid: uuid::Uuid,
-    mm_metadata_tvshow_name: String,
+    pub mm_metadata_tvshow_guid: uuid::Uuid,
+    pub mm_metadata_tvshow_name: String,
     mm_count: i32,
     mm_poster: serde_json::Value,
 }

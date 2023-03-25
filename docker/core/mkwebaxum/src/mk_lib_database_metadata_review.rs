@@ -58,8 +58,8 @@ pub async fn mk_lib_database_metadata_review_count(sqlx_pool: &sqlx::PgPool,
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaReviewList {
-    mm_review_guid: uuid::Uuid,
-    mm_review_json: serde_json::Value,
+    pub mm_review_guid: uuid::Uuid,
+    pub mm_review_json: serde_json::Value,
 }
 
 pub async fn mk_lib_database_metadata_review_list_metadata(sqlx_pool: &sqlx::PgPool,

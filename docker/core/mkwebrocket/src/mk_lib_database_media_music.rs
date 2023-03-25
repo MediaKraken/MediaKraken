@@ -49,7 +49,7 @@ pub async fn mk_lib_database_media_music_count(
 pub struct DBMediaMusicList {
     pub mm_metadata_album_guid: uuid::Uuid,
     pub mm_metadata_album_name: String,
-    mm_metadata_album_json: serde_json::Value,
+    pub mm_metadata_album_json: serde_json::Value,
 }
 
 pub async fn mk_lib_database_media_music_read(

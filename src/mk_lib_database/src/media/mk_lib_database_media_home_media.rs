@@ -15,8 +15,8 @@ mod mk_lib_common_enum_media_type;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaHomeMediaList {
-    mm_metadata_home_guid: uuid::Uuid,
-    mm_metadata_home_name: String,
+    pub mm_metadata_home_guid: uuid::Uuid,
+    pub mm_metadata_home_name: String,
 }
 
 pub async fn mk_lib_database_media_home_media_read(

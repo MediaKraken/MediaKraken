@@ -58,9 +58,16 @@ pub async fn user_media_collection(Extension(sqlx_pool): Extension<PgPool>, Path
         )
         .await
         .unwrap();
+    let mut template_data_exists = false;
+    if collection_list.len() > 0 {
+        template_data_exists = true;
+    }
+    let page_usize = page as usize;
     let template = TemplateMediaCollectionContext {
         template_data: &collection_list,
+        template_data_exists: &template_data_exists,
         pagination_bar: &pagination_html,
+        page: &page_usize,
     };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

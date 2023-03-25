@@ -1,12 +1,5 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use bytesize::ByteSize;
-use chrono::prelude::*;
-use core::fmt::Write;
-use paginator::{PageItem, Paginator};
-use serde_json::json;
-use serde::{Serialize, Deserialize};
-use stdext::function_name;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -15,7 +8,14 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use bytesize::ByteSize;
+use chrono::prelude::*;
+use core::fmt::Write;
+use paginator::{PageItem, Paginator};
+use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgPool;
+use stdext::function_name;
 
 mod filters {
     pub fn space_to_html(s: &str) -> ::askama::Result<String> {
@@ -48,8 +48,7 @@ struct TemplateBackupContext<'a> {
 }
 
 pub async fn admin_backup(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
-    let template = TemplateBackupContext {
-     };
+    let template = TemplateBackupContext {};
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())
 }

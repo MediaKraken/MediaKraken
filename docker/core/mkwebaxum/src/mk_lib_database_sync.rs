@@ -109,10 +109,10 @@ pub async fn mk_lib_database_sync_insert(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBSyncList {
-    mm_sync_guid: uuid::Uuid,
-    mm_sync_path: String,
-    mm_sync_path_to: String,
-    mm_sync_options_json: serde_json::Value,
+    pub mm_sync_guid: uuid::Uuid,
+    pub mm_sync_path: String,
+    pub mm_sync_path_to: String,
+    pub mm_sync_options_json: serde_json::Value,
 }
 
 pub async fn mk_lib_database_sync_list(

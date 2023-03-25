@@ -1,8 +1,5 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use serde_json::json;
-use serde::{Serialize, Deserialize};
-use stdext::function_name;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -11,7 +8,10 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgPool;
+use stdext::function_name;
 
 mod filters {
     pub fn space_to_html(s: &str) -> ::askama::Result<String> {
@@ -50,7 +50,10 @@ struct TemplateMetaMovieContext<'a> {
     page: &'a usize,
 }
 
-pub async fn user_metadata_movie(Extension(sqlx_pool): Extension<PgPool>, Path(page): Path<i32>) -> impl IntoResponse {
+pub async fn user_metadata_movie(
+    Extension(sqlx_pool): Extension<PgPool>,
+    Path(page): Path<i32>,
+) -> impl IntoResponse {
     let db_offset: i32 = (page * 30) - 30;
     let mut total_pages: i64 =
         mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(
@@ -93,7 +96,7 @@ pub async fn user_metadata_movie(Extension(sqlx_pool): Extension<PgPool>, Path(p
         {
             let rating_json: serde_json::Value =
                 row_data.mm_metadata_user_json.as_ref().unwrap().clone();
-                // TODO set status's
+            // TODO set status's
             // rating_status = rating_json["UserStats"][user.id().to_string()]["Rating"].clone();
             // watched_status = rating_json["UserStats"][user.id().to_string()]["Watched"].clone();
             // request_status = rating_json["UserStats"][user.id().to_string()]["Request"].clone();
@@ -116,9 +119,16 @@ pub async fn user_metadata_movie(Extension(sqlx_pool): Extension<PgPool>, Path(p
         };
         template_data_vec.push(temp_meta_line);
     }
+    let mut template_data_exists = false;
+    if template_data_vec.len() > 0 {
+        template_data_exists = true;
+    }
+    let page_usize = page as usize;
     let template = TemplateMetaMovieContext {
         template_data: &template_data_vec,
+        template_data_exists: &template_data_exists,
         pagination_bar: &pagination_html,
+        page: &page_usize,
     };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())
@@ -132,17 +142,20 @@ struct TemplateMetaMovieDetailContext {
     template_data_json_media_crew: serde_json::Value,
 }
 
-pub async fn user_metadata_movie_detail(Extension(sqlx_pool): Extension<PgPool>, Path(guid): Path<uuid::Uuid>) -> impl IntoResponse {
-    let movie_metadata = mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_detail_by_guid(
-        &sqlx_pool,
-        guid,
-    )
-    .await
-    .unwrap();
+pub async fn user_metadata_movie_detail(
+    Extension(sqlx_pool): Extension<PgPool>,
+    Path(guid): Path<uuid::Uuid>,
+) -> impl IntoResponse {
+    let movie_metadata =
+        mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_detail_by_guid(
+            &sqlx_pool, guid,
+        )
+        .await
+        .unwrap();
     let template = TemplateMetaMovieDetailContext {
         template_data_json: movie_metadata.mm_metadata_movie_json,
-        template_data_json_media_ffmpeg: json!({None}),
-        template_data_json_media_crew: json!({None}),
+        template_data_json_media_ffmpeg: json!({ None }),
+        template_data_json_media_crew: json!({ None }),
     };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

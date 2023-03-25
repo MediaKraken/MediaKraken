@@ -65,11 +65,11 @@ pub async fn mk_lib_database_metadata_game_system_count(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaGameSystemList {
-    gs_game_system_id: uuid::Uuid,
-    gs_game_system_name: String,
-    gs_description: Option<String>,
-    gs_year: String,
-    gs_game_system_alias: String,
+    pub gs_game_system_id: uuid::Uuid,
+    pub gs_game_system_name: String,
+    pub gs_description: Option<String>,
+    pub gs_year: String,
+    pub gs_game_system_alias: String,
 }
 
 pub async fn mk_lib_database_metadata_game_system_read(

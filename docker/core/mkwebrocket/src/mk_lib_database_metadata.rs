@@ -12,8 +12,8 @@ use serde_json::json;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetadataGenreCountList {
-    genre: String,
-    mm_count: i64,
+    pub genre: String,
+    pub mm_count: i64,
 }
 
 pub async fn mk_lib_database_metadata_genre_count_read(
@@ -101,10 +101,6 @@ pub async fn mk_lib_database_metadata_genre_count(
 }
 
 /*
-
-
-
-
 // TODO port query
 def db_meta_fetch_media_id_json(self, media_id_id,
                                 collection_media=False):

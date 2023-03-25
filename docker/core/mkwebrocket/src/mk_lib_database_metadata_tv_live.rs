@@ -12,9 +12,9 @@ use serde_json::json;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaTVLiveList {
-    mm_tv_station_name: String,
-    mm_tv_station_channel: String,
-    mm_tv_schedule_json: Json,
+    pub mm_tv_station_name: String,
+    pub mm_tv_station_channel: String,
+    pub mm_tv_schedule_json: Json,
 }
 
 pub async fn mk_lib_database_meta_tv_live_read(

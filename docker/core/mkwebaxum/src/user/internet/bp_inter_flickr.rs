@@ -16,7 +16,10 @@ mod mk_lib_logging;
 
 #[derive(Template)]
 #[template(path = "bss_user/internet/bss_user_internet_flickr.html")]
-struct TemplateUserInternetFlickr;
+struct TemplateUserInternetFlickr<'a> {
+    template_data: &'a Vec<mk_lib_database_cron::DBCronList>,
+    template_data_exists: &'a bool,
+}
 
 pub async fn user_inter_flickr() -> impl IntoResponse {
     let template = TemplateUserInternetFlickr {};

@@ -16,7 +16,10 @@ mod mk_lib_logging;
 
 #[derive(Template)]
 #[template(path = "bss_user/internet/bss_user_internet_youtube.html")]
-struct UserInternetYoutubeTemplate;
+struct UserInternetYoutubeTemplate<'a> {
+    template_data: &'a Vec<mk_lib_database_cron::DBCronList>,
+    template_data_exists: &'a bool,
+}
 
 pub async fn user_inter_youtube() -> impl IntoResponse {
     let template = UserInternetYoutubeTemplate {};

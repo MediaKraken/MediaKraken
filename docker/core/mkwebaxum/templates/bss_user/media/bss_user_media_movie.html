@@ -43,10 +43,9 @@
     {% endif %}
     <div id="the-movie-node">
         {% for row_data in template_data %}
-        <!-- 0 mm_media_name, 1 mm_media_guid, 2 mm_metadata_json (poster only), 3 = watched or not -->
         <div class="main_photo">
-            <div data-id={{row_data[1]}}>
-                <a href= "/user/media/bss_user_media_movie_detail/{{row_data[1]}}">
+            <div data-id={{row_data.mm_metadata_guid}}>
+                <a href= "/user/media/bss_user_media_movie_detail/{{row_data.mm_metadata_guid}}">
                 {% if row_data[2] == None %}
                     <img src="/static/image/Movie-icon.png" height="300" width="200">
                     {% if row_data[3] == true %}

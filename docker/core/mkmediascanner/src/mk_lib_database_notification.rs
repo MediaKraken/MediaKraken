@@ -13,10 +13,10 @@ use serde_json::json;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBNotificationList {
-    mm_notification_guid: uuid::Uuid,
-    mm_notification_text: String,
-    mm_notification_time: String,
-    mm_notification_dismissible: String,
+    pub mm_notification_guid: uuid::Uuid,
+    pub mm_notification_text: String,
+    pub mm_notification_time: String,
+    pub mm_notification_dismissible: String,
 }
 
 pub async fn mk_lib_database_notification_read(

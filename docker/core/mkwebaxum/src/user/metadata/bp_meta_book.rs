@@ -1,7 +1,5 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use stdext::function_name;
-use serde_json::json;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -10,7 +8,9 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use serde_json::json;
 use sqlx::postgres::PgPool;
+use stdext::function_name;
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -30,7 +30,10 @@ struct TemplateMetaBookContext<'a> {
     page: &'a usize,
 }
 
-pub async fn user_metadata_book(Extension(sqlx_pool): Extension<PgPool>, Path(page): Path<i32>) -> impl IntoResponse {
+pub async fn user_metadata_book(
+    Extension(sqlx_pool): Extension<PgPool>,
+    Path(page): Path<i32>,
+) -> impl IntoResponse {
     let db_offset: i32 = (page * 30) - 30;
     let mut total_pages: i64 = mk_lib_database_metadata_book::mk_lib_database_metadata_book_count(
         &sqlx_pool,
@@ -56,9 +59,16 @@ pub async fn user_metadata_book(Extension(sqlx_pool): Extension<PgPool>, Path(pa
     )
     .await
     .unwrap();
+    let mut template_data_exists = false;
+    if book_list.len() > 0 {
+        template_data_exists = true;
+    }
+    let page_usize = page as usize;
     let template = TemplateMetaBookContext {
         template_data: &book_list,
+        template_data_exists: &template_data_exists,
         pagination_bar: &pagination_html,
+        page: &page_usize,
     };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())
@@ -70,7 +80,10 @@ struct TemplateMetaBookDetailContext {
     template_data: serde_json::Value,
 }
 
-pub async fn user_metadata_book_detail(Extension(sqlx_pool): Extension<PgPool>, Path(guid): Path<uuid::Uuid>) -> impl IntoResponse {
+pub async fn user_metadata_book_detail(
+    Extension(sqlx_pool): Extension<PgPool>,
+    Path(guid): Path<uuid::Uuid>,
+) -> impl IntoResponse {
     let detail_data =
         mk_lib_database_metadata_book::mk_lib_database_metadata_book_detail(&sqlx_pool, guid)
             .await

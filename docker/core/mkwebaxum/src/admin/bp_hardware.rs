@@ -17,7 +17,9 @@ mod mk_lib_logging;
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_hardware.html")]
-struct AdminHardwareTemplate;
+struct AdminHardwareTemplate<'a> {
+    page: &'a usize,
+};
 
 pub async fn admin_hardware() -> impl IntoResponse {
     let template = AdminHardwareTemplate {};

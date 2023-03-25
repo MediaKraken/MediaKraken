@@ -12,8 +12,8 @@ use serde_json::json;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaAdultList {
-    mm_metadata_adult_guid: uuid::Uuid,
-    mm_metadata_adult_name: String,
+    pub mm_metadata_adult_guid: uuid::Uuid,
+    pub mm_metadata_adult_name: String,
 }
 
 pub async fn mk_lib_database_media_adult_read(

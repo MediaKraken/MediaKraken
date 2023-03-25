@@ -12,7 +12,7 @@ use serde_json::json;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaSportsList {
-    mm_metadata_music_video_guid: uuid::Uuid,
+    pub mm_metadata_music_video_guid: uuid::Uuid,
 }
 
 pub async fn mk_lib_database_media_sports_read(

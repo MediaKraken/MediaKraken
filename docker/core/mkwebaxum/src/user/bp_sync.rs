@@ -30,12 +30,37 @@ struct TemplateSyncContext<'a> {
 }
 
 pub async fn user_sync(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
+    let db_offset: i32 = (page * 30) - 30;
+    let mut total_pages: i64 = mk_lib_database_sync::mk_lib_database_sync_count(
+        &sqlx_pool,
+        String::new(),
+    )
+    .await
+    .unwrap();
+    if total_pages > 0 {
+        total_pages = total_pages / 30;
+    }
+    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
+        total_pages,
+        page,
+        "/user/metadata/book".to_string(),
+    )
+    .await
+    .unwrap();
     let sync_list =
     mk_lib_database_sync::mk_lib_database_sync_list(&sqlx_pool, uuid::Uuid::nil(), 0, 30)
         .await
         .unwrap();
+    let mut template_data_exists = false;
+    if sync_list.len() > 0 {
+        template_data_exists = true;
+    }
+    let page_usize = page as usize;
     let template = TemplateSyncContext {
         template_data: &sync_list,
+        template_data_exists: &template_data_exists,
+        pagination_bar: &pagination_html,
+        page: &page_usize,
     };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

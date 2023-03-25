@@ -12,10 +12,10 @@ use serde_json::json;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaMusicVideoList {
-    mm_metadata_music_video_guid: uuid::Uuid,
-    mm_metadata_music_video_band: String,
-    mm_metadata_music_video_song: String,
-    mm_metadata_music_video_localimage_json: String,
+    pub mm_metadata_music_video_guid: uuid::Uuid,
+    pub mm_metadata_music_video_band: String,
+    pub mm_metadata_music_video_song: String,
+    pub mm_metadata_music_video_localimage_json: String,
 }
 
 pub async fn mk_lib_database_metadata_music_video_read(

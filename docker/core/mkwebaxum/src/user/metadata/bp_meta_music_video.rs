@@ -59,9 +59,16 @@ pub async fn user_metadata_music_video(Extension(sqlx_pool): Extension<PgPool>, 
         )
         .await
         .unwrap();
+    let mut template_data_exists = false;
+    if music_video_list.len() > 0 {
+        template_data_exists = true;
+    }
+    let page_usize = page as usize;
     let template = TemplateMetaMusicVideoContext {
         template_data: &music_video_list,
+        template_data_exists: &template_data_exists,
         pagination_bar: &pagination_html,
+        page: &page_usize,
     };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

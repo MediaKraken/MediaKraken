@@ -11,8 +11,8 @@ use serde_json::json;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMUsageMovieList {
-    mm_metadata_name: String,
-    mm_metadata_times: i64,
+    pub mm_metadata_name: String,
+    pub mm_metadata_times: i64,
 }
 
 pub async fn mk_lib_database_usage_top10_movie(

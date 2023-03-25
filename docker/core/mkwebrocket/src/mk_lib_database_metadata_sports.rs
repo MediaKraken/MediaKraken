@@ -42,8 +42,8 @@ pub async fn mk_lib_database_metadata_sports_count(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaSportsList {
-    mm_metadata_sports_guid: uuid::Uuid,
-    mm_metadata_sports_name: String,
+    pub mm_metadata_sports_guid: uuid::Uuid,
+    pub mm_metadata_sports_name: String,
 }
 
 pub async fn mk_lib_database_metadata_sports_read(

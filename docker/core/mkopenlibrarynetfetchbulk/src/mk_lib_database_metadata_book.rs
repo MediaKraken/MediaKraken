@@ -35,8 +35,8 @@ pub async fn mk_lib_database_metadata_book_detail(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaBookList {
-    mm_metadata_book_guid: uuid::Uuid,
-    mm_metadata_book_name: String,
+    pub mm_metadata_book_guid: uuid::Uuid,
+    pub mm_metadata_book_name: String,
 }
 
 pub async fn mk_lib_database_metadata_book_read(

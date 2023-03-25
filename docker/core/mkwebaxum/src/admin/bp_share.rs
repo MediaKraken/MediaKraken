@@ -31,6 +31,20 @@ struct TemplateAdminShareContext<'a> {
 }
 
 pub async fn admin_share(Extension(sqlx_pool): Extension<PgPool>, Path(page): Path<i32>) -> impl IntoResponse {
+    let db_offset: i32 = (page * 30) - 30;
+    let mut total_pages: i64 = mk_lib_database_network_share::mk_lib_database_network_share_count(&sqlx_pool)
+        .await
+        .unwrap();
+    if total_pages > 0 {
+        total_pages = total_pages / 30;
+    }
+    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
+        total_pages,
+        page,
+        "/admin/admin_share".to_string(),
+    )
+    .await
+    .unwrap();
     let share_list = mk_lib_database_network_share::mk_lib_database_network_share_read(&sqlx_pool)
         .await
         .unwrap();

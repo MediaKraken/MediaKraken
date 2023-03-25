@@ -67,8 +67,8 @@ pub async fn mk_lib_database_media_unmatched_count(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaUnmatchedList {
-    mm_media_guid: uuid::Uuid,
-    mm_media_path: String,
+    pub mm_media_guid: uuid::Uuid,
+    pub mm_media_path: String,
 }
 
 pub async fn mk_lib_database_media_unmatched_read(
@@ -144,7 +144,7 @@ pub async fn mk_lib_database_media_known_count(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaKnownList {
-    mm_media_path: String,
+    pub mm_media_path: String,
 }
 
 pub async fn mk_lib_database_media_known(

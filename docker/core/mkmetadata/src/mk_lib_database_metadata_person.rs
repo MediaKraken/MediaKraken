@@ -71,10 +71,10 @@ pub async fn mk_lib_database_metadata_person_count(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaPersonList {
-    mm_metadata_person_guid: uuid::Uuid,
-    mm_metadata_person_name: String,
-    mm_metadata_person_image: String,
-    mmp_profile: String,
+    pub mm_metadata_person_guid: uuid::Uuid,
+    pub mm_metadata_person_name: String,
+    pub mm_metadata_person_image: String,
+    pub mmp_profile: String,
 }
 
 pub async fn mk_lib_database_metadata_person_read(

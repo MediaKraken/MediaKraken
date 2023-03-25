@@ -12,10 +12,10 @@ use serde_json::json;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaMusicList {
-    mm_metadata_album_guid: uuid::Uuid,
-    mm_metadata_album_name: String,
-    mm_metadata_album_json: serde_json::Value,
-    mm_metadata_album_localimage: String,
+    pub mm_metadata_album_guid: uuid::Uuid,
+    pub mm_metadata_album_name: String,
+    pub mm_metadata_album_json: serde_json::Value,
+    pub mm_metadata_album_localimage: String,
 }
 
 pub async fn mk_lib_database_metadata_music_count(

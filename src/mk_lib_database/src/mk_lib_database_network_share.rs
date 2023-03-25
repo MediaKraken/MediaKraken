@@ -12,6 +12,24 @@ use std::num::NonZeroU8;
 use stdext::function_name;
 use serde_json::json;
 
+pub async fn mk_lib_database_network_share_count(
+    sqlx_pool: &sqlx::PgPool,
+) -> Result<i64, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let row: (i64,) = sqlx::query_as("select count(*) from mm_network_shares")
+        .fetch_one(sqlx_pool)
+        .await?;
+    Ok(row.0)
+}
+
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBShareList {
     pub mm_network_share_guid: uuid::Uuid,

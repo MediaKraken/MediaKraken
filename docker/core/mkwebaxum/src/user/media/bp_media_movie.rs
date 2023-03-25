@@ -60,9 +60,16 @@ pub async fn user_media_movie(Extension(sqlx_pool): Extension<PgPool>, Path(page
     )
     .await
     .unwrap();
+let mut template_data_exists = false;
+if movie_list.len() > 0 {
+    template_data_exists = true;
+}
+let page_usize = page as usize;
     let template = TemplateMediaMovieContext {
         template_data: &movie_list,
+        template_data_exists: &template_data_exists,
         pagination_bar: &pagination_html,
+        page: &page_usize,
     };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

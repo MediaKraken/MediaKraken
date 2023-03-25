@@ -33,9 +33,9 @@ pub async fn mk_lib_database_link_delete(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBLinkList {
-    mm_link_guid: uuid::Uuid,
-    mm_link_name: String,
-    mm_link_json: Json,
+    pub mm_link_guid: uuid::Uuid,
+    pub mm_link_name: String,
+    pub mm_link_json: Json,
 }
 
 pub async fn mk_lib_database_link_read(

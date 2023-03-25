@@ -80,7 +80,7 @@ pub async fn mk_lib_database_media_game_category_update(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaGameList {
-    mm_metadata_game_guid: uuid::Uuid,
+    pub mm_metadata_game_guid: uuid::Uuid,
 }
 
 pub async fn mk_lib_database_media_game_read(

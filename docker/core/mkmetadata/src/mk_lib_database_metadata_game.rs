@@ -114,12 +114,12 @@ pub async fn mk_lib_database_metadata_game_count(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaGameList {
-    gi_game_info_id: uuid::Uuid,
-    gi_game_info_short_name: String,
-    gi_game_info_name: String,
-    gi_year: Option<String>,
-    gi_game_info_localimage: Option<serde_json::Value>,
-    gs_game_system_name: String,
+    pub gi_game_info_id: uuid::Uuid,
+    pub gi_game_info_short_name: String,
+    pub gi_game_info_name: String,
+    pub gi_year: Option<String>,
+    pub gi_game_info_localimage: Option<serde_json::Value>,
+    pub gs_game_system_name: String,
 }
 
 pub async fn mk_lib_database_metadata_game_read(

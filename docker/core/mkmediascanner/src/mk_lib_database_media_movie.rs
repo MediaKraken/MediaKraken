@@ -69,7 +69,7 @@ pub async fn mk_lib_database_media_movie_random(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaMovieList {
-    mm_metadata_music_video_guid: uuid::Uuid,
+    pub mm_metadata_music_video_guid: uuid::Uuid,
 }
 
 pub async fn mk_lib_database_media_movie_read(
