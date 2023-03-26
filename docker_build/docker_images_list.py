@@ -85,6 +85,9 @@ STAGE_CORE_IMAGES = {
     'mkguessitrest': ('mkguessitrest',
                       'tiangolo/uwsgi-nginx-flask:python3.8-alpine-2021-10-02', 'core'),
 
+    # haproxy
+    'mkhaproxy': ('mkhaproxy', 'alpine:3.17', 'core'),
+
     # runs control network/ir/if/etc
     'mkhardwarecontrol': ('mkhardwarecontrol', 'busybox:1.36.0-uclibc', 'core'),
 
