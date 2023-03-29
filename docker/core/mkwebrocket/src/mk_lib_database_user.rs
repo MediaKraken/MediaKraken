@@ -3,6 +3,7 @@
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
+use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgRow;
@@ -18,7 +19,7 @@ Admin::Edit
 User::View
 */
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
 pub struct User {
     pub id: i64,
     pub username: String,

@@ -87,11 +87,11 @@ pub async fn admin_home(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoRes
         template_data_server_info_server_name: &option_json["MediaKrakenServer"]["Server Name"]
             .to_string(),
         // following boottime only compiles #[cfg(not(windows))] in this case is fine
-        template_data_server_uptime: format!(
+        template_data_server_uptime: &format!(
             "{:02}:{:02}:{:02}",
             boot_duration.num_hours(),
             boot_duration.num_minutes() % 60,
-            boot_duration.num_seconds() % 60
+            boot_duration.num_seconds() % 60,
         ),
         template_data_server_host_ip: &"255.255.255.255".to_string(),
         template_data_server_info_server_ip_external: &external_ip,

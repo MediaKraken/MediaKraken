@@ -56,7 +56,7 @@ services:
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
-      - mediakraken_vol_static:/static
+      - mediakraken_vol_static:/mediakraken/static
     deploy:
       mode: replicated
       replicas: 1
