@@ -52,19 +52,15 @@ struct TemplateMetaMovieContext<'a> {
 
 pub async fn user_metadata_movie(
     Extension(sqlx_pool): Extension<PgPool>,
-    Path(page): Path<i32>,
+    Path(page): Path<i64>,
 ) -> impl IntoResponse {
-    let db_offset: i32 = (page * 30) - 30;
-    let mut total_pages: i64 =
-        mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(
-            &sqlx_pool,
-            String::new(),
-        )
-        .await
-        .unwrap();
-    if total_pages > 0 {
-        total_pages = total_pages / 30;
-    }
+    let db_offset: i64 = (page * 30) - 30;
+    let total_pages: i64 = mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(
+        &sqlx_pool,
+        String::new(),
+    )
+    .await
+    .unwrap();
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
         total_pages,
         page,
@@ -96,11 +92,10 @@ pub async fn user_metadata_movie(
         {
             let rating_json: serde_json::Value =
                 row_data.mm_metadata_user_json.as_ref().unwrap().clone();
-            // TODO set status's
-            // rating_status = rating_json["UserStats"][user.id().to_string()]["Rating"].clone();
-            // watched_status = rating_json["UserStats"][user.id().to_string()]["Watched"].clone();
-            // request_status = rating_json["UserStats"][user.id().to_string()]["Request"].clone();
-            // queue_status = rating_json["UserStats"][user.id().to_string()]["Queue"].clone();
+            rating_status = rating_json["UserStats"][user.id().to_string()]["Rating"].clone();
+            watched_status = rating_json["UserStats"][user.id().to_string()]["Watched"].clone();
+            request_status = rating_json["UserStats"][user.id().to_string()]["Request"].clone();
+            queue_status = rating_json["UserStats"][user.id().to_string()]["Queue"].clone();
         }
         let mut mm_poster: String = "/image/Movie-icon.png".to_string();
         if row_data.mm_poster.len() > 0 {

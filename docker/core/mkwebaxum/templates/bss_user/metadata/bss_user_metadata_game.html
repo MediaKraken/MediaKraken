@@ -29,7 +29,7 @@
             <tbody>
                 {% for row_data in template_data %}
                 <tr>
-                    <td>{{ loop.index + (page - 1) * per_page }}</td>
+                    <td>{{ loop.index + (page - 1) * 30 }}</td>
                     <td><a href ="/user/metadata/game_detail/{{row_data.gi_game_info_id}}">{{ row_data.gi_game_info_name }}</a></td>
                     <td>{{ row_data.gi_year }}</td>
                     <td>{{ row_data.gs_game_system_name }}</td>

@@ -42,17 +42,13 @@ pub async fn user_metadata_movie(
     user: User,
     page: i32,
 ) -> Template {
-    let db_offset: i32 = (page * 30) - 30;
-    let mut total_pages: i64 =
-        mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(
-            &sqlx_pool,
-            String::new(),
-        )
-        .await
-        .unwrap();
-    if total_pages > 0 {
-        total_pages = total_pages / 30;
-    }
+    let db_offset: i64 = (page * 30) - 30;
+    let total_pages: i64 = mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(
+        &sqlx_pool,
+        String::new(),
+    )
+    .await
+    .unwrap();
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
         total_pages,
         page,
@@ -129,18 +125,18 @@ pub async fn user_metadata_movie_detail(
     guid: rocket::serde::uuid::Uuid,
 ) -> Template {
     let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
-    let movie_metadata = mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_detail_by_guid(
-        &sqlx_pool,
-        tmp_uuid,
-    )
-    .await
-    .unwrap();
+    let movie_metadata =
+        mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_detail_by_guid(
+            &sqlx_pool, tmp_uuid,
+        )
+        .await
+        .unwrap();
     Template::render(
         "bss_user/metadata/bss_user_metadata_movie_detail",
         &TemplateMetaMovieDetailContext {
             template_data_json: movie_metadata.mm_metadata_movie_json,
-            template_data_json_media_ffmpeg: json!({None}),
-            template_data_json_media_crew: json!({None}),
+            template_data_json_media_ffmpeg: json!({ None }),
+            template_data_json_media_crew: json!({ None }),
         },
     )
     // Template::render(

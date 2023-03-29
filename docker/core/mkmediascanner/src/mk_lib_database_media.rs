@@ -4,11 +4,11 @@
 mod mk_lib_logging;
 
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 use stdext::function_name;
-use serde_json::json;
 
 pub async fn mk_lib_database_media_update_metadata_guid(
     sqlx_pool: &sqlx::PgPool,
@@ -73,8 +73,8 @@ pub struct DBMediaUnmatchedList {
 
 pub async fn mk_lib_database_media_unmatched_read(
     sqlx_pool: &sqlx::PgPool,
-    offset: i32,
-    limit: i32,
+    offset: i64,
+    limit: i64,
 ) -> Result<Vec<DBMediaUnmatchedList>, sqlx::Error> {
     #[cfg(debug_assertions)]
     {
@@ -149,8 +149,8 @@ pub struct DBMediaKnownList {
 
 pub async fn mk_lib_database_media_known(
     sqlx_pool: &sqlx::PgPool,
-    offset: i32,
-    limit: i32,
+    offset: i64,
+    limit: i64,
 ) -> Result<Vec<DBMediaKnownList>, sqlx::Error> {
     #[cfg(debug_assertions)]
     {
@@ -291,8 +291,8 @@ pub struct DBMediaDuplicateList {
 
 pub async fn mk_lib_database_media_duplicate(
     sqlx_pool: &sqlx::PgPool,
-    offset: i32,
-    limit: i32,
+    offset: i64,
+    limit: i64,
 ) -> Result<Vec<DBMediaDuplicateList>, sqlx::Error> {
     #[cfg(debug_assertions)]
     {
@@ -337,8 +337,8 @@ pub struct DBMediaDuplicateDetailList {
 pub async fn mk_lib_database_media_duplicate_detail(
     sqlx_pool: &sqlx::PgPool,
     mm_metadata_guid: Uuid,
-    offset: i32,
-    limit: i32,
+    offset: i64,
+    limit: i64,
 ) -> Result<Vec<DBMediaDuplicateDetailList>, sqlx::Error> {
     #[cfg(debug_assertions)]
     {

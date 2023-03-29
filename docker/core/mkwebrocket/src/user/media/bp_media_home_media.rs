@@ -5,8 +5,8 @@ use rocket::serde::{json::Json, Deserialize, Serialize};
 use rocket::Request;
 use rocket_auth::{Auth, Error, Login, Signup, User, Users};
 use rocket_dyn_templates::{tera::Tera, Template};
-use stdext::function_name;
 use serde_json::json;
+use stdext::function_name;
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -29,17 +29,14 @@ pub async fn user_media_home_media(
     user: User,
     page: i32,
 ) -> Template {
-    let db_offset: i32 = (page * 30) - 30;
-    let mut total_pages: i64 =
+    let db_offset: i64 = (page * 30) - 30;
+    let total_pages: i64 =
         mk_lib_database_media_home_media::mk_lib_database_media_home_media_count(
             &sqlx_pool,
             String::new(),
         )
         .await
         .unwrap();
-    if total_pages > 0 {
-        total_pages = total_pages / 30;
-    }
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
         total_pages,
         page,

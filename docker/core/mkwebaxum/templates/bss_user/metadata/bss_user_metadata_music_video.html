@@ -20,26 +20,22 @@
     <div id="the-node">
         {% for row_data in template_data %}
         <div class="main_photo">
-            <div class="media_context_right" data-id={{row_data[0]}}>
-                <a href= "/user/metadata/music_video_detail/{{row_data[0]}}" >
-                {% if row_data[3] == None %}
+            <div class="media_context_right" data-id={{row_data.mm_metadata_music_video_guid}}>
+                <a href= "/user/metadata/music_video_detail/{{row_data.mm_metadata_music_video_guid}}" >
+                {% if row_data.mm_metadata_music_video_localimage_json == None %}
                 <img src= "/static/image/Movie-icon.png" loading="lazy" height="300" width="200">
-                </a>
-                {% if row_data[2] == "" %}
-                    <div class="description">
-                        <p class="description_content_left">{{row_data[1]}}</p>
-                    </div>
                 {% else %}
-                    <div class="description">
-                        <p class="description_content_left">{{row_data[1]}} - {{row_data[2]}}</p>
-                    </div>
+                <img src= "/static/{{row_data.mm_metadata_music_video_localimage_json}}" loading="lazy" height="300" width="200">
                 {% endif %}
-                {% else %}
-                <img src= "/static/{{row_data[3]}}" loading="lazy" height="300" width="200">
                 </a>
-                <div class="description">
-                    <p class="description_content_left">{{row_data[2]}}</p>
-                </div>
+                {% if row_data.mm_metadata_music_video_song == "" %}
+                    <div class="description">
+                        <p class="description_content_left">{{row_data.mm_metadata_music_video_band}}</p>
+                    </div>
+                {% else %}
+                    <div class="description">
+                        <p class="description_content_left">{{row_data.mm_metadata_music_video_band}} - {{row_data.mm_metadata_music_video_song}}</p>
+                    </div>
                 {% endif %}
             </div>
         </div>

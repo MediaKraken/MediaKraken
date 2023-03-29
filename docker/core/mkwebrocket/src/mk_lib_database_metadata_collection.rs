@@ -4,11 +4,11 @@
 mod mk_lib_logging;
 
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 use stdext::function_name;
-use serde_json::json;
 
 pub async fn mk_lib_database_metadata_collection_count(
     sqlx_pool: &sqlx::PgPool,
@@ -50,8 +50,8 @@ pub struct DBMetaCollectionList {
 pub async fn mk_lib_database_metadata_collection_read(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
-    offset: i32,
-    limit: i32,
+    offset: i64,
+    limit: i64,
 ) -> Result<Vec<DBMetaCollectionList>, sqlx::Error> {
     #[cfg(debug_assertions)]
     {
@@ -183,17 +183,30 @@ pub async fn mk_lib_database_metadata_collection_guid_by_name(
     Ok(row.0)
 }
 
+pub async fn mk_lib_database_metadata_collection_guid_by_tmdb(
+    sqlx_pool: &sqlx::PgPool,
+    tmdb_id: String,
+) -> Result<uuid::Uuid, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let row: (uuid::Uuid,) = sqlx::query_as(
+        "sselect mm_metadata_collection_guid from mm_metadata_collection
+        where mm_metadata_collection_json @> '{\"id\":$1}'",
+    )
+    .bind(tmdb_id)
+    .fetch_one(sqlx_pool)
+    .await?;
+    Ok(row.0)
+}
+
 /*
-
-// TODO port query
-pub async fn db_collection_by_tmdb(self, tmdb_id):
-    """
-    Return uuid via tmdb id
-    """
-    return await db_conn.fetchval(
-        'select mm_metadata_collection_guid from mm_metadata_collection'
-        ' where mm_metadata_collection_json @> '{"id":$1}'', tmdb_id)
-
 
 // TODO port query
 pub async fn db_collection_update(self, collection_guid, guid_json):

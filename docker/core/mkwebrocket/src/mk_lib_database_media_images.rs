@@ -4,11 +4,11 @@
 mod mk_lib_logging;
 
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 use stdext::function_name;
-use serde_json::json;
 
 pub async fn mk_lib_database_metadata_image_count(
     sqlx_pool: &sqlx::PgPool,
@@ -41,8 +41,8 @@ pub struct MediaImageList {
 pub async fn mk_lib_database_metadata_image_read(
     sqlx_pool: &sqlx::PgPool,
     class_id: i32,
-    offset: i32,
-    limit: i32,
+    offset: i64,
+    limit: i64,
 ) -> Result<Vec<MediaImageList>, sqlx::Error> {
     #[cfg(debug_assertions)]
     {

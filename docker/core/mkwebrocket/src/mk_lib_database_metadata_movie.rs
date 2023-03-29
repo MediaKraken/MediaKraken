@@ -5,11 +5,11 @@ mod mk_lib_logging;
 
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 use stdext::function_name;
-use serde_json::json;
 
 pub async fn mk_lib_database_metadata_exists_movie(
     sqlx_pool: &sqlx::PgPool,
@@ -38,7 +38,7 @@ pub async fn mk_lib_database_metadata_exists_movie(
 pub struct DBMetaMovieList {
     pub mm_metadata_guid: uuid::Uuid,
     pub mm_metadata_name: String,
-    pub mm_date: String,    // DateTime<Utc>,
+    pub mm_date: String, // DateTime<Utc>,
     pub mm_poster: String,
     pub mm_metadata_user_json: Option<serde_json::Value>,
 }
@@ -46,8 +46,8 @@ pub struct DBMetaMovieList {
 pub async fn mk_lib_database_metadata_movie_read(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
-    offset: i32,
-    limit: i32,
+    offset: i64,
+    limit: i64,
 ) -> Result<Vec<DBMetaMovieList>, sqlx::Error> {
     #[cfg(debug_assertions)]
     {
@@ -212,7 +212,6 @@ pub async fn mk_lib_database_metadata_movie_detail_by_guid(
     .await?;
     Ok(row)
 }
-
 
 /*
 

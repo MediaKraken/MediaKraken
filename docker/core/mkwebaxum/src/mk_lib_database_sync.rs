@@ -4,11 +4,11 @@
 mod mk_lib_logging;
 
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 use stdext::function_name;
-use serde_json::json;
 
 pub async fn mk_lib_database_sync_delete(
     sqlx_pool: &sqlx::PgPool,
@@ -59,7 +59,7 @@ pub async fn mk_lib_database_sync_process_update(
     Ok(())
 }
 
-pub async fn mk_lib_database_sync_count(sqlx_pool: &sqlx::PgPool) -> Result<i32, sqlx::Error> {
+pub async fn mk_lib_database_sync_count(sqlx_pool: &sqlx::PgPool) -> Result<i64, sqlx::Error> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -69,7 +69,7 @@ pub async fn mk_lib_database_sync_count(sqlx_pool: &sqlx::PgPool) -> Result<i32,
         .await
         .unwrap();
     }
-    let row: (i32,) = sqlx::query_as("select count(*) from mm_media_sync")
+    let row: (i64,) = sqlx::query_as("select count(*) from mm_media_sync")
         .fetch_one(sqlx_pool)
         .await?;
     Ok(row.0)
@@ -118,8 +118,8 @@ pub struct DBSyncList {
 pub async fn mk_lib_database_sync_list(
     sqlx_pool: &sqlx::PgPool,
     user_id: Uuid,
-    offset: i32,
-    limit: i32,
+    offset: i64,
+    limit: i64,
 ) -> Result<Vec<DBSyncList>, sqlx::Error> {
     #[cfg(debug_assertions)]
     {

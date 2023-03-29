@@ -4,11 +4,11 @@
 mod mk_lib_logging;
 
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 use stdext::function_name;
-use serde_json::json;
 
 #[path = "mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;
@@ -80,8 +80,8 @@ pub struct DBMetaPersonList {
 pub async fn mk_lib_database_metadata_person_read(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
-    offset: i32,
-    limit: i32,
+    offset: i64,
+    limit: i64,
 ) -> Result<Vec<DBMetaPersonList>, sqlx::Error> {
     #[cfg(debug_assertions)]
     {

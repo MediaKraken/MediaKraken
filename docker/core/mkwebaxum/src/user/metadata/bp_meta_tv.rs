@@ -38,16 +38,13 @@ struct TemplateMetaTVContext<'a> {
 
 pub async fn user_metadata_tv(
     Extension(sqlx_pool): Extension<PgPool>,
-    Path(page): Path<i32>,
+    Path(page): Path<i64>,
 ) -> impl IntoResponse {
-    let db_offset: i32 = (page * 30) - 30;
-    let mut total_pages: i64 =
+    let db_offset: i64 = (page * 30) - 30;
+    let total_pages: i64 =
         mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_count(&sqlx_pool, String::new())
             .await
             .unwrap();
-    if total_pages > 0 {
-        total_pages = total_pages / 30;
-    }
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
         total_pages,
         page,

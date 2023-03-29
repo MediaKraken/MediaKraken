@@ -1,7 +1,5 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use stdext::function_name;
-use serde_json::json;
 use askama::Template;
 use askama_filters::filters;
 use axum::{
@@ -11,7 +9,9 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use serde_json::json;
 use sqlx::postgres::PgPool;
+use stdext::function_name;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -31,14 +31,14 @@ struct TemplateAdminLibraryContext<'a> {
     page: &'a usize,
 }
 
-pub async fn admin_library(Extension(sqlx_pool): Extension<PgPool>, Path(page): Path<i32>) -> impl IntoResponse {
-    let db_offset: i32 = (page * 30) - 30;
-    let mut total_pages: i64 = mk_lib_database_library::mk_lib_database_library_count(&sqlx_pool)
+pub async fn admin_library(
+    Extension(sqlx_pool): Extension<PgPool>,
+    Path(page): Path<i64>,
+) -> impl IntoResponse {
+    let db_offset: i64 = (page * 30) - 30;
+    let total_pages: i64 = mk_lib_database_library::mk_lib_database_library_count(&sqlx_pool)
         .await
         .unwrap();
-    if total_pages > 0 {
-        total_pages = total_pages / 30;
-    }
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
         total_pages,
         page,
@@ -46,10 +46,9 @@ pub async fn admin_library(Extension(sqlx_pool): Extension<PgPool>, Path(page): 
     )
     .await
     .unwrap();
-    let library_list =
-        mk_lib_database_library::mk_lib_database_library_path_audit_read(&sqlx_pool)
-            .await
-            .unwrap();
+    let library_list = mk_lib_database_library::mk_lib_database_library_path_audit_read(&sqlx_pool)
+        .await
+        .unwrap();
     let mut template_data_exists: bool = false;
     if library_list.len() > 0 {
         template_data_exists = true;

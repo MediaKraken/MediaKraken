@@ -4,11 +4,29 @@
 mod mk_lib_logging;
 
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
+use std::{collections::HashSet, str::FromStr};
 use stdext::function_name;
-use serde_json::json;
+
+/*
+Adult::View
+Admin::View
+Admin::Edit
+User::View
+*/
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct User {
+    pub id: i64,
+    pub username: String,
+    pub email: String,
+    pub last_signin: DateTime<Utc>,
+    pub last_signoff: DateTime<Utc>,
+    pub permissions: HashSet<String>,
+}
 
 pub async fn mk_lib_database_user_exists(
     sqlx_pool: &sqlx::PgPool,
@@ -24,7 +42,7 @@ pub async fn mk_lib_database_user_exists(
         .unwrap();
     }
     let row: (bool,) = sqlx::query_as(
-        "select exists(select 1 from users \
+        "select exists(select 1 from axum_users \
         where email = $1 limit 1) limit 1",
     )
     .bind(user_name)
@@ -42,8 +60,8 @@ pub struct DBUserList {
 
 pub async fn mk_lib_database_user_read(
     sqlx_pool: &sqlx::PgPool,
-    offset: i32,
-    limit: i32,
+    offset: i64,
+    limit: i64,
 ) -> Result<Vec<DBUserList>, sqlx::Error> {
     #[cfg(debug_assertions)]
     {
@@ -55,7 +73,7 @@ pub async fn mk_lib_database_user_read(
         .unwrap();
     }
     let select_query = sqlx::query(
-        "select id, email, is_admin from users order by LOWER(email) offset $1 limit $2",
+        "select id, email, is_admin from axum_users order by LOWER(email) offset $1 limit $2",
     )
     .bind(offset)
     .bind(limit);
@@ -84,12 +102,12 @@ pub async fn mk_lib_database_user_count(
         .unwrap();
     }
     if user_name == "" {
-        let row: (i64,) = sqlx::query_as("select count(*) from users")
+        let row: (i64,) = sqlx::query_as("select count(*) from axum_users")
             .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
     } else {
-        let row: (i64,) = sqlx::query_as("select count(*) from users where email = $1")
+        let row: (i64,) = sqlx::query_as("select count(*) from axum_users where email = $1")
             .bind(user_name)
             .fetch_one(sqlx_pool)
             .await?;
@@ -111,7 +129,7 @@ pub async fn mk_lib_database_user_delete(
         .unwrap();
     }
     let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query("delete from users where id = $1")
+    sqlx::query("delete from axum_users where id = $1")
         .bind(user_uuid)
         .execute(&mut transaction)
         .await?;
@@ -130,17 +148,9 @@ pub async fn mk_lib_database_user_set_admin(sqlx_pool: &sqlx::PgPool) -> Result<
         .unwrap();
     }
     let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query("update users set is_admin = true")
+    sqlx::query("update axum_users set is_admin = true")
         .execute(&mut transaction)
         .await?;
     transaction.commit().await?;
     Ok(())
 }
-
-/*
-
-// TODO port query
-pub async fn db_user_detail(self, guid):
-    return await db_conn.fetchrow('select * from mm_user'
-                                  ' where id = $1', guid)
- */

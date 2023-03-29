@@ -18,6 +18,14 @@ mod mk_lib_logging;
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_hardware.html")]
 struct AdminHardwareTemplate<'a> {
+    template_data_alexa: &'a serde_json::Value,
+    template_data_chromecast: &'a serde_json::Value,
+    template_data_crestron: &'a serde_json::Value,
+    template_data_dlna: &'a serde_json::Value,
+    template_data_hdhomerun: &'a serde_json::Value,
+    template_data_phue: &'a serde_json::Value,
+    template_data_roku: &'a serde_json::Value,
+    template_data_soco: &'a serde_json::Value,
     page: &'a usize,
 };
 

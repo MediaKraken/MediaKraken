@@ -4,11 +4,11 @@
 mod mk_lib_logging;
 
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 use stdext::function_name;
-use serde_json::json;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaAnimeList {
@@ -19,8 +19,8 @@ pub struct DBMediaAnimeList {
 pub async fn mk_lib_database_media_anime_read(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
-    offset: i32,
-    limit: i32,
+    offset: i64,
+    limit: i64,
 ) -> Result<Vec<DBMediaAnimeList>, sqlx::Error> {
     #[cfg(debug_assertions)]
     {

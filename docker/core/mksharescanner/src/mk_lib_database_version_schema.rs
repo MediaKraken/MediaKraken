@@ -119,6 +119,35 @@ pub async fn mk_lib_database_update_schema(
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 49).await?;
     }
+
+    if version_no < 50 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(
+            "CREATE TABLE IF NOT EXISTS axum_users (\
+            id INTEGER PRIMARY KEY, \
+            username VARCHAR(256) NOT NULL, \
+            email VARCHAR(256) NOT NULL, \
+            last_signin datetime, \
+            last_signoff datetime;",
+        )
+        .execute(&mut transaction)
+        .await?;
+        sqlx::query(
+            "CREATE TABLE IF NOT EXISTS axum_user_permissions (\
+            user_id INTEGER NOT NULL, \
+            token VARCHAR(256) NOT NULL;",
+        )
+        .execute(&mut transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX axum_user_permissions_user_id ON axum_user_permissions USING btree (user_id);",
+        )
+        .execute(&mut transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 50).await?;
+    }
+
     Ok(true)
 }
 

@@ -1,7 +1,5 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use stdext::function_name;
-use serde_json::json;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -10,7 +8,9 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use serde_json::json;
 use sqlx::postgres::PgPool;
+use stdext::function_name;
 
 mod filters {
     pub fn space_to_html(s: &str) -> ::askama::Result<String> {
@@ -36,15 +36,15 @@ struct TemplateMediaMusicContext<'a> {
     page: &'a usize,
 }
 
-pub async fn user_media_music(Extension(sqlx_pool): Extension<PgPool>, Path(page): Path<i32>) -> impl IntoResponse {
-    let db_offset: i32 = (page * 30) - 30;
-    let mut total_pages: i64 =
+pub async fn user_media_music(
+    Extension(sqlx_pool): Extension<PgPool>,
+    Path(page): Path<i64>,
+) -> impl IntoResponse {
+    let db_offset: i64 = (page * 30) - 30;
+    let total_pages: i64 =
         mk_lib_database_media_music::mk_lib_database_media_music_count(&sqlx_pool, String::new())
             .await
             .unwrap();
-    if total_pages > 0 {
-        total_pages = total_pages / 30;
-    }
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
         total_pages,
         page,
@@ -60,11 +60,11 @@ pub async fn user_media_music(Extension(sqlx_pool): Extension<PgPool>, Path(page
     )
     .await
     .unwrap();
-let mut template_data_exists = false;
-if music_list.len() > 0 {
-    template_data_exists = true;
-}
-let page_usize = page as usize;
+    let mut template_data_exists = false;
+    if music_list.len() > 0 {
+        template_data_exists = true;
+    }
+    let page_usize = page as usize;
     let template = TemplateMediaMusicContext {
         template_data: &music_list,
         template_data_exists: &template_data_exists,
@@ -81,7 +81,10 @@ struct TemplateMediaMusicDetailContext {
     template_data: serde_json::Value,
 }
 
-pub async fn user_media_music_detail(Extension(sqlx_pool): Extension<PgPool>, Path(guid): Path<uuid::Uuid>) -> impl IntoResponse {
+pub async fn user_media_music_detail(
+    Extension(sqlx_pool): Extension<PgPool>,
+    Path(guid): Path<uuid::Uuid>,
+) -> impl IntoResponse {
     let template = TemplateMediaMusicDetailContext {
         template_data: json!({}),
     };

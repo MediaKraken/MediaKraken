@@ -19,11 +19,11 @@
     <div id="the-node">
         {% for row_data in template_data %}
         <div class="main_photo">
-            <div class="media_context_right" data-id={{row_data[1]}}>
-                <a href = "/user/metadata/person_detail/{{row_data[0]}}">
-                    <img src="/static/{{row_data[2]}}" loading="lazy" height="300" width="200"></a>
+            <div class="media_context_right" data-id={{row_data.mm_metadata_person_guid}}>
+                <a href = "/user/metadata/person_detail/{{row_data.mm_metadata_person_guid}}">
+                    <img src="/static/{{row_data.mm_metadata_person_image}}" loading="lazy" height="300" width="200"></a>
                 <div class="description">
-                    <p class="description_content_left">{{row_data[1]}}</p>
+                    <p class="description_content_left">{{row_data.mm_metadata_person_name}}</p>
                 </div>
             </div>
         </div>

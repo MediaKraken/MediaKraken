@@ -11,7 +11,7 @@ use stdext::function_name;
 
 pub async fn mk_lib_common_paginate(
     total_pages: i64,
-    page: i32,
+    page: i64,
     base_url: String,
 ) -> Result<String, Box<dyn Error>> {
     #[cfg(debug_assertions)]
@@ -23,10 +23,14 @@ pub async fn mk_lib_common_paginate(
         .await
         .unwrap();
     }
+    let mut total_pages_mut = total_pages;
+    if total_pages_mut > 0 {
+        total_pages_mut = total_pages_mut / 30;
+    }
     let mut pagination_html = String::new();
-    if total_pages != 0 {
+    if total_pages_mut != 0 {
         pagination_html.push_str("<div><ul class=\"pagination\">");
-        let paginator = Paginator::builder(total_pages as usize)
+        let paginator = Paginator::builder(total_pages_mut as usize)
             .current_page(page as usize)
             .build_paginator()
             .unwrap();

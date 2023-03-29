@@ -1,9 +1,5 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use serde::{Deserialize, Serialize};
-use stdext::function_name;
-use serde_json::json;
-use uuid::Uuid;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -12,7 +8,11 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgPool;
+use stdext::function_name;
+use uuid::Uuid;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -20,26 +20,26 @@ mod mk_lib_logging;
 #[path = "../mk_lib_database_sync.rs"]
 mod mk_lib_database_sync;
 
+#[path = "../mk_lib_common_pagination.rs"]
+mod mk_lib_common_pagination;
+
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_sync.html")]
 struct TemplateSyncContext<'a> {
     template_data: &'a Vec<mk_lib_database_sync::DBSyncList>,
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
-    page: &'a usize,    
+    page: &'a usize,
 }
 
-pub async fn user_sync(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
-    let db_offset: i32 = (page * 30) - 30;
-    let mut total_pages: i64 = mk_lib_database_sync::mk_lib_database_sync_count(
-        &sqlx_pool,
-        String::new(),
-    )
-    .await
-    .unwrap();
-    if total_pages > 0 {
-        total_pages = total_pages / 30;
-    }
+pub async fn user_sync(
+    Extension(sqlx_pool): Extension<PgPool>,
+    Path(page): Path<i64>,
+) -> impl IntoResponse {
+    let db_offset: i64 = (page * 30) - 30;
+    let total_pages: i64 = mk_lib_database_sync::mk_lib_database_sync_count(&sqlx_pool)
+        .await
+        .unwrap();
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
         total_pages,
         page,
@@ -48,9 +48,9 @@ pub async fn user_sync(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResp
     .await
     .unwrap();
     let sync_list =
-    mk_lib_database_sync::mk_lib_database_sync_list(&sqlx_pool, uuid::Uuid::nil(), 0, 30)
-        .await
-        .unwrap();
+        mk_lib_database_sync::mk_lib_database_sync_list(&sqlx_pool, uuid::Uuid::nil(), 0, 30)
+            .await
+            .unwrap();
     let mut template_data_exists = false;
     if sync_list.len() > 0 {
         template_data_exists = true;

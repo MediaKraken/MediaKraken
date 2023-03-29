@@ -4,11 +4,11 @@
 mod mk_lib_logging;
 
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 use stdext::function_name;
-use serde_json::json;
 
 pub async fn mk_lib_database_metadata_game_detail(
     sqlx_pool: &sqlx::PgPool,
@@ -125,8 +125,8 @@ pub struct DBMetaGameList {
 pub async fn mk_lib_database_metadata_game_read(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
-    offset: i32,
-    limit: i32,
+    offset: i64,
+    limit: i64,
 ) -> Result<Vec<DBMetaGameList>, sqlx::Error> {
     #[cfg(debug_assertions)]
     {
@@ -227,8 +227,8 @@ pub async fn mk_lib_database_metadata_game_by_name_and_system(
     sqlx_pool: &sqlx::PgPool,
     game_name: String,
     game_system_short_name: String,
-    offset: i32,
-    limit: i32,
+    offset: i64,
+    limit: i64,
 ) -> Result<Vec<DBMetaGameNameMatchList>, sqlx::Error> {
     #[cfg(debug_assertions)]
     {

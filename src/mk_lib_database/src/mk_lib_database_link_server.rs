@@ -4,10 +4,10 @@
 mod mk_lib_logging;
 
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 use stdext::function_name;
-use serde_json::json;
 
 pub async fn mk_lib_database_link_delete(
     sqlx_pool: &sqlx::PgPool,
@@ -40,7 +40,7 @@ pub struct DBLinkList {
 
 pub async fn mk_lib_database_link_read(
     sqlx_pool: &sqlx::PgPool,
-    offset: i32,
+    offset: i64,
     records: i32,
 ) -> Result<Vec<DBLinkList>, sqlx::Error> {
     #[cfg(debug_assertions)]

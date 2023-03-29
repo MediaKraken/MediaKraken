@@ -43,6 +43,7 @@ pub struct BackupList {
 #[template(path = "bss_admin/bss_admin_backup.html")]
 struct TemplateBackupContext<'a> {
     template_data: &'a Vec<BackupList>,
+    template_data_exists: &'a bool,
     pagination_bar: &'a String,
     page: &'a usize,
 }
