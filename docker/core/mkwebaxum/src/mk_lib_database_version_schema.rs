@@ -127,15 +127,15 @@ pub async fn mk_lib_database_update_schema(
             id INTEGER PRIMARY KEY, \
             username VARCHAR(256) NOT NULL, \
             email VARCHAR(256) NOT NULL, \
-            last_signin datetime, \
-            last_signoff datetime;",
+            last_signin timestamp, \
+            last_signoff timestamp);",
         )
         .execute(&mut transaction)
         .await?;
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS axum_user_permissions (\
             user_id INTEGER NOT NULL, \
-            token VARCHAR(256) NOT NULL;",
+            token VARCHAR(256) NOT NULL);",
         )
         .execute(&mut transaction)
         .await?;
