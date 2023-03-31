@@ -3,10 +3,16 @@
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
+use async_trait::async_trait;
+use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgRow;
+use sqlx::{
+    postgres::{PgConnectOptions, PgPoolOptions},
+    ConnectOptions, PgPool,
+};
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 use std::{collections::HashSet, str::FromStr};
@@ -19,14 +25,94 @@ Admin::Edit
 User::View
 */
 
+#[async_trait]
+impl Authentication<User, i64, PgPool> for User {
+    async fn load_user(userid: i64, pool: Option<&PgPool>) -> Result<User, anyhow::Error> {
+        let pool = pool.unwrap();
+        User::get_user(userid, pool)
+            .await
+            .ok_or_else(|| anyhow::anyhow!("Could not load user"))
+    }
+
+    fn is_authenticated(&self) -> bool {
+        !self.anonymous
+    }
+
+    fn is_active(&self) -> bool {
+        !self.anonymous
+    }
+
+    fn is_anonymous(&self) -> bool {
+        self.anonymous
+    }
+}
+
+#[derive(sqlx::FromRow, Clone)]
+pub struct SqlPermissionTokens {
+    pub token: String,
+}
+
 #[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
 pub struct User {
     pub id: i64,
+    pub anonymous: bool,
     pub username: String,
     pub email: String,
     pub last_signin: DateTime<Utc>,
     pub last_signoff: DateTime<Utc>,
     pub permissions: HashSet<String>,
+}
+
+impl User {
+    pub async fn get_user(id: i64, pool: &PgPool) -> Option<Self> {
+        let sqluser = sqlx::query_as::<_, SqlUser>("SELECT * FROM users WHERE id = $1")
+            .bind(id)
+            .fetch_one(pool)
+            .await
+            .ok()?;
+
+        //lets just get all the tokens the user can use, we will only use the full permissions if modifing them.
+        let sql_user_perms = sqlx::query_as::<_, SqlPermissionTokens>(
+            "SELECT token FROM user_permissions WHERE user_id = $1;",
+        )
+        .bind(id)
+        .fetch_all(pool)
+        .await
+        .ok()?;
+
+        Some(sqluser.into_user(Some(sql_user_perms)))
+    }
+}
+
+#[derive(sqlx::FromRow, Clone)]
+pub struct SqlUser {
+    pub id: i64,
+    pub anonymous: bool,
+    pub username: String,
+    pub email: String,
+    pub last_signin: DateTime<Utc>,
+    pub last_signoff: DateTime<Utc>,
+}
+
+impl SqlUser {
+    pub fn into_user(self, sql_user_perms: Option<Vec<SqlPermissionTokens>>) -> User {
+        User {
+            id: self.id,
+            anonymous: self.anonymous,
+            username: self.username,
+            permissions: if let Some(user_perms) = sql_user_perms {
+                user_perms
+                    .into_iter()
+                    .map(|x| x.token)
+                    .collect::<HashSet<String>>()
+            } else {
+                HashSet::<String>::new()
+            },
+            email: self.email,
+            last_signin: self.last_signin,
+            last_signoff: self.last_signoff,
+        }
+    }
 }
 
 pub async fn mk_lib_database_user_exists(
@@ -54,7 +140,7 @@ pub async fn mk_lib_database_user_exists(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBUserList {
-    id: i32,
+    id: i64,
     pub email: String,
     is_admin: bool,
 }
