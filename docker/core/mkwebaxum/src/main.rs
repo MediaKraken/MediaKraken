@@ -30,6 +30,7 @@ use std::io::Write;
 use std::net::SocketAddr;
 use std::path::Path;
 use stdext::function_name;
+use tokio::signal;
 use tower::layer::Layer;
 use tower_http::normalize_path::NormalizePathLayer;
 
@@ -462,6 +463,7 @@ async fn main() {
     // run our app with hyper
     axum::Server::bind(&"0.0.0.0:8080".parse().unwrap())
         .serve(app.into_make_service())
+        .with_graceful_shutdown(shutdown_signal())
         .await
         .unwrap();
 
@@ -477,4 +479,24 @@ async fn main() {
     //     )
     //     .manage(users)
     //    Ok(())
+}
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
 }
