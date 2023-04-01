@@ -1,16 +1,16 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use stdext::function_name;
-use serde_json::json;
 use askama::Template;
 use axum::{
     extract::Path,
-    http::{header, HeaderMap, StatusCode},
+    http::{header, HeaderMap, Method, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
     Extension, Router,
 };
+use serde_json::json;
 use sqlx::postgres::PgPool;
+use stdext::function_name;
 
 mod filters {
     pub fn space_to_html(s: &str) -> ::askama::Result<String> {

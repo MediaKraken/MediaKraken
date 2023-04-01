@@ -4,7 +4,7 @@ use askama::Template;
 use askama_filters::filters;
 use axum::{
     extract::Path,
-    http::{header, HeaderMap, StatusCode},
+    http::{header, HeaderMap, Method, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
     Extension, Router,

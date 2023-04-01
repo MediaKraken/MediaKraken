@@ -1,15 +1,15 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use stdext::function_name;
-use serde_json::json;
 use askama::Template;
 use axum::{
     extract::Path,
-    http::{header, HeaderMap, StatusCode},
+    http::{header, HeaderMap, Method, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
     Extension, Router,
 };
+use serde_json::json;
+use stdext::function_name;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -54,5 +54,8 @@ struct TemplateError500Context {}
 pub async fn general_security() -> impl IntoResponse {
     let template = TemplateError500Context {};
     let reply_html = template.render().unwrap();
-    (StatusCode::INTERNAL_SERVER_ERROR, Html(reply_html).into_response())
+    (
+        StatusCode::INTERNAL_SERVER_ERROR,
+        Html(reply_html).into_response(),
+    )
 }

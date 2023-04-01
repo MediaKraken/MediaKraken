@@ -3,7 +3,7 @@
 use askama::Template;
 use axum::{
     extract::Path,
-    http::{header, HeaderMap, StatusCode},
+    http::{header, HeaderMap, Method, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
     Extension, Router,

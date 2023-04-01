@@ -1,16 +1,16 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use stdext::function_name;
-use serde_json::json;
 use askama::Template;
 use axum::{
     extract::Path,
-    http::{header, HeaderMap, StatusCode},
+    http::{header, HeaderMap, Method, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
     Extension, Router,
 };
+use serde_json::json;
 use sqlx::postgres::PgPool;
+use stdext::function_name;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -22,7 +22,7 @@ struct TemplateUserHardwareContext<'a> {
 }
 
 pub async fn user_hardware(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
-    let mut phue_exists:bool = true;
+    let mut phue_exists: bool = true;
     let template = TemplateUserHardwareContext {
         template_data_phue_exists: &phue_exists,
     };

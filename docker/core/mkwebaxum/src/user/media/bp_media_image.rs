@@ -1,16 +1,16 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use stdext::function_name;
-use serde_json::json;
 use askama::Template;
 use axum::{
     extract::Path,
-    http::{header, HeaderMap, StatusCode},
+    http::{header, HeaderMap, Method, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
     Extension, Router,
 };
+use serde_json::json;
 use sqlx::postgres::PgPool;
+use stdext::function_name;
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -23,8 +23,7 @@ mod mk_lib_database_media_images;
 struct TemplateUserImageContext {}
 
 pub async fn user_media_image(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
-    let template = TemplateUserImageContext {
-    };
+    let template = TemplateUserImageContext {};
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())
 }

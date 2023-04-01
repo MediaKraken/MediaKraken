@@ -4,6 +4,7 @@
 mod mk_lib_logging;
 
 use async_trait::async_trait;
+use axum_session_auth::*;
 use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -47,12 +48,19 @@ impl Authentication<User, i64, PgPool> for User {
     }
 }
 
+#[async_trait]
+impl HasPermission<PgPool> for User {
+    async fn has(&self, perm: &str, _pool: &Option<&PgPool>) -> bool {
+        self.permissions.contains(perm)
+    }
+}
+
 #[derive(sqlx::FromRow, Clone)]
 pub struct SqlPermissionTokens {
     pub token: String,
 }
 
-#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, FromRow, Serialize, Deserialize)]
 pub struct User {
     pub id: i64,
     pub anonymous: bool,
@@ -65,21 +73,19 @@ pub struct User {
 
 impl User {
     pub async fn get_user(id: i64, pool: &PgPool) -> Option<Self> {
-        let sqluser = sqlx::query_as::<_, SqlUser>("SELECT * FROM users WHERE id = $1")
+        let sqluser = sqlx::query_as::<_, SqlUser>("SELECT * FROM axum_users WHERE id = $1")
             .bind(id)
             .fetch_one(pool)
             .await
             .ok()?;
-
-        //lets just get all the tokens the user can use, we will only use the full permissions if modifing them.
+        // lets just get all the tokens the user can use, we will only use the full permissions if modifing them.
         let sql_user_perms = sqlx::query_as::<_, SqlPermissionTokens>(
-            "SELECT token FROM user_permissions WHERE user_id = $1;",
+            "SELECT token FROM axum_user_permissions WHERE user_id = $1;",
         )
         .bind(id)
         .fetch_all(pool)
         .await
         .ok()?;
-
         Some(sqluser.into_user(Some(sql_user_perms)))
     }
 }
@@ -117,7 +123,7 @@ impl SqlUser {
 
 pub async fn mk_lib_database_user_exists(
     sqlx_pool: &sqlx::PgPool,
-    user_name: String,
+    user_name: &String,
 ) -> Result<bool, sqlx::Error> {
     #[cfg(debug_assertions)]
     {
@@ -142,7 +148,6 @@ pub async fn mk_lib_database_user_exists(
 pub struct DBUserList {
     id: i64,
     pub email: String,
-    is_admin: bool,
 }
 
 pub async fn mk_lib_database_user_read(
@@ -160,7 +165,7 @@ pub async fn mk_lib_database_user_read(
         .unwrap();
     }
     let select_query = sqlx::query(
-        "select id, email, is_admin from axum_users order by LOWER(email) offset $1 limit $2",
+        "select id, email from axum_users order by LOWER(email) offset $1 limit $2",
     )
     .bind(offset)
     .bind(limit);
@@ -168,7 +173,6 @@ pub async fn mk_lib_database_user_read(
         .map(|row: PgRow| DBUserList {
             id: row.get("id"),
             email: row.get("email"),
-            is_admin: row.get("is_admin"),
         })
         .fetch_all(sqlx_pool)
         .await?;
@@ -236,6 +240,27 @@ pub async fn mk_lib_database_user_set_admin(sqlx_pool: &sqlx::PgPool) -> Result<
     }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("update axum_users set is_admin = true")
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(())
+}
+
+pub async fn mk_lib_database_user_insert(sqlx_pool: &sqlx::PgPool, 
+    email: &String, password: &String) -> Result<(), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let mut transaction = sqlx_pool.begin().await?;
+    sqlx::query("insert into axum_users (id, email, password) values (NULL, $1, $2)")
+        .bind(email)
+        .bind(password)
         .execute(&mut transaction)
         .await?;
     transaction.commit().await?;

@@ -1,23 +1,69 @@
 #![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
 
-use stdext::function_name;
-use serde_json::json;
 use askama::Template;
 use axum::{
+    extract::Form,
     extract::Path,
-    http::{header, HeaderMap, StatusCode},
-    response::{Html, IntoResponse},
+    http::{header, HeaderMap, Method, StatusCode},
+    response::{Html, IntoResponse, Redirect},
     routing::{get, post},
     Extension, Router,
 };
+use axum_session::{
+    DatabasePool, Session, SessionConfig, SessionLayer, SessionPgPool, SessionStore,
+};
+use axum_session_auth::*;
+use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
+use serde_json::json;
+use serde::{Deserialize, Serialize};
+use sqlx::{
+    postgres::{PgConnectOptions, PgPoolOptions},
+    ConnectOptions, PgPool,
+};
+use stdext::function_name;
 use validator::Validate;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
 
+#[path = "../mk_lib_database_user.rs"]
+mod mk_lib_database_user;
+
 #[derive(Template)]
 #[template(path = "bss_public/bss_public_login.html")]
 struct LoginTemplate;
+
+pub async fn login(
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+) -> String {
+    auth.login_user(2);
+    "You are logged in as a User please try /perm to check permissions".to_owned()
+}
+
+pub async fn perm(
+    method: Method,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+) -> String {
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database_user::User, i64, PgPool>::build([Method::GET], false)
+        .requires(Rights::any([
+            Rights::permission("Category::View"),
+            Rights::permission("Admin::View"),
+        ]))
+        .validate(&current_user, &method, None)
+        .await
+    {
+        return format!(
+            "User {}, Does not have permissions needed to view this page please login",
+            current_user.username
+        );
+    }
+
+    format!(
+        "User has Permissions needed. Here are the Users permissions: {:?}",
+        current_user.permissions
+    )
+}
 
 pub async fn public_login() -> impl IntoResponse {
     let template = LoginTemplate {};
@@ -25,9 +71,13 @@ pub async fn public_login() -> impl IntoResponse {
     (StatusCode::OK, Html(reply_html).into_response())
 }
 
-// #[post("/login", data = "<form>")]
-// pub async fn public_login_post(auth: Auth<'_>, form: Form<Login>) -> Result<Redirect, Error> {
-//     let result = auth.login(&form).await;
-//     result?;
-//     Ok(Redirect::to("/user/home"))
-// }
+#[derive(Deserialize)]
+pub struct LoginInput {
+    email: String,
+    password: String,
+}
+
+pub async fn public_login_post(Extension(sqlx_pool): Extension<PgPool>, Form(input_data): Form<LoginInput>) -> Redirect {
+
+    Redirect::to("/user/home")
+}

@@ -78,6 +78,8 @@ mod bp_public_about;
 mod bp_public_forgot_password;
 #[path = "public/bp_login.rs"]
 mod bp_public_login;
+#[path = "public/bp_logout.rs"]
+mod bp_public_logout;
 #[path = "public/bp_register.rs"]
 mod bp_public_register;
 
@@ -247,13 +249,10 @@ async fn main() {
             "/public/forgot_password",
             get(bp_public_forgot_password::public_forgot_password),
         )
-        .route_with_tsr("/public/login", get(bp_public_login::public_login))
-        //.route_with_tsr("/public/login", post(bp_public_login::public_login_post))
-        .route_with_tsr("/public/register", get(bp_public_register::public_register))
-        // .route_with_tsr(
-        //     "/public/register",
-        //     post(bp_public_register::public_register_post),
-        // )
+        .route_with_tsr("/public/login", get(bp_public_login::public_login).post(bp_public_login::public_login_post))
+        .route_with_tsr("/login", get(bp_public_login::login))
+        .route_with_tsr("/logout", get(bp_public_logout::public_logout))
+        .route_with_tsr("/public/register", get(bp_public_register::public_register).post(bp_public_register::public_register_post))
         // .route_with_tsr(
         //     "/user/internet/flickr",
         //     get(bp_user_internet_bp_inter_flickr::user_inter_flickr),
