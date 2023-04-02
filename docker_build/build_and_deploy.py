@@ -105,7 +105,8 @@ def build_email_push(build_group, email_subject, branch_tag, push_hub_image=Fals
                                                            docker_images_list.DEBIAN_MIRROR,
                                                            docker_images_list.PYPI_MIRROR,
                                                            docker_images_list.PYPI_MIRROR_PORT)),
-                                              stdout=subprocess.PIPE, shell=False)
+                                              stdout=subprocess.PIPE, shell=False,
+                                              env={"DOCKER_BUILDKIT": "1"})
             email_body = ''
             while True:
                 line = pid_build_proc.stdout.readline()
