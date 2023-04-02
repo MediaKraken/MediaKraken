@@ -33,11 +33,11 @@ mod mk_lib_database_user;
 #[template(path = "bss_public/bss_public_login.html")]
 struct LoginTemplate;
 
-pub async fn login(
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
-) -> String {
-    auth.login_user(2);
-    "You are logged in as a User please try /perm to check permissions".to_owned()
+pub async fn public_login(auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
+    let template = LoginTemplate {};
+    let reply_html = template.render().unwrap();
+    auth.login_user(1);
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 pub async fn perm(
@@ -63,12 +63,6 @@ pub async fn perm(
         "User has Permissions needed. Here are the Users permissions: {:?}",
         current_user.permissions
     )
-}
-
-pub async fn public_login() -> impl IntoResponse {
-    let template = LoginTemplate {};
-    let reply_html = template.render().unwrap();
-    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 #[derive(Deserialize)]

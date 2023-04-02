@@ -125,10 +125,16 @@ pub async fn mk_lib_database_update_schema(
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS axum_users (\
             id INTEGER PRIMARY KEY, \
+            anonymous BOOLEAN NOT NULL, \
             username VARCHAR(256) NOT NULL, \
             email VARCHAR(256) NOT NULL, \
             last_signin timestamp, \
             last_signoff timestamp);",
+        )
+        .execute(&mut transaction)
+        .await?;
+        sqlx::query(
+            "INSERT INTO axum_users (id, anonymous, username, email) SELECT 1, true, 'Guest', 'guest@fake.com';",
         )
         .execute(&mut transaction)
         .await?;

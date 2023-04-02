@@ -52,9 +52,9 @@ STAGE_ONE_IMAGES = {
     # 'AlpineBase3170Py3': ('mkbase_alpinepy3', 'alpine:3.17.0', 'base'),
     'AlpineBaseFFMPEG': ('mkbase_alpine_ffmpeg', 'alpine:3.17.1', 'base'),
     'DebianBase11Py3': ('mkbase_debianpy3', 'python:3.12.0a3-bullseye', 'base'),
-    'RustBase1680': ('mkbase_rust', 'rust:1.68.0', 'base'),
-    'RustBase1680Alpine': ('mkbase_rust_alpine', 'rust:1.68.0-alpine', 'base'),
-    'RustBase1680Debian': ('mkbase_rust_debian', 'rust:1.68.0', 'base'),
+    'RustBase1681': ('mkbase_rust', 'rust:1.68.1', 'base'),
+    'RustBase1681Alpine': ('mkbase_rust_alpine', 'rust:1.68.1-alpine', 'base'),
+    'RustBase1681Debian': ('mkbase_rust_debian', 'rust:1.68.1', 'base'),
 }
 
 STAGE_TWO_IMAGES = {}

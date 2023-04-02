@@ -230,7 +230,6 @@ async fn main() {
     // build our application with routes
     // route_with_tsr creates two routes.....one with trailing slash
     let app = Router::new()
-        .route_with_tsr("/about", get(bp_public_about::public_about))
         //.route_with_tsr("/admin/backup", get(bp_admin_backup::admin_backup))
         .route_with_tsr("/admin/cron", get(bp_admin_cron::admin_cron))
         .route_with_tsr("/admin/database", get(bp_admin_database::admin_database))
@@ -246,14 +245,11 @@ async fn main() {
         .route_with_tsr("/admin/settings", get(bp_admin_settings::admin_settings))
         .route_with_tsr("/admin/torrent", get(bp_admin_torrent::admin_torrent))
         //.route_with_tsr("/admin/user/:page", get(bp_admin_user::admin_user))
-        .route_with_tsr(
-            "/public/forgot_password",
-            get(bp_public_forgot_password::public_forgot_password),
-        )
-        .route_with_tsr("/public/login", get(bp_public_login::public_login).post(bp_public_login::public_login_post))
-        .route_with_tsr("/login", get(bp_public_login::login))
         .route_with_tsr("/logout", get(bp_public_logout::public_logout))
-        .route_with_tsr("/public/register", get(bp_public_register::public_register).post(bp_public_register::public_register_post))
+        .route_with_tsr(
+            "/public/login",
+            get(bp_public_login::public_login).post(bp_public_login::public_login_post),
+        )
         // .route_with_tsr(
         //     "/user/internet/flickr",
         //     get(bp_user_internet_bp_inter_flickr::user_inter_flickr),
@@ -450,13 +446,23 @@ async fn main() {
         .route_with_tsr("/user/sync", get(bp_user_sync::user_sync))
         .nest("/static", axum_static::static_router("static"))
         .layer(Extension(sqlx_pool.clone()))
+        .layer(SessionLayer::new(session_store))
         .layer(
             AuthSessionLayer::<mk_lib_database_user::User, i64, SessionPgPool, PgPool>::new(Some(
                 sqlx_pool,
             ))
             .with_config(auth_config),
         )
-        .layer(SessionLayer::new(session_store));
+        // after authsessionlayer so anyone can access
+        .route_with_tsr("/about", get(bp_public_about::public_about))
+        .route_with_tsr(
+            "/public/forgot_password",
+            get(bp_public_forgot_password::public_forgot_password),
+        )
+        .route_with_tsr(
+            "/public/register",
+            get(bp_public_register::public_register).post(bp_public_register::public_register_post),
+        );
     // add a fallback service for handling routes to unknown paths
     let app = app.fallback(bp_error::general_not_found);
 
