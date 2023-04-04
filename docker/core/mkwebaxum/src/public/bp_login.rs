@@ -33,10 +33,9 @@ mod mk_lib_database_user;
 #[template(path = "bss_public/bss_public_login.html")]
 struct LoginTemplate;
 
-pub async fn public_login(auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
+pub async fn public_login() -> impl IntoResponse {
     let template = LoginTemplate {};
     let reply_html = template.render().unwrap();
-    auth.login_user(1);
     (StatusCode::OK, Html(reply_html).into_response())
 }
 

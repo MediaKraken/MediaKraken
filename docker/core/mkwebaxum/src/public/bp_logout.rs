@@ -4,7 +4,7 @@ use askama::Template;
 use axum::{
     extract::Path,
     http::{header, HeaderMap, Method, StatusCode},
-    response::{Html, IntoResponse},
+    response::{Html, IntoResponse, Redirect},
     routing::{get, post},
     Extension, Router,
 };
@@ -26,21 +26,8 @@ mod mk_lib_logging;
 #[path = "../mk_lib_database_user.rs"]
 mod mk_lib_database_user;
 
-#[derive(Template)]
-#[template(path = "bss_public/bss_public_login.html")]
-struct LoginTemplate;
-
-// #[get("/logout")]
-// pub async fn public_logout(
-//     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
-// ) -> Result<Template, Error> {
-//     auth.logout_user()?;
-//     Ok(Template::render("logout", tera::Context::new().into_json()))
-// }
-
 pub async fn public_logout(auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
-    let template = LoginTemplate {};
-    let reply_html = template.render().unwrap();
+    // TODO update user logout time in db
     auth.logout_user();
-    (StatusCode::OK, Html(reply_html).into_response())
+    Redirect::to("/public/login")
 }

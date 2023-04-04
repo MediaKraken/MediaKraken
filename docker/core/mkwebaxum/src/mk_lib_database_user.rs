@@ -60,7 +60,7 @@ pub struct SqlPermissionTokens {
     pub token: String,
 }
 
-#[derive(Debug, Default, Clone, FromRow, Serialize, Deserialize)]
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
 pub struct User {
     pub id: i64,
     pub anonymous: bool,
@@ -69,6 +69,22 @@ pub struct User {
     pub last_signin: DateTime<Utc>,
     pub last_signoff: DateTime<Utc>,
     pub permissions: HashSet<String>,
+}
+
+impl Default for User {
+    fn default() -> Self {
+        let mut permissions = HashSet::new();
+        permissions.insert("Category::View".to_owned());
+        Self {
+            id: 1,
+            anonymous: true,
+            username: "Guest".into(),
+            email: "guest@fake.com".into(),
+            last_signin: Utc::now(),
+            last_signoff: Utc::now(),
+            permissions: permissions,
+            }
+    }
 }
 
 impl User {
@@ -80,7 +96,7 @@ impl User {
             .ok()?;
         // lets just get all the tokens the user can use, we will only use the full permissions if modifing them.
         let sql_user_perms = sqlx::query_as::<_, SqlPermissionTokens>(
-            "SELECT token FROM axum_user_permissions WHERE user_id = $1;",
+            "SELECT token FROM axum_user_permissions WHERE user_id = $1",
         )
         .bind(id)
         .fetch_all(pool)
@@ -106,6 +122,9 @@ impl SqlUser {
             id: self.id,
             anonymous: self.anonymous,
             username: self.username,
+            email: self.email,
+            last_signin: self.last_signin,
+            last_signoff: self.last_signoff,
             permissions: if let Some(user_perms) = sql_user_perms {
                 user_perms
                     .into_iter()
@@ -114,9 +133,6 @@ impl SqlUser {
             } else {
                 HashSet::<String>::new()
             },
-            email: self.email,
-            last_signin: self.last_signin,
-            last_signoff: self.last_signoff,
         }
     }
 }

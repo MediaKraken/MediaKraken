@@ -50,6 +50,8 @@ parser.add_argument('-b', '--base', required=False,
                     help='Base images', action="store_true")
 parser.add_argument('-c', '--core', required=False,
                     help='Core images', action="store_true")
+parser.add_argument('-d', '--docker', required=False,
+                    help='DockerBuildKit', action="store_true")
 parser.add_argument('-g', '--game', required=False,
                     help='Game images', action="store_true")
 parser.add_argument('-e', '--email', required=False,
@@ -90,33 +92,55 @@ def build_email_push(build_group, email_subject, branch_tag, push_hub_image=Fals
                                   build_group[docker_images][2],
                                   docker_images))
             # TODO check for errors/warnings and stop if found
-            # Let the mirror's be passed, if not used it will just throw a warning
-            pid_build_proc = subprocess.Popen(shlex.split('docker build %s'
-                                                          ' -t mediakraken/%s:%s'
-                                                          ' --build-arg BRANCHTAG=%s'
-                                                          ' --build-arg ALPMIRROR=%s'
-                                                          ' --build-arg DEBMIRROR=%s'
-                                                          ' --build-arg PIPMIRROR=%s'
-                                                          ' --build-arg PIPMIRRORPORT=%s .' %
-                                                          (docker_no_cache,
-                                                           build_group[docker_images][0],
-                                                           branch_tag, branch_tag,
-                                                           docker_images_list.ALPINE_MIRROR,
-                                                           docker_images_list.DEBIAN_MIRROR,
-                                                           docker_images_list.PYPI_MIRROR,
-                                                           docker_images_list.PYPI_MIRROR_PORT)),
-                                              stdout=subprocess.PIPE, shell=False,
-                                              env={"DOCKER_BUILDKIT": "1"})
-            email_body = ''
-            while True:
-                line = pid_build_proc.stdout.readline()
-                if not line:
-                    break
-                email_body += line.decode("utf-8")
-                print(line.rstrip(), flush=True)
-            pid_build_proc.wait()
+            if args.docker:
+                # Let the mirror's be passed, if not used it will just throw a warning
+                pid_build_proc = subprocess.Popen(shlex.split('docker build %s'
+                                                            ' -t mediakraken/%s:%s'
+                                                            ' --build-arg BRANCHTAG=%s'
+                                                            ' --build-arg ALPMIRROR=%s'
+                                                            ' --build-arg DEBMIRROR=%s'
+                                                            ' --build-arg PIPMIRROR=%s'
+                                                            ' --build-arg PIPMIRRORPORT=%s .' %
+                                                            (docker_no_cache,
+                                                            build_group[docker_images][0],
+                                                            branch_tag, branch_tag,
+                                                            docker_images_list.ALPINE_MIRROR,
+                                                            docker_images_list.DEBIAN_MIRROR,
+                                                            docker_images_list.PYPI_MIRROR,
+                                                            docker_images_list.PYPI_MIRROR_PORT)),
+                                                stdout=subprocess.PIPE,
+                                                stderr=subprocess.PIPE,
+                                                shell=False,
+                                                env={"DOCKER_BUILDKIT": "1"})
+                (out, err) = pid_build_proc.communicate()
+                email_body = err.decode()
+            else:
+                # Let the mirror's be passed, if not used it will just throw a warning
+                pid_build_proc = subprocess.Popen(shlex.split('docker build %s'
+                                                            ' -t mediakraken/%s:%s'
+                                                            ' --build-arg BRANCHTAG=%s'
+                                                            ' --build-arg ALPMIRROR=%s'
+                                                            ' --build-arg DEBMIRROR=%s'
+                                                            ' --build-arg PIPMIRROR=%s'
+                                                            ' --build-arg PIPMIRRORPORT=%s .' %
+                                                            (docker_no_cache,
+                                                            build_group[docker_images][0],
+                                                            branch_tag, branch_tag,
+                                                            docker_images_list.ALPINE_MIRROR,
+                                                            docker_images_list.DEBIAN_MIRROR,
+                                                            docker_images_list.PYPI_MIRROR,
+                                                            docker_images_list.PYPI_MIRROR_PORT)),
+                                                stdout=subprocess.PIPE,
+                                                shell=False)
+                email_body = ''
+                while True:
+                    line = pid_build_proc.stdout.readline()
+                    if not line:
+                        break
+                    email_body += line.decode("utf-8")
+                    print(line.rstrip(), flush=True)
             subject_text = ' FAILED'
-            if email_body.find('Successfully tagged mediakraken') != -1:
+            if email_body.find('Successfully tagged mediakraken') != -1 or email_body.find('writing image sha256') != -1:
                 subject_text = ' SUCCESS'
                 # push to remote repo
                 if push_hub_image:

@@ -40,8 +40,6 @@ mod mk_lib_database;
 mod mk_lib_database_user;
 #[path = "mk_lib_database_version.rs"]
 mod mk_lib_database_version;
-// #[path = "mk_lib_file.rs"]
-// mod mk_lib_file;
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
@@ -445,14 +443,13 @@ async fn main() {
         .route_with_tsr("/user/search", get(bp_user_search::user_search))
         .route_with_tsr("/user/sync", get(bp_user_sync::user_sync))
         .nest("/static", axum_static::static_router("static"))
-        .layer(Extension(sqlx_pool.clone()))
-        .layer(SessionLayer::new(session_store))
         .layer(
             AuthSessionLayer::<mk_lib_database_user::User, i64, SessionPgPool, PgPool>::new(Some(
-                sqlx_pool,
+                sqlx_pool.clone(),
             ))
             .with_config(auth_config),
         )
+        .layer(SessionLayer::new(session_store))
         // after authsessionlayer so anyone can access
         .route_with_tsr("/about", get(bp_public_about::public_about))
         .route_with_tsr(
@@ -462,7 +459,8 @@ async fn main() {
         .route_with_tsr(
             "/public/register",
             get(bp_public_register::public_register).post(bp_public_register::public_register_post),
-        );
+        )
+        .layer(Extension(sqlx_pool));
     // add a fallback service for handling routes to unknown paths
     let app = app.fallback(bp_error::general_not_found);
 
