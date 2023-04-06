@@ -279,8 +279,8 @@ pub async fn mk_lib_database_user_insert(sqlx_pool: &sqlx::PgPool,
     }
     let mut transaction = sqlx_pool.begin().await?;
     let row: (i64,) = sqlx::query_as("insert into axum_users \
-        (id, email, password, anonymous) \
-        values (NULL, $1, crypt($2, gen_salt('bf', 10)), FALSE) \
+        (email, password, anonymous) \
+        values ($1, crypt($2, gen_salt('bf', 10)), false) \
         RETURNING id")
         .bind(email)
         .bind(password)
