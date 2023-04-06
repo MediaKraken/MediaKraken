@@ -127,6 +127,7 @@ pub async fn mk_lib_database_update_schema(
             id INTEGER PRIMARY KEY, \
             anonymous BOOLEAN NOT NULL, \
             username VARCHAR(256) NOT NULL, \
+            password TEXT, \
             email VARCHAR(256) NOT NULL, \
             last_signin timestamp, \
             last_signoff timestamp);",

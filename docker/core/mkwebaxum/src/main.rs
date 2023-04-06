@@ -193,6 +193,8 @@ async fn main() {
 
     // create crypto salt if needed
     // TODO what was this for?
+    // this was for the db user password salt
+    // but using gen_salt in postgresql to let it pick the salt
     // if Path::new("/secure/data.zip").exists() == false {
     //     #[cfg(debug_assertions)]
     //     {

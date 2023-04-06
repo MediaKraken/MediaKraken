@@ -76,6 +76,7 @@ impl Default for User {
     fn default() -> Self {
         let mut permissions = HashSet::new();
         permissions.insert("User::View".to_owned());
+        permissions.insert("Category::View".to_owned());
         Self {
             id: 1,
             anonymous: true,
@@ -277,7 +278,10 @@ pub async fn mk_lib_database_user_insert(sqlx_pool: &sqlx::PgPool,
         .unwrap();
     }
     let mut transaction = sqlx_pool.begin().await?;
-    let row: (i64,) = sqlx::query_as("insert into axum_users (id, email, password) values (NULL, $1, $2) RETURNING id")
+    let row: (i64,) = sqlx::query_as("insert into axum_users \
+        (id, email, password, anonymous) \
+        values (NULL, $1, crypt($2, gen_salt('bf', 10)), FALSE) \
+        RETURNING id")
         .bind(email)
         .bind(password)
         .fetch_one(&mut transaction)
