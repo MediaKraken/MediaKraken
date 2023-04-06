@@ -8,12 +8,17 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use axum_session_auth::*;
+use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use stdext::function_name;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
+
+#[path = "../mk_lib_database_user.rs"]
+mod mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_user/bss_user_home.html")]
@@ -22,7 +27,8 @@ struct TemplateUserHomeContext<'a> {
     template_data_user_media_queue: &'a bool,
 }
 
-pub async fn user_home(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
+pub async fn user_home(Extension(sqlx_pool): Extension<PgPool>,
+auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,) -> impl IntoResponse {
     let template = TemplateUserHomeContext {
         template_data_new_media: &true,
         template_data_user_media_queue: &true,

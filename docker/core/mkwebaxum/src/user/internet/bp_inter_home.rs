@@ -8,17 +8,24 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use axum_session_auth::*;
+use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use serde_json::json;
 use stdext::function_name;
+use sqlx::postgres::PgPool;
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
+
+#[path = "../../mk_lib_database_user.rs"]
+mod mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_user/internet/bss_user_internet.html")]
 struct UserInternetTemplate;
 
-pub async fn user_inter_home() -> impl IntoResponse {
+pub async fn user_inter_home(
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
     let template = UserInternetTemplate {};
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

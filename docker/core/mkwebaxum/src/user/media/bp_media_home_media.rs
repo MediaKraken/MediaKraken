@@ -8,6 +8,8 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use axum_session_auth::*;
+use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use stdext::function_name;
@@ -32,6 +34,7 @@ struct TemplateMediaHomeContext<'a> {
 
 pub async fn user_media_home_media(
     Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;
@@ -80,6 +83,7 @@ struct TemplateMediaHomeDetailContext {
 
 pub async fn user_media_home_media_detail(
     Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
 ) -> impl IntoResponse {
     let template = TemplateMediaHomeDetailContext {

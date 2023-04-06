@@ -8,6 +8,8 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use axum_session_auth::*;
+use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use stdext::function_name;
@@ -18,6 +20,9 @@ mod mk_lib_logging;
 #[path = "../mk_lib_database_cron.rs"]
 mod mk_lib_database_cron;
 
+#[path = "../mk_lib_database_user.rs"]
+mod mk_lib_database_user;
+
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_cron.html")]
 struct TemplateCronContext<'a> {
@@ -25,7 +30,8 @@ struct TemplateCronContext<'a> {
     template_data_exists: &'a bool,
 }
 
-pub async fn admin_cron(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
+pub async fn admin_cron(Extension(sqlx_pool): Extension<PgPool>,
+auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
     let cron_list = mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool)
         .await
         .unwrap();

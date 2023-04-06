@@ -71,6 +71,7 @@ pub struct LoginInput {
 }
 
 pub async fn public_login_post(Extension(sqlx_pool): Extension<PgPool>, Form(input_data): Form<LoginInput>) -> Redirect {
-
+    // TODO check user/password
+    // TODO login user to auth
     Redirect::to("/user/home")
 }

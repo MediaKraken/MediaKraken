@@ -52,14 +52,13 @@ pub async fn public_register_post(
     if user_found == true {
         // TODO flash error
     } else {
-        mk_lib_database_user::mk_lib_database_user_insert(&sqlx_pool, &input_data.email, &input_data.password).await;
-        // TODO insert base rights
+        let user_id: i64 = mk_lib_database_user::mk_lib_database_user_insert(&sqlx_pool, &input_data.email, &input_data.password).await.unwrap();
         if mk_lib_database_user::mk_lib_database_user_count(&sqlx_pool, String::new())
         .await
         .unwrap()
-        == 1
+        == 2   // 2 as 1 is guest
     {
-        mk_lib_database_user::mk_lib_database_user_set_admin(&sqlx_pool).await;
+        mk_lib_database_user::mk_lib_database_user_set_admin(&sqlx_pool, user_id).await;
     }
     }
     Redirect::to("/public/login")

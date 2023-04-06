@@ -8,6 +8,8 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use axum_session_auth::*;
+use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgPool;
@@ -27,6 +29,9 @@ mod mk_lib_common_pagination;
 
 #[path = "../../mk_lib_database_metadata_movie.rs"]
 mod mk_lib_database_metadata_movie;
+
+#[path = "../../mk_lib_database_user.rs"]
+mod mk_lib_database_user;
 
 #[derive(Debug, Deserialize, Serialize)]
 struct TemplateMetaMovieList {
@@ -52,8 +57,10 @@ struct TemplateMetaMovieContext<'a> {
 
 pub async fn user_metadata_movie(
     Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
 ) -> impl IntoResponse {
+    let current_user = auth.current_user.clone().unwrap_or_default();
     let db_offset: i64 = (page * 30) - 30;
     let total_pages: i64 = mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(
         &sqlx_pool,
@@ -92,10 +99,10 @@ pub async fn user_metadata_movie(
         {
             let rating_json: serde_json::Value =
                 row_data.mm_metadata_user_json.as_ref().unwrap().clone();
-            rating_status = rating_json["UserStats"][user.id().to_string()]["Rating"].clone();
-            watched_status = rating_json["UserStats"][user.id().to_string()]["Watched"].clone();
-            request_status = rating_json["UserStats"][user.id().to_string()]["Request"].clone();
-            queue_status = rating_json["UserStats"][user.id().to_string()]["Queue"].clone();
+            rating_status = rating_json["UserStats"][current_user.id.to_string()]["Rating"].clone();
+            watched_status = rating_json["UserStats"][current_user.id.to_string()]["Watched"].clone();
+            request_status = rating_json["UserStats"][current_user.id.to_string()]["Request"].clone();
+            queue_status = rating_json["UserStats"][current_user.id.to_string()]["Queue"].clone();
         }
         let mut mm_poster: String = "/image/Movie-icon.png".to_string();
         if row_data.mm_poster.len() > 0 {
@@ -129,32 +136,32 @@ pub async fn user_metadata_movie(
     (StatusCode::OK, Html(reply_html).into_response())
 }
 
-#[derive(Template)]
-#[template(path = "bss_user/metadata/bss_user_metadata_movie_detail.html")]
-struct TemplateMetaMovieDetailContext {
-    template_data_json: serde_json::Value,
-    template_data_json_media_ffmpeg: serde_json::Value,
-    template_data_json_media_crew: serde_json::Value,
-}
+// #[derive(Template)]
+// #[template(path = "bss_user/metadata/bss_user_metadata_movie_detail.html")]
+// struct TemplateMetaMovieDetailContext {
+//     template_data_json: serde_json::Value,
+//     template_data_json_media_ffmpeg: serde_json::Value,
+//     template_data_json_media_crew: serde_json::Value,
+// }
 
-pub async fn user_metadata_movie_detail(
-    Extension(sqlx_pool): Extension<PgPool>,
-    Path(guid): Path<uuid::Uuid>,
-) -> impl IntoResponse {
-    let movie_metadata =
-        mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_detail_by_guid(
-            &sqlx_pool, guid,
-        )
-        .await
-        .unwrap();
-    let template = TemplateMetaMovieDetailContext {
-        template_data_json: movie_metadata.mm_metadata_movie_json,
-        template_data_json_media_ffmpeg: json!({ None }),
-        template_data_json_media_crew: json!({ None }),
-    };
-    let reply_html = template.render().unwrap();
-    (StatusCode::OK, Html(reply_html).into_response())
-}
+// pub async fn user_metadata_movie_detail(
+//     Extension(sqlx_pool): Extension<PgPool>,
+//     Path(guid): Path<uuid::Uuid>,
+// ) -> impl IntoResponse {
+//     let movie_metadata =
+//         mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_detail_by_guid(
+//             &sqlx_pool, guid,
+//         )
+//         .await
+//         .unwrap();
+//     let template = TemplateMetaMovieDetailContext {
+//         template_data_json: movie_metadata.mm_metadata_movie_json,
+//         template_data_json_media_ffmpeg: json!({ None }),
+//         template_data_json_media_crew: json!({ None }),
+//     };
+//     let reply_html = template.render().unwrap();
+//     (StatusCode::OK, Html(reply_html).into_response())
+// }
 
 /*
 

@@ -8,6 +8,8 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use axum_session_auth::*;
+use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use stdext::function_name;
@@ -18,11 +20,15 @@ mod mk_lib_logging;
 #[path = "../mk_lib_database_user_queue.rs"]
 mod mk_lib_database_user_queue;
 
+#[path = "../mk_lib_database_user.rs"]
+mod mk_lib_database_user;
+
 #[derive(Template)]
 #[template(path = "bss_user/bss_user_queue.html")]
 struct UserQueueTemplate;
 
-pub async fn user_queue() -> impl IntoResponse {
+pub async fn user_queue(
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,) -> impl IntoResponse {
     let template = UserQueueTemplate {};
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

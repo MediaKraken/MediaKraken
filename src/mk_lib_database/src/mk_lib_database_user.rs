@@ -24,6 +24,7 @@ Adult::View
 Admin::View
 Admin::Edit
 User::View
+Category::View   ??
 */
 
 #[async_trait]
@@ -74,7 +75,7 @@ pub struct User {
 impl Default for User {
     fn default() -> Self {
         let mut permissions = HashSet::new();
-        permissions.insert("Category::View".to_owned());
+        permissions.insert("User::View".to_owned());
         Self {
             id: 1,
             anonymous: true,
@@ -244,7 +245,7 @@ pub async fn mk_lib_database_user_delete(
     Ok(())
 }
 
-pub async fn mk_lib_database_user_set_admin(sqlx_pool: &sqlx::PgPool) -> Result<(), sqlx::Error> {
+pub async fn mk_lib_database_user_set_admin(sqlx_pool: &sqlx::PgPool, user_id: i64) -> Result<(), sqlx::Error> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -255,7 +256,9 @@ pub async fn mk_lib_database_user_set_admin(sqlx_pool: &sqlx::PgPool) -> Result<
         .unwrap();
     }
     let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query("update axum_users set is_admin = true")
+    sqlx::query("insert into axum_user_permissions (user_id, token) values ($1, $2)")
+        .bind(user_id)
+        .bind("Admin::Edit")
         .execute(&mut transaction)
         .await?;
     transaction.commit().await?;
@@ -263,7 +266,7 @@ pub async fn mk_lib_database_user_set_admin(sqlx_pool: &sqlx::PgPool) -> Result<
 }
 
 pub async fn mk_lib_database_user_insert(sqlx_pool: &sqlx::PgPool, 
-    email: &String, password: &String) -> Result<(), sqlx::Error> {
+    email: &String, password: &String) -> Result<i64, sqlx::Error> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -274,11 +277,11 @@ pub async fn mk_lib_database_user_insert(sqlx_pool: &sqlx::PgPool,
         .unwrap();
     }
     let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query("insert into axum_users (id, email, password) values (NULL, $1, $2)")
+    let row: (i64,) = sqlx::query_as("insert into axum_users (id, email, password) values (NULL, $1, $2) RETURNING id")
         .bind(email)
         .bind(password)
-        .execute(&mut transaction)
+        .fetch_one(&mut transaction)
         .await?;
     transaction.commit().await?;
-    Ok(())
+    Ok(row.0)
 }

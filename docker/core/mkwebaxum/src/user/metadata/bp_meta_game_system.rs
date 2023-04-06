@@ -8,6 +8,8 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use axum_session_auth::*;
+use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use sqlx::postgres::PgRow;
@@ -33,6 +35,7 @@ struct TemplateMetaGameSystemContext<'a> {
 
 pub async fn user_metadata_game_system(
     Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;
@@ -82,6 +85,7 @@ struct TemplateMetaGameSystemDetailContext {
 
 pub async fn user_metadata_game_system_detail(
     Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
 ) -> impl IntoResponse {
     let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();

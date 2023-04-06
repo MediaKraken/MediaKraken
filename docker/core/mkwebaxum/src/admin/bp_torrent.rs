@@ -8,11 +8,14 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use axum_session_auth::*;
+use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use bytesize::ByteSize;
 use core::fmt::Write;
 use paginator::{PageItem, Paginator};
 use serde_json::json;
 use stdext::function_name;
+use sqlx::postgres::PgPool;
 use transmission_rpc::types::{
     FreeSpace, Id, Nothing, Result, RpcResponse, SessionClose, Torrent, TorrentAction,
     TorrentAddArgs, TorrentAddedOrDuplicate, TorrentGetField, Torrents,
@@ -25,11 +28,15 @@ mod mk_lib_logging;
 #[path = "../mk_lib_network_transmission.rs"]
 mod mk_lib_network_transmission;
 
+#[path = "../mk_lib_database_user.rs"]
+mod mk_lib_database_user;
+
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_torrent.html")]
 struct AdminTorrentTemplate;
 
-pub async fn admin_torrent() -> impl IntoResponse {
+pub async fn admin_torrent(
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
     let mut transmission_client = TransClient::new("mkstack_transmission".parse().unwrap());
     let res: RpcResponse<Torrents<Torrent>> =
         transmission_client.torrent_get(None, None).await.unwrap();

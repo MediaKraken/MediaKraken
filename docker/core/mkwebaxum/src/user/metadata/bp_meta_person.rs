@@ -8,6 +8,8 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use axum_session_auth::*;
+use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use stdext::function_name;
@@ -21,6 +23,9 @@ mod mk_lib_common_pagination;
 #[path = "../../mk_lib_database_metadata_person.rs"]
 mod mk_lib_database_metadata_person;
 
+#[path = "../../mk_lib_database_user.rs"]
+mod mk_lib_database_user;
+
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_person.html")]
 struct TemplateMetaPersonContext<'a> {
@@ -32,6 +37,7 @@ struct TemplateMetaPersonContext<'a> {
 
 pub async fn user_metadata_person(
     Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;
@@ -79,6 +85,7 @@ struct TemplateMetaPersonDetailContext {
 
 pub async fn user_metadata_person_detail(
     Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
 ) -> impl IntoResponse {
     let template = TemplateMetaPersonDetailContext {

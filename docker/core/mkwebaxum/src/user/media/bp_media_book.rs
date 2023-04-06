@@ -8,6 +8,8 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use axum_session_auth::*;
+use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use stdext::function_name;
@@ -21,6 +23,9 @@ mod mk_lib_common_pagination;
 #[path = "../../mk_lib_database_media_book.rs"]
 mod mk_lib_database_media_book;
 
+#[path = "../../mk_lib_database_user.rs"]
+mod mk_lib_database_user;
+
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_book.html")]
 struct TemplateMediaBookContext<'a> {
@@ -32,6 +37,7 @@ struct TemplateMediaBookContext<'a> {
 
 pub async fn user_media_book(
     Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;
@@ -77,6 +83,7 @@ struct TemplateMediaBookDetailContext {
 
 pub async fn user_media_book_detail(
     Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
 ) -> impl IntoResponse {
     //let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();

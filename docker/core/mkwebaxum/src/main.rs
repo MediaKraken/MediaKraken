@@ -124,8 +124,8 @@ mod bp_user_media_bp_media_image;
 // mod bp_user_metadata_bp_meta_game;
 // #[path = "user/metadata/bp_meta_game_system.rs"]
 // mod bp_user_metadata_bp_meta_game_system;
-// #[path = "user/metadata/bp_meta_movie.rs"]
-// mod bp_user_metadata_bp_meta_movie;
+#[path = "user/metadata/bp_meta_movie.rs"]
+mod bp_user_metadata_bp_meta_movie;
 // #[path = "user/metadata/bp_meta_music.rs"]
 // mod bp_user_metadata_bp_meta_music;
 // #[path = "user/metadata/bp_meta_music_video.rs"]
@@ -376,10 +376,10 @@ async fn main() {
         //     "/user/metadata/game_system_detail/:guid",
         //     get(bp_user_metadata_bp_meta_game_system::user_metadata_game_system_detail),
         // )
-        // .route_with_tsr(
-        //     "/user/metadata/movie/:page",
-        //     get(bp_user_metadata_bp_meta_movie::user_metadata_movie),
-        // )
+        .route_with_tsr(
+            "/user/metadata/movie/:page",
+            get(bp_user_metadata_bp_meta_movie::user_metadata_movie),
+        )
         // .route_with_tsr(
         //     "/user/metadata/movie_detail/:guid",
         //     get(bp_user_metadata_bp_meta_movie::user_metadata_movie_detail),

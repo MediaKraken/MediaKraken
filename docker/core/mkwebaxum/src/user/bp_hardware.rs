@@ -8,6 +8,8 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use axum_session_auth::*;
+use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use stdext::function_name;
@@ -15,13 +17,17 @@ use stdext::function_name;
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
 
+#[path = "../mk_lib_database_user.rs"]
+mod mk_lib_database_user;
+
 #[derive(Template)]
 #[template(path = "bss_user/hardware/bss_user_hardware.html")]
 struct TemplateUserHardwareContext<'a> {
     template_data_phue_exists: &'a bool,
 }
 
-pub async fn user_hardware(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
+pub async fn user_hardware(Extension(sqlx_pool): Extension<PgPool>,
+auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
     let mut phue_exists: bool = true;
     let template = TemplateUserHardwareContext {
         template_data_phue_exists: &phue_exists,
@@ -36,7 +42,8 @@ struct TemplateUserHardwarePhueContext {
     template_data_phue: i32,
 }
 
-pub async fn user_hardware_phue(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
+pub async fn user_hardware_phue(Extension(sqlx_pool): Extension<PgPool>,
+auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
     let template = TemplateUserHardwarePhueContext {
         template_data_phue: 0,
     };

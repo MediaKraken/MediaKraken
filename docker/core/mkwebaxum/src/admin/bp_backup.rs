@@ -8,6 +8,8 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use axum_session_auth::*;
+use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use bytesize::ByteSize;
 use chrono::prelude::*;
 use core::fmt::Write;
@@ -30,6 +32,9 @@ mod filters {
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
 
+#[path = "../mk_lib_database_user.rs"]
+mod mk_lib_database_user;
+
 #[derive(Debug, Deserialize, Serialize)]
 pub struct BackupList {
     mm_backup_name: String,
@@ -48,7 +53,8 @@ struct TemplateBackupContext<'a> {
     page: &'a usize,
 }
 
-pub async fn admin_backup(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
+pub async fn admin_backup(Extension(sqlx_pool): Extension<PgPool>,
+auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
     let template = TemplateBackupContext {};
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

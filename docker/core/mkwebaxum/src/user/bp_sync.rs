@@ -8,6 +8,8 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use axum_session_auth::*;
+use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgPool;
@@ -19,6 +21,9 @@ mod mk_lib_logging;
 
 #[path = "../mk_lib_database_sync.rs"]
 mod mk_lib_database_sync;
+
+#[path = "../mk_lib_database_user.rs"]
+mod mk_lib_database_user;
 
 #[path = "../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;
@@ -34,6 +39,7 @@ struct TemplateSyncContext<'a> {
 
 pub async fn user_sync(
     Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;

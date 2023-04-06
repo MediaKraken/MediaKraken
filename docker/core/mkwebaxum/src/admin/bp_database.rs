@@ -8,6 +8,8 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use axum_session_auth::*;
+use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use bytesize::ByteSize;
 use serde_json::json;
 use sqlx::postgres::PgPool;
@@ -23,6 +25,9 @@ mod mk_lib_database_version;
 #[path = "../mk_lib_database_postgresql.rs"]
 mod mk_lib_database_postgresql;
 
+#[path = "../mk_lib_database_user.rs"]
+mod mk_lib_database_user;
+
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_db_statistics.html")]
 struct AdminDBStatsTemplate<'a> {
@@ -32,7 +37,8 @@ struct AdminDBStatsTemplate<'a> {
     template_data_db_workers: &'a String,
 }
 
-pub async fn admin_database(Extension(sqlx_pool): Extension<PgPool>) -> impl IntoResponse {
+pub async fn admin_database(Extension(sqlx_pool): Extension<PgPool>,
+auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
     let pg_version = mk_lib_database_version::mk_lib_database_postgresql_version(&sqlx_pool)
         .await
         .unwrap();

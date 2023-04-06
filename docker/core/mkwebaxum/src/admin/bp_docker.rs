@@ -8,6 +8,8 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use axum_session_auth::*;
+use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use serde_json::json;
 use stdext::function_name;
 
@@ -21,7 +23,8 @@ mod mk_lib_common_docker;
 #[template(path = "bss_admin/bss_admin_docker.html")]
 struct AdminDockerTemplate;
 
-pub async fn admin_docker() -> impl IntoResponse {
+pub async fn admin_docker(
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
     let docker_results = mk_lib_common_docker::mk_common_docker_info().await.unwrap();
     let template = AdminDockerTemplate {};
     let reply_html = template.render().unwrap();

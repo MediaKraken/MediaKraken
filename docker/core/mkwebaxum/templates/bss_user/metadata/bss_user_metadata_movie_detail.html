@@ -12,7 +12,6 @@
 <body>
     {% include "bss_user/bss_user_include_menu.html" %}
     <div><div>
-    {% if template_data_exists %}
     <div>
         <div class="container">
             <div class="row">
@@ -108,9 +107,6 @@
             </div>
         </div>
     </div>
-    {% else %}
-    <p id="general_text">No info found. ERROR! You should never see this message.</p>
-    {% endif %}
     </div></div>
     {% include "bss_public/bss_public_footer.html" %}
     <script src="/static/js/jquery.min.js"></script>

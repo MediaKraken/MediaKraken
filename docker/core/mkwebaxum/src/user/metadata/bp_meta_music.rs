@@ -8,6 +8,8 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use axum_session_auth::*;
+use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use stdext::function_name;
@@ -32,6 +34,7 @@ struct TemplateMetaMusicContext<'a> {
 
 pub async fn user_metadata_music(
     Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;
@@ -79,6 +82,7 @@ struct TemplateMetaMusicDetailContext {
 
 pub async fn user_metadata_music_detail(
     Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
 ) -> impl IntoResponse {
     let template = TemplateMetaMusicDetailContext {
@@ -89,15 +93,8 @@ pub async fn user_metadata_music_detail(
 }
 
 /*
-from common import common_global
-from common import common_logging_elasticsearch_httpx
-from common import common_pagination_bootstrap
-from sanic import Blueprint
 
-blueprint_user_metadata_music = Blueprint('name_blueprint_user_metadata_music', url_prefix='/user')
-
-
-@blueprint_user_metadata_music.route('/user_meta_music_album_list', methods=['GET', 'POST'])
+blueprint_user_metadata_music = Blueprint('name_blueprint_user_metadata_music', url_prefix='/user')blueprint_user_metadata_music.route('/user_meta_music_album_list', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_user/metadata/bss_user_metadata_music_album.html')
 @common_global.auth.login_required
 pub async fn url_bp_user_metadata_music_album_list(request):
