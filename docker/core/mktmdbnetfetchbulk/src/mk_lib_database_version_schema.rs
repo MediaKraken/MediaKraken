@@ -95,12 +95,14 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut transaction)
         .await?;
         sqlx::query(
-            "CREATE INDEX mm_hardware_manufacturer_name ON mm_hardware_model USING btree (mm_hardware_manufacturer);",
+            "CREATE INDEX mm_hardware_manufacturer_name \
+            ON mm_hardware_model USING btree (mm_hardware_manufacturer);",
         )
         .execute(&mut transaction)
         .await?;
         sqlx::query(
-            "CREATE INDEX mm_hardware_model_type_name ON mm_hardware_model USING btree (mm_hardware_model_type);",
+            "CREATE INDEX mm_hardware_model_type_name \
+            ON mm_hardware_model USING btree (mm_hardware_model_type);",
         )
         .execute(&mut transaction)
         .await?;
@@ -127,7 +129,7 @@ pub async fn mk_lib_database_update_schema(
             id SERIAL PRIMARY KEY, \
             anonymous BOOLEAN NOT NULL, \
             username VARCHAR(256) NOT NULL, \
-            password TEXT, \
+            password NOT NULL TEXT, \
             email VARCHAR(256) NOT NULL, \
             last_signin timestamp, \
             last_signoff timestamp);",
@@ -135,7 +137,8 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut transaction)
         .await?;
         sqlx::query(
-            "INSERT INTO axum_users (anonymous, username, email) SELECT true, 'Guest', 'guest@fake.com';",
+            "INSERT INTO axum_users (anonymous, username, email, password) \
+            values (true, 'Guest', 'guest@fake.com', crypt('fakepass', gen_salt('bf', 10)));",
         )
         .execute(&mut transaction)
         .await?;
@@ -147,7 +150,8 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut transaction)
         .await?;
         sqlx::query(
-            "CREATE INDEX axum_user_permissions_user_id ON axum_user_permissions USING btree (user_id);",
+            "CREATE INDEX axum_user_permissions_user_id \
+            ON axum_user_permissions USING btree (user_id);",
         )
         .execute(&mut transaction)
         .await?;

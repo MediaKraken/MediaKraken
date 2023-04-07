@@ -14,8 +14,8 @@ use axum_session::{
 };
 use axum_session_auth::*;
 use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
-use serde_json::json;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::{
     postgres::{PgConnectOptions, PgPoolOptions},
     ConnectOptions, PgPool,
@@ -70,8 +70,16 @@ pub struct LoginInput {
     password: String,
 }
 
-pub async fn public_login_post(Extension(sqlx_pool): Extension<PgPool>, Form(input_data): Form<LoginInput>) -> Redirect {
-    // TODO check user/password
-    // TODO login user to auth
+pub async fn public_login_post(
+    Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    Form(input_data): Form<LoginInput>,
+) -> Redirect {
+    let user_id: i64 = mk_lib_database_user::mk_lib_database_user_login_verification(&sqlx_pool,
+        &input_data.email, &input_data.password).await.unwrap();
+    // TODO show error when not found
+    if user_id > 0 {
+        auth.login_user(user_id);
+    }
     Redirect::to("/user/home")
 }

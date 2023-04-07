@@ -85,7 +85,7 @@ impl Default for User {
             last_signin: Utc::now(),
             last_signoff: Utc::now(),
             permissions: permissions,
-            }
+        }
     }
 }
 
@@ -182,11 +182,10 @@ pub async fn mk_lib_database_user_read(
         .await
         .unwrap();
     }
-    let select_query = sqlx::query(
-        "select id, email from axum_users order by LOWER(email) offset $1 limit $2",
-    )
-    .bind(offset)
-    .bind(limit);
+    let select_query =
+        sqlx::query("select id, email from axum_users order by LOWER(email) offset $1 limit $2")
+            .bind(offset)
+            .bind(limit);
     let table_rows: Vec<DBUserList> = select_query
         .map(|row: PgRow| DBUserList {
             id: row.get("id"),
@@ -226,7 +225,7 @@ pub async fn mk_lib_database_user_count(
 
 pub async fn mk_lib_database_user_delete(
     sqlx_pool: &sqlx::PgPool,
-    user_uuid: uuid::Uuid,
+    user_id: i64,
 ) -> Result<(), sqlx::Error> {
     #[cfg(debug_assertions)]
     {
@@ -239,14 +238,17 @@ pub async fn mk_lib_database_user_delete(
     }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from axum_users where id = $1")
-        .bind(user_uuid)
+        .bind(user_id)
         .execute(&mut transaction)
         .await?;
     transaction.commit().await?;
     Ok(())
 }
 
-pub async fn mk_lib_database_user_set_admin(sqlx_pool: &sqlx::PgPool, user_id: i64) -> Result<(), sqlx::Error> {
+pub async fn mk_lib_database_user_set_admin(
+    sqlx_pool: &sqlx::PgPool,
+    user_id: i64,
+) -> Result<(), sqlx::Error> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -266,8 +268,11 @@ pub async fn mk_lib_database_user_set_admin(sqlx_pool: &sqlx::PgPool, user_id: i
     Ok(())
 }
 
-pub async fn mk_lib_database_user_insert(sqlx_pool: &sqlx::PgPool, 
-    email: &String, password: &String) -> Result<i64, sqlx::Error> {
+pub async fn mk_lib_database_user_insert(
+    sqlx_pool: &sqlx::PgPool,
+    email: &String,
+    password: &String,
+) -> Result<i64, sqlx::Error> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -278,14 +283,41 @@ pub async fn mk_lib_database_user_insert(sqlx_pool: &sqlx::PgPool,
         .unwrap();
     }
     let mut transaction = sqlx_pool.begin().await?;
-    let row: (i64,) = sqlx::query_as("insert into axum_users \
+    let row: (i64,) = sqlx::query_as(
+        "insert into axum_users \
         (email, password, anonymous) \
         values ($1, crypt($2, gen_salt('bf', 10)), false) \
-        RETURNING id")
-        .bind(email)
-        .bind(password)
-        .fetch_one(&mut transaction)
-        .await?;
+        RETURNING id",
+    )
+    .bind(email)
+    .bind(password)
+    .fetch_one(&mut transaction)
+    .await?;
     transaction.commit().await?;
     Ok(row.0)
+}
+
+pub async fn mk_lib_database_user_login_verification(
+    sqlx_pool: &sqlx::PgPool,
+    email: &String,
+    password: &String,
+) -> Result<i64, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let row: (i64,) = sqlx::query_as(
+        "select id from axum_users \
+        where email = $1 and password = crypt($2, password)",
+    )
+    .bind(email)
+    .bind(password)
+    .fetch_one(sqlx_pool)
+    .await?;
+    Ok(row.0)  
 }
