@@ -321,3 +321,25 @@ pub async fn mk_lib_database_user_login_verification(
     .await?;
     Ok(row.0)  
 }
+
+pub async fn mk_lib_database_user_logout(
+    sqlx_pool: &sqlx::PgPool,
+    user_id: i64,
+) -> Result<(), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let mut transaction = sqlx_pool.begin().await?;
+    sqlx::query("update axum_users set last_signoff = now() where id = $1")
+        .bind(user_id)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(())
+}

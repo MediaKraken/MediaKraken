@@ -53,8 +53,10 @@ struct TemplateBackupContext<'a> {
     page: &'a usize,
 }
 
-pub async fn admin_backup(Extension(sqlx_pool): Extension<PgPool>,
-auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
+pub async fn admin_backup(
+    Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+) -> impl IntoResponse {
     let template = TemplateBackupContext {};
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

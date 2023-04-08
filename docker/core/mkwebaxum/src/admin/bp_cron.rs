@@ -30,8 +30,10 @@ struct TemplateCronContext<'a> {
     template_data_exists: &'a bool,
 }
 
-pub async fn admin_cron(Extension(sqlx_pool): Extension<PgPool>,
-auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
+pub async fn admin_cron(
+    Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+) -> impl IntoResponse {
     let cron_list = mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool)
         .await
         .unwrap();

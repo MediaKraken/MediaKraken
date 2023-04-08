@@ -250,6 +250,10 @@ async fn main() {
             "/public/login",
             get(bp_public_login::public_login).post(bp_public_login::public_login_post),
         )
+        .route_with_tsr(
+            "/public/perm",
+            get(bp_public_login::perm),
+        )
         // .route_with_tsr(
         //     "/user/internet/flickr",
         //     get(bp_user_internet_bp_inter_flickr::user_inter_flickr),

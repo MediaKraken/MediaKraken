@@ -103,7 +103,7 @@ pub async fn mk_lib_database_network_share_insert(
     sqlx::query(
         "insert into mm_network_shares \
         (mm_network_share_guid, mm_network_share_xml) \
-        values ($1,$2)",
+        values ($1, $2)",
     )
     .bind(new_guid)
     .bind(network_share_xml)

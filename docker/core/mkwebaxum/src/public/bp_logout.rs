@@ -26,8 +26,10 @@ mod mk_lib_logging;
 #[path = "../mk_lib_database_user.rs"]
 mod mk_lib_database_user;
 
-pub async fn public_logout(auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
-    // TODO update user logout time in db
+pub async fn public_logout(Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    mk_lib_database_user::mk_lib_database_user_logout(&sqlx_pool, current_user.id).await;
     auth.logout_user();
     Redirect::to("/public/login")
 }
