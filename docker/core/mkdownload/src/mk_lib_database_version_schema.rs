@@ -112,7 +112,7 @@ pub async fn mk_lib_database_update_schema(
     if version_no < 49 {
         let mut transaction = sqlx_pool.begin().await?;
         sqlx::query(
-            "CREATE TABLE mm_network_shares (\
+            "CREATE TABLE IF NOT EXISTS mm_network_shares (\
             mm_network_share_guid uuid NOT NULL, \
             mm_network_share_xml text);",
         )
@@ -126,11 +126,11 @@ pub async fn mk_lib_database_update_schema(
         let mut transaction = sqlx_pool.begin().await?;
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS axum_users (\
-            id SERIAL PRIMARY KEY, \
+            id bigint Primary Key Generated Always as Identity, \
             anonymous BOOLEAN NOT NULL, \
             username VARCHAR(256) NOT NULL, \
-            password NOT NULL TEXT, \
-            email VARCHAR(256) NOT NULL, \
+            password TEXT NOT NULL, \
+            email VARCHAR(256), \
             last_signin timestamp, \
             last_signoff timestamp);",
         )

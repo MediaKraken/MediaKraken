@@ -154,7 +154,7 @@ pub async fn mk_lib_database_user_exists(
     }
     let row: (bool,) = sqlx::query_as(
         "select exists(select 1 from axum_users \
-        where email = $1 limit 1) limit 1",
+        where username = $1 limit 1) limit 1",
     )
     .bind(user_name)
     .fetch_one(sqlx_pool)
@@ -165,7 +165,7 @@ pub async fn mk_lib_database_user_exists(
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBUserList {
     id: i64,
-    pub email: String,
+    pub username: String,
 }
 
 pub async fn mk_lib_database_user_read(
@@ -183,13 +183,13 @@ pub async fn mk_lib_database_user_read(
         .unwrap();
     }
     let select_query =
-        sqlx::query("select id, email from axum_users order by LOWER(email) offset $1 limit $2")
+        sqlx::query("select id, username from axum_users order by LOWER(username) offset $1 limit $2")
             .bind(offset)
             .bind(limit);
     let table_rows: Vec<DBUserList> = select_query
         .map(|row: PgRow| DBUserList {
             id: row.get("id"),
-            email: row.get("email"),
+            username: row.get("username"),
         })
         .fetch_all(sqlx_pool)
         .await?;
@@ -215,7 +215,7 @@ pub async fn mk_lib_database_user_count(
             .await?;
         Ok(row.0)
     } else {
-        let row: (i64,) = sqlx::query_as("select count(*) from axum_users where email = $1")
+        let row: (i64,) = sqlx::query_as("select count(*) from axum_users where username = $1")
             .bind(user_name)
             .fetch_one(sqlx_pool)
             .await?;
@@ -270,7 +270,7 @@ pub async fn mk_lib_database_user_set_admin(
 
 pub async fn mk_lib_database_user_insert(
     sqlx_pool: &sqlx::PgPool,
-    email: &String,
+    username: &String,
     password: &String,
 ) -> Result<i64, sqlx::Error> {
     #[cfg(debug_assertions)]
@@ -285,11 +285,11 @@ pub async fn mk_lib_database_user_insert(
     let mut transaction = sqlx_pool.begin().await?;
     let row: (i64,) = sqlx::query_as(
         "insert into axum_users \
-        (email, password, anonymous) \
+        (username, password, anonymous) \
         values ($1, crypt($2, gen_salt('bf', 10)), false) \
         RETURNING id",
     )
-    .bind(email)
+    .bind(username)
     .bind(password)
     .fetch_one(&mut transaction)
     .await?;
@@ -299,7 +299,7 @@ pub async fn mk_lib_database_user_insert(
 
 pub async fn mk_lib_database_user_login_verification(
     sqlx_pool: &sqlx::PgPool,
-    email: &String,
+    username: &String,
     password: &String,
 ) -> Result<i64, sqlx::Error> {
     #[cfg(debug_assertions)]
@@ -313,13 +313,35 @@ pub async fn mk_lib_database_user_login_verification(
     }
     let row: (i64,) = sqlx::query_as(
         "select id from axum_users \
-        where email = $1 and password = crypt($2, password)",
+        where username = $1 and password = crypt($2, password)",
     )
-    .bind(email)
+    .bind(username)
     .bind(password)
     .fetch_one(sqlx_pool)
     .await?;
     Ok(row.0)  
+}
+
+pub async fn mk_lib_database_user_login(
+    sqlx_pool: &sqlx::PgPool,
+    user_id: i64,
+) -> Result<(), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let mut transaction = sqlx_pool.begin().await?;
+    sqlx::query("update axum_users set last_signin = now() where id = $1")
+        .bind(user_id)
+        .execute(&mut transaction)
+        .await?;
+    transaction.commit().await?;
+    Ok(())
 }
 
 pub async fn mk_lib_database_user_logout(

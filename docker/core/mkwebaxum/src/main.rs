@@ -12,7 +12,7 @@ use axum::{
 };
 use axum_extra::routing::RouterExt;
 use axum_session::{
-    DatabasePool, Session, SessionConfig, SessionLayer, SessionPgPool, SessionStore,
+    DatabasePool, Session, SessionConfig, SessionLayer, SessionPgPool, SessionStore, Key
 };
 use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use rcgen::generate_simple_self_signed;
@@ -220,7 +220,13 @@ async fn main() {
         .unwrap();
     mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
 
-    let session_config = SessionConfig::default().with_table_name("mk_session");
+    let session_config = SessionConfig::default().with_table_name("mk_session")
+        // TODO generaqte config file and load it here.   docker secret on install?
+        // 'Key::generate()' will generate a new key each restart of the server.
+        // If you want it to be more permanent then generate and set it to a config file.
+        // If with_key() is used it will set all cookies as private, which guarantees integrity, and authenticity.
+        .with_key(Key::generate());
+;
     let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
     let session_store =
         SessionStore::<SessionPgPool>::new(Some(sqlx_pool.clone().into()), session_config);

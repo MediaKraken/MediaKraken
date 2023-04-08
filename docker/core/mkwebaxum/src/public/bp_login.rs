@@ -79,6 +79,7 @@ pub async fn public_login_post(
         &input_data.email, &input_data.password).await.unwrap();
     // TODO show error when not found
     if user_id > 0 {
+        mk_lib_database_user::mk_lib_database_user_login(&sqlx_pool, user_id).await;
         auth.login_user(user_id);
     }
     Redirect::to("/user/home")
