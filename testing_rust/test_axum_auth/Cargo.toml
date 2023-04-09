@@ -11,20 +11,18 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-axum = {version = "0.6.12"}
-axum_session = { version = "0.1.5", features = [ "postgres-rustls", "sqlite-rustls"] }
-axum_session_auth = { version = "0.1.1", features = [ "postgres-rustls", "sqlite-rustls" ] }
-tokio = { version = "1.21.2", features = ["full", "tracing"] }
+anyhow = "1.0.70"
 async-trait = "0.1.58"
+axum = { version = "0.6.12", features = ["http2", "json", "ws"] }
+axum_session = { version = "0.1.5", features = [ "postgres-rustls" ] }
+axum_session_auth = { version = "0.1.1", features = [ "postgres-rustls" ] }
+tokio = { version = "1.27.0", features = ["full", "tracing"] }
 sqlx = { version = "0.6.3", features = [
     "macros",
     "offline",
     "migrate",
-    "mssql",
     "postgres",
-    "sqlite",
     "all-types",
     "runtime-tokio-rustls",
 ] }
-anyhow = "1.0.66"
-serde = "1.0.147"
+serde = "1.0.159"

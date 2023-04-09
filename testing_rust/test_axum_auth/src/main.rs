@@ -3,12 +3,8 @@ use axum::{Extension, http::Method, routing::get, Router};
 use axum_session::{Key, SessionPgPool, SessionConfig, SessionLayer, SessionStore};
 use axum_session_auth::*;
 use serde::{Deserialize, Serialize};
-//use sqlx::sqlite::{SqliteConnectOptions, SqlitePool, SqlitePoolOptions};
-use sqlx::{
-    postgres::{PgConnectOptions, PgPoolOptions},
-    ConnectOptions, PgPool,
-};
-use std::{collections::HashSet, str::FromStr};
+use sqlx::{postgres::PgPoolOptions, PgPool};
+use std::{collections::HashSet};
 use tokio::signal;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -191,7 +187,7 @@ async fn main() {
 
     //Create the Database table for storing our Session Data.
     session_store.initiate().await.unwrap();
-    User::create_user_tables(&pool).await;  // will run without this just fine
+    User::create_user_tables(&pool).await;  // will run without this just fine (after first run)
 
     // build our application with some routes
     let app = Router::new()
