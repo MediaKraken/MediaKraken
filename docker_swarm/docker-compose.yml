@@ -487,6 +487,7 @@ services:
 
   webapp:
     image: mediakraken/mkwebaxum:${BRANCH}
+    # TODO remove after testing.......don't want to bypass proxy
     ports:
       - "8080:8080"    
     secrets:

@@ -1,5 +1,5 @@
 [package]
-name = "example"
+name = "mkexample"
 version = "0.0.1"
 authors = ["Andrew Wheeler <genusistimelord@gmail.com>"]
 edition = "2021"

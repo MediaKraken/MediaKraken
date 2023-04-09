@@ -1,0 +1,22 @@
+---
+version: '3.8'
+# Volumes are HOST directory and then CONTAINER directory
+
+services:
+  webapp:
+    image: mediakraken/mkexample:dev
+    container_name: mkstack_example
+    ports:
+      - "3000:3000"    
+    command: sh -c "/mediakraken/mkexample"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
+    restart: unless-stopped      
+
+# Docker private networks
+networks:
+  mediakraken_network:
+    driver: bridge
+    name: mk_mediakraken_network
