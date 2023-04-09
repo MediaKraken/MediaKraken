@@ -9,7 +9,7 @@ use tokio::signal;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
-    pub id: i32,
+    pub id: i64,
     pub anonymous: bool,
     pub username: String,
     pub permissions: HashSet<String>,
@@ -151,7 +151,7 @@ impl User {
 
 #[derive(sqlx::FromRow, Clone)]
 pub struct SqlUser {
-    pub id: i32,
+    pub id: i64,
     pub anonymous: bool,
     pub username: String,
 }
