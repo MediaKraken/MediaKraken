@@ -487,6 +487,8 @@ services:
 
   webapp:
     image: mediakraken/mkwebaxum:${BRANCH}
+    ports:
+      - "8080:8080"    
     secrets:
       - db_password
       - secure_key

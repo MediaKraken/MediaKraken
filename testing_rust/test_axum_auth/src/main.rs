@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use std::{collections::HashSet};
 use tokio::signal;
+use chrono::prelude::*;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
@@ -13,6 +14,8 @@ pub struct User {
     pub anonymous: bool,
     pub username: String,
     pub email: String,
+    pub last_signin: DateTime<Utc>,
+    pub last_signoff: DateTime<Utc>,    
     pub permissions: HashSet<String>,
 }
 
@@ -32,7 +35,9 @@ impl Default for User {
             anonymous: true,
             username: "Guest".into(),
             email: "fake@fake.com".into(),
-            permissions,
+            last_signin: Utc::now(),
+            last_signoff: Utc::now(),            
+            permissions: permissions,
         }
     }
 }
@@ -152,6 +157,8 @@ pub struct SqlUser {
     pub anonymous: bool,
     pub username: String,
     pub email: String,
+    pub last_signin: DateTime<Utc>,
+    pub last_signoff: DateTime<Utc>,    
 }
 
 impl SqlUser {
@@ -161,6 +168,8 @@ impl SqlUser {
             anonymous: self.anonymous,
             username: self.username,
             email: self.email,
+            last_signin: self.last_signin,
+            last_signoff: self.last_signoff,            
             permissions: if let Some(user_perms) = sql_user_perms {
                 user_perms
                     .into_iter()
@@ -204,7 +213,7 @@ async fn main() {
     // add a fallback service for handling routes to unknown paths
     let app = app.fallback(handler_404);
 
-    axum::Server::bind(&"0.0.0.0:8080".parse().unwrap())
+    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
         .serve(app.into_make_service())
         .with_graceful_shutdown(shutdown_signal())
         .await
