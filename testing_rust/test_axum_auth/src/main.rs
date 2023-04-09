@@ -187,7 +187,7 @@ pub struct User {
 
 #[tokio::main]
 async fn main() {
-    let pool = connect_to_database().await;
+    let pool = connect_to_database().await.unwrap();
 
     //This Defaults as normal Cookies.
     //To enable Private cookies for integrity, and authenticity please check the next Example.
@@ -262,13 +262,13 @@ async fn perm(
     )
 }
 
-async fn connect_to_database() -> PgPool {
+async fn connect_to_database() -> Result<sqlx::PgPool, sqlx::Error> {
     let connection_string = "postgresql://postgres:metaman@mkstage/postgres".to_string();
-    PgPoolOptions::new()
+    let sqlx_pool = PgPoolOptions::new()
         .max_connections(5)
         .connect(&connection_string)
-        .await
-        .unwrap()
+        .await?;
+    Ok(sqlx_pool)        
 }
 
 async fn shutdown_signal() {
