@@ -1,4 +1,6 @@
 use async_trait::async_trait;
+use axum::ServiceExt;
+use axum_extra::routing::RouterExt;
 use axum::{Extension, http::{Method, StatusCode}, routing::get, Router, response::{Html, IntoResponse}};
 use axum_session::{Key, SessionPgPool, SessionConfig, SessionLayer, SessionStore};
 use axum_session_auth::*;
@@ -203,9 +205,9 @@ async fn main() {
     // build our application with some routes
     let app = Router::new()
         .route("/", get(greet))
-        .route("/greet", get(greet))
-        .route("/login", get(login))
-        .route("/perm", get(perm))
+        .route_with_tsr("/greet", get(greet))
+        .route_with_tsr("/login", get(login))
+        .route_with_tsr("/perm", get(perm))
         .nest("/static", axum_static::static_router("static"))        
         .layer(
             AuthSessionLayer::<mk_lib_database_user::User, i64, SessionPgPool, PgPool>::new(Some(pool.clone().into()))
