@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use axum::{Extension, http::Method, routing::get, Router};
+use axum::{Extension, http::{Method, StatusCode}, routing::get, Router, response::{Html, IntoResponse}};
 use axum_session::{Key, SessionPgPool, SessionConfig, SessionLayer, SessionStore};
 use axum_session_auth::*;
 use serde::{Deserialize, Serialize};
@@ -12,6 +12,7 @@ pub struct User {
     pub id: i64,
     pub anonymous: bool,
     pub username: String,
+    pub email: String,
     pub permissions: HashSet<String>,
 }
 
@@ -30,6 +31,7 @@ impl Default for User {
             id: 1,
             anonymous: true,
             username: "Guest".into(),
+            email: "fake@fake.com".into(),
             permissions,
         }
     }
@@ -89,9 +91,10 @@ impl User {
         sqlx::query(
             r#"
                 CREATE TABLE IF NOT EXISTS users (
-                    "id" INTEGER PRIMARY KEY,
+                    "id" bigint Primary Key Generated Always as Identity,
                     "anonymous" BOOLEAN NOT NULL,
-                    "username" VARCHAR(256) NOT NULL
+                    "username" VARCHAR(256) NOT NULL,
+                    "email" TEXT
                 )
             "#,
         )
@@ -114,10 +117,7 @@ impl User {
         sqlx::query(
             r#"
                 INSERT INTO users
-                    (id, anonymous, username) SELECT 1, true, 'Guest'
-                ON CONFLICT(id) DO UPDATE SET
-                    anonymous = EXCLUDED.anonymous,
-                    username = EXCLUDED.username
+                    (anonymous, username) SELECT true, 'Guest'
             "#,
         )
         .execute(pool)
@@ -127,10 +127,7 @@ impl User {
         sqlx::query(
             r#"
                 INSERT INTO users
-                    (id, anonymous, username) SELECT 2, true, 'Test'
-                ON CONFLICT(id) DO UPDATE SET
-                    anonymous = EXCLUDED.anonymous,
-                    username = EXCLUDED.username
+                    (anonymous, username) SELECT true, 'Test'
             "#,
         )
         .execute(pool)
@@ -154,6 +151,7 @@ pub struct SqlUser {
     pub id: i64,
     pub anonymous: bool,
     pub username: String,
+    pub email: String,
 }
 
 impl SqlUser {
@@ -162,6 +160,7 @@ impl SqlUser {
             id: self.id,
             anonymous: self.anonymous,
             username: self.username,
+            email: self.email,
             permissions: if let Some(user_perms) = sql_user_perms {
                 user_perms
                     .into_iter()
@@ -195,12 +194,15 @@ async fn main() {
         .route("/greet", get(greet))
         .route("/login", get(login))
         .route("/perm", get(perm))
+        .nest("/static", axum_static::static_router("static"))        
         .layer(
             AuthSessionLayer::<User, i64, SessionPgPool, PgPool>::new(Some(pool.clone().into()))
                 .with_config(auth_config),
         )
         .layer(SessionLayer::new(session_store))
         .layer(Extension(pool));
+    // add a fallback service for handling routes to unknown paths
+    let app = app.fallback(handler_404);
 
     axum::Server::bind(&"0.0.0.0:8080".parse().unwrap())
         .serve(app.into_make_service())
@@ -275,4 +277,8 @@ async fn shutdown_signal() {
         _ = ctrl_c => {},
         _ = terminate => {},
     }
+}
+
+async fn handler_404() -> impl IntoResponse {
+    (StatusCode::NOT_FOUND, "nothing to see here")
 }
