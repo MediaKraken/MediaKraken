@@ -27,6 +27,39 @@ User::View
 Category::View   ??
 */
 
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
+pub struct User {
+    pub id: i64,
+    pub anonymous: bool,
+    pub username: String,
+    pub email: String,
+    pub last_signin: DateTime<Utc>,
+    pub last_signoff: DateTime<Utc>,
+    pub permissions: HashSet<String>,
+}
+
+#[derive(sqlx::FromRow, Clone)]
+pub struct SqlPermissionTokens {
+    pub token: String,
+}
+
+impl Default for User {
+    fn default() -> Self {
+        let mut permissions = HashSet::new();
+        permissions.insert("User::View".to_owned());
+        permissions.insert("Category::View".to_owned());
+        Self {
+            id: 1,
+            anonymous: true,
+            username: "Guest".into(),
+            email: "guest@fake.com".into(),
+            last_signin: Utc::now(),
+            last_signoff: Utc::now(),
+            permissions: permissions,
+        }
+    }
+}
+
 #[async_trait]
 impl Authentication<User, i64, PgPool> for User {
     async fn load_user(userid: i64, pool: Option<&PgPool>) -> Result<User, anyhow::Error> {
@@ -53,39 +86,6 @@ impl Authentication<User, i64, PgPool> for User {
 impl HasPermission<PgPool> for User {
     async fn has(&self, perm: &str, _pool: &Option<&PgPool>) -> bool {
         self.permissions.contains(perm)
-    }
-}
-
-#[derive(sqlx::FromRow, Clone)]
-pub struct SqlPermissionTokens {
-    pub token: String,
-}
-
-#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
-pub struct User {
-    pub id: i64,
-    pub anonymous: bool,
-    pub username: String,
-    pub email: String,
-    pub last_signin: DateTime<Utc>,
-    pub last_signoff: DateTime<Utc>,
-    pub permissions: HashSet<String>,
-}
-
-impl Default for User {
-    fn default() -> Self {
-        let mut permissions = HashSet::new();
-        permissions.insert("User::View".to_owned());
-        permissions.insert("Category::View".to_owned());
-        Self {
-            id: 1,
-            anonymous: true,
-            username: "Guest".into(),
-            email: "guest@fake.com".into(),
-            last_signin: Utc::now(),
-            last_signoff: Utc::now(),
-            permissions: permissions,
-        }
     }
 }
 
@@ -262,6 +262,16 @@ pub async fn mk_lib_database_user_set_admin(
     sqlx::query("insert into axum_user_permissions (user_id, token) values ($1, $2)")
         .bind(user_id)
         .bind("Admin::Edit")
+        .execute(&mut transaction)
+        .await?;
+    sqlx::query("insert into axum_user_permissions (user_id, token) values ($1, $2)")
+        .bind(user_id)
+        .bind("Category::View")
+        .execute(&mut transaction)
+        .await?;
+    sqlx::query("insert into axum_user_permissions (user_id, token) values ($1, $2)")
+        .bind(user_id)
+        .bind("User::View")
         .execute(&mut transaction)
         .await?;
     transaction.commit().await?;

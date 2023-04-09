@@ -220,7 +220,7 @@ async fn main() {
         .unwrap();
     mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
 
-    let session_config = SessionConfig::default().with_table_name("mk_session")
+    let session_config = SessionConfig::default().with_table_name("mm_session")
         // TODO generaqte config file and load it here.   docker secret on install?
         // 'Key::generate()' will generate a new key each restart of the server.
         // If you want it to be more permanent then generate and set it to a config file.
@@ -457,7 +457,7 @@ async fn main() {
         .nest("/static", axum_static::static_router("static"))
         .layer(
             AuthSessionLayer::<mk_lib_database_user::User, i64, SessionPgPool, PgPool>::new(Some(
-                sqlx_pool.clone(),
+                sqlx_pool.clone().into(),
             ))
             .with_config(auth_config),
         )
