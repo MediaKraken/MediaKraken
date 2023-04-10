@@ -1,8 +1,8 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use serde_json::json;
-use stdext::function_name;
 use serde_json::json;
+use stdext::function_name;
 
 // https://github.com/gabrielmagno/crab-dlna
 

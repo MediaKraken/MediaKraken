@@ -1,11 +1,11 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use amiquip::{AmqpProperties, Connection, Exchange, Publish, Result};
 use chrono::prelude::*;
+use serde_json::json;
 use sqlx::Row;
 use std::error::Error;
 use stdext::function_name;
-use serde_json::json;
 use tokio::time::{sleep, Duration};
 
 #[path = "mk_lib_logging.rs"]

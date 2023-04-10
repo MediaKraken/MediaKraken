@@ -1,6 +1,7 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use fltk::{app, button::Button, frame::Frame, image::SharedImage, prelude::*, window::Window};
+use serde_json::json;
 use std::error::Error;
 use std::fs::File;
 use std::io;
@@ -9,7 +10,6 @@ use std::net::ToSocketAddrs;
 use std::path::PathBuf;
 use std::sync::Arc;
 use stdext::function_name;
-use serde_json::json;
 
 #[path = "../../mk_lib_logging/src/mk_lib_logging.rs"]
 mod mk_lib_logging;

@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use bytesize::ByteSize;
 use core::fmt::Write;
@@ -25,7 +25,8 @@ mod mk_lib_network_transmission;
 pub async fn admin_torrent(user: AdminUser) -> Template {
     let mut transmission_client = TransClient::new("mkstack_transmission".parse().unwrap());
 
-    let res: RpcResponse<Torrents<Torrent>> = transmission_client.torrent_get(None, None).await.unwrap();
+    let res: RpcResponse<Torrents<Torrent>> =
+        transmission_client.torrent_get(None, None).await.unwrap();
     let names: Vec<&String> = res
         .arguments
         .torrents
@@ -44,7 +45,8 @@ pub async fn admin_torrent(user: AdminUser) -> Template {
             Some(vec![TorrentGetField::Id, TorrentGetField::Name]),
             Some(vec![Id::Id(1), Id::Id(2), Id::Id(3)]),
         )
-        .await.unwrap();
+        .await
+        .unwrap();
     let first_three: Vec<String> = res1
         .arguments
         .torrents
@@ -78,7 +80,8 @@ pub async fn admin_torrent(user: AdminUser) -> Template {
                 "64b0d9a53ac9cd1002dad1e15522feddb00152fe",
             ))]),
         )
-        .await.unwrap();
+        .await
+        .unwrap();
     let info: Vec<String> = res2
         .arguments
         .torrents

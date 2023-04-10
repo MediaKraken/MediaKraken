@@ -1,10 +1,10 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 // https://forum.opensubtitles.org/viewtopic.php?f=8&t=14563
 
+use serde_json::json;
 use std::error::Error;
 use stdext::function_name;
-use serde_json::json;
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;

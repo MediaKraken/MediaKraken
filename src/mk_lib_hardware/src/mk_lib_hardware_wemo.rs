@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 // https://github.com/Hyperchaotic/weectrl
 
@@ -6,8 +6,8 @@
 mod mk_lib_logging;
 
 use futures::stream::Stream;
-use stdext::function_name;
 use serde_json::json;
+use stdext::function_name;
 use tokio_core::reactor::Core;
 use weectrl::*;
 

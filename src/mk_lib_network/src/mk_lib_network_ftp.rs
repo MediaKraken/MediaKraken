@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 // ftp = { version = "<version>", features = ["secure"] }
 // https://github.com/mattnenterprise/rust-ftp
@@ -7,10 +7,10 @@
 mod mk_lib_logging;
 
 use ftp::FtpStream;
+use serde_json::json;
 use std::io::Cursor;
 use std::str;
 use stdext::function_name;
-use serde_json::json;
 
 pub fn mk_lib_network_ftp_connect(
     host_ip: &str,

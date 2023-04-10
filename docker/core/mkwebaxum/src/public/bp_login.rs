@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use askama::Template;
 use axum::{
@@ -66,7 +66,7 @@ pub async fn perm(
 
 #[derive(Deserialize)]
 pub struct LoginInput {
-    email: String,
+    username: String,
     password: String,
 }
 
@@ -75,8 +75,13 @@ pub async fn public_login_post(
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Form(input_data): Form<LoginInput>,
 ) -> Redirect {
-    let user_id: i64 = mk_lib_database_user::mk_lib_database_user_login_verification(&sqlx_pool,
-        &input_data.email, &input_data.password).await.unwrap();
+    let user_id: i64 = mk_lib_database_user::mk_lib_database_user_login_verification(
+        &sqlx_pool,
+        &input_data.username,
+        &input_data.password,
+    )
+    .await
+    .unwrap();
     // TODO show error when not found
     if user_id > 0 {
         mk_lib_database_user::mk_lib_database_user_login(&sqlx_pool, user_id).await;

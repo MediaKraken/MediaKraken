@@ -1,14 +1,14 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
 // crc32fast = "1.2.1"
 use crc32fast::Hasher;
+use serde_json::json;
 use std::error::Error;
 use std::fs;
 use stdext::function_name;
-use serde_json::json;
 
 #[path = "mk_lib_file.rs"]
 mod mk_lib_file;

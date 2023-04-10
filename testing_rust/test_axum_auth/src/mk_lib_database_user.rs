@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use async_trait::async_trait;
 use axum_session_auth::*;
@@ -161,10 +161,11 @@ pub async fn mk_lib_database_user_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBUserList>, sqlx::Error> {
-    let select_query =
-        sqlx::query("select id, username from axum_users order by LOWER(username) offset $1 limit $2")
-            .bind(offset)
-            .bind(limit);
+    let select_query = sqlx::query(
+        "select id, username from axum_users order by LOWER(username) offset $1 limit $2",
+    )
+    .bind(offset)
+    .bind(limit);
     let table_rows: Vec<DBUserList> = select_query
         .map(|row: PgRow| DBUserList {
             id: row.get("id"),
@@ -263,7 +264,7 @@ pub async fn mk_lib_database_user_login_verification(
     .bind(password)
     .fetch_one(sqlx_pool)
     .await?;
-    Ok(row.0)  
+    Ok(row.0)
 }
 
 pub async fn mk_lib_database_user_login(

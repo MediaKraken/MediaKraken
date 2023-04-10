@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 // https://github.com/lumeohq/onvif-rs
 // onvif = { git = "https://github.com/lumeohq/onvif-rs" }
@@ -7,8 +7,8 @@
 mod mk_lib_logging;
 
 use onvif::discovery;
-use stdext::function_name;
 use serde_json::json;
+use stdext::function_name;
 
 const MAX_CONCURRENT_JUMPERS: usize = 100;
 

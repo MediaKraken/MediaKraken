@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 // https://github.com/teppah/yeelib_rs
 // yeelib_rs = "0.1.1"
@@ -6,8 +6,8 @@
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
-use stdext::function_name;
 use serde_json::json;
+use stdext::function_name;
 use yeelib_rs::fields::{PowerStatus, Transition};
 use yeelib_rs::{Light, YeeClient, YeeError};
 

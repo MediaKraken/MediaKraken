@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 // https://docs.rs/blake3/1.0.0/blake3/
 
@@ -6,10 +6,10 @@
 mod mk_lib_logging;
 
 use blake3;
+use serde_json::json;
 use std::error::Error;
 use std::fs;
 use stdext::function_name;
-use serde_json::json;
 
 #[path = "mk_lib_file.rs"]
 mod mk_lib_file;

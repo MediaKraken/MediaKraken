@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use askama::Template;
 use axum::{
@@ -27,8 +27,10 @@ struct TemplateUserHomeContext<'a> {
     template_data_user_media_queue: &'a bool,
 }
 
-pub async fn user_home(Extension(sqlx_pool): Extension<PgPool>,
-auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,) -> impl IntoResponse {
+pub async fn user_home(
+    Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+) -> impl IntoResponse {
     let template = TemplateUserHomeContext {
         template_data_new_media: &true,
         template_data_user_media_queue: &true,

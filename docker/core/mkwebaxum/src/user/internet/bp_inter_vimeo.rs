@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use askama::Template;
 use axum::{
@@ -27,7 +27,8 @@ struct UserInternetVimeoTemplate<'a> {
 }
 
 pub async fn user_inter_vimeo(
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+) -> impl IntoResponse {
     let template = UserInternetVimeoTemplate {};
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())
@@ -38,7 +39,8 @@ pub async fn user_inter_vimeo(
 struct UserInternetVimeoDetailTemplate;
 
 pub async fn user_inter_vimeo_detail(
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+) -> impl IntoResponse {
     let template = UserInternetVimeoDetailTemplate {};
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

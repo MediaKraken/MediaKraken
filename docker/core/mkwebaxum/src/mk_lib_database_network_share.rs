@@ -1,16 +1,16 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
 use sqlx::{FromRow, Row};
 use std::num::NonZeroU8;
 use stdext::function_name;
-use serde_json::json;
 
 pub async fn mk_lib_database_network_share_count(
     sqlx_pool: &sqlx::PgPool,
@@ -76,11 +76,13 @@ pub async fn mk_lib_database_network_share_delete(
         .unwrap();
     }
     let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query("delete from mm_network_shares \
-        where mm_network_share_guid = $1")
-        .bind(network_share_uuid)
-        .execute(&mut transaction)
-        .await?;
+    sqlx::query(
+        "delete from mm_network_shares \
+        where mm_network_share_guid = $1",
+    )
+    .bind(network_share_uuid)
+    .execute(&mut transaction)
+    .await?;
     transaction.commit().await?;
     Ok(())
 }

@@ -1,9 +1,9 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
+use serde_json::json;
 use sqlx::types::Uuid;
 use std::error::Error;
 use stdext::function_name;
-use serde_json::json;
 use torrent_name_parser::Metadata;
 
 #[path = "../mk_lib_logging.rs"]

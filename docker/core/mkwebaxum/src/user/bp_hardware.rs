@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use askama::Template;
 use axum::{
@@ -26,8 +26,10 @@ struct TemplateUserHardwareContext<'a> {
     template_data_phue_exists: &'a bool,
 }
 
-pub async fn user_hardware(Extension(sqlx_pool): Extension<PgPool>,
-auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
+pub async fn user_hardware(
+    Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+) -> impl IntoResponse {
     let mut phue_exists: bool = true;
     let template = TemplateUserHardwareContext {
         template_data_phue_exists: &phue_exists,
@@ -42,8 +44,10 @@ struct TemplateUserHardwarePhueContext {
     template_data_phue: i32,
 }
 
-pub async fn user_hardware_phue(Extension(sqlx_pool): Extension<PgPool>,
-auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
+pub async fn user_hardware_phue(
+    Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+) -> impl IntoResponse {
     let template = TemplateUserHardwarePhueContext {
         template_data_phue: 0,
     };

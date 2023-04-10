@@ -1,12 +1,12 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use serde_json::Result;
 use stdext::function_name;
-use serde_json::json;
 
 #[derive(Serialize, Deserialize)]
 struct MediaKrakenOptions {

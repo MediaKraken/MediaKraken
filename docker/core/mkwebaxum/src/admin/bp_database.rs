@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use askama::Template;
 use axum::{
@@ -37,8 +37,10 @@ struct AdminDBStatsTemplate<'a> {
     template_data_db_workers: &'a String,
 }
 
-pub async fn admin_database(Extension(sqlx_pool): Extension<PgPool>,
-auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
+pub async fn admin_database(
+    Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+) -> impl IntoResponse {
     let pg_version = mk_lib_database_version::mk_lib_database_postgresql_version(&sqlx_pool)
         .await
         .unwrap();

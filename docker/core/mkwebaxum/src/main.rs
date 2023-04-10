@@ -3,7 +3,6 @@
 #[macro_use]
 extern crate lazy_static;
 
-use axum::ServiceExt;
 use axum::{
     http::StatusCode,
     response::IntoResponse,
@@ -12,7 +11,7 @@ use axum::{
 };
 use axum_extra::routing::RouterExt;
 use axum_session::{
-    DatabasePool, Session, SessionConfig, SessionLayer, SessionPgPool, SessionStore, Key
+    DatabasePool, Key, Session, SessionConfig, SessionLayer, SessionPgPool, SessionStore,
 };
 use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use rcgen::generate_simple_self_signed;
@@ -23,16 +22,11 @@ use sqlx::{
     postgres::{PgConnectOptions, PgPoolOptions},
     ConnectOptions, PgPool,
 };
-use std::collections::{BTreeMap, HashMap};
-use std::fs;
 use std::fs::File;
 use std::io::Write;
-use std::net::SocketAddr;
 use std::path::Path;
 use stdext::function_name;
 use tokio::signal;
-use tower::layer::Layer;
-use tower_http::normalize_path::NormalizePathLayer;
 
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
@@ -220,18 +214,17 @@ async fn main() {
         .unwrap();
     mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
 
-    let session_config = SessionConfig::default().with_table_name("mm_session")
-        // TODO generaqte config file and load it here.   docker secret on install?
-        // 'Key::generate()' will generate a new key each restart of the server.
-        // If you want it to be more permanent then generate and set it to a config file.
-        // If with_key() is used it will set all cookies as private, which guarantees integrity, and authenticity.
+    // TODO generaqte config file and load it here.   docker secret on install?
+    // 'Key::generate()' will generate a new key each restart of the server.
+    // If you want it to be more permanent then generate and set it to a config file.
+    // If with_key() is used it will set all cookies as private, which guarantees integrity, and authenticity.
+    let session_config = SessionConfig::default()
+        .with_table_name("mm_session")
         .with_key(Key::generate());
-;
     let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
     let session_store =
         SessionStore::<SessionPgPool>::new(Some(sqlx_pool.clone().into()), session_config);
     session_store.initiate().await.unwrap();
-    // mk_lib_database_user::User::create_user_tables(&sqlx_pool).await;
 
     // build our application with routes
     // route_with_tsr creates two routes.....one with trailing slash
@@ -256,10 +249,7 @@ async fn main() {
             "/public/login",
             get(bp_public_login::public_login).post(bp_public_login::public_login_post),
         )
-        .route_with_tsr(
-            "/public/perm",
-            get(bp_public_login::perm),
-        )
+        .route_with_tsr("/public/perm", get(bp_public_login::perm))
         // .route_with_tsr(
         //     "/user/internet/flickr",
         //     get(bp_user_internet_bp_inter_flickr::user_inter_flickr),
@@ -487,10 +477,10 @@ async fn main() {
     //     .register(
     //         "/",
     //         catchers![
-    //             bp_error::general_not_authorized,
-    //             bp_error::general_not_administrator,
-    //             bp_error::general_security,
-    //             bp_error::default_catcher,
+    //             bp_error::general_not_authorized,        401
+    //             bp_error::general_not_administrator,     403
+    //             bp_error::general_security,              401?
+    //             bp_error::default_catcher,               500
     //         ],
     //     )
     //     .manage(users)

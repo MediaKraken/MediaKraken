@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use pnet::datalink;
 use serde_json::json;
@@ -64,7 +64,8 @@ async fn main() {
                             "info",
                             json!({ "source_ip": source_ip }),
                         )
-                        .await.unwrap();
+                        .await
+                        .unwrap();
                     }
                     let source_ip = iface
                         .ips
@@ -82,7 +83,8 @@ async fn main() {
                             "info",
                             json!({ "mediakraken_ip": mediakraken_ip }),
                         )
-                        .await.unwrap();
+                        .await
+                        .unwrap();
                     }
                     break;
                 }
@@ -118,7 +120,8 @@ async fn main() {
                 "info",
                 json!({"amt": amt, "remote_addr": remote_addr}),
             )
-            .await.unwrap();
+            .await
+            .unwrap();
         }
         // create a socket to send the response
         let responder =
@@ -134,7 +137,8 @@ async fn main() {
                 "info",
                 json!({"response": response, "remote_addr": remote_addr}),
             )
-            .await.unwrap();
+            .await
+            .unwrap();
         }
     }
 }

@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use rocket::response::Redirect;
 use rocket::serde::{json::Json, Deserialize, Serialize};
@@ -7,8 +7,8 @@ use rocket::{form::Form, get, post, routes};
 use rocket::{form::*, State};
 use rocket_auth::{prelude::Error, *};
 use rocket_dyn_templates::{tera::Tera, Template};
-use stdext::function_name;
 use serde_json::json;
+use stdext::function_name;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;

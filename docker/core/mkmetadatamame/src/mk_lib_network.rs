@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use reqwest::header::CONTENT_TYPE;
 use reqwest::header::USER_AGENT;

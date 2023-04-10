@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -7,8 +7,8 @@ mod mk_lib_logging;
 // lsdp = "0.1.0"
 
 use lsdp::{net::Discover, ClassID};
-use stdext::function_name;
 use serde_json::json;
+use stdext::function_name;
 
 pub async fn mk_hardware_lenbrook_discovery() {
     #[cfg(debug_assertions)]

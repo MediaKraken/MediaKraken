@@ -1,10 +1,10 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 // https://github.com/sile/hls_m3u8
 
 use hls_m3u8::MediaPlaylist;
-use stdext::function_name;
 use serde_json::json;
+use stdext::function_name;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;

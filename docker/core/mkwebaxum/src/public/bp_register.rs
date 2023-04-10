@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use askama::Template;
 use axum::{
@@ -48,18 +48,28 @@ pub async fn public_register_post(
     Extension(sqlx_pool): Extension<PgPool>,
     Form(input_data): Form<RegisterInput>,
 ) -> Redirect {
-    let user_found = mk_lib_database_user::mk_lib_database_user_exists(&sqlx_pool, &input_data.email).await.unwrap();
+    let user_found =
+        mk_lib_database_user::mk_lib_database_user_exists(&sqlx_pool, &input_data.email)
+            .await
+            .unwrap();
     if user_found == true {
         // TODO flash error
     } else {
-        let user_id: i64 = mk_lib_database_user::mk_lib_database_user_insert(&sqlx_pool, &input_data.email, &input_data.password).await.unwrap();
-        if mk_lib_database_user::mk_lib_database_user_count(&sqlx_pool, String::new())
+        let user_id: i64 = mk_lib_database_user::mk_lib_database_user_insert(
+            &sqlx_pool,
+            &input_data.email,
+            &input_data.password,
+        )
         .await
-        .unwrap()
-        == 2   // 2 as 1 is guest
-    {
-        mk_lib_database_user::mk_lib_database_user_set_admin(&sqlx_pool, user_id).await;
-    }
+        .unwrap();
+        if mk_lib_database_user::mk_lib_database_user_count(&sqlx_pool, String::new())
+            .await
+            .unwrap()
+            == 2
+        // 2 as 1 is guest
+        {
+            mk_lib_database_user::mk_lib_database_user_set_admin(&sqlx_pool, user_id).await;
+        }
     }
     Redirect::to("/public/login")
 }

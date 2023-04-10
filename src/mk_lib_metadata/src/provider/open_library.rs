@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 // https://openlibrary.org/
 
@@ -14,9 +14,9 @@
 use open_library::models::books::BibliographyKey;
 use open_library::models::books::BibliographyKey::{ISBN, LCCN, OCLC, OLID};
 use open_library::OpenLibraryClient;
+use serde_json::json;
 use std::error::Error;
 use stdext::function_name;
-use serde_json::json;
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;

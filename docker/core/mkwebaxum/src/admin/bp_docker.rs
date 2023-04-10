@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use askama::Template;
 use axum::{
@@ -24,7 +24,8 @@ mod mk_lib_common_docker;
 struct AdminDockerTemplate;
 
 pub async fn admin_docker(
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+) -> impl IntoResponse {
     let docker_results = mk_lib_common_docker::mk_common_docker_info().await.unwrap();
     let template = AdminDockerTemplate {};
     let reply_html = template.render().unwrap();

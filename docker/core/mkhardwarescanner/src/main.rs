@@ -1,10 +1,10 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use std::error::Error;
 //use onvif::discovery;
 use futures_util::{pin_mut, stream::StreamExt};
-use stdext::function_name;
 use serde_json::json;
+use stdext::function_name;
 use tokio::time::{sleep, Duration};
 
 #[path = "mk_lib_hardware_chromecast.rs"]

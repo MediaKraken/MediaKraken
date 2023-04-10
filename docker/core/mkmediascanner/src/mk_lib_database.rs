@@ -1,14 +1,14 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
+use serde_json::json;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use std::fs;
 use std::path::Path;
 use stdext::function_name;
-use serde_json::json;
 use urlencoding::encode;
 
 pub async fn mk_lib_database_open_pool(pool_connections: u32) -> Result<sqlx::PgPool, sqlx::Error> {

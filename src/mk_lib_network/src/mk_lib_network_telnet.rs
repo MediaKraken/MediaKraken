@@ -1,11 +1,11 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 // mini-telnet = "0.1.8"
 
 use mini_telnet::Telnet;
+use serde_json::json;
 use std::time::Duration;
 use stdext::function_name;
-use serde_json::json;
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;

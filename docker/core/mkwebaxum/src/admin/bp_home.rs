@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use askama::Template;
 use axum::{
@@ -67,8 +67,10 @@ struct TemplateHomeContext<'a> {
     template_data_scan_info: &'a Vec<TemplateHomeScanListContext>,
 }
 
-pub async fn admin_home(Extension(sqlx_pool): Extension<PgPool>,
-auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
+pub async fn admin_home(
+    Extension(sqlx_pool): Extension<PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+) -> impl IntoResponse {
     let user_list = mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool, 0, 9999)
         .await
         .unwrap();

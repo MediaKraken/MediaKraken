@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use askama::Template;
 use axum::{
@@ -11,8 +11,8 @@ use axum::{
 use axum_session_auth::*;
 use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use serde_json::json;
-use stdext::function_name;
 use sqlx::postgres::PgPool;
+use stdext::function_name;
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -25,7 +25,8 @@ mod mk_lib_database_user;
 struct UserPlaybackVideoTemplate;
 
 pub async fn user_playback_video(
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>) -> impl IntoResponse {
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+) -> impl IntoResponse {
     let template = UserPlaybackVideoTemplate {};
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

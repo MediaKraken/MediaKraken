@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use askama::Template;
 use axum::{
@@ -28,7 +28,8 @@ mod mk_lib_database_user;
 struct UserQueueTemplate;
 
 pub async fn user_queue(
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,) -> impl IntoResponse {
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+) -> impl IntoResponse {
     let template = UserQueueTemplate {};
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

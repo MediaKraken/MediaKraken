@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use async_std::path::PathBuf;
 use chrono::prelude::*;
@@ -9,9 +9,9 @@ use std::error::Error;
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
 use std::path::Path;
+use stdext::function_name;
 use tokio::time::{sleep, Duration};
 use uuid::Uuid;
-use stdext::function_name;
 
 // https://www.progettosnaps.net/download/?tipo=dat_mame&file=/dats/MAME/packs/MAME_Dats_236.7z
 
@@ -45,7 +45,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await.unwrap();
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
+            .await
+            .unwrap();
     }
 
     // open the database
@@ -81,7 +83,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         );
         if !Path::new(&unzip_file_name).exists() {
             mk_lib_compression::mk_decompress_zip(&file_name, false, "/mediakraken/emulation/")
-                .await.unwrap();
+                .await
+                .unwrap();
             let file = File::open(&unzip_file_name)?;
             let reader = BufReader::new(file);
             let mut xml_data: String = "".to_owned();
@@ -131,7 +134,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await
         .unwrap();
         mk_lib_compression::mk_decompress_zip(&file_name, false, &"/mediakraken/emulation/")
-            .await.unwrap();
+            .await
+            .unwrap();
         for zippedfile in mk_lib_file::mk_directory_walk(format!(
             "/mediakraken/emulation/mame-mame0{}/hash",
             option_config_json["MAME"]["Version"]
@@ -211,7 +215,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await
         .unwrap();
         mk_lib_compression::mk_decompress_zip(&file_name, false, &"/mediakraken/emulation/")
-            .await.unwrap();
+            .await
+            .unwrap();
 
         let file = File::open(&format!(
             "/mediakraken/emulation/historyxml{}/historyxml{}.xml",
@@ -267,7 +272,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await
         .unwrap();
         mk_lib_compression::mk_decompress_zip(&file_name, false, &"/mediakraken/emulation/")
-            .await.unwrap();
+            .await
+            .unwrap();
         let file = File::open(&format!(
             "/mediakraken/emulation/pS_CatVer_{}/catver.ini",
             option_config_json["MAME"]["Version"]
@@ -320,7 +326,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await
         .unwrap();
         mk_lib_compression::mk_decompress_zip(&file_name, false, &"/mediakraken/emulation/")
-            .await.unwrap();
+            .await
+            .unwrap();
         let file = File::open(&format!(
             "/mediakraken/emulation/pS_messinfo_{}/messinfo.dat",
             option_config_json["MAME"]["Version"]

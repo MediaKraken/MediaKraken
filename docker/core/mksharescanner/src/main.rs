@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use amiquip::{
     Connection, ConsumerMessage, ConsumerOptions, Exchange, QueueDeclareOptions, Result,
@@ -74,9 +74,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .unwrap();
                     }
                     // find and store all network shares
-                    let share_vec = mk_lib_network_nmap::mk_network_share_scan(json_message["Data"].to_string()).await.unwrap();
+                    let share_vec = mk_lib_network_nmap::mk_network_share_scan(
+                        json_message["Data"].to_string(),
+                    )
+                    .await
+                    .unwrap();
                     for share_info in share_vec.iter() {
-                        mk_lib_database_network_share::mk_lib_database_network_share_insert(&sqlx_pool, share_info.mm_share_xml.clone()).await;
+                        mk_lib_database_network_share::mk_lib_database_network_share_insert(
+                            &sqlx_pool,
+                            share_info.mm_share_xml.clone(),
+                        )
+                        .await;
                     }
                     consumer.ack(delivery)?;
                 }

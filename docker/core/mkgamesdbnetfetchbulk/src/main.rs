@@ -1,10 +1,10 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
+use serde_json::json;
 use serde_json::Value;
 use sqlx::Row;
 use std::error::Error;
 use stdext::function_name;
-use serde_json::json;
 use uuid::Uuid;
 
 #[path = "mk_lib_database.rs"]

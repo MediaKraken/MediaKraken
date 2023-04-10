@@ -5,7 +5,6 @@ version: '3.8'
 services:
   webapp:
     image: mediakraken/mkexample:dev
-    container_name: mkstack_example
     ports:
       - "3000:3000"    
     command: sh -c "/mediakraken/mkexample"
@@ -13,10 +12,11 @@ services:
     stop_signal: SIGUSR1
     networks:
       - mediakraken_network
-    restart: unless-stopped      
+    deploy:
+      mode: replicated
+      replicas: 1
 
 # Docker private networks
 networks:
   mediakraken_network:
-    driver: bridge
-    name: mk_mediakraken_network
+    driver: overlay

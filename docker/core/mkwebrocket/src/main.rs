@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 #[macro_use]
 extern crate rocket;
@@ -46,10 +46,10 @@ mod bp_admin_hardware;
 mod bp_admin_home;
 #[path = "admin/bp_library.rs"]
 mod bp_admin_library;
-#[path = "admin/bp_share.rs"]
-mod bp_admin_share;
 #[path = "admin/bp_settings.rs"]
 mod bp_admin_settings;
+#[path = "admin/bp_share.rs"]
+mod bp_admin_share;
 #[path = "admin/bp_torrent.rs"]
 mod bp_admin_torrent;
 #[path = "admin/bp_user.rs"]

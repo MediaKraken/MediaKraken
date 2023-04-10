@@ -1,13 +1,13 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
+use serde_json::json;
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
 use stdext::function_name;
-use serde_json::json;
 
 pub async fn mk_decompress_tar_gz_file(archive_file: &str) -> Result<(), std::io::Error> {
     #[cfg(debug_assertions)]

@@ -1,12 +1,12 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 // https://github.com/runfalk/ed2k-rs
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
-use stdext::function_name;
 use serde_json::json;
+use stdext::function_name;
 
 pub fn mk_file_hash_ed2k(file_to_read: &str) -> Result<String, Box<dyn Error>> {
     #[cfg(debug_assertions)]

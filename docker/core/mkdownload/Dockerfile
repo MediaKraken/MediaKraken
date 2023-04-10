@@ -34,4 +34,4 @@ COPY --from=cargo-build /bin/bash /sh
 COPY --from=cargo-build /mediakraken/target/mkdownload /mkdownload
 
 # Use an unprivileged user.
-USER mediakraken:mediakraken
+# USER mediakraken:mediakraken <- removed due throwing stuff in /mediakraken/static

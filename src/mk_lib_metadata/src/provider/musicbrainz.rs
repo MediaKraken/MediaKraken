@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 // https://github.com/oknozor/musicbrainz_rs
 // musicbrainz_rs = "0.4.0"
@@ -6,9 +6,9 @@
 use musicbrainz_rs::entity::artist;
 use musicbrainz_rs::entity::artist::*;
 use musicbrainz_rs::prelude::*;
+use serde_json::json;
 use std::error::Error;
 use stdext::function_name;
-use serde_json::json;
 
 #[path = "../../mk_lib_logging.rs"]
 mod mk_lib_logging;

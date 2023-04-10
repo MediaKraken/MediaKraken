@@ -524,9 +524,6 @@ networks:
     driver: overlay
   mediakraken_network:
     driver: overlay
-  # mediakraken_network_frontend:
-  #   driver: overlay
-  #   #external: true
 
 volumes:
   mediakraken_vol_cache:

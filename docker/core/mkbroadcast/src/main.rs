@@ -1,13 +1,13 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use pnet::datalink::Channel::Ethernet;
 use pnet::datalink::{self, NetworkInterface};
+use serde_json::json;
 use shiplift::Docker;
 use std::io;
 use std::net::IpAddr;
 use std::str;
 use stdext::function_name;
-use serde_json::json;
 use tokio::net::UdpSocket;
 
 #[path = "mk_lib_logging.rs"]

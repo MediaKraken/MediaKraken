@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use num_format::{Locale, SystemLocale, ToFormattedString};
 use rocket::response::Redirect;
@@ -6,9 +6,9 @@ use rocket::serde::{json::Json, Deserialize, Serialize};
 use rocket::Request;
 use rocket_auth::{AdminUser, Auth, Error, Login, Signup, Users};
 use rocket_dyn_templates::{tera::Tera, Template};
+use serde_json::json;
 use sqlx::Row;
 use stdext::function_name;
-use serde_json::json;
 
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;

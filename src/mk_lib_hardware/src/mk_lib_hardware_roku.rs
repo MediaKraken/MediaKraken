@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 // https://github.com/RoseSecurity/Abusing-Roku-APIs
 // http://sdkdocs.roku.com/display/sdkdoc/External+Control+Guide

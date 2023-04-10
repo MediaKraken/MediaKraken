@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -11,8 +11,8 @@ use rppal::{
     hal::Delay,
 };
 use rppal_dht11::{Dht11, Measurement};
-use stdext::function_name;
 use serde_json::json;
+use stdext::function_name;
 
 const DHT11_PIN: u8 = 17;
 

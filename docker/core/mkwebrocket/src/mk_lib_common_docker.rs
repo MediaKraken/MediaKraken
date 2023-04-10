@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 // https://github.com/vv9k/docker-api-rs
 // docker-api = { version = "0.12.1", features = ["swarm"] }
@@ -10,8 +10,8 @@ use docker_api::opts::ContainerListOpts;
 use docker_api::opts::LogsOpts;
 use docker_api::opts::ServiceListOpts;
 use docker_api::{conn::TtyChunk, Docker, Result};
-use stdext::function_name;
 use serde_json::json;
+use stdext::function_name;
 
 #[cfg(unix)]
 pub fn new_docker() -> Result<Docker> {

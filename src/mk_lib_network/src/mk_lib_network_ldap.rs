@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 // https://github.com/inejge/ldap3
 // ldap3 = "0.10.3"
@@ -8,8 +8,8 @@ mod mk_lib_logging;
 
 use ldap3::result::Result;
 use ldap3::{LdapConn, LdapConnAsync, LdapConnSettings, Scope, SearchEntry};
-use stdext::function_name;
 use serde_json::json;
+use stdext::function_name;
 
 pub async fn ldap_bind(ldap_ip: String, ldap_port: String, ldap_bind: String, ldap_secret: String) {
     #[cfg(debug_assertions)]

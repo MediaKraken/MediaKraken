@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 // https://github.com/lettre/lettre/releases
 
@@ -7,8 +7,8 @@ mod mk_lib_logging;
 
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::{Message, SmtpTransport, Transport};
-use stdext::function_name;
 use serde_json::json;
+use stdext::function_name;
 
 pub async fn mk_lib_network_email_send(
     email_from: String,

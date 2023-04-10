@@ -1,17 +1,17 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use serde_json::{Map, Value};
 use sqlx::postgres::PgRow;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 use std::num::NonZeroU8;
 use stdext::function_name;
-use serde_json::json;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBCronList {

@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 // https://docs.rs/ipnet/latest/ipnet/#
 // ipnet=2.5.1
 
@@ -85,11 +85,11 @@ pub async fn mk_network_share_scan(
             .arg("2>/dev/null")
             .spawn()
             .unwrap();
-            let share_data = NMAPShareList {
-                mm_share_type: "nfs".to_string(),
-                mm_share_xml: mk_lib_file::mk_read_file_data("scan.xml").unwrap(),
-            };
-            vec_share.push(share_data);
-            }
+        let share_data = NMAPShareList {
+            mm_share_type: "nfs".to_string(),
+            mm_share_xml: mk_lib_file::mk_read_file_data("scan.xml").unwrap(),
+        };
+        vec_share.push(share_data);
+    }
     Ok(vec_share)
 }

@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 // https://github.com/mellon85/external-ip
 // external-ip = "4.1.0"
@@ -10,13 +10,13 @@
 // }
 
 /*
-        "https://icanhazip.com/",
-        "https://myexternalip.com/raw",
-        "https://ifconfig.io/ip",
-        "https://ipecho.net/plain",
-        "https://checkip.amazonaws.com/",
-        "https://ident.me/",
-        "http://whatismyip.akamai.com/",
-        "https://myip.dnsomatic.com/",
-        "https://diagnostic.opendns.com/myip",
-         */
+"https://icanhazip.com/",
+"https://myexternalip.com/raw",
+"https://ifconfig.io/ip",
+"https://ipecho.net/plain",
+"https://checkip.amazonaws.com/",
+"https://ident.me/",
+"http://whatismyip.akamai.com/",
+"https://myip.dnsomatic.com/",
+"https://diagnostic.opendns.com/myip",
+ */

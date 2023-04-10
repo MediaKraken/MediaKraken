@@ -1,14 +1,14 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 // https://github.com/serialport/serialport-rs
 // apt install pkg-config libudev-dev
 
 use serde_json::json;
+use serde_json::json;
 use serialport::{available_ports, DataBits, SerialPortType, StopBits};
 use std::io::{self, Write};
 use std::time::Duration;
 use stdext::function_name;
-use serde_json::json;
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;

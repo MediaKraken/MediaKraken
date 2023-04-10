@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -8,9 +8,9 @@ mod mk_lib_logging;
 use futures_util::{pin_mut, stream::StreamExt};
 use mdns::Error;
 use serde_json::json;
+use serde_json::json;
 use std::time::Duration;
 use stdext::function_name;
-use serde_json::json;
 
 const CHROMECAST_SERVICE_NAME: &'static str = "_googlecast._tcp.local";
 

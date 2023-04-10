@@ -1,4 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+#![cfg_attr(debug_assertions, allow(dead_code))]
 
 use askama::Template;
 use axum::{
@@ -100,8 +100,10 @@ pub async fn user_metadata_movie(
             let rating_json: serde_json::Value =
                 row_data.mm_metadata_user_json.as_ref().unwrap().clone();
             rating_status = rating_json["UserStats"][current_user.id.to_string()]["Rating"].clone();
-            watched_status = rating_json["UserStats"][current_user.id.to_string()]["Watched"].clone();
-            request_status = rating_json["UserStats"][current_user.id.to_string()]["Request"].clone();
+            watched_status =
+                rating_json["UserStats"][current_user.id.to_string()]["Watched"].clone();
+            request_status =
+                rating_json["UserStats"][current_user.id.to_string()]["Request"].clone();
             queue_status = rating_json["UserStats"][current_user.id.to_string()]["Queue"].clone();
         }
         let mut mm_poster: String = "/image/Movie-icon.png".to_string();
