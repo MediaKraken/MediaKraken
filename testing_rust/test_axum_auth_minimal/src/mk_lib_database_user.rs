@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use async_trait::async_trait;
 use axum_session_auth::*;
 use chrono::prelude::*;

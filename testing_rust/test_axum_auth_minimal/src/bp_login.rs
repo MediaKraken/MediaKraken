@@ -1,31 +1,10 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
-use axum::{
-    http::{header, HeaderMap, Method, StatusCode},
-    response::{Html, IntoResponse, Redirect},
-    routing::{get, post},
-    Extension, Router,
-};
-use axum_session::{
-    DatabasePool, Session, SessionConfig, SessionLayer, SessionPgPool, SessionStore,
-};
+use axum::http::Method;
+use axum_session::SessionPgPool;
 use axum_session_auth::*;
-use sqlx::{
-    postgres::{PgConnectOptions, PgPoolOptions},
-    ConnectOptions, PgPool,
-};
+use sqlx::PgPool;
 
 #[path = "mk_lib_database_user.rs"]
 mod mk_lib_database_user;
-
-pub async fn greet(
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
-) -> String {
-    format!(
-        "Hello {}, Try logging in via /login or testing permissions via /perm",
-        auth.current_user.unwrap().username
-    )
-}
 
 pub async fn login(
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
