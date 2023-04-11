@@ -79,7 +79,7 @@ async fn login(
     "You are logged in as a User please try /perm to check permissions".to_owned()
 }
 
-async fn perm(
+pub async fn perm(
     method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> String {

@@ -26,14 +26,14 @@ use validator::Validate;
 #[path = "mk_lib_database_user.rs"]
 mod mk_lib_database_user;
 
-// pub async fn greet(
-//     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
-// ) -> String {
-//     format!(
-//         "Hello {}, Try logging in via /login or testing permissions via /perm",
-//         auth.current_user.unwrap().username
-//     )
-// }
+pub async fn greet(
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+) -> String {
+    format!(
+        "Hello {}, Try logging in via /login or testing permissions via /perm",
+        auth.current_user.unwrap().username
+    )
+}
 
 pub async fn login(
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
