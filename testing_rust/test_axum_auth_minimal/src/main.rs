@@ -24,16 +24,13 @@ async fn main() {
     let session_store =
         SessionStore::<SessionPgPool>::new(Some(pool.clone().into()), session_config);
 
-    //Create the Database table for storing our Session Data.
     session_store.initiate().await.unwrap();
-    //User::create_user_tables(&pool).await;  // will run without this just fine (after first run)
 
-    // build our application with some routes
     let app = Router::new()
         .route_with_tsr("/login", get(login))
-        .route("/login2", get(bp_login::login))
+        .route_with_tsr("/login2", get(bp_login::login))
         .route_with_tsr("/perm", get(perm))
-        .route("/perm2", get(bp_login::perm))
+        .route_with_tsr("/perm2", get(bp_login::perm))
         .layer(
             AuthSessionLayer::<mk_lib_database_user::User, i64, SessionPgPool, PgPool>::new(Some(
                 pool.clone().into(),
