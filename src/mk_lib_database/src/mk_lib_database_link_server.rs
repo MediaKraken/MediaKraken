@@ -40,7 +40,7 @@ pub struct DBLinkList {
 pub async fn mk_lib_database_link_read(
     sqlx_pool: &sqlx::PgPool,
     offset: i64,
-    records: i32,
+    records: i64,
 ) -> Result<Vec<DBLinkList>, sqlx::Error> {
     #[cfg(debug_assertions)]
     {
@@ -100,7 +100,7 @@ pub async fn mk_lib_database_link_insert(
 pub async fn mk_lib_database_link_list_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
-) -> Result<i32, sqlx::Error> {
+) -> Result<i64, sqlx::Error> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -111,7 +111,7 @@ pub async fn mk_lib_database_link_list_count(
         .unwrap();
     }
     if search_value != "" {
-        let row: (i32,) = sqlx::query_as(
+        let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_library_link \
             where mm_link_name % $1",
         )
@@ -120,7 +120,7 @@ pub async fn mk_lib_database_link_list_count(
         .await?;
         Ok(row.0)
     } else {
-        let row: (i32,) = sqlx::query_as("select count(*) from mm_library_link")
+        let row: (i64,) = sqlx::query_as("select count(*) from mm_library_link")
             .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)

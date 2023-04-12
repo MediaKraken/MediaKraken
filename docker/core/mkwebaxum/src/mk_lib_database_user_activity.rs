@@ -56,7 +56,7 @@ pub async fn mk_lib_database_activity_insert(
 
 pub async fn mk_lib_database_activity_delete(
     sqlx_pool: &sqlx::PgPool,
-    day_range: i32,
+    day_range: i64,
 ) -> Result<(), sqlx::Error> {
     #[cfg(debug_assertions)]
     {

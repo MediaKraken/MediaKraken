@@ -45,7 +45,7 @@ pub async fn mk_lib_database_media_update_metadata_guid(
 
 pub async fn mk_lib_database_media_unmatched_count(
     sqlx_pool: &sqlx::PgPool,
-) -> Result<i32, sqlx::Error> {
+) -> Result<i64, sqlx::Error> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -55,7 +55,7 @@ pub async fn mk_lib_database_media_unmatched_count(
         .await
         .unwrap();
     }
-    let row: (i32,) = sqlx::query_as(
+    let row: (i64,) = sqlx::query_as(
         "select count(*) from mm_media \
         where mm_media_metadata_guid is NULL",
     )

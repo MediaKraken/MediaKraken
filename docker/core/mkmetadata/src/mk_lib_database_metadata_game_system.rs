@@ -189,7 +189,7 @@ pub async fn mk_lib_database_metadata_game_system_guid_by_short_name(
 pub async fn mk_lib_database_metadata_game_system_game_count_by_short_name(
     sqlx_pool: &sqlx::PgPool,
     game_system_short_name: String,
-) -> Result<i32, sqlx::Error> {
+) -> Result<i64, sqlx::Error> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -200,7 +200,7 @@ pub async fn mk_lib_database_metadata_game_system_game_count_by_short_name(
         .unwrap();
     }
     // TODO this query doesn't return game count.......
-    let row: (i32,) = sqlx::query_as(
+    let row: (i64,) = sqlx::query_as(
         "select count(*) \
         from mm_metadata_game_systems_info \
         where gs_game_system_name = $1",

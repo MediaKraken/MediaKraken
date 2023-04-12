@@ -145,7 +145,7 @@ pub async fn mk_lib_database_cron_insert(
 pub async fn mk_lib_database_cron_count(
     sqlx_pool: &sqlx::PgPool,
     cron_enabled: bool,
-) -> Result<i32, sqlx::Error> {
+) -> Result<i64, sqlx::Error> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -155,7 +155,7 @@ pub async fn mk_lib_database_cron_count(
         .await
         .unwrap();
     }
-    let row: (i32,) = sqlx::query_as("select count(*) from mm_cron where mm_cron_enabled = $1")
+    let row: (i64,) = sqlx::query_as("select count(*) from mm_cron where mm_cron_enabled = $1")
         .bind(cron_enabled)
         .fetch_one(sqlx_pool)
         .await?;

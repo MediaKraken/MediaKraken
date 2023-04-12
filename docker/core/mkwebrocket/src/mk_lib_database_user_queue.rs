@@ -13,7 +13,7 @@ pub async fn mk_lib_database_meta_queue_count(
     sqlx_pool: &sqlx::PgPool,
     user_uuid: Uuid,
     search_value: String,
-) -> Result<i32, sqlx::Error> {
+) -> Result<i64, sqlx::Error> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -24,7 +24,7 @@ pub async fn mk_lib_database_meta_queue_count(
         .unwrap();
     }
     if search_value != "" {
-        let row: (i32,) = sqlx::query_as(
+        let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_user_queue \
             where mm_user_queue_name % $1 and mm_user_queue_user_id = $2",
         )
@@ -34,7 +34,7 @@ pub async fn mk_lib_database_meta_queue_count(
         .await?;
         Ok(row.0)
     } else {
-        let row: (i32,) = sqlx::query_as(
+        let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_user_queue \
             where mm_user_queue_user_id = $1",
         )
