@@ -29,8 +29,7 @@ mod mk_lib_database_metadata_download_queue;
 #[path = "../mk_lib_database_option_status.rs"]
 mod mk_lib_database_option_status;
 
-#[path = "../mk_lib_database_user.rs"]
-mod mk_lib_database_user;
+use crate::mk_lib_database_user;
 
 #[path = "../mk_lib_network.rs"]
 mod mk_lib_network;

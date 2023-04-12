@@ -24,8 +24,7 @@ mod mk_lib_common_pagination;
 #[path = "../mk_lib_database_library.rs"]
 mod mk_lib_database_library;
 
-#[path = "../mk_lib_database_user.rs"]
-mod mk_lib_database_user;
+use crate::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_library.html")]

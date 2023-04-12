@@ -29,6 +29,8 @@ mod mk_lib_common_pagination;
 #[path = "../../mk_lib_database_media_movie.rs"]
 mod mk_lib_database_media_movie;
 
+use crate::mk_lib_database_user;
+
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_movie.html")]
 struct TemplateMediaMovieContext<'a> {

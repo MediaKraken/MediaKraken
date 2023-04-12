@@ -23,6 +23,8 @@ mod mk_lib_common_pagination;
 #[path = "../../mk_lib_database_game_servers.rs"]
 mod mk_lib_database_game_servers;
 
+use crate::mk_lib_database_user;
+
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_game_server.html")]
 struct TemplateMediaGameServersContext<'a> {

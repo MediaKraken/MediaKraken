@@ -25,8 +25,7 @@ use validator::Validate;
 #[path = "../mk_lib_logging.rs"]
 mod mk_lib_logging;
 
-#[path = "../mk_lib_database_user.rs"]
-mod mk_lib_database_user;
+use crate::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_public/bss_public_register.html")]

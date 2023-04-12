@@ -23,8 +23,7 @@ mod mk_lib_common_pagination;
 #[path = "../mk_lib_database_game_servers.rs"]
 mod mk_lib_database_game_servers;
 
-#[path = "../mk_lib_database_user.rs"]
-mod mk_lib_database_user;
+use crate::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_game_servers.html")]

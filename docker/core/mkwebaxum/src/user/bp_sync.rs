@@ -22,8 +22,7 @@ mod mk_lib_logging;
 #[path = "../mk_lib_database_sync.rs"]
 mod mk_lib_database_sync;
 
-#[path = "../mk_lib_database_user.rs"]
-mod mk_lib_database_user;
+use crate::mk_lib_database_user;
 
 #[path = "../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;

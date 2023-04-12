@@ -19,6 +19,8 @@ mod mk_lib_logging;
 #[path = "../mk_lib_common_docker.rs"]
 mod mk_lib_common_docker;
 
+use crate::mk_lib_database_user;
+
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_docker.html")]
 struct AdminDockerTemplate;

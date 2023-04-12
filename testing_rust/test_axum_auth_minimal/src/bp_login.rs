@@ -3,8 +3,7 @@ use axum_session::SessionPgPool;
 use axum_session_auth::*;
 use sqlx::PgPool;
 
-#[path = "mk_lib_database_user.rs"]
-mod mk_lib_database_user;
+use crate::mk_lib_database_user;
 
 pub async fn login(
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,

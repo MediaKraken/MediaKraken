@@ -23,6 +23,8 @@ mod mk_lib_common_pagination;
 #[path = "../../mk_lib_database_media_home_media.rs"]
 mod mk_lib_database_media_home_media;
 
+use crate::mk_lib_database_user;
+
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_home_movie.html")]
 struct TemplateMediaHomeContext<'a> {

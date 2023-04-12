@@ -23,8 +23,7 @@ mod mk_lib_common_pagination;
 #[path = "../mk_lib_database_network_share.rs"]
 mod mk_lib_database_network_share;
 
-#[path = "../mk_lib_database_user.rs"]
-mod mk_lib_database_user;
+use crate::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_share.html")]

@@ -23,6 +23,8 @@ mod mk_lib_common_pagination;
 #[path = "../../mk_lib_database_metadata_game.rs"]
 mod mk_lib_database_metadata_game;
 
+use crate::mk_lib_database_user;
+
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_game.html")]
 struct TemplateMetaGameContext<'a> {

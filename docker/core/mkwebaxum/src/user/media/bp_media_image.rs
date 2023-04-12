@@ -20,8 +20,7 @@ mod mk_lib_logging;
 #[path = "../../mk_lib_database_media_images.rs"]
 mod mk_lib_database_media_images;
 
-#[path = "../../mk_lib_database_user.rs"]
-mod mk_lib_database_user;
+use crate::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_image_gallery.html")]

@@ -28,9 +28,9 @@ async fn main() {
 
     let app = Router::new()
         .route_with_tsr("/login", get(login))
-        .route_with_tsr("/login2", get(bp_login::login))
+        .route_with_tsr("/login2", get(bp_login::login).post(bp_login::login))
         .route_with_tsr("/perm", get(perm))
-        .route_with_tsr("/perm2", get(bp_login::perm))
+        .route_with_tsr("/perm2", get(bp_login::perm).post(bp_login::perm))
         .layer(
             AuthSessionLayer::<mk_lib_database_user::User, i64, SessionPgPool, PgPool>::new(Some(
                 pool.clone().into(),
@@ -52,7 +52,7 @@ async fn login(
     "You are logged in as a User please try /perm to check permissions".to_owned()
 }
 
-pub async fn perm(
+async fn perm(
     method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> String {

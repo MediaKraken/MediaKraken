@@ -30,8 +30,7 @@ mod mk_lib_common_pagination;
 #[path = "../../mk_lib_database_metadata_movie.rs"]
 mod mk_lib_database_metadata_movie;
 
-#[path = "../../mk_lib_database_user.rs"]
-mod mk_lib_database_user;
+use crate::mk_lib_database_user;
 
 #[derive(Debug, Deserialize, Serialize)]
 struct TemplateMetaMovieList {

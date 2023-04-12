@@ -23,6 +23,8 @@ mod mk_lib_common_pagination;
 #[path = "../../mk_lib_database_metadata_collection.rs"]
 mod mk_lib_database_metadata_collection;
 
+use crate::mk_lib_database_user;
+
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_movie_collection.html")]
 struct TemplateMediaCollectionContext<'a> {

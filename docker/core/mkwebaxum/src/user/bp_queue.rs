@@ -20,8 +20,7 @@ mod mk_lib_logging;
 #[path = "../mk_lib_database_user_queue.rs"]
 mod mk_lib_database_user_queue;
 
-#[path = "../mk_lib_database_user.rs"]
-mod mk_lib_database_user;
+use crate::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_user/bss_user_queue.html")]
