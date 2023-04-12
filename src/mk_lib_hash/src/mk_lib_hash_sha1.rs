@@ -5,8 +5,7 @@ use sha1::{Digest, Sha1};
 use std::{fs, io};
 use stdext::function_name;
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 pub fn mk_file_hash_sha1(file_to_read: &str) -> io::Result<String> {
     #[cfg(debug_assertions)]

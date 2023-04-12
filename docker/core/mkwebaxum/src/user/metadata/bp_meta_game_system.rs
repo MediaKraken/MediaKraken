@@ -15,8 +15,7 @@ use sqlx::postgres::PgPool;
 use sqlx::postgres::PgRow;
 use stdext::function_name;
 
-#[path = "../../mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 #[path = "../../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;

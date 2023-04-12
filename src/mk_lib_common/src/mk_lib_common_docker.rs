@@ -3,8 +3,7 @@
 // https://github.com/vv9k/docker-api-rs
 // docker-api = { version = "0.12.1", features = ["swarm"] }
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 use docker_api::opts::ContainerListOpts;
 use docker_api::opts::LogsOpts;

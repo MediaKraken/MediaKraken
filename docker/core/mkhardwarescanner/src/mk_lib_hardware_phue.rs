@@ -3,8 +3,7 @@
 // https://github.com/nn1ks/huelib-rs
 // huelib = "0.13.2"
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 use huelib::resource::sensor;
 use huelib::{bridge, Bridge};

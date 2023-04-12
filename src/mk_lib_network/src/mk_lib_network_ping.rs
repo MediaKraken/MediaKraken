@@ -6,8 +6,7 @@ use futures::{Future, Stream};
 use serde_json::json;
 use stdext::function_name;
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 pub async fn mk_lib_network_ping(addr: String) {
     #[cfg(debug_assertions)]

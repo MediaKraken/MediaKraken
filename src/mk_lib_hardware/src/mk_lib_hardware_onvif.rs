@@ -3,8 +3,7 @@
 // https://github.com/lumeohq/onvif-rs
 // onvif = { git = "https://github.com/lumeohq/onvif-rs" }
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 use onvif::discovery;
 use serde_json::json;

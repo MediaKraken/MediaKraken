@@ -16,8 +16,7 @@ use sqlx::postgres::PgPool;
 use stdext::function_name;
 use uuid::Uuid;
 
-#[path = "../mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 #[path = "../mk_lib_database_sync.rs"]
 mod mk_lib_database_sync;

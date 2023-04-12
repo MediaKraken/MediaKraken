@@ -13,8 +13,7 @@ use stdext::function_name;
 #[path = "mk_lib_file.rs"]
 mod mk_lib_file;
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct NMAPShareList {

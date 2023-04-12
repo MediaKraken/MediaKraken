@@ -21,8 +21,7 @@ mod filters {
     }
 }
 
-#[path = "../../mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 #[path = "../../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;

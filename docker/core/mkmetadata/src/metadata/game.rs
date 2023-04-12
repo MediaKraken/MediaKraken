@@ -7,8 +7,7 @@ use std::error::Error;
 use std::path::Path;
 use stdext::function_name;
 
-#[path = "../mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 #[path = "provider/giant_bomb.rs"]
 mod provider_giant_bomb;

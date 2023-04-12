@@ -3,8 +3,7 @@
 // https://github.com/ConnorTroy/smartcast
 // smartcast = "0.1.1"
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 use smartcast::Device;
 use stdext::function_name;

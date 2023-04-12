@@ -7,8 +7,7 @@ use openweathermap::weather;
 use serde_json::json;
 use stdext::function_name;
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 pub async fn network_openweather_current(city: String, country: String, api_key: String) {
     #[cfg(debug_assertions)]

@@ -7,8 +7,7 @@ use std::num::NonZeroU32;
 use stdext::function_name;
 use serde_json::json;
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 // https://docs.rs/governor/0.5.1/governor/struct.Quota.html
 

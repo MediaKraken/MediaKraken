@@ -3,8 +3,7 @@
 // https://github.com/teppah/yeelib_rs
 // yeelib_rs = "0.1.1"
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 use serde_json::json;
 use stdext::function_name;

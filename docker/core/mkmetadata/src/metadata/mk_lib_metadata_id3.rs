@@ -7,8 +7,7 @@ use id3::{Tag, TagLike};
 use serde_json::json;
 use stdext::function_name;
 
-#[path = "../mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 pub async fn mk_lib_metadata_id3_get_tag_info(file_name: String) {
     #[cfg(debug_assertions)]

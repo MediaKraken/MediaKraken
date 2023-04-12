@@ -6,8 +6,7 @@ use stdext::function_name;
 
 // https://github.com/gabrielmagno/crab-dlna
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 use crab_dlna::{
     get_serve_ip, infer_subtitle_from_video, play, Error, MediaStreamingServer, Render, RenderSpec,

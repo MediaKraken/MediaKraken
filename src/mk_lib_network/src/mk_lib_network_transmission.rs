@@ -11,8 +11,7 @@ use transmission_rpc::types::{
 };
 use transmission_rpc::TransClient;
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 pub async fn mk_network_transmission_login() -> Result<transmission_rpc::TransClient> {
     #[cfg(debug_assertions)]

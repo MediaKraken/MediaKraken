@@ -7,8 +7,7 @@ use std::str;
 use stdext::function_name;
 use substring::Substring;
 
-#[path = "../../mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;

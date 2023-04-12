@@ -2,8 +2,7 @@
 
 // https://github.com/LesnyRumcajs/wakey/releases/tag/v0.1.1
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 use serde_json::json;
 use stdext::function_name;

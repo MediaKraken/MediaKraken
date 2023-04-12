@@ -14,8 +14,7 @@ firewall-cmd --permanent --direct --add-rule ipv6 filter INPUT 0 -m pkttype --pk
 firewall-cmd --reload
  */
 
-#[path = "../../mk_lib_logging/src/mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 pub async fn mk_lib_network_find_mediakraken_server() -> Result<String, std::error::Error> {
     #[cfg(debug_assertions)]

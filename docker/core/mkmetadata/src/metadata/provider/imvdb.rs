@@ -7,8 +7,7 @@ use stdext::function_name;
 
 // https://imvdb.com/developers/api
 
-#[path = "../../mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 #[path = "../../mk_lib_network.rs"]
 mod mk_lib_network;

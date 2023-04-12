@@ -10,8 +10,7 @@ use std::net::UdpSocket;
 use std::str;
 use stdext::function_name;
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 pub async fn mk_data_from_url_to_json(
     url: String,

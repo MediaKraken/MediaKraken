@@ -2,8 +2,7 @@
 
 // https://github.com/Hyperchaotic/weectrl
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 use futures::stream::Stream;
 use serde_json::json;

@@ -2,8 +2,7 @@
 
 // https://docs.rs/blake3/1.0.0/blake3/
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 use blake3;
 use serde_json::json;

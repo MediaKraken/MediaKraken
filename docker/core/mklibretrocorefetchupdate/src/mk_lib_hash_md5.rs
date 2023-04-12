@@ -6,8 +6,7 @@ use std::error::Error;
 use std::fs;
 use stdext::function_name;
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 #[path = "mk_lib_file.rs"]
 mod mk_lib_file;

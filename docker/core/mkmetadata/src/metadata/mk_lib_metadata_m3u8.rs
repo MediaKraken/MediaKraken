@@ -6,8 +6,7 @@ use hls_m3u8::MediaPlaylist;
 use serde_json::json;
 use stdext::function_name;
 
-#[path = "../mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 const M3U_HEADER: String = "EXTM3U\n";
 const M3U_LINE_HEADER: String = "EXTINF:";

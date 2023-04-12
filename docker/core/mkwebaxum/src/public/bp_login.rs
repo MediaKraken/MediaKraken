@@ -23,8 +23,7 @@ use sqlx::{
 use stdext::function_name;
 use validator::Validate;
 
-#[path = "../mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 use crate::mk_lib_database_user;
 

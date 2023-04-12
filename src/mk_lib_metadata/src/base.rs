@@ -6,8 +6,7 @@ use std::error::Error;
 use stdext::function_name;
 use torrent_name_parser::Metadata;
 
-#[path = "../mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 #[path = "adult.rs"]
 mod metadata_adult;

@@ -7,5 +7,4 @@ use serde_json::json;
 use soundcloud::Client;
 use stdext::function_name;
 
-#[path = "../../mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;

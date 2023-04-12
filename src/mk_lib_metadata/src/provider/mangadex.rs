@@ -10,8 +10,7 @@ use mangadex::Client;
 use serde_json::json;
 use stdext::function_name;
 
-#[path = "../../mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 pub async fn provider_mangadex_login(
     user_name: String,

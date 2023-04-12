@@ -8,8 +8,7 @@ use std::time::Duration;
 use stdext::function_name;
 use serde_json::json;
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 pub async fn upnp_discover() -> Result<(), rupnp::Error> {
     #[cfg(debug_assertions)]

@@ -14,8 +14,7 @@ use serde_json::json;
 use sqlx::postgres::PgPool;
 use stdext::function_name;
 
-#[path = "../mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 #[path = "../mk_lib_database_user_profile.rs"]
 mod mk_lib_database_user_profile;

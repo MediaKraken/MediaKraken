@@ -14,8 +14,7 @@ use axum_session_auth::*;
 use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use sqlx::postgres::PgPool;
 
-#[path = "../mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 use crate::mk_lib_database_user;
 

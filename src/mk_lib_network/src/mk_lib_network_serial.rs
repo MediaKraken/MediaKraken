@@ -10,8 +10,7 @@ use std::io::{self, Write};
 use std::time::Duration;
 use stdext::function_name;
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 pub async fn serial_port_discover() -> Result<(), std::Error> {
     #[cfg(debug_assertions)]

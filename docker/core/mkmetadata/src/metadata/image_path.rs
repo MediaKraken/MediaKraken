@@ -4,8 +4,7 @@ use rand::{thread_rng, Rng};
 use serde_json::json;
 use stdext::function_name;
 
-#[path = "../mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 pub async fn meta_image_file_path(
     media_type: String,

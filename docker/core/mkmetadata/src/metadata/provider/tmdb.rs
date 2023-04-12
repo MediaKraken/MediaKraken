@@ -9,8 +9,7 @@ use std::path::Path;
 use stdext::function_name;
 use torrent_name_parser::Metadata;
 
-#[path = "../../mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 #[path = "../../mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;

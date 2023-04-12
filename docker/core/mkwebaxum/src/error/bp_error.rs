@@ -11,8 +11,7 @@ use axum::{
 use serde_json::json;
 use stdext::function_name;
 
-#[path = "../mk_lib_logging.rs"]
-mod mk_lib_logging;
+use crate::mk_lib_logging;
 
 // https://docs.rs/http/latest/http/status/struct.StatusCode.html#
 // possible status codes
