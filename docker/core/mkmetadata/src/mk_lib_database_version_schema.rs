@@ -6,8 +6,7 @@ use serde_json::{json, Value};
 use sqlx::{types::Json, types::Uuid};
 use stdext::function_name;
 
-#[path = "mk_lib_database_option_status.rs"]
-mod mk_lib_database_option_status;
+use crate::mk_lib_database_option_status;
 
 pub async fn mk_lib_database_update_schema(
     sqlx_pool: &sqlx::PgPool,

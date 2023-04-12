@@ -9,11 +9,9 @@ use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 use stdext::function_name;
 
-#[path = "mk_lib_common_enum_media_type.rs"]
-mod mk_lib_common_enum_media_type;
+use crate::mk_lib_common_enum_media_type;
 
-#[path = "mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
+use crate::mk_lib_database_metadata_download_queue;
 
 pub async fn mk_lib_database_metadata_exists_person(
     sqlx_pool: &sqlx::PgPool,

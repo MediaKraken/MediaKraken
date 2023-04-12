@@ -30,10 +30,16 @@ use tokio::signal;
 
 #[path = "mk_lib_database.rs"]
 mod mk_lib_database;
+#[path = "mk_lib_database_metadata_download_queue.rs"]
+mod mk_lib_database_metadata_download_queue;
+#[path = "mk_lib_database_option_status.rs"]
+mod mk_lib_database_option_status;
 #[path = "mk_lib_database_user.rs"]
 mod mk_lib_database_user;
 #[path = "mk_lib_database_version.rs"]
 mod mk_lib_database_version;
+#[path = "mk_lib_database_version_schema.rs"]
+mod mk_lib_database_version_schema;
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
@@ -150,6 +156,9 @@ mod bp_user_queue;
 mod bp_user_search;
 #[path = "user/bp_sync.rs"]
 mod bp_user_sync;
+
+#[path = "mk_lib_common_enum_media_type.rs"]
+mod mk_lib_common_enum_media_type;
 
 #[tokio::main]
 async fn main() {

@@ -11,21 +11,17 @@ use torrent_name_parser::Metadata;
 
 use crate::mk_lib_logging;
 
-#[path = "../../mk_lib_common_enum_media_type.rs"]
-mod mk_lib_common_enum_media_type;
+use crate::mk_lib_common_enum_media_type;
 
-#[path = "../image_path.rs"]
-mod image_path;
+use crate::image_path;
 
-#[path = "../../mk_lib_network.rs"]
-mod mk_lib_network;
+use crate::mk_lib_network;
 
-#[path = "../../mk_lib_database_metadata_movie.rs"]
-mod mk_lib_database_metadata_movie;
-#[path = "../../mk_lib_database_metadata_person.rs"]
-mod mk_lib_database_metadata_person;
-#[path = "../../mk_lib_database_metadata_tv.rs"]
-mod mk_lib_database_metadata_tv;
+use crate::mk_lib_database_metadata_movie;
+
+use crate::mk_lib_database_metadata_person;
+
+use crate::mk_lib_database_metadata_tv;
 
 pub async fn provider_tmdb_movie_fetch(
     sqlx_pool: &sqlx::PgPool,

@@ -9,8 +9,7 @@ use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 use stdext::function_name;
 
-#[path = "mk_lib_common_enum_media_type.rs"]
-mod mk_lib_common_enum_media_type;
+use crate::mk_lib_common_enum_media_type;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaHomeMediaList {

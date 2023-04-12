@@ -8,8 +8,7 @@ use serde_json::json;
 
 use crate::mk_lib_logging;
 
-#[path = "mk_lib_network.rs"]
-mod mk_lib_network;
+use crate::mk_lib_network;
 
 pub async fn mk_lib_hardware_roku_discover() {
 

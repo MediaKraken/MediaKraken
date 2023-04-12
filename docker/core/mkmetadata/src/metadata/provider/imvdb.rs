@@ -9,8 +9,7 @@ use stdext::function_name;
 
 use crate::mk_lib_logging;
 
-#[path = "../../mk_lib_network.rs"]
-mod mk_lib_network;
+use crate::mk_lib_network;
 
 const BASE_API_URL: &str = "http://imvdb.com/api/v1";
 

@@ -8,8 +8,7 @@ use stdext::function_name;
 
 use crate::mk_lib_logging;
 
-#[path = "mk_lib_file.rs"]
-mod mk_lib_file;
+use crate::mk_lib_file;
 
 pub fn mk_file_hash_md5(file_to_read: &str) -> Result<String, Box<dyn Error>> {
     #[cfg(debug_assertions)]
