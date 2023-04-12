@@ -18,6 +18,8 @@ fn is_hidden(entry: &DirEntry) -> bool {
 
 #[path = "mk_lib_compression.rs"]
 mod mk_lib_compression;
+#[path = "mk_lib_file.rs"]
+mod mk_lib_file;
 #[path = "mk_lib_hash_crc32.rs"]
 mod mk_lib_hash_crc32;
 #[path = "mk_lib_logging.rs"]

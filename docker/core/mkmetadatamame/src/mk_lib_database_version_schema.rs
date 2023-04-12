@@ -3,7 +3,6 @@
 use crate::mk_lib_logging;
 
 use serde_json::{json, Value};
-use sqlx::{types::Json, types::Uuid};
 use stdext::function_name;
 
 use crate::mk_lib_database_option_status;

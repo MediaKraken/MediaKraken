@@ -3,10 +3,7 @@
 use reqwest::header::CONTENT_TYPE;
 use reqwest::header::USER_AGENT;
 use serde_json::json;
-use std::collections::HashMap;
 use std::io::Cursor;
-use std::io::Read;
-use std::net::UdpSocket;
 use std::str;
 use stdext::function_name;
 

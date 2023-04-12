@@ -3,7 +3,6 @@
 use crate::mk_lib_logging;
 
 use serde_json::json;
-use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
 use stdext::function_name;

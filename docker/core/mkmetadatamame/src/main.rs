@@ -1,17 +1,12 @@
 #![cfg_attr(debug_assertions, allow(dead_code))]
 
-use async_std::path::PathBuf;
-use chrono::prelude::*;
 use quickxml_to_serde::{xml_string_to_json, Config, JsonArray, JsonType, NullValue};
-use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::error::Error;
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
 use std::path::Path;
 use stdext::function_name;
-use tokio::time::{sleep, Duration};
-use uuid::Uuid;
 
 // https://www.progettosnaps.net/download/?tipo=dat_mame&file=/dats/MAME/packs/MAME_Dats_236.7z
 
@@ -27,6 +22,8 @@ mod mk_lib_database_metadata_game_system;
 mod mk_lib_database_option_status;
 #[path = "mk_lib_database_version.rs"]
 mod mk_lib_database_version;
+#[path = "mk_lib_database_version_schema.rs"]
+mod mk_lib_database_version_schema;
 #[path = "mk_lib_file.rs"]
 mod mk_lib_file;
 #[path = "mk_lib_logging.rs"]

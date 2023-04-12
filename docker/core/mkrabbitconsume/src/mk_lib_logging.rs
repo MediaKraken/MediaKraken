@@ -1,7 +1,6 @@
 #![cfg_attr(debug_assertions, allow(dead_code))]
 
 use chrono::prelude::*;
-use std::env;
 
 pub async fn mk_logging_post_elk(
     message_type: &str,

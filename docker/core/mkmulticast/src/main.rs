@@ -3,12 +3,9 @@
 use pnet::datalink;
 use serde_json::json;
 use shiplift::Docker;
-use socket2::{Domain, Protocol, SockAddr, Socket, Type};
+use socket2::{Domain, Protocol, Socket, Type};
 use std::io;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, UdpSocket};
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, Barrier};
-use std::thread::{self, JoinHandle};
 use std::time::Duration;
 use stdext::function_name;
 

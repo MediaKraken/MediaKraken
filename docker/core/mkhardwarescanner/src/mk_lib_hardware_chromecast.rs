@@ -7,7 +7,6 @@ use crate::mk_lib_logging;
 use futures_util::{pin_mut, stream::StreamExt};
 use mdns::Error;
 use serde_json::json;
-use serde_json::json;
 use std::time::Duration;
 use stdext::function_name;
 

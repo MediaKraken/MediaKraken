@@ -52,9 +52,9 @@ STAGE_ONE_IMAGES = {
     # 'AlpineBase3170Py3': ('mkbase_alpinepy3', 'alpine:3.17.0', 'base'),
     'AlpineBaseFFMPEG': ('mkbase_alpine_ffmpeg', 'alpine:3.17.1', 'base'),
     'DebianBase11Py3': ('mkbase_debianpy3', 'python:3.12.0a3-bullseye', 'base'),
-    'RustBase1681': ('mkbase_rust', 'rust:1.68.1', 'base'),
-    'RustBase1681Alpine': ('mkbase_rust_alpine', 'rust:1.68.1-alpine', 'base'),
-    'RustBase1681Debian': ('mkbase_rust_debian', 'rust:1.68.1', 'base'),
+    'RustBase1682': ('mkbase_rust', 'rust:1.68.2', 'base'),
+    'RustBase1682Alpine': ('mkbase_rust_alpine', 'rust:1.68.2-alpine', 'base'),
+    'RustBase1682Debian': ('mkbase_rust_debian', 'rust:1.68.2', 'base'),
 }
 
 STAGE_TWO_IMAGES = {}
@@ -117,7 +117,7 @@ STAGE_CORE_IMAGES = {
 
     # download open library dump of ids in database and insert into downloads - run and exit
     'mkopenlibrarynetfetchbulk': ('mkopenlibrarynetfetchbulk', 'scratch', 'core'),
-    
+
     # database connection pooler
     'mkpgbouncer': ('mkpgbouncer', 'alpine:3.17.1', 'core'),
 
