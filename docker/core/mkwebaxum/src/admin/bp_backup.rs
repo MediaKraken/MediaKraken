@@ -29,6 +29,8 @@ mod filters {
     }
 }
 
+use crate::guard;
+
 use crate::mk_lib_logging;
 
 use crate::mk_lib_database_user;
@@ -53,8 +55,10 @@ struct TemplateBackupContext<'a> {
 
 pub async fn admin_backup(
     Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
+    guard::guard_page_by_user(true, method, auth).await;
     let template = TemplateBackupContext {};
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

@@ -4,7 +4,7 @@ use askama::Template;
 use axum::{
     extract::Path,
     http::{header, HeaderMap, Method, StatusCode},
-    response::{Html, IntoResponse},
+    response::{Html, IntoResponse, Redirect},
     routing::{get, post},
     Extension, Router,
 };
@@ -19,6 +19,8 @@ use crate::mk_lib_logging;
 #[path = "../mk_lib_database_cron.rs"]
 mod mk_lib_database_cron;
 
+use crate::guard;
+
 use crate::mk_lib_database_user;
 
 #[derive(Template)]
@@ -30,8 +32,13 @@ struct TemplateCronContext<'a> {
 
 pub async fn admin_cron(
     Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
+    let security_verified: bool = guard::guard_page_by_user(true, method, auth).await.unwrap();
+    if security_verified == false {
+        Redirect::to("/error/403");
+    }
     let cron_list = mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool)
         .await
         .unwrap();

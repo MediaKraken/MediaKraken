@@ -19,7 +19,6 @@ use ring::digest;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::{
-    postgres::{PgConnectOptions, PgPoolOptions},
     ConnectOptions, PgPool,
 };
 use std::fs::File;
@@ -160,6 +159,9 @@ mod bp_user_sync;
 #[path = "mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;
 
+#[path = "guard.rs"]
+mod guard;
+
 #[tokio::main]
 async fn main() {
     #[cfg(debug_assertions)]
@@ -258,7 +260,6 @@ async fn main() {
             "/public/login",
             get(bp_public_login::public_login).post(bp_public_login::public_login_post),
         )
-        .route_with_tsr("/public/perm", get(bp_public_login::perm))
         // .route_with_tsr(
         //     "/user/internet/flickr",
         //     get(bp_user_internet_bp_inter_flickr::user_inter_flickr),
@@ -463,6 +464,8 @@ async fn main() {
         .layer(SessionLayer::new(session_store))
         // after authsessionlayer so anyone can access
         .route_with_tsr("/about", get(bp_public_about::public_about))
+        .route_with_tsr("/error/401", get(bp_error::general_not_authorized))
+        .route_with_tsr("/error/403", get(bp_error::general_not_administrator))
         .route_with_tsr(
             "/public/forgot_password",
             get(bp_public_forgot_password::public_forgot_password),

@@ -3,23 +3,14 @@
 use askama::Template;
 use axum::{
     extract::Form,
-    extract::Path,
-    http::{header, HeaderMap, Method, StatusCode},
+    http::StatusCode,
     response::{Html, IntoResponse, Redirect},
-    routing::{get, post},
-    Extension, Router,
+    Extension,
 };
-use axum_session::{
-    DatabasePool, Session, SessionConfig, SessionLayer, SessionPgPool, SessionStore,
-};
+use axum_session::SessionPgPool;
 use axum_session_auth::*;
-use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
-use serde::{Deserialize, Serialize};
-use serde_json::json;
-use sqlx::{
-    postgres::{PgConnectOptions, PgPoolOptions},
-    ConnectOptions, PgPool,
-};
+use serde::Deserialize;
+use sqlx::PgPool;
 use stdext::function_name;
 use validator::Validate;
 
@@ -35,31 +26,6 @@ pub async fn public_login() -> impl IntoResponse {
     let template = LoginTemplate {};
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())
-}
-
-pub async fn perm(
-    method: Method,
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
-) -> String {
-    let current_user = auth.current_user.clone().unwrap_or_default();
-    if !Auth::<mk_lib_database_user::User, i64, PgPool>::build([Method::GET], false)
-        .requires(Rights::any([
-            Rights::permission("Category::View"),
-            Rights::permission("Admin::View"),
-        ]))
-        .validate(&current_user, &method, None)
-        .await
-    {
-        return format!(
-            "User {}, Does not have permissions needed to view this page please login",
-            current_user.username
-        );
-    }
-
-    format!(
-        "User has Permissions needed. Here are the Users permissions: {:?}",
-        current_user.permissions
-    )
 }
 
 #[derive(Deserialize)]
