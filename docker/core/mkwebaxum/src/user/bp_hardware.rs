@@ -26,6 +26,7 @@ struct TemplateUserHardwareContext<'a> {
 
 pub async fn user_hardware(
     Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let mut phue_exists: bool = true;
@@ -44,6 +45,7 @@ struct TemplateUserHardwarePhueContext {
 
 pub async fn user_hardware_phue(
     Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let template = TemplateUserHardwarePhueContext {

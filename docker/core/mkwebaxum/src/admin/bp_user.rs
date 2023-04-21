@@ -32,6 +32,7 @@ struct TemplateAdminUserContext<'a> {
 
 pub async fn admin_user(
     Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
 ) -> impl IntoResponse {

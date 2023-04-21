@@ -16,8 +16,7 @@ use stdext::function_name;
 
 use crate::mk_lib_logging;
 
-#[path = "../../mk_lib_database_media_images.rs"]
-mod mk_lib_database_media_images;
+use crate::mk_lib_database_media_images;
 
 use crate::mk_lib_database_user;
 
@@ -27,6 +26,7 @@ struct TemplateUserImageContext {}
 
 pub async fn user_media_image(
     Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let template = TemplateUserImageContext {};

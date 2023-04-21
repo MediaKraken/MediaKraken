@@ -27,6 +27,7 @@ struct TemplateUserHomeContext<'a> {
 
 pub async fn user_home(
     Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let template = TemplateUserHomeContext {

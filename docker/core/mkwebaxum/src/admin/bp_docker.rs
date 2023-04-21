@@ -25,6 +25,8 @@ use crate::mk_lib_database_user;
 struct AdminDockerTemplate;
 
 pub async fn admin_docker(
+    Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let docker_results = mk_lib_common_docker::mk_common_docker_info().await.unwrap();

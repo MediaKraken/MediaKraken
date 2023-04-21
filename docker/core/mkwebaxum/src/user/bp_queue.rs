@@ -16,8 +16,7 @@ use stdext::function_name;
 
 use crate::mk_lib_logging;
 
-#[path = "../mk_lib_database_user_queue.rs"]
-mod mk_lib_database_user_queue;
+use crate::mk_lib_database_user_queue;
 
 use crate::mk_lib_database_user;
 
@@ -26,6 +25,8 @@ use crate::mk_lib_database_user;
 struct UserQueueTemplate;
 
 pub async fn user_queue(
+    Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let template = UserQueueTemplate {};

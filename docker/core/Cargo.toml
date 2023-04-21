@@ -1,0 +1,26 @@
+[workspace]
+
+members = [
+    "mkbroadcast",
+    "mkcron",
+    "mkdownload",
+    "mkgamesdbnetfetchbulk",
+    "mkhardwarecontrol",
+    "mkhardwarescanner",
+    "mkinotify",
+    "mklibretrocorefetchupdate",
+    "mkmediascanner",
+    "mkmetadata",
+    "mkmetadatamame",
+    "mkmulticast",    
+    "mkopenlibrarynetfetchbulk",
+    "mkrabbitconsume",
+    "mkschedulesdirectupdate",
+    "mksharescanner",
+    "mktcpserver",
+    "mktmdbnetfetchbulk",
+    "mktmdbnetfetchupdate",
+    "mktranscode",
+    "mkwebaxum",
+#    "mkwebrocket",
+]

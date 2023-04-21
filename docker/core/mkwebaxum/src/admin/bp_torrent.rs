@@ -34,6 +34,8 @@ use crate::mk_lib_database_user;
 struct AdminTorrentTemplate;
 
 pub async fn admin_torrent(
+    Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let mut transmission_client = TransClient::new("mkstack_transmission".parse().unwrap());

@@ -25,6 +25,8 @@ struct UserInternetYoutubeTemplate<'a> {
 }
 
 pub async fn user_inter_youtube(
+    Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let template = UserInternetYoutubeTemplate {};
@@ -37,6 +39,8 @@ pub async fn user_inter_youtube(
 struct UserInternetYoutubeDetailTemplate;
 
 pub async fn user_inter_youtube_detail(
+    Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let template = UserInternetYoutubeDetailTemplate {};

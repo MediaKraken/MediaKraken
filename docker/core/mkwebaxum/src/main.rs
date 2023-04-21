@@ -3,13 +3,15 @@
 #[macro_use]
 extern crate lazy_static;
 
+use axum::http::{Method, Uri};
 use axum::{
     http::StatusCode,
     response::IntoResponse,
     routing::{get, post},
-    Extension, Json, Router,
+    BoxError, Extension, Json, Router,
 };
 use axum_extra::routing::RouterExt;
+use axum_handle_error_extract::HandleErrorLayer;
 use axum_session::{
     DatabasePool, Key, Session, SessionConfig, SessionLayer, SessionPgPool, SessionStore,
 };
@@ -18,26 +20,52 @@ use rcgen::generate_simple_self_signed;
 use ring::digest;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sqlx::{
-    ConnectOptions, PgPool,
-};
+use sqlx::{ConnectOptions, PgPool};
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
+use std::time::Duration;
 use stdext::function_name;
 use tokio::signal;
+use tower::{timeout::error::Elapsed, ServiceBuilder};
 
-#[path = "mk_lib_database.rs"]
+#[path = "database/mk_lib_database.rs"]
 mod mk_lib_database;
-#[path = "mk_lib_database_metadata_download_queue.rs"]
+#[path = "database/mk_lib_database_cron.rs"]
+mod mk_lib_database_cron;
+#[path = "database/mk_lib_database_game_servers.rs"]
+mod mk_lib_database_game_servers;
+#[path = "database/mk_lib_database_library.rs"]
+mod mk_lib_database_library;
+#[path = "database/mk_lib_database_media.rs"]
+mod mk_lib_database_media;
+#[path = "database/mk_lib_database_media_images.rs"]
+mod mk_lib_database_media_images;
+#[path = "database/mk_lib_database_metadata_download_queue.rs"]
 mod mk_lib_database_metadata_download_queue;
-#[path = "mk_lib_database_option_status.rs"]
+#[path = "database/mk_lib_database_metadata_movie.rs"]
+mod mk_lib_database_metadata_movie;
+#[path = "database/mk_lib_database_metadata_person.rs"]
+mod mk_lib_database_metadata_person;
+#[path = "database/mk_lib_database_network_share.rs"]
+mod mk_lib_database_network_share;
+#[path = "database/mk_lib_database_option_status.rs"]
 mod mk_lib_database_option_status;
-#[path = "mk_lib_database_user.rs"]
+#[path = "database/mk_lib_database_postgresql.rs"]
+mod mk_lib_database_postgresql;
+#[path = "database/mk_lib_database_search.rs"]
+mod mk_lib_database_search;
+#[path = "database/mk_lib_database_sync.rs"]
+mod mk_lib_database_sync;
+#[path = "database/mk_lib_database_user.rs"]
 mod mk_lib_database_user;
-#[path = "mk_lib_database_version.rs"]
+#[path = "database/mk_lib_database_user_profile.rs"]
+mod mk_lib_database_user_profile;
+#[path = "database/mk_lib_database_user_queue.rs"]
+mod mk_lib_database_user_queue;
+#[path = "database/mk_lib_database_version.rs"]
 mod mk_lib_database_version;
-#[path = "mk_lib_database_version_schema.rs"]
+#[path = "database/mk_lib_database_version_schema.rs"]
 mod mk_lib_database_version_schema;
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -159,6 +187,9 @@ mod bp_user_sync;
 #[path = "mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;
 
+#[path = "error_handling.rs"]
+mod error_handling;
+
 #[path = "guard.rs"]
 mod guard;
 
@@ -172,6 +203,7 @@ async fn main() {
             .unwrap();
     }
 
+    // TODO this needs to move to another container that doesn't start multiples
     // check for and create ssl certs if needed
     if Path::new("/mediakraken/certs/cacert.pem").exists() == false {
         #[cfg(debug_assertions)]
@@ -466,6 +498,7 @@ async fn main() {
         .route_with_tsr("/about", get(bp_public_about::public_about))
         .route_with_tsr("/error/401", get(bp_error::general_not_authorized))
         .route_with_tsr("/error/403", get(bp_error::general_not_administrator))
+        .route_with_tsr("/error/500", get(bp_error::general_error))
         .route_with_tsr(
             "/public/forgot_password",
             get(bp_public_forgot_password::public_forgot_password),
@@ -475,6 +508,11 @@ async fn main() {
             get(bp_public_register::public_register).post(bp_public_register::public_register_post),
         )
         .layer(Extension(sqlx_pool));
+    // .layer(
+    //     ServiceBuilder::new()
+    //         .layer(HandleErrorLayer::new(handle_error))
+    //         .timeout(Duration::from_secs(10))
+    // );
     // add a fallback service for handling routes to unknown paths
     let app = app.fallback(bp_error::general_not_found);
 
@@ -486,18 +524,26 @@ async fn main() {
         .unwrap();
 
     // setup rocket
-    //     .register(
-    //         "/",
     //         catchers![
     //             bp_error::general_not_authorized,        401
     //             bp_error::general_not_administrator,     403
     //             bp_error::general_security,              401?
     //             bp_error::default_catcher,               500
-    //         ],
-    //     )
-    //     .manage(users)
-    //    Ok(())
 }
+
+// async fn handle_error(method: Method, uri: Uri, error: BoxError) -> impl IntoResponse {
+//     if error.is::<Elapsed>() {
+//         (
+//             StatusCode::REQUEST_TIMEOUT,
+//             format!("{} {} took too long", method, uri),
+//         )
+//     } else {
+//         (
+//             StatusCode::INTERNAL_SERVER_ERROR,
+//             format!("{} {} failed: {}", method, uri, error),
+//         )
+//     }
+// }
 
 async fn shutdown_signal() {
     let ctrl_c = async {

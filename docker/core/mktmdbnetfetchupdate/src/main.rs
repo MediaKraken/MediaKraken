@@ -14,19 +14,19 @@ mod mk_lib_common;
 mod mk_lib_common_enum_media_type;
 #[path = "mk_lib_compression.rs"]
 mod mk_lib_compression;
-#[path = "mk_lib_database.rs"]
+#[path = "database/mk_lib_database.rs"]
 mod mk_lib_database;
-#[path = "mk_lib_database_metadata_download_queue.rs"]
+#[path = "database/mk_lib_database_metadata_download_queue.rs"]
 mod mk_lib_database_metadata_download_queue;
-#[path = "mk_lib_database_metadata_movie.rs"]
+#[path = "database/mk_lib_database_metadata_movie.rs"]
 mod mk_lib_database_metadata_movie;
-#[path = "mk_lib_database_metadata_tv.rs"]
+#[path = "database/mk_lib_database_metadata_tv.rs"]
 mod mk_lib_database_metadata_tv;
-#[path = "mk_lib_database_option_status.rs"]
+#[path = "database/mk_lib_database_option_status.rs"]
 mod mk_lib_database_option_status;
-#[path = "mk_lib_database_version.rs"]
+#[path = "database/mk_lib_database_version.rs"]
 mod mk_lib_database_version;
-#[path = "mk_lib_database_version_schema.rs"]
+#[path = "database/mk_lib_database_version_schema.rs"]
 mod mk_lib_database_version_schema;
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;

@@ -7,13 +7,13 @@ use std::error::Error;
 use stdext::function_name;
 use tokio::time::{sleep, Duration};
 
-#[path = "mk_lib_database.rs"]
+#[path = "database/mk_lib_database.rs"]
 mod mk_lib_database;
-#[path = "mk_lib_database_option_status.rs"]
+#[path = "database/mk_lib_database_option_status.rs"]
 mod mk_lib_database_option_status;
-#[path = "mk_lib_database_version.rs"]
+#[path = "database/mk_lib_database_version.rs"]
 mod mk_lib_database_version;
-#[path = "mk_lib_database_version_schema.rs"]
+#[path = "database/mk_lib_database_version_schema.rs"]
 mod mk_lib_database_version_schema;
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;

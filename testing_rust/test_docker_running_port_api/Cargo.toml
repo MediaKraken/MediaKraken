@@ -1,5 +1,5 @@
 [package]
-name = "myapp"
+name = "mktestdockerapirunningapiport"
 version = "0.0.1"
 edition = "2021"
 
@@ -10,8 +10,8 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-shiplift = "0.7"
-tokio = { version = "1.6.0", features = ["full"] }
+docker-api = { version = "0.13", features = ["swarm"] }
+tokio = { version = "1.27.0", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"

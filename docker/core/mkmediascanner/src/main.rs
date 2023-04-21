@@ -20,25 +20,25 @@ use uuid::Uuid;
 mod mk_lib_common_enum_media_type;
 #[path = "mk_lib_common_media_extension.rs"]
 mod mk_lib_common_media_extension;
-#[path = "mk_lib_database.rs"]
+#[path = "database/mk_lib_database.rs"]
 mod mk_lib_database;
-#[path = "mk_lib_database_library.rs"]
+#[path = "database/mk_lib_database_library.rs"]
 mod mk_lib_database_library;
-#[path = "mk_lib_database_media.rs"]
+#[path = "database/mk_lib_database_media.rs"]
 mod mk_lib_database_media;
-#[path = "mk_lib_database_media_movie.rs"]
+#[path = "database/mk_lib_database_media_movie.rs"]
 mod mk_lib_database_media_movie;
-#[path = "mk_lib_database_media_tv.rs"]
+#[path = "database/mk_lib_database_media_tv.rs"]
 mod mk_lib_database_media_tv;
-#[path = "mk_lib_database_metadata_download_queue.rs"]
+#[path = "database/mk_lib_database_metadata_download_queue.rs"]
 mod mk_lib_database_metadata_download_queue;
-#[path = "mk_lib_database_notification.rs"]
+#[path = "database/mk_lib_database_notification.rs"]
 mod mk_lib_database_notification;
-#[path = "mk_lib_database_option_status.rs"]
+#[path = "database/mk_lib_database_option_status.rs"]
 mod mk_lib_database_option_status;
-#[path = "mk_lib_database_version.rs"]
+#[path = "database/mk_lib_database_version.rs"]
 mod mk_lib_database_version;
-#[path = "mk_lib_database_version_schema.rs"]
+#[path = "database/mk_lib_database_version_schema.rs"]
 mod mk_lib_database_version_schema;
 #[path = "mk_lib_file.rs"]
 mod mk_lib_file;

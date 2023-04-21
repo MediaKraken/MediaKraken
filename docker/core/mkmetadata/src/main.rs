@@ -10,17 +10,25 @@ use std::process::Command;
 use stdext::function_name;
 use tokio::time::{sleep, Duration};
 
-#[path = "mk_lib_database.rs"]
+#[path = "database/mk_lib_database.rs"]
 mod mk_lib_database;
-#[path = "mk_lib_database_media.rs"]
+#[path = "database/mk_lib_database_media.rs"]
 mod mk_lib_database_media;
-#[path = "mk_lib_database_metadata_download_queue.rs"]
+#[path = "database/mk_lib_database_metadata_download_queue.rs"]
 mod mk_lib_database_metadata_download_queue;
-#[path = "mk_lib_database_option_status.rs"]
+#[path = "database/mk_lib_database_metadata_game.rs"]
+mod mk_lib_database_metadata_game;
+#[path = "database/mk_lib_database_metadata_movie.rs"]
+mod mk_lib_database_metadata_movie;
+#[path = "database/mk_lib_database_metadata_person.rs"]
+mod mk_lib_database_metadata_person;
+#[path = "database/mk_lib_database_metadata_tv.rs"]
+mod mk_lib_database_metadata_tv;
+#[path = "database/mk_lib_database_option_status.rs"]
 mod mk_lib_database_option_status;
-#[path = "mk_lib_database_version.rs"]
+#[path = "database/mk_lib_database_version.rs"]
 mod mk_lib_database_version;
-#[path = "mk_lib_database_version_schema.rs"]
+#[path = "database/mk_lib_database_version_schema.rs"]
 mod mk_lib_database_version_schema;
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -32,6 +40,11 @@ mod metadata_identification;
 
 #[path = "metadata/base.rs"]
 mod metadata_base;
+
+#[path = "metadata/image_path.rs"]
+mod image_path;
+
+mod mk_lib_common_enum_media_type;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {

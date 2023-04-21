@@ -38,11 +38,9 @@ mod metadata_sports;
 #[path = "metadata/tv.rs"]
 mod metadata_tv;
 
-#[path = "mk_lib_database_metadata_game.rs"]
-mod mk_lib_database_metadata_game;
+use crate::mk_lib_database_metadata_game;
 
-#[path = "mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
+use crate::mk_lib_database_metadata_download_queue;
 use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 
 pub async fn metadata_identification(

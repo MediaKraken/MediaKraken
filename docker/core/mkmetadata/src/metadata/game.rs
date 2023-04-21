@@ -15,12 +15,10 @@ mod provider_giant_bomb;
 #[path = "provider/thegamesdb.rs"]
 mod mk_provider_thegamesdb;
 
-#[path = "../mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
+use crate::mk_lib_database_metadata_download_queue;
 use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 
-#[path = "../mk_lib_database_metadata_game.rs"]
-mod mk_lib_database_metadata_game;
+use crate::mk_lib_database_metadata_game;
 
 #[path = "../mk_lib_hash_sha1.rs"]
 mod mk_lib_hash_sha1;

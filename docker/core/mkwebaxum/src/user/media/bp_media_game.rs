@@ -19,8 +19,7 @@ use crate::mk_lib_logging;
 #[path = "../../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;
 
-#[path = "../../mk_lib_database_media_game.rs"]
-mod mk_lib_database_media_game;
+use crate::mk_lib_database_media_game;
 
 use crate::mk_lib_database_user;
 
@@ -35,6 +34,7 @@ struct TemplateMediaGameContext<'a> {
 
 pub async fn user_media_game(
     Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
 ) -> impl IntoResponse {
@@ -81,6 +81,7 @@ struct TemplateMediaGameDetailContext {
 
 pub async fn user_media_game_detail(
     Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
 ) -> impl IntoResponse {

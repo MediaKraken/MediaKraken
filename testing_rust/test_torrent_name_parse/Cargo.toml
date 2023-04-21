@@ -1,5 +1,5 @@
 [package]
-name = "mkmetadata"
+name = "mktesttorrentnameparse"
 version = "0.0.1"
 edition = "2021"
 

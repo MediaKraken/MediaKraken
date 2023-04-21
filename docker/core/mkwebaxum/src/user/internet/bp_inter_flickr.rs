@@ -25,6 +25,8 @@ struct TemplateUserInternetFlickr<'a> {
 }
 
 pub async fn user_inter_flickr(
+    Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let template = TemplateUserInternetFlickr {};
@@ -37,6 +39,8 @@ pub async fn user_inter_flickr(
 struct TemplateUserInternetFlickrDetail;
 
 pub async fn user_inter_flickr_detail(
+    Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let template = TemplateUserInternetFlickrDetail {};

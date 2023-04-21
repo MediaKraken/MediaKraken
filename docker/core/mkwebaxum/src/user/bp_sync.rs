@@ -18,8 +18,7 @@ use uuid::Uuid;
 
 use crate::mk_lib_logging;
 
-#[path = "../mk_lib_database_sync.rs"]
-mod mk_lib_database_sync;
+use crate::mk_lib_database_sync;
 
 use crate::mk_lib_database_user;
 
@@ -37,6 +36,7 @@ struct TemplateSyncContext<'a> {
 
 pub async fn user_sync(
     Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
 ) -> impl IntoResponse {

@@ -8,8 +8,7 @@ use stdext::function_name;
 
 use crate::mk_lib_logging;
 
-#[path = "../mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
+use crate::mk_lib_database_metadata_download_queue;
 use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 
 #[path = "provider/isbndb.rs"]

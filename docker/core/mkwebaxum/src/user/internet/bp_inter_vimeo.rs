@@ -25,6 +25,8 @@ struct UserInternetVimeoTemplate<'a> {
 }
 
 pub async fn user_inter_vimeo(
+    Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let template = UserInternetVimeoTemplate {};
@@ -37,6 +39,8 @@ pub async fn user_inter_vimeo(
 struct UserInternetVimeoDetailTemplate;
 
 pub async fn user_inter_vimeo_detail(
+    Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let template = UserInternetVimeoDetailTemplate {};

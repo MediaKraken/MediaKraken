@@ -28,8 +28,7 @@ use crate::mk_lib_logging;
 #[path = "../../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;
 
-#[path = "../../mk_lib_database_media_tv.rs"]
-mod mk_lib_database_media_tv;
+use crate::mk_lib_database_media_tv;
 
 use crate::mk_lib_database_user;
 
@@ -44,6 +43,7 @@ struct TemplateMediaTVContext<'a> {
 
 pub async fn user_media_tv(
     Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
 ) -> impl IntoResponse {
@@ -90,6 +90,7 @@ struct TemplateMediaTVDetailContext {
 
 pub async fn user_media_tv_detail(
     Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
 ) -> impl IntoResponse {

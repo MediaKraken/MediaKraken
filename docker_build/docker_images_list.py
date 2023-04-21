@@ -52,9 +52,9 @@ STAGE_ONE_IMAGES = {
     # 'AlpineBase3170Py3': ('mkbase_alpinepy3', 'alpine:3.17.0', 'base'),
     'AlpineBaseFFMPEG': ('mkbase_alpine_ffmpeg', 'alpine:3.17.1', 'base'),
     'DebianBase11Py3': ('mkbase_debianpy3', 'python:3.12.0a3-bullseye', 'base'),
-    'RustBase1682': ('mkbase_rust', 'rust:1.68.2', 'base'),
-    'RustBase1682Alpine': ('mkbase_rust_alpine', 'rust:1.68.2-alpine', 'base'),
-    'RustBase1682Debian': ('mkbase_rust_debian', 'rust:1.68.2', 'base'),
+    'RustBase': ('mkbase_rust', 'rust:1.69.0', 'base'),
+    'RustBaseAlpine': ('mkbase_rust_alpine', 'rust:1.69.0-alpine', 'base'),
+    'RustBaseDebian': ('mkbase_rust_debian', 'rust:1.69.0', 'base'),
 }
 
 STAGE_TWO_IMAGES = {}
@@ -126,6 +126,9 @@ STAGE_CORE_IMAGES = {
 
     # amqp service (rabbitmq)
     'mkrabbitmq': ('mkrabbitmq', 'alpine:3.11', 'core'),
+
+    # redis
+    'mkredis': ('mkredis', 'alpine:3.17', 'core'),
 
     # schedulesdirect update
     'mkschedulesdirectupdate': ('mkschedulesdirectupdate', 'busybox:1.36.0-uclibc', 'core'),

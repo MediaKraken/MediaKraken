@@ -19,14 +19,11 @@ use stdext::function_name;
 
 use crate::mk_lib_logging;
 
-#[path = "../mk_lib_database_media.rs"]
-mod mk_lib_database_media;
+use crate::mk_lib_database_media;
 
-#[path = "../mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
+use crate::mk_lib_database_metadata_download_queue;
 
-#[path = "../mk_lib_database_option_status.rs"]
-mod mk_lib_database_option_status;
+use crate::mk_lib_database_option_status;
 
 use crate::mk_lib_database_user;
 
@@ -67,6 +64,7 @@ struct TemplateHomeContext<'a> {
 
 pub async fn admin_home(
     Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let user_list = mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool, 0, 9999)

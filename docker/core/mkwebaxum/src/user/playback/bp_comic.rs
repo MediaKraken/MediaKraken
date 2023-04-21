@@ -23,6 +23,8 @@ use crate::mk_lib_database_user;
 struct UserPlaybackComicTemplate;
 
 pub async fn user_playback_comic(
+    Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let template = UserPlaybackComicTemplate {};

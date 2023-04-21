@@ -18,11 +18,9 @@ use stdext::function_name;
 
 use crate::mk_lib_logging;
 
-#[path = "../mk_lib_database_version.rs"]
-mod mk_lib_database_version;
+use crate::mk_lib_database_version;
 
-#[path = "../mk_lib_database_postgresql.rs"]
-mod mk_lib_database_postgresql;
+use crate::mk_lib_database_postgresql;
 
 use crate::mk_lib_database_user;
 
@@ -37,6 +35,7 @@ struct AdminDBStatsTemplate<'a> {
 
 pub async fn admin_database(
     Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let pg_version = mk_lib_database_version::mk_lib_database_postgresql_version(&sqlx_pool)
