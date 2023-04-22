@@ -54,7 +54,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             std::module_path!(),
                             json!({ "msg body": json_message }),
                         )
-                        .await;
+                        .await
+                        .unwrap();
                     }
                     if json_message["Type"] == "Hardware" {
                         if json_message["Subtype"] == "Lights" {

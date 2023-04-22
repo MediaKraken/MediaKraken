@@ -287,11 +287,7 @@ async fn main() {
         .route_with_tsr("/admin/settings", get(bp_admin_settings::admin_settings))
         .route_with_tsr("/admin/torrent", get(bp_admin_torrent::admin_torrent))
         //.route_with_tsr("/admin/user/:page", get(bp_admin_user::admin_user))
-        .route_with_tsr("/logout", get(bp_public_logout::public_logout))
-        .route_with_tsr(
-            "/public/login",
-            get(bp_public_login::public_login).post(bp_public_login::public_login_post),
-        )
+        // TODO middleware for must be admin
         // .route_with_tsr(
         //     "/user/internet/flickr",
         //     get(bp_user_internet_bp_inter_flickr::user_inter_flickr),
@@ -486,6 +482,12 @@ async fn main() {
         .route_with_tsr("/user/queue", get(bp_user_queue::user_queue))
         .route_with_tsr("/user/search", get(bp_user_search::user_search))
         .route_with_tsr("/user/sync", get(bp_user_sync::user_sync))
+        // TODO middleware for must be user
+        .route_with_tsr("/logout", get(bp_public_logout::public_logout))
+        .route_with_tsr(
+            "/public/login",
+            get(bp_public_login::public_login).post(bp_public_login::public_login_post),
+        )
         .nest("/static", axum_static::static_router("static"))
         .layer(
             AuthSessionLayer::<mk_lib_database_user::User, i64, SessionPgPool, PgPool>::new(Some(

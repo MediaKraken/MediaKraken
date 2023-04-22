@@ -15,7 +15,8 @@ pub async fn mk_read_file_data(file_to_read: &str) -> io::Result<String> {
             std::module_path!(),
             json!({ "Function": function_name!() }),
         )
-        .await;
+        .await
+        .unwrap();
     }
     let buffer = std::fs::read_to_string(file_to_read).expect("Unable to read file");
     Ok(buffer)
@@ -28,7 +29,8 @@ pub async fn mk_read_file_data_u8(file_to_read: &str) -> io::Result<Vec<u8>> {
             std::module_path!(),
             json!({ "Function": function_name!() }),
         )
-        .await;
+        .await
+        .unwrap();
     }
     let buffer = std::fs::read(file_to_read).expect("Unable to read file");
     Ok(buffer)
@@ -41,21 +43,14 @@ pub async fn mk_save_file_data(file_data: &str, file_to_save: &str) -> io::Resul
             std::module_path!(),
             json!({ "Function": function_name!() }),
         )
-        .await;
+        .await
+        .unwrap();
     }
     std::fs::write(file_to_save, file_data).expect("Unable to read file");
     Ok(())
 }
 
-pub async fn mk_file_is_hidden(entry: &DirEntry) -> bool {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await;
-    }
+pub fn mk_file_is_hidden(entry: &DirEntry) -> bool {
     entry
         .file_name()
         .to_str()
@@ -76,7 +71,8 @@ pub async fn mk_directory_walk(dir_path: String) -> Result<Vec<String>, Box<dyn 
             std::module_path!(),
             json!({ "Function": function_name!() }),
         )
-        .await;
+        .await
+        .unwrap();
     }
     let mut file_list: Vec<String> = Vec::new();
     let walker = WalkDir::new(dir_path).into_iter();
@@ -88,7 +84,8 @@ pub async fn mk_directory_walk(dir_path: String) -> Result<Vec<String>, Box<dyn 
                 std::module_path!(),
                 json!({ "walk file_name": entry.path().display().to_string() }),
             )
-            .await;
+            .await
+            .unwrap();
         }
         file_list.push(entry.path().display().to_string());
     }

@@ -53,7 +53,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await.unwrap();
     }
 
     let fetch_date: String = "01_18_2023".to_string();

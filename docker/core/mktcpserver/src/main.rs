@@ -54,7 +54,7 @@ async fn main() -> io::Result<()> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await.unwrap();
     }
 
     let options: Options = argh::from_env();

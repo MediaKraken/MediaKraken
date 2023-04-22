@@ -4,7 +4,6 @@
 // apt install pkg-config libudev-dev
 
 use serde_json::json;
-use serde_json::json;
 use serialport::{available_ports, DataBits, SerialPortType, StopBits};
 use std::io::{self, Write};
 use std::time::Duration;

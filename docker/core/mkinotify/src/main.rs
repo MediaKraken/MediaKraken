@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await.unwrap();
     }
 
     // connect to db and do a version check
@@ -78,7 +78,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             std::module_path!(),
                             json!({ "Directory created": event.name }),
                         )
-                        .await;
+                        .await
+                        .unwrap();
                     }
                 } else {
                     rabbit_exchange.publish(Publish::with_properties(
@@ -94,7 +95,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             std::module_path!(),
                             json!({ "File created": event.name }),
                         )
-                        .await;
+                        .await
+                        .unwrap();
                     }
                 }
             } else if event.mask.contains(EventMask::DELETE) {
@@ -112,7 +114,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             std::module_path!(),
                             json!({ "Directory deleted": event.name }),
                         )
-                        .await;
+                        .await
+                        .unwrap();
                     }
                 } else {
                     rabbit_exchange.publish(Publish::with_properties(
@@ -128,7 +131,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             std::module_path!(),
                             json!({ "File deleted": event.name }),
                         )
-                        .await;
+                        .await
+                        .unwrap();
                     }
                 }
             } else if event.mask.contains(EventMask::MODIFY) {
@@ -146,7 +150,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             std::module_path!(),
                             json!({ "Directory modified": event.name }),
                         )
-                        .await;
+                        .await
+                        .unwrap();
                     }
                 } else {
                     rabbit_exchange.publish(Publish::with_properties(
@@ -162,7 +167,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             std::module_path!(),
                             json!({ "File modified": event.name }),
                         )
-                        .await;
+                        .await
+                        .unwrap();
                     }
                 }
             }

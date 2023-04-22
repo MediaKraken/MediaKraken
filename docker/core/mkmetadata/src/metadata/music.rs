@@ -8,7 +8,8 @@ use stdext::function_name;
 
 use crate::mk_lib_logging;
 
-use crate::mk_lib_database_metadata_download_queue;
+#[path = "../mk_lib_database_metadata_download_queue.rs"]
+mod mk_lib_database_metadata_download_queue;
 use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 
 #[path = "provider/musicbrainz.rs"]

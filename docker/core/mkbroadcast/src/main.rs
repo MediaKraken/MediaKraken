@@ -1,13 +1,11 @@
 #![cfg_attr(debug_assertions, allow(dead_code))]
 
-use pnet::datalink::Channel::Ethernet;
-use pnet::datalink::{self, NetworkInterface};
+use pnet::datalink::{self};
 use serde_json::json;
 use shiplift::Docker;
 use std::io;
 use std::net::IpAddr;
 use std::str;
-use stdext::function_name;
 use tokio::net::UdpSocket;
 
 #[path = "mk_lib_logging.rs"]

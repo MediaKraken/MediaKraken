@@ -10,7 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-inline-python = "0.6.0"
+inline-python = "0.10.0"
 
 [dev-dependencies]
 tokio-test = "*"

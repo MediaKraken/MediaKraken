@@ -10,7 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-pyo3 = { version = "0.13.2", default-features = true }
+pyo3 = { version = "0.18.3", default-features = true }
 
 [dev-dependencies]
 tokio-test = "*"

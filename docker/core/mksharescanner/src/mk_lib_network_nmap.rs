@@ -66,7 +66,7 @@ pub async fn mk_network_share_scan(
             .unwrap();
         let share_data = NMAPShareList {
             mm_share_type: "smb".to_string(),
-            mm_share_xml: mk_lib_file::mk_read_file_data("scan.xml").unwrap(),
+            mm_share_xml: mk_lib_file::mk_read_file_data("scan.xml").await.unwrap(),
         };
         vec_share.push(share_data);
         // scan for nfs
@@ -86,7 +86,7 @@ pub async fn mk_network_share_scan(
             .unwrap();
         let share_data = NMAPShareList {
             mm_share_type: "nfs".to_string(),
-            mm_share_xml: mk_lib_file::mk_read_file_data("scan.xml").unwrap(),
+            mm_share_xml: mk_lib_file::mk_read_file_data("scan.xml").await.unwrap(),
         };
         vec_share.push(share_data);
     }

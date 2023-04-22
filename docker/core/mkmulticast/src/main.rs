@@ -5,9 +5,8 @@ use serde_json::json;
 use shiplift::Docker;
 use socket2::{Domain, Protocol, Socket, Type};
 use std::io;
-use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, UdpSocket};
+use std::net::{IpAddr, Ipv4Addr, SocketAddr, UdpSocket};
 use std::time::Duration;
-use stdext::function_name;
 
 #[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
@@ -45,7 +44,7 @@ async fn main() {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await.unwrap();
     }
 
     let mut mediakraken_ip: String = "127.0.0.1".to_string();
@@ -104,7 +103,7 @@ async fn main() {
         Err(e) => eprintln!("Error: {}", e),
     }
     let response = format!("{}:{}", mediakraken_ip, host_port);
-    let mut socket = UdpSocket::bind("0.0.0.0:8888").unwrap();
+    let socket = UdpSocket::bind("0.0.0.0:8888").unwrap();
     let mut buf = [0u8; 65535];
     let multi_addr = Ipv4Addr::new(234, 2, 2, 2);
     let inter = Ipv4Addr::new(0, 0, 0, 0);

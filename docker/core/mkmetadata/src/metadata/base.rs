@@ -48,7 +48,8 @@ mod metadata_guessit;
 #[path = "../mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;
 
-use crate::mk_lib_database_metadata_download_queue;
+#[path = "../mk_lib_database_metadata_download_queue.rs"]
+mod mk_lib_database_metadata_download_queue;
 use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 
 pub async fn metadata_process(

@@ -15,7 +15,7 @@ mod provider_anidb;
 #[path = "provider/tmdb.rs"]
 mod provider_tmdb;
 
-#[path = "../database/mk_lib_database_metadata_download_queue.rs"]
+#[path = "../mk_lib_database_metadata_download_queue.rs"]
 mod mk_lib_database_metadata_download_queue;
 use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 
