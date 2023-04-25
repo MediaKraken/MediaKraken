@@ -7,16 +7,12 @@ use serde_json::json;
 use stdext::function_name;
 use tokio::time::{sleep, Duration};
 
-#[path = "mk_lib_hardware_chromecast.rs"]
 mod mk_lib_hardware_chromecast;
 
-#[path = "mk_lib_hardware_phue.rs"]
 mod mk_lib_hardware_phue;
 
-#[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
-#[path = "mk_lib_network_dlna.rs"]
 mod mk_lib_network_dlna;
 
 #[tokio::main]

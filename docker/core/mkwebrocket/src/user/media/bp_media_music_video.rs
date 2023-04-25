@@ -15,7 +15,7 @@ mod mk_lib_logging;
 mod mk_lib_common_pagination;
 
 #[path = "../../mk_lib_database_media_music_video.rs"]
-mod mk_lib_database_media_music_video;
+mod database::mk_lib_database_media_music_video;
 
 #[derive(Serialize)]
 struct TemplateMediaMusicVideoContext {
@@ -31,7 +31,7 @@ pub async fn user_media_music_video(
 ) -> Template {
     let db_offset: i64 = (page * 30) - 30;
     let total_pages: i64 =
-        mk_lib_database_media_music_video::mk_lib_database_media_music_video_count(
+        database::mk_lib_database_media_music_video::mk_lib_database_media_music_video_count(
             &sqlx_pool,
             String::new(),
         )
@@ -45,7 +45,7 @@ pub async fn user_media_music_video(
     .await
     .unwrap();
     let music_video_list =
-        mk_lib_database_media_music_video::mk_lib_database_media_music_video_read(
+        database::mk_lib_database_media_music_video::mk_lib_database_media_music_video_read(
             &sqlx_pool,
             String::new(),
             db_offset,

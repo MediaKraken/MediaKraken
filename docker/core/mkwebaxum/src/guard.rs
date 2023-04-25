@@ -3,9 +3,9 @@
 use axum::http::Method;
 use axum_session::SessionPgPool;
 use axum_session_auth::*;
+use serde_json::json;
 use sqlx::PgPool;
 use stdext::function_name;
-use serde_json::json;
 
 use crate::bp_error;
 
@@ -13,7 +13,7 @@ use crate::error_handling;
 
 use crate::mk_lib_logging;
 
-use crate::mk_lib_database_user;
+use crate::database::mk_lib_database_user;
 
 pub async fn guard_page_by_user(
     user_admin: bool,
@@ -32,9 +32,7 @@ pub async fn guard_page_by_user(
     let current_user = auth.current_user.clone().unwrap_or_default();
     if user_admin == true {
         if !Auth::<mk_lib_database_user::User, i64, PgPool>::build([Method::GET], false)
-            .requires(Rights::any([
-                Rights::permission("Admin::View"),
-            ]))
+            .requires(Rights::any([Rights::permission("Admin::View")]))
             .validate(&current_user, &method, None)
             .await
         {

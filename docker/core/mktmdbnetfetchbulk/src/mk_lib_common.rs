@@ -1,5 +1,4 @@
 #![cfg_attr(debug_assertions, allow(dead_code))]
-#![allow(unused)]
 
 use serde_json::json;
 use stdext::function_name;

@@ -26,9 +26,9 @@ use crate::mk_lib_logging;
 #[path = "../../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;
 
-use crate::mk_lib_database_metadata_movie;
+use crate::database::mk_lib_database_metadata_movie;
 
-use crate::mk_lib_database_user;
+use crate::database::mk_lib_database_user;
 
 #[derive(Debug, Deserialize, Serialize)]
 struct TemplateMetaMovieList {
@@ -149,7 +149,7 @@ pub async fn user_metadata_movie(
 //     Path(guid): Path<uuid::Uuid>,
 // ) -> impl IntoResponse {
 //     let movie_metadata =
-//         mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_detail_by_guid(
+//         database::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_detail_by_guid(
 //             &sqlx_pool, guid,
 //         )
 //         .await

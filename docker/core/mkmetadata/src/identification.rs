@@ -38,10 +38,10 @@ mod metadata_sports;
 #[path = "metadata/tv.rs"]
 mod metadata_tv;
 
-use crate::mk_lib_database_metadata_game;
+use crate::database::mk_lib_database_metadata_game;
 
-use crate::mk_lib_database_metadata_download_queue;
-use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use crate::database::mk_lib_database_metadata_download_queue;
+use crate::database::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 
 pub async fn metadata_identification(
     sqlx_pool: &sqlx::PgPool,

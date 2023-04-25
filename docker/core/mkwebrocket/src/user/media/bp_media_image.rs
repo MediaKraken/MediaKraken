@@ -11,7 +11,7 @@ use stdext::function_name;
 mod mk_lib_logging;
 
 #[path = "../../mk_lib_database_media_images.rs"]
-mod mk_lib_database_media_images;
+mod database::mk_lib_database_media_images;
 
 #[get("/media/image")]
 pub async fn user_media_image(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {

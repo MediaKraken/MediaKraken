@@ -18,7 +18,7 @@ mod mk_lib_logging;
 mod mk_lib_common_pagination;
 
 #[path = "../mk_lib_database_user.rs"]
-mod mk_lib_database_user;
+mod database::mk_lib_database_user;
 
 #[derive(Serialize)]
 struct TemplateAdminUserContext {
@@ -34,7 +34,7 @@ pub async fn admin_user(
 ) -> Template {
     let db_offset: i64 = (page * 30) - 30;
     let total_pages: i64 =
-        mk_lib_database_user::mk_lib_database_user_count(&sqlx_pool, String::new())
+        database::mk_lib_database_user::mk_lib_database_user_count(&sqlx_pool, String::new())
             .await
             .unwrap();
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
@@ -44,7 +44,7 @@ pub async fn admin_user(
     )
     .await
     .unwrap();
-    let user_list = mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool, db_offset, 30)
+    let user_list = database::mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool, db_offset, 30)
         .await
         .unwrap();
     Template::render(
@@ -75,7 +75,7 @@ pub async fn admin_user_delete(
     guid: rocket::serde::uuid::Uuid,
 ) -> Template {
     let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
-    mk_lib_database_user::mk_lib_database_user_delete(&sqlx_pool, tmp_uuid).await;
+    database::mk_lib_database_user::mk_lib_database_user_delete(&sqlx_pool, tmp_uuid).await;
     Template::render(
         "bss_admin/bss_admin_user_delete",
         tera::Context::new().into_json(),

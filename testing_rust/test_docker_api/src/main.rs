@@ -1,6 +1,6 @@
-use docker_api::{Docker};
 use docker_api::api::service::Services;
 use docker_api::opts::ServiceListOpts;
+use docker_api::Docker;
 
 #[tokio::main]
 async fn main() {

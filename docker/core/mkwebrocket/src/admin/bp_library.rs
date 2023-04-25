@@ -15,7 +15,7 @@ mod mk_lib_logging;
 mod mk_lib_common_pagination;
 
 #[path = "../mk_lib_database_library.rs"]
-mod mk_lib_database_library;
+mod database::mk_lib_database_library;
 
 #[derive(Serialize)]
 struct TemplateAdminLibraryContext {
@@ -30,7 +30,7 @@ pub async fn admin_library(
     page: i32,
 ) -> Template {
     let db_offset: i64 = (page * 30) - 30;
-    let total_pages: i64 = mk_lib_database_library::mk_lib_database_library_count(&sqlx_pool)
+    let total_pages: i64 = database::mk_lib_database_library::mk_lib_database_library_count(&sqlx_pool)
         .await
         .unwrap();
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
@@ -41,7 +41,7 @@ pub async fn admin_library(
     .await
     .unwrap();
     let library_list =
-        mk_lib_database_library::mk_lib_database_library_read(&sqlx_pool, db_offset, 30)
+        database::mk_lib_database_library::mk_lib_database_library_read(&sqlx_pool, db_offset, 30)
             .await
             .unwrap();
     Template::render(

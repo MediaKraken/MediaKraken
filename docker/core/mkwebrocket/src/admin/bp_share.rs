@@ -15,7 +15,7 @@ mod mk_lib_logging;
 mod mk_lib_common_pagination;
 
 #[path = "../mk_lib_database_network_share.rs"]
-mod mk_lib_database_network_share;
+mod database::mk_lib_database_network_share;
 
 #[derive(Serialize)]
 struct TemplateAdminShareContext {
@@ -24,7 +24,7 @@ struct TemplateAdminShareContext {
 
 #[get("/share")]
 pub async fn admin_share(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
-    let share_list = mk_lib_database_network_share::mk_lib_database_network_share_read(&sqlx_pool)
+    let share_list = database::mk_lib_database_network_share::mk_lib_database_network_share_read(&sqlx_pool)
         .await
         .unwrap();
     Template::render(

@@ -16,11 +16,11 @@ use stdext::function_name;
 
 use crate::mk_lib_logging;
 
-use crate::mk_lib_database_cron;
-
 use crate::guard;
 
-use crate::mk_lib_database_user;
+use crate::database::mk_lib_database_cron;
+
+use crate::database::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_cron.html")]
@@ -34,7 +34,6 @@ pub async fn admin_cron(
     method: Method,
     auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
-    guard::guard_page_by_user(true, method, auth).await;
     let cron_list = mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool)
         .await
         .unwrap();
@@ -52,7 +51,7 @@ pub async fn admin_cron(
 
 // #[post("/cron_delete/<guid>")]
 // pub async fn admin_cron_delete(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser, guid: rocket::serde::uuid::Uuid) -> Template {
-//     mk_lib_database_cron::mk_lib_database_cron_delete(&sqlx_pool, guid).await.unwrap();
+//     database::mk_lib_database_cron::mk_lib_database_cron_delete(&sqlx_pool, guid).await.unwrap();
 // }
 
 /*

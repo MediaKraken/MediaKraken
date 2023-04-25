@@ -18,11 +18,11 @@ use stdext::function_name;
 
 use crate::mk_lib_logging;
 
-use crate::mk_lib_database_version;
+use crate::database::mk_lib_database_version;
 
-use crate::mk_lib_database_postgresql;
+use crate::database::mk_lib_database_postgresql;
 
-use crate::mk_lib_database_user;
+use crate::database::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_db_statistics.html")]

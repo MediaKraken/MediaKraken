@@ -15,7 +15,7 @@ mod mk_lib_logging;
 mod mk_lib_common_pagination;
 
 #[path = "../../mk_lib_database_media_home_media.rs"]
-mod mk_lib_database_media_home_media;
+mod database::mk_lib_database_media_home_media;
 
 #[derive(Serialize)]
 struct TemplateMediaHomeContext {
@@ -31,7 +31,7 @@ pub async fn user_media_home_media(
 ) -> Template {
     let db_offset: i64 = (page * 30) - 30;
     let total_pages: i64 =
-        mk_lib_database_media_home_media::mk_lib_database_media_home_media_count(
+        database::mk_lib_database_media_home_media::mk_lib_database_media_home_media_count(
             &sqlx_pool,
             String::new(),
         )
@@ -44,7 +44,7 @@ pub async fn user_media_home_media(
     )
     .await
     .unwrap();
-    let home_list = mk_lib_database_media_home_media::mk_lib_database_media_home_media_read(
+    let home_list = database::mk_lib_database_media_home_media::mk_lib_database_media_home_media_read(
         &sqlx_pool,
         String::new(),
         db_offset,

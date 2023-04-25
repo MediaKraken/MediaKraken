@@ -13,7 +13,7 @@ use uuid::Uuid;
 mod mk_lib_logging;
 
 #[path = "../mk_lib_database_sync.rs"]
-mod mk_lib_database_sync;
+mod database::mk_lib_database_sync;
 
 #[derive(Serialize)]
 struct TemplateSyncContext {
@@ -23,7 +23,7 @@ struct TemplateSyncContext {
 #[get("/sync")]
 pub async fn user_sync(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {
     let sync_list =
-        mk_lib_database_sync::mk_lib_database_sync_list(&sqlx_pool, uuid::Uuid::nil(), 0, 30)
+        database::mk_lib_database_sync::mk_lib_database_sync_list(&sqlx_pool, uuid::Uuid::nil(), 0, 30)
             .await
             .unwrap();
     Template::render(

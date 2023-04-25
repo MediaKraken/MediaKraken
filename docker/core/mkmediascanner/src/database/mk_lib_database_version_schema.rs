@@ -5,7 +5,7 @@ use crate::mk_lib_logging;
 use serde_json::{json, Value};
 use stdext::function_name;
 
-use crate::mk_lib_database_option_status;
+use crate::database::mk_lib_database_option_status;
 
 pub async fn mk_lib_database_update_schema(
     sqlx_pool: &sqlx::PgPool,

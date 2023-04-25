@@ -7,29 +7,25 @@ use sqlx::{types::Json, types::Uuid};
 use std::error::Error;
 use stdext::function_name;
 
-#[path = "mk_lib_common.rs"]
 mod mk_lib_common;
-#[path = "mk_lib_common_enum_media_type.rs"]
+
 mod mk_lib_common_enum_media_type;
-#[path = "mk_lib_compression.rs"]
+
 mod mk_lib_compression;
-#[path = "database/mk_lib_database.rs"]
-mod mk_lib_database;
-#[path = "database/mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
-#[path = "database/mk_lib_database_metadata_movie.rs"]
-mod mk_lib_database_metadata_movie;
-#[path = "database/mk_lib_database_metadata_tv.rs"]
-mod mk_lib_database_metadata_tv;
-#[path = "database/mk_lib_database_option_status.rs"]
-mod mk_lib_database_option_status;
-#[path = "database/mk_lib_database_version.rs"]
-mod mk_lib_database_version;
-#[path = "database/mk_lib_database_version_schema.rs"]
-mod mk_lib_database_version_schema;
-#[path = "mk_lib_logging.rs"]
+
+#[path = "database"]
+pub mod database {
+    pub mod mk_lib_database;
+    pub mod mk_lib_database_metadata_download_queue;
+    pub mod mk_lib_database_metadata_movie;
+    pub mod mk_lib_database_metadata_tv;
+    pub mod mk_lib_database_option_status;
+    pub mod mk_lib_database_version;
+    pub mod mk_lib_database_version_schema;
+}
+
 mod mk_lib_logging;
-#[path = "mk_lib_network.rs"]
+
 mod mk_lib_network;
 
 #[derive(Serialize, Deserialize)]
@@ -53,14 +49,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await.unwrap();
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
+            .await
+            .unwrap();
     }
 
     let fetch_date: String = "01_18_2023".to_string();
 
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool(1).await.unwrap();
-    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+    let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(1)
+        .await
+        .unwrap();
+    database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
         .await
         .unwrap();
 
@@ -81,19 +81,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
     for json_item in json_result.split('\n') {
         if !json_item.trim().is_empty() {
             let metadata_struct: MetadataMovie = serde_json::from_str(json_item.trim())?;
-            let result = mk_lib_database_metadata_movie::mk_lib_database_metadata_exists_movie(
-                &sqlx_pool,
-                metadata_struct.id.unwrap_or(0),
-            )
-            .await
-            .unwrap();
+            let result =
+                database::mk_lib_database_metadata_movie::mk_lib_database_metadata_exists_movie(
+                    &sqlx_pool,
+                    metadata_struct.id.unwrap_or(0),
+                )
+                .await
+                .unwrap();
             if result == false {
-                let download_result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
+                let download_result = database::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
                                                                                                                               "themoviedb".to_string(),
                                                                                                                               mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                                               metadata_struct.id.unwrap_or(0)).await.unwrap();
                 if download_result == false {
-                    let result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                    let result = database::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                             "themoviedb".to_string(),
                                                                                                             mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                             Uuid::new_v4(),
@@ -120,19 +121,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
     for json_item in json_result.split('\n') {
         if !json_item.trim().is_empty() {
             let metadata_struct: MetadataTV = serde_json::from_str(json_item.trim())?;
-            let result = mk_lib_database_metadata_tv::mk_lib_database_metadata_exists_tv(
+            let result = database::mk_lib_database_metadata_tv::mk_lib_database_metadata_exists_tv(
                 &sqlx_pool,
                 metadata_struct.id.unwrap_or(0),
             )
             .await
             .unwrap();
             if result == false {
-                let download_result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
+                let download_result = database::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
                                                                                                                               "themoviedb".to_string(),
                                                                                                                               mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                                               metadata_struct.id.unwrap_or(0)).await.unwrap();
                 if download_result == false {
-                    let result = mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                    let result = database::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                             "themoviedb".to_string(),
                                                                                                             mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                             Uuid::new_v4(),

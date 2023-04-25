@@ -14,7 +14,6 @@ use tokio::net::TcpListener;
 use tokio_rustls::rustls::{self, Certificate, PrivateKey};
 use tokio_rustls::TlsAcceptor;
 
-#[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
 /// Tokio Rustls server example
@@ -54,7 +53,9 @@ async fn main() -> io::Result<()> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await.unwrap();
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
+            .await
+            .unwrap();
     }
 
     let options: Options = argh::from_env();

@@ -7,13 +7,13 @@ use std::error::Error;
 use uuid::Uuid;
 
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
-mod mk_lib_database;
+mod database::mk_lib_database;
 
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_hardware_device.rs"]
-mod mk_lib_database_hardware_device;
+mod database::mk_lib_database_hardware_device;
 
 #[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
-mod mk_lib_database_version;
+mod database::mk_lib_database_version;
 
 #[path = "../../../../src/mk_lib_network/src/mk_lib_network.rs"]
 mod mk_lib_network;
@@ -64,8 +64,8 @@ struct ApiBrandsTypeCodeset {}
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool(1).await.unwrap();
-    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+    let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(1).await.unwrap();
+    database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
         .await
         .unwrap();
 
@@ -85,7 +85,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             println!("{:?}\n", brand_item);
         }
         let _result =
-            mk_lib_database_hardware_device::mk_lib_database_hardware_manufacturer_upsert(
+            database::mk_lib_database_hardware_device::mk_lib_database_hardware_manufacturer_upsert(
                 &sqlx_pool,
                 brand_item.brand_name.replace("\"", ""),
                 brand_item
@@ -120,7 +120,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             {
                 println!("item_type: {:?}\n", item_type);
             }
-            let _result = mk_lib_database_hardware_device::mk_lib_database_hardware_type_upsert(
+            let _result = database::mk_lib_database_hardware_device::mk_lib_database_hardware_type_upsert(
                 &sqlx_pool,
                 item_type.brand_type.replace("\"", ""),
             )
@@ -163,7 +163,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     println!("model_item: {:?}\n", item_model);
                 }
                 let device_count =
-                    mk_lib_database_hardware_device::mk_lib_database_hardware_model_device_count(
+                    database::mk_lib_database_hardware_device::mk_lib_database_hardware_model_device_count(
                         &sqlx_pool,
                         item_model.brand_name.replace("\"", ""),
                         item_model.brand_type.replace("\"", ""),
@@ -173,7 +173,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .unwrap();
                 if device_count == 0 {
                     let _result =
-                        mk_lib_database_hardware_device::mk_lib_database_hardware_model_insert(
+                        database::mk_lib_database_hardware_device::mk_lib_database_hardware_model_insert(
                             &sqlx_pool,
                             item_model.brand_name.replace("\"", ""),
                             item_model.brand_type.replace("\"", ""),

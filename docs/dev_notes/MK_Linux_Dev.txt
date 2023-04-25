@@ -1,3 +1,11 @@
+rust on linux
+apt-get install lld clang
+  TODO zero to production page 5 for cargo config of faster linker
+  pg 8 code coverage
+  cargo fmt    - do entire project at once
+  cargo audit
+
+
 th-mkbuild-1
 debian 11
 apt-get update && apt upgrade

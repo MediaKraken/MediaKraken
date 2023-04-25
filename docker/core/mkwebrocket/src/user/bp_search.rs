@@ -11,7 +11,7 @@ use stdext::function_name;
 mod mk_lib_logging;
 
 #[path = "../mk_lib_database_search.rs"]
-mod mk_lib_database_search;
+mod database::mk_lib_database_search;
 
 #[get("/search")]
 pub async fn user_search(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {

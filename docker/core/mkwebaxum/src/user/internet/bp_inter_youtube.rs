@@ -15,7 +15,7 @@ use stdext::function_name;
 
 use crate::mk_lib_logging;
 
-use crate::mk_lib_database_user;
+use crate::database::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_user/internet/bss_user_internet_youtube.html")]

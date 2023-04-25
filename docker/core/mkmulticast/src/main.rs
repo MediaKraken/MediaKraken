@@ -8,7 +8,6 @@ use std::io;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr, UdpSocket};
 use std::time::Duration;
 
-#[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
 fn new_socket(addr: &SocketAddr) -> io::Result<Socket> {
@@ -44,7 +43,9 @@ async fn main() {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await.unwrap();
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
+            .await
+            .unwrap();
     }
 
     let mut mediakraken_ip: String = "127.0.0.1".to_string();

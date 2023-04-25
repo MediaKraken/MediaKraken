@@ -9,9 +9,8 @@ use torrent_name_parser::Metadata;
 
 use crate::mk_lib_logging;
 
-#[path = "../mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
-use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use crate::database::mk_lib_database_metadata_download_queue;
+use crate::database::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 
 // #[path = "../identification.rs"]
 // mod metadata_identification;
@@ -83,7 +82,7 @@ pub async fn metadata_guessit(
         //     metadata_last_year = 0;
         // }
     } else {
-        mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_update_provider(&sqlx_pool,
+        database::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_update_provider(&sqlx_pool,
                                                                                                                  "ZZ".to_string(),
                                                                                                                  download_data.mm_download_guid).await.unwrap();
     }

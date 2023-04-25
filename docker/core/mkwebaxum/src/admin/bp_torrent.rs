@@ -27,7 +27,7 @@ use crate::mk_lib_logging;
 #[path = "../mk_lib_network_transmission.rs"]
 mod mk_lib_network_transmission;
 
-use crate::mk_lib_database_user;
+use crate::database::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_torrent.html")]

@@ -1,6 +1,6 @@
 use axum::{
     http::{Method, StatusCode},
-    response::{Html, IntoResponse},
+    response::IntoResponse,
     routing::get,
     Extension, Router,
 };

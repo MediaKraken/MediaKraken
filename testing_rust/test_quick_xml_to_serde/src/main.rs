@@ -1,5 +1,5 @@
-use std::fs::File;
 use quickxml_to_serde::{xml_string_to_json, Config, JsonArray, JsonType, NullValue};
+use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
 // killed
 // fn main() {
@@ -27,15 +27,13 @@ fn main() -> io::Result<()> {
         if xml_line.starts_with("<machine") == true {
             println!("here");
             xml_data = xml_line.to_string();
-        }
-        else if xml_line.starts_with("</machine") == true {
+        } else if xml_line.starts_with("</machine") == true {
             xml_data += xml_line;
             println!("xml {}", xml_data);
             let json = xml_string_to_json(xml_data.to_string(), &conf);
             println!("json {:?}", json.unwrap());
             //println!("json {:?}", json.unwrap()["machine"]["@name"]);
-        }
-        else {
+        } else {
             xml_data += xml_line;
         }
     }

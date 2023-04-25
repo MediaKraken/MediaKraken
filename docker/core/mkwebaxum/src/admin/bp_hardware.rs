@@ -1,7 +1,5 @@
 #![cfg_attr(debug_assertions, allow(dead_code))]
 
-use stdext::function_name;
-use serde_json::json;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -12,11 +10,13 @@ use axum::{
 };
 use axum_session_auth::*;
 use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
+use serde_json::json;
 use sqlx::postgres::PgPool;
+use stdext::function_name;
 
 use crate::mk_lib_logging;
 
-use crate::mk_lib_database_user;
+use crate::database::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_hardware.html")]
@@ -30,7 +30,7 @@ struct AdminHardwareTemplate<'a> {
     template_data_roku: &'a serde_json::Value,
     template_data_soco: &'a serde_json::Value,
     page: &'a usize,
-};
+}
 
 pub async fn admin_hardware(
     Extension(sqlx_pool): Extension<PgPool>,

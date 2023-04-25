@@ -1,7 +1,7 @@
 fn main() {
     use std::env;
 
-// these seem to return the same things
+    // these seem to return the same things
     for (key, value) in env::vars_os() {
         println!("{:?}: {:?}", key, value);
     }
@@ -13,7 +13,7 @@ fn main() {
     let key = "OS";
     match env::var_os(key) {
         Some(val) => println!("{}: {:?}", key, val),
-        None => println!("{} is not defined in the environment.", key)
+        None => println!("{} is not defined in the environment.", key),
     }
 
     match env::var("PATH") {
@@ -30,20 +30,19 @@ fn main() {
     println!("{:?}", data);
 
     match env::var("SWARMIP") {
-    Ok(mediakraken_ip) => {
-        println!("{:?}", mediakraken_ip);
-        },
-    Err(e) => {
-        println!("couldn't interpret swarm {}", e);
-        match env::var("HOST_IP") {
-            Ok(mediakraken_ip) => {
-                println!("{:?}", mediakraken_ip);
-                },
-            Err(e) => {
-                println!("couldn't interpret host {}", e);
+        Ok(mediakraken_ip) => {
+            println!("{:?}", mediakraken_ip);
+        }
+        Err(e) => {
+            println!("couldn't interpret swarm {}", e);
+            match env::var("HOST_IP") {
+                Ok(mediakraken_ip) => {
+                    println!("{:?}", mediakraken_ip);
+                }
+                Err(e) => {
+                    println!("couldn't interpret host {}", e);
                 }
             }
         }
     }
-
 }

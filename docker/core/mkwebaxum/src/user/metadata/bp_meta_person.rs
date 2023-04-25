@@ -19,9 +19,9 @@ use crate::mk_lib_logging;
 #[path = "../../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;
 
-use crate::mk_lib_database_metadata_person;
+use crate::database::mk_lib_database_metadata_person;
 
-use crate::mk_lib_database_user;
+use crate::database::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_person.html")]

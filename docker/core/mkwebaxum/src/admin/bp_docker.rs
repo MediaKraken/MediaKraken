@@ -11,6 +11,7 @@ use axum::{
 use axum_session_auth::*;
 use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use serde_json::json;
+use sqlx::postgres::PgPool;
 use stdext::function_name;
 
 use crate::mk_lib_logging;
@@ -18,7 +19,7 @@ use crate::mk_lib_logging;
 #[path = "../mk_lib_common_docker.rs"]
 mod mk_lib_common_docker;
 
-use crate::mk_lib_database_user;
+use crate::database::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_docker.html")]

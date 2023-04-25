@@ -22,7 +22,7 @@ mod filters {
 
 use crate::mk_lib_logging;
 
-use crate::mk_lib_database_user;
+use crate::database::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_genre_video.html")]

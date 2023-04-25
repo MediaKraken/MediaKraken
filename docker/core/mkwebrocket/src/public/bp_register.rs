@@ -12,7 +12,7 @@ use stdext::function_name;
 mod mk_lib_logging;
 
 #[path = "../mk_lib_database_user.rs"]
-mod mk_lib_database_user;
+mod database::mk_lib_database_user;
 
 #[get("/register")]
 pub async fn public_register() -> Template {
@@ -30,12 +30,12 @@ pub async fn public_register_post(
 ) -> Result<Redirect, Error> {
     auth.signup(&form).await?;
     auth.login(&form.into()).await?;
-    if mk_lib_database_user::mk_lib_database_user_count(&sqlx_pool, String::new())
+    if database::mk_lib_database_user::mk_lib_database_user_count(&sqlx_pool, String::new())
         .await
         .unwrap()
         == 1
     {
-        mk_lib_database_user::mk_lib_database_user_set_admin(&sqlx_pool).await;
+        database::mk_lib_database_user::mk_lib_database_user_set_admin(&sqlx_pool).await;
     }
     Ok(Redirect::to("/user/home"))
 }

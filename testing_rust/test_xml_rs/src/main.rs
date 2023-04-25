@@ -7,8 +7,9 @@ use xml::reader::{EventReader, XmlEvent};
 
 fn indent(size: usize) -> String {
     const INDENT: &'static str = "    ";
-    (0..size).map(|_| INDENT)
-             .fold(String::with_capacity(size*INDENT.len()), |r, s| r + s)
+    (0..size)
+        .map(|_| INDENT)
+        .fold(String::with_capacity(size * INDENT.len()), |r, s| r + s)
 }
 
 fn main() {

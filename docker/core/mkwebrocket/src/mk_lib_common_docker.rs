@@ -12,16 +12,6 @@ use docker_api::{conn::TtyChunk, Docker, Result};
 use serde_json::json;
 use stdext::function_name;
 
-#[cfg(unix)]
-pub fn new_docker() -> Result<Docker> {
-    Ok(Docker::unix("/var/run/docker.sock"))
-}
-
-#[cfg(not(unix))]
-pub fn new_docker() -> Result<Docker> {
-    Docker::new("tcp://127.0.0.1:8080")
-}
-
 pub async fn mk_common_docker_container_inspect(id: String) -> Result<Vec<String>> {
     #[cfg(debug_assertions)]
     {
@@ -32,7 +22,7 @@ pub async fn mk_common_docker_container_inspect(id: String) -> Result<Vec<String
         .await
         .unwrap();
     }
-    let docker = new_docker()?;
+    let docker = Docker::unix("/var/run/docker.sock");
     let mut logs_list: Vec<String> = Vec::new();
     match docker.containers().get(&id).inspect().await {
         Ok(container) => println!("{:#?}", container),
@@ -51,7 +41,7 @@ pub async fn mk_common_docker_container_list() -> Result<Vec<String>> {
         .await
         .unwrap();
     }
-    let docker = new_docker()?;
+    let docker = Docker::unix("/var/run/docker.sock");
     let mut container_list: Vec<String> = Vec::new();
     let opts = ContainerListOpts::builder().all(true).build();
     match docker.containers().list(&opts).await {
@@ -82,7 +72,7 @@ pub async fn mk_common_docker_container_logs(id: String) -> Result<Vec<String>> 
         .await
         .unwrap();
     }
-    let docker = new_docker()?;
+    let docker = Docker::unix("/var/run/docker.sock");
     let mut logs_list: Vec<String> = Vec::new();
     let container = docker.containers().get(&id);
     let logs_stream = container.logs(&LogsOpts::builder().stdout(true).stderr(true).build());
@@ -113,7 +103,7 @@ pub async fn mk_common_docker_container_stats(id: String) -> Result<Vec<String>>
         .await
         .unwrap();
     }
-    let docker = new_docker()?;
+    let docker = Docker::unix("/var/run/docker.sock");
     let mut stats_list: Vec<String> = Vec::new();
     while let Some(result) = docker.containers().get(&id).stats().next().await {
         match result {
@@ -134,7 +124,7 @@ pub async fn mk_common_docker_service_inspect(service: String) -> Result<Vec<Str
         .await
         .unwrap();
     }
-    let docker = new_docker()?;
+    let docker = Docker::unix("/var/run/docker.sock");
     let mut logs_list: Vec<String> = Vec::new();
     match docker.services().get(&service).inspect().await {
         Ok(service) => println!("{:#?}", service),
@@ -153,7 +143,7 @@ pub async fn mk_common_docker_service_list() -> Result<Vec<String>> {
         .await
         .unwrap();
     }
-    let docker = new_docker()?;
+    let docker = Docker::unix("/var/run/docker.sock");
     let mut logs_list: Vec<String> = Vec::new();
     match docker
         .services()
@@ -188,7 +178,7 @@ pub async fn mk_common_docker_service_logs(service: String) -> Result<Vec<String
         .await
         .unwrap();
     }
-    let docker = new_docker()?;
+    let docker = Docker::unix("/var/run/docker.sock");
     let mut logs_list: Vec<String> = Vec::new();
     let service = docker.services().get(&service);
     let logs_stream = service.logs(&LogsOpts::builder().stdout(true).stderr(true).build());
@@ -219,7 +209,7 @@ pub async fn mk_common_docker_volume_inspect(volume: String) -> Result<Vec<Strin
         .await
         .unwrap();
     }
-    let docker = new_docker()?;
+    let docker = Docker::unix("/var/run/docker.sock");
     let mut logs_list: Vec<String> = Vec::new();
     match docker.volumes().get(&volume).inspect().await {
         Ok(info) => println!("{:#?}", info),
@@ -238,7 +228,7 @@ pub async fn mk_common_docker_volume_list() -> Result<Vec<String>> {
         .await
         .unwrap();
     }
-    let docker = new_docker()?;
+    let docker = Docker::unix("/var/run/docker.sock");
     let mut logs_list: Vec<String> = Vec::new();
     match docker.volumes().list(&Default::default()).await {
         Ok(volumes) => {
@@ -269,7 +259,7 @@ pub async fn mk_common_docker_info() -> Result<serde_json::Value> {
         .await
         .unwrap();
     }
-    let docker = new_docker()?;
+    let docker = Docker::unix("/var/run/docker.sock");
     let mut logs_list: serde_json::Value = serde_json::json!({});
     match docker.info().await {
         Ok(info) => {

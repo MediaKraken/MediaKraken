@@ -20,9 +20,9 @@ use crate::mk_lib_logging;
 #[path = "../../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;
 
-use crate::mk_lib_database_metadata_game_system;
+use crate::database::mk_lib_database_metadata_game_system;
 
-use crate::mk_lib_database_user;
+use crate::database::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_game_system.html")]
@@ -41,7 +41,7 @@ pub async fn user_metadata_game_system(
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;
     let total_pages: i64 =
-        mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_count(
+        database::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_count(
             &sqlx_pool,
             String::new(),
         )
@@ -55,7 +55,7 @@ pub async fn user_metadata_game_system(
     .await
     .unwrap();
     let game_system_list =
-        mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_read(
+        database::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_read(
             &sqlx_pool,
             String::new(),
             db_offset,
@@ -92,7 +92,7 @@ pub async fn user_metadata_game_system_detail(
 ) -> impl IntoResponse {
     let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
     let detail_data =
-        mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_detail(
+        database::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_detail(
             &sqlx_pool, tmp_uuid,
         )
         .await

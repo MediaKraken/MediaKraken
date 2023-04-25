@@ -19,13 +19,13 @@ use stdext::function_name;
 
 use crate::mk_lib_logging;
 
-use crate::mk_lib_database_media;
+use crate::database::mk_lib_database_media;
 
-use crate::mk_lib_database_metadata_download_queue;
+use crate::database::mk_lib_database_metadata_download_queue;
 
-use crate::mk_lib_database_option_status;
+use crate::database::mk_lib_database_option_status;
 
-use crate::mk_lib_database_user;
+use crate::database::mk_lib_database_user;
 
 #[path = "../mk_lib_network.rs"]
 mod mk_lib_network;

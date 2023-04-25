@@ -19,9 +19,9 @@ use crate::mk_lib_logging;
 #[path = "../../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;
 
-use crate::mk_lib_database_media_book;
+use crate::database::mk_lib_database_media_book;
 
-use crate::mk_lib_database_user;
+use crate::database::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_book.html")]
@@ -40,7 +40,7 @@ pub async fn user_media_book(
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;
     let total_pages: i64 =
-        mk_lib_database_media_book::mk_lib_database_media_book_count(&sqlx_pool, String::new())
+        database::mk_lib_database_media_book::mk_lib_database_media_book_count(&sqlx_pool, String::new())
             .await
             .unwrap();
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
@@ -50,7 +50,7 @@ pub async fn user_media_book(
     )
     .await
     .unwrap();
-    let book_list = mk_lib_database_media_book::mk_lib_database_media_book_read(
+    let book_list = database::mk_lib_database_media_book::mk_lib_database_media_book_read(
         &sqlx_pool,
         String::new(),
         db_offset,

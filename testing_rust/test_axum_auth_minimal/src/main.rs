@@ -1,8 +1,4 @@
-use axum::{
-    http::{Method},
-    routing::get,
-    Router,
-};
+use axum::{http::Method, routing::get, Router};
 use axum_extra::routing::RouterExt;
 use axum_session::{Key, SessionConfig, SessionLayer, SessionPgPool, SessionStore};
 use axum_session_auth::*;

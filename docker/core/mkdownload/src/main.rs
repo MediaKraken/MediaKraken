@@ -11,17 +11,16 @@ use std::process::Command;
 //use rustube::{Id, VideoFetcher};
 use stdext::function_name;
 
-#[path = "database/mk_lib_database.rs"]
-mod mk_lib_database;
-#[path = "database/mk_lib_database_option_status.rs"]
-mod mk_lib_database_option_status;
-#[path = "database/mk_lib_database_version.rs"]
-mod mk_lib_database_version;
-#[path = "database/mk_lib_database_version_schema.rs"]
-mod mk_lib_database_version_schema;
-#[path = "mk_lib_logging.rs"]
+#[path = "database"]
+mod database {
+    pub mod mk_lib_database;
+    pub mod mk_lib_database_option_status;
+    pub mod mk_lib_database_version;
+    pub mod mk_lib_database_version_schema;
+}
+
 mod mk_lib_logging;
-#[path = "mk_lib_network.rs"]
+
 mod mk_lib_network;
 
 #[tokio::main]
@@ -58,12 +57,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool(1).await.unwrap();
-    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, true)
+    let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(1)
+        .await
+        .unwrap();
+    database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, true)
         .await
         .unwrap();
     let option_config_json: Value =
-        mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
+        database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
             .await
             .unwrap();
 

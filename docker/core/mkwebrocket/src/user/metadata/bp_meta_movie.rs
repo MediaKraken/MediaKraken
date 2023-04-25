@@ -15,7 +15,7 @@ mod mk_lib_logging;
 mod mk_lib_common_pagination;
 
 #[path = "../../mk_lib_database_metadata_movie.rs"]
-mod mk_lib_database_metadata_movie;
+mod database::mk_lib_database_metadata_movie;
 
 #[derive(Serialize)]
 struct TemplateMetaMovieContext {
@@ -43,7 +43,7 @@ pub async fn user_metadata_movie(
     page: i32,
 ) -> Template {
     let db_offset: i64 = (page * 30) - 30;
-    let total_pages: i64 = mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(
+    let total_pages: i64 = database::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(
         &sqlx_pool,
         String::new(),
     )
@@ -56,7 +56,7 @@ pub async fn user_metadata_movie(
     )
     .await
     .unwrap();
-    let movie_list = mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(
+    let movie_list = database::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(
         &sqlx_pool,
         String::new(),
         db_offset,
@@ -126,7 +126,7 @@ pub async fn user_metadata_movie_detail(
 ) -> Template {
     let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
     let movie_metadata =
-        mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_detail_by_guid(
+        database::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_detail_by_guid(
             &sqlx_pool, tmp_uuid,
         )
         .await

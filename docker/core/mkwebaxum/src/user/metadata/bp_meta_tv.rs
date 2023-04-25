@@ -25,9 +25,9 @@ use crate::mk_lib_logging;
 #[path = "../../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;
 
-use crate::mk_lib_database_metadata_tv;
+use crate::database::mk_lib_database_metadata_tv;
 
-use crate::mk_lib_database_user;
+use crate::database::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_tv.html")]
@@ -46,7 +46,7 @@ pub async fn user_metadata_tv(
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;
     let total_pages: i64 =
-        mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_count(&sqlx_pool, String::new())
+        database::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_count(&sqlx_pool, String::new())
             .await
             .unwrap();
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
@@ -56,7 +56,7 @@ pub async fn user_metadata_tv(
     )
     .await
     .unwrap();
-    let tv_list = mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_read(
+    let tv_list = database::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_read(
         &sqlx_pool,
         String::new(),
         db_offset,

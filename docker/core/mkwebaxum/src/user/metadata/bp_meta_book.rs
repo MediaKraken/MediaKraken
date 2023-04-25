@@ -19,9 +19,9 @@ use crate::mk_lib_logging;
 #[path = "../../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;
 
-use crate::mk_lib_database_metadata_book;
+use crate::database::mk_lib_database_metadata_book;
 
-use crate::mk_lib_database_user;
+use crate::database::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_book.html")]
@@ -39,7 +39,7 @@ pub async fn user_metadata_book(
     Path(page): Path<i64>,
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;
-    let total_pages: i64 = mk_lib_database_metadata_book::mk_lib_database_metadata_book_count(
+    let total_pages: i64 = database::mk_lib_database_metadata_book::mk_lib_database_metadata_book_count(
         &sqlx_pool,
         String::new(),
     )
@@ -52,7 +52,7 @@ pub async fn user_metadata_book(
     )
     .await
     .unwrap();
-    let book_list = mk_lib_database_metadata_book::mk_lib_database_metadata_book_read(
+    let book_list = database::mk_lib_database_metadata_book::mk_lib_database_metadata_book_read(
         &sqlx_pool,
         String::new(),
         db_offset,
@@ -88,7 +88,7 @@ pub async fn user_metadata_book_detail(
     Path(guid): Path<uuid::Uuid>,
 ) -> impl IntoResponse {
     let detail_data =
-        mk_lib_database_metadata_book::mk_lib_database_metadata_book_detail(&sqlx_pool, guid)
+        database::mk_lib_database_metadata_book::mk_lib_database_metadata_book_detail(&sqlx_pool, guid)
             .await
             .unwrap();
     let template = TemplateMetaBookDetailContext {

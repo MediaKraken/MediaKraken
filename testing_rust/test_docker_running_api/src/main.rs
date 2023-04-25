@@ -8,15 +8,16 @@ async fn main() {
     match result {
         Ok(images) => {
             for i in images {
-//                if i.names[0] == "/mkstack_reactor" {
-                    println!(
-                        "{:?} {:?} {:?} {:?}",
-                        i.id,
-                        i.created,
-                        //i.labels,  // the actual labels in the dockerfile
-                        i.ports,
-                        i.names  );
-//                }
+                //                if i.names[0] == "/mkstack_reactor" {
+                println!(
+                    "{:?} {:?} {:?} {:?}",
+                    i.id,
+                    i.created,
+                    //i.labels,  // the actual labels in the dockerfile
+                    i.ports,
+                    i.names
+                );
+                //                }
             }
         }
         Err(e) => eprintln!("Error: {}", e),

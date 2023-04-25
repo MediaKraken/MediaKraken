@@ -5,24 +5,20 @@ use amiquip::{
 };
 use serde_json::{json, Value};
 use std::error::Error;
-use std::path::Path;
-use std::process::Command;
-//use rustube::{Id, VideoFetcher};
-use stdext::function_name;
 
-#[path = "database/mk_lib_database.rs"]
-mod mk_lib_database;
-#[path = "database/mk_lib_database_network_share.rs"]
-mod mk_lib_database_network_share;
-#[path = "database/mk_lib_database_option_status.rs"]
-mod mk_lib_database_option_status;
-#[path = "database/mk_lib_database_version.rs"]
-mod mk_lib_database_version;
-#[path = "database/mk_lib_database_version_schema.rs"]
-mod mk_lib_database_version_schema;
-#[path = "mk_lib_logging.rs"]
+//use rustube::{Id, VideoFetcher};
+
+#[path = "database"]
+pub mod database {
+    pub mod mk_lib_database;
+    pub mod mk_lib_database_network_share;
+    pub mod mk_lib_database_option_status;
+    pub mod mk_lib_database_version;
+    pub mod mk_lib_database_version_schema;
+}
+
 mod mk_lib_logging;
-#[path = "mk_lib_network_nmap.rs"]
+
 mod mk_lib_network_nmap;
 
 #[tokio::main]
@@ -36,12 +32,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool(1).await.unwrap();
-    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+    let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(1)
         .await
         .unwrap();
-    let option_config_json: Value =
-        mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
+    database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+        .await
+        .unwrap();
+    let _option_config_json: Value =
+        database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
             .await
             .unwrap();
 
@@ -61,7 +59,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let consumer = queue.consume(ConsumerOptions::default())?;
 
     loop {
-        for (i, message) in consumer.receiver().iter().enumerate() {
+        for (_i, message) in consumer.receiver().iter().enumerate() {
             match message {
                 ConsumerMessage::Delivery(delivery) => {
                     let json_message: Value =
@@ -82,7 +80,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .await
                     .unwrap();
                     for share_info in share_vec.iter() {
-                        mk_lib_database_network_share::mk_lib_database_network_share_insert(
+                        database::mk_lib_database_network_share::mk_lib_database_network_share_insert(
                             &sqlx_pool,
                             share_info.mm_share_xml.clone(),
                         )

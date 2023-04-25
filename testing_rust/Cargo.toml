@@ -12,7 +12,7 @@ members = [
     "test_network_broadcast",
     "test_postgresql",
     "test_postgresql_tokio",
-    "test_python",    
+#    "test_python",    
 #    "test_python_pyo3",
     "test_quick_xml",
     "test_quick_xml_to_serde",

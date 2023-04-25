@@ -19,9 +19,9 @@ use crate::mk_lib_logging;
 #[path = "../../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;
 
-use crate::mk_lib_database_metadata_game;
+use crate::database::mk_lib_database_metadata_game;
 
-use crate::mk_lib_database_user;
+use crate::database::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_game.html")]
@@ -39,7 +39,7 @@ pub async fn user_metadata_game(
     Path(page): Path<i64>,
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;
-    let total_pages: i64 = mk_lib_database_metadata_game::mk_lib_database_metadata_game_count(
+    let total_pages: i64 = database::mk_lib_database_metadata_game::mk_lib_database_metadata_game_count(
         &sqlx_pool,
         String::new(),
     )
@@ -52,7 +52,7 @@ pub async fn user_metadata_game(
     )
     .await
     .unwrap();
-    let game_list = mk_lib_database_metadata_game::mk_lib_database_metadata_game_read(
+    let game_list = database::mk_lib_database_metadata_game::mk_lib_database_metadata_game_read(
         &sqlx_pool,
         String::new(),
         db_offset,

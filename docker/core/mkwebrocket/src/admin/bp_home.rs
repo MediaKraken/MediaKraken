@@ -14,16 +14,16 @@ use stdext::function_name;
 mod mk_lib_logging;
 
 #[path = "../mk_lib_database_media.rs"]
-mod mk_lib_database_media;
+mod database::mk_lib_database_media;
 
 #[path = "../mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
+mod database::mk_lib_database_metadata_download_queue;
 
 #[path = "../mk_lib_database_option_status.rs"]
-mod mk_lib_database_option_status;
+mod database::mk_lib_database_option_status;
 
 #[path = "../mk_lib_database_user.rs"]
-mod mk_lib_database_user;
+mod database::mk_lib_database_user;
 
 #[path = "../mk_lib_network.rs"]
 mod mk_lib_network;
@@ -61,11 +61,11 @@ struct TemplateHomeContext {
 
 #[get("/home")]
 pub async fn admin_home(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
-    let user_list = mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool, 0, 9999)
+    let user_list = database::mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool, 0, 9999)
         .await
         .unwrap();
     let option_status_row =
-        mk_lib_database_option_status::mk_lib_database_option_status_read(&sqlx_pool)
+        database::mk_lib_database_option_status::mk_lib_database_option_status_read(&sqlx_pool)
             .await
             .unwrap();
     let option_json: serde_json::Value = option_status_row.get("mm_options_json");
@@ -94,17 +94,17 @@ pub async fn admin_home(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser
             template_data_server_info_server_ip_external: external_ip,
             template_data_server_info_server_version: "Fake Version".to_string(),
             template_data_count_media_files:
-                mk_lib_database_media::mk_lib_database_media_known_count(&sqlx_pool)
+                database::mk_lib_database_media::mk_lib_database_media_known_count(&sqlx_pool)
                     .await
                     .unwrap()
                     .to_formatted_string(&locale),
             template_data_count_matched_media:
-                mk_lib_database_media::mk_lib_database_media_matched_count(&sqlx_pool)
+                database::mk_lib_database_media::mk_lib_database_media_matched_count(&sqlx_pool)
                     .await
                     .unwrap()
                     .to_formatted_string(&locale),
             template_data_count_meta_fetch:
-                mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(
+                database::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(
                     &sqlx_pool,
                 )
                 .await

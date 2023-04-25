@@ -2,9 +2,9 @@ use async_trait::async_trait;
 use axum_session_auth::*;
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::PgPool;
-use sqlx::{FromRow};
-use std::{collections::HashSet};
+use std::collections::HashSet;
 
 #[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
 pub struct User {

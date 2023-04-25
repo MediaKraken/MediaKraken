@@ -8,13 +8,9 @@ use std::error::Error;
 //use std::process::Command;
 use stdext::function_name;
 
-#[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
-#[path = "mk_lib_network.rs"]
 mod mk_lib_network;
-#[path = "mk_lib_network_serial.rs"]
 mod mk_lib_network_serial;
-#[path = "mk_lib_network_telnet.rs"]
 mod mk_lib_network_telnet;
 
 #[tokio::main]

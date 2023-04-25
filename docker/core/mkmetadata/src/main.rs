@@ -10,29 +10,22 @@ use std::process::Command;
 use stdext::function_name;
 use tokio::time::{sleep, Duration};
 
-#[path = "database/mk_lib_database.rs"]
-mod mk_lib_database;
-#[path = "database/mk_lib_database_media.rs"]
-mod mk_lib_database_media;
-#[path = "database/mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
-#[path = "database/mk_lib_database_metadata_game.rs"]
-mod mk_lib_database_metadata_game;
-#[path = "database/mk_lib_database_metadata_movie.rs"]
-mod mk_lib_database_metadata_movie;
-#[path = "database/mk_lib_database_metadata_person.rs"]
-mod mk_lib_database_metadata_person;
-#[path = "database/mk_lib_database_metadata_tv.rs"]
-mod mk_lib_database_metadata_tv;
-#[path = "database/mk_lib_database_option_status.rs"]
-mod mk_lib_database_option_status;
-#[path = "database/mk_lib_database_version.rs"]
-mod mk_lib_database_version;
-#[path = "database/mk_lib_database_version_schema.rs"]
-mod mk_lib_database_version_schema;
-#[path = "mk_lib_logging.rs"]
+#[path = "database"]
+mod database {
+    pub mod mk_lib_database;
+    pub mod mk_lib_database_media;
+    pub mod mk_lib_database_metadata_download_queue;
+    pub mod mk_lib_database_metadata_game;
+    pub mod mk_lib_database_metadata_movie;
+    pub mod mk_lib_database_metadata_person;
+    pub mod mk_lib_database_metadata_tv;
+    pub mod mk_lib_database_option_status;
+    pub mod mk_lib_database_version;
+    pub mod mk_lib_database_version_schema;
+}
+
 mod mk_lib_logging;
-#[path = "mk_lib_network.rs"]
+
 mod mk_lib_network;
 
 #[path = "identification.rs"]
@@ -57,12 +50,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // open the database
-    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool(1).await.unwrap();
-    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
+    let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(1)
+        .await
+        .unwrap();
+    database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
 
     // pull options/api keys and set structs to contain the data
     let option_json: serde_json::Value =
-        mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
+        database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
             .await
             .unwrap();
 
@@ -72,9 +67,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .unwrap()
         .to_string();
     let handle_tmdb = tokio::spawn(async move {
-        let sqlx_pool = mk_lib_database::mk_lib_database_open_pool(1).await.unwrap();
+        let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(1)
+            .await
+            .unwrap();
         loop {
-            let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "themoviedb").await.unwrap();
+            let metadata_to_process = database::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "themoviedb").await.unwrap();
             for download_data in metadata_to_process {
                 metadata_base::metadata_process(
                     &sqlx_pool,
@@ -95,9 +92,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .unwrap()
             .to_string();
         let handle_musicbrainz = tokio::spawn(async move {
-            let sqlx_pool = mk_lib_database::mk_lib_database_open_pool(1).await.unwrap();
+            let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(1)
+                .await
+                .unwrap();
             loop {
-                let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "musicbrainz").await.unwrap();
+                let metadata_to_process = database::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "musicbrainz").await.unwrap();
                 for download_data in metadata_to_process {
                     metadata_base::metadata_process(
                         &sqlx_pool,
@@ -118,9 +117,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .unwrap()
         .to_string();
     let handle_thesportsdb = tokio::spawn(async move {
-        let sqlx_pool = mk_lib_database::mk_lib_database_open_pool(1).await.unwrap();
+        let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(1)
+            .await
+            .unwrap();
         loop {
-            let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "thesportsdb").await.unwrap();
+            let metadata_to_process = database::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "thesportsdb").await.unwrap();
             for download_data in metadata_to_process {
                 metadata_base::metadata_process(
                     &sqlx_pool,
@@ -140,7 +141,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     loop {
         // grab new batch of records to process by content provider
         let metadata_to_process =
-            mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(
+            database::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(
                 &sqlx_pool, "Z",
             )
             .await
@@ -159,7 +160,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             //         .unwrap();
             // update the media row with the json media id and the proper name
             if metadata_uuid != uuid::Uuid::nil() {
-                mk_lib_database_media::mk_lib_database_media_update_metadata_guid(
+                database::mk_lib_database_media::mk_lib_database_media_update_metadata_guid(
                     &sqlx_pool,
                     &download_data.mm_download_provider_id,
                     metadata_uuid,

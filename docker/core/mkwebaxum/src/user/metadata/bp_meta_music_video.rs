@@ -19,9 +19,9 @@ use crate::mk_lib_logging;
 #[path = "../../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;
 
-use crate::mk_lib_database_metadata_music_video;
+use crate::database::mk_lib_database_metadata_music_video;
 
-use crate::mk_lib_database_user;
+use crate::database::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_music_video.html")]
@@ -40,7 +40,7 @@ pub async fn user_metadata_music_video(
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;
     let total_pages: i64 =
-        mk_lib_database_metadata_music_video::mk_lib_database_metadata_music_video_count(
+        database::mk_lib_database_metadata_music_video::mk_lib_database_metadata_music_video_count(
             &sqlx_pool,
             String::new(),
             0,
@@ -55,7 +55,7 @@ pub async fn user_metadata_music_video(
     .await
     .unwrap();
     let music_video_list =
-        mk_lib_database_metadata_music_video::mk_lib_database_metadata_music_video_read(
+        database::mk_lib_database_metadata_music_video::mk_lib_database_metadata_music_video_read(
             &sqlx_pool,
             String::new(),
             db_offset,

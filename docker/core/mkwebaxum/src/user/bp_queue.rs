@@ -16,9 +16,9 @@ use stdext::function_name;
 
 use crate::mk_lib_logging;
 
-use crate::mk_lib_database_user_queue;
+use crate::database::mk_lib_database_user_queue;
 
-use crate::mk_lib_database_user;
+use crate::database::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_user/bss_user_queue.html")]

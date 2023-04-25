@@ -3,24 +3,15 @@
 use askama::Template;
 use axum::{
     extract::Form,
-    extract::Path,
-    http::{header, HeaderMap, Method, StatusCode},
+    http::{Method, StatusCode},
     response::{Html, IntoResponse, Redirect},
-    routing::{get, post},
-    Extension, Router,
+    Extension,
 };
-use axum_session::{
-    DatabasePool, Session, SessionConfig, SessionLayer, SessionPgPool, SessionStore,
-};
+use axum_session::SessionPgPool;
+use axum_session_auth::AuthSession;
 use axum_session_auth::*;
-use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
-use serde::{Deserialize, Serialize};
-use serde_json::json;
-use sqlx::{
-    postgres::{PgConnectOptions, PgPoolOptions},
-    ConnectOptions, PgPool,
-};
-use stdext::function_name;
+use serde::Deserialize;
+use sqlx::PgPool;
 use validator::Validate;
 
 #[path = "mk_lib_database_user.rs"]

@@ -1,6 +1,5 @@
 extern crate xmlparser as xml;
 
-use std::env;
 use std::fs;
 use std::io::Read;
 

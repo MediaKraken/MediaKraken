@@ -12,7 +12,7 @@ use stdext::function_name;
 mod mk_lib_logging;
 
 #[path = "../mk_lib_database_cron.rs"]
-mod mk_lib_database_cron;
+mod database::mk_lib_database_cron;
 
 #[derive(Serialize)]
 struct TemplateCronContext {
@@ -21,7 +21,7 @@ struct TemplateCronContext {
 
 #[get("/cron")]
 pub async fn admin_cron(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
-    let cron_list = mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool)
+    let cron_list = database::mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool)
         .await
         .unwrap();
     Template::render(
@@ -34,7 +34,7 @@ pub async fn admin_cron(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser
 
 // #[post("/cron_delete/<guid>")]
 // pub async fn admin_cron_delete(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser, guid: rocket::serde::uuid::Uuid) -> Template {
-//     mk_lib_database_cron::mk_lib_database_cron_delete(&sqlx_pool, guid).await.unwrap();
+//     database::mk_lib_database_cron::mk_lib_database_cron_delete(&sqlx_pool, guid).await.unwrap();
 // }
 
 /*

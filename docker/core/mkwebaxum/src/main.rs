@@ -29,85 +29,68 @@ use stdext::function_name;
 use tokio::signal;
 use tower::{timeout::error::Elapsed, ServiceBuilder};
 
-#[path = "database/mk_lib_database.rs"]
-mod mk_lib_database;
-#[path = "database/mk_lib_database_cron.rs"]
-mod mk_lib_database_cron;
-#[path = "database/mk_lib_database_game_servers.rs"]
-mod mk_lib_database_game_servers;
-#[path = "database/mk_lib_database_library.rs"]
-mod mk_lib_database_library;
-#[path = "database/mk_lib_database_media.rs"]
-mod mk_lib_database_media;
-#[path = "database/mk_lib_database_media_images.rs"]
-mod mk_lib_database_media_images;
-#[path = "database/mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
-#[path = "database/mk_lib_database_metadata_movie.rs"]
-mod mk_lib_database_metadata_movie;
-#[path = "database/mk_lib_database_metadata_person.rs"]
-mod mk_lib_database_metadata_person;
-#[path = "database/mk_lib_database_network_share.rs"]
-mod mk_lib_database_network_share;
-#[path = "database/mk_lib_database_option_status.rs"]
-mod mk_lib_database_option_status;
-#[path = "database/mk_lib_database_postgresql.rs"]
-mod mk_lib_database_postgresql;
-#[path = "database/mk_lib_database_search.rs"]
-mod mk_lib_database_search;
-#[path = "database/mk_lib_database_sync.rs"]
-mod mk_lib_database_sync;
-#[path = "database/mk_lib_database_user.rs"]
-mod mk_lib_database_user;
-#[path = "database/mk_lib_database_user_profile.rs"]
-mod mk_lib_database_user_profile;
-#[path = "database/mk_lib_database_user_queue.rs"]
-mod mk_lib_database_user_queue;
-#[path = "database/mk_lib_database_version.rs"]
-mod mk_lib_database_version;
-#[path = "database/mk_lib_database_version_schema.rs"]
-mod mk_lib_database_version_schema;
-#[path = "mk_lib_logging.rs"]
+#[path = "database"]
+pub mod database {
+    pub mod mk_lib_database;
+    pub mod mk_lib_database_cron;
+    pub mod mk_lib_database_game_servers;
+    pub mod mk_lib_database_library;
+    pub mod mk_lib_database_media;
+    pub mod mk_lib_database_media_images;
+    pub mod mk_lib_database_metadata_download_queue;
+    pub mod mk_lib_database_metadata_movie;
+    pub mod mk_lib_database_metadata_person;
+    pub mod mk_lib_database_network_share;
+    pub mod mk_lib_database_option_status;
+    pub mod mk_lib_database_postgresql;
+    pub mod mk_lib_database_search;
+    pub mod mk_lib_database_sync;
+    pub mod mk_lib_database_user;
+    pub mod mk_lib_database_user_profile;
+    pub mod mk_lib_database_user_queue;
+    pub mod mk_lib_database_version;
+    pub mod mk_lib_database_version_schema;
+}
+
 mod mk_lib_logging;
 
-// #[path = "admin/bp_backup.rs"]
-// mod bp_admin_backup;
-#[path = "admin/bp_cron.rs"]
-mod bp_admin_cron;
-#[path = "admin/bp_database.rs"]
-mod bp_admin_database;
-// #[path = "admin/bp_docker.rs"]
-// mod bp_admin_docker;
-#[path = "admin/bp_game_servers.rs"]
-mod bp_admin_game_servers;
-// #[path = "admin/bp_hardware.rs"]
-// mod bp_admin_hardware;
-#[path = "admin/bp_home.rs"]
-mod bp_admin_home;
-#[path = "admin/bp_library.rs"]
-mod bp_admin_library;
-#[path = "admin/bp_settings.rs"]
-mod bp_admin_settings;
-#[path = "admin/bp_share.rs"]
-mod bp_admin_share;
-#[path = "admin/bp_torrent.rs"]
-mod bp_admin_torrent;
-// #[path = "admin/bp_user.rs"]
-// mod bp_admin_user;
+#[path = "admin"]
+pub mod admin {
+    pub mod bp_backup;
+    pub mod bp_cron;
+    pub mod bp_database;
+    pub mod bp_docker;
+    pub mod bp_game_servers;
+    pub mod bp_hardware;
+    pub mod bp_home;
+    pub mod bp_library;
+    pub mod bp_settings;
+    pub mod bp_share;
+    pub mod bp_torrent;
+    pub mod bp_user;
+}
 
 #[path = "error/bp_error.rs"]
 mod bp_error;
 
-#[path = "public/bp_about.rs"]
-mod bp_public_about;
-#[path = "public/bp_forgot_password.rs"]
-mod bp_public_forgot_password;
-#[path = "public/bp_login.rs"]
-mod bp_public_login;
-#[path = "public/bp_logout.rs"]
-mod bp_public_logout;
-#[path = "public/bp_register.rs"]
-mod bp_public_register;
+#[path = "public"]
+pub mod public {
+    pub mod bp_about;
+    pub mod bp_forgot_password;
+    pub mod bp_login;
+    pub mod bp_logout;
+    pub mod bp_register;
+}
+
+#[path = "user"]
+pub mod user {
+    pub mod bp_hardware;
+    pub mod bp_home;
+    pub mod bp_profile;
+    pub mod bp_queue;
+    pub mod bp_search;
+    pub mod bp_sync;
+}
 
 // #[path = "user/internet/bp_inter_flickr.rs"]
 // mod bp_user_internet_bp_inter_flickr;
@@ -171,26 +154,10 @@ mod bp_user_playback_bp_comic;
 #[path = "user/playback/bp_video.rs"]
 mod bp_user_playback_bp_video;
 
-#[path = "user/bp_hardware.rs"]
-mod bp_user_hardware;
-#[path = "user/bp_home.rs"]
-mod bp_user_home;
-#[path = "user/bp_profile.rs"]
-mod bp_user_profile;
-#[path = "user/bp_queue.rs"]
-mod bp_user_queue;
-#[path = "user/bp_search.rs"]
-mod bp_user_search;
-#[path = "user/bp_sync.rs"]
-mod bp_user_sync;
-
-#[path = "mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;
 
-#[path = "error_handling.rs"]
 mod error_handling;
 
-#[path = "guard.rs"]
 mod guard;
 
 #[tokio::main]
@@ -252,10 +219,10 @@ async fn main() {
     // }
 
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool(50)
+    let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(50)
         .await
         .unwrap();
-    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
+    database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
 
     // TODO generaqte config file and load it here.   docker secret on install?
     // 'Key::generate()' will generate a new key each restart of the server.
@@ -272,21 +239,21 @@ async fn main() {
     // build our application with routes
     // route_with_tsr creates two routes.....one with trailing slash
     let app = Router::new()
-        //.route_with_tsr("/admin/backup", get(bp_admin_backup::admin_backup))
-        .route_with_tsr("/admin/cron", get(bp_admin_cron::admin_cron))
-        .route_with_tsr("/admin/database", get(bp_admin_database::admin_database))
-        //.route_with_tsr("/admin/docker", get(bp_admin_docker::admin_docker))
+        //.route_with_tsr("/admin/backup", get(bp_backup::admin_backup))
+        .route_with_tsr("/admin/cron", get(admin::bp_cron::admin_cron))
+        .route_with_tsr("/admin/database", get(admin::bp_database::admin_database))
+        //.route_with_tsr("/admin/docker", get(bp_docker::admin_docker))
         .route_with_tsr(
             "/admin//game_servers/:page",
-            get(bp_admin_game_servers::admin_game_servers),
+            get(admin::bp_game_servers::admin_game_servers),
         )
-        //.route_with_tsr("/admin/hardware", get(bp_admin_hardware::admin_hardware))
-        .route_with_tsr("/admin/home", get(bp_admin_home::admin_home))
-        .route_with_tsr("/admin/library/:page", get(bp_admin_library::admin_library))
-        .route_with_tsr("/admin/share/:page", get(bp_admin_share::admin_share))
-        .route_with_tsr("/admin/settings", get(bp_admin_settings::admin_settings))
-        .route_with_tsr("/admin/torrent", get(bp_admin_torrent::admin_torrent))
-        //.route_with_tsr("/admin/user/:page", get(bp_admin_user::admin_user))
+        //.route_with_tsr("/admin/hardware", get(admin::bp_hardware::admin_hardware))
+        .route_with_tsr("/admin/home", get(admin::bp_home::admin_home))
+        .route_with_tsr("/admin/library/:page", get(admin::bp_library::admin_library))
+        .route_with_tsr("/admin/share/:page", get(admin::bp_share::admin_share))
+        .route_with_tsr("/admin/settings", get(admin::bp_settings::admin_settings))
+        .route_with_tsr("/admin/torrent", get(admin::bp_torrent::admin_torrent))
+        //.route_with_tsr("/admin/user/:page", get(admin::bp_user::admin_user))
         // TODO middleware for must be admin
         // .route_with_tsr(
         //     "/user/internet/flickr",
@@ -476,38 +443,38 @@ async fn main() {
             "/user/playback/video",
             get(bp_user_playback_bp_video::user_playback_video),
         )
-        .route_with_tsr("/user/hardware", get(bp_user_hardware::user_hardware))
-        .route_with_tsr("/user/home", get(bp_user_home::user_home))
-        .route_with_tsr("/user/profile", get(bp_user_profile::user_profile))
-        .route_with_tsr("/user/queue", get(bp_user_queue::user_queue))
-        .route_with_tsr("/user/search", get(bp_user_search::user_search))
-        .route_with_tsr("/user/sync", get(bp_user_sync::user_sync))
+        .route_with_tsr("/user/hardware", get(user::bp_hardware::user_hardware))
+        .route_with_tsr("/user/home", get(user::bp_home::user_home))
+        .route_with_tsr("/user/profile", get(user::bp_profile::user_profile))
+        .route_with_tsr("/user/queue", get(user::bp_queue::user_queue))
+        .route_with_tsr("/user/search", get(user::bp_search::user_search))
+        .route_with_tsr("/user/sync", get(user::bp_sync::user_sync))
         // TODO middleware for must be user
-        .route_with_tsr("/logout", get(bp_public_logout::public_logout))
+        .route_with_tsr("/logout", get(public::bp_logout::public_logout))
         .route_with_tsr(
             "/public/login",
-            get(bp_public_login::public_login).post(bp_public_login::public_login_post),
+            get(public::bp_login::public_login).post(public::bp_login::public_login_post),
         )
         .nest("/static", axum_static::static_router("static"))
         .layer(
-            AuthSessionLayer::<mk_lib_database_user::User, i64, SessionPgPool, PgPool>::new(Some(
+            AuthSessionLayer::<database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>::new(Some(
                 sqlx_pool.clone().into(),
             ))
             .with_config(auth_config),
         )
         .layer(SessionLayer::new(session_store))
         // after authsessionlayer so anyone can access
-        .route_with_tsr("/about", get(bp_public_about::public_about))
+        .route_with_tsr("/about", get(public::bp_about::public_about))
         .route_with_tsr("/error/401", get(bp_error::general_not_authorized))
         .route_with_tsr("/error/403", get(bp_error::general_not_administrator))
         .route_with_tsr("/error/500", get(bp_error::general_error))
         .route_with_tsr(
             "/public/forgot_password",
-            get(bp_public_forgot_password::public_forgot_password),
+            get(public::bp_forgot_password::public_forgot_password),
         )
         .route_with_tsr(
             "/public/register",
-            get(bp_public_register::public_register).post(bp_public_register::public_register_post),
+            get(public::bp_register::public_register).post(public::bp_register::public_register_post),
         )
         .layer(Extension(sqlx_pool));
     // .layer(

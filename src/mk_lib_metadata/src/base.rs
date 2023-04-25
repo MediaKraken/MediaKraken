@@ -48,9 +48,8 @@ mod metadata_guessit;
 #[path = "../mk_lib_common_enum_media_type.rs"]
 mod mk_lib_common_enum_media_type;
 
-#[path = "../mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
-use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use crate::database::mk_lib_database_metadata_download_queue;
+use crate::database::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 
 pub async fn metadata_process(
     sqlx_pool: &sqlx::PgPool,
@@ -208,7 +207,7 @@ pub async fn metadata_search(
         .unwrap();
         if metadata_uuid != uuid::Uuid::nil() {
             // TODO add theme.mp3 dl"d above to media table
-            mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+            database::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
                 &sqlx_pool,
                 download_data.mm_download_guid,
             )
@@ -371,7 +370,7 @@ pub async fn metadata_fetch(
             .await;
         }
     }
-    mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+    database::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
         download_data.mm_download_guid,
     )
@@ -426,7 +425,7 @@ pub async fn metadata_image(
         .unwrap();
     }
     // TODO grab the actual image
-    mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+    database::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
         download_data.mm_download_guid,
     )
@@ -450,7 +449,7 @@ pub async fn metadata_review(
         .unwrap();
     }
     // review is last.....so can delete download que
-    mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+    database::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
         download_data.mm_download_guid,
     )
@@ -474,7 +473,7 @@ pub async fn metadata_collection(
         .unwrap();
     }
     // only one record for this so nuke it
-    mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+    database::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
         download_data.mm_download_guid,
     )

@@ -1,9 +1,7 @@
 use torrent_name_parser::Metadata;
 
 pub fn main() {
-    if let Ok(m) =
-        Metadata::from("Robocop.2018.AMZN.WEB-DL.DDP5.1.H.264-KiNGS")
-    {
+    if let Ok(m) = Metadata::from("Robocop.2018.AMZN.WEB-DL.DDP5.1.H.264-KiNGS") {
         println!(
             "{}, {}, {:?}",
             m.title(),

@@ -8,7 +8,6 @@ use std::net::IpAddr;
 use std::str;
 use tokio::net::UdpSocket;
 
-#[path = "mk_lib_logging.rs"]
 mod mk_lib_logging;
 
 #[tokio::main]

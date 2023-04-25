@@ -11,7 +11,7 @@ use stdext::function_name;
 mod mk_lib_logging;
 
 #[path = "../mk_lib_database_user_profile.rs"]
-mod mk_lib_database_user_profile;
+mod database::mk_lib_database_user_profile;
 
 #[get("/profile")]
 pub async fn user_profile(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {

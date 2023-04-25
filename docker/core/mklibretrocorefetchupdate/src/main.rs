@@ -16,15 +16,14 @@ fn is_hidden(entry: &DirEntry) -> bool {
         .unwrap_or(false)
 }
 
-#[path = "mk_lib_compression.rs"]
 mod mk_lib_compression;
-#[path = "mk_lib_file.rs"]
+
 mod mk_lib_file;
-#[path = "mk_lib_hash_crc32.rs"]
+
 mod mk_lib_hash_crc32;
-#[path = "mk_lib_logging.rs"]
+
 mod mk_lib_logging;
-#[path = "mk_lib_network.rs"]
+
 mod mk_lib_network;
 
 #[tokio::main]
@@ -54,7 +53,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let file_name = entry.path().display().to_string();
         emulation_cores.insert(
             file_name,
-            mk_lib_hash_crc32::mk_file_hash_crc32(&entry.path().display().to_string()).await.unwrap(),
+            mk_lib_hash_crc32::mk_file_hash_crc32(&entry.path().display().to_string())
+                .await
+                .unwrap(),
         );
     }
     println!("hash: {:?}", emulation_cores);

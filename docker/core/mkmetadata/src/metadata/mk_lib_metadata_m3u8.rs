@@ -11,7 +11,7 @@ use crate::mk_lib_logging;
 const M3U_HEADER: String = "EXTM3U\n";
 const M3U_LINE_HEADER: String = "EXTINF:";
 
-pub fn mk_lib_metadata_m3u8_validate_playlist(playlist: &str) {
+pub async fn mk_lib_metadata_m3u8_validate_playlist(playlist: &str) {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(

@@ -15,7 +15,7 @@ mod mk_lib_logging;
 mod mk_lib_common_pagination;
 
 #[path = "../../mk_lib_database_metadata_person.rs"]
-mod mk_lib_database_metadata_person;
+mod database::mk_lib_database_metadata_person;
 
 #[derive(Serialize)]
 struct TemplateMetaPersonContext {
@@ -30,7 +30,7 @@ pub async fn user_metadata_person(
     page: i32,
 ) -> Template {
     let db_offset: i64 = (page * 30) - 30;
-    let total_pages: i64 = mk_lib_database_metadata_person::mk_lib_database_metadata_person_count(
+    let total_pages: i64 = database::mk_lib_database_metadata_person::mk_lib_database_metadata_person_count(
         &sqlx_pool,
         String::new(),
     )
@@ -43,7 +43,7 @@ pub async fn user_metadata_person(
     )
     .await
     .unwrap();
-    let person_list = mk_lib_database_metadata_person::mk_lib_database_metadata_person_read(
+    let person_list = database::mk_lib_database_metadata_person::mk_lib_database_metadata_person_read(
         &sqlx_pool,
         String::new(),
         db_offset,

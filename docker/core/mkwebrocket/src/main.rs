@@ -22,9 +22,9 @@ use std::path::Path;
 use stdext::function_name;
 
 #[path = "mk_lib_database.rs"]
-mod mk_lib_database;
+mod database::mk_lib_database;
 #[path = "mk_lib_database_version.rs"]
-mod mk_lib_database_version;
+mod database::mk_lib_database_version;
 #[path = "mk_lib_file.rs"]
 mod mk_lib_file;
 #[path = "mk_lib_logging.rs"]
@@ -221,10 +221,10 @@ async fn main() -> Result<(), Error> {
     }
 
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool(50)
+    let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(50)
         .await
         .unwrap();
-    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, true).await;
+    database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, true).await;
 
     // setup auth
     let users: Users = sqlx_pool.clone().into();

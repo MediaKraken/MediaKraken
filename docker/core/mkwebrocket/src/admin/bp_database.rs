@@ -14,10 +14,10 @@ use stdext::function_name;
 mod mk_lib_logging;
 
 #[path = "../mk_lib_database_version.rs"]
-mod mk_lib_database_version;
+mod database::mk_lib_database_version;
 
 #[path = "../mk_lib_database_postgresql.rs"]
-mod mk_lib_database_postgresql;
+mod database::mk_lib_database_postgresql;
 
 #[derive(Serialize)]
 struct TemplateDatabaseContext {
@@ -29,16 +29,16 @@ struct TemplateDatabaseContext {
 
 #[get("/database")]
 pub async fn admin_database(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser) -> Template {
-    let pg_version = mk_lib_database_version::mk_lib_database_postgresql_version(&sqlx_pool)
+    let pg_version = database::mk_lib_database_version::mk_lib_database_postgresql_version(&sqlx_pool)
         .await
         .unwrap();
-    let pg_table_size = mk_lib_database_postgresql::mk_lib_database_table_size(&sqlx_pool)
+    let pg_table_size = database::mk_lib_database_postgresql::mk_lib_database_table_size(&sqlx_pool)
         .await
         .unwrap();
-    let pg_table_row_count = mk_lib_database_postgresql::mk_lib_database_table_rows(&sqlx_pool)
+    let pg_table_row_count = database::mk_lib_database_postgresql::mk_lib_database_table_rows(&sqlx_pool)
         .await
         .unwrap();
-    let pg_worker_count = mk_lib_database_postgresql::mk_lib_database_parallel_workers(&sqlx_pool)
+    let pg_worker_count = database::mk_lib_database_postgresql::mk_lib_database_parallel_workers(&sqlx_pool)
         .await
         .unwrap();
     Template::render(

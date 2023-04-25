@@ -11,7 +11,7 @@ use stdext::function_name;
 mod mk_lib_logging;
 
 #[path = "../mk_lib_database_user_queue.rs"]
-mod mk_lib_database_user_queue;
+mod database::mk_lib_database_user_queue;
 
 #[get("/queue")]
 pub async fn user_queue(sqlx_pool: &rocket::State<sqlx::PgPool>, user: User) -> Template {

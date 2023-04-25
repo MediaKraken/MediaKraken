@@ -1,6 +1,6 @@
-use tokio::net::UdpSocket;
 use std::io;
 use std::str;
+use tokio::net::UdpSocket;
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
@@ -13,8 +13,7 @@ async fn main() -> io::Result<()> {
                 Ok(v) => v,
                 Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
             };
-            if s == "who is MediaKrakenServer?"
-            {
+            if s == "who is MediaKrakenServer?" {
                 println!("{:?} bytes received from {:?} {:?}", len, addr, s);
 
                 let len = sock.send_to(b"10.0.0.141:8903", addr).await?;

@@ -16,9 +16,9 @@ use stdext::function_name;
 
 use crate::mk_lib_logging;
 
-use crate::mk_lib_database_media_images;
+use crate::database::mk_lib_database_media_images;
 
-use crate::mk_lib_database_user;
+use crate::database::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_image_gallery.html")]

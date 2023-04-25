@@ -7,17 +7,15 @@ use sqlx::Row;
 use std::error::Error;
 use stdext::function_name;
 
-#[path = "database/mk_lib_database.rs"]
-mod mk_lib_database;
-#[path = "database/mk_lib_database_library.rs"]
-mod mk_lib_database_library;
-#[path = "database/mk_lib_database_option_status.rs"]
-mod mk_lib_database_option_status;
-#[path = "database/mk_lib_database_version.rs"]
-mod mk_lib_database_version;
-#[path = "database/mk_lib_database_version_schema.rs"]
-mod mk_lib_database_version_schema;
-#[path = "mk_lib_logging.rs"]
+#[path = "database"]
+mod database {
+    pub mod mk_lib_database;
+    pub mod mk_lib_database_library;
+    pub mod mk_lib_database_option_status;
+    pub mod mk_lib_database_version;
+    pub mod mk_lib_database_version_schema;
+}
+
 mod mk_lib_logging;
 
 #[tokio::main]
@@ -25,12 +23,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await.unwrap();
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
+            .await
+            .unwrap();
     }
 
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool(1).await.unwrap();
-    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
+    let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(1)
+        .await
+        .unwrap();
+    database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
 
     // open rabbit connection
     let mut rabbit_connection =
@@ -43,9 +45,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let mut inotify = Inotify::init().expect("Failed to initialize inotify");
 
-    for row_data in mk_lib_database_library::mk_lib_database_library_read(&sqlx_pool, 0, 99999)
-        .await
-        .unwrap()
+    for row_data in
+        database::mk_lib_database_library::mk_lib_database_library_read(&sqlx_pool, 0, 99999)
+            .await
+            .unwrap()
     {
         let lib_path: String = row_data.mm_media_dir_path;
         inotify

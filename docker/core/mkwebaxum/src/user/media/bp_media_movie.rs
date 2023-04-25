@@ -25,9 +25,9 @@ use crate::mk_lib_logging;
 #[path = "../../mk_lib_common_pagination.rs"]
 mod mk_lib_common_pagination;
 
-use crate::mk_lib_database_media_movie;
+use crate::database::mk_lib_database_media_movie;
 
-use crate::mk_lib_database_user;
+use crate::database::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_movie.html")]
@@ -46,7 +46,7 @@ pub async fn user_media_movie(
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;
     let total_pages: i64 =
-        mk_lib_database_media_movie::mk_lib_database_media_movie_count(&sqlx_pool, String::new())
+        database::mk_lib_database_media_movie::mk_lib_database_media_movie_count(&sqlx_pool, String::new())
             .await
             .unwrap();
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
@@ -56,7 +56,7 @@ pub async fn user_media_movie(
     )
     .await
     .unwrap();
-    let movie_list = mk_lib_database_media_movie::mk_lib_database_media_movie_read(
+    let movie_list = database::mk_lib_database_media_movie::mk_lib_database_media_movie_read(
         &sqlx_pool,
         String::new(),
         db_offset,
