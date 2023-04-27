@@ -4,8 +4,6 @@
 
 use ipnet::Ipv4Subnets;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
-use stdext::function_name;
 
 // nmap -sU -sS -p U:137,T:139 --script smb-enum-shares 192.168.1.122 -oX scan.xml 1>/dev/null 2>/dev/null
 // nmap -sS -sV -p 111,2049 --script nfs-showmount 192.168.1.122 -oX scan.xml 1>/dev/null 2>/dev/null
@@ -47,7 +45,9 @@ pub async fn mk_network_share_scan(
             mm_share_type: "smb".to_string(),
             mm_share_xml: mk_lib_file::mk_read_file_data("scan.xml").await.unwrap(),
         };
-        vec_share.push(share_data);
+        if !share_data.mm_share_xml.contains("(0 hosts up)") {
+            vec_share.push(share_data);
+        }
         // scan for nfs
         std::process::Command::new("nmap")
             .arg("-sS")
@@ -65,7 +65,9 @@ pub async fn mk_network_share_scan(
             mm_share_type: "nfs".to_string(),
             mm_share_xml: mk_lib_file::mk_read_file_data("scan.xml").await.unwrap(),
         };
-        vec_share.push(share_data);
+        if !share_data.mm_share_xml.contains("(0 hosts up)") {
+            vec_share.push(share_data);
+        }
     }
     Ok(vec_share)
 }

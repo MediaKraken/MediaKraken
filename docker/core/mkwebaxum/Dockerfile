@@ -18,7 +18,7 @@ RUN if [ "${BRANCHTAG}" = "prod" ]; \
 ####################################################################################################
 FROM debian:bullseye-20230109-slim AS runtime
 WORKDIR /mediakraken
-RUN apt-get update && apt-get -y install wget \
+RUN apt-get update && apt-get -y install wget nmap \
   && wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.9.0/wait \
   && chmod +x /wait \
   && apt-get clean \
