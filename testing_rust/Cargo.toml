@@ -21,6 +21,7 @@ members = [
 #    "test_rocket_auth",
 #    "test_rocket_auth2",
     "test_roxmltree",
+    "test_share_scanner",
     "test_substring",
     "test_torrent_name_parse",
     "test_type_conversion",

@@ -28,3 +28,18 @@ pub async fn mk_file_hash_blake3(file_to_read: &str) -> Result<String, Box<dyn E
     let checksum = hasher.finalize();
     Ok(format!("{:x}", checksum))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    async fn test_mk_file_hash_blake3() {
+        assert_eq!(
+            "8ded73d934fbe4d9cf796dd562d8fbc64f00089b049e66dab39c57b6d9a1c5b2",
+            mk_file_hash_blake3("testing_data/HashCalc.txt")
+                .await
+                .unwrap()
+        );
+    }
+}

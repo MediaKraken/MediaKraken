@@ -20,3 +20,18 @@ pub async fn mk_file_hash_ed2k(file_to_read: &str) -> Result<String, Box<dyn Err
     let ed2k = Ed2k::from_path(file_to_read)?;
     return ed2k;
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    async fn test_mk_file_hash_ed2k() {
+        assert_eq!(
+            "82711e358a7d031aedafdb01c1e986a4",
+            mk_file_hash_ed2k("testing_data/HashCalc.txt")
+                .await
+                .unwrap()
+        );
+    }
+}

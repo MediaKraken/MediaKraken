@@ -12,8 +12,6 @@ use stdext::function_name;
 
 use crate::mk_lib_file;
 
-use crate::mk_lib_logging;
-
 #[derive(Debug, Deserialize, Serialize)]
 pub struct NMAPShareList {
     pub mm_share_type: String,
@@ -23,15 +21,6 @@ pub struct NMAPShareList {
 pub async fn mk_network_share_scan(
     subnet_prefix: String,
 ) -> Result<Vec<NMAPShareList>, Box<dyn std::error::Error>> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let subnets = Ipv4Subnets::new(
         format!("{}.1", subnet_prefix).parse().unwrap(),
         format!("{}.255", subnet_prefix).parse().unwrap(),
@@ -40,16 +29,7 @@ pub async fn mk_network_share_scan(
     println!("Subnets: {:?}", subnets);
     let mut vec_share = Vec::new();
     for ip_address in subnets.enumerate() {
-        println!("IP Addr: {:?}", ip_address);
-        #[cfg(debug_assertions)]
-        {
-            mk_lib_logging::mk_logging_post_elk(
-                std::module_path!(),
-                json!({ "ip_address": format!("{:?}", ip_address) }),
-            )
-            .await
-            .unwrap();
-        }
+        println!("IP Addr: {:?}", ip_address.1);
         // scan for smb
         std::process::Command::new("nmap")
             .arg("-sU")

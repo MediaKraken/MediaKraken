@@ -28,3 +28,18 @@ pub async fn mk_file_hash_crc32(file_to_read: &str) -> Result<String, Box<dyn Er
     let checksum = hasher.finalize();
     Ok(format!("{:x}", checksum))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    async fn test_mk_file_hash_crc32() {
+        assert_eq!(
+            "ba0d5184",
+            mk_file_hash_crc32("testing_data/HashCalc.txt")
+                .await
+                .unwrap()
+        );
+    }
+}

@@ -18,8 +18,8 @@ mod mk_provider_thegamesdb;
 use crate::database::mk_lib_database_metadata_download_queue;
 use crate::database::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 
-#[path = "../database/mk_lib_database_metadata_game.rs"]
-mod mk_lib_database_metadata_game;
+#[path = "../mk_lib_database_metadata_game.rs"]
+mod database::mk_lib_database_metadata_game;
 
 #[path = "../mk_lib_hash_sha1.rs"]
 mod mk_lib_hash_sha1;
@@ -56,12 +56,11 @@ pub async fn metadata_game_lookup(
         let sha1_hash =
             mk_lib_hash_sha1::mk_file_hash_sha1(&download_data.mm_download_path.as_ref().unwrap())
                 .unwrap();
-        metadata_uuid =
-            database::mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(
-                &sqlx_pool, sha1_hash,
-            )
-            .await
-            .unwrap();
+        metadata_uuid = database::mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(
+            &sqlx_pool, sha1_hash,
+        )
+        .await
+        .unwrap();
     }
     Ok(metadata_uuid)
 }

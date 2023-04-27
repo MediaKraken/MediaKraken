@@ -91,3 +91,13 @@ pub async fn mk_directory_walk(dir_path: String) -> Result<Vec<String>, Box<dyn 
     }
     Ok(file_list)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    async fn test_mk_read_file_data() {
+        assert_eq!("thisisafileforhashcalctests", mk_read_file_data("testing_data/HashCalc.txt").await.unwrap());
+    }
+}

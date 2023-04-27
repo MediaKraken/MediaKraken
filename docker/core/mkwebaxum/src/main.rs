@@ -77,6 +77,7 @@ mod bp_error;
 pub mod public {
     pub mod bp_about;
     pub mod bp_forgot_password;
+    pub mod bp_health_check;
     pub mod bp_login;
     pub mod bp_logout;
     pub mod bp_register;
@@ -476,6 +477,7 @@ async fn main() {
             "/public/register",
             get(public::bp_register::public_register).post(public::bp_register::public_register_post),
         )
+        .route_with_tsr("/health_check", get(public::bp_health_check::public_health_check))
         .layer(Extension(sqlx_pool));
     // .layer(
     //     ServiceBuilder::new()

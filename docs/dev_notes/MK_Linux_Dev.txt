@@ -4,7 +4,7 @@ apt-get install lld clang
   pg 8 code coverage
   cargo fmt    - do entire project at once
   cargo audit
-
+  sqlx compile time checks
 
 th-mkbuild-1
 debian 11
