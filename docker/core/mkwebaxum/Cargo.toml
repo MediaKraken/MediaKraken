@@ -19,6 +19,7 @@ async-trait = "0.1.68"
 axum = { version = "0.6.16", features = ["form", "http2", "json", "ws"] }
 axum-extra = "0.7.3"
 axum-handle-error-extract = "0.1.0"
+axum-prometheus = "0.3.2"
 axum_session = { version = "0.2.1", features = [ "postgres-rustls"] }
 axum_session_auth = { version = "0.2.0", features = [ "postgres-rustls" ] }
 axum_static = "1.2.1"

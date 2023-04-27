@@ -12,6 +12,7 @@ use axum::{
 };
 use axum_extra::routing::RouterExt;
 use axum_handle_error_extract::HandleErrorLayer;
+use axum_prometheus::{EndpointLabel, PrometheusMetricLayerBuilder};
 use axum_session::{
     DatabasePool, Key, Session, SessionConfig, SessionLayer, SessionPgPool, SessionStore,
 };
@@ -237,6 +238,12 @@ async fn main() {
         SessionStore::<SessionPgPool>::new(Some(sqlx_pool.clone().into()), session_config);
     session_store.initiate().await.unwrap();
 
+    let (prometheus_layer, metric_handle) = PrometheusMetricLayerBuilder::new()
+        .with_endpoint_label_type(EndpointLabel::MatchedPathWithFallbackFn(|path| {
+            format!("{}_changed", path)
+        }))
+        .with_default_metrics()
+        .build_pair();
     // build our application with routes
     // route_with_tsr creates two routes.....one with trailing slash
     let app = Router::new()
@@ -478,6 +485,8 @@ async fn main() {
             get(public::bp_register::public_register).post(public::bp_register::public_register_post),
         )
         .route_with_tsr("/health_check", get(public::bp_health_check::public_health_check))
+        .route("/metrics", get(|| async move { metric_handle.render() }))
+        .layer(prometheus_layer)
         .layer(Extension(sqlx_pool));
     // .layer(
     //     ServiceBuilder::new()
