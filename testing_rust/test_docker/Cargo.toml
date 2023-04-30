@@ -1,0 +1,26 @@
+[package]
+name = "mktestdocker"
+version = "0.0.1"
+edition = "2021"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
+
+[dependencies]
+chrono = { version = "0.4.24", features = ["serde"] }
+docker-api = { version = "0.13", features = ["swarm"] }
+futures = "0.3.28"
+reqwest = { version = "0.11.16", default-features = false, features = [
+    "json",
+    "native-tls",
+] }
+serde = { version = "1.0.159", features = ["derive"] }
+serde_json = "1.0.96"
+stdext = "0.3.1"
+tokio = { version = "1.27.0", features = ["full"] }
+
+[dev-dependencies]
+tokio-test = "*"

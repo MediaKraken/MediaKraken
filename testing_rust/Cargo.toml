@@ -3,6 +3,7 @@
 members = [
     "test_axum_auth",
     "test_axum_auth_minimal",
+    "test_docker",
     "test_docker_api",
     "test_docker_running_api",
     "test_docker_running_port_api",

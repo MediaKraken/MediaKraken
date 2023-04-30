@@ -28,6 +28,7 @@ use std::path::Path;
 use std::time::Duration;
 use stdext::function_name;
 use tokio::signal;
+use tower::timeout::TimeoutLayer;
 use tower::{timeout::error::Elapsed, ServiceBuilder};
 
 #[path = "database"]
@@ -57,10 +58,10 @@ mod mk_lib_logging;
 
 #[path = "admin"]
 pub mod admin {
-    pub mod bp_backup;
+//    pub mod bp_backup;
     pub mod bp_cron;
     pub mod bp_database;
-    pub mod bp_docker;
+//    pub mod bp_docker;
     pub mod bp_game_servers;
     pub mod bp_hardware;
     pub mod bp_home;
@@ -262,7 +263,7 @@ async fn main() {
         .route_with_tsr("/admin/settings", get(admin::bp_settings::admin_settings))
         .route_with_tsr("/admin/torrent", get(admin::bp_torrent::admin_torrent))
         //.route_with_tsr("/admin/user/:page", get(admin::bp_user::admin_user))
-        // TODO middleware for must be admin
+        .route_layer(axum::middleware::from_fn(|req, next|guard::auth(req, next, Method::GET, true)))
         // .route_with_tsr(
         //     "/user/internet/flickr",
         //     get(bp_user_internet_bp_inter_flickr::user_inter_flickr),
@@ -457,7 +458,7 @@ async fn main() {
         .route_with_tsr("/user/queue", get(user::bp_queue::user_queue))
         .route_with_tsr("/user/search", get(user::bp_search::user_search))
         .route_with_tsr("/user/sync", get(user::bp_sync::user_sync))
-        // TODO middleware for must be user
+        .route_layer(axum::middleware::from_fn(|req, next|guard::auth(req, next, Method::GET, false)))
         .route_with_tsr("/logout", get(public::bp_logout::public_logout))
         .route_with_tsr(
             "/public/login",
@@ -487,12 +488,14 @@ async fn main() {
         .route_with_tsr("/health_check", get(public::bp_health_check::public_health_check))
         .route("/metrics", get(|| async move { metric_handle.render() }))
         .layer(prometheus_layer)
-        .layer(Extension(sqlx_pool));
-    // .layer(
-    //     ServiceBuilder::new()
-    //         .layer(HandleErrorLayer::new(handle_error))
-    //         .timeout(Duration::from_secs(10))
-    // );
+        .layer(Extension(sqlx_pool))
+        .layer(
+            ServiceBuilder::new()
+                .layer(HandleErrorLayer::new(|_: BoxError| async {
+                    StatusCode::REQUEST_TIMEOUT
+                }))
+                .layer(TimeoutLayer::new(Duration::from_secs(10)))
+    );
     // add a fallback service for handling routes to unknown paths
     let app = app.fallback(bp_error::general_not_found);
 

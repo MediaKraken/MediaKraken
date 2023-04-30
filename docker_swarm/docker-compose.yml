@@ -64,7 +64,7 @@ services:
       - mediakraken_network
 
   filebeat:
-    image: elastic/filebeat:7.17.8
+    image: elastic/filebeat:7.17.9
     environment:
       - ELASTICSEARCH_HOSTS=mkelk.beaverbay.local:9200
       - KIBANA_HOSTS=mkelk.beaverbay.local:5601
@@ -306,7 +306,7 @@ services:
       replicas: 1
 
   portainer:
-    image: portainer/portainer-ce:2.16.2-alpine
+    image: portainer/portainer-ce:2.18.1-alpine
     command: -H tcp://tasks.portaineragent:9001 --tlsskipverify
     ports:
       - "9000:9000"
@@ -320,7 +320,7 @@ services:
       replicas: 1
 
   portaineragent:
-    image: portainer/agent:linux-amd64-2.16.2-alpine
+    image: portainer/agent:linux-amd64-2.18.1-alpine
     environment:
       AGENT_CLUSTER_ADDR: tasks.portaineragent
       # AGENT_PORT: 9001
@@ -489,7 +489,7 @@ services:
     image: mediakraken/mkwebaxum:${BRANCH}
     # TODO remove after testing.......don't want to bypass proxy
     ports:
-      - "8080:8080"    
+      - "8080:8080"
     secrets:
       - db_password
       - secure_key
