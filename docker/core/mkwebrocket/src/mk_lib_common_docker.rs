@@ -3,12 +3,14 @@
 // https://github.com/vv9k/docker-api-rs
 // docker-api = { version = "0.12.1", features = ["swarm"] }
 
+extern crate tokio;
 use crate::mk_lib_logging;
+use futures::StreamExt;
 
 use docker_api::opts::ContainerListOpts;
 use docker_api::opts::LogsOpts;
 use docker_api::opts::ServiceListOpts;
-use docker_api::{conn::TtyChunk, Docker, Result};
+use docker_api::{Docker, Result};
 use serde_json::json;
 use stdext::function_name;
 
@@ -80,7 +82,7 @@ pub async fn mk_common_docker_container_logs(id: String) -> Result<Vec<String>> 
         .map(|chunk| match chunk {
             Ok(chunk) => chunk.to_vec(),
             Err(e) => {
-                eprintln!("Error: {}", e);
+                eprintln!("Error: {e}");
                 vec![]
             }
         })
@@ -278,4 +280,81 @@ pub async fn mk_common_docker_info() -> Result<serde_json::Value> {
         Err(e) => eprintln!("Error: {}", e),
     };
     Ok(logs_list)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_mk_common_docker_container_inspect() {
+        let test_results = mk_common_docker_container_inspect("mkstack_example".to_string())
+            .await
+            .unwrap();
+        println!("Cont Inspect: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_container_list() {
+        let test_results = mk_common_docker_container_list().await.unwrap();
+        println!("Cont List: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_container_logs() {
+        let test_results = mk_common_docker_container_logs("mkstack_example".to_string())
+            .await
+            .unwrap();
+        println!("Cont Logs: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_container_stats() {
+        let test_results = mk_common_docker_container_stats("mkstack_example".to_string())
+            .await
+            .unwrap();
+        println!("Cont Stats: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_service_inspect() {
+        let test_results = mk_common_docker_service_inspect("mkstack_example".to_string())
+            .await
+            .unwrap();
+        println!("Service Inspect: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_service_list() {
+        let test_results = mk_common_docker_service_list().await.unwrap();
+        println!("Service List: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_service_logs() {
+        let test_results = mk_common_docker_service_logs("mkstack_example".to_string())
+            .await
+            .unwrap();
+        println!("Service Logs: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_volume_inspect() {
+        let test_results = mk_common_docker_volume_inspect("mkstack_example".to_string())
+            .await
+            .unwrap();
+        println!("Volume Inspect: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_volume_list() {
+        let test_results = mk_common_docker_volume_list().await.unwrap();
+        println!("Volume List: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_info() {
+        let test_results = mk_common_docker_info().await.unwrap();
+        println!("Info: {:?}", test_results);
+    }
 }

@@ -23,3 +23,19 @@ pub async fn mk_file_hash_sha1(file_to_read: &str) -> io::Result<String> {
     let hash = hasher.finalize();
     Ok(format!("{:x}", hash))
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    async fn test_mk_file_hash_sha1() {
+        assert_eq!(
+            "b2dfeef48e0ad8b260674dcf2a8fb92f1456afba",
+            mk_file_hash_sha1("testing_data/HashCalc.txt")
+                .await
+                .unwrap()
+        );
+    }
+}

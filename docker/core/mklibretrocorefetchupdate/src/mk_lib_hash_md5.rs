@@ -26,3 +26,18 @@ pub async fn mk_file_hash_md5(file_to_read: &str) -> Result<String, Box<dyn Erro
     let result = hasher.finalize();
     Ok(format!("{:x}", result))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    async fn test_mk_file_hash_md5() {
+        assert_eq!(
+            "4efd2e93b6b8525d93c310ef232639eb",
+            mk_file_hash_md5("testing_data/HashCalc.txt")
+                .await
+                .unwrap()
+        );
+    }
+}

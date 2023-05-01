@@ -32,7 +32,9 @@ pub async fn mk_lib_database_network_share_count(
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBShareList {
     pub mm_network_share_guid: uuid::Uuid,
-    pub mm_network_share_xml: String,
+    pub mm_network_share_ip: std::net::IpAddr,
+    pub mm_network_share_path: String,
+    pub mm_network_share_comment: String,
 }
 
 pub async fn mk_lib_database_network_share_read(
@@ -49,12 +51,16 @@ pub async fn mk_lib_database_network_share_read(
     }
     let select_query = sqlx::query(
         "select mm_network_share_guid, \
-        mm_network_share_xml from mm_network_shares",
+        mm_network_share_ip, \
+        mm_network_share_path, \
+        mm_network_share_comment from mm_network_shares",
     );
     let table_rows: Vec<DBShareList> = select_query
         .map(|row: PgRow| DBShareList {
             mm_network_share_guid: row.get("mm_network_share_guid"),
-            mm_network_share_xml: row.get("mm_network_share_xml"),
+            mm_network_share_ip: row.get("mm_network_share_ip"),
+            mm_network_share_path: row.get("mm_network_share_path"),
+            mm_network_share_comment: row.get("mm_network_share_comment"),
         })
         .fetch_all(sqlx_pool)
         .await?;
@@ -88,7 +94,9 @@ pub async fn mk_lib_database_network_share_delete(
 
 pub async fn mk_lib_database_network_share_insert(
     sqlx_pool: &sqlx::PgPool,
-    network_share_xml: String,
+    network_share_ip: std::net::IpAddr,
+    network_share_path: String,
+    network_share_comment: String,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     #[cfg(debug_assertions)]
     {
@@ -103,11 +111,15 @@ pub async fn mk_lib_database_network_share_insert(
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_network_shares \
-        (mm_network_share_guid, mm_network_share_xml) \
-        values ($1, $2)",
+        (mm_network_share_ip, \
+        mm_network_share_path, \
+        mm_network_share_comment) \
+        values ($1, $2, $3, $4)",
     )
     .bind(new_guid)
-    .bind(network_share_xml)
+    .bind(network_share_ip)
+    .bind(network_share_path)
+    .bind(network_share_comment)
     .execute(&mut transaction)
     .await?;
     transaction.commit().await?;

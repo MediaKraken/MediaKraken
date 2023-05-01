@@ -27,8 +27,7 @@ use crate::database::mk_lib_database_option_status;
 
 use crate::database::mk_lib_database_user;
 
-#[path = "../mk_lib_network.rs"]
-mod mk_lib_network;
+use crate::mk_lib_network;
 
 #[derive(Serialize)]
 struct TemplateHomeStreamListContext {

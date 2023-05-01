@@ -58,10 +58,10 @@ mod mk_lib_logging;
 
 #[path = "admin"]
 pub mod admin {
-//    pub mod bp_backup;
+    //    pub mod bp_backup;
     pub mod bp_cron;
     pub mod bp_database;
-//    pub mod bp_docker;
+    //    pub mod bp_docker;
     pub mod bp_game_servers;
     pub mod bp_hardware;
     pub mod bp_home;
@@ -162,6 +162,8 @@ mod mk_lib_common_enum_media_type;
 mod error_handling;
 
 mod guard;
+
+mod mk_lib_network;
 
 #[tokio::main]
 async fn main() {

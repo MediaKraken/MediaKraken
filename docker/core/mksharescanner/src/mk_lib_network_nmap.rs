@@ -10,15 +10,19 @@ use stdext::function_name;
 // nmap -sU -sS -p U:137,T:139 --script smb-enum-shares 192.168.1.122 -oX scan.xml 1>/dev/null 2>/dev/null
 // nmap -sS -sV -p 111,2049 --script nfs-showmount 192.168.1.122 -oX scan.xml 1>/dev/null 2>/dev/null
 
-#[path = "mk_lib_file.rs"]
-mod mk_lib_file;
+// nmap -sV --script=broadcast-upnp-info 192.168.1.1
+// way faster
+// nmap -sU -p 1900 --script=upnp-info 192.168.1.1
+
+use crate::mk_lib_file;
 
 use crate::mk_lib_logging;
 
-#[derive(Debug, Deserialize, Serialize)]
 pub struct NMAPShareList {
     pub mm_share_type: String,
-    pub mm_share_xml: String,
+    pub mm_share_ip: String,
+    pub mm_share_path: String,
+    pub mm_share_comment: String,
 }
 
 pub async fn mk_network_share_scan(
@@ -36,10 +40,12 @@ pub async fn mk_network_share_scan(
     let subnets = Ipv4Subnets::new(
         format!("{}.1", subnet_prefix).parse().unwrap(),
         format!("{}.255", subnet_prefix).parse().unwrap(),
-        24,
+        32,
     );
+    println!("Subnets: {:?}", subnets);
     let mut vec_share = Vec::new();
     for ip_address in subnets.enumerate() {
+        println!("IP Addr: {:?}", ip_address);
         #[cfg(debug_assertions)]
         {
             mk_lib_logging::mk_logging_post_elk(
@@ -57,18 +63,32 @@ pub async fn mk_network_share_scan(
             .arg("U:137,T:139")
             .arg("--script")
             .arg("smb-enum-shares")
-            .arg(format!("{:?}", ip_address))
+            .arg(format!("{:?}", ip_address.1))
             .arg("-oX")
             .arg("scan.xml")
-            .arg("1>/dev/null")
-            .arg("2>/dev/null")
-            .spawn()
+            .output()
             .unwrap();
-        let share_data = NMAPShareList {
-            mm_share_type: "smb".to_string(),
-            mm_share_xml: mk_lib_file::mk_read_file_data("scan.xml").await.unwrap(),
-        };
-        vec_share.push(share_data);
+        let file_data = mk_lib_file::mk_read_file_data("scan.xml").await.unwrap();
+        if !file_data.contains("(0 hosts up)") && file_data.contains("table key=") {
+            let nmap_json = xml_string_to_json(file_data.to_string(), &conf).unwrap();
+            for val in nmap_json["nmaprun"]["host"]["hostscript"]["script"]
+                .as_object()
+                .unwrap()
+            {
+                let (key, v) = val;
+                if key == "table" {
+                    for share_ndx in 0..v.as_array().unwrap().len() {
+                        let share_data = NMAPShareList {
+                            mm_share_type: "smb".to_string(),
+                            mm_share_ip: format!("{:?}", ip_address.1),
+                            mm_share_path: v[share_ndx]["@key"].to_string(),
+                            mm_share_comment: v[share_ndx]["elem"][1]["#text"].to_string(),
+                        };
+                        vec_share.push(share_data);
+                    }
+                }
+            }
+        }
         // scan for nfs
         std::process::Command::new("nmap")
             .arg("-sS")
@@ -77,12 +97,10 @@ pub async fn mk_network_share_scan(
             .arg("111,2049")
             .arg("--script")
             .arg("nfs-showmount")
-            .arg(format!("{:?}", ip_address))
+            .arg(format!("{:?}", ip_address.1))
             .arg("-oX")
             .arg("scan.xml")
-            .arg("1>/dev/null")
-            .arg("2>/dev/null")
-            .spawn()
+            .output()
             .unwrap();
         let share_data = NMAPShareList {
             mm_share_type: "nfs".to_string(),

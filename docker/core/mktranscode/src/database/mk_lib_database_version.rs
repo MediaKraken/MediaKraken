@@ -6,7 +6,7 @@ use serde_json::json;
 use stdext::function_name;
 use tokio::time::{sleep, Duration};
 
-pub static DATABASE_VERSION: i32 = 50;
+pub static DATABASE_VERSION: i32 = 51;
 
 use crate::database::mk_lib_database_version_schema;
 

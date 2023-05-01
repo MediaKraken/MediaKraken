@@ -32,7 +32,7 @@ pub async fn mk_lib_database_network_share_count(
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBShareList {
     pub mm_network_share_guid: uuid::Uuid,
-    pub mm_network_share_ip: ipnetwork::IpNetwork,
+    pub mm_network_share_ip: std::net::IpAddr,
     pub mm_network_share_path: String,
     pub mm_network_share_comment: String,
 }
@@ -94,7 +94,7 @@ pub async fn mk_lib_database_network_share_delete(
 
 pub async fn mk_lib_database_network_share_insert(
     sqlx_pool: &sqlx::PgPool,
-    network_share_ip: ipnetwork::IpNetwork,
+    network_share_ip: std::net::IpAddr,
     network_share_path: String,
     network_share_comment: String,
 ) -> Result<uuid::Uuid, sqlx::Error> {

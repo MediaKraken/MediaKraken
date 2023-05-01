@@ -156,6 +156,24 @@ pub async fn mk_lib_database_update_schema(
         mk_lib_database_version_update(&sqlx_pool, 50).await?;
     }
 
+    if version_no < 51 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query("ALTER TABLE mm_network_shares DROP COLUMN mm_network_share_xml;")
+            .execute(&mut transaction)
+            .await?;
+        sqlx::query("ALTER TABLE mm_network_shares ADD COLUMN mm_network_share_ip INET;")
+            .execute(&mut transaction)
+            .await?;
+        sqlx::query("ALTER TABLE mm_network_shares ADD COLUMN mm_network_share_path TEXT;")
+            .execute(&mut transaction)
+            .await?;
+        sqlx::query("ALTER TABLE mm_network_shares ADD COLUMN mm_network_share_path TEXT;")
+            .execute(&mut transaction)
+            .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 51).await?;
+    }
+
     Ok(true)
 }
 
