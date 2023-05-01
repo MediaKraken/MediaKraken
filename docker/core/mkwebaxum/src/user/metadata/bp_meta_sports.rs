@@ -39,7 +39,7 @@ pub async fn user_metadata_sports(
     Path(page): Path<i64>,
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;
-    let total_pages: i64 = database::mk_lib_database_metadata_sports::mk_lib_database_metadata_sports_count(
+    let total_pages: i64 = mk_lib_database_metadata_sports::mk_lib_database_metadata_sports_count(
         &sqlx_pool,
         String::new(),
     )
@@ -52,7 +52,7 @@ pub async fn user_metadata_sports(
     )
     .await
     .unwrap();
-    let sports_list = database::mk_lib_database_metadata_sports::mk_lib_database_metadata_sports_read(
+    let sports_list = mk_lib_database_metadata_sports::mk_lib_database_metadata_sports_read(
         &sqlx_pool,
         String::new(),
         db_offset,

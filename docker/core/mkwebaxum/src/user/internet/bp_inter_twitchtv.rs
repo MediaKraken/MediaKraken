@@ -12,6 +12,7 @@ use axum_session_auth::*;
 use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use serde_json::json;
 use stdext::function_name;
+use sqlx::postgres::PgPool;
 
 use crate::mk_lib_logging;
 

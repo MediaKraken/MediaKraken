@@ -38,10 +38,26 @@ pub mod database {
     pub mod mk_lib_database_game_servers;
     pub mod mk_lib_database_library;
     pub mod mk_lib_database_media;
+    pub mod mk_lib_database_media_book;
+    pub mod mk_lib_database_media_game;
+    pub mod mk_lib_database_media_home_media;
     pub mod mk_lib_database_media_images;
+    pub mod mk_lib_database_media_movie;
+    pub mod mk_lib_database_media_music;
+    pub mod mk_lib_database_media_music_video;
+    pub mod mk_lib_database_media_sports;
+    pub mod mk_lib_database_media_tv;
+    pub mod mk_lib_database_metadata_collection;
     pub mod mk_lib_database_metadata_download_queue;
+    pub mod mk_lib_database_metadata_book;
+    pub mod mk_lib_database_metadata_game;
+    pub mod mk_lib_database_metadata_game_system;
     pub mod mk_lib_database_metadata_movie;
+    pub mod mk_lib_database_metadata_music;
+    pub mod mk_lib_database_metadata_music_video;
     pub mod mk_lib_database_metadata_person;
+    pub mod mk_lib_database_metadata_sports;
+    pub mod mk_lib_database_metadata_tv;
     pub mod mk_lib_database_network_share;
     pub mod mk_lib_database_option_status;
     pub mod mk_lib_database_postgresql;
@@ -95,60 +111,60 @@ pub mod user {
     pub mod bp_sync;
 }
 
-// #[path = "user/internet/bp_inter_flickr.rs"]
-// mod bp_user_internet_bp_inter_flickr;
+#[path = "user/internet/bp_inter_flickr.rs"]
+mod bp_user_internet_bp_inter_flickr;
 #[path = "user/internet/bp_inter_home.rs"]
 mod bp_user_internet_bp_inter_home;
-// #[path = "user/internet/bp_inter_twitchtv.rs"]
-// mod bp_user_internet_bp_inter_twitchtv;
-// #[path = "user/internet/bp_inter_vimeo.rs"]
-// mod bp_user_internet_bp_inter_vimeo;
-// #[path = "user/internet/bp_inter_youtube.rs"]
-// mod bp_user_internet_bp_inter_youtube;
+#[path = "user/internet/bp_inter_twitchtv.rs"]
+mod bp_user_internet_bp_inter_twitchtv;
+#[path = "user/internet/bp_inter_vimeo.rs"]
+mod bp_user_internet_bp_inter_vimeo;
+#[path = "user/internet/bp_inter_youtube.rs"]
+mod bp_user_internet_bp_inter_youtube;
 
-// #[path = "user/media/bp_media_book.rs"]
-// mod bp_user_media_bp_media_book;
-// #[path = "user/media/bp_media_collection.rs"]
-// mod bp_user_media_bp_media_collection;
-// #[path = "user/media/bp_media_game.rs"]
-// mod bp_user_media_bp_media_game;
-// #[path = "user/media/bp_media_game_servers.rs"]
-// mod bp_user_media_bp_media_game_servers;
-// #[path = "user/media/bp_media_genre.rs"]
-// mod bp_user_media_bp_media_genre;
-// #[path = "user/media/bp_media_home_media.rs"]
-// mod bp_user_media_bp_media_home_media;
+#[path = "user/media/bp_media_book.rs"]
+mod bp_user_media_bp_media_book;
+#[path = "user/media/bp_media_collection.rs"]
+mod bp_user_media_bp_media_collection;
+#[path = "user/media/bp_media_game.rs"]
+mod bp_user_media_bp_media_game;
+#[path = "user/media/bp_media_game_servers.rs"]
+mod bp_user_media_bp_media_game_servers;
+#[path = "user/media/bp_media_genre.rs"]
+mod bp_user_media_bp_media_genre;
+#[path = "user/media/bp_media_home_media.rs"]
+mod bp_user_media_bp_media_home_media;
 #[path = "user/media/bp_media_image.rs"]
 mod bp_user_media_bp_media_image;
-// #[path = "user/media/bp_media_movie.rs"]
-// mod bp_user_media_bp_media_movie;
-// #[path = "user/media/bp_media_music.rs"]
-// mod bp_user_media_bp_media_music;
-// #[path = "user/media/bp_media_music_video.rs"]
-// mod bp_user_media_bp_media_music_video;
-// #[path = "user/media/bp_media_sports.rs"]
-// mod bp_user_media_bp_media_sports;
-// #[path = "user/media/bp_media_tv.rs"]
-// mod bp_user_media_bp_media_tv;
+#[path = "user/media/bp_media_movie.rs"]
+mod bp_user_media_bp_media_movie;
+#[path = "user/media/bp_media_music.rs"]
+mod bp_user_media_bp_media_music;
+#[path = "user/media/bp_media_music_video.rs"]
+mod bp_user_media_bp_media_music_video;
+#[path = "user/media/bp_media_sports.rs"]
+mod bp_user_media_bp_media_sports;
+#[path = "user/media/bp_media_tv.rs"]
+mod bp_user_media_bp_media_tv;
 
-// #[path = "user/metadata/bp_meta_book.rs"]
-// mod bp_user_metadata_bp_meta_book;
-// #[path = "user/metadata/bp_meta_game.rs"]
-// mod bp_user_metadata_bp_meta_game;
-// #[path = "user/metadata/bp_meta_game_system.rs"]
-// mod bp_user_metadata_bp_meta_game_system;
+#[path = "user/metadata/bp_meta_book.rs"]
+mod bp_user_metadata_bp_meta_book;
+#[path = "user/metadata/bp_meta_game.rs"]
+mod bp_user_metadata_bp_meta_game;
+#[path = "user/metadata/bp_meta_game_system.rs"]
+mod bp_user_metadata_bp_meta_game_system;
 #[path = "user/metadata/bp_meta_movie.rs"]
 mod bp_user_metadata_bp_meta_movie;
-// #[path = "user/metadata/bp_meta_music.rs"]
-// mod bp_user_metadata_bp_meta_music;
-// #[path = "user/metadata/bp_meta_music_video.rs"]
-// mod bp_user_metadata_bp_meta_music_video;
+#[path = "user/metadata/bp_meta_music.rs"]
+mod bp_user_metadata_bp_meta_music;
+#[path = "user/metadata/bp_meta_music_video.rs"]
+mod bp_user_metadata_bp_meta_music_video;
 #[path = "user/metadata/bp_meta_person.rs"]
 mod bp_user_metadata_bp_meta_person;
-// #[path = "user/metadata/bp_meta_sports.rs"]
-// mod bp_user_metadata_bp_meta_sports;
-// #[path = "user/metadata/bp_meta_tv.rs"]
-// mod bp_user_metadata_bp_meta_tv;
+#[path = "user/metadata/bp_meta_sports.rs"]
+mod bp_user_metadata_bp_meta_sports;
+#[path = "user/metadata/bp_meta_tv.rs"]
+mod bp_user_metadata_bp_meta_tv;
 
 #[path = "user/playback/bp_audio.rs"]
 mod bp_user_playback_bp_audio;

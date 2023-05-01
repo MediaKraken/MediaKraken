@@ -49,7 +49,7 @@ pub async fn user_media_tv(
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;
     let total_pages: i64 =
-        database::mk_lib_database_media_tv::mk_lib_database_media_tv_count(&sqlx_pool, String::new())
+        mk_lib_database_media_tv::mk_lib_database_media_tv_count(&sqlx_pool, String::new())
             .await
             .unwrap();
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
@@ -59,7 +59,7 @@ pub async fn user_media_tv(
     )
     .await
     .unwrap();
-    let tv_list = database::mk_lib_database_media_tv::mk_lib_database_media_tv_read(
+    let tv_list = mk_lib_database_media_tv::mk_lib_database_media_tv_read(
         &sqlx_pool,
         String::new(),
         db_offset,

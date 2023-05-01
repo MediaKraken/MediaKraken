@@ -40,7 +40,7 @@ pub async fn user_media_game_servers(
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;
     let total_pages: i64 =
-        database::mk_lib_database_game_servers::mk_lib_database_game_server_count(&sqlx_pool, String::new())
+        mk_lib_database_game_servers::mk_lib_database_game_server_count(&sqlx_pool, String::new())
             .await
             .unwrap();
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
@@ -50,7 +50,7 @@ pub async fn user_media_game_servers(
     )
     .await
     .unwrap();
-    let game_server_list = database::mk_lib_database_game_servers::mk_lib_database_game_server_read(
+    let game_server_list = mk_lib_database_game_servers::mk_lib_database_game_server_read(
         &sqlx_pool,
         String::new(),
         db_offset,

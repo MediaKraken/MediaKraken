@@ -41,7 +41,7 @@ pub async fn user_metadata_game_system(
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;
     let total_pages: i64 =
-        database::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_count(
+        mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_count(
             &sqlx_pool,
             String::new(),
         )
@@ -55,7 +55,7 @@ pub async fn user_metadata_game_system(
     .await
     .unwrap();
     let game_system_list =
-        database::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_read(
+        mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_read(
             &sqlx_pool,
             String::new(),
             db_offset,
@@ -92,7 +92,7 @@ pub async fn user_metadata_game_system_detail(
 ) -> impl IntoResponse {
     let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
     let detail_data =
-        database::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_detail(
+        mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_detail(
             &sqlx_pool, tmp_uuid,
         )
         .await
