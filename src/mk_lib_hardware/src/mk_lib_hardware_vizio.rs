@@ -1,15 +1,11 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 // https://github.com/ConnorTroy/smartcast
-// smartcast = "0.1.1"
 
-use crate::mk_lib_logging;
-
+use mk_lib_logging::mk_lib_logging;
+use serde_json::json;
 use smartcast::Device;
 use stdext::function_name;
-use serde_json::json;
 
-put async fn mk_hardware_vizio_discover() {
+pub async fn mk_hardware_vizio_discover() -> Result<(), smartcast::Error> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -25,4 +21,5 @@ put async fn mk_hardware_vizio_discover() {
     let uuid = dev_by_ssdp.uuid();
     let dev_by_ip = Device::from_ip(ip_addr).await?;
     let dev_by_uuid = Device::from_uuid(uuid).await?;
+    Ok(())
 }

@@ -1,9 +1,6 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use amiquip::{AmqpProperties, Connection, Exchange, Publish, Result};
 use chrono::prelude::*;
 use num_format::{Locale, ToFormattedString};
-// use regex::Regex;
 use fancy_regex::Regex;
 use serde_json::{json, Value};
 use sqlx::Row;
@@ -15,28 +12,10 @@ use std::path::PathBuf;
 use stdext::function_name;
 use tokio::time::{sleep, Duration};
 use uuid::Uuid;
-
-mod mk_lib_common_enum_media_type;
-
-mod mk_lib_common_media_extension;
-
-#[path = "database"]
-mod database {
-    pub mod mk_lib_database;
-    pub mod mk_lib_database_library;
-    pub mod mk_lib_database_media;
-    pub mod mk_lib_database_media_movie;
-    pub mod mk_lib_database_media_tv;
-    pub mod mk_lib_database_metadata_download_queue;
-    pub mod mk_lib_database_notification;
-    pub mod mk_lib_database_option_status;
-    pub mod mk_lib_database_version;
-    pub mod mk_lib_database_version_schema;
-}
-
-mod mk_lib_file;
-
-mod mk_lib_logging;
+use mk_lib_common;
+use mk_lib_database
+use mk_lib_file;
+use mk_lib_logging::mk_lib_logging;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {

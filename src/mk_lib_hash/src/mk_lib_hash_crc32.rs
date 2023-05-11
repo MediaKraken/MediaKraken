@@ -1,14 +1,9 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
-use crate::mk_lib_logging;
-
-// crc32fast = "1.2.1"
+use mk_lib_logging::mk_lib_logging;
 use crc32fast::Hasher;
 use serde_json::json;
 use std::error::Error;
 use stdext::function_name;
-
-use crate::mk_lib_file;
+use mk_lib_file::mk_lib_file;
 
 pub async fn mk_file_hash_crc32(file_to_read: &str) -> Result<String, Box<dyn Error>> {
     #[cfg(debug_assertions)]
@@ -33,7 +28,7 @@ pub async fn mk_file_hash_crc32(file_to_read: &str) -> Result<String, Box<dyn Er
 mod tests {
     use super::*;
 
-    #[test]
+    #[tokio::test]
     async fn test_mk_file_hash_crc32() {
         assert_eq!(
             "ba0d5184",

@@ -1,17 +1,17 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 // https://github.com/sile/hls_m3u8
 
 use hls_m3u8::MediaPlaylist;
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
+use std::error::Error;
 use stdext::function_name;
 
-use crate::mk_lib_logging;
+const M3U_HEADER: &str = "EXTM3U\n";
+const M3U_LINE_HEADER: &str = "EXTINF:";
 
-const M3U_HEADER: String = "EXTM3U\n";
-const M3U_LINE_HEADER: String = "EXTINF:";
-
-pub async fn mk_lib_metadata_m3u8_validate_playlist(playlist: &str) {
+pub async fn mk_lib_metadata_m3u8_validate_playlist(
+    playlist: &str,
+) -> Result<MediaPlaylist, Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -21,8 +21,8 @@ pub async fn mk_lib_metadata_m3u8_validate_playlist(playlist: &str) {
         .await
         .unwrap();
     }
-    let valid_playlist = playlist.parse::<MediaPlaylist>().is_ok();
-    valid_playlist
+    let valid_playlist: MediaPlaylist = playlist.parse::<MediaPlaylist>().unwrap();
+    Ok(valid_playlist)
 }
 
 /*

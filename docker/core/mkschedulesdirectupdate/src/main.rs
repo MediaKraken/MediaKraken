@@ -1,21 +1,11 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use chrono::prelude::*;
 use serde_json::{json, Value};
 use sqlx::Row;
 use std::error::Error;
 use stdext::function_name;
 use tokio::time::{sleep, Duration};
-
-#[path = "database"]
-pub mod database {
-    pub mod mk_lib_database;
-    pub mod mk_lib_database_option_status;
-    pub mod mk_lib_database_version;
-    pub mod mk_lib_database_version_schema;
-}
-
-mod mk_lib_logging;
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {

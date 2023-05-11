@@ -1,8 +1,9 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use amiquip::{
     Connection, ConsumerMessage, ConsumerOptions, Exchange, QueueDeclareOptions, Result,
 };
+use mk_lib_common::mk_lib_common_ffmpeg;
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
 use serde_json::{json, Value};
 use sqlx::types::Uuid;
 use sqlx::Row;
@@ -10,19 +11,6 @@ use std::error::Error;
 use std::path::Path;
 use std::process::{Command, Stdio};
 use stdext::function_name;
-
-mod mk_lib_common_ffmpeg;
-
-#[path = "database"]
-pub mod database {
-    pub mod mk_lib_database;
-    pub mod mk_lib_database_media;
-    pub mod mk_lib_database_option_status;
-    pub mod mk_lib_database_version;
-    pub mod mk_lib_database_version_schema;
-}
-
-mod mk_lib_logging;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -35,14 +23,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // open the database
-    let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(1)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
         .await
         .unwrap();
-    database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+        .await;
 
     // pull options for metadata/chapters/images location
     let option_json: serde_json::Value =
-        database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
+        mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
             .await
             .unwrap();
 
@@ -83,7 +72,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     } else if json_message["Type"] == "HDHomeRun" {
                     } else if json_message["Type"] == "FFMPEG" {
                         if json_message["Subtype"] == "Probe" {
-                            // scan media file via ffprobe
+                            // scan media file via ffprobeS
                             let ffprobe_data: serde_json::Value =
                                 mk_lib_common_ffmpeg::mk_common_ffmpeg_get_info(
                                     &json_message["Media Path"].to_string(),
@@ -94,7 +83,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 &json_message["Media UUID"].to_string(),
                             )
                             .unwrap();
-                            database::mk_lib_database_media::mk_lib_database_media_ffmpeg_update_by_uuid(
+                            mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_ffmpeg_update_by_uuid(
                                 &sqlx_pool,
                                 tmp_uuid,
                                 ffprobe_data,
@@ -215,10 +204,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         {
                                             os.makedirs(image_file_path);
                                         }
-                                        image_file_path = os.path.join(
-                                            image_file_path,
-                                            (chapter_count.as_str() + ".png"),
-                                        );
+                                        image_file_path = os
+                                            .path
+                                            .join(image_file_path, chapter_count.as_str() + ".png");
                                     }
                                     // format the seconds to what ffmpeg is looking for
                                     (minutes, seconds) =

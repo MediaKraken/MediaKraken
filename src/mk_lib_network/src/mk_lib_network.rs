@@ -1,13 +1,10 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
+use mk_lib_logging::mk_lib_logging;
 use reqwest::header::CONTENT_TYPE;
 use reqwest::header::USER_AGENT;
 use serde_json::json;
 use std::io::Cursor;
 use std::str;
 use stdext::function_name;
-
-use crate::mk_lib_logging;
 
 pub async fn mk_data_from_url_to_json(
     url: String,

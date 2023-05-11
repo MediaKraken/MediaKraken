@@ -1,0 +1,26 @@
+[package]
+name = "mk_lib_hash"
+version = "0.0.1"
+edition = "2021"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
+
+[dependencies]
+blake3 = "1.3.3"
+crc32fast = "1.3.2"
+digest = "0.10.6"
+ed2k = { git = "https://github.com/runfalk/ed2k-rs" }
+md-5 = "0.10.5"
+mk_lib_file = { path = "/root/MediaKraken/src/mk_lib_file" }
+mk_lib_logging = { path = "/root/MediaKraken/src/mk_lib_logging" }
+serde_json = "1.0.96"
+sha1 = "0.10.5"
+stdext = "0.3.1"
+tokio = { version = "1.28.0", features = ["full"] }
+
+[dev-dependencies]
+tokio-test = "*"

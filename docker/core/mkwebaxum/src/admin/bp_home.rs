@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use askama::Template;
 use axum::{
     extract::Path,
@@ -10,24 +8,15 @@ use axum::{
 };
 use axum_session_auth::*;
 use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_network;
 use num_format::{Locale, SystemLocale, ToFormattedString};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use sqlx::Row;
 use stdext::function_name;
-
-use crate::mk_lib_logging;
-
-use crate::database::mk_lib_database_media;
-
-use crate::database::mk_lib_database_metadata_download_queue;
-
-use crate::database::mk_lib_database_option_status;
-
-use crate::database::mk_lib_database_user;
-
-use crate::mk_lib_network;
 
 #[derive(Serialize)]
 struct TemplateHomeStreamListContext {
@@ -57,29 +46,34 @@ struct TemplateHomeContext<'a> {
     template_data_count_meta_fetch: &'a String,
     template_data_count_streamed_media: &'a String,
     template_server_streams: &'a Vec<TemplateHomeStreamListContext>,
-    template_server_users: &'a Vec<mk_lib_database_user::DBUserList>,
+    template_server_users: &'a Vec<mk_lib_database::mk_lib_database_user::DBUserList>,
     template_data_scan_info: &'a Vec<TemplateHomeScanListContext>,
 }
 
 pub async fn admin_home(
     Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
-    let user_list = mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool, 0, 9999)
-        .await
-        .unwrap();
-    let option_status_row =
-        mk_lib_database_option_status::mk_lib_database_option_status_read(&sqlx_pool)
+    let user_list =
+        mk_lib_database::mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool, 0, 9999)
             .await
             .unwrap();
+    let option_status_row =
+        mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_status_read(
+            &sqlx_pool,
+        )
+        .await
+        .unwrap();
     let option_json: serde_json::Value = option_status_row.get("mm_options_json");
     let status_json: serde_json::Value = option_status_row.get("mm_status_json");
     let boot_seconds: libc::timeval = sys_info::boottime().unwrap();
     let boot_duration = chrono::Duration::seconds(i64::from(boot_seconds.tv_sec));
-    let external_ip = mk_lib_network::mk_data_from_url("https://myexternalip.com/raw".to_string())
-        .await
-        .unwrap();
+    let external_ip = mk_lib_network::mk_lib_network::mk_data_from_url(
+        "https://myexternalip.com/raw".to_string(),
+    )
+    .await
+    .unwrap();
     let mut server_streams = Vec::new();
     let mut server_scans = Vec::new();
     let locale = SystemLocale::default().unwrap();
@@ -96,19 +90,18 @@ pub async fn admin_home(
         template_data_server_host_ip: &"255.255.255.255".to_string(),
         template_data_server_info_server_ip_external: &external_ip,
         template_data_server_info_server_version: &"Fake Version".to_string(),
-        template_data_count_media_files: &mk_lib_database_media::mk_lib_database_media_known_count(
-            &sqlx_pool,
-        )
-        .await
-        .unwrap()
-        .to_formatted_string(&locale),
+        template_data_count_media_files:
+            &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_known_count(&sqlx_pool)
+                .await
+                .unwrap()
+                .to_formatted_string(&locale),
         template_data_count_matched_media:
-            &mk_lib_database_media::mk_lib_database_media_matched_count(&sqlx_pool)
+            &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_matched_count(&sqlx_pool)
                 .await
                 .unwrap()
                 .to_formatted_string(&locale),
         template_data_count_meta_fetch:
-            &mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(
+            &mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(
                 &sqlx_pool,
             )
             .await

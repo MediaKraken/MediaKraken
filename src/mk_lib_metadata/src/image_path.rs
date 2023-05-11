@@ -1,10 +1,7 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
+use mk_lib_logging::mk_lib_logging;
 use rand::{thread_rng, Rng};
 use serde_json::json;
 use stdext::function_name;
-
-use crate::mk_lib_logging;
 
 pub async fn meta_image_file_path(
     media_type: String,

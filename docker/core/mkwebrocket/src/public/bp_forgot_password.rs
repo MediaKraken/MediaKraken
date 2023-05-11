@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use rocket::form::{Context, Contextual, Form, FromForm, FromFormField};
 use rocket::response::Redirect;
 use rocket::Request;

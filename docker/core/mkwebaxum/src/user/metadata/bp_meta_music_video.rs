@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use askama::Template;
 use axum::{
     extract::Path,
@@ -10,23 +8,18 @@ use axum::{
 };
 use axum_session_auth::*;
 use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
+use mk_lib_common::mk_lib_common_pagination;
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use stdext::function_name;
 
-use crate::mk_lib_logging;
-
-#[path = "../../mk_lib_common_pagination.rs"]
-mod mk_lib_common_pagination;
-
-use crate::database::mk_lib_database_metadata_music_video;
-
-use crate::database::mk_lib_database_user;
-
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_music_video.html")]
 struct TemplateMetaMusicVideoContext<'a> {
-    template_data: &'a Vec<mk_lib_database_metadata_music_video::DBMetaMusicVideoList>,
+    template_data:
+        &'a Vec<mk_lib_database::database_metadata::mk_lib_database_metadata_music_video::DBMetaMusicVideoList>,
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
     page: &'a usize,
@@ -35,12 +28,12 @@ struct TemplateMetaMusicVideoContext<'a> {
 pub async fn user_metadata_music_video(
     Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;
     let total_pages: i64 =
-        mk_lib_database_metadata_music_video::mk_lib_database_metadata_music_video_count(
+        mk_lib_database::database_metadata::mk_lib_database_metadata_music_video::mk_lib_database_metadata_music_video_count(
             &sqlx_pool,
             String::new(),
             0,
@@ -55,7 +48,7 @@ pub async fn user_metadata_music_video(
     .await
     .unwrap();
     let music_video_list =
-        mk_lib_database_metadata_music_video::mk_lib_database_metadata_music_video_read(
+        mk_lib_database::database_metadata::mk_lib_database_metadata_music_video::mk_lib_database_metadata_music_video_read(
             &sqlx_pool,
             String::new(),
             db_offset,
@@ -87,7 +80,7 @@ struct TemplateMetaMusicVideoDetailContext {
 pub async fn user_metadata_music_video_detail(
     Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
 ) -> impl IntoResponse {
     let template = TemplateMetaMusicVideoDetailContext {

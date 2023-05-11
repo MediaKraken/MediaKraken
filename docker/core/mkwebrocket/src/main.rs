@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 #[macro_use]
 extern crate rocket;
 #[macro_use]
@@ -27,8 +25,8 @@ mod database::mk_lib_database;
 mod database::mk_lib_database_version;
 #[path = "mk_lib_file.rs"]
 mod mk_lib_file;
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+
+use mk_lib_logging::mk_lib_logging;
 
 #[path = "admin/bp_backup.rs"]
 mod bp_admin_backup;

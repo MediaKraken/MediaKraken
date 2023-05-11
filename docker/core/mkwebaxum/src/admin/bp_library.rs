@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use askama::Template;
 use askama_filters::filters;
 use axum::{
@@ -11,23 +9,17 @@ use axum::{
 };
 use axum_session_auth::*;
 use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
+use mk_lib_common::mk_lib_common_pagination;
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use stdext::function_name;
 
-use crate::mk_lib_logging;
-
-#[path = "../mk_lib_common_pagination.rs"]
-mod mk_lib_common_pagination;
-
-use crate::database::mk_lib_database_library;
-
-use crate::database::mk_lib_database_user;
-
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_library.html")]
 struct TemplateAdminLibraryContext<'a> {
-    template_data: &'a Vec<mk_lib_database_library::DBLibraryAuditList>,
+    template_data: &'a Vec<mk_lib_database::mk_lib_database_library::DBLibraryAuditList>,
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
     page: &'a usize,
@@ -36,13 +28,14 @@ struct TemplateAdminLibraryContext<'a> {
 pub async fn admin_library(
     Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;
-    let total_pages: i64 = mk_lib_database_library::mk_lib_database_library_count(&sqlx_pool)
-        .await
-        .unwrap();
+    let total_pages: i64 =
+        mk_lib_database::mk_lib_database_library::mk_lib_database_library_count(&sqlx_pool)
+            .await
+            .unwrap();
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
         total_pages,
         page,
@@ -50,7 +43,10 @@ pub async fn admin_library(
     )
     .await
     .unwrap();
-    let library_list = mk_lib_database_library::mk_lib_database_library_path_audit_read(&sqlx_pool)
+    let library_list =
+        mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_audit_read(
+            &sqlx_pool,
+        )
         .await
         .unwrap();
     let mut template_data_exists: bool = false;

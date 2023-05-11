@@ -1,7 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
-use crate::mk_lib_logging;
-
+use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgRow;
@@ -30,22 +27,20 @@ pub async fn mk_lib_database_media_adult_read(
         .await
         .unwrap();
     }
+    let select_query;
     if search_value != "" {
-        let rows = sqlx::query("")
-            .bind(search_value)
-            .bind(offset)
-            .bind(limit)
-            .fetch_all(sqlx_pool)
-            .await?;
-        Ok(rows)
+        select_query = sqlx::query("").bind(search_value).bind(offset).bind(limit);
     } else {
-        let rows = sqlx::query("")
-            .bind(offset)
-            .bind(limit)
-            .fetch_all(sqlx_pool)
-            .await?;
-        Ok(rows)
+        select_query = sqlx::query("").bind(offset).bind(limit);
     }
+    let table_rows: Vec<DBMediaAdultList> = select_query
+        .map(|row: PgRow| DBMediaAdultList {
+            mm_metadata_adult_guid: row.get("mm_metadata_adult_guid"),
+            mm_metadata_adult_name: row.get("mm_metadata_adult_name"),
+        })
+        .fetch_all(sqlx_pool)
+        .await?;
+    Ok(table_rows)
 }
 
 pub async fn mk_lib_database_media_adult_count(
@@ -62,13 +57,13 @@ pub async fn mk_lib_database_media_adult_count(
         .unwrap();
     }
     if search_value != "" {
-        let row: (i64,) = sqlx::query("")
+        let row: (i64,) = sqlx::query_as("")
             .bind(search_value)
             .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
     } else {
-        let row: (i64,) = sqlx::query("").fetch_one(sqlx_pool).await?;
+        let row: (i64,) = sqlx::query_as("").fetch_one(sqlx_pool).await?;
         Ok(row.0)
     }
 }

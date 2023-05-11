@@ -1,15 +1,10 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
-use serde_json::json;
-use sqlx::types::Uuid;
-use std::error::Error;
-use stdext::function_name;
-
 // https://imvdb.com/developers/api
 
-use crate::mk_lib_logging;
-
-use crate::mk_lib_network;
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_network::mk_lib_network;
+use serde_json::json;
+use std::error::Error;
+use stdext::function_name;
 
 const BASE_API_URL: &str = "http://imvdb.com/api/v1";
 
@@ -88,8 +83,8 @@ pub async fn meta_fetch_save_imvdb(db_connection, imvdb_id, metadata_uuid):
 pub async fn meta_fetch_save_imvdb(
     sqlx_pool: &sqlx::PgPool,
     imvdb_id: i32,
-    metadata_uuid: Uuid,
-) -> Result<Uuid, Box<dyn Error>> {
+    metadata_uuid: uuid::Uuid,
+) -> Result<uuid::Uuid, Box<dyn Error>> {
     let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
     Ok(metadata_uuid)
 }

@@ -6,7 +6,7 @@ use sqlx::PgPool;
 use crate::mk_lib_database_user;
 
 pub async fn login(
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> String {
     auth.login_user(2);
     "You are logged in as a User please try /perm to check permissions".to_owned()
@@ -14,7 +14,7 @@ pub async fn login(
 
 pub async fn perm(
     method: Method,
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> String {
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database_user::User, i64, PgPool>::build([Method::GET], false)

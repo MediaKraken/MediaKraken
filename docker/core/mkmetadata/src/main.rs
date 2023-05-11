@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::types::Uuid;
@@ -9,24 +7,9 @@ use std::path::Path;
 use std::process::Command;
 use stdext::function_name;
 use tokio::time::{sleep, Duration};
-
-#[path = "database"]
-mod database {
-    pub mod mk_lib_database;
-    pub mod mk_lib_database_media;
-    pub mod mk_lib_database_metadata_download_queue;
-    pub mod mk_lib_database_metadata_game;
-    pub mod mk_lib_database_metadata_movie;
-    pub mod mk_lib_database_metadata_person;
-    pub mod mk_lib_database_metadata_tv;
-    pub mod mk_lib_database_option_status;
-    pub mod mk_lib_database_version;
-    pub mod mk_lib_database_version_schema;
-}
-
-mod mk_lib_logging;
-
-mod mk_lib_network;
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_network;
 
 #[path = "identification.rs"]
 mod metadata_identification;

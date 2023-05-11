@@ -1,8 +1,7 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 #[macro_use]
 extern crate lazy_static;
 
+use axum_csrf::{CsrfConfig, CsrfToken};
 use axum::http::{Method, Uri};
 use axum::{
     http::StatusCode,
@@ -17,6 +16,8 @@ use axum_session::{
     DatabasePool, Key, Session, SessionConfig, SessionLayer, SessionPgPool, SessionStore,
 };
 use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
 use rcgen::generate_simple_self_signed;
 use ring::digest;
 use serde::{Deserialize, Serialize};
@@ -31,53 +32,16 @@ use tokio::signal;
 use tower::timeout::TimeoutLayer;
 use tower::{timeout::error::Elapsed, ServiceBuilder};
 
-#[path = "database"]
-pub mod database {
-    pub mod mk_lib_database;
-    pub mod mk_lib_database_cron;
-    pub mod mk_lib_database_game_servers;
-    pub mod mk_lib_database_library;
-    pub mod mk_lib_database_media;
-    pub mod mk_lib_database_media_book;
-    pub mod mk_lib_database_media_game;
-    pub mod mk_lib_database_media_home_media;
-    pub mod mk_lib_database_media_images;
-    pub mod mk_lib_database_media_movie;
-    pub mod mk_lib_database_media_music;
-    pub mod mk_lib_database_media_music_video;
-    pub mod mk_lib_database_media_sports;
-    pub mod mk_lib_database_media_tv;
-    pub mod mk_lib_database_metadata_collection;
-    pub mod mk_lib_database_metadata_download_queue;
-    pub mod mk_lib_database_metadata_book;
-    pub mod mk_lib_database_metadata_game;
-    pub mod mk_lib_database_metadata_game_system;
-    pub mod mk_lib_database_metadata_movie;
-    pub mod mk_lib_database_metadata_music;
-    pub mod mk_lib_database_metadata_music_video;
-    pub mod mk_lib_database_metadata_person;
-    pub mod mk_lib_database_metadata_sports;
-    pub mod mk_lib_database_metadata_tv;
-    pub mod mk_lib_database_network_share;
-    pub mod mk_lib_database_option_status;
-    pub mod mk_lib_database_postgresql;
-    pub mod mk_lib_database_search;
-    pub mod mk_lib_database_sync;
-    pub mod mk_lib_database_user;
-    pub mod mk_lib_database_user_profile;
-    pub mod mk_lib_database_user_queue;
-    pub mod mk_lib_database_version;
-    pub mod mk_lib_database_version_schema;
-}
-
-mod mk_lib_logging;
+mod axum_custom_filters;
+mod error_handling;
+mod guard;
 
 #[path = "admin"]
 pub mod admin {
-    //    pub mod bp_backup;
+    pub mod bp_backup;
     pub mod bp_cron;
     pub mod bp_database;
-    //    pub mod bp_docker;
+    pub mod bp_docker;
     pub mod bp_game_servers;
     pub mod bp_hardware;
     pub mod bp_home;
@@ -111,75 +75,50 @@ pub mod user {
     pub mod bp_sync;
 }
 
-#[path = "user/internet/bp_inter_flickr.rs"]
-mod bp_user_internet_bp_inter_flickr;
-#[path = "user/internet/bp_inter_home.rs"]
-mod bp_user_internet_bp_inter_home;
-#[path = "user/internet/bp_inter_twitchtv.rs"]
-mod bp_user_internet_bp_inter_twitchtv;
-#[path = "user/internet/bp_inter_vimeo.rs"]
-mod bp_user_internet_bp_inter_vimeo;
-#[path = "user/internet/bp_inter_youtube.rs"]
-mod bp_user_internet_bp_inter_youtube;
+#[path = "user/internet"]
+pub mod user_internet {
+    pub mod bp_inter_flickr;
+    pub mod bp_inter_home;
+    pub mod bp_inter_twitchtv;
+    pub mod bp_inter_vimeo;
+    pub mod bp_inter_youtube;
+}
 
-#[path = "user/media/bp_media_book.rs"]
-mod bp_user_media_bp_media_book;
-#[path = "user/media/bp_media_collection.rs"]
-mod bp_user_media_bp_media_collection;
-#[path = "user/media/bp_media_game.rs"]
-mod bp_user_media_bp_media_game;
-#[path = "user/media/bp_media_game_servers.rs"]
-mod bp_user_media_bp_media_game_servers;
-#[path = "user/media/bp_media_genre.rs"]
-mod bp_user_media_bp_media_genre;
-#[path = "user/media/bp_media_home_media.rs"]
-mod bp_user_media_bp_media_home_media;
-#[path = "user/media/bp_media_image.rs"]
-mod bp_user_media_bp_media_image;
-#[path = "user/media/bp_media_movie.rs"]
-mod bp_user_media_bp_media_movie;
-#[path = "user/media/bp_media_music.rs"]
-mod bp_user_media_bp_media_music;
-#[path = "user/media/bp_media_music_video.rs"]
-mod bp_user_media_bp_media_music_video;
-#[path = "user/media/bp_media_sports.rs"]
-mod bp_user_media_bp_media_sports;
-#[path = "user/media/bp_media_tv.rs"]
-mod bp_user_media_bp_media_tv;
+#[path = "user/media"]
+pub mod user_media {
+    pub mod bp_media_book;
+    pub mod bp_media_collection;
+    pub mod bp_media_game;
+    pub mod bp_media_game_servers;
+    pub mod bp_media_genre;
+    pub mod bp_media_home_media;
+    pub mod bp_media_image;
+    pub mod bp_media_movie;
+    pub mod bp_media_music;
+    pub mod bp_media_music_video;
+    pub mod bp_media_sports;
+    pub mod bp_media_tv;
+}
 
-#[path = "user/metadata/bp_meta_book.rs"]
-mod bp_user_metadata_bp_meta_book;
-#[path = "user/metadata/bp_meta_game.rs"]
-mod bp_user_metadata_bp_meta_game;
-#[path = "user/metadata/bp_meta_game_system.rs"]
-mod bp_user_metadata_bp_meta_game_system;
-#[path = "user/metadata/bp_meta_movie.rs"]
-mod bp_user_metadata_bp_meta_movie;
-#[path = "user/metadata/bp_meta_music.rs"]
-mod bp_user_metadata_bp_meta_music;
-#[path = "user/metadata/bp_meta_music_video.rs"]
-mod bp_user_metadata_bp_meta_music_video;
-#[path = "user/metadata/bp_meta_person.rs"]
-mod bp_user_metadata_bp_meta_person;
-#[path = "user/metadata/bp_meta_sports.rs"]
-mod bp_user_metadata_bp_meta_sports;
-#[path = "user/metadata/bp_meta_tv.rs"]
-mod bp_user_metadata_bp_meta_tv;
+#[path = "user/metadata"]
+pub mod user_metadata {
+    pub mod bp_meta_book;
+    pub mod bp_meta_game;
+    pub mod bp_meta_game_system;
+    pub mod bp_meta_movie;
+    pub mod bp_meta_music;
+    pub mod bp_meta_music_video;
+    pub mod bp_meta_person;
+    pub mod bp_meta_sports;
+    pub mod bp_meta_tv;
+}
 
-#[path = "user/playback/bp_audio.rs"]
-mod bp_user_playback_bp_audio;
-#[path = "user/playback/bp_comic.rs"]
-mod bp_user_playback_bp_comic;
-#[path = "user/playback/bp_video.rs"]
-mod bp_user_playback_bp_video;
-
-mod mk_lib_common_enum_media_type;
-
-mod error_handling;
-
-mod guard;
-
-mod mk_lib_network;
+#[path = "user/playback"]
+pub mod user_playback {
+    pub mod bp_audio;
+    pub mod bp_comic;
+    pub mod bp_video;
+}
 
 #[tokio::main]
 async fn main() {
@@ -240,10 +179,11 @@ async fn main() {
     // }
 
     // connect to db and do a version check
-    let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(50)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50)
         .await
         .unwrap();
-    database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+        .await;
 
     // TODO generaqte config file and load it here.   docker secret on install?
     // 'Key::generate()' will generate a new key each restart of the server.
@@ -266,209 +206,211 @@ async fn main() {
     // build our application with routes
     // route_with_tsr creates two routes.....one with trailing slash
     let app = Router::new()
-        //.route_with_tsr("/admin/backup", get(bp_backup::admin_backup))
+        .route_with_tsr("/admin/backup", get(admin::bp_backup::admin_backup))
         .route_with_tsr("/admin/cron", get(admin::bp_cron::admin_cron))
         .route_with_tsr("/admin/database", get(admin::bp_database::admin_database))
-        //.route_with_tsr("/admin/docker", get(bp_docker::admin_docker))
+        .route_with_tsr("/admin/docker", get(admin::bp_docker::admin_docker))
         .route_with_tsr(
-            "/admin//game_servers/:page",
+            "/admin/game_servers/:page",
             get(admin::bp_game_servers::admin_game_servers),
         )
-        //.route_with_tsr("/admin/hardware", get(admin::bp_hardware::admin_hardware))
+        .route_with_tsr("/admin/hardware", get(admin::bp_hardware::admin_hardware))
         .route_with_tsr("/admin/home", get(admin::bp_home::admin_home))
-        .route_with_tsr("/admin/library/:page", get(admin::bp_library::admin_library))
+        .route_with_tsr(
+            "/admin/library/:page",
+            get(admin::bp_library::admin_library),
+        )
         .route_with_tsr("/admin/share/:page", get(admin::bp_share::admin_share))
         .route_with_tsr("/admin/settings", get(admin::bp_settings::admin_settings))
         .route_with_tsr("/admin/torrent", get(admin::bp_torrent::admin_torrent))
-        //.route_with_tsr("/admin/user/:page", get(admin::bp_user::admin_user))
-        .route_layer(axum::middleware::from_fn(|req, next|guard::auth(req, next, Method::GET, true)))
-        // .route_with_tsr(
-        //     "/user/internet/flickr",
-        //     get(bp_user_internet_bp_inter_flickr::user_inter_flickr),
-        // )
-        // .route_with_tsr(
-        //     "/user/internet/flickr/:guid",
-        //     get(bp_user_internet_bp_inter_flickr::user_inter_flickr_detail),
-        // )
+        .route_with_tsr("/admin/user/:page", get(admin::bp_user::admin_user))
+        .route_with_tsr(
+            "/user/internet/flickr",
+            get(user_internet::bp_inter_flickr::user_inter_flickr),
+        )
+        .route_with_tsr(
+            "/user/internet/flickr/:guid",
+            get(user_internet::bp_inter_flickr::user_inter_flickr_detail),
+        )
         .route_with_tsr(
             "/user/internet",
-            get(bp_user_internet_bp_inter_home::user_inter_home),
+            get(user_internet::bp_inter_home::user_inter_home),
         )
-        // .route_with_tsr(
-        //     "/user/internet/twitchtv",
-        //     get(bp_user_internet_bp_inter_twitchtv::user_inter_twitchtv),
-        // )
-        // .route_with_tsr(
-        //     "/user/internet/vimeo",
-        //     get(bp_user_internet_bp_inter_vimeo::user_inter_vimeo),
-        // )
-        // .route_with_tsr(
-        //     "/user/internet/youtube",
-        //     get(bp_user_internet_bp_inter_youtube::user_inter_youtube),
-        // )
-        // .route_with_tsr(
-        //     "/user/media/book/:page",
-        //     get(bp_user_media_bp_media_book::user_media_book),
-        // )
-        // .route_with_tsr(
-        //     "/user/media/book_detail/:guid",
-        //     get(bp_user_media_bp_media_book::user_media_book_detail),
-        // )
-        // .route_with_tsr(
-        //     "/user/media/collection/:page",
-        //     get(bp_user_media_bp_media_collection::user_media_collection),
-        // )
-        // .route_with_tsr(
-        //     "/user/media/collection_detail/:guid",
-        //     get(bp_user_media_bp_media_collection::user_media_collection_detail),
-        // )
-        // .route_with_tsr(
-        //     "/user/media/game/:page",
-        //     get(bp_user_media_bp_media_game::user_media_game),
-        // )
-        // .route_with_tsr(
-        //     "/user/media/game_detail/:guid",
-        //     get(bp_user_media_bp_media_game::user_media_game_detail),
-        // )
-        // .route_with_tsr(
-        //     "/user/media/game_servers/:page",
-        //     get(bp_user_media_bp_media_game_servers::user_media_game_servers),
-        // )
-        // .route_with_tsr(
-        //     "/user/media/genre",
-        //     get(bp_user_media_bp_media_genre::user_media_genre),
-        // )
-        // .route_with_tsr(
-        //     "/user/media/home_media/:page",
-        //     get(bp_user_media_bp_media_home_media::user_media_home_media),
-        // )
+        .route_with_tsr(
+            "/user/internet/twitchtv",
+            get(user_internet::bp_inter_twitchtv::user_inter_twitchtv),
+        )
+        .route_with_tsr(
+            "/user/internet/vimeo",
+            get(user_internet::bp_inter_vimeo::user_inter_vimeo),
+        )
+        .route_with_tsr(
+            "/user/internet/youtube",
+            get(user_internet::bp_inter_youtube::user_inter_youtube),
+        )
+        .route_with_tsr(
+            "/user/media/book/:page",
+            get(user_media::bp_media_book::user_media_book),
+        )
+        .route_with_tsr(
+            "/user/media/book_detail/:guid",
+            get(user_media::bp_media_book::user_media_book_detail),
+        )
+        .route_with_tsr(
+            "/user/media/collection/:page",
+            get(user_media::bp_media_collection::user_media_collection),
+        )
+        .route_with_tsr(
+            "/user/media/collection_detail/:guid",
+            get(user_media::bp_media_collection::user_media_collection_detail),
+        )
+        .route_with_tsr(
+            "/user/media/game/:page",
+            get(user_media::bp_media_game::user_media_game),
+        )
+        .route_with_tsr(
+            "/user/media/game_detail/:guid",
+            get(user_media::bp_media_game::user_media_game_detail),
+        )
+        .route_with_tsr(
+            "/user/media/game_servers/:page",
+            get(user_media::bp_media_game_servers::user_media_game_servers),
+        )
+        .route_with_tsr(
+            "/user/media/genre",
+            get(user_media::bp_media_genre::user_media_genre),
+        )
+        .route_with_tsr(
+            "/user/media/home_media/:page",
+            get(user_media::bp_media_home_media::user_media_home_media),
+        )
         .route_with_tsr(
             "/user/media/image",
-            get(bp_user_media_bp_media_image::user_media_image),
+            get(user_media::bp_media_image::user_media_image),
         )
-        // .route_with_tsr(
-        //     "/user/media/movie/:page",
-        //     get(bp_user_media_bp_media_movie::user_media_movie),
-        // )
-        // .route_with_tsr(
-        //     "/user/media/movie_detail/:guid",
-        //     get(bp_user_media_bp_media_movie::user_media_movie_detail),
-        // )
-        // .route_with_tsr(
-        //     "/user/media/music/:page",
-        //     get(bp_user_media_bp_media_music::user_media_music),
-        // )
-        // .route_with_tsr(
-        //     "/user/media/music_detail/:guid",
-        //     get(bp_user_media_bp_media_music::user_media_music_detail),
-        // )
-        // .route_with_tsr(
-        //     "/user/media/music_video/:page",
-        //     get(bp_user_media_bp_media_music_video::user_media_music_video),
-        // )
-        // .route_with_tsr(
-        //     "/user/media/music_video_detail/:guid",
-        //     get(bp_user_media_bp_media_music_video::user_media_music_video_detail),
-        // )
-        // .route_with_tsr(
-        //     "/user/media/sports/:page",
-        //     get(bp_user_media_bp_media_sports::user_media_sports),
-        // )
-        // .route_with_tsr(
-        //     "/user/media/sports_detail/:guid",
-        //     get(bp_user_media_bp_media_sports::user_media_sports_detail),
-        // )
-        // .route_with_tsr(
-        //     "/user/media/tv/:page",
-        //     get(bp_user_media_bp_media_tv::user_media_tv),
-        // )
-        // .route_with_tsr(
-        //     "/user/media/tv_detail/:guid",
-        //     get(bp_user_media_bp_media_tv::user_media_tv_detail),
-        // )
-        // .route_with_tsr(
-        //     "/user/metadata/book/:page",
-        //     get(bp_user_metadata_bp_meta_book::user_metadata_book),
-        // )
-        // .route_with_tsr(
-        //     "/user/metadata/book_detail/:guid",
-        //     get(bp_user_metadata_bp_meta_book::user_metadata_book_detail),
-        // )
-        // .route_with_tsr(
-        //     "/user/metadata/game/:page",
-        //     get(bp_user_metadata_bp_meta_game::user_metadata_game),
-        // )
-        // .route_with_tsr(
-        //     "/user/metadata/game_detail/:guid",
-        //     get(bp_user_metadata_bp_meta_game::user_metadata_game_detail),
-        // )
-        // .route_with_tsr(
-        //     "/user/metadata/game_system/:page",
-        //     get(bp_user_metadata_bp_meta_game_system::user_metadata_game_system),
-        // )
-        // .route_with_tsr(
-        //     "/user/metadata/game_system_detail/:guid",
-        //     get(bp_user_metadata_bp_meta_game_system::user_metadata_game_system_detail),
-        // )
+        .route_with_tsr(
+            "/user/media/movie/:page",
+            get(user_media::bp_media_movie::user_media_movie),
+        )
+        .route_with_tsr(
+            "/user/media/movie_detail/:guid",
+            get(user_media::bp_media_movie::user_media_movie_detail),
+        )
+        .route_with_tsr(
+            "/user/media/music/:page",
+            get(user_media::bp_media_music::user_media_music),
+        )
+        .route_with_tsr(
+            "/user/media/music_detail/:guid",
+            get(user_media::bp_media_music::user_media_music_detail),
+        )
+        .route_with_tsr(
+            "/user/media/music_video/:page",
+            get(user_media::bp_media_music_video::user_media_music_video),
+        )
+        .route_with_tsr(
+            "/user/media/music_video_detail/:guid",
+            get(user_media::bp_media_music_video::user_media_music_video_detail),
+        )
+        .route_with_tsr(
+            "/user/media/sports/:page",
+            get(user_media::bp_media_sports::user_media_sports),
+        )
+        .route_with_tsr(
+            "/user/media/sports_detail/:guid",
+            get(user_media::bp_media_sports::user_media_sports_detail),
+        )
+        .route_with_tsr(
+            "/user/media/tv/:page",
+            get(user_media::bp_media_tv::user_media_tv),
+        )
+        .route_with_tsr(
+            "/user/media/tv_detail/:guid",
+            get(user_media::bp_media_tv::user_media_tv_detail),
+        )
+        .route_with_tsr(
+            "/user/metadata/book/:page",
+            get(user_metadata::bp_meta_book::user_metadata_book),
+        )
+        .route_with_tsr(
+            "/user/metadata/book_detail/:guid",
+            get(user_metadata::bp_meta_book::user_metadata_book_detail),
+        )
+        .route_with_tsr(
+            "/user/metadata/game/:page",
+            get(user_metadata::bp_meta_game::user_metadata_game),
+        )
+        .route_with_tsr(
+            "/user/metadata/game_detail/:guid",
+            get(user_metadata::bp_meta_game::user_metadata_game_detail),
+        )
+        .route_with_tsr(
+            "/user/metadata/game_system/:page",
+            get(user_metadata::bp_meta_game_system::user_metadata_game_system),
+        )
+        .route_with_tsr(
+            "/user/metadata/game_system_detail/:guid",
+            get(user_metadata::bp_meta_game_system::user_metadata_game_system_detail),
+        )
         .route_with_tsr(
             "/user/metadata/movie/:page",
-            get(bp_user_metadata_bp_meta_movie::user_metadata_movie),
+            get(user_metadata::bp_meta_movie::user_metadata_movie),
         )
-        // .route_with_tsr(
-        //     "/user/metadata/movie_detail/:guid",
-        //     get(bp_user_metadata_bp_meta_movie::user_metadata_movie_detail),
-        // )
-        // .route_with_tsr(
-        //     "/user/metadata/music/:page",
-        //     get(bp_user_metadata_bp_meta_music::user_metadata_music),
-        // )
-        // .route_with_tsr(
-        //     "/user/metadata/music_detail/:guid",
-        //     get(bp_user_metadata_bp_meta_music::user_metadata_music_detail),
-        // )
-        // .route_with_tsr(
-        //     "/user/metadata/music_video/:page",
-        //     get(bp_user_metadata_bp_meta_music_video::user_metadata_music_video),
-        // )
-        // .route_with_tsr(
-        //     "/user/metadata/music_video_detail/:guid",
-        //     get(bp_user_metadata_bp_meta_music_video::user_metadata_music_video_detail),
-        // )
+        .route_with_tsr(
+            "/user/metadata/movie_detail/:guid",
+            get(user_metadata::bp_meta_movie::user_metadata_movie_detail),
+        )
+        .route_with_tsr(
+            "/user/metadata/music/:page",
+            get(user_metadata::bp_meta_music::user_metadata_music),
+        )
+        .route_with_tsr(
+            "/user/metadata/music_detail/:guid",
+            get(user_metadata::bp_meta_music::user_metadata_music_detail),
+        )
+        .route_with_tsr(
+            "/user/metadata/music_video/:page",
+            get(user_metadata::bp_meta_music_video::user_metadata_music_video),
+        )
+        .route_with_tsr(
+            "/user/metadata/music_video_detail/:guid",
+            get(user_metadata::bp_meta_music_video::user_metadata_music_video_detail),
+        )
         .route_with_tsr(
             "/user/metadata/person/:page",
-            get(bp_user_metadata_bp_meta_person::user_metadata_person),
+            get(user_metadata::bp_meta_person::user_metadata_person),
         )
         .route_with_tsr(
             "/user/metadata/person_detail/:guid",
-            get(bp_user_metadata_bp_meta_person::user_metadata_person_detail),
+            get(user_metadata::bp_meta_person::user_metadata_person_detail),
         )
-        // .route_with_tsr(
-        //     "/user/metadata/sports/:page",
-        //     get(bp_user_metadata_bp_meta_sports::user_metadata_sports),
-        // )
-        // .route_with_tsr(
-        //     "/user/metadata/sports_detail/:guid",
-        //     get(bp_user_metadata_bp_meta_sports::user_metadata_sports_detail),
-        // )
-        // .route_with_tsr(
-        //     "/user/metadata/tv/:page",
-        //     get(bp_user_metadata_bp_meta_tv::user_metadata_tv),
-        // )
-        // .route_with_tsr(
-        //     "/user/metadata/tv_detail/:guid",
-        //     get(bp_user_metadata_bp_meta_tv::user_metadata_tv_detail),
-        // )
+        .route_with_tsr(
+            "/user/metadata/sports/:page",
+            get(user_metadata::bp_meta_sports::user_metadata_sports),
+        )
+        .route_with_tsr(
+            "/user/metadata/sports_detail/:guid",
+            get(user_metadata::bp_meta_sports::user_metadata_sports_detail),
+        )
+        .route_with_tsr(
+            "/user/metadata/tv/:page",
+            get(user_metadata::bp_meta_tv::user_metadata_tv),
+        )
+        .route_with_tsr(
+            "/user/metadata/tv_detail/:guid",
+            get(user_metadata::bp_meta_tv::user_metadata_tv_detail),
+        )
         .route_with_tsr(
             "/user/playback/audio",
-            get(bp_user_playback_bp_audio::user_playback_audio),
+            get(user_playback::bp_audio::user_playback_audio),
         )
         .route_with_tsr(
             "/user/playback/comic",
-            get(bp_user_playback_bp_comic::user_playback_comic),
+            get(user_playback::bp_comic::user_playback_comic),
         )
         .route_with_tsr(
             "/user/playback/video",
-            get(bp_user_playback_bp_video::user_playback_video),
+            get(user_playback::bp_video::user_playback_video),
         )
         .route_with_tsr("/user/hardware", get(user::bp_hardware::user_hardware))
         .route_with_tsr("/user/home", get(user::bp_home::user_home))
@@ -476,7 +418,6 @@ async fn main() {
         .route_with_tsr("/user/queue", get(user::bp_queue::user_queue))
         .route_with_tsr("/user/search", get(user::bp_search::user_search))
         .route_with_tsr("/user/sync", get(user::bp_sync::user_sync))
-        .route_layer(axum::middleware::from_fn(|req, next|guard::auth(req, next, Method::GET, false)))
         .route_with_tsr("/logout", get(public::bp_logout::public_logout))
         .route_with_tsr(
             "/public/login",
@@ -484,9 +425,12 @@ async fn main() {
         )
         .nest("/static", axum_static::static_router("static"))
         .layer(
-            AuthSessionLayer::<database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>::new(Some(
-                sqlx_pool.clone().into(),
-            ))
+            AuthSessionLayer::<
+                mk_lib_database::mk_lib_database_user::User,
+                i64,
+                SessionPgPool,
+                PgPool,
+            >::new(Some(sqlx_pool.clone().into()))
             .with_config(auth_config),
         )
         .layer(SessionLayer::new(session_store))
@@ -501,9 +445,13 @@ async fn main() {
         )
         .route_with_tsr(
             "/public/register",
-            get(public::bp_register::public_register).post(public::bp_register::public_register_post),
+            get(public::bp_register::public_register)
+                .post(public::bp_register::public_register_post),
         )
-        .route_with_tsr("/health_check", get(public::bp_health_check::public_health_check))
+        .route_with_tsr(
+            "/health_check",
+            get(public::bp_health_check::public_health_check),
+        )
         .route("/metrics", get(|| async move { metric_handle.render() }))
         .layer(prometheus_layer)
         .layer(Extension(sqlx_pool))
@@ -512,8 +460,8 @@ async fn main() {
                 .layer(HandleErrorLayer::new(|_: BoxError| async {
                     StatusCode::REQUEST_TIMEOUT
                 }))
-                .layer(TimeoutLayer::new(Duration::from_secs(10)))
-    );
+                .layer(TimeoutLayer::new(Duration::from_secs(10))),
+        );
     // add a fallback service for handling routes to unknown paths
     let app = app.fallback(bp_error::general_not_found);
 
@@ -524,27 +472,11 @@ async fn main() {
         .await
         .unwrap();
 
-    // setup rocket
-    //         catchers![
     //             bp_error::general_not_authorized,        401
     //             bp_error::general_not_administrator,     403
     //             bp_error::general_security,              401?
     //             bp_error::default_catcher,               500
 }
-
-// async fn handle_error(method: Method, uri: Uri, error: BoxError) -> impl IntoResponse {
-//     if error.is::<Elapsed>() {
-//         (
-//             StatusCode::REQUEST_TIMEOUT,
-//             format!("{} {} took too long", method, uri),
-//         )
-//     } else {
-//         (
-//             StatusCode::INTERNAL_SERVER_ERROR,
-//             format!("{} {} failed: {}", method, uri, error),
-//         )
-//     }
-// }
 
 async fn shutdown_signal() {
     let ctrl_c = async {

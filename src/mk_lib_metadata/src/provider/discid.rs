@@ -1,15 +1,11 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 // https://github.com/phw/rust-discid
-// discid = "0.4.4"
 
 use discid::{DiscId, Features};
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use stdext::function_name;
 
-use crate::mk_lib_logging;
-
-fn print_disc_info(disc: DiscId) {
+async fn print_disc_info(disc: DiscId) {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -19,11 +15,11 @@ fn print_disc_info(disc: DiscId) {
         .await
         .unwrap();
     }
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "DiscId": disc.id(), "TOC": disc.toc_string(), "Submitvia": disc.submission_url() }))
-                .await.unwrap()
-    }
+    // #[cfg(debug_assertions)]
+    // {
+    //     mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "DiscId": disc.id(), "TOC": disc.toc_string(), "Submitvia": disc.submission_url() }))
+    //             .await.unwrap()
+    // }
 }
 
 pub async fn mk_metadata_biscid() {
@@ -41,7 +37,7 @@ pub async fn mk_metadata_biscid() {
     ];
     let result = DiscId::put(1, &offsets);
     match result {
-        Ok(disc) => print_disc_info(disc),
+        Ok(disc) => print_disc_info(disc).await,
         Err(e) => {
             eprintln!("{}", e);
             std::process::exit(1);

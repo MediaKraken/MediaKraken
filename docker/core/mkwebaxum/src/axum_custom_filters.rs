@@ -1,4 +1,4 @@
-mod filters {
+pub mod filters {
     pub fn space_to_html(s: &str) -> ::askama::Result<String> {
         Ok(s.replace(" ", "%20"))
     }

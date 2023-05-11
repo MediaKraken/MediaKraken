@@ -1,14 +1,10 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 // https://www.giantbomb.com/api/
 
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_network::mk_lib_network;
 use serde_json::json;
 use std::error::Error;
 use stdext::function_name;
-
-use crate::mk_lib_logging;
-
-use crate::mk_lib_network;
 
 pub async fn mk_provider_giant_bomb_platforms(
     api_key: String,

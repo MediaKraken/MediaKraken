@@ -1,5 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
+use crate::guard;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -10,33 +9,29 @@ use axum::{
 };
 use axum_session_auth::*;
 use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use stdext::function_name;
 
-use crate::mk_lib_logging;
-
-use crate::guard;
-
-use crate::database::mk_lib_database_cron;
-
-use crate::database::mk_lib_database_user;
-
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_cron.html")]
 struct TemplateCronContext<'a> {
-    template_data: &'a Vec<mk_lib_database_cron::DBCronList>,
+    template_data: &'a Vec<mk_lib_database::mk_lib_database_cron::DBCronList>,
     template_data_exists: &'a bool,
 }
 
 pub async fn admin_cron(
     Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
-    let cron_list = mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool)
-        .await
-        .unwrap();
+    let auth_response = guard::guard_page_by_user(method, auth, true);
+    let cron_list =
+        mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool)
+            .await
+            .unwrap();
     let mut cron_data: bool = false;
     if cron_list.len() > 0 {
         cron_data = true;
@@ -48,11 +43,6 @@ pub async fn admin_cron(
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())
 }
-
-// #[post("/cron_delete/<guid>")]
-// pub async fn admin_cron_delete(sqlx_pool: &rocket::State<sqlx::PgPool>, user: AdminUser, guid: rocket::serde::uuid::Uuid) -> Template {
-//     database::mk_lib_database_cron::mk_lib_database_cron_delete(&sqlx_pool, guid).await.unwrap();
-// }
 
 /*
 @blueprint_admin_cron.route('/admin_cron_edit/<guid>', methods=['GET', 'POST'])

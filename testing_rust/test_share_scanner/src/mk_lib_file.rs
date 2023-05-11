@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use std::io;
 
 pub async fn mk_read_file_data(file_to_read: &str) -> io::Result<String> {

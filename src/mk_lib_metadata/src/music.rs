@@ -1,15 +1,8 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
+use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
-use sqlx::postgres::PgRow;
-use sqlx::types::Uuid;
 use std::error::Error;
 use stdext::function_name;
-
-use crate::mk_lib_logging;
-
-use crate::database::mk_lib_database_metadata_download_queue;
-use crate::database::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 
 #[path = "provider/musicbrainz.rs"]
 mod provider_musicbrainz;
@@ -23,7 +16,7 @@ mod provider_shoutcast;
 pub async fn metadata_music_lookup(
     sqlx_pool: &sqlx::PgPool,
     download_data: &DBDownloadQueueByProviderList,
-) -> Result<Uuid, sqlx::Error> {
+) -> Result<uuid::Uuid, Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(

@@ -1,11 +1,7 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
-use crate::mk_lib_logging;
-
+use crate::mk_lib_database_option_status;
+use mk_lib_logging::mk_lib_logging;
 use serde_json::{json, Value};
 use stdext::function_name;
-
-use crate::database::mk_lib_database_option_status;
 
 pub async fn mk_lib_database_update_schema(
     sqlx_pool: &sqlx::PgPool,

@@ -1,16 +1,9 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
+use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
-use sqlx::postgres::PgRow;
-use sqlx::types::Uuid;
 use std::error::Error;
 use stdext::function_name;
 use torrent_name_parser::Metadata;
-
-use crate::mk_lib_logging;
-
-use crate::database::mk_lib_database_metadata_download_queue;
-use crate::database::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 
 #[path = "provider/imdb.rs"]
 mod provider_imdb;
@@ -22,7 +15,7 @@ mod provider_omdb;
 mod provider_tmdb;
 
 pub struct MetadataMovieLastLookup {
-    metadata_last_id: Uuid,
+    metadata_last_id: uuid::Uuid,
     metadata_last_imdb: String,
     metadata_last_tmdb: String,
 }
@@ -31,7 +24,7 @@ pub async fn metadata_movie_lookup(
     sqlx_pool: &sqlx::PgPool,
     download_data: &DBDownloadQueueByProviderList,
     file_name: Metadata,
-) -> Result<Uuid, sqlx::Error> {
+) -> Result<uuid::Uuid, Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(

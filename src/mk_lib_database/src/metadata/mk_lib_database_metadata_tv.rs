@@ -1,7 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
-use crate::mk_lib_logging;
-
+use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgRow;
@@ -37,7 +34,7 @@ pub struct DBMetaTVShowList {
     pub mm_metadata_tvshow_guid: uuid::Uuid,
     pub mm_metadata_tvshow_name: String,
     air_date: String,
-    image_json: serde_json::Value,
+    pub image_json: serde_json::Value,
 }
 
 pub async fn mk_lib_database_metadata_tv_read(

@@ -1,20 +1,22 @@
 {% block content %}
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>MediaKraken</title>
     <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
     <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
     <link rel="stylesheet" href="/static/css/styles.min.css">
-    <link rel="stylesheet" href="/static/css/base_webapp_layout.css" media="all" type="text/css"/>
+    <link rel="stylesheet" href="/static/css/base_webapp_layout.css" media="all" type="text/css" />
 </head>
 
 <body>
     {% include "bss_user/bss_user_include_menu.html" %}
     {% if template_data_exists %}
     {% if pagination_bar != "" %}
-        {{ pagination_bar|safe }}
+    {{ pagination_bar|safe }}
     {% endif %}
     <div class="table-responsive">
         <table class="table table-striped table-hover">
@@ -30,7 +32,8 @@
                 {% for row_data in template_data %}
                 <tr>
                     <td>{{ loop.index + (page - 1) * 30 }}</td>
-                    <td><a href ="/user/metadata/game_detail/{{row_data.gi_game_info_id}}">{{ row_data.gi_game_info_name }}</a></td>
+                    <td><a href="/user/metadata/game_detail/{{row_data.gi_game_info_id}}">{{ row_data.gi_game_info_name
+                            }}</a></td>
                     <td>{{ row_data.gi_year }}</td>
                     <td>{{ row_data.gs_game_system_name }}</td>
                 </tr>
@@ -39,7 +42,7 @@
         </table>
     </div>
     {% if pagination_bar != "" %}
-        {{ pagination_bar|safe }}
+    {{ pagination_bar|safe }}
     {% endif %}
     {% else %}
     <p id="general_text">No game metadata found.</p>

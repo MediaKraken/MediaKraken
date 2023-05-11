@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use rocket::response::Redirect;
 use rocket::Request;
 use rocket_auth::{Auth, Error, Login, Signup, User, Users};

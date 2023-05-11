@@ -1,12 +1,11 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
+use crate::guessit;
+use mk_lib_common::mk_lib_common_enum_media_type;
+use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
-use sqlx::types::Uuid;
 use std::error::Error;
 use stdext::function_name;
 use torrent_name_parser::Metadata;
-
-use crate::mk_lib_logging;
 
 #[path = "adult.rs"]
 mod metadata_adult;
@@ -41,15 +40,6 @@ mod provider_musicbrainz;
 mod provider_televisiontunes;
 #[path = "provider/tmdb.rs"]
 mod provider_tmdb;
-
-#[path = "guessit.rs"]
-mod metadata_guessit;
-
-#[path = "../mk_lib_common_enum_media_type.rs"]
-mod mk_lib_common_enum_media_type;
-
-use crate::database::mk_lib_database_metadata_download_queue;
-use crate::database::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 
 pub async fn metadata_process(
     sqlx_pool: &sqlx::PgPool,
@@ -117,7 +107,7 @@ pub async fn metadata_search(
     provider_name: String,
     download_data: DBDownloadQueueByProviderList,
     provider_api_key: &String,
-) -> Result<(), sqlx::Error> {
+) -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -127,16 +117,15 @@ pub async fn metadata_search(
         .await
         .unwrap();
     }
-    let mut metadata_uuid: Uuid = uuid::Uuid::nil();
+    let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
     let mut set_fetch: bool = false;
     let mut lookup_halt: bool = false;
     let mut update_provider = String::new();
     let mut guessit_data: Metadata;
     if provider_name == "anidb" {
-        (metadata_uuid, guessit_data) =
-            metadata_guessit::metadata_guessit(&sqlx_pool, &download_data)
-                .await
-                .unwrap();
+        (metadata_uuid, guessit_data) = guessit::metadata_guessit(&sqlx_pool, &download_data)
+            .await
+            .unwrap();
         if metadata_uuid == uuid::Uuid::nil() {
             metadata_uuid =
                 metadata_anime::metadata_anime_lookup(&sqlx_pool, &download_data, guessit_data)
@@ -207,7 +196,7 @@ pub async fn metadata_search(
         .unwrap();
         if metadata_uuid != uuid::Uuid::nil() {
             // TODO add theme.mp3 dl"d above to media table
-            database::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+            mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
                 &sqlx_pool,
                 download_data.mm_download_guid,
             )
@@ -221,10 +210,9 @@ pub async fn metadata_search(
     } else if provider_name == "thegamesdb" {
         lookup_halt = true;
     } else if provider_name == "themoviedb" {
-        (metadata_uuid, guessit_data) =
-            metadata_guessit::metadata_guessit(&sqlx_pool, &download_data)
-                .await
-                .unwrap();
+        (metadata_uuid, guessit_data) = guessit::metadata_guessit(&sqlx_pool, &download_data)
+            .await
+            .unwrap();
         if download_data.mm_download_que_type == mk_lib_common_enum_media_type::DLMediaType::MOVIE {
             if metadata_uuid == uuid::Uuid::nil() {
                 metadata_uuid =
@@ -331,7 +319,7 @@ pub async fn metadata_fetch(
     }
     if provider_name == "imvdb" {
         let imvdb_id = provider_imvdb::meta_fetch_save_imvdb(
-            sqlx_pool,
+            &sqlx_pool,
             download_data.mm_download_provider_id,
             download_data.mm_download_new_uuid,
         )
@@ -370,7 +358,7 @@ pub async fn metadata_fetch(
             .await;
         }
     }
-    database::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+    mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
         download_data.mm_download_guid,
     )
@@ -425,7 +413,7 @@ pub async fn metadata_image(
         .unwrap();
     }
     // TODO grab the actual image
-    database::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+    mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
         download_data.mm_download_guid,
     )
@@ -449,7 +437,7 @@ pub async fn metadata_review(
         .unwrap();
     }
     // review is last.....so can delete download que
-    database::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+    mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
         download_data.mm_download_guid,
     )
@@ -473,7 +461,7 @@ pub async fn metadata_collection(
         .unwrap();
     }
     // only one record for this so nuke it
-    database::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+    mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
         download_data.mm_download_guid,
     )

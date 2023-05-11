@@ -1,7 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
-use crate::mk_lib_logging;
-
+use mk_lib_logging::mk_lib_logging;
 use core::fmt::Write;
 use paginator::{PageItem, Paginator};
 use serde_json::json;

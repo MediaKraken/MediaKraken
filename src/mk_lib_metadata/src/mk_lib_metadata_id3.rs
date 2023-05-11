@@ -1,13 +1,9 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 // https://github.com/polyfloyd/rust-id3
-// id3 = "1.2.0"
 
 use id3::{Tag, TagLike};
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use stdext::function_name;
-
-use crate::mk_lib_logging;
 
 pub async fn mk_lib_metadata_id3_get_tag_info(file_name: String) {
     #[cfg(debug_assertions)]
@@ -19,7 +15,7 @@ pub async fn mk_lib_metadata_id3_get_tag_info(file_name: String) {
         .await
         .unwrap();
     }
-    let tag = Tag::read_from_path(file_name)?;
+    let tag = Tag::read_from_path(file_name).unwrap();
     if let Some(artist) = tag.artist() {
         #[cfg(debug_assertions)]
         {

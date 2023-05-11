@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use bytesize::ByteSize;
 use core::fmt::Write;
 use paginator::{PageItem, Paginator};

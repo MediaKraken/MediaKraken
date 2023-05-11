@@ -13,24 +13,17 @@ codegen-units = 1
 argh = "0.1.6"
 amiquip = { version = "0.4.2", default-features = false }
 chrono = { version = "0.4.23", features = ["serde"] }
+mk_lib_logging = { path = "/root/MediaKraken/src/mk_lib_logging" }
 reqwest = { version = "0.11.13", default-features = false, features = ["json", "rustls-tls"] }
 rustls = "0.20.7"
 rustls-pemfile = "1.0.1"
 serde = { version = "1.0.152", features = ["derive"] }
 serde_json = "1.0.91"
-sqlx = { version = "0.6.3", features = [
-    "chrono",
-    "json",
-    "runtime-tokio-rustls",
-    "postgres",
-    "uuid",
-] }
 stdext = "0.3.1"
 sys-info = "0.9.1"
-tokio = { version = "1.24.1", features = ["full"] }
+tokio = { version = "1.28.0", features = ["full"] }
 tokio-rustls = "0.23.2"
 validator = { version = "0.16.0", features = ["derive"] }
-urlencoding = "2.1.2"
 
 [dev-dependencies]
 tokio-test = "*"

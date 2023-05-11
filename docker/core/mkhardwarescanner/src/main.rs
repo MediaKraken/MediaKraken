@@ -1,19 +1,12 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use std::error::Error;
 //use onvif::discovery;
 use futures_util::{pin_mut, stream::StreamExt};
+use mk_lib_hardware;
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_network;
 use serde_json::json;
 use stdext::function_name;
 use tokio::time::{sleep, Duration};
-
-mod mk_lib_hardware_chromecast;
-
-mod mk_lib_hardware_phue;
-
-mod mk_lib_logging;
-
-mod mk_lib_network_dlna;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -37,7 +30,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // chromecast discover
-    mk_lib_hardware_chromecast::mk_hardware_chromecast_discover()
+    mk_lib_hardware::mk_lib_hardware_chromecast::mk_hardware_chromecast_discover()
         .await
         .unwrap();
     #[cfg(debug_assertions)]
@@ -67,13 +60,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // dlna devices
-    mk_lib_network_dlna::mk_lib_network_dlna_discover().await;
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"HWScan": "After DLNA"}))
-            .await
-            .unwrap();
-    }
+    // mk_lib_network::mk_lib_network_dlna::mk_lib_network_dlna_discover().await;
+    // #[cfg(debug_assertions)]
+    // {
+    //     mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"HWScan": "After DLNA"}))
+    //         .await
+    //         .unwrap();
+    // }
+
     // hdhomerun tuner discovery
     // tuner_api = common_hardware_hdhomerun_py.CommonHardwareHDHomeRunPY()
     // tuner_api.com_hdhomerun_discover()

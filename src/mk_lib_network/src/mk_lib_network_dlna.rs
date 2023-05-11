@@ -1,12 +1,8 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
-use serde_json::json;
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use stdext::function_name;
 
 // https://github.com/gabrielmagno/crab-dlna
-
-use crate::mk_lib_logging;
 
 use crab_dlna::{
     get_serve_ip, infer_subtitle_from_video, play, Error, MediaStreamingServer, Render, RenderSpec,
@@ -26,12 +22,13 @@ pub async fn mk_lib_network_dlna_discover() {
     let discover_timeout_secs = 5;
     let renders_discovered = Render::discover(discover_timeout_secs).await.unwrap();
     for render in renders_discovered {
-        #[cfg(debug_assertions)]
-        {
-            mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "render": render }))
-                .await
-                .unwrap();
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "render": render }))
+        //         .await
+        //         .unwrap();
+        // }
+        continue;
     }
 }
 

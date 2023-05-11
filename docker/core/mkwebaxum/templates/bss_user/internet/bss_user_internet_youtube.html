@@ -1,10 +1,12 @@
 {% block content %}
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>MediaKraken - Youtube</title>
     <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
     <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
     <link rel="stylesheet" href="/static/css/styles.min.css">
 </head>
@@ -12,22 +14,23 @@
 <body>
     {% include "bss_user/bss_user_include_menu.html" %}
     <div>
-    {% if template_data_exists %}
-    <div>
-        {% for row_data in template_data %}
+        {% if template_data_exists %}
+        <div>
+            {% for row_data in template_data %}
             <div class="main_photo">
-                <a href= "/user/internet/youtube_detail/{{row_data["items"][0]["id"]}}"" >
-                <img src="{{ row_data["items"][0]["snippet"]["thumbnails"]["default"]["url"] }}" height="300" width="200">
+                <a href="/user/internet/youtube_detail/{{row_data[" items"][0]["id"]}}"">
+                    <img src="{{ row_data[" items"][0]["snippet"]["thumbnails"]["default"]["url"] }}" height="300"
+                        width="200">
                 </a>
                 <div class="description">
                     <p class="description_content_left">{{row_data["items"][0]["snippet"]["title"]}}</p>
                 </div>
             </div>
-        {% endfor %}
-    </div>
-    {% else %}
+            {% endfor %}
+        </div>
+        {% else %}
         <p id="general_text">No YouTube media found.</p>
-    {% endif %}
+        {% endif %}
     </div>
     {% include "bss_public/bss_public_footer.html" %}
     <script src="/static/js/jquery.min.js"></script>

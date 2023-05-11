@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::types::Uuid;

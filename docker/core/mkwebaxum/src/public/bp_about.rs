@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use askama::Template;
 use axum::{
     extract::Path,
@@ -8,10 +6,9 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use stdext::function_name;
-
-use crate::mk_lib_logging;
 
 #[derive(Template)]
 #[template(path = "bss_public/bss_public_about.html")]

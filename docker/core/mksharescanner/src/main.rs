@@ -1,25 +1,11 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use amiquip::{
     Connection, ConsumerMessage, ConsumerOptions, Exchange, QueueDeclareOptions, Result,
 };
 use serde_json::{json, Value};
 use std::error::Error;
-
-//use rustube::{Id, VideoFetcher};
-
-#[path = "database"]
-pub mod database {
-    pub mod mk_lib_database;
-    pub mod mk_lib_database_network_share;
-    pub mod mk_lib_database_option_status;
-    pub mod mk_lib_database_version;
-    pub mod mk_lib_database_version_schema;
-}
-
-mod mk_lib_logging;
-
-mod mk_lib_network_nmap;
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_network;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {

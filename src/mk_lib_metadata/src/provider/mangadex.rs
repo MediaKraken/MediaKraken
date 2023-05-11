@@ -1,21 +1,18 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 // https://github.com/edg-l/mangadex-rs
-// mangadex = "0.1.2"
 
 use mangadex::api::manga::*;
 use mangadex::schema::manga::*;
 use mangadex::schema::LanguageCode;
 use mangadex::Client;
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
+use std::error::Error;
 use stdext::function_name;
-
-use crate::mk_lib_logging;
 
 pub async fn provider_mangadex_login(
     user_name: String,
     user_password: String,
-) -> Result<mangadex::Client, sqlx::Error> {
+) -> Result<mangadex::Client, Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -26,6 +23,6 @@ pub async fn provider_mangadex_login(
         .unwrap();
     }
     let mut client = Client::default();
-    client.login(user_name, user_password).await?;
+    client.login(&user_name, &user_password).await?;
     Ok(client)
 }

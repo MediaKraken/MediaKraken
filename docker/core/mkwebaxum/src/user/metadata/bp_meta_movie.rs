@@ -1,5 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
+use crate::axum_custom_filters::filters;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -10,25 +9,13 @@ use axum::{
 };
 use axum_session_auth::*;
 use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
+use mk_lib_common::mk_lib_common_pagination;
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use stdext::function_name;
-
-mod filters {
-    pub fn space_to_html(s: &str) -> ::askama::Result<String> {
-        Ok(s.replace(" ", "%20"))
-    }
-}
-
-use crate::mk_lib_logging;
-
-#[path = "../../mk_lib_common_pagination.rs"]
-mod mk_lib_common_pagination;
-
-use crate::database::mk_lib_database_metadata_movie;
-
-use crate::database::mk_lib_database_user;
 
 #[derive(Debug, Deserialize, Serialize)]
 struct TemplateMetaMovieList {
@@ -55,17 +42,18 @@ struct TemplateMetaMovieContext<'a> {
 pub async fn user_metadata_movie(
     Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
 ) -> impl IntoResponse {
     let current_user = auth.current_user.clone().unwrap_or_default();
     let db_offset: i64 = (page * 30) - 30;
-    let total_pages: i64 = mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(
-        &sqlx_pool,
-        String::new(),
-    )
-    .await
-    .unwrap();
+    let total_pages: i64 =
+        mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(
+            &sqlx_pool,
+            String::new(),
+        )
+        .await
+        .unwrap();
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
         total_pages,
         page,
@@ -73,14 +61,15 @@ pub async fn user_metadata_movie(
     )
     .await
     .unwrap();
-    let movie_list = mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(
-        &sqlx_pool,
-        String::new(),
-        db_offset,
-        30,
-    )
-    .await
-    .unwrap();
+    let movie_list =
+        mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(
+            &sqlx_pool,
+            String::new(),
+            db_offset,
+            30,
+        )
+        .await
+        .unwrap();
     let mut template_data_vec: Vec<TemplateMetaMovieList> = Vec::new();
     for row_data in movie_list.iter() {
         let mut watched_status: serde_json::Value = json!(false);
@@ -136,32 +125,32 @@ pub async fn user_metadata_movie(
     (StatusCode::OK, Html(reply_html).into_response())
 }
 
-// #[derive(Template)]
-// #[template(path = "bss_user/metadata/bss_user_metadata_movie_detail.html")]
-// struct TemplateMetaMovieDetailContext {
-//     template_data_json: serde_json::Value,
-//     template_data_json_media_ffmpeg: serde_json::Value,
-//     template_data_json_media_crew: serde_json::Value,
-// }
+#[derive(Template)]
+#[template(path = "bss_user/metadata/bss_user_metadata_movie_detail.html")]
+struct TemplateMetaMovieDetailContext {
+    template_data_json: serde_json::Value,
+    template_data_json_media_ffmpeg: serde_json::Value,
+    template_data_json_media_crew: serde_json::Value,
+}
 
-// pub async fn user_metadata_movie_detail(
-//     Extension(sqlx_pool): Extension<PgPool>,
-//     Path(guid): Path<uuid::Uuid>,
-// ) -> impl IntoResponse {
-//     let movie_metadata =
-//         database::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_detail_by_guid(
-//             &sqlx_pool, guid,
-//         )
-//         .await
-//         .unwrap();
-//     let template = TemplateMetaMovieDetailContext {
-//         template_data_json: movie_metadata.mm_metadata_movie_json,
-//         template_data_json_media_ffmpeg: json!({ None }),
-//         template_data_json_media_crew: json!({ None }),
-//     };
-//     let reply_html = template.render().unwrap();
-//     (StatusCode::OK, Html(reply_html).into_response())
-// }
+pub async fn user_metadata_movie_detail(
+    Extension(sqlx_pool): Extension<PgPool>,
+    Path(guid): Path<uuid::Uuid>,
+) -> impl IntoResponse {
+    let movie_metadata =
+        mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_detail_by_guid(
+            &sqlx_pool, guid,
+        )
+        .await
+        .unwrap();
+    let template = TemplateMetaMovieDetailContext {
+        template_data_json: movie_metadata.mm_metadata_movie_json,
+        template_data_json_media_ffmpeg: json!({ None }),
+        template_data_json_media_crew: json!({ None }),
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
+}
 
 /*
 

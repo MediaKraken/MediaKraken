@@ -1,0 +1,36 @@
+[package]
+name = "mk_lib_hardware"
+version = "0.0.1"
+edition = "2021"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
+
+[dependencies]
+futures = "0.3.28"
+futures-util = "0.3.28"
+huelib = "0.13.2"
+LGremote = "0.2.1"
+lsdp = "0.3.0"
+mdns = "3.0.0"
+mini-telnet = "0.1.8"
+mk_lib_logging = { path = "/root/MediaKraken/src/mk_lib_logging" }
+mk_lib_network = { path = "/root/MediaKraken/src/mk_lib_network" }
+onvif = { git = "https://github.com/lumeohq/onvif-rs" }   # has request with default
+# rascam = "0.0.2"  # breaks on mmal-sys compile - mmal-sys is for raspberry pi only
+rppal = { version = "0.13.1", features = ["hal"] }
+rppal-dht11 = "0.4.0"
+rups = { version = "0.5.3", features = ["ssl"] }
+serde_json = "1.0.96"
+serialport = "4.2.0"
+smartcast = "0.1.1"
+stdext = "0.3.1"
+tokio = "1.28.1"
+weectrl = { git = "https://github.com/Hyperchaotic/weectrl" } 
+yeelib_rs = "0.1.1"
+
+[dev-dependencies]
+tokio-test = "*"

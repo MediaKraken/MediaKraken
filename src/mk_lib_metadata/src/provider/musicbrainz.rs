@@ -1,18 +1,13 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 // https://github.com/oknozor/musicbrainz_rs
-// musicbrainz_rs = "0.4.0"
 
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_network::mk_lib_network;
 use musicbrainz_rs::entity::artist;
 use musicbrainz_rs::entity::artist::*;
 use musicbrainz_rs::prelude::*;
 use serde_json::json;
 use std::error::Error;
 use stdext::function_name;
-
-use crate::mk_lib_logging;
-
-use crate::mk_lib_network;
 
 /*
 

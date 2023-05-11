@@ -25,6 +25,8 @@ axum_static = "1.2.1"
 bytesize = {version = "1.2.0", features = ["serde"]}
 chrono = { version = "0.4.24", features = ["serde"] }
 docker-api = { version = "0.12.1", features = ["swarm"] }
+mk_lib_database = { path = "/root/MediaKraken/src/mk_lib_database" }
+mk_lib_logging = { path = "/root/MediaKraken/src/mk_lib_logging" }
 lazy_static = "1.4.0"
 libc = "0.2.126"
 num-format = { version = "0.4.4", features = ["with-system-locale"] }
@@ -46,7 +48,7 @@ sqlx = { version = "0.6.3", features = [
 ] }
 stdext = "0.3.1"
 sys-info = "0.9.1"
-tokio = { version = "1.27.0", features = ["full"] }
+tokio = { version = "1.28.0", features = ["full"] }
 tower = { version = "0.4.13" }
 transmission-rpc = "0.4.1"
 urlencoding = "2.1.2"

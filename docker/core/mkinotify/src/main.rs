@@ -1,22 +1,9 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use amiquip::{AmqpProperties, Connection, Exchange, Publish, Result};
 use inotify::{EventMask, Inotify, WatchMask};
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
-use sqlx::Row;
 use std::error::Error;
-use stdext::function_name;
-
-#[path = "database"]
-mod database {
-    pub mod mk_lib_database;
-    pub mod mk_lib_database_library;
-    pub mod mk_lib_database_option_status;
-    pub mod mk_lib_database_version;
-    pub mod mk_lib_database_version_schema;
-}
-
-mod mk_lib_logging;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -29,10 +16,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // connect to db and do a version check
-    let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(1)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
         .await
         .unwrap();
-    database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+        .await.unwrap();
 
     // open rabbit connection
     let mut rabbit_connection =
@@ -46,7 +34,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let mut inotify = Inotify::init().expect("Failed to initialize inotify");
 
     for row_data in
-        database::mk_lib_database_library::mk_lib_database_library_read(&sqlx_pool, 0, 99999)
+        mk_lib_database::mk_lib_database_library::mk_lib_database_library_read(&sqlx_pool, 0, 99999)
             .await
             .unwrap()
     {

@@ -1,4 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
 // https://docs.rs/ipnet/latest/ipnet/#
 // ipnet=2.5.1
 

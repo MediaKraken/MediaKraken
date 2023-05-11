@@ -1,17 +1,12 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use amiquip::{
     Connection, ConsumerMessage, ConsumerOptions, Exchange, QueueDeclareOptions, Result,
 };
+use mk_lib_hardware;
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_network;
 use serde_json::{json, Value};
 use std::error::Error;
-//use std::process::Command;
 use stdext::function_name;
-
-mod mk_lib_logging;
-mod mk_lib_network;
-mod mk_lib_network_serial;
-mod mk_lib_network_telnet;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {

@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use rocket::fs::{relative, FileServer};
 use rocket::http::Status;
 use rocket::response::{content, status};

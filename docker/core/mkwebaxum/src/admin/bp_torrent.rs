@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use askama::Template;
 use axum::{
     extract::Path,
@@ -12,6 +10,9 @@ use axum_session_auth::*;
 use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use bytesize::ByteSize;
 use core::fmt::Write;
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_network;
 use paginator::{PageItem, Paginator};
 use serde_json::json;
 use sqlx::postgres::PgPool;
@@ -22,13 +23,6 @@ use transmission_rpc::types::{
 };
 use transmission_rpc::TransClient;
 
-use crate::mk_lib_logging;
-
-#[path = "../mk_lib_network_transmission.rs"]
-mod mk_lib_network_transmission;
-
-use crate::database::mk_lib_database_user;
-
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_torrent.html")]
 struct AdminTorrentTemplate;
@@ -36,7 +30,7 @@ struct AdminTorrentTemplate;
 pub async fn admin_torrent(
     Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let mut transmission_client = TransClient::new("mkstack_transmission".parse().unwrap());
     let res: RpcResponse<Torrents<Torrent>> =

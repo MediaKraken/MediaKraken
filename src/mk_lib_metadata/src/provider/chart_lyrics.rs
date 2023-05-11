@@ -1,20 +1,12 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 // http://www.chartlyrics.com/api.aspx
 
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_network::mk_lib_network;
 use serde_json::json;
 use std::error::Error;
 use stdext::function_name;
 
-use crate::mk_lib_logging;
-
-use crate::mk_lib_network;
-
-pub async fn provider_chart_lyrics_fetch(
-    sqlx_pool: &sqlx::PgPool,
-    artist_name: String,
-    song_name: String,
-) {
+pub async fn provider_chart_lyrics_fetch(artist_name: String, song_name: String) {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(

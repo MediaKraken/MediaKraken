@@ -1,7 +1,7 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use fltk::{app, button::Button, frame::Frame, image::SharedImage, prelude::*, window::Window};
 use fltk::{enums::Color, prelude::*, *};
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_network;
 use serde_json::json;
 use std::error::Error;
 use std::fs::File;
@@ -12,17 +12,8 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use stdext::function_name;
 
-#[path = "../../mk_lib_logging/src/mk_lib_logging.rs"]
-mod mk_lib_logging;
-
-#[path = "../../mk_lib_network/src/mk_lib_network.rs"]
-mod mk_lib_network;
-
-#[path = "../../mk_lib_network/src/mk_lib_network_mediakraken.rs"]
-mod mk_lib_network_mediakraken;
-
 fn main() {
-    let server_list = mk_lib_network_mediakraken::mk_lib_network_find_mediakraken_server();
+    let server_list = mk_lib_network::mk_lib_network_mediakraken::mk_lib_network_find_mediakraken_server();
     let app = app::App::default().with_scheme(app::AppScheme::Gtk);
     let mut win = window::Window::new(100, 100, 800, 600, "Media Player");
 

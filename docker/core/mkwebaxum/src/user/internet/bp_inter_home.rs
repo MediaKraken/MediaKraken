@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use askama::Template;
 use axum::{
     extract::Path,
@@ -10,13 +8,11 @@ use axum::{
 };
 use axum_session_auth::*;
 use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use stdext::function_name;
-
-use crate::mk_lib_logging;
-
-use crate::database::mk_lib_database_user;
 
 #[derive(Template)]
 #[template(path = "bss_user/internet/bss_user_internet.html")]
@@ -25,7 +21,7 @@ struct UserInternetTemplate;
 pub async fn user_inter_home(
     Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let template = UserInternetTemplate {};
     let reply_html = template.render().unwrap();

@@ -1,17 +1,16 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 // https://github.com/serialport/serialport-rs
 // apt install pkg-config libudev-dev
 
+// TODO port this to https://github.com/berkowski/tokio-serial
 use serde_json::json;
-use serialport::{available_ports, DataBits, SerialPortType, StopBits};
+use serialport::{available_ports, DataBits, SerialPort, SerialPortType, StopBits};
 use std::io::{self, Write};
 use std::time::Duration;
 use stdext::function_name;
 
-use crate::mk_lib_logging;
+use mk_lib_logging::mk_lib_logging;
 
-pub async fn serial_port_discover() -> Result<(), std::Error> {
+pub async fn serial_port_discover() -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -27,7 +26,7 @@ pub async fn serial_port_discover() -> Result<(), std::Error> {
         {
             mk_lib_logging::mk_logging_post_elk(
                 std::module_path!(),
-                json!({ "port": p.port_name, "type": p.port_type }),
+                json!({ "port": p.port_name }), //, "type": p.port_type }),
             )
             .await
             .unwrap();
@@ -41,7 +40,7 @@ pub async fn serial_port_open(
     serial_speed: u32,
     serial_stop_bits: StopBits,
     serial_data_bits: DataBits,
-) -> Result<(serialport), std::Error> {
+) -> Result<Box<dyn SerialPort>, Box<dyn std::error::Error>> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -61,7 +60,7 @@ pub async fn serial_port_open(
     Ok(port)
 }
 
-pub async fn serial_port_write() -> Result<(), std::Error> {
+pub async fn serial_port_write(mut port: Box<dyn SerialPort>) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -73,9 +72,10 @@ pub async fn serial_port_write() -> Result<(), std::Error> {
     }
     let output = "This is a test. This is only a test.".as_bytes();
     port.write(output).expect("Write failed!");
+    Ok(())
 }
 
-pub async fn serial_port_read() -> Result<(), std::Error> {
+pub async fn serial_port_read(mut port:Box<dyn SerialPort>) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -88,4 +88,5 @@ pub async fn serial_port_read() -> Result<(), std::Error> {
     let mut serial_buf: Vec<u8> = vec![0; 32];
     port.read(serial_buf.as_mut_slice())
         .expect("Found no data!");
+    Ok(())
 }

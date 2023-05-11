@@ -1,20 +1,14 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_network::mk_lib_network;
 use serde_json::json;
-use sqlx::types::Uuid;
-use std::error::Error;
 use std::str;
 use stdext::function_name;
 use substring::Substring;
 
-use crate::mk_lib_logging;
-
-use crate::mk_lib_network;
-
 pub async fn provider_televisiontunes_theme_fetch(
     tv_show_name: String,
     tv_show_theme_path: String,
-) -> Result<Uuid, Box<dyn std::error::Error>> {
+) -> Result<uuid::Uuid, Box<dyn std::error::Error>> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -56,7 +50,7 @@ pub async fn provider_televisiontunes_theme_fetch(
                 .unwrap();
         }
         mk_lib_network::mk_download_file_from_url(dl_url, &tv_show_theme_path).await;
-        metadata_uuid = Uuid::new_v4();
+        metadata_uuid = uuid::Uuid::new_v4();
     }
     Ok(metadata_uuid)
 }

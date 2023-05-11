@@ -1,10 +1,6 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
-use crate::mk_lib_logging;
-
 // https://github.com/Xavientois/rppal-dht11-rs
-// rppal-dht11 = "0.4.0"
 
+use mk_lib_logging::mk_lib_logging;
 use rppal::{
     gpio::{Gpio, Mode},
     hal::Delay,
@@ -43,7 +39,7 @@ pub async fn mk_lib_hardware_dht11_get_reading() {
                 {
                     mk_lib_logging::mk_logging_post_elk(
                         std::module_path!(),
-                        json!({ "Temp": temperature:.1, "Hum": humidity:.1 }),
+                        json!({ "Temp": temperature, "Hum": humidity }),
                     )
                     .await
                     .unwrap();

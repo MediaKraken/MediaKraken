@@ -10,7 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-tokio = { version = "1.6.0", features = ["full"] }
+tokio = { version = "1.28.0", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"

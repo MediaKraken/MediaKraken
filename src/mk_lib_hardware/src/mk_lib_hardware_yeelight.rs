@@ -1,18 +1,15 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 // https://github.com/teppah/yeelib_rs
-// yeelib_rs = "0.1.1"
 
-use crate::mk_lib_logging;
-
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use stdext::function_name;
+use std::time::Duration;
 use yeelib_rs::fields::{PowerStatus, Transition};
 use yeelib_rs::{Light, YeeClient, YeeError};
 
 pub async fn mk_hardware_yeelight_brightness() {}
 
-pub async fn mk_hardware_yeelight_discover() {
+pub async fn mk_hardware_yeelight_discover() -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -41,12 +38,13 @@ pub async fn mk_hardware_yeelight_discover() {
         }
     };
     let light = res.get_mut(0).unwrap();
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "light": light }))
-            .await
-            .unwrap();
-    }
+    // #[cfg(debug_assertions)]
+    // {
+    //     mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "light": light }))
+    //         .await
+    //         .unwrap();
+    // }
+    Ok(())
 }
 
 pub async fn mk_hardware_yeelight_power() {}

@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 // https://github.com/vv9k/docker-api-rs
 // docker-api = { version = "0.12.1", features = ["swarm"] }
 

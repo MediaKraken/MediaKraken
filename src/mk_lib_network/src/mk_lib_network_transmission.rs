@@ -1,8 +1,6 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 // https://github.com/j0rsa/transmission-rpc
-// transmission-rpc = "0.3.6"
 
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use stdext::function_name;
 use transmission_rpc::types::{
@@ -10,8 +8,6 @@ use transmission_rpc::types::{
     TorrentAddArgs, TorrentAddedOrDuplicate, TorrentGetField, Torrents,
 };
 use transmission_rpc::TransClient;
-
-use crate::mk_lib_logging;
 
 pub async fn mk_network_transmission_login() -> Result<transmission_rpc::TransClient> {
     #[cfg(debug_assertions)]
@@ -23,7 +19,7 @@ pub async fn mk_network_transmission_login() -> Result<transmission_rpc::TransCl
         .await
         .unwrap();
     }
-    let client = TransClient::new("mkstack_transmission".parse()?);
+    let client = TransClient::new("mkstack_transmission".to_string().parse()?);
     Ok(client)
 }
 

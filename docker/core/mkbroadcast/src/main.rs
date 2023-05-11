@@ -1,14 +1,10 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use pnet::datalink::{self};
 use serde_json::json;
-use shiplift::Docker;
 use std::io;
 use std::net::IpAddr;
 use std::str;
 use tokio::net::UdpSocket;
-
-mod mk_lib_logging;
+use mk_lib_logging::mk_lib_logging;
 
 #[tokio::main]
 async fn main() -> io::Result<()> {

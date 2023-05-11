@@ -1,10 +1,12 @@
 {% block content %}
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>MediaKraken</title>
     <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
     <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
     <link rel="stylesheet" href="/static/css/styles.min.css">
 </head>
@@ -12,28 +14,36 @@
 <body>
     {% include "bss_user/bss_user_include_menu.html" %}
     <div>
-    {% if template_data_new_media %}
+        {% if template_data_new_media %}
         <a href="/user/media/new"><img src="/static/image/new.png" width="200" height="200" loading="lazy"></a>
-    {% endif %}
-    {% if template_data_user_media_queue %}
-        <a href="/user/media/queue"><img src="/static/image/rectangles_black.png" width="200" height="200" loading="lazy"></a>
-    {% endif %}
-    <a href="/user/media/movie_genre/all"><img src="/static/image/movie_ticket.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/music/1"><img src="/static/image/headphone.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/tv/1"><img src="/static/image/television.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/sports/1"><img src="/static/image/stadium.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/live_tv/20170716/213500"><img src="/static/image/television_live.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/images"><img src="/static/image/photo.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/game/1"><img src="/static/image/vid_game.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/book/1"><img src="/static/image/books.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/iradio"><img src="/static/image/radio.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/home_video/1"><img src="/static/image/vid_camera.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/3d"><img src="/static/image/3D.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/internet"><img src="/static/image/earth.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/music_video/1"><img src="/static/image/listening-music-video-clip-with-auricular.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/cctv"><img src="/static/image/surveillance-cctv-symbol-in-rounded-triangle.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/media/search"><img src="/static/image/magnifying-glass.png" width="200" height="200" loading="lazy"></a>
-    <a href="/user/hardware"><img src="/static/image/circuit-board.png" width="200" height="200" loading="lazy"></a>
+        {% endif %}
+        {% if template_data_user_media_queue %}
+        <a href="/user/media/queue"><img src="/static/image/rectangles_black.png" width="200" height="200"
+                loading="lazy"></a>
+        {% endif %}
+        <a href="/user/media/movie_genre/all"><img src="/static/image/movie_ticket.png" width="200" height="200"
+                loading="lazy"></a>
+        <a href="/user/media/music/1"><img src="/static/image/headphone.png" width="200" height="200"
+                loading="lazy"></a>
+        <a href="/user/media/tv/1"><img src="/static/image/television.png" width="200" height="200" loading="lazy"></a>
+        <a href="/user/media/sports/1"><img src="/static/image/stadium.png" width="200" height="200" loading="lazy"></a>
+        <a href="/user/media/live_tv/20170716/213500"><img src="/static/image/television_live.png" width="200"
+                height="200" loading="lazy"></a>
+        <a href="/user/media/images"><img src="/static/image/photo.png" width="200" height="200" loading="lazy"></a>
+        <a href="/user/media/game/1"><img src="/static/image/vid_game.png" width="200" height="200" loading="lazy"></a>
+        <a href="/user/media/book/1"><img src="/static/image/books.png" width="200" height="200" loading="lazy"></a>
+        <a href="/user/media/iradio"><img src="/static/image/radio.png" width="200" height="200" loading="lazy"></a>
+        <a href="/user/media/home_video/1"><img src="/static/image/vid_camera.png" width="200" height="200"
+                loading="lazy"></a>
+        <a href="/user/media/3d"><img src="/static/image/3D.png" width="200" height="200" loading="lazy"></a>
+        <a href="/user/internet"><img src="/static/image/earth.png" width="200" height="200" loading="lazy"></a>
+        <a href="/user/media/music_video/1"><img src="/static/image/listening-music-video-clip-with-auricular.png"
+                width="200" height="200" loading="lazy"></a>
+        <a href="/user/media/cctv"><img src="/static/image/surveillance-cctv-symbol-in-rounded-triangle.png" width="200"
+                height="200" loading="lazy"></a>
+        <a href="/user/media/search"><img src="/static/image/magnifying-glass.png" width="200" height="200"
+                loading="lazy"></a>
+        <a href="/user/hardware"><img src="/static/image/circuit-board.png" width="200" height="200" loading="lazy"></a>
     </div>
     {% include "bss_public/bss_public_footer.html" %}
     <script src="/static/js/jquery.min.js"></script>

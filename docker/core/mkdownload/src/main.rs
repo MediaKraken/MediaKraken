@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use amiquip::{
     Connection, ConsumerMessage, ConsumerOptions, Exchange, QueueDeclareOptions, Result,
 };
@@ -7,21 +5,9 @@ use serde_json::{json, Value};
 use std::error::Error;
 use std::fs;
 use std::path::Path;
-use std::process::Command;
-//use rustube::{Id, VideoFetcher};
-use stdext::function_name;
-
-#[path = "database"]
-mod database {
-    pub mod mk_lib_database;
-    pub mod mk_lib_database_option_status;
-    pub mod mk_lib_database_version;
-    pub mod mk_lib_database_version_schema;
-}
-
-mod mk_lib_logging;
-
-mod mk_lib_network;
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_database;
+use mk_lib_network;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -57,14 +43,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // connect to db and do a version check
-    let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(1)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
         .await
         .unwrap();
-    database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, true)
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, true)
         .await
         .unwrap();
     let option_config_json: Value =
-        database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
+    mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
             .await
             .unwrap();
 
@@ -100,7 +86,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     }
                     if json_message["Type"].to_string() == "File" {
                         // do NOT remove the header.....this is the SAVE location
-                        mk_lib_network::mk_download_file_from_url(
+                        mk_lib_network::mk_lib_network::mk_download_file_from_url(
                             json_message["URL"].to_string(),
                             &json_message["Local Save Path"].to_string(),
                         )
@@ -117,7 +103,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     } else if json_message["Type"].to_string() == "HDTrailers" {
                         // try to grab the RSS feed itself
                         let data: serde_json::Value = serde_json::from_str(
-                            &mk_lib_network::mk_data_from_url(
+                            &mk_lib_network::mk_lib_network::mk_data_from_url(
                                 "http://feeds.hd-trailers.net/hd-trailers".to_string(),
                             )
                             .await
@@ -165,7 +151,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 );
                                 // verify it doesn't exist in meta folder
                                 if !Path::new(&file_save_name).exists() {
-                                    mk_lib_network::mk_download_file_from_url(
+                                    mk_lib_network::mk_lib_network::mk_download_file_from_url(
                                         download_link.to_string(),
                                         &file_save_name.to_string(),
                                     )

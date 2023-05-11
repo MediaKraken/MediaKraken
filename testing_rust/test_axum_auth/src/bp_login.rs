@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use askama::Template;
 use axum::{
     extract::Form,
@@ -13,12 +11,10 @@ use axum_session_auth::*;
 use serde::Deserialize;
 use sqlx::PgPool;
 use validator::Validate;
-
-#[path = "mk_lib_database_user.rs"]
-mod mk_lib_database_user;
+use mk_lib_database;
 
 pub async fn greet(
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> String {
     format!(
         "Hello {}, Try logging in via /login or testing permissions via /perm",
@@ -27,7 +23,7 @@ pub async fn greet(
 }
 
 pub async fn login(
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> String {
     auth.login_user(2);
     "You are logged in as a User please try /perm to check permissions".to_owned()
@@ -35,10 +31,10 @@ pub async fn login(
 
 pub async fn perm(
     method: Method,
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> String {
     let current_user = auth.current_user.clone().unwrap_or_default();
-    if !Auth::<mk_lib_database_user::User, i64, PgPool>::build([Method::GET], false)
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build([Method::GET], false)
         .requires(Rights::any([
             Rights::permission("Category::View"),
             Rights::permission("Admin::View"),
@@ -76,10 +72,10 @@ pub struct LoginInput {
 
 pub async fn public_login_post(
     Extension(sqlx_pool): Extension<PgPool>,
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Form(input_data): Form<LoginInput>,
 ) -> Redirect {
-    let user_id: i64 = mk_lib_database_user::mk_lib_database_user_login_verification(
+    let user_id: i64 = mk_lib_database::mk_lib_database_user::mk_lib_database_user_login_verification(
         &sqlx_pool,
         &input_data.username,
         &input_data.password,
@@ -88,7 +84,7 @@ pub async fn public_login_post(
     .unwrap();
     // TODO show error when not found
     if user_id > 0 {
-        mk_lib_database_user::mk_lib_database_user_login(&sqlx_pool, user_id).await;
+        mk_lib_database::mk_lib_database_user::mk_lib_database_user_login(&sqlx_pool, user_id).await;
         auth.login_user(user_id);
     }
     Redirect::to("/user/home")

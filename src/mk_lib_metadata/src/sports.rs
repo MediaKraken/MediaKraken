@@ -1,21 +1,14 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
+use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
-use sqlx::postgres::PgRow;
-use sqlx::types::Uuid;
 use std::error::Error;
 use stdext::function_name;
-
-use crate::mk_lib_logging;
-
-use crate::database::mk_lib_database_metadata_download_queue;
-use crate::database::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 
 #[path = "provider/thesportsdb.rs"]
 mod provider_thesportsdb;
 
 pub struct MetadataSportsLastLookup {
-    metadata_last_id: Uuid,
+    metadata_last_id: uuid::Uuid,
     metadata_last_imdb: String,
     metadata_last_tmdb: String,
     metadata_last_thesportsdb: String,
@@ -24,7 +17,7 @@ pub struct MetadataSportsLastLookup {
 pub async fn metadata_sports_lookup(
     sqlx_pool: &sqlx::PgPool,
     download_data: &DBDownloadQueueByProviderList,
-) -> Result<Uuid, sqlx::Error> {
+) -> Result<uuid::Uuid, Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(

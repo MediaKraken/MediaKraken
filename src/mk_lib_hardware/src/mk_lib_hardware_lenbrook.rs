@@ -1,15 +1,11 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
-use crate::mk_lib_logging;
-
-// https://github.com/coral/lsdp
-// lsdp = "0.1.0"
+// https://crates.io/crates/lsdp
 
 use lsdp::{net::Discover, ClassID};
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use stdext::function_name;
 
-pub async fn mk_hardware_lenbrook_discovery() {
+pub async fn mk_hardware_lenbrook_discovery() -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -23,14 +19,16 @@ pub async fn mk_hardware_lenbrook_discovery() {
     d.query(lsdp::QueryMessage::new(vec![ClassID::All])).await?;
     tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
     for (_, d) in d.inventory().await.lock().await.iter() {
-        #[cfg(debug_assertions)]
-        {
-            mk_lib_logging::mk_logging_post_elk(
-                std::module_path!(),
-                json!({ "found": d.addr, "records": d.records[0].cid, "data":, d.records[0].data }),
-            )
-            .await
-            .unwrap();
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     mk_lib_logging::mk_logging_post_elk(
+        //         std::module_path!(),
+        //         json!({ "found": d.addr, "records": d.records[0].cid, "data":, d.records[0].data }),
+        //     )
+        //     .await
+        //     .unwrap();
+        // }
+        continue;
     }
+    Ok(())
 }

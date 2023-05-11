@@ -1,10 +1,12 @@
 {% block content %}
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>MediaKraken</title>
     <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
     <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
     <link rel="stylesheet" href="/static/css/styles.min.css">
     <link rel="stylesheet" href="/static/css/base_webapp_layout.css">
@@ -13,45 +15,52 @@
 
 <body>
     {% include "bss_user/bss_user_include_menu.html" %}
-    <div><div>
-    {% if template_data_exists %}
-    {% if pagination_bar != "" %}
-        {{ pagination_bar|safe }}
-    {% endif %}
-    <div id="the-movie-metadata-node">
-        {% for row_data in template_data %}
-            <div class="main_photo">
-                <div data-id={{row_data.template_metadata_guid}}>
-                    <a href= "/user/metadata/movie_detail/{{row_data.template_metadata_guid}}" >
-                        <img src="/static{{row_data.template_metadata_poster|safe}}" loading="lazy" height="300" width="200">
-                        {% if row_data.template_metadata_user_watched == true %}
+    <div>
+        <div>
+            {% if template_data_exists %}
+            {% if pagination_bar != "" %}
+            {{ pagination_bar|safe }}
+            {% endif %}
+            <div id="the-movie-metadata-node">
+                {% for row_data in template_data %}
+                <div class="main_photo">
+                    <div data-id={{row_data.template_metadata_guid}}>
+                        <a href="/user/metadata/movie_detail/{{row_data.template_metadata_guid}}">
+                            <img src="/static{{row_data.template_metadata_poster|safe}}" loading="lazy" height="300"
+                                width="200">
+                            {% if row_data.template_metadata_user_watched == true %}
                             <img class="watched_icon" src="/static/image/eye.png" loading="lazy" height="25" width="25">
-                        {% endif %}
-                        {% if row_data.template_metadata_user_rating_view == true %}
-                            <img class="rating_icon" src="/static/image/{{row_data.template_metadata_user_rating}}" loading="lazy" height="25" width="25">
-                        {% endif %}
-                        {% if row_data.template_metadata_user_request == true %}
-                            <img class="request_icon" src="/static/image/add-button.png" loading="lazy" height="25" width="25">
-                        {% endif %}
-                        {% if row_data.template_metadata_user_queue == true %}
-                            <img class="queue_icon" src="/static/image/rectangles.png" loading="lazy" height="25" width="25">
-                        {% endif %}
-                    </a>
-                    {% if row_data.template_metadata_poster == "/image/Movie-icon.png" %}
+                            {% endif %}
+                            {% if row_data.template_metadata_user_rating_view == true %}
+                            <img class="rating_icon" src="/static/image/{{row_data.template_metadata_user_rating}}"
+                                loading="lazy" height="25" width="25">
+                            {% endif %}
+                            {% if row_data.template_metadata_user_request == true %}
+                            <img class="request_icon" src="/static/image/add-button.png" loading="lazy" height="25"
+                                width="25">
+                            {% endif %}
+                            {% if row_data.template_metadata_user_queue == true %}
+                            <img class="queue_icon" src="/static/image/rectangles.png" loading="lazy" height="25"
+                                width="25">
+                            {% endif %}
+                        </a>
+                        {% if row_data.template_metadata_poster == "/image/Movie-icon.png" %}
                         <div class="description">
                             <p class="description_content_left">{{row_data.template_metadata_name}}</p>
                         </div>
-                    {% endif %}
+                        {% endif %}
+                    </div>
                 </div>
+                {% endfor %}
             </div>
-        {% endfor %}
+            {% if pagination_bar != "" %}
+            {{ pagination_bar|safe }}
+            {% endif %}
+            {% else %}
+            <p id="general_text">No movie metadata found.</p>
+            {% endif %}
+        </div>
     </div>
-    {% if pagination_bar != "" %}
-        {{ pagination_bar|safe }}
-    {% endif %}
-    {% else %}
-    <p id="general_text">No movie metadata found.</p>
-    {% endif %}</div></div>
     {% include "bss_public/bss_public_footer.html" %}
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>

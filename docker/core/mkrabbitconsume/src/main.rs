@@ -1,24 +1,13 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use amiquip::{
     Connection, ConsumerMessage, ConsumerOptions, Exchange, QueueDeclareOptions, Result,
 };
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_network;
 use serde_json::{json, Value};
 use sqlx::Row;
 use std::error::Error;
 use stdext::function_name;
-
-#[path = "database"]
-pub mod database {
-    pub mod mk_lib_database;
-    pub mod mk_lib_database_option_status;
-    pub mod mk_lib_database_version;
-    pub mod mk_lib_database_version_schema;
-}
-
-mod mk_lib_logging;
-
-mod mk_lib_network;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -31,12 +20,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // connect to db and do a version check
-    let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(1)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
         .await
         .unwrap();
-    database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+        .await;
     let option_config_json =
-        &mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool).await?;
+        &mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
+            .await?;
 
     // open rabbit connection
     let mut rabbit_connection =

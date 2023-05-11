@@ -1,5 +1,5 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
+use crate::axum_custom_filters::filters;
+use crate::guard;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -13,27 +13,14 @@ use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authenticatio
 use bytesize::ByteSize;
 use chrono::prelude::*;
 use core::fmt::Write;
+use mk_lib_common;
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
 use paginator::{PageItem, Paginator};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use stdext::function_name;
-
-mod filters {
-    pub fn space_to_html(s: &str) -> ::askama::Result<String> {
-        Ok(s.replace(" ", "%20"))
-    }
-
-    pub fn slash_to_asterik(s: &str) -> ::askama::Result<String> {
-        Ok(s.replace("/", "*"))
-    }
-}
-
-use crate::guard;
-
-use crate::mk_lib_logging;
-
-use crate::database::mk_lib_database_user;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct BackupList {
@@ -56,9 +43,80 @@ struct TemplateBackupContext<'a> {
 pub async fn admin_backup(
     Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    Path(page): Path<i64>,
 ) -> impl IntoResponse {
-    let template = TemplateBackupContext {};
+    let db_offset: i64 = (page * 30) - 30;
+    let total_pages: i64 =
+        mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(
+            &sqlx_pool,
+            String::new(),
+        )
+        .await
+        .unwrap();
+    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
+        total_pages,
+        page,
+        "/user/metadata/movie".to_string(),
+    )
+    .await
+    .unwrap();
+    let movie_list =
+        mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(
+            &sqlx_pool,
+            String::new(),
+            db_offset,
+            30,
+        )
+        .await
+        .unwrap();
+    let mut template_data_vec: Vec<TemplateMetaMovieList> = Vec::new();
+    for row_data in movie_list.iter() {
+        let mut watched_status: serde_json::Value = json!(false);
+        let mut request_status: serde_json::Value = json!(false);
+        let mut rating_status: serde_json::Value = json!(null);
+        let mut queue_status: serde_json::Value = json!(false);
+        if !row_data.mm_metadata_user_json.is_none()
+            && row_data
+                .mm_metadata_user_json
+                .as_ref()
+                .unwrap()
+                .get("UserStats")
+                .is_some()
+        {
+            let rating_json: serde_json::Value =
+                row_data.mm_metadata_user_json.as_ref().unwrap().clone();
+            rating_status = rating_json["UserStats"][current_user.id.to_string()]["Rating"].clone();
+            watched_status =
+                rating_json["UserStats"][current_user.id.to_string()]["Watched"].clone();
+            request_status =
+                rating_json["UserStats"][current_user.id.to_string()]["Request"].clone();
+            queue_status = rating_json["UserStats"][current_user.id.to_string()]["Queue"].clone();
+        }
+        let mut mm_poster: String = "/image/Movie-icon.png".to_string();
+        if row_data.mm_poster.len() > 0 {
+            mm_poster = row_data.mm_poster.clone();
+        }
+        let temp_meta_line = TemplateMetaMovieList {
+            template_metadata_guid: row_data.mm_metadata_guid,
+            template_metadata_name: row_data.mm_metadata_name.clone(),
+            template_metadata_date: row_data.mm_date.clone(),
+            template_metadata_poster: mm_poster,
+        };
+        template_data_vec.push(temp_meta_line);
+    }
+
+    let mut template_data_exists = false;
+    if template_data_vec.len() > 0 {
+        template_data_exists = true;
+    }
+    let page_usize = page as usize;
+    let template = TemplateBackupContext {
+        template_data: &template_data_vec,
+        template_data_exists: &template_data_exists,
+        pagination_bar: &pagination_html,
+        page: &page_usize,
+    };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())
 }

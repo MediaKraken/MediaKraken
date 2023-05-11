@@ -1,8 +1,5 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
-use crate::mk_lib_logging;
-
 use chrono::prelude::*;
+use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use serde_json::{Map, Value};
@@ -68,7 +65,8 @@ pub async fn mk_lib_database_library_path_audit_read(
         .unwrap();
     }
     let select_query = sqlx::query(
-        "select mm_media_dir_guid, mm_media_dir_path, \
+        "select mm_media_dir_guid, \
+        mm_media_dir_path, \
         mm_media_dir_class_enum, \
         mm_media_dir_last_scanned \
         from mm_library_dir",

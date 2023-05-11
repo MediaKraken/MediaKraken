@@ -1,18 +1,12 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
-use crate::mk_lib_logging;
-
 use async_trait::async_trait;
 use axum_session_auth::*;
 use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
 use chrono::prelude::*;
+use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use sqlx::postgres::PgPool;
 use sqlx::postgres::PgRow;
-use sqlx::{
-    postgres::{PgConnectOptions, PgPoolOptions},
-    ConnectOptions, PgPool,
-};
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 use std::{collections::HashSet, str::FromStr};
@@ -163,8 +157,12 @@ pub async fn mk_lib_database_user_exists(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBUserList {
-    id: i64,
+    pub id: i64,
+    pub anonymous: bool,
     pub username: String,
+    pub email: String,
+    pub last_signin: DateTime<Utc>,
+    pub last_signoff: DateTime<Utc>,
 }
 
 pub async fn mk_lib_database_user_read(
@@ -182,14 +180,18 @@ pub async fn mk_lib_database_user_read(
         .unwrap();
     }
     let select_query = sqlx::query(
-        "select id, username from axum_users order by LOWER(username) offset $1 limit $2",
+        "select id, username, email, last_signin, last_signoff from axum_users order by LOWER(username) offset $1 limit $2",
     )
     .bind(offset)
     .bind(limit);
     let table_rows: Vec<DBUserList> = select_query
         .map(|row: PgRow| DBUserList {
             id: row.get("id"),
+            anonymous: row.get("anonymous"),
             username: row.get("username"),
+            email: row.get("email"),
+            last_signin: row.get("last_signin"),
+            last_signoff: row.get("last_signoff"),
         })
         .fetch_all(sqlx_pool)
         .await?;

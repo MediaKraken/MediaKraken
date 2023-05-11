@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 // https://docs.rs/http/latest/http/status/struct.StatusCode.html#
 // possible status codes
 

@@ -1,7 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
-use crate::mk_lib_logging;
-
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use std::error::Error;
 use std::io;
@@ -96,8 +93,13 @@ pub async fn mk_directory_walk(dir_path: String) -> Result<Vec<String>, Box<dyn 
 mod tests {
     use super::*;
 
-    #[test]
+    #[tokio::test]
     async fn test_mk_read_file_data() {
-        assert_eq!("thisisafileforhashcalctests", mk_read_file_data("testing_data/HashCalc.txt").await.unwrap());
+        assert_eq!(
+            "thisisafileforhashcalctests",
+            mk_read_file_data("testing_data/HashCalc.txt")
+                .await
+                .unwrap()
+        );
     }
 }

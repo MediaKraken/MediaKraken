@@ -1,22 +1,10 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
+use mk_lib_database;
+use mk_lib_network;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::HashMap;
 use std::error::Error;
 use uuid::Uuid;
-
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database.rs"]
-mod database::mk_lib_database;
-
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_hardware_device.rs"]
-mod database::mk_lib_database_hardware_device;
-
-#[path = "../../../../src/mk_lib_database/src/mk_lib_database_version.rs"]
-mod database::mk_lib_database_version;
-
-#[path = "../../../../src/mk_lib_network/src/mk_lib_network.rs"]
-mod mk_lib_network;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct ApiBrands {
@@ -64,14 +52,16 @@ struct ApiBrandsTypeCodeset {}
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(1).await.unwrap();
-    database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+        .await
+        .unwrap();
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
         .await
         .unwrap();
 
     // grab the manufacturer's from Global Cache
     let fetch_brand_result: Vec<ApiBrands> = serde_json::from_str(
-        &mk_lib_network::mk_data_from_url(
+        &mk_lib_network::mk_lib_network::mk_data_from_url(
             "https://irdb.globalcache.com:8081/api/brands/".to_string(),
         )
         .await
@@ -85,7 +75,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             println!("{:?}\n", brand_item);
         }
         let _result =
-            database::mk_lib_database_hardware_device::mk_lib_database_hardware_manufacturer_upsert(
+        mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_manufacturer_upsert(
                 &sqlx_pool,
                 brand_item.brand_name.replace("\"", ""),
                 brand_item
@@ -97,7 +87,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .await?;
         // fetch types for the manufacturer (dvd, cd, etc)
         let fetch_result_type: Vec<ApiBrandsTypes> = serde_json::from_str(
-            &mk_lib_network::mk_data_from_url(
+            &mk_lib_network::mk_lib_network::mk_data_from_url(
                 format!(
                     "https://irdb.globalcache.com:8081/api/brands/{}/types",
                     brand_item
@@ -120,13 +110,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
             {
                 println!("item_type: {:?}\n", item_type);
             }
-            let _result = database::mk_lib_database_hardware_device::mk_lib_database_hardware_type_upsert(
+            let _result = mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_type_upsert(
                 &sqlx_pool,
                 item_type.brand_type.replace("\"", ""),
             )
             .await?;
             let fetch_model_type: Vec<ApiBrandsTypeModels> = serde_json::from_str(
-                &mk_lib_network::mk_data_from_url(
+                &mk_lib_network::mk_lib_network::mk_data_from_url(
                     format!(
                         "https://irdb.globalcache.com:8081/api/brands/{}/types/{}/models",
                         item_type
@@ -163,7 +153,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     println!("model_item: {:?}\n", item_model);
                 }
                 let device_count =
-                    database::mk_lib_database_hardware_device::mk_lib_database_hardware_model_device_count(
+                mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_model_device_count(
                         &sqlx_pool,
                         item_model.brand_name.replace("\"", ""),
                         item_model.brand_type.replace("\"", ""),
@@ -173,7 +163,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .unwrap();
                 if device_count == 0 {
                     let _result =
-                        database::mk_lib_database_hardware_device::mk_lib_database_hardware_model_insert(
+                    mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_model_insert(
                             &sqlx_pool,
                             item_model.brand_name.replace("\"", ""),
                             item_model.brand_type.replace("\"", ""),

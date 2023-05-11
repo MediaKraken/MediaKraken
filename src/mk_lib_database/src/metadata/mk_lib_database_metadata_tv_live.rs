@@ -1,7 +1,5 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
-use crate::mk_lib_logging;
-
+use chrono::prelude::*;
+use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgRow;
@@ -13,12 +11,12 @@ use stdext::function_name;
 pub struct DBMetaTVLiveList {
     pub mm_tv_station_name: String,
     pub mm_tv_station_channel: String,
-    pub mm_tv_schedule_json: Json,
+    pub mm_tv_schedule_json: serde_json::Value,
 }
 
 pub async fn mk_lib_database_meta_tv_live_read(
     sqlx_pool: &sqlx::PgPool,
-    broadcast_time: chrono::DateTime,
+    broadcast_time: DateTime<Utc>,
 ) -> Result<Vec<PgRow>, sqlx::Error> {
     #[cfg(debug_assertions)]
     {

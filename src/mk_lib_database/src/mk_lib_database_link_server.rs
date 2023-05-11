@@ -1,12 +1,10 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
-use crate::mk_lib_logging;
-
+use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
 use stdext::function_name;
+use sqlx::postgres::PgRow;
 
 pub async fn mk_lib_database_link_delete(
     sqlx_pool: &sqlx::PgPool,
@@ -34,7 +32,7 @@ pub async fn mk_lib_database_link_delete(
 pub struct DBLinkList {
     pub mm_link_guid: uuid::Uuid,
     pub mm_link_name: String,
-    pub mm_link_json: Json,
+    pub mm_link_json: serde_json::Value,
 }
 
 pub async fn mk_lib_database_link_read(
@@ -83,7 +81,7 @@ pub async fn mk_lib_database_link_insert(
         .await
         .unwrap();
     }
-    new_guid = Uuid::new_v4();
+    let new_guid = Uuid::new_v4();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_link (mm_link_guid, mm_link_json) \

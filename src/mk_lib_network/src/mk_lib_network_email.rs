@@ -1,11 +1,8 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 // https://github.com/lettre/lettre/releases
-
-use crate::mk_lib_logging;
 
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::{Message, SmtpTransport, Transport};
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use stdext::function_name;
 

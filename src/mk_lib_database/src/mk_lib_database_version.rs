@@ -1,14 +1,10 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
-use crate::mk_lib_logging;
-
+use crate::mk_lib_database_version_schema;
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use stdext::function_name;
 use tokio::time::{sleep, Duration};
 
 pub static DATABASE_VERSION: i32 = 51;
-
-use crate::database::mk_lib_database_version_schema;
 
 pub async fn mk_lib_database_postgresql_version(
     sqlx_pool: &sqlx::PgPool,

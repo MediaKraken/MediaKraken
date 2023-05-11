@@ -11,7 +11,7 @@ codegen-units = 1
 
 [dependencies]
 docker-api = { version = "0.13", features = ["swarm"] }
-tokio = { version = "1.27.0", features = ["full"] }
+tokio = { version = "1.28.0", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"

@@ -1,27 +1,12 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
+use mk_lib_compression;
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_network;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sqlx::Row;
-use sqlx::{types::Json, types::Uuid};
 use std::error::Error;
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
-use stdext::function_name;
-
-mod mk_lib_compression;
-
-#[path = "database"]
-pub mod database {
-    pub mod mk_lib_database;
-    pub mod mk_lib_database_option_status;
-    pub mod mk_lib_database_version;
-    pub mod mk_lib_database_version_schema;
-}
-
-mod mk_lib_logging;
-
-mod mk_lib_network;
 
 #[derive(Serialize, Deserialize)]
 struct MetadataBook {
@@ -43,10 +28,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // connect to db and do a version check
-    let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(1)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
         .await
         .unwrap();
-    database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
         .await
         .unwrap();
 

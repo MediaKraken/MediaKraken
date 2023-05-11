@@ -1,5 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
+use mk_lib_logging::mk_lib_logging;
 use pnet::datalink;
 use serde_json::json;
 use shiplift::Docker;
@@ -7,8 +6,6 @@ use socket2::{Domain, Protocol, Socket, Type};
 use std::io;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr, UdpSocket};
 use std::time::Duration;
-
-mod mk_lib_logging;
 
 fn new_socket(addr: &SocketAddr) -> io::Result<Socket> {
     let domain = if addr.is_ipv4() {
@@ -95,7 +92,7 @@ async fn main() {
     match result {
         Ok(images) => {
             for i in images {
-                if i.names[0] == "/mkstack_webapp" {
+                if i.names[0] == "/mkstack_nginx" {
                     host_port = i.ports[0].private_port;
                     break;
                 }

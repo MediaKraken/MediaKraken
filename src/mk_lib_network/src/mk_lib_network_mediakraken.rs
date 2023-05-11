@@ -1,6 +1,6 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
+use std::error::Error;
 use std::net::UdpSocket;
 use stdext::function_name;
 
@@ -14,9 +14,7 @@ firewall-cmd --permanent --direct --add-rule ipv6 filter INPUT 0 -m pkttype --pk
 firewall-cmd --reload
  */
 
-use crate::mk_lib_logging;
-
-pub async fn mk_lib_network_find_mediakraken_server() -> Result<String, std::error::Error> {
+pub async fn mk_lib_network_find_mediakraken_server() -> Result<String, Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -28,7 +26,7 @@ pub async fn mk_lib_network_find_mediakraken_server() -> Result<String, std::err
     }
     let socket = UdpSocket::bind("0.0.0.0:9999").unwrap();
     let buf = [1u8; 15000];
-    let mut count = 1473;
+    let count = 1473;
     socket.send_to(&buf[0..count], "234.2.2.2:8888").unwrap();
     #[cfg(debug_assertions)]
     {
@@ -51,11 +49,11 @@ pub async fn mk_lib_network_find_mediakraken_server() -> Result<String, std::err
                 .await
                 .unwrap();
             }
-            return response;
+            Ok(response.to_string())
         }
         Err(err) => {
             eprintln!("client: had a problem: {}", err);
-            return "Invalid";
+            Ok("Invalid".to_string())
         }
     }
 }

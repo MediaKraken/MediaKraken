@@ -1,11 +1,9 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 // https://github.com/vv9k/docker-api-rs
 // docker-api = { version = "0.12.1", features = ["swarm"] }
 
 extern crate tokio;
-use crate::mk_lib_logging;
 use futures::StreamExt;
+use mk_lib_logging::mk_lib_logging;
 
 use docker_api::opts::ContainerListOpts;
 use docker_api::opts::LogsOpts;

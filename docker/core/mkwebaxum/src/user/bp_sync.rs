@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use askama::Template;
 use axum::{
     extract::Path,
@@ -10,25 +8,19 @@ use axum::{
 };
 use axum_session_auth::*;
 use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
+use mk_lib_common::mk_lib_common_pagination;
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use stdext::function_name;
 use uuid::Uuid;
 
-use crate::mk_lib_logging;
-
-use crate::database::mk_lib_database_sync;
-
-use crate::database::mk_lib_database_user;
-
-#[path = "../mk_lib_common_pagination.rs"]
-mod mk_lib_common_pagination;
-
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_sync.html")]
 struct TemplateSyncContext<'a> {
-    template_data: &'a Vec<mk_lib_database_sync::DBSyncList>,
+    template_data: &'a Vec<mk_lib_database::mk_lib_database_sync::DBSyncList>,
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
     page: &'a usize,
@@ -37,13 +29,14 @@ struct TemplateSyncContext<'a> {
 pub async fn user_sync(
     Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;
-    let total_pages: i64 = mk_lib_database_sync::mk_lib_database_sync_count(&sqlx_pool)
-        .await
-        .unwrap();
+    let total_pages: i64 =
+        mk_lib_database::mk_lib_database_sync::mk_lib_database_sync_count(&sqlx_pool)
+            .await
+            .unwrap();
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
         total_pages,
         page,
@@ -51,10 +44,14 @@ pub async fn user_sync(
     )
     .await
     .unwrap();
-    let sync_list =
-        mk_lib_database_sync::mk_lib_database_sync_list(&sqlx_pool, uuid::Uuid::nil(), 0, 30)
-            .await
-            .unwrap();
+    let sync_list = mk_lib_database::mk_lib_database_sync::mk_lib_database_sync_list(
+        &sqlx_pool,
+        uuid::Uuid::nil(),
+        0,
+        30,
+    )
+    .await
+    .unwrap();
     let mut template_data_exists = false;
     if sync_list.len() > 0 {
         template_data_exists = true;
@@ -71,36 +68,6 @@ pub async fn user_sync(
 }
 
 /*
-
-@blueprint_user_sync.route('/user_sync')
-@common_global.jinja_template.template('bss_user/media/bss_user_media_sync.html')
-@common_global.auth.login_required
-pub async fn url_bp_user_sync_display_all(request):
-    """
-    Display sync page
-    """
-    page, offset = common_pagination_bootstrap.com_pagination_page_calc(request)
-    db_connection = await request.app.db_pool.acquire()
-    # 0 - mm_sync_guid uuid, 1 - mm_sync_path, 2 - mm_sync_path_to, 3 - mm_sync_options_json
-    pagination = common_pagination_bootstrap.com_pagination_boot_html(page,
-                                                                      url='/user/user_sync',
-                                                                      item_count=await request.app.db_functions.db_table_count(
-                                                                          table_name='mm_sync',
-                                                                          db_connection=db_connection),
-                                                                      client_items_per_page=
-                                                                      int(request.ctx.session[
-                                                                              'per_page']),
-                                                                      format_number=True)
-    media_data = await request.app.db_functions.db_sync_list(offset,
-                                                             int(request.ctx.session[
-                                                                     'per_page']),
-                                                             db_connection=db_connection)
-    await request.app.db_pool.release(db_connection)
-    return {
-        'media_sync': media_data,
-        'pagination_bar': pagination,
-    }
-
 
 @blueprint_user_sync.route('/user_sync_delete', methods=["POST"])
 @common_global.auth.login_required

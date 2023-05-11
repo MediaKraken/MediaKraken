@@ -1,5 +1,8 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
+use mk_lib_common;
+use mk_lib_compression;
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_network;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use sqlx::Row;
@@ -7,27 +10,6 @@ use std::collections::HashMap;
 use std::error::Error;
 use stdext::function_name;
 use uuid::Uuid;
-
-mod mk_lib_common;
-
-mod mk_lib_common_enum_media_type;
-
-mod mk_lib_compression;
-
-#[path = "database"]
-pub mod database {
-    pub mod mk_lib_database;
-    pub mod mk_lib_database_metadata_download_queue;
-    pub mod mk_lib_database_metadata_movie;
-    pub mod mk_lib_database_metadata_tv;
-    pub mod mk_lib_database_option_status;
-    pub mod mk_lib_database_version;
-    pub mod mk_lib_database_version_schema;
-}
-
-mod mk_lib_logging;
-
-mod mk_lib_network;
 
 #[derive(Deserialize)]
 struct Response {

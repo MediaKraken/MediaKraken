@@ -9,9 +9,7 @@ use axum_session::{Key, SessionConfig, SessionLayer, SessionPgPool, SessionStore
 use axum_session_auth::*;
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use tokio::signal;
-
-#[path = "mk_lib_database_user.rs"]
-mod mk_lib_database_user;
+use mk_lib_database;
 
 #[path = "bp_login.rs"]
 mod bp_login;
@@ -46,7 +44,7 @@ async fn main() {
         .route_with_tsr("/perm2", get(bp_login::perm))
         .nest("/static", axum_static::static_router("static"))
         .layer(
-            AuthSessionLayer::<mk_lib_database_user::User, i64, SessionPgPool, PgPool>::new(Some(
+            AuthSessionLayer::<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>::new(Some(
                 pool.clone().into(),
             ))
             .with_config(auth_config),
@@ -64,7 +62,7 @@ async fn main() {
 }
 
 async fn greet(
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> String {
     format!(
         "Hello {}, Try logging in via /login or testing permissions via /perm",
@@ -73,7 +71,7 @@ async fn greet(
 }
 
 async fn login(
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> String {
     auth.login_user(2);
     "You are logged in as a User please try /perm to check permissions".to_owned()
@@ -81,10 +79,10 @@ async fn login(
 
 pub async fn perm(
     method: Method,
-    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> String {
     let current_user = auth.current_user.clone().unwrap_or_default();
-    if !Auth::<mk_lib_database_user::User, i64, PgPool>::build([Method::GET], false)
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build([Method::GET], false)
         .requires(Rights::any([
             Rights::permission("Category::View"),
             Rights::permission("Admin::View"),

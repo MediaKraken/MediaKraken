@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use quickxml_to_serde::{xml_string_to_json, Config, JsonArray, JsonType, NullValue};
 use serde_json::{json, Value};
 use std::error::Error;
@@ -7,26 +5,13 @@ use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
 use std::path::Path;
 use stdext::function_name;
+use mk_lib_compression;
+use mk_lib_database;
+use mk_lib_file;
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_network;
 
 // https://www.progettosnaps.net/download/?tipo=dat_mame&file=/dats/MAME/packs/MAME_Dats_236.7z
-
-mod mk_lib_compression;
-
-#[path = "database"]
-pub mod database {
-    pub mod mk_lib_database;
-    pub mod mk_lib_database_metadata_game;
-    pub mod mk_lib_database_metadata_game_system;
-    pub mod mk_lib_database_option_status;
-    pub mod mk_lib_database_version;
-    pub mod mk_lib_database_version_schema;
-}
-
-mod mk_lib_file;
-
-mod mk_lib_logging;
-
-mod mk_lib_network;
 
 // technically arcade games are "systems"....
 // they just don"t have @isdevice = "yes" like mess hardware does

@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use num_format::{Locale, SystemLocale, ToFormattedString};
 use rocket::response::Redirect;
 use rocket::serde::{json::Json, Deserialize, Serialize};

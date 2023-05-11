@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code))]
-
 use argh::FromArgs;
 use rustls_pemfile::{certs, rsa_private_keys};
 use serde_json::json;
@@ -13,8 +11,7 @@ use tokio::io::{copy, sink, split, AsyncWriteExt};
 use tokio::net::TcpListener;
 use tokio_rustls::rustls::{self, Certificate, PrivateKey};
 use tokio_rustls::TlsAcceptor;
-
-mod mk_lib_logging;
+use mk_lib_logging::mk_lib_logging;
 
 /// Tokio Rustls server example
 #[derive(FromArgs)]
