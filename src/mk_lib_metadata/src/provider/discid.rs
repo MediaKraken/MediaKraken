@@ -1,11 +1,11 @@
 // https://github.com/phw/rust-discid
 
-use discid::{DiscId, Features};
+use discid::{DiscId};
 use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use stdext::function_name;
 
-async fn print_disc_info(disc: DiscId) {
+async fn print_disc_info(_disc: DiscId) {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(

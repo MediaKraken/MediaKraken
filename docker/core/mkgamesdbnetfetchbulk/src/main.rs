@@ -20,7 +20,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .unwrap();
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
 
-    let option_config_json: Value =
+    let _option_config_json: Value =
     mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
             .await
             .unwrap();

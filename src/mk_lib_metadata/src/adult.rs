@@ -18,9 +18,9 @@ pub struct MetadataAdultLastLookup {
 }
 
 pub async fn metadata_adult_lookup(
-    sqlx_pool: &sqlx::PgPool,
-    download_data: &DBDownloadQueueByProviderList,
-    file_name: Metadata,
+    _sqlx_pool: &sqlx::PgPool,
+    _download_data: &DBDownloadQueueByProviderList,
+    _file_name: Metadata,
 ) -> Result<uuid::Uuid, Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
@@ -32,7 +32,7 @@ pub async fn metadata_adult_lookup(
         .unwrap();
     }
     // don't bother checking title/year as the main_server_metadata_api_worker does it already
-    let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
+    let metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
     Ok(metadata_uuid)
 }
 

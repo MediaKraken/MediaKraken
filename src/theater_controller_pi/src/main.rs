@@ -1,19 +1,19 @@
 use crossbeam_channel::unbounded;
-use fltk::{app, button::Button, frame::Frame, image::SharedImage, prelude::*, window::Window};
-use mk_lib_logging::mk_lib_logging;
+use fltk::{app, button::Button, image::SharedImage, prelude::*, window::Window};
+
 use mk_lib_network;
-use serde_json::json;
+
 use std::error::Error;
-use std::fs::File;
-use std::io;
-use std::io::BufReader;
-use std::net::ToSocketAddrs;
-use std::path::PathBuf;
-use std::sync::Arc;
-use stdext::function_name;
+
+
+
+
+
+
+
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let server_list = mk_lib_network::mk_lib_network_mediakraken::mk_lib_network_find_mediakraken_server();
+    let _server_list = mk_lib_network::mk_lib_network_mediakraken::mk_lib_network_find_mediakraken_server();
     let app = app::App::default().with_scheme(app::Scheme::Gleam);
     let mut window_main = Window::default().with_size(800, 480); // pi 7" screen default
     let mut window_menu = Window::default().with_size(800, 480);
@@ -135,7 +135,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // app.run()?;
     while app.wait() {
-        if let Ok(msg) = r.try_recv() {
+        if let Ok(_msg) = r.try_recv() {
             //button_settings.set_label(&format!("{}", msg));
             window_menu.hide();
             window_settings.show();

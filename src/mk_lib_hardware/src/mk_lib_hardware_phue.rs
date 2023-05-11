@@ -1,7 +1,7 @@
 // https://github.com/nn1ks/huelib-rs
 
 use mk_lib_logging::mk_lib_logging;
-use huelib::resource::sensor;
+
 use huelib::{bridge, Bridge};
 use serde_json::json;
 use stdext::function_name;
@@ -30,7 +30,7 @@ pub async fn mk_hardware_phue_discover() -> Result<serde_json::Value, Box<dyn st
         // Register a new user.
         let username = bridge::register_user(bridge_ip, "huelib-rs example").unwrap();
         let bridge = Bridge::new(bridge_ip, username);
-        let lights = bridge.get_all_lights().unwrap();
+        let _lights = bridge.get_all_lights().unwrap();
         // #[cfg(debug_assertions)]
         // {
         //     mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "bridge": lights }))

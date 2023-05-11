@@ -24,7 +24,7 @@ pub async fn mk_lib_hardware_roku_command(
         .unwrap();
     }
     let roku_url = format!("http://{}:{}/", roku_addr, roku_port);
-    let mut request_url: String = String::new();
+    let _request_url: String = String::new();
     let mut request_json: serde_json::Value = json!({});
     if roku_command_seconds > 0 {
         /*

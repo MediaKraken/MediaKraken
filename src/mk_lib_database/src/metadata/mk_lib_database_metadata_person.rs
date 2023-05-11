@@ -1,12 +1,12 @@
-use mk_lib_common::mk_lib_common_enum_media_type;
+
 use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgRow;
-use sqlx::{types::Json, types::Uuid};
+use sqlx::{types::Uuid};
 use sqlx::{FromRow, Row};
 use stdext::function_name;
-use crate::database_metadata::mk_lib_database_metadata_download_queue;
+
 
 pub async fn mk_lib_database_metadata_exists_person(
     sqlx_pool: &sqlx::PgPool,
@@ -225,8 +225,8 @@ pub async fn mk_lib_database_metadata_person_insert(
 }
 
 pub async fn mk_lib_database_metadata_person_insert_cast_crew(
-    sqlx_pool: &sqlx::PgPool,
-    person_json: &serde_json::Value,
+    _sqlx_pool: &sqlx::PgPool,
+    _person_json: &serde_json::Value,
 ) {
     #[cfg(debug_assertions)]
     {

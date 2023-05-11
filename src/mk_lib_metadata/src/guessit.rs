@@ -27,7 +27,7 @@ pub async fn metadata_guessit(
         .await
         .unwrap();
     }
-    let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
+    let metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
     // check for dupes by name/year
     let file_name = Path::new(&download_data.mm_download_path.as_ref().unwrap())
         .file_name()

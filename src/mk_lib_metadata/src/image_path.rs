@@ -1,5 +1,5 @@
 use mk_lib_logging::mk_lib_logging;
-use rand::{thread_rng, Rng};
+use rand::{Rng};
 use serde_json::json;
 use stdext::function_name;
 

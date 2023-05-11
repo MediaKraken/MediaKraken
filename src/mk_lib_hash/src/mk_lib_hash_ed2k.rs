@@ -1,6 +1,6 @@
 // https://github.com/runfalk/ed2k-rs
 
-use digest::generic_array::{ArrayLength, GenericArray};
+
 use digest::Digest;
 use ed2k::Ed2k;
 use std::error::Error;

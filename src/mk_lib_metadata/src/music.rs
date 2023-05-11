@@ -14,8 +14,8 @@ mod provider_pitchfork;
 mod provider_shoutcast;
 
 pub async fn metadata_music_lookup(
-    sqlx_pool: &sqlx::PgPool,
-    download_data: &DBDownloadQueueByProviderList,
+    _sqlx_pool: &sqlx::PgPool,
+    _download_data: &DBDownloadQueueByProviderList,
 ) -> Result<uuid::Uuid, Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
@@ -26,7 +26,7 @@ pub async fn metadata_music_lookup(
         .await
         .unwrap();
     }
-    let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
+    let metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
     Ok(metadata_uuid)
 }
 

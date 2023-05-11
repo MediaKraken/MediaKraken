@@ -1,15 +1,15 @@
 use async_trait::async_trait;
 use axum_session_auth::*;
-use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
+use axum_session_auth::{Authentication};
 use chrono::prelude::*;
 use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use sqlx::postgres::PgRow;
-use sqlx::{types::Json, types::Uuid};
+
 use sqlx::{FromRow, Row};
-use std::{collections::HashSet, str::FromStr};
+use std::{collections::HashSet};
 use stdext::function_name;
 
 /*

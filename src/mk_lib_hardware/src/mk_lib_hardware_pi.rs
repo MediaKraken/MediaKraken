@@ -1,14 +1,14 @@
 //use rascam::*;
 use mk_lib_logging::mk_lib_logging;
 use rppal::gpio::Gpio;
-use rppal::i2c::I2c;
-use rppal::pwm::{Channel, Pwm};
-use rppal::spi::{Bus, Mode, SlaveSelect, Spi};
-use rppal::uart::{Parity, Uart};
+
+
+
+
 use serde_json::json;
 use std::error::Error;
-use std::fs::File;
-use std::thread;
+
+
 use stdext::function_name;
 use tokio::time::{sleep, Duration};
 

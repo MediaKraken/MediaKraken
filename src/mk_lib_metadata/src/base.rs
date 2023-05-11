@@ -84,10 +84,10 @@ pub async fn metadata_process(
 }
 
 pub async fn metadata_update(
-    sqlx_pool: &sqlx::PgPool,
-    provider_name: String,
-    download_data: DBDownloadQueueByProviderList,
-    provider_api_key: &String,
+    _sqlx_pool: &sqlx::PgPool,
+    _provider_name: String,
+    _download_data: DBDownloadQueueByProviderList,
+    _provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
@@ -106,7 +106,7 @@ pub async fn metadata_search(
     sqlx_pool: &sqlx::PgPool,
     provider_name: String,
     download_data: DBDownloadQueueByProviderList,
-    provider_api_key: &String,
+    _provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
@@ -120,8 +120,8 @@ pub async fn metadata_search(
     let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
     let mut set_fetch: bool = false;
     let mut lookup_halt: bool = false;
-    let mut update_provider = String::new();
-    let mut guessit_data: Metadata;
+    let _update_provider = String::new();
+    let guessit_data: Metadata;
     if provider_name == "anidb" {
         (metadata_uuid, guessit_data) = guessit::metadata_guessit(&sqlx_pool, &download_data)
             .await
@@ -318,7 +318,7 @@ pub async fn metadata_fetch(
         .unwrap();
     }
     if provider_name == "imvdb" {
-        let imvdb_id = provider_imvdb::meta_fetch_save_imvdb(
+        let _imvdb_id = provider_imvdb::meta_fetch_save_imvdb(
             &sqlx_pool,
             download_data.mm_download_provider_id,
             download_data.mm_download_new_uuid,
@@ -367,10 +367,10 @@ pub async fn metadata_fetch(
 }
 
 pub async fn metadata_castcrew(
-    sqlx_pool: &sqlx::PgPool,
-    provider_name: String,
-    download_data: DBDownloadQueueByProviderList,
-    provider_api_key: &String,
+    _sqlx_pool: &sqlx::PgPool,
+    _provider_name: String,
+    _download_data: DBDownloadQueueByProviderList,
+    _provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
@@ -399,9 +399,9 @@ pub async fn metadata_castcrew(db_connection, provider_name, download_data):
 
 pub async fn metadata_image(
     sqlx_pool: &sqlx::PgPool,
-    provider_name: String,
+    _provider_name: String,
     download_data: DBDownloadQueueByProviderList,
-    provider_api_key: &String,
+    _provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
@@ -423,9 +423,9 @@ pub async fn metadata_image(
 
 pub async fn metadata_review(
     sqlx_pool: &sqlx::PgPool,
-    provider_name: String,
+    _provider_name: String,
     download_data: DBDownloadQueueByProviderList,
-    provider_api_key: &String,
+    _provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
@@ -447,9 +447,9 @@ pub async fn metadata_review(
 
 pub async fn metadata_collection(
     sqlx_pool: &sqlx::PgPool,
-    provider_name: String,
+    _provider_name: String,
     download_data: DBDownloadQueueByProviderList,
-    provider_api_key: &String,
+    _provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {

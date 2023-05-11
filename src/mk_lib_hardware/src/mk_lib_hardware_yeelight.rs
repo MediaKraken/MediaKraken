@@ -4,8 +4,8 @@ use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use stdext::function_name;
 use std::time::Duration;
-use yeelib_rs::fields::{PowerStatus, Transition};
-use yeelib_rs::{Light, YeeClient, YeeError};
+
+use yeelib_rs::{Light, YeeClient};
 
 pub async fn mk_hardware_yeelight_brightness() {}
 
@@ -37,7 +37,7 @@ pub async fn mk_hardware_yeelight_discover() -> Result<(), Box<dyn std::error::E
             break lights;
         }
     };
-    let light = res.get_mut(0).unwrap();
+    let _light = res.get_mut(0).unwrap();
     // #[cfg(debug_assertions)]
     // {
     //     mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "light": light }))

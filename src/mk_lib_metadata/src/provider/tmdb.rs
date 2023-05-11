@@ -6,9 +6,9 @@ use mk_lib_database;
 use mk_lib_logging::mk_lib_logging;
 use mk_lib_network::mk_lib_network;
 use serde_json::json;
-use sqlx::{types::Json, types::Uuid};
-use std::error::Error;
-use std::path::Path;
+use sqlx::{types::Uuid};
+
+
 use stdext::function_name;
 use torrent_name_parser::Metadata;
 
@@ -61,9 +61,9 @@ pub async fn provider_tmdb_movie_fetch(
 }
 
 pub async fn provider_tmdb_person_fetch(
-    sqlx_pool: &sqlx::PgPool,
+    _sqlx_pool: &sqlx::PgPool,
     tmdb_id: i32,
-    metadata_uuid: Uuid,
+    _metadata_uuid: Uuid,
     tmdb_api_key: &String,
 ) {
     #[cfg(debug_assertions)]
@@ -76,7 +76,7 @@ pub async fn provider_tmdb_person_fetch(
         .unwrap();
     }
     // fetch and save json data via tmdb id
-    let result_json = provider_tmdb_person_fetch_by_id(tmdb_id, tmdb_api_key)
+    let _result_json = provider_tmdb_person_fetch_by_id(tmdb_id, tmdb_api_key)
         .await
         .unwrap();
 }
@@ -100,7 +100,7 @@ pub async fn provider_tmdb_tv_fetch(
     let result_json = provider_tmdb_tv_fetch_by_id(tmdb_id, tmdb_api_key)
         .await
         .unwrap();
-    let mut image_json: serde_json::Value =
+    let image_json: serde_json::Value =
         provider_tmdb_meta_info_build(&result_json).await.unwrap();
     mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_insert(
         sqlx_pool,
@@ -419,7 +419,7 @@ pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_
         | mk_lib_common_enum_media_type::DLMediaType::MOVIE_SUBTITLE
         | mk_lib_common_enum_media_type::DLMediaType::MOVIE_THEME
         | mk_lib_common_enum_media_type::DLMediaType::MOVIE_TRAILER => {
-            let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
+            let _url_result = mk_lib_network::mk_data_from_url_to_json(format!(
                 "https://api.themoviedb.org/3/search/movie\
                 ?api_key={}&include_adult=1&query={}",
                 search_text, tmdb_api_key
@@ -434,7 +434,7 @@ pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_
         | mk_lib_common_enum_media_type::DLMediaType::TV_SUBTITLE
         | mk_lib_common_enum_media_type::DLMediaType::TV_THEME
         | mk_lib_common_enum_media_type::DLMediaType::TV_TRAILER => {
-            let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
+            let _url_result = mk_lib_network::mk_data_from_url_to_json(format!(
                 "https://api.themoviedb.org/3/search/tv\
                 ?api_key={}&include_adult=1&query={}",
                 search_text, tmdb_api_key
@@ -443,7 +443,7 @@ pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_
             .unwrap();
         }
         mk_lib_common_enum_media_type::DLMediaType::PERSON => {
-            let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
+            let _url_result = mk_lib_network::mk_data_from_url_to_json(format!(
                 "https://api.themoviedb.org/3/search/person\
                 ?api_key={}&include_adult=1&query={}",
                 search_text, tmdb_api_key
