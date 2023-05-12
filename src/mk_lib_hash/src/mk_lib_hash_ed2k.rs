@@ -1,7 +1,5 @@
 // https://github.com/runfalk/ed2k-rs
 
-
-use digest::Digest;
 use ed2k::Ed2k;
 use std::error::Error;
 use mk_lib_logging::mk_lib_logging;

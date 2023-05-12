@@ -1,5 +1,4 @@
 use std::error::Error;
-//use onvif::discovery;
 use futures_util::{pin_mut, stream::StreamExt};
 use mk_lib_hardware;
 use mk_lib_logging::mk_lib_logging;
@@ -115,15 +114,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // phillips hue hub discover
-    mk_lib_hardware_phue::mk_hardware_phue_discover()
-        .await
-        .unwrap();
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"HWScan": "After PHue"}))
-            .await
-            .unwrap();
-    }
+    // mk_lib_hardware_phue::mk_hardware_phue_discover()
+    //     .await
+    //     .unwrap();
+    // #[cfg(debug_assertions)]
+    // {
+    //     mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"HWScan": "After PHue"}))
+    //         .await
+    //         .unwrap();
+    // }
     // roku discover
     // for roku in common_hardware_roku_network.com_roku_network_discovery():
     //     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',

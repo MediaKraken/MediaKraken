@@ -3,7 +3,6 @@ use mk_lib_logging::mk_lib_logging;
 use nonzero_ext::*;
 use phf::phf_map;
 use serde_json::json;
-use std::num::NonZeroU32;
 use stdext::function_name;
 
 // https://docs.rs/governor/0.5.1/governor/struct.Quota.html

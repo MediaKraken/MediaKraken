@@ -178,7 +178,7 @@ pub async fn mk_network_transmission_remove_torrent(
 
 pub async fn mk_network_transmission_start_torrent(
     mut transmission_client: transmission_rpc::TransClient,
-    torrent_id: i32,
+    torrent_id: i64,
 ) -> Result<bool> {
     #[cfg(debug_assertions)]
     {
@@ -190,14 +190,14 @@ pub async fn mk_network_transmission_start_torrent(
         .unwrap();
     }
     let res: RpcResponse<Nothing> = transmission_client
-        .torrent_action(TorrentAction::Start, vec![Id::Id(1)])
+        .torrent_action(TorrentAction::Start, vec![Id::Id(torrent_id)])
         .await?;
     Ok(res.is_ok())
 }
 
 pub async fn mk_network_transmission_stop_torrent(
     mut transmission_client: transmission_rpc::TransClient,
-    torrent_id: i32,
+    torrent_id: i64,
 ) -> Result<bool> {
     #[cfg(debug_assertions)]
     {
@@ -209,7 +209,7 @@ pub async fn mk_network_transmission_stop_torrent(
         .unwrap();
     }
     let res: RpcResponse<Nothing> = transmission_client
-        .torrent_action(TorrentAction::Stop, vec![Id::Id(1)])
+        .torrent_action(TorrentAction::Stop, vec![Id::Id(torrent_id)])
         .await?;
     Ok(res.is_ok())
 }

@@ -1,10 +1,7 @@
 use chrono::prelude::*;
 use mk_lib_logging::mk_lib_logging;
-
 use serde_json::json;
-
 use sqlx::{types::Uuid};
-use sqlx::{Row};
 use stdext::function_name;
 
 pub async fn mk_lib_database_activity_insert(

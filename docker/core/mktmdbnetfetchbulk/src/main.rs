@@ -36,7 +36,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .unwrap();
     }
 
-    let fetch_date: String = "01_18_2023".to_string();
+    let fetch_date: String = "05_10_2023".to_string();
 
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
@@ -47,7 +47,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .unwrap();
 
     // grab the movie id's
-    // files.tmdb.org = 13.227.42.62
     let _fetch_result_movie = mk_lib_network::mk_download_file_from_url(
         format!(
             "http://files.tmdb.org/p/exports/movie_ids_{}.json.gz",
@@ -82,7 +81,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                             Uuid::new_v4(),
                                                                                                             metadata_struct.id,
                                                                                                             "Fetch".to_string()).await.unwrap();
-                    //println!("result {:?}", result);
                 }
             }
         }
@@ -121,14 +119,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                             Uuid::new_v4(),
                                                                                                             metadata_struct.id,
                                                                                                             "Fetch".to_string()).await.unwrap();
-                    //println!("tv result {:?}", result)
                 }
             }
         }
     }
     #[cfg(debug_assertions)]
     {
-        // stop logging
         mk_lib_logging::mk_logging_post_elk("info", json!({"STOP": "STOP"})).await;
     }
     Ok(())

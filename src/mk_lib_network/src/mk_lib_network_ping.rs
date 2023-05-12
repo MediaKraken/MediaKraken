@@ -1,7 +1,6 @@
 // https://github.com/kolapapa/surge-ping
 
 use std::time::Duration;
-
 use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use stdext::function_name;

@@ -2,11 +2,7 @@
 
 use ipnet::Ipv4Subnets;
 use mk_lib_file::mk_lib_file;
-use mk_lib_logging::mk_lib_logging;
-use quickxml_to_serde::{xml_string_to_json, Config, JsonArray, JsonType, NullValue};
-use serde::{Deserialize, Serialize};
-use serde_json::json;
-use stdext::function_name;
+use quickxml_to_serde::{xml_string_to_json, Config};
 
 // nmap -sU -sS -p U:137,T:139 --script smb-enum-shares 192.168.1.122 -oX scan.xml 1>/dev/null 2>/dev/null
 // nmap -sS -sV -p 111,2049 --script nfs-showmount 192.168.1.122 -oX scan.xml 1>/dev/null 2>/dev/null

@@ -1,8 +1,7 @@
 // https://github.com/jakobhellermann/rupnp
 
-use futures::prelude::*;
 use mk_lib_logging::mk_lib_logging;
-use rupnp::ssdp::{SearchTarget, URN};
+use rupnp::ssdp::{SearchTarget};
 use serde_json::json;
 use std::time::Duration;
 use stdext::function_name;

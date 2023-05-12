@@ -4,7 +4,6 @@ use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use stdext::function_name;
 use std::time::Duration;
-
 use yeelib_rs::{Light, YeeClient};
 
 pub async fn mk_hardware_yeelight_brightness() {}
