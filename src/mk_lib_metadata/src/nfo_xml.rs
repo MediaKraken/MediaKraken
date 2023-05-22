@@ -1,8 +1,5 @@
 
 
-
-
-
 /*
 
 pub async fn nfo_file_tv(media_file_path):

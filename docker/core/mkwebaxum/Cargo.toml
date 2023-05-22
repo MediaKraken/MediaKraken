@@ -20,7 +20,7 @@ axum-extra = "0.7.4"
 axum-flash = "0.6.0"
 axum-handle-error-extract = "0.1.0"
 axum-prometheus = "0.3.3"
-axum_session = { version = "0.2.2", features = [ "postgres-rustls"] }
+axum_session = { version = "0.2.3", features = [ "postgres-rustls"] }
 axum_session_auth = { version = "0.2.1", features = [ "postgres-rustls" ] }
 axum_static = "1.2.1"
 bytesize = {version = "1.2.0", features = ["serde"]}

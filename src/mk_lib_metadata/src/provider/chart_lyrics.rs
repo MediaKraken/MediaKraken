@@ -1,9 +1,7 @@
 // http://www.chartlyrics.com/api.aspx
 
 use mk_lib_logging::mk_lib_logging;
-
 use serde_json::json;
-
 use stdext::function_name;
 
 pub async fn provider_chart_lyrics_fetch(_artist_name: String, _song_name: String) {

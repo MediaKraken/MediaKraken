@@ -1,6 +1,9 @@
 use mk_lib_logging::mk_lib_logging;
+use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sqlx::{types::Uuid};
+use sqlx::postgres::PgRow;
+use sqlx::types::Uuid;
+use sqlx::{FromRow, Row};
 use stdext::function_name;
 
 pub async fn mk_lib_database_hardware_manufacturer_upsert(
@@ -91,7 +94,7 @@ pub async fn mk_lib_database_hardware_model_insert(
     Ok(())
 }
 
-pub async fn mk_lib_database_hardware_model_device_count(
+pub async fn mk_lib_database_hardware_model_device_count_by_type(
     sqlx_pool: &sqlx::PgPool,
     hardware_manufacturer: String,
     hardware_type: String,
@@ -118,7 +121,7 @@ pub async fn mk_lib_database_hardware_model_device_count(
     Ok(row.0)
 }
 
-pub async fn mk_lib_database_hardware_json_read(
+pub async fn mk_lib_database_hardware_json_read_by_type(
     sqlx_pool: &sqlx::PgPool,
     manufacturer: String,
     model_name: String,
@@ -141,6 +144,61 @@ pub async fn mk_lib_database_hardware_json_read(
     .fetch_one(sqlx_pool)
     .await?;
     Ok(row.0)
+}
+
+pub async fn mk_lib_database_hardware_device_count(
+    sqlx_pool: &sqlx::PgPool,
+) -> Result<i64, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let row: (i64,) = sqlx::query_as("select count(*) from mm_hardware_json")
+        .fetch_one(sqlx_pool)
+        .await?;
+    Ok(row.0)
+}
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBDeviceList {
+    pub mm_hardware_manufacturer: String,
+    pub mm_hardware_model_type: String,
+    pub mm_hardware_model_name: String,
+}
+
+pub async fn mk_lib_database_hardware_device_read(
+    sqlx_pool: &sqlx::PgPool,
+) -> Result<Vec<DBDeviceList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let select_query = sqlx::query(
+        "select mm_hardware_manufacturer, \
+            mm_hardware_model_type, \
+            mm_hardware_model_name \
+            from mm_hardware_model order by mm_hardware_manufacturer, \
+            mm_hardware_model_type, mm_hardware_model_name desc",
+    );
+    let table_rows: Vec<DBDeviceList> = select_query
+        .map(|row: PgRow| DBDeviceList {
+            mm_hardware_manufacturer: row.get("mm_hardware_manufacturer"),
+            mm_hardware_model_type: row.get("mm_hardware_model_type"),
+            mm_hardware_model_name: row.get("mm_hardware_model_name"),
+        })
+        .fetch_all(sqlx_pool)
+        .await?;
+    Ok(table_rows)
 }
 
 pub async fn mk_lib_database_hardware_insert(

@@ -9,9 +9,9 @@ use rppal_dht11::{Dht11, Measurement};
 use serde_json::json;
 use stdext::function_name;
 
-const DHT11_PIN: u8 = 17;
+//const DHT11_PIN: u8 = 17;
 
-pub async fn mk_lib_hardware_dht11_get_reading() {
+pub async fn mk_lib_hardware_dht11_get_reading(dht11_pin: u8) {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -23,7 +23,7 @@ pub async fn mk_lib_hardware_dht11_get_reading() {
     }
     let pin = Gpio::new()
         .unwrap()
-        .get(DHT11_PIN)
+        .get(dht11_pin)
         .unwrap()
         .into_io(Mode::Output);
     let mut dht11 = Dht11::new(pin);

@@ -1,31 +1,19 @@
 use askama::Template;
 use axum::{
-    extract::Path,
-    http::{header, HeaderMap, Method, StatusCode},
+    http::{Method, StatusCode},
     response::{Html, IntoResponse},
-    routing::{get, post},
-    Extension, Router,
+    Extension,
 };
-use axum_session_auth::*;
-use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
+use axum_session_auth::{AuthSession, SessionPgPool};
 use mk_lib_database;
-use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use sqlx::postgres::PgPool;
-use stdext::function_name;
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_hardware.html")]
 struct AdminHardwareTemplate<'a> {
-    template_data_alexa: &'a serde_json::Value,
-    template_data_chromecast: &'a serde_json::Value,
-    template_data_crestron: &'a serde_json::Value,
-    template_data_dlna: &'a serde_json::Value,
-    template_data_hdhomerun: &'a serde_json::Value,
-    template_data_phue: &'a serde_json::Value,
-    template_data_roku: &'a serde_json::Value,
-    template_data_soco: &'a serde_json::Value,
-    page: &'a usize,
+    template_data: &'a Vec<mk_lib_database::mk_lib_database_hardware_device::DBDeviceList>,
+    template_data_exists: &'a bool,
 }
 
 pub async fn admin_hardware(
@@ -33,7 +21,18 @@ pub async fn admin_hardware(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
-    let template = AdminHardwareTemplate {};
+    let hardware_list =
+    mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_device_read(&sqlx_pool)
+        .await
+        .unwrap();
+    let mut hardware_data: bool = false;
+    if hardware_list.len() > 0 {
+        hardware_data = true;
+    }
+    let template = AdminHardwareTemplate {
+        template_data: json!("{}"),
+        template_data_exists: &hardware_data,
+    };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())
 }

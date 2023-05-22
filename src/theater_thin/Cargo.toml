@@ -10,11 +10,11 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-fltk = { version = "1.4.2", features = ["fltk-bundled"] }
+fltk = { version = "1.4.3", features = ["fltk-bundled"] }
 mk_lib_logging = { path = "/root/MediaKraken/src/mk_lib_logging" }
 mk_lib_network = { path = "/root/MediaKraken/src/mk_lib_network" }
-reqwest = { version = "0.11.17", default-features = false, features = ["json", "rustls-tls"] }
-serde = { version = "1.0.160", features = ["derive"] }
+reqwest = { version = "0.11.18", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1.0.163", features = ["derive"] }
 serde_json = "1.0.96"
 stdext = "0.3.1"
 

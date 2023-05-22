@@ -1,16 +1,10 @@
 use crossbeam_channel::unbounded;
 use fltk::{app, button::Button, image::SharedImage, prelude::*, window::Window};
-
 use mk_lib_network;
-
 use std::error::Error;
-
-
-
-
-
-
-
+use fltk_theme::widget_schemes::fluent::colors::*;
+use fltk_theme::widget_schemes::fluent::frames::*;
+use fltk_theme::{SchemeType, WidgetScheme};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let _server_list = mk_lib_network::mk_lib_network_mediakraken::mk_lib_network_find_mediakraken_server();
@@ -89,6 +83,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     window_menu.make_resizable(true);
     window_menu.fullscreen(true);
 
+    let theme = WidgetScheme::new(SchemeType::Fluent);
+    theme.apply();
+    
     let mut window_settings = Window::default().with_size(800, 480);
     let mut button_settings_back = Button::new(666, 384, 133, 96, "Back");
     let mut image =

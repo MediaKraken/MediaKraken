@@ -28,7 +28,7 @@
                             {% if row_data[2] == "" || row_data[2] == None %}
                             <img src="/static/image/vid_game.png" loading="lazy" height="200" width="300"></a>
                         <div class="description">
-                            <p class="description_content_left">{{row_data[1]}}</p>
+                            <p class="description_content_left">{{row_data.gs_game_system_name}}</p>
                         </div>
                         {% else %}
                         <img src="/static/{{row_data[2]}}" loading="lazy" height="200" width="300">

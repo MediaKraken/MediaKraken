@@ -10,4 +10,8 @@ pub mod filters {
     pub fn replace(s: &str, a: &str, b: &str) -> ::askama::Result<String> {
         Ok(s.replace(a, b))
     }
+
+    pub fn uuid_to_str(s: &uuid::Uuid) -> ::askama::Result<String> {
+        Ok(format!("{}", s))
+    }
 }

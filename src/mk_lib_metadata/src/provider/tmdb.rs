@@ -6,9 +6,7 @@ use mk_lib_database;
 use mk_lib_logging::mk_lib_logging;
 use mk_lib_network::mk_lib_network;
 use serde_json::json;
-use sqlx::{types::Uuid};
-
-
+use sqlx::types::Uuid;
 use stdext::function_name;
 use torrent_name_parser::Metadata;
 
@@ -100,8 +98,7 @@ pub async fn provider_tmdb_tv_fetch(
     let result_json = provider_tmdb_tv_fetch_by_id(tmdb_id, tmdb_api_key)
         .await
         .unwrap();
-    let image_json: serde_json::Value =
-        provider_tmdb_meta_info_build(&result_json).await.unwrap();
+    let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
     mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_insert(
         sqlx_pool,
         metadata_uuid,

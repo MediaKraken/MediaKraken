@@ -1,7 +1,6 @@
 #[macro_use]
 extern crate lazy_static;
 
-use axum_csrf::{CsrfConfig, CsrfToken};
 use axum::http::{Method, Uri};
 use axum::{
     http::StatusCode,
@@ -9,25 +8,22 @@ use axum::{
     routing::{get, post},
     BoxError, Extension, Json, Router,
 };
+use axum_csrf::{CsrfConfig, CsrfToken};
 use axum_extra::routing::RouterExt;
 use axum_handle_error_extract::HandleErrorLayer;
 use axum_prometheus::{EndpointLabel, PrometheusMetricLayerBuilder};
-use axum_session::{
-    DatabasePool, Key, Session, SessionConfig, SessionLayer, SessionPgPool, SessionStore,
-};
-use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
+use axum_session::{Key, SessionConfig, SessionLayer, SessionPgPool, SessionStore};
+use axum_session_auth::{AuthConfig, AuthSessionLayer};
 use mk_lib_database;
 use mk_lib_logging::mk_lib_logging;
 use rcgen::generate_simple_self_signed;
 use ring::digest;
-use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sqlx::{ConnectOptions, PgPool};
+use sqlx::PgPool;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::time::Duration;
-use stdext::function_name;
 use tokio::signal;
 use tower::timeout::TimeoutLayer;
 use tower::{timeout::error::Elapsed, ServiceBuilder};

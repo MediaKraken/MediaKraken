@@ -17,7 +17,7 @@ mk_lib_logging = { path = "/root/MediaKraken/src/mk_lib_logging" }
 paginator = "0.2.6"
 serde_json = "1.0.96"
 stdext = "0.3.1"
-tokio = { version = "1.28.0", features = ["full"] }
+tokio = { version = "1.28.1", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"

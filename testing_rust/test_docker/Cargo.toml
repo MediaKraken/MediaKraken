@@ -10,6 +10,8 @@ lto = true
 codegen-units = 1
 
 [dependencies]
+mk_lib_common = { path = "/root/MediaKraken/src/mk_lib_common" }
+mk_lib_logging = { path = "/root/MediaKraken/src/mk_lib_logging" }
 chrono = { version = "0.4.24", features = ["serde"] }
 docker-api = { version = "0.13", features = ["swarm"] }
 futures = "0.3.28"

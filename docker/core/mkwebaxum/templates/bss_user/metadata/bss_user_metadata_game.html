@@ -34,7 +34,7 @@
                     <td>{{ loop.index + (page - 1) * 30 }}</td>
                     <td><a href="/user/metadata/game_detail/{{row_data.gi_game_info_id}}">{{ row_data.gi_game_info_name
                             }}</a></td>
-                    <td>{{ row_data.gi_year }}</td>
+                    <td>{{ "{:?}"|format(row_data.gi_year) }}</td>
                     <td>{{ row_data.gs_game_system_name }}</td>
                 </tr>
                 {% endfor %}

@@ -1,19 +1,13 @@
 use crate::guard;
 use askama::Template;
 use axum::{
-    extract::Path,
-    http::{header, HeaderMap, Method, StatusCode},
-    response::{Html, IntoResponse, Redirect},
-    routing::{get, post},
-    Extension, Router,
+    http::{Method, StatusCode},
+    response::{Html, IntoResponse,},
+    Extension,
 };
-use axum_session_auth::*;
-use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
+use axum_session_auth::{AuthSession, SessionPgPool};
 use mk_lib_database;
-use mk_lib_logging::mk_lib_logging;
-use serde_json::json;
 use sqlx::postgres::PgPool;
-use stdext::function_name;
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_cron.html")]

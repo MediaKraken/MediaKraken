@@ -1,10 +1,6 @@
 // https://imvdb.com/developers/api
 
-
-
-
 use std::error::Error;
-
 
 const BASE_API_URL: &str = "http://imvdb.com/api/v1";
 

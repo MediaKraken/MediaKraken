@@ -2,9 +2,7 @@ use mk_lib_database;
 use mk_lib_network;
 use serde::{Deserialize, Serialize};
 
-
 use std::error::Error;
-
 
 #[derive(Debug, Serialize, Deserialize)]
 struct ApiBrands {
@@ -153,7 +151,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     println!("model_item: {:?}\n", item_model);
                 }
                 let device_count =
-                mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_model_device_count(
+                mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_model_device_count_by_type(
                         &sqlx_pool,
                         item_model.brand_name.replace("\"", ""),
                         item_model.brand_type.replace("\"", ""),

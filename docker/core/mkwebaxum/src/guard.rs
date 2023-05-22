@@ -8,8 +8,7 @@ use axum::{
     routing::get,
     Extension, Router,
 };
-use axum_session::SessionPgPool;
-use axum_session_auth::*;
+use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
 use mk_lib_database;
 use mk_lib_logging::mk_lib_logging;
 use serde_json::json;

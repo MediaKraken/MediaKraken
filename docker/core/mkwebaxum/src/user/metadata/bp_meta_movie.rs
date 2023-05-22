@@ -2,20 +2,16 @@ use crate::axum_custom_filters::filters;
 use askama::Template;
 use axum::{
     extract::Path,
-    http::{header, HeaderMap, Method, StatusCode},
+    http::{Method, StatusCode},
     response::{Html, IntoResponse},
-    routing::{get, post},
-    Extension, Router,
+    Extension,
 };
-use axum_session_auth::*;
-use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
+use axum_session_auth::{AuthSession, SessionPgPool};
 use mk_lib_common::mk_lib_common_pagination;
 use mk_lib_database;
-use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgPool;
-use stdext::function_name;
 
 #[derive(Debug, Deserialize, Serialize)]
 struct TemplateMetaMovieList {
@@ -24,7 +20,6 @@ struct TemplateMetaMovieList {
     template_metadata_date: String,
     template_metadata_poster: String,
     template_metadata_user_watched: serde_json::Value,
-    template_metadata_user_rating_view: bool,
     template_metadata_user_rating: serde_json::Value,
     template_metadata_user_request: serde_json::Value,
     template_metadata_user_queue: serde_json::Value,
@@ -103,7 +98,6 @@ pub async fn user_metadata_movie(
             template_metadata_date: row_data.mm_date.clone(),
             template_metadata_poster: mm_poster,
             template_metadata_user_watched: watched_status,
-            template_metadata_user_rating_view: false,
             template_metadata_user_rating: rating_status,
             template_metadata_user_request: request_status,
             template_metadata_user_queue: queue_status,

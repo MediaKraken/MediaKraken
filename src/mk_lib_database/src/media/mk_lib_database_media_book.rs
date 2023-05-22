@@ -10,6 +10,7 @@ use stdext::function_name;
 pub struct DBMediaBookList {
     pub mm_metadata_book_guid: uuid::Uuid,
     pub mm_metadata_book_name: String,
+    pub mm_metadata_book_cover: String,
 }
 
 pub async fn mk_lib_database_media_book_read(
@@ -55,6 +56,7 @@ pub async fn mk_lib_database_media_book_read(
         .map(|row: PgRow| DBMediaBookList {
             mm_metadata_book_guid: row.get("mm_metadata_book_guid"),
             mm_metadata_book_name: row.get("mm_metadata_book_name"),
+            mm_metadata_book_cover: row.get("mm_metadata_book_cover"),
         })
         .fetch_all(sqlx_pool)
         .await?;

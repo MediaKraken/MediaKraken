@@ -5,8 +5,7 @@ use axum::{
     response::{Html, IntoResponse},
     Extension,
 };
-use axum_session_auth::AuthSession;
-use axum_session_auth::*;
+use axum_session_auth::{AuthSession, SessionPgPool};
 use mk_lib_common::mk_lib_common_pagination;
 use mk_lib_database;
 use sqlx::postgres::PgPool;

@@ -1,14 +1,8 @@
-//use rascam::*;
+use rascam::*;
 use mk_lib_logging::mk_lib_logging;
 use rppal::gpio::Gpio;
-
-
-
-
 use serde_json::json;
 use std::error::Error;
-
-
 use stdext::function_name;
 use tokio::time::{sleep, Duration};
 
@@ -41,38 +35,38 @@ pub async fn mk_lib_hardware_pi_led_flash(
     }
 }
 
-// pub async fn mk_lib_hardware_pi_take_image(image_file_name: String) {
-//     #[cfg(debug_assertions)]
-//     {
-//         mk_lib_logging::mk_logging_post_elk(
-//             std::module_path!(),
-//             json!({ "Function": function_name!() }),
-//         )
-//         .await
-//         .unwrap();
-//     }
-//     let info = info().unwrap();
-//     if info.cameras.len() > 0 {
-//         #[cfg(debug_assertions)]
-//         {
-//             mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "info": info })).await.unwrap();
-//         }
-//         simple_sync(&info.cameras[0], image_file_name);
-//     }
-// }
+pub async fn mk_lib_hardware_pi_take_image(image_file_name: String) {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let info = info().unwrap();
+    if info.cameras.len() > 0 {
+        #[cfg(debug_assertions)]
+        {
+            mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "info": info })).await.unwrap();
+        }
+        simple_sync(&info.cameras[0], image_file_name);
+    }
+}
 
-// async fn simple_sync(info: &CameraInfo, image_file_name: String) {
-//     #[cfg(debug_assertions)]
-//     {
-//         mk_lib_logging::mk_logging_post_elk(
-//             std::module_path!(),
-//             json!({ "Function": function_name!() }),
-//         )
-//         .await
-//         .unwrap();
-//     }
-//     let mut camera = SimpleCamera::new(info.clone()).unwrap();
-//     camera.activate().unwrap();
-//     let b = camera.take_one().unwrap();
-//     File::create(image_file_name).unwrap().write_all(&b).unwrap();
-// }
+async fn simple_sync(info: &CameraInfo, image_file_name: String) {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let mut camera = SimpleCamera::new(info.clone()).unwrap();
+    camera.activate().unwrap();
+    let b = camera.take_one().unwrap();
+    File::create(image_file_name).unwrap().write_all(&b).unwrap();
+}

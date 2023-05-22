@@ -1,9 +1,7 @@
 // https://isbndb.com/apidocs/v2
 
 use mk_lib_logging::mk_lib_logging;
-
 use serde_json::json;
-
 use stdext::function_name;
 
 pub async fn metadata_book_search_isbndb(_lookup_name: String) {

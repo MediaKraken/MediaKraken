@@ -2,17 +2,12 @@ use askama::Template;
 use axum::{
     extract::Form,
     extract::Path,
-    http::{header, HeaderMap, Method, StatusCode},
+    http::{Method, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
     Extension, Router,
 };
-use axum_session::{
-    DatabasePool, Session, SessionConfig, SessionLayer, SessionPgPool, SessionStore,
-};
-use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
-use mk_lib_logging::mk_lib_logging;
-use serde_json::json;
+use axum_session_auth::{AuthSession, SessionPgPool};
 use sqlx::{
     postgres::{PgConnectOptions, PgPoolOptions},
     ConnectOptions, PgPool,

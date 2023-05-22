@@ -2,15 +2,19 @@
 // docker-api = { version = "0.12.1", features = ["swarm"] }
 
 extern crate tokio;
-use futures::StreamExt;
-use mk_lib_logging::mk_lib_logging;
-
+use docker_api::models::Node;
+use docker_api::models::Swarm;
+use docker_api::models::SystemInfo;
 use docker_api::opts::ContainerListOpts;
 use docker_api::opts::LogsOpts;
 use docker_api::opts::ServiceListOpts;
 use docker_api::{Docker, Result};
+use futures::StreamExt;
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use stdext::function_name;
+// use docker_api::models::SwarmInfo;
+// use docker_api::models::JoinTokens;
 
 pub async fn mk_common_docker_container_inspect(id: String) -> Result<Vec<String>> {
     #[cfg(debug_assertions)]
@@ -249,7 +253,7 @@ pub async fn mk_common_docker_volume_list() -> Result<Vec<String>> {
     Ok(logs_list)
 }
 
-pub async fn mk_common_docker_info() -> Result<serde_json::Value> {
+pub async fn mk_common_docker_info() -> Result<SystemInfo> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -260,24 +264,35 @@ pub async fn mk_common_docker_info() -> Result<serde_json::Value> {
         .unwrap();
     }
     let docker = Docker::unix("/var/run/docker.sock");
-    let mut logs_list: serde_json::Value = serde_json::json!({});
-    match docker.info().await {
-        Ok(info) => {
-            #[cfg(debug_assertions)]
-            {
-                mk_lib_logging::mk_logging_post_elk(
-                    std::module_path!(),
-                    json!({ "info": &format!("{:#?}", info) }),
-                )
-                .await
-                .unwrap();
-            }
-            logs_list = json!(&format!("{:#?}", info));
-            //logs_list = serde_json::from_str(&format!("{:#?}", info)).unwrap();
-        }
-        Err(e) => eprintln!("Error: {}", e),
-    };
-    Ok(logs_list)
+    docker.info().await
+}
+
+pub async fn mk_common_docker_swarm_inspect() -> Result<Swarm> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let docker = Docker::unix("/var/run/docker.sock");
+    docker.swarm().inspect().await
+}
+
+pub async fn mk_common_docker_swarm_nodes() -> Result<Vec<Node>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let docker = Docker::unix("/var/run/docker.sock");
+    docker.nodes().list(&Default::default()).await
 }
 
 #[cfg(test)]
@@ -354,5 +369,17 @@ mod tests {
     async fn test_mk_common_docker_info() {
         let test_results = mk_common_docker_info().await.unwrap();
         println!("Info: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_swarm_inspect() {
+        let test_results = mk_common_docker_swarm_inspect().await.unwrap();
+        println!("Swarm Inspect: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_swarm_node() {
+        let test_results = mk_common_docker_swarm_nodes().await.unwrap();
+        println!("Swarm Node: {:?}", test_results);
     }
 }

@@ -1,23 +1,27 @@
 use askama::Template;
 use axum::{
-    extract::Path,
-    http::{header, HeaderMap, Method, StatusCode},
+    http::{Method, StatusCode},
     response::{Html, IntoResponse},
-    routing::{get, post},
-    Extension, Router,
+    Extension,
 };
-use axum_session_auth::*;
-use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
+use axum_session_auth::{AuthSession, SessionPgPool};
 use mk_lib_common;
 use mk_lib_database;
-use mk_lib_logging::mk_lib_logging;
-use serde_json::json;
 use sqlx::postgres::PgPool;
-use stdext::function_name;
+
+use docker_api::models::JoinTokens;
+use docker_api::models::Node;
+//use docker_api::models::Swarm;
+use docker_api::models::SystemInfo;
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_docker.html")]
-struct AdminDockerTemplate;
+struct AdminDockerTemplate<'a> {
+    template_data: &'a SystemInfo,
+    template_data_node_addr: &'a String,
+    template_data_swarm: &'a JoinTokens,
+    template_data_nodes: &'a Vec<Node>,
+}
 
 pub async fn admin_docker(
     Extension(sqlx_pool): Extension<PgPool>,
@@ -27,36 +31,21 @@ pub async fn admin_docker(
     let docker_results = mk_lib_common::mk_lib_common_docker::mk_common_docker_info()
         .await
         .unwrap();
-    let template = AdminDockerTemplate {};
+    let node_addr = docker_results.clone().swarm.unwrap().node_addr.unwrap();
+    let swarm_docker_results =
+        mk_lib_common::mk_lib_common_docker::mk_common_docker_swarm_inspect()
+            .await
+            .unwrap();
+    let token = swarm_docker_results.join_tokens.unwrap();
+    let node_docker_results = mk_lib_common::mk_lib_common_docker::mk_common_docker_swarm_nodes()
+        .await
+        .unwrap();
+    let template = AdminDockerTemplate {
+        template_data: &docker_results,
+        template_data_node_addr: &node_addr,
+        template_data_swarm: &token,
+        template_data_nodes: &node_docker_results,
+    };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())
 }
-
-/*
-
-@blueprint_admin_docker.route("/admin_docker_stat")
-@common_global.jinja_template.template('bss_admin/bss_admin_docker.html')
-@common_global.auth.login_required
-pub async fn url_bp_admin_docker_stat(request):
-    """
-    Docker statistics including swarm
-    """
-    docker_inst = common_docker.CommonDocker()
-    # it returns a dict, not a json
-    docker_info = docker_inst.com_docker_info()
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'Docker info': docker_info})
-    if 'Managers' not in docker_info['Swarm'] or docker_info['Swarm']['Managers'] == 0:
-        docker_swarm = "Cluster not active"
-        docker_nodes = None
-    else:
-        docker_swarm = docker_inst.com_docker_swarm_inspect()['JoinTokens']['Worker']
-        docker_nodes = docker_inst.com_docker_node_list()
-    return {
-        'data_host': docker_info,
-        'data_swam': docker_swarm,
-        'data_nodes': docker_nodes,
-    }
-
- */

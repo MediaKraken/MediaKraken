@@ -163,11 +163,30 @@ pub async fn mk_lib_database_update_schema(
         sqlx::query("ALTER TABLE mm_network_shares ADD COLUMN mm_network_share_path TEXT;")
             .execute(&mut transaction)
             .await?;
-        sqlx::query("ALTER TABLE mm_network_shares ADD COLUMN mm_network_share_path TEXT;")
-            .execute(&mut transaction)
-            .await?;
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 51).await?;
+    }
+
+    if version_no < 52 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(
+            "CREATE TABLE IF NOT EXISTS mm_backup (\
+                mm_backup_guid uuid NOT NULL, \
+                mm_backup_description TEXT NOT NULL, \
+                mm_backup_location_type integer NOT NULL, \
+                mm_backup_location TEXT NOT NULL, \
+                mm_backup_created timestamp NOT NULL);",
+        )
+        .execute(&mut transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX mm_backup_created_ndx \
+           ON mm_backup USING btree (mm_backup_created);",
+        )
+        .execute(&mut transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 52).await?;
     }
 
     Ok(true)

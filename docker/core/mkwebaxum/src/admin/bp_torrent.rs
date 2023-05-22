@@ -1,22 +1,19 @@
 use askama::Template;
 use axum::{
     extract::Path,
-    http::{header, HeaderMap, Method, StatusCode},
+    http::{Method, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Extension, Router,
+    Extension,
 };
-use axum_session_auth::*;
-use axum_session_auth::{AuthConfig, AuthSession, AuthSessionLayer, Authentication};
+use axum_session_auth::{AuthSession, SessionPgPool};
 use bytesize::ByteSize;
 use core::fmt::Write;
 use mk_lib_database;
 use mk_lib_logging::mk_lib_logging;
 use mk_lib_network;
-use paginator::{PageItem, Paginator};
 use serde_json::json;
 use sqlx::postgres::PgPool;
-use stdext::function_name;
 use transmission_rpc::types::{
     FreeSpace, Id, Nothing, Result, RpcResponse, SessionClose, Torrent, TorrentAction,
     TorrentAddArgs, TorrentAddedOrDuplicate, TorrentGetField, Torrents,

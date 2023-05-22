@@ -4,7 +4,6 @@ use std::time::Duration;
 use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use stdext::function_name;
-use surge_ping::{Client, Config, PingIdentifier, PingSequence, ICMP};
 
 pub async fn mk_lib_network_ping(addr: String) -> Result<Duration, Box<dyn std::error::Error>> {
     #[cfg(debug_assertions)]

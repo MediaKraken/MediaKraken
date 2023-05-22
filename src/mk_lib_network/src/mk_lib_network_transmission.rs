@@ -4,7 +4,7 @@ use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use stdext::function_name;
 use transmission_rpc::types::{
-    FreeSpace, Id, Nothing, Result, RpcResponse, SessionClose, Torrent, TorrentAction,
+    Id, Nothing, Result, RpcResponse, SessionClose, Torrent, TorrentAction,
     TorrentAddArgs, TorrentAddedOrDuplicate, TorrentGetField, Torrents,
 };
 use transmission_rpc::TransClient;

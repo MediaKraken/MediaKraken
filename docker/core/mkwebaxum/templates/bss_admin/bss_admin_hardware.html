@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>MediaKraken - Dashboard</title>
+    <title>MediaKraken - Hardware</title>
     <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
@@ -22,237 +22,37 @@
                         <div class="col-xl-8">
                             <div>
                                 <fieldset>
-                                    <legend>Alexa</legend>
+                                    <legend>Hardware Device</legend>
                                 </fieldset>
                                 <table class="table table-bordered">
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>User</th>
-                                            <th>Media</th>
-                                            <th>Device</th>
-                                            <th>Time</th>
-                                            <th>Stop</th>
+                                            <th>Manufacturer</th>
+                                            <th>Type</th>
+                                            <th>Model</th>
+                                            <th>Version</th>
+                                            <th>IP</th>
+                                            <th>Json</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for row_data in template_data_alexa %}
+                                        {% for row_data in template_data %}
                                         <tr>
-                                            <td>{{ loop.index + (page - 1) * 30 }}</td>
-                                            <td>{{ row_data[0] }}</td>
-                                            <td>{{ row_data[1] }}</td>
-                                            <td>{{ row_data[2] }}</td>
-                                            <td>{{ row_data[3] }}</td>
+                                            <td>{{ loop.index }}</td>
+                                            <td>{{ row_data.mm_hardware_manufacturer }}</td>
+                                            <td>{{ row_data.mm_hardware_model_type }}</td>
+                                            <td>{{ row_data.mm_hardware_model_name }}</td>
                                             <div class="pull-right action-buttons">
                                                 <td>
                                                     <p data-placement="top" data-toggle="tooltip" title="Delete">
-                                                        <button class="btn btn-danger btn-xs" <a data-id={{ row_data[4]
-                                                            }} onclick="ConfirmLibraryDelete(this)"><img class="b-lazy"
+                                                        <button class="btn btn-danger btn-xs" <a data-id={{
+                                                            row_data.mm_hardware_model_name }}
+                                                            onclick="ConfirmLibraryDelete(this)"><img class="b-lazy"
                                                                 src="/static/image/16/rubbish-bin.png" height="20"
                                                                 width="20"></a>
                                                 </td>
                                             </div>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xl-8">
-                            <div>
-                                <fieldset>
-                                    <legend>Chromecast</legend>
-                                </fieldset>
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>User</th>
-                                            <th>Login Time</th>
-                                            <th>Total Time</th>
-                                            <th>Kick</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for row_data in template_data_chromecast %}
-                                        <tr>
-                                            <td>{{ loop.index + (page - 1) * 30 }}</td>
-                                            <td>{{ row_data[0] }}</td>
-                                            <td>{{ row_data[1] }}</td>
-                                            <td>{{ row_data[2] }}</td>
-                                            <div class="pull-right action-buttons">
-                                                <td>
-                                                    <p data-placement="top" data-toggle="tooltip" title="Delete">
-                                                        <button class="btn btn-danger btn-xs" <a data-id={{ row_data[4]
-                                                            }} onclick="ConfirmLibraryDelete(this)"><img class="b-lazy"
-                                                                src="/static/image/16/rubbish-bin.png" height="20"
-                                                                width="20"></a>
-                                                </td>
-                                            </div>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xl-8">
-                            <div>
-                                <fieldset>
-                                    <legend>Crestron</legend>
-                                </fieldset>
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Directory</th>
-                                            <th>Status</th>
-                                            <th>Percentage</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for row_data in template_data_crestron %}
-                                        <tr>
-                                            <td>{{ row_data[0] }}</td>
-                                            <td>{{ row_data[1] }}</td>
-                                            <td>{{ row_data[2] }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xl-8">
-                            <div>
-                                <fieldset>
-                                    <legend>DLNA</legend>
-                                </fieldset>
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Directory</th>
-                                            <th>Status</th>
-                                            <th>Percentage</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for row_data in template_data_dlna %}
-                                        <tr>
-                                            <td>{{ row_data[0] }}</td>
-                                            <td>{{ row_data[1] }}</td>
-                                            <td>{{ row_data[2] }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xl-8">
-                            <div>
-                                <fieldset>
-                                    <legend>HDHomeRun</legend>
-                                </fieldset>
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Directory</th>
-                                            <th>Status</th>
-                                            <th>Percentage</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for row_data in template_data_hdhomerun %}
-                                        <tr>
-                                            <td>{{ row_data[0] }}</td>
-                                            <td>{{ row_data[1] }}</td>
-                                            <td>{{ row_data[2] }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xl-8">
-                            <div>
-                                <fieldset>
-                                    <legend>Phillips Hue</legend>
-                                </fieldset>
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Directory</th>
-                                            <th>Status</th>
-                                            <th>Percentage</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for row_data in template_data_phue %}
-                                        <tr>
-                                            <td>{{ row_data[0] }}</td>
-                                            <td>{{ row_data[1] }}</td>
-                                            <td>{{ row_data[2] }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xl-8">
-                            <div>
-                                <fieldset>
-                                    <legend>Roku</legend>
-                                </fieldset>
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Directory</th>
-                                            <th>Status</th>
-                                            <th>Percentage</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for row_data in template_data_roku %}
-                                        <tr>
-                                            <td>{{ row_data[0] }}</td>
-                                            <td>{{ row_data[1] }}</td>
-                                            <td>{{ row_data[2] }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xl-8">
-                            <div>
-                                <fieldset>
-                                    <legend>Soco</legend>
-                                </fieldset>
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>Directory</th>
-                                            <th>Status</th>
-                                            <th>Percentage</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for row_data in template_data_soco %}
-                                        <tr>
-                                            <td>{{ row_data[0] }}</td>
-                                            <td>{{ row_data[1] }}</td>
-                                            <td>{{ row_data[2] }}</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>

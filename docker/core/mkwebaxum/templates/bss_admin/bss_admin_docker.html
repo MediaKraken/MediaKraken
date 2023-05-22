@@ -25,10 +25,10 @@
                                     <h5 class="mb-0">Docker Info</h5>
                                 </div>
                                 <div class="card-body">
-                                    <p class="card-text">Operating System: {{data_host["operating_system"]}}</p>
-                                    <p>Kernel: {{data_host["kernel_version"]}}</p>
-                                    <p>Host IP: {{data_host["Swarm"]["NodeAddr"]}}</p>
-                                    <p>Docker Engine: {{data_host["server_version"]}}</p>
+                                    <p class="card-text">Operating System: {{"{:?}"|format(template_data.operating_system)}}</p>
+                                    <p>Kernel: {{"{:?}"|format(template_data.kernel_version)}}</p>
+                                    <p>Host IP: {{"{:?}"|format(template_data_node_addr)}}</p>
+                                    <p>Docker Engine: {{"{:?}"|format(template_data.server_version)}}</p>
                                 </div>
                             </div>
                         </div>
@@ -38,9 +38,13 @@
                                     <h5 class="mb-0">Cluster Join Info</h5>
                                 </div>
                                 <div class="card-body">
-                                    <p class="card-text">Token: {{data_swam}}</p>
-                                    <p>Run following on other node(s) to join swarm cluster.</p>
-                                    <p>docker swarm join --token {{data_swam}} {{data_host["Swarm"]["NodeAddr"]}}:2377
+                                    <p class="card-text">Token:</p>
+                                    <p>Run following on other node(s) to join swarm cluster as manager.</p>
+                                    <p>docker swarm join --token {{"{:?}"|format(template_data_swarm.manager)}}
+                                        {{template_data_node_addr}}:2377
+                                    <p>Run following on other node(s) to join swarm cluster as worker.</p>
+                                    <p>docker swarm join --token {{"{:?}"|format(template_data_swarm.worker)}}
+                                        {{template_data_node_addr}}:2377
                                     </p>
                                 </div>
                             </div>
@@ -50,25 +54,23 @@
                         <div class="col-xl-8">
                             <div>
                                 <fieldset>
-                                    <legend>Active Swarm Node(s)</legend>
+                                    <legend>Swarm Node(s)</legend>
                                 </fieldset>
                                 <div class="table-responsive table-bordered">
                                     <table class="table table-bordered">
                                         <thead>
                                             <tr>
                                                 <th>Name</th>
-                                                <th>Operating System</th>
                                                 <th>ID</th>
                                                 <th>Docker Engine</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {% for row_data in template_data %}
+                                            {% for row_data in template_data_nodes %}
                                             <tr>
-                                                <td>{{ row_data["Description"]["Hostname"] }}</td>
-                                                <td>{{ row_data["Description"]["Platform"]["OS"] }}</td>
-                                                <td>{{ row_data["ID"] }}</td>
-                                                <td>{{ row_data["Description"]["Engine"]["EngineVersion"] }}</td>
+                                                <td>{{ "{:?}"|format(row_data.description) }}</td>
+                                                <td>{{ "{:?}"|format(row_data.id) }}</td>
+                                                <td>{{ "{:?}"|format(row_data.version) }}</td>
                                             </tr>
                                             {% endfor %}
                                         </tbody>

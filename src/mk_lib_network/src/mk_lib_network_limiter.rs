@@ -17,7 +17,7 @@ pub async fn mk_network_rate_limiter() {
         .await
         .unwrap();
     }
-    let mut lim = RateLimiter::direct(Quota::per_second(nonzero!(50u32))); // Allow 50 units per second
+    let lim = RateLimiter::direct(Quota::per_second(nonzero!(50u32))); // Allow 50 units per second
     assert_eq!(Ok(()), lim.check());
 }
 

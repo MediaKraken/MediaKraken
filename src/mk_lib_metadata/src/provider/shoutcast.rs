@@ -1,11 +1,6 @@
 // https://directory.shoutcast.com/Developer
 
 
-
-
-
-
-
 /*
 
 class CommonMetadataShoutcast:

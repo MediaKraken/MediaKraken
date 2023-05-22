@@ -11,11 +11,11 @@ codegen-units = 1
 
 [dependencies]
 chrono = { version = "0.4.24", features = ["serde"] }
-reqwest = { version = "0.11.17", default-features = false, features = [
+reqwest = { version = "0.11.18", default-features = false, features = [
     "json",
     "native-tls",
 ] }
-serde = { version = "1.0.160", features = ["derive"] }
+serde = { version = "1.0.163", features = ["derive"] }
 serde_json = "1.0.96"
 stdext = "0.3.1"
 

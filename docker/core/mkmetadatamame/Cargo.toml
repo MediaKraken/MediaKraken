@@ -12,6 +12,7 @@ codegen-units = 1
 [dependencies]
 async-std = "1.12.0"
 chrono = { version = "0.4.24", features = ["serde"] }
+mk_lib_compression = { path = "/root/MediaKraken/src/mk_lib_compression" }
 mk_lib_database = { path = "/root/MediaKraken/src/mk_lib_database" }
 mk_lib_logging = { path = "/root/MediaKraken/src/mk_lib_logging" }
 quickxml_to_serde = { version = "0.5.0", features = ["json_types"] }

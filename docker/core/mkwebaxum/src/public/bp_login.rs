@@ -8,10 +8,8 @@ use axum::{
 use axum_session::SessionPgPool;
 use axum_session_auth::*;
 use mk_lib_database;
-use mk_lib_logging::mk_lib_logging;
 use serde::Deserialize;
 use sqlx::PgPool;
-use stdext::function_name;
 use validator::Validate;
 
 #[derive(Template)]

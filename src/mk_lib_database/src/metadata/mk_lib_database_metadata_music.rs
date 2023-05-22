@@ -9,6 +9,7 @@ use stdext::function_name;
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaMusicList {
     pub mm_metadata_album_guid: uuid::Uuid,
+    pub mm_metadata_album_artist: String,
     pub mm_metadata_album_name: String,
     pub mm_metadata_album_json: serde_json::Value,
     pub mm_metadata_album_localimage: String,
@@ -86,6 +87,7 @@ pub async fn mk_lib_database_metadata_music_read(
     let table_rows: Vec<DBMetaMusicList> = select_query
         .map(|row: PgRow| DBMetaMusicList {
             mm_metadata_album_guid: row.get("mm_metadata_album_guid"),
+            mm_metadata_album_artist: row.get("mm_metadata_album_artist"),
             mm_metadata_album_name: row.get("mm_metadata_album_name"),
             mm_metadata_album_json: row.get("mm_metadata_album_json"),
             mm_metadata_album_localimage: row.get("mm_metadata_album_localimage"),

@@ -3,7 +3,6 @@ use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue:
 use mk_lib_hash;
 use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
-
 use std::error::Error;
 use std::path::Path;
 use stdext::function_name;
