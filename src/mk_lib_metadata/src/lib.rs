@@ -19,13 +19,14 @@ pub mod metadata_provider {
     pub mod anidb;
     pub mod chart_lyrics;
     pub mod comicvine;
+    #[cfg(feature = "discid")]
     pub mod discid;
     pub mod flickr;
-    pub mod free_music_archive;
     pub mod giant_bomb;
     pub mod gutenberg;
     pub mod imdb;
     pub mod imvdb;
+    pub mod isbndb;
     pub mod lastfm;
     pub mod mangadex;
     pub mod musicbrainz;
@@ -36,6 +37,7 @@ pub mod metadata_provider {
     pub mod pitchfork;
     pub mod pornhub;
     pub mod shoutcast;
+    pub mod shutterstock;
     pub mod soundcloud;
     pub mod televisiontunes;
     pub mod theaudiodb;

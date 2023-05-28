@@ -49,7 +49,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     );
     // only do the parse/import if not processed before
     if !Path::new(&file_name).exists() {
-        mk_lib_network::mk_download_file_from_url(
+        mk_lib_network::mk_lib_network::mk_download_file_from_url(
             format!(
                 "https://github.com/mamedev/mame/releases/download/mame0{}/mame0{}lx.zip",
                 option_config_json["MAME"]["Version"], option_config_json["MAME"]["Version"]
@@ -63,7 +63,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             option_config_json["MAME"]["Version"]
         );
         if !Path::new(&unzip_file_name).exists() {
-            mk_lib_compression::mk_decompress_zip(&file_name, false, "/mediakraken/emulation/")
+            mk_lib_compression::mk_lib_compression::mk_decompress_zip(&file_name, false, "/mediakraken/emulation/")
                 .await
                 .unwrap();
             let file = File::open(&unzip_file_name)?;
@@ -82,7 +82,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     let json_data = xml_string_to_json(xml_data.to_string(), &conf).unwrap();
                     // name is short name
                     // description is long name
-                    mk_lib_database::mk_lib_database_metadata_game::mk_lib_database_metadata_game_upsert(
+                    mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_upsert(
                         &sqlx_pool,
                         uuid::Uuid::nil(),
                         json_data["machine"]["@name"].to_string(),
@@ -105,7 +105,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     );
     // only do the parse/import if not processed before
     if !Path::new(&file_name).exists() {
-        mk_lib_network::mk_download_file_from_url(
+        mk_lib_network::mk_lib_network::mk_download_file_from_url(
             format!(
                 "https://github.com/mamedev/mame/archive/mame0{}.zip",
                 option_config_json["MAME"]["Version"]
@@ -114,10 +114,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         )
         .await
         .unwrap();
-        mk_lib_compression::mk_decompress_zip(&file_name, false, &"/mediakraken/emulation/")
+        mk_lib_compression::mk_lib_compression::mk_decompress_zip(&file_name, false, &"/mediakraken/emulation/")
             .await
             .unwrap();
-        for zippedfile in mk_lib_file::mk_directory_walk(format!(
+        for zippedfile in mk_lib_file::mk_lib_file::mk_directory_walk(format!(
             "/mediakraken/emulation/mame-mame0{}/hash",
             option_config_json["MAME"]["Version"]
         ))
@@ -151,9 +151,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     // fetch sytem id from /softwarelist/@name
                     if xml_line.starts_with("<softwarelist") == true {
                         let system_string_split: Vec<&str> = xml_line.split("\"").collect();
-                        game_system_uuid = mk_lib_database::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(&sqlx_pool, system_string_split[1].to_string()).await.unwrap();
+                        game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(&sqlx_pool, system_string_split[1].to_string()).await.unwrap();
                         if game_system_uuid == uuid::Uuid::nil() {
-                            game_system_uuid = mk_lib_database::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool, system_string_split[1].to_string(), String::new(), json!({})).await.unwrap();
+                            game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool, system_string_split[1].to_string(), String::new(), json!({})).await.unwrap();
                         }
                     } else if xml_line.starts_with("<software") == true {
                         xml_data = xml_line.to_string();
@@ -162,7 +162,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         let json_data = xml_string_to_json(xml_data.to_string(), &conf).unwrap();
                         // name is short name
                         // description is long name
-                        mk_lib_database::mk_lib_database_metadata_game::mk_lib_database_metadata_game_upsert(
+                        mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_upsert(
                             &sqlx_pool,
                             game_system_uuid,
                             json_data["software"]["@name"].to_string(),
@@ -186,7 +186,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     );
     // only do the parse/import if not processed before
     if !Path::new(&file_name).exists() {
-        mk_lib_network::mk_download_file_from_url(
+        mk_lib_network::mk_lib_network::mk_download_file_from_url(
             format!(
                 "https://www.arcade-history.com/dats/historyxml{}.zip",
                 option_config_json["MAME"]["Version"]
@@ -195,7 +195,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         )
         .await
         .unwrap();
-        mk_lib_compression::mk_decompress_zip(&file_name, false, &"/mediakraken/emulation/")
+        mk_lib_compression::mk_lib_compression::mk_decompress_zip(&file_name, false, &"/mediakraken/emulation/")
             .await
             .unwrap();
 
@@ -217,11 +217,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
             } else if xml_line.starts_with("</entry") == true {
                 xml_data.push_str(xml_line);
                 let json_data = xml_string_to_json(xml_data.to_string(), &conf).unwrap();
-                let mut game_system_uuid = mk_lib_database::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(&sqlx_pool, json_data["entry"]["software"]["item"]["@list"].to_string()).await.unwrap();
+                let mut game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(&sqlx_pool, json_data["entry"]["software"]["item"]["@list"].to_string()).await.unwrap();
                 if game_system_uuid == uuid::Uuid::nil() {
-                    game_system_uuid = mk_lib_database::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool, json_data["entry"]["software"]["item"]["@list"].to_string(), String::new(), json!({})).await.unwrap();
+                    game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool, json_data["entry"]["software"]["item"]["@list"].to_string(), String::new(), json!({})).await.unwrap();
                 }
-                mk_lib_database::mk_lib_database_metadata_game::mk_lib_database_metadata_game_upsert(
+                mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_upsert(
                     &sqlx_pool,
                     game_system_uuid,
                     json_data["entry"]["software"]["item"]["@name"].to_string(),
@@ -243,7 +243,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     );
     // only do the parse/import if not processed before
     if !Path::new(&file_name).exists() {
-        mk_lib_network::mk_download_file_from_url(
+        mk_lib_network::mk_lib_network::mk_download_file_from_url(
             format!(
                 "https://www.progettosnaps.net/download/?tipo=catver&file=pS_CatVer_{}.zip",
                 option_config_json["MAME"]["Version"]
@@ -252,7 +252,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         )
         .await
         .unwrap();
-        mk_lib_compression::mk_decompress_zip(&file_name, false, &"/mediakraken/emulation/")
+        mk_lib_compression::mk_lib_compression::mk_decompress_zip(&file_name, false, &"/mediakraken/emulation/")
             .await
             .unwrap();
         let file = File::open(&format!(
@@ -297,7 +297,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     );
     // only do the parse/import if not processed before
     if !Path::new(&file_name).exists() {
-        mk_lib_network::mk_download_file_from_url(
+        mk_lib_network::mk_lib_network::mk_download_file_from_url(
             format!(
                 "https://www.progettosnaps.net/download?tipo=messinfo&file=pS_messinfo_{}.zip",
                 option_config_json["MAME"]["Version"]
@@ -306,7 +306,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         )
         .await
         .unwrap();
-        mk_lib_compression::mk_decompress_zip(&file_name, false, &"/mediakraken/emulation/")
+        mk_lib_compression::mk_lib_compression::mk_decompress_zip(&file_name, false, &"/mediakraken/emulation/")
             .await
             .unwrap();
         let file = File::open(&format!(

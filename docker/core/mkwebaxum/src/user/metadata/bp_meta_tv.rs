@@ -68,8 +68,9 @@ pub async fn user_metadata_tv(
 
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_tv_detail.html")]
-struct TemplateMetaTVDetailContext {
-    template_data: serde_json::Value,
+struct TemplateMetaTVDetailContext<'a> {
+    template_data: &'a serde_json::Value,
+    template_data_media_seasons_exists: &'a bool,
 }
 
 pub async fn user_metadata_tv_detail(
@@ -79,7 +80,8 @@ pub async fn user_metadata_tv_detail(
     Path(guid): Path<uuid::Uuid>,
 ) -> impl IntoResponse {
     let template = TemplateMetaTVDetailContext {
-        template_data: json!({}),
+        template_data: &json!({}),
+        template_data_media_seasons_exists: &false,
     };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

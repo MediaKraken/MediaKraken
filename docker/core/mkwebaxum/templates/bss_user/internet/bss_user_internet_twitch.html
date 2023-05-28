@@ -16,7 +16,7 @@
     <div>
         {% if template_data_exists %}
         <div>
-            {% for row_data in template_data %}
+            {#{% for row_data in template_data %}
             <div class="main_photo">
                 <a href="/user/internet/twichtv_detail/{{row_data[0]}}">
                     <img src="{{ row_data[1] }}" height="180" width="320">
@@ -25,7 +25,7 @@
                     <p class="description_content_left">{{row_data[0]}}: {{row_data[2]}}</p>
                 </div>
             </div>
-            {% endfor %}
+            {% endfor %} #}
         </div>
         {% else %}
         <p id="general_text">No Twitch TV media found.</p>

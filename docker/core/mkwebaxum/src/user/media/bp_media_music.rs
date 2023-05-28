@@ -71,6 +71,7 @@ pub async fn user_media_music(
 #[template(path = "bss_user/media/bss_user_media_music_album_detail.html")]
 struct TemplateMediaMusicDetailContext {
     template_data: serde_json::Value,
+    template_data_exists: bool,
 }
 
 pub async fn user_media_music_detail(
@@ -81,6 +82,7 @@ pub async fn user_media_music_detail(
 ) -> impl IntoResponse {
     let template = TemplateMediaMusicDetailContext {
         template_data: json!({}),
+        template_data_exists: false,
     };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

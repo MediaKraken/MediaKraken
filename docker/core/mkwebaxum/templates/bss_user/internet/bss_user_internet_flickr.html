@@ -16,16 +16,16 @@
     <div>
         {% if template_data_exists %}
         <div>
-            {% for row_data in template_data %}
+            {# {% for row_data in template_data %}
             <div class="main_photo">
-                <a href="/user/internet/flickr_detail/{{row_data[0]}}">
+                <a href="/user/internet/flickr_detail/{{row_data.id}}">
                     <img src="{{ row_data[1] }}" height="180" width="320">
                 </a>
                 <div class="description">
-                    <p class="description_content_left">{{row_data[0]}}: {{row_data[2]}}</p>
+                    <p class="description_content_left">{{row_data.id}}: {{row_data.title}}</p>
                 </div>
             </div>
-            {% endfor %}
+            {% endfor %} #}
         </div>
         {% else %}
         <p id="general_text">No Flickr media found.</p>

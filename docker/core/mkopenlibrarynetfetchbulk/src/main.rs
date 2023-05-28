@@ -35,13 +35,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await
         .unwrap();
 
-    let _fetch_result_movie = mk_lib_network::mk_download_file_from_url(
+    let _fetch_result_movie = mk_lib_network::mk_lib_network::mk_download_file_from_url(
         "https://openlibrary.org/data/ol_cdump_latest.txt.gz".to_string(),
         &"/ol_cdump_latest.txt.gz".to_string(),
     )
     .await;
 
-    mk_lib_compression::mk_decompress_tar_gz_file("/ol_cdump_latest.txt.gz")
+    mk_lib_compression::mk_lib_compression::mk_decompress_tar_gz_file("/ol_cdump_latest.txt.gz")
         .await
         .unwrap();
 

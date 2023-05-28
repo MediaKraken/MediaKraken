@@ -44,7 +44,7 @@
             {{ pagination_bar|safe }}
             {% endif %}
             <div id="the-movie-node">
-                {% for row_data in template_data %}
+                {#{% for row_data in template_data %}
                 <div class="main_photo">
                     <div data-id={{row_data.mm_metadata_book_guid}}>
                         <a href="/user/media/bss_user_media_book_detail/{{row_data.mm_metadata_book_guid}}">
@@ -86,7 +86,7 @@
                         {% endif %}
                     </div>
                 </div>
-                {% endfor %}
+                {% endfor %}#}
             </div>
             {% if pagination_bar != "" %}
             {{ pagination_bar|safe }}

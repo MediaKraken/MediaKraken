@@ -33,11 +33,11 @@
                     <td>{{ loop.index + (page - 1) * 30 }}</td>
                     <td><a href="/user/metadata/sports_detail/{{row_data.mm_metadata_sports_guid}}">{{
                             row_data.mm_metadata_sports_name }}</a></td>
-                    {% if row_data[2] != None %}
+                    {#{% if row_data[2] != None %}
                     <td>{{ row_data[2] }}</td>
                     {% else %}
                     <td>Unknown</td>
-                    {% endif %}
+                    {% endif %}#}
                 </tr>
                 {% endfor %}
             </tbody>

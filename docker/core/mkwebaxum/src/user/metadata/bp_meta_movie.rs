@@ -121,10 +121,10 @@ pub async fn user_metadata_movie(
 
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_movie_detail.html")]
-struct TemplateMetaMovieDetailContext {
-    template_data_json: serde_json::Value,
-    template_data_json_media_ffmpeg: serde_json::Value,
-    template_data_json_media_crew: serde_json::Value,
+struct TemplateMetaMovieDetailContext<'a>{
+    template_data_json: &'a serde_json::Value,
+    template_data_json_media_ffmpeg: &'a serde_json::Value,
+    template_data_json_media_crew: &'a serde_json::Value,
 }
 
 pub async fn user_metadata_movie_detail(
@@ -138,9 +138,9 @@ pub async fn user_metadata_movie_detail(
         .await
         .unwrap();
     let template = TemplateMetaMovieDetailContext {
-        template_data_json: movie_metadata.mm_metadata_movie_json,
-        template_data_json_media_ffmpeg: json!({ None }),
-        template_data_json_media_crew: json!({ None }),
+        template_data_json: &json!({ }),
+        template_data_json_media_ffmpeg: &json!({  }),
+        template_data_json_media_crew: &json!({  }),
     };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

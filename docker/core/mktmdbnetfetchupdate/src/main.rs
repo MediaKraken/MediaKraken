@@ -1,11 +1,9 @@
-use mk_lib_common;
 use mk_lib_compression;
 use mk_lib_database;
 use mk_lib_logging::mk_lib_logging;
 use mk_lib_network;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use sqlx::Row;
 use std::collections::HashMap;
 use std::error::Error;
 use stdext::function_name;
@@ -38,12 +36,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // connect to db and do a version check
-    let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(1)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
         .await
         .unwrap();
-    database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
     let option_config_json =
-        database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
+    mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
             .await
             .unwrap();
     // println!("options: {:?}", option_config_json);
@@ -52,7 +50,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // println!("huh {:?}", format!("https://api.themoviedb.org/3/movie/changes?api_key={}",
     //                              option_config_json["API"]["themoviedb"]).replace("\"", ""));
     // process movie changes
-    let url_result = mk_lib_network::mk_data_from_url(
+    let url_result = mk_lib_network::mk_lib_network::mk_data_from_url(
         format!(
             "https://api.themoviedb.org/3/movie/changes?api_key={}",
             option_config_json["API"]["themoviedb"]

@@ -13,6 +13,7 @@ codegen-units = 1
 amiquip = { version = "0.4.2", default-features = false }
 chrono = { version = "0.4.24", features = ["serde"] }
 mk_lib_common = { path = "/root/MediaKraken/src/mk_lib_common" }
+mk_lib_compression = { path = "/root/MediaKraken/src/mk_lib_compression" }
 mk_lib_database = { path = "/root/MediaKraken/src/mk_lib_database" }
 mk_lib_logging = { path = "/root/MediaKraken/src/mk_lib_logging" }
 reqwest = { version = "0.11.17", default-features = false, features = [

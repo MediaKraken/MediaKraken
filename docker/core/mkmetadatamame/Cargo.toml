@@ -14,10 +14,12 @@ async-std = "1.12.0"
 chrono = { version = "0.4.24", features = ["serde"] }
 mk_lib_compression = { path = "/root/MediaKraken/src/mk_lib_compression" }
 mk_lib_database = { path = "/root/MediaKraken/src/mk_lib_database" }
+mk_lib_file = { path = "/root/MediaKraken/src/mk_lib_file" }
 mk_lib_logging = { path = "/root/MediaKraken/src/mk_lib_logging" }
+mk_lib_network = { path = "/root/MediaKraken/src/mk_lib_network" }
 quickxml_to_serde = { version = "0.5.0", features = ["json_types"] }
 reqwest = { version = "0.11.17", default-features = false, features = ["json", "native-tls"] }
-rustls = "0.20.8"
+rustls = "0.21.1"
 serde = { version = "1.0.160", features = ["derive"] }
 serde_json = "1.0.96"
 stdext = "0.3.1"

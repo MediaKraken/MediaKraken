@@ -1,11 +1,10 @@
 use chrono::prelude::*;
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
 use serde_json::{json, Value};
-use sqlx::Row;
 use std::error::Error;
 use stdext::function_name;
 use tokio::time::{sleep, Duration};
-use mk_lib_database;
-use mk_lib_logging::mk_lib_logging;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -18,11 +17,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // open the database
-    let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(1)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
         .await
         .unwrap();
     let _db_check =
-        database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+        mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
             .await
             .unwrap();
 

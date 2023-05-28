@@ -25,17 +25,17 @@
                 <div class="main_photo">
                     <div class="media_context_right" data-id={{row_data.mm_metadata_tvshow_guid}}>
                         <a href="/user/metadata/tv_detail/{{row_data.mm_metadata_tvshow_guid}}">
-                            {% if row_data.image_json == None %}
+                            {#{% if row_data.image_json == None %}
                             <img src="/static/image/missing_icon.jpg" loading="lazy" height="300" width="200">
                             {% else %}
                             <img src="/static/{{row_data.image_json}}" loading="lazy" height="300" width="200">
-                            {% endif %}
+                            {% endif %}#}
                         </a>
-                        {% if row_data.mm_metadata_tvshow_name != None %}
+                        {#{% if row_data.mm_metadata_tvshow_name != None %}
                         <div class="description">
                             <p class="description_content_left">{{row_data.mm_metadata_tvshow_name}}</p>
                         </div>
-                        {% endif %}
+                        {% endif %}#}
                     </div>
                 </div>
                 {% endfor %}

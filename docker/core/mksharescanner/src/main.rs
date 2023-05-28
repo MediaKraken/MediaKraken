@@ -1,11 +1,12 @@
 use amiquip::{
     Connection, ConsumerMessage, ConsumerOptions, Exchange, QueueDeclareOptions, Result,
 };
-use serde_json::{json, Value};
-use std::error::Error;
 use mk_lib_database;
 use mk_lib_logging::mk_lib_logging;
 use mk_lib_network;
+use serde_json::{json, Value};
+use std::error::Error;
+use std::net::IpAddr;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -18,14 +19,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // connect to db and do a version check
-    let sqlx_pool = database::mk_lib_database::mk_lib_database_open_pool(1)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
         .await
         .unwrap();
-    database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
         .await
         .unwrap();
     let _option_config_json: Value =
-        database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
+        mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
             .await
             .unwrap();
 
@@ -60,15 +61,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .unwrap();
                     }
                     // find and store all network shares
-                    let share_vec = mk_lib_network_nmap::mk_network_share_scan(
+                    let share_vec = mk_lib_network::mk_lib_network_nmap::mk_network_share_scan(
                         json_message["Data"].to_string(),
                     )
                     .await
                     .unwrap();
                     for share_info in share_vec.iter() {
-                        database::mk_lib_database_network_share::mk_lib_database_network_share_insert(
+                        mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_insert(
                             &sqlx_pool,
-                            share_info.mm_share_xml.clone(),
+                            share_info.mm_share_ip.parse::<IpAddr>().unwrap(),
+                            share_info.mm_share_path.clone(),
+                            share_info.mm_share_comment.clone(),
                         )
                         .await;
                     }

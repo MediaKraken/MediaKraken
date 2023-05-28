@@ -14,11 +14,12 @@ amiquip = { version = "0.4.2", default-features = false }
 chrono = { version = "0.4.24", features = ["serde"] }
 mk_lib_database = { path = "/root/MediaKraken/src/mk_lib_database" }
 mk_lib_logging = { path = "/root/MediaKraken/src/mk_lib_logging" }
+mk_lib_network = { path = "/root/MediaKraken/src/mk_lib_network" }
 reqwest = { version = "0.11.17", default-features = false, features = [
     "json",
     "rustls-tls",
 ] }
-rustls = "0.20.8"
+rustls = "0.21.1"
 serde = { version = "1.0.160", features = ["derive"] }
 serde_json = "1.0.96"
 stdext = "0.3.1"

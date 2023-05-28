@@ -1,10 +1,38 @@
 use mk_lib_logging::mk_lib_logging;
 use reqwest::header::CONTENT_TYPE;
 use reqwest::header::USER_AGENT;
+use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use serde_json::json;
+use std::collections::HashMap;
 use std::io::Cursor;
 use std::str;
 use stdext::function_name;
+
+pub async fn custom_headers(map: &HashMap<String, String>) -> HeaderMap {
+    let mut headers = HeaderMap::new();
+    for (key, value) in map.iter() {
+        headers.insert(
+            HeaderName::from_bytes(key.as_bytes()).unwrap(),
+            HeaderValue::from_bytes(value.as_bytes()).unwrap(),
+        );
+    }
+    headers
+}
+
+pub async fn mk_data_from_url_to_json_custom_headers(
+    url: String,
+    custom_headers: HeaderMap,
+) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+        let client = reqwest::Client::builder().build()?;
+        let res: serde_json::Value = client
+            .get(url)
+            .headers(custom_headers)
+            .send()
+            .await?
+            .json()
+            .await?;
+        Ok(res)
+}
 
 pub async fn mk_data_from_url_to_json(
     url: String,
@@ -18,9 +46,7 @@ pub async fn mk_data_from_url_to_json(
         .await
         .unwrap();
     }
-    // Build the client using the builder pattern
     let client = reqwest::Client::builder().build()?;
-    // Perform the actual execution of the network request
     let res: serde_json::Value = client
         .get(url)
         .header(CONTENT_TYPE, "Content-Type: application/json")

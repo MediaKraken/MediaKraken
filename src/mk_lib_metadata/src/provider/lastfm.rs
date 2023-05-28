@@ -1,11 +1,6 @@
 // https://www.last.fm/api
 
-
-
 /*
-# https://github.com/MediaKraken-Dependancies/pylast
-import pylast
-
 
 class CommonMetadataLastFM:
     """

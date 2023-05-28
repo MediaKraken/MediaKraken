@@ -30,7 +30,7 @@ pub async fn admin_hardware(
         hardware_data = true;
     }
     let template = AdminHardwareTemplate {
-        template_data: json!("{}"),
+        template_data: &hardware_list,
         template_data_exists: &hardware_data,
     };
     let reply_html = template.render().unwrap();

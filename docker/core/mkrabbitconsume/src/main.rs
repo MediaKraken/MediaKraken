@@ -5,7 +5,6 @@ use mk_lib_database;
 use mk_lib_logging::mk_lib_logging;
 use mk_lib_network;
 use serde_json::{json, Value};
-use sqlx::Row;
 use std::error::Error;
 use stdext::function_name;
 

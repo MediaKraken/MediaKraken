@@ -196,7 +196,7 @@ services:
       # stores posters/etc so webserver can present
       - mediakraken_vol_static:/mediakraken/static
       # stores the xml/json xref files for anime match
-      - mediakraken_vol_cache:/cache
+      - mediakraken_vol_cache:/mediakraken/cache
     networks:
       - mediakraken_network
     deploy:

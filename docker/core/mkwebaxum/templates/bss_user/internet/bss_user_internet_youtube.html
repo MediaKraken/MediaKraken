@@ -16,7 +16,7 @@
     <div>
         {% if template_data_exists %}
         <div>
-            {% for row_data in template_data %}
+            {#{% for row_data in template_data %}
             <div class="main_photo">
                 <a href="/user/internet/youtube_detail/{{row_data[" items"][0]["id"]}}"">
                     <img src="{{ row_data[" items"][0]["snippet"]["thumbnails"]["default"]["url"] }}" height="300"
@@ -26,7 +26,7 @@
                     <p class="description_content_left">{{row_data["items"][0]["snippet"]["title"]}}</p>
                 </div>
             </div>
-            {% endfor %}
+            {% endfor %}#}
         </div>
         {% else %}
         <p id="general_text">No YouTube media found.</p>

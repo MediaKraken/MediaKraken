@@ -318,10 +318,11 @@ pub async fn metadata_fetch(
         .unwrap();
     }
     if provider_name == "imvdb" {
-        let _imvdb_id = provider_imvdb::meta_fetch_save_imvdb(
+        let _imvdb_id = provider_imvdb::provider_imvdb_video_fetch_by_id(
             &sqlx_pool,
             download_data.mm_download_provider_id,
             download_data.mm_download_new_uuid,
+            provider_api_key,
         )
         .await
         .unwrap();

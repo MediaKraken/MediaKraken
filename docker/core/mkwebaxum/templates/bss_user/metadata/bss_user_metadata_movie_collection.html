@@ -25,7 +25,7 @@
                 <div class="main_photo">
                     <div class="media_context_right" data-id={{row_data.mm_metadata_collection_guid}}>
                         <a href="/user/metadata/collection_detail/{{row_data.mm_metadata_collection_guid}}">
-                            {% if row_data.mm_metadata_collection_imagelocal_json == "" ||
+                            {#{% if row_data.mm_metadata_collection_imagelocal_json == "" ||
                             row_data.mm_metadata_collection_imagelocal_json == None %}
                             <img src="/static/image/Movie-icon.png" loading="lazy" height="300" width="200"></a>
                         <div class="description">
@@ -35,7 +35,7 @@
                         <img src="/static/{{row_data.mm_metadata_collection_imagelocal_json}}" loading="lazy"
                             height="300" width="200">
                         </a>
-                        {% endif %}
+                        {% endif %}#}
                     </div>
                 </div>
                 {% endfor %}

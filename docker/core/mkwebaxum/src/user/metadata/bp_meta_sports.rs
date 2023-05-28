@@ -69,8 +69,9 @@ pub async fn user_metadata_sports(
 
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_sports_detail.html")]
-struct TemplateMetaSportsDetailContext {
-    template_data: serde_json::Value,
+struct TemplateMetaSportsDetailContext<'a> {
+    template_data: &'a serde_json::Value,
+    template_data_exists: &'a bool,
 }
 
 pub async fn user_metadata_sports_detail(
@@ -80,7 +81,8 @@ pub async fn user_metadata_sports_detail(
     Path(guid): Path<uuid::Uuid>,
 ) -> impl IntoResponse {
     let template = TemplateMetaSportsDetailContext {
-        template_data: json!({}),
+        template_data: &json!({}),
+        template_data_exists: &false,
     };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

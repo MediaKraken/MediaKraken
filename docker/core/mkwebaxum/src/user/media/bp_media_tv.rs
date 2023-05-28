@@ -9,7 +9,6 @@ use axum::{
 use axum_session_auth::{AuthSession, SessionPgPool};
 use mk_lib_common::mk_lib_common_pagination;
 use mk_lib_database;
-use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use sqlx::postgres::PgPool;
 
@@ -72,6 +71,7 @@ pub async fn user_media_tv(
 #[template(path = "bss_user/media/bss_user_media_tv_detail.html")]
 struct TemplateMediaTVDetailContext {
     template_data: serde_json::Value,
+    template_data_exists: bool,
 }
 
 pub async fn user_media_tv_detail(
@@ -82,6 +82,7 @@ pub async fn user_media_tv_detail(
 ) -> impl IntoResponse {
     let template = TemplateMediaTVDetailContext {
         template_data: json!({}),
+        template_data_exists: false,
     };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

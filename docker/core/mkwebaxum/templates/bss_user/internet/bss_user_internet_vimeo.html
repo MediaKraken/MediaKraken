@@ -16,7 +16,7 @@
     <div>
         {% if template_data_exists %}
         <div>
-            {% for row_data in template_data %}
+            {#{% for row_data in template_data %}
             {% if row_data[2] == None %}
             <a href="/user/internet/vimeo_detail/{{row_data[1]}}"> {{row_data[0]}}</a>
             {% else %}
@@ -24,7 +24,7 @@
                 <img src="/static/meta/images/{{row_data[2]}}" height="300" width="200">
             </a>
             {% endif %}
-            {% endfor %}
+            {% endfor %}#}
         </div>
         {% else %}
         <p id="general_text">No Vimeo media found.</p>

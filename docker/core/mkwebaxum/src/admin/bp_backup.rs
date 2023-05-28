@@ -20,7 +20,7 @@ use sqlx::postgres::PgPool;
 #[template(path = "bss_admin/bss_admin_backup.html")]
 struct TemplateBackupContext<'a> {
     template_data: &'a Vec<mk_lib_database::mk_lib_database_backup::DBBackupList>,
-    template_backup_class: &'a mk_lib_common_enum_backup_type::BACKUP_MUTEX_MAP,
+    template_backup_class: &'a Vec<(i32, String)>,
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
     page: &'a usize,
@@ -62,7 +62,7 @@ pub async fn admin_backup(
     let page_usize = page as usize;
     let template = TemplateBackupContext {
         template_data: &backup_list,
-        template_backup_class: &mk_lib_common_enum_backup_type::BACKUP_MUTEX_MAP,
+        template_backup_class: &mk_lib_common_enum_backup_type::BACKUP_CLASS.clone(),
         template_data_exists: &template_data_exists,
         pagination_bar: &pagination_html,
         page: &page_usize,
