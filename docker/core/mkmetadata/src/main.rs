@@ -2,7 +2,6 @@ use mk_lib_common;
 use mk_lib_database;
 use mk_lib_logging::mk_lib_logging;
 use mk_lib_metadata;
-use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::error::Error;
 use std::path::Path;

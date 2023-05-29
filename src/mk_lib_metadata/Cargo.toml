@@ -39,7 +39,7 @@ sqlx = { version = "0.6.3", features = [
 soundcloud = "0.4.0"
 stdext = "0.3.1"
 substring = "1.4.5"
-tokio = "1.28.1"
+tokio = "1.28.2"
 tokio-util = { version = "0.7.8", features = ["compat"] }
 torrent-name-parser = "0.12.1"
 twitch_api = { version = "0.7.0-rc.6", features = ["client", "helix", "reqwest", "twitch_oauth2"] }
