@@ -181,7 +181,7 @@ STAGE_ONE_GAME_SERVERS = {
     'mkgamebasesteamcmdroot': ('mkgamebasesteamcmdroot', 'debian:10.9-slim', 'game_base'),
 
     # for hosting games via steamcmd as root
-    'mkgamebasesteamcmdrootbullseye': ('mkgamebasesteamcmdrootbullseye', 'debian:bullseye-slim', 'game_base'),
+    'mkgamebasesteamcmdbullseyeroot': ('mkgamebasesteamcmdbullseyeroot', 'debian:bullseye-slim', 'game_base'),
 
     # for hosting software via wine
     'mkgamebasewine': ('mkgamebasewine', 'debian:10.9-slim', 'game_base'),

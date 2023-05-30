@@ -45,5 +45,3 @@ FROM build_stage AS bullseye-root
 WORKDIR ${STEAMCMDDIR}
 
 FROM bullseye-root AS bullseye
-# Switch to user
-USER ${USER}
