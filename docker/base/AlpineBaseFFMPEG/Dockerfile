@@ -1,4 +1,4 @@
-FROM alpine:3.17.1
+FROM alpine:3.17.3
 
 ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig \
     SRC=/usr/local
@@ -54,7 +54,8 @@ RUN buildDeps="autoconf \
         yasm \
         zlib-dev" && \
     export MAKEFLAGS="-j$(($(grep -c ^processor /proc/cpuinfo) + 1))" && \
-    apk add --no-cache ${buildDeps} libgcc==12.2.1_git20220924-r4 libstdc++==12.2.1_git20220924-r4 ca-certificates==20220614-r4 busybox==1.35.0-r29 && \
+    apk add --no-cache ${buildDeps} libgcc==12.2.1_git20220924-r4 libstdc++==12.2.1_git20220924-r4 \
+    ca-certificates==20230506-r0 busybox==1.35.0-r29 && \
     DIR=$(mktemp -d) && cd ${DIR} && \
     git clone https://code.videolan.org/videolan/x264.git && \
     cd x264 && \

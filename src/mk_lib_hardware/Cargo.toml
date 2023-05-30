@@ -17,8 +17,8 @@ LGremote = "0.2.1"
 lsdp = "0.3.0"
 mdns = "3.0.0"
 mini-telnet = "0.1.8"
-mk_lib_logging = { path = "/root/MediaKraken/src/mk_lib_logging" }
-mk_lib_network = { path = "/root/MediaKraken/src/mk_lib_network" }
+mk_lib_logging = { path = "../mk_lib_logging" }
+mk_lib_network = { path = "../mk_lib_network" }
 onvif = { git = "https://github.com/lumeohq/onvif-rs" }   # has request with default
 rascam = { versoin = "0.0.2", optional = true}  # breaks on mmal-sys compile - mmal-sys is for raspberry pi only
 rppal = { version = "0.13.1", features = ["hal"], optional = true }

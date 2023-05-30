@@ -6,6 +6,7 @@ WORKDIR /mediakraken
 
 COPY ./ .
 
+RUN apt update && apt install libudev-dev -y
 RUN if [ "${BRANCHTAG}" = "prod" ]; \
   then cargo build --release \
   && cp /mediakraken/target/release/mk* /mediakraken/target/.; \

@@ -7,10 +7,10 @@ WORKDIR /mediakraken
 COPY ./ .
 
 RUN if [ "${BRANCHTAG}" = "prod" ]; \
-  then RUSTFLAGS=-Clinker=musl-gcc cargo build --release --target=x86_64-unknown-linux-musl \
-  && cp /mediakraken/target/x86_64-unknown-linux-musl/release/mk* /mediakraken/target/x86_64-unknown-linux-musl/.; \
-  else RUSTFLAGS=-Clinker=musl-gcc cargo build --target=x86_64-unknown-linux-musl \
-  && cp /mediakraken/target/x86_64-unknown-linux-musl/debug/mk* /mediakraken/target/x86_64-unknown-linux-musl/.; \
+  then cargo build --release \
+  && cp /mediakraken/target/release/mk* /mediakraken/target/.; \
+  else cargo build \
+  && cp /mediakraken/target/debug/mk* /mediakraken/target/.; \
   fi
 
 ####################################################################################################

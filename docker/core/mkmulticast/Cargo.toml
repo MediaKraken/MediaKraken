@@ -11,7 +11,7 @@ codegen-units = 1
 
 [dependencies]
 chrono = { version = "0.4.24", features = ["serde"] }
-mk_lib_logging = { path = "/root/MediaKraken/src/mk_lib_logging" }
+mk_lib_logging = { path = "mk_lib_logging" }
 # 0.31.0 breaks datalink
 pnet = "0.30.0"
 reqwest = { version = "0.11.18", default-features = false, features = ["json", "rustls-tls"] }

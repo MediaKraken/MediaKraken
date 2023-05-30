@@ -12,11 +12,11 @@ codegen-units = 1
 [dependencies]
 chrono = { version = "0.4.24", features = ["serde"] }
 flate2 = "1.0.26"
-mk_lib_common = { path = "/root/MediaKraken/src/mk_lib_common" }
-mk_lib_compression = { path = "/root/MediaKraken/src/mk_lib_compression" }
-mk_lib_database = { path = "/root/MediaKraken/src/mk_lib_database" }
-mk_lib_logging = { path = "/root/MediaKraken/src/mk_lib_logging" }
-mk_lib_network = { path = "/root/MediaKraken/src/mk_lib_network" }
+mk_lib_common = { path = "mk_lib_common" }
+mk_lib_compression = { path = "mk_lib_compression" }
+mk_lib_database = { path = "mk_lib_database" }
+mk_lib_logging = { path = "mk_lib_logging" }
+mk_lib_network = { path = "mk_lib_network" }
 reqwest = { version = "0.11.18", default-features = false, features = ["json", "native-tls"] }
 serde = { version = "1.0.163", features = ["derive"] }
 serde_json = "1.0.96"

@@ -11,4 +11,5 @@ RUN adduser \
     --shell "/sbin/nologin" \
     --no-create-home \
     --uid "${UID}" \
-    "${USER}"
+    "${USER}" \
+    && cargo search lazy_static

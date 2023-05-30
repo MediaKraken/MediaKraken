@@ -1,5 +1,5 @@
 # Download base image
-FROM alpine:3.13.5
+FROM alpine:3.17.3
 
 LABEL author="Quinn D Granfor, spootdev@gmail.com"
 LABEL description="This holds the base image"
@@ -18,10 +18,9 @@ WORKDIR /mediakraken
 RUN sed -i "2 s/^#//" /etc/apk/repositories \
   && sed -i "s/dl-cdn.alpinelinux.org/${ALPMIRROR}/" /etc/apk/repositories \
   && apk add --no-cache \
-  busybox==1.32.1-r6 \
-  python3==3.8.10-r0 \
-  py3-pip==20.3.4-r0 \
-  && pip3 install --no-cache-dir --upgrade pip==21.0.1 \
+  busybox==1.35.0-r29 \
+  python3==3.10.9-r1 \
+  py3-pip==22.3.1-r1 \
   && pip3 install --no-cache-dir --trusted-host mksonatype -i http://mksonatype:8081/repository/pypi/simple -r requirements.txt \
   && rm requirements.txt \
   && adduser -DHs /sbin/nologin metaman

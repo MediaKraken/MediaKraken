@@ -1,3 +1,14 @@
 target
 Cargo.lock
 .gitignore
+mk_lib_common/target
+mk_lib_compression/target
+mk_lib_database/target
+mk_lib_file/target
+mk_lib_hardware/target
+mk_lib_hash/target
+mk_lib_image/target
+mk_lib_logging/target
+mk_lib_metadata/target
+mk_lib_network/target
+mk_lib_rabbitmq/target

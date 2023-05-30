@@ -25,8 +25,8 @@ axum_static = "1.2.1"
 bytesize = {version = "1.2.0", features = ["serde"]}
 chrono = { version = "0.4.24", features = ["serde"] }
 docker-api = { version = "0.12.1", features = ["swarm"] }
-mk_lib_database = { path = "/root/MediaKraken/src/mk_lib_database" }
-mk_lib_logging = { path = "/root/MediaKraken/src/mk_lib_logging" }
+mk_lib_database = { path = "mk_lib_database" }
+mk_lib_logging = { path = "mk_lib_logging" }
 lazy_static = "1.4.0"
 libc = "0.2.126"
 num-format = { version = "0.4.4", features = ["with-system-locale"] }
