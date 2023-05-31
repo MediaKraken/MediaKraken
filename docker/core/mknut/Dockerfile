@@ -1,4 +1,4 @@
-// https://github.com/instantlinux/docker-tools/blob/main/images/nut-upsd/Dockerfile
+# https://github.com/instantlinux/docker-tools/blob/main/images/nut-upsd/Dockerfile
 
 FROM alpine:3.17
 MAINTAINER Rich Braun "docker@instantlinux.net"
