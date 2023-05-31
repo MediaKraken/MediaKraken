@@ -1,23 +1,29 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
-
+use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgRow;
-use sqlx::{types::Json, types::Uuid};
 use sqlx::{FromRow, Row};
+use stdext::function_name;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct PGTableRows {
     table_schema_name: String,
-    table_name: String,
-    table_rows: f32,
+    pub table_name: String,
+    pub table_rows: f32,
 }
 
 pub async fn mk_lib_database_table_rows(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<PGTableRows>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // query provided by postgresql wiki
     let select_query = sqlx::query(
         "SELECT nspname AS schemaname,relname,reltuples \
@@ -38,13 +44,22 @@ pub async fn mk_lib_database_table_rows(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct PGTableSize {
-    table_name: String,
-    table_size: i64,
+    pub table_name: String,
+    pub table_size: i64,
 }
 
 pub async fn mk_lib_database_table_size(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<PGTableSize>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // query provided by postgresql wiki
     let select_query = sqlx::query(
         "SELECT nspname || '.' || relname AS \"relation\", \
@@ -67,6 +82,15 @@ pub async fn mk_lib_database_table_size(
 pub async fn mk_lib_database_parallel_workers(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<String, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let row: (String,) = sqlx::query_as("show max_parallel_workers_per_gather")
         .fetch_one(sqlx_pool)
         .await?;

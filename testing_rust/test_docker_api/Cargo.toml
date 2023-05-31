@@ -1,0 +1,17 @@
+[package]
+name = "mktestdockerapi"
+version = "0.0.1"
+edition = "2021"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
+
+[dependencies]
+docker-api = { version = "0.13", features = ["swarm"] }
+tokio = { version = "1.28.0", features = ["full"] }
+
+[dev-dependencies]
+tokio-test = "*"

@@ -1,0 +1,18 @@
+[package]
+name = "mktestsubstring"
+version = "0.0.1"
+edition = "2021"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
+
+[dependencies]
+reqwest = { version = "0.11.17", default-features = false, features = ["json", "rustls-tls"] }
+substring = "1.4.5"
+tokio = { version = "1.28.0", features = ["full"] }
+
+[dev-dependencies]
+tokio-test = "*"

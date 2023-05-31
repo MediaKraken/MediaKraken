@@ -1,16 +1,10 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-use sqlx::{types::Json, types::Uuid};
+use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use mk_lib_logging::mk_lib_logging;
+use serde_json::json;
 use std::error::Error;
 use std::path::Path;
+use stdext::function_name;
 use torrent_name_parser::Metadata;
-
-#[path = "../mk_lib_logging.rs"]
-mod mk_lib_logging;
-
-#[path = "../mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
-use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 
 // #[path = "../identification.rs"]
 // mod metadata_identification;
@@ -24,7 +18,16 @@ pub async fn metadata_guessit(
     sqlx_pool: &sqlx::PgPool,
     download_data: &DBDownloadQueueByProviderList,
 ) -> Result<(uuid::Uuid, Metadata), Box<dyn Error>> {
-    let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
     // check for dupes by name/year
     let file_name = Path::new(&download_data.mm_download_path.as_ref().unwrap())
         .file_name()
@@ -38,7 +41,8 @@ pub async fn metadata_guessit(
             std::module_path!(),
             json!({ "Guessit File": file_name }),
         )
-        .await;
+        .await
+        .unwrap();
     }
     let guessit_data: Metadata = Metadata::from(&file_name).unwrap();
     if guessit_data.title().len() > 0 {
@@ -72,7 +76,7 @@ pub async fn metadata_guessit(
         //     metadata_last_year = 0;
         // }
     } else {
-        mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_update_provider(&sqlx_pool,
+        mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_update_provider(&sqlx_pool,
                                                                                                                  "ZZ".to_string(),
                                                                                                                  download_data.mm_download_guid).await.unwrap();
     }

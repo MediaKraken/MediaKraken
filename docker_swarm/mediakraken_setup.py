@@ -82,10 +82,10 @@ if not os.path.isfile('/usr/bin/docker'):
     install_pid.wait()
 
 # verify docker-compose is installed (to handle env vars in the yaml file)
+# use OLD version due to how it handles "missing" version bug in 2.x.x
 if not os.path.isfile('/usr/local/bin/docker-compose'):
     install_pid = subprocess.Popen(shlex.split('curl -L "https://github.com/docker/compose/'
-                                               'releases/download/1.29.2/docker-compose-'
-                                               'Linux-x86_64" '
+                                               'releases/download/1.29.2/docker-compose-Linux-x86_64" '
                                                '-o /usr/local/bin/docker-compose'),
                                    stdout=subprocess.PIPE, shell=False)
     install_pid.wait()
@@ -98,32 +98,39 @@ subprocess.call(shlex.split('docker swarm init'),
 
 if not os.path.isfile('.env'):
     file_handle = open('.env', 'w+')
-    file_handle.write('BRANCH=dev2021_07')
+    file_handle.write('BRANCH=prod')
     file_handle.close()
 
 if not os.path.isfile('./mkstack_db_password.txt'):
     file_handle = open('./mkstack_db_password.txt', 'w+')
     random_key = b64encode(os.urandom(32)).decode('utf-8')
-    file_handle.write(random_key.replace('"', '').replace("'", ''))
+    file_handle.write(random_key.replace(
+        '"', '').replace("'", '').replace("%", ''))
     file_handle.close()
-    subprocess.call(shlex.split('docker secret create db_password ./mkstack_db_password.txt'),
-                    stdout=subprocess.PIPE, shell=False)
+    install_pid = subprocess.call(shlex.split('docker secret create db_password ./mkstack_db_password.txt'),
+                                  stdout=subprocess.PIPE, shell=False)
+    install_pid.wait()
 
 if not os.path.isfile('./mkstack_secure_key.txt'):
     file_handle = open('./mkstack_secure_key.txt', 'w+')
     random_key = b64encode(os.urandom(32)).decode('utf-8')
-    file_handle.write(random_key.replace('"', '').replace("'", ''))
+    file_handle.write(random_key.replace(
+        '"', '').replace("'", '').replace("%", ''))
     file_handle.close()
-    subprocess.call(shlex.split('docker secret create secure_key ./mkstack_secure_key.txt'),
-                    stdout=subprocess.PIPE, shell=False)
+    install_pid = subprocess.call(shlex.split('docker secret create secure_key ./mkstack_secure_key.txt'),
+                                  stdout=subprocess.PIPE, shell=False)
+    install_pid.wait()
 
 if not os.path.isfile('./mkstack_csrf_key.txt'):
     file_handle = open('./mkstack_csrf_key.txt', 'w+')
     random_key = b64encode(os.urandom(32)).decode('utf-8')
-    file_handle.write(random_key.replace('"', '').replace("'", ''))
+    file_handle.write(random_key.replace(
+        '"', '').replace("'", '').replace("%", ''))
     file_handle.close()
-    subprocess.call(shlex.split('docker secret create csrf_key ./mkstack_csrf_key.txt'),
-                    stdout=subprocess.PIPE, shell=False)
+    install_pid = subprocess.call(shlex.split('docker secret create csrf_key ./mkstack_csrf_key.txt'),
+                                  stdout=subprocess.PIPE, shell=False)
+    install_pid.wait()
 
-subprocess.call(shlex.split('python3 mediakraken_update_images.py'),
-                stdout=subprocess.PIPE, shell=False)
+install_pid = subprocess.call(shlex.split('python3 mediakraken_update_images.py'),
+                              stdout=subprocess.PIPE, shell=False)
+install_pid.wait()

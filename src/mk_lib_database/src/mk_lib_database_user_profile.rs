@@ -1,18 +1,21 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
-
-use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
-use sqlx::{types::Json, types::Uuid};
-use sqlx::{FromRow, Row};
+use mk_lib_logging::mk_lib_logging;
+use serde_json::json;
+use stdext::function_name;
 
 pub async fn mk_lib_database_user_profile_insert(
     sqlx_pool: &sqlx::PgPool,
     profile_name: String,
     profile_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let new_guid = uuid::Uuid::new_v4();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
@@ -34,6 +37,15 @@ pub async fn mk_lib_database_user_group_insert(
     group_desc: String,
     group_rights_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let new_guid = uuid::Uuid::new_v4();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(

@@ -1,7 +1,4 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
 use chrono::prelude::*;
-use std::env;
 
 pub async fn mk_logging_post_elk(
     message_type: &str,
@@ -13,7 +10,7 @@ pub async fn mk_logging_post_elk(
     let client = reqwest::Client::new();
     let echo_json = client
         .post(format!(
-            "http://mkelk:9200/{}/_doc",
+            "http://mkelk.beaverbay.local:9200/{}/_doc",
             std::env::current_exe()
                 .expect("Can't get the exec path")
                 .file_name()

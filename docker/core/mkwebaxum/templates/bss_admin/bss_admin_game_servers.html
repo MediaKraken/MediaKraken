@@ -1,0 +1,76 @@
+{% block content %}
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>MediaKraken - Game Servers</title>
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.min.css">
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+        {% include "bss_admin/bss_admin_include_menu.html" %}
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content">
+                <div class="container-fluid">
+                    <div class="card shadow">
+                        <div class="card-header py-3">
+                            <fieldset>
+                                <legend>Game Servers</legend>
+                                <div>
+                                    {% if template_data_exists %}
+                                    {% if pagination_bar != "" %}
+                                    {{ pagination_bar|safe }}
+                                    {% endif %}
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Game Name</th>
+                                                    <th>Description</th>
+                                                    <th>Created</th>
+                                                    <th>Active</th>
+                                                    <th>Edit</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for row_data in template_data %}
+                                                <tr>
+                                                    <td>{{ loop.index + (page - 1) * 30 }}</td>
+                                                    <td><a
+                                                            href="/admin/bss_admin_game_server_detail/{{row_data.mm_game_server_guid}}">{{
+                                                            row_data.mm_game_server_name }}</a></td>
+                                                    <td>{{ row_data.mm_game_server_name }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% if pagination_bar != "" %}
+                                    {{ pagination_bar|safe }}
+                                    {% endif %}
+                                    {% else %}
+                                    <p>No game servers found. Contact administrator.</p>
+                                    {% endif %}
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% include "bss_public/bss_public_footer.html" %}
+        </div>
+    </div>
+    <script src="/static/js/jquery.tmpl.min.js"></script>
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/js/base_webapp_delete.js"></script>
+    <script src="/static/js/jquery-easing.min.js"></script>
+    <script src="/static/js/script.min.js"></script>
+</body>
+{% endblock %}

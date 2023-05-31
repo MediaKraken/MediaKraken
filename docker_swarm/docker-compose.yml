@@ -1,23 +1,22 @@
 ---
-version: '3.6'
+version: '3.8'
 # Volumes are HOST directory and then CONTAINER directory
 
 services:
-  # runs cron
   cron:
     image: mediakraken/mkcron:${BRANCH}
     secrets:
       - db_password
     environment:
-      - WAIT_HOSTS=database:5432, rabbit:5672
-    command: sh -c "/wait && /mediakraken/mkcon"
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+    command: sh -c "/wait && /mkcron"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     deploy:
       mode: replicated
       replicas: 1
     networks:
-      - mediakraken_network_backend
+      - mediakraken_network
 
   # Postgresql server
   database:
@@ -45,16 +44,15 @@ services:
       - mediakraken_vol_postgresql_backup:/mediakraken/backup
       - mediakraken_vol_postgresql_logging:/var/log/postgresql
     networks:
-      - mediakraken_network_backend
+      - mediakraken_network
 
-  # Runs the download services
   download:
     image: mediakraken/mkdownload:${BRANCH}
     secrets:
       - db_password
     environment:
-      - WAIT_HOSTS=database:5432, rabbit:5672
-    command: sh -c "/wait && /mediakraken/mkdownload"
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+    command: sh -c "/wait && /mkdownload"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
@@ -63,13 +61,13 @@ services:
       mode: replicated
       replicas: 1
     networks:
-      - mediakraken_network_backend
+      - mediakraken_network
 
   filebeat:
-    image: mediakraken/mkfilebeat:${BRANCH}
+    image: elastic/filebeat:7.17.9
     environment:
-      - ELASTICSEARCH_HOSTS=mkelk:9200
-      - KIBANA_HOSTS=mkelk:5601
+      - ELASTICSEARCH_HOSTS=mkelk.beaverbay.local:9200
+      - KIBANA_HOSTS=mkelk.beaverbay.local:5601
     volumes:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -78,69 +76,149 @@ services:
     deploy:
       mode: global
 
-  # runs hardware
-  hardware:
-    image: mediakraken/mkhardware:${BRANCH}
+  gamesdbnetfetchbulk:
+    image: mediakraken/mkgamesdbnetfetchbulk:${BRANCH}
+    secrets:
+      - db_password
+    command: sh -c "/mkgamesdbnetfetchbulk"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      - mediakraken_vol_static:/static
+    deploy:
+      mode: replicated
+      replicas: 0
+    networks:
+      - mediakraken_network
+
+  guessitrest:
+    image: mediakraken/mkguessitrest:${BRANCH}
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  hardwarecontrol:
+    image: mediakraken/mkhardwarecontrol:${BRANCH}
     volumes:
       # TODO why not store this in the db with the device as postgresql crypt
       # this stores the "push button" key
       - mediakraken_vol_phue:/mediakraken/phue
     environment:
-      - WAIT_HOSTS=database:5432, rabbit:5672
-    command: sh -c "/wait && /mediakraken/mkhardware"
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+    command: sh -c "/wait && /mkhardwarecontrol"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     networks:
-      - mediakraken_network_backend
+      - mediakraken_network
     deploy:
       mode: replicated
       replicas: 1
       placement:
         constraints: [ node.role == manager ]
 
-  # inotify
-  inotify:
-    image: mediakraken/mkinotify:${BRANCH}
+  hardwarescanner:
+    image: mediakraken/mkhardwarescanner:${BRANCH}
+    volumes:
+      # TODO why not store this in the db with the device as postgresql crypt
+      # this stores the "push button" key
+      - mediakraken_vol_phue:/mediakraken/phue
     environment:
-      - WAIT_HOSTS=rabbit:5672
-    command: sh -c "/wait && /mediakraken/myinotify"
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+    command: sh -c "/wait && /mkhardwarescanner"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     networks:
-      - mediakraken_network_backend
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 0
+      placement:
+        constraints: [ node.role == manager ]
+
+  inotify:
+    image: mediakraken/mkinotify:${BRANCH}
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+    command: sh -c "/wait && /mkinotify"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
     deploy:
       mode: replicated
       replicas: 1
 
-  # runs the server to fetch/process all metadata
+  libretrocorefetchupdate:
+    image: mediakraken/mklibretrocorefetchupdate:${BRANCH}
+    command: sh -c "/mklibretrocorefetchupdate"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      - mediakraken_vol_static:/mediakraken/static
+    deploy:
+      mode: replicated
+      replicas: 0
+    networks:
+      - mediakraken_network
+
+  mediascanner:
+    image: mediakraken/mkmediascanner:${BRANCH}
+    secrets:
+      - db_password
+    command: sh -c "/mkmediascanner"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      - mediakraken_vol_static:/mediakraken/static
+    deploy:
+      mode: replicated
+      replicas: 0
+    networks:
+      - mediakraken_network
+
   metadata:
     image: mediakraken/mkmetadata:${BRANCH}
     secrets:
       - db_password
-    entrypoint: ./wait-for-it-ash-busybox130.sh \
-      -h mkstack_database -p 5432 -t 120 -- python3 main_server_metadata_api.py
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+    command: sh -c "/wait && /mkmetadata"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      #- ./mkmount:/mediakraken/mnt
+      # stores posters/etc so webserver can present
+      - mediakraken_vol_static:/mediakraken/static
+      # stores the xml/json xref files for anime match
+      - mediakraken_vol_cache:/mediakraken/cache
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  metadatamame:
+    image: mediakraken/mkmetadatamame:${BRANCH}
+    secrets:
+      - db_password
+    command: sh -c "/mkmetadatamame"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
       - ./mkmount:/mediakraken/mnt
       # stores posters/etc so webserver can present
-      - mediakraken_vol_static:/mediakraken/mkwebapp/static
-      # stores the xml/json xref files for anime match
-      - mediakraken_vol_cache:/mediakraken/cache
+      - mediakraken_vol_static:/mediakraken/static
     networks:
-      - mediakraken_network_backend
+      - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 1
-
-  # multicast discover server
-  mkmulticast:
-    image: mediakraken/mkmulticast:${BRANCH}
-    command: sh -c "/mediakraken/mkmulticast"
-    stop_grace_period: 30s
-    stop_signal: SIGUSR1
-    networks:
-      - mediakraken_network_frontend
+      replicas: 0
 
   # runs the mumble chat server
   mumble:
@@ -154,40 +232,46 @@ services:
       - "64738:64738/tcp"
       - "64738:64738/udp"
     volumes:
-      # stores mumble server data
       - mediakraken_vol_mumble:/etc/mumble
-    networks:
-      - mediakraken_network_backend
     deploy:
       mode: replicated
       replicas: 0
 
-  # runs the nginx proxy service
+  multicast:
+    image: mediakraken/mkmulticast:${BRANCH}
+    command: sh -c "/mkmulticast"
+    volumes:
+      # needed to get docker/swarm info
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    deploy:
+      mode: replicated
+      replicas: 1
+
   nginx:
     image: mediakraken/mknginx:${BRANCH}
-    entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh \
-      -h mkstack_webapp -p 8080 -t 120 -- nginx
+    entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh -h mkstack_webapp -p 8080 -t 120 -- nginx
     stop_grace_period: 30s
     stop_signal: SIGTERM
     volumes:
       - mediakraken_vol_nginx:/var/log/mediakraken/nginx
       - mediakraken_vol_certs:/etc/nginx/certs:ro
-      - mediakraken_vol_static:/mediakraken/web_app_sanic/static:ro
+      - mediakraken_vol_static:/mediakraken/static:ro
     ports:
       - "8900:8900"
     networks:
-      - mediakraken_network_backend
+      - mediakraken_network
     deploy:
       mode: replicated
       replicas: 1
 
   pgadmin:
-    image: dpage/pgadmin4:6.15
+    image: dpage/pgadmin4:6.21
     stop_grace_period: 30s
     stop_signal: SIGTERM
     networks:
-      - mediakraken_network_backend
-      - mediakraken_network_frontend
+      - mediakraken_network
     ports:
       - "5050:5050"
     environment:
@@ -201,7 +285,6 @@ services:
       mode: replicated
       replicas: 1
 
-  # pgbouncer
   pgbouncer:
     image: mediakraken/mkpgbouncer:${BRANCH}
     environment:
@@ -213,39 +296,17 @@ services:
       - SERVER_RESET_QUERY=DISCARD ALL
     secrets:
       - db_password
-    entrypoint: ./wait-for-it-ash-busybox130.sh \
-      -h mkstack_database -p 5432 -t 120 -- ./entrypoint.sh
+    entrypoint: ./wait-for-it-ash-busybox130.sh -h mkstack_database -p 5432 -t 120 -- ./entrypoint.sh
     stop_grace_period: 30s
     stop_signal: SIGTERM
     networks:
-      - mediakraken_network_backend
-    deploy:
-      mode: replicated
-      replicas: 1
-
-  # pika
-  pika:
-    image: mediakraken/mkpika:${BRANCH}
-    secrets:
-      - db_password
-    entrypoint: python3 subprogram_pika.py
-    stop_grace_period: 30s
-    stop_signal: SIGUSR1
-    volumes:
-      # for start of SSL server
-      - mediakraken_vol_certs:/mediakraken/key:ro
-      - mediakraken_vol_postgresql_backup:/mediakraken/backup
-      - ./mkmount:/mediakraken/mnt
-      # so it can start docker containers
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - mediakraken_network_backend
+      - mediakraken_network
     deploy:
       mode: replicated
       replicas: 1
 
   portainer:
-    image: portainer/portainer-ce:2.16.1-alpine
+    image: portainer/portainer-ce:2.18.1-alpine
     command: -H tcp://tasks.portaineragent:9001 --tlsskipverify
     ports:
       - "9000:9000"
@@ -254,13 +315,12 @@ services:
       - mediakraken_vol_portainer_data:/data
     networks:
       - portaineragent_agent_network
-      - mediakraken_network_frontend
     deploy:
       mode: replicated
       replicas: 1
 
   portaineragent:
-    image: portainer/agent:linux-amd64-2.16.1-alpine
+    image: portainer/agent:linux-amd64-2.18.1-alpine
     environment:
       AGENT_CLUSTER_ADDR: tasks.portaineragent
       # AGENT_PORT: 9001
@@ -275,7 +335,24 @@ services:
       placement:
         constraints: [ node.platform.os == linux ]
 
-  # rabbit
+  rabbitconsume:
+    image: mediakraken/mkrabbitconsume:${BRANCH}
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+    command: sh -c "/wait && /mkrabbitconsume"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      # so it can start docker containers
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
   rabbitmq:
     image: mediakraken/mkrabbitmq:${BRANCH}
     environment:
@@ -292,45 +369,44 @@ services:
     volumes:
       - mediakraken_vol_rabbit:/var/lib/rabbitmq
     networks:
-      - mediakraken_network_backend
-      - mediakraken_network_frontend
+      - mediakraken_network
     deploy:
       mode: replicated
       replicas: 1
 
-  # Main reactor
-  reactor:
-    image: mediakraken/mkreactor:${BRANCH}
+  schedulesdirectupdate:
+    image: mediakraken/mkschedulesdirectupdate:${BRANCH}
     secrets:
       - db_password
-      - secure_key
-      - csrf_key
-    entrypoint: ./wait-for-it-ash-busybox130.sh \
-      -h mkstack_pgbouncer -p 6432 -t 120 -- python3 main_reactor_line.py
+    command: sh -c "/mkschedulesdirectupdate"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
-    ports:
-      - "8903:8903"
-    volumes:
-      # server will generate ssl key for use by web/nginx
-      - mediakraken_vol_certs:/mediakraken/key
-      # do I need this?  is pika what does the backup?
-      - mediakraken_vol_postgresql_backup:/mediakraken/backup
-      - ./mkmount:/mediakraken/mnt
-      # so it can start docker containers
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      # so can read the device scan output
-      - mediakraken_vol_devices:/mediakraken/devices
-      # server will generate salt/key
-      - /var/opt/mediakraken/secure:/mediakraken/secure
     networks:
-      - mediakraken_network_backend
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 0
+
+  sharescanner:
+    image: mediakraken/mksharescanner:${BRANCH}
+    secrets:
+      - db_password
+    command: sh -c "/mksharescanner"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
     deploy:
       mode: replicated
       replicas: 1
 
+  # runs the teamspeak3 chat server
   teamspeak:
     image: mediakraken/mkchatteamspeak:${BRANCH}
+    environment:
+      - TS3SERVER_LICENSE=accept
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
     ports:
       - "9987:9987/udp"
       - "10011:10011"
@@ -341,28 +417,49 @@ services:
       mode: replicated
       replicas: 0
 
-  # runs transcode
+  tmdbnetfetchbulk:
+    image: mediakraken/mktmdbnetfetchbulk:${BRANCH}
+    secrets:
+      - db_password
+    command: sh -c "/mktmdbnetfetchbulk"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 0
+
+  tmdbnetfetchupdate:
+    image: mediakraken/mktmdbnetfetchupdate:${BRANCH}
+    secrets:
+      - db_password
+    command: sh -c "/mktmdbnetfetchupdate"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 0
+
   transcode:
     image: mediakraken/mktranscode:${BRANCH}
     secrets:
       - db_password
-    entrypoint: ./wait-for-it-ash-busybox130.sh \
-      -h mkstack_pgbouncer -p 6432 -t 120 -- python3 async_transcode.py
+    command: sh -c "/mktranscode"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
       - ./mkmount:/mediakraken/mnt:ro
     networks:
-      - mediakraken_network_backend
+      - mediakraken_network
     deploy:
       mode: replicated
       replicas: 0
 
   transmission:
     image: mediakraken/mktransmission:${BRANCH}
-    environment:
-      - USERNAME=metaman
-      - PASSWORD=metaman
     ports:
       - "9091:9091"
       - "51413:51413/tcp"
@@ -375,37 +472,47 @@ services:
       mode: replicated
       replicas: 0
 
-  # Runs the web service for the main server application
+  tvheadend:
+    image: mediakraken/mktvheadend:${BRANCH}
+    secrets:
+      - db_password
+    command: sh -c "/mktvheadend"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 0
+
   webapp:
-    image: mediakraken/mkwebapp:${BRANCH}
+    image: mediakraken/mkwebaxum:${BRANCH}
+    # TODO remove after testing.......don't want to bypass proxy
+    ports:
+      - "8080:8080"
     secrets:
       - db_password
       - secure_key
       - csrf_key
-    entrypoint: ./wait-for-it-ash-busybox130.sh \
-      -h pgbouncer -p 6432 -t 60 -- gunicorn web_app_sanic.app:app \
-      -b :8080 -w 1 -k uvicorn.workers.UvicornWorker
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+    command: sh -c "/wait && /mediakraken/mkwebapp"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
-      - ./mkmount:/mediakraken/mnt
       # must not be read only as it stores cache here
       - mediakraken_vol_static:/mediakraken/static
-      - mediakraken_vol_webkey:/mediakraken/key
-      - ./data/uploads:/mediakraken/uploads
+      - mediakraken_vol_certs:/mediakraken/certs
       # needed to show docker/swarm info
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      # hold log files
-      - ./data/log:/mediakraken/log
       # this stores the "push button" key
-      - mediakraken_vol_phue:/mediakraken/phue
+      - mediakraken_vol_phue:/phue
       # server will generate salt/key
-      - /var/opt/mediakraken/secure:/mediakraken/secure:ro
+      #- /var/opt/mediakraken/secure:/secure
       # db backups
-      - mediakraken_vol_postgresql_backup:/mediakraken/backup
+      - mediakraken_vol_postgresql_backup:/backup
     networks:
-      - mediakraken_network_backend
-      - mediakraken_network_frontend
+      - mediakraken_network
     deploy:
       mode: replicated
       replicas: 1
@@ -415,11 +522,8 @@ networks:
   # don't bother naming as swarm names as stackname_*
   portaineragent_agent_network:
     driver: overlay
-  mediakraken_network_backend:
+  mediakraken_network:
     driver: overlay
-  mediakraken_network_frontend:
-    driver: overlay
-    external: true
 
 volumes:
   mediakraken_vol_cache:
@@ -441,7 +545,6 @@ volumes:
   mediakraken_vol_transmission:
   mediakraken_vol_transmission_downloads:
   mediakraken_vol_transmission_incomplete:
-  mediakraken_vol_webkey:
 
 
 secrets:

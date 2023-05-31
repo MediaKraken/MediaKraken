@@ -1,61 +1,54 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-use serde::{Deserialize, Serialize};
+use mk_lib_common;
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_metadata;
 use serde_json::json;
-use sqlx::types::Uuid;
-use sqlx::Row;
 use std::error::Error;
 use std::path::Path;
 use std::process::Command;
+use stdext::function_name;
 use tokio::time::{sleep, Duration};
-
-#[path = "mk_lib_database.rs"]
-mod mk_lib_database;
-#[path = "mk_lib_database_media.rs"]
-mod mk_lib_database_media;
-#[path = "mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
-#[path = "mk_lib_database_option_status.rs"]
-mod mk_lib_database_option_status;
-#[path = "mk_lib_database_version.rs"]
-mod mk_lib_database_version;
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
-#[path = "mk_lib_network.rs"]
-mod mk_lib_network;
+use mk_lib_common::mk_lib_common_enum_media_type;
 
 #[path = "identification.rs"]
 mod metadata_identification;
-
-#[path = "metadata/base.rs"]
-mod metadata_base;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
+            .await
+            .unwrap();
     }
 
     // open the database
-    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
-    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+        .await
+        .unwrap();
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+        .await;
 
     // pull options/api keys and set structs to contain the data
     let option_json: serde_json::Value =
-        mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
+        mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
             .await
             .unwrap();
 
     // launch thread per provider
-    let tmdb_api_key = option_json["API"]["themoviedb"].to_string();
+    let tmdb_api_key = option_json["API"]["themoviedb"]
+        .as_str()
+        .unwrap()
+        .to_string();
     let handle_tmdb = tokio::spawn(async move {
+        let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+            .await
+            .unwrap();
         loop {
-            let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
-            let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "themoviedb").await.unwrap();
+            let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "themoviedb").await.unwrap();
             for download_data in metadata_to_process {
-                metadata_base::metadata_process(
+                mk_lib_metadata::base::metadata_process(
                     &sqlx_pool,
                     "themoviedb".to_string(),
                     download_data,
@@ -66,15 +59,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
             sleep(Duration::from_secs(1)).await;
         }
+        // sqlx_pool.close().await;
     });
     if !option_json["API"]["musicbrainz"].is_null() {
-        let musicbrainz_api_key = option_json["API"]["musicbrainz"].to_string();
+        let musicbrainz_api_key = option_json["API"]["musicbrainz"]
+            .as_str()
+            .unwrap()
+            .to_string();
         let handle_musicbrainz = tokio::spawn(async move {
+            let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+                .await
+                .unwrap();
             loop {
-                let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
-                let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "musicbrainz").await.unwrap();
+                let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "musicbrainz").await.unwrap();
                 for download_data in metadata_to_process {
-                    metadata_base::metadata_process(
+                    mk_lib_metadata::base::metadata_process(
                         &sqlx_pool,
                         "musicbrainz".to_string(),
                         download_data,
@@ -85,15 +84,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
                 sleep(Duration::from_secs(1)).await;
             }
+            // sqlx_pool.close().await;
         });
     };
-    let thesportsdb_api_key = option_json["API"]["thesportsdb"].to_string();
+    let thesportsdb_api_key = option_json["API"]["thesportsdb"]
+        .as_str()
+        .unwrap()
+        .to_string();
     let handle_thesportsdb = tokio::spawn(async move {
+        let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+            .await
+            .unwrap();
         loop {
-            let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
-            let metadata_to_process = mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "thesportsdb").await.unwrap();
+            let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "thesportsdb").await.unwrap();
             for download_data in metadata_to_process {
-                metadata_base::metadata_process(
+                mk_lib_metadata::base::metadata_process(
                     &sqlx_pool,
                     "thesportsdb".to_string(),
                     download_data,
@@ -104,13 +109,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
             sleep(Duration::from_secs(1)).await;
         }
+        // sqlx_pool.close().await;
     });
 
     // process all the "Z" records
     loop {
         // grab new batch of records to process by content provider
         let metadata_to_process =
-            mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(
+            mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(
                 &sqlx_pool, "Z",
             )
             .await
@@ -129,7 +135,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             //         .unwrap();
             // update the media row with the json media id and the proper name
             if metadata_uuid != uuid::Uuid::nil() {
-                mk_lib_database_media::mk_lib_database_media_update_metadata_guid(
+                mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_update_metadata_guid(
                     &sqlx_pool,
                     &download_data.mm_download_provider_id,
                     metadata_uuid,
@@ -142,6 +148,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         sleep(Duration::from_secs(1)).await;
     }
     // TODO unreachable....so, do I care
+    // sqlx_pool.close().await;
     //handle_tmdb.join().unwrap();
     //handle_tmdb.take().map(JoinHandle::join);
     //handle_musicbrainz.join().unwrap();

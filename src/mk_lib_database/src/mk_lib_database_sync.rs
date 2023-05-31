@@ -1,17 +1,24 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
-
+use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgRow;
-use sqlx::{types::Json, types::Uuid};
+use sqlx::{types::Uuid};
 use sqlx::{FromRow, Row};
+use stdext::function_name;
 
 pub async fn mk_lib_database_sync_delete(
     sqlx_pool: &sqlx::PgPool,
     sync_guid: Uuid,
 ) -> Result<(), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from mm_media_sync where mm_sync_guid = $1")
         .bind(sync_guid)
@@ -26,6 +33,15 @@ pub async fn mk_lib_database_sync_process_update(
     sync_guid: Uuid,
     sync_percent: f32,
 ) -> Result<(), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "update mm_media_sync set mm_sync_options_json->'Progress' = $1
@@ -39,8 +55,17 @@ pub async fn mk_lib_database_sync_process_update(
     Ok(())
 }
 
-pub async fn mk_lib_database_sync_count(sqlx_pool: &sqlx::PgPool) -> Result<i32, sqlx::Error> {
-    let row: (i32,) = sqlx::query_as("select count(*) from mm_media_sync")
+pub async fn mk_lib_database_sync_count(sqlx_pool: &sqlx::PgPool) -> Result<i64, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let row: (i64,) = sqlx::query_as("select count(*) from mm_media_sync")
         .fetch_one(sqlx_pool)
         .await?;
     Ok(row.0)
@@ -52,6 +77,15 @@ pub async fn mk_lib_database_sync_insert(
     sync_path_to: String,
     sync_json: serde_json::Value,
 ) -> Result<Uuid, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let new_guid = uuid::Uuid::new_v4();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
@@ -71,18 +105,27 @@ pub async fn mk_lib_database_sync_insert(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBSyncList {
-    mm_sync_guid: uuid::Uuid,
-    mm_sync_path: String,
-    mm_sync_path_to: String,
-    mm_sync_options_json: serde_json::Value,
+    pub mm_sync_guid: uuid::Uuid,
+    pub mm_sync_path: String,
+    pub mm_sync_path_to: String,
+    pub mm_sync_options_json: serde_json::Value,
 }
 
 pub async fn mk_lib_database_sync_list(
     sqlx_pool: &sqlx::PgPool,
     user_id: Uuid,
-    offset: i32,
-    limit: i32,
+    offset: i64,
+    limit: i64,
 ) -> Result<Vec<DBSyncList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let select_query;
     if user_id == uuid::Uuid::nil() {
         select_query = sqlx::query(

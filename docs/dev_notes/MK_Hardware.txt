@@ -1,0 +1,13 @@
+https://wiki.archlinux.org/title/Hardware_video_acceleration#Comparison_tables
+
+https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker
+
+ Intel Quicksync (QSV), AMD AMF and NVIDIA NVENC/NVDEC
+
+ https://jellyfin.org/docs/general/administration/hardware-acceleration/
+
+ Video Acceleration API (VA-API) provides both hardware accelerated video encoding and decoding, designed for Intel CPU / GPU.
+Video Decode and Presentation API for Unix (VDPAU) allows to offload portions of the video decoding process and video post-processing to the GPU video-hardware, developed by NVIDIA. VDPAU has not been updated since September 2015.
+NVDECODE/NVENCODE - hardware video acceleration used by NVIDIA Fermi, Kepler, Maxwell and Pascal generation GPUs.
+
+https://docs.frigate.video/configuration/hardware_acceleration/

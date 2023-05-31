@@ -1,26 +1,30 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
 // https://directory.shoutcast.com/Developer
 
-use std::error::Error;
+use mk_lib_network;
 
-#[path = "../../mk_lib_logging.rs"]
-mod mk_lib_logging;
+const shoutcast_api_url: &str = "http://api.shoutcast.com/legacy/";
 
-#[path = "../../mk_lib_network.rs"]
-mod mk_lib_network;
+pub async fn mk_provider_shoutcast_top500(
+    api_key: String,
+) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+    let url = format!("{}Top500?k={}", shoutcast_api_url, api_key);
+    let json_data = mk_lib_network::mk_lib_network::mk_data_from_url_to_json(url)
+        .await
+        .unwrap();
+    Ok(json_data)
+}
+
+pub async fn mk_provider_shoutcast_genre_list(
+    api_key: String,
+) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+    let url = format!("{}genrelist?k={}", shoutcast_api_url, api_key);
+    let json_data = mk_lib_network::mk_lib_network::mk_data_from_url_to_json(url)
+        .await
+        .unwrap();
+    Ok(json_data)
+}
 
 /*
-
-class CommonMetadataShoutcast:
-    """
-    Class for interfacing with Shoutcast
-    """
-
-    def __init__(self, option_config_json):
-        self.shoutcast_api_key = option_config_json['API']['shoutcast']
-        self.shoutcast_url = 'http://api.shoutcast.com/legacy/'
-
     pub async fn com_shoutcast_generate_options(self, rec_limit=None, bit_rate=None, media_type=None):
         options = ''
         if rec_limit != None:
@@ -35,14 +39,6 @@ class CommonMetadataShoutcast:
                 media_type = 'audio/aacp'
             options += '&mt=%s' % media_type
         return options
-
-    pub async fn com_shoutcast_top_500(self, rec_limit=None, bit_rate=None, media_type=None):
-        """
-        Grab top 500 stations
-        """
-        return json.loads(await common_network_async.mk_network_fetch_from_url_async(
-            self.shoutcast_url + 'Top500?k=' + self.shoutcast_api_key
-            + self.com_shoutcast_generate_options(rec_limit, bit_rate, media_type), None))
 
     pub async fn com_shoutcast_keyword(self, search_string, rec_limit=None, bit_rate=None,
                                     media_type=None):
@@ -63,15 +59,5 @@ class CommonMetadataShoutcast:
             self.shoutcast_url + 'stationsearch?k=' + self.shoutcast_api_key
             + ('&genresearch=%s' % genre_string.replace(' ', '+'))
             + self.com_shoutcast_generate_options(rec_limit, bit_rate, media_type), None))
-
-    pub async fn com_shoutcast_genre_list(self):
-        """
-        Grab genre list
-        """
-        return json.loads(await common_network_async.mk_network_fetch_from_url_async(
-            self.shoutcast_url + 'genrelist?k=' + self.shoutcast_api_key, None))
-
-// TODO
-# Get Secondary Genres
 
  */

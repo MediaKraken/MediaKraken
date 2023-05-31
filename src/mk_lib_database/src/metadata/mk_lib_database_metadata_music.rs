@@ -1,25 +1,33 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
-
+use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgRow;
-use sqlx::{types::Json, types::Uuid};
+
 use sqlx::{FromRow, Row};
+use stdext::function_name;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaMusicList {
-    mm_metadata_album_guid: uuid::Uuid,
-    mm_metadata_album_name: String,
-    mm_metadata_album_json: serde_json::Value,
-    mm_metadata_album_localimage: String,
+    pub mm_metadata_album_guid: uuid::Uuid,
+    pub mm_metadata_album_artist: String,
+    pub mm_metadata_album_name: String,
+    pub mm_metadata_album_json: serde_json::Value,
+    pub mm_metadata_album_localimage: String,
 }
 
 pub async fn mk_lib_database_metadata_music_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_album \
@@ -40,9 +48,18 @@ pub async fn mk_lib_database_metadata_music_count(
 pub async fn mk_lib_database_metadata_music_read(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
-    offset: i32,
-    limit: i32,
+    offset: i64,
+    limit: i64,
 ) -> Result<Vec<DBMetaMusicList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // TODO, only grab the poster locale from json
     // TODO order by release year
     let select_query;
@@ -70,6 +87,7 @@ pub async fn mk_lib_database_metadata_music_read(
     let table_rows: Vec<DBMetaMusicList> = select_query
         .map(|row: PgRow| DBMetaMusicList {
             mm_metadata_album_guid: row.get("mm_metadata_album_guid"),
+            mm_metadata_album_artist: row.get("mm_metadata_album_artist"),
             mm_metadata_album_name: row.get("mm_metadata_album_name"),
             mm_metadata_album_json: row.get("mm_metadata_album_json"),
             mm_metadata_album_localimage: row.get("mm_metadata_album_localimage"),

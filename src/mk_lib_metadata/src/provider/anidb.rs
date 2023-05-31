@@ -1,38 +1,19 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
 // https://anidb.net/
 
-use std::error::Error;
+use mk_lib_network;
 
-#[path = "../../mk_lib_logging.rs"]
-mod mk_lib_logging;
-
-#[path = "../../mk_lib_network.rs"]
-mod mk_lib_network;
+pub async fn provider_anidb_fetch_titles_file() {
+    mk_lib_network::mk_lib_network::mk_download_file_from_url(
+        "http://anidb.net/api/anime-titles.xml.gz".to_string(),
+        &"/mediakraken/cache/anidb_titles.gz".to_string(),
+    )
+    .await
+    .unwrap();
+}
 
 /*
 
 class CommonMetadataANIdb:
-    """
-    Class for interfacing with anidb
-    """
-
-    def __init__(self, db_connection):
-        self.adba_connection = None
-
-    pub async fn com_net_anidb_fetch_titles_file(self):
-        """
-        Fetch the tarball of anime titles
-        """
-        // check to see if local titles file is older than 24 hours
-        if common_file.com_file_modification_timestamp('./cache/anidb_titles.gz') \
-                < (time.time() - 86400):
-            await common_network_async.mk_network_fetch_from_url_async(
-                'http://anidb.net/api/anime-titles.xml.gz',
-                './cache/anidb_titles.gz')
-            return True  # new file
-        return False
-
     pub async fn com_net_anidb_save_title_data_to_db(self, title_file='./cache/anidb_titles.gz'):
         """
         Save anidb title data to database
@@ -80,30 +61,4 @@ class CommonMetadataANIdb:
                 return None
         else:
             return local_db_result
-
-    pub async fn com_net_anidb_connect(self, user_name, user_password):
-        """
-        Remote api calls
-        """
-        self.adba_connection = adba.Connection(log=True)
-        try:
-            self.adba_connection.auth(user_name, user_password)
-        except Exception as err_code:
-            common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='error',
-                                                                 message_text={"exception msg":
-                                                                                   err_code})
-        return self.adba_connection
-
-    pub async fn com_net_anidb_logout(self):
-        """
-        Logout of anidb
-        """
-        self.adba_connection.logout()
-
-    pub async fn com_net_anidb_stop(self):
-        """
-        Close the anidb connect and stop the thread
-        """
-        self.adba_connection.stop()
-
  */

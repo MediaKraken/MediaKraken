@@ -2,7 +2,7 @@
 # Dockerfile that builds a TF2 Gameserver
 ###########################################################
 ARG BRANCHTAG
-FROM mediakraken/mkbasesteamcmdroot:${BRANCHTAG}
+FROM mediakraken/mkgamebasesteamcmdroot:${BRANCHTAG}
 
 LABEL maintainer="walentinlamonos@gmail.com"
 
@@ -17,7 +17,7 @@ ENV DLURL https://raw.githubusercontent.com/CM2Walki/TF2
 RUN set -x \
 	&& apt-get update \
 	&& apt-get install -y --no-install-recommends --no-install-suggests \
-		lib32z1=1:1.2.11.dfsg-1 \
+		lib32z1=1:1.2.11.dfsg-1+deb10u2 \
 		libncurses5:i386=6.1+20181013-2+deb10u2 \
 		libbz2-1.0:i386=1.0.6-9.2~deb10u1 \
 		lib32gcc1=1:8.3.0-6 \

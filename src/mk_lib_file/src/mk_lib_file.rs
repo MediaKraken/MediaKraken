@@ -1,25 +1,48 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
-
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use std::error::Error;
 use std::io;
-use std::io::prelude::*;
+use stdext::function_name;
 use walkdir::{DirEntry, WalkDir};
 
-pub fn mk_read_file_data(file_to_read: &str) -> io::Result<String> {
+pub async fn mk_read_file_data(file_to_read: &str) -> io::Result<String> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let buffer = std::fs::read_to_string(file_to_read).expect("Unable to read file");
     Ok(buffer)
 }
 
-pub fn mk_read_file_data_u8(file_to_read: &str) -> io::Result<Vec<u8>> {
+pub async fn mk_read_file_data_u8(file_to_read: &str) -> io::Result<Vec<u8>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let buffer = std::fs::read(file_to_read).expect("Unable to read file");
     Ok(buffer)
 }
 
-pub fn mk_save_file_data(file_data: &str, file_to_save: &str) -> io::Result<()> {
+pub async fn mk_save_file_data(file_data: &str, file_to_save: &str) -> io::Result<()> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     std::fs::write(file_to_save, file_data).expect("Unable to read file");
     Ok(())
 }
@@ -39,6 +62,15 @@ pub fn mk_file_is_hidden(entry: &DirEntry) -> bool {
 //  .filter(|d| d.path().extension() == Some(OsStr::from_bytes(b"zip")))
 //  .filter(|e| !e.file_type().is_dir())
 pub async fn mk_directory_walk(dir_path: String) -> Result<Vec<String>, Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut file_list: Vec<String> = Vec::new();
     let walker = WalkDir::new(dir_path).into_iter();
     for entry in walker.filter_entry(|e| !mk_file_is_hidden(e)) {
@@ -47,11 +79,27 @@ pub async fn mk_directory_walk(dir_path: String) -> Result<Vec<String>, Box<dyn 
         {
             mk_lib_logging::mk_logging_post_elk(
                 std::module_path!(),
-                json!({ "walk file_name": entry.path().display() }),
+                json!({ "walk file_name": entry.path().display().to_string() }),
             )
-            .await;
+            .await
+            .unwrap();
         }
         file_list.push(entry.path().display().to_string());
     }
     Ok(file_list)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_mk_read_file_data() {
+        assert_eq!(
+            "thisisafileforhashcalctests",
+            mk_read_file_data("testing_data/HashCalc.txt")
+                .await
+                .unwrap()
+        );
+    }
 }

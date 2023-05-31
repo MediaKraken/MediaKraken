@@ -1,0 +1,13 @@
+[package]
+name = "mktestenvvariables"
+version = "0.0.1"
+edition = "2021"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
+
+[dev-dependencies]
+tokio-test = "*"

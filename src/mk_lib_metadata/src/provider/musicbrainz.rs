@@ -1,18 +1,7 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
 // https://github.com/oknozor/musicbrainz_rs
-// musicbrainz_rs = "0.4.0"
 
-use musicbrainz_rs::entity::artist;
-use musicbrainz_rs::entity::artist::*;
-use musicbrainz_rs::prelude::*;
-use std::error::Error;
 
-#[path = "../../mk_lib_logging.rs"]
-mod mk_lib_logging;
 
-#[path = "../../mk_lib_network.rs"]
-mod mk_lib_network;
 
 /*
 

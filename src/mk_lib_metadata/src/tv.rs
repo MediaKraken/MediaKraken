@@ -1,34 +1,36 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-use sqlx::postgres::PgRow;
-use sqlx::types::Uuid;
+use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use mk_lib_logging::mk_lib_logging;
+use serde_json::json;
 use std::error::Error;
+use stdext::function_name;
 use torrent_name_parser::Metadata;
-
-#[path = "../mk_lib_logging.rs"]
-mod mk_lib_logging;
-
-#[path = "../mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
-use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 
 #[path = "provider/tmdb.rs"]
 mod provider_tmdb;
 
 pub struct MetadataTVLastLookup {
-    metadata_last_id: Uuid,
+    metadata_last_id: uuid::Uuid,
     metadata_last_imdb: String,
     metadata_last_tvdb: String,
     metadata_last_tmdb: String,
 }
 
 pub async fn metadata_tv_lookup(
-    sqlx_pool: &sqlx::PgPool,
-    download_data: &DBDownloadQueueByProviderList,
-    file_name: Metadata,
-) -> Result<Uuid, Box<dyn Error>> {
+    _sqlx_pool: &sqlx::PgPool,
+    _download_data: &DBDownloadQueueByProviderList,
+    _file_name: Metadata,
+) -> Result<uuid::Uuid, Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // don't bother checking title/year as the main_server_metadata_api_worker does it already
-    let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
+    let metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
     Ok(metadata_uuid)
 }
 

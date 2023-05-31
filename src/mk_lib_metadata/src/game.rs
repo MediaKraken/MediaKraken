@@ -1,37 +1,29 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-use sqlx::postgres::PgRow;
-use sqlx::types::Uuid;
+use mk_lib_database;
+use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use mk_lib_hash;
+use mk_lib_logging::mk_lib_logging;
+use serde_json::json;
 use std::error::Error;
 use std::path::Path;
-
-#[path = "../mk_lib_logging.rs"]
-mod mk_lib_logging;
-
-#[path = "provider/giant_bomb.rs"]
-mod provider_giant_bomb;
-
-#[path = "provider/thegamesdb.rs"]
-mod mk_provider_thegamesdb;
-
-#[path = "../mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
-use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
-
-#[path = "../mk_lib_database_metadata_game.rs"]
-mod mk_lib_database_metadata_game;
-
-#[path = "../mk_lib_hash_sha1.rs"]
-mod mk_lib_hash_sha1;
+use stdext::function_name;
 
 pub async fn metadata_game_lookup(
     sqlx_pool: &sqlx::PgPool,
     download_data: &DBDownloadQueueByProviderList,
-) -> Result<Uuid, sqlx::Error> {
+) -> Result<uuid::Uuid, Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
                                                // TODO remove the file extension
     metadata_uuid =
-        mk_lib_database_metadata_game::mk_lib_database_metadata_game_uuid_by_name_and_system(
+        mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_uuid_by_name_and_system(
             &sqlx_pool,
             Path::new(&download_data.mm_download_path.as_ref().unwrap())
                 .file_name()
@@ -44,14 +36,17 @@ pub async fn metadata_game_lookup(
         .await
         .unwrap();
     if metadata_uuid == uuid::Uuid::nil() {
-        let sha1_hash =
-            mk_lib_hash_sha1::mk_file_hash_sha1(&download_data.mm_download_path.as_ref().unwrap())
-                .unwrap();
-        metadata_uuid = mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(
-            &sqlx_pool, sha1_hash,
+        let sha1_hash = mk_lib_hash::mk_lib_hash_sha1::mk_file_hash_sha1(
+            &download_data.mm_download_path.as_ref().unwrap(),
         )
         .await
         .unwrap();
+        metadata_uuid =
+            mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(
+                &sqlx_pool, sha1_hash,
+            )
+            .await
+            .unwrap();
     }
     Ok(metadata_uuid)
 }

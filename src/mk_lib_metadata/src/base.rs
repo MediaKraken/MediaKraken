@@ -1,11 +1,11 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-use sqlx::types::Uuid;
+use crate::guessit;
+use mk_lib_common::mk_lib_common_enum_media_type;
+use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use mk_lib_logging::mk_lib_logging;
+use serde_json::json;
 use std::error::Error;
+use stdext::function_name;
 use torrent_name_parser::Metadata;
-
-#[path = "../mk_lib_logging.rs"]
-mod mk_lib_logging;
 
 #[path = "adult.rs"]
 mod metadata_adult;
@@ -41,22 +41,21 @@ mod provider_televisiontunes;
 #[path = "provider/tmdb.rs"]
 mod provider_tmdb;
 
-#[path = "guessit.rs"]
-mod metadata_guessit;
-
-#[path = "../mk_lib_common_enum_media_type.rs"]
-mod mk_lib_common_enum_media_type;
-
-#[path = "../mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
-use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
-
 pub async fn metadata_process(
     sqlx_pool: &sqlx::PgPool,
     provider_name: String,
     download_data: DBDownloadQueueByProviderList,
     provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // TODO art, posters, trailers, etc in here as well
     #[cfg(debug_assertions)]
     {
@@ -64,7 +63,7 @@ pub async fn metadata_process(
                 std::module_path!(),
                 json!({ "metadata_process status": download_data.mm_download_status,  "provider": provider_name, "id": download_data.mm_download_provider_id }),
             )
-            .await;
+            .await.unwrap();
     }
     if download_data.mm_download_status == "Search" {
         metadata_search(&sqlx_pool, provider_name, download_data, provider_api_key).await;
@@ -85,11 +84,20 @@ pub async fn metadata_process(
 }
 
 pub async fn metadata_update(
-    sqlx_pool: &sqlx::PgPool,
-    provider_name: String,
-    download_data: DBDownloadQueueByProviderList,
-    provider_api_key: &String,
+    _sqlx_pool: &sqlx::PgPool,
+    _provider_name: String,
+    _download_data: DBDownloadQueueByProviderList,
+    _provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // TODO horribly broken.  Need to add the dlid, that to update, etc
     Ok(())
 }
@@ -98,18 +106,26 @@ pub async fn metadata_search(
     sqlx_pool: &sqlx::PgPool,
     provider_name: String,
     download_data: DBDownloadQueueByProviderList,
-    provider_api_key: &String,
-) -> Result<(), sqlx::Error> {
-    let mut metadata_uuid: Uuid = uuid::Uuid::nil();
+    _provider_api_key: &String,
+) -> Result<(), Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
     let mut set_fetch: bool = false;
     let mut lookup_halt: bool = false;
-    let mut update_provider = String::new();
-    let mut guessit_data: Metadata;
+    let _update_provider = String::new();
+    let guessit_data: Metadata;
     if provider_name == "anidb" {
-        (metadata_uuid, guessit_data) =
-            metadata_guessit::metadata_guessit(&sqlx_pool, &download_data)
-                .await
-                .unwrap();
+        (metadata_uuid, guessit_data) = guessit::metadata_guessit(&sqlx_pool, &download_data)
+            .await
+            .unwrap();
         if metadata_uuid == uuid::Uuid::nil() {
             metadata_uuid =
                 metadata_anime::metadata_anime_lookup(&sqlx_pool, &download_data, guessit_data)
@@ -180,7 +196,7 @@ pub async fn metadata_search(
         .unwrap();
         if metadata_uuid != uuid::Uuid::nil() {
             // TODO add theme.mp3 dl"d above to media table
-            mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+            mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
                 &sqlx_pool,
                 download_data.mm_download_guid,
             )
@@ -194,10 +210,9 @@ pub async fn metadata_search(
     } else if provider_name == "thegamesdb" {
         lookup_halt = true;
     } else if provider_name == "themoviedb" {
-        (metadata_uuid, guessit_data) =
-            metadata_guessit::metadata_guessit(&sqlx_pool, &download_data)
-                .await
-                .unwrap();
+        (metadata_uuid, guessit_data) = guessit::metadata_guessit(&sqlx_pool, &download_data)
+            .await
+            .unwrap();
         if download_data.mm_download_que_type == mk_lib_common_enum_media_type::DLMediaType::MOVIE {
             if metadata_uuid == uuid::Uuid::nil() {
                 metadata_uuid =
@@ -293,11 +308,21 @@ pub async fn metadata_fetch(
     download_data: DBDownloadQueueByProviderList,
     provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     if provider_name == "imvdb" {
-        let imvdb_id = provider_imvdb::meta_fetch_save_imvdb(
-            sqlx_pool,
+        let _imvdb_id = provider_imvdb::provider_imvdb_video_fetch_by_id(
+            &sqlx_pool,
             download_data.mm_download_provider_id,
             download_data.mm_download_new_uuid,
+            provider_api_key,
         )
         .await
         .unwrap();
@@ -334,7 +359,7 @@ pub async fn metadata_fetch(
             .await;
         }
     }
-    mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+    mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
         download_data.mm_download_guid,
     )
@@ -343,11 +368,20 @@ pub async fn metadata_fetch(
 }
 
 pub async fn metadata_castcrew(
-    sqlx_pool: &sqlx::PgPool,
-    provider_name: String,
-    download_data: DBDownloadQueueByProviderList,
-    provider_api_key: &String,
+    _sqlx_pool: &sqlx::PgPool,
+    _provider_name: String,
+    _download_data: DBDownloadQueueByProviderList,
+    _provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     Ok(())
 }
 
@@ -366,12 +400,21 @@ pub async fn metadata_castcrew(db_connection, provider_name, download_data):
 
 pub async fn metadata_image(
     sqlx_pool: &sqlx::PgPool,
-    provider_name: String,
+    _provider_name: String,
     download_data: DBDownloadQueueByProviderList,
-    provider_api_key: &String,
+    _provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // TODO grab the actual image
-    mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+    mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
         download_data.mm_download_guid,
     )
@@ -381,12 +424,21 @@ pub async fn metadata_image(
 
 pub async fn metadata_review(
     sqlx_pool: &sqlx::PgPool,
-    provider_name: String,
+    _provider_name: String,
     download_data: DBDownloadQueueByProviderList,
-    provider_api_key: &String,
+    _provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // review is last.....so can delete download que
-    mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+    mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
         download_data.mm_download_guid,
     )
@@ -396,12 +448,21 @@ pub async fn metadata_review(
 
 pub async fn metadata_collection(
     sqlx_pool: &sqlx::PgPool,
-    provider_name: String,
+    _provider_name: String,
     download_data: DBDownloadQueueByProviderList,
-    provider_api_key: &String,
+    _provider_api_key: &String,
 ) -> Result<(), Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     // only one record for this so nuke it
-    mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+    mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
         download_data.mm_download_guid,
     )

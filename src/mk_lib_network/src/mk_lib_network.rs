@@ -1,23 +1,52 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
+use mk_lib_logging::mk_lib_logging;
 use reqwest::header::CONTENT_TYPE;
 use reqwest::header::USER_AGENT;
+use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use serde_json::json;
 use std::collections::HashMap;
 use std::io::Cursor;
-use std::io::Read;
-use std::net::UdpSocket;
 use std::str;
+use stdext::function_name;
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+pub async fn custom_headers(map: &HashMap<String, String>) -> HeaderMap {
+    let mut headers = HeaderMap::new();
+    for (key, value) in map.iter() {
+        headers.insert(
+            HeaderName::from_bytes(key.as_bytes()).unwrap(),
+            HeaderValue::from_bytes(value.as_bytes()).unwrap(),
+        );
+    }
+    headers
+}
+
+pub async fn mk_data_from_url_to_json_custom_headers(
+    url: String,
+    custom_headers: HeaderMap,
+) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+        let client = reqwest::Client::builder().build()?;
+        let res: serde_json::Value = client
+            .get(url)
+            .headers(custom_headers)
+            .send()
+            .await?
+            .json()
+            .await?;
+        Ok(res)
+}
 
 pub async fn mk_data_from_url_to_json(
     url: String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    // Build the client using the builder pattern
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!(), "URL": url }),
+        )
+        .await
+        .unwrap();
+    }
     let client = reqwest::Client::builder().build()?;
-    // Perform the actual execution of the network request
     let res: serde_json::Value = client
         .get(url)
         .header(CONTENT_TYPE, "Content-Type: application/json")
@@ -33,33 +62,67 @@ pub async fn mk_data_from_url_to_json(
 }
 
 pub async fn mk_data_from_url(url: String) -> Result<String, Box<dyn std::error::Error>> {
-    let response = reqwest::get(url).await?;
     #[cfg(debug_assertions)]
     {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "response": response }))
-            .await;
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!(), "URL": url }),
+        )
+        .await
+        .unwrap();
     }
+    let response = reqwest::get(url).await?;
     let content = response.bytes().await?;
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "content": str::from_utf8(&content).unwrap().to_string() }),
+        )
+        .await
+        .unwrap();
+    }
     Ok(str::from_utf8(&content).unwrap().to_string())
 }
 
 pub async fn mk_download_file_from_url(
     url: String,
     file_name: &String,
-) -> Result<bool, Box<dyn std::error::Error>> {
+) -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(debug_assertions)]
     {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "url": url })).await;
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
     }
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "url": url }))
+            .await
+            .unwrap();
+    }
+    println!("url: {}", url);
     let response = reqwest::get(url).await?;
     let mut file = std::fs::File::create(file_name)?;
     let mut content = Cursor::new(response.bytes().await?);
     std::io::copy(&mut content, &mut file)?;
-    Ok(true)
+    Ok(())
 }
 
 // wait_seconds - 120 typically
 pub async fn mk_network_service_available(host_dns: &str, host_port: &str, wait_seconds: &str) {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     if std::path::Path::new("/mediakraken/wait-for-it-ash-busybox130.sh").exists() {
         std::process::Command::new("/mediakraken/wait-for-it-ash-busybox130.sh")
             .arg("-h")

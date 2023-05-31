@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
-import sys
-import os
+import sys, os
 
 # Preparations
 utServerPath = "/ut-server"
@@ -9,14 +8,14 @@ utDataPath = "/ut-data"
 folders = ["Maps", "Music", "Sounds", "System", "Textures"]
 utIniFileServer = f"/{utServerPath}/System/UnrealTournament.ini"
 utIniFileData = f"/{utDataPath}/System/UnrealTournament.ini"
-
+userIniFileServer = f"/{utServerPath}/System/User.ini"
+userIniFileData = f"/{utDataPath}/System/User.ini"
 
 def main():
     if len(sys.argv) >= 2 and sys.argv[1] == "i":
         initial_setup()
     else:
         prepare()
-
 
 def initial_setup():
     # Prepare the directories
@@ -27,60 +26,61 @@ def initial_setup():
     os.makedirs('/ut-data/Textures', exist_ok=True)
 
     # Initialize ini with good default values
-    # Enable the web admin and set username/password
+    ## Enable the web admin and set username/password
     set_config_value(utIniFileServer, 'UWeb.WebServer', 'bEnabled', 'True')
     set_config_value(utIniFileServer, 'UWeb.WebServer', 'ListenPort', '5580')
     set_config_value(utIniFileServer, 'UTServerAdmin.UTServerAdmin', 'AdminUsername', 'admin')
     set_config_value(utIniFileServer, 'UTServerAdmin.UTServerAdmin', 'AdminPassword', 'admin')
-    # Replace / Add Server information
+    ## Replace / Add Server information
     set_config_value(utIniFileServer, 'Engine.GameReplicationInfo', 'ServerName', 'My UT Server')
     set_config_value(utIniFileServer, 'Engine.GameReplicationInfo', 'AdminName', 'UTAdmin')
     set_config_value(utIniFileServer, 'Engine.GameReplicationInfo', 'AdminEmail', 'no@one.com')
     set_config_value(utIniFileServer, 'Engine.GameReplicationInfo', 'MOTDLine1', 'Have Fun')
-    # Replace / Add Admin and Game password
+    ## Replace / Add Admin and Game password
     set_config_value(utIniFileServer, 'Engine.GameInfo', 'AdminPassword', 'admin')
     set_config_value(utIniFileServer, 'Engine.GameInfo', 'GamePassword', '')
-    # Add some bots by default
+    ## Add some bots by default
     set_config_value(utIniFileServer, 'Botpack.DeathMatchPlus', 'MinPlayers', '4')
-    # Section to enable/disable publishing the server in the server list
-    set_config_value(utIniFileServer, 'IpServer.UdpServerUplink', 'DoUpLink', 'False')
+    set_config_value(utIniFileServer, 'Botpack.CTFGame', 'MinPlayers', '8')
+    set_config_value(utIniFileServer, 'Botpack.DeathMatchPlus', 'InitialBots', '4')
+    set_config_value(utIniFileServer, 'Botpack.CTFGame', 'InitialBots', '8')
+    ## Section to enable/disable publishing the server in the server list
+    set_config_value(utIniFileServer, 'IpServer.UdpServerUplink', 'DoUpLink', 'True')
     set_config_value(utIniFileServer, 'IpServer.UdpServerUplink', 'UpdateMinutes', '1')
     set_config_value(utIniFileServer, 'IpServer.UdpServerUplink', 'MasterServerPort', '27900')
-    # Add server visibility in server browser inside game by adding correct URLs
-    set_config_value(utIniFileServer, 'Engine.GameEngine', 'ServerActors',
-                     'IpServer.UdpServerUplink MasterServerAddress=utmaster.epicgames.com MasterServerPort=27900', True)
-    set_config_value(utIniFileServer, 'Engine.GameEngine', 'ServerActors',
-                     'IpServer.UdpServerUplink MasterServerAddress=master.noccer.de MasterServerPort=27900', True)
-    set_config_value(utIniFileServer, 'Engine.GameEngine', 'ServerActors',
-                     'IpServer.UdpServerUplink MasterServerAddress=master.333networks.com MasterServerPort=27900', True)
+    ## Add server visibility in server browser inside game by adding correct URLs
+    set_config_value(utIniFileServer, 'Engine.GameEngine', 'ServerActors', 'IpServer.UdpServerUplink MasterServerAddress=utmaster.epicgames.com MasterServerPort=27900', True)
+    set_config_value(utIniFileServer, 'Engine.GameEngine', 'ServerActors', 'IpServer.UdpServerUplink MasterServerAddress=master.333networks.com MasterServerPort=27900', True)
 
     # Add Mutators
-    # CustomCrossHairScale
+    ## CustomCrossHairScale
     set_config_value(utIniFileServer, 'Engine.GameEngine', 'ServerPackages', 'CCHS4', True)
     set_config_value(utIniFileServer, 'Engine.GameEngine', 'ServerActors', 'CCHS4.CCHS', True)
     os.remove(f"/{utDataPath}/System/CCHS4.int")
-    # FlagAnnouncementsV2
+    ## FlagAnnouncementsV2
     set_config_value(utIniFileServer, 'Engine.GameEngine', 'ServerPackages', 'FlagAnnouncementsV2', True)
     set_config_value(utIniFileServer, 'Engine.GameEngine', 'ServerPackages', 'DefaultAnnouncements', True)
-    # KickIdlePlayers2
+    ## KickIdlePlayers2
     set_config_value(utIniFileServer, 'Engine.GameEngine', 'ServerPackages', 'KickIdlePlayers2', True)
-    # MapVoteLAv2
+    ## MapVoteLAv2
     set_config_value(utIniFileServer, 'Engine.GameEngine', 'ServerPackages', 'MapVoteLAv2', True)
-    # WhoPushedMe
+    ## WhoPushedMe
     set_config_value(utIniFileServer, 'Engine.GameEngine', 'ServerPackages', 'EnhancedItems', True)
     set_config_value(utIniFileServer, 'Engine.GameEngine', 'ServerPackages', 'WhoPushedMe', True)
-    # ZeroPingPlus103
+    ## ZeroPingPlus103
     set_config_value(utIniFileServer, 'Engine.GameEngine', 'ServerPackages', 'ZeroPingPlus103', True)
 
     # Move and/or symlink the original ini files
     move_and_symlink(utIniFileServer, utIniFileData)
+    move_and_symlink(userIniFileServer, userIniFileData)
+
+    # Remove the original BotPack.u and just keep the newer Botpack.u from the latest patch
+    os.remove(f"/{utServerPath}/System/BotPack.u")
 
     # Fix some file cases (to prevent a warning)
-    os.rename(f"/{utServerPath}/System/BotPack.u", f"/{utServerPath}/System/Botpack.u")
     os.rename(f"/{utServerPath}/Textures/UTcrypt.utx", f"/{utServerPath}/Textures/utcrypt.utx")
     os.rename(f"/{utServerPath}/Textures/GenFluid.utx", f"/{utServerPath}/Textures/genfluid.utx")
     os.rename(f"/{utServerPath}/Textures/Soldierskins.utx", f"/{utServerPath}/Textures/SoldierSkins.utx")
-
 
 def prepare():
     # Remove all Symlinks
@@ -101,37 +101,39 @@ def prepare():
             fullFilePath = os.path.join(folderPath, entry)
             print(f'[L] {os.path.join(folder, entry)}')
             targetPath = os.path.join(utServerPath, folder, entry)
-            os.symlink(fullFilePath, targetPath)
+            if not (os.path.lexists(targetPath)):
+                os.symlink(fullFilePath, targetPath)
 
     # Update some config values according to optional environment variables
-    # Enable the web admin and set username/password
+    ## Enable the web admin and set username/password
     set_config_to_environment('UT_WEBADMINUSER', utIniFileServer, 'UTServerAdmin.UTServerAdmin', 'AdminUsername')
     set_config_to_environment('UT_WEBADMINPWD', utIniFileServer, 'UTServerAdmin.UTServerAdmin', 'AdminPassword')
-    # Replace / Add Server information
+    ## Replace / Add Server information
     set_config_to_environment('UT_SERVERNAME', utIniFileServer, 'Engine.GameReplicationInfo', 'ServerName')
     set_config_to_environment('UT_ADMINNAME', utIniFileServer, 'Engine.GameReplicationInfo', 'AdminName')
     set_config_to_environment('UT_ADMINEMAIL', utIniFileServer, 'Engine.GameReplicationInfo', 'AdminEmail')
     set_config_to_environment('UT_MOTD1', utIniFileServer, 'Engine.GameReplicationInfo', 'MOTDLine1')
-    # Replace / Add Master server connection information
+    ## Replace / Add Master server connection information
     set_config_to_environment('UT_DOUPLINK', utIniFileServer, 'IpServer.UdpServerUplink', 'DoUpLink')
-    # Replace / Add Admin and Game password
+    ## Replace / Add Admin and Game password
     set_config_to_environment('UT_ADMINPWD', utIniFileServer, 'Engine.GameInfo', 'AdminPassword')
     set_config_to_environment('UT_GAMEPWD', utIniFileServer, 'Engine.GameInfo', 'GamePassword')
-
+    ## Replace / Add Minimum Players
+    set_config_to_environment('UT_MINPLAYERS_DM', utIniFileServer, 'Botpack.DeathMatchPlus', 'MinPlayers')
+    set_config_to_environment('UT_MINPLAYERS_CTF', utIniFileServer, 'Botpack.CTFGame', 'MinPlayers')
+    set_config_to_environment('UT_INITIALBOTS_DM', utIniFileServer, 'Botpack.DeathMatchPlus', 'InitialBots')
+    set_config_to_environment('UT_INITIALBOTS_CTF', utIniFileServer, 'Botpack.CTFGame', 'InitialBots')
 
 def move_and_symlink(fileSrc, fileDest):
-    os.rename(fileSrc, fileDest)
+    os.replace(fileSrc, fileDest)
     symlink(fileDest, fileSrc)
-
 
 def symlink(fileSrc, fileDest):
     os.symlink(fileSrc, fileDest)
 
-
 def set_config_to_environment(environmentKey, filePath, section, key):
     if os.environ.get(environmentKey) is not None:
         set_config_value(filePath, section, key, os.environ.get(environmentKey))
-
 
 def set_config_value(filePath, section, key, value, alwaysInsert=False):
     """
@@ -178,11 +180,11 @@ def set_config_value(filePath, section, key, value, alwaysInsert=False):
                 # Parse the key and value
                 (currKey, currValue) = line.split('=', 1)
                 # If the key is the desired key
-                if currKey == key:
-                    if currValue.strip() == value:
+                if (currKey == key):
+                    if (currValue.strip() == value):
                         # The value is aleady the desired value, so skip it.
                         return
-                    if alwaysInsert:
+                    if (alwaysInsert):
                         # Continue searching for the key/value pair
                         continue
                     foundKey = True
@@ -212,6 +214,5 @@ def set_config_value(filePath, section, key, value, alwaysInsert=False):
     f.writelines(contents)
     f.close()
 
-
-if __name__ == "__main__":
+if __name__== "__main__":
     main()

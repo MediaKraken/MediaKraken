@@ -1,0 +1,75 @@
+{% block content %}
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>MediaKraken</title>
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.min.css">
+</head>
+
+<body>
+    {% include "bss_user/bss_user_include_menu.html" %}
+    <div>
+        <div class="row">
+            <div class="col"><img src="/static/image/Movie-icon.png"></div>
+            <div class="col-xl-9">
+                <div class="row"></div>
+                <div class="row"></div>
+                <div class="row"></div>
+                <div class="row">
+                    <div class="col-xl-1"></div>
+                    <div class="col"></div>
+                </div>
+                <div class="row">
+                    <div class="col"></div>
+                    <div class="col"></div>
+                    <div class="col"></div>
+                    <div class="col"></div>
+                    <div class="col"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <p><br>Overview: {{template_data["mm_metadata_json"]["overview"]}}<br><br></p>
+            </div>
+        </div>
+        <div class="row">
+            <div>
+                {% if template_data_exists %}
+                <div class="row">
+                    <div class="card">
+                        <div class="card-header">
+                            Seasons
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">
+                            <div class="grid">
+                                {#{% for chapter_info in template_data %}
+                                <div class="col-1-4">
+                                    <a
+                                        href="/user/media/bss_user_playback/hls/{{data_guid}}/{{chapter_info[0]|space_to_html}}/0/0">
+                                        <img src="/static/meta/images/{{chapter_info[1]}}" height="150" width="150">
+                                    </a>
+                                </div>
+                                {% endfor %}#}
+                            </div>
+                            <p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% include "bss_public/bss_public_footer.html" %}
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery-easing.min.js"></script>
+    <script src="/static/js/script.min.js"></script>
+</body>
+{% endblock %}

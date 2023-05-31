@@ -1,35 +1,29 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
 use amiquip::{AmqpProperties, Connection, Exchange, Publish, Result};
 use chrono::prelude::*;
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
-use sqlx::Row;
 use std::error::Error;
 use tokio::time::{sleep, Duration};
-
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
-
-#[path = "mk_lib_database.rs"]
-mod mk_lib_database;
-#[path = "mk_lib_database_cron.rs"]
-mod mk_lib_database_cron;
-#[path = "mk_lib_database_version.rs"]
-mod mk_lib_database_version;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
+            .await
+            .unwrap();
     }
 
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
-    let _db_check = mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
         .await
         .unwrap();
+    let _db_check =
+        mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+            .await
+            .unwrap();
 
     // open rabbit connection
     let mut rabbit_connection =
@@ -42,9 +36,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // start loop for cron checks
     loop {
-        let cron_row = mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool)
-            .await
-            .unwrap();
+        let cron_row =
+            mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool)
+                .await
+                .unwrap();
         for row_data in cron_row {
             let time_delta: chrono::Duration;
             match row_data.mm_cron_schedule_type.as_str() {
@@ -75,7 +70,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .with_delivery_mode(2)
                         .with_content_type("text/plain".to_string()),
                 ))?;
-                mk_lib_database_cron::mk_lib_database_cron_time_update(
+                mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_time_update(
                     &sqlx_pool,
                     row_data.mm_cron_guid,
                 )

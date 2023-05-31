@@ -1,32 +1,28 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
 // http://www.chartlyrics.com/api.aspx
 
-use std::error::Error;
-
-#[path = "../../mk_lib_logging.rs"]
-mod mk_lib_logging;
-
-#[path = "../../mk_lib_network.rs"]
-mod mk_lib_network;
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_network;
+use serde_json::json;
+use stdext::function_name;
 
 pub async fn provider_chart_lyrics_fetch(
-    sqlx_pool: &sqlx::PgPool,
     artist_name: String,
     song_name: String,
-) {
+) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let json_data = mk_lib_network::mk_lib_network::mk_data_from_url_to_json(format!(
+        "http://api.chartlyrics.com/apiv1.asmx/SearchLyricDirect?artist={}&song={}",
+        artist_name, song_name
+    ))
+    .await
+    .unwrap();
+    Ok(json_data)
 }
-
-/*
-pub async fn com_meta_chart_lyrics(artist_name, song_name):
-    """
-    Generate url link and fetch lyrics
-    """
-    lyric_text = urllib.request.urlopen('http://api.chartlyrics.com/apiv1.asmx/SearchLyricDirect?%s'
-                                        % urllib.parse.urlencode(
-        {'artist': artist_name, 'song': song_name})).read()
-    return lyric_text
-
-# com_meta_chart_lyrics('Megadeath','Peace Sells')
-# com_meta_chart_lyrics('Metallica','ride the lightning')
-*/

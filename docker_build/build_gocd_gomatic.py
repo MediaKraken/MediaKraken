@@ -128,10 +128,12 @@ for build_group in (docker_images_list.STAGE_ONE_IMAGES,
                                              ' --build-arg ALPMIRROR=%s'
                                              ' --build-arg DEBMIRROR=%s'
                                              ' --build-arg PIPMIRROR=%s'
+                                             ' --build-arg PIPMIRRORPORT=%s'
                                              ' ./docker/%s/%s/.' % (build_group[docker_images][0],
                                                                     docker_images_list.ALPINE_MIRROR,
                                                                     docker_images_list.DEBIAN_MIRROR,
                                                                     docker_images_list.PYPI_MIRROR,
+                                                                    docker_images_list.PYPI_MIRROR_PORT,
                                                                     build_group[docker_images][2],
                                                                     docker_images)]))
 
@@ -143,10 +145,12 @@ for build_group in (docker_images_list.STAGE_CORE_IMAGES,):
                                              ' --build-arg ALPMIRROR=%s'
                                              ' --build-arg DEBMIRROR=%s'
                                              ' --build-arg PIPMIRROR=%s'
+                                             ' --build-arg PIPMIRRORPORT=%s'
                                              ' ./docker/%s/%s/.' % (build_group[docker_images][0],
                                                                     docker_images_list.ALPINE_MIRROR,
                                                                     docker_images_list.DEBIAN_MIRROR,
                                                                     docker_images_list.PYPI_MIRROR,
+                                                                    docker_images_list.PYPI_MIRROR_PORT,
                                                                     build_group[docker_images][2],
                                                                     docker_images)]))
 
@@ -159,10 +163,12 @@ for build_group in (docker_images_list.STAGE_TWO_GAME_SERVERS,):
                                              ' --build-arg ALPMIRROR=%s'
                                              ' --build-arg DEBMIRROR=%s'
                                              ' --build-arg PIPMIRROR=%s'
+                                             ' --build-arg PIPMIRRORPORT=%s'
                                              ' ./docker/%s/%s/.' % (build_group[docker_images][0],
                                                                     docker_images_list.ALPINE_MIRROR,
                                                                     docker_images_list.DEBIAN_MIRROR,
                                                                     docker_images_list.PYPI_MIRROR,
+                                                                    docker_images_list.PYPI_MIRROR_PORT,
                                                                     build_group[docker_images][2],
                                                                     docker_images)]))
 

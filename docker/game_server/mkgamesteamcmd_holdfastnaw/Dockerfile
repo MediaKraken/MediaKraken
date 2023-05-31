@@ -2,7 +2,7 @@
 # Dockerfile that builds a HoldfastNaW Gameserver
 ###########################################################
 ARG BRANCHTAG
-FROM mediakraken/mkbasesteamcmdroot:${BRANCHTAG}
+FROM mediakraken/mkgamebasesteamcmdroot:${BRANCHTAG}
 
 LABEL maintainer="walentinlamonos@gmail.com"
 

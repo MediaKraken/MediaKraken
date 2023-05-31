@@ -48,26 +48,17 @@ Multiple EPG sources are supported (over-the-air DVB and ATSC including OpenTV D
 
 ## Supported Architectures
 
-Our images support multiple architectures such as `x86-64`, `arm64` and `armhf`. We utilise the docker manifest for multi-platform awareness. More information is available from docker [here](https://github.com/docker/distribution/blob/master/docs/spec/manifest-v2-2.md#manifest-list) and our announcement [here](https://blog.linuxserver.io/2019/02/21/the-lsio-pipeline-project/).
+We utilise the docker manifest for multi-platform awareness. More information is available from docker [here](https://github.com/docker/distribution/blob/master/docs/spec/manifest-v2-2.md#manifest-list) and our announcement [here](https://blog.linuxserver.io/2019/02/21/the-lsio-pipeline-project/).
 
-Simply pulling `lscr.io/linuxserver/tvheadend` should retrieve the correct image for your arch, but you can also pull specific arch images via tags.
+Simply pulling `lscr.io/linuxserver/tvheadend:latest` should retrieve the correct image for your arch, but you can also pull specific arch images via tags.
 
 The architectures supported by this image are:
 
-| Architecture | Tag |
-| :----: | --- |
-| x86-64 | amd64-latest |
-| arm64 | arm64v8-latest |
-| armhf | arm32v7-latest |
-
-## Version Tags
-
-This image provides various versions that are available via tags. `latest` tag usually provides the latest stable version. Others are considered under development and caution must be exercised when using them.
-
-| Tag | Description |
-| :----: | --- |
-| latest | Current latest release. |
-| release-4.2 | Latest release from 4.2 branch. |
+| Architecture | Available | Tag |
+| :----: | :----: | ---- |
+| x86-64 | ✅ | amd64-\<version tag\> |
+| arm64 | ✅ | arm64v8-\<version tag\> |
+| armhf| ✅ | arm32v7-\<version tag\> |
 
 ## Application Setup
 
@@ -140,16 +131,16 @@ Here are some example snippets to help you get started creating a container.
 version: "2.1"
 services:
   tvheadend:
-    image: lscr.io/linuxserver/tvheadend
+    image: lscr.io/linuxserver/tvheadend:latest
     container_name: tvheadend
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/London
-      - RUN_OPTS=<run options here> #optional
+      - RUN_OPTS= #optional
     volumes:
-      - <path to data>:/config
-      - <path to recordings>:/recordings
+      - /path/to/data:/config
+      - /path/to/recordings:/recordings
     ports:
       - 9981:9981
       - 9982:9982
@@ -167,15 +158,15 @@ docker run -d \
   -e PUID=1000 \
   -e PGID=1000 \
   -e TZ=Europe/London \
-  -e RUN_OPTS=<run options here> `#optional` \
+  -e RUN_OPTS= `#optional` \
   -p 9981:9981 \
   -p 9982:9982 \
-  -v <path to data>:/config \
-  -v <path to recordings>:/recordings \
+  -v /path/to/data:/config \
+  -v /path/to/recordings:/recordings \
   --device /dev/dri:/dev/dri `#optional` \
   --device /dev/dvb:/dev/dvb `#optional` \
   --restart unless-stopped \
-  lscr.io/linuxserver/tvheadend
+  lscr.io/linuxserver/tvheadend:latest
 ```
 
 #### Host vs. Bridge
@@ -194,7 +185,7 @@ Container images are configured using parameters passed at runtime (such as thos
 | `-e PUID=1000` | for UserID - see below for explanation |
 | `-e PGID=1000` | for GroupID - see below for explanation |
 | `-e TZ=Europe/London` | Specify a timezone to use EG Europe/London. |
-| `-e RUN_OPTS=<run options here>` | Optionally specify additional arguments to be passed. See Additional runtime parameters. |
+| `-e RUN_OPTS=` | Optionally specify additional arguments to be passed. See Additional runtime parameters. |
 | `-v /config` | Where TVHeadend show store it's config files. |
 | `-v /recordings` | Where you want the PVR to store recordings. |
 | `--device /dev/dri` | Only needed if you want to use your AMD/Intel GPU for hardware accelerated video encoding (vaapi). |
@@ -243,7 +234,7 @@ We publish various [Docker Mods](https://github.com/linuxserver/docker-mods) to 
 * container version number
   * `docker inspect -f '{{ index .Config.Labels "build_version" }}' tvheadend`
 * image version number
-  * `docker inspect -f '{{ index .Config.Labels "build_version" }}' lscr.io/linuxserver/tvheadend`
+  * `docker inspect -f '{{ index .Config.Labels "build_version" }}' lscr.io/linuxserver/tvheadend:latest`
 
 ## Updating Info
 
@@ -261,7 +252,7 @@ Below are the instructions for updating containers:
 
 ### Via Docker Run
 
-* Update the image: `docker pull lscr.io/linuxserver/tvheadend`
+* Update the image: `docker pull lscr.io/linuxserver/tvheadend:latest`
 * Stop the running container: `docker stop tvheadend`
 * Delete the container: `docker rm tvheadend`
 * Recreate a new container with the same docker run parameters as instructed above (if mapped correctly to a host folder, your `/config` folder and settings will be preserved)
@@ -309,6 +300,9 @@ Once registered you can define the dockerfile to use with `-f Dockerfile.aarch64
 
 ## Versions
 
+* **31.08.22:** - Update sample env vars and how RUN_OPTS are handled.
+* **19.08.22:** - Switch to new picons builder.
+* **16.04.22:** - Added URL XMLTV grabber.
 * **05.01.22:** - Rebase to Alpine 3.15. Disable execinfo to fix builds. Update xmltv.
 * **11.05.21:** - Added Intel iHD driver support.
 * **02.06.20:** - Update to Alpine 3.12.

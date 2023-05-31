@@ -1,17 +1,20 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
-
-use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
-use sqlx::{types::Json, types::Uuid};
-use sqlx::{FromRow, Row};
+use mk_lib_logging::mk_lib_logging;
+use serde_json::json;
+use stdext::function_name;
 
 pub async fn mk_lib_database_remote_media_count(
     sqlx_pool: &sqlx::PgPool,
-) -> Result<i32, sqlx::Error> {
-    let row: (i32,) = sqlx::query_as("select count(*) from mm_media_remote")
+) -> Result<i64, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let row: (i64,) = sqlx::query_as("select count(*) from mm_media_remote")
         .fetch_one(sqlx_pool)
         .await?;
     Ok(row.0)

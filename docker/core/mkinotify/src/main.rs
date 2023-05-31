@@ -1,31 +1,26 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
 use amiquip::{AmqpProperties, Connection, Exchange, Publish, Result};
 use inotify::{EventMask, Inotify, WatchMask};
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
-use sqlx::Row;
 use std::error::Error;
-
-#[path = "mk_lib_database.rs"]
-mod mk_lib_database;
-#[path = "mk_lib_database_library.rs"]
-mod mk_lib_database_library;
-#[path = "mk_lib_database_version.rs"]
-mod mk_lib_database_version;
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
+            .await
+            .unwrap();
     }
 
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
-    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+        .await
+        .unwrap();
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+        .await.unwrap();
 
     // open rabbit connection
     let mut rabbit_connection =
@@ -38,9 +33,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let mut inotify = Inotify::init().expect("Failed to initialize inotify");
 
-    for row_data in mk_lib_database_library::mk_lib_database_library_read(&sqlx_pool, 0, 99999)
-        .await
-        .unwrap()
+    for row_data in
+        mk_lib_database::mk_lib_database_library::mk_lib_database_library_read(&sqlx_pool, 0, 99999)
+            .await
+            .unwrap()
     {
         let lib_path: String = row_data.mm_media_dir_path;
         inotify
@@ -73,7 +69,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             std::module_path!(),
                             json!({ "Directory created": event.name }),
                         )
-                        .await;
+                        .await
+                        .unwrap();
                     }
                 } else {
                     rabbit_exchange.publish(Publish::with_properties(
@@ -89,7 +86,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             std::module_path!(),
                             json!({ "File created": event.name }),
                         )
-                        .await;
+                        .await
+                        .unwrap();
                     }
                 }
             } else if event.mask.contains(EventMask::DELETE) {
@@ -107,7 +105,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             std::module_path!(),
                             json!({ "Directory deleted": event.name }),
                         )
-                        .await;
+                        .await
+                        .unwrap();
                     }
                 } else {
                     rabbit_exchange.publish(Publish::with_properties(
@@ -123,7 +122,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             std::module_path!(),
                             json!({ "File deleted": event.name }),
                         )
-                        .await;
+                        .await
+                        .unwrap();
                     }
                 }
             } else if event.mask.contains(EventMask::MODIFY) {
@@ -141,7 +141,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             std::module_path!(),
                             json!({ "Directory modified": event.name }),
                         )
-                        .await;
+                        .await
+                        .unwrap();
                     }
                 } else {
                     rabbit_exchange.publish(Publish::with_properties(
@@ -157,7 +158,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             std::module_path!(),
                             json!({ "File modified": event.name }),
                         )
-                        .await;
+                        .await
+                        .unwrap();
                     }
                 }
             }

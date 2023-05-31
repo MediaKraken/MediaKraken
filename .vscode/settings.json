@@ -1,0 +1,9 @@
+{
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8"
+    },
+    "python.formatting.provider": "none",
+    "rust-analyzer.linkedProjects": [
+        "./src/mk_lib_metadata/Cargo.toml"
+    ]
+}

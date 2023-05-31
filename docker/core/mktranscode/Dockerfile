@@ -1,43 +1,36 @@
-FROM rust:1.66.0 as cargo-build
+FROM mediakraken/mkbase_rust_alpine:dev as cargo-build
 
-RUN rustup target add x86_64-unknown-linux-musl \
-  && apt-get update && apt-get install -y --no-install-recommends musl-tools musl-dev \
-  && update-ca-certificates
-
-# Create appuser
-ENV USER=mediakraken
-ENV UID=10001
-
-RUN adduser \
-  --disabled-password \
-  --gecos "" \
-  --home "/nonexistent" \
-  --shell "/sbin/nologin" \
-  --no-create-home \
-  --uid "${UID}" \
-  "${USER}"
+ARG BRANCHTAG
 
 WORKDIR /mediakraken
 
 COPY ./ .
 
-RUN cargo build --target x86_64-unknown-linux-musl --release
+RUN if [ "${BRANCHTAG}" = "prod" ]; \
+  then cargo build --release \
+  && cp /mediakraken/target/release/mk* /mediakraken/target/.; \
+  else cargo build \
+  && cp /mediakraken/target/debug/mk* /mediakraken/target/.; \
+  fi
+
+FROM mediakraken/mkbase_alpine_ffmpeg:dev as ffmpeg-build
 
 ####################################################################################################
 ## Final image
 ####################################################################################################
-FROM busybox:1.35.0-uclibc
+FROM alpine:3.17.1 AS runtime
 RUN wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.9.0/wait &&\
   chmod +x /wait
 # Import from builder.
-COPY --from=cargo-build /etc/passwd /etc/passwd
-COPY --from=cargo-build /etc/group /etc/group
+# COPY --from=cargo-build /etc/passwd /etc/passwd
+# COPY --from=cargo-build /etc/group /etc/group
 COPY --from=cargo-build /bin/sh /sh
-
-WORKDIR /mediakraken
+COPY --from=ffmpeg-build /usr/local/bin/ffmpeg /usr/local/bin/ffmpeg
+COPY --from=ffmpeg-build /usr/local/bin/ffprobe /usr/local/bin/ffprobe
+COPY --from=ffmpeg-build /usr/local/lib /usr/local/lib
 
 # Copy our build
-COPY --from=cargo-build /mediakraken/target/x86_64-unknown-linux-musl/release/mktranscode ./
+COPY --from=cargo-build /mediakraken/target/mktranscode /mktranscode
 
 # Use an unprivileged user.
-USER mediakraken:mediakraken
+# USER mediakraken:mediakraken

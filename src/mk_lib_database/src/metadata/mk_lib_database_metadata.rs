@@ -1,22 +1,29 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
-
+use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgRow;
-use sqlx::{types::Json, types::Uuid};
+
 use sqlx::{FromRow, Row};
+use stdext::function_name;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetadataGenreCountList {
-    genre: String,
-    mm_count: i64,
+    pub genre: String,
+    pub mm_count: i64,
 }
 
 pub async fn mk_lib_database_metadata_genre_count_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBMetadataGenreCountList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let select_query = sqlx::query(
         "select \
         jsonb_array_elements_text(mm_metadata_json->'genres')b as genre, \
@@ -40,9 +47,18 @@ pub struct DBMetadataGenreList {
 
 pub async fn mk_lib_database_metadata_genre_read(
     sqlx_pool: &sqlx::PgPool,
-    offset: i32,
-    limit: i32,
+    offset: i64,
+    limit: i64,
 ) -> Result<Vec<DBMetadataGenreList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let select_query = sqlx::query(
         "select distinct \
         jsonb_array_elements_text(mm_metadata_json->'genres')b as genre from mm_metadata_movie \
@@ -62,6 +78,15 @@ pub async fn mk_lib_database_metadata_genre_read(
 pub async fn mk_lib_database_metadata_genre_count(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<i64, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let row: (i64,) = sqlx::query_as(
         "select distinct jsonb_array_elements_text(mm_metadata_json->'genres')b \
         from mm_metadata_movie",
@@ -72,10 +97,6 @@ pub async fn mk_lib_database_metadata_genre_count(
 }
 
 /*
-
-
-
-
 // TODO port query
 def db_meta_fetch_media_id_json(self, media_id_id,
                                 collection_media=False):

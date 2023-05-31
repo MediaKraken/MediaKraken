@@ -1,15 +1,8 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-use sqlx::postgres::PgRow;
-use sqlx::types::Uuid;
+use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use mk_lib_logging::mk_lib_logging;
+use serde_json::json;
 use std::error::Error;
-
-#[path = "../mk_lib_logging.rs"]
-mod mk_lib_logging;
-
-#[path = "../mk_lib_database_metadata_download_queue.rs"]
-mod mk_lib_database_metadata_download_queue;
-use crate::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use stdext::function_name;
 
 #[path = "provider/isbndb.rs"]
 mod provider_isbndb;
@@ -18,10 +11,19 @@ mod provider_isbndb;
 mod provider_open_library;
 
 pub async fn metadata_book_lookup(
-    sqlx_pool: &sqlx::PgPool,
-    download_data: &DBDownloadQueueByProviderList,
-) -> Result<Uuid, sqlx::Error> {
-    let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
+    _sqlx_pool: &sqlx::PgPool,
+    _download_data: &DBDownloadQueueByProviderList,
+) -> Result<uuid::Uuid, Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
     Ok(metadata_uuid)
 }
 

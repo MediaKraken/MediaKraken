@@ -1,29 +1,29 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
 use chrono::prelude::*;
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
 use serde_json::{json, Value};
-use sqlx::Row;
 use std::error::Error;
+use stdext::function_name;
 use tokio::time::{sleep, Duration};
-
-#[path = "mk_lib_database.rs"]
-mod mk_lib_database;
-#[path = "mk_lib_database_version.rs"]
-mod mk_lib_database_version;
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
+            .await
+            .unwrap();
     }
 
     // open the database
-    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
-    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+        .await
+        .unwrap();
+    let _db_check =
+        mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+            .await
+            .unwrap();
 
     //
     // def mk_schedules_direct_program_info_fetch(meta_program_fetch):
@@ -129,4 +129,5 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //     mk_schedules_direct_program_info_fetch(meta_program_fetch)
     //
     // // TODO, go grab images for blank logos
+    Ok(())
 }

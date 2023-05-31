@@ -1,3 +1,11 @@
+rust on linux
+apt-get install lld clang
+  TODO zero to production page 5 for cargo config of faster linker
+  pg 8 code coverage
+  cargo fmt    - do entire project at once
+  cargo audit
+  sqlx compile time checks
+
 th-mkbuild-1
 debian 11
 apt-get update && apt upgrade
@@ -11,10 +19,11 @@ python3 build_dev_environment.py
 
 
 Debian 11
-apt-get install curl build-essential libssl-dev
+apt-get install curl build-essential libssl-dev cmake linux-headers-$(uname -r) libnl-nf-3-dev rsync libudev-dev
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 # restart terminal!
 cargo install cargo-audit
+cargo install cargo-edit
 apt-get install python3-dotenv
 nano /etc/docker/daemon.json
 {

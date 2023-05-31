@@ -1,40 +1,56 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
 use amiquip::{
     Connection, ConsumerMessage, ConsumerOptions, Exchange, QueueDeclareOptions, Result,
 };
 use serde_json::{json, Value};
 use std::error::Error;
+use std::fs;
 use std::path::Path;
-use std::process::Command;
-//use rustube::{Id, VideoFetcher};
-
-#[path = "mk_lib_database.rs"]
-mod mk_lib_database;
-#[path = "mk_lib_database_option_status.rs"]
-mod mk_lib_database_option_status;
-#[path = "mk_lib_database_version.rs"]
-mod mk_lib_database_version;
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
-#[path = "mk_lib_network.rs"]
-mod mk_lib_network;
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_database;
+use mk_lib_network;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
+            .await
+            .unwrap();
+    }
+
+    // create metadata paths, as before the db update will let it finish before
+    // other containers can use them
+    if !Path::new(&"/mediakraken/static/meta").exists() {
+        fs::create_dir("/mediakraken/static/meta")?;
+        let vec_of_metadata = vec!["poster", "backdrop", "trailer"];
+        for metadata_type in vec_of_metadata.iter() {
+            let file_name = format!("/mediakraken/static/meta/{}", metadata_type);
+            fs::create_dir(&file_name)?;
+            for c in b'a'..=b'z' {
+                for d in b'a'..=b'z' {
+                    for e in b'a'..=b'z' {
+                        for f in b'a'..=b'z' {
+                            fs::create_dir_all(format!(
+                                "{}/{}{}/{}{}",
+                                file_name, c as char, d as char, e as char, f as char
+                            ))?;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
-    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+        .await
+        .unwrap();
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, true)
         .await
         .unwrap();
     let option_config_json: Value =
-        mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
+    mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
             .await
             .unwrap();
 
@@ -65,11 +81,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             std::module_path!(),
                             json!({ "msg body": json_message }),
                         )
-                        .await;
+                        .await
+                        .unwrap();
                     }
                     if json_message["Type"].to_string() == "File" {
                         // do NOT remove the header.....this is the SAVE location
-                        mk_lib_network::mk_download_file_from_url(
+                        mk_lib_network::mk_lib_network::mk_download_file_from_url(
                             json_message["URL"].to_string(),
                             &json_message["Local Save Path"].to_string(),
                         )
@@ -86,7 +103,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     } else if json_message["Type"].to_string() == "HDTrailers" {
                         // try to grab the RSS feed itself
                         let data: serde_json::Value = serde_json::from_str(
-                            &mk_lib_network::mk_data_from_url(
+                            &mk_lib_network::mk_lib_network::mk_data_from_url(
                                 "http://feeds.hd-trailers.net/hd-trailers".to_string(),
                             )
                             .await
@@ -99,7 +116,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 std::module_path!(),
                                 json!({ "download": { "hdtrailer_json": data } }),
                             )
-                            .await;
+                            .await
+                            .unwrap();
                         }
                         let an_array = data["rss"]["channel"]["item"].as_array().unwrap();
                         for item in an_array.iter() {
@@ -109,7 +127,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     std::module_path!(),
                                     json!({ "item": item }),
                                 )
-                                .await;
+                                .await
+                                .unwrap();
                             }
                             if (item["title"].to_string().contains("(Trailer")
                                 && option_config_json["Metadata"]["Trailer"]["Trailer"] == true)
@@ -125,13 +144,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             {
                                 let download_link = item["enclosure"]["@url"].to_string();
                                 // do NOT remove the header.....this is the SAVE location
+                                // TODO use image directory format
                                 let file_save_name = format!(
-                                    "/mediakraken/web_app/static/meta/trailer/{:?}",
+                                    "/mediakraken/static/meta/trailer/{:?}",
                                     download_link.rsplitn(1, "/")
                                 );
                                 // verify it doesn't exist in meta folder
                                 if !Path::new(&file_save_name).exists() {
-                                    mk_lib_network::mk_download_file_from_url(
+                                    mk_lib_network::mk_lib_network::mk_download_file_from_url(
                                         download_link.to_string(),
                                         &file_save_name.to_string(),
                                     )
@@ -141,7 +161,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             }
                         }
                     }
-                    println!("({:>3}) Received [{}]", i, json_message);
+                    #[cfg(debug_assertions)]
+                    {
+                        mk_lib_logging::mk_logging_post_elk(
+                            std::module_path!(),
+                            json!({ "i": i, "json_message": json_message }),
+                        )
+                        .await
+                        .unwrap();
+                    }
                     consumer.ack(delivery)?;
                 }
                 other => {

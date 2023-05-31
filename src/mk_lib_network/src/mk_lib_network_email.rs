@@ -1,12 +1,10 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
 // https://github.com/lettre/lettre/releases
-
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
 
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::{Message, SmtpTransport, Transport};
+use mk_lib_logging::mk_lib_logging;
+use serde_json::json;
+use stdext::function_name;
 
 pub async fn mk_lib_network_email_send(
     email_from: String,
@@ -17,6 +15,15 @@ pub async fn mk_lib_network_email_send(
     user_name: String,
     user_password: String,
 ) {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let email = Message::builder()
         .from(email_from.parse().unwrap())
         .reply_to(email_reply_to.parse().unwrap())

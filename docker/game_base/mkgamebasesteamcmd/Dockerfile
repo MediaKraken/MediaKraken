@@ -30,8 +30,8 @@ RUN set -x \
 		ca-certificates=20200601~deb10u2 \
 		nano=3.2-3 \
 		libsdl2-2.0-0:i386=2.0.9+dfsg1-1 \
-		curl=7.64.0-4+deb10u2 \
-		locales=2.28-10 \
+		curl=7.64.0-4+deb10u6 \
+		locales=2.28-10+deb10u2 \
 	&& sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
 	&& dpkg-reconfigure --frontend=noninteractive locales \
 	&& useradd -u "${PUID}" -m "${USER}" \

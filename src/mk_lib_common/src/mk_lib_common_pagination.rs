@@ -1,21 +1,32 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
-
+use mk_lib_logging::mk_lib_logging;
 use core::fmt::Write;
 use paginator::{PageItem, Paginator};
+use serde_json::json;
 use std::error::Error;
+use stdext::function_name;
 
 pub async fn mk_lib_common_paginate(
     total_pages: i64,
-    page: i32,
+    page: i64,
     base_url: String,
 ) -> Result<String, Box<dyn Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let mut total_pages_mut = total_pages;
+    if total_pages_mut > 0 {
+        total_pages_mut = total_pages_mut / 30;
+    }
     let mut pagination_html = String::new();
-    if total_pages != 0 {
-        pagination_html.push_str("<div>");
-        let paginator = Paginator::builder(total_pages as usize)
+    if total_pages_mut != 0 {
+        pagination_html.push_str("<div><ul class=\"pagination\">");
+        let paginator = Paginator::builder(total_pages_mut as usize)
             .current_page(page as usize)
             .build_paginator()
             .unwrap();
@@ -25,7 +36,7 @@ pub async fn mk_lib_common_paginate(
                     // `PageItem::Prev` variant is used when the `has_prev` option is not set to `YesNoDepends::No`.
                     pagination_html
                         .write_fmt(format_args!(
-                            "<li><a href=\"{url}/{page}\">&laquo;</a></li>",
+                            "<li class=\"page-item\"><a class=\"page-link\" href=\"{url}/{page}\" aria-label=\"Previous\"><span aria-hidden=\"true\">&laquo;</span><span class=\"sr-only\">Previous</span></a></li>",
                             url = base_url,
                             page = page
                         ))
@@ -34,7 +45,7 @@ pub async fn mk_lib_common_paginate(
                 PageItem::Page(page) => {
                     pagination_html
                         .write_fmt(format_args!(
-                            "<li><a href=\"{url}/{page}\">{page}</a></li>",
+                            "<li class=\"page-item\"><a class=\"page-link\" href=\"{url}/{page}\">{page}</a></li>",
                             url = base_url,
                             page = page
                         ))
@@ -42,17 +53,19 @@ pub async fn mk_lib_common_paginate(
                 }
                 PageItem::CurrentPage(page) => {
                     pagination_html
-                        .write_fmt(format_args!("<li>{page}</li>", page = page))
+                        .write_fmt(format_args!(
+                            "<li class=\"page-item active\"><span class=\"page-link\">{page}<span class=\"sr-only\">(current)</span></span></li>",
+                            page = page
+                        ))
                         .unwrap();
                 }
                 PageItem::Ignore => {
-                    pagination_html.push_str("<li>...</li>");
+                    pagination_html.push_str("<li class=\"page-item\">...</li>");
                 }
                 PageItem::Next(page) => {
                     // `PageItem::Next` variant is used when the `has_next` option is not set to `YesNoDepends::No`.
                     pagination_html
-                        .write_fmt(format_args!(
-                            "<li><a href=\"{url}/{page}\">&raquo;</a></li>",
+                        .write_fmt(format_args!("<li class=\"page-item\"><a class=\"page-link\" href=\"{url}/{page}\" aria-label=\"Next\"><span aria-hidden=\"true\">&raquo;</span><span class=\"sr-only\">Next</span></a></li>",
                             url = base_url,
                             page = page
                         ))
@@ -63,7 +76,7 @@ pub async fn mk_lib_common_paginate(
                 }
             }
         }
-        pagination_html.push_str("</div>");
+        pagination_html.push_str("</ul></div>");
     }
     Ok(pagination_html)
 }

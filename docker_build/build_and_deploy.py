@@ -47,12 +47,18 @@ import network_email
 parser = argparse.ArgumentParser(
     description='This program builds and deploys MediaKraken')
 parser.add_argument('-b', '--base', required=False,
-                    help='Base images only', action="store_true")
+                    help='Base images', action="store_true")
+parser.add_argument('-c', '--core', required=False,
+                    help='Core images', action="store_true")
+parser.add_argument('-g', '--game', required=False,
+                    help='Game images', action="store_true")
 parser.add_argument('-e', '--email', required=False,
                     help='Send results email', action="store_true")
-# set args.image variable if entered - ex. ComposeMediaKrakenBaseFFMPEG
+# set args.image variable if entered - ex. mkwebaxum
 parser.add_argument('-i', '--image', metavar='image', required=False,
                     help='Image to build')
+parser.add_argument('-p', '--push', required=False,
+                    help='Push images to Hub', action="store_true")
 parser.add_argument('-r', '--rebuild', required=False,
                     help='Force rebuild with no cached layers', action="store_true")
 parser.add_argument('-s', '--security', required=False,
@@ -60,7 +66,7 @@ parser.add_argument('-s', '--security', required=False,
 parser.add_argument('-t', '--testing', required=False,
                     help='Build testing images', action="store_true")
 parser.add_argument('-v', '--version', metavar='version', required=False,
-                    help='The build version dev/prod')
+                    help='The build version dev/prod or other branch')
 args = parser.parse_args()
 
 # load .env stats
@@ -86,30 +92,26 @@ def build_email_push(build_group, email_subject, branch_tag, push_hub_image=Fals
             # TODO check for errors/warnings and stop if found
             # Let the mirror's be passed, if not used it will just throw a warning
             pid_build_proc = subprocess.Popen(shlex.split('docker build %s'
-                                                          ' -t mediakraken/%s:%s'
-                                                          ' --build-arg BRANCHTAG=%s'
-                                                          ' --build-arg ALPMIRROR=%s'
-                                                          ' --build-arg DEBMIRROR=%s'
-                                                          ' --build-arg PIPMIRROR=%s'
-                                                          ' --build-arg PIPMIRRORPORT=%s .' %
-                                                          (docker_no_cache,
-                                                           build_group[docker_images][0],
-                                                           branch_tag, branch_tag,
-                                                           docker_images_list.ALPINE_MIRROR,
-                                                           docker_images_list.DEBIAN_MIRROR,
-                                                           docker_images_list.PYPI_MIRROR,
-                                                           docker_images_list.PYPI_MIRROR_PORT)),
-                                              stdout=subprocess.PIPE, shell=False)
-            email_body = ''
-            while True:
-                line = pid_build_proc.stdout.readline()
-                if not line:
-                    break
-                email_body += line.decode("utf-8")
-                print(line.rstrip(), flush=True)
-            pid_build_proc.wait()
+                                                        ' -t mediakraken/%s:%s'
+                                                        ' --build-arg BRANCHTAG=%s'
+                                                        ' --build-arg ALPMIRROR=%s'
+                                                        ' --build-arg DEBMIRROR=%s'
+                                                        ' --build-arg PIPMIRROR=%s'
+                                                        ' --build-arg PIPMIRRORPORT=%s .' %
+                                                        (docker_no_cache,
+                                                        build_group[docker_images][0],
+                                                        branch_tag, branch_tag,
+                                                        docker_images_list.ALPINE_MIRROR,
+                                                        docker_images_list.DEBIAN_MIRROR,
+                                                        docker_images_list.PYPI_MIRROR,
+                                                        docker_images_list.PYPI_MIRROR_PORT)),
+                                            stdout=subprocess.PIPE,
+                                            stderr=subprocess.PIPE,
+                                            shell=False)
+            (out, err) = pid_build_proc.communicate()
+            email_body = err.decode("utf-8")                    
             subject_text = ' FAILED'
-            if email_body.find('Successfully tagged mediakraken') != -1:
+            if email_body.find('Successfully tagged mediakraken') != -1 or email_body.find('writing image sha256') != -1:
                 subject_text = ' SUCCESS'
                 # push to remote repo
                 if push_hub_image:
@@ -124,39 +126,40 @@ def build_email_push(build_group, email_subject, branch_tag, push_hub_image=Fals
                             break
                         print(line.rstrip(), flush=True)
                     pid_push_proc.wait()
-            if args.email:                    
+            if args.email:
                 # send success/fail email
                 network_email.com_net_send_email(os.environ['MAILUSER'],
-                                                os.environ['MAILPASS'],
-                                                os.environ['MAILUSER'],
-                                                email_subject
-                                                + build_stages[docker_images][0]
-                                                + subject_text,
-                                                email_body.encode('utf-8'),
-                                                smtp_server=os.environ['MAILSERVER'],
-                                                smtp_port=os.environ['MAILPORT'])
+                                                 os.environ['MAILPASS'],
+                                                 os.environ['MAILUSER'],
+                                                 email_subject
+                                                 + build_stages[docker_images][0]
+                                                 + subject_text,
+                                                 email_body,
+                                                 smtp_server=os.environ['MAILSERVER'],
+                                                 smtp_port=os.environ['MAILPORT'])
 
 
 # start
 CWD_HOME_DIRECTORY = os.getcwd().rsplit('MediaKraken', 1)[0]
-# grab version to build via git branch
-pid_git_proc = subprocess.Popen(
-    shlex.split('git branch'), stdout=subprocess.PIPE, shell=False)
-git_branch = None
-while True:
-    line = pid_git_proc.stdout.readline()
-    if not line:
-        break
-    print(line.rstrip(), flush=True)
-    if line.rstrip().decode('utf-8').find('*') == 0:
-        git_branch = line.rstrip().decode('utf-8').split(' ')[1]
-        break
-pid_git_proc.wait()
-if git_branch is None:
-    print('Can\'t find Git branch!  Exiting!')
-    sys.exit()
-else:
-    print('Found Git branch: %s' % git_branch)
+# # grab version to build via git branch
+# pid_git_proc = subprocess.Popen(
+#     shlex.split('git branch'), stdout=subprocess.PIPE, shell=False)
+# git_branch = None
+# while True:
+#     line = pid_git_proc.stdout.readline()
+#     if not line:
+#         break
+#     print(line.rstrip(), flush=True)
+#     if line.rstrip().decode('utf-8').find('*') == 0:
+#         git_branch = line.rstrip().decode('utf-8').split(' ')[1]
+#         break
+# pid_git_proc.wait()
+# if git_branch is None:
+#     print('Can\'t find Git branch!  Exiting!')
+#     sys.exit()
+# else:
+#     print('Found Git branch: %s' % git_branch)
+git_branch = args.version
 
 if not os.path.exists(os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken')):
     # backup to main dir with checkouts
@@ -178,36 +181,40 @@ else:
 os.chdir(os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken/docker_build'))
 # sync the latest code into the image locations for build
 pid_proc = subprocess.Popen(
-    [os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken', 'docker_build/source_sync_local.sh')])
+    [os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken', 'docker_build/source_sync_local_lib.sh')])
 pid_proc.wait()
 
 # begin build process
 if args.base:
     for build_stages in (docker_images_list.STAGE_ONE_IMAGES,
                          docker_images_list.STAGE_ONE_GAME_SERVERS,):
-        build_email_push(build_stages, 'Build base dev image: ',
-                         branch_tag=git_branch, push_hub_image=False)
-        # TODO put back to push_hub_image=True
+        build_email_push(build_stages, 'Build base image: ',
+                         branch_tag=git_branch, push_hub_image=args.push)
 
 if args.security:
     for build_stages in (docker_images_list.STAGE_ONE_SECURITY_TOOLS,
                          docker_images_list.STAGE_TWO_SECURITY_TOOLS,):
         build_email_push(build_stages, 'Build security image: ',
-                         branch_tag=git_branch, push_hub_image=False)
+                         branch_tag=git_branch, push_hub_image=args.push)
 
 if args.testing:
     for build_stages in (docker_images_list.STAGE_ONE_TESTING_TOOLS,
                          docker_images_list.STAGE_TWO_TESTING_TOOLS):
         build_email_push(build_stages, 'Build testing image: ',
-                         branch_tag=git_branch, push_hub_image=False)
+                         branch_tag=git_branch, push_hub_image=args.push)
 
-if args.version == 'dev' or args.version == 'prod':
+if args.core:
     for build_stages in (docker_images_list.STAGE_TWO_IMAGES,
-                         docker_images_list.STAGE_CORE_IMAGES,
-                         docker_images_list.STAGE_TWO_GAME_SERVERS):
-        if args.version == 'dev':
-            build_email_push(build_stages, 'Build dev image: ',
-                             branch_tag=git_branch, push_hub_image=False)
-        else:
-            build_email_push(build_stages, 'Build prod image: ',
-                             branch_tag=git_branch, push_hub_image=True)
+                         docker_images_list.STAGE_CORE_IMAGES):
+        build_email_push(build_stages, 'Build ' + args.version + ' image: ',
+                         branch_tag=git_branch, push_hub_image=args.push)
+
+if args.game:
+    for build_stages in (docker_images_list.STAGE_TWO_GAME_SERVERS):
+        build_email_push(build_stages, 'Build ' + args.version + ' image: ',
+                         branch_tag=git_branch, push_hub_image=args.push)
+
+# purge the none images
+pid_proc = subprocess.Popen(
+    [os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken', 'docker_build/purge_images_none.sh')])
+pid_proc.wait()

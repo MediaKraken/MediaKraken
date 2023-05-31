@@ -1,0 +1,43 @@
+{% block content %}
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>MediaKraken - Hue</title>
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.min.css">
+</head>
+
+<body>
+    {% include "bss_user/bss_user_include_menu.html" %}
+    <div>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <ul class="list-group">
+                        <li class="list-group-item"><span>List Group Item 1</span></li>
+                        <li class="list-group-item"><span>List Group Item 2</span></li>
+                        <li class="list-group-item"><span>List Group Item 3</span></li>
+                    </ul>
+                </div>
+                <div class="col">
+                    <div class="row">
+                        <div class="col"><a href="#"><img src="/static/image/lightbulb_on.png" width="200"
+                                    height="200"></a><a href="#">
+                                <img src="/static/image/lightbulb_off.png" width="200" height="200"></a><input
+                                type="color"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% include "bss_public/bss_public_footer.html" %}
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery-easing.min.js"></script>
+    <script src="/static/js/script.min.js"></script>
+</body>
+{% endblock %}

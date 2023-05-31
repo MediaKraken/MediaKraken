@@ -1,0 +1,16 @@
+[package]
+name = "mktestpythonpyo3"
+version = "0.0.1"
+edition = "2021"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
+
+[dependencies]
+pyo3 = { version = "0.18.3", default-features = true }
+
+[dev-dependencies]
+tokio-test = "*"

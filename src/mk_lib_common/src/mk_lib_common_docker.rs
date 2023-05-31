@@ -1,31 +1,33 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
 // https://github.com/vv9k/docker-api-rs
 // docker-api = { version = "0.12.1", features = ["swarm"] }
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
-
-use crate::rocket::futures::FutureExt;
-use crate::rocket::futures::StreamExt;
-use docker_api::api::ContainerListOpts;
-use docker_api::api::LogsOpts;
-use docker_api::api::ServiceListOpts;
-use docker_api::{conn::TtyChunk, Docker, Result};
-
-#[cfg(unix)]
-pub fn new_docker() -> Result<Docker> {
-    Ok(Docker::unix("/var/run/docker.sock"))
-}
-
-#[cfg(not(unix))]
-pub fn new_docker() -> Result<Docker> {
-    Docker::new("tcp://127.0.0.1:8080")
-}
+extern crate tokio;
+use docker_api::models::Node;
+use docker_api::models::Swarm;
+use docker_api::models::SystemInfo;
+use docker_api::opts::ContainerListOpts;
+use docker_api::opts::LogsOpts;
+use docker_api::opts::ServiceListOpts;
+use docker_api::{Docker, Result};
+use futures::StreamExt;
+use mk_lib_logging::mk_lib_logging;
+use serde_json::json;
+use stdext::function_name;
+// use docker_api::models::SwarmInfo;
+// use docker_api::models::JoinTokens;
 
 pub async fn mk_common_docker_container_inspect(id: String) -> Result<Vec<String>> {
-    let docker = new_docker()?;
-    let mut logs_list: Vec<String> = Vec::new();
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let docker = Docker::unix("/var/run/docker.sock");
+    let logs_list: Vec<String> = Vec::new();
     match docker.containers().get(&id).inspect().await {
         Ok(container) => println!("{:#?}", container),
         Err(e) => eprintln!("Error: {}", e),
@@ -34,19 +36,28 @@ pub async fn mk_common_docker_container_inspect(id: String) -> Result<Vec<String
 }
 
 pub async fn mk_common_docker_container_list() -> Result<Vec<String>> {
-    let docker = new_docker()?;
-    let mut container_list: Vec<String> = Vec::new();
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let docker = Docker::unix("/var/run/docker.sock");
+    let container_list: Vec<String> = Vec::new();
     let opts = ContainerListOpts::builder().all(true).build();
     match docker.containers().list(&opts).await {
         Ok(containers) => {
             containers.into_iter().for_each(|container| {
                 println!(
                     "{}\t{}\t{:?}\t{}\t{}",
-                    &container.id[..12],
-                    container.image,
+                    &container.id.unwrap_or_default()[..12],
+                    container.image.unwrap_or_default(),
                     container.state,
-                    container.status,
-                    container.names[0]
+                    container.status.unwrap_or_default(),
+                    container.names.map(|n| n[0].to_owned()).unwrap_or_default()
                 );
             });
         }
@@ -56,15 +67,24 @@ pub async fn mk_common_docker_container_list() -> Result<Vec<String>> {
 }
 
 pub async fn mk_common_docker_container_logs(id: String) -> Result<Vec<String>> {
-    let docker = new_docker()?;
-    let mut logs_list: Vec<String> = Vec::new();
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let docker = Docker::unix("/var/run/docker.sock");
+    let logs_list: Vec<String> = Vec::new();
     let container = docker.containers().get(&id);
     let logs_stream = container.logs(&LogsOpts::builder().stdout(true).stderr(true).build());
     let logs: Vec<_> = logs_stream
         .map(|chunk| match chunk {
             Ok(chunk) => chunk.to_vec(),
             Err(e) => {
-                eprintln!("Error: {}", e);
+                eprintln!("Error: {e}");
                 vec![]
             }
         })
@@ -78,8 +98,17 @@ pub async fn mk_common_docker_container_logs(id: String) -> Result<Vec<String>> 
 }
 
 pub async fn mk_common_docker_container_stats(id: String) -> Result<Vec<String>> {
-    let docker = new_docker()?;
-    let mut stats_list: Vec<String> = Vec::new();
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let docker = Docker::unix("/var/run/docker.sock");
+    let stats_list: Vec<String> = Vec::new();
     while let Some(result) = docker.containers().get(&id).stats().next().await {
         match result {
             Ok(stat) => println!("{:?}", stat),
@@ -90,8 +119,17 @@ pub async fn mk_common_docker_container_stats(id: String) -> Result<Vec<String>>
 }
 
 pub async fn mk_common_docker_service_inspect(service: String) -> Result<Vec<String>> {
-    let docker = new_docker()?;
-    let mut logs_list: Vec<String> = Vec::new();
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let docker = Docker::unix("/var/run/docker.sock");
+    let logs_list: Vec<String> = Vec::new();
     match docker.services().get(&service).inspect().await {
         Ok(service) => println!("{:#?}", service),
         Err(e) => eprintln!("Error: {}", e),
@@ -100,8 +138,17 @@ pub async fn mk_common_docker_service_inspect(service: String) -> Result<Vec<Str
 }
 
 pub async fn mk_common_docker_service_list() -> Result<Vec<String>> {
-    let docker = new_docker()?;
-    let mut logs_list: Vec<String> = Vec::new();
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let docker = Docker::unix("/var/run/docker.sock");
+    let logs_list: Vec<String> = Vec::new();
     match docker
         .services()
         .list(&ServiceListOpts::builder().status(true).build())
@@ -115,7 +162,8 @@ pub async fn mk_common_docker_service_list() -> Result<Vec<String>> {
                         std::module_path!(),
                         json!({ "service": s }),
                     )
-                    .await;
+                    .await
+                    .unwrap();
                 }
             }
         }
@@ -125,8 +173,17 @@ pub async fn mk_common_docker_service_list() -> Result<Vec<String>> {
 }
 
 pub async fn mk_common_docker_service_logs(service: String) -> Result<Vec<String>> {
-    let docker = new_docker()?;
-    let mut logs_list: Vec<String> = Vec::new();
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let docker = Docker::unix("/var/run/docker.sock");
+    let logs_list: Vec<String> = Vec::new();
     let service = docker.services().get(&service);
     let logs_stream = service.logs(&LogsOpts::builder().stdout(true).stderr(true).build());
     let logs: Vec<_> = logs_stream
@@ -147,8 +204,17 @@ pub async fn mk_common_docker_service_logs(service: String) -> Result<Vec<String
 }
 
 pub async fn mk_common_docker_volume_inspect(volume: String) -> Result<Vec<String>> {
-    let docker = new_docker()?;
-    let mut logs_list: Vec<String> = Vec::new();
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let docker = Docker::unix("/var/run/docker.sock");
+    let logs_list: Vec<String> = Vec::new();
     match docker.volumes().get(&volume).inspect().await {
         Ok(info) => println!("{:#?}", info),
         Err(e) => eprintln!("Error: {}", e),
@@ -157,8 +223,17 @@ pub async fn mk_common_docker_volume_inspect(volume: String) -> Result<Vec<Strin
 }
 
 pub async fn mk_common_docker_volume_list() -> Result<Vec<String>> {
-    let docker = new_docker()?;
-    let mut logs_list: Vec<String> = Vec::new();
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let docker = Docker::unix("/var/run/docker.sock");
+    let logs_list: Vec<String> = Vec::new();
     match docker.volumes().list(&Default::default()).await {
         Ok(volumes) => {
             for v in volumes.volumes {
@@ -168,7 +243,8 @@ pub async fn mk_common_docker_volume_list() -> Result<Vec<String>> {
                         std::module_path!(),
                         json!({ "volume": v }),
                     )
-                    .await;
+                    .await
+                    .unwrap();
                 }
             }
         }
@@ -177,19 +253,133 @@ pub async fn mk_common_docker_volume_list() -> Result<Vec<String>> {
     Ok(logs_list)
 }
 
-pub async fn mk_common_docker_info() -> Result<serde_json::Value> {
-    let docker = new_docker()?;
-    let mut logs_list: serde_json::Value = serde_json::json!({});
-    match docker.info().await {
-        Ok(info) => {
-            #[cfg(debug_assertions)]
-            {
-                mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "info": info }))
-                    .await;
-            }
-            logs_list = serde_json::from_str(&format!("{:#?}", info)).unwrap();
-        }
-        Err(e) => eprintln!("Error: {}", e),
-    };
-    Ok(logs_list)
+pub async fn mk_common_docker_info() -> Result<SystemInfo> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let docker = Docker::unix("/var/run/docker.sock");
+    docker.info().await
+}
+
+pub async fn mk_common_docker_swarm_inspect() -> Result<Swarm> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let docker = Docker::unix("/var/run/docker.sock");
+    docker.swarm().inspect().await
+}
+
+pub async fn mk_common_docker_swarm_nodes() -> Result<Vec<Node>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let docker = Docker::unix("/var/run/docker.sock");
+    docker.nodes().list(&Default::default()).await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_mk_common_docker_container_inspect() {
+        let test_results = mk_common_docker_container_inspect("mkstack_example".to_string())
+            .await
+            .unwrap();
+        println!("Cont Inspect: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_container_list() {
+        let test_results = mk_common_docker_container_list().await.unwrap();
+        println!("Cont List: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_container_logs() {
+        let test_results = mk_common_docker_container_logs("mkstack_example".to_string())
+            .await
+            .unwrap();
+        println!("Cont Logs: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_container_stats() {
+        let test_results = mk_common_docker_container_stats("mkstack_example".to_string())
+            .await
+            .unwrap();
+        println!("Cont Stats: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_service_inspect() {
+        let test_results = mk_common_docker_service_inspect("mkstack_example".to_string())
+            .await
+            .unwrap();
+        println!("Service Inspect: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_service_list() {
+        let test_results = mk_common_docker_service_list().await.unwrap();
+        println!("Service List: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_service_logs() {
+        let test_results = mk_common_docker_service_logs("mkstack_example".to_string())
+            .await
+            .unwrap();
+        println!("Service Logs: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_volume_inspect() {
+        let test_results = mk_common_docker_volume_inspect("mkstack_example".to_string())
+            .await
+            .unwrap();
+        println!("Volume Inspect: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_volume_list() {
+        let test_results = mk_common_docker_volume_list().await.unwrap();
+        println!("Volume List: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_info() {
+        let test_results = mk_common_docker_info().await.unwrap();
+        println!("Info: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_swarm_inspect() {
+        let test_results = mk_common_docker_swarm_inspect().await.unwrap();
+        println!("Swarm Inspect: {:?}", test_results);
+    }
+
+    #[tokio::test]
+    async fn test_mk_common_docker_swarm_node() {
+        let test_results = mk_common_docker_swarm_nodes().await.unwrap();
+        println!("Swarm Node: {:?}", test_results);
+    }
 }

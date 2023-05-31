@@ -1,29 +1,20 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-use serde_json::json;
 use std::error::Error;
-//use onvif::discovery;
 use futures_util::{pin_mut, stream::StreamExt};
+use mk_lib_hardware;
+use mk_lib_logging::mk_lib_logging;
+use mk_lib_network;
+use serde_json::json;
+use stdext::function_name;
 use tokio::time::{sleep, Duration};
-
-#[path = "mk_lib_hardware_chromecast.rs"]
-mod mk_lib_hardware_chromecast;
-
-#[path = "mk_lib_hardware_phue.rs"]
-mod mk_lib_hardware_phue;
-
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
-
-#[path = "mk_lib_network_dlna.rs"]
-mod mk_lib_network_dlna;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
+            .await
+            .unwrap();
     }
 
     // media_devices = []
@@ -33,11 +24,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
             std::module_path!(),
             json!({"HWScan": "Before Chromcast"}),
         )
-        .await;
+        .await
+        .unwrap();
     }
 
     // chromecast discover
-    mk_lib_hardware_chromecast::mk_hardware_chromecast_discover()
+    mk_lib_hardware::mk_lib_hardware_chromecast::mk_hardware_chromecast_discover()
         .await
         .unwrap();
     #[cfg(debug_assertions)]
@@ -46,7 +38,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
             std::module_path!(),
             json!({"HWScan": "After Chromcast"}),
         )
-        .await;
+        .await
+        .unwrap();
     }
 
     // crestron device discover
@@ -61,16 +54,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
             std::module_path!(),
             json!({"HWScan": "After Crestron"}),
         )
-        .await;
+        .await
+        .unwrap();
     }
 
     // dlna devices
-    mk_lib_network_dlna::mk_lib_network_dlna_discover().await;
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"HWScan": "After DLNA"}))
-            .await;
-    }
+    // mk_lib_network::mk_lib_network_dlna::mk_lib_network_dlna_discover().await;
+    // #[cfg(debug_assertions)]
+    // {
+    //     mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"HWScan": "After DLNA"}))
+    //         .await
+    //         .unwrap();
+    // }
+
     // hdhomerun tuner discovery
     // tuner_api = common_hardware_hdhomerun_py.CommonHardwareHDHomeRunPY()
     // tuner_api.com_hdhomerun_discover()
@@ -96,7 +92,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
             std::module_path!(),
             json!({"HWScan": "After HDHomerun"}),
         )
-        .await;
+        .await
+        .unwrap();
     }
 
     // onvif cameras discover
@@ -112,18 +109,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"HWScan": "After Onvif"}))
-            .await;
+            .await
+            .unwrap();
     }
 
     // phillips hue hub discover
-    mk_lib_hardware_phue::mk_hardware_phue_discover()
-        .await
-        .unwrap();
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"HWScan": "After PHue"}))
-            .await;
-    }
+    // mk_lib_hardware_phue::mk_hardware_phue_discover()
+    //     .await
+    //     .unwrap();
+    // #[cfg(debug_assertions)]
+    // {
+    //     mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"HWScan": "After PHue"}))
+    //         .await
+    //         .unwrap();
+    // }
     // roku discover
     // for roku in common_hardware_roku_network.com_roku_network_discovery():
     //     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
@@ -132,7 +131,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"HWScan": "After ROKU"}))
-            .await;
+            .await
+            .unwrap();
     }
     // soco discover
     // soco_devices = common_hardware_soco.com_hardware_soco_discover()
@@ -145,7 +145,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"HWScan": "After SOCO"}))
-            .await;
+            .await
+            .unwrap();
     }
     // sonos discover
     // let mut devices = sonor::discover(std::time::Duration::from_secs(5)).await?;
@@ -156,7 +157,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"HWScan": "After Sonos"}))
-            .await;
+            .await
+            .unwrap();
     }
 
     // common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
@@ -169,7 +171,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //                                file_ext=None)
     #[cfg(debug_assertions)]
     {
-        mk_lib_logging::mk_logging_post_elk("info", json!({"STOP": "STOP"})).await;
+        mk_lib_logging::mk_logging_post_elk("info", json!({"STOP": "STOP"}))
+            .await
+            .unwrap();
     }
     Ok(())
 }

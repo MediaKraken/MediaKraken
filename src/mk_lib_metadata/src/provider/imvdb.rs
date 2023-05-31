@@ -1,63 +1,77 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-use sqlx::types::Uuid;
-use std::error::Error;
-
 // https://imvdb.com/developers/api
 
-#[path = "../../mk_lib_logging.rs"]
-mod mk_lib_logging;
-
-#[path = "../../mk_lib_network.rs"]
-mod mk_lib_network;
+use mk_lib_network;
+use std::collections::HashMap;
+use std::error::Error;
 
 const BASE_API_URL: &str = "http://imvdb.com/api/v1";
+const BASE_USER_AGENT: &str = "MediaKraken_0.1.6";
+
+pub async fn provider_imvdb_video_fetch_by_id(
+    sqlx_pool: &sqlx::PgPool,
+    video_id: i32,
+    metadata_uuid: uuid::Uuid,
+    api_key: &String,
+) -> Result<uuid::Uuid, Box<dyn std::error::Error>> {
+    let mut custom_headers: HashMap<String, String> = HashMap::new();
+    custom_headers.insert(String::from("User-Agent"), BASE_USER_AGENT.to_string());
+    custom_headers.insert(String::from("IMVDB-APP-KEY"), api_key.to_string());
+    custom_headers.insert(String::from("Accept"), String::from("application/json"));
+    let headers = mk_lib_network::mk_lib_network::custom_headers(&custom_headers).await;
+    let _result = mk_lib_network::mk_lib_network::mk_data_from_url_to_json_custom_headers(
+        format!(
+            "{}/video/{}?include=sources,credits,bts,featured,popularity,countries",
+            BASE_API_URL, video_id
+        ),
+        headers,
+    )
+    .await;
+    let metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
+    Ok(metadata_uuid)
+}
+
+pub async fn provider_imvdb_search_video_by_names(
+    band_name: String,
+    song_name: String,
+    api_key: String,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let mut custom_headers: HashMap<String, String> = HashMap::new();
+    custom_headers.insert(String::from("User-Agent"), BASE_USER_AGENT.to_string());
+    custom_headers.insert(String::from("IMVDB-APP-KEY"), api_key);
+    custom_headers.insert(String::from("Accept"), String::from("application/json"));
+    let headers = mk_lib_network::mk_lib_network::custom_headers(&custom_headers).await;
+    let _result = mk_lib_network::mk_lib_network::mk_data_from_url_to_json_custom_headers(
+        format!(
+            "{}/search/videos?q=/{}+{}",
+            BASE_API_URL, band_name.replace(" ", "+"), song_name.replace(" ", "+")
+        ),
+        headers,
+    )
+    .await;
+    Ok(())
+}
+
+pub async fn provider_imvdb_search_videos_by_band(
+    band_name: String,
+    api_key: String,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let mut custom_headers: HashMap<String, String> = HashMap::new();
+    custom_headers.insert(String::from("User-Agent"), BASE_USER_AGENT.to_string());
+    custom_headers.insert(String::from("IMVDB-APP-KEY"), api_key);
+    custom_headers.insert(String::from("Accept"), String::from("application/json"));
+    let headers = mk_lib_network::mk_lib_network::custom_headers(&custom_headers).await;
+    let _result = mk_lib_network::mk_lib_network::mk_data_from_url_to_json_custom_headers(
+        format!(
+            "{}/search/entities?q=/{}",
+            BASE_API_URL, band_name.replace(" ", "+")
+        ),
+        headers,
+    )
+    .await;
+    Ok(())
+}
 
 /*
-
-class CommonMetadataIMVdb:
-    def __init__(self, option_config_json):
-        self.headers = {'User-Agent': 'MediaKraken_0.1.6',
-                        'IMVDB-APP-KEY': option_config_json['API']['imvdb'],
-                        'Accept': 'application/json'}
-
-    pub async fn com_imvdb_video_info(self, video_id):
-        """
-        Video info
-        """
-        resp = requests.post(self.base_api_url + "/video/" + video_id
-                             + "?include=sources,credits,bts,featured,popularity,countries",
-                             headers=self.headers)
-        try:
-            return resp.json()
-        except:
-            return None
-
-    pub async fn com_imvdb_search_video(self, artist_name, song_title):
-        """
-        Search for video by band name and song title
-        """
-        resp = requests.post(self.base_api_url + "/search/videos?q="
-                             + (artist_name.replace(' ', '+') + '+'
-                                + song_title.replace(' ', '+')),
-                             headers=self.headers)
-        try:
-            return resp.json()
-        except:
-            return None
-
-    pub async fn com_imvdb_search_entities(self, artist_name):
-        """
-        Search by band name
-        """
-        resp = requests.post(self.base_api_url + "/search/entities?q="
-                             + artist_name.replace(' ', '+'), headers=self.headers)
-        try:
-            return resp.json()
-        except:
-            return None
-
-
 pub async fn meta_fetch_save_imvdb(db_connection, imvdb_id, metadata_uuid):
     """
     # fetch from imvdb
@@ -72,24 +86,4 @@ pub async fn meta_fetch_save_imvdb(db_connection, imvdb_id, metadata_uuid):
                                                     result_json['song_slug'],
                                                     result_json,
                                                     None)
-    else if result_json.status_code == 502:
-        time.sleep(300)
-        // redo fetch due to 502
-        await movie_fetch_save_imvdb(db_connection, imvdb_id, metadata_uuid)
-    else if result_json.status_code == 404:
-        // TODO handle 404's better
-        metadata_uuid = None
-    else:  # is this is None....
-        metadata_uuid = None
-    return metadata_uuid
-
  */
-
-pub async fn meta_fetch_save_imvdb(
-    sqlx_pool: &sqlx::PgPool,
-    imvdb_id: i32,
-    metadata_uuid: Uuid,
-) -> Result<Uuid, Box<dyn Error>> {
-    let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
-    Ok(metadata_uuid)
-}

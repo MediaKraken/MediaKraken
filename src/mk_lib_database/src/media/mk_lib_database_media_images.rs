@@ -1,18 +1,25 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
-
+use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgRow;
-use sqlx::{types::Json, types::Uuid};
+
 use sqlx::{FromRow, Row};
+use stdext::function_name;
 
 pub async fn mk_lib_database_metadata_image_count(
     sqlx_pool: &sqlx::PgPool,
     class_id: i32,
-) -> Result<i32, sqlx::Error> {
-    let row: (i32,) = sqlx::query_as(
+) -> Result<i64, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let row: (i64,) = sqlx::query_as(
         "select count(*) from mm_media \
         where mm_media_class_guid = $1",
     )
@@ -30,9 +37,18 @@ pub struct MediaImageList {
 pub async fn mk_lib_database_metadata_image_read(
     sqlx_pool: &sqlx::PgPool,
     class_id: i32,
-    offset: i32,
-    limit: i32,
+    offset: i64,
+    limit: i64,
 ) -> Result<Vec<MediaImageList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let select_query = sqlx::query(
         "select mm_media_path from mm_media \
         where mm_media_class_guid = $1 offset $2 limit $3",

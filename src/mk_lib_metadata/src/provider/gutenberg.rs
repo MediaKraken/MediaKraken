@@ -1,14 +1,18 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
 // https://www.gutenberg.org/
 
 // feed of new books
 // http://www.gutenberg.org/cache/epub/feeds/today.rss
 
-use std::error::Error;
+use mk_lib_network;
 
-#[path = "../../mk_lib_logging.rs"]
-mod mk_lib_logging;
-
-#[path = "../../mk_lib_network.rs"]
-mod mk_lib_network;
+pub async fn provider_gutenberg_metadata_download() -> Result<(), Box<dyn std::error::Error>> {
+    let _result = mk_lib_network::mk_lib_network::mk_download_file_from_url(
+        "https://www.gutenberg.org/cache/epub/feeds/pg_catalog.csv.gz".to_string(),
+        &"/mediakraken/cache/pg_catalog.csv.gz".to_string(),
+    ).await;
+    let _result = mk_lib_network::mk_lib_network::mk_download_file_from_url(
+        "https://www.gutenberg.org/cache/epub/feeds/rdf-files.tar.bz2".to_string(),
+        &"/mediakraken/cache/rdf-files.tar.bz2".to_string(),
+    ).await;
+    Ok(())
+}

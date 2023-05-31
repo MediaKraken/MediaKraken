@@ -1,34 +1,27 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
 use serde_json::json;
 use serde_json::Value;
-use sqlx::Row;
 use std::error::Error;
-use uuid::Uuid;
-
-#[path = "mk_lib_database.rs"]
-mod mk_lib_database;
-#[path = "mk_lib_database_option_status.rs"]
-mod mk_lib_database_option_status;
-#[path = "mk_lib_database_version.rs"]
-mod mk_lib_database_version;
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use mk_lib_database;
+use mk_lib_logging::mk_lib_logging;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
+            .await
+            .unwrap();
     }
 
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database_open_pool().await.unwrap();
-    mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+        .await
+        .unwrap();
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false).await;
 
-    let option_config_json: Value =
-        mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
+    let _option_config_json: Value =
+    mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
             .await
             .unwrap();
 
@@ -56,7 +49,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     */
     #[cfg(debug_assertions)]
     {
-        mk_lib_logging::mk_logging_post_elk("info", json!({"STOP": "STOP"})).await;
+        mk_lib_logging::mk_logging_post_elk("info", json!({"STOP": "STOP"}))
+            .await
+            .unwrap();
     }
     Ok(())
 }

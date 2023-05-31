@@ -1,27 +1,33 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
-
+use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
-use serde_json::{Map, Value};
+use serde_json::json;
 use sqlx::postgres::PgRow;
-use sqlx::{types::Json, types::Uuid};
+use sqlx::{types::Uuid};
 use sqlx::{FromRow, Row};
+use stdext::function_name;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBNotificationList {
-    mm_notification_guid: uuid::Uuid,
-    mm_notification_text: String,
-    mm_notification_time: String,
-    mm_notification_dismissible: String,
+    pub mm_notification_guid: uuid::Uuid,
+    pub mm_notification_text: String,
+    pub mm_notification_time: String,
+    pub mm_notification_dismissible: String,
 }
 
 pub async fn mk_lib_database_notification_read(
     sqlx_pool: &sqlx::PgPool,
-    offset: i32,
-    limit: i32,
+    offset: i64,
+    limit: i64,
 ) -> Result<Vec<DBNotificationList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let select_query = sqlx::query(
         "select mm_notification_guid, mm_notification_text, \
         mm_notification_time, \
@@ -47,6 +53,15 @@ pub async fn mk_lib_database_notification_insert(
     mm_notification_text: String,
     mm_notification_dismissable: bool,
 ) -> Result<(), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_notification (mm_notification_guid, \
@@ -68,6 +83,15 @@ pub async fn mk_lib_database_notification_delete(
     sqlx_pool: &sqlx::PgPool,
     mk_notification_guid: Uuid,
 ) -> Result<(), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from mm_notification where mm_notification_guid = $1")
         .bind(mk_notification_guid)

@@ -1,23 +1,22 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
+// https://github.com/kolapapa/surge-ping
 
-// https://github.com/knsd/tokio-ping/releases
+use std::time::Duration;
+use mk_lib_logging::mk_lib_logging;
+use serde_json::json;
+use stdext::function_name;
 
-use futures::{Future, Stream};
-
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
-
-pub async fn mk_lib_network_ping(addr: String) {
-    let pinger = tokio_ping::Pinger::new();
-    let stream = pinger.and_then(move |pinger| Ok(pinger.chain(addr).stream()));
-    let future = stream.and_then(|stream| {
-        stream.take(3).for_each(|mb_time| {
-            match mb_time {
-                Some(time) => println!("time={}", time),
-                None => eprintln!("timeout"),
-            }
-            Ok(())
-        })
-    });
-    tokio::run(future.map_err(|err| eprintln!("Error: {}", err)))
+pub async fn mk_lib_network_ping(addr: String) -> Result<Duration, Box<dyn std::error::Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let payload = [0; 8];
+    let (_packet, duration) = surge_ping::ping(addr.parse()?, &payload).await?;
+    //println!("Ping took {:.3?}", duration);
+    Ok(duration)
 }

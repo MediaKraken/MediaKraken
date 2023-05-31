@@ -1,12 +1,19 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
 // https://github.com/jonhoo/rust-ibverbs
-// ibverbs = "0.7.0"
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use mk_lib_logging::mk_lib_logging;
+use serde_json::json;
+use stdext::function_name;
 
 pub async fn mk_lib_network_ibverbs_discover() {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let ctx = ibverbs::devices()
         .unwrap()
         .iter()

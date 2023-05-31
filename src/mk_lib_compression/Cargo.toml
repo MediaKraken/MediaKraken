@@ -1,0 +1,21 @@
+[package]
+name = "mk_lib_compression"
+version = "0.0.1"
+edition = "2021"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
+
+[dependencies]
+flate2 = "1.0.26"
+mk_lib_logging = { path = "../mk_lib_logging" }
+serde_json = "1.0.96"
+stdext = "0.3.1"
+tar = "0.4.38"
+zip = "0.6.6"
+
+[dev-dependencies]
+tokio-test = "*"

@@ -1,0 +1,3022 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<meta name="generator" content="AsciiDoc 9.0.0rc2" />
+<title>Q2PRO Server Manual</title>
+<style type="text/css">
+/* Shared CSS for AsciiDoc xhtml11 and html5 backends */
+
+/* Default font. */
+body {
+  font-family: Georgia,serif;
+}
+
+/* Title font. */
+h1, h2, h3, h4, h5, h6,
+div.title, caption.title,
+thead, p.table.header,
+#toctitle,
+#author, #revnumber, #revdate, #revremark,
+#footer {
+  font-family: Arial,Helvetica,sans-serif;
+}
+
+body {
+  margin: 1em 5% 1em 5%;
+}
+
+a {
+  color: blue;
+  text-decoration: underline;
+}
+a:visited {
+  color: fuchsia;
+}
+
+em {
+  font-style: italic;
+  color: navy;
+}
+
+strong {
+  font-weight: bold;
+  color: #083194;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #527bbd;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+h1, h2, h3 {
+  border-bottom: 2px solid silver;
+}
+h2 {
+  padding-top: 0.5em;
+}
+h3 {
+  float: left;
+}
+h3 + * {
+  clear: left;
+}
+h5 {
+  font-size: 1.0em;
+}
+
+div.sectionbody {
+  margin-left: 0;
+}
+
+hr {
+  border: 1px solid silver;
+}
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+ul, ol, li > p {
+  margin-top: 0;
+}
+ul > li     { color: #aaa; }
+ul > li > * { color: black; }
+
+.monospaced, code, pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+  padding: 0;
+  margin: 0;
+}
+pre {
+  white-space: pre-wrap;
+}
+
+#author {
+  color: #527bbd;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+#email {
+}
+#revnumber, #revdate, #revremark {
+}
+
+#footer {
+  font-size: small;
+  border-top: 2px solid silver;
+  padding-top: 0.5em;
+  margin-top: 4.0em;
+}
+#footer-text {
+  float: left;
+  padding-bottom: 0.5em;
+}
+#footer-badges {
+  float: right;
+  padding-bottom: 0.5em;
+}
+
+#preamble {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+div.imageblock, div.exampleblock, div.verseblock,
+div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
+div.admonitionblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.admonitionblock {
+  margin-top: 2.0em;
+  margin-bottom: 2.0em;
+  margin-right: 10%;
+  color: #606060;
+}
+
+div.content { /* Block element content. */
+  padding: 0;
+}
+
+/* Block element titles. */
+div.title, caption.title {
+  color: #527bbd;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 1.0em;
+  margin-bottom: 0.5em;
+}
+div.title + * {
+  margin-top: 0;
+}
+
+td div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content + div.title {
+  margin-top: 0.0em;
+}
+
+div.sidebarblock > div.content {
+  background: #ffffee;
+  border: 1px solid #dddddd;
+  border-left: 4px solid #f0f0f0;
+  padding: 0.5em;
+}
+
+div.listingblock > div.content {
+  border: 1px solid #dddddd;
+  border-left: 5px solid #f0f0f0;
+  background: #f8f8f8;
+  padding: 0.5em;
+}
+
+div.quoteblock, div.verseblock {
+  padding-left: 1.0em;
+  margin-left: 1.0em;
+  margin-right: 10%;
+  border-left: 5px solid #f0f0f0;
+  color: #888;
+}
+
+div.quoteblock > div.attribution {
+  padding-top: 0.5em;
+  text-align: right;
+}
+
+div.verseblock > pre.content {
+  font-family: inherit;
+  font-size: inherit;
+}
+div.verseblock > div.attribution {
+  padding-top: 0.75em;
+  text-align: left;
+}
+/* DEPRECATED: Pre version 8.2.7 verse style literal block. */
+div.verseblock + div.attribution {
+  text-align: left;
+}
+
+div.admonitionblock .icon {
+  vertical-align: top;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #527bbd;
+  padding-right: 0.5em;
+}
+div.admonitionblock td.content {
+  padding-left: 0.5em;
+  border-left: 3px solid #dddddd;
+}
+
+div.exampleblock > div.content {
+  border-left: 3px solid #dddddd;
+  padding-left: 0.5em;
+}
+
+div.imageblock div.content { padding-left: 0; }
+span.image img { border-style: none; vertical-align: text-bottom; }
+a.image:visited { color: white; }
+
+dl {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+dt {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+  font-style: normal;
+  color: navy;
+}
+dd > *:first-child {
+  margin-top: 0.1em;
+}
+
+ul, ol {
+    list-style-position: outside;
+}
+ol.arabic {
+  list-style-type: decimal;
+}
+ol.loweralpha {
+  list-style-type: lower-alpha;
+}
+ol.upperalpha {
+  list-style-type: upper-alpha;
+}
+ol.lowerroman {
+  list-style-type: lower-roman;
+}
+ol.upperroman {
+  list-style-type: upper-roman;
+}
+
+div.compact ul, div.compact ol,
+div.compact p, div.compact p,
+div.compact div, div.compact div {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+tfoot {
+  font-weight: bold;
+}
+td > div.verse {
+  white-space: pre;
+}
+
+div.hdlist {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+div.hdlist tr {
+  padding-bottom: 15px;
+}
+dt.hdlist1.strong, td.hdlist1.strong {
+  font-weight: bold;
+}
+td.hdlist1 {
+  vertical-align: top;
+  font-style: normal;
+  padding-right: 0.8em;
+  color: navy;
+}
+td.hdlist2 {
+  vertical-align: top;
+}
+div.hdlist.compact tr {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+.comment {
+  background: yellow;
+}
+
+.footnote, .footnoteref {
+  font-size: 0.8em;
+}
+
+span.footnote, span.footnoteref {
+  vertical-align: super;
+}
+
+#footnotes {
+  margin: 20px 0 20px 0;
+  padding: 7px 0 0 0;
+}
+
+#footnotes div.footnote {
+  margin: 0 0 5px 0;
+}
+
+#footnotes hr {
+  border: none;
+  border-top: 1px solid silver;
+  height: 1px;
+  text-align: left;
+  margin-left: 0;
+  width: 20%;
+  min-width: 100px;
+}
+
+div.colist td {
+  padding-right: 0.5em;
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+div.colist td img {
+  margin-top: 0.3em;
+}
+
+@media print {
+  #footer-badges { display: none; }
+}
+
+#toc {
+  margin-bottom: 2.5em;
+}
+
+#toctitle {
+  color: #527bbd;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-top: 1.0em;
+  margin-bottom: 0.1em;
+}
+
+div.toclevel0, div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+div.toclevel2 {
+  margin-left: 2em;
+  font-size: 0.9em;
+}
+div.toclevel3 {
+  margin-left: 4em;
+  font-size: 0.9em;
+}
+div.toclevel4 {
+  margin-left: 6em;
+  font-size: 0.9em;
+}
+
+span.aqua { color: aqua; }
+span.black { color: black; }
+span.blue { color: blue; }
+span.fuchsia { color: fuchsia; }
+span.gray { color: gray; }
+span.green { color: green; }
+span.lime { color: lime; }
+span.maroon { color: maroon; }
+span.navy { color: navy; }
+span.olive { color: olive; }
+span.purple { color: purple; }
+span.red { color: red; }
+span.silver { color: silver; }
+span.teal { color: teal; }
+span.white { color: white; }
+span.yellow { color: yellow; }
+
+span.aqua-background { background: aqua; }
+span.black-background { background: black; }
+span.blue-background { background: blue; }
+span.fuchsia-background { background: fuchsia; }
+span.gray-background { background: gray; }
+span.green-background { background: green; }
+span.lime-background { background: lime; }
+span.maroon-background { background: maroon; }
+span.navy-background { background: navy; }
+span.olive-background { background: olive; }
+span.purple-background { background: purple; }
+span.red-background { background: red; }
+span.silver-background { background: silver; }
+span.teal-background { background: teal; }
+span.white-background { background: white; }
+span.yellow-background { background: yellow; }
+
+span.big { font-size: 2em; }
+span.small { font-size: 0.6em; }
+
+span.underline { text-decoration: underline; }
+span.overline { text-decoration: overline; }
+span.line-through { text-decoration: line-through; }
+
+div.unbreakable { page-break-inside: avoid; }
+
+
+/*
+ * xhtml11 specific
+ *
+ * */
+
+div.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.tableblock > table {
+  border: 3px solid #527bbd;
+}
+thead, p.table.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.table {
+  margin-top: 0;
+}
+/* Because the table frame attribute is overridden by CSS in most browsers. */
+div.tableblock > table[frame="void"] {
+  border-style: none;
+}
+div.tableblock > table[frame="hsides"] {
+  border-left-style: none;
+  border-right-style: none;
+}
+div.tableblock > table[frame="vsides"] {
+  border-top-style: none;
+  border-bottom-style: none;
+}
+
+
+/*
+ * html5 specific
+ *
+ * */
+
+table.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+thead, p.tableblock.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.tableblock {
+  margin-top: 0;
+}
+table.tableblock {
+  border-width: 3px;
+  border-spacing: 0px;
+  border-style: solid;
+  border-color: #527bbd;
+  border-collapse: collapse;
+}
+th.tableblock, td.tableblock {
+  border-width: 1px;
+  padding: 4px;
+  border-style: solid;
+  border-color: #527bbd;
+}
+
+table.tableblock.frame-topbot {
+  border-left-style: hidden;
+  border-right-style: hidden;
+}
+table.tableblock.frame-sides {
+  border-top-style: hidden;
+  border-bottom-style: hidden;
+}
+table.tableblock.frame-none {
+  border-style: hidden;
+}
+
+th.tableblock.halign-left, td.tableblock.halign-left {
+  text-align: left;
+}
+th.tableblock.halign-center, td.tableblock.halign-center {
+  text-align: center;
+}
+th.tableblock.halign-right, td.tableblock.halign-right {
+  text-align: right;
+}
+
+th.tableblock.valign-top, td.tableblock.valign-top {
+  vertical-align: top;
+}
+th.tableblock.valign-middle, td.tableblock.valign-middle {
+  vertical-align: middle;
+}
+th.tableblock.valign-bottom, td.tableblock.valign-bottom {
+  vertical-align: bottom;
+}
+
+
+/*
+ * manpage specific
+ *
+ * */
+
+body.manpage h1 {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  border-top: 2px solid silver;
+  border-bottom: 2px solid silver;
+}
+body.manpage h2 {
+  border-style: none;
+}
+body.manpage div.sectionbody {
+  margin-left: 3em;
+}
+
+@media print {
+  body.manpage div#toc { display: none; }
+}
+
+
+</style>
+<script type="text/javascript">
+/*<![CDATA[*/
+var asciidoc = {  // Namespace.
+
+/////////////////////////////////////////////////////////////////////
+// Table Of Contents generator
+/////////////////////////////////////////////////////////////////////
+
+/* Author: Mihai Bazon, September 2002
+ * http://students.infoiasi.ro/~mishoo
+ *
+ * Table Of Content generator
+ * Version: 0.4
+ *
+ * Feel free to use this script under the terms of the GNU General Public
+ * License, as long as you do not remove or alter this notice.
+ */
+
+ /* modified by Troy D. Hanson, September 2006. License: GPL */
+ /* modified by Stuart Rackham, 2006, 2009. License: GPL */
+
+// toclevels = 1..4.
+toc: function (toclevels) {
+
+  function getText(el) {
+    var text = "";
+    for (var i = el.firstChild; i != null; i = i.nextSibling) {
+      if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
+        text += i.data;
+      else if (i.firstChild != null)
+        text += getText(i);
+    }
+    return text;
+  }
+
+  function TocEntry(el, text, toclevel) {
+    this.element = el;
+    this.text = text;
+    this.toclevel = toclevel;
+  }
+
+  function tocEntries(el, toclevels) {
+    var result = new Array;
+    var re = new RegExp('[hH]([1-'+(toclevels+1)+'])');
+    // Function that scans the DOM tree for header elements (the DOM2
+    // nodeIterator API would be a better technique but not supported by all
+    // browsers).
+    var iterate = function (el) {
+      for (var i = el.firstChild; i != null; i = i.nextSibling) {
+        if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
+          var mo = re.exec(i.tagName);
+          if (mo && (i.getAttribute("class") || i.getAttribute("className")) != "float") {
+            result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
+          }
+          iterate(i);
+        }
+      }
+    }
+    iterate(el);
+    return result;
+  }
+
+  var toc = document.getElementById("toc");
+  if (!toc) {
+    return;
+  }
+
+  // Delete existing TOC entries in case we're reloading the TOC.
+  var tocEntriesToRemove = [];
+  var i;
+  for (i = 0; i < toc.childNodes.length; i++) {
+    var entry = toc.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div'
+     && entry.getAttribute("class")
+     && entry.getAttribute("class").match(/^toclevel/))
+      tocEntriesToRemove.push(entry);
+  }
+  for (i = 0; i < tocEntriesToRemove.length; i++) {
+    toc.removeChild(tocEntriesToRemove[i]);
+  }
+
+  // Rebuild TOC entries.
+  var entries = tocEntries(document.getElementById("content"), toclevels);
+  for (var i = 0; i < entries.length; ++i) {
+    var entry = entries[i];
+    if (entry.element.id == "")
+      entry.element.id = "_toc_" + i;
+    var a = document.createElement("a");
+    a.href = "#" + entry.element.id;
+    a.appendChild(document.createTextNode(entry.text));
+    var div = document.createElement("div");
+    div.appendChild(a);
+    div.className = "toclevel" + entry.toclevel;
+    toc.appendChild(div);
+  }
+  if (entries.length == 0)
+    toc.parentNode.removeChild(toc);
+},
+
+
+/////////////////////////////////////////////////////////////////////
+// Footnotes generator
+/////////////////////////////////////////////////////////////////////
+
+/* Based on footnote generation code from:
+ * http://www.brandspankingnew.net/archive/2005/07/format_footnote.html
+ */
+
+footnotes: function () {
+  // Delete existing footnote entries in case we're reloading the footnodes.
+  var i;
+  var noteholder = document.getElementById("footnotes");
+  if (!noteholder) {
+    return;
+  }
+  var entriesToRemove = [];
+  for (i = 0; i < noteholder.childNodes.length; i++) {
+    var entry = noteholder.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div' && entry.getAttribute("class") == "footnote")
+      entriesToRemove.push(entry);
+  }
+  for (i = 0; i < entriesToRemove.length; i++) {
+    noteholder.removeChild(entriesToRemove[i]);
+  }
+
+  // Rebuild footnote entries.
+  var cont = document.getElementById("content");
+  var spans = cont.getElementsByTagName("span");
+  var refs = {};
+  var n = 0;
+  for (i=0; i<spans.length; i++) {
+    if (spans[i].className == "footnote") {
+      n++;
+      var note = spans[i].getAttribute("data-note");
+      if (!note) {
+        // Use [\s\S] in place of . so multi-line matches work.
+        // Because JavaScript has no s (dotall) regex flag.
+        note = spans[i].innerHTML.match(/\s*\[([\s\S]*)]\s*/)[1];
+        spans[i].innerHTML =
+          "[<a id='_footnoteref_" + n + "' href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+        spans[i].setAttribute("data-note", note);
+      }
+      noteholder.innerHTML +=
+        "<div class='footnote' id='_footnote_" + n + "'>" +
+        "<a href='#_footnoteref_" + n + "' title='Return to text'>" +
+        n + "</a>. " + note + "</div>";
+      var id =spans[i].getAttribute("id");
+      if (id != null) refs["#"+id] = n;
+    }
+  }
+  if (n == 0)
+    noteholder.parentNode.removeChild(noteholder);
+  else {
+    // Process footnoterefs.
+    for (i=0; i<spans.length; i++) {
+      if (spans[i].className == "footnoteref") {
+        var href = spans[i].getElementsByTagName("a")[0].getAttribute("href");
+        href = href.match(/#.*/)[0];  // Because IE return full URL.
+        n = refs[href];
+        spans[i].innerHTML =
+          "[<a href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+      }
+    }
+  }
+},
+
+install: function(toclevels) {
+  var timerId;
+
+  function reinstall() {
+    asciidoc.footnotes();
+    if (toclevels) {
+      asciidoc.toc(toclevels);
+    }
+  }
+
+  function reinstallAndRemoveTimer() {
+    clearInterval(timerId);
+    reinstall();
+  }
+
+  timerId = setInterval(reinstall, 500);
+  if (document.addEventListener)
+    document.addEventListener("DOMContentLoaded", reinstallAndRemoveTimer, false);
+  else
+    window.onload = reinstallAndRemoveTimer;
+}
+
+}
+asciidoc.install();
+/*]]>*/
+</script>
+</head>
+<body class="article">
+<div id="header">
+<h1>Q2PRO Server Manual</h1>
+<span id="author">Andrey Nazarov</span><br />
+<span id="email"><code>&lt;<a href="mailto:skuller@skuller.net">skuller@skuller.net</a>&gt;</code></span><br />
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_about">About</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Q2PRO is an enhanced, multiplayer oriented Quake 2 server, compatible
+with existing Quake 2 ports and licensed under GPLv2. This document provides
+descriptions of console variables and commands added to or modified by Q2PRO
+since the original Quake 2 release. Cvars and commands inherited from original
+Quake 2 are not described here (yet).</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_variables">Variables</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_network">Network</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+net_enable_ipv6
+</dt>
+<dd>
+<p>
+    Enables IPv6 support. Default value is 1 on systems that support IPv6 and 0
+    otherwise.
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+0 — disable IPv6, use IPv4 only
+</p>
+</li>
+<li>
+<p>
+1 — enable IPv6, but do not listen for incoming IPv6 connections and
+      prefer IPv4 over IPv6 when resolving host names with multiple addresses
+</p>
+</li>
+<li>
+<p>
+2 — enable IPv6, listen for incoming IPv6 connections and use normal
+      address resolver priority configured by OS
+</p>
+</li>
+</ul></div>
+</dd>
+<dt class="hdlist1">
+net_ip
+</dt>
+<dd>
+<p>
+    Specifies network interface address server should listen on for UDP and TCP
+    connections using IPv4. The same interface is also used for outgoing TCP
+    connections (these include MVD/GTV and anticheat connections).  Default
+    value is empty, which means listening on all interfaces.
+</p>
+</dd>
+</dl></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">There is a limitation preventing anticheat to work correctly on servers
+accessible from multiple IP addresses. If you are running the server on multi-ip
+system and plan to use anticheat, you need to explicitly bind the server to
+one of your network interfaces using the ‘net_ip’ cvar.</td>
+</tr></table>
+</div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+net_ip6
+</dt>
+<dd>
+<p>
+    Specifies network interface address server should listen on for UDP and TCP
+    connections using IPv6. The same interface is also used for outgoing TCP
+    connections (these include MVD/GTV connections).  Default value is empty,
+    which means listening on all interfaces. Has no effect unless
+    ‘net_enable_ipv6’ is set to non-zero value.
+</p>
+</dd>
+<dt class="hdlist1">
+net_port
+</dt>
+<dd>
+<p>
+    Specifies port number server should listen on for UDP and TCP connections
+    (using IPv4 or IPv6).  Default value is 27910.
+</p>
+</dd>
+<dt class="hdlist1">
+net_ignore_icmp
+</dt>
+<dd>
+<p>
+    On Win32 and Linux, server is able to receive ICMP
+    ‘destination-unreachable’ packets from clients. This enables intelligent
+    detection of crashed clients, allowing the server to quickly re-use their
+    slots. If this behavior is not wanted for some reason, then this variable
+    can be used to turn it off. Default value is 0 (don&#8217;t ignore ICMP packets).
+</p>
+</dd>
+<dt class="hdlist1">
+net_maxmsglen
+</dt>
+<dd>
+<p>
+    Specifies maximum server to client packet size clients may request from
+    server. 0 means no hard limit. Default value is conservative 1390 bytes. It
+    is nice to have this variable as close to your network link MTU as possible
+    (accounting for headers). Thus for normal Ethernet MTU of 1500 bytes 1462
+    can be specified (10 bytes quake header, 8 bytes UDP header, 20 bytes IPv4
+    header). Higher values may cause IP fragmentation for misconfigured clients
+    which is better to avoid. Don&#8217;t change this variable unless you know
+    exactly what you are doing.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_generic">Generic</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+sv_iplimit
+</dt>
+<dd>
+<p>
+    Maximum number of simultaneous connections allowed from single IP address
+    (per connection type, TCP and UDP client lists are separate).  Setting this
+    variable to 0 disables the limit. Default value is 3.
+</p>
+</dd>
+<dt class="hdlist1">
+sv_status_show
+</dt>
+<dd>
+<p>
+    Specifies how the server should respond to status queries. Default value is
+    2.
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+0 — do not respond at all
+</p>
+</li>
+<li>
+<p>
+1 — respond with server info only
+</p>
+</li>
+<li>
+<p>
+2 — respond with server info and player list
+</p>
+</li>
+</ul></div>
+</dd>
+<dt class="hdlist1">
+sv_status_limit
+</dt>
+<dd>
+<p>
+    Limits the rate at which server responds to status queries. Default value
+    is 15 queries per second.
+</p>
+</dd>
+</dl></div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Rate limits specification</div>
+<div class="paragraph"><p>Rate limiting is implemented as a simple token bucket filter. Full syntax for
+specifying rate limits is: <em>&lt;limit&gt;[/&lt;period&gt;[sec|min|hour]][*&lt;burst&gt;]</em>. Only
+the <em>limit</em> argument is mandatory. Zero <em>limit</em> means rate is not limited.</p></div>
+<div class="paragraph"><p>Default period is one second. Custom <em>period</em> can be specified after a slash,
+with optional <em>sec</em>, <em>min</em>, or <em>hour</em> suffix (default units are seconds).</p></div>
+<div class="paragraph"><p>Default burst value is 5. Custom <em>burst</em> can be specified after an asterisk.
+Burst specifies initial number of extra packets that are permitted even if
+they arrive at rate higher than allowed.</p></div>
+</div></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+sv_auth_limit
+</dt>
+<dd>
+<p>
+    Limits the rate of client connection attempts with invalid password.
+    Default value is 1 invalid authentication attempt per second.
+</p>
+</dd>
+<dt class="hdlist1">
+sv_rcon_limit
+</dt>
+<dd>
+<p>
+    Limits the rate at which server responds to invalid rcon commands. Default
+    value is 1 invalid command per second.
+</p>
+</dd>
+<dt class="hdlist1">
+sv_namechange_limit
+</dt>
+<dd>
+<p>
+    Limits the rate at which clients are permitted to change their name.
+    Default value is 5 name changes per minute.
+</p>
+</dd>
+<dt class="hdlist1">
+sv_password
+</dt>
+<dd>
+<p>
+    If not empty, allows only authenticated clients to connect.  Authenticated
+    clients are allowed to occupy reserved slots, see below.  Clients set their
+    passwords via ‘password’ userinfo variable. Default value is empty (no
+    password).
+</p>
+</dd>
+</dl></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">If password protection is needed for a server, it is preferable to use
+‘sv_password’ instead of going the game mod way and using ‘password’ variable.
+The latter will prevent MVD/GTV features from working.</td>
+</tr></table>
+</div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">If ‘sv_password’ is set, then game mod&#8217;s ‘password’ variable must be empty.
+Otherwise clients will be unable to connect.</td>
+</tr></table>
+</div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+sv_reserved_slots
+</dt>
+<dd>
+<p>
+    Number of client slots reserved for clients who know ‘sv_reserved_password’
+    or ‘sv_password’. Must be less than ‘maxclients’ value. Default value is 0
+    (don&#8217;t reserve slots).
+</p>
+</dd>
+</dl></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">If ‘sv_mvd_enable’ is non-zero and ‘sv_reserved_slots’ is zero,
+‘sv_reserved_slots’ is automatically set to one to reserve a slot for dummy MVD
+observer.</td>
+</tr></table>
+</div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">Value of ‘sv_reserved_slots’ cvar is subtracted from ‘maxclients’ value
+visible in the server info.</td>
+</tr></table>
+</div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+sv_reserved_password
+</dt>
+<dd>
+<p>
+    The password to use for reserved slots. Default value is empty, which means
+    no one is allowed to occupy reserved slot(s), except of dummy MVD observer.
+    Clients set their passwords via ‘password’ userinfo variable.
+</p>
+</dd>
+<dt class="hdlist1">
+sv_locked
+</dt>
+<dd>
+<p>
+    Locks the server, preventing new clients from connecting. Default value is
+    0 (server unlocked).
+</p>
+</dd>
+<dt class="hdlist1">
+sv_lan_force_rate
+</dt>
+<dd>
+<p>
+    When enabled, do not enforce any rate limits on clients whose IP is from
+    private address space (127.x.x.x, 10.x.x.x, 192.168.x.x, 172.16.x.x).
+    Default value is 0 (disabled).
+</p>
+</dd>
+<dt class="hdlist1">
+sv_min_rate
+</dt>
+<dd>
+<p>
+    Specifies minimum value of ‘rate’ userinfo parameter clients are allowed
+    to use. Default value is 100 bytes/sec.
+</p>
+</dd>
+<dt class="hdlist1">
+sv_max_rate
+</dt>
+<dd>
+<p>
+    Specifies maximum value of ‘rate’ userinfo parameter clients are allowed
+    use. Default value is 15000 bytes/sec.
+</p>
+</dd>
+<dt class="hdlist1">
+sv_calcpings_method
+</dt>
+<dd>
+<p>
+    Specifies the way client pings are calculated. Default ping calculation
+    algorithm depends on client frame and packet rates, and may give inaccurate
+    results, depending on client settings. Using improved algorithm is
+    recommended as it should produce results more consistent with ‘ping’ command
+    line utility. Default value is 2.
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+0 — disable ping calculation entirely
+</p>
+</li>
+<li>
+<p>
+1 — use default ping calculation algorithm based on averaging
+</p>
+</li>
+<li>
+<p>
+2 — use improved algorithm based on minimum round trip times
+</p>
+</li>
+</ul></div>
+</dd>
+<dt class="hdlist1">
+sv_ghostime
+</dt>
+<dd>
+<p>
+    Maximum time, in seconds, before dropping clients which have passed initial
+    challenge-response connection stage but have not yet sent any data over
+    newly established connection.  This also applies to MVD/GTV clients in
+    request processing stage.  Helps to avoid attacks flooding server with
+    zombie clients, combined with ‘sv_iplimit’ variable. Default value is 6.
+</p>
+</dd>
+<dt class="hdlist1">
+sv_idlekick
+</dt>
+<dd>
+<p>
+    Time, in seconds, before dropping inactive clients. Default value is 0
+    (don&#8217;t kick idling clients). Moving, pressing buttons while in game and
+    issuing chat commands counts as activity.
+</p>
+</dd>
+</dl></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">Don&#8217;t set ‘sv_idlekick’ too low to avoid kicking clients that are
+downloading or otherwise taking long time to enter the game.</td>
+</tr></table>
+</div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+sv_force_reconnect
+</dt>
+<dd>
+<p>
+    When set to an address string, forces new clients to quickly reconnect to
+    this address as an additional proxy protection measure. Default value is
+    empty (do not enforce reconnection).
+</p>
+</dd>
+<dt class="hdlist1">
+sv_redirect_address
+</dt>
+<dd>
+<p>
+    When server becomes full, redirects new clients to the specified address.
+    Default value is empty (don&#8217;t redirect).
+</p>
+</dd>
+<dt class="hdlist1">
+sv_downloadserver
+</dt>
+<dd>
+<p>
+    Specifies the URL clients should use for HTTP downloading. URL must begin
+    with a ‘http://’ or ‘https://’ prefix and must end with a slash. Default
+    value is empty (no download URL).
+</p>
+</dd>
+<dt class="hdlist1">
+sv_show_name_changes
+</dt>
+<dd>
+<p>
+    Broadcast player name changes to everyone. Enable this unless game mod
+    already shows name changes. Default value is 0.
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+0 — don&#8217;t show name changes
+</p>
+</li>
+<li>
+<p>
+1 — show name changes of players fully spawned in game
+</p>
+</li>
+<li>
+<p>
+2 — show name changes of all players, including connecting players
+</p>
+</li>
+</ul></div>
+</dd>
+<dt class="hdlist1">
+sv_allow_nodelta
+</dt>
+<dd>
+<p>
+    Enables automatic removal of clients that abuse the server with requests
+    for too many ‘nodelta’ (uncompressed) frames, hogging network resources.
+    Default value is 1 (don&#8217;t remove clients), since this may sometimes
+    legitimately happen on very poor client connections.
+</p>
+</dd>
+<dt class="hdlist1">
+sv_allow_unconnected_cmds
+</dt>
+<dd>
+<p>
+    Controls whether client command strings are processed by the game mod even
+    when the client is not fully spawned in game. Originally, Quake 2 server
+    forwarded all commands to the game mod even for connecting clients, but
+    this is known to cause problems with some (broken) mods that don&#8217;t perform
+    their own client state checks. Default value is 0 (ignore commands unless
+    fully connected).
+</p>
+</dd>
+<dt class="hdlist1">
+sv_uptime
+</dt>
+<dd>
+<p>
+    Include ‘uptime’ key/value pair in server info. Default value is 0.
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+0 — do not display uptime at all
+</p>
+</li>
+<li>
+<p>
+1 — display uptime in compact format
+</p>
+</li>
+<li>
+<p>
+2 — display uptime in verbose format
+</p>
+</li>
+</ul></div>
+</dd>
+<dt class="hdlist1">
+sv_enhanced_setplayer
+</dt>
+<dd>
+<p>
+    Enable partial client name matching for certain console commands like
+    ‘kick’ and ‘stuff’. Default value is 0 (use original matching algorithm).
+</p>
+</dd>
+<dt class="hdlist1">
+sv_recycle
+</dt>
+<dd>
+<p>
+    Temporary variable useful for automatically upgrading the server at the
+    next map change.  Default value is 0.
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+0 — handle ‘gamemap’ command normally
+</p>
+</li>
+<li>
+<p>
+1 — turn the next ‘gamemap’ into ‘map’ and reload the game module
+</p>
+</li>
+<li>
+<p>
+2 — turn the next ‘gamemap’ into ‘recycle’ and reload entire server
+</p>
+</li>
+</ul></div>
+</dd>
+</dl></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">Be sure to read ‘recycle’ command description below before enabling ‘sv_recycle’.</td>
+</tr></table>
+</div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+sv_allow_map
+</dt>
+<dd>
+<p>
+    Controls the ‘map’ command behavior. ‘map’ is often mistakingly used by
+    server operators to change maps instead of the more lightweight ‘gamemap’.
+    Thus, this variable exists to prevent misuse of ‘map’. Default value is 0.
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+0 — disallow ‘map’ and print a warning unless there are pending
+       latched cvars
+</p>
+</li>
+<li>
+<p>
+1 — handle ‘map’ command normally
+</p>
+</li>
+<li>
+<p>
+2 — turn ‘map’ into ‘gamemap’ unless there are pending latched cvars
+</p>
+</li>
+</ul></div>
+</dd>
+<dt class="hdlist1">
+sv_changemapcmd
+</dt>
+<dd>
+<p>
+    Specifies command to be executed each time server finishes loading a new map.
+    Default value is empty.
+</p>
+</dd>
+<dt class="hdlist1">
+sv_fps
+</dt>
+<dd>
+<p>
+    Specifies native server frame rate.  Only used when game mod advertises
+    support for variable server FPS. Specified rate should be a multiple of 10
+    (maximum rate is 60). Default value is 10 frames per second. Only clients
+    that support Q2PRO protocol will be able to take advantage of higher FPS.
+    Other clients will receive updates at default rate of 10 packets per
+    second.
+</p>
+</dd>
+<dt class="hdlist1">
+lrcon_password
+</dt>
+<dd>
+<p>
+    If not empty, enables users of this password to execute limited set of rcon
+    commands on the server. By default no commands are permitted. Permitted
+    command prefixes can be added using ‘addlrconcmd’.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_downloads">Downloads</h3>
+<div class="paragraph"><p>These variables control legacy server UDP downloads.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+allow_download
+</dt>
+<dd>
+<p>
+    Globally allows or disallows server UDP downloads. Remaining variables listed
+    below are effective only when downloads are globally enabled. Default value
+    is 0.
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+0 — downloads are disabled
+</p>
+</li>
+<li>
+<p>
+1 — downloads are enabled
+</p>
+</li>
+</ul></div>
+</dd>
+<dt class="hdlist1">
+allow_download_maps
+</dt>
+<dd>
+<p>
+    Enables downloading of files from ‘maps/’ subdirectory. Default value is 1.
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+0 — map downloads are disabled
+</p>
+</li>
+<li>
+<p>
+1 — map downloads are enabled for physical files and disabled for files
+     from packs
+</p>
+</li>
+<li>
+<p>
+2 — map downloads are enabled for all files
+</p>
+</li>
+</ul></div>
+</dd>
+<dt class="hdlist1">
+allow_download_models
+</dt>
+<dd>
+<p>
+    Enables downloading of files from ‘models/’ and ‘sprites/’ subdirectories.
+    Default value is 1.
+</p>
+</dd>
+<dt class="hdlist1">
+allow_download_sounds
+</dt>
+<dd>
+<p>
+    Enables downloading of files from ‘sound/’ subdirectory. Default value is 1.
+</p>
+</dd>
+<dt class="hdlist1">
+allow_download_pics
+</dt>
+<dd>
+<p>
+    Enables downloading of files from ‘pics/’ subdirectory. Default value is 1.
+</p>
+</dd>
+<dt class="hdlist1">
+allow_download_players
+</dt>
+<dd>
+<p>
+    Enables downloading of files from ‘players/’ subdirectory. Default value is
+    1.
+</p>
+</dd>
+<dt class="hdlist1">
+allow_download_textures
+</dt>
+<dd>
+<p>
+    Enables downloading of files from ‘textures/’ and ‘env/’ subdirectories.
+    Default value is 1.
+</p>
+</dd>
+<dt class="hdlist1">
+allow_download_others
+</dt>
+<dd>
+<p>
+    Enables downloading of files from any subdirectory other than those listed
+    above. Default value is 0.
+</p>
+</dd>
+</dl></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">Q2PRO clients can stream compressed downloads directly from .pkz archives
+on the server. Thus it is advisable to keep all data in .pkz for optimal
+download speeds.</td>
+</tr></table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_mvd_gtv_server">MVD/GTV server</h3>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Server modes</div>
+<div class="paragraph"><p>Q2PRO server can run in either MVD/GTV ‘server’ or ‘client’ mode. ‘Server’ mode
+is just a regular game server mode. In this mode, server functions as a primary
+source of MVD data, which can be either locally recorded to disk in form of a
+demo file, or sent to GTV clients over the network.  ‘Client’ mode is more
+special. In this mode, game mod is not run and server acts as a GTV ‘relay’ node,
+reading MVD data from local demo files, receiving live data from remote GTV
+servers, or both at the same time. MVD data is then served to regular Quake 2
+clients (spectators).</p></div>
+<div class="paragraph"><p>As a convention, cvars related to server mode have ‘sv_mvd_’ prefix. Cvars related
+to client mode have ‘mvd_’ prefix (see the next section).</p></div>
+</div></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+sv_mvd_enable
+</dt>
+<dd>
+<p>
+    Enables MVD/GTV server functionality. Default value is 0.
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+0 — MVD server is disabled
+</p>
+</li>
+<li>
+<p>
+1 — local MVD recording is allowed
+</p>
+</li>
+<li>
+<p>
+2 — local MVD recording and remote GTV connections are allowed
+</p>
+</li>
+</ul></div>
+</dd>
+<dt class="hdlist1">
+sv_mvd_maxclients
+</dt>
+<dd>
+<p>
+    Total number of MVD/GTV client slots on the server. Default value is 8.
+</p>
+</dd>
+<dt class="hdlist1">
+sv_mvd_password
+</dt>
+<dd>
+<p>
+    If not empty, allows only authenticated MVD/GTV clients to connect.
+    Default value is empty (any neutral host can connect).
+</p>
+</dd>
+</dl></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">Password check only applies to MVD/GTV clients that are neither
+whitelisted nor blacklisted (see ‘addgtvhost’ and ‘addgtvban’ commands
+description for more information).</td>
+</tr></table>
+</div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+sv_mvd_nogun
+</dt>
+<dd>
+<p>
+    Reduce bandwidth usage by filtering on-screen gun updates out of MVD
+    stream.  Default value is 1 (filtering enabled).
+</p>
+</dd>
+<dt class="hdlist1">
+sv_mvd_noblend
+</dt>
+<dd>
+<p>
+    Reduce bandwidth usage by filtering on-screen blend effects out of MVD
+    stream.  Default value is 0 (filtering disabled).
+</p>
+</dd>
+<dt class="hdlist1">
+sv_mvd_nomsgs
+</dt>
+<dd>
+<p>
+    When enabled, MVD/GTV spectators in chasecam mode will not receive any text
+    messages routed to their chase targets (which are normally on a team), but
+    will receive messages routed to the dummy MVD observer. Default value is 1
+    (enabled). This variable is only effective when dummy client is spawned,
+    see ‘sv_mvd_spawn_dummy’ variable description for more information.
+</p>
+</dd>
+<dt class="hdlist1">
+sv_mvd_maxtime
+</dt>
+<dd>
+<p>
+    Maximum duration, in minutes, of the locally recorded MVD.  Default value
+    is 0 (unlimited).
+</p>
+</dd>
+<dt class="hdlist1">
+sv_mvd_maxsize
+</dt>
+<dd>
+<p>
+    Maximum size, in kB, of the locally recorded MVD. Default value is 0
+    (unlimited).
+</p>
+</dd>
+<dt class="hdlist1">
+sv_mvd_maxmaps
+</dt>
+<dd>
+<p>
+    Specifies number of map changes local MVD recording is stopped after.
+    Default value is 1. Setting this to 0 disables the limit.
+</p>
+</dd>
+<dt class="hdlist1">
+sv_mvd_begincmd
+</dt>
+<dd>
+<p>
+    This command is issued on behalf of dummy MVD observer as soon as it enters
+    the game. Do whatever preparations are needed here to make sure MVD
+    observer enters an appropriate observing mode, opens the scoreboard, etc.
+    MVD observer has it&#8217;s own command buffer and each ‘wait’ cycle lasts 100 ms
+    there. Default value is "wait 50; putaway; wait 10; help;".
+</p>
+</dd>
+<dt class="hdlist1">
+sv_mvd_scorecmd
+</dt>
+<dd>
+<p>
+    This command is issued on behalf of dummy MVD observer each time no layout
+    updates are detected for more than 9 seconds. Useful for reopening the
+    scoreboard if the game mod closes it for some reason.  MVD observer has
+    its own command buffer and each ‘wait’ cycle lasts 100 ms there. Default
+    value is "putaway; wait 10; help;".
+</p>
+</dd>
+<dt class="hdlist1">
+sv_mvd_suspend_time
+</dt>
+<dd>
+<p>
+    GTV connections are suspended after this period of time, in minutes,
+    counted from the moment last active player disconnects or becomes inactive.
+    Setting this to zero disables server side suspending entirely. Default
+    value is 5.
+</p>
+</dd>
+<dt class="hdlist1">
+sv_mvd_disconnect_time
+</dt>
+<dd>
+<p>
+    Dummy MVD observer is disconnected after this period of time, in minutes,
+    counted from the moment last GTV client disconnects or becomes inactive.
+    Setting this to zero makes dummy client persistent. Default value is 15.
+</p>
+</dd>
+<dt class="hdlist1">
+sv_mvd_spawn_dummy
+</dt>
+<dd>
+<p>
+    Specifies if dummy MVD observer needs to be spawned. Default value is 1.
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+0 — never spawn dummy client
+</p>
+</li>
+<li>
+<p>
+1 — only spawn if game mod advertises support for MVD
+</p>
+</li>
+<li>
+<p>
+2 — always spawn dummy client
+</p>
+</li>
+</ul></div>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_mvd_gtv_client">MVD/GTV client</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+mvd_username
+</dt>
+<dd>
+<p>
+    Default username to use for outgoing GTV connections. Default value is
+    "unnamed".
+</p>
+</dd>
+<dt class="hdlist1">
+mvd_password
+</dt>
+<dd>
+<p>
+    Default password to use for outgoing GTV connections. Default value is
+    empty.
+</p>
+</dd>
+<dt class="hdlist1">
+mvd_timeout
+</dt>
+<dd>
+<p>
+    Specifies MVD connection timeout value, in seconds. Default value is 90.
+</p>
+</dd>
+<dt class="hdlist1">
+mvd_suspend_time
+</dt>
+<dd>
+<p>
+    GTV connections are suspended after this period of time, in minutes,
+    counted from the last moment of MVD spectator(s) activity. Setting this to
+    zero disables client side suspending entirely. Default value is 5.
+</p>
+</dd>
+<dt class="hdlist1">
+mvd_wait_delay
+</dt>
+<dd>
+<p>
+    Time, in seconds, for MVD channel to buffer data initially.  This
+    effectively specifies MVD stream delay seen by observers. Default value is
+    20.
+</p>
+</dd>
+<dt class="hdlist1">
+mvd_wait_percent
+</dt>
+<dd>
+<p>
+    Maximum inuse percentage of the delay buffer when MVD channel stops
+    buffering data to prevent overrun, ignoring ‘mvd_wait_delay’ value.
+    Default value is 50.
+</p>
+</dd>
+<dt class="hdlist1">
+mvd_default_map
+</dt>
+<dd>
+<p>
+    Specifies default map used for the Waiting Room channel. Default value is
+    "q2dm1".
+</p>
+</dd>
+<dt class="hdlist1">
+mvd_chase_prefix
+</dt>
+<dd>
+<p>
+    Specifies POV info string position on the screen. This should be a valid
+    fragment of the Quake 2 layout script. Default value is "xv 0 yb -64".
+</p>
+</dd>
+<dt class="hdlist1">
+mvd_stats_score
+</dt>
+<dd>
+<p>
+    Specifies what ‘score’ stats field should contain for MVD observers.
+    This field is externally visible to server browsers. Default value is 0.
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+0 — always zero
+</p>
+</li>
+<li>
+<p>
+1 — MVD channel ID spectator is on
+</p>
+</li>
+<li>
+<p>
+2 — score of the chase target
+</p>
+</li>
+</ul></div>
+</dd>
+<dt class="hdlist1">
+mvd_snaps
+</dt>
+<dd>
+<p>
+    Specifies time interval, in seconds, between saving ‘snapshots’ in memory
+    during MVD playback.  Snapshots enable backward seeking in demo (see ‘mvdseek’
+    command description), and speed up repeated forward seeks. Setting this
+    variable to 0 disables snapshotting entirely. Default value is 10.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_hacks">Hacks</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+sv_strafejump_hack
+</dt>
+<dd>
+<p>
+    Enables FPS-independent strafe jumping mode for clients using R1Q2 and
+    Q2PRO protocols. Values higher than 1 will force this mode for all clients,
+    regardless of their protocol version. Default value is 1 (enable strafe
+    jumping hack only for compatible clients).
+</p>
+</dd>
+<dt class="hdlist1">
+sv_waterjump_hack
+</dt>
+<dd>
+<p>
+    Makes underwater movement speed equal in all directions for clients using
+    Q2PRO protocol. Values higher than 1 will force this mode for all clients,
+    regardless of their protocol version.  Default value is 0 (disabled).
+</p>
+</dd>
+</dl></div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Water jump bug</div>
+<div class="paragraph"><p>Quake 2 player movement code contains a bug that causes surfacing velocity
+produced by holding the jump button underwater to be severely limited,
+comparing to movement in other directions. Even worse, resulting velocity is
+calculated differently on client and server sides and that causes prediction
+errors and jerky movement.  Q2PRO is able to work around this bug and make
+player movement speed equal in all directions underwater. However, this fix is
+disabled by default as it is yet unknown if this can be considered an unfair
+advantage over non-Q2PRO clients.</p></div>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_system">System</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+sys_console
+</dt>
+<dd>
+<p>
+    On UNIX-like systems, specifies the way system console is used, as well as
+    ‘daemonization’ level of the process. Default value is 2 if both stdin and
+    stdout descriptors refer to a TTY, and 0 otherwise.
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+0 — run daemonized, don&#8217;t output anything on stdout and don&#8217;t read
+        anything from stdin, handle SIGHUP to reopen log files
+</p>
+</li>
+<li>
+<p>
+1 — enable ‘dumb’ system console mode: print to stdout and read
+        commands from stdin, but don&#8217;t assume it is a terminal, don&#8217;t handle
+        SIGHUP
+</p>
+</li>
+<li>
+<p>
+2 — enable ‘smart’ system console mode: handle it as a terminal, enable
+        command completion and colored text output, don&#8217;t handle SIGHUP
+</p>
+</li>
+</ul></div>
+</dd>
+</dl></div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">System console key bindings</div>
+<div class="paragraph"><p>The following key bindings are available in Windows console and in TTY console
+when ‘smart’ mode is enabled:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+HOME, Ctrl+A — move cursor to start of line
+</p>
+</li>
+<li>
+<p>
+END, Ctrl+E — move cursor to end of line
+</p>
+</li>
+<li>
+<p>
+Left arrow, Ctrl+B — move cursor one character left
+</p>
+</li>
+<li>
+<p>
+Right arrow, Ctrl+F — move cursor one character right
+</p>
+</li>
+<li>
+<p>
+Alt+B — move cursor one word left
+</p>
+</li>
+<li>
+<p>
+Alt+F — move cursor one word right
+</p>
+</li>
+<li>
+<p>
+DEL, Ctrl+D — delete character under cursor
+</p>
+</li>
+<li>
+<p>
+Backspace, Ctrl+H — delete character left of cursor
+</p>
+</li>
+<li>
+<p>
+Ctrl+W — delete word left of cursor
+</p>
+</li>
+<li>
+<p>
+Ctrl+U — delete all characters left of cursor
+</p>
+</li>
+<li>
+<p>
+Ctrl+K — delete all characters right of cursor
+</p>
+</li>
+<li>
+<p>
+Ctrl+L — erase screen
+</p>
+</li>
+<li>
+<p>
+Ctrl+C — quit
+</p>
+</li>
+<li>
+<p>
+Down arrow, Ctrl+N — next line in command history
+</p>
+</li>
+<li>
+<p>
+Up arrow, Ctrl+P — previous line in command history
+</p>
+</li>
+<li>
+<p>
+Ctrl+R — reverse search in command history
+</p>
+</li>
+<li>
+<p>
+Ctrl+S — forward search in command history
+</p>
+</li>
+<li>
+<p>
+Tab — complete command
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>In Windows console additional key bindings are supported:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+PGUP — scroll console buffer up
+</p>
+</li>
+<li>
+<p>
+PGDN — scroll console buffer down
+</p>
+</li>
+<li>
+<p>
+Ctrl+PGUP — scroll to console top
+</p>
+</li>
+<li>
+<p>
+Ctrl+PGDN — scroll to console bottom
+</p>
+</li>
+</ul></div>
+</div></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+sys_parachute
+</dt>
+<dd>
+<p>
+    On UNIX-like systems, specifies if a fatal termination handler is
+    installed. Default value is 1, which means Q2PRO will do some cleanup when
+    it crashes, like restoring terminal settings.  However, this will prevent
+    core dump from being generated. To enable core dumps, set this variable to
+    0.
+</p>
+</dd>
+<dt class="hdlist1">
+sys_forcegamelib
+</dt>
+<dd>
+<p>
+    Specifies the full path to the game library server should attempt to load
+    first, before normal search paths are tried. Useful mainly for debugging or
+    mod development.  Default value is empty (use normal search paths).
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_console_logging">Console Logging</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+logfile
+</dt>
+<dd>
+<p>
+    Specifies if console logging to file is enabled. Default value is 0.
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+0 — logging disabled
+</p>
+</li>
+<li>
+<p>
+1 — logging enabled, overwrite previous file
+</p>
+</li>
+<li>
+<p>
+2 — logging enabled, append to previous file
+</p>
+</li>
+</ul></div>
+</dd>
+</dl></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">Log file is not automatically reopened when game directory is changed.</td>
+</tr></table>
+</div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+logfile_flush
+</dt>
+<dd>
+<p>
+    Specifies if log file data is buffered in memory or flushed to disk
+    immediately. Default value is 0. See setvbuf(3) manual page for more
+    details.
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+0 — system default mode (block buffered)
+</p>
+</li>
+<li>
+<p>
+1 — line buffered mode
+</p>
+</li>
+<li>
+<p>
+2 — unbuffered mode
+</p>
+</li>
+</ul></div>
+</dd>
+<dt class="hdlist1">
+logfile_name
+</dt>
+<dd>
+<p>
+    Specifies base name of the log file. Should not include any extension part
+    or path components. ‘logs/’ prefix and ‘.log’ suffix are automatically
+    appended.  Default value is ‘console’.
+</p>
+</dd>
+<dt class="hdlist1">
+logfile_prefix
+</dt>
+<dd>
+<p>
+    Specifies the time/date template each line of log file is prefixed with.
+    Default value is ‘[%Y-%m-%d %H:%M] ’. See strftime(3) manual page for
+    syntax description. In addition, the first ‘@’ character in the template,
+    if found, is replaced with a single character representing message type
+    (T — talk, D — developer, W — warning, E — error, N — notice, A — default).
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_miscellaneous">Miscellaneous</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+map_override_path
+</dt>
+<dd>
+<p>
+    Specifies the prefix used to construct path to the entity string override
+    file. Override file will be loaded from ‘${map_override_path}${mapname}.ent’.
+    Usually this variable is set to ‘maps/’ (notice the trailing slash), and
+    ‘.ent’ files are placed together with ‘.bsp’ files. Default value is empty
+    (don&#8217;t try to override entity strings).
+</p>
+</dd>
+</dl></div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Entity overrides</div>
+<div class="paragraph"><p>Override files allow the entity string of a map being loaded to be replaced by
+a custom data supplied by server operator. This makes it possible to change the
+layout of entities on the map (thus creating a new version of the map) without
+requiring clients to download anything. Entity string can be dumped from the current
+map using ‘dumpents’ server command and later changed with a text editor.</p></div>
+</div></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+map_visibility_patch
+</dt>
+<dd>
+<p>
+    Attempt to patch miscalculated visibility data for some well-known maps
+    (q2dm1, q2dm3 and q2dm8 are patched so far), fixing disappearing walls and
+    entities. Default value is 1 (enabled).
+</p>
+</dd>
+<dt class="hdlist1">
+com_fatal_error
+</dt>
+<dd>
+<p>
+    Turns all non-fatal errors into fatal errors that cause server process exit.
+    Default value is 0 (disabled).
+</p>
+</dd>
+<dt class="hdlist1">
+com_debug_break
+</dt>
+<dd>
+<p>
+    Development variable that turns all errors into debug breakpoints. Default
+    value is 0 (disabled).
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_commands">Commands</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_generic_2">Generic</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+status [mode]
+</dt>
+<dd>
+<p>
+    Show information about connected clients. Optional <em>mode</em> argument may be
+    provided to show different kind of information. Only the first character of
+    <em>mode</em> is significant.
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+d(ownloads)
+</dt>
+<dd>
+<p>
+show current downloads
+</p>
+</dd>
+<dt class="hdlist1">
+l(ag)
+</dt>
+<dd>
+<p>
+show connection quality statistics
+</p>
+</dd>
+<dt class="hdlist1">
+p(rotocols)
+</dt>
+<dd>
+<p>
+show network protocol information
+</p>
+</dd>
+<dt class="hdlist1">
+s(ettings)
+</dt>
+<dd>
+<p>
+show client settings
+</p>
+</dd>
+<dt class="hdlist1">
+t(ime)
+</dt>
+<dd>
+<p>
+show connection times
+</p>
+</dd>
+<dt class="hdlist1">
+v(ersions)
+</dt>
+<dd>
+<p>
+show client executable versions
+</p>
+</dd>
+</dl></div>
+</dd>
+<dt class="hdlist1">
+stuff &lt;userid&gt; &lt;text &#8230;&gt;
+</dt>
+<dd>
+<p>
+    Stuff the given raw <em>text</em> into command buffer of the client identified by
+    <em>userid</em>.
+</p>
+</dd>
+<dt class="hdlist1">
+stuffall &lt;text &#8230;&gt;
+</dt>
+<dd>
+<p>
+    Stuff the given raw <em>text</em> into command buffers of all connected clients.
+</p>
+</dd>
+<dt class="hdlist1">
+stuffcvar &lt;userid&gt; &lt;variable&gt; [&#8230;]
+</dt>
+<dd>
+<p>
+    Stuff a command to query value of console <em>variable</em> into command buffer of
+    the client identified by <em>userid</em>. Result of the query is printed in server
+    console once a reply is received. More than one variable can be specified on
+    command line.
+</p>
+</dd>
+<dt class="hdlist1">
+printall &lt;text &#8230;&gt;
+</dt>
+<dd>
+<p>
+    Prints the given raw <em>text</em> to all connected clients.
+</p>
+</dd>
+<dt class="hdlist1">
+dumpents [filename]
+</dt>
+<dd>
+<p>
+    Dumps the entity string of current map into ‘maps/<em>filename</em>.ent’ file. See
+    also ‘map_override_path’ variable description.
+</p>
+</dd>
+<dt class="hdlist1">
+pickclient &lt;address:port&gt;
+</dt>
+<dd>
+<p>
+    Send ‘passive_connect’ packet to the client at specified <em>address</em> and
+    <em>port</em>.  This is useful if the server is behind NAT or firewall and can not
+    accept remote connections. Remote client must support passive connections
+    (R1Q2 and Q2PRO clients do), must be in passive connection mode and the
+    specified <em>port</em> must be reachable. See ‘passive’ <a id="client"></a> command for
+    more details.
+</p>
+</dd>
+<dt class="hdlist1">
+addban &lt;address[/mask]&gt; [comment &#8230;]
+</dt>
+<dd>
+<p>
+    Adds specified <em>address</em> to the ban list. Specify <em>mask</em> to ban entire
+    subnetwork.  If specified, <em>comment</em> will be printed to banned user(s) when
+    they attempt to connect.
+</p>
+</dd>
+<dt class="hdlist1">
+delban &lt;address[/mask]|id|all&gt;
+</dt>
+<dd>
+<p>
+    Deletes exactly matching <em>address</em>/<em>mask</em> pair from the ban list. You can
+    also specify numeric <em>id</em> of the address/mask pair to delete, or use
+    special keyword <em>all</em> to clear the entire list.
+</p>
+</dd>
+<dt class="hdlist1">
+listbans
+</dt>
+<dd>
+<p>
+    Displays all address/mask pairs added to the ban list along with their IDs,
+    last access times and comments.
+</p>
+</dd>
+<dt class="hdlist1">
+kickban &lt;userid&gt;
+</dt>
+<dd>
+<p>
+    Kick the client identified by <em>userid</em> and add his IP address to the ban
+    list (with a default mask of 32).
+</p>
+</dd>
+<dt class="hdlist1">
+addblackhole &lt;address[/mask]&gt; [comment &#8230;]
+</dt>
+<dd>
+<p>
+    Adds specified <em>address</em> to the blackhole list. Specify <em>mask</em> to blackhole
+    entire subnetwork.  All connectionless packets from blackholed hosts will
+    be silently ignored.
+</p>
+</dd>
+<dt class="hdlist1">
+delblackhole &lt;address[/mask]|id|all&gt;
+</dt>
+<dd>
+<p>
+    Deletes exactly matching <em>address</em>/<em>mask</em> pair from the blackhole list. You
+    can also specify numeric <em>id</em> of the address/mask pair to delete, or use
+    special keyword <em>all</em> to clear the entire list.
+</p>
+</dd>
+<dt class="hdlist1">
+listblackholes
+</dt>
+<dd>
+<p>
+    Displays all address/mask pairs added to the blackhole list along with
+    their IDs, last access times and comments.
+</p>
+</dd>
+<dt class="hdlist1">
+addstuffcmd &lt;connect|begin&gt; &lt;command&gt; [&#8230;]
+</dt>
+<dd>
+<p>
+    Adds <em>command</em> to be automatically stuffed to every client as they initially
+    <em>connect</em> or each time they <em>begin</em> on a new map.
+</p>
+</dd>
+<dt class="hdlist1">
+delstuffcmd &lt;connect|begin&gt; &lt;id|cmd|all&gt;
+</dt>
+<dd>
+<p>
+    Deletes command identified by the numeric <em>id</em> or by literal <em>cmd</em> string
+    from the specified list. You can also specify <em>all</em> to clear the whole
+    stuffcmd list.
+</p>
+</dd>
+<dt class="hdlist1">
+liststuffcmds &lt;connect|begin&gt;
+</dt>
+<dd>
+<p>
+    Enumerates all registered commands in the specified stuffcmd list.
+</p>
+</dd>
+<dt class="hdlist1">
+addfiltercmd &lt;command&gt; [ignore|log|print|stuff|kick] [comment &#8230;]
+</dt>
+<dd>
+<p>
+    Prevents client <em>command</em> otherwise unknown to the server from being
+    interpreted by the game mod, and takes the specified action instead. For
+    <em>print</em> and <em>stuff</em> actions <em>comment</em> argument is mandatory, and should
+    contain data to print and stuff to the client. For <em>kick</em> action <em>comment</em>
+    specifies optional disconnect reason printed to the client. Default action
+    is <em>ignore</em>. Commands are matched in a case-insensitive way.
+</p>
+</dd>
+<dt class="hdlist1">
+delfiltercmd &lt;id|name|all&gt;
+</dt>
+<dd>
+<p>
+    Deletes command identified by numeric <em>id</em> or by <em>name</em> from the list of
+    filtered commands. You can also specify <em>all</em> to clear the whole filtercmd
+    list.
+</p>
+</dd>
+<dt class="hdlist1">
+listfiltercmds
+</dt>
+<dd>
+<p>
+    Enumerates all filtered commands along with appropriate actions and comments.
+</p>
+</dd>
+<dt class="hdlist1">
+addcvarban &lt;cvar&gt; &lt;match&gt; [log|print|stuff|kick] [comment]
+</dt>
+<dd>
+<p>
+    Adds an automatic check for specified <em>cvar</em>. Cvar value on the client is
+    compared with <em>match</em> and specified action is taken if value matches. For
+    <em>print</em> and <em>stuff</em> actions <em>comment</em> argument is mandatory, and should
+    contain data to print and stuff to the client. For <em>kick</em> action <em>comment</em>
+    specifies optional disconnect reason printed to the client. Default action
+    is <em>log</em>. See below for description of <em>match</em> string syntax. Multiple
+    entries with the same <em>cvar</em> are permitted and are matched sequentially
+    (stopping at the first entry with <em>kick</em> action that matched).
+</p>
+</dd>
+<dt class="hdlist1">
+delcvarban &lt;id|cvar|all&gt;
+</dt>
+<dd>
+<p>
+    Deletes single cvarban identified by numeric <em>id</em>, or deletes all cvarbans
+    matching <em>cvar</em>. You can also specify <em>all</em> to delete all cvarbans.
+</p>
+</dd>
+<dt class="hdlist1">
+listcvarbans
+</dt>
+<dd>
+<p>
+    Enumerates all cvarbans along with appropriate actions and comments.
+</p>
+</dd>
+<dt class="hdlist1">
+checkcvarbans
+</dt>
+<dd>
+<p>
+    Use this command to manually send cvarban checks to all connected clients.
+    By default, cvarbans are automatically checked on each map change.
+</p>
+</dd>
+<dt class="hdlist1">
+adduserinfoban &lt;key&gt; &lt;match&gt; [log|print|stuff|kick] [comment]
+</dt>
+<dd>
+<p>
+    Adds an automatic check for specified userinfo <em>key</em>. Specified key is
+    compared with <em>match</em> and specified action is taken if value matches. For
+    <em>print</em> and <em>stuff</em> actions <em>comment</em> argument is mandatory, and should
+    contain data to print and stuff to the client. For <em>kick</em> action <em>comment</em>
+    specifies optional disconnect reason printed to the client. Default action
+    is <em>log</em>. See below for description of <em>match</em> string syntax. Multiple
+    entries with the same <em>key</em> are permitted and are matched sequentially
+    (stopping at the first entry with <em>kick</em> action that matched). Matched
+    userinfo bans with <em>kick</em> action also prevent new clients from connecting.
+</p>
+</dd>
+<dt class="hdlist1">
+deluserinfoban &lt;id|key|all&gt;
+</dt>
+<dd>
+<p>
+    Deletes single userinfo ban identified by numeric <em>id</em>, or deletes all
+    userinfo bans matching <em>key</em>. You can also specify <em>all</em> to delete all
+    userinfo bans.
+</p>
+</dd>
+<dt class="hdlist1">
+listuserinfobans
+</dt>
+<dd>
+<p>
+    Enumerates all userinfobans along with appropriate actions and comments.
+</p>
+</dd>
+</dl></div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Cvarban and userinfo ban match string syntax</div>
+<div class="paragraph"><p>Full syntax for match string is: <em>[!][*|=|&lt;|&gt;|~|#][num|str]</em>. The
+following special characters are recognized at the beginning of the string:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+! — negates the check
+</p>
+</li>
+<li>
+<p>
+* — matches if value is not empty
+</p>
+</li>
+<li>
+<p>
+= — matches if numerical value is equal to <em>num</em>
+</p>
+</li>
+<li>
+<p>
+&lt; — matches if numerical value is less than <em>num</em>
+</p>
+</li>
+<li>
+<p>
+&gt; — matches if numerical value is greater than <em>num</em>
+</p>
+</li>
+<li>
+<p>
+~ — matches if value substring matches <em>str</em> literally
+</p>
+</li>
+<li>
+<p>
+# — escape character (<em>str</em> is matched literally)
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>If match string begins with any other character, it is matched literally. All
+string comparsions are case-insensitive.</p></div>
+</div></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+addlrconcmd &lt;command&gt;
+</dt>
+<dd>
+<p>
+    Adds a command prefix to the list of permitted limited rcon commands (see
+    ‘lrcon_password’ variable description).
+</p>
+</dd>
+<dt class="hdlist1">
+dellrconcmd &lt;id|cmd|all&gt;
+</dt>
+<dd>
+<p>
+    Deletes lrcon command prefix identified by numeric <em>id</em> or by literal <em>cmd</em>
+    string. You can also specify <em>all</em> to delete all lrcon commands.
+</p>
+</dd>
+<dt class="hdlist1">
+listlrconcmds
+</dt>
+<dd>
+<p>
+    Enumerates all lrcon commands.
+</p>
+</dd>
+<dt class="hdlist1">
+listmasters
+</dt>
+<dd>
+<p>
+    List master server hostnames, resolved IP addresses and last acknowledge times.
+</p>
+</dd>
+<dt class="hdlist1">
+quit [reason &#8230;]
+</dt>
+<dd>
+<p>
+    Exit the server, sending ‘disconnect’ message to clients. Optional <em>reason</em>
+    string may be provided instead of the default ‘Server quit’ message.
+</p>
+</dd>
+<dt class="hdlist1">
+recycle [reason &#8230;]
+</dt>
+<dd>
+<p>
+    This command is equivalent to ‘quit’, with an exception that ‘reconnect’
+    message is sent to clients instead of ‘disconnect’. Useful for quickly
+    upgrading the server binary without losing clients, assuming the server
+    process is automatically restarted after it exits.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_mvd_gtv_server_2">MVD/GTV server</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+mvdrecord [-hz] &lt;filename&gt;
+</dt>
+<dd>
+<p>
+    Start local MVD recording into ‘demos/<em>filename</em>.mvd2’.
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+-h | --help
+</dt>
+<dd>
+<p>
+display help message
+</p>
+</dd>
+<dt class="hdlist1">
+-z | --compress
+</dt>
+<dd>
+<p>
+compress file with gzip
+</p>
+</dd>
+</dl></div>
+</dd>
+<dt class="hdlist1">
+mvdstop
+</dt>
+<dd>
+<p>
+    Stop local MVD recording.
+</p>
+</dd>
+<dt class="hdlist1">
+mvdstuff &lt;text&gt;
+</dt>
+<dd>
+<p>
+    Execute the given <em>text</em> on behalf of dummy MVD observer.
+</p>
+</dd>
+<dt class="hdlist1">
+addgtvhost &lt;address[/mask]&gt;
+</dt>
+<dd>
+<p>
+    Adds specified <em>address</em> to the white list of trusted MVD/GTV hosts allowed
+    to connect to this server without password. Specify <em>mask</em> to allow entire
+    subnetwork.
+</p>
+</dd>
+<dt class="hdlist1">
+delgtvhost &lt;address[/mask]|id|all&gt;
+</dt>
+<dd>
+<p>
+    Deletes exactly matching <em>address</em>/<em>mask</em> pair from the white list of
+    trusted MVD/GTV hosts. You can also specify numeric <em>id</em> of the
+    address/mask pair to delete, or use special keyword <em>all</em> to clear the
+    entire list.
+</p>
+</dd>
+<dt class="hdlist1">
+listgtvhosts
+</dt>
+<dd>
+<p>
+    Displays all address/mask pairs added to the white list of trusted MVD/GTV
+    hosts along with their IDs.
+</p>
+</dd>
+</dl></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">White list of MVD/GTV hosts takes precedence over black list. Whitelisted
+hosts are not required to know ‘sv_mvd_password’ even if it is set.</td>
+</tr></table>
+</div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+addgtvban &lt;address[/mask]&gt;
+</dt>
+<dd>
+<p>
+    Adds specified <em>address</em> to the black list of banned MVD/GTV hosts
+    disallowed to connect to this server. Specify <em>mask</em> to ban entire
+    subnetwork.
+</p>
+</dd>
+<dt class="hdlist1">
+delgtvban &lt;address[/mask]|id|all&gt;
+</dt>
+<dd>
+<p>
+    Deletes exactly matching <em>address</em>/<em>mask</em> pair from the black list of
+    banned MVD/GTV hosts. You can also specify numeric <em>id</em> of the address/mask
+    pair to delete, or use special keyword <em>all</em> to clear the entire list.
+</p>
+</dd>
+<dt class="hdlist1">
+listgtvbans
+</dt>
+<dd>
+<p>
+    Displays all address/mask pairs added to the black list of banned MVD/GTV
+    hosts along with their IDs.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_mvd_gtv_client_2">MVD/GTV client</h3>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Channels and connections</div>
+<div class="paragraph"><p>MVD/GTV client command interface operates with ‘channel’ and ‘connection’
+objects. Typically, there is one-to-one correspondence between them, but this
+is not always the case.  Connection is a persistent handle to the remote GTV
+server, while MVD channel, which represents a world state seen by the
+observers, has a shorter lifetime. Channels are automatically created
+once there is some data available on the connection and destroyed once
+connection is suspended by server and all buffered data have been read. A demo
+playback channel is special in a way that is does not have a parent connection.</p></div>
+<div class="paragraph"><p>Both <em>connections</em> and <em>channels</em> can be identified by their name or by unique
+ID number seen in the output of ‘mvdservers’ and ‘mvdchannels’ commands.
+Channels inherit names and IDs from their parent connections.</p></div>
+</div></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+mvdconnect [-hn:u:p:] &lt;address[:port]&gt;
+</dt>
+<dd>
+<p>
+    Create connection to the GTV server at the given <em>address</em>. If <em>port</em> is
+    omitted, default server port 27910 is used.
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+-h | --help
+</dt>
+<dd>
+<p>
+display help message
+</p>
+</dd>
+<dt class="hdlist1">
+-n | --name=&lt;string&gt;
+</dt>
+<dd>
+<p>
+specify channel name as <em>string</em>,
+        default is ‘netX’
+</p>
+</dd>
+<dt class="hdlist1">
+-u | --user=&lt;string&gt;
+</dt>
+<dd>
+<p>
+specify username as <em>string</em>,
+        default is to use value of ‘mvd_username’ cvar
+</p>
+</dd>
+<dt class="hdlist1">
+-p | --pass=&lt;string&gt;
+</dt>
+<dd>
+<p>
+specify password as <em>string</em>,
+        default is to use value of ‘mvd_password’ cvar
+</p>
+</dd>
+</dl></div>
+</dd>
+<dt class="hdlist1">
+mvdisconnect [connection]
+</dt>
+<dd>
+<p>
+    Destroy the specified GTV server <em>connection</em> (if there is an associated
+    MVD channel, any buffered data is replayed to spectators, then MVD channel
+    is destroyed). There is no need to specify <em>connection</em> if there is only
+    one active connection.
+</p>
+</dd>
+<dt class="hdlist1">
+mvdkill [channel]
+</dt>
+<dd>
+<p>
+    Destroy the specified MVD <em>channel</em> (any parent GTV connection is also
+    destroyed).  There is no need to specify <em>channel</em> if there is only one
+    active channel.
+</p>
+</dd>
+<dt class="hdlist1">
+mvdplay [-hl:n:r:] &lt;[/]filename&gt; [&#8230;]
+</dt>
+<dd>
+<p>
+    Begins MVD playback from the file identified by <em>filename</em> by creating a
+    new MVD channel.  This command does not require file extension to be
+    specified and supports filename autocompletion on TAB. Loads file from
+    ‘demos/’ unless slash is prepended to <em>filename</em>, otherwise loads from the
+    root of quake file system. Multiple <em>filenames</em> can be specified to create
+    a playlist.
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+-h | --help
+</dt>
+<dd>
+<p>
+display help message
+</p>
+</dd>
+<dt class="hdlist1">
+-l | --loop=&lt;number&gt;
+</dt>
+<dd>
+<p>
+replay <em>number</em> of times (0 means forever,
+        replays once by default)
+</p>
+</dd>
+<dt class="hdlist1">
+-n | --name=&lt;string&gt;
+</dt>
+<dd>
+<p>
+specify channel name as <em>string</em>,
+        default is ‘demX’
+</p>
+</dd>
+<dt class="hdlist1">
+-r | --replace=&lt;channel&gt;
+</dt>
+<dd>
+<p>
+replace existing <em>channel</em> playlist with
+        new entries, don&#8217;t create a new channel
+</p>
+</dd>
+</dl></div>
+</dd>
+<dt class="hdlist1">
+mvdseek [+-]&lt;timespec&gt; [channel]
+</dt>
+<dd>
+<p>
+    Seeks the given amount of time during MVD playback on the specified
+    <em>channel</em>.  Prepend with ‘+’ to seek forward relative to current position,
+    prepend with ‘-’ to seek backward relative to current position.  Without
+    prefix, seeks to an absolute position within the MVD file, counted from the
+    last map change. See below for <em>timespec</em> syntax description.  Initial
+    forward seek may be slow, so be patient. For multi-map recordings, it is
+    not possible to return to the previous map by seeking. Seeking during demo
+    recording is not yet supported.
+</p>
+</dd>
+</dl></div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">MVD time specification</div>
+<div class="paragraph"><p>Absolute or relative MVD time can be specified in one of the following
+formats:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+.FF, where FF are frames
+</p>
+</li>
+<li>
+<p>
+SS, where SS are seconds
+</p>
+</li>
+<li>
+<p>
+SS.FF, where SS are seconds, FF are frames
+</p>
+</li>
+<li>
+<p>
+MM:SS, where MM are minutes, SS are seconds
+</p>
+</li>
+<li>
+<p>
+MM:SS.FF, where MM are minutes, SS are seconds, FF are frames
+</p>
+</li>
+</ul></div>
+</div></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+mvdrecord [-hz] &lt;filename&gt; [channel]
+</dt>
+<dd>
+<p>
+    Start MVD recording on the specified <em>channel</em> into ‘demos/<em>filename</em>.mvd2’.
+    There is no need to specify <em>channel</em> if there is only one active channel.
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+-h | --help
+</dt>
+<dd>
+<p>
+display help message
+</p>
+</dd>
+<dt class="hdlist1">
+-z | --compress
+</dt>
+<dd>
+<p>
+compress file with gzip
+</p>
+</dd>
+</dl></div>
+</dd>
+</dl></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">With Q2PRO it is possible to record a demo while playing back another one.</td>
+</tr></table>
+</div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+mvdstop [channel]
+</dt>
+<dd>
+<p>
+    Stop MVD recording on the specified channel. There is no need to specify
+    <em>channel</em> if there is only one active channel.
+</p>
+</dd>
+</dl></div>
+<div class="sidebarblock">
+<div class="content">
+<div class="title">Record commands</div>
+<div class="paragraph"><p>As you have probably noticed, the same ‘mvdrecord’ and ‘mvdstop’ commands
+introduced in the previous section are used here. This is possible since Q2PRO
+server may be either in the MVD/GTV server or client mode, but not both at the
+same time.</p></div>
+</div></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+mvdspawn
+</dt>
+<dd>
+<p>
+    Put the server into MVD/GTV mode, creating the Waiting Room channel.  This
+    command performs a full server restart. Done automatically as soon as the
+    first GTV connection is established or local MVD file is replayed.
+</p>
+</dd>
+<dt class="hdlist1">
+mvdchannels [mode]
+</dt>
+<dd>
+<p>
+    List all MVD channels (there may be none, if all GTV connections are
+    suspended). Optional <em>mode</em> argument may be provided to show different
+    kind of information.
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+r(ecordings)
+</dt>
+<dd>
+<p>
+show MVD recording status
+</p>
+</dd>
+</dl></div>
+</dd>
+<dt class="hdlist1">
+mvdservers
+</dt>
+<dd>
+<p>
+    List all GTV connections.
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_incompatibilities">Incompatibilities</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Q2PRO server tries to be compatible with other Quake 2 ports, including
+original Quake 2 release. Compatibility, however, is defined in terms of full
+file format and network protocol compatibility. Q2PRO is not meant to be a
+direct replacement of your regular Quake 2 server. Some features are
+implemented differently in Q2PRO, some may be not implemented at all. You may
+need to review your config and adapt it for Q2PRO. This section tries to
+document most of these incompatibilities so that when something doesn&#8217;t work as
+it used to be you know where to look. The following list may be incomplete.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+‘ip’ variable has been renamed to ‘net_ip’.
+</p>
+</li>
+<li>
+<p>
+‘port’ variable has been renamed to ‘net_port’, and
+  ‘ip_hostport’ and ‘hostport’ aliases are no longer supported.
+</p>
+</li>
+<li>
+<p>
+‘serverrecord’ and ‘demomap’ commands has been removed in favor of
+  ‘mvdrecord’ and ‘mvdplay’.
+</p>
+</li>
+<li>
+<p>
+On Windows, ‘./release/gamex86.dll’ path will not be tried by default when
+  loading the game DLL.  If you need this for loading some sort of a game mod
+  proxy, use ‘sys_forcegamelib’ variable.
+</p>
+</li>
+<li>
+<p>
+Q2PRO works only with virtual paths constrained to the quake file system.
+  All paths are normalized before use so that it is impossible to go past virtual
+  filesystem root using ‘../’ components.  This means commands like these are
+  equivalent and all reference the same file: ‘exec ../global.cfg’, ‘exec
+  /global.cfg’, ‘exec global.cfg’.  If you have any config files in your Quake 2
+  directory root, you should consider moving them into ‘baseq2/’ to make them
+  accessible.
+</p>
+</li>
+<li>
+<p>
+Likewise, ‘link’ command syntax has been changed to work with virtual paths
+  constrained to the quake file system. All arguments to ‘link’ are normalized.
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+</div>
+<div id="footnotes"><hr /></div>
+<div id="footer">
+<div id="footer-text">
+Last updated
+ 2022-07-02 22:55:47 MSK
+</div>
+</div>
+</body>
+</html>

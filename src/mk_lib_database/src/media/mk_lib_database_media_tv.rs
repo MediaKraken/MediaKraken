@@ -1,17 +1,15 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
-
+use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use sqlx::postgres::PgRow;
-use sqlx::{types::Json, types::Uuid};
+
 use sqlx::{FromRow, Row};
+use stdext::function_name;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaTVShowList {
-    mm_metadata_tvshow_guid: uuid::Uuid,
-    mm_metadata_tvshow_name: String,
+    pub mm_metadata_tvshow_guid: uuid::Uuid,
+    pub mm_metadata_tvshow_name: String,
     mm_count: i32,
     mm_poster: serde_json::Value,
 }
@@ -19,9 +17,18 @@ pub struct DBMediaTVShowList {
 pub async fn mk_lib_database_media_tv_read(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
-    offset: i32,
-    limit: i32,
+    offset: i64,
+    limit: i64,
 ) -> Result<Vec<DBMediaTVShowList>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let select_query;
     if search_value != "" {
         select_query = sqlx::query(
@@ -71,6 +78,15 @@ pub async fn mk_lib_database_media_tv_count(
     sqlx_pool: &sqlx::PgPool,
     search_string: String,
 ) -> Result<i64, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     if search_string != "" {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_tvshow, \

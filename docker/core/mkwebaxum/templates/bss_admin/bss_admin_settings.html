@@ -1,0 +1,93 @@
+{% block content %}
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>MediaKraken - Settings</title>
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
+    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.min.css">
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+        {% include "bss_admin/bss_admin_include_menu.html" %}
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Server</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                    < input label="Server Name", type="text", name="server.name" >
+                    <br></p>
+                    <p>
+                     < input label="Server MOTD", type="text", name="server.motd" >
+                    <br></p>
+                    <p>
+                    < input label="Purge Activity Data Older Than", type="text", name="server.purge_activity" >
+                    <br></p>
+                    <p>
+                    < input label="Lock account after failed attempts", type="text", name="server.lock_account" >
+                    <br></p>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Metadata</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            < input type=checkbox name="server.metadata_with_media", label="Save metadata with media" >
+                        <br></p>
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Subtitles</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">
+                                    < input type=checkbox name="server.subtitle_for_media", label="Subtitle" >
+                                <br><br></p>
+                                <p class="card-text">
+                                    < input type=checkbox name="server.subtitle_opensubtitles", label="OpenSubtitles" >
+                                <br></p>
+                                <p class="card-text">
+                                    < input type=checkbox name="server.subtitle_skip_if_audio", label="Skip if audio track in media" >
+                                <br></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Subservers via Docker</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                    < input label="Brainzcode", type="text", name="server.brainzcode" >
+                    <br></p>
+                    <p>
+                    < input type=checkbox name="server.docker_mumble", label="Mumble" >
+                    <br></p>
+                    <p>
+                        < input type=checkbox name="server.docker_teamspeak3", label="Teamspeak 3" >
+                                        <br></p>
+                    <p>
+                        < input type=checkbox name="server.docker_transmission", label="Transmission" >
+                                        <br></p>
+                    <br></p>
+                </div>
+            </div>
+            <footer class="bg-white sticky-footer">
+                <div class="container my-auto">
+                    <div class="text-center my-auto copyright"><span>Copyright © Quinn D Granfor 2022</span></div>
+                </div>
+            </footer>
+        </div>
+    </div>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/jquery-easing.min.js"></script>
+    <script src="/static/js/script.min.js"></script>
+</body>
+{% endblock %}

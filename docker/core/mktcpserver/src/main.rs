@@ -1,5 +1,3 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
 use argh::FromArgs;
 use rustls_pemfile::{certs, rsa_private_keys};
 use serde_json::json;
@@ -8,13 +6,12 @@ use std::io::{self, BufReader};
 use std::net::ToSocketAddrs;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use stdext::function_name;
 use tokio::io::{copy, sink, split, AsyncWriteExt};
 use tokio::net::TcpListener;
 use tokio_rustls::rustls::{self, Certificate, PrivateKey};
 use tokio_rustls::TlsAcceptor;
-
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use mk_lib_logging::mk_lib_logging;
 
 /// Tokio Rustls server example
 #[derive(FromArgs)]
@@ -53,7 +50,9 @@ async fn main() -> io::Result<()> {
     #[cfg(debug_assertions)]
     {
         // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"})).await;
+        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
+            .await
+            .unwrap();
     }
 
     let options: Options = argh::from_env();

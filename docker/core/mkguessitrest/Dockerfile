@@ -1,5 +1,5 @@
 FROM tiangolo/uwsgi-nginx-flask:python3.8-alpine-2021-10-02
-LABEL maintainer="Rémi Alvergnat <toilal.dev@gmail.com>"
+LABEL maintainer="Remi Alvergnat <toilal.dev@gmail.com>"
 
 COPY / /guessit-rest
 RUN cd /guessit-rest && pip3 install -e .

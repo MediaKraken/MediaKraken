@@ -1,13 +1,8 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
-
 use chrono::prelude::*;
-use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
-use sqlx::{types::Json, types::Uuid};
-use sqlx::{FromRow, Row};
+use mk_lib_logging::mk_lib_logging;
+use serde_json::json;
+use sqlx::{types::Uuid};
+use stdext::function_name;
 
 pub async fn mk_lib_database_activity_insert(
     sqlx_pool: &sqlx::PgPool,
@@ -15,11 +10,20 @@ pub async fn mk_lib_database_activity_insert(
     activity_overview: String,
     activity_short_overview: String,
     activity_type: String,
-    activity_itemid: Uuis,
+    activity_itemid: Uuid,
     activity_userid: Uuid,
     activity_severity: String,
 ) -> Result<Uuid, sqlx::Error> {
-    new_guid = Uuid::new_v4();
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let new_guid = Uuid::new_v4();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_user_activity (mm_activity_guid, mm_activity_name, \
@@ -37,7 +41,7 @@ pub async fn mk_lib_database_activity_insert(
     .bind(activity_itemid)
     .bind(activity_userid)
     .bind(Utc::now())
-    .bind(activity_log_severity)
+    .bind(activity_severity)
     .execute(&mut transaction)
     .await?;
     transaction.commit().await?;
@@ -46,8 +50,17 @@ pub async fn mk_lib_database_activity_insert(
 
 pub async fn mk_lib_database_activity_delete(
     sqlx_pool: &sqlx::PgPool,
-    day_range: i32,
+    day_range: i64,
 ) -> Result<(), sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "delete from mm_user_activity \

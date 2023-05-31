@@ -1,43 +1,29 @@
-FROM rust:1.66.0 as cargo-build
+FROM mediakraken/mkbase_rust_alpine:dev as cargo-build
 
-RUN rustup target add x86_64-unknown-linux-musl \
-  && apt-get update && apt-get install -y --no-install-recommends musl-tools musl-dev \
-  && update-ca-certificates
-
-# Create appuser
-ENV USER=mediakraken
-ENV UID=10001
-
-RUN adduser \
-  --disabled-password \
-  --gecos "" \
-  --home "/nonexistent" \
-  --shell "/sbin/nologin" \
-  --no-create-home \
-  --uid "${UID}" \
-  "${USER}"
+ARG BRANCHTAG
 
 WORKDIR /mediakraken
 
 COPY ./ .
 
-RUN cargo build --target x86_64-unknown-linux-musl --release
+RUN if [ "${BRANCHTAG}" = "prod" ]; \
+  then cargo build --release \
+  && cp /mediakraken/target/release/mk* /mediakraken/target/.; \
+  else cargo build \
+  && cp /mediakraken/target/debug/mk* /mediakraken/target/.; \
+  fi
 
 ####################################################################################################
 ## Final image
 ####################################################################################################
-FROM scratch
+FROM alpine:3.17.1 AS runtime
 
 # Import from builder.
-COPY --from=cargo-build /etc/passwd /etc/passwd
-COPY --from=cargo-build /etc/group /etc/group
-
-WORKDIR /mediakraken
+# COPY --from=cargo-build /etc/passwd /etc/passwd
+# COPY --from=cargo-build /etc/group /etc/group
 
 # Copy our build
-COPY --from=cargo-build /mediakraken/target/x86_64-unknown-linux-musl/release/mkbroadcast ./
+COPY --from=cargo-build /mediakraken/target/mkbroadcast /mkbroadcast
 
 # Use an unprivileged user.
-USER mediakraken:mediakraken
-
-CMD ["/mediakraken/mkbroadcast"]
+# USER mediakraken:mediakraken

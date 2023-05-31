@@ -1,14 +1,8 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
 // https://github.com/kallekankaanpaa/rsteam
-// rsteam = "0.1.3"
 
 use rsteam::steam_id::{SteamID2, SteamID3};
 use rsteam::steam_user::{BanData, Status};
 use rsteam::{SteamClient, SteamID};
-
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
 
 /*
 ISteamUser
@@ -33,3 +27,10 @@ GetAppList
 ISteamNews
 GetNewsForApp
  */
+
+ pub async fn steam_login(api_key: &str, vanity_url: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let client = SteamClient::with_api_key(&api_key);
+    let id = client.resolve_vanity_url(&vanity_url, None).await?;
+    let id_vec = vec![id.clone()];
+    Ok(())
+ }

@@ -1,9 +1,8 @@
-#![cfg_attr(debug_assertions, allow(dead_code, unused_imports))]
-
 // https://github.com/gabrielmagno/crab-dlna
 
-#[path = "mk_lib_logging.rs"]
-mod mk_lib_logging;
+use mk_lib_logging::mk_lib_logging;
+use serde_json::json;
+use stdext::function_name;
 
 use crab_dlna::{
     get_serve_ip, infer_subtitle_from_video, play, Error, MediaStreamingServer, Render, RenderSpec,
@@ -11,18 +10,38 @@ use crab_dlna::{
 use std::path::PathBuf;
 
 pub async fn mk_lib_network_dlna_discover() {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let discover_timeout_secs = 5;
     let renders_discovered = Render::discover(discover_timeout_secs).await.unwrap();
     for render in renders_discovered {
-        #[cfg(debug_assertions)]
-        {
-            mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "render": render }))
-                .await;
-        }
+        // #[cfg(debug_assertions)]
+        // {
+        //     mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "render": render }))
+        //         .await
+        //         .unwrap();
+        // }
+        continue;
     }
 }
 
 pub async fn mk_lib_network_dlna_play(filename_to_play: String) -> Result<(), Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
     let discover_timeout_secs = 5;
     let render_spec = RenderSpec::Query(discover_timeout_secs, "Kodi".to_string());
     let render = Render::new(render_spec).await?;

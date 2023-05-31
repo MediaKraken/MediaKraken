@@ -1,0 +1,19 @@
+[package]
+name = "mk_lib_image"
+version = "0.0.1"
+edition = "2021"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
+
+[dependencies]
+image = "0.24.6"
+mk_lib_logging = { path = "../mk_lib_logging" }
+serde_json = "1.0.96"
+stdext = "0.3.1"
+
+[dev-dependencies]
+tokio-test = "*"
