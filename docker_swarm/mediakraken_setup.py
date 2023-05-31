@@ -131,6 +131,18 @@ if not os.path.isfile('./mkstack_csrf_key.txt'):
                                   stdout=subprocess.PIPE, shell=False)
     install_pid.wait()
 
+if not os.path.isfile('./mkstack_nut.txt'):
+    file_handle = open('./mkstack_nut.txt', 'w+')
+    random_key = b64encode(os.urandom(32)).decode('utf-8')
+    file_handle.write(random_key.replace(
+        '"', '').replace("'", '').replace("%", ''))
+    file_handle.close()
+    install_pid = subprocess.call(shlex.split('docker secret create nut-upsd-password ./mkstack_nut.txt'),
+                                  stdout=subprocess.PIPE, shell=False)
+    install_pid.wait()
+
+# TODO when production, remove the secret files
+
 install_pid = subprocess.call(shlex.split('python3 mediakraken_update_images.py'),
                               stdout=subprocess.PIPE, shell=False)
 install_pid.wait()

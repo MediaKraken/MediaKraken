@@ -23,7 +23,7 @@ onvif = { git = "https://github.com/lumeohq/onvif-rs" }   # has request with def
 rascam = { versoin = "0.0.2", optional = true}  # breaks on mmal-sys compile - mmal-sys is for raspberry pi only
 rppal = { version = "0.13.1", features = ["hal"], optional = true }
 rppal-dht11 = {version = "0.4.0", optional = true}
-rups = { version = "0.5.3", features = ["ssl"] }
+rups = { version = "0.5.3", features = ["async", "async-ssl"] }
 serde_json = "1.0.96"
 serialport = "4.2.1"
 smartcast = "0.1.1"
