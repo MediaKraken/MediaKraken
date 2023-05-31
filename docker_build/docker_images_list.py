@@ -159,9 +159,6 @@ STAGE_CORE_IMAGES = {
 
     # website via rust and rocket
     #'mkwebrocket': ('mkwebrocket', 'busybox:1.36.0-uclibc', 'core'),
-
-    # website for nut
-    'mkwebnut': ('mkwebnut', 'ubuntu:18.04', 'core'),
 }
 
 STAGE_ONE_GAME_SERVERS = {

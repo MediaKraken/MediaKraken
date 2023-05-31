@@ -54,7 +54,7 @@ parser.add_argument('-g', '--game', required=False,
                     help='Game images', action="store_true")
 parser.add_argument('-e', '--email', required=False,
                     help='Send results email', action="store_true")
-# set args.image variable if entered - ex. ComposeMediaKrakenBaseFFMPEG
+# set args.image variable if entered - ex. mkwebaxum
 parser.add_argument('-i', '--image', metavar='image', required=False,
                     help='Image to build')
 parser.add_argument('-p', '--push', required=False,
