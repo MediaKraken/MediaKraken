@@ -137,7 +137,7 @@ if not os.path.isfile('./mkstack_nut.txt'):
     file_handle.write(random_key.replace(
         '"', '').replace("'", '').replace("%", ''))
     file_handle.close()
-    install_pid = subprocess.call(shlex.split('docker secret create nut-upsd-password ./mkstack_nut.txt'),
+    install_pid = subprocess.call(shlex.split('docker secret create nut_password ./mkstack_nut.txt'),
                                   stdout=subprocess.PIPE, shell=False)
     install_pid.wait()
 
