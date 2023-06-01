@@ -118,7 +118,7 @@ pub async fn mk_lib_database_update_schema(
     if version_no < 50 {
         let mut transaction = sqlx_pool.begin().await?;
         sqlx::query(
-            "CREATE TABLE IF NOT EXISTS axum_users (\
+            "CREATE TABLE IF NOT EXISTS mm_axum_users (\
             id bigint Primary Key Generated Always as Identity, \
             anonymous BOOLEAN NOT NULL, \
             username VARCHAR(256) NOT NULL, \
@@ -130,21 +130,21 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut transaction)
         .await?;
         sqlx::query(
-            "INSERT INTO axum_users (anonymous, username, email, password) \
+            "INSERT INTO mm_axum_users (anonymous, username, email, password) \
             values (true, 'Guest', 'guest@fake.com', crypt('fakepass', gen_salt('bf', 10)));",
         )
         .execute(&mut transaction)
         .await?;
         sqlx::query(
-            "CREATE TABLE IF NOT EXISTS axum_user_permissions (\
+            "CREATE TABLE IF NOT EXISTS mm_axum_user_permissions (\
             user_id INTEGER NOT NULL, \
             token VARCHAR(256) NOT NULL);",
         )
         .execute(&mut transaction)
         .await?;
         sqlx::query(
-            "CREATE INDEX axum_user_permissions_user_id \
-            ON axum_user_permissions USING btree (user_id);",
+            "CREATE INDEX mm_axum_user_permissions_user_id \
+            ON mm_axum_user_permissions USING btree (user_id);",
         )
         .execute(&mut transaction)
         .await?;
@@ -182,6 +182,17 @@ pub async fn mk_lib_database_update_schema(
         sqlx::query(
             "CREATE INDEX mm_backup_created_ndx \
            ON mm_backup USING btree (mm_backup_created);",
+        )
+        .execute(&mut transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 52).await?;
+    }
+
+    if version_no < 53{
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(
+            "DROP TABLE IF EXISTS mm_users, mm_user_group, mm_user_profile;",
         )
         .execute(&mut transaction)
         .await?;
