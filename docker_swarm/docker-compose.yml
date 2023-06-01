@@ -266,6 +266,24 @@ services:
       mode: replicated
       replicas: 1
 
+  nut:
+    image: mediakraken/mknut:${BRANCH}
+    environment:
+      - nut-upsd-password=/run/secrets/nut_password
+    secrets:
+      - nut_password
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    ports:
+      - "3493:3493"
+    deploy:
+      mode: replicated
+      replicas: 0
+      placement:
+        constraints: [ node.role == manager ]
+    networks:
+      - mediakraken_network
+
   pgadmin:
     image: dpage/pgadmin4:6.21
     stop_grace_period: 30s
@@ -548,9 +566,11 @@ volumes:
 
 
 secrets:
-  secure_key:
+  csrf_key:
     external: true
   db_password:
     external: true
-  csrf_key:
+  nut_password:
+    external: true
+  secure_key:
     external: true
