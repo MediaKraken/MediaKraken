@@ -285,7 +285,7 @@ services:
       - mediakraken_network
 
   pgadmin:
-    image: dpage/pgadmin4:6.21
+    image: dpage/pgadmin4:7.2
     stop_grace_period: 30s
     stop_signal: SIGTERM
     networks:

@@ -139,5 +139,6 @@ if not os.path.isfile('./mkstack_nut.txt'):
 
 # TODO when production, remove the secret files
 
+print("Downloading docker images from Dockerhub.", flush=True)
 install_pid = subprocess.call(shlex.split('python3 mediakraken_update_images.py'),
                               stdout=subprocess.PIPE, shell=False)
