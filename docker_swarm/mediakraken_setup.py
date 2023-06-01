@@ -141,4 +141,3 @@ if not os.path.isfile('./mkstack_nut.txt'):
 
 install_pid = subprocess.call(shlex.split('python3 mediakraken_update_images.py'),
                               stdout=subprocess.PIPE, shell=False)
-install_pid.wait()
