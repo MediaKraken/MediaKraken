@@ -21,11 +21,11 @@ ALPINE_MIRROR = 'dl-cdn.alpinelinux.org'
 
 CARGO_CRATES = "crates.io"
 
-# CENTOS_MIRROR = 'mksonatype:8081/repository/repo_yum/'
-CENTOS_MIRROR = 'http://mirror.centos.org/'
+CENTOS_MIRROR = 'mksonatype:8081/repository/repo_yum/'
+#CENTOS_MIRROR = 'http://mirror.centos.org/'
 
-# DEBIAN_MIRROR = 'mksonatype:8081/repository/repo_apt/'
-DEBIAN_MIRROR = 'ftp.us.debian.org'
+DEBIAN_MIRROR = 'mksonatype:8081/repository/repo_apt/'
+#DEBIAN_MIRROR = 'ftp.us.debian.org'
 
 DOCKER_REPOSITORY = 'mkregistry:5000'
 DOCKERHUB_REPOSITORY = 'index.docker.io:443'
@@ -117,8 +117,9 @@ STAGE_CORE_IMAGES = {
     # download open library dump of ids in database and insert into downloads - run and exit
     'mkopenlibrarynetfetchbulk': ('mkopenlibrarynetfetchbulk', 'scratch', 'core'),
 
+    # since using pgpool in sqlx for all containers, I don't think this has a use atm
     # database connection pooler
-    'mkpgbouncer': ('mkpgbouncer', 'alpine:3.17.1', 'core'),
+    # 'mkpgbouncer': ('mkpgbouncer', 'alpine:3.17.1', 'core'),
 
     # consume and process ampq records
     'mkrabbitconsume': ('mkrabbitconsume', 'busybox:1.36.0-uclibc', 'core'),

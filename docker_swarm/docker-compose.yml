@@ -303,25 +303,25 @@ services:
       mode: replicated
       replicas: 1
 
-  pgbouncer:
-    image: mediakraken/mkpgbouncer:${BRANCH}
-    environment:
-      - DB_HOST=mkstack_database
-      - POOL_MODE=transaction
-      #- POOL_MODE=session  # this might not work in docker swarm
-      - MAX_CLIENT_CONN=1024
-      - DEFAULT_POOL_SIZE=85
-      - SERVER_RESET_QUERY=DISCARD ALL
-    secrets:
-      - db_password
-    entrypoint: ./wait-for-it-ash-busybox130.sh -h mkstack_database -p 5432 -t 120 -- ./entrypoint.sh
-    stop_grace_period: 30s
-    stop_signal: SIGTERM
-    networks:
-      - mediakraken_network
-    deploy:
-      mode: replicated
-      replicas: 1
+  # pgbouncer:
+  #   image: mediakraken/mkpgbouncer:${BRANCH}
+  #   environment:
+  #     - DB_HOST=mkstack_database
+  #     - POOL_MODE=transaction
+  #     #- POOL_MODE=session  # this might not work in docker swarm
+  #     - MAX_CLIENT_CONN=1024
+  #     - DEFAULT_POOL_SIZE=85
+  #     - SERVER_RESET_QUERY=DISCARD ALL
+  #   secrets:
+  #     - db_password
+  #   entrypoint: ./wait-for-it-ash-busybox130.sh -h mkstack_database -p 5432 -t 120 -- ./entrypoint.sh
+  #   stop_grace_period: 30s
+  #   stop_signal: SIGTERM
+  #   networks:
+  #     - mediakraken_network
+  #   deploy:
+  #     mode: replicated
+  #     replicas: 1
 
   portainer:
     image: portainer/portainer-ce:2.18.3-alpine
