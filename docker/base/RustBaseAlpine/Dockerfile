@@ -1,4 +1,4 @@
-FROM rust:1.69.0-alpine
+FROM rust:1.70.0-alpine
 
 RUN apk update && \
   apk add alpine-sdk sqlite-dev openssl1.1-compat-dev
