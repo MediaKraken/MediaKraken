@@ -6,6 +6,7 @@ WORKDIR /mediakraken
 
 COPY ./ .
 
+RUN apt update && apt install libudev-dev -y
 RUN if [ "${BRANCHTAG}" = "prod" ]; \
   then cargo build --release \
   && cp /mediakraken/target/release/mk* /mediakraken/target/.; \
@@ -16,7 +17,7 @@ RUN if [ "${BRANCHTAG}" = "prod" ]; \
 ####################################################################################################
 ## Final image
 ####################################################################################################
-FROM debian:bullseye-20230109-slim AS runtime
+FROM debian:bullseye-20230522-slim AS runtime
 
 # Import from builder.
 COPY --from=cargo-build /etc/passwd /etc/passwd
