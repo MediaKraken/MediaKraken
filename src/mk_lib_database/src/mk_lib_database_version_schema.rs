@@ -192,12 +192,12 @@ pub async fn mk_lib_database_update_schema(
     if version_no < 53{
         let mut transaction = sqlx_pool.begin().await?;
         sqlx::query(
-            "DROP TABLE IF EXISTS mm_users, mm_user_group, mm_user_profile;",
+            "DROP TABLE IF EXISTS mm_user, mm_user_group, mm_user_profile;",
         )
         .execute(&mut transaction)
         .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool, 52).await?;
+        mk_lib_database_version_update(&sqlx_pool, 53).await?;
     }
 
     Ok(true)
