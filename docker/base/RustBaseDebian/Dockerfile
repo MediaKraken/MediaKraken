@@ -1,4 +1,6 @@
-FROM rust:1.70.0
+# don't use the slim version as it's just a stage one image
+# as too much stuff is missing causing stuff later to not compile
+FROM rust:1.69.0-bullseye
 
 # Create appuser
 ENV USER=mediakraken

@@ -1,4 +1,4 @@
-FROM rust:1.70.0-alpine
+FROM rust:1-alpine3.17
 
 RUN apk update && \
   apk add alpine-sdk sqlite-dev openssl1.1-compat-dev
@@ -8,12 +8,11 @@ ENV USER=mediakraken
 ENV UID=10001
 
 RUN adduser \
-    --disabled-password \
-    --gecos "" \
-    --home "/nonexistent" \
-    --shell "/sbin/nologin" \
-    --no-create-home \
-    --uid "${UID}" \
-    "${USER}" \
-    && cargo search lazy_static
-
+  --disabled-password \
+  --gecos "" \
+  --home "/nonexistent" \
+  --shell "/sbin/nologin" \
+  --no-create-home \
+  --uid "${UID}" \
+  "${USER}" \
+  && cargo search lazy_static

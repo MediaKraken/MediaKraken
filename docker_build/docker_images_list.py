@@ -22,10 +22,10 @@ ALPINE_MIRROR = 'dl-cdn.alpinelinux.org'
 CARGO_CRATES = "crates.io"
 
 CENTOS_MIRROR = 'mksonatype:8081/repository/repo_yum/'
-#CENTOS_MIRROR = 'http://mirror.centos.org/'
+# CENTOS_MIRROR = 'http://mirror.centos.org/'
 
 DEBIAN_MIRROR = 'mksonatype:8081/repository/repo_apt/'
-#DEBIAN_MIRROR = 'ftp.us.debian.org'
+# DEBIAN_MIRROR = 'ftp.us.debian.org'
 
 DOCKER_REPOSITORY = 'mkregistry:5000'
 DOCKERHUB_REPOSITORY = 'index.docker.io:443'
@@ -44,7 +44,6 @@ PYPI_MIRROR_PORT = ':8081'
 
 # base OS images to build off of, meaning there is a 'from' in the docker file(s) that use these
 STAGE_ONE_IMAGES = {
-    # 'AlpineBase3162Py3': ('mkbase_alpinepy3', 'alpine:3.16.2', 'base'),
     # 'AlpineBase3173Py3': ('mkbase_alpinepy3', 'alpine:3.17.3', 'base'),
     'AlpineBaseFFMPEG': ('mkbase_alpine_ffmpeg', 'alpine:3.17.3', 'base'),
     'DebianBaseFFMPEG': ('mkbase_debian_ffmpeg', 'debian:bullseye-20230522-slim', 'base'),
@@ -76,6 +75,9 @@ STAGE_CORE_IMAGES = {
 
     # thegamesdb bulk data fetch
     'mkgamesdbnetfetchbulk': ('mkgamesdbnetfetchbulk', 'busybox:1.36.0-uclibc', 'core'),
+
+    # download manufactuer stuff from global cache
+    'mkglobalcache': ('mkglobalcache', 'debian:bullseye-slim', 'core'),
 
     # guessit via web rest
     'mkguessitrest': ('mkguessitrest',
@@ -137,7 +139,7 @@ STAGE_CORE_IMAGES = {
     'mksharescanner': ('mksharescanner', 'busybox:1.36.0-uclibc', 'core'),
 
     # server for "fat" clients to talk too (local server)
-    #'mktcpserver': ('mktcpserver', 'busybox:1.36.0-uclibc', 'core'),
+    # 'mktcpserver': ('mktcpserver', 'busybox:1.36.0-uclibc', 'core'),
 
     # download tmdb dump of ids in database and insert into downloads - run and exit
     'mktmdbnetfetchbulk': ('mktmdbnetfetchbulk', 'scratch', 'core'),
@@ -158,7 +160,7 @@ STAGE_CORE_IMAGES = {
     'mkwebaxum': ('mkwebaxum', 'busybox:1.36.0-uclibc', 'core'),
 
     # website via rust and rocket
-    #'mkwebrocket': ('mkwebrocket', 'busybox:1.36.0-uclibc', 'core'),
+    # 'mkwebrocket': ('mkwebrocket', 'busybox:1.36.0-uclibc', 'core'),
 }
 
 STAGE_ONE_GAME_SERVERS = {

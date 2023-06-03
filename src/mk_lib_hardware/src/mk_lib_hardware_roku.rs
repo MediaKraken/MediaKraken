@@ -88,18 +88,50 @@ pub async fn mk_lib_hardware_roku_app_launch(
     Ok(request_json)
 }
 
-/*
-def com_roku_network_app_icon(roku_addr, roku_port, roku_app_id):
-    """
-    Grab app icon
-    """
-    return urllib.request.urlopen(roku_addr + ':' + roku_port + '/query/icon/' + roku_app_id)
+pub async fn mk_lib_hardware_roku_icon_save(
+    roku_addr: String,
+    roku_port: i16,
+    roku_app_id: String,
+    file_path: String,
+) -> Result<(), Box<dyn std::error::Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let _result = mk_lib_network::mk_download_file_from_url(
+        format!("{}:{}/query/icon/{}", roku_addr, roku_port, roku_app_id),
+        &file_path,
+    )
+    .await
+    .unwrap();
+    Ok(())
+}
 
-
-def com_roku_network_touch(roku_addr, roku_port, x_pos, y_pos):
-    """
-    'Click' screen
-    """
-    return urllib.request.urlopen(roku_addr + ':' + roku_port + '/input?touch.0.x=' + str(x_pos)
-                                  + '.0&touch.0.y=' + str(y_pos) + '.0&touch.0.op=down')
- */
+pub async fn mk_lib_hardware_roku_touch_sreen(
+    roku_addr: String,
+    roku_port: i16,
+    x_pos: u16,
+    y_pos: u16,
+) -> Result<(), Box<dyn std::error::Error>> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    let _result = mk_lib_network::mk_data_from_url(format!(
+        "{}:{}/input?touch.0.x={}.0&touch.0.y={}.0&touch.0.op=down",
+        roku_addr, roku_port, x_pos, y_pos
+    ))
+    .await
+    .unwrap();
+    Ok(())
+}

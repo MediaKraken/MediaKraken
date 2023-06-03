@@ -19,6 +19,9 @@
 # mkgamesdbnetfetchbulk
 \rsync -a ../src/mk_lib_* ../docker/core/mkgamesdbnetfetchbulk/. --exclude target
 
+# mkglobalcache
+\rsync -a ../src/mk_lib_* ../docker/core/mkglobalcache/. --exclude target
+
 # mkhardwarecontrol
 \rsync -a ../src/mk_lib_* ../docker/core/mkhardwarecontrol/. --exclude target
 

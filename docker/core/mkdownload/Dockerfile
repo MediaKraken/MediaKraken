@@ -1,7 +1,6 @@
-FROM mediakraken/mkbase_rust_debian:dev as cargo-build
-
 ARG BRANCHTAG
 
+FROM mediakraken/mkbase_rust_debian:"${BRANCHTAG}" as cargo-build
 WORKDIR /mediakraken
 
 COPY ./ .

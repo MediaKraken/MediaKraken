@@ -392,6 +392,16 @@ services:
       mode: replicated
       replicas: 1
 
+  redis:
+    image: mediakraken/mkredis:${BRANCH}
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    deploy:
+      mode: replicated
+      replicas: 1
+    networks:
+      - mediakraken_network
+
   schedulesdirectupdate:
     image: mediakraken/mkschedulesdirectupdate:${BRANCH}
     secrets:
@@ -513,7 +523,7 @@ services:
       - secure_key
       - csrf_key
     environment:
-      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672, mkstack_redis:6379
     command: sh -c "/wait && /mediakraken/mkwebapp"
     stop_grace_period: 30s
     stop_signal: SIGUSR1

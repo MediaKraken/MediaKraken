@@ -5,6 +5,7 @@ members = [
     "mkcron",
     "mkdownload",
     "mkgamesdbnetfetchbulk",
+    "mkglobalcache",
     "mkhardwarecontrol",
     "mkhardwarescanner",
     "mkinotify",
