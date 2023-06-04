@@ -1,12 +1,16 @@
+# outside of build step, hence have to re arg it below
 ARG BRANCHTAG
 
 FROM mediakraken/mkbase_rust_debian:"${BRANCHTAG}" as cargo-build
+
+ARG BRANCHTAG
 
 WORKDIR /mediakraken
 
 COPY ./ .
 
-RUN apt update && apt install libudev-dev -y
+ENV RUSTFLAGS="-C target-feature=-crt-static"
+
 RUN if [ "${BRANCHTAG}" = "prod" ]; \
   then cargo build --release \
   && cp /mediakraken/target/release/mk* /mediakraken/target/.; \
@@ -27,4 +31,4 @@ COPY --from=cargo-build /etc/group /etc/group
 COPY --from=cargo-build /mediakraken/target/mktmdbnetfetchupdate /mktmdbnetfetchupdate
 
 # Use an unprivileged user.
-# USER mediakraken:mediakraken
+USER mediakraken:mediakraken

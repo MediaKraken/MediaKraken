@@ -1,6 +1,9 @@
+# outside of build step, hence have to re arg it below
 ARG BRANCHTAG
 
 FROM mediakraken/mkbase_rust_debian:"${BRANCHTAG}" as cargo-build
+
+ARG BRANCHTAG
 
 WORKDIR /mediakraken
 

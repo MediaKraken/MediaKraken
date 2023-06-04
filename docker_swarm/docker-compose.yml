@@ -309,6 +309,21 @@ services:
     networks:
       - mediakraken_network
 
+  openlibrarynetfetchbulk:
+    image: mediakraken/mkopenlibrarynetfetchbulk:${BRANCH}
+    secrets:
+      - db_password
+    command: sh -c "/mkopenlibrarynetfetchbulk"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 0
+      restart_policy:
+        condition: none
+
   pgadmin:
     image: dpage/pgadmin4:7.2
     stop_grace_period: 30s

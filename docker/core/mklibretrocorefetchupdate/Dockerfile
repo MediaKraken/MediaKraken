@@ -1,12 +1,16 @@
+# outside of build step, hence have to re arg it below
 ARG BRANCHTAG
 
 FROM mediakraken/mkbase_rust_debian:"${BRANCHTAG}" as cargo-build
+
+ARG BRANCHTAG
 
 WORKDIR /mediakraken
 
 COPY ./ .
 
-RUN apt update && apt install libudev-dev -y
+ENV RUSTFLAGS="-C target-feature=-crt-static"
+
 RUN if [ "${BRANCHTAG}" = "prod" ]; \
   then cargo build --release \
   && cp /mediakraken/target/release/mk* /mediakraken/target/.; \
@@ -20,8 +24,8 @@ RUN if [ "${BRANCHTAG}" = "prod" ]; \
 FROM debian:bullseye-20230522-slim AS runtime
 
 # Import from builder.
-COPY --from=cargo-build /etc/passwd /etc/passwd
-COPY --from=cargo-build /etc/group /etc/group
+# COPY --from=cargo-build /etc/passwd /etc/passwd
+# COPY --from=cargo-build /etc/group /etc/group
 
 # Copy our build
 COPY --from=cargo-build /mediakraken/target/mklibretrocorefetchupdate /mklibretrocorefetchupdate

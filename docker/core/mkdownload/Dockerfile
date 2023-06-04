@@ -1,11 +1,16 @@
+# outside of build step, hence have to re arg it below
 ARG BRANCHTAG
 
 FROM mediakraken/mkbase_rust_debian:"${BRANCHTAG}" as cargo-build
+
+ARG BRANCHTAG
+
 WORKDIR /mediakraken
 
 COPY ./ .
 
-RUN apt update && apt install libudev-dev -y
+ENV RUSTFLAGS="-C target-feature=-crt-static"
+
 RUN if [ "${BRANCHTAG}" = "prod" ]; \
   then cargo build --release \
   && cp /mediakraken/target/release/mk* /mediakraken/target/.; \
@@ -17,18 +22,15 @@ RUN if [ "${BRANCHTAG}" = "prod" ]; \
 ## Final image
 ####################################################################################################
 FROM debian:bullseye-20230522-slim AS runtime
-RUN apt-get update && apt-get -y install wget \
-  && wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.9.0/wait \
-  && chmod +x /wait \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-  && wget -q https://github.com/yt-dlp/yt-dlp/releases/download/2023.01.06/yt-dlp_linux -O /yt-dlp \
-  && chmod a+rx /yt-dlp
+
+ADD https://github.com/yt-dlp/yt-dlp/releases/download/2023.01.06/yt-dlp_linux /yt-dlp
+
+RUN chmod a+rx /yt-dlp
 
 # Import from builder.
-COPY --from=cargo-build /etc/passwd /etc/passwd
-COPY --from=cargo-build /etc/group /etc/group
-COPY --from=cargo-build /bin/bash /sh
+# COPY --from=cargo-build /etc/passwd /etc/passwd
+# COPY --from=cargo-build /etc/group /etc/group
+COPY --from=cargo-build /wait /wait
 
 # Copy our build
 COPY --from=cargo-build /mediakraken/target/mkdownload /mkdownload
