@@ -431,7 +431,7 @@ async fn main() {
         )
         .layer(SessionLayer::new(session_store))
         // after authsessionlayer so anyone can access
-        .route_with_tsr("/about", get(public::bp_about::public_about))
+        .route_with_tsr("/public/about", get(public::bp_about::public_about))
         .route_with_tsr("/error/401", get(bp_error::general_not_authorized))
         .route_with_tsr("/error/403", get(bp_error::general_not_administrator))
         .route_with_tsr("/error/500", get(bp_error::general_error))
