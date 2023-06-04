@@ -88,6 +88,8 @@ services:
     deploy:
       mode: replicated
       replicas: 0
+      restart_policy:
+        condition: none
     networks:
       - mediakraken_network
 
@@ -103,6 +105,8 @@ services:
     deploy:
       mode: replicated
       replicas: 0
+      restart_policy:
+        condition: none
 
   guessitrest:
     image: mediakraken/mkguessitrest:${BRANCH}
@@ -149,6 +153,8 @@ services:
     deploy:
       mode: replicated
       replicas: 0
+      restart_policy:
+        condition: none
       placement:
         constraints: [ node.role == manager ]
 
@@ -177,6 +183,8 @@ services:
     deploy:
       mode: replicated
       replicas: 0
+      restart_policy:
+        condition: none
     networks:
       - mediakraken_network
 
@@ -192,6 +200,8 @@ services:
     deploy:
       mode: replicated
       replicas: 0
+      restart_policy:
+        condition: none
     networks:
       - mediakraken_network
 
@@ -232,6 +242,8 @@ services:
     deploy:
       mode: replicated
       replicas: 0
+      restart_policy:
+        condition: none
 
   # runs the mumble chat server
   mumble:
@@ -427,6 +439,8 @@ services:
     deploy:
       mode: replicated
       replicas: 0
+      restart_policy:
+        condition: none
 
   sharescanner:
     image: mediakraken/mksharescanner:${BRANCH}
@@ -470,6 +484,8 @@ services:
     deploy:
       mode: replicated
       replicas: 0
+      restart_policy:
+        condition: none
 
   tmdbnetfetchupdate:
     image: mediakraken/mktmdbnetfetchupdate:${BRANCH}
@@ -483,6 +499,8 @@ services:
     deploy:
       mode: replicated
       replicas: 0
+      restart_policy:
+        condition: none
 
   transcode:
     image: mediakraken/mktranscode:${BRANCH}
@@ -498,6 +516,8 @@ services:
     deploy:
       mode: replicated
       replicas: 0
+      restart_policy:
+        condition: none
 
   transmission:
     image: mediakraken/mktransmission:${BRANCH}
