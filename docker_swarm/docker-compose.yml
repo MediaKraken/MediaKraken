@@ -91,6 +91,19 @@ services:
     networks:
       - mediakraken_network
 
+  globalcache:
+    image: mediakraken/mkglobalcache:${BRANCH}
+    secrets:
+      - db_password
+    command: sh -c "/mkglobalcache"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 0
+
   guessitrest:
     image: mediakraken/mkguessitrest:${BRANCH}
     stop_grace_period: 30s
