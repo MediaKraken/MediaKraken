@@ -83,14 +83,14 @@ impl HasPermission<PgPool> for User {
 
 impl User {
     pub async fn get_user(id: i64, pool: &PgPool) -> Option<Self> {
-        let sqluser = sqlx::query_as::<_, SqlUser>("SELECT * FROM axum_users WHERE id = $1")
+        let sqluser = sqlx::query_as::<_, SqlUser>("SELECT * FROM mm_axum_users WHERE id = $1")
             .bind(id)
             .fetch_one(pool)
             .await
             .ok()?;
         // lets just get all the tokens the user can use, we will only use the full permissions if modifing them.
         let sql_user_perms = sqlx::query_as::<_, SqlPermissionTokens>(
-            "SELECT token FROM axum_user_permissions WHERE user_id = $1",
+            "SELECT token FROM mm_axum_user_permissions WHERE user_id = $1",
         )
         .bind(id)
         .fetch_all(pool)
@@ -179,7 +179,8 @@ pub async fn mk_lib_database_user_read(
         .unwrap();
     }
     let select_query = sqlx::query(
-        "select id, username, email, last_signin, last_signoff from mm_axum_users order by LOWER(username) offset $1 limit $2",
+        "select id, anonymous, username, email, last_signin, last_signoff \
+        from mm_axum_users order by LOWER(username) offset $1 limit $2",
     )
     .bind(offset)
     .bind(limit);
