@@ -160,8 +160,8 @@ pub struct DBUserList {
     pub anonymous: bool,
     pub username: String,
     pub email: String,
-    pub last_signin: DateTime<Utc>,
-    pub last_signoff: DateTime<Utc>,
+    pub last_signin: Option<DateTime<Utc>>,
+    pub last_signoff: Option<DateTime<Utc>>,
 }
 
 pub async fn mk_lib_database_user_read(

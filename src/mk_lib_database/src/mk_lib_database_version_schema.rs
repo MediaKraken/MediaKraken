@@ -163,6 +163,9 @@ pub async fn mk_lib_database_update_schema(
         sqlx::query("ALTER TABLE mm_network_shares ADD COLUMN mm_network_share_path TEXT;")
             .execute(&mut transaction)
             .await?;
+        sqlx::query("ALTER TABLE mm_network_shares ADD COLUMN mm_network_share_comment TEXT;")
+            .execute(&mut transaction)
+            .await?;
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 51).await?;
     }

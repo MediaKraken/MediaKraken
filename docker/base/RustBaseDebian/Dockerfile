@@ -2,7 +2,8 @@
 # as too much stuff is missing causing stuff later to not compile
 FROM rust:1.69.0-bullseye
 
-RUN apt update && apt install libudev-dev wget -y \
+RUN apt update && apt install libudev-dev wget ca-certificates -y \
+  && update-ca-certificates \
   && wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.9.0/wait \
   && chmod +x /wait
   
