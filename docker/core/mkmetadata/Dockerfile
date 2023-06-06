@@ -9,8 +9,6 @@ WORKDIR /mediakraken
 
 COPY ./ .
 
-ENV RUSTFLAGS="-C target-feature=-crt-static"
-
 RUN if [ "${BRANCHTAG}" = "prod" ]; \
   then cargo build --release \
   && cp /mediakraken/target/release/mk* /mediakraken/target/.; \
