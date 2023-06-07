@@ -2,12 +2,24 @@ use amqprs::channel::Channel;
 use amqprs::{
     callbacks::{DefaultChannelCallback, DefaultConnectionCallback},
     channel::{
-        BasicConsumeArguments, BasicPublishArguments, QueueBindArguments, QueueDeclareArguments,
+        BasicAckArguments, BasicConsumeArguments, BasicPublishArguments, ConsumerMessage,
+        QueueBindArguments, QueueDeclareArguments,
     },
     connection::{Connection, OpenConnectionArguments},
-    consumer::DefaultConsumer,
     BasicProperties,
 };
+use tokio::sync::mpsc::UnboundedReceiver;
+
+pub async fn rabbitmq_ack(rabbit_channel: &Channel, rabbit_msg_id: u64) -> Result<(), Box<dyn std::error::Error>> {
+    rabbit_channel
+        .basic_ack(BasicAckArguments::new(
+            rabbit_msg_id,
+            false,
+        ))
+        .await
+        .unwrap();
+    Ok(())
+}
 
 pub async fn rabbitmq_connect(
     rabbit_queue: &str,
@@ -46,6 +58,17 @@ pub async fn rabbitmq_connect(
         .await
         .unwrap();
     Ok((rabbit_connection, rabbit_channel))
+}
+
+pub async fn rabbitmq_consumer(
+    rabbit_queue: &str,
+    rabbit_channel: &Channel,
+) -> Result<UnboundedReceiver<ConsumerMessage>, Box<dyn std::error::Error>> {
+    let rabbit_args = BasicConsumeArguments::new(rabbit_queue, "mkstack_consumer")
+        .manual_ack(true)
+        .finish();
+    let (_ctag, mut rabbit_rx) = rabbit_channel.basic_consume_rx(rabbit_args).await.unwrap();
+    Ok(rabbit_rx)
 }
 
 pub async fn rabbitmq_publish(

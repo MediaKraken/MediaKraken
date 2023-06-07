@@ -1,7 +1,7 @@
-use amiquip::{AmqpProperties, Connection, Exchange, Publish, Result};
 use inotify::{EventMask, Inotify, WatchMask};
 use mk_lib_database;
 use mk_lib_logging::mk_lib_logging;
+use mk_lib_rabbitmq;
 use serde_json::json;
 use std::error::Error;
 
@@ -20,16 +20,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await
         .unwrap();
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
-        .await.unwrap();
+        .await
+        .unwrap();
 
-    // open rabbit connection
-    let mut rabbit_connection =
-        Connection::insecure_open("amqp://guest:guest@mkstack_rabbitmq:5672")?;
-    // Open a channel - None says let the library choose the channel ID.
-    let rabbit_channel = rabbit_connection.open_channel(None)?;
-
-    // Get a handle to the direct exchange on our channel.
-    let rabbit_exchange = Exchange::direct(&rabbit_channel);
+    let (_rabbit_connection, rabbit_channel) =
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkinotify")
+            .await
+            .unwrap();
 
     let mut inotify = Inotify::init().expect("Failed to initialize inotify");
 
@@ -56,13 +53,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
         for event in events {
             if event.mask.contains(EventMask::CREATE) {
                 if event.mask.contains(EventMask::ISDIR) {
-                    rabbit_exchange.publish(Publish::with_properties(
-                        format!("{{'Type': 'Dir Create', 'JSON': {:?}}}", event.name).as_bytes(),
-                        "mkinotify".to_string(),
-                        AmqpProperties::default()
-                            .with_delivery_mode(2)
-                            .with_content_type("text/plain".to_string()),
-                    ))?;
+                    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
+                        rabbit_channel.clone(),
+                        "mk_inotify",
+                        format!("{{'Type': 'Dir Create', 'JSON': {:?}}}", event.name),
+                    )
+                    .await
+                    .unwrap();
                     #[cfg(debug_assertions)]
                     {
                         mk_lib_logging::mk_logging_post_elk(
@@ -73,13 +70,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .unwrap();
                     }
                 } else {
-                    rabbit_exchange.publish(Publish::with_properties(
-                        format!("{{'Type': 'File Create', 'JSON': {:?}}}", event.name).as_bytes(),
-                        "mkinotify".to_string(),
-                        AmqpProperties::default()
-                            .with_delivery_mode(2)
-                            .with_content_type("text/plain".to_string()),
-                    ))?;
+                    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
+                        rabbit_channel.clone(),
+                        "mk_inotify",
+                        format!("{{'Type': 'File Create', 'JSON': {:?}}}", event.name),
+                    )
+                    .await
+                    .unwrap();
                     #[cfg(debug_assertions)]
                     {
                         mk_lib_logging::mk_logging_post_elk(
@@ -92,13 +89,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
             } else if event.mask.contains(EventMask::DELETE) {
                 if event.mask.contains(EventMask::ISDIR) {
-                    rabbit_exchange.publish(Publish::with_properties(
-                        format!("{{'Type': 'Dir Delete', 'JSON': {:?}}}", event.name).as_bytes(),
-                        "mkinotify".to_string(),
-                        AmqpProperties::default()
-                            .with_delivery_mode(2)
-                            .with_content_type("text/plain".to_string()),
-                    ))?;
+                    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
+                        rabbit_channel.clone(),
+                        "mk_inotify",
+                        format!("{{'Type': 'Dir Delete', 'JSON': {:?}}}", event.name),
+                    )
+                    .await
+                    .unwrap();
                     #[cfg(debug_assertions)]
                     {
                         mk_lib_logging::mk_logging_post_elk(
@@ -109,13 +106,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .unwrap();
                     }
                 } else {
-                    rabbit_exchange.publish(Publish::with_properties(
-                        format!("{{'Type': 'File Delete', 'JSON': {:?}}}", event.name).as_bytes(),
-                        "mkinotify".to_string(),
-                        AmqpProperties::default()
-                            .with_delivery_mode(2)
-                            .with_content_type("text/plain".to_string()),
-                    ))?;
+                    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
+                        rabbit_channel.clone(),
+                        "mk_inotify",
+                        format!("{{'Type': 'File Delete', 'JSON': {:?}}}", event.name),
+                    )
+                    .await
+                    .unwrap();
                     #[cfg(debug_assertions)]
                     {
                         mk_lib_logging::mk_logging_post_elk(
@@ -128,13 +125,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
             } else if event.mask.contains(EventMask::MODIFY) {
                 if event.mask.contains(EventMask::ISDIR) {
-                    rabbit_exchange.publish(Publish::with_properties(
-                        format!("{{'Type': 'Dir Modify', 'JSON': {:?}}}", event.name).as_bytes(),
-                        "mkinotify".to_string(),
-                        AmqpProperties::default()
-                            .with_delivery_mode(2)
-                            .with_content_type("text/plain".to_string()),
-                    ))?;
+                    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
+                        rabbit_channel.clone(),
+                        "mk_inotify",
+                        format!("{{'Type': 'Dir Modify', 'JSON': {:?}}}", event.name),
+                    )
+                    .await
+                    .unwrap();
                     #[cfg(debug_assertions)]
                     {
                         mk_lib_logging::mk_logging_post_elk(
@@ -145,13 +142,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .unwrap();
                     }
                 } else {
-                    rabbit_exchange.publish(Publish::with_properties(
-                        format!("{{'Type': 'File Modify', 'JSON': {:?}}}", event.name).as_bytes(),
-                        "mkinotify".to_string(),
-                        AmqpProperties::default()
-                            .with_delivery_mode(2)
-                            .with_content_type("text/plain".to_string()),
-                    ))?;
+                    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
+                        rabbit_channel.clone(),
+                        "mk_inotify",
+                        format!("{{'Type': 'File Modify', 'JSON': {:?}}}", event.name),
+                    )
+                    .await
+                    .unwrap();
                     #[cfg(debug_assertions)]
                     {
                         mk_lib_logging::mk_logging_post_elk(

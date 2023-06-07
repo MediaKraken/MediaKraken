@@ -80,16 +80,16 @@ services:
     image: mediakraken/mkgamesdbnetfetchbulk:${BRANCH}
     secrets:
       - db_password
-    command: sh -c "/mkgamesdbnetfetchbulk"
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672      
+    command: sh -c "/wait && /mkgamesdbnetfetchbulk"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
       - mediakraken_vol_static:/static
     deploy:
       mode: replicated
-      replicas: 0
-      restart_policy:
-        condition: none
+      replicas: 1
     networks:
       - mediakraken_network
 
@@ -97,16 +97,16 @@ services:
     image: mediakraken/mkglobalcache:${BRANCH}
     secrets:
       - db_password
-    command: sh -c "/mkglobalcache"
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672           
+    command: sh -c "/wait && /mkglobalcache"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     networks:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 0
-      restart_policy:
-        condition: none
+      replicas: 1
 
   guessitrest:
     image: mediakraken/mkguessitrest:${BRANCH}
@@ -139,6 +139,8 @@ services:
 
   hardwarescanner:
     image: mediakraken/mkhardwarescanner:${BRANCH}
+    secrets:
+      - db_password    
     volumes:
       # TODO why not store this in the db with the device as postgresql crypt
       # this stores the "push button" key
@@ -152,9 +154,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 0
-      restart_policy:
-        condition: none
+      replicas: 1
       placement:
         constraints: [ node.role == manager ]
 
@@ -175,16 +175,16 @@ services:
 
   libretrocorefetchupdate:
     image: mediakraken/mklibretrocorefetchupdate:${BRANCH}
-    command: sh -c "/mklibretrocorefetchupdate"
+    environment:
+      - WAIT_HOSTS=mkstack_rabbitmq:5672    
+    command: sh -c "/wait && /mklibretrocorefetchupdate"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
       - mediakraken_vol_static:/mediakraken/static
     deploy:
       mode: replicated
-      replicas: 0
-      restart_policy:
-        condition: none
+      replicas: 1
     networks:
       - mediakraken_network
 
@@ -192,16 +192,16 @@ services:
     image: mediakraken/mkmediascanner:${BRANCH}
     secrets:
       - db_password
-    command: sh -c "/mkmediascanner"
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+    command: sh -c "/wait && /mkmediascanner"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
       - mediakraken_vol_static:/mediakraken/static
     deploy:
       mode: replicated
-      replicas: 0
-      restart_policy:
-        condition: none
+      replicas: 1
     networks:
       - mediakraken_network
 
@@ -230,7 +230,9 @@ services:
     image: mediakraken/mkmetadatamame:${BRANCH}
     secrets:
       - db_password
-    command: sh -c "/mkmetadatamame"
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+    command: sh -c "/wait && /mkmetadatamame"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
@@ -241,9 +243,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 0
-      restart_policy:
-        condition: none
+      replicas: 1
 
   # runs the mumble chat server
   mumble:
@@ -313,16 +313,16 @@ services:
     image: mediakraken/mkopenlibrarynetfetchbulk:${BRANCH}
     secrets:
       - db_password
-    command: sh -c "/mkopenlibrarynetfetchbulk"
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+    command: sh -c "/wait && /mkopenlibrarynetfetchbulk"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     networks:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 0
-      restart_policy:
-        condition: none
+      replicas: 1
 
   pgadmin:
     image: dpage/pgadmin4:7.2
@@ -446,7 +446,9 @@ services:
     image: mediakraken/mkschedulesdirectupdate:${BRANCH}
     secrets:
       - db_password
-    command: sh -c "/mkschedulesdirectupdate"
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672      
+    command: sh -c "/wait && /mkschedulesdirectupdate"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     networks:
@@ -493,31 +495,31 @@ services:
     image: mediakraken/mktmdbnetfetchbulk:${BRANCH}
     secrets:
       - db_password
-    command: sh -c "/mktmdbnetfetchbulk"
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672      
+    command: sh -c "/wait && /mktmdbnetfetchbulk"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     networks:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 0
-      restart_policy:
-        condition: none
+      replicas: 1
 
   tmdbnetfetchupdate:
     image: mediakraken/mktmdbnetfetchupdate:${BRANCH}
     secrets:
       - db_password
-    command: sh -c "/mktmdbnetfetchupdate"
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+    command: sh -c "/wait && /mktmdbnetfetchupdate"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     networks:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 0
-      restart_policy:
-        condition: none
+      replicas: 1
 
   transcode:
     image: mediakraken/mktranscode:${BRANCH}
@@ -565,9 +567,6 @@ services:
 
   webapp:
     image: mediakraken/mkwebaxum:${BRANCH}
-    # TODO remove after testing.......don't want to bypass proxy
-    ports:
-      - "8080:8080"
     secrets:
       - db_password
       - secure_key

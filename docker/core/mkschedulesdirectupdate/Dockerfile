@@ -25,6 +25,7 @@ FROM debian:bullseye-20230522-slim AS runtime
 COPY --from=cargo-build /etc/passwd /etc/passwd
 COPY --from=cargo-build /etc/group /etc/group
 COPY --from=cargo-build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=cargo-build /wait /wait
 
 # Copy our build
 COPY --from=cargo-build /mediakraken/target/mkschedulesdirectupdate /mkschedulesdirectupdate

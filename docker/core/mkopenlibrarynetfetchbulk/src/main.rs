@@ -2,11 +2,14 @@ use mk_lib_compression;
 use mk_lib_database;
 use mk_lib_logging::mk_lib_logging;
 use mk_lib_network;
+use mk_lib_rabbitmq;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use serde_json::Value;
 use std::error::Error;
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
+use tokio::sync::Notify;
 
 #[derive(Serialize, Deserialize)]
 struct MetadataBook {
@@ -35,26 +38,62 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await
         .unwrap();
 
-    let _fetch_result_movie = mk_lib_network::mk_lib_network::mk_download_file_from_url(
-        "https://openlibrary.org/data/ol_cdump_latest.txt.gz".to_string(),
-        &"/ol_cdump_latest.txt.gz".to_string(),
+    let (_rabbit_connection, rabbit_channel) =
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkopenlibrarynetfetchbulk")
+            .await
+            .unwrap();
+
+    let mut rabbit_consumer = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer(
+        "mkopenlibrarynetfetchbulk",
+        &rabbit_channel,
     )
-    .await;
+    .await
+    .unwrap();
 
-    mk_lib_compression::mk_lib_compression::mk_decompress_tar_gz_file("/ol_cdump_latest.txt.gz")
-        .await
-        .unwrap();
+    tokio::spawn(async move {
+        while let Some(msg) = rabbit_consumer.recv().await {
+            if let Some(payload) = msg.content {
+                let json_message: Value =
+                    serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
+                #[cfg(debug_assertions)]
+                {
+                    mk_lib_logging::mk_logging_post_elk(
+                        std::module_path!(),
+                        json!({ "msg body": json_message }),
+                    )
+                    .await
+                    .unwrap();
+                }
 
-    let file = File::open("foo.txt")?;
-    let reader = BufReader::new(file);
-    for line in reader.lines() {
-        println!("{}", line?);
-    }
+                let _fetch_result = mk_lib_network::mk_lib_network::mk_download_file_from_url(
+                    "https://openlibrary.org/data/ol_cdump_latest.txt.gz".to_string(),
+                    &"/ol_cdump_latest.txt.gz".to_string(),
+                )
+                .await
+                .unwrap();
 
-    #[cfg(debug_assertions)]
-    {
-        // stop logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"STOP": "STOP"})).await;
-    }
+                mk_lib_compression::mk_lib_compression::mk_decompress_tar_gz_file(
+                    "/ol_cdump_latest.txt.gz",
+                )
+                .await
+                .unwrap();
+
+                let file = File::open("foo.txt").unwrap();
+                let reader = BufReader::new(file);
+                for line in reader.lines() {
+                    println!("{}", line.unwrap());
+                }
+
+                let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
+                    &rabbit_channel,
+                    msg.deliver.unwrap().delivery_tag(),
+                )
+                .await;
+            }
+        }
+    });
+
+    let guard = Notify::new();
+    guard.notified().await;
     Ok(())
 }

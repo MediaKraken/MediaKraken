@@ -11,9 +11,9 @@ codegen-units = 1
 
 [dependencies]
 argh = "0.1.6"
-amiquip = { version = "0.4.2", default-features = false }
 chrono = { version = "0.4.23", features = ["serde"] }
 mk_lib_logging = { path = "mk_lib_logging" }
+mk_lib_rabbitmq = { path = "mk_lib_rabbitmq" }
 reqwest = { version = "0.11.13", default-features = false, features = ["json", "rustls-tls"] }
 rustls = "0.21.1"
 rustls-pemfile = "1.0.1"

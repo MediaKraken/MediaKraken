@@ -1,12 +1,11 @@
-use amiquip::{
-    Connection, ConsumerMessage, ConsumerOptions, Exchange, QueueDeclareOptions, Result,
-};
 use mk_lib_database;
 use mk_lib_logging::mk_lib_logging;
 use mk_lib_network;
+use mk_lib_rabbitmq;
 use serde_json::{json, Value};
 use std::error::Error;
 use std::net::IpAddr;
+use tokio::sync::Notify;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -30,58 +29,54 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .await
             .unwrap();
 
-    // open rabbit connection
-    let mut rabbit_connection =
-        Connection::insecure_open("amqp://guest:guest@mkstack_rabbitmq:5672")?;
-    // Open a channel - None says let the library choose the channel ID.
-    let rabbit_channel = rabbit_connection.open_channel(None)?;
+    let (_rabbit_connection, rabbit_channel) =
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mksharescanner")
+            .await
+            .unwrap();
 
-    // Get a handle to the direct exchange on our channel.
-    let _rabbit_exchange = Exchange::direct(&rabbit_channel);
+    let mut rabbit_consumer =
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mksharescanner", &rabbit_channel)
+            .await
+            .unwrap();
 
-    // Declare the queue.
-    let queue = rabbit_channel.queue_declare("mk_sharescanner", QueueDeclareOptions::default())?;
-
-    // Start a consumer.
-    let consumer = queue.consume(ConsumerOptions::default())?;
-
-    loop {
-        for (_i, message) in consumer.receiver().iter().enumerate() {
-            match message {
-                ConsumerMessage::Delivery(delivery) => {
-                    let json_message: Value =
-                        serde_json::from_str(&String::from_utf8_lossy(&delivery.body))?;
-                    #[cfg(debug_assertions)]
-                    {
-                        mk_lib_logging::mk_logging_post_elk(
-                            std::module_path!(),
-                            json!({ "msg body": json_message }),
-                        )
-                        .await
-                        .unwrap();
-                    }
-                    // find and store all network shares
-                    let share_vec = mk_lib_network::mk_lib_network_nmap::mk_network_share_scan(
-                        json_message["Data"].to_string(),
+    tokio::spawn(async move {
+        while let Some(msg) = rabbit_consumer.recv().await {
+            if let Some(payload) = msg.content {
+                let json_message: Value =
+                    serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
+                #[cfg(debug_assertions)]
+                {
+                    mk_lib_logging::mk_logging_post_elk(
+                        std::module_path!(),
+                        json!({ "msg body": json_message }),
                     )
                     .await
                     .unwrap();
-                    for share_info in share_vec.iter() {
-                        mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_insert(
+                }
+                // find and store all network shares
+                let share_vec = mk_lib_network::mk_lib_network_nmap::mk_network_share_scan(
+                    json_message["Data"].to_string(),
+                )
+                .await
+                .unwrap();
+                for share_info in share_vec.iter() {
+                    mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_insert(
                             &sqlx_pool,
                             share_info.mm_share_ip.parse::<IpAddr>().unwrap(),
                             share_info.mm_share_path.clone(),
                             share_info.mm_share_comment.clone(),
                         )
-                        .await;
-                    }
-                    consumer.ack(delivery)?;
+                        .await.unwrap();
                 }
-                other => {
-                    eprintln!("Consumer ended: {:?}", other);
-                    break;
-                }
+                let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
+                    &rabbit_channel,
+                    msg.deliver.unwrap().delivery_tag(),
+                )
+                .await;
             }
         }
-    }
+    });
+    let guard = Notify::new();
+    guard.notified().await;
+    Ok(())
 }

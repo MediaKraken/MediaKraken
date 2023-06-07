@@ -29,6 +29,7 @@ FROM debian:bullseye-20230522-slim AS runtime
 COPY --from=ffmpeg-build /usr/local/bin/ffmpeg /usr/local/bin/ffmpeg
 COPY --from=ffmpeg-build /usr/local/bin/ffprobe /usr/local/bin/ffprobe
 COPY --from=ffmpeg-build /usr/local/lib /usr/local/lib
+COPY --from=cargo-build /wait /wait
 
 # Copy our build
 COPY --from=cargo-build /mediakraken/target/mktranscode /mktranscode

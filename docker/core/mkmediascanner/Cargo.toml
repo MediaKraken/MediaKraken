@@ -10,13 +10,13 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-amiquip = { version = "0.4.2", default-features = false }
 chrono = { version = "0.4.24", features = ["serde"] }
 fancy-regex = "0.11.0"
 mk_lib_common = { path = "mk_lib_common" }
 mk_lib_database = { path = "mk_lib_database" }
 mk_lib_file = { path = "mk_lib_file" }
 mk_lib_logging = { path = "mk_lib_logging" }
+mk_lib_rabbitmq = { path = "mk_lib_rabbitmq" }
 num-format = "0.4.4"
 reqwest = { version = "0.11.18", default-features = false, features = ["json", "rustls-tls"] }
 rustls = "0.20.8"

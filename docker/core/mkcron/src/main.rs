@@ -26,7 +26,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .unwrap();
 
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mk_cron")
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkcron")
             .await
             .unwrap();
 
@@ -64,7 +64,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     row_data.mm_cron_json["route_key"].as_str().unwrap(),
                     row_data.mm_cron_json.to_string(),
                 )
-                .await.unwrap();
+                .await
+                .unwrap();
                 mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_time_update(
                     &sqlx_pool,
                     row_data.mm_cron_guid,
