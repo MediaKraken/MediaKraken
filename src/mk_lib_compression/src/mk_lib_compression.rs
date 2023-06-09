@@ -42,7 +42,7 @@ pub async fn mk_decompress_zip(
     archive_file: &str,
     remove_zip: bool,
     output_path: &str,
-) -> Result<String, std::io::Error> {
+) -> Result<(), std::io::Error> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -64,38 +64,38 @@ pub async fn mk_decompress_zip(
         let mut override_path = PathBuf::from(output_path);
         override_path.push(outpath);
         outpath = override_path;
-        let comment = file.comment();
-        if !comment.is_empty() {
-            #[cfg(debug_assertions)]
-            {
-                mk_lib_logging::mk_logging_post_elk(
-                    std::module_path!(),
-                    json!({ "File": i, "comment": comment }),
-                )
-                .await
-                .unwrap();
-            }
-        }
+        // let comment = file.comment();
+        // if !comment.is_empty() {
+        //     #[cfg(debug_assertions)]
+        //     {
+        //         mk_lib_logging::mk_logging_post_elk(
+        //             std::module_path!(),
+        //             json!({ "File": i, "comment": comment }),
+        //         )
+        //         .await
+        //         .unwrap();
+        //     }
+        // }
         if (&*file.name()).ends_with('/') {
-            #[cfg(debug_assertions)]
-            {
-                mk_lib_logging::mk_logging_post_elk(
-                    std::module_path!(),
-                    json!({ "File": i, "extracted to": outpath.display().to_string() }),
-                )
-                .await
-                .unwrap();
-            }
+            // #[cfg(debug_assertions)]
+            // {
+            //     mk_lib_logging::mk_logging_post_elk(
+            //         std::module_path!(),
+            //         json!({ "File": i, "extracted to": outpath.display().to_string() }),
+            //     )
+            //     .await
+            //     .unwrap();
+            // }
             std::fs::create_dir_all(&outpath).unwrap();
         } else {
-            #[cfg(debug_assertions)]
-            {
-                mk_lib_logging::mk_logging_post_elk(
-                    std::module_path!(),
-                    json!({ "File": i, "extracted to": outpath.display().to_string(), "bytes": file.size() }),
-                )
-                .await.unwrap();
-            }
+            // #[cfg(debug_assertions)]
+            // {
+            //     mk_lib_logging::mk_logging_post_elk(
+            //         std::module_path!(),
+            //         json!({ "File": i, "extracted to": outpath.display().to_string(), "bytes": file.size() }),
+            //     )
+            //     .await.unwrap();
+            // }
             if let Some(p) = outpath.parent() {
                 if !p.exists() {
                     std::fs::create_dir_all(&p).unwrap();
@@ -114,7 +114,7 @@ pub async fn mk_decompress_zip(
         }
     }
     if remove_zip {
-        std::fs::remove_file(archive_file)?;
+        std::fs::remove_file(archive_file).unwrap();
     }
-    Ok("OK".to_string())
+    Ok(())
 }

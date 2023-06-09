@@ -22,11 +22,12 @@ pub async fn rabbitmq_ack(rabbit_channel: &Channel, rabbit_msg_id: u64) -> Resul
 }
 
 pub async fn rabbitmq_connect(
+    rabbit_host: &str,
     rabbit_queue: &str,
 ) -> Result<(Connection, Channel), Box<dyn std::error::Error>> {
     // open a connection to RabbitMQ server
     let rabbit_connection = Connection::open(&OpenConnectionArguments::new(
-        "mkstack_rabbitmq",
+        rabbit_host,
         5672,
         "guest",
         "guest",
@@ -48,7 +49,7 @@ pub async fn rabbitmq_connect(
         .unwrap()
         .unwrap();
     let rounting_key = rabbit_queue;
-    let exchange_name = "mediakraken";
+    let exchange_name = "amq.direct";
     rabbit_channel
         .queue_bind(QueueBindArguments::new(
             &queue_name,
@@ -76,7 +77,7 @@ pub async fn rabbitmq_publish(
     rabbit_queue: &str,
     rabbit_message: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let args = BasicPublishArguments::new("mediakraken", rabbit_queue);
+    let args = BasicPublishArguments::new("amq.direct", rabbit_queue);
     rabbit_channel
         .basic_publish(
             BasicProperties::default()

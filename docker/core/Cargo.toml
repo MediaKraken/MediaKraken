@@ -12,7 +12,7 @@ members = [
 #     "mklibretrocorefetchupdate",
 #     "mkmediascanner",
 #     "mkmetadata",
-#     "mkmetadatamame",
+     "mkmetadatamame",
 #     "mkmulticast",    
 #     "mkopenlibrarynetfetchbulk",
 #     "mkrabbitconsume",

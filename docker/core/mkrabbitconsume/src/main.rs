@@ -28,7 +28,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .await?;
 
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkrabbitconsume")
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mkrabbitconsume")
             .await
             .unwrap();
 

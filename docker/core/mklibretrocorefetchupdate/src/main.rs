@@ -31,7 +31,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mklibretrocorefetchupdate")
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mklibretrocorefetchupdate")
             .await
             .unwrap();
 
@@ -143,7 +143,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
         }
     });
-
     let guard = Notify::new();
     guard.notified().await;
     Ok(())

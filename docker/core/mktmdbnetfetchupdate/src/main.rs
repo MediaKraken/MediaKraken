@@ -54,7 +54,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //                              option_config_json["API"]["themoviedb"]).replace("\"", ""));
 
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mktmdbnetfetchupdate")
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mktmdbnetfetchupdate")
             .await
             .unwrap();
 
