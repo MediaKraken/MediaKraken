@@ -5,11 +5,11 @@ use std::error::Error;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let (rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mkrabbitmq", "mktest")
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkrabbitmq", "mktest")
             .await
             .unwrap();
 
-    for _ndx in 1..100001 {
+    for _ndx in 1..100_000_001 {
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
             rabbit_channel.clone(),
             "mktest",

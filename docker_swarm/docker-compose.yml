@@ -64,7 +64,7 @@ services:
       - mediakraken_network
 
   filebeat:
-    image: elastic/filebeat:7.17.9
+    image: elastic/filebeat:7.17.10
     environment:
       - ELASTICSEARCH_HOSTS=mkelk.beaverbay.local:9200
       - KIBANA_HOSTS=mkelk.beaverbay.local:5601
@@ -325,7 +325,7 @@ services:
       replicas: 1
 
   pgadmin:
-    image: dpage/pgadmin4:7.2
+    image: dpage/pgadmin4:7.3
     stop_grace_period: 30s
     stop_signal: SIGTERM
     networks:
@@ -455,9 +455,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 0
-      restart_policy:
-        condition: none
+      replicas: 1
 
   sharescanner:
     image: mediakraken/mksharescanner:${BRANCH}
