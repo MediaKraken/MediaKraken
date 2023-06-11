@@ -9,7 +9,7 @@ WORKDIR /mediakraken
 
 COPY ./ .
 
-RUN apt install libcurl4 libnghttp2-14
+RUN apt install libcurl4 libnghttp2-14 librtmp1 libssh2-1 libpsl5 libldap-2.4-2 libbrotli1
 
 RUN if [ "${BRANCHTAG}" = "prod" ]; \
   then cargo build --release \
@@ -17,6 +17,8 @@ RUN if [ "${BRANCHTAG}" = "prod" ]; \
   else cargo build \
   && cp /mediakraken/target/debug/mk* /mediakraken/target/.; \
   fi
+RUN ldd /mediakraken/target/mkmetadata | tr -s '[:blank:]' '\n' | grep '^/' | \
+  xargs -I % sh -c 'mkdir -p $(dirname deps%); cp % deps%;'
 
 ####################################################################################################
 ## Final image
@@ -28,8 +30,8 @@ FROM debian:bullseye-20230522-slim AS runtime
 # COPY --from=cargo-build /etc/group /etc/group
 COPY --from=cargo-build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=cargo-build /wait /wait
-COPY --from=cargo-build /usr/lib/x86_64-linux-gnu/libcurl.so.4.7.0 /usr/lib/x86_64-linux-gnu/libcurl.so.4
-COPY --from=cargo-build /usr/lib/x86_64-linux-gnu/libnghttp2.so.14.20.1 /usr/lib/x86_64-linux-gnu/libnghttp2.so.14
+# deps has full /usr/lib/x86 path.....hence copy to /
+COPY --from=cargo-build /mediakraken/deps /
 
 # Copy our build
 COPY --from=cargo-build /mediakraken/target/mkmetadata /mkmetadata

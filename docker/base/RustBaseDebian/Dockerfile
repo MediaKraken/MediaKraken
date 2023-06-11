@@ -2,7 +2,7 @@
 # as too much stuff is missing causing stuff later to not compile
 FROM rust:1.69.0-bullseye
 
-RUN apt update && apt install libudev-dev wget ca-certificates -y \
+RUN apt update && apt install libudev-dev wget ca-certificates libc-bin -y \
   && update-ca-certificates \
   && wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.12.0/wait \
   && chmod +x /wait
@@ -15,7 +15,6 @@ RUN wget https://github.com/mozilla/sccache/releases/download/v0.5.3/sccache-v0.
 
 ENV RUSTC_WRAPPER=/usr/local/bin/sccache
 ENV SCCACHE_REDIS="redis://mksccache:6379/mksccache"
-
 ENV RUSTFLAGS="-C target-feature=-crt-static"
 
 # Create appuser
