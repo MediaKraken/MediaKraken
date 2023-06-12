@@ -181,6 +181,7 @@ services:
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
+      - mediakraken_vol_emulation:/mediakraken/emulation    
       - mediakraken_vol_static:/mediakraken/static
     deploy:
       mode: replicated
@@ -236,7 +237,7 @@ services:
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
-      - ./mkmount:/mediakraken/mnt
+      - mediakraken_vol_emulation:/mediakraken/emulation
       # stores posters/etc so webserver can present
       - mediakraken_vol_static:/mediakraken/static
     networks:
@@ -604,6 +605,7 @@ volumes:
   mediakraken_vol_cache:
   mediakraken_vol_certs:
   mediakraken_vol_devices:
+  mediakraken_vol_emulation:
   mediakraken_vol_mbrainz_conf:
   mediakraken_vol_mbrainz_data:
   mediakraken_vol_mumble:
