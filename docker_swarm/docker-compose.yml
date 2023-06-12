@@ -24,11 +24,11 @@ services:
     environment:
       - MAX_CONNECTIONS=125
       - MAX_WAL_SENDERS=10
-      - SHARED_BUFFERS=4096MB
-      - WORK_MEM=256MB
-      - MAX_WORKER_PROCESSES=4
+      - SHARED_BUFFERS=2048MB
+      - WORK_MEM=64MB
+      - MAX_WORKER_PROCESSES=8
       - MAX_PARALLEL_WORKERS_PER_GATHER=2
-      - MAX_PARALLEL_WORKERS=4
+      - MAX_PARALLEL_WORKERS=8
       - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
     secrets:
       - db_password
