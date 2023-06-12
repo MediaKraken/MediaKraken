@@ -539,6 +539,8 @@ services:
 
   transmission:
     image: mediakraken/mktransmission:${BRANCH}
+    environment:
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672    
     ports:
       - "9091:9091"
       - "51413:51413/tcp"
@@ -549,7 +551,7 @@ services:
       - mediakraken_vol_transmission_incomplete:/transmission/incomplete
     deploy:
       mode: replicated
-      replicas: 0
+      replicas: 1
 
   tvheadend:
     image: mediakraken/mktvheadend:${BRANCH}

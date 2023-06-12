@@ -15,7 +15,7 @@ use mk_lib_network;
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use transmission_rpc::types::{
-    FreeSpace, Id, Nothing, Result, RpcResponse, SessionClose, Torrent, TorrentAction,
+    BasicAuth, FreeSpace, Id, Nothing, Result, RpcResponse, SessionClose, Torrent, TorrentAction,
     TorrentAddArgs, TorrentAddedOrDuplicate, TorrentGetField, Torrents,
 };
 use transmission_rpc::TransClient;
@@ -29,7 +29,13 @@ pub async fn admin_torrent(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
-    let mut transmission_client = TransClient::new("mkstack_transmission".parse().unwrap());
+    let mut transmission_client = TransClient::with_auth(
+        "mkstack_transmission".parse().unwrap(),
+        BasicAuth {
+            user: "admin".to_string(),
+            password: "metaman".to_string(),
+        },
+    );
     let res: RpcResponse<Torrents<Torrent>> =
         transmission_client.torrent_get(None, None).await.unwrap();
     let names: Vec<&String> = res
