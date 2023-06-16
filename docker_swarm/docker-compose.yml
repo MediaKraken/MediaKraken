@@ -239,22 +239,23 @@ services:
       replicas: 1
     networks:
       - mediakraken_network
-
-  logspout:
-    image: gliderlabs/logspout:v3.2.14
-    environment:
-      - ROUTE_URIS="multiline+logstash+tcp://mkelk.beaverbay.local:5000"
-      - LOGSTASH_FIELDS="environment=production"
-      - ALLOW_TTY=true
-      - SYSLOG_TAG="{{index .Service.Name}}"
-      - SYSLOG_HOSTNAME="{{index .Node.Hostname}}"      
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /etc/hostname:/etc/host_hostname:ro
-    deploy:
-      mode: global
-    networks:
-      - mediakraken_network
+  
+  # not used..........since filebeat collects the logs
+  # logspout:
+  #   image: gliderlabs/logspout:v3.2.14
+  #   environment:
+  #     - ROUTE_URIS="logstash+tcp://mkelk.beaverbay.local:5000"
+  #     - LOGSTASH_FIELDS="environment=production"
+  #     - ALLOW_TTY=true
+  #     - SYSLOG_TAG="{{index .Service.Name}}"
+  #     - SYSLOG_HOSTNAME="{{index .Node.Hostname}}"      
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - /etc/hostname:/etc/host_hostname:ro
+  #   deploy:
+  #     mode: global
+  #   networks:
+  #     - mediakraken_network
 
   mediascanner:
     image: mediakraken/mkmediascanner:${BRANCH}
