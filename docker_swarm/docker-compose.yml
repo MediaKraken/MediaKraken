@@ -46,6 +46,57 @@ services:
     networks:
       - mediakraken_network
 
+ #  # Postgresql server
+  #  database:
+  #    image: mediakraken/mkdatabase:${BRANCH}
+  #    environment:
+  #      - PGHOST=/tmp
+  #      - MAX_CONNECTIONS=20
+  #      - MAX_WAL_SENDERS=10
+  #      - PG_MODE=primary
+  #      - PG_PRIMARY_USER=${DBUSER}
+  #      - PG_PRIMARY_PASSWORD=${DBPASS}
+  #      - PG_ROOT_PASSWORD=${DBPASS}
+  #      - PG_PRIMARY_PORT=5432
+  #      - POSTGRES_DB=${DBDATABASE}
+  #      - POSTGRES_USER=${DBUSER}
+  #      - POSTGRES_PASSWORD=${DBPASS}
+  #    stop_grace_period: 30s
+  #    stop_signal: SIGTERM
+  #    networks:
+  #      - mediakraken_network_backend
+  #    deploy:
+  #      placement:
+  #        constraints:
+  #        - node.labels.type == primary
+  #        - node.role == worker
+  #
+  #  # Postgresql server replica
+  #  database-replica:
+  #    image: mediakraken/mkdatabase:${BRANCH}
+  #    environment:
+  #      - PGHOST=/tmp
+  #      - MAX_CONNECTIONS=20
+  #      - MAX_WAL_SENDERS=10
+  #      - PG_MODE=replica
+  #      - PG_PRIMARY_HOST=database
+  #      - PG_PRIMARY_PORT=5432
+  #      - PG_PRIMARY_USER=${DBUSER}
+  #      - PG_PRIMARY_PASSWORD=${DBPASS}
+  #      - PG_ROOT_PASSWORD=${DBPASS}
+  #      - POSTGRES_DB=${DBDATABASE}
+  #      - POSTGRES_USER=${DBUSER}
+  #      - POSTGRES_PASSWORD=${DBPASS}
+  #    stop_grace_period: 30s
+  #    stop_signal: SIGTERM
+  #    networks:
+  #      - mediakraken_network_backend
+  #    deploy:
+  #      placement:
+  #        constraints:
+  #        - node.labels.type != primary
+  #        - node.role == worker
+
   download:
     image: mediakraken/mkdownload:${BRANCH}
     secrets:
@@ -189,6 +240,22 @@ services:
     networks:
       - mediakraken_network
 
+  logspout:
+    image: gliderlabs/logspout:v3.2.14
+    environment:
+      - ROUTE_URIS="syslog+tcp://mkelk:5000"
+      - LOGSTASH_FIELDS="environment=production"
+      - ALLOW_TTY=true
+      - SYSLOG_TAG="{{index .Service.Name}}"
+      - SYSLOG_HOSTNAME="{{index .Node.Hostname}}"      
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/hostname:/etc/host_hostname:ro
+    deploy:
+      mode: global
+    networks:
+      - mediakraken_network
+
   mediascanner:
     image: mediakraken/mkmediascanner:${BRANCH}
     secrets:
@@ -245,6 +312,73 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+
+  # Container to monitor services running inside other containers
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat:8.8.1
+    hostname: "{{.Node.Hostname}}-metricbeat"
+    networks:
+      - mediakraken_network
+    volumes:
+      - /proc:/hostfs/proc:ro
+      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+      - /:/hostfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - mediakraken_vol_metricbeat:/usr/share/metricbeat/data
+    environment:
+      - ELASTICSEARCH_HOST=mkelk.beaverbay.local
+      - KIBANA_HOST=mkelk.beaverbay.local
+    # disable strict permission checks
+    command: ["--strict.perms=false", "-system.hostfs=/hostfs"]
+    deploy:
+      mode: global
+
+#  # Specific container and configuration to monitor the HOST (filesystem, memory, processes,...)
+#  metricbeat-host:
+#    build:
+#      context: ./docker/metricbeat
+#      args:
+#        - METRICBEAT_FILE=metricbeat-host.yml
+#    container_name: metricbeat-metricbeat-host
+#    command: -system.hostfs=/hostfs
+#    volumes:
+#      - /proc:/hostfs/proc:ro
+#      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+#      - /:/hostfs:ro
+#      - /var/run/docker.sock:/var/run/docker.sock
+#    environment:
+#      - "HOST_ELASTICSEARCH=mkelk.beaverbay.local:9222"
+#      - "HOST_KIBANA=mkelk.beaverbay.local:5666"
+#    extra_hosts:
+#      - "elasticsearch:172.17.0.1" # The IP of docker0 interface to access host from container
+#      - "kibana:172.17.0.1" # The IP of docker0 interface to access host from container
+#    network_mode: host # Mandatory to monitor HOST filesystem, memory, processes,...
+
+#  moosefsmaster:
+#    image: mediakraken/mkmoosemaster:${BRANCH}
+#    networks:
+#      - mediakraken_moosefsnet
+#    ports:
+#      - "9425:9425"
+#    deploy:
+#      mode: replicated
+#      replicas: 1
+#      placement:
+#        constraints: [node.role == manager]
+#
+#  moosefschunkserver:
+#    image: mediakraken/mkmoosechunkserver:${BRANCH}
+#    environment:
+#      - LABELS=M
+#      - SIZE=1
+#    networks:
+#      - mediakraken_moosefsnet
+#    volumes:
+#      - ./data/moosehdd0:/mnt/hdd0
+#    deploy:
+#      mode: global
+#      placement:
+#        constraints: [node.platform.os == linux]
 
   # runs the mumble chat server
   mumble:
