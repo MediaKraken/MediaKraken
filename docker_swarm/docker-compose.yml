@@ -243,7 +243,7 @@ services:
   logspout:
     image: gliderlabs/logspout:v3.2.14
     environment:
-      - ROUTE_URIS="syslog+tcp://mkelk:5000"
+      - ROUTE_URIS="multiline+logstash+tcp://mkelk.beaverbay.local:5000"
       - LOGSTASH_FIELDS="environment=production"
       - ALLOW_TTY=true
       - SYSLOG_TAG="{{index .Service.Name}}"
