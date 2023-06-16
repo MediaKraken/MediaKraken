@@ -742,6 +742,7 @@ volumes:
   mediakraken_vol_certs:
   mediakraken_vol_devices:
   mediakraken_vol_emulation:
+  mediakraken_vol_metricbeat:
   mediakraken_vol_mbrainz_conf:
   mediakraken_vol_mbrainz_data:
   mediakraken_vol_mumble:
