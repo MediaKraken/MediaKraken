@@ -1,0 +1,24 @@
+# this'll load all possible modules
+filebeat.config:
+  modules:
+    path: ${path.config}/modules.d/*.yml
+    reload.enabled: false
+
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
+
+processors:
+  - add_docker_metadata:
+    host: "unix:///var/run/docker.sock"
+
+output.elasticsearch:
+  hosts: '${ELASTICSEARCH_HOSTS:mkelk.beaverbay.local:9200}'
+
+filebeat.inputs:
+  - type: log 
+    paths:
+      - /var/lib/docker/containers/*/*.log
+      - /var/log/postgresql
+      - /var/log/mediakraken/nginx

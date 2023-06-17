@@ -73,6 +73,9 @@ STAGE_CORE_IMAGES = {
     # download files/etc trailers/etc from ampq records
     'mkdownload': ('mkdownload', 'busybox:1.36.0-uclibc', 'core'),
 
+    # filebeat
+    'mkfilebeat': ('mkfilebeat', 'elastic/filebeat:7.17.10', 'core'),
+
     # thegamesdb bulk data fetch
     'mkgamesdbnetfetchbulk': ('mkgamesdbnetfetchbulk', 'busybox:1.36.0-uclibc', 'core'),
 
