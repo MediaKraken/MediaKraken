@@ -22,7 +22,7 @@ RUN if [ "${BRANCHTAG}" = "prod" ]; \
 FROM debian:bullseye-20230522-slim AS runtime
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends ca-certificates wget gnupg2 gosu tini \
-  && gosu nobody true
+  && gosu nobody true \
   && bash -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ bullseye-pgdg main" >> /etc/apt/sources.list.d/pgdg.list' \
 	&& (wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -) \
   && apt-get update \
