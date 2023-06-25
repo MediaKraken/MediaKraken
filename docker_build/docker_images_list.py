@@ -55,6 +55,9 @@ STAGE_ONE_IMAGES = {
 STAGE_TWO_IMAGES = {}
 
 STAGE_CORE_IMAGES = {
+    # barman postgresql backup server
+    'mkbarman': ('mkbarman', 'debian:buster', 'core'),
+
     # broadcast server IP for web and client connectivity, must run from HOST
     # 'mkbroadcast': ('mkbroadcast', 'scratch', 'core'),   # retired!  mkmulticast instead
 
@@ -113,8 +116,14 @@ STAGE_CORE_IMAGES = {
     # "broadcast" multicast for discovery
     'mkmulticast': ('mkmulticast', 'busybox:1.36.0-uclibc', 'core'),
 
+    # musicbrainz load
+    'mkmusicbrainz': ('mkmusicbrainz', 'RustBaseDebian', 'core'),
+
     # nginx proxy for http to https and some bot blocking
     'mknginx': ('mknginx', 'alpine:3.13', 'core'),
+
+    # nginx pagespeed - retired by apache
+    # 'mknginxpagespeed': ('mknginxpagespeed', 'alpine:3.8', 'core'),
 
     # nut
     'mknut': ('mknut', 'alpine:3.17', 'core'),

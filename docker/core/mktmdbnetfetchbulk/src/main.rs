@@ -8,7 +8,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use serde_json::Value;
 use std::error::Error;
-use stdext::function_name;
 use tokio::sync::Notify;
 
 #[derive(Serialize, Deserialize)]
@@ -45,10 +44,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await
         .unwrap();
 
-    let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mktmdbnetfetchbulk")
-            .await
-            .unwrap();
+    let (_rabbit_connection, rabbit_channel) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect(
+        "mkstack_rabbitmq",
+        "mktmdbnetfetchbulk",
+    )
+    .await
+    .unwrap();
 
     let mut rabbit_consumer =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mktmdbnetfetchbulk", &rabbit_channel)
@@ -69,14 +70,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .await
                     .unwrap();
                 }
-                // TODO pull from json queue message!
-                let fetch_date: String = "05_30_2023".to_string();
-                // // grab the movie id's
+                // let fetch_date: String = "05_30_2023".to_string();
+                // grab the movie id's
                 let _fetch_result_movie =
                     mk_lib_network::mk_lib_network::mk_download_file_from_url(
                         format!(
                             "http://files.tmdb.org/p/exports/movie_ids_{}.json.gz",
-                            fetch_date
+                            json_message["Data"]
                         ),
                         &"/movie.gz".to_string(),
                     )
@@ -104,7 +104,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                               mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                                               metadata_struct.id.unwrap_or(0)).await.unwrap();
                             if download_result == false {
-                                let result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                             "themoviedb".to_string(),
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                             uuid::Uuid::new_v4(),
@@ -119,7 +119,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let _fetch_result_tv = mk_lib_network::mk_lib_network::mk_download_file_from_url(
                     format!(
                         "http://files.tmdb.org/p/exports/tv_series_ids_{}.json.gz",
-                        fetch_date
+                        json_message["Data"]
                     ),
                     &"/tv.gz".to_string(),
                 )
@@ -146,7 +146,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                               mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                                               metadata_struct.id.unwrap_or(0)).await.unwrap();
                             if download_result == false {
-                                let result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                             "themoviedb".to_string(),
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                             uuid::Uuid::new_v4(),

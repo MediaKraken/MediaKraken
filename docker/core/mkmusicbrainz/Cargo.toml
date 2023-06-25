@@ -1,0 +1,25 @@
+[package]
+name = "mkmusicbrainz"
+version = "0.0.1"
+edition = "2021"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
+
+[dependencies]
+mk_lib_database = { path = "mk_lib_database" }
+mk_lib_logging = { path = "mk_lib_logging" }
+mk_lib_rabbitmq = { path = "mk_lib_rabbitmq" }
+reqwest = { version = "0.11.18", default-features = false, features = ["json", "rustls-tls"] }
+rustls = "0.21.1"
+serde = { version = "1.0.163", features = ["derive"] }
+serde_json = "1.0.96"
+stdext = "0.3.1"
+sys-info = "0.9.1"
+tokio = { version = "1.28.2", features = ["full"] }
+
+[dev-dependencies]
+tokio-test = "*"

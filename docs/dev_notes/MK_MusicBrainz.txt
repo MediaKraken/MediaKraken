@@ -1,0 +1,39 @@
+git clone https://github.com/metabrainz/musicbrainz-docker.git
+cd musicbrainz-docker
+
+# depends on how new yer server is
+docker-compose build
+docker compose build
+
+docker compose run --rm musicbrainz createdb.sh -fetch
+
+# due to crash/redo?
+docker compose run --rm musicbrainz
+
+docker compose exec musicbrainz bash -c './admin/BuildMaterializedTables --database=MAINTENANCE all'
+
+docker compose down
+
+# kick up memory alot and change host name
+docker compose up -d
+
+# boom with 503
+docker compose exec indexer python -m sir reindex
+
+docker compose run --rm musicbrainz fetch-dump.sh search
+
+docker compose run --rm search load-search-indexes.sh --force
+
+docker compose down
+
+docker compose up -d
+
+
+
+# full db dumps.....only 4.6G compressed.......
+https://ftp.osuosl.org/pub/musicbrainz/data/fullexport/20230617-002144/
+    mkprod /home/spoot
+    tar -xf mbdump.tar.bz2
+    musicbrainz-docker/build/musicbrainz/scripts/createdb.sh
+
+http://mkbrainz:5000/ws/2/

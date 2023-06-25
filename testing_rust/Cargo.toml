@@ -31,6 +31,7 @@ members = [
     "test_walkdir",
     "test_webapp",
     "test_xml_rs",
+    "test_xml_generator",
     "test_xml_rs_mame",
     "test_xmlparser",                                    
 ]

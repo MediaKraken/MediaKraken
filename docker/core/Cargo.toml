@@ -14,6 +14,7 @@ members = [
 #     "mkmetadata",
 #     "mkmetadatamame",
 #     "mkmulticast",    
+     "mkmusicbrainz",    
 #     "mkopenlibrarynetfetchbulk",
 #     "mkrabbitconsume",
 #     "mkschedulesdirectupdate",
@@ -22,6 +23,6 @@ members = [
 #     "mktmdbnetfetchbulk",
 #     "mktmdbnetfetchupdate",
 #     "mktranscode",
-     "mkwebaxum",
+#     "mkwebaxum",
 # #    "mkwebrocket",
 ]

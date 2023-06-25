@@ -1,0 +1,5 @@
+When changing the hostname of your system, you must perform the following actions before you start any MythTV programs.
+ If you start a MythTV program before modifying the hostname in the database, the program will create new entries 
+ with the new hostname, meaning that the following procedure will fail because of duplicate entries--and will corrupt 
+ the database in the process. Therefore, you will need to restore the database backup you made before attempting the 
+ host name change (specifically, one you made before you ran any MythTV programs on the new host name), and then perform the name change.

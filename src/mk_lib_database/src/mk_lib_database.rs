@@ -37,16 +37,16 @@ pub async fn mk_lib_database_open_pool(pool_connections: u32) -> Result<sqlx::Pg
     {
         connection_string = "postgresql://postgres:metaman@mkstage/postgres".to_string();
     } else if Path::new("/run/secrets/db_password").exists() {
-        let dp_pass = fs::read_to_string("/run/secrets/db_password").unwrap();
+        let db_pass = fs::read_to_string("/run/secrets/db_password").unwrap();
         connection_string = format!(
             "postgresql://postgres:{}@mkstack_database/postgres",
-            encode(&dp_pass)
+            encode(&db_pass)
         );
     } else {
-        let dp_pass = env::var("POSTGRES_PASSWORD").unwrap();
+        let db_pass = env::var("POSTGRES_PASSWORD").unwrap();
         connection_string = format!(
             "postgresql://postgres:{}@mkdatabase/postgres",
-            encode(&dp_pass)
+            encode(&db_pass)
         );
     }
     let sqlx_pool = PgPoolOptions::new()

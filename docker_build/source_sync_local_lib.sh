@@ -46,6 +46,9 @@
 # mkmulticast
 \rsync -a ../src/mk_lib_* ../docker/core/mkmulticast/. --exclude target
 
+# mkmusicbrainz
+\rsync -a ../src/mk_lib_* ../docker/core/mkmusicbrainz/. --exclude target
+
 # mkopenlibrarynetfetchbulk
 \rsync -a ../src/mk_lib_* ../docker/core/mkopenlibrarynetfetchbulk/. --exclude target
 
