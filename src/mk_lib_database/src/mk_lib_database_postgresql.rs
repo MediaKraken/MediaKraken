@@ -43,6 +43,38 @@ pub async fn mk_lib_database_table_rows(
 }
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct PGTable {
+    pub table_name: String,
+}
+
+pub async fn mk_lib_database_tables(sqlx_pool: &sqlx::PgPool) -> Result<Vec<PGTable>, sqlx::Error> {
+    #[cfg(debug_assertions)]
+    {
+        mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Function": function_name!() }),
+        )
+        .await
+        .unwrap();
+    }
+    // this does NOT return sequences like the tables size does
+    let select_query = sqlx::query(
+        "SELECT tablename
+        FROM pg_catalog.pg_tables
+        WHERE schemaname != 'pg_catalog' AND 
+        schemaname != 'information_schema'
+        order by tablename;",
+    );
+    let table_rows: Vec<PGTable> = select_query
+        .map(|row: PgRow| PGTable {
+            table_name: row.get("tablename"),
+        })
+        .fetch_all(sqlx_pool)
+        .await?;
+    Ok(table_rows)
+}
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct PGTableSize {
     pub table_name: String,
     pub table_size: i64,
@@ -62,7 +94,7 @@ pub async fn mk_lib_database_table_size(
     }
     // query provided by postgresql wiki
     let select_query = sqlx::query(
-        "SELECT nspname || '.' || relname AS \"relation\", \
+        "SELECT relname AS \"relation\", \
         pg_total_relation_size(C.oid) AS \"total_size\" FROM pg_class C \
         LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace) \
         WHERE nspname NOT IN ('pg_catalog', 'information_schema') \
