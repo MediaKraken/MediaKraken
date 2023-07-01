@@ -129,6 +129,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     // loop through tables and see if dump files exist
                     let table_name = row_data.table_name.replace("public.", "");
                     println!("Table: {}", table_name);
+                    // TODO remove all l_* tables?   don't know what these are for
+                    // TODO remove all event* tables
+                    // TODO remove all link* tables
                     if Path::new(&format!("/mediakraken/mbdump/{}", table_name)).exists() {
                         println!("Table Found");
                         let output = Command::new("psql")

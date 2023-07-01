@@ -29,6 +29,10 @@ pub async fn provider_tmdb_movie_fetch(
     let result_json = provider_tmdb_movie_fetch_by_id(tmdb_id, tmdb_api_key)
         .await
         .unwrap();
+    if result_json.get("success").is_some() && result_json["success"] == false {
+        println!("Skipn Movie: {}", tmdb_id);
+        return;
+    }
     let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
     mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_insert(
         sqlx_pool,
@@ -74,9 +78,13 @@ pub async fn provider_tmdb_person_fetch(
         .unwrap();
     }
     // fetch and save json data via tmdb id
-    let _result_json = provider_tmdb_person_fetch_by_id(tmdb_id, tmdb_api_key)
+    let result_json = provider_tmdb_person_fetch_by_id(tmdb_id, tmdb_api_key)
         .await
         .unwrap();
+    if result_json.get("success").is_some() && result_json["success"] == false {
+        println!("Skipn Person: {}", tmdb_id);
+        return;
+    }        
 }
 
 pub async fn provider_tmdb_tv_fetch(
@@ -98,6 +106,10 @@ pub async fn provider_tmdb_tv_fetch(
     let result_json = provider_tmdb_tv_fetch_by_id(tmdb_id, tmdb_api_key)
         .await
         .unwrap();
+    if result_json.get("success").is_some() && result_json["success"] == false {
+        println!("Skipn TV: {}", tmdb_id);
+        return;
+    }    
     let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
     mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_insert(
         sqlx_pool,
@@ -483,8 +495,6 @@ pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_
         else:
             return None, None
 
-
-
     pub async fn com_tmdb_meta_bio_image_build(self, result_json):
         """
         # download info and set data to be ready for insert into database
@@ -594,22 +604,5 @@ pub async fn movie_fetch_save_tmdb_collection(db_connection, tmdb_collection_id,
         // update
         // db_connection.db_collection_update(collection_guid, guid_list)
         return 0  # to add totals later
-
-
-pub async fn metadata_fetch_tmdb_person(db_connection, provider_name, download_data):
-    // fetch and save json data via tmdb id
-    result_json = await common_global.api_instance.com_tmdb_metadata_bio_by_id(
-        download_data["mdq_provider_id"])
-    if result_json == None or result_json.status_code == 502:
-        asyncio.sleep(60)
-        metadata_fetch_tmdb_person(db_connection, provider_name, download_data)
-    else if result_json.status_code == 200:
-        db_connection.db_meta_person_update(provider_name=provider_name,
-                                                  provider_uuid=download_data['mdq_provider_id'],
-                                                  person_bio=result_json.json(),
-                                                  person_image=await common_global.api_instance.com_tmdb_meta_bio_image_build(
-                                                      result_json.json()))
-        db_connection.db_download_delete(download_data['mdq_id'])
-        db_connection.db_commit()
 
  */

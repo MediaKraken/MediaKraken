@@ -140,6 +140,8 @@ pub async fn mk_lib_database_metadata_movie_insert(
         .await
         .unwrap();
     }
+    println!("ID: {:?}", series_id);
+    println!("Json: {:?}", data_json);
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_metadata_movie (mm_metadata_movie_guid, \

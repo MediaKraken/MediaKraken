@@ -7,6 +7,10 @@ use std::collections::HashMap;
 use std::io::Cursor;
 use std::str;
 use stdext::function_name;
+use tokio::time::Duration;
+use reqwest_middleware::ClientBuilder;
+use reqwest_retry::{RetryTransientMiddleware, policies::ExponentialBackoff};
+use reqwest::Client;
 
 pub async fn custom_headers(map: &HashMap<String, String>) -> HeaderMap {
     let mut headers = HeaderMap::new();
@@ -26,6 +30,7 @@ pub async fn mk_data_from_url_to_json_custom_headers(
         let client = reqwest::Client::builder().build()?;
         let res: serde_json::Value = client
             .get(url)
+            .timeout(Duration::from_secs(30))
             .headers(custom_headers)
             .send()
             .await?
@@ -46,9 +51,19 @@ pub async fn mk_data_from_url_to_json(
         .await
         .unwrap();
     }
-    let client = reqwest::Client::builder().build()?;
+    let retry_policy = reqwest_retry::policies::ExponentialBackoff {
+        /// How many times the policy will tell the middleware to retry the request.
+        max_n_retries: 100,
+        min_retry_interval: std::time::Duration::from_secs(30),
+        max_retry_interval: std::time::Duration::from_secs(300),
+        backoff_exponent: 2,
+    };
+    let retry_transient_middleware = RetryTransientMiddleware::new_with_policy(retry_policy);
+    let client = ClientBuilder::new(Client::new()).with(retry_transient_middleware).build();
+    //let client = reqwest::Client::builder().build()?;
     let res: serde_json::Value = client
         .get(url)
+        .timeout(Duration::from_secs(30))
         .header(CONTENT_TYPE, "Content-Type: application/json")
         .header(
             USER_AGENT,

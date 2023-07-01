@@ -478,7 +478,7 @@ services:
       replicas: 1
 
   pgadmin:
-    image: dpage/pgadmin4:7.3
+    image: dpage/pgadmin4:7.4
     stop_grace_period: 30s
     stop_signal: SIGTERM
     networks:

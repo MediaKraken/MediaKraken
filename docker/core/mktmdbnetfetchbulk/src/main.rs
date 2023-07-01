@@ -76,8 +76,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     mk_lib_network::mk_lib_network::mk_download_file_from_url(
                         format!(
                             "http://files.tmdb.org/p/exports/movie_ids_{}.json.gz",
-                            json_message["Data"]
-                        ),
+                            json_message["Data"].as_str().unwrap()
+                        ).replace("\"", ""),
                         &"/movie.gz".to_string(),
                     )
                     .await
@@ -119,8 +119,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let _fetch_result_tv = mk_lib_network::mk_lib_network::mk_download_file_from_url(
                     format!(
                         "http://files.tmdb.org/p/exports/tv_series_ids_{}.json.gz",
-                        json_message["Data"]
-                    ),
+                        json_message["Data"].as_str().unwrap()
+                    ).replace("\"", ""),
                     &"/tv.gz".to_string(),
                 )
                 .await

@@ -31,4 +31,4 @@ COPY --from=cargo-build /wait /wait
 COPY --from=cargo-build /mediakraken/target/mktmdbnetfetchupdate /mktmdbnetfetchupdate
 
 # Use an unprivileged user.
-USER mediakraken:mediakraken
+# USER mediakraken:mediakraken
