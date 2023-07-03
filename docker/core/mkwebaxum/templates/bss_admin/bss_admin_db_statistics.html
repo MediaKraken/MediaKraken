@@ -42,15 +42,14 @@
                                         <tr>
                                             <td>{{ row_data.table_name }}</td>
                                             {% if row_data.table_rows != -1.0 %}
-                                            <td>{{ row_data.table_rows }}</td>
-                                            {% let total_rows = total_rows + row_data.table_rows %}
+                                            <td>{{ row_data.table_rows|number_format }}</td>
                                             {% else %}
                                             <td>0</td>
                                             {% endif %}
                                         </tr>
                                         {% endfor %}
                                         <tr>
-                                            <td>Total Rows:</td>
+                                            <td><b>Total Rows:</b></td>
                                             <td>{{ total_rows }}</td>
                                         </tr>
                                     </tbody>
@@ -74,12 +73,11 @@
                                         {% for row_data in template_data_db_size %}
                                         <tr>
                                             <td>{{ row_data.table_name }}</td>
-                                            <td>{{ row_data.table_size }}</td>
-                                            {% let total_size = total_size + row_data.table_size %}
+                                            <td>{{ row_data.table_size|byte_format }}</td>
                                         </tr>
                                         {% endfor %}
                                         <tr>
-                                            <td>Total Size:</td>
+                                            <td><b>Total Size:</b></td>
                                             <td>{{ total_size }}</td>
                                         </tr>
                                     </tbody>

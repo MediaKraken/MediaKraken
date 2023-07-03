@@ -20,20 +20,20 @@
                 <table class="table table-hover">
                     <tbody>
                         <tr>
-                            {#<p>Title: {{ data_title }}</p>
-                            <p>Runtime: {{data_runtime}}</p>
-                            <p>Rating: </p>
-                            <p>User Rating Avg: {{data_user_rating}}</p>
-                            <p>Release Date: {{data_first_aired}}</p>
-                            <p>Overview: {{data_overview}}</p>
+                            {#<p><b>Title:</b> {{ data_title }}</p>
+                            <p><b>Runtime:</b> {{data_runtime}}</p>
+                            <p><b>Rating:</b> </p>
+                            <p><b>User Rating Avg:</b> {{data_user_rating}}</p>
+                            <p><b>Release Date:</b> {{data_first_aired}}</p>
+                            <p><b>Overview:</b> {{data_overview}}</p>
                             {% if data_genres_list %}
-                            <p>Genres: {{data_genres_list}}</p>
+                            <p><b>Genres:</b> {{data_genres_list}}</p>
                             {% endif %}
                             {% if data_production %}
-                            <p>Production Companies: {{data_production}}</p>
+                            <p><b>Production Companies:</b> {{data_production}}</p>
                             {% endif %}
                             {% if data_review %}
-                            <p>Reviews:</p>
+                            <p><b>Reviews:</b></p>
                             {% endif %}#}
                         </tr>
                     </tbody>

@@ -726,6 +726,7 @@ services:
       - csrf_key
     environment:
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672, mkstack_redis:6379
+      - LANG=en_US.UTF-8
     command: sh -c "/wait && /mediakraken/mkwebapp"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -749,7 +750,6 @@ services:
 
   # wireshark:
   #   image: linuxserver/wireshark:4.0.6
-  #   container_name: wireshark
   #   cap_add:
   #     - NET_ADMIN
   #   security_opt:
@@ -764,7 +764,42 @@ services:
   #   ports:
   #     - 3000:3000 #optional http
   #     - 3001:3001 #optional https
-  #   restart: unless-stopped
+  #  deploy:
+  #    mode: replicated
+  #    replicas: 1
+  #    placement:
+  #      constraints: [ node.role == manager ]
+
+  # https://github.com/linuxserver/docker-wireguard
+  wireguard:
+    image: lscr.io/linuxserver/wireguard:latest
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - SERVERURL=wireguard.domain.com
+      - SERVERPORT=51820
+      - PEERS=1
+      - PEERDNS=auto
+      - INTERNAL_SUBNET=10.13.13.0
+      - ALLOWEDIPS=0.0.0.0/0
+      - PERSISTENTKEEPALIVE_PEERS=all
+      - LOG_CONFS=true
+    volumes:
+      - /path/to/appdata/config:/config
+      - /lib/modules:/lib/modules
+    ports:
+      - 51820:51820/udp
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [ node.role == manager ]
 
 # Docker private networks
 networks:
@@ -796,7 +831,6 @@ volumes:
   mediakraken_vol_transmission:
   mediakraken_vol_transmission_downloads:
   mediakraken_vol_transmission_incomplete:
-
 
 secrets:
   csrf_key:

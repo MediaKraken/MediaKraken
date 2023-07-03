@@ -25,10 +25,10 @@
                                     <h5 class="mb-0">Docker Info</h5>
                                 </div>
                                 <div class="card-body">
-                                    <p class="card-text">Operating System: {{template_data.operating_system.as_deref().unwrap_or_default()}}</p>
-                                    <p>Kernel: {{template_data.kernel_version.as_deref().unwrap_or_default()}}</p>
-                                    <p>Host IP: {{template_data_node_addr}}</p>
-                                    <p>Docker Engine: {{template_data.server_version.as_deref().unwrap_or_default()}}</p>
+                                    <p class="card-text"><b>Operating System:</b> {{template_data.operating_system.as_deref().unwrap_or_default()}}</p>
+                                    <p><b>Kernel:</b> {{template_data.kernel_version.as_deref().unwrap_or_default()}}</p>
+                                    <p><b>Host IP:</b> {{template_data_node_addr}}</p>
+                                    <p><b>Docker Engine:</b> {{template_data.server_version.as_deref().unwrap_or_default()}}</p>
                                 </div>
                             </div>
                         </div>

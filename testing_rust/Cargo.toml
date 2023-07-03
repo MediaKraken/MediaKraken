@@ -8,6 +8,7 @@ members = [
     "test_docker_api",
     "test_docker_running_api",
     "test_docker_running_port_api",
+    "test_format",
     "test_env_variables",
     "test_host_ips",
     "test_libxml",

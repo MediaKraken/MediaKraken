@@ -1,0 +1,24 @@
+[package]
+name = "mktestformat"
+version = "0.0.1"
+edition = "2021"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
+
+[dependencies]
+mk_lib_common = { path = "../../src/mk_lib_common" }
+reqwest = { version = "0.11.17", default-features = false, features = [
+    "json",
+    "native-tls",
+] }
+serde = { version = "1.0.160", features = ["derive"] }
+serde_json = "1.0.96"
+stdext = "0.3.1"
+tokio = { version = "1.28.0", features = ["full"] }
+
+[dev-dependencies]
+tokio-test = "*"

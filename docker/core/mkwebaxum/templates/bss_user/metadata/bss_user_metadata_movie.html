@@ -28,7 +28,6 @@
                         <a href="/user/metadata/movie_detail/{{row_data.template_metadata_guid}}">
                             <img src="/static{{row_data.template_metadata_poster|safe}}" loading="lazy" height="300"
                                 width="200">
-                            
                             {#{% if row_data.template_metadata_user_watched == true %}
                             <img class="watched_icon" src="/static/image/eye.png" loading="lazy" height="25" width="25">
                             {% endif %}
