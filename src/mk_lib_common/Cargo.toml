@@ -10,10 +10,12 @@ lto = true
 codegen-units = 1
 
 [dependencies]
+bytesize = {version = "1.2.0", features = ["serde"]}
 docker-api = { version = "0.13.0", features = ["swarm"] }
 futures = "0.3.28"
 lazy_static = "1.4.0"
 mk_lib_logging = { path = "../mk_lib_logging" }
+num-format = { version = "0.4.4", features = ["with-system-locale", "with-num-bigint"] }
 paginator = "0.2.6"
 serde_json = "1.0.96"
 stdext = "0.3.1"

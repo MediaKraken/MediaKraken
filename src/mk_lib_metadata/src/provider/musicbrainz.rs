@@ -1,11 +1,12 @@
 // https://github.com/oknozor/musicbrainz_rs
 
+use musicbrainz_rs::entity::release::*;
+use musicbrainz_rs::entity::CoverartResponse;
+use musicbrainz_rs::prelude::*;
+use musicbrainz_rs::FetchCoverart;
 
-
-
+const USER_AGENT: &str = "MediaKraken/0.0.1";
 /*
-
-'''
 A musicbrainz release represents the unique release (i.e. issuing) of a product on a
 specific date with specific release information such as the country, label, barcode,
 packaging, etc. If you walk into a store and purchase an album or single, they're each
@@ -14,18 +15,10 @@ represented in musicbrainz as one release.
 A recording is an entity in musicbrainz which can be linked to tracks on releases.
 Each track must always be associated with a single recording, but a recording can
 be linked to any number of tracks.
+*/
 
-'''
-
-class CommonMetadataMusicbrainz:
-    """
-    Class for interfacing with musicbrainz
-    """
-
+/*
     def __init__(self, option_config_json):
-        // If you plan to submit data, authenticate
-        // musicbrainzngs.auth(option_config_json.get('MediaBrainz','User').strip(),
-        // option_config_json.get('MediaBrainz','Password').strip())
         musicbrainzngs.set_useragent("MediaKraken_Server", common_version.APP_VERSION,
                                      "spootdev@gmail.com "
                                      "https://github.com/MediaKraken/MediaKraken_Deployment")
@@ -43,15 +36,6 @@ class CommonMetadataMusicbrainz:
         """
         Get release details
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         // "artist-credit-phrase" is a flat string of the credited artists
         // joined with " + " or whatever is given by the server.
         // You can also work with the "artist-credit" list manually.
@@ -67,15 +51,6 @@ class CommonMetadataMusicbrainz:
         """
         # search by artist and album name
         """
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                         message_text={
-                                                                             'function':
-                                                                                 inspect.stack()[0][
-                                                                                     3],
-                                                                             'locals': locals(),
-                                                                             'caller':
-                                                                                 inspect.stack()[1][
-                                                                                     3]})
         if disc_id != None:
             result = musicbrainzngs.get_releases_by_discid(disc_id,
                                                            includes=["artists", "recordings"])
@@ -138,15 +113,6 @@ pub async fn music_fetch_save_musicbrainz(db_connection, tmdb_id, metadata_uuid)
     """
     # fetch from musicbrainz
     """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'function':
-                                                                             inspect.stack()[0][
-                                                                                 3],
-                                                                         'locals': locals(),
-                                                                         'caller':
-                                                                             inspect.stack()[1][
-                                                                                 3]})
     // fetch and save json data via tmdb id
     result_json = TMDB_CONNECTION.com_tmdb_metadata_by_id(tmdb_id)
     if result_json != None:

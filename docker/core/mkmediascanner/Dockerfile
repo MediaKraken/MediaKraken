@@ -1,4 +1,7 @@
-FROM mediakraken/mkbase_rust:dev as cargo-build
+# outside of build step, hence have to re arg it below
+ARG BRANCHTAG
+
+FROM mediakraken/mkbase_rust_debian:"${BRANCHTAG}" as cargo-build
 
 ARG BRANCHTAG
 
@@ -16,11 +19,12 @@ RUN if [ "${BRANCHTAG}" = "prod" ]; \
 ####################################################################################################
 ## Final image
 ####################################################################################################
-FROM alpine:3.17.1 AS runtime
+FROM debian:bullseye-20230522-slim AS runtime
 
 # Import from builder.
 # COPY --from=cargo-build /etc/passwd /etc/passwd
 # COPY --from=cargo-build /etc/group /etc/group
+COPY --from=cargo-build /wait /wait
 
 # Copy our build
 COPY --from=cargo-build /mediakraken/target/mkmediascanner /mkmediascanner

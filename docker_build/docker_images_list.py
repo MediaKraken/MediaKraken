@@ -21,11 +21,11 @@ ALPINE_MIRROR = 'dl-cdn.alpinelinux.org'
 
 CARGO_CRATES = "crates.io"
 
-# CENTOS_MIRROR = 'mksonatype:8081/repository/repo_yum/'
-CENTOS_MIRROR = 'http://mirror.centos.org/'
+CENTOS_MIRROR = 'mksonatype:8081/repository/repo_yum/'
+# CENTOS_MIRROR = 'http://mirror.centos.org/'
 
-# DEBIAN_MIRROR = 'mksonatype:8081/repository/repo_apt/'
-DEBIAN_MIRROR = 'ftp.us.debian.org'
+DEBIAN_MIRROR = 'mksonatype:8081/repository/repo_apt/'
+# DEBIAN_MIRROR = 'ftp.us.debian.org'
 
 DOCKER_REPOSITORY = 'mkregistry:5000'
 DOCKERHUB_REPOSITORY = 'index.docker.io:443'
@@ -44,22 +44,20 @@ PYPI_MIRROR_PORT = ':8081'
 
 # base OS images to build off of, meaning there is a 'from' in the docker file(s) that use these
 STAGE_ONE_IMAGES = {
-    # 'AlpineBase3142Py3': ('mkbase_alpinepy3', 'alpine:3.14.2', 'base'),
-    # 'AlpineBase3142RustBuilder': ('mkbase_alpine_rust', 'alpine:3.14.2', 'base'),
-    # 'AlpineBase3143Py3': ('mkbase_alpinepy3', 'alpine:3.14.3', 'base'),
-    # 'AlpineBase3150Py3': ('mkbase_alpinepy3', 'alpine:3.15.0', 'base'),
-    # 'AlpineBase3162Py3': ('mkbase_alpinepy3', 'alpine:3.16.2', 'base'),
     # 'AlpineBase3173Py3': ('mkbase_alpinepy3', 'alpine:3.17.3', 'base'),
     'AlpineBaseFFMPEG': ('mkbase_alpine_ffmpeg', 'alpine:3.17.3', 'base'),
+    'DebianBaseFFMPEG': ('mkbase_debian_ffmpeg', 'debian:bullseye-20230522-slim', 'base'),
     'DebianBase11Py3': ('mkbase_debianpy3', 'python:3.12.0a3-bullseye', 'base'),
-    'RustBase': ('mkbase_rust', 'rust:1.69.0', 'base'),
-    'RustBaseAlpine': ('mkbase_rust_alpine', 'rust:1.69.0-alpine', 'base'),
-    'RustBaseDebian': ('mkbase_rust_debian', 'rust:1.69.0', 'base'),
+    'RustBaseAlpine': ('mkbase_rust_alpine', 'rust:1.70.0-alpine', 'base'),
+    'RustBaseDebian': ('mkbase_rust_debian', 'rust:1.70.0', 'base'),
 }
 
 STAGE_TWO_IMAGES = {}
 
 STAGE_CORE_IMAGES = {
+    # barman postgresql backup server
+    'mkbarman': ('mkbarman', 'debian:buster', 'core'),
+
     # broadcast server IP for web and client connectivity, must run from HOST
     # 'mkbroadcast': ('mkbroadcast', 'scratch', 'core'),   # retired!  mkmulticast instead
 
@@ -78,8 +76,14 @@ STAGE_CORE_IMAGES = {
     # download files/etc trailers/etc from ampq records
     'mkdownload': ('mkdownload', 'busybox:1.36.0-uclibc', 'core'),
 
+    # filebeat
+    'mkfilebeat': ('mkfilebeat', 'elastic/filebeat:7.17.10', 'core'),
+
     # thegamesdb bulk data fetch
     'mkgamesdbnetfetchbulk': ('mkgamesdbnetfetchbulk', 'busybox:1.36.0-uclibc', 'core'),
+
+    # download manufactuer stuff from global cache
+    'mkglobalcache': ('mkglobalcache', 'debian:bullseye-slim', 'core'),
 
     # guessit via web rest
     'mkguessitrest': ('mkguessitrest',
@@ -112,8 +116,14 @@ STAGE_CORE_IMAGES = {
     # "broadcast" multicast for discovery
     'mkmulticast': ('mkmulticast', 'busybox:1.36.0-uclibc', 'core'),
 
+    # musicbrainz load
+    'mkmusicbrainz': ('mkmusicbrainz', 'RustBaseDebian', 'core'),
+
     # nginx proxy for http to https and some bot blocking
     'mknginx': ('mknginx', 'alpine:3.13', 'core'),
+
+    # nginx pagespeed - retired by apache
+    # 'mknginxpagespeed': ('mknginxpagespeed', 'alpine:3.8', 'core'),
 
     # nut
     'mknut': ('mknut', 'alpine:3.17', 'core'),
@@ -121,8 +131,9 @@ STAGE_CORE_IMAGES = {
     # download open library dump of ids in database and insert into downloads - run and exit
     'mkopenlibrarynetfetchbulk': ('mkopenlibrarynetfetchbulk', 'scratch', 'core'),
 
+    # since using pgpool in sqlx for all containers, I don't think this has a use atm
     # database connection pooler
-    'mkpgbouncer': ('mkpgbouncer', 'alpine:3.17.1', 'core'),
+    # 'mkpgbouncer': ('mkpgbouncer', 'alpine:3.17.1', 'core'),
 
     # consume and process ampq records
     'mkrabbitconsume': ('mkrabbitconsume', 'busybox:1.36.0-uclibc', 'core'),
@@ -140,7 +151,7 @@ STAGE_CORE_IMAGES = {
     'mksharescanner': ('mksharescanner', 'busybox:1.36.0-uclibc', 'core'),
 
     # server for "fat" clients to talk too (local server)
-    #'mktcpserver': ('mktcpserver', 'busybox:1.36.0-uclibc', 'core'),
+    # 'mktcpserver': ('mktcpserver', 'busybox:1.36.0-uclibc', 'core'),
 
     # download tmdb dump of ids in database and insert into downloads - run and exit
     'mktmdbnetfetchbulk': ('mktmdbnetfetchbulk', 'scratch', 'core'),
@@ -161,7 +172,7 @@ STAGE_CORE_IMAGES = {
     'mkwebaxum': ('mkwebaxum', 'busybox:1.36.0-uclibc', 'core'),
 
     # website via rust and rocket
-    #'mkwebrocket': ('mkwebrocket', 'busybox:1.36.0-uclibc', 'core'),
+    # 'mkwebrocket': ('mkwebrocket', 'busybox:1.36.0-uclibc', 'core'),
 }
 
 STAGE_ONE_GAME_SERVERS = {

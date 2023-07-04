@@ -1,7 +1,7 @@
-use amiquip::{AmqpProperties, Connection, Exchange, Publish, Result};
 use chrono::prelude::*;
 use mk_lib_database;
 use mk_lib_logging::mk_lib_logging;
+use mk_lib_rabbitmq;
 use serde_json::json;
 use std::error::Error;
 use tokio::time::{sleep, Duration};
@@ -25,14 +25,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .await
             .unwrap();
 
-    // open rabbit connection
-    let mut rabbit_connection =
-        Connection::insecure_open("amqp://guest:guest@mkstack_rabbitmq:5672")?;
-    // Open a channel - None says let the library choose the channel ID.
-    let rabbit_channel = rabbit_connection.open_channel(None)?;
-
-    // Get a handle to the direct exchange on our channel.
-    let rabbit_exchange = Exchange::direct(&rabbit_channel);
+    let (_rabbit_connection, rabbit_channel) =
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mkcron")
+            .await
+            .unwrap();
 
     // start loop for cron checks
     loop {
@@ -63,13 +59,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
             let date_check: DateTime<Utc> = Utc::now() - time_delta;
             if row_data.mm_cron_last_run < date_check {
-                rabbit_exchange.publish(Publish::with_properties(
-                    row_data.mm_cron_json.to_string().as_bytes(),
-                    row_data.mm_cron_json["route_key"].to_string(),
-                    AmqpProperties::default()
-                        .with_delivery_mode(2)
-                        .with_content_type("text/plain".to_string()),
-                ))?;
+                mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
+                    rabbit_channel.clone(),
+                    row_data.mm_cron_json["route_key"].as_str().unwrap(),
+                    row_data.mm_cron_json.to_string(),
+                )
+                .await
+                .unwrap();
                 mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_time_update(
                     &sqlx_pool,
                     row_data.mm_cron_guid,

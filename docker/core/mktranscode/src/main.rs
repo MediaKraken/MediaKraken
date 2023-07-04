@@ -33,17 +33,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .await
             .unwrap();
 
-    // open rabbit connection
-    let mut rabbit_connection =
-        Connection::insecure_open("amqp://guest:guest@mkstack_rabbitmq:5672")?;
-    // Open a channel - None says let the library choose the channel ID.
-    let rabbit_channel = rabbit_connection.open_channel(None)?;
-
-    // Get a handle to the direct exchange on our channel.
-    let _rabbit_exchange = Exchange::direct(&rabbit_channel);
+    let (_rabbit_connection, rabbit_channel) =
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mktranscode")
+            .await
+            .unwrap();
 
     // Declare the queue.
-    let queue = rabbit_channel.queue_declare("mk_hardware", QueueDeclareOptions::default())?;
+    let queue = rabbit_channel.queue_declare("mktranscode", QueueDeclareOptions::default())?;
 
     // Start a consumer.
     let consumer = queue.consume(ConsumerOptions::default())?;
@@ -77,10 +73,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 )
                                 .await
                                 .unwrap();
-                            let tmp_uuid = uuid::Uuid::parse_str(
-                                &json_message["Media UUID"].to_string(),
-                            )
-                            .unwrap();
+                            let tmp_uuid =
+                                uuid::Uuid::parse_str(&json_message["Media UUID"].to_string())
+                                    .unwrap();
                             mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_ffmpeg_update_by_uuid(
                                 &sqlx_pool,
                                 tmp_uuid,
@@ -168,7 +163,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             }
                         } else if json_message["Subtype"] == "ChapterImage" {
                             // begin image generation
-                            let mut chapter_image_list = json!({ });
+                            let mut chapter_image_list = json!({});
                             let mut chapter_count: i16 = 0;
                             let mut first_image: bool = true;
                             let mut image_file_path: String = String::new();

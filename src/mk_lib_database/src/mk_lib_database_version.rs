@@ -4,7 +4,7 @@ use serde_json::json;
 use stdext::function_name;
 use tokio::time::{sleep, Duration};
 
-pub static DATABASE_VERSION: i32 = 52;
+pub static DATABASE_VERSION: i32 = 53;
 
 pub async fn mk_lib_database_postgresql_version(
     sqlx_pool: &sqlx::PgPool,

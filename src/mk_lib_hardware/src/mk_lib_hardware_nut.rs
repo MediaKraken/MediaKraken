@@ -18,7 +18,7 @@ pub async fn mk_lib_hardware_nut_connection(
         .with_auth(Some(auth))
         .with_debug(false)
         .build();
-    let mut nut_connection = Connection::new(&config).await?;
+    let nut_connection = Connection::new(&config).await?;
     Ok(nut_connection)
 }
 
@@ -69,7 +69,7 @@ pub async fn mk_lib_hardware_nut_ups_list(
 }
 
 pub async fn mk_lib_hardware_nut_connection_close(
-    mut nut_connection: Connection,
+    nut_connection: Connection,
 ) -> Result<(), Box<dyn std::error::Error>> {
     nut_connection.close().await?;
     Ok(())

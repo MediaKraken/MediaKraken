@@ -4,7 +4,7 @@ use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use stdext::function_name;
 use transmission_rpc::types::{
-    Id, Nothing, Result, RpcResponse, SessionClose, Torrent, TorrentAction,
+    BasicAuth, Id, Nothing, Result, RpcResponse, SessionClose, Torrent, TorrentAction,
     TorrentAddArgs, TorrentAddedOrDuplicate, TorrentGetField, Torrents,
 };
 use transmission_rpc::TransClient;
@@ -19,8 +19,14 @@ pub async fn mk_network_transmission_login() -> Result<transmission_rpc::TransCl
         .await
         .unwrap();
     }
-    let client = TransClient::new("mkstack_transmission".to_string().parse()?);
-    Ok(client)
+    let mut transmission_client = TransClient::with_auth(
+        "mkstack_transmission".parse().unwrap(),
+        BasicAuth {
+            user: "admin".to_string(),
+            password: "metaman".to_string(),
+        },
+    );
+    Ok(transmission_client)
 }
 
 pub async fn mk_network_transmission_close(
@@ -63,15 +69,6 @@ pub async fn mk_network_transmission_add_torrent(
 pub async fn mk_network_transmission_list_torrents(
     mut transmission_client: transmission_rpc::TransClient,
 ) -> Result<()> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let res: RpcResponse<Torrents<Torrent>> = transmission_client.torrent_get(None, None).await?;
     let names: Vec<&String> = res
         .arguments
@@ -79,72 +76,62 @@ pub async fn mk_network_transmission_list_torrents(
         .iter()
         .map(|it| it.name.as_ref().unwrap())
         .collect();
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "names": names }))
-            .await
-            .unwrap();
-    }
 
-    let res1: RpcResponse<Torrents<Torrent>> = transmission_client
-        .torrent_get(
-            Some(vec![TorrentGetField::Id, TorrentGetField::Name]),
-            Some(vec![Id::Id(1), Id::Id(2), Id::Id(3)]),
-        )
-        .await?;
-    let first_three: Vec<String> = res1
-        .arguments
-        .torrents
-        .iter()
-        .map(|it| {
-            format!(
-                "{}. {}",
-                &it.id.as_ref().unwrap(),
-                &it.name.as_ref().unwrap()
-            )
+    /*
+    let result: Vec<(i32, i32)> = numbers
+        .into_iter()
+        .map(|n| {
+            number_of_times += 1;
+            return (n, number_of_times)
         })
+        .rev() // reverses the iterator returned by Map
         .collect();
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "first_three": first_three }),
-        )
-        .await
-        .unwrap();
-    }
+     */
+    // let res1: RpcResponse<Torrents<Torrent>> = transmission_client
+    //     .torrent_get(
+    //         Some(vec![TorrentGetField::Id, TorrentGetField::Name]),
+    //         Some(vec![Id::Id(1), Id::Id(2), Id::Id(3)]),
+    //     )
+    //     .await?;
+    // let first_three: Vec<String> = res1
+    //     .arguments
+    //     .torrents
+    //     .iter()
+    //     .map(|it| {
+    //         format!(
+    //             "{}. {}",
+    //             &it.id.as_ref().unwrap(),
+    //             &it.name.as_ref().unwrap()
+    //         )
+    //     })
+    //     .collect();
 
-    let res2: RpcResponse<Torrents<Torrent>> = transmission_client
-        .torrent_get(
-            Some(vec![
-                TorrentGetField::Id,
-                TorrentGetField::HashString,
-                TorrentGetField::Name,
-            ]),
-            Some(vec![Id::Hash(String::from(
-                "64b0d9a53ac9cd1002dad1e15522feddb00152fe",
-            ))]),
-        )
-        .await?;
-    let info: Vec<String> = res2
-        .arguments
-        .torrents
-        .iter()
-        .map(|it| {
-            format!(
-                "{:5}. {:^45} {}",
-                &it.id.as_ref().unwrap(),
-                &it.hash_string.as_ref().unwrap(),
-                &it.name.as_ref().unwrap()
-            )
-        })
-        .collect();
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "info": info }))
-            .await
-            .unwrap();
-    }
+    // let res2: RpcResponse<Torrents<Torrent>> = transmission_client
+    //     .torrent_get(
+    //         Some(vec![
+    //             TorrentGetField::Id,
+    //             TorrentGetField::HashString,
+    //             TorrentGetField::Name,
+    //         ]),
+    //         Some(vec![Id::Hash(String::from(
+    //             "64b0d9a53ac9cd1002dad1e15522feddb00152fe",
+    //         ))]),
+    //     )
+    //     .await?;
+    // let info: Vec<String> = res2
+    //     .arguments
+    //     .torrents
+    //     .iter()
+    //     .map(|it| {
+    //         format!(
+    //             "{:5}. {:^45} {}",
+    //             &it.id.as_ref().unwrap(),
+    //             &it.hash_string.as_ref().unwrap(),
+    //             &it.name.as_ref().unwrap()
+    //         )
+    //     })
+    //     .collect();
+
     Ok(())
 }
 

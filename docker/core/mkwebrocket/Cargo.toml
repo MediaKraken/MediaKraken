@@ -10,10 +10,9 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-amiquip = { version = "0.4.2", default-features = false }
 bytesize = {version = "1.1.0", features = ["serde"]}
 chrono = { version = "0.4.23", features = ["serde"] }
-docker-api = { version = "0.12.1", features = ["swarm"] }
+docker-api = { version = "0.13.0", features = ["swarm"] }
 lazy_static = "1.4.0"
 libc = "0.2.126"
 num-format = { version = "0.4.4", features = ["with-system-locale"] }
@@ -28,7 +27,7 @@ ring = "0.16.20"
 rocket_auth = { git = "https://github.com/MediaKraken/rocket_auth", branch = "dev", version = "0.4.0", features = ["sqlx-postgres"]  }
 serde = { version = "1.0.137", features = ["derive"] }
 serde_json = "1.0.91"
-sqlx = { version = "0.5.13", features = [
+sqlx = { version = "0.6.3", features = [
     "chrono",
     "json",
     "runtime-tokio-rustls",
@@ -41,11 +40,11 @@ tera = "1.17.1"
 tokio = { version = "1.28.0", features = ["full"] }
 transmission-rpc = "0.4.0"
 urlencoding = "2.1.2"
-uuid = { version = "0.8.2", features = ["serde", "v4"] }
+uuid = { version = "1.3.3", features = ["serde", "v4"] }
 walkdir = "2.3.2"
 
-rocket = { version = "0.5.0-rc.2", features = ["json", "secrets", "uuid"] }
-rocket_dyn_templates = { version = "0.1.0-rc.2", features = ["tera"] }
+rocket = { version = "0.5.0-rc.3", features = ["json", "secrets", "uuid"] }
+rocket_dyn_templates = { version = "0.1.0-rc.3", features = ["tera"] }
 
 [dev-dependencies]
 tokio-test = "*"

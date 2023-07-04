@@ -109,7 +109,6 @@ if not os.path.isfile('./mkstack_db_password.txt'):
     file_handle.close()
     install_pid = subprocess.call(shlex.split('docker secret create db_password ./mkstack_db_password.txt'),
                                   stdout=subprocess.PIPE, shell=False)
-    install_pid.wait()
 
 if not os.path.isfile('./mkstack_secure_key.txt'):
     file_handle = open('./mkstack_secure_key.txt', 'w+')
@@ -119,7 +118,6 @@ if not os.path.isfile('./mkstack_secure_key.txt'):
     file_handle.close()
     install_pid = subprocess.call(shlex.split('docker secret create secure_key ./mkstack_secure_key.txt'),
                                   stdout=subprocess.PIPE, shell=False)
-    install_pid.wait()
 
 if not os.path.isfile('./mkstack_csrf_key.txt'):
     file_handle = open('./mkstack_csrf_key.txt', 'w+')
@@ -129,7 +127,6 @@ if not os.path.isfile('./mkstack_csrf_key.txt'):
     file_handle.close()
     install_pid = subprocess.call(shlex.split('docker secret create csrf_key ./mkstack_csrf_key.txt'),
                                   stdout=subprocess.PIPE, shell=False)
-    install_pid.wait()
 
 if not os.path.isfile('./mkstack_nut.txt'):
     file_handle = open('./mkstack_nut.txt', 'w+')
@@ -139,10 +136,9 @@ if not os.path.isfile('./mkstack_nut.txt'):
     file_handle.close()
     install_pid = subprocess.call(shlex.split('docker secret create nut_password ./mkstack_nut.txt'),
                                   stdout=subprocess.PIPE, shell=False)
-    install_pid.wait()
 
 # TODO when production, remove the secret files
 
+print("Downloading docker images from Dockerhub.", flush=True)
 install_pid = subprocess.call(shlex.split('python3 mediakraken_update_images.py'),
                               stdout=subprocess.PIPE, shell=False)
-install_pid.wait()

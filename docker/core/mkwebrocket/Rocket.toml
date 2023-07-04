@@ -7,4 +7,4 @@ keep_alive = 5
 # openssl rand -base64 32
 secret_key = "UOx4cuTYUlhBlvmuLuOrf4qTWJXnJMG3Z3Es4VxG3nI="
 #limits = { forms = 32768 }
-limits.data-form = "2MiB"
+limits = { data-form = "2MiB" }

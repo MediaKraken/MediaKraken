@@ -10,6 +10,7 @@ pub mod mk_lib_hardware_arduino_SPL06_007;
 pub mod mk_lib_hardware_chromecast;
 pub mod mk_lib_hardware_crestron;
 pub mod mk_lib_hardware_firetv;
+pub mod mk_lib_hardware_global_cache;
 pub mod mk_lib_hardware_hdhomerun;
 pub mod mk_lib_hardware_lenbrook;
 pub mod mk_lib_hardware_lg;

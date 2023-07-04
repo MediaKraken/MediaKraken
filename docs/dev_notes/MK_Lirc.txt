@@ -1,6 +1,7 @@
 remote file configs
 */MediaKraken_Deployment/hardware/lirc/remotes/
 
+
 # receive
 https://searchcode.com/codesearch/view/21616531/
 
@@ -17,5 +18,3 @@ grep '^N:' /proc/bus/input/devices
 #rasp sender
 https://github.com/devhirano/rasp-lircd-sender
 https://github.com/mtraver/rpi-ir-remote
-
-

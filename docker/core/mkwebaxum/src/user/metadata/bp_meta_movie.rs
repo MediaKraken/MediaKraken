@@ -11,7 +11,8 @@ use mk_lib_common::mk_lib_common_pagination;
 use mk_lib_database;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sqlx::postgres::PgPool;
+use sqlx::postgres::{PgPool, PgRow};
+use sqlx::{FromRow, Row};
 
 #[derive(Debug, Deserialize, Serialize)]
 struct TemplateMetaMovieList {
@@ -123,7 +124,6 @@ pub async fn user_metadata_movie(
 #[template(path = "bss_user/metadata/bss_user_metadata_movie_detail.html")]
 struct TemplateMetaMovieDetailContext<'a>{
     template_data_json: &'a serde_json::Value,
-    template_data_json_media_ffmpeg: &'a serde_json::Value,
     template_data_json_media_crew: &'a serde_json::Value,
 }
 
@@ -138,8 +138,7 @@ pub async fn user_metadata_movie_detail(
         .await
         .unwrap();
     let template = TemplateMetaMovieDetailContext {
-        template_data_json: &json!({ }),
-        template_data_json_media_ffmpeg: &json!({  }),
+        template_data_json: &movie_metadata.get("mm_metadata_movie_json"),
         template_data_json_media_crew: &json!({  }),
     };
     let reply_html = template.render().unwrap();

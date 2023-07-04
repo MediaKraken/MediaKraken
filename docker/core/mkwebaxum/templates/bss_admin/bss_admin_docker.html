@@ -25,10 +25,10 @@
                                     <h5 class="mb-0">Docker Info</h5>
                                 </div>
                                 <div class="card-body">
-                                    <p class="card-text">Operating System: {{"{:?}"|format(template_data.operating_system)}}</p>
-                                    <p>Kernel: {{"{:?}"|format(template_data.kernel_version)}}</p>
-                                    <p>Host IP: {{"{:?}"|format(template_data_node_addr)}}</p>
-                                    <p>Docker Engine: {{"{:?}"|format(template_data.server_version)}}</p>
+                                    <p class="card-text"><b>Operating System:</b> {{template_data.operating_system.as_deref().unwrap_or_default()}}</p>
+                                    <p><b>Kernel:</b> {{template_data.kernel_version.as_deref().unwrap_or_default()}}</p>
+                                    <p><b>Host IP:</b> {{template_data_node_addr}}</p>
+                                    <p><b>Docker Engine:</b> {{template_data.server_version.as_deref().unwrap_or_default()}}</p>
                                 </div>
                             </div>
                         </div>
@@ -40,11 +40,9 @@
                                 <div class="card-body">
                                     <p class="card-text">Token:</p>
                                     <p>Run following on other node(s) to join swarm cluster as manager.</p>
-                                    <p>docker swarm join --token {{"{:?}"|format(template_data_swarm.manager)}}
-                                        {{template_data_node_addr}}:2377
+                                    <p>docker swarm join --token {{template_data_swarm.manager.as_deref().unwrap_or_default()}} {{template_data_node_addr}}:2377
                                     <p>Run following on other node(s) to join swarm cluster as worker.</p>
-                                    <p>docker swarm join --token {{"{:?}"|format(template_data_swarm.worker)}}
-                                        {{template_data_node_addr}}:2377
+                                    <p>docker swarm join --token {{template_data_swarm.worker.as_deref().unwrap_or_default()}} {{template_data_node_addr}}:2377
                                     </p>
                                 </div>
                             </div>

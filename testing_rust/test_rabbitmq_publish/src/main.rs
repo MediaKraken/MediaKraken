@@ -1,17 +1,26 @@
-use amiquip::{Connection, Exchange, Publish, Result};
+use mk_lib_rabbitmq;
+use serde_json::json;
+use std::error::Error;
 
-fn main() -> Result<()> {
-    // Open connection.
-    let mut connection = Connection::insecure_open("amqp://guest:guest@localhost:5672")?;
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
+    let (rabbit_connection, rabbit_channel) =
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkrabbitmq", "mktest")
+            .await
+            .unwrap();
 
-    // Open a channel - None says let the library choose the channel ID.
-    let channel = connection.open_channel(None)?;
+    for _ndx in 1..100_000_001 {
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
+            rabbit_channel.clone(),
+            "mktest",
+            json!({}).to_string(),
+        )
+        .await
+        .unwrap();
+    }
 
-    // Get a handle to the direct exchange on our channel.
-    let exchange = Exchange::direct(&channel);
-
-    // Publish a message to the "hello" queue.
-    exchange.publish(Publish::new("hello there".as_bytes(), "hello"))?;
-
-    connection.close()
+    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
+        .await
+        .unwrap();
+    Ok(())
 }

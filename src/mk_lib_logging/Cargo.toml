@@ -15,6 +15,8 @@ reqwest = { version = "0.11.18", default-features = false, features = [
     "json",
     "native-tls",
 ] }
+reqwest-middleware = "0.2.2"
+reqwest-retry = "0.2.2"
 serde = { version = "1.0.163", features = ["derive"] }
 serde_json = "1.0.96"
 stdext = "0.3.1"

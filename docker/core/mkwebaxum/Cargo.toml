@@ -10,7 +10,6 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-amiquip = { version = "0.4.2", default-features = false }
 askama = { version = "0.12.0", features = ["with-axum", "mime", "mime_guess"] }
 askama_axum = "0.3.0"
 askama-filters = "0.1.3"
@@ -35,6 +34,7 @@ mk_lib_database = { path = "mk_lib_database" }
 mk_lib_logging = { path = "mk_lib_logging" }
 mk_lib_metadata = { path = "mk_lib_metadata" }
 mk_lib_network = { path = "mk_lib_network" }
+mk_lib_rabbitmq = { path = "mk_lib_rabbitmq" }
 num-format = { version = "0.4.4", features = ["with-system-locale"] }
 paginator = "0.2.6"
 rcgen = "0.10.0"

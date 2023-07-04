@@ -14,11 +14,6 @@ use mk_lib_logging::mk_lib_logging;
 use mk_lib_network;
 use serde_json::json;
 use sqlx::postgres::PgPool;
-use transmission_rpc::types::{
-    FreeSpace, Id, Nothing, Result, RpcResponse, SessionClose, Torrent, TorrentAction,
-    TorrentAddArgs, TorrentAddedOrDuplicate, TorrentGetField, Torrents,
-};
-use transmission_rpc::TransClient;
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_torrent.html")]
@@ -29,79 +24,18 @@ pub async fn admin_torrent(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
-    let mut transmission_client = TransClient::new("mkstack_transmission".parse().unwrap());
-    let res: RpcResponse<Torrents<Torrent>> =
-        transmission_client.torrent_get(None, None).await.unwrap();
-    let names: Vec<&String> = res
-        .arguments
-        .torrents
-        .iter()
-        .map(|it| it.name.as_ref().unwrap())
-        .collect();
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "names": names }))
+    let transmission_client =
+        mk_lib_network::mk_lib_network_transmission::mk_network_transmission_login()
             .await
             .unwrap();
-    }
 
-    let res1: RpcResponse<Torrents<Torrent>> = transmission_client
-        .torrent_get(
-            Some(vec![TorrentGetField::Id, TorrentGetField::Name]),
-            Some(vec![Id::Id(1), Id::Id(2), Id::Id(3)]),
+    let transmission_torrents =
+        mk_lib_network::mk_lib_network_transmission::mk_network_transmission_list_torrents(
+            transmission_client,
         )
         .await
         .unwrap();
-    let first_three: Vec<String> = res1
-        .arguments
-        .torrents
-        .iter()
-        .map(|it| {
-            format!(
-                "{}. {}",
-                &it.id.as_ref().unwrap(),
-                &it.name.as_ref().unwrap()
-            )
-        })
-        .collect();
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "first_three": first_three }),
-        )
-        .await
-        .unwrap();
-    }
 
-    let res2: RpcResponse<Torrents<Torrent>> = transmission_client
-        .torrent_get(
-            Some(vec![
-                TorrentGetField::Id,
-                TorrentGetField::HashString,
-                TorrentGetField::Name,
-            ]),
-            Some(vec![Id::Hash(String::from(
-                "64b0d9a53ac9cd1002dad1e15522feddb00152fe",
-            ))]),
-        )
-        .await
-        .unwrap();
-    let info: Vec<String> = res2
-        .arguments
-        .torrents
-        .iter()
-        .map(|it| {
-            format!(
-                "{:5}. {:^45} {}",
-                &it.id.as_ref().unwrap(),
-                &it.hash_string.as_ref().unwrap(),
-                &it.name.as_ref().unwrap()
-            )
-        })
-        .collect();
-
-    let response: Result<RpcResponse<SessionClose>> = transmission_client.session_close().await;
     let template = AdminTorrentTemplate {};
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())
@@ -110,7 +44,6 @@ pub async fn admin_torrent(
 /*
 
 @blueprint_admin_torrent.route('/admin_torrent_delete', methods=["POST"])
-@common_global.auth.login_required
 pub async fn url_bp_admin_torrent_delete(request):
     """
     Delete torrent

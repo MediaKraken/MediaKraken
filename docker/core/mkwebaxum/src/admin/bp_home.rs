@@ -7,7 +7,7 @@ use axum::{
 use axum_session_auth::{AuthSession, SessionPgPool};
 use mk_lib_database;
 use mk_lib_network;
-use num_format::{Locale, SystemLocale, ToFormattedString};
+use num_format::{SystemLocale, ToFormattedString};
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPool;
 use sqlx::Row;

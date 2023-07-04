@@ -1,0 +1,15 @@
+properties
+content_type    application/json
+
+payload
+{
+    "fingerprint": "0xF9BA143B95FF6D82",
+    "location": "Menlo Park, CA"
+}
+
+
+mktmdbnetfetchbulk
+content_type    application/json
+{
+    "Data": "06_27_2023"
+}
