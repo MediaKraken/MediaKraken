@@ -1,0 +1,13 @@
+curl -sO https://raw.githubusercontent.com/shmick/TV_Stuff/master/channel_scan.sh
+curl -sO https://raw.githubusercontent.com/shmick/TV_Stuff/master/channel_report.sh
+
+RUN apt update
+RUN apt install -y curl git build-essential
+
+RUN git clone https://github.com/Silicondust/libhdhomerun
+WORKDIR /src/libhdhomerun
+RUN make -j$(nproc)
+
+https://info.hdhomerun.com/info/hdhomerun_config
+
+In order for hdhomerun_config to discover the HDHR Tuners on the network, the container needs to use host networking
