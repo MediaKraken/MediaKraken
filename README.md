@@ -1,4 +1,4 @@
-<p align="center"><img src="art/K1.png" alt="MediaKraken" height="200px"></p>
+<p align="center"><img src="src/art/K1.png" alt="MediaKraken" height="200px"></p>
 
 <B>What is it?</B>
 Yet another media streaming server and client application suite. Also includes media management and remote conrol software to run on a tablet.<BR>
@@ -12,7 +12,7 @@ Please see the WIKI for documentation.<BR>
 <h2 style="color:white;">Features (in progress):</h2>
 <UL style="color:white">
 <LI>100% Open Source, no "premium", paid betas, restricted access or other nonsense.
-<LI>Native server will run under MacOSX, Linux and Windows via Docker
+<LI>Native server will run under MacOSX, Linux and Windows via Docker Swarm
 <LI>Native client support for Android, iOS, MacOSX, Linux and Windows
 <LI>"Slave" servers for streaming to balance the load with many clients streaming at once via Docker Swarm
 	<ul>
@@ -25,13 +25,13 @@ Please see the WIKI for documentation.<BR>
 <ul>
 <LI>Client:
     <UL>
-    <li>img file for Raspberry Pi 1/2/3 (Linux based)
+    <li>img file for Raspberry Pi 1/2/3/4 (Linux based)
     <li>ISO/img for install on dedicated client hardware (Linux based)
     </UL>
 <LI>Server: Most server images are simply Alpine Linux with Docker and Docker Compose with the images downloaded for immediate use.
     <UL>
-    <li>OVA for VMWare 5.x or 6.x
-    <li>OVA for Proxmox VE 5.x
+    <li>OVA for VMWare 6.x or 7.x
+    <li>OVA for Proxmox VE 8.x
     <li>64-bit ISO/img for install on dedicated server hardware
     </ul>
 </ul>
@@ -39,4 +39,3 @@ Please see the WIKI for documentation.<BR>
 </UL>
 </ul>
 <h2 style="color:white";>Privacy Policy: This program collects NO data on users.</h2>
-<h1 align="center" style="color:white;">Feel like donating for inspiration and pizza?  <a href="http://PayPal.Me/SpootDev">Paypal</a></h1>
