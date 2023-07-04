@@ -727,6 +727,7 @@ services:
     environment:
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672, mkstack_redis:6379
       - LANG=en_US.UTF-8
+      - LC_ALL=en_US.UTF-8
     command: sh -c "/wait && /mediakraken/mkwebapp"
     stop_grace_period: 30s
     stop_signal: SIGUSR1

@@ -23,6 +23,9 @@ RUN if [ "${BRANCHTAG}" = "prod" ]; \
 FROM debian:bullseye-20230522-slim AS runtime
 WORKDIR /mediakraken
 
+RUN apt-get update && apt-get install -y locales locales-all \
+  && rm -rf /var/lib/apt/lists/*
+
 # Import from builder.
 # COPY --from=cargo-build /etc/passwd /etc/passwd
 # COPY --from=cargo-build /etc/group /etc/group
