@@ -19,7 +19,6 @@ members = [
 #     "mkrabbitconsume",
 #     "mkschedulesdirectupdate",
 #     "mksharescanner",
-# #    "mktcpserver",
 #     "mktmdbnetfetchbulk",
 #     "mktmdbnetfetchupdate",
 #     "mktranscode",
