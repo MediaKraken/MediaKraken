@@ -61,9 +61,6 @@
 # mksharescanner
 \rsync -a ../src/mk_lib_* ../docker/core/mksharescanner/. --exclude target
 
-# mktcpserver
-\rsync -a ../src/mk_lib_* ../docker/core/mktcpserver/. --exclude target
-
 # mktmdbnetfetchbulk
 \rsync -a ../src/mk_lib_* ../docker/core/mktmdbnetfetchbulk/. --exclude target
 

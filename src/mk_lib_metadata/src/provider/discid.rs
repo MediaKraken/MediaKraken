@@ -22,7 +22,7 @@ async fn print_disc_info(disc: DiscId) {
     // }
 }
 
-pub async fn mk_metadata_biscid() {
+pub async fn mk_metadata_discid() {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(

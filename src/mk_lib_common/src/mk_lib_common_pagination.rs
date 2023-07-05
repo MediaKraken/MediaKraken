@@ -1,9 +1,12 @@
-use mk_lib_logging::mk_lib_logging;
 use core::fmt::Write;
+use mk_lib_logging::mk_lib_logging;
 use paginator::{PageItem, Paginator};
 use serde_json::json;
 use std::error::Error;
 use stdext::function_name;
+
+#[path = "./mk_lib_common_internationalization.rs"]
+mod mk_lib_common_internationalization;
 
 pub async fn mk_lib_common_paginate(
     total_pages: i64,
@@ -45,9 +48,10 @@ pub async fn mk_lib_common_paginate(
                 PageItem::Page(page) => {
                     pagination_html
                         .write_fmt(format_args!(
-                            "<li class=\"page-item\"><a class=\"page-link\" href=\"{url}/{page}\">{page}</a></li>",
+                            "<li class=\"page-item\"><a class=\"page-link\" href=\"{url}/{page}\">{page_format}</a></li>",
                             url = base_url,
-                            page = page
+                            page = page,
+                            page_format = mk_lib_common_internationalization::mk_lib_common_internationalization_number_format(page.get() as i64).unwrap(),
                         ))
                         .unwrap();
                 }

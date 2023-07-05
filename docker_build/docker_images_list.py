@@ -150,9 +150,6 @@ STAGE_CORE_IMAGES = {
     # scan for network shares
     'mksharescanner': ('mksharescanner', 'busybox:1.36.0-uclibc', 'core'),
 
-    # server for "fat" clients to talk too (local server)
-    # 'mktcpserver': ('mktcpserver', 'busybox:1.36.0-uclibc', 'core'),
-
     # download tmdb dump of ids in database and insert into downloads - run and exit
     'mktmdbnetfetchbulk': ('mktmdbnetfetchbulk', 'scratch', 'core'),
 

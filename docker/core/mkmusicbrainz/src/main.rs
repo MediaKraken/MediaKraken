@@ -105,18 +105,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .stdout(Stdio::piped())
                     .output()
                     .unwrap();
-                let _output = Command::new("psql")
-                    .args([
-                        "-h",
-                        "mkstack_database",
-                        "-U",
-                        "postgres",
-                        "-f",
-                        "/scripts/caa/CreateTables.sql",
-                    ])
-                    .stdout(Stdio::piped())
-                    .output()
-                    .unwrap();
+
+                // no db dumps for caa
+                // let _output = Command::new("psql")
+                //     .args([
+                //         "-h",
+                //         "mkstack_database",
+                //         "-U",
+                //         "postgres",
+                //         "-f",
+                //         "/scripts/caa/CreateTables.sql",
+                //     ])
+                //     .stdout(Stdio::piped())
+                //     .output()
+                //     .unwrap();
 
                 // import dump tables
                 let pg_tables =
@@ -193,18 +195,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .stdout(Stdio::piped())
                     .output()
                     .unwrap();
-                let _output = Command::new("psql")
-                    .args([
-                        "-h",
-                        "mkstack_database",
-                        "-U",
-                        "postgres",
-                        "-f",
-                        "/scripts/caa/CreatePrimaryKeys.sql",
-                    ])
-                    .stdout(Stdio::piped())
-                    .output()
-                    .unwrap();
+                // no db dumps for caa
+                // let _output = Command::new("psql")
+                //     .args([
+                //         "-h",
+                //         "mkstack_database",
+                //         "-U",
+                //         "postgres",
+                //         "-f",
+                //         "/scripts/caa/CreatePrimaryKeys.sql",
+                //     ])
+                //     .stdout(Stdio::piped())
+                //     .output()
+                //     .unwrap();
                 let _output = Command::new("psql")
                     .args([
                         "-h",
@@ -217,18 +220,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .stdout(Stdio::piped())
                     .output()
                     .unwrap();
-                let _output = Command::new("psql")
-                    .args([
-                        "-h",
-                        "mkstack_database",
-                        "-U",
-                        "postgres",
-                        "-f",
-                        "/scripts/caa/CreateIndexes.sql",
-                    ])
-                    .stdout(Stdio::piped())
-                    .output()
-                    .unwrap();
+                // no db dumps for caa
+                // let _output = Command::new("psql")
+                //     .args([
+                //         "-h",
+                //         "mkstack_database",
+                //         "-U",
+                //         "postgres",
+                //         "-f",
+                //         "/scripts/caa/CreateIndexes.sql",
+                //     ])
+                //     .stdout(Stdio::piped())
+                //     .output()
+                //     .unwrap();
 
                 // # ??  why  RunSQLScript($DB, 'CreateSearchIndexes.sql', 'Creating search indexes ...');
                 let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(

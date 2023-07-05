@@ -19,6 +19,7 @@ pub mod metadata_provider {
     pub mod anidb;
     pub mod chart_lyrics;
     pub mod comicvine;
+    pub mod coverartarchive;
     #[cfg(feature = "discid")]
     pub mod discid;
     pub mod flickr;

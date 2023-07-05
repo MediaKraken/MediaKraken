@@ -2,15 +2,15 @@ use mk_lib_logging::mk_lib_logging;
 use reqwest::header::CONTENT_TYPE;
 use reqwest::header::USER_AGENT;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
+use reqwest::Client;
+use reqwest_middleware::ClientBuilder;
+use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
 use serde_json::json;
 use std::collections::HashMap;
 use std::io::Cursor;
 use std::str;
 use stdext::function_name;
 use tokio::time::Duration;
-use reqwest_middleware::ClientBuilder;
-use reqwest_retry::{RetryTransientMiddleware, policies::ExponentialBackoff};
-use reqwest::Client;
 
 pub async fn custom_headers(map: &HashMap<String, String>) -> HeaderMap {
     let mut headers = HeaderMap::new();
@@ -27,16 +27,16 @@ pub async fn mk_data_from_url_to_json_custom_headers(
     url: String,
     custom_headers: HeaderMap,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-        let client = reqwest::Client::builder().build()?;
-        let res: serde_json::Value = client
-            .get(url)
-            .timeout(Duration::from_secs(30))
-            .headers(custom_headers)
-            .send()
-            .await?
-            .json()
-            .await?;
-        Ok(res)
+    let client = reqwest::Client::builder().build()?;
+    let res: serde_json::Value = client
+        .get(url)
+        .timeout(Duration::from_secs(30))
+        .headers(custom_headers)
+        .send()
+        .await?
+        .json()
+        .await?;
+    Ok(res)
 }
 
 pub async fn mk_data_from_url_to_json(
@@ -59,7 +59,9 @@ pub async fn mk_data_from_url_to_json(
         backoff_exponent: 2,
     };
     let retry_transient_middleware = RetryTransientMiddleware::new_with_policy(retry_policy);
-    let client = ClientBuilder::new(Client::new()).with(retry_transient_middleware).build();
+    let client = ClientBuilder::new(Client::new())
+        .with(retry_transient_middleware)
+        .build();
     //let client = reqwest::Client::builder().build()?;
     let res: serde_json::Value = client
         .get(url)
@@ -138,37 +140,21 @@ pub async fn mk_network_service_available(host_dns: &str, host_port: &str, wait_
         .await
         .unwrap();
     }
+    let mut command_string = "/mediakraken/wait-for-it-bash.sh";
     if std::path::Path::new("/mediakraken/wait-for-it-ash-busybox130.sh").exists() {
-        std::process::Command::new("/mediakraken/wait-for-it-ash-busybox130.sh")
-            .arg("-h")
-            .arg(host_dns)
-            .arg("-p")
-            .arg(host_port)
-            .arg("-t")
-            .arg(wait_seconds)
-            .spawn()
-            .unwrap();
+        command_string = "/mediakraken/wait-for-it-ash-busybox130.sh";
     } else if std::path::Path::new("/mediakraken/wait-for-it-ash.sh").exists() {
-        std::process::Command::new("/mediakraken/wait-for-it-ash.sh")
-            .arg("-h")
-            .arg(host_dns)
-            .arg("-p")
-            .arg(host_port)
-            .arg("-t")
-            .arg(wait_seconds)
-            .spawn()
-            .unwrap();
-    } else {
-        std::process::Command::new("/mediakraken/wait-for-it-bash.sh")
-            .arg("-h")
-            .arg(host_dns)
-            .arg("-p")
-            .arg(host_port)
-            .arg("-t")
-            .arg(wait_seconds)
-            .spawn()
-            .unwrap();
+        command_string = "/mediakraken/wait-for-it-ash.sh";
     }
+    std::process::Command::new(command_string)
+        .arg("-h")
+        .arg(host_dns)
+        .arg("-p")
+        .arg(host_port)
+        .arg("-t")
+        .arg(wait_seconds)
+        .spawn()
+        .unwrap();
 }
 
 // cargo test -- --show-output

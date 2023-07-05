@@ -25,7 +25,7 @@ pub async fn provider_imvdb_video_fetch_by_id(
         ),
         headers,
     )
-    .await;
+    .await.unwrap();
     let metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
     Ok(metadata_uuid)
 }
