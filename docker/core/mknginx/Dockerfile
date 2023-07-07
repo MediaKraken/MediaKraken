@@ -127,7 +127,6 @@ COPY 30-tune-worker-processes.sh /docker-entrypoint.d
 
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY nginx.vh.default.conf /etc/nginx/conf.d/default.conf
-# COPY uwsgi_params /var/uwsgi_params
 # https://github.com/MediaKraken-Dep/nginx-badbot-blocker
 COPY blacklist.conf /etc/nginx/blacklist.conf
 COPY blockips.conf /etc/nginx/blockips.conf

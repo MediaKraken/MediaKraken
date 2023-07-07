@@ -24,17 +24,17 @@ pub async fn admin_torrent(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
-    let transmission_client =
-        mk_lib_network::mk_lib_network_transmission::mk_network_transmission_login()
-            .await
-            .unwrap();
+    // let transmission_client =
+    //     mk_lib_network::mk_lib_network_transmission::mk_network_transmission_login()
+    //         .await
+    //         .unwrap();
 
-    let transmission_torrents =
-        mk_lib_network::mk_lib_network_transmission::mk_network_transmission_list_torrents(
-            transmission_client,
-        )
-        .await
-        .unwrap();
+    // let transmission_torrents =
+    //     mk_lib_network::mk_lib_network_transmission::mk_network_transmission_list_torrents(
+    //         transmission_client,
+    //     )
+    //     .await
+    //     .unwrap();
 
     let template = AdminTorrentTemplate {};
     let reply_html = template.render().unwrap();

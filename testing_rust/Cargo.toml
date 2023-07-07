@@ -30,6 +30,7 @@ members = [
     "test_torrent_name_parse",
     "test_type_conversion",
     "test_torrent_name_parse",
+    "test_transmission",
     "test_type_conversion",
     "test_walkdir",
     "test_webapp",
