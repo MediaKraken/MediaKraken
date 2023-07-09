@@ -64,7 +64,7 @@ pub struct DBMetaGameSystemList {
     pub gs_game_system_id: uuid::Uuid,
     pub gs_game_system_name: String,
     pub gs_description: Option<String>,
-    pub gs_year: String,
+    pub gs_year: Option<String>,
     pub gs_game_system_alias: String,
 }
 

@@ -9,6 +9,7 @@ use axum::{
 use axum_session_auth::{AuthSession, SessionPgPool};
 use bytesize::ByteSize;
 use core::fmt::Write;
+use mk_lib_common;
 use mk_lib_database;
 use mk_lib_logging::mk_lib_logging;
 use mk_lib_network;
@@ -17,7 +18,9 @@ use sqlx::postgres::PgPool;
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_torrent.html")]
-struct AdminTorrentTemplate;
+struct AdminTorrentTemplate<'a> {
+    template_data_host: &'a String,
+}
 
 pub async fn admin_torrent(
     Extension(sqlx_pool): Extension<PgPool>,
@@ -35,8 +38,12 @@ pub async fn admin_torrent(
     //     )
     //     .await
     //     .unwrap();
-
-    let template = AdminTorrentTemplate {};
+    let docker_results = mk_lib_common::mk_lib_common_docker::mk_common_docker_info()
+        .await
+        .unwrap();
+    let template = AdminTorrentTemplate {
+        template_data_host: &docker_results.name.unwrap(),
+    };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())
 }

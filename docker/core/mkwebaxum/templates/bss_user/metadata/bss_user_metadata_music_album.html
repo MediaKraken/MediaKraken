@@ -25,10 +25,10 @@
                 <div class="main_photo">
                     <div class="media_context_right" data-id={{row_data.mm_metadata_album_id}}>
                         <a href="/user/metadata/music_album_detail/{{row_data.mm_metadata_album_id}}">
-                        {% if row_data.mm_metadata_album_cover_art == "" %}
-                            <img src="/static/image/headphone.png" loading="lazy" height="300" width="200">
+                        {% if row_data.mm_metadata_album_cover_art.len() == 0 %}
+                            <img src="/static/image/headphone.png" loading="lazy" height="300" width="300">
                         {% else %}
-                            <img src="/static/{{row_data.mm_metadata_album_cover_art}}" loading="lazy" height="300" width="200">
+                            <img src="/static/{{row_data.mm_metadata_album_cover_art}}" loading="lazy" height="300" width="300">
                         {% endif %}
                         </a>
                         <div class="description">
