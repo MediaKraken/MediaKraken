@@ -4,7 +4,7 @@ use reqwest::header::USER_AGENT;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use reqwest::Client;
 use reqwest_middleware::ClientBuilder;
-use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
+use reqwest_retry::RetryTransientMiddleware;
 use serde_json::json;
 use std::collections::HashMap;
 use std::io::Cursor;

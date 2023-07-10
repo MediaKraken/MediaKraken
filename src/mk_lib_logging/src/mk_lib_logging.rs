@@ -1,7 +1,7 @@
 use chrono::prelude::*;
 use reqwest::Client;
 use reqwest_middleware::ClientBuilder;
-use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
+use reqwest_retry::RetryTransientMiddleware;
 
 pub async fn mk_logging_post_elk(
     message_type: &str,
