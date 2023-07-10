@@ -19,7 +19,7 @@ serde_json = "1.0.96"
 shiplift = { version = "0.7", default-features = false, features = [
     "unix-socket",
 ] }
-socket2 = { version = "0.4.9", features = ["all"] }
+socket2 = { version = "0.5.3", features = ["all"] }
 stdext = "0.3.1"
 tokio = { version = "1.28.2", features = ["full"] }
 
