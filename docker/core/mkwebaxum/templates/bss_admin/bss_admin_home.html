@@ -23,7 +23,7 @@
                                     <h5 class="mb-0">Server Info</h5>
                                 </div>
                                 <div class="card-body">
-                                    <p class="card-text"><b>Server Name:</b>&nbsp;{{ template_data_server_info_server_name }}</p>
+                                    <p class="card-text"><b>Server Name:</b>&nbsp;{{ template_data_server_info_server_name|unquote_json }}</p>
                                     <p><b>Host Uptime:</b>&nbsp;{{ template_data_server_uptime }}</p>
                                     <p><b>Host IP:</b>&nbsp;{{ template_data_server_host_ip }}</p>
                                     <p><b>IP External:</b>&nbsp;{{ template_data_server_info_server_ip_external }}</p>

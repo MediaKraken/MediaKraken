@@ -26,5 +26,10 @@ pub mod filters {
         let result = mk_lib_common::mk_lib_common_bytesize::mk_lib_common_bytesize(s.clone() as u64).unwrap();
         Ok(result)
     }
+
+    pub fn unquote_json(s: &serde_json::Value) -> ::askama::Result<String> {
+        Ok(s.to_string().replace("\"", ""))
+    }
+
 }
 

@@ -13,3 +13,8 @@ content_type    application/json
 {
     "Data": "06_27_2023"
 }
+
+mksharescanner
+{
+    "Data": "192.168.1"
+}
