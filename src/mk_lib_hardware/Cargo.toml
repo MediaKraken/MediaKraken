@@ -27,6 +27,7 @@ rups = { version = "0.6.0", features = ["async", "async-ssl"] }
 serde_json = "1.0.96"
 serialport = "4.2.1"
 smartcast = "0.1.1"
+sonos_discovery = "0.0.2"
 spl06-007 = { version = "0.3", optional = true }
 ssdp = { git = "https://github.com/ssnover/ssdp-rs", branch = "feature/local-impl-of-ip-feature" } 
 stdext = "0.3.1"
