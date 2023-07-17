@@ -1,4 +1,5 @@
 // https://github.com/torbencarstens/sonos_discovery
+// https://github.com/jakobhellermann/sonor
 
 use sonos_discovery::Discover;
 use std::net::IpAddr;
