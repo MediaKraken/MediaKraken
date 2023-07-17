@@ -1,11 +1,11 @@
 // https://github.com/oknozor/musicbrainz_rs
 
-use musicbrainz_rs::entity::release::*;
-use musicbrainz_rs::entity::CoverartResponse;
-use musicbrainz_rs::prelude::*;
-use musicbrainz_rs::FetchCoverart;
+// use musicbrainz_rs::entity::release::*;
+// use musicbrainz_rs::entity::CoverartResponse;
+// use musicbrainz_rs::prelude::*;
+// use musicbrainz_rs::FetchCoverart;
 
-const USER_AGENT: &str = "MediaKraken/0.0.1";
+// const USER_AGENT: &str = "MediaKraken/0.0.1";
 /*
 A musicbrainz release represents the unique release (i.e. issuing) of a product on a
 specific date with specific release information such as the country, label, barcode,

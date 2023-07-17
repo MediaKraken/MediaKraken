@@ -33,7 +33,7 @@ pub async fn mk_lib_database_metadata_exists_tv(
 pub struct DBMetaTVShowList {
     pub mm_metadata_tvshow_guid: uuid::Uuid,
     pub mm_metadata_tvshow_name: String,
-    air_date: String,
+    pub air_date: serde_json::Value,
     pub image_json: serde_json::Value,
 }
 
@@ -133,7 +133,7 @@ pub async fn mk_lib_database_metadata_tv_insert(
     )
     .bind(uuid_id)
     .bind(series_id)
-    .bind(data_json["title"].to_string())
+    .bind(data_json["name"].to_string())
     .bind(data_json)
     .bind(data_image_json)
     .execute(&mut transaction)

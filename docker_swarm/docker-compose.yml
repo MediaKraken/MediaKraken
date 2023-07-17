@@ -429,7 +429,7 @@ services:
 
   nginx:
     image: mediakraken/mknginx:${BRANCH}
-    entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh -h mkstack_webapp -p 8080 -t 120 -- nginx
+    entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh -h mkstack_webapp -p 8080 -t 120 -h mkstack_transmission -p 9091 -t 120 -- nginx
     stop_grace_period: 30s
     stop_signal: SIGTERM
     volumes:
@@ -691,16 +691,15 @@ services:
 
   transmission:
     image: mediakraken/mktransmission:${BRANCH}
-    environment:
-      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672    
     ports:
-      - "9091:9091"
       - "51413:51413/tcp"
       - "51413:51413/udp"
     volumes:
       - mediakraken_vol_transmission:/etc/transmission-daemon
       - mediakraken_vol_transmission_downloads:/transmission/downloads
       - mediakraken_vol_transmission_incomplete:/transmission/incomplete
+    networks:
+      - mediakraken_network      
     deploy:
       mode: replicated
       replicas: 1
@@ -754,7 +753,7 @@ services:
   #   cap_add:
   #     - NET_ADMIN
   #   security_opt:
-  #     - seccomp:unconfined #optional
+  #     - seccomp:unconfined
   #   network_mode: host
   #   environment:
   #     - PUID=1000
@@ -763,7 +762,6 @@ services:
   #   volumes:
   #     - /path/to/config:/config
   #   ports:
-  #     - 3000:3000 #optional http
   #     - 3001:3001 #optional https
   #  deploy:
   #    mode: replicated

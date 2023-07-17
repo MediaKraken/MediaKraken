@@ -9,6 +9,7 @@ use axum::{
 use axum_session_auth::{AuthSession, SessionPgPool};
 use bytesize::ByteSize;
 use core::fmt::Write;
+use mk_lib_common;
 use mk_lib_database;
 use mk_lib_logging::mk_lib_logging;
 use mk_lib_network;
@@ -17,26 +18,32 @@ use sqlx::postgres::PgPool;
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_torrent.html")]
-struct AdminTorrentTemplate;
+struct AdminTorrentTemplate<'a> {
+    template_data_host: &'a String,
+}
 
 pub async fn admin_torrent(
     Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
-    let transmission_client =
-        mk_lib_network::mk_lib_network_transmission::mk_network_transmission_login()
-            .await
-            .unwrap();
+    // let transmission_client =
+    //     mk_lib_network::mk_lib_network_transmission::mk_network_transmission_login()
+    //         .await
+    //         .unwrap();
 
-    let transmission_torrents =
-        mk_lib_network::mk_lib_network_transmission::mk_network_transmission_list_torrents(
-            transmission_client,
-        )
+    // let transmission_torrents =
+    //     mk_lib_network::mk_lib_network_transmission::mk_network_transmission_list_torrents(
+    //         transmission_client,
+    //     )
+    //     .await
+    //     .unwrap();
+    let docker_results = mk_lib_common::mk_lib_common_docker::mk_common_docker_info()
         .await
         .unwrap();
-
-    let template = AdminTorrentTemplate {};
+    let template = AdminTorrentTemplate {
+        template_data_host: &docker_results.name.unwrap(),
+    };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())
 }

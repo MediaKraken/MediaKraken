@@ -21,7 +21,7 @@ mk_lib_database = { path = "../mk_lib_database" }
 mk_lib_hash = { path = "../mk_lib_hash" }
 mk_lib_logging = { path = "../mk_lib_logging" }
 mk_lib_network = { path = "../mk_lib_network" }
-musicbrainz_rs = { version = "0.5.0", features = ["async"] }
+# musicbrainz_rs = { version = "0.5.0", features = ["async"] }
 omdb = "0.3.2"
 open-library = "0.7.1"
 rand = "0.8.5"

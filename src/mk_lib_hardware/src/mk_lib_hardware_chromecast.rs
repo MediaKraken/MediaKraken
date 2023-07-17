@@ -2,7 +2,6 @@
 
 use mk_lib_logging::mk_lib_logging;
 use futures_util::{pin_mut, stream::StreamExt};
-
 use serde_json::json;
 use std::time::Duration;
 use stdext::function_name;

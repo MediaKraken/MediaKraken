@@ -15,7 +15,7 @@ use sqlx::postgres::PgPool;
 #[template(path = "bss_user/metadata/bss_user_metadata_music_album.html")]
 struct TemplateMetaMusicContext<'a> {
     template_data: &'a Vec<
-        mk_lib_database::database_metadata::mk_lib_database_metadata_music::DBMetaMusicList,
+        mk_lib_database::database_metadata::mk_lib_database_metadata_music_brainz::DBMetaMusicList,
     >,
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
@@ -30,7 +30,7 @@ pub async fn user_metadata_music(
 ) -> impl IntoResponse {
     let db_offset: i64 = (page * 30) - 30;
     let total_pages: i64 =
-        mk_lib_database::database_metadata::mk_lib_database_metadata_music::mk_lib_database_metadata_music_count(
+        mk_lib_database::database_metadata::mk_lib_database_metadata_music_brainz::mk_lib_database_metadata_music_album_count(
             &sqlx_pool,
             String::new(),
         )
@@ -44,7 +44,7 @@ pub async fn user_metadata_music(
     .await
     .unwrap();
     let music_list =
-        mk_lib_database::database_metadata::mk_lib_database_metadata_music::mk_lib_database_metadata_music_read(
+        mk_lib_database::database_metadata::mk_lib_database_metadata_music_brainz::mk_lib_database_metadata_music_album_read(
             &sqlx_pool,
             String::new(),
             db_offset,

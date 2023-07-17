@@ -1,3 +1,4 @@
+use crate::axum_custom_filters::filters;
 use askama::Template;
 use axum::{
     http::{Method, StatusCode},
@@ -30,7 +31,7 @@ struct TemplateHomeScanListContext {
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_home.html")]
 struct TemplateHomeContext<'a> {
-    template_data_server_info_server_name: &'a String,
+    template_data_server_info_server_name: &'a serde_json::Value,
     template_data_server_uptime: &'a String,
     template_data_server_host_ip: &'a String,
     template_data_server_info_server_ip_external: &'a String,
@@ -72,8 +73,7 @@ pub async fn admin_home(
     let mut server_scans = Vec::new();
     let locale = SystemLocale::default().unwrap();
     let template = TemplateHomeContext {
-        template_data_server_info_server_name: &option_json["MediaKrakenServer"]["Server Name"]
-            .to_string(),
+        template_data_server_info_server_name: &option_json["MediaKrakenServer"]["Server Name"],
         // following boottime only compiles #[cfg(not(windows))] in this case is fine
         template_data_server_uptime: &format!(
             "{:02}:{:02}:{:02}",

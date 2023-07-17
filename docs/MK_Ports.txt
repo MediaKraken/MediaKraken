@@ -1,3 +1,4 @@
+3001 - Wireshark Https - Optional
 5050 - PGAdmin4 - Optional
 8900 - Main web app
 9000 - Portainer (docker monitor) - Optional

@@ -15,6 +15,7 @@ pub mod mk_lib_network_rss;
 pub mod mk_lib_network_serial;
 pub mod mk_lib_network_speedtest;
 pub mod mk_lib_network_ssdp;
+pub mod mk_lib_network_ssh;
 pub mod mk_lib_network_steam;
 pub mod mk_lib_network_telnet;
 pub mod mk_lib_network_transmission;

@@ -1,0 +1,15 @@
+[package]
+name = "mktestonvif"
+version = "0.0.1"
+edition = "2021"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
+
+[dependencies]
+mk_lib_hardware = { path = "../../src/mk_lib_hardware" }
+tokio = { version = "1.28.2", features = ["full"] }
+tokio-test = "*"

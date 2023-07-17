@@ -55,7 +55,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
                 // find and store all network shares
                 let share_vec = mk_lib_network::mk_lib_network_nmap::mk_network_share_scan(
-                    json_message["Data"].to_string(),
+                    json_message["Data"].to_string().replace("\"", ""),
                 )
                 .await
                 .unwrap();

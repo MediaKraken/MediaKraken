@@ -1,8 +1,0 @@
-version: '2'
-services:
-  alpine-mirror:
-    image: anjia0532/alpine-package-mirror
-    ports:
-    - 8079:80/tcp
-    volumes:
-        - /data/alpine/packages:/usr/share/nginx/html

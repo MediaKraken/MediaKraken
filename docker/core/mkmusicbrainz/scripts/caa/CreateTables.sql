@@ -1,7 +1,5 @@
 BEGIN;
 
-SET search_path = 'cover_art_archive';
-
 CREATE TABLE art_type ( -- replicate (verbose)
     id                  SERIAL NOT NULL, -- PK
     name                TEXT NOT NULL,

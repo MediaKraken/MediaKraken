@@ -1,3 +1,5 @@
+make -j$(nproc)
+
 rust on linux
 apt-get install lld clang
   TODO zero to production page 5 for cargo config of faster linker
