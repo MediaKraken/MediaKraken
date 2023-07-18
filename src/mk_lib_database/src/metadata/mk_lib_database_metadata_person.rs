@@ -1,17 +1,15 @@
-
 use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgRow;
-use sqlx::{types::Uuid};
+use sqlx::types::Uuid;
 use sqlx::{FromRow, Row};
 use stdext::function_name;
-
 
 pub async fn mk_lib_database_metadata_exists_person(
     sqlx_pool: &sqlx::PgPool,
     metadata_id: i32,
-) -> Result<i32, sqlx::Error> {
+) -> Result<bool, sqlx::Error> {
     #[cfg(debug_assertions)]
     {
         mk_lib_logging::mk_logging_post_elk(
@@ -21,7 +19,7 @@ pub async fn mk_lib_database_metadata_exists_person(
         .await
         .unwrap();
     }
-    let row: (i32,) = sqlx::query_as(
+    let row: (bool,) = sqlx::query_as(
         "select exists(select 1 from mm_metadata_person \
         where mm_metadata_person_media_id = $1 limit 1) as found_record limit 1",
     )
