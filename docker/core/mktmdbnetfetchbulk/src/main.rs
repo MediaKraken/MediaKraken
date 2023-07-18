@@ -26,6 +26,14 @@ struct MetadataTV {
     popularity: f32,
 }
 
+#[derive(Serialize, Deserialize)]
+struct MetadataPerson {
+    adult: bool,
+    id: Option<i32>,
+    name: String,
+    popularity: f32,
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     #[cfg(debug_assertions)]
@@ -77,7 +85,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         format!(
                             "http://files.tmdb.org/p/exports/movie_ids_{}.json.gz",
                             json_message["Data"].as_str().unwrap()
-                        ).replace("\"", ""),
+                        )
+                        .replace("\"", ""),
                         &"/movie.gz".to_string(),
                     )
                     .await
@@ -120,7 +129,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     format!(
                         "http://files.tmdb.org/p/exports/tv_series_ids_{}.json.gz",
                         json_message["Data"].as_str().unwrap()
-                    ).replace("\"", ""),
+                    )
+                    .replace("\"", ""),
                     &"/tv.gz".to_string(),
                 )
                 .await
@@ -149,6 +159,49 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                             "themoviedb".to_string(),
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
+                                                                                                            uuid::Uuid::new_v4(),
+                                                                                                            metadata_struct.id,
+                                                                                                            "Fetch".to_string()).await.unwrap();
+                            }
+                        }
+                    }
+                }
+
+                // grab the Person id's
+                let _fetch_result_tv = mk_lib_network::mk_lib_network::mk_download_file_from_url(
+                    format!(
+                        "http://files.tmdb.org/p/exports/person_ids{}.json.gz",
+                        json_message["Data"].as_str().unwrap()
+                    )
+                    .replace("\"", ""),
+                    &"/person.gz".to_string(),
+                )
+                .await
+                .unwrap();
+                let json_result =
+                    mk_lib_compression::mk_lib_compression::mk_decompress_gz_data("/person.gz")
+                        .await
+                        .unwrap();
+                for json_item in json_result.split('\n') {
+                    if !json_item.trim().is_empty() {
+                        let metadata_struct: MetadataPerson =
+                            serde_json::from_str(json_item.trim()).unwrap();
+                        let result =
+                            mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_exists_person(
+                                &sqlx_pool,
+                                metadata_struct.id.unwrap_or(0),
+                            )
+                            .await
+                            .unwrap();
+                        if result == false {
+                            let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
+                                                                                                                              "themoviedb".to_string(),
+                                                                                                                              mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
+                                                                                                                              metadata_struct.id.unwrap_or(0)).await.unwrap();
+                            if download_result == false {
+                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                                                                                                            "themoviedb".to_string(),
+                                                                                                            mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
                                                                                                             uuid::Uuid::new_v4(),
                                                                                                             metadata_struct.id,
                                                                                                             "Fetch".to_string()).await.unwrap();
