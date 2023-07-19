@@ -107,6 +107,7 @@ services:
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
+      - mediakraken_vol_comics:/Comics
       - mediakraken_vol_static:/mediakraken/static
     deploy:
       mode: replicated
@@ -734,6 +735,7 @@ services:
       # must not be read only as it stores cache here
       - mediakraken_vol_static:/mediakraken/static
       - mediakraken_vol_certs:/mediakraken/certs
+      - mediakraken_vol_comics:/Comics
       # needed to show docker/swarm info
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # this stores the "push button" key
@@ -811,6 +813,7 @@ networks:
 volumes:
   mediakraken_vol_cache:
   mediakraken_vol_certs:
+  mediakraken_vol_comics:
   mediakraken_vol_devices:
   mediakraken_vol_emulation:
   mediakraken_vol_metricbeat:

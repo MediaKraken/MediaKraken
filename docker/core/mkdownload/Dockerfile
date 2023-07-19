@@ -22,7 +22,10 @@ RUN if [ "${BRANCHTAG}" = "prod" ]; \
 FROM debian:bullseye-20230522-slim AS runtime
 
 ADD https://github.com/yt-dlp/yt-dlp/releases/download/2023.01.06/yt-dlp_linux /yt-dlp
-RUN chmod a+rx /yt-dlp
+RUN chmod a+rx /yt-dlp \
+  && apt-get update && apt-get install -y python3-pip \
+  && rm -rf /var/lib/apt/lists/* \
+  && pip3 install dosage==3.0 cssselect==1.2.0
 
 # Import from builder.
 # COPY --from=cargo-build /etc/passwd /etc/passwd
