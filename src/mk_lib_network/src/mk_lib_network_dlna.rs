@@ -5,7 +5,7 @@ use serde_json::json;
 use stdext::function_name;
 
 use crab_dlna::{
-    get_serve_ip, infer_subtitle_from_video, play, Error, MediaStreamingServer, Render, RenderSpec,
+    get_local_ip, infer_subtitle_from_video, play, Error, MediaStreamingServer, Render, RenderSpec,
 };
 use std::path::PathBuf;
 
@@ -45,7 +45,7 @@ pub async fn mk_lib_network_dlna_play(filename_to_play: String) -> Result<(), Er
     let discover_timeout_secs = 5;
     let render_spec = RenderSpec::Query(discover_timeout_secs, "Kodi".to_string());
     let render = Render::new(render_spec).await?;
-    let host_ip = get_serve_ip(&render.host()).await?;
+    let host_ip = get_local_ip().await?;
     let video_path = PathBuf::from(filename_to_play);
     let inferred_subtitle_path = infer_subtitle_from_video(&video_path);
     let media_streaming_server =
