@@ -11,7 +11,7 @@ codegen-units = 1
 
 [dependencies]
 cotton-ssdp = "0.0.2"
-crab-dlna = "0.1.0"
+crab-dlna = "0.1.1"
 futures = "0.3.28"
 futures-util = "0.3.28"
 governor = "0.6.0"
