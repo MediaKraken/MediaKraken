@@ -6,6 +6,7 @@ use serde_json::{json, Value};
 use std::error::Error;
 use std::fs;
 use std::path::Path;
+use std::process::{Command, Stdio};
 use tokio::sync::Notify;
 
 #[tokio::main]
@@ -104,6 +105,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     } else {
                         // TODO log error by user requested
                         continue;
+                    }
+                } else if json_message["Type"].to_string() == "Dosage" {
+                    // This saves to ./Comics
+                    let output = Command::new("dosage")
+                        .args(["--adult", &json_message["Data"].as_str().unwrap()])
+                        .stdout(Stdio::piped())
+                        .output()
+                        .unwrap();
+                    let stdout = String::from_utf8(output.stdout).unwrap();
+                    if json_message["Data"].as_str().unwrap() == "--list" {
+                        // TODO parse list and store the strips, see notes in data example
                     }
                 } else if json_message["Type"].to_string() == "HDTrailers" {
                     // try to grab the RSS feed itself

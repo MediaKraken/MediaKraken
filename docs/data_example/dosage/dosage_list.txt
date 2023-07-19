@@ -1,0 +1,30 @@
+Available comic scrapers:
+Comics tagged with [adult] require age confirmation with the --adult option.
+Non-english comics are tagged with [lang].
+1977                                                        2214                                                        AbbysAgency                                                 AbstruseGoose                                               
+AbsurdNotions                                               AcademyVale                                                 Achewood                                                    AdventuresOfFifne                                           
+AfterStrife                                                 AGirlAndHerFed                                              AhoiPolloi [lang:de]                                        AhoyEarth                                                   
+AirForceBlues                                               ALessonIsLearned                                            Alice                                                       AlienDice                                                   
+AlienDice/Legacy                                            AlienLovesPredator                                          AlienShores                                                 AllTheGrowingThings                                         
+AlphaLuna                                                   AlphaLuna/Spanish [lang:es]                                 Altermeta                                                   AltermetaOld                                                
+AmazingSuperPowers                                          AmbersNoBrainers                                            Amya                                                        Anaria                                                      
+Angband                                                     Angels2200                                                  Annyseed                                                    AntiheroForHire                                             
+AppleGeeks                                                  Arcamax/ArcticCircle                                        Arcamax/BabyBlues                                           Arcamax/BarneyGoogleAndSnuffySmith                          
+Arcamax/BeetleBailey                                        Arcamax/Bizarro                                             Arcamax/Blondie                                             Arcamax/Boondocks                                           
+Arcamax/BrilliantMindOfEdisonLee                            Arcamax/CarpeDiem                                           Arcamax/Crankshaft                                          Arcamax/Curtis                                              
+Arcamax/DennisTheMenace                                     Arcamax/DinetteSet                                          Arcamax/Dustin                                              Arcamax/FamilyCircus                                        
+
+*******other stuff
+
+Wondermark                                                  WorldOfMrToast                                              WormWorldSaga                                               WormWorldSagaFrench [lang:fr]                               
+WormWorldSagaGerman [lang:de]                               WormWorldSagaSpanish [lang:es]                              Wrongside                                                   Wrongside/AnarkisRising                                     
+Wrongside/Beginnings                                        Wrongside/CommonsDreams                                     Wrongside/Faith                                             Wrongside/Sarah                                             
+Wrongside/ThereAreNoAviansHere                              Wrongside/TheScientificProphet                              Wrongside/TheStrangers                                      Wumo                                                        
+xkcd                                                        YAFGC                                                       YoshSaga                                                    ZapComic [dis:css]                                          
+Zapiro                                                      ZenPencils                                                  ZombieHunters                                               Zwarwald [lang:de]                                          
+3044 supported comics.
+
+Some comics are disabled, they are tagged with [dis:REASON], where REASON is one of:
+  css        This module needs the cssselect (python-cssselect) python module which is not installed.
+
+  Added css option listed above via pypi
