@@ -3,7 +3,7 @@
 members = [
 #    "mkbroadcast",
 #     "mkcron",
-#     "mkdownload",
+     "mkdownload",
 #     "mkgamesdbnetfetchbulk",
 #     "mkglobalcache",
 #     "mkhardwarecontrol",
@@ -19,7 +19,7 @@ members = [
 #     "mkrabbitconsume",
 #     "mkschedulesdirectupdate",
 #     "mksharescanner",
-     "mktmdbnetfetchbulk",
+#     "mktmdbnetfetchbulk",
 #     "mktmdbnetfetchupdate",
 #     "mktranscode",
 #     "mkwebaxum",

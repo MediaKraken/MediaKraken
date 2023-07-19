@@ -94,6 +94,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         // TODO log error by user requested
                         continue;
                     }
+                } else if json_message["Type"].to_string() == "Twitch" {
+                    if validator::validate_url(json_message["URL"].to_string()) {
+                        let _res = mk_lib_network::mk_lib_network::mk_download_file_from_url_tokio(
+                            json_message["URL"].to_string(),
+                            &json_message["Local Save Path"].to_string(),
+                        )
+                        .await;
+                    } else {
+                        // TODO log error by user requested
+                        continue;
+                    }
                 } else if json_message["Type"].to_string() == "HDTrailers" {
                     // try to grab the RSS feed itself
                     let data: serde_json::Value = serde_json::from_str(

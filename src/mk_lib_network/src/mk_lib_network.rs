@@ -7,9 +7,14 @@ use reqwest_middleware::ClientBuilder;
 use reqwest_retry::RetryTransientMiddleware;
 use serde_json::json;
 use std::collections::HashMap;
+use std::io::prelude::*;
 use std::io::Cursor;
+use std::io::Write;
+use std::path::PathBuf;
 use std::str;
 use stdext::function_name;
+use tokio::fs::File;
+use tokio::io::{self, AsyncWriteExt};
 use tokio::time::Duration;
 
 pub async fn custom_headers(map: &HashMap<String, String>) -> HeaderMap {
@@ -126,6 +131,69 @@ pub async fn mk_download_file_from_url(
     let mut file = std::fs::File::create(file_name)?;
     let mut content = Cursor::new(response.bytes().await?);
     std::io::copy(&mut content, &mut file)?;
+    Ok(())
+}
+
+pub async fn mk_download_file_from_url_tokio(
+    url: String,
+    file_name: &String,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let client = Client::builder()
+        .user_agent("MediaKraken/0.0.1")
+        .build()
+        .expect("Could not build client");
+    // get response
+    let res = if let Ok(mut res) = client.get(&url).send().await {
+        // Try to open file
+        if let Ok(file) = tokio::fs::File::create(&file_name).await {
+            let mut writer = tokio::io::BufWriter::new(file);
+            // Write all bytes to file
+            loop {
+                match res.chunk().await {
+                    Ok(Some(bytes)) => {
+                        writer.write_all(&bytes).await;
+                    }
+                    Ok(None) => {
+                        writer.flush().await;
+                        break;
+                    }
+                    Err(e) => {
+                        #[cfg(debug_assertions)]
+                        {
+                            mk_lib_logging::mk_logging_post_elk(
+                                std::module_path!(),
+                                json!({ format!("Could not get bytes from data: {:?}", &e ): url }),
+                            )
+                            .await
+                            .unwrap();
+                        }
+                    }
+                }
+            }
+        } else {
+            #[cfg(debug_assertions)]
+            {
+                mk_lib_logging::mk_logging_post_elk(
+                    std::module_path!(),
+                    json!({ format!("Could not open file for writing: {:?}", &file_name ): url }),
+                )
+                .await
+                .unwrap();
+            }
+        }
+    } else {
+        if let Err(e) = client.get(&url).send().await {
+            #[cfg(debug_assertions)]
+            {
+                mk_lib_logging::mk_logging_post_elk(
+                    std::module_path!(),
+                    json!({ format!("File error for {:?} with error {:#?}", &file_name, &e ): url }),
+                )
+                .await
+                .unwrap();
+            }
+        }
+    };
     Ok(())
 }
 
