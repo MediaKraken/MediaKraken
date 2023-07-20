@@ -590,6 +590,11 @@ services:
     image: mediakraken/mkredis:${BRANCH}
     stop_grace_period: 30s
     stop_signal: SIGUSR1
+    environment:
+      - REDIS_PASSWORD=metaman
+    command: sh -c "redis-server --appendonly yes --requirepass $${REDIS_PASSWORD}"
+    volumes:
+      - mediakraken_vol_redis:/data
     deploy:
       mode: replicated
       replicas: 1
@@ -828,6 +833,7 @@ volumes:
   mediakraken_vol_postgresql_backup:
   mediakraken_vol_postgresql_logging:
   mediakraken_vol_rabbit:
+  mediakraken_vol_redis:
   mediakraken_vol_static:
   mediakraken_vol_teamspeak:
   mediakraken_vol_transmission:
