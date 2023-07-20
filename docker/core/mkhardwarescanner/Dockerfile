@@ -1,7 +1,20 @@
 # outside of build step, hence have to re arg it below
 ARG BRANCHTAG
 
-FROM mediakraken/mkbase_rust_debian:"${BRANCHTAG}" as cargo-build
+FROM mediakraken/mkbase_rust_debian:"${BRANCHTAG}" as planner
+
+COPY . .
+
+RUN cargo chef prepare --recipe-path recipe.json
+
+####################################################################################################
+## Build from Chef
+####################################################################################################
+FROM planner AS cargo-build
+
+COPY --from=planner recipe.json recipe.json
+
+RUN cargo chef cook --release --recipe-path recipe.json
 
 ARG BRANCHTAG
 
