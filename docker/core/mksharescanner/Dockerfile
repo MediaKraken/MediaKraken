@@ -32,7 +32,7 @@ RUN if [ "${BRANCHTAG}" = "prod" ]; \
 ####################################################################################################
 ## Final image
 ####################################################################################################
-FROM debian:bullseye-20230522-slim AS runtime
+FROM debian:bookworm-20230703-slim AS runtime
 
 RUN apt-get update && apt-get install -y nmap \
   && rm -rf /var/lib/apt/lists/*

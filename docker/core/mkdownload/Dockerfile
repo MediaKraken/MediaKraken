@@ -32,7 +32,7 @@ RUN if [ "${BRANCHTAG}" = "prod" ]; \
 ####################################################################################################
 ## Final image
 ####################################################################################################
-FROM debian:bullseye-20230522-slim AS runtime
+FROM debian:bookworm-20230703-slim AS runtime
 
 ADD https://github.com/yt-dlp/yt-dlp/releases/download/2023.01.06/yt-dlp_linux /yt-dlp
 RUN chmod a+rx /yt-dlp \
