@@ -1,4 +1,4 @@
-FROM rust:1-alpine3.17
+FROM rust:1.71-alpine
 
 RUN apk update && \
   apk add alpine-sdk sqlite-dev openssl1.1-compat-dev wget ca-certificates \
@@ -11,6 +11,9 @@ RUN wget https://github.com/mozilla/sccache/releases/download/v0.5.3/sccache-v0.
     && tar xzf sccache-v0.5.3-x86_64-unknown-linux-musl.tar.gz \
     && mv sccache-v0.5.3-x86_64-unknown-linux-musl/sccache /usr/local/bin/sccache \
     && chmod +x /usr/local/bin/sccache
+
+# for layer cache later in build
+RUN cargo install cargo-chef
 
 ENV RUSTC_WRAPPER=/usr/local/bin/sccache
 ENV SCCACHE_REDIS="redis://mksccache:6379/mksccache"
