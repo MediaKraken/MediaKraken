@@ -16,7 +16,7 @@ RUN if [ "${BRANCHTAG}" = "prod" ]; \
 ####################################################################################################
 ## Final image
 ####################################################################################################
-FROM debian:bullseye-20230522-slim AS runtime
+FROM debian:bookworm-20230703-slim AS runtime
 WORKDIR /mediakraken
 RUN apt-get update && apt-get -y install wget \
   && wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.9.0/wait \

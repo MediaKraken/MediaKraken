@@ -1,6 +1,6 @@
 # don't use the slim version as it's just a stage one image
 # as too much stuff is missing causing stuff later to not compile
-FROM rust:1.71.0-bullseye
+FROM rust:1.71.0-bookworm
 
 RUN apt update && apt install libudev-dev wget ca-certificates libc-bin -y \
   && update-ca-certificates \

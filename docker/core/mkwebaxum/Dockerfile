@@ -33,7 +33,7 @@ RUN if [ "${BRANCHTAG}" = "prod" ]; \
 ## Final image
 ####################################################################################################
 # FROM gcr.io/distroless/base-debian11 as runtime
-FROM debian:bullseye-20230522-slim AS runtime
+FROM debian:bookworm-20230703-slim AS runtime
 WORKDIR /mediakraken
 
 RUN apt-get update && apt-get install -y locales locales-all \

@@ -46,7 +46,7 @@ PYPI_MIRROR_PORT = ':8081'
 STAGE_ONE_IMAGES = {
     # 'AlpineBase3173Py3': ('mkbase_alpinepy3', 'alpine:3.17.3', 'base'),
     'AlpineBaseFFMPEG': ('mkbase_alpine_ffmpeg', 'alpine:3.17.3', 'base'),
-    'DebianBaseFFMPEG': ('mkbase_debian_ffmpeg', 'debian:bullseye-20230522-slim', 'base'),
+    'DebianBaseFFMPEG': ('mkbase_debian_ffmpeg', 'debian:bookworm-20230703-slim', 'base'),
     'DebianBase11Py3': ('mkbase_debianpy3', 'python:3.12.0a3-bullseye', 'base'),
     'RustBaseAlpine': ('mkbase_rust_alpine', 'rust:1.70.0-alpine', 'base'),
     'RustBaseDebian': ('mkbase_rust_debian', 'rust:1.70.0', 'base'),

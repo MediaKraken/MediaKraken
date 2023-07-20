@@ -36,7 +36,7 @@ RUN ldd /mediakraken/target/mkmetadata | tr -s '[:blank:]' '\n' | grep '^/' | \
 ####################################################################################################
 ## Final image
 ####################################################################################################
-FROM debian:bullseye-20230522-slim AS runtime
+FROM debian:bookworm-20230703-slim AS runtime
 
 # Import from builder.
 # COPY --from=cargo-build /etc/passwd /etc/passwd

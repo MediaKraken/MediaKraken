@@ -1,4 +1,4 @@
-FROM debian:bullseye-20230522-slim
+FROM debian:bookworm-20230703-slim
 
 ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig \
     SRC=/usr/local
