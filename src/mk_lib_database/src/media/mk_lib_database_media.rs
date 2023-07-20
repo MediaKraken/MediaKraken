@@ -1,8 +1,9 @@
+use chrono::{Duration, Utc};
 use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgRow;
-use sqlx::{types::Uuid};
+use sqlx::types::Uuid;
 use sqlx::{FromRow, Row};
 use stdext::function_name;
 
@@ -418,6 +419,53 @@ pub async fn mk_lib_database_media_ffmpeg_update_by_uuid(
     Ok(())
 }
 
+pub async fn mk_lib_database_media_new_count(
+    sqlx_pool: &sqlx::PgPool,
+    days_old: i64,
+) -> Result<i64, sqlx::Error> {
+    let date_added = (Utc::now() - Duration::days(days_old))
+        .format("%Y-%m-%d")
+        .to_string();
+    let row: (i64,) = sqlx::query_as(
+        "select count(*) from mm_media, mm_metadata_movie where mm_media_metadata_guid = mm_metadata_guid and mm_media_json->>'DateAdded' >= $1",
+    )
+    .bind(date_added)
+    .fetch_one(sqlx_pool)
+    .await?;
+    Ok(row.0)
+}
+
+pub async fn mk_lib_database_media_new(
+    sqlx_pool: &sqlx::PgPool,
+    days_old: i64,
+    offset: i64,
+    limit: i64,
+) -> Result<Vec<DBMediaKnownList>, sqlx::Error> {
+    let date_added = (Utc::now() - Duration::days(days_old))
+        .format("%Y-%m-%d")
+        .to_string();
+    let select_query = sqlx::query(
+        "select mm_media_name, \
+         mm_media_guid, \
+         mm_media_class_guid \
+         from mm_media, mm_metadata_movie \
+         where mm_media_metadata_guid = mm_metadata_guid \
+         and mm_media_json->>'DateAdded' >= $1 \
+         order by LOWER(mm_media_name), \
+         mm_media_class_guid offset $2 limit $3",
+    )
+    .bind(date_added)
+    .bind(offset)
+    .bind(limit);
+    let table_rows: Vec<DBMediaKnownList> = select_query
+        .map(|row: PgRow| DBMediaKnownList {
+            mm_media_path: row.get("mm_media_path"),
+        })
+        .fetch_all(sqlx_pool)
+        .await?;
+    Ok(table_rows)
+}
+
 /*
 
 // TODO port query
@@ -532,38 +580,6 @@ def db_read_media_path_like(self, media_path):
         return self.db_cursor.fetchone()['mm_media_metadata_guid']
     except:
         return None
-
-
-// TODO port query
-def db_read_media_new(self, offset=None, records=None, search_value=None, days_old=7):
-    """
-    # new media
-    """
-    if offset is None:
-        self.db_cursor.execute('select mm_media_name,'
-                               ' mm_media_guid,'
-                               ' mm_media_class_guid'
-                               ' from mm_media, mm_metadata_movie'
-                               ' where mm_media_metadata_guid = mm_metadata_guid'
-                               ' and mm_media_json->>'DateAdded' >= $1'
-                               ' order by LOWER(mm_media_name),'
-                               ' mm_media_class_guid',
-                               ((datetime.datetime.now()
-                                 - datetime.timedelta(days=days_old)).strftime("%Y-%m-%d"),))
-    else:
-        self.db_cursor.execute('select mm_media_name,'
-                               ' mm_media_guid,'
-                               ' mm_media_class_guid'
-                               ' from mm_media, mm_metadata_movie'
-                               ' where mm_media_metadata_guid = mm_metadata_guid'
-                               ' and mm_media_json->>'DateAdded' >= $1'
-                               ' order by LOWER(mm_media_name),'
-                               ' mm_media_class_guid offset $2 limit $3',
-                               ((datetime.datetime.now()
-                                 - datetime.timedelta(days=days_old)).strftime("%Y-%m-%d"),
-                                offset, records))
-    return self.db_cursor.fetchall()
-
 
 // TODO port query
 def db_ffprobe_all_media_guid(self, media_uuid, media_class_uuid):

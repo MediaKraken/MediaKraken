@@ -20,8 +20,12 @@ pub async fn user_home(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
+    let mut new_media = false;
+    if mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_new_count(&sqlx_pool, 7).await.unwrap() > 0 {
+        new_media = true;
+    }
     let template = TemplateUserHomeContext {
-        template_data_new_media: &true,
+        template_data_new_media: &new_media,
         template_data_user_media_queue: &true,
     };
     let reply_html = template.render().unwrap();
