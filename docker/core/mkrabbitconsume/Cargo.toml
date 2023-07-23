@@ -12,7 +12,6 @@ codegen-units = 1
 [dependencies]
 chrono = { version = "0.4.24", features = ["serde"] }
 mk_lib_database = { path = "mk_lib_database" }
-mk_lib_logging = { path = "mk_lib_logging" }
 mk_lib_network = { path = "mk_lib_network" }
 mk_lib_rabbitmq = { path = "mk_lib_rabbitmq" }
 reqwest = { version = "0.11.18", default-features = false, features = [

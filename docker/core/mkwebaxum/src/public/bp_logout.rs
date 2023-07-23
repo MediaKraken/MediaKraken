@@ -8,7 +8,6 @@ use axum::{
 };
 use axum_session_auth::{AuthSession, SessionPgPool};
 use mk_lib_database;
-use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use sqlx::{
     postgres::{PgConnectOptions, PgPoolOptions},

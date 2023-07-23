@@ -1,24 +1,12 @@
-use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use sqlx::postgres::PgRow;
-use sqlx::{types::Uuid};
 use sqlx::{FromRow, Row};
-use stdext::function_name;
+use sqlx::types::Uuid;
 
 pub async fn mk_lib_database_metadata_collection_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_collection \
@@ -49,15 +37,6 @@ pub async fn mk_lib_database_metadata_collection_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMetaCollectionList>, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let select_query;
     if search_value != "" {
         select_query = sqlx::query(
@@ -100,15 +79,6 @@ pub async fn mk_lib_database_meta_collection_detail(
     sqlx_pool: &sqlx::PgPool,
     collection_uuid: String,
 ) -> Result<PgRow, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let row: PgRow = sqlx::query(
         "select mm_metadata_collection_json, \
         mm_metadata_collection_imagelocal_json from mm_metadata_collection \
@@ -130,15 +100,6 @@ pub async fn mk_lib_database_meta_collection_by_name(
     sqlx_pool: &sqlx::PgPool,
     collection_name: String,
 ) -> Result<Vec<DBMetaCollectionByNameList>, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let select_query = sqlx::query(
         "select mm_metadata_guid, mm_metadata_json \
          from mm_metadata_movie where mm_metadata_json->'belongs_to_collection'::text \
@@ -159,15 +120,6 @@ pub async fn mk_lib_database_metadata_collection_guid_by_name(
     sqlx_pool: &sqlx::PgPool,
     collection_name: String,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let row: (uuid::Uuid,) = sqlx::query_as(
         "select mm_metadata_collection_guid \
         from mm_metadata_collection \
@@ -183,15 +135,6 @@ pub async fn mk_lib_database_metadata_collection_guid_by_tmdb(
     sqlx_pool: &sqlx::PgPool,
     tmdb_id: String,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let row: (uuid::Uuid,) = sqlx::query_as(
         "sselect mm_metadata_collection_guid from mm_metadata_collection
         where mm_metadata_collection_json @> '{\"id\":$1}'",
@@ -224,15 +167,6 @@ pub async fn mk_lib_database_meta_collection_insert(
     metadata_json: serde_json::Value,
     local_image_json: serde_json::Value,
 ) -> Result<Uuid, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let new_guid = uuid::Uuid::new_v4();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(

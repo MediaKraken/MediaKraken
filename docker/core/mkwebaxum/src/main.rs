@@ -15,7 +15,6 @@ use axum_prometheus::{EndpointLabel, PrometheusMetricLayerBuilder};
 use axum_session::{Key, SessionConfig, SessionLayer, SessionRedisPool, SessionStore};
 use axum_session_auth::{AuthConfig, AuthSessionLayer};
 use mk_lib_database;
-use mk_lib_logging::mk_lib_logging;
 use rcgen::generate_simple_self_signed;
 use ring::digest;
 use serde_json::json;
@@ -118,26 +117,9 @@ pub mod user_playback {
 
 #[tokio::main]
 async fn main() {
-    #[cfg(debug_assertions)]
-    {
-        // start logging
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"START": "START"}))
-            .await
-            .unwrap();
-    }
-
     // TODO this needs to move to another container that doesn't start multiples
     // check for and create ssl certs if needed
     if Path::new("/mediakraken/certs/cacert.pem").exists() == false {
-        #[cfg(debug_assertions)]
-        {
-            mk_lib_logging::mk_logging_post_elk(
-                std::module_path!(),
-                json!({"stuff": "Cert not found, generating."}),
-            )
-            .await
-            .unwrap();
-        }
         // generate certs/keys
         let subject_alt_names = vec!["www.mediakraken.org".to_string(), "localhost".to_string()];
         let cert = generate_simple_self_signed(subject_alt_names).unwrap();

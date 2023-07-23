@@ -1,10 +1,7 @@
-use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use sqlx::postgres::PgRow;
-use sqlx::{types::Uuid};
 use sqlx::{FromRow, Row};
-use stdext::function_name;
+use sqlx::types::Uuid;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBDownloadQueueByProviderList {
@@ -20,15 +17,6 @@ pub async fn mk_lib_database_download_queue_by_provider(
     sqlx_pool: &sqlx::PgPool,
     provider_name: &str,
 ) -> Result<Vec<DBDownloadQueueByProviderList>, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let select_query = sqlx::query(
         "select mm_download_guid, \
         mm_download_que_type, \
@@ -59,15 +47,6 @@ pub async fn mk_lib_database_download_queue_delete(
     sqlx_pool: &sqlx::PgPool,
     download_guid: uuid::Uuid,
 ) -> Result<(), sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     sqlx::query("delete from mm_metadata_download_que where mm_download_guid = $1")
         .bind(download_guid)
         .execute(sqlx_pool)
@@ -81,15 +60,6 @@ pub async fn mk_lib_database_metadata_download_queue_exists(
     metadata_que_type: i16,
     metadata_provider_id: i32,
 ) -> Result<bool, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let row: (bool,) = sqlx::query_as(
         "select exists(select 1 from mm_metadata_download_que \
         where mm_download_provider_id = $1 and mm_download_provider = $2 \
@@ -109,15 +79,6 @@ pub async fn mk_lib_database_metadata_download_queue_update_provider(
     metadata_provider: String,
     metadata_queue_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "update mm_metadata_download_que \
@@ -140,15 +101,6 @@ pub async fn mk_lib_database_metadata_download_queue_insert(
     metadata_provider_id: Option<i32>,
     metadata_status: String,
 ) -> Result<(), sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_metadata_download_que (mm_download_guid, \
@@ -176,15 +128,6 @@ pub async fn mk_lib_database_metadata_download_status_update(
     metadata_download_uuid: Uuid,
     metadata_status: String,
 ) -> Result<(), sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "update mm_metadata_download_que \
@@ -201,15 +144,6 @@ pub async fn mk_lib_database_metadata_download_status_update(
 pub async fn mk_lib_database_metadata_download_count(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<i64, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let row: (i64,) = sqlx::query_as("select count(*) from mm_metadata_download_que")
         .fetch_one(sqlx_pool)
         .await?;

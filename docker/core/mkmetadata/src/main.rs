@@ -1,6 +1,5 @@
 use mk_lib_common;
 use mk_lib_database;
-use mk_lib_logging::mk_lib_logging;
 use mk_lib_metadata;
 use serde_json::json;
 use std::error::Error;
@@ -15,14 +14,6 @@ mod metadata_identification;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    #[cfg(debug_assertions)]
-    {
-        // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
-            .await
-            .unwrap();
-    }
-
     // open the database
     let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
         .await
