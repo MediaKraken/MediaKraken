@@ -7,7 +7,7 @@ use quickxml_to_serde::{xml_string_to_json, Config, JsonArray, JsonType, NullVal
 use serde_json::{json, Value};
 use std::error::Error;
 use std::fs::File;
-use std::io::{self, prelude::*, BufReader};
+use std::io::{prelude::*, BufReader};
 use std::path::Path;
 use tokio::sync::Notify;
 
