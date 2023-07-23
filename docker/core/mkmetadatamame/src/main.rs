@@ -47,17 +47,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         {
             while let Some(msg) = rabbit_consumer.recv().await {
                 if let Some(payload) = msg.content {
-                    let json_message: Value =
-                        serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                    // #[cfg(debug_assertions)]
-                    // {
-                    //     mk_lib_logging::mk_logging_post_elk(
-                    //         std::module_path!(),
-                    //         json!({ "msg body": json_message }),
-                    //     )
-                    //     .await
-                    //     .unwrap();
-                    // }
+                    // let _json_message: Value =
+                    //     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
                     // create mame game list
                     let file_name = format!(
                         "/mediakraken/emulation/mame0{}lx.zip",
@@ -385,7 +376,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         let mut sys_short_name = String::new();
                         let mut sys_longname = String::new();
                         let mut sys_manufacturer = String::new();
-                        let mut sys_year: i8 = 0;
+                        let mut sys_year: i16 = 0;
                         let mut sys_desc = String::new();
                         let mut sys_emulation = String::new();
                         let mut sys_color = String::new();
