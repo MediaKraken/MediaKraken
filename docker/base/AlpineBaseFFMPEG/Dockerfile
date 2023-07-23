@@ -189,6 +189,3 @@ RUN buildDeps="autoconf \
 #     libva-intel-driver==2.4.1-r0 \
 #     && rm -Rf /home/* && \
 #     ffmpeg -buildconf
-
-# # Use an unprivileged user.
-# # USER mediakraken:mediakraken

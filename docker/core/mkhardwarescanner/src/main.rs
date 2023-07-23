@@ -1,6 +1,5 @@
 use futures_util::{pin_mut, stream::StreamExt};
 use mk_lib_hardware;
-use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use serde_json::Value;
 use std::error::Error;
@@ -8,14 +7,6 @@ use tokio::sync::Notify;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    #[cfg(debug_assertions)]
-    {
-        // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
-            .await
-            .unwrap();
-    }
-
     let (_rabbit_connection, rabbit_channel) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mkhardwarescanner")
             .await
@@ -31,39 +22,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(payload) = msg.content {
                 let json_message: Value =
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                #[cfg(debug_assertions)]
-                {
-                    mk_lib_logging::mk_logging_post_elk(
-                        std::module_path!(),
-                        json!({ "msg body": json_message }),
-                    )
-                    .await
-                    .unwrap();
-                }
+                // #[cfg(debug_assertions)]
+                // {
+                //     mk_lib_logging::mk_logging_post_elk(
+                //         std::module_path!(),
+                //         json!({ "msg body": json_message }),
+                //     )
+                //     .await
+                //     .unwrap();
+                // }
                 // media_devices = []
-                #[cfg(debug_assertions)]
-                {
-                    mk_lib_logging::mk_logging_post_elk(
-                        std::module_path!(),
-                        json!({"HWScan": "Before Chromcast"}),
-                    )
-                    .await
-                    .unwrap();
-                }
 
                 // chromecast discover
                 mk_lib_hardware::mk_lib_hardware_chromecast::mk_hardware_chromecast_discover()
                     .await
                     .unwrap();
-                #[cfg(debug_assertions)]
-                {
-                    mk_lib_logging::mk_logging_post_elk(
-                        std::module_path!(),
-                        json!({"HWScan": "After Chromcast"}),
-                    )
-                    .await
-                    .unwrap();
-                }
 
                 // crestron device discover
                 // # crestron_devices = common_hardware_crestron.com_hardware_crestron_discover()
@@ -71,15 +44,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // #     for crestron in crestron_devices:
                 // #         common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text= {'crestron out': crestron})
                 // #         media_devices.append({'Crestron': crestron})
-                #[cfg(debug_assertions)]
-                {
-                    mk_lib_logging::mk_logging_post_elk(
-                        std::module_path!(),
-                        json!({"HWScan": "After Crestron"}),
-                    )
-                    .await
-                    .unwrap();
-                }
 
                 // dlna devices
                 // mk_lib_network::mk_lib_network_dlna::mk_lib_network_dlna_discover().await;
@@ -109,15 +73,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // #                                         'Firmware': row_tuner.get_version(),
                 // #                                         'Active': True,
                 // #                                         'Channels': {}}})
-                #[cfg(debug_assertions)]
-                {
-                    mk_lib_logging::mk_logging_post_elk(
-                        std::module_path!(),
-                        json!({"HWScan": "After HDHomerun"}),
-                    )
-                    .await
-                    .unwrap();
-                }
 
                 // onvif cameras discover
                 //use futures_util::stream::StreamExt;
@@ -129,15 +84,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 //         println!("Onvif Device found: {:?}", addr);
                 //     })
                 //     .await;
-                #[cfg(debug_assertions)]
-                {
-                    mk_lib_logging::mk_logging_post_elk(
-                        std::module_path!(),
-                        json!({"HWScan": "After Onvif"}),
-                    )
-                    .await
-                    .unwrap();
-                }
 
                 // phillips hue hub discover
                 // mk_lib_hardware_phue::mk_hardware_phue_discover()
@@ -154,15 +100,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 //     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
                 //                                                          message_text={'roku out': roku})
                 //     media_devices.append({'Roku': roku})
-                #[cfg(debug_assertions)]
-                {
-                    mk_lib_logging::mk_logging_post_elk(
-                        std::module_path!(),
-                        json!({"HWScan": "After ROKU"}),
-                    )
-                    .await
-                    .unwrap();
-                }
+
                 // soco discover
                 // soco_devices = common_hardware_soco.com_hardware_soco_discover()
                 // if soco_devices != None:
@@ -171,30 +109,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 //             message_type='info',
                 //             message_text={'soco out': soco})
                 //         media_devices.append({'Soco': soco})
-                #[cfg(debug_assertions)]
-                {
-                    mk_lib_logging::mk_logging_post_elk(
-                        std::module_path!(),
-                        json!({"HWScan": "After SOCO"}),
-                    )
-                    .await
-                    .unwrap();
-                }
+
                 // sonos discover
                 // let mut devices = sonor::discover(std::time::Duration::from_secs(5)).await?;
                 // while let Some(device) = devices.try_next().await? {
                 //     let name = device.name().await?;
                 //     println!("Sonos Discovered {}", name);
                 // }
-                #[cfg(debug_assertions)]
-                {
-                    mk_lib_logging::mk_logging_post_elk(
-                        std::module_path!(),
-                        json!({"HWScan": "After Sonos"}),
-                    )
-                    .await
-                    .unwrap();
-                }
 
                 // common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
                 //                                                      message_text={'devices': media_devices})

@@ -4,18 +4,9 @@ use std::io;
 use std::net::IpAddr;
 use std::str;
 use tokio::net::UdpSocket;
-use mk_lib_logging::mk_lib_logging;
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
-    #[cfg(debug_assertions)]
-    {
-        // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
-            .await
-            .unwrap();
-    }
-
     let mut mediakraken_ip: String = "127.0.0.1".to_string();
     // loop through interfaces
     for iface in datalink::interfaces() {
@@ -23,15 +14,15 @@ async fn main() -> io::Result<()> {
         if iface.name == "ens18" || iface.name == "eth0" || iface.name == "ens192" {
             for source_ip in iface.ips.iter() {
                 if source_ip.is_ipv4() {
-                    #[cfg(debug_assertions)]
-                    {
-                        mk_lib_logging::mk_logging_post_elk(
-                            std::module_path!(),
-                            json!({ "source_ip": source_ip }),
-                        )
-                        .await
-                        .unwrap();
-                    }
+                    // #[cfg(debug_assertions)]
+                    // {
+                    //     mk_lib_logging::mk_logging_post_elk(
+                    //         std::module_path!(),
+                    //         json!({ "source_ip": source_ip }),
+                    //     )
+                    //     .await
+                    //     .unwrap();
+                    // }
                     let source_ip = iface
                         .ips
                         .iter()
@@ -42,15 +33,15 @@ async fn main() -> io::Result<()> {
                         })
                         .unwrap();
                     mediakraken_ip = source_ip.to_string();
-                    #[cfg(debug_assertions)]
-                    {
-                        mk_lib_logging::mk_logging_post_elk(
-                            std::module_path!(),
-                            json!({ "mediakraken_ip": mediakraken_ip }),
-                        )
-                        .await
-                        .unwrap();
-                    }
+                    // #[cfg(debug_assertions)]
+                    // {
+                    //     mk_lib_logging::mk_logging_post_elk(
+                    //         std::module_path!(),
+                    //         json!({ "mediakraken_ip": mediakraken_ip }),
+                    //     )
+                    //     .await
+                    //     .unwrap();
+                    // }
                     break;
                 }
             }
@@ -84,41 +75,41 @@ async fn main() -> io::Result<()> {
                 Err(e) => panic!("Invalid UTF-8 sequence: {}", e),
             };
             if net_string == "who is MediaKrakenServer?" {
-                #[cfg(debug_assertions)]
-                {
-                    mk_lib_logging::mk_logging_post_elk(
-                        std::module_path!(),
-                        json!({"bytes received": len, "addr": addr, "net_string": net_string}),
-                    )
-                    .await
-                    .unwrap();
-                    mk_lib_logging::mk_logging_post_elk(
-                        std::module_path!(),
-                        json!({ "host_port": host_port }),
-                    )
-                    .await
-                    .unwrap();
-                }
+                // #[cfg(debug_assertions)]
+                // {
+                //     mk_lib_logging::mk_logging_post_elk(
+                //         std::module_path!(),
+                //         json!({"bytes received": len, "addr": addr, "net_string": net_string}),
+                //     )
+                //     .await
+                //     .unwrap();
+                //     mk_lib_logging::mk_logging_post_elk(
+                //         std::module_path!(),
+                //         json!({ "host_port": host_port }),
+                //     )
+                //     .await
+                //     .unwrap();
+                // }
                 let mk_address = format!("{}:{}", mediakraken_ip, host_port);
-                #[cfg(debug_assertions)]
-                {
-                    mk_lib_logging::mk_logging_post_elk(
-                        std::module_path!(),
-                        json!({ "mk_address": mk_address }),
-                    )
-                    .await
-                    .unwrap();
-                }
+                // #[cfg(debug_assertions)]
+                // {
+                //     mk_lib_logging::mk_logging_post_elk(
+                //         std::module_path!(),
+                //         json!({ "mk_address": mk_address }),
+                //     )
+                //     .await
+                //     .unwrap();
+                // }
                 let _len = sock.send_to(&mk_address.into_bytes(), addr).await?;
-                #[cfg(debug_assertions)]
-                {
-                    mk_lib_logging::mk_logging_post_elk(
-                        std::module_path!(),
-                        json!({ "bytes sent": len }),
-                    )
-                    .await
-                    .unwrap();
-                }
+                // #[cfg(debug_assertions)]
+                // {
+                //     mk_lib_logging::mk_logging_post_elk(
+                //         std::module_path!(),
+                //         json!({ "bytes sent": len }),
+                //     )
+                //     .await
+                //     .unwrap();
+                // }
             }
         }
     }

@@ -1,7 +1,7 @@
 # outside of build step, hence have to re arg it below
 ARG BRANCHTAG
 
-FROM mediakraken/mkbase_rust_debian:"${BRANCHTAG}" as planner
+FROM mediakraken/mkbase_rust_alpine:"${BRANCHTAG}" as planner
 
 COPY . .
 
@@ -14,7 +14,7 @@ FROM planner AS cargo-build
 
 COPY --from=planner recipe.json recipe.json
 
-RUN cargo chef cook --release --recipe-path recipe.json
+RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
 
 ARG BRANCHTAG
 
@@ -22,22 +22,32 @@ WORKDIR /mediakraken
 
 COPY ./ .
 
-RUN if [ "${BRANCHTAG}" = "prod" ]; \
-  then echo "Building Release" && cargo build --release \
-  && cp /mediakraken/target/release/mk* /mediakraken/target/.; \
-  else echo "Building Debug" && cargo build \
-  && cp /mediakraken/target/debug/mk* /mediakraken/target/.; \
+RUN if [ "${BRANCHTAG}" = "dev" ]; \
+  then cargo build --release --target x86_64-unknown-linux-musl \
+  && cp /mediakraken/target/x86_64-unknown-linux-musl/release/mk* /mediakraken/target/.; \
+  else cargo build --target x86_64-unknown-linux-musl \
+  && cp /mediakraken/target/x86_64-unknown-linux-musl/debug/mk* /mediakraken/target/.; \
   fi
+RUN ldd /mediakraken/target/mkwebapp | tr -s '[:blank:]' '\n' | grep '^/' | \
+  xargs -I % sh -c 'mkdir -p $(dirname /mediakraken/deps%); cp % /mediakraken/deps%;'
 
 ####################################################################################################
 ## Final image
 ####################################################################################################
 # FROM gcr.io/distroless/base-debian11 as runtime
-FROM debian:bookworm-20230703-slim AS runtime
+FROM scratch
+# otherwise throws file not found error
+ADD alpine-minirootfs-3.18.2-x86_64.tar.gz /
+# deps has full /usr/lib/x86_64-linux-gnu path.....hence copy to /
+COPY --from=cargo-build /mediakraken/deps/* /
+
 WORKDIR /mediakraken
 
-RUN apt-get update && apt-get install -y locales locales-all \
-  && rm -rf /var/lib/apt/lists/*
+RUN apk update && apk add --no-cache musl-locales lang \
+ && rm -rf /var/cache/apt/*
+
+# RUN apt-get update && apt-get install -y locales locales-all \
+#   && rm -rf /var/lib/apt/lists/*
 
 # Import from builder.
 # COPY --from=cargo-build /etc/passwd /etc/passwd

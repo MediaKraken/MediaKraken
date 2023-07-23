@@ -1,4 +1,3 @@
-use mk_lib_logging::mk_lib_logging;
 use reqwest::header::CONTENT_TYPE;
 use reqwest::header::USER_AGENT;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
@@ -47,15 +46,6 @@ pub async fn mk_data_from_url_to_json_custom_headers(
 pub async fn mk_data_from_url_to_json(
     url: String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!(), "URL": url }),
-        )
-        .await
-        .unwrap();
-    }
     let retry_policy = reqwest_retry::policies::ExponentialBackoff {
         /// How many times the policy will tell the middleware to retry the request.
         max_n_retries: 100,
@@ -84,26 +74,8 @@ pub async fn mk_data_from_url_to_json(
 }
 
 pub async fn mk_data_from_url(url: String) -> Result<String, Box<dyn std::error::Error>> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!(), "URL": url }),
-        )
-        .await
-        .unwrap();
-    }
     let response = reqwest::get(url).await?;
     let content = response.bytes().await?;
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "content": str::from_utf8(&content).unwrap().to_string() }),
-        )
-        .await
-        .unwrap();
-    }
     Ok(str::from_utf8(&content).unwrap().to_string())
 }
 
@@ -111,21 +83,6 @@ pub async fn mk_download_file_from_url(
     url: String,
     file_name: &String,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "url": url }))
-            .await
-            .unwrap();
-    }
     println!("url: {}", url);
     let response = reqwest::get(url).await?;
     let mut file = std::fs::File::create(file_name)?;
@@ -160,12 +117,12 @@ pub async fn mk_download_file_from_url_tokio(
                     Err(e) => {
                         #[cfg(debug_assertions)]
                         {
-                            mk_lib_logging::mk_logging_post_elk(
-                                std::module_path!(),
-                                json!({ format!("Could not get bytes from data: {:?}", &e ): url }),
-                            )
-                            .await
-                            .unwrap();
+                            // mk_lib_logging::mk_logging_post_elk(
+                            //     std::module_path!(),
+                            //     json!({ format!("Could not get bytes from data: {:?}", &e ): url }),
+                            // )
+                            // .await
+                            // .unwrap();
                         }
                     }
                 }
@@ -173,24 +130,24 @@ pub async fn mk_download_file_from_url_tokio(
         } else {
             #[cfg(debug_assertions)]
             {
-                mk_lib_logging::mk_logging_post_elk(
-                    std::module_path!(),
-                    json!({ format!("Could not open file for writing: {:?}", &file_name ): url }),
-                )
-                .await
-                .unwrap();
+                // mk_lib_logging::mk_logging_post_elk(
+                //     std::module_path!(),
+                //     json!({ format!("Could not open file for writing: {:?}", &file_name ): url }),
+                // )
+                // .await
+                // .unwrap();
             }
         }
     } else {
         if let Err(e) = client.get(&url).send().await {
             #[cfg(debug_assertions)]
             {
-                mk_lib_logging::mk_logging_post_elk(
-                    std::module_path!(),
-                    json!({ format!("File error for {:?} with error {:#?}", &file_name, &e ): url }),
-                )
-                .await
-                .unwrap();
+                // mk_lib_logging::mk_logging_post_elk(
+                //     std::module_path!(),
+                //     json!({ format!("File error for {:?} with error {:#?}", &file_name, &e ): url }),
+                // )
+                // .await
+                // .unwrap();
             }
         }
     };
@@ -199,15 +156,6 @@ pub async fn mk_download_file_from_url_tokio(
 
 // wait_seconds - 120 typically
 pub async fn mk_network_service_available(host_dns: &str, host_port: &str, wait_seconds: &str) {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let mut command_string = "/mediakraken/wait-for-it-bash.sh";
     if std::path::Path::new("/mediakraken/wait-for-it-ash-busybox130.sh").exists() {
         command_string = "/mediakraken/wait-for-it-ash-busybox130.sh";

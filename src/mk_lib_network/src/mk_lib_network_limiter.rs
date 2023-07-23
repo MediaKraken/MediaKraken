@@ -1,5 +1,4 @@
 use governor::{Quota, RateLimiter};
-use mk_lib_logging::mk_lib_logging;
 use nonzero_ext::*;
 use phf::phf_map;
 use serde_json::json;
@@ -8,15 +7,6 @@ use stdext::function_name;
 // https://docs.rs/governor/0.5.1/governor/struct.Quota.html
 
 pub async fn mk_network_rate_limiter() {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let lim = RateLimiter::direct(Quota::per_second(nonzero!(50u32))); // Allow 50 units per second
     assert_eq!(Ok(()), lim.check());
 }

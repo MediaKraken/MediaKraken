@@ -3,7 +3,6 @@ use fancy_regex::Regex;
 use mk_lib_common;
 use mk_lib_database;
 use mk_lib_file;
-use mk_lib_logging::mk_lib_logging;
 use mk_lib_rabbitmq;
 use num_format::{Locale, ToFormattedString};
 use serde_json::{json, Value};
@@ -12,21 +11,11 @@ use std::ffi::OsStr;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
-use stdext::function_name;
 use tokio::sync::Notify;
-use tokio::time::{sleep, Duration};
 use uuid::Uuid;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    #[cfg(debug_assertions)]
-    {
-        // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
-            .await
-            .unwrap();
-    }
-
     // setup regex for finding media parts
     let stack_cd = Regex::new(r"(?i)-cd\d").unwrap();
     let stack_cd1 = Regex::new(r"(?i)-cd1(?!\d)").unwrap();
@@ -63,15 +52,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(payload) = msg.content {
                 let json_message: Value =
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                #[cfg(debug_assertions)]
-                {
-                    mk_lib_logging::mk_logging_post_elk(
-                        std::module_path!(),
-                        json!({ "msg body": json_message }),
-                    )
-                    .await
-                    .unwrap();
-                }
+                // #[cfg(debug_assertions)]
+                // {
+                //     mk_lib_logging::mk_logging_post_elk(
+                //         std::module_path!(),
+                //         json!({ "msg body": json_message }),
+                //     )
+                //     .await
+                //     .unwrap();
+                // }
                 // determine directories to audit
                 for row_data in
    mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_audit_read(
@@ -80,14 +69,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
    .await
    .unwrap()
 {
-   #[cfg(debug_assertions)]
-   {
-       mk_lib_logging::mk_logging_post_elk(
-           std::module_path!(),
-           json!({ "Audit Path": row_data }),
-       )
-       .await;
-   }
    let mut media_path: PathBuf;
    // shouldn't need to care  let unc_slice = &row_data.get("mm_media_dir_path")[..1];
    // obviously this would mean we mount unc to below as well when defining libraries
@@ -117,14 +98,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
            )
            .await
            .unwrap();
-           #[cfg(debug_assertions)]
-           {
-               mk_lib_logging::mk_logging_post_elk(
-                   std::module_path!(),
-                   json!({ "worker dir": media_path }),
-               )
-               .await;
-           }
+        //    #[cfg(debug_assertions)]
+        //    {
+        //        mk_lib_logging::mk_logging_post_elk(
+        //            std::module_path!(),
+        //            json!({ "worker dir": media_path }),
+        //        )
+        //        .await;
+        //    }
 
            let original_media_class = row_data.mm_media_dir_class_enum;
            // update the timestamp now so any other media added DURING this scan don"t get skipped

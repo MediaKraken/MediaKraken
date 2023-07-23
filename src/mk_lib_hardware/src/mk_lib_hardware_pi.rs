@@ -1,5 +1,4 @@
 use rascam::*;
-use mk_lib_logging::mk_lib_logging;
 use rppal::gpio::Gpio;
 use serde_json::json;
 use std::error::Error;
@@ -19,15 +18,6 @@ pub async fn mk_lib_hardware_pi_led_flash(
     gpio_pin: u8,
     milliseconds: u64,
 ) -> Result<(), Box<dyn Error>> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let mut pin = Gpio::new()?.get(gpio_pin)?.into_output();
     loop {
         pin.toggle();
@@ -36,15 +26,6 @@ pub async fn mk_lib_hardware_pi_led_flash(
 }
 
 pub async fn mk_lib_hardware_pi_take_image(image_file_name: String) {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let info = info().unwrap();
     if info.cameras.len() > 0 {
         #[cfg(debug_assertions)]
@@ -56,15 +37,6 @@ pub async fn mk_lib_hardware_pi_take_image(image_file_name: String) {
 }
 
 async fn simple_sync(info: &CameraInfo, image_file_name: String) {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let mut camera = SimpleCamera::new(info.clone()).unwrap();
     camera.activate().unwrap();
     let b = camera.take_one().unwrap();
