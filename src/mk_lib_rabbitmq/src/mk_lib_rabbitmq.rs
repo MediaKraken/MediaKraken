@@ -68,7 +68,7 @@ pub async fn rabbitmq_consumer(
     let rabbit_args = BasicConsumeArguments::new(rabbit_queue, "mkstack_consumer")
         .manual_ack(true)
         .finish();
-    let (_ctag, mut rabbit_rx) = rabbit_channel.basic_consume_rx(rabbit_args).await.unwrap();
+    let (_ctag, rabbit_rx) = rabbit_channel.basic_consume_rx(rabbit_args).await.unwrap();
     Ok(rabbit_rx)
 }
 

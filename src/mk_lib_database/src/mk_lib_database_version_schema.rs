@@ -1,21 +1,10 @@
 use crate::mk_lib_database_option_status;
-use mk_lib_logging::mk_lib_logging;
-use serde_json::{json, Value};
-use stdext::function_name;
+use serde_json::Value;
 
 pub async fn mk_lib_database_update_schema(
     sqlx_pool: &sqlx::PgPool,
     version_no: i32,
 ) -> Result<bool, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     if version_no < 44 {
         // set mame version to 240
         let _option_json: Value =
@@ -210,15 +199,6 @@ pub async fn mk_lib_database_version_update(
     sqlx_pool: &sqlx::PgPool,
     version_number: i32,
 ) -> Result<(), sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("update mm_version set mm_version_number = $1")
         .bind(version_number)

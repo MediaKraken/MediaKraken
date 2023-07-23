@@ -10,7 +10,6 @@ use axum::{
 };
 use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
 use mk_lib_database;
-use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use sqlx::PgPool;
 use stdext::function_name;
@@ -32,15 +31,6 @@ pub async fn guard_page_by_user(
     user_admin: bool,
     //) -> Result<Response, error_handling::MKAxumError> {
 ) -> Result<(), StatusCode> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let current_user = auth.current_user.clone().unwrap_or_default();
     if user_admin == true {
         if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(

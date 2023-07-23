@@ -11,7 +11,7 @@ members = [
 #     "mkinotify",
 #     "mklibretrocorefetchupdate",
 #     "mkmediascanner",
-#     "mkmetadata",
+     "mkmetadata",
      "mkmetadatamame",
 #     "mkmulticast",    
 #     "mkmusicbrainz",    

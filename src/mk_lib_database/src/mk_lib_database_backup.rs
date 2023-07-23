@@ -1,10 +1,7 @@
 use chrono::prelude::*;
-use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
-use stdext::function_name;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBBackupList {
@@ -20,15 +17,6 @@ pub async fn mk_lib_database_backup_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBBackupList>, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let select_query = sqlx::query(
         "select mm_backup_guid, mm_backup_description, \
             mm_backup_location_type, mm_backup_location, mm_backup_created \
@@ -54,15 +42,6 @@ pub async fn mk_lib_database_backup_read(
 pub async fn mk_lib_database_backup_count(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<i64, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let row: (i64,) = sqlx::query_as("select count(*) from mm_backup")
         .fetch_one(sqlx_pool)
         .await?;

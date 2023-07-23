@@ -1,21 +1,11 @@
 use chrono::prelude::*;
 use mk_lib_database;
-use mk_lib_logging::mk_lib_logging;
 use mk_lib_rabbitmq;
-use serde_json::json;
 use std::error::Error;
 use tokio::time::{sleep, Duration};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    #[cfg(debug_assertions)]
-    {
-        // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
-            .await
-            .unwrap();
-    }
-
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
         .await

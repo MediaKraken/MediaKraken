@@ -16,7 +16,6 @@ digest = "0.10.7"
 ed2k = { git = "https://github.com/runfalk/ed2k-rs" }
 md-5 = "0.10.5"
 mk_lib_file = { path = "../mk_lib_file" }
-mk_lib_logging = { path = "../mk_lib_logging" }
 serde_json = "1.0.96"
 sha1 = "0.10.5"
 stdext = "0.3.1"

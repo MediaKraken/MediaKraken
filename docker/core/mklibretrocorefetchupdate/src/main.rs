@@ -1,9 +1,7 @@
 use mk_lib_compression;
 use mk_lib_hash;
-use mk_lib_logging::mk_lib_logging;
 use mk_lib_network;
 use mk_lib_rabbitmq;
-use serde_json::json;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::error::Error;
@@ -22,14 +20,6 @@ fn is_hidden(entry: &DirEntry) -> bool {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    #[cfg(debug_assertions)]
-    {
-        // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
-            .await
-            .unwrap();
-    }
-
     let (_rabbit_connection, rabbit_channel) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mklibretrocorefetchupdate")
             .await
@@ -47,15 +37,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(payload) = msg.content {
                 let json_message: Value =
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                #[cfg(debug_assertions)]
-                {
-                    mk_lib_logging::mk_logging_post_elk(
-                        std::module_path!(),
-                        json!({ "msg body": json_message }),
-                    )
-                    .await
-                    .unwrap();
-                }
+                // #[cfg(debug_assertions)]
+                // {
+                //     mk_lib_logging::mk_logging_post_elk(
+                //         std::module_path!(),
+                //         json!({ "msg body": json_message }),
+                //     )
+                //     .await
+                //     .unwrap();
+                // }
                 // populate current zipped cores into hashmap
                 let mut emulation_cores = HashMap::new();
                 let walker = WalkDir::new("/mediakraken/emulation/cores").into_iter();

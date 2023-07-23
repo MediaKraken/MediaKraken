@@ -1,20 +1,8 @@
-use mk_lib_logging::mk_lib_logging;
-use serde_json::json;
 use std::process::{Command, Stdio};
-use stdext::function_name;
 
 pub async fn mk_common_ffmpeg_get_info(
     media_file: &str,
 ) -> Result<serde_json::Value, std::io::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let output = Command::new("ffprobe")
         .args([
             "-hide_banner",

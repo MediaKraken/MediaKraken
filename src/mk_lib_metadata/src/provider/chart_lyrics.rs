@@ -1,23 +1,11 @@
 // http://www.chartlyrics.com/api.aspx
 
-use mk_lib_logging::mk_lib_logging;
 use mk_lib_network;
-use serde_json::json;
-use stdext::function_name;
 
 pub async fn provider_chart_lyrics_fetch(
     artist_name: String,
     song_name: String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let json_data = mk_lib_network::mk_lib_network::mk_data_from_url_to_json(format!(
         "http://api.chartlyrics.com/apiv1.asmx/SearchLyricDirect?artist={}&song={}",
         artist_name, song_name

@@ -1,22 +1,12 @@
 use mk_lib_database;
-use mk_lib_logging::mk_lib_logging;
 use mk_lib_network;
 use mk_lib_rabbitmq;
 use serde_json::{json, Value};
 use std::error::Error;
-use stdext::function_name;
 use tokio::sync::Notify;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    #[cfg(debug_assertions)]
-    {
-        // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
-            .await
-            .unwrap();
-    }
-
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
         .await
@@ -43,15 +33,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(payload) = msg.content {
                 let json_message: Value =
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                #[cfg(debug_assertions)]
-                {
-                    mk_lib_logging::mk_logging_post_elk(
-                        std::module_path!(),
-                        json!({ "msg body": json_message }),
-                    )
-                    .await
-                    .unwrap();
-                }
+                // #[cfg(debug_assertions)]
+                // {
+                //     mk_lib_logging::mk_logging_post_elk(
+                //         std::module_path!(),
+                //         json!({ "msg body": json_message }),
+                //     )
+                //     .await
+                //     .unwrap();
+                // }
                 /*
                 Do I actually launch a docker swarm container that checks for cuda
                 and then that launches the slave container with ffmpeg

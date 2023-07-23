@@ -1,14 +1,10 @@
 // https://github.com/nn1ks/huelib-rs
 
-use mk_lib_logging::mk_lib_logging;
-
 use huelib::resource::Light;
 use huelib::resource::{light, Adjust, Alert};
 use huelib::Color;
 use huelib::{bridge, Bridge};
-use serde_json::json;
 use std::net::IpAddr;
-use stdext::function_name;
 
 pub async fn mk_hardware_phue_register_username(
     bridge_ip: IpAddr,
@@ -18,15 +14,6 @@ pub async fn mk_hardware_phue_register_username(
 }
 
 pub async fn mk_hardware_phue_bridge_discover() -> Result<Vec<IpAddr>, Box<dyn std::error::Error>> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let hub_ip_addresses = bridge::discover_nupnp().unwrap();
     Ok(hub_ip_addresses)
 }
