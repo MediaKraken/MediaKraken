@@ -6,7 +6,6 @@ use mk_lib_database;
 use mk_lib_network::mk_lib_network;
 use serde_json::json;
 use sqlx::types::Uuid;
-use stdext::function_name;
 use torrent_name_parser::Metadata;
 
 pub async fn provider_tmdb_movie_fetch(

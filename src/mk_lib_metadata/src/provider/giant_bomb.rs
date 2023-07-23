@@ -1,8 +1,6 @@
 // https://www.giantbomb.com/api/
 
 use mk_lib_network::mk_lib_network;
-use serde_json::json;
-use stdext::function_name;
 
 pub async fn mk_provider_giant_bomb_platforms(
     api_key: String,
