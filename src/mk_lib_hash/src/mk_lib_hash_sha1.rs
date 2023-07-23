@@ -1,7 +1,5 @@
-use serde_json::json;
 use sha1::{Digest, Sha1};
 use std::{fs, io};
-use stdext::function_name;
 
 pub async fn mk_file_hash_sha1(file_to_read: &str) -> io::Result<String> {
     let mut file = fs::File::open(&file_to_read)?;

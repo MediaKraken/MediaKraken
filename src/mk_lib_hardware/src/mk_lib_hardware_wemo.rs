@@ -1,7 +1,5 @@
 // https://github.com/Hyperchaotic/weectrl
 
-use serde_json::json;
-use stdext::function_name;
 use std::time::Duration;
 use weectrl::{DiscoveryMode, WeeController};
 use futures::prelude::*;

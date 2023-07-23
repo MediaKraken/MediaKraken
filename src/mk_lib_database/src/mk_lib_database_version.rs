@@ -1,6 +1,4 @@
 use crate::mk_lib_database_version_schema;
-use serde_json::json;
-use stdext::function_name;
 use tokio::time::{sleep, Duration};
 
 pub static DATABASE_VERSION: i32 = 53;

@@ -1,8 +1,6 @@
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
-use stdext::function_name;
 use sqlx::types::Uuid;
 
 pub async fn mk_lib_database_metadata_exists_tv(

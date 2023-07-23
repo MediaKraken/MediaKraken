@@ -1,5 +1,3 @@
-use serde_json::json;
-use stdext::function_name;
 
 pub async fn mk_lib_database_user_profile_insert(
     sqlx_pool: &sqlx::PgPool,

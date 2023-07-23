@@ -2,8 +2,6 @@
 
 use ldap3::result::Result;
 use ldap3::{LdapConn, LdapConnAsync, LdapConnSettings, LdapResult, Scope, SearchEntry};
-use serde_json::json;
-use stdext::function_name;
 
 pub async fn ldap_bind(
     ldap_ip: String,

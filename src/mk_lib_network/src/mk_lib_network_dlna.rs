@@ -1,8 +1,5 @@
 // https://github.com/gabrielmagno/crab-dlna
 
-use serde_json::json;
-use stdext::function_name;
-
 use crab_dlna::{
     get_local_ip, infer_subtitle_from_video, play, Error, MediaStreamingServer, Render, RenderSpec,
 };

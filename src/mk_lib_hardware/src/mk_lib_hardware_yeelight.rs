@@ -1,6 +1,5 @@
 // https://github.com/teppah/yeelib_rs
 
-use serde_json::json;
 use std::time::Duration;
 use yeelib_rs::{Light, YeeClient};
 

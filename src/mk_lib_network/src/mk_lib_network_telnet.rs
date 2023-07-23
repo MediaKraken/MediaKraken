@@ -1,7 +1,5 @@
 use mini_telnet::Telnet;
-use serde_json::json;
 use std::time::Duration;
-use stdext::function_name;
 
 pub async fn telnet_connect(
     telnet_prompt: String,

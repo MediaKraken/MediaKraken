@@ -1,10 +1,8 @@
 use mk_lib_database;
 use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 use mk_lib_hash;
-use serde_json::json;
 use std::error::Error;
 use std::path::Path;
-use stdext::function_name;
 
 pub async fn metadata_game_lookup(
     sqlx_pool: &sqlx::PgPool,

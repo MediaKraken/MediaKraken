@@ -3,7 +3,6 @@
 use futures_util::{pin_mut, stream::StreamExt};
 use serde_json::json;
 use std::time::Duration;
-use stdext::function_name;
 
 const CHROMECAST_SERVICE_NAME: &'static str = "_googlecast._tcp.local";
 

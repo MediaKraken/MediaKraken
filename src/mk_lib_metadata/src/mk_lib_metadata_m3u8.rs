@@ -1,9 +1,7 @@
 // https://github.com/sile/hls_m3u8
 
 use hls_m3u8::MediaPlaylist;
-use serde_json::json;
 use std::error::Error;
-use stdext::function_name;
 
 const M3U_HEADER: &str = "EXTM3U\n";
 const M3U_LINE_HEADER: &str = "EXTINF:";

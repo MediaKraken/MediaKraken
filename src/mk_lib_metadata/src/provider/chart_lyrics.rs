@@ -1,8 +1,6 @@
 // http://www.chartlyrics.com/api.aspx
 
 use mk_lib_network;
-use serde_json::json;
-use stdext::function_name;
 
 pub async fn provider_chart_lyrics_fetch(
     artist_name: String,

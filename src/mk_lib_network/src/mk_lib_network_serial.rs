@@ -2,11 +2,9 @@
 // apt install pkg-config libudev-dev
 
 // TODO port this to https://github.com/berkowski/tokio-serial
-use serde_json::json;
 use serialport::{available_ports, DataBits, SerialPort, SerialPortType, StopBits};
 use std::io::{self, Write};
 use std::time::Duration;
-use stdext::function_name;
 
 pub async fn serial_port_discover() -> Result<(), Box<dyn std::error::Error>> {
     let ports = serialport::available_ports().expect("No ports found!");
