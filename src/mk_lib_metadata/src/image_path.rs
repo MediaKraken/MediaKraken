@@ -1,4 +1,3 @@
-use mk_lib_logging::mk_lib_logging;
 use rand::Rng;
 use serde_json::json;
 use stdext::function_name;
@@ -6,15 +5,6 @@ use stdext::function_name;
 pub async fn meta_image_file_path(
     media_type: String,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     // This is the SAVE path.  Do NOT shorten the path to static.
     // This is the SAVE path.  Do NOT shorten the path to static.
     const CHARSET: &[u8] = b"abcdefghijklmnopqrstuvwxyz";

@@ -1,4 +1,3 @@
-use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use stdext::function_name;
 
@@ -7,15 +6,6 @@ pub async fn mk_lib_database_user_profile_insert(
     profile_name: String,
     profile_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let new_guid = uuid::Uuid::new_v4();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(

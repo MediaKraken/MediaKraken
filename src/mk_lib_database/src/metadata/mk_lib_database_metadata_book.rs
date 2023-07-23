@@ -1,4 +1,3 @@
-use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgRow;
@@ -10,15 +9,6 @@ pub async fn mk_lib_database_metadata_book_detail(
     sqlx_pool: &sqlx::PgPool,
     book_uuid: Uuid,
 ) -> Result<serde_json::Value, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let row: (serde_json::Value,) = sqlx::query_as(
         "select mm_metadata_book_json from mm_metadata_book \
         where mm_metadata_book_guid = $1",
@@ -41,15 +31,6 @@ pub async fn mk_lib_database_metadata_book_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMetaBookList>, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     // TODO sort by release date
     let select_query;
     if search_value != "" {
@@ -84,15 +65,6 @@ pub async fn mk_lib_database_metadata_book_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_book \
@@ -115,15 +87,6 @@ pub async fn mk_lib_database_metadata_book_guid_by_isbn(
     isbn: String,
     isbn13: String,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let row: (uuid::Uuid,) = sqlx::query_as(
         "select mm_metadata_book_guid \
         from mm_metadata_book \
@@ -141,15 +104,6 @@ pub async fn mk_lib_database_metadata_book_insert(
     sqlx_pool: &sqlx::PgPool,
     json_data: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let new_guid = uuid::Uuid::new_v4();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
@@ -175,15 +129,6 @@ pub async fn mk_lib_database_metadata_book_guid_by_name(
     sqlx_pool: &sqlx::PgPool,
     book_name: String,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     // TODO can be more than one by name
     // TODO sort by release date
     let row: (uuid::Uuid,) = sqlx::query_as(

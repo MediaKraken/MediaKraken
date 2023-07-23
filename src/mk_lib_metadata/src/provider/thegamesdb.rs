@@ -1,7 +1,6 @@
 // https://api.thegamesdb.net/
 // https://cdn.thegamesdb.net/json/database-latest.json - db dump
 
-use mk_lib_logging::mk_lib_logging;
 use mk_lib_network::mk_lib_network;
 use serde_json::json;
 use stdext::function_name;
@@ -11,15 +10,6 @@ use stdext::function_name;
  */
 
 pub async fn thegamesdb_database_fetch() {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let _json_data: serde_json::Value = mk_lib_network::mk_data_from_url_to_json(
         "https://cdn.thegamesdb.net/json/database-latest.json".to_string(),
     )
@@ -28,29 +18,11 @@ pub async fn thegamesdb_database_fetch() {
 }
 
 pub async fn thegamesdb_platforms_read(api_key: String) {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let _json_data: serde_json::Value =
         mk_lib_network::mk_data_from_url_to_json(format!("https://api.thegamesdb.net/v1/Platforms?apikey={}?fields=icon,console,controller,developer,manufacturer,media,cpu,memory,graphics,sound,maxcontrollers,display,overview,youtube", api_key)).await.unwrap();
 }
 
 pub async fn thegamesdb_games_updated(api_key: String, edit_id: String) {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let _json_data: serde_json::Value = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.thegamesdb.net/v1/Games/Updates?apikey={}?last_edit_id={}",
         api_key, edit_id
@@ -60,15 +32,6 @@ pub async fn thegamesdb_games_updated(api_key: String, edit_id: String) {
 }
 
 pub async fn thegamesdb_genre_read(api_key: String) {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let _json_data: serde_json::Value = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.thegamesdb.net/v1/Genres?apikey={}",
         api_key
@@ -78,15 +41,6 @@ pub async fn thegamesdb_genre_read(api_key: String) {
 }
 
 pub async fn thegamesdb_developers_read(api_key: String) {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let _json_data: serde_json::Value = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.thegamesdb.net/v1/Developers?apikey={}",
         api_key
@@ -96,15 +50,6 @@ pub async fn thegamesdb_developers_read(api_key: String) {
 }
 
 pub async fn thegamesdb_publishers_read(api_key: String) {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let _json_data: serde_json::Value = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.thegamesdb.net/v1/Publishers?apikey={}",
         api_key

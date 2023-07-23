@@ -1,22 +1,10 @@
-use mk_lib_logging::mk_lib_logging;
-use serde_json::json;
-use sqlx::{types::Uuid};
-use stdext::function_name;
+use sqlx::types::Uuid;
 
 pub async fn mk_lib_database_meta_queue_count(
     sqlx_pool: &sqlx::PgPool,
     user_uuid: Uuid,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_user_queue \

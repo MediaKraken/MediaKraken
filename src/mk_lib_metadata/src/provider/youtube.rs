@@ -1,6 +1,6 @@
 // https://github.com/Mithronn/rusty_ytdl
 
-use rusty_ytdl::Video;
+//use rusty_ytdl::Video;
 use select::document::Document;
 use select::predicate::{Attr, Name};
 use std::error::Error;
@@ -8,15 +8,15 @@ use std::io::Read;
 use std::io::Write;
 use std::str;
 
-pub async fn provider_youtube_video_fetch(video_url: &str, download_path: &str) {
-    let video = Video::new(video_url).unwrap();
-    let video_download_buffer = video.download().await;
-    if video_download_buffer.is_ok() {
-        let path = std::path::Path::new(download_path);
-        let mut file = std::fs::File::create(path).unwrap();
-        let _info = file.write_all(&video_download_buffer.unwrap());
-    }
-}
+// pub async fn provider_youtube_video_fetch(video_url: &str, download_path: &str) {
+//     let video = Video::new(video_url).unwrap();
+//     let video_download_buffer = video.download().await;
+//     if video_download_buffer.is_ok() {
+//         let path = std::path::Path::new(download_path);
+//         let mut file = std::fs::File::create(path).unwrap();
+//         let _info = file.write_all(&video_download_buffer.unwrap());
+//     }
+// }
 
 pub async fn provider_youtube_trending(country_code: &str) -> Result<(), Box<dyn Error>> {
     let mut link_list: Vec<String> = Vec::new();

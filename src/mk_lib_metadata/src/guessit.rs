@@ -1,5 +1,4 @@
 use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
-use mk_lib_logging::mk_lib_logging;
 use serde_json::json;
 use std::error::Error;
 use std::path::Path;
@@ -18,15 +17,6 @@ pub async fn metadata_guessit(
     sqlx_pool: &sqlx::PgPool,
     download_data: &DBDownloadQueueByProviderList,
 ) -> Result<(uuid::Uuid, Metadata), Box<dyn Error>> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
     // check for dupes by name/year
     let file_name = Path::new(&download_data.mm_download_path.as_ref().unwrap())
@@ -37,12 +27,12 @@ pub async fn metadata_guessit(
         .unwrap();
     #[cfg(debug_assertions)]
     {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Guessit File": file_name }),
-        )
-        .await
-        .unwrap();
+        // mk_lib_logging::mk_logging_post_elk(
+        //     std::module_path!(),
+        //     json!({ "Guessit File": file_name }),
+        // )
+        // .await
+        // .unwrap();
     }
     let guessit_data: Metadata = Metadata::from(&file_name).unwrap();
     if guessit_data.title().len() > 0 {

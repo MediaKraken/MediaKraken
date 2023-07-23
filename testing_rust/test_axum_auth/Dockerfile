@@ -6,17 +6,17 @@ WORKDIR /mediakraken
 
 COPY ./ .
 
-RUN if [ "${BRANCHTAG}" = "prod" ]; \
-  then cargo build --release \
-  && cp /mediakraken/target/release/mk* /mediakraken/target/.; \
-  else cargo build \
-  && cp /mediakraken/target/debug/mk* /mediakraken/target/.; \
+RUN if [ "${BRANCHTAG}" = "dev" ]; \
+  then cargo build --release --target x86_64-unknown-linux-musl \
+  && cp /mediakraken/target/x86_64-unknown-linux-musl/release/mk* /mediakraken/target/.; \
+  else cargo build --target x86_64-unknown-linux-musl \
+  && cp /mediakraken/target/x86_64-unknown-linux-musl/debug/mk* /mediakraken/target/.; \
   fi
 
 ####################################################################################################
 ## Final image
 ####################################################################################################
-FROM debian:bookworm-20230703-slim AS runtime
+FROM scratch
 WORKDIR /mediakraken
 RUN apt-get update && apt-get -y install wget \
   && wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.9.0/wait \

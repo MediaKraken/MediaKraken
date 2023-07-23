@@ -1,5 +1,4 @@
 use core::fmt::Write;
-use mk_lib_logging::mk_lib_logging;
 use paginator::{PageItem, Paginator};
 use serde_json::json;
 use std::error::Error;
@@ -13,15 +12,6 @@ pub async fn mk_lib_common_paginate(
     page: i64,
     base_url: String,
 ) -> Result<String, Box<dyn Error>> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let mut total_pages_mut = total_pages;
     if total_pages_mut > 0 {
         total_pages_mut = total_pages_mut / 30;
