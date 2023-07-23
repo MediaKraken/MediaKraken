@@ -1,6 +1,4 @@
-use serde_json::json;
 use std::str;
-use stdext::function_name;
 
 pub async fn mk_lib_network_external_ip() -> Result<String, Box<dyn std::error::Error>> {
     let response = reqwest::get("https://myexternalip.com/raw").await?;

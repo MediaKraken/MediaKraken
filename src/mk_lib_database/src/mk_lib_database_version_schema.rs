@@ -1,6 +1,5 @@
 use crate::mk_lib_database_option_status;
-use serde_json::{json, Value};
-use stdext::function_name;
+use serde_json::Value;
 
 pub async fn mk_lib_database_update_schema(
     sqlx_pool: &sqlx::PgPool,

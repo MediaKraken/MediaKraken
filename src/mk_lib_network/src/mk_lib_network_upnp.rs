@@ -1,9 +1,7 @@
 // https://github.com/jakobhellermann/rupnp
 
 use rupnp::ssdp::SearchTarget;
-use serde_json::json;
 use std::time::Duration;
-use stdext::function_name;
 
 pub async fn upnp_discover() -> Result<(), rupnp::Error> {
     let devices = rupnp::discover(&SearchTarget::RootDevice, Duration::from_secs(3)).await?;

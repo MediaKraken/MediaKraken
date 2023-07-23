@@ -2,8 +2,6 @@
 
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::{Message, SmtpTransport, Transport};
-use serde_json::json;
-use stdext::function_name;
 
 pub async fn mk_lib_network_email_send(
     email_from: String,

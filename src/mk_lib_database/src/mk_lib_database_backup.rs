@@ -1,9 +1,7 @@
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
-use stdext::function_name;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBBackupList {

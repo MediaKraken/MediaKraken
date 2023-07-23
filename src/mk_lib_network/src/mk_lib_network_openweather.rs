@@ -3,8 +3,6 @@
 
 use openweathermap_client::models::{City, UnitSystem};
 use openweathermap_client::{error::ClientError, Client, ClientOptions};
-use serde_json::json;
-use stdext::function_name;
 
 pub async fn network_openweather_current(
     city: &str,

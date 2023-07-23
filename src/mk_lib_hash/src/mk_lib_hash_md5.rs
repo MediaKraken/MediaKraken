@@ -1,7 +1,5 @@
 use md5::{Digest, Md5};
-use serde_json::json;
 use std::error::Error;
-use stdext::function_name;
 use mk_lib_file::mk_lib_file;
 
 pub async fn mk_file_hash_md5(file_to_read: &str) -> Result<String, Box<dyn Error>> {

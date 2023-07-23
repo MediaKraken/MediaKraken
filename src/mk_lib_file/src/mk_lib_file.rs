@@ -1,7 +1,5 @@
-use serde_json::json;
 use std::error::Error;
 use std::io;
-use stdext::function_name;
 use walkdir::{DirEntry, WalkDir};
 
 pub async fn mk_read_file_data(file_to_read: &str) -> io::Result<String> {

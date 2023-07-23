@@ -2,7 +2,6 @@
 
 use mk_lib_network;
 use std::collections::HashMap;
-use std::error::Error;
 
 const BASE_API_URL: &str = "http://imvdb.com/api/v1";
 const BASE_USER_AGENT: &str = "MediaKraken_0.1.6";

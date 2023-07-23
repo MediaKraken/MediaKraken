@@ -5,7 +5,6 @@ use mk_lib_network::mk_lib_network;
 use serde_json::json;
 use ssdp::header::{HeaderMut, HeaderRef, Man, MX, ST};
 use ssdp::message::{Multicast, SearchRequest};
-use stdext::function_name;
 use url::Url;
 
 pub async fn mk_lib_hardware_roku_discover() -> Vec<Url> {

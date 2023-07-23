@@ -23,7 +23,7 @@ pub async fn provider_tmdb_movie_fetch(
         return;
     }
     let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
-    mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_insert(
+    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_insert(
         sqlx_pool,
         metadata_uuid,
         tmdb_id,
@@ -82,7 +82,7 @@ pub async fn provider_tmdb_tv_fetch(
         return;
     }    
     let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
-    mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_insert(
+    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_insert(
         sqlx_pool,
         metadata_uuid,
         tmdb_id,
@@ -237,7 +237,7 @@ pub async fn provider_tmdb_meta_info_build(
     if result_json.get("poster_path").is_some() && !result_json["poster_path"].is_null() {
         image_file_path += &result_json["poster_path"].as_str().unwrap().to_string();
         println!("ifilepath {}", image_file_path);
-        mk_lib_network::mk_download_file_from_url(
+        let _result = mk_lib_network::mk_download_file_from_url(
             format!(
                 "https://image.tmdb.org/t/p/original{}",
                 &result_json["poster_path"].as_str().unwrap().to_string()
@@ -255,7 +255,7 @@ pub async fn provider_tmdb_meta_info_build(
     if result_json.get("backdrop_path").is_some() && !result_json["backdrop_path"].is_null() {
         image_file_path += &result_json["backdrop_path"].as_str().unwrap().to_string();
         println!("iifilepath {}", image_file_path);
-        mk_lib_network::mk_download_file_from_url(
+        let _result = mk_lib_network::mk_download_file_from_url(
             format!(
                 "https://image.tmdb.org/t/p/original{}",
                 &result_json["backdrop_path"].as_str().unwrap().to_string()

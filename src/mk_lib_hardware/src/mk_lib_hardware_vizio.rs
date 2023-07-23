@@ -1,8 +1,6 @@
 // https://github.com/ConnorTroy/smartcast
 
-use serde_json::json;
 use smartcast::Device;
-use stdext::function_name;
 
 pub async fn mk_hardware_vizio_discover() -> Result<(), smartcast::Error> {
     let ssdp_devices = smartcast::discover_devices().await?;

@@ -4,9 +4,7 @@ use huelib::resource::Light;
 use huelib::resource::{light, Adjust, Alert};
 use huelib::Color;
 use huelib::{bridge, Bridge};
-use serde_json::json;
 use std::net::IpAddr;
-use stdext::function_name;
 
 pub async fn mk_hardware_phue_register_username(
     bridge_ip: IpAddr,

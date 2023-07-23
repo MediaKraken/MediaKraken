@@ -1,6 +1,4 @@
 use rand::Rng;
-use serde_json::json;
-use stdext::function_name;
 
 pub async fn meta_image_file_path(
     media_type: String,

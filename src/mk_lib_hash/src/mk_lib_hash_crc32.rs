@@ -1,7 +1,5 @@
 use crc32fast::Hasher;
-use serde_json::json;
 use std::error::Error;
-use stdext::function_name;
 use mk_lib_file::mk_lib_file;
 
 pub async fn mk_file_hash_crc32(file_to_read: &str) -> Result<String, Box<dyn Error>> {

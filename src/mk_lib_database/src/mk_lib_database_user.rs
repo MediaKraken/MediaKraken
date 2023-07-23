@@ -3,12 +3,10 @@ use axum_session_auth::*;
 use axum_session_auth::{Authentication};
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use sqlx::postgres::PgPool;
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
 use std::{collections::HashSet};
-use stdext::function_name;
 
 /*
 Adult::View

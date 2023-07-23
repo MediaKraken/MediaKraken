@@ -1,6 +1,4 @@
-use serde_json::json;
 use sqlx::postgres::PgRow;
-use stdext::function_name;
 
 pub async fn mk_lib_database_option_read(
     sqlx_pool: &sqlx::PgPool,

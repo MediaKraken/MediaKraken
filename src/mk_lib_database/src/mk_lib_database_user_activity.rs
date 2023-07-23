@@ -1,7 +1,5 @@
 use chrono::prelude::*;
-use serde_json::json;
 use sqlx::types::Uuid;
-use stdext::function_name;
 
 pub async fn mk_lib_database_activity_insert(
     sqlx_pool: &sqlx::PgPool,

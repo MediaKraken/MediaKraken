@@ -1,8 +1,5 @@
 // https://github.com/LesnyRumcajs/wakey
 
-use serde_json::json;
-use stdext::function_name;
-
 pub async fn mk_lib_network_wol(mac_addr: String) -> Result<bool, Box<dyn std::error::Error>> {
     // "01:02:03:04:05:06"
     let wol = wakey::WolPacket::from_string(mac_addr, ':')?;

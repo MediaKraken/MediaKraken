@@ -1,9 +1,7 @@
 // https://github.com/veeso/suppaftp
 
-use serde_json::json;
 use std::io::Cursor;
 use std::str;
-use stdext::function_name;
 use suppaftp::{FtpResult, FtpStream, ImplFtpStream};
 
 // pub async fn mk_lib_network_ftp_connect(

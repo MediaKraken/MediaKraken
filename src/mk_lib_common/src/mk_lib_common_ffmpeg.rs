@@ -1,5 +1,4 @@
 use std::process::{Command, Stdio};
-use stdext::function_name;
 
 pub async fn mk_common_ffmpeg_get_info(
     media_file: &str,
