@@ -3,12 +3,13 @@ use mk_lib_database;
 use mk_lib_file;
 use mk_lib_network;
 use quickxml_to_serde::{xml_string_to_json, Config, JsonArray, JsonType, NullValue};
-use serde_json::{json, Value};
+use serde_json::json;
 use std::error::Error;
 use std::fs::File;
-use std::io::{self, prelude::*, BufReader};
+use std::io::{prelude::*, BufReader};
 use std::path::Path;
 use tokio::sync::Notify;
+use std::str::RSplit;
 
 // https://www.progettosnaps.net/download/?tipo=dat_mame&file=/dats/MAME/packs/MAME_Dats_236.7z
 
@@ -46,18 +47,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     tokio::task::spawn_local(async move {
         {
             while let Some(msg) = rabbit_consumer.recv().await {
-                if let Some(payload) = msg.content {
-                    let json_message: Value =
-                        serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                    // #[cfg(debug_assertions)]
-                    // {
-                    //     mk_lib_logging::mk_logging_post_elk(
-                    //         std::module_path!(),
-                    //         json!({ "msg body": json_message }),
-                    //     )
-                    //     .await
-                    //     .unwrap();
-                    // }
+                if let Some(_payload) = msg.content {
+                    // let _json_message: Value =
+                    //     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
                     // create mame game list
                     let file_name = format!(
                         "/mediakraken/emulation/mame0{}lx.zip",
@@ -230,7 +222,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     if !Path::new(&file_name).exists() {
                         mk_lib_network::mk_lib_network::mk_download_file_from_url(
                             format!(
-                                "https://www.arcade-history.com/dats/historyxml{}.zip",
+                                "https://www.arcade-history.com/dats/history{}b.zip",
                                 option_config_json["MAME"]["Version"]
                             ),
                             &file_name,
@@ -326,16 +318,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     category_found = true;
                                 }
                             }
+
+                            // TODO
                             //  result_value = db_connection.db_meta_game_category_by_name(category)
                             //  if result_value == None:
                             //        result_value = db_connection.db_meta_game_category_add(category)
                             //        cat_dictionary[line.strip()] = result_value
                             //
+                            // TODO
                             // grab all system null in db as those are mame
                             //     for sql_row in db_connection.db_media_mame_game_list():
                             //         db_connection.db_media_game_category_update(cat_dictionary[sql_row["gi_short_name"]],
                             //                                                     sql_row["gi_id"])
                             //
+                            // TODO
                             // grab all the non parent roms that aren't set
                             //     for sql_row in db_connection.db_media_game_clone_list():
                             //         for sql_cat_row in db_connection.db_media_game_category_by_name(sql_row["gi_cloneof"]):
@@ -353,12 +349,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     // only do the parse/import if not processed before
                     if !Path::new(&file_name).exists() {
                         mk_lib_network::mk_lib_network::mk_download_file_from_url(
-                            format!(
-                    "https://www.progettosnaps.net/download?tipo=messinfo&file=pS_messinfo_{}.zip",
-                    option_config_json["MAME"]["Version"]
-                ),
-                            &file_name,
-                        )
+                            format!("https://www.progettosnaps.net/download/?tipo=messinfo&file=pS_messinfo_{}.zip", option_config_json["MAME"]["Version"]), &file_name)
                         .await
                         .unwrap();
                         mk_lib_compression::mk_lib_compression::mk_decompress_zip(
@@ -373,8 +364,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             option_config_json["MAME"]["Version"]
                         ))
                         .unwrap();
-                        let reader = BufReader::new(file);
-
+                        let mut reader = BufReader::new(file);
+                        let mut dat_line = String::new();
                         let mut start_system_read = false;
                         let mut skip_next_line = false;
                         let mut long_name_next = false;
@@ -385,91 +376,123 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         let mut sys_short_name = String::new();
                         let mut sys_longname = String::new();
                         let mut sys_manufacturer = String::new();
-                        let mut sys_year: i8 = 0;
+                        let mut sys_year = String::new();
                         let mut sys_desc = String::new();
                         let mut sys_emulation = String::new();
                         let mut sys_color = String::new();
                         let mut sys_sound = String::new();
                         let mut sys_graphics = String::new();
-                        let mut sys_save_state = String::new();
+                        let mut sys_save_state = false;
                         let mut sys_wip = String::new();
                         let mut sys_romset = String::new();
 
                         let mut sql_string = String::new();
-                        //     while 1:
-                        //         line = infile.readline()
-                        //         if not line:
-                        //             break
-                        //         if skip_next_line:
-                        //             skip_next_line = false
-                        //         else:
-                        //             if line.find("DRIVERS INFO") != -1:  // stop at drivers
-                        //                 break
-                        //             line = line.replace("    ", "")
-                        //             if line[0] == "#" or len(line) < 4 \
-                        //                     or line.find("$mame") == 0:  // skip comments and blank lines
-                        //                 if line.find("$mame") == 0:
-                        //                     skip_next_line = true
-                        //                     long_name_next = true
-                        //             else if line.find("$info") == 0:  // found so begin start system read
-                        //                 start_system_read = true
-                        //                 // load the short name
-                        //                 sys_short_name = line.split("=")[1]
-                        //             else if line.find("Emulation:") == 0:  // found so begin start system read
-                        //                 sys_emulation = line.split(" ")[1]
-                        //             else if line.find("Color:") == 0:  // found so begin start system read
-                        //                 sys_color = line.split(" ")[1]
-                        //             else if line.find("Sound:") == 0:  // found so begin start system read
-                        //                 sys_sound = line.split(" ")[1]
-                        //             else if line.find("Graphics:") == 0:  // found so begin start system read
-                        //                 sys_graphics = line.split(" ")[1]
-                        //             else if line.find("Save State:") == 0:  // found so begin start system read
-                        //                 if line.rsplit(" ", 1)[1][:-1] == "Supported":
-                        //                     sys_save_state = true
-                        //                 else:
-                        //                     sys_save_state = false
-                        //             else if line.find("WIP:") == 0:  // found so begin start system read
-                        //                 wip_in_progress = true
-                        //             else if line.find("Romset:") == 0:  // found so begin start system read
-                        //                 wip_in_progress = false
-                        //                 romset_in_progress = true
-                        //             else:
-                        //                 if wip_in_progress and line.find("Romset:") != 0:
-                        // sys_wip += line[:-1] + "<BR>"
-                        //                     pass
-                        //                 if romset_in_progress and line.find("$end") != 0:
-                        // sys_romset += line[:-1] + "<BR>"
-                        //                     pass
-                        //                 if desc_next:
-                        //                     sys_desc = line
-                        //                     desc_next = false
-                        //                 if long_name_next:
-                        //                     try:
-                        //                         sys_longname, sys_manufacturer, sys_year = line.split(",")
-                        //                     except:
-                        //                         sys_longname, msys_manufacturer, sys_year = line.rsplit(",", 2)
-                        //                     long_name_next = false
-                        //                     desc_next = true
-                        //                 if line.find("$end") == 0:  // end of system info so store system into db
-                        //                     romset_in_progress = false
-                        //                     if sys_desc[:-1] == "...":
-                        //                         sys_desc = None
-                        //                     else:
-                        //                         sys_desc = sys_desc[:-1]
-                        //                     sys_emulation = sys_emulation[:-1]
-                        //                     sys_color = sys_color[:-1]
-                        //                     sys_sound = sys_sound[:-1]
-                        //                     sys_graphics = sys_graphics[:-1]
-                        // upsert the system
-                        //                     db_connection.db_meta_game_system_upsert(sys_short_name[:-1],
-                        //                                                              sys_longname,
-                        //                                                              sys_desc, sys_year[:-1],
-                        //                                                              sys_manufacturer,
-                        //                                                              sys_emulation,
-                        //                                                              sys_color, sys_sound,
-                        //                                                              sys_graphics, sys_save_state)
-                        //                     sys_wip = None
-                        //                     sys_romset = None
+
+                        loop {
+                            match reader.read_line(&mut dat_line) {
+                                Ok(0) => break,
+                                Ok(_) => {
+                                    if skip_next_line {
+                                        skip_next_line = false;
+                                    } else {
+                                        if dat_line.contains("DRIVERS INFO") {
+                                            // stop at drivers
+                                            break;
+                                        }
+                                        dat_line = dat_line.replace("    ", "");
+                                        if dat_line.starts_with("#")
+                                            || dat_line.len() < 4
+                                            || dat_line.starts_with("$mame")
+                                        {
+                                            // skip comments and blank lines
+                                            if dat_line.starts_with("$mame") {
+                                                skip_next_line = true;
+                                                long_name_next = true;
+                                            }
+                                        } else if dat_line.starts_with("$info") {
+                                            // found so begin start system read
+                                            start_system_read = true;
+                                            sys_short_name =
+                                                dat_line.split("=").nth(1).unwrap().to_string();
+                                        } else if dat_line.starts_with("Emulation:") {
+                                            sys_emulation =
+                                                dat_line.split(" ").nth(1).unwrap().to_string();
+                                        } else if dat_line.starts_with("Color:") {
+                                            sys_color =
+                                                dat_line.split(" ").nth(1).unwrap().to_string();
+                                        } else if dat_line.starts_with("Sound:") {
+                                            sys_sound =
+                                                dat_line.split(" ").nth(1).unwrap().to_string();
+                                        } else if dat_line.starts_with("Graphics:") {
+                                            sys_graphics =
+                                                dat_line.split(" ").nth(1).unwrap().to_string();
+                                        } else if dat_line.starts_with("Save State:") {
+                                            if dat_line.rsplit(" ").last().unwrap().trim_end_matches('\n') == "Supported" {
+                                                sys_save_state = true;
+                                            }
+                                            else {
+                                                sys_save_state = false;
+                                            }
+                                        } else if dat_line.starts_with("WIP:") {
+                                            wip_in_progress = true;
+                                        } else if dat_line.starts_with("Romset:") {
+                                            wip_in_progress = false;
+                                            romset_in_progress = true;
+                                        } else {
+                                            if wip_in_progress && dat_line.find("Romset:") != Some(0) {
+                                                sys_wip += format!("{}<BR>", dat_line.trim_end_matches('\n').to_string());
+                                            }
+                                            if romset_in_progress && dat_line.find("$end") != Some(0) {
+                                                sys_romset += format!("{}<BR>", dat_line.trim_end_matches('\n').to_string());
+                                            }
+                                            if desc_next {
+                                                sys_desc = dat_line;
+                                                desc_next = false;
+                                            }
+                                            if long_name_next {
+                                                // TODO
+                                                // try:
+                                                //     sys_longname, sys_manufacturer, sys_year = dat_line.split(",");
+                                                // except:
+                                                //     sys_longname, msys_manufacturer, sys_year = dat_line.rsplit(",", 2);
+                                                long_name_next = false;
+                                                desc_next = true;
+                                            }
+                                             if dat_line.starts_with("$end") {  // end of system info so store system into db
+                                                romset_in_progress = false;
+                                                if sys_desc.trim_end_matches('\n') == "..." {
+                                                    sys_desc = String::new();
+                                                }
+                                                else {
+                                                    sys_desc = sys_desc.trim_end_matches('\n').to_string();
+                                                }
+                                                sys_emulation = sys_emulation.trim_end_matches('\n').to_string();
+                                                sys_color = sys_color.trim_end_matches('\n').to_string();
+                                                sys_sound = sys_sound.trim_end_matches('\n').to_string();
+                                                sys_graphics = sys_graphics.trim_end_matches('\n').to_string();
+                                            }
+                                            // upsert the system
+                                            mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool, 
+                                                sys_short_name.trim_end_matches('\n').to_string(),
+                                                sys_longname,
+                                                json!({
+                                                "Desc": sys_desc,
+                                                "Year": sys_year.trim_end_matches('\n'),
+                                                "Manufacturer": sys_manufacturer,
+                                                "Emulation": sys_emulation,
+                                                "Color": sys_color,
+                                                "Sound": sys_sound,
+                                                "Graphics": sys_graphics,
+                                                "Save State": sys_save_state})
+                                            );
+                                            sys_wip = String::new();
+                                            sys_romset = String::new();
+                                        }
+                                    }
+                                }
+                                Err(_) => break,
+                            }
+                        }
                     }
                     let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
                         &rabbit_channel,
