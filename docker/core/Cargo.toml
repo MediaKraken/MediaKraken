@@ -3,7 +3,7 @@
 members = [
 #    "mkbroadcast",
 #     "mkcron",
-     "mkdownload",
+#     "mkdownload",
 #     "mkgamesdbnetfetchbulk",
 #     "mkglobalcache",
 #     "mkhardwarecontrol",
@@ -12,7 +12,7 @@ members = [
 #     "mklibretrocorefetchupdate",
 #     "mkmediascanner",
 #     "mkmetadata",
-#     "mkmetadatamame",
+     "mkmetadatamame",
 #     "mkmulticast",    
 #     "mkmusicbrainz",    
 #     "mkopenlibrarynetfetchbulk",

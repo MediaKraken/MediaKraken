@@ -1,5 +1,4 @@
 use mk_lib_hardware;
-use mk_lib_logging::mk_lib_logging;
 use mk_lib_network;
 use mk_lib_rabbitmq;
 use serde_json::{json, Value};
@@ -11,14 +10,6 @@ use tokio::sync::Notify;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    #[cfg(debug_assertions)]
-    {
-        // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
-            .await
-            .unwrap();
-    }
-
     let (_rabbit_connection, rabbit_channel) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mkhardwarecontrol")
             .await
@@ -34,15 +25,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(payload) = msg.content {
                 let json_message: Value =
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                #[cfg(debug_assertions)]
-                {
-                    mk_lib_logging::mk_logging_post_elk(
-                        std::module_path!(),
-                        json!({ "msg body": json_message }),
-                    )
-                    .await
-                    .unwrap();
-                }
+                // #[cfg(debug_assertions)]
+                // {
+                //     mk_lib_logging::mk_logging_post_elk(
+                //         std::module_path!(),
+                //         json!({ "msg body": json_message }),
+                //     )
+                //     .await
+                //     .unwrap();
+                // }
                 if json_message["Type"] == "Hardware" {
                     if json_message["Subtype"] == "Lights" {
                         if json_message["Hardware"] == "Hue" {

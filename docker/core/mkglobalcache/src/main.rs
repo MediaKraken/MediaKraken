@@ -1,5 +1,4 @@
 use mk_lib_database;
-use mk_lib_logging::mk_lib_logging;
 use mk_lib_network;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -75,15 +74,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(payload) = msg.content {
                 let json_message: Value =
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                #[cfg(debug_assertions)]
-                {
-                    mk_lib_logging::mk_logging_post_elk(
-                        std::module_path!(),
-                        json!({ "msg body": json_message }),
-                    )
-                    .await
-                    .unwrap();
-                }
+                // #[cfg(debug_assertions)]
+                // {
+                //     mk_lib_logging::mk_logging_post_elk(
+                //         std::module_path!(),
+                //         json!({ "msg body": json_message }),
+                //     )
+                //     .await
+                //     .unwrap();
+                // }
                 // grab the manufacturer's from Global Cache
                 let fetch_brand_result: Vec<ApiBrands> = serde_json::from_str(
                     &mk_lib_network::mk_lib_network::mk_data_from_url(

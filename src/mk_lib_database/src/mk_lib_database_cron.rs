@@ -1,11 +1,8 @@
 use chrono::prelude::*;
-use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use sqlx::postgres::PgRow;
-use sqlx::{types::Uuid};
 use sqlx::{FromRow, Row};
-use stdext::function_name;
+use sqlx::types::Uuid;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBCronList {
@@ -22,15 +19,6 @@ pub struct DBCronList {
 pub async fn mk_lib_database_cron_service_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBCronList>, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let select_query = sqlx::query(
         "select mm_cron_guid, \
         mm_cron_name, mm_cron_description, mm_cron_enabled, \
@@ -58,15 +46,6 @@ pub async fn mk_lib_database_cron_time_update(
     sqlx_pool: &sqlx::PgPool,
     cron_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "update mm_cron_jobs set mm_cron_last_run = NOW() \
@@ -83,15 +62,6 @@ pub async fn mk_lib_database_cron_delete(
     sqlx_pool: &sqlx::PgPool,
     cron_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from mm_cron where mm_cron_guid = $1")
         .bind(cron_uuid)
@@ -109,15 +79,6 @@ pub async fn mk_lib_database_cron_insert(
     cron_schedule: String,
     cron_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let new_guid = uuid::Uuid::new_v4();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
@@ -141,15 +102,6 @@ pub async fn mk_lib_database_cron_count(
     sqlx_pool: &sqlx::PgPool,
     cron_enabled: bool,
 ) -> Result<i64, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let row: (i64,) = sqlx::query_as("select count(*) from mm_cron where mm_cron_enabled = $1")
         .bind(cron_enabled)
         .fetch_one(sqlx_pool)

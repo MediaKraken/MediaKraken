@@ -1,20 +1,11 @@
 use inotify::{EventMask, Inotify, WatchMask};
 use mk_lib_database;
-use mk_lib_logging::mk_lib_logging;
 use mk_lib_rabbitmq;
 use serde_json::json;
 use std::error::Error;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    #[cfg(debug_assertions)]
-    {
-        // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
-            .await
-            .unwrap();
-    }
-
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
         .await
@@ -60,15 +51,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     )
                     .await
                     .unwrap();
-                    #[cfg(debug_assertions)]
-                    {
-                        mk_lib_logging::mk_logging_post_elk(
-                            std::module_path!(),
-                            json!({ "Directory created": event.name }),
-                        )
-                        .await
-                        .unwrap();
-                    }
                 } else {
                     mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
                         rabbit_channel.clone(),
@@ -77,15 +59,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     )
                     .await
                     .unwrap();
-                    #[cfg(debug_assertions)]
-                    {
-                        mk_lib_logging::mk_logging_post_elk(
-                            std::module_path!(),
-                            json!({ "File created": event.name }),
-                        )
-                        .await
-                        .unwrap();
-                    }
                 }
             } else if event.mask.contains(EventMask::DELETE) {
                 if event.mask.contains(EventMask::ISDIR) {
@@ -96,15 +69,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     )
                     .await
                     .unwrap();
-                    #[cfg(debug_assertions)]
-                    {
-                        mk_lib_logging::mk_logging_post_elk(
-                            std::module_path!(),
-                            json!({ "Directory deleted": event.name }),
-                        )
-                        .await
-                        .unwrap();
-                    }
                 } else {
                     mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
                         rabbit_channel.clone(),
@@ -113,15 +77,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     )
                     .await
                     .unwrap();
-                    #[cfg(debug_assertions)]
-                    {
-                        mk_lib_logging::mk_logging_post_elk(
-                            std::module_path!(),
-                            json!({ "File deleted": event.name }),
-                        )
-                        .await
-                        .unwrap();
-                    }
                 }
             } else if event.mask.contains(EventMask::MODIFY) {
                 if event.mask.contains(EventMask::ISDIR) {
@@ -132,15 +87,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     )
                     .await
                     .unwrap();
-                    #[cfg(debug_assertions)]
-                    {
-                        mk_lib_logging::mk_logging_post_elk(
-                            std::module_path!(),
-                            json!({ "Directory modified": event.name }),
-                        )
-                        .await
-                        .unwrap();
-                    }
                 } else {
                     mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
                         rabbit_channel.clone(),
@@ -149,15 +95,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     )
                     .await
                     .unwrap();
-                    #[cfg(debug_assertions)]
-                    {
-                        mk_lib_logging::mk_logging_post_elk(
-                            std::module_path!(),
-                            json!({ "File modified": event.name }),
-                        )
-                        .await
-                        .unwrap();
-                    }
                 }
             }
         }

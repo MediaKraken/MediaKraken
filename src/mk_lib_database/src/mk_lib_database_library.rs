@@ -1,11 +1,8 @@
 use chrono::prelude::*;
-use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use sqlx::postgres::PgRow;
-use sqlx::{types::Uuid};
 use sqlx::{FromRow, Row};
-use stdext::function_name;
+use sqlx::types::Uuid;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBLibraryList {
@@ -18,15 +15,6 @@ pub async fn mk_lib_database_library_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBLibraryList>, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let select_query = sqlx::query(
         "select mm_media_dir_guid, mm_media_dir_path \
         from mm_library_dir offset $1 limit $2",
@@ -54,15 +42,6 @@ pub struct DBLibraryAuditList {
 pub async fn mk_lib_database_library_path_audit_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBLibraryAuditList>, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let select_query = sqlx::query(
         "select mm_media_dir_guid, \
         mm_media_dir_path, \
@@ -91,15 +70,6 @@ pub struct DBLibraryPathStatus {
 pub async fn mk_lib_database_library_path_status(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBLibraryPathStatus>, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let select_query = sqlx::query(
         "select mm_media_dir_path, mm_media_dir_status \
         from mm_library_dir where mm_media_dir_status IS NOT NULL \
@@ -120,15 +90,6 @@ pub async fn mk_lib_database_library_path_status_update(
     library_uuid: uuid::Uuid,
     library_status_json: serde_json::Value,
 ) -> Result<(), sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "update mm_library_dir set mm_media_dir_status = $1 \
@@ -146,15 +107,6 @@ pub async fn mk_lib_database_library_path_timestamp_update(
     sqlx_pool: &sqlx::PgPool,
     library_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "update mm_library_dir set mm_media_dir_last_scanned = NOW() \
@@ -171,15 +123,6 @@ pub async fn mk_lib_database_library_file_exists(
     sqlx_pool: &sqlx::PgPool,
     file_name: &String,
 ) -> Result<bool, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let row: (bool,) = sqlx::query_as(
         "select exists(select 1 from mm_media \
         where mm_media_path = $1 limit 1) \
@@ -192,15 +135,6 @@ pub async fn mk_lib_database_library_file_exists(
 }
 
 pub async fn mk_lib_database_library_count(sqlx_pool: &sqlx::PgPool) -> Result<i64, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let row: (i64,) = sqlx::query_as("select count(*) from mm_library_dir")
         .fetch_one(sqlx_pool)
         .await?;

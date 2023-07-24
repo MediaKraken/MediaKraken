@@ -1,23 +1,11 @@
 // https://github.com/teppah/yeelib_rs
 
-use mk_lib_logging::mk_lib_logging;
-use serde_json::json;
-use stdext::function_name;
 use std::time::Duration;
 use yeelib_rs::{Light, YeeClient};
 
 pub async fn mk_hardware_yeelight_brightness() {}
 
 pub async fn mk_hardware_yeelight_discover() -> Result<(), Box<dyn std::error::Error>> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let client = YeeClient::new()?;
     let mut res: Vec<Light> = loop {
         let lights = client.find_lights(Duration::from_secs(1));
@@ -25,12 +13,12 @@ pub async fn mk_hardware_yeelight_discover() -> Result<(), Box<dyn std::error::E
         if lights.len() == 0 {
             #[cfg(debug_assertions)]
             {
-                mk_lib_logging::mk_logging_post_elk(
-                    std::module_path!(),
-                    json!({ "YeeClient": "zero" }),
-                )
-                .await
-                .unwrap();
+                // mk_lib_logging::mk_logging_post_elk(
+                //     std::module_path!(),
+                //     json!({ "YeeClient": "zero" }),
+                // )
+                // .await
+                // .unwrap();
             }
         } else {
             break lights;

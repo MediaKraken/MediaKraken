@@ -1,24 +1,11 @@
-use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use sqlx::postgres::PgRow;
-
 use sqlx::{FromRow, Row};
-use stdext::function_name;
 
 pub async fn mk_lib_database_metadata_sports_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_sports \
@@ -48,15 +35,6 @@ pub async fn mk_lib_database_metadata_sports_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMetaSportsList>, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     // TODO order by year
     let select_query;
     if search_value != "" {

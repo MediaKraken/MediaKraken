@@ -1,10 +1,7 @@
 // https://github.com/veeso/suppaftp
 
-use mk_lib_logging::mk_lib_logging;
-use serde_json::json;
 use std::io::Cursor;
 use std::str;
-use stdext::function_name;
 use suppaftp::{FtpResult, FtpStream, ImplFtpStream};
 
 // pub async fn mk_lib_network_ftp_connect(
@@ -32,30 +29,12 @@ use suppaftp::{FtpResult, FtpStream, ImplFtpStream};
 pub async fn mk_lib_network_ftp_get_pwd(
     mut ftp_stream: suppaftp::FtpStream,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     // Get the current directory that the client will be reading from and writing to.
     let ftp_directory = ftp_stream.pwd().unwrap();
     Ok(ftp_directory)
 }
 
 pub async fn mk_lib_network_ftp_set_cwd(mut ftp_stream: suppaftp::FtpStream, new_directory: &str) {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     // Change into a new directory, relative to the one we are currently in.
     let _ = ftp_stream.cwd(new_directory).unwrap();
 }
@@ -64,15 +43,6 @@ pub async fn mk_lib_network_ftp_get(
     mut ftp_stream: suppaftp::FtpStream,
     get_file_name: &str,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     // Retrieve (GET) a file from the FTP server in the current working directory.
     let remote_file = ftp_stream.retr_as_buffer(get_file_name).unwrap();
     let ftp_data = str::from_utf8(&remote_file.into_inner())
@@ -82,30 +52,12 @@ pub async fn mk_lib_network_ftp_get(
 }
 
 pub async fn mk_lib_network_ftp_put(mut ftp_stream: suppaftp::FtpStream, put_file_name: &str) {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     // Store (PUT) a file from the client to the current working directory of the server.
     let mut reader = Cursor::new("Hello from the Rust \"ftp\" crate!".as_bytes());
     let _ = ftp_stream.put_file(put_file_name, &mut reader);
 }
 
 pub async fn mk_lib_network_ftp_close(mut ftp_stream: suppaftp::FtpStream) {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     // Terminate the connection to the server.
     let _ = ftp_stream.quit();
 }

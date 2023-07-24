@@ -1,25 +1,13 @@
 use mk_lib_database;
 use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 use mk_lib_hash;
-use mk_lib_logging::mk_lib_logging;
-use serde_json::json;
 use std::error::Error;
 use std::path::Path;
-use stdext::function_name;
 
 pub async fn metadata_game_lookup(
     sqlx_pool: &sqlx::PgPool,
     download_data: &DBDownloadQueueByProviderList,
 ) -> Result<uuid::Uuid, Box<dyn Error>> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
                                                // TODO remove the file extension
     metadata_uuid =

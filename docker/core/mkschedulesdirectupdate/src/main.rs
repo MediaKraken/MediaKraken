@@ -1,22 +1,12 @@
 use chrono::prelude::*;
 use mk_lib_database;
-use mk_lib_logging::mk_lib_logging;
 use mk_lib_rabbitmq;
 use serde_json::{json, Value};
 use std::error::Error;
-use stdext::function_name;
 use tokio::sync::Notify;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    #[cfg(debug_assertions)]
-    {
-        // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
-            .await
-            .unwrap();
-    }
-
     // open the database
     let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
         .await
@@ -43,15 +33,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(payload) = msg.content {
                 let json_message: Value =
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                #[cfg(debug_assertions)]
-                {
-                    mk_lib_logging::mk_logging_post_elk(
-                        std::module_path!(),
-                        json!({ "msg body": json_message }),
-                    )
-                    .await
-                    .unwrap();
-                }
+                // #[cfg(debug_assertions)]
+                // {
+                //     mk_lib_logging::mk_logging_post_elk(
+                //         std::module_path!(),
+                //         json!({ "msg body": json_message }),
+                //     )
+                //     .await
+                //     .unwrap();
+                // }
                 //
                 // def mk_schedules_direct_program_info_fetch(meta_program_fetch):
                 //     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',

@@ -1,23 +1,15 @@
 use mk_lib_database;
-use mk_lib_logging::mk_lib_logging;
 use mk_lib_network;
 use mk_lib_rabbitmq;
 use serde_json::{json, Value};
 use std::error::Error;
 use std::fs;
 use std::path::Path;
+use std::process::{Command, Stdio};
 use tokio::sync::Notify;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    #[cfg(debug_assertions)]
-    {
-        // start logging
-        mk_lib_logging::mk_logging_post_elk("info", json!({"START": "START"}))
-            .await
-            .unwrap();
-    }
-
     // create metadata paths, as before the db update will let it finish before
     // other containers can use them
     if !Path::new(&"/mediakraken/static/meta").exists() {
@@ -68,15 +60,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(payload) = msg.content {
                 let json_message: Value =
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                #[cfg(debug_assertions)]
-                {
-                    mk_lib_logging::mk_logging_post_elk(
-                        std::module_path!(),
-                        json!({ "msg body": json_message }),
-                    )
-                    .await
-                    .unwrap();
-                }
+                // #[cfg(debug_assertions)]
+                // {
+                //     mk_lib_logging::mk_logging_post_elk(
+                //         std::module_path!(),
+                //         json!({ "msg body": json_message }),
+                //     )
+                //     .await
+                //     .unwrap();
+                // }
                 //println!(" [x] Received {:?}", std::str::from_utf8(&payload).unwrap());
                 if json_message["Type"].to_string() == "File" {
                     // do NOT remove the header.....this is the SAVE location
@@ -105,6 +97,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         // TODO log error by user requested
                         continue;
                     }
+                } else if json_message["Type"].to_string() == "Dosage" {
+                    // This saves to ./Comics
+                    let output = Command::new("dosage")
+                        .args(["--adult", &json_message["Data"].as_str().unwrap()])
+                        .stdout(Stdio::piped())
+                        .output()
+                        .unwrap();
+                    let stdout = String::from_utf8(output.stdout).unwrap();
+                    if json_message["Data"].as_str().unwrap() == "--list" {
+                        // TODO parse list and store the strips, see notes in data example
+                    }
                 } else if json_message["Type"].to_string() == "HDTrailers" {
                     // try to grab the RSS feed itself
                     let data: serde_json::Value = serde_json::from_str(
@@ -115,26 +118,26 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .unwrap(),
                     )
                     .unwrap();
-                    #[cfg(debug_assertions)]
-                    {
-                        mk_lib_logging::mk_logging_post_elk(
-                            std::module_path!(),
-                            json!({ "download": { "hdtrailer_json": data } }),
-                        )
-                        .await
-                        .unwrap();
-                    }
+                    // #[cfg(debug_assertions)]
+                    // {
+                    //     mk_lib_logging::mk_logging_post_elk(
+                    //         std::module_path!(),
+                    //         json!({ "download": { "hdtrailer_json": data } }),
+                    //     )
+                    //     .await
+                    //     .unwrap();
+                    // }
                     let an_array = data["rss"]["channel"]["item"].as_array().unwrap();
                     for item in an_array.iter() {
-                        #[cfg(debug_assertions)]
-                        {
-                            mk_lib_logging::mk_logging_post_elk(
-                                std::module_path!(),
-                                json!({ "item": item }),
-                            )
-                            .await
-                            .unwrap();
-                        }
+                        // #[cfg(debug_assertions)]
+                        // {
+                        //     mk_lib_logging::mk_logging_post_elk(
+                        //         std::module_path!(),
+                        //         json!({ "item": item }),
+                        //     )
+                        //     .await
+                        //     .unwrap();
+                        // }
                         if (item["title"].to_string().contains("(Trailer")
                             && option_config_json["Metadata"]["Trailer"]["Trailer"] == true)
                             || (item["title"].to_string().contains("(Behind")

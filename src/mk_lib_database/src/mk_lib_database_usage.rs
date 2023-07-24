@@ -1,8 +1,5 @@
-use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use sqlx::{FromRow, Row};
-use stdext::function_name;
 use sqlx::postgres::PgRow;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
@@ -14,15 +11,6 @@ pub struct DBMUsageMovieList {
 pub async fn mk_lib_database_usage_top10_movie(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBMUsageMovieList>, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let select_query = sqlx::query(
         "select mm_metadata_name, \
         mm_metadata_user_json->'Watched'->'Times' as mm_metadata_times \
@@ -47,15 +35,6 @@ pub struct DBUsageTVList {
 pub async fn mk_lib_database_usage_top10_tv(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBUsageTVList>, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let select_query = sqlx::query(
         "select mm_metadata_tvshow_name, \
         mm_metadata_tvshow_user_json->'Watched'->'Times' as mm_metadata_times \

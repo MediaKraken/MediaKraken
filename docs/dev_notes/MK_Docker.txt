@@ -1,0 +1,3 @@
+docker run -it mediakraken/mkcron:dev /mkcron
+
+docker run -it mediakraken/mkwebaxum:dev /bin/ash

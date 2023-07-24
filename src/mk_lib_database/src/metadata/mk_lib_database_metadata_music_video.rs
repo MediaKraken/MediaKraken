@@ -1,10 +1,7 @@
-use mk_lib_logging::mk_lib_logging;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use sqlx::postgres::PgRow;
-use sqlx::{types::Uuid};
 use sqlx::{FromRow, Row};
-use stdext::function_name;
+use sqlx::types::Uuid;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaMusicVideoList {
@@ -20,15 +17,6 @@ pub async fn mk_lib_database_metadata_music_video_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMetaMusicVideoList>, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let select_query;
     if search_value != "" {
         select_query = sqlx::query(
@@ -71,15 +59,6 @@ pub async fn mk_lib_database_metadata_music_video_lookup(
     artist_name: String,
     song_title: String,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let row: (Uuid,) = sqlx::query_as(
         "select mm_metadata_music_video_guid \
         from mm_metadata_music_video \
@@ -98,15 +77,6 @@ pub async fn mk_lib_database_metadata_music_video_count(
     search_value: String,
     imvdb_id: i32,
 ) -> Result<i64, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     if imvdb_id == 0 {
         if search_value != "" {
             let row: (i64,) = sqlx::query_as(
@@ -139,15 +109,6 @@ pub async fn mk_lib_database_metadata_music_video_detail(
     sqlx_pool: &sqlx::PgPool,
     music_video_uuid: String,
 ) -> Result<PgRow, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     let row: PgRow = sqlx::query(
         "select mm_media_music_video_band, \
         mm_media_music_video_song, mm_metadata_music_video_json, \
@@ -167,16 +128,7 @@ pub async fn mk_lib_database_metadata_music_video_insert(
     id_json: serde_json::Value,
     data_json: serde_json::Value,
     image_json: serde_json::Value,
-) -> Result<Uuid, sqlx::Error> {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
+) -> Result<uuid::Uuid, sqlx::Error> {
     let new_guid = uuid::Uuid::new_v4();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
