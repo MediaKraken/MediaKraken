@@ -171,6 +171,7 @@ pub async fn mk_lib_database_metadata_game_by_name_and_system(
 ) -> Result<Vec<DBMetaGameNameMatchList>, sqlx::Error> {
     let select_query;
     if game_system_short_name != "" {
+        // TODO fix game_system_short_name in query below
         select_query = sqlx::query(
             "select gi_id, gi_game_info_json \
             from mm_metadata_game_software_info \
@@ -200,7 +201,7 @@ pub async fn mk_lib_database_metadata_game_by_name_and_system(
     Ok(table_rows)
 }
 
-pub async fn mk_lib_database_metadata_game_upsert(
+pub async fn mk_lib_database_metadata_game_insert(
     sqlx_pool: &sqlx::PgPool,
     game_system_id: Uuid,
     game_short_name: String,
@@ -215,14 +216,12 @@ pub async fn mk_lib_database_metadata_game_upsert(
         gi_game_info_short_name, \
         gi_game_info_name, \
         gi_game_info_json) \
-        values ($1, $2, $3, $4, $5) \
-        ON CONFLICT (gi_game_info_short_name) DO UPDATE set gi_game_info_json = $6",
+        values ($1, $2, $3, $4, $5)",
     )
     .bind(new_guid)
     .bind(game_system_id)
     .bind(game_short_name)
     .bind(game_name)
-    .bind(&game_json)
     .bind(&game_json)
     .execute(&mut transaction)
     .await?;
