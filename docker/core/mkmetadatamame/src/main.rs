@@ -197,7 +197,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     println!("split: {:?}", system_string_split);
                                     let system_counter = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_game_count_by_short_name(&sqlx_pool, &system_string_split[1].to_string()).await.unwrap();
                                     if system_counter == 0 {
-                                        game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool, system_string_split[1].to_string(), String::new(), json!({})).await.unwrap();
+                                        game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool, system_string_split[1].to_string(), system_string_split[3].to_string(), json!({})).await.unwrap();
                                     } else {
                                         game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(&sqlx_pool, &system_string_split[1].to_string()).await.unwrap();
                                     }

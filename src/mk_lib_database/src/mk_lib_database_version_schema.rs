@@ -181,15 +181,28 @@ pub async fn mk_lib_database_update_schema(
         mk_lib_database_version_update(&sqlx_pool, 52).await?;
     }
 
-    if version_no < 53{
+    if version_no < 53 {
         let mut transaction = sqlx_pool.begin().await?;
-        sqlx::query(
-            "DROP TABLE IF EXISTS mm_user, mm_user_group, mm_user_profile;",
-        )
-        .execute(&mut transaction)
-        .await?;
+        sqlx::query("DROP TABLE IF EXISTS mm_user, mm_user_group, mm_user_profile;")
+            .execute(&mut transaction)
+            .await?;
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 53).await?;
+    }
+
+    if version_no < 54 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query("DROP INDEX IF EXISTS mm_metadata_game_systems_info_ndx_name;")
+            .execute(&mut transaction)
+            .await?;
+        sqlx::query("CREATE UNIQUE INDEX IF NOT EXISTS mm_metadata_game_systems_info_ndx_name ON mm_metadata_game_systems_info USING btree (gs_game_system_name);")
+            .execute(&mut transaction)
+            .await?;
+        sqlx::query("ALTER TABLE mm_metadata_game_systems_info ADD CONSTRAINT system_name_unique UNIQUE (gs_game_system_name);")
+            .execute(&mut transaction)
+            .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 54).await?;
     }
 
     Ok(true)
