@@ -469,11 +469,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                             desc_next = false;
                                         }
                                         if long_name_next {
-                                            // TODO
-                                            // try:
-                                            //     sys_longname, sys_manufacturer, sys_year = dat_line.split(",");
-                                            // except:
-                                            //     sys_longname, msys_manufacturer, sys_year = dat_line.rsplit(",", 2);
+                                            let mut split_items = dat_line.split(",");
+                                            if let Some(first) = split_items.next() {
+                                                sys_longname = first.to_string();
+                                                if let Some(second) = split_items.next() {
+                                                    sys_manufacturer = second.to_string();
+                                                    if let Some(third) = split_items.next() {
+                                                        sys_year = third.to_string();
+                                                    }
+                                                }
+                                            }
                                             long_name_next = false;
                                             desc_next = true;
                                         }
