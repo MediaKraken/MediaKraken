@@ -112,8 +112,10 @@ pub async fn mk_lib_database_metadata_game_system_upsert(
     )
     .bind(new_guid)
     .bind(system_name)
-    .bind(system_alias)
-    .bind(system_json)
+    .bind(&system_alias)
+    .bind(&system_json)
+    .bind(&system_alias)
+    .bind(&system_json)
     .execute(&mut transaction)
     .await?;
     transaction.commit().await?;
@@ -137,7 +139,7 @@ pub async fn mk_lib_database_metadata_game_system_guid_by_short_name(
 
 pub async fn mk_lib_database_metadata_game_system_game_count_by_short_name(
     sqlx_pool: &sqlx::PgPool,
-    game_system_short_name: String,
+    game_system_short_name: &String,
 ) -> Result<i64, sqlx::Error> {
     // TODO this query doesn't return game count.......
     let row: (i64,) = sqlx::query_as(
