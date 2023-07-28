@@ -52,7 +52,7 @@ pub async fn mk_lib_database_cron_time_update(
         where mm_cron_guid = $1",
     )
     .bind(cron_uuid)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(())
@@ -65,7 +65,7 @@ pub async fn mk_lib_database_cron_delete(
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from mm_cron where mm_cron_guid = $1")
         .bind(cron_uuid)
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
     transaction.commit().await?;
     Ok(())
@@ -92,7 +92,7 @@ pub async fn mk_lib_database_cron_insert(
     .bind(cron_enabled)
     .bind(cron_schedule)
     .bind(cron_json)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(new_guid)

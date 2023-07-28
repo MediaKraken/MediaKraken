@@ -97,7 +97,7 @@ pub async fn mk_lib_database_library_path_status_update(
     )
     .bind(library_status_json)
     .bind(library_uuid)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(())
@@ -113,7 +113,7 @@ pub async fn mk_lib_database_library_path_timestamp_update(
         where mm_media_dir_guid = $1",
     )
     .bind(library_uuid)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(())

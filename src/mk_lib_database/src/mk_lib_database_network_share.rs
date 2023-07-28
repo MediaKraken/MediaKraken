@@ -51,7 +51,7 @@ pub async fn mk_lib_database_network_share_delete(
         where mm_network_share_guid = $1",
     )
     .bind(network_share_uuid)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(())
@@ -76,7 +76,7 @@ pub async fn mk_lib_database_network_share_insert(
     .bind(network_share_ip)
     .bind(network_share_path)
     .bind(network_share_comment)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(new_guid)

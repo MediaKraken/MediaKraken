@@ -18,11 +18,11 @@ chrono = { version = "0.4.26", features = ["serde"] }
 mk_lib_common = { path = "../mk_lib_common" }
 serde = { version = "1.0.163", features = ["derive"] }
 serde_json = "1.0.96"
-sqlx = { version = "0.6.3", features = [
+sqlx = { version = "0.7.1", features = [
     "chrono",
     "ipnetwork",
     "json",
-    "runtime-tokio-rustls",
+    "runtime-tokio",
     "postgres",
     "uuid",
 ] }

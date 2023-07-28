@@ -13,7 +13,7 @@ pub async fn mk_lib_database_user_profile_insert(
     .bind(new_guid)
     .bind(profile_name)
     .bind(profile_json)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(new_guid)
