@@ -17,12 +17,12 @@ pub async fn mk_lib_database_media_update_metadata_guid(
     )
     .bind(mm_metadata_guid)
     .bind(mm_media_guid)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     if mm_download_uuid != &uuid::Uuid::nil() {
         sqlx::query("delete from mm_metadata_download_que where mm_download_guid = $1")
             .bind(mm_download_uuid)
-            .execute(&mut transaction)
+            .execute(&mut *transaction)
             .await?;
     }
     transaction.commit().await?;
@@ -138,7 +138,7 @@ pub async fn mk_lib_database_media_insert(
     .bind(mm_media_metadata_guid)
     .bind(mm_media_ffprobe_json)
     .bind(mm_media_json)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(())
@@ -284,7 +284,7 @@ pub async fn mk_lib_database_media_ffmpeg_update_by_uuid(
     )
     .bind(ffmpeg_json)
     .bind(mm_media_guid)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(())

@@ -37,7 +37,7 @@ pub async fn mk_lib_database_media_game_category_update(
     sqlx::query("update mm_metadata_game_software_info set gi_gc_category = $1 where gi_id = $2")
         .bind(category)
         .bind(game_id)
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
     transaction.commit().await?;
     Ok(())

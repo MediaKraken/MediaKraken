@@ -146,7 +146,7 @@ pub async fn mk_lib_database_metadata_music_video_insert(
     .bind(artist_song)
     .bind(data_json)
     .bind(image_json)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(new_guid)

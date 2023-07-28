@@ -30,7 +30,7 @@ pub async fn mk_lib_database_activity_insert(
     .bind(activity_userid)
     .bind(Utc::now())
     .bind(activity_severity)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(new_guid)
@@ -46,7 +46,7 @@ pub async fn mk_lib_database_activity_delete(
         where mm_activity_datecreated < now() - interval $1 day;",
     )
     .bind(day_range)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(())

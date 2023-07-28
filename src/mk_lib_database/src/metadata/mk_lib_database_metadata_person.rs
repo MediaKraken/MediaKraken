@@ -159,7 +159,7 @@ pub async fn mk_lib_database_metadata_person_insert(
     .bind(media_id)
     .bind(person_json)
     .bind(person_image_path)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(new_guid)
@@ -226,7 +226,7 @@ pub async fn mk_lib_database_metadata_person_update(
         .bind(person_bio)
         .bind(person_image)
         .bind(person_media_id)
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
     transaction.commit().await?;
     Ok(())

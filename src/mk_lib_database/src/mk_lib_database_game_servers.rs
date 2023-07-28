@@ -10,7 +10,7 @@ pub async fn mk_lib_database_game_server_delete(
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from mm_game_dedicated_servers where mm_game_server_guid = $1")
         .bind(game_server_uuid)
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
     transaction.commit().await?;
     Ok(())
@@ -112,7 +112,7 @@ pub async fn mk_lib_database_game_server_upsert(
     .bind(server_name)
     .bind(&server_json)
     .bind(&server_json)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(new_guid)

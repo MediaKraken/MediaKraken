@@ -116,7 +116,7 @@ pub async fn mk_lib_database_metadata_game_system_upsert(
     .bind(&system_json)
     .bind(&system_alias)
     .bind(&system_json)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(new_guid)

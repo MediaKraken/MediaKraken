@@ -180,7 +180,7 @@ pub async fn mk_lib_database_meta_collection_insert(
     .bind(guid_json)
     .bind(metadata_json)
     .bind(local_image_json)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(new_guid)

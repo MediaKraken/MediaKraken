@@ -223,7 +223,7 @@ pub async fn mk_lib_database_metadata_game_insert(
     .bind(game_short_name)
     .bind(game_name)
     .bind(&game_json)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(new_guid)
@@ -339,7 +339,7 @@ pub async fn mk_lib_database_metadata_game_category_insert(
     )
     .bind(new_guid)
     .bind(category_name)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(new_guid)

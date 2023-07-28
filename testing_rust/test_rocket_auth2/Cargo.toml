@@ -84,7 +84,7 @@ features = ["secrets", "json"]
 version = "0.7.0"
 
 [dev-dependencies.redis]
-version = "0.20.0"
+version = "0.23.0"
 features = ["aio", "tokio-comp"]
 
 
@@ -94,8 +94,8 @@ features = ["tera"]
 
 
 [dev-dependencies.sqlx]
-version = "0.5.5"
-features = ["runtime-tokio-rustls"]
+version = "0.7.1"
+features = ["runtime-tokio"]
 
 [dev-dependencies.rocket_auth]
 path = "../rocket_auth"

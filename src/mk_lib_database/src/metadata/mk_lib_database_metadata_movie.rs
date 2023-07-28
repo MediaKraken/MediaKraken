@@ -116,7 +116,7 @@ pub async fn mk_lib_database_metadata_movie_insert(
     .bind(data_json["title"].as_str().unwrap().to_string())
     .bind(data_json)
     .bind(data_image_json)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(())
