@@ -532,7 +532,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
         }
     });
-    //}).await;
 
     let guard = Notify::new();
     guard.notified().await;
