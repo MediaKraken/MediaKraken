@@ -518,7 +518,7 @@ services:
   #     replicas: 1
 
   portainer:
-    image: portainer/portainer-ce:2.18.3-alpine
+    image: portainer/portainer-ce:2.18.4-alpine
     command: -H tcp://tasks.portaineragent:9001 --tlsskipverify
     ports:
       - "9000:9000"
@@ -532,7 +532,7 @@ services:
       replicas: 1
 
   portaineragent:
-    image: portainer/agent:linux-amd64-2.18.3-alpine
+    image: portainer/agent:linux-amd64-2.18.4-alpine
     environment:
       AGENT_CLUSTER_ADDR: tasks.portaineragent
       # AGENT_PORT: 9001
