@@ -1,20 +1,15 @@
 FROM debian:buster-slim
 
-# Install wget, lsb-release and curl
-RUN apt-get update && apt-get install -y wget gnupg2 gettext-base
+# Add start script
+ADD chunkserver.sh /usr/sbin/chunkserver.sh
 
-# Add key
-RUN wget -O - http://ppa.moosefs.com/moosefs.key 2>/dev/null | apt-key add - 2>/dev/null \
-  && echo "deb http://ppa.moosefs.com/3.0.117/apt/debian/buster buster main" > /etc/apt/sources.list.d/moosefs.list
-
-# Install MooseFS chunkserver
-RUN apt-get update && apt-get install -y moosefs-chunkserver
+RUN apt-get update && apt-get install -y wget gnupg2 gettext-base \
+  && wget -O - http://ppa.moosefs.com/moosefs.key 2>/dev/null | apt-key add - 2>/dev/null \
+  && echo "deb http://ppa.moosefs.com/3.0.117/apt/debian/buster buster main" > /etc/apt/sources.list.d/moosefs.list \
+  && apt-get update && apt-get install -y moosefs-chunkserver \
+  && chown root:root /usr/sbin/chunkserver.sh ; chmod 700 /usr/sbin/chunkserver.sh ; mkdir -p /mnt/hdd0
 
 # Expose ports
 EXPOSE 9422
-
-# Add start script
-ADD chunkserver.sh /usr/sbin/chunkserver.sh
-RUN chown root:root /usr/sbin/chunkserver.sh ; chmod 700 /usr/sbin/chunkserver.sh ; mkdir -p /mnt/hdd0
 
 CMD ["chunkserver.sh"]
