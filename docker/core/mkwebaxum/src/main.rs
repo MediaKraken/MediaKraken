@@ -165,8 +165,8 @@ async fn main() {
 
     let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
 
-    let client = redis::Client::open("redis://default:metaman@mkstack_redis:6379/0")
-        .expect("Error while tryiong to open the redis connection");
+    let client = redis::Client::open("redis://default:metaman@mkstack_redis:6379/mksession")
+        .expect("Error while trying to open the redis connection");
     let session_config = SessionConfig::default();
     let session_store =
         SessionStore::<SessionRedisPool>::new(Some(client.clone().into()), session_config).await
