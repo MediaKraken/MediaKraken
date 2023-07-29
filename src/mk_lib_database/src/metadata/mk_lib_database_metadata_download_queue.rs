@@ -87,7 +87,7 @@ pub async fn mk_lib_database_metadata_download_queue_update_provider(
     )
     .bind(metadata_provider)
     .bind(metadata_queue_uuid)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(())
@@ -117,7 +117,7 @@ pub async fn mk_lib_database_metadata_download_queue_insert(
     .bind(metadata_new_uuid)
     .bind(metadata_provider_id)
     .bind(metadata_status)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(())
@@ -135,7 +135,7 @@ pub async fn mk_lib_database_metadata_download_status_update(
     )
     .bind(metadata_status)
     .bind(metadata_download_uuid)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(())

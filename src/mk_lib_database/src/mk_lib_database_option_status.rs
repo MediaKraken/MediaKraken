@@ -40,7 +40,7 @@ pub async fn mk_lib_database_option_update(
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("update mm_options_and_status set mm_options_json = $1")
         .bind(option_json)
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
     transaction.commit().await?;
     Ok(())
@@ -56,7 +56,7 @@ pub async fn mk_lib_database_option_status_update(
     sqlx::query("update mm_options_and_status set mm_options_json = $1, mm_status_json = $2")
         .bind(option_json)
         .bind(status_json)
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
     transaction.commit().await?;
     Ok(())
@@ -70,7 +70,7 @@ pub async fn mk_lib_database_status_update_scan(
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("update mm_options_and_status set mm_status_json = $1")
         .bind(status_json)
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
     transaction.commit().await?;
     Ok(())

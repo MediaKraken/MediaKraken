@@ -21,13 +21,13 @@ pub async fn mk_lib_database_update_schema(
             "ALTER TABLE mm_metadata_game_software_info \
             RENAME COLUMN gi_id TO gi_game_info_id;",
         )
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
         sqlx::query(
             "ALTER TABLE mm_metadata_game_software_info \
             RENAME COLUMN gi_system_id TO gi_game_info_system_id;",
         )
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 45).await?;
@@ -38,7 +38,7 @@ pub async fn mk_lib_database_update_schema(
             "ALTER TABLE mm_metadata_game_systems_info \
             RENAME COLUMN gs_id TO gs_game_system_id;",
         )
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
         sqlx::query(
             "INSERT INTO mm_metadata_game_systems_info \
@@ -48,7 +48,7 @@ pub async fn mk_lib_database_update_schema(
             VALUES ($1, 'Arcade', 'Arcade')",
         )
         .bind(uuid::Uuid::nil())
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 46).await?;
@@ -63,7 +63,7 @@ pub async fn mk_lib_database_update_schema(
                 mm_hardware_model_name text
             );",
         )
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 47).await?;
@@ -74,19 +74,19 @@ pub async fn mk_lib_database_update_schema(
             "ALTER TABLE ONLY mm_hardware_model
             ADD CONSTRAINT mm_hardware_model_guid_pk PRIMARY KEY (mm_hardware_model_guid);",
         )
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
         sqlx::query(
             "CREATE INDEX mm_hardware_manufacturer_name \
             ON mm_hardware_model USING btree (mm_hardware_manufacturer);",
         )
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
         sqlx::query(
             "CREATE INDEX mm_hardware_model_type_name \
             ON mm_hardware_model USING btree (mm_hardware_model_type);",
         )
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 48).await?;
@@ -98,7 +98,7 @@ pub async fn mk_lib_database_update_schema(
             mm_network_share_guid uuid NOT NULL, \
             mm_network_share_xml text);",
         )
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 49).await?;
@@ -116,26 +116,26 @@ pub async fn mk_lib_database_update_schema(
             last_signin timestamp, \
             last_signoff timestamp);",
         )
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
         sqlx::query(
             "INSERT INTO mm_axum_users (anonymous, username, email, password) \
             values (true, 'Guest', 'guest@fake.com', crypt('fakepass', gen_salt('bf', 10)));",
         )
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
         sqlx::query(
             "CREATE TABLE IF NOT EXISTS mm_axum_user_permissions (\
             user_id INTEGER NOT NULL, \
             token VARCHAR(256) NOT NULL);",
         )
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
         sqlx::query(
             "CREATE INDEX mm_axum_user_permissions_user_id \
             ON mm_axum_user_permissions USING btree (user_id);",
         )
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 50).await?;
@@ -144,16 +144,16 @@ pub async fn mk_lib_database_update_schema(
     if version_no < 51 {
         let mut transaction = sqlx_pool.begin().await?;
         sqlx::query("ALTER TABLE mm_network_shares DROP COLUMN mm_network_share_xml;")
-            .execute(&mut transaction)
+            .execute(&mut *transaction)
             .await?;
         sqlx::query("ALTER TABLE mm_network_shares ADD COLUMN mm_network_share_ip INET;")
-            .execute(&mut transaction)
+            .execute(&mut *transaction)
             .await?;
         sqlx::query("ALTER TABLE mm_network_shares ADD COLUMN mm_network_share_path TEXT;")
-            .execute(&mut transaction)
+            .execute(&mut *transaction)
             .await?;
         sqlx::query("ALTER TABLE mm_network_shares ADD COLUMN mm_network_share_comment TEXT;")
-            .execute(&mut transaction)
+            .execute(&mut *transaction)
             .await?;
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 51).await?;
@@ -169,27 +169,40 @@ pub async fn mk_lib_database_update_schema(
                 mm_backup_location TEXT NOT NULL, \
                 mm_backup_created timestamp NOT NULL);",
         )
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
         sqlx::query(
             "CREATE INDEX mm_backup_created_ndx \
            ON mm_backup USING btree (mm_backup_created);",
         )
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 52).await?;
     }
 
-    if version_no < 53{
+    if version_no < 53 {
         let mut transaction = sqlx_pool.begin().await?;
-        sqlx::query(
-            "DROP TABLE IF EXISTS mm_user, mm_user_group, mm_user_profile;",
-        )
-        .execute(&mut transaction)
-        .await?;
+        sqlx::query("DROP TABLE IF EXISTS mm_user, mm_user_group, mm_user_profile;")
+            .execute(&mut *transaction)
+            .await?;
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 53).await?;
+    }
+
+    if version_no < 54 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query("DROP INDEX IF EXISTS mm_metadata_game_systems_info_ndx_name;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("CREATE UNIQUE INDEX IF NOT EXISTS mm_metadata_game_systems_info_ndx_name ON mm_metadata_game_systems_info USING btree (gs_game_system_name);")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("ALTER TABLE mm_metadata_game_systems_info ADD CONSTRAINT system_name_unique UNIQUE (gs_game_system_name);")
+            .execute(&mut *transaction)
+            .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 54).await?;
     }
 
     Ok(true)
@@ -202,7 +215,7 @@ pub async fn mk_lib_database_version_update(
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("update mm_version set mm_version_number = $1")
         .bind(version_number)
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
     transaction.commit().await?;
     Ok(())

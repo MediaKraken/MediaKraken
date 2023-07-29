@@ -117,7 +117,7 @@ pub async fn mk_lib_database_metadata_book_insert(
     .bind(&json_data["data"][0]["isbn13"])
     .bind(&json_data["data"][0]["title"])
     .bind(&json_data["data"][0])
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(new_guid)

@@ -17,7 +17,7 @@ pub async fn mk_lib_database_hardware_manufacturer_upsert(
     .bind(uuid::Uuid::new_v4())
     .bind(manufacturer_name)
     .bind(manufacturer_id)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(())
@@ -35,7 +35,7 @@ pub async fn mk_lib_database_hardware_type_upsert(
     )
     .bind(uuid::Uuid::new_v4())
     .bind(hardware_type)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(())
@@ -58,7 +58,7 @@ pub async fn mk_lib_database_hardware_model_insert(
     .bind(hardware_manufacturer)
     .bind(hardware_type)
     .bind(hardware_model)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(())
@@ -151,7 +151,7 @@ pub async fn mk_lib_database_hardware_insert(
     .bind(manufacturer)
     .bind(model_name)
     .bind(json_data)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(new_guid)
@@ -164,7 +164,7 @@ pub async fn mk_lib_database_hardware_delete(
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from mm_hardware_json where mm_hardware_id = $1")
         .bind(hardware_uuid)
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
     transaction.commit().await?;
     Ok(())

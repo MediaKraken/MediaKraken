@@ -10,7 +10,7 @@ pub async fn mk_lib_database_link_delete(
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from mm_link where mm_link_guid = $1")
         .bind(link_uuid)
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
     transaction.commit().await?;
     Ok(())
@@ -59,7 +59,7 @@ pub async fn mk_lib_database_link_insert(
     )
     .bind(new_guid)
     .bind(link_json)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(new_guid)

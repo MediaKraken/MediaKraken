@@ -68,22 +68,22 @@ STAGE_CORE_IMAGES = {
     'mkchatteamspeak': ('mkchatteamspeak', 'alpine:3.14.2', 'core'),
 
     # process cron jobs from the database to amqp or direct container launch
-    'mkcron': ('mkcron', 'busybox:1.36.0-uclibc', 'core'),
+    'mkcron': ('mkcron', 'scratch', 'core'),
 
     # database via postgresql
     'mkdatabase': ('mkdatabase', 'debian:bullseye-slim', 'core'),
 
     # download files/etc trailers/etc from ampq records
-    'mkdownload': ('mkdownload', 'busybox:1.36.0-uclibc', 'core'),
+    'mkdownload': ('mkdownload', 'scratch', 'core'),
 
     # filebeat
     'mkfilebeat': ('mkfilebeat', 'elastic/filebeat:7.17.10', 'core'),
 
     # thegamesdb bulk data fetch
-    'mkgamesdbnetfetchbulk': ('mkgamesdbnetfetchbulk', 'busybox:1.36.0-uclibc', 'core'),
+    'mkgamesdbnetfetchbulk': ('mkgamesdbnetfetchbulk', 'scratch', 'core'),
 
     # download manufactuer stuff from global cache
-    'mkglobalcache': ('mkglobalcache', 'debian:bullseye-slim', 'core'),
+    'mkglobalcache': ('mkglobalcache', 'scratch', 'core'),
 
     # guessit via web rest
     'mkguessitrest': ('mkguessitrest',
@@ -93,13 +93,13 @@ STAGE_CORE_IMAGES = {
     'mkhaproxy': ('mkhaproxy', 'alpine:3.17', 'core'),
 
     # runs control network/ir/if/etc
-    'mkhardwarecontrol': ('mkhardwarecontrol', 'busybox:1.36.0-uclibc', 'core'),
+    'mkhardwarecontrol': ('mkhardwarecontrol', 'scratch', 'core'),
 
     # runs as HOST to find new hardware - run and exit
-    'mkhardwarescanner': ('mkhardwarescanner', 'busybox:1.36.0-uclibc', 'core'),
+    'mkhardwarescanner': ('mkhardwarescanner', 'scratch', 'core'),
 
     # inotify of file system changes to amqp
-    'mkinotify': ('mkinotify', 'busybox:1.36.0-uclibc', 'core'),
+    'mkinotify': ('mkinotify', 'scratch', 'core'),
 
     # download libretro cores that are newer - run and exit
     'mklibretrocorefetchupdate': ('mklibretrocorefetchupdate', 'scratch', 'core'),
@@ -108,16 +108,16 @@ STAGE_CORE_IMAGES = {
     'mkmediascanner': ('mkmediascanner', 'scratch', 'core'),
 
     # process metadata for media
-    'mkmetadata': ('mkmetadata', 'busybox:1.36.0-uclibc', 'core'),
+    'mkmetadata': ('mkmetadata', 'scratch', 'core'),
 
     # process metadata for mame and other game xml
-    'mkmetadatamame': ('mkmetadatamame', 'busybox:1.36.0-uclibc', 'core'),
+    'mkmetadatamame': ('mkmetadatamame', 'scratch', 'core'),
 
     # "broadcast" multicast for discovery
-    'mkmulticast': ('mkmulticast', 'busybox:1.36.0-uclibc', 'core'),
+    'mkmulticast': ('mkmulticast', 'scratch', 'core'),
 
     # musicbrainz load
-    'mkmusicbrainz': ('mkmusicbrainz', 'RustBaseDebian', 'core'),
+    'mkmusicbrainz': ('mkmusicbrainz', 'scratch', 'core'),
 
     # nginx proxy for http to https and some bot blocking
     'mknginx': ('mknginx', 'alpine:3.13', 'core'),
@@ -136,7 +136,7 @@ STAGE_CORE_IMAGES = {
     # 'mkpgbouncer': ('mkpgbouncer', 'alpine:3.17.1', 'core'),
 
     # consume and process ampq records
-    'mkrabbitconsume': ('mkrabbitconsume', 'busybox:1.36.0-uclibc', 'core'),
+    'mkrabbitconsume': ('mkrabbitconsume', 'scratch', 'core'),
 
     # amqp service (rabbitmq)
     'mkrabbitmq': ('mkrabbitmq', 'alpine:3.11', 'core'),
@@ -145,10 +145,10 @@ STAGE_CORE_IMAGES = {
     'mkredis': ('mkredis', 'alpine:3.17', 'core'),
 
     # schedulesdirect update
-    'mkschedulesdirectupdate': ('mkschedulesdirectupdate', 'busybox:1.36.0-uclibc', 'core'),
+    'mkschedulesdirectupdate': ('mkschedulesdirectupdate', 'scratch', 'core'),
 
     # scan for network shares
-    'mksharescanner': ('mksharescanner', 'busybox:1.36.0-uclibc', 'core'),
+    'mksharescanner': ('mksharescanner', 'scratch', 'core'),
 
     # download tmdb dump of ids in database and insert into downloads - run and exit
     'mktmdbnetfetchbulk': ('mktmdbnetfetchbulk', 'scratch', 'core'),
@@ -157,7 +157,7 @@ STAGE_CORE_IMAGES = {
     'mktmdbnetfetchupdate': ('mktmdbnetfetchupdate', 'scratch', 'core'),
 
     # transcode/STREAM media to client - run and exit
-    'mktranscode': ('mktranscode', 'busybox:1.36.0-uclibc', 'core'),
+    'mktranscode': ('mktranscode', 'scratch', 'core'),
 
     # transmission server
     'mktransmission': ('mktransmission', 'alpine:3.16.2', 'core'),
@@ -166,7 +166,7 @@ STAGE_CORE_IMAGES = {
     'mktvheadend': ('mktvheadend', 'alpine:3.12', 'core'),
 
     # website via rust and axum
-    'mkwebaxum': ('mkwebaxum', 'busybox:1.36.0-uclibc', 'core'),
+    'mkwebaxum': ('mkwebaxum', 'scratch', 'core'),
 
     # website via rust and rocket
     # 'mkwebrocket': ('mkwebrocket', 'busybox:1.36.0-uclibc', 'core'),
@@ -269,6 +269,17 @@ STAGE_TWO_GAME_SERVERS = {
     'mkgamewindward': ('mkgamewindward', 'FAKE', 'game_server'),
 }
 
+STAGE_ONE_OPTIONS = {
+    'mkmoosefscgi': ('mkmoosefscgi', 'debian:buster', 'option'),
+    'mkmoosefschunkserver': ('mkmoosefschunkserver', 'debian:buster', 'option'),
+    'mkmoosefsmaster': ('mkmoosefsmaster', 'debian:buster', 'option'),
+    'mkmoosefsmetalogger': ('mkmoosefsmetalogger', 'debian:buster', 'option'),
+}
+
+STAGE_TWO_OPTIONS = {
+
+}
+    
 STAGE_ONE_SECURITY_TOOLS = {
 
 }

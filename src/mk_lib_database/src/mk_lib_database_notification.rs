@@ -52,7 +52,7 @@ pub async fn mk_lib_database_notification_insert(
     .bind(Uuid::new_v4())
     .bind(mm_notification_text)
     .bind(mm_notification_dismissable)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(())
@@ -65,7 +65,7 @@ pub async fn mk_lib_database_notification_delete(
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from mm_notification where mm_notification_guid = $1")
         .bind(mk_notification_guid)
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
     transaction.commit().await?;
     Ok(())

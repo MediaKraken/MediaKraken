@@ -202,7 +202,7 @@ pub async fn mk_lib_database_user_delete(
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from mm_axum_users where id = $1")
         .bind(user_id)
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
     transaction.commit().await?;
     Ok(())
@@ -216,17 +216,17 @@ pub async fn mk_lib_database_user_set_admin(
     sqlx::query("insert into mm_axum_user_permissions (user_id, token) values ($1, $2)")
         .bind(user_id)
         .bind("Admin::Edit")
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
     sqlx::query("insert into mm_axum_user_permissions (user_id, token) values ($1, $2)")
         .bind(user_id)
         .bind("Category::View")
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
     sqlx::query("insert into mm_axum_user_permissions (user_id, token) values ($1, $2)")
         .bind(user_id)
         .bind("User::View")
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
     transaction.commit().await?;
     Ok(())
@@ -246,7 +246,7 @@ pub async fn mk_lib_database_user_insert(
     )
     .bind(username)
     .bind(password)
-    .fetch_one(&mut transaction)
+    .fetch_one(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(row.0)
@@ -275,7 +275,7 @@ pub async fn mk_lib_database_user_login(
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("update mm_axum_users set last_signin = now() where id = $1")
         .bind(user_id)
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
     transaction.commit().await?;
     Ok(())
@@ -288,7 +288,7 @@ pub async fn mk_lib_database_user_logout(
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("update mm_axum_users set last_signoff = now() where id = $1")
         .bind(user_id)
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
     transaction.commit().await?;
     Ok(())

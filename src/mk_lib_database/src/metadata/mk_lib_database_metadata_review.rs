@@ -17,7 +17,7 @@ pub async fn mk_lib_database_metadata_review_insert(
     .bind(new_guid)
     .bind(metadata_uuid)
     .bind(review_json)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(new_guid)

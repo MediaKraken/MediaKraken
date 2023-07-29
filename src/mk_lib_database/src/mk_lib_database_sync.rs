@@ -10,7 +10,7 @@ pub async fn mk_lib_database_sync_delete(
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from mm_media_sync where mm_sync_guid = $1")
         .bind(sync_guid)
-        .execute(&mut transaction)
+        .execute(&mut *transaction)
         .await?;
     transaction.commit().await?;
     Ok(())
@@ -28,7 +28,7 @@ pub async fn mk_lib_database_sync_process_update(
     )
     .bind(sync_percent)
     .bind(sync_guid)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(())
@@ -58,7 +58,7 @@ pub async fn mk_lib_database_sync_insert(
     .bind(sync_path)
     .bind(sync_path_to)
     .bind(sync_json)
-    .execute(&mut transaction)
+    .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(new_guid)
