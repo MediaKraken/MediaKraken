@@ -1,12 +1,12 @@
 use async_trait::async_trait;
 use axum_session_auth::*;
-use axum_session_auth::{Authentication};
+use axum_session_auth::Authentication;
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPool;
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
-use std::{collections::HashSet};
+use std::collections::HashSet;
 
 /*
 Adult::View
