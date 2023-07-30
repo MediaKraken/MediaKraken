@@ -160,17 +160,17 @@ async fn main() {
     let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50)
         .await
         .unwrap();
-    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+    let _result = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
         .await;
 
     let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
 
-    let client = redis::Client::open("redis://default:metaman@mkstack_redis:6379/0")
-        .expect("Error while tryiong to open the redis connection");
+    let client = redis::Client::open("redis://default:metaman@mkstack_redis:6379/mksession")
+        .expect("Error while trying to open the redis connection");
     let session_config = SessionConfig::default();
     let session_store =
-        SessionStore::<SessionRedisPool>::new(Some(client.clone().into()), session_config);
-    session_store.initiate().await.unwrap();
+        SessionStore::<SessionRedisPool>::new(Some(client.clone().into()), session_config).await
+        .unwrap();
 
     let (prometheus_layer, metric_handle) = PrometheusMetricLayerBuilder::new()
         .with_endpoint_label_type(EndpointLabel::MatchedPathWithFallbackFn(|path| {
