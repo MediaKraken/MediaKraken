@@ -587,7 +587,7 @@ services:
       replicas: 1
 
   redis:
-    image: mediakraken/mkredis:${BRANCH}
+    image: redis/redis-stack:6.2.6-v9
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     ports:
@@ -595,7 +595,7 @@ services:
       - "8001:8001"
     environment:
       - REDIS_PASSWORD=metaman
-    command: sh -c "redis-server --appendonly yes --requirepass $${REDIS_PASSWORD}"
+    command: sh -c "redis-server --requirepass $${REDIS_PASSWORD}"
     volumes:
       - mediakraken_vol_redis:/data
     deploy:
