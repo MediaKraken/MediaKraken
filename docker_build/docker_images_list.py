@@ -141,9 +141,6 @@ STAGE_CORE_IMAGES = {
     # amqp service (rabbitmq)
     'mkrabbitmq': ('mkrabbitmq', 'alpine:3.11', 'core'),
 
-    # redis
-    'mkredis': ('mkredis', 'alpine:3.17', 'core'),
-
     # schedulesdirect update
     'mkschedulesdirectupdate': ('mkschedulesdirectupdate', 'scratch', 'core'),
 
