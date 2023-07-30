@@ -591,11 +591,7 @@ services:
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     ports:
-      # - "6379:6379"
-      - "8001:8001"
-    environment:
-      - REDIS_PASSWORD=metaman
-    command: sh -c "redis-server --requirepass $${REDIS_PASSWORD}"
+      - "8001:8001"  # RedisInsight
     volumes:
       - mediakraken_vol_redis:/data
     deploy:
