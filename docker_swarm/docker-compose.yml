@@ -3,6 +3,21 @@ version: '3.8'
 # Volumes are HOST directory and then CONTAINER directory
 
 services:
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    hostname: '{{.Node.ID}}'
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - portaineragent_agent_network
+    deploy:
+      mode: global
+      placement:
+        constraints: [ node.platform.os == linux ]
+  
   cron:
     image: mediakraken/mkcron:${BRANCH}
     secrets:
@@ -159,6 +174,26 @@ services:
     deploy:
       mode: replicated
       replicas: 1
+
+  grafana:
+    image: grafana/grafana-oss:10.0.3
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=metaman
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=redis-datasource
+    ports:
+      - "3000:3000"
+    volumes:
+      - mediakraken_vol_grafana:/var/lib/grafana
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+        placement:
+        constraints: [ node.role == manager ]
 
   guessitrest:
     image: mediakraken/mkguessitrest:${BRANCH}
@@ -547,6 +582,33 @@ services:
       placement:
         constraints: [ node.platform.os == linux ]
 
+  # https://github.com/prometheus-community/postgres_exporter
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.13.2
+    environment:
+      DATA_SOURCE_URI: mkstack_database:5432/postgres?sslmode=disable
+      DATA_SOURCE_USER: postgres
+      DATA_SOURCE_PASS_FILE : /run/secrets/db_password
+    secrets:
+      - db_password      
+    networks:
+      - mediakraken_network
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+  # https://prometheus.io/download/
+  # https://hub.docker.com/u/prom
+  prometheus:
+    image: prom/prometheus:v2.37.9
+    ports:
+      - 9090:9090
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - mediakraken_network
+
   rabbitconsume:
     image: mediakraken/mkrabbitconsume:${BRANCH}
     secrets:
@@ -586,6 +648,7 @@ services:
       mode: replicated
       replicas: 1
 
+  # using stack instead of own image for RedisInsight
   redis:
     image: redis/redis-stack:6.2.6-v9
     stop_grace_period: 30s
@@ -820,6 +883,7 @@ volumes:
   mediakraken_vol_comics:
   mediakraken_vol_devices:
   mediakraken_vol_emulation:
+  mediakraken_vol_grafana:
   mediakraken_vol_metricbeat:
   mediakraken_vol_mbrainz_conf:
   mediakraken_vol_mbrainz_data:
