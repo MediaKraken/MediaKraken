@@ -2,9 +2,9 @@ use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
 
-pub async fn mk_lib_database_table_row_count(sqlx_pool: &sqlx::PgPool) -> Result<i64, sqlx::Error> {
+pub async fn mk_lib_database_table_row_count(sqlx_pool: &sqlx::PgPool) -> Result<f32, sqlx::Error> {
     // query provided by postgresql wiki
-    let row: (i64,) = sqlx::query_as(
+    let row: (f32,) = sqlx::query_as(
         "SELECT sum(reltuples) \
         FROM pg_class C LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace) \
         WHERE nspname NOT IN ('pg_catalog', 'information_schema') \
