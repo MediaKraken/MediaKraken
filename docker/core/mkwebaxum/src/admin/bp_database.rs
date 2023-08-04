@@ -1,3 +1,4 @@
+use crate::axum_custom_filters::filters;
 use askama::Template;
 use axum::{
     http::{Method, StatusCode},
@@ -7,14 +8,15 @@ use axum::{
 use axum_session_auth::{AuthSession, SessionPgPool};
 use mk_lib_database;
 use sqlx::postgres::PgPool;
-use crate::axum_custom_filters::filters;
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_db_statistics.html")]
 struct AdminDBStatsTemplate<'a> {
     template_data_db_version: &'a String,
     template_data_db_size: &'a Vec<mk_lib_database::mk_lib_database_postgresql::PGTableSize>,
+    template_data_db_size_total: &'a i64,
     template_data_db_count: &'a Vec<mk_lib_database::mk_lib_database_postgresql::PGTableRows>,
+    template_data_db_count_total: &'a f32,
     template_data_db_workers: &'a String,
 }
 
@@ -31,8 +33,16 @@ pub async fn admin_database(
         mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_size(&sqlx_pool)
             .await
             .unwrap();
+    let pg_table_size_total =
+        mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_size_total(&sqlx_pool)
+            .await
+            .unwrap();
     let pg_table_row_count =
         mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_rows(&sqlx_pool)
+            .await
+            .unwrap();
+    let pg_table_row_count_total =
+        mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_row_count(&sqlx_pool)
             .await
             .unwrap();
     let pg_worker_count =
@@ -42,7 +52,9 @@ pub async fn admin_database(
     let template = AdminDBStatsTemplate {
         template_data_db_version: &pg_version,
         template_data_db_size: &pg_table_size,
+        template_data_db_size_total: &pg_table_size_total,
         template_data_db_count: &pg_table_row_count,
+        template_data_db_count_total: &pg_table_row_count_total,
         template_data_db_workers: &pg_worker_count,
     };
     let reply_html = template.render().unwrap();

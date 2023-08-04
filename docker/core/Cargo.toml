@@ -21,6 +21,6 @@ members = [
 #     "mksharescanner",
 #     "mktmdbnetfetchbulk",
 #     "mktmdbnetfetchupdate",
-     "mktranscode",
-#     "mkwebaxum",
+#     "mktranscode",
+     "mkwebaxum",
 ]

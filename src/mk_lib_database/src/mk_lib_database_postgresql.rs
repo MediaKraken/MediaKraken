@@ -2,6 +2,19 @@ use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
 
+pub async fn mk_lib_database_table_row_count(sqlx_pool: &sqlx::PgPool) -> Result<f32, sqlx::Error> {
+    // query provided by postgresql wiki
+    let row: (f32,) = sqlx::query_as(
+        "SELECT sum(reltuples) \
+        FROM pg_class C LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace) \
+        WHERE nspname NOT IN ('pg_catalog', 'information_schema') \
+        AND relkind='r'",
+    )
+    .fetch_one(sqlx_pool)
+    .await?;
+    Ok(row.0)
+}
+
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct PGTableRows {
     table_schema_name: String,
@@ -79,6 +92,21 @@ pub async fn mk_lib_database_table_size(
         .fetch_all(sqlx_pool)
         .await?;
     Ok(table_rows)
+}
+
+pub async fn mk_lib_database_table_size_total(
+    sqlx_pool: &sqlx::PgPool,
+) -> Result<i64, sqlx::Error> {
+    // query provided by postgresql wiki
+    let row: (i64,) = sqlx::query_as(
+        "SELECT sum(pg_total_relation_size(C.oid)) AS \"total_size\" FROM pg_class C \
+        LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace) \
+        WHERE nspname NOT IN ('pg_catalog', 'information_schema') \
+        AND C.relkind <> 'i' AND nspname!~ '^pg_toast'",
+    )
+    .fetch_one(sqlx_pool)
+    .await?;
+    Ok(row.0)
 }
 
 pub async fn mk_lib_database_parallel_workers(

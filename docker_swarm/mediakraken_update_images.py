@@ -32,7 +32,7 @@ load_dotenv()  # take environment variables from .env.
 
 with open('docker-compose.yml') as file_handle:
     for line in file_handle:
-        if line.find('image: ') > 0:
+        if line.find('image: ') > 0 and line.strip().find('#') != 0:
             pull_pid = subprocess.Popen(shlex.split('docker pull %s'
                                                     % (line.split('image: ')[1].strip() \
                                                        .replace('${BRANCH}',
