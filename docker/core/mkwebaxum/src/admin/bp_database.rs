@@ -14,6 +14,7 @@ use sqlx::postgres::PgPool;
 struct AdminDBStatsTemplate<'a> {
     template_data_db_version: &'a String,
     template_data_db_size: &'a Vec<mk_lib_database::mk_lib_database_postgresql::PGTableSize>,
+    template_data_db_size_total: &'a i64,
     template_data_db_count: &'a Vec<mk_lib_database::mk_lib_database_postgresql::PGTableRows>,
     template_data_db_workers: &'a String,
 }
