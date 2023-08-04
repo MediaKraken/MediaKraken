@@ -36,7 +36,6 @@
                                             <th>Record(s)</th>
                                         </tr>
                                     </thead>
-                                    {% let total_rows = 0.0 %}
                                     <tbody>
                                         {% for row_data in template_data_db_count %}
                                         <tr>
@@ -50,7 +49,7 @@
                                         {% endfor %}
                                         <tr>
                                             <td><b>Total Rows:</b></td>
-                                            <td>{{ total_rows }}</td>
+                                            <td>{{ template_data_db_count_total|number_format }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
