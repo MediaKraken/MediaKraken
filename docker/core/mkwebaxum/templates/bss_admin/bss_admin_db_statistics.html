@@ -68,7 +68,6 @@
                                             <th>Size</th>
                                         </tr>
                                     </thead>
-                                    {% let total_size = 0 %}
                                     <tbody>
                                         {% for row_data in template_data_db_size %}
                                         <tr>
@@ -78,7 +77,7 @@
                                         {% endfor %}
                                         <tr>
                                             <td><b>Total Size:</b></td>
-                                            <td>{{ total_size }}</td>
+                                            <td>{{ template_data_db_size_total|byte_format }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
