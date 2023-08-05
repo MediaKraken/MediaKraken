@@ -10,8 +10,8 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-aws-config = { version = "0.55.3", optional = true }
-aws-sdk-s3= { version = "0.28.0", optional = true }
+aws-config = { version = "0.56.0", optional = true }
+aws-sdk-s3= { version = "0.29.0", optional = true }
 serde_json = "1.0.96"
 stdext = "0.3.1"
 tokio = { version = "1.28.2", features = ["full"] }
