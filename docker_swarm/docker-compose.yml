@@ -24,6 +24,7 @@ services:
       - db_password
     environment:
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+      - WAIT_TIMEOUT=180
     command: sh -c "/wait && /mkcron"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -118,6 +119,7 @@ services:
       - db_password
     environment:
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+      - WAIT_TIMEOUT=180
     command: sh -c "/wait && /mkdownload"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -148,7 +150,8 @@ services:
     secrets:
       - db_password
     environment:
-      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672      
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+      - WAIT_TIMEOUT=180
     command: sh -c "/wait && /mkgamesdbnetfetchbulk"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -165,7 +168,8 @@ services:
     secrets:
       - db_password
     environment:
-      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672           
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+      - WAIT_TIMEOUT=180
     command: sh -c "/wait && /mkglobalcache"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -213,6 +217,7 @@ services:
       - mediakraken_vol_phue:/mediakraken/phue
     environment:
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+      - WAIT_TIMEOUT=180
     command: sh -c "/wait && /mkhardwarecontrol"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -234,6 +239,7 @@ services:
       - mediakraken_vol_phue:/mediakraken/phue
     environment:
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+      - WAIT_TIMEOUT=180
     command: sh -c "/wait && /mkhardwarescanner"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -251,6 +257,7 @@ services:
       - db_password
     environment:
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+      - WAIT_TIMEOUT=180
     command: sh -c "/wait && /mkinotify"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -263,7 +270,8 @@ services:
   libretrocorefetchupdate:
     image: mediakraken/mklibretrocorefetchupdate:${BRANCH}
     environment:
-      - WAIT_HOSTS=mkstack_rabbitmq:5672    
+      - WAIT_HOSTS=mkstack_rabbitmq:5672
+      - WAIT_TIMEOUT=180
     command: sh -c "/wait && /mklibretrocorefetchupdate"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -299,6 +307,7 @@ services:
       - db_password
     environment:
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+      - WAIT_TIMEOUT=180
     command: sh -c "/wait && /mkmediascanner"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -316,6 +325,7 @@ services:
       - db_password
     environment:
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+      - WAIT_TIMEOUT=180
     command: sh -c "/wait && /mkmetadata"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -337,6 +347,7 @@ services:
       - db_password
     environment:
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+      - WAIT_TIMEOUT=180
     command: sh -c "/wait && /mkmetadatamame"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -452,6 +463,7 @@ services:
       - db_password
     environment:
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+      - WAIT_TIMEOUT=180
     command: sh -c "/wait && /mkmusicbrainz"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -465,7 +477,7 @@ services:
 
   nginx:
     image: mediakraken/mknginx:${BRANCH}
-    entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh -h mkstack_webapp -p 8080 -t 120 -h mkstack_transmission -p 9091 -t 120 -- nginx
+    entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh -h mkstack_webapp -p 8080 -t 180 -h mkstack_transmission -p 9091 -t 180 -- nginx
     stop_grace_period: 30s
     stop_signal: SIGTERM
     volumes:
@@ -504,6 +516,7 @@ services:
       - db_password
     environment:
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+      - WAIT_TIMEOUT=180
     command: sh -c "/wait && /mkopenlibrarynetfetchbulk"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -557,7 +570,6 @@ services:
     command: -H tcp://tasks.portaineragent:9001 --tlsskipverify
     ports:
       - "9000:9000"
-      - "8000:8000"
     volumes:
       - mediakraken_vol_portainer_data:/data
     networks:
@@ -615,6 +627,7 @@ services:
       - db_password
     environment:
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+      - WAIT_TIMEOUT=180
     command: sh -c "/wait && /mkrabbitconsume"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -668,7 +681,8 @@ services:
     secrets:
       - db_password
     environment:
-      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672      
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+      - WAIT_TIMEOUT=180
     command: sh -c "/wait && /mkschedulesdirectupdate"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -684,6 +698,7 @@ services:
       - db_password
     environment:
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+      - WAIT_TIMEOUT=180
     command: sh -c "/wait && /mksharescanner"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -715,7 +730,8 @@ services:
     secrets:
       - db_password
     environment:
-      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672      
+      - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+      - WAIT_TIMEOUT=180
     command: sh -c "/wait && /mktmdbnetfetchbulk"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -731,6 +747,7 @@ services:
       - db_password
     environment:
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672
+      - WAIT_TIMEOUT=180
     command: sh -c "/wait && /mktmdbnetfetchupdate"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
@@ -767,7 +784,7 @@ services:
       - mediakraken_vol_transmission_downloads:/transmission/downloads
       - mediakraken_vol_transmission_incomplete:/transmission/incomplete
     networks:
-      - mediakraken_network      
+      - mediakraken_network
     deploy:
       mode: replicated
       replicas: 1
@@ -793,6 +810,7 @@ services:
       - csrf_key
     environment:
       - WAIT_HOSTS=mkstack_database:5432, mkstack_rabbitmq:5672, mkstack_redis:6379
+      - WAIT_TIMEOUT=180
       - LANG=en_US.UTF-8
       - LC_ALL=en_US.UTF-8
     command: sh -c "/wait && /mediakraken/mkwebapp"
