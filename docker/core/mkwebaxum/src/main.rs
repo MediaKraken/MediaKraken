@@ -12,7 +12,7 @@ use axum_csrf::{CsrfConfig, CsrfToken};
 use axum_extra::routing::RouterExt;
 use axum_handle_error_extract::HandleErrorLayer;
 use axum_prometheus::{EndpointLabel, PrometheusMetricLayerBuilder};
-use axum_session::{Key, SessionConfig, SessionLayer, SessionRedisPool, SessionStore};
+use axum_session::{Key, SessionConfig, SessionLayer, SessionPgPool, SessionRedisPool, SessionStore, SessionPgSessionStore};
 use axum_session_auth::{AuthConfig, AuthSessionLayer};
 use mk_lib_database;
 use rcgen::generate_simple_self_signed;
@@ -165,11 +165,15 @@ async fn main() {
 
     let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
 
-    let client = redis::Client::open("redis://default:@mkstack_redis:6379/0")
-        .expect("Error while trying to open the redis connection");
-    let session_config = SessionConfig::default();
-    let session_store =
-        SessionStore::<SessionRedisPool>::new(Some(client.clone().into()), session_config).await
+    // let client = redis::Client::open("redis://default:@mkstack_redis:6379/0")
+    //     .expect("Error while trying to open the redis connection");
+    // let session_config = SessionConfig::default();
+    // let session_store =
+    //     SessionStore::<SessionRedisPool>::new(Some(client.clone().into()), session_config).await
+    //     .unwrap();
+    let session_config = SessionConfig::default().with_table_name("mm_session");
+    let session_store = SessionPgSessionStore::new(Some(sqlx_pool.clone().into()), session_config)
+        .await
         .unwrap();
 
     let (prometheus_layer, metric_handle) = PrometheusMetricLayerBuilder::new()
@@ -403,7 +407,7 @@ async fn main() {
             AuthSessionLayer::<
                 mk_lib_database::mk_lib_database_user::User,
                 i64,
-                SessionRedisPool,
+                SessionPgPool,
                 PgPool,
             >::new(Some(sqlx_pool.clone().into()))
             .with_config(auth_config),

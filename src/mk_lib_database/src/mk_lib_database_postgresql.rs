@@ -99,7 +99,7 @@ pub async fn mk_lib_database_table_size_total(
 ) -> Result<i64, sqlx::Error> {
     // query provided by postgresql wiki
     let row: (i64,) = sqlx::query_as(
-        "SELECT sum(pg_total_relation_size(C.oid)) AS \"total_size\" FROM pg_class C \
+        "SELECT sum(pg_total_relation_size(C.oid))::bigint AS \"total_size\" FROM pg_class C \
         LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace) \
         WHERE nspname NOT IN ('pg_catalog', 'information_schema') \
         AND C.relkind <> 'i' AND nspname!~ '^pg_toast'",

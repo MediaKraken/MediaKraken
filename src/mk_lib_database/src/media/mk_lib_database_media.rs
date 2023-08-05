@@ -298,7 +298,7 @@ pub async fn mk_lib_database_media_new_count(
         .format("%Y-%m-%d")
         .to_string();
     let row: (i64,) = sqlx::query_as(
-        "select count(*) from mm_media, mm_metadata_movie where mm_media_metadata_guid = mm_metadata_guid and mm_media_json->>'DateAdded' >= $1",
+        "select count(*) from mm_media, mm_metadata_movie where mm_media_metadata_guid = mm_metadata_movie_guid and mm_media_json->>'DateAdded' >= $1",
     )
     .bind(date_added)
     .fetch_one(sqlx_pool)
@@ -320,7 +320,7 @@ pub async fn mk_lib_database_media_new(
          mm_media_guid, \
          mm_media_class_guid \
          from mm_media, mm_metadata_movie \
-         where mm_media_metadata_guid = mm_metadata_guid \
+         where mm_media_metadata_guid = mm_metadata_movie_guid \
          and mm_media_json->>'DateAdded' >= $1 \
          order by LOWER(mm_media_name), \
          mm_media_class_guid offset $2 limit $3",
