@@ -171,6 +171,7 @@ async fn main() {
     // let session_store =
     //     SessionStore::<SessionRedisPool>::new(Some(client.clone().into()), session_config).await
     //     .unwrap();
+
     let session_config = SessionConfig::default().with_table_name("mm_session");
     let session_store = SessionPgSessionStore::new(Some(sqlx_pool.clone().into()), session_config)
         .await
