@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.93 scan initiated Mon Aug  7 14:41:10 2023 as: nmap -sU -sS -p U:137,T:139 -&#45;script smb-enum-shares -oX scan.xml 192.168.1.110 -->
+<nmaprun scanner="nmap" args="nmap -sU -sS -p U:137,T:139 -&#45;script smb-enum-shares -oX scan.xml 192.168.1.110" start="1691437270" startstr="Mon Aug  7 14:41:10 2023" version="7.93" xmloutputversion="1.05">
+<scaninfo type="syn" protocol="tcp" numservices="1" services="139"/>
+<scaninfo type="udp" protocol="udp" numservices="1" services="137"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.1.110" addrtype="ipv4"/>
+<address addr="3E:0C:8A:0F:0A:88" addrtype="mac"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<host starttime="1691437271" endtime="1691437272"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.1.110" addrtype="ipv4"/>
+<address addr="3E:0C:8A:0F:0A:88" addrtype="mac"/>
+<hostnames>
+<hostname name="th-retronas-1.beaverbay.local" type="PTR"/>
+</hostnames>
+<ports><port protocol="tcp" portid="139"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="netbios-ssn" method="table" conf="3"/></port>
+<port protocol="udp" portid="137"><state state="open" reason="udp-response" reason_ttl="64"/><service name="netbios-ns" method="table" conf="3"/></port>
+</ports>
+<hostscript><script id="smb-enum-shares" output="&#xa;  account_used: guest&#xa;  \\192.168.1.110\IPC$: &#xa;    Type: STYPE_IPC_HIDDEN&#xa;    Comment: IPC Service (Samba 4.13.13-Debian)&#xa;    Users: 1&#xa;    Max Users: &lt;unlimited&gt;&#xa;    Path: C:\tmp&#xa;    Anonymous access: READ/WRITE&#xa;    Current user access: READ/WRITE&#xa;  \\192.168.1.110\mister: &#xa;    Type: STYPE_DISKTREE&#xa;    Comment: mister&#xa;    Users: 0&#xa;    Max Users: &lt;unlimited&gt;&#xa;    Path: C:\data\retronas\mister&#xa;    Anonymous access: &lt;none&gt;&#xa;    Current user access: &lt;none&gt;&#xa;  \\192.168.1.110\print$: &#xa;    Type: STYPE_DISKTREE&#xa;    Comment: Printer Drivers&#xa;    Users: 0&#xa;    Max Users: &lt;unlimited&gt;&#xa;    Path: C:\var\lib\samba\printers&#xa;    Anonymous access: &lt;none&gt;&#xa;    Current user access: &lt;none&gt;&#xa;  \\192.168.1.110\ps2: &#xa;    Type: STYPE_DISKTREE&#xa;    Comment: ps2&#xa;    Users: 0&#xa;    Max Users: &lt;unlimited&gt;&#xa;    Path: C:\data\retronas\ps2\OpenPS2Loader&#xa;    Anonymous access: &lt;none&gt;&#xa;    Current user access: &lt;none&gt;&#xa;  \\192.168.1.110\retronas: &#xa;    Type: STYPE_DISKTREE&#xa;    Comment: retronas&#xa;    Users: 0&#xa;    Max Users: &lt;unlimited&gt;&#xa;    Path: C:\data\retronas&#xa;    Anonymous access: &lt;none&gt;&#xa;    Current user access: &lt;none&gt;"><elem key="account_used">guest</elem>
+<table key="\\192.168.1.110\IPC$">
+<elem key="Type">STYPE_IPC_HIDDEN</elem>
+<elem key="Comment">IPC Service (Samba 4.13.13-Debian)</elem>
+<elem key="Users">1</elem>
+<elem key="Max Users">&lt;unlimited&gt;</elem>
+<elem key="Path">C:\tmp</elem>
+<elem key="Anonymous access">READ/WRITE</elem>
+<elem key="Current user access">READ/WRITE</elem>
+</table>
+<table key="\\192.168.1.110\mister">
+<elem key="Type">STYPE_DISKTREE</elem>
+<elem key="Comment">mister</elem>
+<elem key="Users">0</elem>
+<elem key="Max Users">&lt;unlimited&gt;</elem>
+<elem key="Path">C:\data\retronas\mister</elem>
+<elem key="Anonymous access">&lt;none&gt;</elem>
+<elem key="Current user access">&lt;none&gt;</elem>
+</table>
+<table key="\\192.168.1.110\print$">
+<elem key="Type">STYPE_DISKTREE</elem>
+<elem key="Comment">Printer Drivers</elem>
+<elem key="Users">0</elem>
+<elem key="Max Users">&lt;unlimited&gt;</elem>
+<elem key="Path">C:\var\lib\samba\printers</elem>
+<elem key="Anonymous access">&lt;none&gt;</elem>
+<elem key="Current user access">&lt;none&gt;</elem>
+</table>
+<table key="\\192.168.1.110\ps2">
+<elem key="Type">STYPE_DISKTREE</elem>
+<elem key="Comment">ps2</elem>
+<elem key="Users">0</elem>
+<elem key="Max Users">&lt;unlimited&gt;</elem>
+<elem key="Path">C:\data\retronas\ps2\OpenPS2Loader</elem>
+<elem key="Anonymous access">&lt;none&gt;</elem>
+<elem key="Current user access">&lt;none&gt;</elem>
+</table>
+<table key="\\192.168.1.110\retronas">
+<elem key="Type">STYPE_DISKTREE</elem>
+<elem key="Comment">retronas</elem>
+<elem key="Users">0</elem>
+<elem key="Max Users">&lt;unlimited&gt;</elem>
+<elem key="Path">C:\data\retronas</elem>
+<elem key="Anonymous access">&lt;none&gt;</elem>
+<elem key="Current user access">&lt;none&gt;</elem>
+</table>
+</script></hostscript><times srtt="1152" rttvar="2854" to="100000"/>
+</host>
+<runstats><finished time="1691437272" timestr="Mon Aug  7 14:41:12 2023" summary="Nmap done at Mon Aug  7 14:41:12 2023; 1 IP address (1 host up) scanned in 1.80 seconds" elapsed="1.80" exit="success"/><hosts up="1" down="0" total="1"/>
+</runstats>
+</nmaprun>

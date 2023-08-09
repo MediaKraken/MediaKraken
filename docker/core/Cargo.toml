@@ -18,9 +18,9 @@ members = [
 #     "mkopenlibrarynetfetchbulk",
 #     "mkrabbitconsume",
 #     "mkschedulesdirectupdate",
-#     "mksharescanner",
+     "mksharescanner",
 #     "mktmdbnetfetchbulk",
 #     "mktmdbnetfetchupdate",
 #     "mktranscode",
-     "mkwebaxum",
+#     "mkwebaxum",
 ]

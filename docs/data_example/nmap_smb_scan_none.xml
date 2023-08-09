@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.93 scan initiated Mon Aug  7 14:43:21 2023 as: nmap -sU -sS -p U:137,T:139 -&#45;script smb-enum-shares -oX scan.xml 192.168.1.10 -->
+<nmaprun scanner="nmap" args="nmap -sU -sS -p U:137,T:139 -&#45;script smb-enum-shares -oX scan.xml 192.168.1.10" start="1691437401" startstr="Mon Aug  7 14:43:21 2023" version="7.93" xmloutputversion="1.05">
+<scaninfo type="syn" protocol="tcp" numservices="1" services="139"/>
+<scaninfo type="udp" protocol="udp" numservices="1" services="137"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<hosthint><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.1.10" addrtype="ipv4"/>
+<address addr="F8:BC:12:1F:FE:80" addrtype="mac" vendor="Dell"/>
+<hostnames>
+</hostnames>
+</hosthint>
+<host starttime="1691437402" endtime="1691437402"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="192.168.1.10" addrtype="ipv4"/>
+<address addr="F8:BC:12:1F:FE:80" addrtype="mac" vendor="Dell"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="tcp" portid="139"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="netbios-ssn" method="table" conf="3"/></port>
+<port protocol="udp" portid="137"><state state="open" reason="udp-response" reason_ttl="64"/><service name="netbios-ns" method="table" conf="3"/></port>
+</ports>
+<times srtt="452" rttvar="2982" to="100000"/>
+</host>
+<runstats><finished time="1691437402" timestr="Mon Aug  7 14:43:22 2023" summary="Nmap done at Mon Aug  7 14:43:22 2023; 1 IP address (1 host up) scanned in 0.78 seconds" elapsed="0.78" exit="success"/><hosts up="1" down="0" total="1"/>
+</runstats>
+</nmaprun>

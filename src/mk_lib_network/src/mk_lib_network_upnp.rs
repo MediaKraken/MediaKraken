@@ -3,6 +3,8 @@
 use rupnp::ssdp::SearchTarget;
 use std::time::Duration;
 
+// nmap -sU -p 1900 --script=upnp-info 192.168.1.1
+
 pub async fn upnp_discover() -> Result<(), rupnp::Error> {
     let devices = rupnp::discover(&SearchTarget::RootDevice, Duration::from_secs(3)).await?;
     pin_utils::pin_mut!(devices);
