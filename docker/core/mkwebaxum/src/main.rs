@@ -12,7 +12,10 @@ use axum_csrf::{CsrfConfig, CsrfToken};
 use axum_extra::routing::RouterExt;
 use axum_handle_error_extract::HandleErrorLayer;
 use axum_prometheus::{EndpointLabel, PrometheusMetricLayerBuilder};
-use axum_session::{Key, SessionConfig, SessionLayer, SessionPgPool, SessionRedisPool, SessionStore, SessionPgSessionStore};
+use axum_session::{
+    Key, SessionConfig, SessionLayer, SessionPgPool, SessionPgSessionStore, SessionRedisPool,
+    SessionStore,
+};
 use axum_session_auth::{AuthConfig, AuthSessionLayer};
 use mk_lib_database;
 use rcgen::generate_simple_self_signed;
@@ -42,7 +45,6 @@ pub mod admin {
     pub mod bp_home;
     pub mod bp_library;
     pub mod bp_settings;
-    pub mod bp_share;
     pub mod bp_torrent;
     pub mod bp_user;
 }
@@ -160,8 +162,9 @@ async fn main() {
     let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50)
         .await
         .unwrap();
-    let _result = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
-        .await;
+    let _result =
+        mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+            .await;
 
     let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
 
@@ -200,7 +203,6 @@ async fn main() {
             "/admin/library/:page",
             get(admin::bp_library::admin_library),
         )
-        .route_with_tsr("/admin/share/:page", get(admin::bp_share::admin_share))
         .route_with_tsr("/admin/settings", get(admin::bp_settings::admin_settings))
         .route_with_tsr("/admin/torrent", get(admin::bp_torrent::admin_torrent))
         .route_with_tsr("/admin/user/:page", get(admin::bp_user::admin_user))
