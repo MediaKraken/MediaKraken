@@ -35,19 +35,24 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let json_message: Value =
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
                 // find and store all network shares
-                let share_vec = mk_lib_network::mk_lib_network_share::mk_network_share_scan_port(
-                    json_message["Data"].to_string().replace("\"", ""),
-                )
-                .await
-                .unwrap();
+                let share_vec =
+                    mk_lib_network::mk_lib_network_share::mk_network_share_scan_port_rustscan(
+                        json_message["Data"].to_string().replace("\"", ""),
+                    )
+                    .await
+                    .unwrap();
                 for share_info in share_vec.iter() {
-                    mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_insert(
-                            &sqlx_pool,
+                    if mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_exists( &sqlx_pool,
                             share_info.mm_share_ip,
-                            share_info.mm_share_path.clone(),
-                            share_info.mm_share_comment.clone(),
-                        )
-                        .await.unwrap();
+                            share_info.mm_share_path.clone(),).await.unwrap() == false {
+                        mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_insert(
+                                &sqlx_pool,
+                                share_info.mm_share_ip,
+                                share_info.mm_share_path.clone(),
+                                share_info.mm_share_comment.clone(),
+                            )
+                            .await.unwrap();
+                    }
                 }
                 let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
                     &rabbit_channel,

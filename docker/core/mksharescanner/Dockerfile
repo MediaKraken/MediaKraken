@@ -43,10 +43,13 @@ ADD alpine-minirootfs-3.18.2-x86_64.tar.gz /
 # deps has full /usr/lib/x86_64-linux-gnu path.....hence copy to /
 COPY --from=cargo-build-mksharescanner /mediakraken/deps/* /
 
+RUN apk update && apk add --no-cache nmap nmap-scripts \
+  && apk add --no-cache rustscan --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing \
+  && rm -rf /var/cache/apt/*
+
 # Import from builder.
 # COPY --from=cargo-build-mksharescanner /etc/passwd /etc/passwd
 # COPY --from=cargo-build-mksharescanner /etc/group /etc/group
-COPY --from=cargo-build-mksharescanner /usr/bin/nmap /usr/bin/nmap
 COPY --from=cargo-build-mksharescanner /wait /wait
 
 # Copy our build

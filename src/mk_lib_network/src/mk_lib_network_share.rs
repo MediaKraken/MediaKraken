@@ -5,6 +5,7 @@ use mk_lib_file::mk_lib_file;
 use quickxml_to_serde::{xml_string_to_json, Config};
 use std::fs::File;
 use std::io::{prelude::*, BufReader};
+use std::process::{Command, Stdio};
 
 // nmap -sU -sS -p U:137,T:139 --script smb-enum-shares 192.168.1.122 -oX scan.xml 1>/dev/null 2>/dev/null
 // By default, the script uses guest permissions to list only publicly available shares
@@ -19,6 +20,46 @@ pub struct NMAPShareList {
     pub mm_share_ip: std::net::IpAddr,
     pub mm_share_path: serde_json::Value,
     pub mm_share_comment: serde_json::Value,
+}
+
+pub async fn mk_network_share_scan_port_rustscan(
+    subnet_prefix: String,
+) -> Result<Vec<NMAPShareList>, Box<dyn std::error::Error>> {
+    // rustscan -n -a 192.168.1.0/24 -p 445,2049 -g
+    let output = std::process::Command::new("rustscan")
+        .arg("-n")
+        .arg("-a")
+        .arg(format!("{}.0/24", subnet_prefix))
+        .arg("-p")
+        .arg("445,2049")
+        .arg("-g")
+        .stdout(Stdio::piped())
+        .output()
+        .unwrap();
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    let mut vec_share = Vec::new();
+    let mut ip_addr = String::new();
+    for line in stdout.split("\n") {
+        let text_line = &line.trim().to_string();
+        ip_addr = text_line.split(" ").next().unwrap().to_string();
+        if text_line.contains("445") == true {
+            // smb share
+            vec_share.extend(
+                mk_network_share_smb_detail(ip_addr.parse().unwrap())
+                    .await
+                    .unwrap(),
+            );
+        }
+        if text_line.contains("2049") == true {
+            // nfs share
+            vec_share.extend(
+                mk_network_share_nfs_detail(ip_addr.parse().unwrap())
+                    .await
+                    .unwrap(),
+            );
+        }
+    }
+    Ok(vec_share)
 }
 
 pub async fn mk_network_share_scan_port(
@@ -42,8 +83,7 @@ pub async fn mk_network_share_scan_port(
     for line in reader.lines() {
         let text_line = &line.unwrap().trim().to_string();
         if text_line.starts_with("Nmap scan report for") == true {
-            ip_addr = text_line.split(" ").last().unwrap().to_string() + "/32"; // since it's a single host at this point
-            println!("Ip Addr: {}", ip_addr);
+            ip_addr = text_line.split(" ").last().unwrap().to_string();
         } else if text_line.starts_with("445/tcp") == true {
             // smb share
             vec_share.extend(
@@ -88,14 +128,13 @@ pub async fn mk_network_share_smb_detail(
             .unwrap()
         {
             let (key, v) = val;
-            println!("SMB Key: {:?}", key);
             if key == "table" {
                 for share_ndx in 0..v.as_array().unwrap().len() {
                     if v[share_ndx]["@key"].to_string().contains("$") {
                     } else {
-                        println!("path: {}", v[share_ndx]["@key"]);
-                        println!("elem: {}", v[share_ndx]["elem"]);
-                        println!("elem: {}", v[share_ndx]["elem"][1]["#text"]);
+                        // println!("path: {}", v[share_ndx]["@key"]);
+                        // println!("elem: {}", v[share_ndx]["elem"]);
+                        // println!("elem: {}", v[share_ndx]["elem"][1]["#text"]);
                         let share_data = NMAPShareList {
                             mm_share_type: "smb".to_string(),
                             mm_share_ip: format!("{:?}", ip_addr).parse().unwrap(),
@@ -131,17 +170,14 @@ pub async fn mk_network_share_nfs_detail(
     let file_data = mk_lib_file::mk_read_file_data("scan.xml").await.unwrap();
     if !file_data.contains("(0 hosts up)") && file_data.contains("table key=") {
         let nmap_json = xml_string_to_json(file_data.to_string(), &conf).unwrap();
-        println!("json: {:?}", nmap_json);
         for val in nmap_json["nmaprun"]["host"].as_object().unwrap() {
             let (key, v) = val;
-            println!("NFS Key: {:?}", key);
             if key == "table" {
-                println!("value: {}", v);
                 for share_ndx in 0..v.as_array().unwrap().len() {
-                    println!("num: {}", v.as_array().unwrap().len());
-                    println!("path: {}", v[share_ndx]["@key"]);
-                    println!("elem: {}", v[share_ndx]["elem"]);
-                    println!("elem: {}", v[share_ndx]["elem"][1]["#text"]);
+                    // println!("num: {}", v.as_array().unwrap().len());
+                    // println!("path: {}", v[share_ndx]["@key"]);
+                    // println!("elem: {}", v[share_ndx]["elem"]);
+                    // println!("elem: {}", v[share_ndx]["elem"][1]["#text"]);
                     let share_data = NMAPShareList {
                         mm_share_type: "nfs".to_string(),
                         mm_share_ip: format!("{:?}", ip_addr).parse().unwrap(),

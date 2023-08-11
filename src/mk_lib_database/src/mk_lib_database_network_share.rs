@@ -3,6 +3,21 @@ use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
 use sqlx::{FromRow, Row};
 
+pub async fn mk_lib_database_network_share_exists(
+    sqlx_pool: &sqlx::PgPool,
+    network_share_ip: std::net::IpAddr,
+    network_share_path: serde_json::Value,
+) -> Result<bool, sqlx::Error> {
+    let row: (bool,) = sqlx::query_as(
+        "select exists(select 1 from mm_network_shares \
+        where mm_network_share_ip = $1 and mm_network_share_path = $2 limit 1) as found_record limit 1",
+    )
+    .bind(network_share_ip)
+    .bind(network_share_path)
+    .fetch_one(sqlx_pool)
+    .await?;
+    Ok(row.0)
+}
 pub async fn mk_lib_database_network_share_count(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<i64, sqlx::Error> {
@@ -67,15 +82,16 @@ pub async fn mk_lib_database_network_share_insert(
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_network_shares \
-        (mm_network_share_ip, \
+        (mm_network_share_guid, \
+        mm_network_share_ip, \
         mm_network_share_path, \
         mm_network_share_comment) \
         values ($1, $2, $3, $4)",
     )
     .bind(new_guid)
     .bind(network_share_ip)
-    .bind(network_share_path)
-    .bind(network_share_comment)
+    .bind(network_share_path.as_str())
+    .bind(network_share_comment.as_str())
     .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
