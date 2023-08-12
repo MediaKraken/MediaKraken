@@ -12,15 +12,11 @@ pub struct DBLibraryList {
 
 pub async fn mk_lib_database_library_read(
     sqlx_pool: &sqlx::PgPool,
-    offset: i64,
-    limit: i64,
 ) -> Result<Vec<DBLibraryList>, sqlx::Error> {
     let select_query = sqlx::query(
         "select mm_media_dir_guid, mm_media_dir_path \
-        from mm_library_dir offset $1 limit $2",
-    )
-    .bind(offset)
-    .bind(limit);
+        from mm_library_dir",
+    );
     let table_rows: Vec<DBLibraryList> = select_query
         .map(|row: PgRow| DBLibraryList {
             mm_media_dir_guid: row.get("mm_media_dir_guid"),

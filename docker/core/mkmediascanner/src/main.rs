@@ -52,15 +52,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(payload) = msg.content {
                 let json_message: Value =
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                // #[cfg(debug_assertions)]
-                // {
-                //     mk_lib_logging::mk_logging_post_elk(
-                //         std::module_path!(),
-                //         json!({ "msg body": json_message }),
-                //     )
-                //     .await
-                //     .unwrap();
-                // }
                 // determine directories to audit
                 for row_data in
    mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_audit_read(
@@ -70,10 +61,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
    .unwrap()
 {
    let mut media_path: PathBuf;
-   // shouldn't need to care  let unc_slice = &row_data.get("mm_media_dir_path")[..1];
-   // obviously this would mean we mount unc to below as well when defining libraries
    // make sure the path still exists
-   let media_path: PathBuf = ["/mediakraken/mnt", &row_data.mm_media_dir_path]
+   let media_path: PathBuf = ["/mediakraken/mnt/", &row_data.mm_media_dir_guid, "/", &row_data.mm_media_dir_path]
        .iter()
        .collect();
 
