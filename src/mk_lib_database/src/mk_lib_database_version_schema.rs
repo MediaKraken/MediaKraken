@@ -205,6 +205,21 @@ pub async fn mk_lib_database_update_schema(
         mk_lib_database_version_update(&sqlx_pool, 54).await?;
     }
 
+    if version_no < 55 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query("ALTER TABLE mm_library_dir ADD COLUMN mm_media_dir_share_guid uuid;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_media_dir_share_guid_ndx \
+            ON mm_library_dir USING btree (mm_media_dir_share_guid);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 55).await?;
+    }
+
     Ok(true)
 }
 

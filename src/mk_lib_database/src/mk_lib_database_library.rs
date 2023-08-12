@@ -8,19 +8,21 @@ use sqlx::types::Uuid;
 pub struct DBLibraryList {
     pub mm_media_dir_guid: uuid::Uuid,
     pub mm_media_dir_path: String,
+    pub mm_media_dir_share_guid: uuid::Uuid,
 }
 
 pub async fn mk_lib_database_library_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBLibraryList>, sqlx::Error> {
     let select_query = sqlx::query(
-        "select mm_media_dir_guid, mm_media_dir_path \
+        "select mm_media_dir_guid, mm_media_dir_path, mm_media_dir_share_guid \
         from mm_library_dir",
     );
     let table_rows: Vec<DBLibraryList> = select_query
         .map(|row: PgRow| DBLibraryList {
             mm_media_dir_guid: row.get("mm_media_dir_guid"),
             mm_media_dir_path: row.get("mm_media_dir_path"),
+            mm_media_dir_share_guid: row.get("mm_media_dir_share_guid"),
         })
         .fetch_all(sqlx_pool)
         .await?;
