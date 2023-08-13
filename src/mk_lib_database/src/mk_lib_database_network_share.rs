@@ -33,6 +33,9 @@ pub struct DBShareList {
     pub mm_network_share_ip: std::net::IpAddr,
     pub mm_network_share_path: String,
     pub mm_network_share_comment: String,
+    pub mm_network_share_user: Option<String>,
+    pub mm_network_share_password: Option<String>,
+    pub mm_network_share_version: Option<bool>,
 }
 
 pub async fn mk_lib_database_network_share_read(
@@ -42,7 +45,11 @@ pub async fn mk_lib_database_network_share_read(
         "select mm_network_share_guid, \
         mm_network_share_ip, \
         mm_network_share_path, \
-        mm_network_share_comment from mm_network_shares",
+        mm_network_share_comment, \
+        mm_network_share_user, \
+        mm_network_share_password, \
+        mm_network_share_version \
+        from mm_network_shares",
     );
     let table_rows: Vec<DBShareList> = select_query
         .map(|row: PgRow| DBShareList {
@@ -50,6 +57,9 @@ pub async fn mk_lib_database_network_share_read(
             mm_network_share_ip: row.get("mm_network_share_ip"),
             mm_network_share_path: row.get("mm_network_share_path"),
             mm_network_share_comment: row.get("mm_network_share_comment"),
+            mm_network_share_user: row.get("mm_network_share_user"),
+            mm_network_share_password: row.get("mm_network_share_password"),
+            mm_network_share_version: row.get("mm_network_share_version"),
         })
         .fetch_all(sqlx_pool)
         .await?;
@@ -96,4 +106,25 @@ pub async fn mk_lib_database_network_share_insert(
     .await?;
     transaction.commit().await?;
     Ok(new_guid)
+}
+
+pub async fn mk_lib_database_network_share_update_user_info(
+    sqlx_pool: &sqlx::PgPool,
+    network_share_uuid: Uuid,
+    network_share_user: String,
+    network_share_password: String,
+) -> Result<(), sqlx::Error> {
+    let mut transaction = sqlx_pool.begin().await?;
+    sqlx::query(
+        "udpate mm_network_shares set mm_network_share_user = $1, \
+        mm_network_share_password = $2 \
+        where mm_network_share_guid = $3",
+    )
+    .bind(network_share_user)
+    .bind(network_share_password)
+    .bind(network_share_uuid)
+    .execute(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(())
 }

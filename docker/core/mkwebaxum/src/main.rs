@@ -166,6 +166,10 @@ async fn main() {
         mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
             .await;
 
+    // mount all the shares
+    let shares_to_mount = mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_read(&sqlx_pool).await.unwrap();
+    let _result = mk_lib_file::mk_lib_file_share::mk_file_share_mount_all(shares_to_mount).await;
+
     let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
 
     // let client = redis::Client::open("redis://default:@mkstack_redis:6379/0")

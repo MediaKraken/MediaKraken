@@ -220,6 +220,21 @@ pub async fn mk_lib_database_update_schema(
         mk_lib_database_version_update(&sqlx_pool, 55).await?;
     }
 
+    if version_no < 56 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query("ALTER TABLE mm_network_shares ADD COLUMN mm_network_share_user text;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("ALTER TABLE mm_network_shares ADD COLUMN mm_network_share_password text;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("ALTER TABLE mm_network_shares ADD COLUMN mm_network_share_version smallint;")
+            .execute(&mut *transaction)
+            .await?;
+            transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 56).await?;
+    }
+
     Ok(true)
 }
 

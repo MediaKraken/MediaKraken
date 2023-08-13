@@ -10,7 +10,7 @@ members = [
     #     "mkhardwarescanner",
     #     "mkinotify",
     #     "mklibretrocorefetchupdate",
-    #     "mkmediascanner",
+#         "mkmediascanner",
     #     "mkmetadata",
     #     "mkmetadatamame",
     #     "mkmulticast",    
