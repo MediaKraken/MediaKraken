@@ -819,6 +819,7 @@ services:
     cap_add:
       - CAP_SYS_ADMIN
       - DAC_READ_SEARCH
+    privileged: true
     secrets:
       - db_password
       - secure_key
