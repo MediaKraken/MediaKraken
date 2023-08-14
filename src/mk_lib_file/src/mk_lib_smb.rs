@@ -8,14 +8,17 @@ pub async fn mk_file_smb_client_connect(
 ) -> Result<SmbClient, Box<dyn Error>> {
     let mut smb_workgroup = "WORKGROUP";
     if shares_to_mount.mm_network_share_workgroup.is_some() {
-        smb_workgroup = shares_to_mount.mm_network_share_workgroup;
+        smb_workgroup = shares_to_mount
+            .mm_network_share_workgroup
+            .as_deref()
+            .unwrap_or("WORKGROUP");
     }
     let client = SmbClient::new(
         SmbCredentials::default()
             .server(format!("smb://{}", shares_to_mount.mm_network_share_ip))
             .share(format!("/{}", shares_to_mount.mm_network_share_path))
-            .password(shares_to_mount.mm_share_auth_user)
-            .username(shares_to_mount.mm_share_auth_password)
+            .password(shares_to_mount.mm_share_auth_user.unwrap())
+            .username(shares_to_mount.mm_share_auth_password.unwrap())
             .workgroup(smb_workgroup),
         SmbOptions::default().one_share_per_server(true),
     )
@@ -48,7 +51,7 @@ fn entity_uri(entity: &SmbDirent, path: &str) -> String {
 
 fn print_entry(entity: &SmbDirent, stat: &SmbStat) {
     println!(
-        "{:32}\t{}\t{}\t{}\t{}",
+        "{:32}\t{}\t{}\t{}\t{:?}",
         entity.name(),
         stat.uid,
         stat.gid,
