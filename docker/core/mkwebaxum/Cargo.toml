@@ -32,7 +32,7 @@ lazy_static = "1.4.0"
 libc = "0.2.144"
 mk_lib_common = { path = "mk_lib_common" }
 mk_lib_database = { path = "mk_lib_database" }
-mk_lib_file = { path = "mk_lib_file", features = [ "share" ] }
+mk_lib_file = { path = "mk_lib_file", features = [ "smb" ] }
 # mk_lib_metadata = { path = "mk_lib_metadata" }
 mk_lib_network = { path = "mk_lib_network" }
 mk_lib_rabbitmq = { path = "mk_lib_rabbitmq" }

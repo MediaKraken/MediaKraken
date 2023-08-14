@@ -33,9 +33,10 @@ pub struct DBShareList {
     pub mm_network_share_ip: std::net::IpAddr,
     pub mm_network_share_path: String,
     pub mm_network_share_comment: String,
-    pub mm_network_share_user: Option<String>,
-    pub mm_network_share_password: Option<String>,
+    pub mm_share_auth_user: Option<String>,
+    pub mm_share_auth_password: Option<String>,
     pub mm_network_share_version: Option<bool>,
+    pub mm_network_share_workgroup: Option<String>,
 }
 
 pub async fn mk_lib_database_network_share_read(
@@ -46,10 +47,12 @@ pub async fn mk_lib_database_network_share_read(
         mm_network_share_ip, \
         mm_network_share_path, \
         mm_network_share_comment, \
-        mm_network_share_user, \
-        mm_network_share_password, \
-        mm_network_share_version \
-        from mm_network_shares",
+        mm_share_auth_user, \
+        mm_share_auth_password, \
+        mm_network_share_version, \
+        mm_network_share_workgroup \
+        from mm_network_shares, mm_share_auth \
+        where mm_network_share_user_guid = mm_share_auth_guid",
     );
     let table_rows: Vec<DBShareList> = select_query
         .map(|row: PgRow| DBShareList {
@@ -57,9 +60,10 @@ pub async fn mk_lib_database_network_share_read(
             mm_network_share_ip: row.get("mm_network_share_ip"),
             mm_network_share_path: row.get("mm_network_share_path"),
             mm_network_share_comment: row.get("mm_network_share_comment"),
-            mm_network_share_user: row.get("mm_network_share_user"),
-            mm_network_share_password: row.get("mm_network_share_password"),
+            mm_share_auth_user: row.get("mm_share_auth_user"),
+            mm_share_auth_password: row.get("mm_share_auth_password"),
             mm_network_share_version: row.get("mm_network_share_version"),
+            mm_network_share_workgroup: row.get("mm_network_share_workgroup"),
         })
         .fetch_all(sqlx_pool)
         .await?;

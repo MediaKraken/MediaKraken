@@ -47,10 +47,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .await
             .unwrap();
 
-    // mount all the shares
-    let shares_to_mount = mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_read(&sqlx_pool).await.unwrap();
-    let _result = mk_lib_file::mk_lib_file_share::mk_file_share_mount_all(shares_to_mount).await;
-
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {

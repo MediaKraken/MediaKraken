@@ -1,7 +1,8 @@
 FROM rust:1.71.1-alpine
 
 RUN apk update && \
-  apk add alpine-sdk sqlite-dev openssl1.1-compat-dev wget ca-certificates nmap postgresql15-client \
+  apk add alpine-sdk sqlite-dev openssl1.1-compat-dev wget ca-certificates \
+  nmap postgresql15-client libsmbclient samba-dev \
   && update-ca-certificates \
   && wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.12.0/wait \
   && chmod +x /wait

@@ -311,8 +311,6 @@ services:
 
   mediascanner:
     image: mediakraken/mkmediascanner:${BRANCH}
-    cap_add:
-      - CAP_SYS_ADMIN
     secrets:
       - db_password
     environment:
@@ -769,8 +767,6 @@ services:
 
   transcode:
     image: mediakraken/mktranscode:${BRANCH}
-    cap_add:
-      - CAP_SYS_ADMIN
     secrets:
       - db_password
     command: sh -c "/mktranscode"
@@ -816,10 +812,6 @@ services:
 
   webapp:
     image: mediakraken/mkwebaxum:${BRANCH}
-    cap_add:
-      - CAP_SYS_ADMIN
-      - DAC_READ_SEARCH
-    privileged: true
     secrets:
       - db_password
       - secure_key

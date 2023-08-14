@@ -28,6 +28,7 @@ members = [
 #    "test_rocket_auth2",
     "test_roku",
     "test_roxmltree",
+    "test_share_read",
     "test_share_scanner",
     "test_substring",
     "test_torrent_name_parse",
