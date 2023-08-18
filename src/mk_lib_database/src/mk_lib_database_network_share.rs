@@ -18,6 +18,7 @@ pub async fn mk_lib_database_network_share_exists(
     .await?;
     Ok(row.0)
 }
+
 pub async fn mk_lib_database_network_share_count(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<i64, sqlx::Error> {
@@ -25,6 +26,31 @@ pub async fn mk_lib_database_network_share_count(
         .fetch_one(sqlx_pool)
         .await?;
     Ok(row.0)
+}
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBShareAuthUserList {
+    pub mm_share_auth_guid: uuid::Uuid,
+    pub mm_share_auth_user: String,
+}
+
+pub async fn mk_lib_database_network_share_user_read(
+    sqlx_pool: &sqlx::PgPool,
+) -> Result<Vec<DBShareAuthUserList>, sqlx::Error> {
+    let select_query = sqlx::query(
+        "select mm_share_auth_guid, \
+        mm_share_auth_user \
+        from mm_share_auth \
+        order by mm_share_auth_user",
+    );
+    let table_rows: Vec<DBShareAuthUserList> = select_query
+        .map(|row: PgRow| DBShareAuthUserList {
+            mm_share_auth_guid: row.get("mm_share_auth_guid"),
+            mm_share_auth_user: row.get("mm_share_auth_user"),
+        })
+        .fetch_all(sqlx_pool)
+        .await?;
+    Ok(table_rows)
 }
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
@@ -37,6 +63,40 @@ pub struct DBShareList {
     pub mm_share_auth_password: Option<String>,
     pub mm_network_share_version: Option<bool>,
     pub mm_network_share_workgroup: Option<String>,
+}
+
+pub async fn mk_lib_database_network_share_detail(
+    sqlx_pool: &sqlx::PgPool,
+    share_guid: uuid::Uuid,
+) -> Result<DBShareList, sqlx::Error> {
+    let select_query = sqlx::query(
+        "select mm_network_share_guid, \
+        mm_network_share_ip, \
+        mm_network_share_path, \
+        mm_network_share_comment, \
+        mm_share_auth_user, \
+        mm_share_auth_password, \
+        mm_network_share_version, \
+        mm_network_share_workgroup \
+        from mm_network_shares, mm_share_auth \
+        where mm_network_share_user_guid = mm_share_auth_guid \
+        and mm_network_share_guid = $1",
+    )
+    .bind(share_guid);
+    let table_rows: DBShareList = select_query
+        .map(|row: PgRow| DBShareList {
+            mm_network_share_guid: row.get("mm_network_share_guid"),
+            mm_network_share_ip: row.get("mm_network_share_ip"),
+            mm_network_share_path: row.get("mm_network_share_path"),
+            mm_network_share_comment: row.get("mm_network_share_comment"),
+            mm_share_auth_user: row.get("mm_share_auth_user"),
+            mm_share_auth_password: row.get("mm_share_auth_password"),
+            mm_network_share_version: row.get("mm_network_share_version"),
+            mm_network_share_workgroup: row.get("mm_network_share_workgroup"),
+        })
+        .fetch_one(sqlx_pool)
+        .await?;
+    Ok(table_rows)
 }
 
 pub async fn mk_lib_database_network_share_read(

@@ -10,7 +10,7 @@ members = [
     #     "mkhardwarescanner",
     #     "mkinotify",
     #     "mklibretrocorefetchupdate",
-#         "mkmediascanner",
+    # "mkmediascanner",
     #     "mkmetadata",
     #     "mkmetadatamame",
     #     "mkmulticast",    
@@ -22,5 +22,5 @@ members = [
     #     "mktmdbnetfetchbulk",
     #     "mktmdbnetfetchupdate",
     #     "mktranscode",
-    "mkwebaxum",
+        "mkwebaxum",
 ]

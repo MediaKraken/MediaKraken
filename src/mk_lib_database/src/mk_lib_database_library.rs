@@ -1,8 +1,8 @@
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 use sqlx::types::Uuid;
+use sqlx::{FromRow, Row};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBLibraryList {
@@ -35,6 +35,7 @@ pub struct DBLibraryAuditList {
     pub mm_media_dir_path: String,
     pub mm_media_dir_class_enum: i16,
     pub mm_media_dir_last_scanned: DateTime<Utc>,
+    pub mm_media_dir_share_guid: uuid::Uuid,
 }
 
 pub async fn mk_lib_database_library_path_audit_read(
@@ -44,7 +45,8 @@ pub async fn mk_lib_database_library_path_audit_read(
         "select mm_media_dir_guid, \
         mm_media_dir_path, \
         mm_media_dir_class_enum, \
-        mm_media_dir_last_scanned \
+        mm_media_dir_last_scanned, \
+        mm_media_dir_share_guid \
         from mm_library_dir",
     );
     let table_rows: Vec<DBLibraryAuditList> = select_query
@@ -53,6 +55,7 @@ pub async fn mk_lib_database_library_path_audit_read(
             mm_media_dir_path: row.get("mm_media_dir_path"),
             mm_media_dir_class_enum: row.get("mm_media_dir_class_enum"),
             mm_media_dir_last_scanned: row.get("mm_media_dir_last_scanned"),
+            mm_media_dir_share_guid: row.get("mm_media_dir_share_guid"),
         })
         .fetch_all(sqlx_pool)
         .await?;

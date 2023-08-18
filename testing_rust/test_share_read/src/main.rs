@@ -1,19 +1,29 @@
-use std::path::PathBuf;
 use pavao::{SmbClient, SmbCredentials, SmbDirent, SmbDirentType, SmbOptions, SmbStat};
+use std::path::PathBuf;
 
 fn main() {
     // setup server
     let client = SmbClient::new(
         SmbCredentials::default()
-            .server("smb://ip")
+            .server("smb://192.168.1.187")
             .share("/daworks")
-            .password("fakepass")
-            .username("fakepass")
+            .username("gfdgdg")
+            .password("gfgdfgfd!")
             .workgroup("WORKGROUP"),
         SmbOptions::default().one_share_per_server(true),
     )
     .unwrap();
-    tree(&client, "/", 0);
+    let stats = client.stat("/Media");
+    match stats {
+        Ok(file_stat) => {
+            println!("{:?}", file_stat.modified);
+        }
+        Err(_) => {
+            println!("boom");
+        }
+    };
+    //println!("stats: {:?}", stats);
+    //tree(&client, "/", 0);
 }
 
 fn tree(client: &SmbClient, uri: &str, depth: usize) {

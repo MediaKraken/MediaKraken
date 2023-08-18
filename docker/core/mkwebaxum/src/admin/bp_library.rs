@@ -14,6 +14,7 @@ use sqlx::postgres::PgPool;
 struct TemplateAdminLibraryContext<'a> {
     template_data_share: &'a Vec<mk_lib_database::mk_lib_database_network_share::DBShareList>,
     template_data_libary: &'a Vec<mk_lib_database::mk_lib_database_library::DBLibraryAuditList>,
+    template_data_share_user: &'a Vec<mk_lib_database::mk_lib_database_network_share::DBShareAuthUserList>,
     template_data_exists: &'a bool,
 }
 
@@ -34,6 +35,7 @@ pub async fn admin_library(
         )
         .await
         .unwrap();
+    let share_user_list = mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_user_read(&sqlx_pool,).await.unwrap();
     let mut template_data_exists: bool = false;
     if library_list.len() > 0 {
         template_data_exists = true;
@@ -41,6 +43,7 @@ pub async fn admin_library(
     let template = TemplateAdminLibraryContext {
         template_data_share: &share_list,
         template_data_libary: &library_list,
+        template_data_share_user: &share_user_list,
         template_data_exists: &template_data_exists,
     };
     let reply_html = template.render().unwrap();
