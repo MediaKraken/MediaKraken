@@ -99,7 +99,7 @@ pub async fn mk_lib_database_table_size_total(
 ) -> Result<i64, sqlx::Error> {
     // query provided by postgresql wiki
     let row: (i64,) = sqlx::query_as(
-        "SELECT sum(pg_total_relation_size(C.oid)) AS \"total_size\" FROM pg_class C \
+        "SELECT sum(pg_total_relation_size(C.oid))::bigint AS \"total_size\" FROM pg_class C \
         LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace) \
         WHERE nspname NOT IN ('pg_catalog', 'information_schema') \
         AND C.relkind <> 'i' AND nspname!~ '^pg_toast'",
@@ -116,6 +116,50 @@ pub async fn mk_lib_database_parallel_workers(
         .fetch_one(sqlx_pool)
         .await?;
     Ok(row.0)
+}
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct PGExtensionActive {
+    pub extname: String,
+    pub extversion: String,
+}
+
+pub async fn mk_lib_database_extension_active(
+    sqlx_pool: &sqlx::PgPool,
+) -> Result<Vec<PGExtensionActive>, sqlx::Error> {
+    let select_query = sqlx::query(
+        "SELECT extname, extversion from pg_extension order by extname",
+    );
+    let table_rows: Vec<PGExtensionActive> = select_query
+        .map(|row: PgRow| PGExtensionActive {
+            extname: row.get("extname"),
+            extversion: row.get("extversion"),
+        })
+        .fetch_all(sqlx_pool)
+        .await?;
+    Ok(table_rows)
+}
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct PGExtensionAvailable {
+    pub name: String,
+    pub default_version: String,
+}
+
+pub async fn mk_lib_database_extension_available(
+    sqlx_pool: &sqlx::PgPool,
+) -> Result<Vec<PGExtensionAvailable>, sqlx::Error> {
+    let select_query = sqlx::query(
+        "SELECT name, default_version FROM pg_available_extensions order by name",
+    );
+    let table_rows: Vec<PGExtensionAvailable> = select_query
+        .map(|row: PgRow| PGExtensionAvailable {
+            name: row.get("name"),
+            default_version: row.get("default_version"),
+        })
+        .fetch_all(sqlx_pool)
+        .await?;
+    Ok(table_rows)
 }
 
 /*

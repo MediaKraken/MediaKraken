@@ -8,11 +8,11 @@ pub mod mk_lib_network_ibverbs; // docker image, so, no infiniband
 pub mod mk_lib_network_ldap;
 pub mod mk_lib_network_limiter;
 pub mod mk_lib_network_mediakraken;
-pub mod mk_lib_network_nmap;
 pub mod mk_lib_network_openweather;
 pub mod mk_lib_network_ping;
 pub mod mk_lib_network_rss;
 pub mod mk_lib_network_serial;
+pub mod mk_lib_network_share;
 pub mod mk_lib_network_speedtest;
 pub mod mk_lib_network_ssdp;
 pub mod mk_lib_network_ssh;

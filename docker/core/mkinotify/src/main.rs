@@ -22,7 +22,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let mut inotify = Inotify::init().expect("Failed to initialize inotify");
 
     for row_data in
-        mk_lib_database::mk_lib_database_library::mk_lib_database_library_read(&sqlx_pool, 0, 99999)
+        mk_lib_database::mk_lib_database_library::mk_lib_database_library_read(&sqlx_pool)
             .await
             .unwrap()
     {

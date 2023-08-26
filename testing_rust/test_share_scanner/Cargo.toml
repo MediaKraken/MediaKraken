@@ -10,6 +10,8 @@ lto = true
 codegen-units = 1
 
 [dependencies]
+mk_lib_file = { path = "../../src/mk_lib_file" }
+mk_lib_network = { path = "../../src/mk_lib_network" }
 ipnet = "2.7.2"
 ipnetwork = "0.20.0"
 quickxml_to_serde = { version = "0.5.0", features = ["json_types"] }

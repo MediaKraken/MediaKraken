@@ -1,0 +1,50 @@
+# Nmap 7.93 scan initiated Mon Aug  7 15:42:04 2023 as: nmap -p 445,2049 -n --open -oN port.xml 192.168.1.*
+Nmap scan report for 192.168.1.10
+Host is up (0.00072s latency).
+
+PORT     STATE SERVICE
+445/tcp  open  microsoft-ds
+2049/tcp open  nfs
+MAC Address: F8:BC:12:1F:FE:81 (Dell)
+
+Nmap scan report for 192.168.1.11
+Host is up (0.00030s latency).
+
+PORT     STATE SERVICE
+445/tcp  open  microsoft-ds
+2049/tcp open  nfs
+MAC Address: F8:BC:12:1F:FE:81 (Dell)
+
+Nmap scan report for 192.168.1.110
+Host is up (0.0011s latency).
+
+PORT     STATE SERVICE
+445/tcp  open  microsoft-ds
+2049/tcp open  nfs
+MAC Address: 3E:0C:8A:0F:0A:88 (Unknown)
+
+Nmap scan report for 192.168.1.122
+Host is up (0.00093s latency).
+
+PORT     STATE SERVICE
+445/tcp  open  microsoft-ds
+2049/tcp open  nfs
+MAC Address: 00:11:32:07:39:0B (Synology Incorporated)
+
+Nmap scan report for 192.168.1.147
+Host is up (0.00036s latency).
+Not shown: 1 filtered tcp port (no-response)
+Some closed ports may be reported as filtered due to --defeat-rst-ratelimit
+PORT    STATE SERVICE
+445/tcp open  microsoft-ds
+MAC Address: 10:7B:44:93:AA:09 (Asustek Computer)
+
+Nmap scan report for 192.168.1.187
+Host is up (0.0014s latency).
+
+PORT     STATE SERVICE
+445/tcp  open  microsoft-ds
+2049/tcp open  nfs
+MAC Address: A8:A1:59:E1:2E:6F (ASRock Incorporation)
+
+# Nmap done at Mon Aug  7 15:42:11 2023 -- 256 IP addresses (28 hosts up) scanned in 6.91 seconds

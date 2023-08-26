@@ -1,9 +1,8 @@
 use mk_lib_database;
 use mk_lib_network;
 use mk_lib_rabbitmq;
-use serde_json::{json, Value};
+use serde_json::Value;
 use std::error::Error;
-use std::net::IpAddr;
 use tokio::sync::Notify;
 
 #[tokio::main]
@@ -35,29 +34,25 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(payload) = msg.content {
                 let json_message: Value =
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                // #[cfg(debug_assertions)]
-                // {
-                //     mk_lib_logging::mk_logging_post_elk(
-                //         std::module_path!(),
-                //         json!({ "msg body": json_message }),
-                //     )
-                //     .await
-                //     .unwrap();
-                // }
                 // find and store all network shares
-                let share_vec = mk_lib_network::mk_lib_network_nmap::mk_network_share_scan(
-                    json_message["Data"].to_string().replace("\"", ""),
-                )
-                .await
-                .unwrap();
+                let share_vec =
+                    mk_lib_network::mk_lib_network_share::mk_network_share_scan_port_rustscan(
+                        json_message["Data"].to_string().replace("\"", ""),
+                    )
+                    .await
+                    .unwrap();
                 for share_info in share_vec.iter() {
-                    mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_insert(
-                            &sqlx_pool,
-                            share_info.mm_share_ip.parse::<IpAddr>().unwrap(),
-                            share_info.mm_share_path.clone(),
-                            share_info.mm_share_comment.clone(),
-                        )
-                        .await.unwrap();
+                    if mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_exists( &sqlx_pool,
+                            share_info.mm_share_ip,
+                            share_info.mm_share_path.clone(),).await.unwrap() == false {
+                        mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_insert(
+                                &sqlx_pool,
+                                share_info.mm_share_ip,
+                                share_info.mm_share_path.clone(),
+                                share_info.mm_share_comment.clone(),
+                            )
+                            .await.unwrap();
+                    }
                 }
                 let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
                     &rabbit_channel,

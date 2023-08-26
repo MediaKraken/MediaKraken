@@ -19,7 +19,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     .await
     .unwrap();
 
-    tokio::spawn(async move {
+//    tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {
                 let json_message: Value =
@@ -31,8 +31,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 )
                 .await;
             }
-        }
-    });
+        };
+//    });
 
     let guard = Notify::new();
     guard.notified().await;

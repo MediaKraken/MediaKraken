@@ -71,7 +71,10 @@ STAGE_CORE_IMAGES = {
     'mkcron': ('mkcron', 'scratch', 'core'),
 
     # database via postgresql
-    'mkdatabase': ('mkdatabase', 'debian:bullseye-slim', 'core'),
+    # 'mkdatabase': ('mkdatabase', 'debian:bullseye-slim', 'core'),
+
+    # database via postgresql/citus
+    'mkdatabase_citus': ('mkdatabase', 'alpine 3.18.3', 'core'),
 
     # download files/etc trailers/etc from ampq records
     'mkdownload': ('mkdownload', 'scratch', 'core'),
@@ -276,7 +279,7 @@ STAGE_ONE_OPTIONS = {
 STAGE_TWO_OPTIONS = {
 
 }
-    
+
 STAGE_ONE_SECURITY_TOOLS = {
 
 }

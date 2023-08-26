@@ -24,6 +24,31 @@
                             <p class="text-primary m-0 font-weight-bold"><strong>Parallel Workers:
                                     {{template_data_db_workers}}</strong></p>
                         </div>
+
+                        <div class="card-body">
+                            <fieldset>
+                                <legend>Database Extensions (Active)</legend>
+                            </fieldset>
+                            <div>
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Vesion</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row_data in template_data_db_extension %}
+                                        <tr>
+                                            <td>{{ row_data.extname }}</td>
+                                            <td>{{ row_data.extversion }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
                         <div class="card-body">
                             <fieldset>
                                 <legend>Database Record Count</legend>
@@ -55,6 +80,7 @@
                                 </table>
                             </div>
                         </div>
+
                         <div class="card-body">
                             <fieldset>
                                 <legend>Database Table Size<br></legend>
@@ -82,6 +108,31 @@
                                 </table>
                             </div>
                         </div>
+
+                        <div class="card-body">
+                            <fieldset>
+                                <legend>Database Extensions (Available)</legend>
+                            </fieldset>
+                            <div>
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Vesion</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row_data in template_data_db_extension_avail %}
+                                        <tr>
+                                            <td>{{ row_data.name }}</td>
+                                            <td>{{ row_data.default_version }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>

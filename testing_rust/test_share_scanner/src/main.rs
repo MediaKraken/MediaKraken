@@ -1,11 +1,18 @@
 use std::error::Error;
 
-mod mk_lib_network_nmap;
-
-mod mk_lib_file;
+use mk_lib_network;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    mk_lib_network_nmap::mk_network_share_scan("192.168.1".to_string()).await.unwrap();
+    let vec_data = mk_lib_network::mk_lib_network_share::mk_network_share_scan_port_rustscan(
+        "192.168.1".to_string(),
+    )
+    .await
+    .unwrap();
+    // let vec_data = mk_lib_network::mk_lib_network_nmap::mk_network_share_scan("192.168.1".to_string()).await.unwrap();
+    println!("Data: {:?}", vec_data);
+    for share_info in vec_data.iter() {
+        println!("Info: {:?}", share_info);
+    }
     Ok(())
 }

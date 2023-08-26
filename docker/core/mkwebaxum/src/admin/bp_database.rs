@@ -18,6 +18,8 @@ struct AdminDBStatsTemplate<'a> {
     template_data_db_count: &'a Vec<mk_lib_database::mk_lib_database_postgresql::PGTableRows>,
     template_data_db_count_total: &'a f32,
     template_data_db_workers: &'a String,
+    template_data_db_extension: &'a Vec<mk_lib_database::mk_lib_database_postgresql::PGExtensionActive>,
+    template_data_db_extension_avail: &'a Vec<mk_lib_database::mk_lib_database_postgresql::PGExtensionAvailable>,
 }
 
 pub async fn admin_database(
@@ -49,6 +51,14 @@ pub async fn admin_database(
         mk_lib_database::mk_lib_database_postgresql::mk_lib_database_parallel_workers(&sqlx_pool)
             .await
             .unwrap();
+    let pg_extension =
+        mk_lib_database::mk_lib_database_postgresql::mk_lib_database_extension_active(&sqlx_pool)
+            .await
+            .unwrap();
+    let pg_extension_avail =
+        mk_lib_database::mk_lib_database_postgresql::mk_lib_database_extension_available(&sqlx_pool)
+            .await
+            .unwrap();
     let template = AdminDBStatsTemplate {
         template_data_db_version: &pg_version,
         template_data_db_size: &pg_table_size,
@@ -56,6 +66,9 @@ pub async fn admin_database(
         template_data_db_count: &pg_table_row_count,
         template_data_db_count_total: &pg_table_row_count_total,
         template_data_db_workers: &pg_worker_count,
+        template_data_db_extension: &pg_extension,
+        template_data_db_extension_avail: &pg_extension_avail,
+
     };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())

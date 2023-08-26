@@ -6,53 +6,45 @@ use axum::{
     Extension,
 };
 use axum_session_auth::{AuthSession, SessionPgPool};
-use mk_lib_common::mk_lib_common_pagination;
 use mk_lib_database;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_library.html")]
 struct TemplateAdminLibraryContext<'a> {
-    template_data: &'a Vec<mk_lib_database::mk_lib_database_library::DBLibraryAuditList>,
+    template_data_share: &'a Vec<mk_lib_database::mk_lib_database_network_share::DBShareList>,
+    template_data_libary: &'a Vec<mk_lib_database::mk_lib_database_library::DBLibraryAuditList>,
+    template_data_share_user: &'a Vec<mk_lib_database::mk_lib_database_network_share::DBShareAuthUserList>,
     template_data_exists: &'a bool,
-    pagination_bar: &'a String,
-    page: &'a usize,
 }
 
 pub async fn admin_library(
     Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
-    Path(page): Path<i64>,
 ) -> impl IntoResponse {
-    let db_offset: i64 = (page * 30) - 30;
-    let total_pages: i64 =
-        mk_lib_database::mk_lib_database_library::mk_lib_database_library_count(&sqlx_pool)
-            .await
-            .unwrap();
-    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
-        total_pages,
-        page,
-        "/admin/admin_library".to_string(),
-    )
-    .await
-    .unwrap();
+    let share_list =
+        mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_read(
+            &sqlx_pool,
+        )
+        .await
+        .unwrap();
     let library_list =
         mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_audit_read(
             &sqlx_pool,
         )
         .await
         .unwrap();
+    let share_user_list = mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_user_read(&sqlx_pool,).await.unwrap();
     let mut template_data_exists: bool = false;
     if library_list.len() > 0 {
         template_data_exists = true;
     }
-    let page_usize = page as usize;
     let template = TemplateAdminLibraryContext {
-        template_data: &library_list,
+        template_data_share: &share_list,
+        template_data_libary: &library_list,
+        template_data_share_user: &share_user_list,
         template_data_exists: &template_data_exists,
-        pagination_bar: &pagination_html,
-        page: &page_usize,
     };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())
