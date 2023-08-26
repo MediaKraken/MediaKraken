@@ -48,6 +48,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .unwrap();
 
     tokio::task::spawn_local(async move {
+    //tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {
                 let json_message: Value =
@@ -326,9 +327,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 true,
                             )
                             .await;
-                            mk_lib_file::mk_lib_smb::mk_file_smb_client_disconnect(smb_client);
                             },
                     };
+                    mk_lib_file::mk_lib_smb::mk_file_smb_client_disconnect(smb_client);
                 }
                 let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
                     &rabbit_channel,
@@ -337,7 +338,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 .await;
             }
         }
-    });
+    }).await.unwrap();
     let guard = Notify::new();
     guard.notified().await;
     Ok(())

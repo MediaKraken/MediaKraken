@@ -273,6 +273,54 @@ pub async fn mk_lib_database_update_schema(
         mk_lib_database_version_update(&sqlx_pool, 57).await?;
     }
 
+    if version_no < 58 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query("ALTER TABLE mm_network_shares ADD PRIMARY KEY (mm_network_share_guid);")
+            .execute(&mut *transaction)
+            .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 58).await?;
+    }
+
+    if version_no < 59 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query("ALTER TABLE mm_library_dir DROP COLUMN mm_media_dir_username;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("ALTER TABLE mm_library_dir DROP COLUMN mm_media_dir_password;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("ALTER TABLE mm_library_dir ADD COLUMN mm_media_dir_auth_user uuid;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_media_dir_auth_user_ndx \
+            ON mm_library_dir USING btree (mm_media_dir_auth_user);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 59).await?;
+    }
+
+    if version_no < 60 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query("ALTER TABLE mm_library_dir DROP COLUMN mm_media_dir_auth_user;")
+            .execute(&mut *transaction)
+            .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 60).await?;
+    }
+
+    if version_no < 61 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query("CREATE EXTENSION IF NOT EXISTS citus WITH SCHEMA pg_catalog;")
+            .execute(&mut *transaction)
+            .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 61).await?;
+    }
+
     Ok(true)
 }
 

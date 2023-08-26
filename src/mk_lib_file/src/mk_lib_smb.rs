@@ -17,7 +17,7 @@ pub fn mk_file_smb_client_connect(
         SmbCredentials::default()
             .server(format!("smb://{}", share_to_mount.mm_network_share_ip))
             .share(format!("/{}", share_to_mount.mm_network_share_path))
-            .username(share_to_mount.mm_share_auth_user.unwrap())
+            .username(share_to_mount.mm_share_auth_user)
             .password(share_to_mount.mm_share_auth_password.unwrap())
             .workgroup(smb_workgroup),
         SmbOptions::default().one_share_per_server(true),

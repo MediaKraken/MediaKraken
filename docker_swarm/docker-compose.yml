@@ -54,6 +54,7 @@ services:
       - MAX_PARALLEL_WORKERS_PER_GATHER=2
       - MAX_PARALLEL_WORKERS=8
       - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+      - POSTGRESQL_SHARED_PRELOAD_LIBRARIES=citus
     secrets:
       - db_password
     stop_grace_period: 30s

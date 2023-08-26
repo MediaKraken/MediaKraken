@@ -43,7 +43,7 @@ COPY --from=cargo-build-mkwebapp /mediakraken/deps/* /
 
 WORKDIR /mediakraken
 
-RUN apk update && apk add --no-cache musl-locales lang libssl1.1 libcrypto1.1 cifs-utils nfs-utils \
+RUN apk update && apk add --no-cache musl-locales lang libssl1.1 libcrypto1.1 cifs-utils nfs-utils libsmbclient \
  && rm -rf /var/cache/apt/*
 
 # RUN apt-get update && apt-get install -y locales locales-all \

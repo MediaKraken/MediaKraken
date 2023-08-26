@@ -118,6 +118,50 @@ pub async fn mk_lib_database_parallel_workers(
     Ok(row.0)
 }
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct PGExtensionActive {
+    pub extname: String,
+    pub extversion: String,
+}
+
+pub async fn mk_lib_database_extension_active(
+    sqlx_pool: &sqlx::PgPool,
+) -> Result<Vec<PGExtensionActive>, sqlx::Error> {
+    let select_query = sqlx::query(
+        "SELECT extname, extversion from pg_extension order by extname",
+    );
+    let table_rows: Vec<PGExtensionActive> = select_query
+        .map(|row: PgRow| PGExtensionActive {
+            extname: row.get("extname"),
+            extversion: row.get("extversion"),
+        })
+        .fetch_all(sqlx_pool)
+        .await?;
+    Ok(table_rows)
+}
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct PGExtensionAvailable {
+    pub name: String,
+    pub default_version: String,
+}
+
+pub async fn mk_lib_database_extension_available(
+    sqlx_pool: &sqlx::PgPool,
+) -> Result<Vec<PGExtensionAvailable>, sqlx::Error> {
+    let select_query = sqlx::query(
+        "SELECT name, default_version FROM pg_available_extensions order by name",
+    );
+    let table_rows: Vec<PGExtensionAvailable> = select_query
+        .map(|row: PgRow| PGExtensionAvailable {
+            name: row.get("name"),
+            default_version: row.get("default_version"),
+        })
+        .fetch_all(sqlx_pool)
+        .await?;
+    Ok(table_rows)
+}
+
 /*
 
 // TODO port query

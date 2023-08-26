@@ -55,7 +55,19 @@
                                                         <td>{{ row_data.mm_network_share_ip }}</td>
                                                         <td>{{ row_data.mm_network_share_path }}</td>
                                                         <td>{{ row_data.mm_network_share_comment }}</td>
-                                                        <td></td>
+                                                        <td>
+                                                            <select>
+                                                                <optgroup label="Auth user group">
+                                                                    {% for auth_row in template_data_share_user %}
+                                                                        {% if auth_row.mm_share_auth_user == row_data.mm_share_auth_user %}
+                                                                            <option value="{{auth_row.mm_share_auth_guid}}" selected="">{{auth_row.mm_share_auth_user}}</option>
+                                                                        {% else %}
+                                                                            <option value="{{auth_row.mm_share_auth_guid}}">{{auth_row.mm_share_auth_user}}</option>
+                                                                        {% endif %}
+                                                                    {% endfor %}
+                                                                </optgroup>
+                                                            </select>
+                                                        </td>
                                                     </tr>
                                                     {% endfor %}
                                                 </tbody>
@@ -89,8 +101,7 @@
                                                             <td>{{ row_data.mm_media_dir_path }}</td>
                                                             <td>{{ row_data.mm_media_dir_class_enum }}</td>
                                                             {% if row_data.mm_media_dir_last_scanned.to_string() ==
-                                                            "1970-01-01
-                                                            00:00:01" %}
+                                                            "1970-01-01 00:00:01 UTC" %}
                                                             <td><i>Never Scanned</i></td>
                                                             {% else %}
                                                             <td>{{ row_data.mm_media_dir_last_scanned }}</td>

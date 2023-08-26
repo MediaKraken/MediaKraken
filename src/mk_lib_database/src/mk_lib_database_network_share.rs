@@ -59,7 +59,7 @@ pub struct DBShareList {
     pub mm_network_share_ip: std::net::IpAddr,
     pub mm_network_share_path: String,
     pub mm_network_share_comment: String,
-    pub mm_share_auth_user: Option<String>,
+    pub mm_share_auth_user: String,
     pub mm_share_auth_password: Option<String>,
     pub mm_network_share_version: Option<bool>,
     pub mm_network_share_workgroup: Option<String>,
@@ -112,7 +112,8 @@ pub async fn mk_lib_database_network_share_read(
         mm_network_share_version, \
         mm_network_share_workgroup \
         from mm_network_shares, mm_share_auth \
-        where mm_network_share_user_guid = mm_share_auth_guid",
+        where mm_network_share_user_guid = mm_share_auth_guid \
+        order by mm_network_share_path",
     );
     let table_rows: Vec<DBShareList> = select_query
         .map(|row: PgRow| DBShareList {
