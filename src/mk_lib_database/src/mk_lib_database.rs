@@ -26,8 +26,9 @@ pub async fn mk_lib_database_open_pool(pool_connections: u32) -> Result<sqlx::Pg
         connection_string = "postgresql://postgres:metaman@mkstage/postgres?sslmode=disable".to_string();
     } else if hostname == "mkcode" {
         let db_pass = fs::read_to_string("/run/secrets/db_password").unwrap();
+        println!("dbpass {}", db_pass);
         connection_string = format!(
-            "postgresql://postgres:{}@mkprods/postgres?sslmode=disable",
+            "postgresql://postgres:{}@mkprod/postgres?sslmode=disable",
             encode(&db_pass)
         );
     } 

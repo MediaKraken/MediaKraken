@@ -57,6 +57,8 @@ services:
     command: postgres -c shared_preload_libraries=citus
     ports: # for debugging only!!!!!
       - "5432:5432"
+    expose:
+      - 5432
     secrets:
       - db_password
     stop_grace_period: 30s
