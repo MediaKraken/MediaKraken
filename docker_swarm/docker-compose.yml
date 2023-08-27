@@ -54,7 +54,7 @@ services:
       - MAX_PARALLEL_WORKERS_PER_GATHER=2
       - MAX_PARALLEL_WORKERS=8
       - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
-      - POSTGRES_INITDB_ARGS=--auth-host=trust
+      - POSTGRES_INITDB_ARGS=--auth-host=trust  # for debug only
     command: postgres -c shared_preload_libraries=citus
     ports: # for debugging only!!!!!
       - "5432:5432"
