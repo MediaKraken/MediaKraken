@@ -1,5 +1,5 @@
 [package]
-name = "mktestshareread"
+name = "mktestsharereaddb"
 version = "0.0.1"
 edition = "2021"
 
@@ -12,7 +12,7 @@ codegen-units = 1
 [dependencies]
 argh = "0.1.7"
 env_logger = "^0.10"
-mk_lib_database = { path = "../../src/mk_lib_database"}
+mk_lib_database = { path = "../../src/mk_lib_database" }
 mk_lib_file = { path = "../../src/mk_lib_file", features = ["smb"]}
 mk_lib_network = { path = "../../src/mk_lib_network" }
 pavao = "0.2.3"

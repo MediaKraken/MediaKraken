@@ -29,6 +29,7 @@ members = [
     "test_roku",
     "test_roxmltree",
     "test_share_read",
+    "test_share_read_db",
     "test_share_scanner",
     "test_substring",
     "test_torrent_name_parse",

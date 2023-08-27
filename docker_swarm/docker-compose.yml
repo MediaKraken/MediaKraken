@@ -55,6 +55,8 @@ services:
       - MAX_PARALLEL_WORKERS=8
       - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
     command: postgres -c shared_preload_libraries=citus
+    ports: # for debugging only!!!!!
+      - "5432:5432"
     secrets:
       - db_password
     stop_grace_period: 30s
@@ -536,7 +538,7 @@ services:
       replicas: 1
 
   pgadmin:
-    image: dpage/pgadmin4:7.5
+    image: dpage/pgadmin4:7.6
     stop_grace_period: 30s
     stop_signal: SIGTERM
     networks:

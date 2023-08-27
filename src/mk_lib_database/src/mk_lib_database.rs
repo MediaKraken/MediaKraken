@@ -21,10 +21,17 @@ pub async fn mk_lib_database_open_pool(pool_connections: u32) -> Result<sqlx::Pg
         || hostname == "th-hplaptop-1"
         || hostname == "th-hplap-1"
         || hostname == "th-linuxgui-1"
-        || hostname == "mkcode"
+        || hostname == "spoot-Inspiron-15-3525"
     {
         connection_string = "postgresql://postgres:metaman@mkstage/postgres?sslmode=disable".to_string();
-    } else if Path::new("/run/secrets/db_password").exists() {
+    } else if hostname == "mkcode" {
+        let db_pass = fs::read_to_string("/run/secrets/db_password").unwrap();
+        connection_string = format!(
+            "postgresql://postgres:{}@mkprods/postgres?sslmode=disable",
+            encode(&db_pass)
+        );
+    } 
+    else if Path::new("/run/secrets/db_password").exists() {
         let db_pass = fs::read_to_string("/run/secrets/db_password").unwrap();
         connection_string = format!(
             "postgresql://postgres:{}@mkstack_database/postgres?sslmode=disable",
