@@ -327,7 +327,7 @@ services:
       - mediakraken_vol_static:/mediakraken/static
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0  # TODO renable after testing via mkcode
     networks:
       - mediakraken_network
 
@@ -661,6 +661,7 @@ services:
     stop_grace_period: 30s
     stop_signal: SIGTERM
     ports:
+      - "5672:5672"  # for testing only!!!
       # https management port
       # - "15671:15671"
       # http management port

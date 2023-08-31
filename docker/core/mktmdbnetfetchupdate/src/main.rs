@@ -33,12 +33,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .await
             .unwrap();
 
-    let (_rabbit_connection, rabbit_channel) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect(
-        "mkstack_rabbitmq",
-        "mktmdbnetfetchupdate",
-    )
-    .await
-    .unwrap();
+    let (_rabbit_connection, rabbit_channel) =
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mktmdbnetfetchupdate")
+            .await
+            .unwrap();
 
     let mut rabbit_consumer = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer(
         "mktmdbnetfetchupdate",

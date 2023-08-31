@@ -60,7 +60,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .unwrap();
 
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mkglobalcache")
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkglobalcache")
             .await
             .unwrap();
 

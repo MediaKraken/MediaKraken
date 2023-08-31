@@ -90,7 +90,7 @@ STAGE_CORE_IMAGES = {
 
     # guessit via web rest
     'mkguessitrest': ('mkguessitrest',
-                      'tiangolo/uwsgi-nginx-flask:python3.8-alpine-2021-10-02', 'core'),
+                      'tiangolo/uwsgi-nginx-flask:python3.10-2023-08-28', 'core'),
 
     # haproxy
     'mkhaproxy': ('mkhaproxy', 'alpine:3.17', 'core'),

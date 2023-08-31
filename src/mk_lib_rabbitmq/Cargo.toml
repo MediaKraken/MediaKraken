@@ -11,6 +11,7 @@ codegen-units = 1
 
 [dependencies]
 amqprs = "1.4.0"
+sys-info = "0.9.1"
 tokio = "1.28.2"
 
 [dev-dependencies]

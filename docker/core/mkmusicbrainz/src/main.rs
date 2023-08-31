@@ -19,7 +19,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await;
 
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mkmusicbrainz")
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkmusicbrainz")
             .await
             .unwrap();
 
@@ -113,11 +113,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                 // import dump tables
                 let pg_tables =
-                    mk_lib_database::mk_lib_database_postgresql::mk_lib_database_tables(
-                        &sqlx_pool,
-                    )
-                    .await
-                    .unwrap();
+                    mk_lib_database::mk_lib_database_postgresql::mk_lib_database_tables(&sqlx_pool)
+                        .await
+                        .unwrap();
                 for row_data in pg_tables.iter() {
                     // loop through tables and see if dump files exist
                     let table_name = row_data.table_name.replace("public.", "");

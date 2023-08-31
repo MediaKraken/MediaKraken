@@ -1,5 +1,6 @@
 pub mod mk_lib_common;
 pub mod mk_lib_common_bytesize;
+pub mod mk_lib_common_date;
 pub mod mk_lib_common_docker;
 pub mod mk_lib_common_enum_backup_type;
 pub mod mk_lib_common_enum_media_type;

@@ -5,7 +5,7 @@ use tokio::sync::Notify;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let (_rabbit_connection, rabbit_channel) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect(
+    let (_rabbit_connection, rabbit_channel) = 
         "mkrabbitmq",
         "mktest",
     )

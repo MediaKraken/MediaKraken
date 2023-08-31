@@ -11,7 +11,7 @@ use tokio::sync::Notify;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mkhardwarecontrol")
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkhardwarecontrol")
             .await
             .unwrap();
 

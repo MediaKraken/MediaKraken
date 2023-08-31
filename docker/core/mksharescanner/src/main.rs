@@ -20,7 +20,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .unwrap();
 
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mksharescanner")
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mksharescanner")
             .await
             .unwrap();
 
@@ -48,7 +48,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_insert(
                                 &sqlx_pool,
                                 share_info.mm_share_ip,
-                                share_info.mm_share_path.clone(),
+                                share_info.mm_share_path.clone().as_str().unwrap(),
                                 share_info.mm_share_comment.clone(),
                             )
                             .await.unwrap();
