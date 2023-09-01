@@ -93,7 +93,7 @@ STAGE_CORE_IMAGES = {
                       'tiangolo/uwsgi-nginx-flask:python3.10-2023-08-28', 'core'),
 
     # haproxy
-    'mkhaproxy': ('mkhaproxy', 'alpine:3.17', 'core'),
+    # 'mkhaproxy': ('mkhaproxy', 'alpine:3.17', 'core'),
 
     # runs control network/ir/if/etc
     'mkhardwarecontrol': ('mkhardwarecontrol', 'scratch', 'core'),
@@ -123,7 +123,7 @@ STAGE_CORE_IMAGES = {
     'mkmusicbrainz': ('mkmusicbrainz', 'scratch', 'core'),
 
     # nginx proxy for http to https and some bot blocking
-    'mknginx': ('mknginx', 'alpine:3.13', 'core'),
+    # 'mknginx': ('mknginx', 'alpine:3.13', 'core'),
 
     # nginx pagespeed - retired by apache
     # 'mknginxpagespeed': ('mknginxpagespeed', 'alpine:3.8', 'core'),

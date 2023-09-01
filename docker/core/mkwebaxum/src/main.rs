@@ -12,6 +12,7 @@ use axum_csrf::{CsrfConfig, CsrfToken};
 use axum_extra::routing::RouterExt;
 use axum_handle_error_extract::HandleErrorLayer;
 use axum_prometheus::{EndpointLabel, PrometheusMetricLayerBuilder};
+use axum_server::tls_rustls::RustlsConfig;
 use axum_session::{
     Key, SessionConfig, SessionLayer, SessionPgPool, SessionPgSessionStore, SessionRedisPool,
     SessionStore,
@@ -26,6 +27,7 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::time::Duration;
+use std::{net::SocketAddr, path::PathBuf};
 use tokio::signal;
 use tower::timeout::TimeoutLayer;
 use tower::{timeout::error::Elapsed, ServiceBuilder};
@@ -186,6 +188,15 @@ async fn main() {
         }))
         .with_default_metrics()
         .build_pair();
+
+    // configure certificate and private key used by https
+    let config = RustlsConfig::from_pem_file(
+        PathBuf::from("/mediakraken/certs/cacert.pem"),
+        PathBuf::from("/mediakraken/certs/privkey.pem"),
+    )
+    .await
+    .unwrap();
+
     // build our application with routes
     // route_with_tsr creates two routes.....one with trailing slash
     let app = Router::new()
@@ -448,9 +459,8 @@ async fn main() {
     let app = app.fallback(bp_error::general_not_found);
 
     // run our app with hyper
-    axum::Server::bind(&"0.0.0.0:8080".parse().unwrap())
+    axum_server::bind_rustls("0.0.0.0:8080".parse().unwrap(), config)
         .serve(app.into_make_service())
-        .with_graceful_shutdown(shutdown_signal())
         .await
         .unwrap();
 
