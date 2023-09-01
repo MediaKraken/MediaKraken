@@ -829,6 +829,8 @@ services:
     command: sh -c "/wait && /mediakraken/mkwebapp"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
+    ports:
+      - "8080:8080"    # for testing only!!!!!
     volumes:
       # must not be read only as it stores cache here
       - mediakraken_vol_static:/mediakraken/static
