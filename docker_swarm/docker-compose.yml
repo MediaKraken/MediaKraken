@@ -153,7 +153,7 @@ services:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - mediakraken_vol_postgresql_logging:/var/log/postgresql:ro
-      - mediakraken_vol_nginx:/var/log/mediakraken/nginx:ro
+      # - mediakraken_vol_nginx:/var/log/mediakraken/nginx:ro
     deploy:
       mode: global
 
@@ -487,22 +487,22 @@ services:
     networks:
       - mediakraken_network
 
-  nginx:
-    image: mediakraken/mknginx:${BRANCH}
-    entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh -h mkstack_webapp -p 8080 -t 180 -h mkstack_transmission -p 9091 -t 180 -- nginx
-    stop_grace_period: 30s
-    stop_signal: SIGTERM
-    volumes:
-      - mediakraken_vol_nginx:/var/log/mediakraken/nginx
-      - mediakraken_vol_certs:/etc/nginx/certs:ro
-      - mediakraken_vol_static:/mediakraken/static:ro
-    ports:
-      - "8900:8900"
-    networks:
-      - mediakraken_network
-    deploy:
-      mode: replicated
-      replicas: 1
+  # nginx:
+  #   image: mediakraken/mknginx:${BRANCH}
+  #   entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh -h mkstack_webapp -p 8080 -t 180 -h mkstack_transmission -p 9091 -t 180 -- nginx
+  #   stop_grace_period: 30s
+  #   stop_signal: SIGTERM
+  #   volumes:
+  #     - mediakraken_vol_nginx:/var/log/mediakraken/nginx
+  #     - mediakraken_vol_certs:/etc/nginx/certs:ro
+  #     - mediakraken_vol_static:/mediakraken/static:ro
+  #   ports:
+  #     - "8900:8900"
+  #   networks:
+  #     - mediakraken_network
+  #   deploy:
+  #     mode: replicated
+  #     replicas: 1
 
   nut:
     image: mediakraken/mknut:${BRANCH}
@@ -830,7 +830,7 @@ services:
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     ports:
-      - "8080:8080"    # for testing only!!!!!
+      - "8900:8080"
     volumes:
       # must not be read only as it stores cache here
       - mediakraken_vol_static:/mediakraken/static
@@ -921,7 +921,7 @@ volumes:
   mediakraken_vol_mbrainz_conf:
   mediakraken_vol_mbrainz_data:
   mediakraken_vol_mumble:
-  mediakraken_vol_nginx:
+  # mediakraken_vol_nginx:
   mediakraken_vol_pgadmin:
   mediakraken_vol_phue:
   mediakraken_vol_portainer_data:
