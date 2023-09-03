@@ -38,7 +38,7 @@ services:
     stop_signal: SIGUSR1
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
     networks:
       - mediakraken_network
 
@@ -171,7 +171,7 @@ services:
       - mediakraken_vol_static:/static
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
     networks:
       - mediakraken_network
 
@@ -189,7 +189,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
 
   grafana:
     image: grafana/grafana-oss:10.0.3
@@ -237,7 +237,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
       placement:
         constraints: [ node.role == manager ]
 
@@ -259,7 +259,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
       placement:
         constraints: [ node.role == manager ]
 
@@ -277,7 +277,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
 
   libretrocorefetchupdate:
     image: mediakraken/mklibretrocorefetchupdate:${BRANCH}
@@ -292,7 +292,7 @@ services:
       - mediakraken_vol_static:/mediakraken/static
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
     networks:
       - mediakraken_network
   
@@ -371,7 +371,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
 
   # Container to monitor services running inside other containers
   metricbeat:
@@ -483,7 +483,7 @@ services:
       - /home/spoot/mbdump:/mediakraken/mbdump
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
     networks:
       - mediakraken_network
 
@@ -536,7 +536,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
 
   pgadmin:
     image: dpage/pgadmin4:7.6
@@ -703,7 +703,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
 
   sharescanner:
     image: mediakraken/mksharescanner:${BRANCH}
@@ -768,7 +768,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
 
   transcode:
     image: mediakraken/mktranscode:${BRANCH}
@@ -847,8 +847,9 @@ services:
     networks:
       - mediakraken_network
     deploy:
-      mode: replicated
-      replicas: 1
+      mode: global
+      placement:
+        constraints: [ node.platform.os == linux ]
 
   # wireshark:
   #   image: linuxserver/wireshark:4.0.6
