@@ -351,7 +351,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
 
   metadatamame:
     image: mediakraken/mkmetadatamame:${BRANCH}

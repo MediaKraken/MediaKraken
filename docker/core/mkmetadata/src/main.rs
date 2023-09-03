@@ -119,7 +119,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 metadata_identification::metadata_identification(&sqlx_pool, &download_data)
                     .await
                     .unwrap();
-            // // guessit processing which includes identification
+            // guessit processing which includes identification
             // let metadata_uuid: uuid::Uuid =
             //     metadata_guessit::metadata_guessit(&sqlx_pool, download_data)
             //         .await
@@ -128,7 +128,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if metadata_uuid != uuid::Uuid::nil() {
                 mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_update_metadata_guid(
                     &sqlx_pool,
-                    &download_data.mm_download_provider_id,
+                    &download_data.mm_download_provider_id.unwrap(),
                     metadata_uuid,
                     &download_data.mm_download_guid,
                 )

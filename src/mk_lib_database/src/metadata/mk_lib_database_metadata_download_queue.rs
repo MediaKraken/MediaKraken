@@ -8,7 +8,7 @@ pub struct DBDownloadQueueByProviderList {
     pub mm_download_guid: uuid::Uuid,
     pub mm_download_que_type: i16,
     pub mm_download_new_uuid: uuid::Uuid,
-    pub mm_download_provider_id: i32,
+    pub mm_download_provider_id: Option<i32>,
     pub mm_download_status: String,
     pub mm_download_path: Option<String>,
 }

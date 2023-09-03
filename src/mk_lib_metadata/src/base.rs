@@ -104,7 +104,7 @@ pub async fn metadata_search(
     let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
     let mut set_fetch: bool = false;
     let mut lookup_halt: bool = false;
-    let _update_provider = String::new();
+    let update_provider = String::new();
     let guessit_data: Metadata;
     if provider_name == "anidb" {
         (metadata_uuid, guessit_data) = guessit::metadata_guessit(&sqlx_pool, &download_data)
@@ -295,7 +295,7 @@ pub async fn metadata_fetch(
     if provider_name == "imvdb" {
         let _imvdb_id = provider_imvdb::provider_imvdb_video_fetch_by_id(
             &sqlx_pool,
-            download_data.mm_download_provider_id,
+            download_data.mm_download_provider_id.unwrap(),
             download_data.mm_download_new_uuid,
             provider_api_key,
         )
@@ -306,7 +306,7 @@ pub async fn metadata_fetch(
         {
             provider_tmdb::provider_tmdb_person_fetch(
                 sqlx_pool,
-                download_data.mm_download_provider_id,
+                download_data.mm_download_provider_id.unwrap(),
                 download_data.mm_download_new_uuid,
                 provider_api_key,
             )
@@ -317,7 +317,7 @@ pub async fn metadata_fetch(
             // removing the imdb check.....as com_tmdb_metadata_by_id converts it
             provider_tmdb::provider_tmdb_movie_fetch(
                 sqlx_pool,
-                download_data.mm_download_provider_id,
+                download_data.mm_download_provider_id.unwrap(),
                 download_data.mm_download_new_uuid,
                 provider_api_key,
             )
@@ -327,7 +327,7 @@ pub async fn metadata_fetch(
         {
             provider_tmdb::provider_tmdb_tv_fetch(
                 sqlx_pool,
-                download_data.mm_download_provider_id,
+                download_data.mm_download_provider_id.unwrap(),
                 download_data.mm_download_new_uuid,
                 provider_api_key,
             )
