@@ -95,7 +95,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                     mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                                     Uuid::new_v4(),
                                                                                                                    Some(json_item.id),
-                                                                                                                    "Fetch".to_string()).await;
+                                                                                                                    "Fetch".to_string(), None).await;
                         } else {
                             // it's on the database, so must update the record with latest information
                             let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
@@ -103,7 +103,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                     mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                                     Uuid::new_v4(),
                                                                                                                     Some(json_item.id),
-                                                                                                                    "Update".to_string()).await;
+                                                                                                                    "Update".to_string(), None).await;
                         }
                     }
                 }
@@ -139,7 +139,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                                         Uuid::new_v4(),
                                                                                                                         Some(json_item.id),
-                                                                                                                        "Fetch".to_string()).await;
+                                                                                                                        "Fetch".to_string(), None).await;
                         } else {
                             // it's on the database, so must update the record with latest information
                             let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
@@ -147,7 +147,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                                         Uuid::new_v4(),
                                                                                                                         Some(json_item.id),
-                                                                                                                        "Update".to_string()).await;
+                                                                                                                        "Update".to_string(), None).await;
                         }
                     }
                 }
@@ -183,7 +183,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
                                                                                                                         Uuid::new_v4(),
                                                                                                                         Some(json_item.id),
-                                                                                                                        "Fetch".to_string()).await;
+                                                                                                                        "Fetch".to_string(), None).await;
                         } else {
                             // it's on the database, so must update the record with latest information
                             let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
@@ -191,7 +191,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
                                                                                                                         Uuid::new_v4(),
                                                                                                                         Some(json_item.id),
-                                                                                                                        "Update".to_string()).await;
+                                                                                                                        "Update".to_string(), None).await;
                         }
                     }
                 }

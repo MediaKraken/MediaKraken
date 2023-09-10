@@ -313,7 +313,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                                                 new_class_type_uuid,
                                                                                                                                                 media_id,
                                                                                                                                                 None,
-                                                                                                                                                "Search".to_string()).await;
+                                                                                                                                                "Search".to_string(),
+                                                                                                                                                Some(&file_metadata.name)).await;
                                                     }
                                                 }
                                             }

@@ -107,7 +107,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                             uuid::Uuid::new_v4(),
                                                                                                             metadata_struct.id,
-                                                                                                            "Fetch".to_string()).await.unwrap();
+                                                                                                            "Fetch".to_string(), None).await.unwrap();
                             }
                         }
                     }
@@ -150,7 +150,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                             uuid::Uuid::new_v4(),
                                                                                                             metadata_struct.id,
-                                                                                                            "Fetch".to_string()).await.unwrap();
+                                                                                                            "Fetch".to_string(), None).await.unwrap();
                             }
                         }
                     }
@@ -193,7 +193,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
                                                                                                             uuid::Uuid::new_v4(),
                                                                                                             metadata_struct.id,
-                                                                                                            "Fetch".to_string()).await.unwrap();
+                                                                                                            "Fetch".to_string(), None).await.unwrap();
                             }
                         }
                     }
