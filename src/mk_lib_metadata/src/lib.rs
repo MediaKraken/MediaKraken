@@ -4,6 +4,7 @@ pub mod base;
 pub mod book;
 pub mod game;
 pub mod guessit;
+pub mod identification;
 pub mod image_path;
 pub mod mk_lib_metadata_id3;
 pub mod mk_lib_metadata_m3u8;

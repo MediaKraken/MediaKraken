@@ -23,9 +23,9 @@ WORKDIR /mediakraken
 COPY ./ .
 
 RUN if [ "${BRANCHTAG}" = "dev" ]; \
-  then cargo build --release --target x86_64-unknown-linux-musl \
+  then cargo build --manifest-path Cargo-docker.toml --release --target x86_64-unknown-linux-musl \
   && cp /mediakraken/target/x86_64-unknown-linux-musl/release/mk* /mediakraken/target/.; \
-  else cargo build --target x86_64-unknown-linux-musl \
+  else cargo build --manifest-path Cargo-docker.toml --target x86_64-unknown-linux-musl \
   && cp /mediakraken/target/x86_64-unknown-linux-musl/debug/mk* /mediakraken/target/.; \
   fi
 RUN ldd /mediakraken/target/mkbroadcast | tr -s '[:blank:]' '\n' | grep '^/' | \

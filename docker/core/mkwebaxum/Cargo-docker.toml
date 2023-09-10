@@ -34,11 +34,11 @@ futures = "0.3.28"
 ipnetwork = "0.20.0"
 lazy_static = "1.4.0"
 libc = "0.2.144"
-mk_lib_common = { path = "../../../src/mk_lib_common" }
-mk_lib_database = { path = "../../../src/mk_lib_database" }
-mk_lib_file = { path = "../../../src/mk_lib_file", features = ["smb"] }
-mk_lib_network = { path = "../../../src/mk_lib_network" }
-mk_lib_rabbitmq = { path = "../../../src/mk_lib_rabbitmq" }
+mk_lib_common = { path = "mk_lib_common" }
+mk_lib_database = { path = "mk_lib_database" }
+mk_lib_file = { path = "mk_lib_file", features = ["smb"] }
+mk_lib_network = { path = "mk_lib_network" }
+mk_lib_rabbitmq = { path = "mk_lib_rabbitmq" }
 num-format = { version = "0.4.4", features = ["with-system-locale"] }
 paginator = "0.2.6"
 rcgen = "0.11.1"

@@ -1,5 +1,4 @@
 use pnet::datalink::{self};
-use serde_json::json;
 use std::io;
 use std::net::IpAddr;
 use std::str;

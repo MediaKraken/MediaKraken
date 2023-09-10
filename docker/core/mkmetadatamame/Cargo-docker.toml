@@ -1,5 +1,5 @@
 [package]
-name = "mkdownload"
+name = "mkmetadatamame"
 version = "0.0.1"
 edition = "2021"
 
@@ -10,22 +10,22 @@ lto = true
 codegen-units = 1
 
 [dependencies]
+async-std = "1.12.0"
 chrono = { version = "0.4.24", features = ["serde"] }
-governor = "0.6.0"
-mk_lib_database = { path = "../../../src/mk_lib_database" }
-mk_lib_network = { path = "../../../src/mk_lib_network" }
-mk_lib_rabbitmq = { path = "../../../src/mk_lib_rabbitmq" }
-reqwest = { version = "0.11.18", default-features = false, features = [
-    "json",
-    "native-tls",
-] }
+mk_lib_compression = { path = "mk_lib_compression" }
+mk_lib_database = { path = "mk_lib_database" }
+mk_lib_network = { path = "mk_lib_network" }
+mk_lib_rabbitmq = { path = "mk_lib_rabbitmq" }
+quickxml_to_serde = { version = "0.5.0", features = ["json_types"] }
+reqwest = { version = "0.11.18", default-features = false, features = ["json", "native-tls"] }
+rustls = "0.21.1"
 serde = { version = "1.0.163", features = ["derive"] }
 serde_json = "1.0.96"
 stdext = "0.3.1"
 sys-info = "0.9.1"
 tokio = { version = "1.28.2", features = ["full"] }
+walkdir = "2.3.3"
 uuid = { version = "1.3.3", features = ["serde", "v4"] }
-validator = { version = "0.16.0", features = ["derive"] }
 
 [dev-dependencies]
 tokio-test = "*"

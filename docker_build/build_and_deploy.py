@@ -22,6 +22,7 @@
 import argparse
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 
@@ -91,6 +92,19 @@ def build_email_push(build_group, email_subject, branch_tag, push_hub_image=Fals
                                   'MediaKraken/docker',
                                   build_group[docker_images][2],
                                   docker_images))
+            # flip the cargo files around
+            try:
+                shutil.copy(os.path.join(CWD_HOME_DIRECTORY,
+                                         'MediaKraken/docker',
+                                         build_group[docker_images][2],
+                                         build_group[docker_images][0],
+                                         'Cargo-docker.toml'), os.path.join(CWD_HOME_DIRECTORY,
+                                                                            'MediaKraken/docker',
+                                                                            build_group[docker_images][2],
+                                                                            build_group[docker_images][0],
+                                                                            'Cargo.toml'))
+            except FileNotFoundError:
+                continue
             # TODO check for errors/warnings and stop if found
             # Let the mirror's be passed, if not used it will just throw a warning
             pid_build_proc = subprocess.Popen(shlex.split('docker build %s'
@@ -111,6 +125,19 @@ def build_email_push(build_group, email_subject, branch_tag, push_hub_image=Fals
                                               stderr=subprocess.PIPE,
                                               shell=False)
             (out, err) = pid_build_proc.communicate()
+            # flip the cargo files back around
+            try:
+                shutil.copy(os.path.join(CWD_HOME_DIRECTORY,
+                                         'MediaKraken/docker',
+                                         build_group[docker_images][2],
+                                         build_group[docker_images][0],
+                                         'Cargo-local.toml'), os.path.join(CWD_HOME_DIRECTORY,
+                                                                           'MediaKraken/docker',
+                                                                           build_group[docker_images][2],
+                                                                           build_group[docker_images][0],
+                                                                           'Cargo.toml'))
+            except FileNotFoundError:
+                continue
             email_body = err.decode("utf-8")
             subject_text = ' FAILED'
             if email_body.find('Successfully tagged mediakraken') != -1 or email_body.find('writing image sha256') != -1:
@@ -224,7 +251,7 @@ if args.option:
                          docker_images_list.STAGE_TWO_OPTIONS):
         build_email_push(build_stages, 'Build options image: ',
                          branch_tag=git_branch, push_hub_image=args.push)
-        
+
 # purge the none images
 pid_proc = subprocess.Popen(
     [os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken', 'docker_build/purge_images_none.sh')])

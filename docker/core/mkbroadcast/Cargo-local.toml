@@ -1,0 +1,26 @@
+[package]
+name = "mkbroadcast"
+version = "0.0.1"
+edition = "2021"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
+
+[dependencies]
+chrono = { version = "0.4.23", features = ["serde"] }
+mk_lib_common = { path = "../../../src/mk_lib_common" }
+# 0.31.0 breaks datalink
+pnet = "0.30.0"
+reqwest = { version = "0.11.13", default-features = false, features = [
+    "json",
+    "rustls-tls",
+] }
+serde_json = "1.0.91"
+stdext = "0.3.1"
+tokio = { version = "1.28.0", features = ["full"] }
+
+[dev-dependencies]
+tokio-test = "*"

@@ -1,16 +1,15 @@
-use mk_lib_common;
 use mk_lib_database;
 use mk_lib_metadata;
-use serde_json::json;
+use serde::{Deserialize, Serialize};
 use std::error::Error;
-use std::path::Path;
-use std::process::Command;
-use stdext::function_name;
 use tokio::time::{sleep, Duration};
-use mk_lib_common::mk_lib_common_enum_media_type;
 
-#[path = "identification.rs"]
-mod metadata_identification;
+#[derive(Deserialize, Debug)]
+struct APIJson {
+    themoviedb: String,
+    musicbrainz: Option<String>,
+    thesportsdb: String,
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -18,21 +17,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
         .await
         .unwrap();
-    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
-        .await;
+    let _result =
+        mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+            .await;
 
     // pull options/api keys and set structs to contain the data
     let option_json: serde_json::Value =
-        mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
+        mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_api_read(&sqlx_pool)
             .await
             .unwrap();
+    let option_api: APIJson = serde_json::from_value(option_json).unwrap();
 
     // launch thread per provider
-    let tmdb_api_key = option_json["API"]["themoviedb"]
-        .as_str()
-        .unwrap()
-        .to_string();
-    let handle_tmdb = tokio::spawn(async move {
+    let _handle_tmdb = tokio::spawn(async move {
         let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
             .await
             .unwrap();
@@ -43,7 +40,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     &sqlx_pool,
                     "themoviedb".to_string(),
                     download_data,
-                    &tmdb_api_key,
+                    option_api.themoviedb.as_str(),
                 )
                 .await
                 .unwrap();
@@ -52,12 +49,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
         // sqlx_pool.close().await;
     });
-    if !option_json["API"]["musicbrainz"].is_null() {
-        let musicbrainz_api_key = option_json["API"]["musicbrainz"]
-            .as_str()
-            .unwrap()
-            .to_string();
-        let handle_musicbrainz = tokio::spawn(async move {
+    if option_api.musicbrainz.is_some() {
+        let musicbrainz_api_key = option_api.musicbrainz.unwrap();
+        let _handle_musicbrainz = tokio::spawn(async move {
             let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
                 .await
                 .unwrap();
@@ -68,7 +62,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         &sqlx_pool,
                         "musicbrainz".to_string(),
                         download_data,
-                        &musicbrainz_api_key,
+                        musicbrainz_api_key.as_str(),
                     )
                     .await
                     .unwrap();
@@ -78,11 +72,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             // sqlx_pool.close().await;
         });
     };
-    let thesportsdb_api_key = option_json["API"]["thesportsdb"]
-        .as_str()
-        .unwrap()
-        .to_string();
-    let handle_thesportsdb = tokio::spawn(async move {
+    let _handle_thesportsdb = tokio::spawn(async move {
         let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
             .await
             .unwrap();
@@ -93,7 +83,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     &sqlx_pool,
                     "thesportsdb".to_string(),
                     download_data,
-                    &thesportsdb_api_key,
+                    option_api.thesportsdb.as_str(),
                 )
                 .await
                 .unwrap();
@@ -114,16 +104,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .unwrap();
         for download_data in metadata_to_process {
             // begin id process
-            let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
-            metadata_uuid =
-                metadata_identification::metadata_identification(&sqlx_pool, &download_data)
-                    .await
-                    .unwrap();
-            // guessit processing which includes identification
-            // let metadata_uuid: uuid::Uuid =
-            //     metadata_guessit::metadata_guessit(&sqlx_pool, download_data)
-            //         .await
-            //         .unwrap();
+            let metadata_uuid = mk_lib_metadata::identification::metadata_identification(
+                &sqlx_pool,
+                &download_data,
+            )
+            .await
+            .unwrap();
             // update the media row with the json media id and the proper name
             if metadata_uuid != uuid::Uuid::nil() {
                 mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_update_metadata_guid(

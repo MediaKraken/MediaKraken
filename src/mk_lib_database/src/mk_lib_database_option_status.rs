@@ -1,4 +1,22 @@
+use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
+
+#[derive(Deserialize, Debug)]
+pub struct APIJson {
+    pub themoviedb: String,
+    pub musicbrainz: Option<String>,
+    pub thesportsdb: String,
+}
+
+pub async fn mk_lib_database_option_api_read(
+    sqlx_pool: &sqlx::PgPool,
+) -> Result<serde_json::Value, sqlx::Error> {
+    let row: (serde_json::Value,) =
+        sqlx::query_as("select mm_options_json->>'API' from mm_options_and_status")
+            .fetch_one(sqlx_pool)
+            .await?;
+    Ok(row.0)
+}
 
 pub async fn mk_lib_database_option_read(
     sqlx_pool: &sqlx::PgPool,
