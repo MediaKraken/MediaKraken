@@ -18,21 +18,22 @@ lsdp = "0.3.0"
 mdns = "3.0.0"
 mini-telnet = "0.1.8"
 mk_lib_network = { path = "../mk_lib_network" }
-onvif = { git = "https://github.com/lumeohq/onvif-rs" }   # has request with default
-rascam = { versoin = "0.0.2", optional = true}  # breaks on mmal-sys compile - mmal-sys is for raspberry pi only
-rppal = { version = "0.13.1", features = ["hal"], optional = true } # version 14.1 has dep errors
-rppal-dht11 = {version = "0.4.0", optional = true}
+onvif = { git = "https://github.com/lumeohq/onvif-rs" } # has request with default
+rascam = { versoin = "0.0.2", optional = true } # breaks on mmal-sys compile - mmal-sys is for raspberry pi only
+rppal = { version = "0.13.1", features = [
+    "hal",
+], optional = true } # version 14.1 has dep errors
+rppal-dht11 = { version = "0.4.0", optional = true }
 rups = { version = "0.6.0", features = ["async", "async-ssl"] }
 serde_json = "1.0.96"
 serialport = "4.2.1"
 smartcast = "0.1.1"
 sonos_discovery = "0.0.2"
 spl06-007 = { version = "0.3", optional = true }
-ssdp = { git = "https://github.com/ssnover/ssdp-rs", branch = "feature/local-impl-of-ip-feature" } 
-stdext = "0.3.1"
+ssdp = { git = "https://github.com/ssnover/ssdp-rs", branch = "feature/local-impl-of-ip-feature" }
 tokio = "1.28.2"
 url = "2.4.0"
-weectrl = { git = "https://github.com/Hyperchaotic/weectrl" } 
+weectrl = { git = "https://github.com/Hyperchaotic/weectrl" }
 yeelib_rs = "0.1.1"
 
 [features]

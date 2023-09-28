@@ -1,6 +1,3 @@
-use serde_json::json;
-use stdext::function_name;
-
 pub async fn mk_image_file_resize(
     base_image_path: &str,
     image_save_path: &str,

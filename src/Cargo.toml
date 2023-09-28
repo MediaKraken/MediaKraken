@@ -14,5 +14,5 @@ members = [
     "mk_lib_rabbitmq", 
     "theater_controller_pi",
     "theater_full",
-    "theater_thin",          
+    "theater_thin",
 ]

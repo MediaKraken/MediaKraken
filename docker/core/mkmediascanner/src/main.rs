@@ -112,157 +112,158 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 let file_metadata = file_data[0].clone();
                                 println!("meta: {:?}", file_metadata);
                                 if file_metadata.directory == true {
-                                    file_data.append(&mut mk_lib_file::mk_lib_smb::mk_file_smb_client_tree(
-                                        &smb_client,
-                                        format!("/{}", file_metadata.name).as_str(),
-                                    ));
-                                }
-                                else {
+                                    file_data.append(
+                                        &mut mk_lib_file::mk_lib_smb::mk_file_smb_client_tree(
+                                            &smb_client,
+                                            format!("/{}", file_metadata.name).as_str(),
+                                        ),
+                                    );
+                                } else {
                                     if mk_lib_database::mk_lib_database_library::mk_lib_database_library_file_exists(&sqlx_pool, &file_metadata.name).await.unwrap() == false {
-                                                // set lower here so I can remove a lot of .lower() in the code below
-                                                let file_lower = &file_metadata.name.to_lowercase();
-                                                let file_extension = Path::new(&file_lower)
-                                                    .extension()
-                                                    .and_then(OsStr::to_str)
-                                                    .unwrap();
-                                                println!("filelower: {} {}", file_lower, file_extension);
-                                                // checking subtitles for parts as need multiple files for multiple media files
-                                                if mk_lib_common::mk_lib_common_media_extension::MEDIA_EXTENSION.contains(&file_extension)
-                                                    || mk_lib_common::mk_lib_common_media_extension::SUBTITLE_EXTENSION
-                                                        .contains(&file_extension)
-                                                    || mk_lib_common::mk_lib_common_media_extension::GAME_EXTENSION
-                                                        .contains(&file_extension)
-                                                    {
-                                                    println!("Matched Extension");
-                                                    let mut ffprobe_bif_data = true;
-                                                    let mut save_dl_record = true;
-                                                    total_files += 1;
-                                                    // set here which MIGHT be overrode later
-                                                    let mut new_class_type_uuid = original_media_class;
-                                                    // check for "stacked" media file
-                                                    let base_file_name = Path::new(&file_metadata.name)
-                                                        .file_name()
-                                                        .and_then(OsStr::to_str)
-                                                        .unwrap();
-                                                    // check to see if it's a "stacked" file
-                                                    // including games since some are two or more discs
-                                                    if stack_cd.is_match(&base_file_name).unwrap()
-                                                        || stack_part.is_match(&base_file_name).unwrap()
-                                                        || stack_dvd.is_match(&base_file_name).unwrap()
-                                                        || stack_pt.is_match(&base_file_name).unwrap()
-                                                        || stack_disk.is_match(&base_file_name).unwrap()
-                                                        || stack_disc.is_match(&base_file_name).unwrap()
-                                                    {
-                                                        // check to see if it"s part one or not
-                                                        if stack_cd1.is_match(&base_file_name).unwrap() == false
-                                                            && stack_part1.is_match(&base_file_name).unwrap() == false
-                                                            && stack_dvd1.is_match(&base_file_name).unwrap() == false
-                                                            && stack_pt1.is_match(&base_file_name).unwrap() == false
-                                                            && stack_disk1.is_match(&base_file_name).unwrap() == false
-                                                            && stack_disc1.is_match(&base_file_name).unwrap() == false
-                                                        {
-                                                            // it's not a part one here so, no DL record needed
-                                                            save_dl_record = false;
-                                                        }
+                                        // set lower here so I can remove a lot of .lower() in the code below
+                                        let file_lower = &file_metadata.name.to_lowercase();
+                                        let file_extension = Path::new(&file_lower)
+                                            .extension()
+                                            .and_then(OsStr::to_str)
+                                            .unwrap();
+                                        println!("filelower: {} {}", file_lower, file_extension);
+                                        // checking subtitles for parts as need multiple files for multiple media files
+                                        if mk_lib_common::mk_lib_common_media_extension::MEDIA_EXTENSION.contains(&file_extension)
+                                            || mk_lib_common::mk_lib_common_media_extension::SUBTITLE_EXTENSION
+                                                .contains(&file_extension)
+                                            || mk_lib_common::mk_lib_common_media_extension::GAME_EXTENSION
+                                                .contains(&file_extension)
+                                            {
+                                            println!("Matched Extension");
+                                            let mut ffprobe_bif_data = true;
+                                            let mut save_dl_record = true;
+                                            total_files += 1;
+                                            // set here which MIGHT be overrode later
+                                            let mut new_class_type_uuid = original_media_class;
+                                            // check for "stacked" media file
+                                            let base_file_name = Path::new(&file_metadata.name)
+                                                .file_name()
+                                                .and_then(OsStr::to_str)
+                                                .unwrap();
+                                            // check to see if it's a "stacked" file
+                                            // including games since some are two or more discs
+                                            if stack_cd.is_match(&base_file_name).unwrap()
+                                                || stack_part.is_match(&base_file_name).unwrap()
+                                                || stack_dvd.is_match(&base_file_name).unwrap()
+                                                || stack_pt.is_match(&base_file_name).unwrap()
+                                                || stack_disk.is_match(&base_file_name).unwrap()
+                                                || stack_disc.is_match(&base_file_name).unwrap()
+                                            {
+                                                println!("WHAT!");
+                                                // check to see if it's part one or not
+                                                if stack_cd1.is_match(&base_file_name).unwrap() == false
+                                                    && stack_part1.is_match(&base_file_name).unwrap() == false
+                                                    && stack_dvd1.is_match(&base_file_name).unwrap() == false
+                                                    && stack_pt1.is_match(&base_file_name).unwrap() == false
+                                                    && stack_disk1.is_match(&base_file_name).unwrap() == false
+                                                    && stack_disc1.is_match(&base_file_name).unwrap() == false
+                                                {
+                                                    println!("WHAT2!");
+                                                    // it's not a part one here so, no DL record needed
+                                                    save_dl_record = false;
+                                                }
+                                            }
+                                            // video game data
+                                            // TODO look for cue/bin data as well
+                                            if original_media_class
+                                                == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::GAME
+                                            {
+                                                if file_extension == "iso" {
+                                                    new_class_type_uuid =
+                                                    mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::GAME_ISO;
+                                                } else {
+                                                    if file_extension == "chd" {
+                                                        new_class_type_uuid =
+                                                        mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::GAME_CHD;
+                                                    } else {
+                                                        new_class_type_uuid =
+                                                        mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::GAME_ROM;
                                                     }
-                                                    // video game data
-                                                    // TODO look for cue/bin data as well
+                                                }
+                                                ffprobe_bif_data = false;
+                                            }
+                                            // set new media class for subtitles
+                                            else {
+                                                if mk_lib_common::mk_lib_common_media_extension::SUBTITLE_EXTENSION
+                                                    .contains(&file_extension)
+                                                {
                                                     if original_media_class
-                                                        == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::GAME
+                                                        == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE
                                                     {
-                                                        if file_extension == "iso" {
-                                                            new_class_type_uuid =
-                                                            mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::GAME_ISO;
-                                                        } else {
-                                                            if file_extension == "chd" {
-                                                                new_class_type_uuid =
-                                                                mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::GAME_CHD;
-                                                            } else {
-                                                                new_class_type_uuid =
-                                                                mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::GAME_ROM;
-                                                            }
+                                                        new_class_type_uuid = mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE_SUBTITLE;
+                                                    } else {
+                                                        if original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV
+                                                            || original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_EPISODE
+                                                            || original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_SEASON {
+                                                            new_class_type_uuid = mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_SUBTITLE;
                                                         }
-                                                        ffprobe_bif_data = false;
                                                     }
-                                                    // set new media class for subtitles
-                                                    else {
-                                                        if mk_lib_common::mk_lib_common_media_extension::SUBTITLE_EXTENSION
-                                                            .contains(&file_extension)
+                                                    ffprobe_bif_data = false;
+                                                }
+                                                // set new media class for trailers or themes
+                                                else {
+                                                    if file_metadata.name.contains("/trailers/")
+                                                        || file_metadata.name.contains("\\trailers\\")
+                                                        || file_metadata.name.contains("/theme.")
+                                                        || file_metadata.name.contains("\\theme.")
+                                                    {
+                                                        if original_media_class
+                                                            == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE
                                                         {
-                                                            if original_media_class
-                                                                == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE
-                                                            {
-                                                                new_class_type_uuid = mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE_SUBTITLE;
-                                                            } else {
-                                                                if original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV
-                                                                    || original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_EPISODE
-                                                                    || original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_SEASON {
-                                                                    new_class_type_uuid = mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_SUBTITLE;
-                                                                }
-                                                            }
-                                                            ffprobe_bif_data = false;
-                                                        }
-                                                        // set new media class for trailers or themes
-                                                        else {
                                                             if file_metadata.name.contains("/trailers/")
                                                                 || file_metadata.name.contains("\\trailers\\")
-                                                                || file_metadata.name.contains("/theme.")
-                                                                || file_metadata.name.contains("\\theme.")
                                                             {
-                                                                if original_media_class
-                                                                    == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE
-                                                                {
-                                                                    if file_metadata.name.contains("/trailers/")
-                                                                        || file_metadata.name.contains("\\trailers\\")
-                                                                    {
-                                                                        new_class_type_uuid = mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE_TRAILER;
-                                                                    } else {
-                                                                        new_class_type_uuid = mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE_THEME;
-                                                                    }
+                                                                new_class_type_uuid = mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE_TRAILER;
+                                                            } else {
+                                                                new_class_type_uuid = mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE_THEME;
+                                                            }
+                                                        } else {
+                                                            if original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV
+                                                                || original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_EPISODE
+                                                                || original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_SEASON {
+                                                                if file_metadata.name.contains("/trailers/") || file_metadata.name.contains("\\trailers\\") {
+                                                                    new_class_type_uuid = mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_TRAILER;
                                                                 } else {
-                                                                    if original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV
-                                                                        || original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_EPISODE
-                                                                        || original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_SEASON {
-                                                                        if file_metadata.name.contains("/trailers/") || file_metadata.name.contains("\\trailers\\") {
-                                                                            new_class_type_uuid = mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_TRAILER;
-                                                                        } else {
-                                                                            new_class_type_uuid = mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_THEME;
+                                                                    new_class_type_uuid = mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_THEME;
+                                                                }
+                                                            }
+                                                            // set new media class for extras
+                                                            else {
+                                                                if file_metadata.name.contains("/extras/")
+                                                                    || file_metadata.name.contains("\\extras\\")
+                                                                {
+                                                                    if original_media_class
+                                                                        == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE
+                                                                    {
+                                                                        new_class_type_uuid = mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE_EXTRAS;
+                                                                    } else {
+                                                                        if original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV
+                                                                            || original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_EPISODE
+                                                                            || original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_SEASON {
+                                                                            new_class_type_uuid = mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_EXTRAS;
                                                                         }
                                                                     }
-                                                                    // set new media class for extras
-                                                                    else {
-                                                                        if file_metadata.name.contains("/extras/")
-                                                                            || file_metadata.name.contains("\\extras\\")
+                                                                }
+                                                                // set new media class for backdrops (usually themes)
+                                                                else {
+                                                                    if file_metadata.name.contains("/backdrops/")
+                                                                        || file_metadata.name.contains("\\backdrops\\")
+                                                                    {
+                                                                        if file_metadata.name.contains("/theme.")
+                                                                            || file_metadata.name.contains("\\theme.")
                                                                         {
-                                                                            if original_media_class
-                                                                                == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE
-                                                                            {
-                                                                                new_class_type_uuid = mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE_EXTRAS;
+                                                                            if original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE {
+                                                                                new_class_type_uuid = mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE_THEME;
                                                                             } else {
                                                                                 if original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV
                                                                                     || original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_EPISODE
                                                                                     || original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_SEASON {
-                                                                                    new_class_type_uuid = mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_EXTRAS;
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                        // set new media class for backdrops (usually themes)
-                                                                        else {
-                                                                            if file_metadata.name.contains("/backdrops/")
-                                                                                || file_metadata.name.contains("\\backdrops\\")
-                                                                            {
-                                                                                if file_metadata.name.contains("/theme.")
-                                                                                    || file_metadata.name.contains("\\theme.")
-                                                                                {
-                                                                                    if original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE {
-                                                                                        new_class_type_uuid = mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE_THEME;
-                                                                                    } else {
-                                                                                        if original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV
-                                                                                            || original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_EPISODE
-                                                                                            || original_media_class == mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_SEASON {
-                                                                                            new_class_type_uuid = mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_THEME;
-                                                                                        }
-                                                                                    }
+                                                                                    new_class_type_uuid = mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_THEME;
                                                                                 }
                                                                             }
                                                                         }
@@ -271,54 +272,57 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                             }
                                                         }
                                                     }
-                                                    // create media_json data
-                                                    let media_json =
-                                                        json!({ "Added": Utc::now().to_string() });
-                                                    let media_id = Uuid::new_v4();
-                                                    let _result = mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_insert(
-                                                        &sqlx_pool,
-                                                        media_id,
-                                                        new_class_type_uuid as i16,
-                                                        &file_metadata.name,
-                                                        None,
-                                                        json!({}),
-                                                        media_json,
-                                                    )
-                                                    .await;
-                                                    // verify ffprobe and bif should run on the data
-                                                    if mk_lib_common::mk_lib_common_media_extension::MEDIA_EXTENSION_SKIP_FFMPEG.contains(&file_extension) == false
-                                                        && mk_lib_common::mk_lib_common_media_extension::MEDIA_EXTENSION.contains(&file_extension) {
-                                                        // Send a message so ffprobe runs
-                                                        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
-                                                            rabbit_channel.clone(),
-                                                            "mk_ffmpeg",
-                                                            json!({"Type": "FFProbe", "Media UUID": media_id, "Media Path": file_metadata.name}).to_string(),
-                                                        )
-                                                        .await.unwrap();
-                                                        if ffprobe_bif_data == true && original_media_class != mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MUSIC {
-                                                            // Send a message so roku thumbnail is generated
-                                                            mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
-                                                                rabbit_channel.clone(),
-                                                                "mk_ffmpeg",
-                                                                json!({"Type": "Roku", "Media UUID": media_id, "Media Path": file_metadata.name}).to_string(),
-                                                            )
-                                                            .await.unwrap();
-                                                        }
-                                                    }
-                                                    // it should save a dl "Z" record for search/lookup/etc
-                                                    if save_dl_record == true {
-                                                        // media id begin and download que insert
-                                                        let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
-                                                                                                                                                "Z".to_string(),
-                                                                                                                                                new_class_type_uuid,
-                                                                                                                                                media_id,
-                                                                                                                                                None,
-                                                                                                                                                "Search".to_string(),
-                                                                                                                                                Some(&file_metadata.name)).await;
-                                                    }
                                                 }
                                             }
+                                            // create media_json data
+                                            let media_json =
+                                                json!({ "Added": Utc::now().to_string() });
+                                            let media_id = Uuid::new_v4();
+                                            let _result = mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_insert(
+                                                &sqlx_pool,
+                                                media_id,
+                                                new_class_type_uuid as i16,
+                                                &file_metadata.name,
+                                                None,
+                                                json!({}),
+                                                media_json,
+                                            )
+                                            .await;
+                                            // verify ffprobe and bif should run on the data
+                                            if mk_lib_common::mk_lib_common_media_extension::MEDIA_EXTENSION_SKIP_FFMPEG.contains(&file_extension) == false
+                                                && mk_lib_common::mk_lib_common_media_extension::MEDIA_EXTENSION.contains(&file_extension) {
+                                                // Send a message so ffprobe runs
+                                                mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
+                                                    rabbit_channel.clone(),
+                                                    "mk_ffmpeg",
+                                                    json!({"Type": "FFProbe", "Media UUID": media_id, "Media Path": file_metadata.name}).to_string(),
+                                                )
+                                                .await.unwrap();
+                                                if ffprobe_bif_data == true && original_media_class != mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MUSIC {
+                                                    // Send a message so roku thumbnail is generated
+                                                    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
+                                                        rabbit_channel.clone(),
+                                                        "mk_ffmpeg",
+                                                        json!({"Type": "Roku", "Media UUID": media_id, "Media Path": file_metadata.name}).to_string(),
+                                                    )
+                                                    .await.unwrap();
+                                                }
+                                            }
+                                            // it should save a dl "Z" record for search/lookup/etc
+                                            if save_dl_record == true {
+                                                println!("WHAT3");
+                                                // media id begin and download que insert
+                                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                                                                                                                                        "Z".to_string(),
+                                                                                                                                        new_class_type_uuid,
+                                                                                                                                        media_id,
+                                                                                                                                        None,
+                                                                                                                                        "Search".to_string(),
+                                                                                                                                        Some(&file_metadata.name)).await;
+                                            }
                                         }
+                                    }
+                                }
                                 file_data.remove(0);
                             }
                             total_scanned += 1;

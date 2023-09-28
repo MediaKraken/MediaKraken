@@ -12,8 +12,11 @@ codegen-units = 1
 [dependencies]
 anyhow = "1.0.71"
 async-trait = "0.1.68"
-axum_session = { version = "0.4.0", features = [ "postgres-rustls", "redis-db"] }
-axum_session_auth = { version = "0.4.0", features = [ "postgres-rustls", "redis-db" ] }
+axum_session = { version = "0.5.0", features = ["postgres-rustls", "redis-db"] }
+axum_session_auth = { version = "0.5.0", features = [
+    "postgres-rustls",
+    "redis-db",
+] }
 chrono = { version = "0.4.26", features = ["serde"] }
 mk_lib_common = { path = "../mk_lib_common" }
 serde = { version = "1.0.163", features = ["derive"] }
@@ -26,7 +29,6 @@ sqlx = { version = "0.7.1", features = [
     "postgres",
     "uuid",
 ] }
-stdext = "0.3.1"
 sys-info = "0.9.1"
 tokio = { version = "1.28.2", features = ["full"] }
 urlencoding = "2.1.2"

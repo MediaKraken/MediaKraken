@@ -102,14 +102,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
             )
             .await
             .unwrap();
+        println!("here");
         for download_data in metadata_to_process {
-            // begin id process
-            let metadata_uuid = mk_lib_metadata::identification::metadata_identification(
+            println!("DL Data: {:?}", download_data);
+            // process the "Z" record
+            let metadata_uuid = mk_lib_metadata::base::metadata_process(
                 &sqlx_pool,
                 &download_data,
             )
             .await
             .unwrap();
+            println!("here2");
             // update the media row with the json media id and the proper name
             if metadata_uuid != uuid::Uuid::nil() {
                 mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_update_metadata_guid(

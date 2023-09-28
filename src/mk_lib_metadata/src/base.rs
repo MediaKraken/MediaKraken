@@ -45,14 +45,6 @@ pub async fn metadata_process(
     provider_api_key: &str,
 ) -> Result<(), Box<dyn Error>> {
     // TODO art, posters, trailers, etc in here as well
-    #[cfg(debug_assertions)]
-    {
-        // mk_lib_logging::mk_logging_post_elk(
-        //         std::module_path!(),
-        //         json!({ "metadata_process status": download_data.mm_download_status,  "provider": provider_name, "id": download_data.mm_download_provider_id }),
-        //     )
-        //     .await.unwrap();
-    }
     if download_data.mm_download_status == "Search" {
         metadata_search(&sqlx_pool, provider_name, download_data, provider_api_key)
             .await
@@ -107,7 +99,7 @@ pub async fn metadata_search(
     let update_provider = String::new();
     let guessit_data: Metadata;
     if provider_name == "anidb" {
-        (metadata_uuid, guessit_data) = guessit::metadata_guessit(
+        guessit_data = guessit::metadata_guessit(
             &sqlx_pool,
             &download_data,
             "fake".to_string(),
@@ -200,7 +192,7 @@ pub async fn metadata_search(
     } else if provider_name == "thegamesdb" {
         lookup_halt = true;
     } else if provider_name == "themoviedb" {
-        (metadata_uuid, guessit_data) = guessit::metadata_guessit(
+        guessit_data = guessit::metadata_guessit(
             &sqlx_pool,
             &download_data,
             "fake".to_string(),

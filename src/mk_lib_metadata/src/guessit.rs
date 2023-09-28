@@ -9,7 +9,7 @@ pub async fn metadata_guessit(
     mut metadata_last_title: String,
     mut metadata_last_year: i32,
     mut metadata_last_uuid: uuid::Uuid,
-) -> Result<(uuid::Uuid, Metadata), Box<dyn Error>> {
+) -> Result<Metadata, Box<dyn Error>> {
     let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
     // check for dupes by name/year
     let file_name = Path::new(&download_data.mm_download_path.as_ref().unwrap())
@@ -31,16 +31,6 @@ pub async fn metadata_guessit(
             // matches last media scanned, so set with that metadata id
             metadata_uuid = metadata_last_uuid;
         }
-        if metadata_uuid == uuid::Uuid::nil() {
-            // begin id process
-            // metadata_uuid = metadata_identification::metadata_identification(
-            //     &sqlx_pool,
-            //     download_data,
-            //     guessit_data,
-            // )
-            // .await
-            // .unwrap();
-        }
         // allow none to be set so unmatched stuff can work for skipping
         metadata_last_uuid = metadata_uuid;
         metadata_last_title = guessit_data.title().to_lowercase();
@@ -54,5 +44,6 @@ pub async fn metadata_guessit(
                                                                                                                  "ZZ".to_string(),
                                                                                                                  download_data.mm_download_guid).await.unwrap();
     }
-    Ok((metadata_uuid, guessit_data))
+    //Ok((metadata_uuid, guessit_data))
+    Ok(guessit_data)
 }

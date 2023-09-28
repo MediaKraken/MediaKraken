@@ -111,7 +111,7 @@ pub async fn mk_lib_database_metadata_download_queue_insert(
         mm_download_provider_id, \
         mm_download_status, \
         mm_download_path) \
-        values ($1, $2, $3, $4, $5, $6)",
+        values ($1, $2, $3, $4, $5, $6, $7)",
     )
     .bind(uuid::Uuid::new_v4())
     .bind(metadata_provider)

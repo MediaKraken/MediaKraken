@@ -18,10 +18,11 @@ pub async fn metadata_identification(
 ) -> Result<uuid::Uuid, Box<dyn Error>> {
     let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
     let mut guessit_data: Metadata;
+    println!("typeL {}", dl_row.mm_download_que_type);
     match dl_row.mm_download_que_type {
         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::ADULT
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::ADULT_SCENE => {
-            (metadata_uuid, guessit_data) = guessit::metadata_guessit(
+            guessit_data = guessit::metadata_guessit(
                 &sqlx_pool,
                 &dl_row,
                 "fake".to_string(),
@@ -38,7 +39,7 @@ pub async fn metadata_identification(
         }
 
         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::ANIME => {
-            (metadata_uuid, guessit_data) = guessit::metadata_guessit(
+            guessit_data = guessit::metadata_guessit(
                 &sqlx_pool,
                 &dl_row,
                 "fake".to_string(),
@@ -82,7 +83,8 @@ pub async fn metadata_identification(
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE_SUBTITLE
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE_THEME
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE_TRAILER => {
-            (metadata_uuid, guessit_data) = guessit::metadata_guessit(
+            println!("movie lookup");
+            guessit_data = guessit::metadata_guessit(
                 &sqlx_pool,
                 &dl_row,
                 "fake".to_string(),
@@ -131,7 +133,7 @@ pub async fn metadata_identification(
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_SUBTITLE
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_THEME
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_TRAILER => {
-            (metadata_uuid, guessit_data) = guessit::metadata_guessit(
+            guessit_data = guessit::metadata_guessit(
                 &sqlx_pool,
                 &dl_row,
                 "fake".to_string(),
