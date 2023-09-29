@@ -13,16 +13,19 @@ codegen-units = 1
 chrono = { version = "0.4.24", features = ["serde"] }
 crab-dlna = "0.1.0"
 futures-util = "0.3.28"
-huelib = "0.13.2"  # https://github.com/nn1ks/huelib-rs
+huelib = "0.13.2" # https://github.com/nn1ks/huelib-rs
 mdns = "3.0.0"
 mk_lib_database = { path = "mk_lib_database" }
 mk_lib_hardware = { path = "mk_lib_hardware" }
 mk_lib_network = { path = "mk_lib_network" }
 mk_lib_rabbitmq = { path = "mk_lib_rabbitmq" }
-reqwest = { version = "0.11.18", default-features = false, features = ["json", "rustls-tls"] }
+reqwest = { version = "0.11.18", default-features = false, features = [
+    "json",
+    "rustls-tls",
+] }
 serde = { version = "1.0.163", features = ["derive"] }
 serde_json = "1.0.96"
-sonor = "1.1.0"
+sonor = "2.0.0"
 stdext = "0.3.1"
 sys-info = "0.9.1"
 tokio = { version = "1.28.2", features = ["full"] }

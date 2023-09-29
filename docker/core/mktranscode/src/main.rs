@@ -12,7 +12,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
         .await
         .unwrap();
-    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+    let _results = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
         .await;
 
     // pull options for metadata/chapters/images location
@@ -36,15 +36,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(payload) = msg.content {
                 let json_message: Value =
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                // #[cfg(debug_assertions)]
-                // {
-                //     mk_lib_logging::mk_logging_post_elk(
-                //         std::module_path!(),
-                //         json!({ "msg body": json_message }),
-                //     )
-                //     .await
-                //     .unwrap();
-                // }
                 if json_message["Type"] == "Roku" {
                     if json_message["Subtype"] == "Thumbnail" {
                         //common_hardware_roku_bif.com_roku_create_bif(&json_message["Media Path"].to_string());
@@ -156,9 +147,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         if json_message["Data"].get("chapters").is_some() {
                             // for chapter_data in json_message["Data"]["chapters"].iter() {
                             //     chapter_count += 1;
-                            //     // file path, time, output name
-                            //     // check image save option whether to
-                            //     // save this in media folder or metadata folder
+                                // file path, time, output name
+                                // check image save option whether to
+                                // save this in media folder or metadata folder
                             //     if option_json["MetadataImageLocal"] == false {
                             //         image_file_path = os.path.join(
                             //             common_metadata.com_meta_image_file_path(
@@ -186,7 +177,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             //             .path
                             //             .join(image_file_path, chapter_count.as_str() + ".png");
                             //     }
-                            //     // format the seconds to what ffmpeg is looking for
+                                 // format the seconds to what ffmpeg is looking for
                             //     (minutes, seconds) =
                             //         divmod(float(chapter_data["start_time"]), 60);
                             //     (hours, minutes) = divmod(minutes, 60);
@@ -208,7 +199,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             //         .output()
                             //         .unwrap();
                             //     let stdout = String::from_utf8(output.stdout).unwrap();
-                            //     // as the worker might see it as finished if allowed to continue
+                                 // as the worker might see it as finished if allowed to continue
                             //     chapter_image_list[chapter_data["tags"]["title"]] =
                             //         image_file_path;
                             //     first_image = false;
