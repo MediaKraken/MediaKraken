@@ -55,15 +55,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         json_message["Color"].to_string(),
                                     ).await.unwrap();
                             }
-                            // else if json_message["Action"] == "Bright" {
-                            //     mk_lib_hardware::mk_lib_hardware_phue::mk_hardware_phue_bridge_set_light(
-                            //         json_message["Target"].to_string().parse::<IpAddr>().unwrap(),
-                            //         json_message["ClientKey"].to_string(),
-                            //         json_message["LightList"].to_string(),
-                            //         json_message["Saturation"].into(),
-                            //         json_message["Brightness"] as i64(),
-                            //     );
-                            // }
+                            else if json_message["Action"] == "Bright" {
+                                let _hardware_hue = mk_lib_hardware::mk_lib_hardware_phue::mk_hardware_phue_bridge_set_light(
+                                    json_message["Target"].to_string().parse::<IpAddr>().unwrap(),
+                                    json_message["ClientKey"].to_string(),
+                                    json_message["LightList"].to_string(),
+                                    json_message["Saturation"].as_u64(),
+                                    json_message["Brightness"].as_u64(),
+                                );
+                            }
                         }
                     }
                 }

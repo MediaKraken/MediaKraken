@@ -61,7 +61,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             .unwrap();
                         let tmp_uuid =
                             uuid::Uuid::parse_str(&json_message["Media UUID"].to_string()).unwrap();
-                        mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_ffmpeg_update_by_uuid(
+                        let _result = mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_ffmpeg_update_by_uuid(
                         &sqlx_pool,
                         tmp_uuid,
                         ffprobe_data,
