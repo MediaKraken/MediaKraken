@@ -1,6 +1,4 @@
-/Dockerfile~
 /target/
-/Cargo.lock
 mk_lib_common
 mk_lib_compression
 mk_lib_database

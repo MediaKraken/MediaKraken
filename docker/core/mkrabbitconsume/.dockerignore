@@ -1,5 +1,4 @@
 target
-Cargo.lock
 .gitignore
 mk_lib_common/target
 mk_lib_compression/target

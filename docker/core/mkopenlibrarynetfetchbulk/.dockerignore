@@ -1,5 +1,4 @@
 target
-Cargo.lock
 .gitignore
 ol_cdump_latest.txt
 mk_lib_common/target

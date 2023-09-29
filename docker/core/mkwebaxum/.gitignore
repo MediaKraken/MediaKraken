@@ -1,4 +1,3 @@
-/Cargo.lock
 /target/
 mk_lib_common
 mk_lib_compression

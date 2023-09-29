@@ -1,5 +1,4 @@
 /target/
-/Cargo.lock
 /license.md
 mk_lib_common
 mk_lib_compression
