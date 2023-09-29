@@ -33,7 +33,7 @@ print(CWD_HOME_DIRECTORY, flush=True)
 #####################################
 # start up the application so can see running images for several tools
 #####################################
-os.chdir(os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken', 'docker_compose'))
+os.chdir(os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken', 'docker_swarm'))
 pid_proc = subprocess.Popen(shlex.split('./mediakraken_start.sh'),
                             stdout=subprocess.PIPE, shell=False)
 while True:
@@ -50,7 +50,7 @@ time.sleep(60)
 #####################################
 # stop the application
 #####################################
-os.chdir(os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken', 'docker_compose'))
+os.chdir(os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken', 'docker_swarm'))
 pid_proc = subprocess.Popen(shlex.split('./mediakraken_stop.sh'),
                             stdout=subprocess.PIPE, shell=False)
 pid_proc.wait()

@@ -1,16 +1,6 @@
 mkalpinemirror - Mirror for Alpine linux
     docker/test/mkalpinemirror image
 
-mkaptmirror - Mirror for Apt
-    docker/test/mkaptmirror image
-
-mkarcherysec - Automate Your Application Security Orchestration And Correlation (ASOC)
-    can't get openvas to work.....
-    added arachni, oswasp zap as containers exist for that
-    admin@user.com
-    password in docker-compose file
-    NOT USED - GAVE UP
-
 mkcode - VSS Code build/git
     accessible via SSH Key only
     docker installed
@@ -33,11 +23,6 @@ mkcode - VSS Code build/git
         git lfs install
         git lfs track --filename docker/game_server/mkgameq3a_cpma/cpma/cpma-mappack-full.zip
         # git rm --cached docker/game_server/mkgameq3a_cpma/cpma/cpma-mappack-full.zip   fix the previous add
-
-mkdim - Dim, a media manager fueled by dark forces.
-    DockerHub image
-    docker compose yml file
-    NOT USED
 
 mkelk - Elasticsearch, Logstash, Kibana (ELK)
     docker/test/mkelk image
@@ -70,8 +55,6 @@ mkkillrn - Rust Cargo repo/proxy
 mkmailhog - fake email server to view mail via web interface (receives build and deploy emails)
     http://mkmailhog:8025
 
-mkopenproject
-
 mkprod - Live production
     docker swarm from DockerHub
     docker installed
@@ -94,7 +77,3 @@ mksonatype - Security check, repo host, etc
     docker - http://mksonatype:8081/repository/docker_group/   should hold private and proxy for hub
 
 mkstage - Test DB
-
-mktrac - Trac project tracking
-    docker/test/mktrac image
-    NOT USED
