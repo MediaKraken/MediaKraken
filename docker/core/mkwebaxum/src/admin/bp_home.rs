@@ -6,6 +6,7 @@ use axum::{
     Extension,
 };
 use axum_session_auth::{AuthSession, SessionPgPool};
+use mk_lib_common;
 use mk_lib_database;
 use mk_lib_network;
 use num_format::{SystemLocale, ToFormattedString};
@@ -83,7 +84,7 @@ pub async fn admin_home(
         ),
         template_data_server_host_ip: &"255.255.255.255".to_string(),
         template_data_server_info_server_ip_external: &external_ip,
-        template_data_server_info_server_version: &"Fake Version".to_string(),
+        template_data_server_info_server_version: &mk_lib_common::mk_lib_common_version::WEB_VERSION.to_string(),
         template_data_count_media_files:
             &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_known_count(&sqlx_pool)
                 .await

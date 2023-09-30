@@ -174,8 +174,3 @@ https://github.com/PyCQA/pydocstyle             - docstring style checker for py
 https://github.com/stylelint/stylelint      - A mighty, modern linter that helps you avoid errors and enforce conventions in your styles. (css, etc)
 https://github.com/epi052/feroxbuster - website attacker
 https://github.com/PyCQA/isort   - sorts and updates your imports
-
-
-standalone app:
-archerysec - vuln db and monitor
-    https://www.archerysec.com/index.html
