@@ -21,8 +21,8 @@ axum-flash = "0.7.0"
 axum-handle-error-extract = "0.1.0"
 axum-prometheus = "0.4.0"
 axum-server = { version = "0.5.1", features = ["tls-rustls"] }
-axum_session = { version = "0.6.1", features = ["postgres-rustls", "redis-db"] }
-axum_session_auth = { version = "0.6.0", features = [
+axum_session = { version = "0.7.0", features = ["postgres-rustls", "redis-db"] }
+axum_session_auth = { version = "0.7.0", features = [
     "postgres-rustls",
     "redis-db",
 ] }

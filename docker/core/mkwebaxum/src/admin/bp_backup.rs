@@ -33,11 +33,9 @@ pub async fn admin_backup(
     //let current_user = auth.current_user.clone().unwrap_or_default();
     let db_offset: i64 = (page * 30) - 30;
     let total_pages: i64 =
-        mk_lib_database::mk_lib_database_backup::mk_lib_database_backup_count(
-            &sqlx_pool,
-        )
-        .await
-        .unwrap();
+        mk_lib_database::mk_lib_database_backup::mk_lib_database_backup_count(&sqlx_pool)
+            .await
+            .unwrap();
     let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
         total_pages,
         page,
@@ -45,14 +43,11 @@ pub async fn admin_backup(
     )
     .await
     .unwrap();
-    let backup_list =
-        mk_lib_database::mk_lib_database_backup::mk_lib_database_backup_read(
-            &sqlx_pool,
-            db_offset,
-            30,
-        )
-        .await
-        .unwrap();
+    let backup_list = mk_lib_database::mk_lib_database_backup::mk_lib_database_backup_read(
+        &sqlx_pool, db_offset, 30,
+    )
+    .await
+    .unwrap();
     let mut template_data_exists = false;
     if backup_list.len() > 0 {
         template_data_exists = true;
