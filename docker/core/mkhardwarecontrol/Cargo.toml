@@ -18,7 +18,7 @@ reqwest = { version = "0.11.18", default-features = false, features = [
     "json",
     "rustls-tls",
 ] }
-rppal = { version = "0.13.1", features = ["hal"] }
+rppal = { version = "0.15.0", features = ["hal"] }
 serde = { version = "1.0.163", features = ["derive"] }
 serde_json = "1.0.96"
 stdext = "0.3.1"

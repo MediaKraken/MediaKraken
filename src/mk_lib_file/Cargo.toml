@@ -11,7 +11,7 @@ codegen-units = 1
 
 [dependencies]
 aws-config = { version = "0.56.0", optional = true }
-aws-sdk-s3 = { version = "0.30.0", optional = true }
+aws-sdk-s3 = { version = "0.33.0", optional = true }
 libnfs = { version = "0.1.1", optional = true }
 mk_lib_database = { path = "../mk_lib_database", optional = true }
 pavao = { version = "0.2.3", optional = true }

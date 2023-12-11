@@ -1,6 +1,6 @@
 # don't use the slim version as it's just a stage one image
 # as too much stuff is missing causing stuff later to not compile
-FROM rust:1.73.0-bookworm
+FROM rust:1.74.0-bookworm
 RUN rustup target add x86_64-unknown-linux-musl
 RUN apt update && apt install libudev-dev wget ca-certificates libc-bin musl-tools clang -y \
   && update-ca-certificates \
