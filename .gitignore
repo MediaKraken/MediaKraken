@@ -11,3 +11,4 @@ testing_rust/test_share_scanner/scan.xml
 testing_rust/scan.xml
 testing_rust/test_share_scanner/nfs_scan.xml
 testing_rust/test_share_scanner/smb_scan.xml
+docker/core/mkbroadcast/alpine-minirootfs-x86_64.tar.gz

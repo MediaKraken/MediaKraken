@@ -38,7 +38,7 @@ RUN ldd /mediakraken/target/mkmetadata | tr -s '[:blank:]' '\n' | grep '^/' | \
 ####################################################################################################
 FROM scratch
 # otherwise throws file not found error
-ADD alpine-minirootfs-3.18.2-x86_64.tar.gz /
+ADD alpine-minirootfs-x86_64.tar.gz /
 # deps has full /usr/lib/x86_64-linux-gnu path.....hence copy to /
 COPY --from=cargo-build-mkmetadata /mediakraken/deps/* /
 

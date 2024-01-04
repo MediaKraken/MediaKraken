@@ -10,17 +10,21 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-chrono = { version = "0.4.24", features = ["serde"] }
 mk_lib_hardware = { path = "mk_lib_hardware" }
 mk_lib_network = { path = "mk_lib_network" }
 mk_lib_rabbitmq = { path = "mk_lib_rabbitmq" }
-reqwest = { version = "0.11.18", default-features = false, features = ["json", "rustls-tls"] }
-rppal = { version = "0.15.0", features = ["hal"] }
-serde = { version = "1.0.163", features = ["derive"] }
-serde_json = "1.0.96"
+
+chrono = { version = "0.4.31", features = ["serde"] }
+reqwest = { version = "0.11.23", default-features = false, features = [
+    "json",
+    "rustls-tls",
+] }
+rppal = { version = "0.16.1", features = ["hal"] }
+serde = { version = "1.0.194", features = ["derive"] }
+serde_json = "1.0.111"
 stdext = "0.3.1"
 sys-info = "0.9.1"
-tokio = { version = "1.28.2", features = ["full"] }
+tokio = { version = "1.35.1", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"

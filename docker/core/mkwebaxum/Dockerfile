@@ -34,10 +34,9 @@ RUN ldd /mediakraken/target/mkwebapp | tr -s '[:blank:]' '\n' | grep '^/' | \
 ####################################################################################################
 ## Final image
 ####################################################################################################
-# FROM gcr.io/distroless/base-debian11 as runtime
 FROM scratch
 # otherwise throws file not found error
-ADD alpine-minirootfs-3.18.2-x86_64.tar.gz /
+ADD alpine-minirootfs-x86_64.tar.gz /
 # deps has full /usr/lib/x86_64-linux-gnu path.....hence copy to /
 COPY --from=cargo-build-mkwebapp /mediakraken/deps/* /
 

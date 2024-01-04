@@ -1,10 +1,10 @@
-FROM rust:1.75.0-alpine
+FROM rust:1.75.0-alpine3.19
 
 RUN apk update && \
-  apk add alpine-sdk sqlite-dev openssl1.1-compat-dev wget ca-certificates \
+  apk add alpine-sdk sqlite-dev openssl-dev wget ca-certificates \
   nmap postgresql15-client libsmbclient samba-dev \
   && update-ca-certificates \
-  && wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.12.0/wait \
+  && wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.12.1/wait \
   && chmod +x /wait
 
 # docker run -d --name redis-stack -p 6379:6379 -p 8001:8001 redis/redis-stack:latest

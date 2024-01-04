@@ -10,8 +10,8 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-chrono = { version = "0.4.23", features = ["serde"] }
 mk_lib_common = { path = "mk_lib_common" }
+chrono = { version = "0.4.23", features = ["serde"] }
 # 0.31.0 breaks datalink
 pnet = "0.30.0"
 reqwest = { version = "0.11.13", default-features = false, features = [

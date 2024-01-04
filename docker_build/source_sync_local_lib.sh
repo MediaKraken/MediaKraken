@@ -9,6 +9,7 @@
 
 # mkbroadcast
 \rsync -a ../src/mk_lib_* ../docker/core/mkbroadcast/. --exclude target
+\rsync -a alpine-minirootfs* ../docker/core/mkbroadcast/alpine-minirootfs-x86_64.tar.gz --exclude target
 
 # mkcron
 \rsync -a ../src/mk_lib_* ../docker/core/mkcron/. --exclude target

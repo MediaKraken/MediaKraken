@@ -4,7 +4,7 @@ FROM rust:1.75.0-bookworm
 RUN rustup target add x86_64-unknown-linux-musl
 RUN apt update && apt install libudev-dev wget ca-certificates libc-bin musl-tools clang -y \
   && update-ca-certificates \
-  && wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.12.0/wait \
+  && wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.12.1/wait \
   && chmod +x /wait
 
 # docker run -d --name redis-stack -p 6379:6379 -p 8001:8001 redis/redis-stack:latest
