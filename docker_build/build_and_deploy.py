@@ -87,6 +87,7 @@ def build_email_push(build_group, email_subject, branch_tag, push_hub_image=Fals
         docker_no_cache = ''
     for docker_images in build_group:
         if args.image is None or (args.image is not None and docker_images == args.image):
+            print("Docker Image:", docker_images)
             # do the actual build process for docker image
             os.chdir(os.path.join(CWD_HOME_DIRECTORY,
                                   'MediaKraken/docker',
@@ -104,7 +105,7 @@ def build_email_push(build_group, email_subject, branch_tag, push_hub_image=Fals
                                                                             build_group[docker_images][0],
                                                                             'Cargo.toml'))
             except FileNotFoundError:
-                continue
+                pass
             # TODO check for errors/warnings and stop if found
             # Let the mirror's be passed, if not used it will just throw a warning
             pid_build_proc = subprocess.Popen(shlex.split('docker build %s'
@@ -137,7 +138,7 @@ def build_email_push(build_group, email_subject, branch_tag, push_hub_image=Fals
                                                                            build_group[docker_images][0],
                                                                            'Cargo.toml'))
             except FileNotFoundError:
-                continue
+                pass
             email_body = err.decode("utf-8")
             subject_text = ' FAILED'
             if email_body.find('Successfully tagged mediakraken') != -1 or email_body.find('writing image sha256') != -1:
