@@ -122,11 +122,9 @@ STAGE_CORE_IMAGES = {
     # musicbrainz load
     'mkmusicbrainz': ('mkmusicbrainz', 'scratch', 'core'),
 
+    # nginx pagespeed - retired by apache
     # nginx proxy for http to https and some bot blocking
     # 'mknginx': ('mknginx', 'alpine:3.13', 'core'),
-
-    # nginx pagespeed - retired by apache
-    # 'mknginxpagespeed': ('mknginxpagespeed', 'alpine:3.8', 'core'),
 
     # nut
     'mknut': ('mknut', 'alpine:3.17', 'core'),
@@ -167,9 +165,6 @@ STAGE_CORE_IMAGES = {
 
     # website via rust and axum
     'mkwebaxum': ('mkwebaxum', 'scratch', 'core'),
-
-    # website via rust and rocket
-    # 'mkwebrocket': ('mkwebrocket', 'busybox:1.36.0-uclibc', 'core'),
 }
 
 STAGE_ONE_GAME_SERVERS = {

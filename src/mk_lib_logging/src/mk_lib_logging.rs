@@ -11,11 +11,12 @@ pub async fn mk_logging_post_elk(
     let data = serde_json::json!({"@timestamp": utc.format("%Y-%m-%dT%H:%M:%S.%f").to_string(),
         "message": message_text, "type": message_type, "user": {"id": "metaman"}});
     let retry_policy = reqwest_retry::policies::ExponentialBackoff {
-        /// How many times the policy will tell the middleware to retry the request.
+        // How many times the policy will tell the middleware to retry the request.
         max_n_retries: 100,
         min_retry_interval: std::time::Duration::from_secs(30),
         max_retry_interval: std::time::Duration::from_secs(300),
         backoff_exponent: 2,
+        //jitter:  retry_policies::Jitter::Bounded,
     };
     let retry_transient_middleware = RetryTransientMiddleware::new_with_policy(retry_policy);
     let client = ClientBuilder::new(Client::new())

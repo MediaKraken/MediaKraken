@@ -45,7 +45,7 @@ pub async fn mk_data_from_url_to_json(
     url: String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let retry_policy = reqwest_retry::policies::ExponentialBackoff {
-        /// How many times the policy will tell the middleware to retry the request.
+        // How many times the policy will tell the middleware to retry the request.
         max_n_retries: 100,
         min_retry_interval: std::time::Duration::from_secs(30),
         max_retry_interval: std::time::Duration::from_secs(300),

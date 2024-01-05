@@ -42,7 +42,7 @@ COPY --from=cargo-build-mkdownload /mediakraken/deps/* /
 
 ADD https://github.com/yt-dlp/yt-dlp/releases/download/2023.07.06/yt-dlp_linux /yt-dlp
 RUN chmod a+rx /yt-dlp \
- && apk update && apk add --no-cache py3-pip libssl1.1 libcrypto1.1 \
+ && apk update && apk add --no-cache py3-pip libssl3 libcrypto3 \
  && rm -rf /var/cache/apt/* \
  && pip3 install dosage==3.0 cssselect==1.2.0 --break-system-packages
 
