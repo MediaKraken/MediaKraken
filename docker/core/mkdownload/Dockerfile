@@ -44,7 +44,7 @@ ADD https://github.com/yt-dlp/yt-dlp/releases/download/2023.07.06/yt-dlp_linux /
 RUN chmod a+rx /yt-dlp \
  && apk update && apk add --no-cache py3-pip libssl3 libcrypto3 \
  && rm -rf /var/cache/apt/* \
- && pip3 install dosage==3.0 cssselect==1.2.0 --break-system-packages
+ && pip3 install --no-cache-dir --trusted-host mksonatype -i http://mksonatype:8081/repository/pypi/simple dosage==3.0 cssselect==1.2.0 --break-system-packages
 
 # Import from builder.
 # COPY --from=cargo-build-mkdownload /etc/passwd /etc/passwd

@@ -40,7 +40,7 @@ ADD alpine-minirootfs-x86_64.tar.gz /
 # deps has full /usr/lib/x86_64-linux-gnu path.....hence copy to /
 COPY --from=cargo-build-mktmdbnetfetchupdate /mediakraken/deps/* /
 
-RUN apk update && apk add --no-cache libssl1.1 libcrypto1.1 \
+RUN apk update && apk add --no-cache libssl3 libcrypto3 \
  && rm -rf /var/cache/apt/*
 
 # Import from builder.

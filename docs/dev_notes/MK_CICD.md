@@ -13,7 +13,8 @@ apt-get install -y python3-dotenv python3-pip wget cloc shellcheck \
   cppcheck nodejs npm unzip
 
 # install the python tools 
-pip3 install pylint pyflakes bandit vulture dead bashate yamllint \ 
+pip3 install --no-cache-dir --trusted-host mksonatype -i http://mksonatype:8081/repository/pypi/simple \
+  pylint pyflakes bandit vulture dead bashate yamllint \ 
   pydocstyle flawfinder isort pytest selenium psutil gomatic
 
 # Pipelines

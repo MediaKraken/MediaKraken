@@ -23,8 +23,8 @@ ARG FFMPEG_VERSION=6.0
 # FONTCONFIG=2.14.2 - 2.14.2-r3
 # FREETYPE=2.12.1 - 2.13.0-r5
 # TODO FRIBIDI=1.0.13  <- why is hebrew lang needed?
-ARG GMMLIB=22.3.5
-ARG IHD=23.1.6
+ARG GMMLIB=22.3.15
+ARG IHD=23.4.3
 ARG KVAZAAR=2.2.0
 # LAME=3.100 - 3.100-r5
 # LIBASS=0.17.1 - 0.17.1-r0
@@ -101,7 +101,7 @@ RUN buildDeps="autoconf \
     export MAKEFLAGS="-j$(($(grep -c ^processor /proc/cpuinfo) + 1))" && \
     apk add --no-cache ${buildDeps} libgcc libstdc++ \
     ca-certificates busybox && \
-    pip3 install --no-cache-dir meson cmake
+    pip3 install --no-cache-dir --trusted-host mksonatype -i http://mksonatype:8081/repository/pypi/simple meson cmake --break-system-packages
 
     # aom
     RUN echo "Begin: aom" && \

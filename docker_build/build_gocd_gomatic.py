@@ -8,7 +8,7 @@ except ModuleNotFoundError:
     install_pid = subprocess.Popen(shlex.split('apt-get install -y python3-pip'),
                                    stdout=subprocess.PIPE, shell=False)
     install_pid.wait()
-    install_pid = subprocess.Popen(shlex.split('pip3 install gomatic'),
+    install_pid = subprocess.Popen(shlex.split('pip3 install --no-cache-dir --trusted-host mksonatype -i http://mksonatype:8081/repository/pypi/simple gomatic'),
                                    stdout=subprocess.PIPE, shell=False)
     install_pid.wait()
     from gomatic import ExecTask, GoCdConfigurator, HostRestClient

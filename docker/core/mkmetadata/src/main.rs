@@ -106,24 +106,26 @@ async fn main() -> Result<(), Box<dyn Error>> {
         for download_data in metadata_to_process {
             println!("DL Data: {:?}", download_data);
             // process the "Z" record
-            let metadata_uuid = mk_lib_metadata::base::metadata_process(
+            mk_lib_metadata::base::metadata_process(
                 &sqlx_pool,
-                &download_data,
+                "Z".to_string(),
+                download_data,
+                "",
             )
             .await
             .unwrap();
             println!("here2");
             // update the media row with the json media id and the proper name
-            if metadata_uuid != uuid::Uuid::nil() {
-                mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_update_metadata_guid(
-                    &sqlx_pool,
-                    &download_data.mm_download_provider_id.unwrap(),
-                    metadata_uuid,
-                    &download_data.mm_download_guid,
-                )
-                .await
-                .unwrap();
-            }
+            // if metadata_uuid != uuid::Uuid::nil() {
+            //     mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_update_metadata_guid(
+            //         &sqlx_pool,
+            //         &download_data.mm_download_provider_id.unwrap(),
+            //         metadata_uuid,
+            //         &download_data.mm_download_guid,
+            //     )
+            //     .await
+            //     .unwrap();
+            // }
         }
         sleep(Duration::from_secs(1)).await;
     }
