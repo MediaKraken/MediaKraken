@@ -14,8 +14,7 @@ FROM planner-mktranscode AS cargo-build-ffmpeg
 
 ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig \
     SRC=/usr/local \
-    DEBIAN_FRONTEND="noninteractive" \
-    MAKEFLAGS="-j48"
+    DEBIAN_FRONTEND="noninteractive"
 
 # https://aomedia.googlesource.com/aom
 ARG AOM=v3.8.0

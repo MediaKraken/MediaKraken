@@ -17,7 +17,7 @@ pub mod mk_lib_hardware_lg;
 pub mod mk_lib_hardware_marantz;
 pub mod mk_lib_hardware_nut;
 pub mod mk_lib_hardware_onkyo;
-pub mod mk_lib_hardware_onvif;
+//pub mod mk_lib_hardware_onvif;
 pub mod mk_lib_hardware_phue;
 #[cfg(feature = "raspberry")]
 pub mod mk_lib_hardware_pi;
