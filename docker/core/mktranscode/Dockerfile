@@ -17,35 +17,51 @@ ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig \
     DEBIAN_FRONTEND="noninteractive" \
     MAKEFLAGS="-j48"
 
-ARG AOM=v3.6.1
-ARG FDKAAC_VERSION=2.0.2
-ARG FFMPEG_VERSION=6.0
+# https://aomedia.googlesource.com/aom
+ARG AOM=v3.8.0
+# https://github.com/mstorsjo/fdk-aac
+ARG FDKAAC_VERSION=2.0.3
+# https://ffmpeg.org/download.html
+ARG FFMPEG_VERSION=6.1.1
 # FONTCONFIG=2.14.2 - 2.14.2-r3
 # FREETYPE=2.12.1 - 2.13.0-r5
 # TODO FRIBIDI=1.0.13  <- why is hebrew lang needed?
+# https://github.com/intel/gmmlib
 ARG GMMLIB=22.3.15
+# https://github.com/intel/media-driver
 ARG IHD=23.4.3
+# https://github.com/ultravideo/kvazaar
 ARG KVAZAAR=2.2.0
 # LAME=3.100 - 3.100-r5
 # LIBASS=0.17.1 - 0.17.1-r0
-ARG LIBDRM=2.4.115
+# https://dri.freedesktop.org/libdrm
+ARG LIBDRM=2.4.119
+# https://github.com/Intel-Media-SDK/MediaSDK
 ARG LIBMFX=22.5.4
 # LIBVA=2.18.0 - 2.18.0-r1
 # LIBVDPAU=1.5 - 1.5-r1
+# https://github.com/georgmartius/vid.stab
 ARG LIBVIDSTAB=1.1.1
-ARG LIBVMAF=2.3.1
-ARG LIBVPL=2023.3.1
+# https://github.com/Netflix/vmaf
+ARG LIBVMAF=3.0.0
+# https://github.com/oneapi-src/oneVPL
+ARG LIBVPL=2.10.1
 # NVCODEC=n12.0.16.0
 # OGG=1.3.5 - 1.3.5-r4
-ARG ONEVPL=23.2.4
+# https://github.com/oneapi-src/oneVPL-intel-gpu/
+ARG ONEVPL=23.4.3
+# ttp://downloads.sourceforge.net/project/opencore-amr/opencore-amr
 ARG OPENCOREAMR=0.1.6
-ARG OPENH264=2.3.1
-ARG OPENMPT_VERSION=0.7.2+release.makefile
+# https://github.com/cisco/openh264
+ARG OPENH264=2.4.0
+# https://lib.openmpt.org/files/libopenmpt/src/
+ARG OPENMPT_VERSION=0.7.3+release.makefile
 # OPENJPEG=2.5.0 - 2.5.0-r3
 # OPUS=1.3.1 - 1.4-r0
 # THEORA=1.1.1 - 1.1.1-r17
 # VORBIS=1.3.7 - 1.3.7-r1
 # VPX=1.13.0 -1.13.0-r1
+# https://bitbucket.org/multicoreware/x265_git
 ARG X265=3.5
 # XVID=1.3.7 - 1.3.7-r1
 
