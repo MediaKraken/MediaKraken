@@ -14,16 +14,16 @@ use serde_json::json;
 use sqlx::PgPool;
 use stdext::function_name;
 
-pub async fn auth<B>(
-    req: Request<B>,
-    next: Next<B>,
-    method: Method,
-    //auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
-    user_admin: bool,
-) -> Result<Response, StatusCode> {
-    println!("in auth");
-    Ok(next.run(req).await)
-}
+// pub async fn auth<B>(
+//     req: Request<B>,
+//     next: Next<B>,
+//     method: Method,
+//     //auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+//     user_admin: bool,
+// ) -> Result<Response, StatusCode> {
+//     println!("in auth");
+//     Ok(next.run(req).await)
+// }
 
 pub async fn guard_page_by_user(
     method: Method,

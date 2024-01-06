@@ -31,7 +31,10 @@ use std::{net::SocketAddr, path::PathBuf};
 use tokio::signal;
 use tower::timeout::TimeoutLayer;
 use tower::{timeout::error::Elapsed, ServiceBuilder};
-
+use tower::ServiceExt;
+use tower_http::{
+    services::{ServeDir, ServeFile},
+};
 mod axum_custom_filters;
 mod error_handling;
 mod guard;
@@ -416,7 +419,7 @@ async fn main() {
             "/public/login",
             get(public::bp_login::public_login).post(public::bp_login::public_login_post),
         )
-        .nest("/static", axum_static::static_router("static"))
+        .nest_service("/static", ServeDir::new("static"))
         .layer(
             AuthSessionLayer::<
                 mk_lib_database::mk_lib_database_user::User,
@@ -447,14 +450,14 @@ async fn main() {
         )
         .route("/metrics", get(|| async move { metric_handle.render() }))
         .layer(prometheus_layer)
-        .layer(Extension(sqlx_pool))
-        .layer(
-            ServiceBuilder::new()
-                .layer(HandleErrorLayer::new(|_: BoxError| async {
-                    StatusCode::REQUEST_TIMEOUT
-                }))
-                .layer(TimeoutLayer::new(Duration::from_secs(10))),
-        );
+        .layer(Extension(sqlx_pool));
+        // TODO .layer(
+        //     ServiceBuilder::new()
+        //         .layer(HandleErrorLayer::new(|_: BoxError| async {
+        //             StatusCode::REQUEST_TIMEOUT
+        //         }))
+        //         .layer(TimeoutLayer::new(Duration::from_secs(10))),
+        // );
     // add a fallback service for handling routes to unknown paths
     let app = app.fallback(bp_error::general_not_found);
 

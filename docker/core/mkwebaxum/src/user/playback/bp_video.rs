@@ -19,7 +19,7 @@ struct UserPlaybackVideoTemplate;
 pub async fn user_playback_video(
     Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
-    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    //auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let template = UserPlaybackVideoTemplate {};
     let reply_html = template.render().unwrap();
