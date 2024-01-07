@@ -26,7 +26,7 @@ ARG FFMPEG_VERSION=6.1.1
 # FREETYPE=2.12.1 - 2.13.0-r5
 # TODO FRIBIDI=1.0.13  <- why is hebrew lang needed?
 # https://github.com/intel/gmmlib
-ARG GMMLIB=22.3.15
+ARG GMMLIB=22.3.16
 # https://github.com/intel/media-driver
 ARG IHD=23.4.3
 # https://github.com/ultravideo/kvazaar
