@@ -95,6 +95,30 @@ services:
     networks:
       - mediakraken_network
 
+  elk:
+    # https://hub.docker.com/r/sebp/elk/
+    image: sebp/elk:oss-8.11.1
+    environment:
+      - ELASTICSEARCH_START=1
+      - LOGSTASH_START=1
+      - KIBANA_START=1
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    volumes:
+      - mediakraken_vol_test_elk:/var/lib/elasticsearch      
+    networks:
+      - mediakraken_network
+    ports:
+      - "5000:5000"
+      - "5044:5044"
+      - "5601:5601"
+      - "9200:9200"
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [ node.role == manager ]
+
   filebeat:
     # https://www.docker.elastic.co/r/beats
     image: docker.elastic.co/beats/filebeat-oss:8.11.3
