@@ -20,7 +20,8 @@ services:
         constraints: [ node.platform.os == linux ]
 
   certbot:
-    image: certbot/certbot:v2.6.0
+    # https://github.com/certbot/certbot/releases
+    image: certbot/certbot:v2.8.0
     deploy:
       mode: replicated
       replicas: 1
