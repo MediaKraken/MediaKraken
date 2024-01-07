@@ -608,7 +608,7 @@ services:
 
   # https://github.com/prometheus-community/postgres_exporter
   postgres-exporter:
-    image: quay.io/prometheuscommunity/postgres-exporter:v0.13.2
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.15.0
     environment:
       DATA_SOURCE_URI: mkstack_database:5432/postgres?sslmode=disable
       DATA_SOURCE_USER: postgres
