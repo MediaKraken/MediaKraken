@@ -194,7 +194,7 @@ services:
       replicas: 0 # TODO renable after testing via mkcode
 
   grafana:
-    image: grafana/grafana-oss:10.0.3
+    image: grafana/grafana-oss:10.0.10
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     environment:
