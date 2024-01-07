@@ -49,6 +49,7 @@ pub mod admin {
     pub mod bp_hardware;
     pub mod bp_home;
     pub mod bp_library;
+    pub mod bp_reports;
     pub mod bp_settings;
     pub mod bp_torrent;
     pub mod bp_user;
@@ -218,6 +219,7 @@ async fn main() {
             get(admin::bp_library::admin_library),
         )
         .route_with_tsr("/admin/settings", get(admin::bp_settings::admin_settings))
+        .route_with_tsr("/admin/report_known_media/:page", get(admin::bp_reports::admin_report_known_media))
         .route_with_tsr("/admin/torrent", get(admin::bp_torrent::admin_torrent))
         .route_with_tsr("/admin/user/:page", get(admin::bp_user::admin_user))
         .route_with_tsr(

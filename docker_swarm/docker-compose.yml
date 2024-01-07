@@ -5,7 +5,6 @@ version: '3.8'
 services:
   cadvisor:
     # https://github.com/google/cadvisor
-    # https://github.com/google/cadvisor/releases
     image: gcr.io/cadvisor/cadvisor:v0.47.2
     hostname: '{{.Node.ID}}'
     volumes:
@@ -25,7 +24,7 @@ services:
     image: certbot/certbot:v2.8.0
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
       placement:
         constraints: [ node.role == manager ]
   
@@ -77,57 +76,6 @@ services:
     networks:
       - mediakraken_network
 
- #  # Postgresql server
-  #  database:
-  #    image: mediakraken/mkdatabase:${BRANCH}
-  #    environment:
-  #      - PGHOST=/tmp
-  #      - MAX_CONNECTIONS=20
-  #      - MAX_WAL_SENDERS=10
-  #      - PG_MODE=primary
-  #      - PG_PRIMARY_USER=${DBUSER}
-  #      - PG_PRIMARY_PASSWORD=${DBPASS}
-  #      - PG_ROOT_PASSWORD=${DBPASS}
-  #      - PG_PRIMARY_PORT=5432
-  #      - POSTGRES_DB=${DBDATABASE}
-  #      - POSTGRES_USER=${DBUSER}
-  #      - POSTGRES_PASSWORD=${DBPASS}
-  #    stop_grace_period: 30s
-  #    stop_signal: SIGTERM
-  #    networks:
-  #      - mediakraken_network_backend
-  #    deploy:
-  #      placement:
-  #        constraints:
-  #        - node.labels.type == primary
-  #        - node.role == worker
-  #
-  #  # Postgresql server replica
-  #  database-replica:
-  #    image: mediakraken/mkdatabase:${BRANCH}
-  #    environment:
-  #      - PGHOST=/tmp
-  #      - MAX_CONNECTIONS=20
-  #      - MAX_WAL_SENDERS=10
-  #      - PG_MODE=replica
-  #      - PG_PRIMARY_HOST=database
-  #      - PG_PRIMARY_PORT=5432
-  #      - PG_PRIMARY_USER=${DBUSER}
-  #      - PG_PRIMARY_PASSWORD=${DBPASS}
-  #      - PG_ROOT_PASSWORD=${DBPASS}
-  #      - POSTGRES_DB=${DBDATABASE}
-  #      - POSTGRES_USER=${DBUSER}
-  #      - POSTGRES_PASSWORD=${DBPASS}
-  #    stop_grace_period: 30s
-  #    stop_signal: SIGTERM
-  #    networks:
-  #      - mediakraken_network_backend
-  #    deploy:
-  #      placement:
-  #        constraints:
-  #        - node.labels.type != primary
-  #        - node.role == worker
-
   download:
     image: mediakraken/mkdownload:${BRANCH}
     secrets:
@@ -143,12 +91,13 @@ services:
       - mediakraken_vol_static:/mediakraken/static
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
     networks:
       - mediakraken_network
 
   filebeat:
-    image: elastic/filebeat:7.17.10
+    # https://www.docker.elastic.co/r/beats
+    image: docker.elastic.co/beats/filebeat-oss:8.11.3
     environment:
       - ELASTICSEARCH_HOSTS=mkelk.beaverbay.local:9200
       - KIBANA_HOSTS=mkelk.beaverbay.local:5601
@@ -299,23 +248,6 @@ services:
     networks:
       - mediakraken_network
   
-  # not used..........since filebeat collects the logs
-  # logspout:
-  #   image: gliderlabs/logspout:v3.2.14
-  #   environment:
-  #     - ROUTE_URIS="logstash+tcp://mkelk.beaverbay.local:5000"
-  #     - LOGSTASH_FIELDS="environment=production"
-  #     - ALLOW_TTY=true
-  #     - SYSLOG_TAG="{{index .Service.Name}}"
-  #     - SYSLOG_HOSTNAME="{{index .Node.Hostname}}"      
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock:ro
-  #     - /etc/hostname:/etc/host_hostname:ro
-  #   deploy:
-  #     mode: global
-  #   networks:
-  #     - mediakraken_network
-
   mediascanner:
     image: mediakraken/mkmediascanner:${BRANCH}
     secrets:
@@ -330,7 +262,7 @@ services:
       - mediakraken_vol_static:/mediakraken/static
     deploy:
       mode: replicated
-      replicas: 0  # TODO renable after testing via mkcode
+      replicas: 0 # TODO renable after testing via mkcode
     networks:
       - mediakraken_network
 
@@ -378,7 +310,8 @@ services:
 
   # Container to monitor services running inside other containers
   metricbeat:
-    image: docker.elastic.co/beats/metricbeat:8.8.1
+    # https://www.docker.elastic.co/r/beats/metricbeat-oss
+    image: docker.elastic.co/beats/metricbeat-oss:8.11.3
     hostname: "{{.Node.Hostname}}-metricbeat"
     networks:
       - mediakraken_network
@@ -425,7 +358,7 @@ services:
 #      - "9425:9425"
 #    deploy:
 #      mode: replicated
-#      replicas: 1
+#      replicas: 0
 #      placement:
 #        constraints: [node.role == manager]
 #
@@ -635,6 +568,10 @@ services:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - mediakraken_network
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
 
   rabbitconsume:
     image: mediakraken/mkrabbitconsume:${BRANCH}
@@ -756,7 +693,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
 
   tmdbnetfetchupdate:
     image: mediakraken/mktmdbnetfetchupdate:${BRANCH}
@@ -817,7 +754,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 0
+      replicas: 0 # TODO renable after testing via mkcode
 
   webapp:
     image: mediakraken/mkwebaxum:${BRANCH}
@@ -872,7 +809,7 @@ services:
   #     - 3001:3001 #optional https
   #  deploy:
   #    mode: replicated
-  #    replicas: 1
+  #    replicas: 0 # TODO renable after testing via mkcode
   #    placement:
   #      constraints: [ node.role == manager ]
 
@@ -903,7 +840,7 @@ services:
       - net.ipv4.conf.all.src_valid_mark=1
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
       placement:
         constraints: [ node.role == manager ]
 

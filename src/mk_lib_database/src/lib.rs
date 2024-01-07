@@ -9,6 +9,7 @@ pub mod mk_lib_database_network_share;
 pub mod mk_lib_database_notification;
 pub mod mk_lib_database_option_status;
 pub mod mk_lib_database_postgresql;
+pub mod mk_lib_database_report;
 pub mod mk_lib_database_search;
 pub mod mk_lib_database_sync;
 pub mod mk_lib_database_usage;
