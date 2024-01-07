@@ -627,7 +627,7 @@ services:
   # https://prometheus.io/download/
   # https://hub.docker.com/u/prom
   prometheus:
-    image: prom/prometheus:v2.37.9
+    image: prom/prometheus:v2.45.2
     ports:
       - 9090:9090
     volumes:
