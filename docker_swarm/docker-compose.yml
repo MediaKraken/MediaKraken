@@ -881,6 +881,7 @@ volumes:
   mediakraken_vol_certs:
   mediakraken_vol_comics:
   mediakraken_vol_devices:
+  mediakraken_vol_elk:
   mediakraken_vol_emulation:
   mediakraken_vol_grafana:
   mediakraken_vol_metricbeat:
