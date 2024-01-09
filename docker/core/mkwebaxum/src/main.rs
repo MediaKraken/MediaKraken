@@ -204,6 +204,7 @@ async fn main() {
     // build our application with routes
     // route_with_tsr creates two routes.....one with trailing slash
     let app = Router::new()
+        .route_with_tsr("/admin", get(admin::bp_home::admin_home))
         .route_with_tsr("/admin/backup", get(admin::bp_backup::admin_backup))
         .route_with_tsr("/admin/cron", get(admin::bp_cron::admin_cron))
         .route_with_tsr("/admin/database", get(admin::bp_database::admin_database))
