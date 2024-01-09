@@ -42,15 +42,6 @@ async fn main() {
         if iface.name == "ens18" || iface.name == "eth0" || iface.name == "ens192" {
             for source_ip in iface.ips.iter() {
                 if source_ip.is_ipv4() {
-                    // #[cfg(debug_assertions)]
-                    // {
-                    //     mk_lib_logging::mk_logging_post_elk(
-                    //         "info",
-                    //         json!({ "source_ip": source_ip }),
-                    //     )
-                    //     .await
-                    //     .unwrap();
-                    // }
                     let source_ip = iface
                         .ips
                         .iter()
@@ -61,15 +52,6 @@ async fn main() {
                         })
                         .unwrap();
                     mediakraken_ip = source_ip.to_string();
-                    // #[cfg(debug_assertions)]
-                    // {
-                    //     mk_lib_logging::mk_logging_post_elk(
-                    //         "info",
-                    //         json!({ "mediakraken_ip": mediakraken_ip }),
-                    //     )
-                    //     .await
-                    //     .unwrap();
-                    // }
                     break;
                 }
             }
@@ -82,7 +64,7 @@ async fn main() {
     match result {
         Ok(images) => {
             for i in images {
-                if i.names[0] == "/mkstack_nginx" {
+                if i.names[0] == "/mkstack_webapp" {
                     host_port = i.ports[0].private_port;
                     break;
                 }
@@ -95,34 +77,15 @@ async fn main() {
     let mut buf = [0u8; 65535];
     let multi_addr = Ipv4Addr::new(234, 2, 2, 2);
     let inter = Ipv4Addr::new(0, 0, 0, 0);
-    socket.join_multicast_v4(&multi_addr, &inter);
+    let _result = socket.join_multicast_v4(&multi_addr, &inter);
     loop {
         let (amt, remote_addr) = socket.recv_from(&mut buf).unwrap();
-        // #[cfg(debug_assertions)]
-        // {
-        //     mk_lib_logging::mk_logging_post_elk(
-        //         "info",
-        //         json!({"amt": amt, "remote_addr": remote_addr}),
-        //     )
-        //     .await
-        //     .unwrap();
-        // }
         // create a socket to send the response
         let responder =
             UdpSocket::from(new_socket(&remote_addr).expect("failed to create responder"));
-
         // we send the response that was set at the method beginning
         responder
             .send_to(response.as_bytes(), &remote_addr)
             .expect("failed to respond");
-        // #[cfg(debug_assertions)]
-        // {
-        //     mk_lib_logging::mk_logging_post_elk(
-        //         "info",
-        //         json!({"response": response, "remote_addr": remote_addr}),
-        //     )
-        //     .await
-        //     .unwrap();
-        // }
     }
 }
