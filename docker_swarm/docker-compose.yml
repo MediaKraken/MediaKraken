@@ -755,6 +755,7 @@ services:
   transmission:
     image: mediakraken/mktransmission:${BRANCH}
     ports:
+      - "9091:9091"  # for testing only!
       - "51413:51413/tcp"
       - "51413:51413/udp"
     volumes:

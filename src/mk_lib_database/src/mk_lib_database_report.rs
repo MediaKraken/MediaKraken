@@ -27,7 +27,7 @@ pub async fn mk_lib_database_report_known_media_read(
     let select_query = sqlx::query(
         "select mm_media_path, \
         mm_media_class_enum, \
-        (mm_media_json->>'Added')::timestamp as mm_media_json_added \
+        (mm_media_json->>'Added')::timestamptz as mm_media_json_added \
         from mm_media order by mm_media_json_added desc offset $1 limit $2",
     )
     .bind(offset)
