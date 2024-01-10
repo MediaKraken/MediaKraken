@@ -20,6 +20,8 @@ use axum_session::{
 use axum_session_auth::{AuthConfig, AuthSessionLayer};
 use mk_lib_database;
 use rcgen::generate_simple_self_signed;
+use reverse_proxy_service::ReusedServiceBuilder;
+use reverse_proxy_service::{AppendSuffix, Static, TrimPrefix};
 use ring::digest;
 use serde_json::json;
 use sqlx::PgPool;
@@ -30,11 +32,9 @@ use std::time::Duration;
 use std::{net::SocketAddr, path::PathBuf};
 use tokio::signal;
 use tower::timeout::TimeoutLayer;
-use tower::{timeout::error::Elapsed, ServiceBuilder};
 use tower::ServiceExt;
-use tower_http::{
-    services::{ServeDir, ServeFile},
-};
+use tower::{timeout::error::Elapsed, ServiceBuilder};
+use tower_http::services::{ServeDir, ServeFile};
 mod axum_custom_filters;
 mod error_handling;
 mod guard;
@@ -202,6 +202,12 @@ async fn main() {
     .unwrap();
 
     // build our application with routes
+    let docker_results = mk_lib_common::mk_lib_common_docker::mk_common_docker_info()
+        .await
+        .unwrap();
+    let transmission_host =
+        reverse_proxy_service::builder_http(format!("{}:9091", docker_results.name.unwrap()))
+            .unwrap();
     // route_with_tsr creates two routes.....one with trailing slash
     let app = Router::new()
         .route_with_tsr("/admin", get(admin::bp_home::admin_home))
@@ -220,8 +226,12 @@ async fn main() {
             get(admin::bp_library::admin_library),
         )
         .route_with_tsr("/admin/settings", get(admin::bp_settings::admin_settings))
-        .route_with_tsr("/admin/report_known_media/:page", get(admin::bp_reports::admin_report_known_media))
-        .route_with_tsr("/admin/torrent", get(admin::bp_torrent::admin_torrent))
+        .route_with_tsr(
+            "/admin/report_known_media/:page",
+            get(admin::bp_reports::admin_report_known_media),
+        )
+        // .route_with_tsr("/admin/torrent", get(admin::bp_torrent::admin_torrent))
+        .route_service("/admin/torrent", transmission_host.build(AppendSuffix("/web")));
         .route_with_tsr("/admin/user/:page", get(admin::bp_user::admin_user))
         .route_with_tsr(
             "/user/internet/flickr",
@@ -454,13 +464,13 @@ async fn main() {
         .route("/metrics", get(|| async move { metric_handle.render() }))
         .layer(prometheus_layer)
         .layer(Extension(sqlx_pool));
-        // TODO .layer(
-        //     ServiceBuilder::new()
-        //         .layer(HandleErrorLayer::new(|_: BoxError| async {
-        //             StatusCode::REQUEST_TIMEOUT
-        //         }))
-        //         .layer(TimeoutLayer::new(Duration::from_secs(10))),
-        // );
+    // TODO .layer(
+    //     ServiceBuilder::new()
+    //         .layer(HandleErrorLayer::new(|_: BoxError| async {
+    //             StatusCode::REQUEST_TIMEOUT
+    //         }))
+    //         .layer(TimeoutLayer::new(Duration::from_secs(10))),
+    // );
     // add a fallback service for handling routes to unknown paths
     let app = app.fallback(bp_error::general_not_found);
 
