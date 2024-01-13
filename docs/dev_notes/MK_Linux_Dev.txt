@@ -100,3 +100,11 @@ sudo pip3 install docker-compose
 sudo systemctl enable docker
 sudo usermod -aG docker pi
 # restart terminal
+
+
+
+
+
+
+cargo install cargo-cache
+cargo cache -a

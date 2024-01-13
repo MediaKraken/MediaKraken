@@ -3,10 +3,12 @@ extern crate lazy_static;
 
 use axum::http::{Method, Uri};
 use axum::{
-    http::StatusCode,
-    response::IntoResponse,
+    body::Body,
+    //http::StatusCode,
     routing::{get, post},
     BoxError, Extension, Json, Router,
+    extract::{Request, State},
+    response::{IntoResponse, Response},
 };
 use axum_csrf::{CsrfConfig, CsrfToken};
 use axum_extra::routing::RouterExt;
@@ -20,8 +22,8 @@ use axum_session::{
 use axum_session_auth::{AuthConfig, AuthSessionLayer};
 use mk_lib_database;
 use rcgen::generate_simple_self_signed;
-use reverse_proxy_service::ReusedServiceBuilder;
-use reverse_proxy_service::{AppendSuffix, Static, TrimPrefix};
+// use reverse_proxy_service::ReusedServiceBuilder;
+// use reverse_proxy_service::{AppendSuffix, Static, TrimPrefix};
 use ring::digest;
 use serde_json::json;
 use sqlx::PgPool;
@@ -35,6 +37,10 @@ use tower::timeout::TimeoutLayer;
 use tower::ServiceExt;
 use tower::{timeout::error::Elapsed, ServiceBuilder};
 use tower_http::services::{ServeDir, ServeFile};
+use hyper::StatusCode;
+use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
+
+type Client = hyper_util::client::legacy::Client<HttpConnector, Body>;
 mod axum_custom_filters;
 mod error_handling;
 mod guard;
@@ -205,9 +211,12 @@ async fn main() {
     let docker_results = mk_lib_common::mk_lib_common_docker::mk_common_docker_info()
         .await
         .unwrap();
-    let transmission_host =
-        reverse_proxy_service::builder_http(format!("{}:9091", docker_results.name.unwrap()))
-            .unwrap();
+    // TODO let transmission_host: reverse_proxy_service::ReusedServiceBuilder =
+    //     reverse_proxy_service::builder_http(format!("{}:9091", docker_results.name.unwrap()))
+    //         .unwrap();
+    let client: Client =
+        hyper_util::client::legacy::Client::<(), ()>::builder(TokioExecutor::new())
+            .build(HttpConnector::new());
     // route_with_tsr creates two routes.....one with trailing slash
     let app = Router::new()
         .route_with_tsr("/admin", get(admin::bp_home::admin_home))
@@ -230,8 +239,8 @@ async fn main() {
             "/admin/report_known_media/:page",
             get(admin::bp_reports::admin_report_known_media),
         )
-        // .route_with_tsr("/admin/torrent", get(admin::bp_torrent::admin_torrent))
-        .route_service("/admin/torrent", transmission_host.build(AppendSuffix("/web")));
+        .route_with_tsr("/admin/torrent", get(admin::bp_torrent::admin_torrent))
+        .route_with_tsr("/admin/torrent/web", get(proxy_transmission_handler)).with_state(client)
         .route_with_tsr("/admin/user/:page", get(admin::bp_user::admin_user))
         .route_with_tsr(
             "/user/internet/flickr",
@@ -504,4 +513,20 @@ async fn shutdown_signal() {
         _ = ctrl_c => {},
         _ = terminate => {},
     }
+}
+
+async fn proxy_transmission_handler(State(client): State<Client>, mut req: Request) -> Result<Response, StatusCode> {
+    let path = req.uri().path();
+    let path_query = req
+        .uri()
+        .path_and_query()
+        .map(|v| v.as_str())
+        .unwrap_or(path);
+    let uri = format!("https://127.0.0.1:3000{}", path_query);
+    *req.uri_mut() = Uri::try_from(uri).unwrap();
+    Ok(client
+        .request(req)
+        .await
+        .map_err(|_| StatusCode::BAD_REQUEST)?
+        .into_response())
 }

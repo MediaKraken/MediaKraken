@@ -16,7 +16,7 @@ Please see the WIKI for documentation.<BR>
 <LI>Native client support for Android, iOS, MacOSX, Linux and Windows
 <LI>"Slave" servers for streaming to balance the load with many clients streaming at once via Docker Swarm
 	<ul>
-	<li>GPU acceleration supported via CUDA
+	<li>GPU acceleration support
 	</ul>
 <li>"Link" servers together so they can display each others media
 <LI>Central database implemented via PostgreSQL w/Citus plugin for clustering
@@ -28,9 +28,8 @@ Please see the WIKI for documentation.<BR>
     <li>img file for Raspberry Pi 3/4 (Linux based)
     <li>ISO/img for install on dedicated client hardware (Linux based)
     </UL>
-<LI>Server: Most server images are simply Alpine Linux with Docker and Docker Compose with the images downloaded for immediate use.
+<LI>Server: Most server images are Alpine Linux with Docker Swarm and Docker Compose with the current images downloaded for immediate use.
     <UL>
-    <li>OVA for VMWare 6.x or 7.x
     <li>OVA for Proxmox VE 8.x
     <li>64-bit ISO/img for install on dedicated server hardware
     </ul>
