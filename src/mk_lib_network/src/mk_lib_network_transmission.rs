@@ -26,7 +26,6 @@ pub async fn mk_network_transmission_close(
         Ok(_) => println!("Yay!"),
         Err(_) => panic!("Oh no!"),
     }
-    println!("Rpc response is ok: {}", response?.is_ok());
     Ok(())
 }
 

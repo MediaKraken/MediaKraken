@@ -522,7 +522,7 @@ async fn proxy_transmission_handler(State(client): State<Client>, mut req: Reque
         .path_and_query()
         .map(|v| v.as_str())
         .unwrap_or(path);
-    let uri = format!("https://127.0.0.1:3000{}", path_query);
+    let uri = format!("https://mkstack_transmission:9091{}", path_query);
     *req.uri_mut() = Uri::try_from(uri).unwrap();
     Ok(client
         .request(req)

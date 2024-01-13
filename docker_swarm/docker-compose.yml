@@ -72,7 +72,6 @@ services:
     volumes:
       - mediakraken_vol_postgresql:/var/lib/postgresql/data
       - mediakraken_vol_postgresql_backup:/mediakraken/backup
-      - mediakraken_vol_postgresql_logging:/var/log/postgresql
     networks:
       - mediakraken_network
 
@@ -109,10 +108,10 @@ services:
     networks:
       - mediakraken_network
     ports:
-      - "5000:5000"
-      - "5044:5044"
+      #- "5000:5000"
+      #- "5044:5044"
       - "5601:5601"
-      - "9200:9200"
+      #- "9200:9200"
     deploy:
       mode: replicated
       replicas: 1
@@ -440,7 +439,8 @@ services:
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
-      - /home/spoot/mbdump:/mediakraken/mbdump
+      - mediakraken_vol_mbrainz_data:/mediakraken/mbdump
+      #- /home/spoot/mbdump:/mediakraken/mbdump
     deploy:
       mode: replicated
       replicas: 0 # TODO renable after testing via mkcode
@@ -499,7 +499,7 @@ services:
       replicas: 0 # TODO renable after testing via mkcode
 
   pgadmin:
-    image: dpage/pgadmin4:8.1
+    image: dpage/pgadmin4:8.2
     stop_grace_period: 30s
     stop_signal: SIGTERM
     networks:
@@ -817,26 +817,27 @@ services:
       placement:
         constraints: [ node.platform.os == linux ]
 
-  # wireshark:
-  #   image: linuxserver/wireshark:4.0.6
-  #   cap_add:
-  #     - NET_ADMIN
-  #   security_opt:
-  #     - seccomp:unconfined
-  #   network_mode: host
-  #   environment:
-  #     - PUID=1000
-  #     - PGID=1000
-  #     - TZ=Etc/UTC
-  #   volumes:
-  #     - /path/to/config:/config
-  #   ports:
-  #     - 3001:3001 #optional https
-  #  deploy:
-  #    mode: replicated
-  #    replicas: 0 # TODO renable after testing via mkcode
-  #    placement:
-  #      constraints: [ node.role == manager ]
+  wireshark:
+    # https://hub.docker.com/r/linuxserver/wireshark/tags
+    image: linuxserver/wireshark:4.0.11
+    cap_add:
+      - NET_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    network_mode: host
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - mediakraken_vol_wireshark:/config
+    ports:
+      - 3001:3001 #optional https
+   deploy:
+     mode: replicated
+     replicas: 0 # TODO renable after testing via mkcode
+     placement:
+       constraints: [ node.role == manager ]
 
   # https://github.com/linuxserver/docker-wireguard
   wireguard:
@@ -886,7 +887,6 @@ volumes:
   mediakraken_vol_emulation:
   mediakraken_vol_grafana:
   mediakraken_vol_metricbeat:
-  mediakraken_vol_mbrainz_conf:
   mediakraken_vol_mbrainz_data:
   mediakraken_vol_mumble:
   # mediakraken_vol_nginx:
@@ -895,7 +895,6 @@ volumes:
   mediakraken_vol_portainer_data:
   mediakraken_vol_postgresql:
   mediakraken_vol_postgresql_backup:
-  mediakraken_vol_postgresql_logging:
   mediakraken_vol_rabbit:
   mediakraken_vol_redis:
   mediakraken_vol_static:
@@ -903,6 +902,7 @@ volumes:
   mediakraken_vol_transmission:
   mediakraken_vol_transmission_downloads:
   mediakraken_vol_transmission_incomplete:
+  mediakraken_vol_wireshark:
 
 secrets:
   csrf_key:
