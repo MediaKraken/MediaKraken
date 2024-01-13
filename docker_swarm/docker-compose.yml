@@ -90,7 +90,7 @@ services:
       - mediakraken_vol_static:/mediakraken/static
     deploy:
       mode: replicated
-      replicas: 0 # TODO renable after testing via mkcode
+      replicas: 1
     networks:
       - mediakraken_network
 
@@ -146,7 +146,7 @@ services:
       - mediakraken_vol_static:/static
     deploy:
       mode: replicated
-      replicas: 0 # TODO renable after testing via mkcode
+      replicas: 1
     networks:
       - mediakraken_network
 
@@ -164,7 +164,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 0 # TODO renable after testing via mkcode
+      replicas: 1
 
   grafana:
     image: grafana/grafana-oss:10.0.10
@@ -212,7 +212,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 0 # TODO renable after testing via mkcode
+      replicas: 1
       placement:
         constraints: [ node.role == manager ]
 
@@ -234,7 +234,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 0 # TODO renable after testing via mkcode
+      replicas: 1
       placement:
         constraints: [ node.role == manager ]
 
@@ -252,7 +252,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 0 # TODO renable after testing via mkcode
+      replicas: 1
 
   libretrocorefetchupdate:
     image: mediakraken/mklibretrocorefetchupdate:${BRANCH}
@@ -267,7 +267,7 @@ services:
       - mediakraken_vol_static:/mediakraken/static
     deploy:
       mode: replicated
-      replicas: 0 # TODO renable after testing via mkcode
+      replicas: 1
     networks:
       - mediakraken_network
   
@@ -285,7 +285,7 @@ services:
       - mediakraken_vol_static:/mediakraken/static
     deploy:
       mode: replicated
-      replicas: 0 # TODO renable after testing via mkcode
+      replicas: 1
     networks:
       - mediakraken_network
 
@@ -329,7 +329,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 0 # TODO renable after testing via mkcode
+      replicas: 1
 
   # Container to monitor services running inside other containers
   metricbeat:
@@ -496,7 +496,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 0 # TODO renable after testing via mkcode
+      replicas: 1
 
   pgadmin:
     image: dpage/pgadmin4:8.2
@@ -668,7 +668,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 0 # TODO renable after testing via mkcode
+      replicas: 1
 
   sharescanner:
     image: mediakraken/mksharescanner:${BRANCH}
@@ -717,7 +717,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 0 # TODO renable after testing via mkcode
+      replicas: 1
 
   tmdbnetfetchupdate:
     image: mediakraken/mktmdbnetfetchupdate:${BRANCH}
@@ -733,7 +733,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 0 # TODO renable after testing via mkcode
+      replicas: 1
 
   transcode:
     image: mediakraken/mktranscode:${BRANCH}
@@ -835,7 +835,7 @@ services:
       - 3001:3001 #optional https
     deploy:
       mode: replicated
-      replicas: 0 # TODO renable after testing via mkcode
+      replicas: 1
       placement:
         constraints: [ node.role == manager ]
 
