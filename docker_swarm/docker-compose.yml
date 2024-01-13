@@ -833,11 +833,11 @@ services:
       - mediakraken_vol_wireshark:/config
     ports:
       - 3001:3001 #optional https
-   deploy:
-     mode: replicated
-     replicas: 0 # TODO renable after testing via mkcode
-     placement:
-       constraints: [ node.role == manager ]
+    deploy:
+      mode: replicated
+      replicas: 0 # TODO renable after testing via mkcode
+      placement:
+        constraints: [ node.role == manager ]
 
   # https://github.com/linuxserver/docker-wireguard
   wireguard:
