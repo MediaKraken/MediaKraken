@@ -21,7 +21,7 @@ pub async fn mk_lib_database_metadata_game_system_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
-    if search_value != "" {
+    if search_value != String::new() {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_game_systems_info \
             where gs_game_system_name % $1",
@@ -55,7 +55,7 @@ pub async fn mk_lib_database_metadata_game_system_read(
 ) -> Result<Vec<DBMetaGameSystemList>, sqlx::Error> {
     // TODO might need to sort by release year as well for machines with multiple releases
     let select_query;
-    if search_value != "" {
+    if search_value != String::new() {
         select_query = sqlx::query(
             "select gs_game_system_id, gs_game_system_name, \
             gs_game_system_json->>'description' as gs_description, \
@@ -63,7 +63,7 @@ pub async fn mk_lib_database_metadata_game_system_read(
             gs_game_system_alias from mm_metadata_game_systems_info \
             where gs_game_system_name % $1 \
             order by gs_game_system_json->'description' \
-            offset $2 limit $2",
+            offset $2 limit $3",
         )
         .bind(search_value)
         .bind(offset)

@@ -51,75 +51,76 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .await
             .unwrap();
 
-    // while let Some(msg) = rabbit_consumer.recv().await {
-    //     if let Some(payload) = msg.content {
-    // determine directories to audit
-    for row_data in
-        mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_audit_read(
-            &sqlx_pool,
-        )
-        .await
-        .unwrap()
-    {
-        let share_info =
+    while let Some(msg) = rabbit_consumer.recv().await {
+        if let Some(payload) = msg.content {
+            // determine directories to audit
+            for row_data in
+                mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_audit_read(
+                    &sqlx_pool,
+                )
+                .await
+                .unwrap()
+            {
+                let share_info =
             mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_detail(
                 &sqlx_pool,
                 row_data.mm_media_dir_share_guid,
             )
             .await
             .unwrap();
-        // TODO handle NFS shares as well
-        // log into share via smbclient
-        let smb_client = mk_lib_file::mk_lib_smb::mk_file_smb_client_connect(share_info);
-        match smb_client {
-            Ok(smb_client) => {
-                // make sure the path still exists
-                let data_stat = smb_client.stat(format!("/{}", row_data.mm_media_dir_path));
-                match data_stat {
-                    Ok(file_stat) => {
-                        let last_modified =
-                            mk_lib_common::mk_lib_common_date::system_time_to_date_time(
-                                file_stat.modified,
-                            );
-                        // TODO remove true for testing
-                        if true || last_modified > row_data.mm_media_dir_last_scanned {
-                            let _result = mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_status_update(
+                // TODO handle NFS shares as well
+                // log into share via smbclient
+                let smb_client = mk_lib_file::mk_lib_smb::mk_file_smb_client_connect(share_info);
+                match smb_client {
+                    Ok(smb_client) => {
+                        // make sure the path still exists
+                        let data_stat = smb_client.stat(format!("/{}", row_data.mm_media_dir_path));
+                        match data_stat {
+                            Ok(file_stat) => {
+                                let last_modified =
+                                    mk_lib_common::mk_lib_common_date::system_time_to_date_time(
+                                        file_stat.modified,
+                                    );
+                                // TODO remove true for testing
+                                if true || last_modified > row_data.mm_media_dir_last_scanned {
+                                    let _result = mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_status_update(
                                             &sqlx_pool,
                                             row_data.mm_media_dir_guid,
                                             json!({"Status": "Added to scan", "Pct": 100}),
                                         )
                                         .await;
-                            let original_media_class = row_data.mm_media_dir_class_enum;
-                            // update the timestamp now so any other media added DURING this scan don't get skipped
-                            let _result = mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_timestamp_update(
+                                    let original_media_class = row_data.mm_media_dir_class_enum;
+                                    // update the timestamp now so any other media added DURING this scan don't get skipped
+                                    let _result = mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_timestamp_update(
                                             &sqlx_pool,
                                             row_data.mm_media_dir_guid,
                                         )
                                         .await;
-                            let _result = mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_status_update(
+                                    let _result = mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_status_update(
                                             &sqlx_pool,
                                             row_data.mm_media_dir_guid,
                                             json!({"Status": "File search scan", "Pct": 0.0}),
                                         )
                                         .await;
-                            let mut file_data = mk_lib_file::mk_lib_smb::mk_file_smb_client_tree(
-                                &smb_client,
-                                format!("/{}", row_data.mm_media_dir_path).as_str(),
-                            );
-                            let mut total_scanned: u64 = 0;
-                            let mut total_files: u64 = 0;
-                            while file_data.len() > 0 {
-                                let file_metadata = file_data[0].clone();
-                                println!("meta: {:?}", file_metadata);
-                                if file_metadata.directory == true {
-                                    file_data.append(
+                                    let mut file_data =
+                                        mk_lib_file::mk_lib_smb::mk_file_smb_client_tree(
+                                            &smb_client,
+                                            format!("/{}", row_data.mm_media_dir_path).as_str(),
+                                        );
+                                    let mut total_scanned: u64 = 0;
+                                    let mut total_files: u64 = 0;
+                                    while file_data.len() > 0 {
+                                        let file_metadata = file_data[0].clone();
+                                        println!("meta: {:?}", file_metadata);
+                                        if file_metadata.directory == true {
+                                            file_data.append(
                                         &mut mk_lib_file::mk_lib_smb::mk_file_smb_client_tree(
                                             &smb_client,
                                             format!("/{}", file_metadata.name).as_str(),
                                         ),
                                     );
-                                } else {
-                                    if mk_lib_database::mk_lib_database_library::mk_lib_database_library_file_exists(&sqlx_pool, &file_metadata.name).await.unwrap() == false {
+                                        } else {
+                                            if mk_lib_database::mk_lib_database_library::mk_lib_database_library_file_exists(&sqlx_pool, &file_metadata.name).await.unwrap() == false {
                                         // set lower here so I can remove a lot of .lower() in the code below
                                         let file_lower = &file_metadata.name.to_lowercase();
                                         let file_extension = Path::new(&file_lower)
@@ -322,28 +323,28 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                             }
                                         }
                                     }
-                                }
-                                file_data.remove(0);
-                            }
-                            total_scanned += 1;
-                            // let _result = mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_status_update(&sqlx_pool,
-                            //                                                                         row_data.mm_media_dir_guid,
-                            //                                                                         json!({"Status": format!("File scan: {:?}/{:?}",
-                            //                                                                             total_scanned.to_formatted_string(&Locale::en),
-                            //                                                                                     total_file_in_dir.to_formatted_string(&Locale::en)),
-                            //                                                                         "Pct": (total_scanned / total_file_in_dir) * 100})).await;
-                            // end of for loop for each file in library
-                            // set to none so it doesn't show up anymore in admin status page
-                            mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_status_update(
+                                        }
+                                        file_data.remove(0);
+                                    }
+                                    total_scanned += 1;
+                                    // let _result = mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_status_update(&sqlx_pool,
+                                    //                                                                         row_data.mm_media_dir_guid,
+                                    //                                                                         json!({"Status": format!("File scan: {:?}/{:?}",
+                                    //                                                                             total_scanned.to_formatted_string(&Locale::en),
+                                    //                                                                                     total_file_in_dir.to_formatted_string(&Locale::en)),
+                                    //                                                                         "Pct": (total_scanned / total_file_in_dir) * 100})).await;
+                                    // end of for loop for each file in library
+                                    // set to none so it doesn't show up anymore in admin status page
+                                    mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_status_update(
                                             &sqlx_pool,
                                             row_data.mm_media_dir_guid,
                                             json!({"Status": "File scan complete", "Pct": 100}),
                                         )
                                         .await
                                         .unwrap();
-                            if total_files > 0 {
-                                // add notification to admin status page
-                                let _result = mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_insert(
+                                    if total_files > 0 {
+                                        // add notification to admin status page
+                                        let _result = mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_insert(
                                                 &sqlx_pool,
                                                 format!(
                                                     "{} file(s) added from {}",
@@ -353,38 +354,38 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                 true,
                                             )
                                             .await;
+                                    }
+                                }
                             }
-                        }
-                    }
-                    Err(_) => {
-                        // Lib path is not found on share
-                        let _result = mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_insert(
+                            Err(_) => {
+                                // Lib path is not found on share
+                                let _result = mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_insert(
                                         &sqlx_pool,
                                         format!("Library path not found: {}", row_data.mm_media_dir_path),
                                         true,
                                     )
                                     .await;
+                            }
+                        };
+                        mk_lib_file::mk_lib_smb::mk_file_smb_client_disconnect(smb_client);
                     }
-                };
-                mk_lib_file::mk_lib_smb::mk_file_smb_client_disconnect(smb_client);
-            }
-            Err(_) => {
-                // Fail share login
-                let _result = mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_insert(
+                    Err(_) => {
+                        // Fail share login
+                        let _result = mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_insert(
                                 &sqlx_pool,
                                 format!("Unable to connect to share: {}", row_data.mm_media_dir_path),
                                 true,
                             )
                             .await;
+                    }
+                }
             }
+            let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
+                &rabbit_channel,
+                msg.deliver.unwrap().delivery_tag(),
+            )
+            .await;
         }
     }
-    // let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
-    //     &rabbit_channel,
-    //     msg.deliver.unwrap().delivery_tag(),
-    // )
-    // .await;
-    //     }
-    // }
     Ok(())
 }

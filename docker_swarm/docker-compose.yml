@@ -578,9 +578,8 @@ services:
     networks:
       - mediakraken_network
     deploy:
-      placement:
-        constraints:
-          - node.role == manager
+      mode: replicated
+      replicas: 1
 
   # https://prometheus.io/download/
   # https://hub.docker.com/u/prom
@@ -858,7 +857,7 @@ services:
       - PERSISTENTKEEPALIVE_PEERS=all
       - LOG_CONFS=true
     volumes:
-      - /path/to/appdata/config:/config
+      - mediakraken_vol_wireguard:/config
       - /lib/modules:/lib/modules
     ports:
       - 51820:51820/udp
@@ -902,6 +901,7 @@ volumes:
   mediakraken_vol_transmission:
   mediakraken_vol_transmission_downloads:
   mediakraken_vol_transmission_incomplete:
+  mediakraken_vol_wireguard:
   mediakraken_vol_wireshark:
 
 secrets:

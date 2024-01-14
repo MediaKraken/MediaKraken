@@ -27,12 +27,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .unwrap()
     {
         let lib_path: String = row_data.mm_media_dir_path;
-        inotify
-            .add_watch(
-                &lib_path,
-                WatchMask::MODIFY | WatchMask::CREATE | WatchMask::DELETE,
-            )
-            .expect("Failed to add inotify watch");
+        match inotify.add_watch(
+            &lib_path,
+            WatchMask::MODIFY | WatchMask::CREATE | WatchMask::DELETE,
+        ) {
+            Ok(lib_path) => println!("Loaded add inotify watch: {:?}", lib_path),
+            Err(lib_path) => println!("Failed to add inotify watch: {:?}", lib_path),
+        }
     }
 
     let mut buffer = [0u8; 4096];
