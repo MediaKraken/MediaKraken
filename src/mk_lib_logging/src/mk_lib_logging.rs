@@ -25,7 +25,7 @@ pub async fn mk_logging_post_elk(
     //let client = reqwest::Client::new();
     let echo_json = client
         .post(format!(
-            "http://mkelk.beaverbay.local:9200/{}/_doc",
+            "http://mkstack_elk:9200/{}/_doc",
             std::env::current_exe()
                 .expect("Can't get the exec path")
                 .file_name()

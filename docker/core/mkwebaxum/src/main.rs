@@ -4,11 +4,14 @@ extern crate lazy_static;
 use axum::http::{Method, Uri};
 use axum::{
     body::Body,
-    //http::StatusCode,
-    routing::{get, post},
-    BoxError, Extension, Json, Router,
     extract::{Request, State},
     response::{IntoResponse, Response},
+    //http::StatusCode,
+    routing::{get, post},
+    BoxError,
+    Extension,
+    Json,
+    Router,
 };
 use axum_csrf::{CsrfConfig, CsrfToken};
 use axum_extra::routing::RouterExt;
@@ -24,6 +27,8 @@ use mk_lib_database;
 use rcgen::generate_simple_self_signed;
 // use reverse_proxy_service::ReusedServiceBuilder;
 // use reverse_proxy_service::{AppendSuffix, Static, TrimPrefix};
+use hyper::StatusCode;
+use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
 use ring::digest;
 use serde_json::json;
 use sqlx::PgPool;
@@ -37,8 +42,6 @@ use tower::timeout::TimeoutLayer;
 use tower::ServiceExt;
 use tower::{timeout::error::Elapsed, ServiceBuilder};
 use tower_http::services::{ServeDir, ServeFile};
-use hyper::StatusCode;
-use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
 
 type Client = hyper_util::client::legacy::Client<HttpConnector, Body>;
 mod axum_custom_filters;
@@ -152,14 +155,6 @@ async fn main() {
     // this was for the db user password salt?
     // but using gen_salt in postgresql to let it pick the salt
     // if Path::new("/secure/data.zip").exists() == false {
-    //     #[cfg(debug_assertions)]
-    //     {
-    //         mk_lib_logging::mk_logging_post_elk(
-    //             std::module_path!(),
-    //             json!({"stuff": "data.zip not found, generating."}),
-    //         )
-    //         .await.unwrap();
-    //     }
     //     // create the hash salt
     //     if Path::new("/secure/data.zip").exists() == false {
     //         let mut file_salt = File::create("/secure/data.zip").unwrap();
@@ -240,7 +235,8 @@ async fn main() {
             get(admin::bp_reports::admin_report_known_media),
         )
         .route_with_tsr("/admin/torrent", get(admin::bp_torrent::admin_torrent))
-        .route_with_tsr("/admin/torrent/web", get(proxy_transmission_handler)).with_state(client)
+        .route_with_tsr("/admin/torrent/web", get(proxy_transmission_handler))
+        .with_state(client)
         .route_with_tsr("/admin/user/:page", get(admin::bp_user::admin_user))
         .route_with_tsr(
             "/user/internet/flickr",
@@ -515,7 +511,10 @@ async fn shutdown_signal() {
     }
 }
 
-async fn proxy_transmission_handler(State(client): State<Client>, mut req: Request) -> Result<Response, StatusCode> {
+async fn proxy_transmission_handler(
+    State(client): State<Client>,
+    mut req: Request,
+) -> Result<Response, StatusCode> {
     let path = req.uri().path();
     let path_query = req
         .uri()

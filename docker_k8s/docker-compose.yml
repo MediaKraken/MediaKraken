@@ -143,13 +143,11 @@ services:
   filebeat:
     image: elastic/filebeat:7.17.10
     environment:
-      - ELASTICSEARCH_HOSTS=mkelk.beaverbay.local:9200
-      - KIBANA_HOSTS=mkelk.beaverbay.local:5601
+      - ELASTICSEARCH_HOSTS=mkstack_elk:9200
+      - KIBANA_HOSTS=mkstack_elk:5601
     volumes:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - mediakraken_vol_postgresql_logging:/var/log/postgresql:ro
-      - mediakraken_vol_nginx:/var/log/mediakraken/nginx:ro
     deploy:
       mode: global
 
@@ -296,7 +294,7 @@ services:
   # logspout:
   #   image: gliderlabs/logspout:v3.2.14
   #   environment:
-  #     - ROUTE_URIS="logstash+tcp://mkelk.beaverbay.local:5000"
+  #     - ROUTE_URIS="logstash+tcp://mkstack_elk:5000"
   #     - LOGSTASH_FIELDS="environment=production"
   #     - ALLOW_TTY=true
   #     - SYSLOG_TAG="{{index .Service.Name}}"
@@ -384,8 +382,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - mediakraken_vol_metricbeat:/usr/share/metricbeat/data
     environment:
-      - ELASTICSEARCH_HOST=mkelk.beaverbay.local
-      - KIBANA_HOST=mkelk.beaverbay.local
+      - ELASTICSEARCH_HOST=mkstack_elk
+      - KIBANA_HOST=mkstack_elk
     # disable strict permission checks
     command: ["--strict.perms=false", "-system.hostfs=/hostfs"]
     deploy:
@@ -405,8 +403,8 @@ services:
 #      - /:/hostfs:ro
 #      - /var/run/docker.sock:/var/run/docker.sock
 #    environment:
-#      - "HOST_ELASTICSEARCH=mkelk.beaverbay.local:9222"
-#      - "HOST_KIBANA=mkelk.beaverbay.local:5666"
+#      - "HOST_ELASTICSEARCH=mkstack_elk:9222"
+#      - "HOST_KIBANA=mkstack_elk:5666"
 #    extra_hosts:
 #      - "elasticsearch:172.17.0.1" # The IP of docker0 interface to access host from container
 #      - "kibana:172.17.0.1" # The IP of docker0 interface to access host from container

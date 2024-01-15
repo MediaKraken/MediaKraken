@@ -33,15 +33,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(payload) = msg.content {
                 let json_message: Value =
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                // #[cfg(debug_assertions)]
-                // {
-                //     mk_lib_logging::mk_logging_post_elk(
-                //         std::module_path!(),
-                //         json!({ "msg body": json_message }),
-                //     )
-                //     .await
-                //     .unwrap();
-                // }
                 let db_pass = fs::read_to_string("/run/secrets/db_password").unwrap();
                 env::set_var("PGPASSWORD", &db_pass);
                 // extensions, collations, types

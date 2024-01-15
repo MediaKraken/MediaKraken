@@ -27,7 +27,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 .await
                 .unwrap();
         for row_data in cron_row {
-            let time_delta: chrono::Duration;
+            let mut time_delta: chrono::Duration;
             match row_data.mm_cron_schedule_type.as_str() {
                 "Week(s)" => {
                     time_delta = chrono::Duration::weeks(i64::from(row_data.mm_cron_schedule_time))

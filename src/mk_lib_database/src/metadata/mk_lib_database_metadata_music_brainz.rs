@@ -7,14 +7,13 @@ pub struct DBMetaMusicList {
     pub mm_metadata_album_id: i32,
     pub mm_metadata_album_name: String,
     pub mm_metadata_album_artist: String,
-    pub mm_metadata_album_cover_art: String,
 }
 
 pub async fn mk_lib_database_metadata_music_album_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
-    if search_value != "" {
+    if search_value != String::new() {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from release \
             where name % $1",
@@ -40,7 +39,7 @@ pub async fn mk_lib_database_metadata_music_album_read(
     // TODO, only grab the poster locale from json
     // TODO order by release year
     let select_query;
-    if search_value != "" {
+    if search_value != String::new() {
         select_query = sqlx::query(
             "select release.id as brainz_id, release.name as brainz_name, artist.name as brainz_artist \
             from release, artist \
@@ -67,7 +66,6 @@ pub async fn mk_lib_database_metadata_music_album_read(
             mm_metadata_album_id: row.get("brainz_id"),
             mm_metadata_album_name: row.get("brainz_name"),
             mm_metadata_album_artist: row.get("brainz_artist"),
-            mm_metadata_album_cover_art: row.get("brainz_artist"),
         })
         .fetch_all(sqlx_pool)
         .await?;

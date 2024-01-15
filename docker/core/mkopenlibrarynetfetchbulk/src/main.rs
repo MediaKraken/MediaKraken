@@ -45,15 +45,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(payload) = msg.content {
                 let json_message: Value =
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                // #[cfg(debug_assertions)]
-                // {
-                //     mk_lib_logging::mk_logging_post_elk(
-                //         std::module_path!(),
-                //         json!({ "msg body": json_message }),
-                //     )
-                //     .await
-                //     .unwrap();
-                // }
 
                 let _fetch_result = mk_lib_network::mk_lib_network::mk_download_file_from_url(
                     "https://openlibrary.org/data/ol_cdump_latest.txt.gz".to_string(),

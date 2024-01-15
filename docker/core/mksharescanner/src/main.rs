@@ -42,7 +42,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .await
                     .unwrap();
                 for share_info in share_vec.iter() {
-                    if mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_exists( &sqlx_pool,
+                    if mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_exists(&sqlx_pool,
                             share_info.mm_share_ip,
                             share_info.mm_share_path.clone(),).await.unwrap() == false {
                         mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_insert(

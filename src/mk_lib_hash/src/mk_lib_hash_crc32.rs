@@ -1,17 +1,8 @@
 use crc32fast::Hasher;
-use std::error::Error;
 use mk_lib_file::mk_lib_file;
+use std::error::Error;
 
 pub async fn mk_file_hash_crc32(file_to_read: &str) -> Result<String, Box<dyn Error>> {
-    #[cfg(debug_assertions)]
-    {
-        // mk_lib_logging::mk_logging_post_elk(
-        //     std::module_path!(),
-        //     json!({ "Function": function_name!() }),
-        // )
-        // .await
-        // .unwrap();
-    }
     let mut hasher = Hasher::new();
     let mut file_data = mk_lib_file::mk_read_file_data_u8(&file_to_read)
         .await

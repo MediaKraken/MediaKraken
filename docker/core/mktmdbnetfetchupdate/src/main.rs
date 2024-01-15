@@ -49,15 +49,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(_payload) = msg.content {
                 // let json_message: Value =
                 //     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                // #[cfg(debug_assertions)]
-                // {
-                //     mk_lib_logging::mk_logging_post_elk(
-                //         std::module_path!(),
-                //         json!({ "msg body": json_message }),
-                //     )
-                //     .await
-                //     .unwrap();
-                // }
 
                 // process movie changes
                 let url_result = mk_lib_network::mk_lib_network::mk_data_from_url(

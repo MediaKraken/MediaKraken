@@ -18,7 +18,7 @@ use sqlx::postgres::PgPool;
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_torrent.html")]
 struct AdminTorrentTemplate<'a> {
-    template_data_host: &'a String,
+    template_data: &'a Vec<mk_lib_network::mk_lib_network_transmission::TorrentList>,
 }
 
 pub async fn admin_torrent(
@@ -26,22 +26,18 @@ pub async fn admin_torrent(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
-    // let transmission_client =
-    //     mk_lib_network::mk_lib_network_transmission::mk_network_transmission_login()
-    //         .await
-    //         .unwrap();
-
-    // let transmission_torrents =
-    //     mk_lib_network::mk_lib_network_transmission::mk_network_transmission_list_torrents(
-    //         transmission_client,
-    //     )
-    //     .await
-    //     .unwrap();
-    let docker_results = mk_lib_common::mk_lib_common_docker::mk_common_docker_info()
+    let transmission_client =
+        mk_lib_network::mk_lib_network_transmission::mk_network_transmission_login()
+            .await
+            .unwrap();
+    let transmission_torrents =
+        mk_lib_network::mk_lib_network_transmission::mk_network_transmission_list_torrents(
+            transmission_client,
+        )
         .await
         .unwrap();
     let template = AdminTorrentTemplate {
-        template_data_host: &docker_results.name.unwrap(),
+        template_data: &transmission_torrents,
     };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())
