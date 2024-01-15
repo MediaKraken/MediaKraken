@@ -26,9 +26,9 @@ ARG FFMPEG_VERSION=6.1.1
 # FREETYPE=2.12.1 - 2.13.0-r5
 # TODO FRIBIDI=1.0.13  <- why is hebrew lang needed?
 # https://github.com/intel/gmmlib
-ARG GMMLIB=22.3.16
+#ARG GMMLIB=22.3.16
 # https://github.com/intel/media-driver
-ARG IHD=23.4.3
+#ARG IHD=23.4.3
 # https://github.com/ultravideo/kvazaar
 ARG KVAZAAR=2.2.0
 # LAME=3.100 - 3.100-r5
@@ -82,6 +82,8 @@ RUN buildDeps="autoconf \
         gperf \
         fontconfig-dev \
         freetype-dev \
+        intel-media-driver-dev \
+        intel-gmmlib-dev \
         lame-dev \
         libass-dev \
         libgomp \
@@ -192,16 +194,27 @@ RUN buildDeps="autoconf \
       make -j`getconf _NPROCESSORS_ONLN` && \
       make install
 
-    # GMMLIB
-    RUN echo "Begin: gmmlib" && \
-      DIR=$(mktemp -d) && cd ${DIR} && \
-      curl -Lf https://github.com/intel/gmmlib/archive/refs/tags/intel-gmmlib-${GMMLIB}.tar.gz | \
-      tar -zx --strip-components=1 && \
-      mkdir build && cd build && \
-      cmake -DCMAKE_BUILD_TYPE=Release -DARCH=64 .. && \
-      make -j`getconf _NPROCESSORS_ONLN` && \
-      make install && \
-      strip -d /usr/local/lib/libigdgmm.so
+    # # GMMLIB
+    # RUN echo "Begin: gmmlib" && \
+    #   DIR=$(mktemp -d) && cd ${DIR} && \
+    #   curl -Lf https://github.com/intel/gmmlib/archive/refs/tags/intel-gmmlib-${GMMLIB}.tar.gz | \
+    #   tar -zx --strip-components=1 && \
+    #   mkdir build && cd build && \
+    #   cmake -DCMAKE_BUILD_TYPE=Release -DARCH=64 .. && \
+    #   make -j`getconf _NPROCESSORS_ONLN` && \
+    #   make install && \
+    #   strip -d /usr/local/lib/libigdgmm.so
+
+    # # IHD
+    # RUN echo "Begin: ihd" && \
+    #   DIR=$(mktemp -d) && cd ${DIR} && \
+    #   curl -Lf https://github.com/intel/media-driver/archive/refs/tags/intel-media-${IHD}.tar.gz | \
+    #   tar -zx --strip-components=1 && \
+    #   mkdir build && cd build && \
+    #   cmake -DLIBVA_DRIVERS_PATH=/usr/lib/x86_64-linux-gnu/dri/ .. && \
+    #   make -j`getconf _NPROCESSORS_ONLN` && \
+    #   make install && \
+    #   strip -d /usr/lib/x86_64-linux-gnu/dri/iHD_drv_video.so
 
     # LIBDRM
     RUN echo "Begin: libdrm" && \
@@ -212,17 +225,6 @@ RUN buildDeps="autoconf \
       ninja -C build && \
       ninja -C build install && \
       strip -d /usr/local/lib/x86_64-linux-gnu/libdrm*.so
-
-    # IHD
-    RUN echo "Begin: ihd" && \
-      DIR=$(mktemp -d) && cd ${DIR} && \
-      curl -Lf https://github.com/intel/media-driver/archive/refs/tags/intel-media-${IHD}.tar.gz | \
-      tar -zx --strip-components=1 && \
-      mkdir build && cd build && \
-      cmake -DLIBVA_DRIVERS_PATH=/usr/lib/x86_64-linux-gnu/dri/ .. && \
-      make -j`getconf _NPROCESSORS_ONLN` && \
-      make install && \
-      strip -d /usr/lib/x86_64-linux-gnu/dri/iHD_drv_video.so
 
     # LIBMFX
     RUN echo "Begin: libmfx" && \
