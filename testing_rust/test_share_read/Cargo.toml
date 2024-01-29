@@ -10,18 +10,18 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-argh = "0.1.7"
+argh = "0.1.12"
 env_logger = "^0.10"
 mk_lib_database = { path = "../../src/mk_lib_database"}
 mk_lib_file = { path = "../../src/mk_lib_file", features = ["smb"]}
 mk_lib_network = { path = "../../src/mk_lib_network" }
 pavao = "0.2.3"
-reqwest = { version = "0.11.17", default-features = false, features = ["json", "rustls-tls"] }
-rpassword = "7.2"
-serde = { version = "1.0.160", features = ["derive"] }
-serde_json = "1.0.96"
-tokio = { version = "1.28.0", features = ["full"] }
-walkdir = "2.3.3"
+reqwest = { version = "0.11.23", default-features = false, features = ["json", "rustls-tls"] }
+rpassword = "7.3"
+serde = { version = "1.0.195", features = ["derive"] }
+serde_json = "1.0.111"
+tokio = { version = "1.35.1", features = ["full"] }
+walkdir = "2.4.0"
 
 [dev-dependencies]
 tokio-test = "*"

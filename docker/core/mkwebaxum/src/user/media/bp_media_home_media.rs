@@ -119,15 +119,4 @@ pub async fn url_bp_user_home_media_list(request):
     return {
         'media': media_data
     }
-
-
-@blueprint_user_home_media.route('/user_home_media_detail/<guid>')
-@common_global.jinja_template.template('bss_user/media/bss_user_media_home_movie_detail.html')
-@common_global.auth.login_required
-pub async fn url_bp_user_home_media_detail(request, guid):
-    """
-    Display home page for home media
-    """
-    return {}
-
  */

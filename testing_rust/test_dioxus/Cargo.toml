@@ -10,8 +10,8 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-dioxus = "0.4.0"
-dioxus-desktop = {version="0.4.0", features = ["tokio_runtime"], default-features = false }
+dioxus = "0.4.3"
+dioxus-desktop = {version="0.4.3", features = ["tokio_runtime"], default-features = false }
 
 [dev-dependencies]
 tokio-test = "*"

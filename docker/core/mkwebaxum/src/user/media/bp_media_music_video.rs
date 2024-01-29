@@ -118,14 +118,4 @@ pub async fn url_bp_user_music_video_list(request):
         'media_person': media_data,
         'pagination_bar': pagination,
     }
-
-
-@blueprint_user_music_video.route('/user_music_video_detail/<guid>', methods=['GET'])
-@common_global.auth.login_required
-pub async fn url_bp_user_music_video_detail(request, guid):
-    """
-    Display music video detail page
-    """
-    return {}
-
  */

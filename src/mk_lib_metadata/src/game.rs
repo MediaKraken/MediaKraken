@@ -9,7 +9,7 @@ pub async fn metadata_game_lookup(
     download_data: &DBDownloadQueueByProviderList,
 ) -> Result<uuid::Uuid, Box<dyn Error>> {
     let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
-                                               // TODO remove the file extension
+    // TODO remove the file extension
     metadata_uuid =
         mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_uuid_by_name_and_system(
             &sqlx_pool,

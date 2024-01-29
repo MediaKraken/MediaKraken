@@ -1,11 +1,7 @@
-/movie.gz
-/movie_ids_05_15_2021.json
-/tv.gz
-/tv_series_ids_05_15_2021.json
 /target/
 /license.md
-/ol_cdump_latest.txt.gz
-/ol_cdump_latest.txt
+/ol_dump_latest.txt.gz
+/ol_dump_latest.txt
 mk_lib_common
 mk_lib_compression
 mk_lib_database

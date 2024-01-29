@@ -47,9 +47,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(_payload) = msg.content {
-                // let json_message: Value =
-                //     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-
                 // process movie changes
                 let url_result = mk_lib_network::mk_lib_network::mk_data_from_url(
                     format!(

@@ -40,7 +40,7 @@ pub async fn user_sync(
     let sync_list = mk_lib_database::mk_lib_database_sync::mk_lib_database_sync_list(
         &sqlx_pool,
         uuid::Uuid::nil(),
-        0,
+        db_offset,
         30,
     )
     .await

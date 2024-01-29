@@ -11,7 +11,7 @@ use sqlx::postgres::PgPool;
 
 use docker_api::models::JoinTokens;
 use docker_api::models::Node;
-//use docker_api::models::Swarm;
+use docker_api::models::Swarm;
 use docker_api::models::SystemInfo;
 
 #[derive(Template)]

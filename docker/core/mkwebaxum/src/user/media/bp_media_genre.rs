@@ -26,14 +26,6 @@ pub async fn user_media_genre(
 /*
 
 @blueprint_user_media_genre.route("/user_media_genre", methods=['GET', 'POST'])
-@common_global.jinja_template.template('bss_user/media/bss_user_media_genre_video.html')
-@common_global.auth.login_required
-pub async fn url_bp_user_media_genre(request):
-    """
-    Display media split up by genre
-    """
-    media = []
-    db_connection = await request.app.db_pool.acquire()
     for row_data in await request.app.db_functions.db_media_movie_count_by_genre(
             common_global.DLMediaType.Movie.value, db_connection=db_connection):
         print('genre:', row_data, flush=True)
@@ -126,16 +118,4 @@ pub async fn url_bp_user_movie_page(request, user, genre):
         db_connection=db_connection)
     await request.app.db_pool.release(db_connection)
     request.ctx.session['search_page'] = 'media_movie'
-    pagination = common_pagination_bootstrap.com_pagination_boot_html(page,
-                                                                      url='/user/user_movie',
-                                                                      item_count=total,
-                                                                      client_items_per_page=
-                                                                      int(request.ctx.session[
-                                                                              'per_page']),
-                                                                      format_number=True)
-    return {
-        'media': media,
-        'pagination_bar': pagination,
-    }
-
  */

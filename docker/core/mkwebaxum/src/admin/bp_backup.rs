@@ -133,7 +133,7 @@ pub async fn url_bp_admin_backup_delete(request):
         os.remove(file_path)
     else:
         pass
-        // TODO, do the actual delete
+        // do the actual delete
     return json.dumps({'status': 'OK'})
 
 

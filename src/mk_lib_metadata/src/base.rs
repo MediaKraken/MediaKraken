@@ -177,7 +177,7 @@ pub async fn metadata_search(
         .await
         .unwrap();
         if metadata_uuid != uuid::Uuid::nil() {
-            // TODO add theme.mp3 dl"d above to media table
+            // TODO add theme.mp3 dl'd above to media table
             mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
                 &sqlx_pool,
                 download_data.mm_download_guid,
@@ -375,7 +375,7 @@ pub async fn metadata_image(
     _provider_api_key: &str,
 ) -> Result<(), Box<dyn Error>> {
     // TODO grab the actual image
-    mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
         download_data.mm_download_guid,
     )
@@ -390,7 +390,7 @@ pub async fn metadata_review(
     _provider_api_key: &str,
 ) -> Result<(), Box<dyn Error>> {
     // review is last.....so can delete download que
-    mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
         download_data.mm_download_guid,
     )
@@ -405,7 +405,7 @@ pub async fn metadata_collection(
     _provider_api_key: &str,
 ) -> Result<(), Box<dyn Error>> {
     // only one record for this so nuke it
-    mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
         download_data.mm_download_guid,
     )

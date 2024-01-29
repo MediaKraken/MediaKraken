@@ -11,5 +11,5 @@ codegen-units = 1
 
 [dependencies]
 mk_lib_hardware = { path = "../../src/mk_lib_hardware" }
-tokio = { version = "1.28.2", features = ["full"] }
+tokio = { version = "1.35.1", features = ["full"] }
 tokio-test = "*"

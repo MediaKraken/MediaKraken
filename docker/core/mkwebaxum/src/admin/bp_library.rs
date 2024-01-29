@@ -2,11 +2,13 @@ use askama::Template;
 use axum::{
     extract::Path,
     http::{Method, StatusCode},
-    response::{Html, IntoResponse},
+    response::{Html, IntoResponse, Redirect},
     Extension,
 };
 use axum_session_auth::{AuthSession, SessionPgPool};
 use mk_lib_database;
+use mk_lib_rabbitmq;
+use serde_json::{json, Value};
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -14,7 +16,8 @@ use sqlx::postgres::PgPool;
 struct TemplateAdminLibraryContext<'a> {
     template_data_share: &'a Vec<mk_lib_database::mk_lib_database_network_share::DBShareList>,
     template_data_libary: &'a Vec<mk_lib_database::mk_lib_database_library::DBLibraryAuditList>,
-    template_data_share_user: &'a Vec<mk_lib_database::mk_lib_database_network_share::DBShareAuthUserList>,
+    template_data_share_user:
+        &'a Vec<mk_lib_database::mk_lib_database_network_share::DBShareAuthUserList>,
     template_data_exists: &'a bool,
 }
 
@@ -35,7 +38,12 @@ pub async fn admin_library(
         )
         .await
         .unwrap();
-    let share_user_list = mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_user_read(&sqlx_pool,).await.unwrap();
+    let share_user_list =
+        mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_user_read(
+            &sqlx_pool,
+        )
+        .await
+        .unwrap();
     let mut template_data_exists: bool = false;
     if library_list.len() > 0 {
         template_data_exists = true;
@@ -50,15 +58,51 @@ pub async fn admin_library(
     (StatusCode::OK, Html(reply_html).into_response())
 }
 
+pub async fn admin_library_media_scan(
+    Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+) -> impl IntoResponse {
+    let (rabbit_connection, rabbit_channel) =
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp")
+            .await
+            .unwrap();
+    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
+        rabbit_channel.clone(),
+        "mkmediascanner",
+        json!({"Type": "Library Scan"}).to_string(),
+    )
+    .await
+    .unwrap();
+    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
+        .await
+        .unwrap();
+    Redirect::to("/admin/library")
+}
+
+pub async fn admin_library_share_scan(
+    Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+) -> impl IntoResponse {
+    let (rabbit_connection, rabbit_channel) =
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp")
+            .await
+            .unwrap();
+    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
+        rabbit_channel.clone(),
+        "mksharescanner",
+        json!({"Type": "Share Scan"}).to_string(),
+    )
+    .await
+    .unwrap();
+    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
+        .await
+        .unwrap();
+    Redirect::to("/admin/library")
+}
+
 /*
-    if request.method == 'POST':
-        if "scan" in request.form:
-            # submit the message
-            common_network_pika.com_net_pika_send({'Type': 'Library Scan'},
-                                                  rabbit_host_name='mkstack_rabbitmq',
-                                                  exchange_name='mkque_ex',
-                                                  route_key='mkque')
-            // TODO request['flash']('Scheduled media scan.', 'success')
 
 @blueprint_admin_library.route('/admin_library_by_id', methods=['POST'])
 @common_global.auth.login_required

@@ -31,9 +31,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {
-                let json_message: Value =
-                    serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-
                 //
                 // def mk_schedules_direct_program_info_fetch(meta_program_fetch):
                 //     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',

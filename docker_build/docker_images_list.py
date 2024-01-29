@@ -289,7 +289,6 @@ STAGE_ONE_TESTING_TOOLS = {
     'mkjenkins': ('mkjenkins', 'jenkins/jenkins:lts', 'test'),
     'mkselenium': ('mkselenium', 'mkbase_alpinepy3', 'test'),
     'mksonatype': ('mksonatype', 'sonatype/nexus3', 'test'),
-    'mktrac': ('mktrac', 'debian:buster-slim', 'test'),
 }
 
 STAGE_TWO_TESTING_TOOLS = {

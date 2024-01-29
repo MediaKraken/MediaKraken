@@ -56,7 +56,6 @@ pub async fn url_bp_user_internet_youtube(request):
     """
     youtube_videos = []
     if request.ctx.session['search_text'] != None:
-        // TODO - ytpy search instead
         videos, channels, playlists = g.google_instance.com_google_youtube_search(
             request.ctx.session['search_text'])
         for url_link in videos:

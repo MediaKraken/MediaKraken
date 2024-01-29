@@ -81,8 +81,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     mk_lib_common::mk_lib_common_date::system_time_to_date_time(
                                         file_stat.modified,
                                     );
-                                // TODO remove true for testing
-                                if true || last_modified > row_data.mm_media_dir_last_scanned {
+                                if last_modified > row_data.mm_media_dir_last_scanned {
                                     let _result = mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_status_update(
                                             &sqlx_pool,
                                             row_data.mm_media_dir_guid,

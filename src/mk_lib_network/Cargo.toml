@@ -10,7 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-cidr-utils = { version = "0.5.10", features = [
+cidr-utils = { version = "0.5.11", features = [
     "serde",
 ] } # 0.6.x breaks buildof cidr addr
 cotton-ssdp = "0.0.3"
@@ -37,13 +37,13 @@ reqwest = { version = "0.11.23", default-features = false, features = [
 ] }
 reqwest-middleware = "0.2.4"
 reqwest-retry = "0.2.3" # 0.3.0 breaks with jitter and base, but I can't find base
-rss = "2.0.6"
+rss = "2.0.7"
 rsteam = "0.2.1"
-serde = { version = "1.0.194", features = ["derive"] }
+serde = { version = "1.0.195", features = ["derive"] }
 serde_json = "1.0.111"
 serialport = "4.3.0"
 ssh-rs = { version = "0.5.0", features = ["scp"] }
-suppaftp = { version = "5.2.2", features = ["native-tls"] }
+suppaftp = { version = "5.3.0", features = ["native-tls"] }
 surge-ping = "0.8.0"
 tokio = { version = "1.35.1", features = ["full"] }
 transmission-rpc = "0.4.2"

@@ -43,7 +43,7 @@ pub async fn public_login_post(
         .unwrap();
     // TODO show error when not found
     if user_id > 0 {
-        mk_lib_database::mk_lib_database_user::mk_lib_database_user_login(&sqlx_pool, user_id)
+        let _result = mk_lib_database::mk_lib_database_user::mk_lib_database_user_login(&sqlx_pool, user_id)
             .await;
         auth.login_user(user_id);
     }

@@ -25,8 +25,6 @@ use axum_session::{
 use axum_session_auth::{AuthConfig, AuthSessionLayer};
 use mk_lib_database;
 use rcgen::generate_simple_self_signed;
-// use reverse_proxy_service::ReusedServiceBuilder;
-// use reverse_proxy_service::{AppendSuffix, Static, TrimPrefix};
 use hyper::StatusCode;
 use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
 use ring::digest;
@@ -206,9 +204,6 @@ async fn main() {
     let docker_results = mk_lib_common::mk_lib_common_docker::mk_common_docker_info()
         .await
         .unwrap();
-    // TODO let transmission_host: reverse_proxy_service::ReusedServiceBuilder =
-    //     reverse_proxy_service::builder_http(format!("{}:9091", docker_results.name.unwrap()))
-    //         .unwrap();
     let client: Client =
         hyper_util::client::legacy::Client::<(), ()>::builder(TokioExecutor::new())
             .build(HttpConnector::new());
@@ -225,10 +220,10 @@ async fn main() {
         )
         .route_with_tsr("/admin/hardware", get(admin::bp_hardware::admin_hardware))
         .route_with_tsr("/admin/home", get(admin::bp_home::admin_home))
-        .route_with_tsr(
-            "/admin/library/:page",
-            get(admin::bp_library::admin_library),
-        )
+        .route_with_tsr("/admin/library", get(admin::bp_library::admin_library)) 
+        .route_with_tsr("/admin/library_media_scan", get(admin::bp_library::admin_library_media_scan)) 
+        .route_with_tsr("/admin/library_share_scan", get(admin::bp_library::admin_library_share_scan)) 
+        //.post(admin::bp_library::admin_library_post))
         .route_with_tsr("/admin/settings", get(admin::bp_settings::admin_settings))
         .route_with_tsr(
             "/admin/report_known_media/:page",
@@ -269,14 +264,6 @@ async fn main() {
         .route_with_tsr(
             "/user/media/book_detail/:guid",
             get(user_media::bp_media_book::user_media_book_detail),
-        )
-        .route_with_tsr(
-            "/user/media/collection/:page",
-            get(user_media::bp_media_collection::user_media_collection),
-        )
-        .route_with_tsr(
-            "/user/media/collection_detail/:guid",
-            get(user_media::bp_media_collection::user_media_collection_detail),
         )
         .route_with_tsr(
             "/user/media/game/:page",
@@ -350,6 +337,14 @@ async fn main() {
             "/user/metadata/book_detail/:guid",
             get(user_metadata::bp_meta_book::user_metadata_book_detail),
         )
+        .route_with_tsr(
+            "/user/metadata/collection/:page",
+            get(user_media::bp_media_collection::user_media_collection),
+        )
+        .route_with_tsr(
+            "/user/metadata/collection_detail/:guid",
+            get(user_media::bp_media_collection::user_media_collection_detail),
+        )        
         .route_with_tsr(
             "/user/metadata/game/:page",
             get(user_metadata::bp_meta_game::user_metadata_game),
@@ -431,7 +426,7 @@ async fn main() {
         .route_with_tsr("/user/profile", get(user::bp_profile::user_profile))
         .route_with_tsr("/user/queue", get(user::bp_queue::user_queue))
         .route_with_tsr("/user/search", get(user::bp_search::user_search))
-        .route_with_tsr("/user/sync", get(user::bp_sync::user_sync))
+        .route_with_tsr("/user/sync/:page", get(user::bp_sync::user_sync))
         .route_with_tsr("/logout", get(public::bp_logout::public_logout))
         .route_with_tsr(
             "/public/login",

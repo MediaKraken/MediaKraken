@@ -5,7 +5,7 @@ use std::error::Error;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let (rabbit_connection, rabbit_channel) =
-        "mkrabbitmq", "mktest")
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mktest")
             .await
             .unwrap();
 

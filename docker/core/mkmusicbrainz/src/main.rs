@@ -31,8 +31,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {
-                let json_message: Value =
-                    serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
                 let db_pass = fs::read_to_string("/run/secrets/db_password").unwrap();
                 env::set_var("PGPASSWORD", &db_pass);
                 // extensions, collations, types

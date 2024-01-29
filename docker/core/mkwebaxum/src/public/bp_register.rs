@@ -14,6 +14,7 @@ use sqlx::{
     ConnectOptions, PgPool,
 };
 use validator::Validate;
+use axum_flash::{IncomingFlashes, Flash, Key};
 
 #[derive(Template)]
 #[template(path = "bss_public/bss_public_register.html")]
@@ -58,9 +59,9 @@ pub async fn public_register_post(
         .await
         .unwrap()
             == 2
-        // 2 as 1 is guest
+        // Use 2 as 1 is guest
         {
-            mk_lib_database::mk_lib_database_user::mk_lib_database_user_set_admin(
+            let _result = mk_lib_database::mk_lib_database_user::mk_lib_database_user_set_admin(
                 &sqlx_pool, user_id,
             )
             .await;

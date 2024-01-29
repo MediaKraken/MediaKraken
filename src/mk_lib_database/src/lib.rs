@@ -1,5 +1,6 @@
 pub mod mk_lib_database;
 pub mod mk_lib_database_backup;
+pub mod mk_lib_database_copy;
 pub mod mk_lib_database_cron;
 pub mod mk_lib_database_game_servers;
 pub mod mk_lib_database_hardware_device;
@@ -13,8 +14,8 @@ pub mod mk_lib_database_report;
 pub mod mk_lib_database_search;
 pub mod mk_lib_database_sync;
 pub mod mk_lib_database_usage;
-pub mod mk_lib_database_user_activity;
 pub mod mk_lib_database_user;
+pub mod mk_lib_database_user_activity;
 pub mod mk_lib_database_user_profile;
 pub mod mk_lib_database_user_queue;
 pub mod mk_lib_database_version;
@@ -54,6 +55,7 @@ pub mod database_metadata {
     pub mod mk_lib_database_metadata_music;
     pub mod mk_lib_database_metadata_music_brainz;
     pub mod mk_lib_database_metadata_music_video;
+    pub mod mk_lib_database_metadata_openlib;
     pub mod mk_lib_database_metadata_person;
     pub mod mk_lib_database_metadata_review;
     pub mod mk_lib_database_metadata_sports;

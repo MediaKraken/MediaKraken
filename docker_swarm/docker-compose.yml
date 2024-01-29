@@ -567,7 +567,7 @@ services:
         constraints: [ node.platform.os == linux ]
 
   # https://github.com/prometheus-community/postgres_exporter
-  postgres-exporter:
+  postgres_exporter:
     image: quay.io/prometheuscommunity/postgres-exporter:v0.15.0
     environment:
       DATA_SOURCE_URI: mkstack_database:5432/postgres?sslmode=disable
@@ -821,9 +821,9 @@ services:
     image: linuxserver/wireshark:4.0.11
     cap_add:
       - NET_ADMIN
-    security_opt:
-      - seccomp:unconfined
-    network_mode: host
+    # security_opt:
+    #   - seccomp:unconfined
+    # network_mode: host
     environment:
       - PUID=1000
       - PGID=1000
