@@ -451,14 +451,14 @@ pub async fn mk_lib_database_update_schema(
         mk_lib_database_version_update(&sqlx_pool, 64).await?;
     }
 
-    if version_no < 65 {
-        let mut transaction = sqlx_pool.begin().await?;
-        sqlx::query("REINDEX DATABASE postgres;")
-            .execute(&mut *transaction)
-            .await?;
-        transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool, 65).await?;
-    }
+    // if version_no < 65 {
+    //     let mut transaction = sqlx_pool.begin().await?;
+    //     sqlx::query("REINDEX DATABASE postgres;")
+    //         .execute(&mut *transaction)
+    //         .await?;
+    //     transaction.commit().await?;
+    //     mk_lib_database_version_update(&sqlx_pool, 65).await?;
+    // }
 
     Ok(true)
 }

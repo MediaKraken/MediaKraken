@@ -1,0 +1,1 @@
+docker exec -t mkstack_database pg_dump -U postgres < mkstack_database_dump_2024-01-30_16_06_36.sql
