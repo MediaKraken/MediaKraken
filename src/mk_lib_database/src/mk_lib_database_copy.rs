@@ -4,12 +4,12 @@ CREATE TEMPORARY TABLE mktemp_import (
 );
 COPY mktemp_import FROM STDIN With CSV;
 
-INSERT INTO table_a(temp_id, temp_json)
-SELECT *
-FROM mktemp_import ON conflict (temp_id)
-DO update set temp_json=EXCLUDED.temp_json;
+INSERT INTO mm_openlib_author(mm_openlib_author_id, mm_openlib_author_json)
+SELECT temp_key, temp_json::jsonb
+FROM mktemp_import7 ON conflict (mm_openlib_author_id)
+DO update set mm_openlib_author_json=EXCLUDED.mm_openlib_author_json;
 
-DROP TABLE mktemp_import;
+DROP TABLE mktemp_import7;
 */
 
 pub async fn mk_lib_database_copy(
@@ -18,14 +18,14 @@ pub async fn mk_lib_database_copy(
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
-        "CREATE TABLE IF NOT EXISTS mktemp_import6 (temp_type TEXT, temp_key TEXT, temp_revision TEXT, temp_last_modified TIMESTAMP, temp_json JSONB);",
+        "CREATE TABLE IF NOT EXISTS mktemp_import (temp_type TEXT, temp_key TEXT, temp_revision TEXT, temp_last_modified TIMESTAMP, temp_json TEXT);",
     )
     .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     let mut pg_connection = sqlx_pool.acquire().await.unwrap();
     let mut pg_copy_in = pg_connection
-        .copy_in_raw("copy public.mktemp_import6 (temp_type, temp_key, temp_revision, temp_last_modified, temp_json) from stdin CSV DELIMITER E'\t' QUOTE '\"' ESCAPE '\\'")
+        .copy_in_raw("copy public.mktemp_import (temp_type, temp_key, temp_revision, temp_last_modified, temp_json) from stdin")
         .await
         .unwrap();
     let file = tokio::fs::File::open(copy_file).await?;
@@ -35,6 +35,8 @@ pub async fn mk_lib_database_copy(
     Ok(())
 }
 
+// works but no quoates on json .copy_in_raw("copy public.mktemp_import (temp_type, temp_key, temp_revision, temp_last_modified, temp_json) from stdin CSV DELIMITER E'\t' ESCAPE '\\'")
+// works but no quotes on "json".copy_in_raw("copy public.mktemp_import (temp_type, temp_key, temp_revision, temp_last_modified, temp_json) from stdin CSV DELIMITER E'\t' QUOTE '\"' ESCAPE '\\'")
 // INSERT ... AS SELECT ... command, where the SELECT is doing conversion to JSONB
 //         .copy_in_raw("copy public.mktemp_import3 (temp_type, temp_key, temp_revision, temp_last_modified, temp_json) from stdin TEXT DELIMITER E'\t' QUOTE '\"' ESCAPE '\\'")
 // ESCAPE '\'  - COPY escape must be a single one-byte character
