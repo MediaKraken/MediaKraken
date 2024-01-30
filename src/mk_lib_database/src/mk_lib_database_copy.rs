@@ -18,14 +18,14 @@ pub async fn mk_lib_database_copy(
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
-        "CREATE TABLE IF NOT EXISTS mktemp_import (temp_type TEXT, temp_key TEXT, temp_revision TEXT, temp_last_modified TIMESTAMP, temp_json TEXT);",
+        "CREATE TABLE IF NOT EXISTS mktemp_import10 (temp_type TEXT, temp_key TEXT, temp_revision TEXT, temp_last_modified TIMESTAMP, temp_json JSONB);",
     )
     .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
     let mut pg_connection = sqlx_pool.acquire().await.unwrap();
     let mut pg_copy_in = pg_connection
-        .copy_in_raw("copy public.mktemp_import (temp_type, temp_key, temp_revision, temp_last_modified, temp_json) from stdin")
+        .copy_in_raw("copy public.mktemp_import10 (temp_type, temp_key, temp_revision, temp_last_modified, temp_json) from stdin with delimiter E'\t' escape '\\' quote E'\x08' csv")
         .await
         .unwrap();
     let file = tokio::fs::File::open(copy_file).await?;
@@ -35,6 +35,7 @@ pub async fn mk_lib_database_copy(
     Ok(())
 }
 
+// works on jsonb          .copy_in_raw("copy public.mktemp_import10 (temp_type, temp_key, temp_revision, temp_last_modified, temp_json) from stdin with delimiter E'\t' escape '\\' quote E'\x08' csv")
 // works but no quoates on json .copy_in_raw("copy public.mktemp_import (temp_type, temp_key, temp_revision, temp_last_modified, temp_json) from stdin CSV DELIMITER E'\t' ESCAPE '\\'")
 // works but no quotes on "json".copy_in_raw("copy public.mktemp_import (temp_type, temp_key, temp_revision, temp_last_modified, temp_json) from stdin CSV DELIMITER E'\t' QUOTE '\"' ESCAPE '\\'")
 // INSERT ... AS SELECT ... command, where the SELECT is doing conversion to JSONB
