@@ -12,6 +12,14 @@ DO update set mm_openlib_author_json=EXCLUDED.mm_openlib_author_json;
 DROP TABLE mktemp_import7;
 */
 
+/*
+running
+INSERT INTO mm_openlib_author(mm_openlib_author_id, mm_openlib_author_json)
+SELECT temp_key, temp_json
+FROM mktemp_import10 ON conflict (mm_openlib_author_id)
+DO update set mm_openlib_author_json=EXCLUDED.mm_openlib_author_json;
+ */
+
 pub async fn mk_lib_database_copy(
     sqlx_pool: &sqlx::PgPool,
     copy_file: &str,
