@@ -7,14 +7,14 @@ LABEL author="Quinn D Granfor, spootdev@gmail.com"
 RUN apk update && apk add --no-cache bash su-exec tzdata zstd icu-data-full nss_wrapper \
   && apk add --no-cache postgresql-citus postgresql16-contrib
 
-ADD https://raw.githubusercontent.com/postgres/postgres/master/src/backend/utils/misc/postgresql.conf.sample /usr/local/share/postgresql/postgresql.conf.sample
+ADD https://raw.githubusercontent.com/postgres/postgres/master/src/backend/utils/misc/postgresql.conf.sample /usr/local/share/postgresql/postgresql.conf
 COPY docker-entrypoint.sh /usr/local/bin/
 COPY docker-entrypoint-initdb.d /docker-entrypoint-initdb.d
 
 # make the sample config easier to munge (and "correct by default")
 RUN set -eux; \
-  sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/local/share/postgresql/postgresql.conf.sample; \
-  grep -F "listen_addresses = '*'" /usr/local/share/postgresql/postgresql.conf.sample \
+  sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/local/share/postgresql/postgresql.conf; \
+  grep -F "listen_addresses = '*'" /usr/local/share/postgresql/postgresql.conf \
   && mkdir -p /var/run/postgresql && chown -R postgres:postgres /var/run/postgresql && chmod 3777 /var/run/postgresql
 
 ENV PGDATA /var/lib/postgresql/data
