@@ -1,1 +1,1 @@
-docker exec -t mkstack_database pg_dump -U postgres < mkstack_database_dump_2024-01-30_16_06_36.sql
+docker exec -t mkstack_database.1.udos625q9uhj272a8279zhqjp psql -U postgres postgres -f /home/spoot/MediaKraken/docker_swarm/mkstack_database_dump_2024-01-30_16_06_36.sql

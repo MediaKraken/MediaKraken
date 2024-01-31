@@ -74,6 +74,7 @@ services:
     volumes:
       - mediakraken_vol_postgresql:/var/lib/postgresql/data
       - mediakraken_vol_postgresql_backup:/mediakraken/backup
+      - ./backups:/backups
     networks:
       - mediakraken_network
 
