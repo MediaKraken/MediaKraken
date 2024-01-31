@@ -11,10 +11,9 @@ ADD https://raw.githubusercontent.com/postgres/postgres/master/src/backend/utils
 COPY docker-entrypoint.sh /usr/local/bin/
 COPY docker-entrypoint-initdb.d /docker-entrypoint-initdb.d
 
-RUN ln -sv /usr/local/share/postgresql/postgresql.conf.sample "/usr/share/postgresql/16/"; \
-  sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/local/share/postgresql/postgresql.conf.sample; \
+RUN sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/local/share/postgresql/postgresql.conf.sample; \
   grep -F "listen_addresses = '*'" /usr/local/share/postgresql/postgresql.conf.sample \
-  && mkdir -p /var/run/postgresql && chown -R postgres:postgres /var/run/postgresql && chmod 3777 /var/run/postgresql
+  && mkdir -p /var/run/postgresql && chown -R postgres:postgres /var/run/postgresql && chown -R postgres:postgres /usr/local/share/postgresql/postgresql.conf.sample && chmod 3777 /var/run/postgresql
 
 ENV PGDATA /var/lib/postgresql/data
 # this 777 will be replaced by 700 at runtime (allows semi-arbitrary "--user" values)
