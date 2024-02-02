@@ -1,6 +1,5 @@
 pub mod mk_lib_database;
 pub mod mk_lib_database_backup;
-pub mod mk_lib_database_copy;
 pub mod mk_lib_database_cron;
 pub mod mk_lib_database_game_servers;
 pub mod mk_lib_database_hardware_device;
@@ -56,6 +55,7 @@ pub mod database_metadata {
     pub mod mk_lib_database_metadata_music_brainz;
     pub mod mk_lib_database_metadata_music_video;
     pub mod mk_lib_database_metadata_openlib;
+    pub mod mk_lib_database_metadata_openlib_copy;
     pub mod mk_lib_database_metadata_person;
     pub mod mk_lib_database_metadata_review;
     pub mod mk_lib_database_metadata_sports;

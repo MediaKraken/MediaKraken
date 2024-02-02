@@ -64,12 +64,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .unwrap();
     }
     println!("huh3");
-    let result = mk_lib_database::mk_lib_database_copy::mk_lib_database_copy(
+    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy(
         &sqlx_pool,
         "/mediakraken/ol_dump_authors_latest.txt",
     )
     .await;
-    println!("result: {:?}", result);
+    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy_author_upsert(&sqlx_pool,).await;
     // let file = File::open("/mediakraken/ol_dump_authors_latest.txt").unwrap();
     // let reader = BufReader::new(file);
     // for line in reader.lines() {
@@ -99,13 +99,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .unwrap();
     }
     println!("booger3");
-    let file = File::open("/mediakraken/ol_dump_editions_latest.txt").unwrap();
-    let reader = BufReader::new(file);
-    for line in reader.lines() {
-        let s = line.unwrap();
-        let record_info: Vec<&str> = s.split('\t').collect();
-        let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib::mk_lib_database_metadata_openlib_edition_upsert(&sqlx_pool, record_info[1], record_info[4]).await;
-    }
+    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy(
+        &sqlx_pool,
+        "/mediakraken/ol_dump_editions_latest.txt",
+    )
+    .await;
+    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy_edition_upsert(&sqlx_pool,).await;
+    // let file = File::open("/mediakraken/ol_dump_editions_latest.txt").unwrap();
+    // let reader = BufReader::new(file);
+    // for line in reader.lines() {
+    //     let s = line.unwrap();
+    //     let record_info: Vec<&str> = s.split('\t').collect();
+    //     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib::mk_lib_database_metadata_openlib_edition_upsert(&sqlx_pool, record_info[1], record_info[4]).await;
+    // }
 
     // ratings
     if !Path::new(&"/mediakraken/ol_dump_ratings_latest.txt.gz").exists()
@@ -128,13 +134,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .unwrap();
     }
     println!("what3");
-    let file = File::open("/mediakraken/ol_dump_ratings_latest.txt").unwrap();
-    let reader = BufReader::new(file);
-    for line in reader.lines() {
-        let s = line.unwrap();
-        let record_info: Vec<&str> = s.split('\t').collect();
-        let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib::mk_lib_database_metadata_openlib_rating_upsert(&sqlx_pool, record_info[1], record_info[4]).await;
-    }
+    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy(
+        &sqlx_pool,
+        "/mediakraken/ol_dump_ratings_latest.txt",
+    )
+    .await;
+    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy_rating_upsert(&sqlx_pool,).await;
+    // let file = File::open("/mediakraken/ol_dump_ratings_latest.txt").unwrap();
+    // let reader = BufReader::new(file);
+    // for line in reader.lines() {
+    //     let s = line.unwrap();
+    //     let record_info: Vec<&str> = s.split('\t').collect();
+    //     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib::mk_lib_database_metadata_openlib_rating_upsert(&sqlx_pool, record_info[1], record_info[4]).await;
+    // }
 
     // works
     if !Path::new(&"/mediakraken/ol_dump_works_latest.txt.gz").exists()
@@ -157,13 +169,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .unwrap();
     }
     println!("works2");
-    let file = File::open("/mediakraken/ol_dump_works_latest.txt").unwrap();
-    let reader = BufReader::new(file);
-    for line in reader.lines() {
-        let s = line.unwrap();
-        let record_info: Vec<&str> = s.split('\t').collect();
-        let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib::mk_lib_database_metadata_openlib_work_upsert(&sqlx_pool, record_info[1], record_info[4]).await;
-    }
+    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy(
+        &sqlx_pool,
+        "/mediakraken/ol_dump_works_latest.txt",
+    )
+    .await;
+    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy_work_upsert(&sqlx_pool,).await;
+    // let file = File::open("/mediakraken/ol_dump_works_latest.txt").unwrap();
+    // let reader = BufReader::new(file);
+    // for line in reader.lines() {
+    //     let s = line.unwrap();
+    //     let record_info: Vec<&str> = s.split('\t').collect();
+    //     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib::mk_lib_database_metadata_openlib_work_upsert(&sqlx_pool, record_info[1], record_info[4]).await;
+    // }
 
     // match record_info[0] {
     //     "/type/about" => {}
