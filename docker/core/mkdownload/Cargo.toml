@@ -10,9 +10,9 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { path = "../../../src/mk_lib_database" }
-mk_lib_network = { path = "../../../src/mk_lib_network" }
-mk_lib_rabbitmq = { path = "../../../src/mk_lib_rabbitmq" }
+mk_lib_database = { path = "mk_lib_database" }
+mk_lib_network = { path = "mk_lib_network" }
+mk_lib_rabbitmq = { path = "mk_lib_rabbitmq" }
 
 chrono = { version = "0.4.31", features = ["serde"] }
 governor = "0.6.0"
@@ -27,6 +27,5 @@ sys-info = "0.9.1"
 tokio = { version = "1.35.1", features = ["full"] }
 uuid = { version = "1.6.1", features = ["serde", "v4"] }
 validator = { version = "0.16.1", features = ["derive"] }
-
 [dev-dependencies]
 tokio-test = "*"
