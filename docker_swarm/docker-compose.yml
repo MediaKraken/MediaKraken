@@ -50,7 +50,7 @@ services:
     environment:
       - MAX_CONNECTIONS=125
       - MAX_WAL_SENDERS=10
-      # - MAX_WAL_SIZE=16G  This parameter can only be set in the postgresql.conf file or on the server command line.
+      # - MAX_WAL_SIZE=16GB  This parameter can only be set in the postgresql.conf file or on the server command line.
       - SHARED_BUFFERS=4096MB
       - WORK_MEM=64MB
       - MAX_WORKER_PROCESSES=8
@@ -59,7 +59,7 @@ services:
       - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
       - POSTGRES_INITDB_ARGS=--auth-host=trust  # for debug only
       #- POSTGRES_INITDB_ARGS="--locale-provider=icu --icu-locale=en --auth-host=trust"   initdb: error: unrecognized locale provider: icu --icu-locale=en --auth-host=trust
-    command: postgres -c shared_preload_libraries=citus -c max_wal_size=16G -c config_file=/usr/local/share/postgresql/postgresql.conf.sample
+    command: postgres -c shared_preload_libraries=citus -c max_wal_size=16GB -c config_file=/usr/local/share/postgresql/postgresql.conf.sample
     ports: # for debugging only!!!!!
       - "5432:5432"
     secrets:
