@@ -11,7 +11,7 @@ codegen-units = 1
 
 [dependencies]
 flate2 = "1.0.28"
-serde_json = "1.0.111"
+serde_json = "1.0.113"
 tar = "0.4.40"
 zip = "0.6.6"
 

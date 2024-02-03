@@ -25,13 +25,13 @@ rppal = { version = "0.16.1", features = [
 ], optional = true }
 #rppal-dht11 = { version = "0.4.0", optional = true }
 rups = { version = "0.6.1", features = ["async", "async-ssl"] }
-serde_json = "1.0.111"
+serde_json = "1.0.113"
 serialport = "4.3.0"
 smartcast = "0.1.1"
 sonos_discovery = "0.0.2"
 spl06-007 = { version = "0.3.3", optional = true }
 ssdp = { git = "https://github.com/ssnover/ssdp-rs", branch = "feature/local-impl-of-ip-feature" }
-tokio = "1.35.1"
+tokio = "1.36.0"
 url = "2.5.0"
 weectrl = { git = "https://github.com/Hyperchaotic/weectrl" }
 yeelib_rs = "0.1.1"
