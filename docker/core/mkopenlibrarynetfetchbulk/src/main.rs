@@ -77,6 +77,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy(&sqlx_pool, "/mediakraken/ol_dump_authors_latest.txt",).await;
                     println!("huh4");
                     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy_author_upsert(&sqlx_pool,).await;
+                    println!("huh5");
                     // let file = File::open("/mediakraken/ol_dump_authors_latest.txt").unwrap();
                     // let reader = BufReader::new(file);
                     // for line in reader.lines() {
@@ -115,6 +116,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy(&sqlx_pool, "/mediakraken/ol_dump_editions_latest.txt",).await;
                     println!("booger4");
                     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy_edition_upsert(&sqlx_pool,).await;
+                    println!("booger5");
                     // let file = File::open("/mediakraken/ol_dump_editions_latest.txt").unwrap();
                     // let reader = BufReader::new(file);
                     // for line in reader.lines() {
@@ -149,10 +151,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .await
                         .unwrap();
                     }
-                    println!("works2");
-                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy(&sqlx_pool, "/mediakraken/ol_dump_works_latest.txt",).await;
                     println!("works3");
+                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy(&sqlx_pool, "/mediakraken/ol_dump_works_latest.txt",).await;
+                    println!("works4");
                     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy_work_upsert(&sqlx_pool,).await;
+                    println!("works5");
                     // let file = File::open("/mediakraken/ol_dump_works_latest.txt").unwrap();
                     // let reader = BufReader::new(file);
                     // for line in reader.lines() {
