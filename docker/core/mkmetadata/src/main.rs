@@ -14,7 +14,7 @@ struct APIJson {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // open the database
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
         .await
         .unwrap();
     let _result =
@@ -30,7 +30,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // launch thread per provider
     let _handle_tmdb = tokio::spawn(async move {
-        let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+        let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
             .await
             .unwrap();
         loop {
@@ -52,7 +52,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     if option_api.musicbrainz.is_some() {
         let musicbrainz_api_key = option_api.musicbrainz.unwrap();
         let _handle_musicbrainz = tokio::spawn(async move {
-            let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+            let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
                 .await
                 .unwrap();
             loop {
@@ -73,7 +73,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         });
     };
     let _handle_thesportsdb = tokio::spawn(async move {
-        let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+        let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
             .await
             .unwrap();
         loop {

@@ -1,10 +1,11 @@
+use std::time::Duration;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use std::fs;
 use std::path::Path;
 use urlencoding::encode;
 
-pub async fn mk_lib_database_open_pool(pool_connections: u32) -> Result<sqlx::PgPool, sqlx::Error> {
+pub async fn mk_lib_database_open_pool(pool_connections: u32, connection_timeout: u64) -> Result<sqlx::PgPool, sqlx::Error> {
     // trim is get rid of the \r returned in hostname
     let hostname: String = sys_info::hostname().unwrap().trim().to_string();
     let connection_string: String;
@@ -37,6 +38,7 @@ pub async fn mk_lib_database_open_pool(pool_connections: u32) -> Result<sqlx::Pg
     }
     let sqlx_pool = PgPoolOptions::new()
         .max_connections(pool_connections)
+        .idle_timeout(Duration::new(connection_timeout, 0))
         .connect(&connection_string)
         .await?;
     Ok(sqlx_pool)

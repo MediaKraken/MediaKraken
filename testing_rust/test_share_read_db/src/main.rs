@@ -9,7 +9,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 #[tokio::main]
 async fn main() {
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
         .await
         .unwrap();
     let _result =

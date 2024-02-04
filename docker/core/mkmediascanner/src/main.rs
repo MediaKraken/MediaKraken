@@ -34,7 +34,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let stack_disc1 = Regex::new(r"(?i)-disc1(?!\d)").unwrap();
 
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
         .await
         .unwrap();
     let _result =
