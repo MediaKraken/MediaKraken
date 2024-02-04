@@ -45,8 +45,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(payload) = msg.content {
                 let json_message: Value =
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                if json_message["Type"].to_string() == "authors"
-                    || json_message["Type"].to_string() == "all"
+                println!("Json: {:?}", json_message);
+                println!("What: {:?}", json_message["Type"].to_string());
+                println!("What2: {:?}", json_message["Type"]);
+                if json_message["Type"] == "authors"
+                    || json_message["Type"] == "all"
                 {
                     // authors
                     if !Path::new(&"/mediakraken/ol_dump_authors_latest.txt.gz").exists()
@@ -83,8 +86,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     // }
                 }
 
-                if json_message["Type"].to_string() == "editions"
-                    || json_message["Type"].to_string() == "all"
+                if json_message["Type"] == "editions"
+                    || json_message["Type"] == "all"
                 {
                     // editions
                     if !Path::new(&"/mediakraken/ol_dump_editions_latest.txt.gz").exists()
@@ -121,46 +124,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     // }
                 }
 
-                if json_message["Type"].to_string() == "ratings"
-                    || json_message["Type"].to_string() == "all"
-                {
-                    // ratings
-                    if !Path::new(&"/mediakraken/ol_dump_ratings_latest.txt.gz").exists()
-                        && !Path::new(&"/mediakraken/ol_dump_ratings_latest.txt").exists()
-                    {
-                        println!("what1");
-                        let _fetch_result =
-                            mk_lib_network::mk_lib_network::mk_download_file_from_url(
-                                "https://openlibrary.org/data/ol_dump_ratings_latest.txt.gz"
-                                    .to_string(),
-                                &"/mediakraken/ol_dump_ratings_latest.txt.gz".to_string(),
-                            )
-                            .await
-                            .unwrap();
-                    }
-                    if !Path::new(&"/mediakraken/ol_dump_ratings_latest.txt").exists() {
-                        println!("what2");
-                        mk_lib_compression::mk_lib_compression::mk_decompress_tar_gz_file_gunzip(
-                            "/mediakraken/ol_dump_ratings_latest.txt.gz",
-                        )
-                        .await
-                        .unwrap();
-                    }
-                    println!("what3");
-                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy(&sqlx_pool, "/mediakraken/ol_dump_ratings_latest.txt",).await;
-                    println!("what4");
-                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy_rating_upsert(&sqlx_pool,).await;
-                    // let file = File::open("/mediakraken/ol_dump_ratings_latest.txt").unwrap();
-                    // let reader = BufReader::new(file);
-                    // for line in reader.lines() {
-                    //     let s = line.unwrap();
-                    //     let record_info: Vec<&str> = s.split('\t').collect();
-                    //     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib::mk_lib_database_metadata_openlib_rating_upsert(&sqlx_pool, record_info[1], record_info[4]).await;
-                    // }
-                }
-
-                if json_message["Type"].to_string() == "works"
-                    || json_message["Type"].to_string() == "all"
+                if json_message["Type"] == "works"
+                    || json_message["Type"] == "all"
                 {
                     // works
                     if !Path::new(&"/mediakraken/ol_dump_works_latest.txt.gz").exists()
