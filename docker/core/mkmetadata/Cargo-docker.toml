@@ -14,19 +14,19 @@ mk_lib_common = { path = "mk_lib_common" }
 mk_lib_database = { path = "mk_lib_database" }
 mk_lib_metadata = { path = "mk_lib_metadata" }
 
-chrono = { version = "0.4.31", features = ["serde"] }
+chrono = { version = "0.4.33", features = ["serde"] }
 flate2 = "1.0.28"
 governor = "0.6.0"
 musicbrainz_rs = "0.5.0"
 open-library = "0.7.1"
 rand = "0.8.5"
-reqwest = { version = "0.11.23", default-features = false, features = [
+reqwest = { version = "0.11.24", default-features = false, features = [
     "json",
     "native-tls",
 ] }
 roxmltree = "0.19.0"
-serde = { version = "1.0.194", features = ["derive"] }
-serde_json = "1.0.111"
+serde = { version = "1.0.196", features = ["derive"] }
+serde_json = "1.0.113"
 sqlx = { version = "0.7.3", features = [
     "chrono",
     "ipnetwork",
@@ -39,9 +39,9 @@ stdext = "0.3.1"
 substring = "1.4.5"
 sys-info = "0.9.1"
 tar = "0.4.40"
-tokio = { version = "1.35.1", features = ["full"] }
+tokio = { version = "1.36.0", features = ["full"] }
 torrent-name-parser = "0.12.1"
-uuid = { version = "1.6.1", features = ["serde", "v4"] }
+uuid = { version = "1.7.0", features = ["serde", "v4"] }
 md-5 = "0.10.6"
 sha-1 = "0.10.1"
 

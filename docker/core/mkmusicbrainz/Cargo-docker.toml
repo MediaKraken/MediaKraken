@@ -13,16 +13,16 @@ codegen-units = 1
 mk_lib_database = { path = "mk_lib_database" }
 mk_lib_rabbitmq = { path = "mk_lib_rabbitmq" }
 
-reqwest = { version = "0.11.23", default-features = false, features = [
+reqwest = { version = "0.11.24", default-features = false, features = [
     "json",
     "rustls-tls",
 ] }
-rustls = "0.22.1"
-serde = { version = "1.0.194", features = ["derive"] }
-serde_json = "1.0.111"
+rustls = "0.22.2"
+serde = { version = "1.0.196", features = ["derive"] }
+serde_json = "1.0.113"
 stdext = "0.3.1"
 sys-info = "0.9.1"
-tokio = { version = "1.35.1", features = ["full"] }
+tokio = { version = "1.36.0", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"

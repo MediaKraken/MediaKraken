@@ -25,7 +25,8 @@ import shlex
 import shutil
 import subprocess
 import sys
-
+import concurrent.futures
+ 
 try:
     from dotenv import load_dotenv
 except ModuleNotFoundError:
@@ -107,6 +108,7 @@ def build_email_push(build_group, email_subject, branch_tag, push_hub_image=Fals
             except FileNotFoundError:
                 pass
             # TODO check for errors/warnings and stop if found
+            # BuildKit is the default builder for users on Docker Desktop and Docker Engine v23.0 and later.
             # Let the mirror's be passed, if not used it will just throw a warning
             pid_build_proc = subprocess.Popen(shlex.split('docker build %s'
                                                           ' -t mediakraken/%s:%s'
@@ -219,39 +221,62 @@ pid_proc.wait()
 
 # begin build process
 if args.base:
+    pool = concurrent.futures.ThreadPoolExecutor(max_workers=
+                                                 len(docker_images_list.STAGE_ONE_IMAGES) 
+                                                 + len(docker_images_list.STAGE_ONE_GAME_SERVERS))
     for build_stages in (docker_images_list.STAGE_ONE_IMAGES,
                          docker_images_list.STAGE_ONE_GAME_SERVERS,):
-        build_email_push(build_stages, 'Build base image: ',
-                         branch_tag=git_branch, push_hub_image=args.push)
+        pool.submit(build_email_push(build_stages, 'Build ' + args.version + ' image: ', 
+                                     branch_tag=git_branch, push_hub_image=args.push))        
+    pool.shutdown(wait=True)
 
 if args.security:
+    pool = concurrent.futures.ThreadPoolExecutor(max_workers=
+                                                 len(docker_images_list.STAGE_ONE_SECURITY_TOOLS) 
+                                                 + len(docker_images_list.STAGE_TWO_SECURITY_TOOLS))
     for build_stages in (docker_images_list.STAGE_ONE_SECURITY_TOOLS,
                          docker_images_list.STAGE_TWO_SECURITY_TOOLS,):
-        build_email_push(build_stages, 'Build security image: ',
-                         branch_tag=git_branch, push_hub_image=args.push)
+        pool.submit(build_email_push(build_stages, 'Build ' + args.version + ' image: ', 
+                                     branch_tag=git_branch, push_hub_image=args.push))        
+    pool.shutdown(wait=True)
 
 if args.testing:
+    pool = concurrent.futures.ThreadPoolExecutor(max_workers=
+                                                 len(docker_images_list.STAGE_ONE_TESTING_TOOLS) 
+                                                 + len(docker_images_list.STAGE_TWO_TESTING_TOOLS))
     for build_stages in (docker_images_list.STAGE_ONE_TESTING_TOOLS,
                          docker_images_list.STAGE_TWO_TESTING_TOOLS):
-        build_email_push(build_stages, 'Build testing image: ',
-                         branch_tag=git_branch, push_hub_image=args.push)
+        pool.submit(build_email_push(build_stages, 'Build ' + args.version + ' image: ', 
+                                     branch_tag=git_branch, push_hub_image=args.push))        
+    pool.shutdown(wait=True)
 
 if args.core:
+    pool = concurrent.futures.ThreadPoolExecutor(max_workers=
+                                                 len(docker_images_list.STAGE_TWO_IMAGES) 
+                                                 + len(docker_images_list.STAGE_CORE_IMAGES))
     for build_stages in (docker_images_list.STAGE_TWO_IMAGES,
                          docker_images_list.STAGE_CORE_IMAGES):
-        build_email_push(build_stages, 'Build ' + args.version + ' image: ',
-                         branch_tag=git_branch, push_hub_image=args.push)
+        pool.submit(build_email_push(build_stages, 'Build ' + args.version + ' image: ', 
+                                     branch_tag=git_branch, push_hub_image=args.push))        
+    pool.shutdown(wait=True)
 
 if args.game:
+    pool = concurrent.futures.ThreadPoolExecutor(max_workers=
+                                                 len(docker_images_list.STAGE_TWO_GAME_SERVERS))
     for build_stages in (docker_images_list.STAGE_TWO_GAME_SERVERS):
-        build_email_push(build_stages, 'Build ' + args.version + ' image: ',
-                         branch_tag=git_branch, push_hub_image=args.push)
+        pool.submit(build_email_push(build_stages, 'Build ' + args.version + ' image: ', 
+                                     branch_tag=git_branch, push_hub_image=args.push))        
+    pool.shutdown(wait=True)
 
 if args.option:
+    pool = concurrent.futures.ThreadPoolExecutor(max_workers=
+                                                 len(docker_images_list.STAGE_ONE_OPTIONS) 
+                                                 + len(docker_images_list.STAGE_TWO_OPTIONS))
     for build_stages in (docker_images_list.STAGE_ONE_OPTIONS,
                          docker_images_list.STAGE_TWO_OPTIONS):
-        build_email_push(build_stages, 'Build options image: ',
-                         branch_tag=git_branch, push_hub_image=args.push)
+        pool.submit(build_email_push(build_stages, 'Build ' + args.version + ' image: ', 
+                                     branch_tag=git_branch, push_hub_image=args.push))        
+    pool.shutdown(wait=True)
 
 # purge the none images
 pid_proc = subprocess.Popen(
