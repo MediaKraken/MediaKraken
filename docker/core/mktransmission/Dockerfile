@@ -1,6 +1,6 @@
 # https://github.com/rlesouef/alpine-transmission
 
-FROM alpine:3.19.0
+FROM alpine:3.19.1
 
 LABEL maintainer="Open Source Services [opensourceservices.fr]"
 
