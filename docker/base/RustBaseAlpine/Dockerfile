@@ -8,9 +8,9 @@ RUN apk update && \
   && chmod +x /wait
 
 # docker run -d --name redis-stack -p 6379:6379 -p 8001:8001 redis/redis-stack:latest
-RUN wget https://github.com/mozilla/sccache/releases/download/v0.7.4/sccache-v0.7.4-x86_64-unknown-linux-musl.tar.gz \
-    && tar xzf sccache-v0.7.4-x86_64-unknown-linux-musl.tar.gz \
-    && mv sccache-v0.7.4-x86_64-unknown-linux-musl/sccache /usr/local/bin/sccache \
+RUN wget https://github.com/mozilla/sccache/releases/download/v0.7.7/sccache-v0.7.7-x86_64-unknown-linux-musl.tar.gz \
+    && tar xzf sccache-v0.7.7-x86_64-unknown-linux-musl.tar.gz \
+    && mv sccache-v0.7.7-x86_64-unknown-linux-musl/sccache /usr/local/bin/sccache \
     && chmod +x /usr/local/bin/sccache
 
 # for layer cache later in build
