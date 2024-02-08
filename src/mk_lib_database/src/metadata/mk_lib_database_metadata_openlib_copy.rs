@@ -55,6 +55,9 @@ pub async fn mk_lib_database_copy_author_upsert(
     )
     .execute(&mut *transaction)
     .await?;
+    sqlx::query("truncate mktemp_import;")
+        .execute(&mut *transaction)
+        .await?;
     transaction.commit().await?;
     Ok(())
 }
@@ -71,29 +74,14 @@ pub async fn mk_lib_database_copy_edition_upsert(
     )
     .execute(&mut *transaction)
     .await?;
+    sqlx::query("truncate mktemp_import;")
+        .execute(&mut *transaction)
+        .await?;
     transaction.commit().await?;
     Ok(())
 }
 
-pub async fn mk_lib_database_copy_rating_upsert(
-    sqlx_pool: &sqlx::PgPool,
-) -> Result<(), sqlx::Error> {
-    let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query(
-        "INSERT INTO mm_openlib_rating(mm_openlib_rating_id, mm_openlib_rating_json)
-        SELECT temp_key, temp_json
-        FROM mktemp_import ON conflict (mm_openlib_rating_id)
-        DO update set mm_openlib_rating_json=EXCLUDED.mm_openlib_rating_json;",
-    )
-    .execute(&mut *transaction)
-    .await?;
-    transaction.commit().await?;
-    Ok(())
-}
-
-pub async fn mk_lib_database_copy_work_upsert(
-    sqlx_pool: &sqlx::PgPool,
-) -> Result<(), sqlx::Error> {
+pub async fn mk_lib_database_copy_work_upsert(sqlx_pool: &sqlx::PgPool) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "INSERT INTO mm_openlib_work(mm_openlib_work_id, mm_openlib_work_json)
@@ -103,6 +91,9 @@ pub async fn mk_lib_database_copy_work_upsert(
     )
     .execute(&mut *transaction)
     .await?;
+    sqlx::query("truncate mktemp_import;")
+        .execute(&mut *transaction)
+        .await?;
     transaction.commit().await?;
     Ok(())
 }

@@ -46,11 +46,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let json_message: Value =
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
                 println!("Json: {:?}", json_message);
-                println!("What: {:?}", json_message["Type"].to_string());
-                println!("What2: {:?}", json_message["Type"]);
-                if json_message["Type"] == "authors"
-                    || json_message["Type"] == "all"
-                {
+                if json_message["Type"] == "authors" || json_message["Type"] == "all" {
                     // authors
                     if !Path::new(&"/mediakraken/ol_dump_authors_latest.txt.gz").exists()
                         && !Path::new(&"/mediakraken/ol_dump_authors_latest.txt").exists()
@@ -78,18 +74,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     println!("huh4");
                     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy_author_upsert(&sqlx_pool,).await;
                     println!("huh5");
-                    // let file = File::open("/mediakraken/ol_dump_authors_latest.txt").unwrap();
-                    // let reader = BufReader::new(file);
-                    // for line in reader.lines() {
-                    //     let s = line.unwrap();
-                    //     let record_info: Vec<&str> = s.split('\t').collect();
-                    //     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib::mk_lib_database_metadata_openlib_author_upsert(&sqlx_pool, record_info[1], record_info[4]).await;
-                    // }
                 }
 
-                if json_message["Type"] == "editions"
-                    || json_message["Type"] == "all"
-                {
+                if json_message["Type"] == "editions" || json_message["Type"] == "all" {
                     // editions
                     if !Path::new(&"/mediakraken/ol_dump_editions_latest.txt.gz").exists()
                         && !Path::new(&"/mediakraken/ol_dump_editions_latest.txt").exists()
@@ -117,18 +104,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     println!("booger4");
                     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy_edition_upsert(&sqlx_pool,).await;
                     println!("booger5");
-                    // let file = File::open("/mediakraken/ol_dump_editions_latest.txt").unwrap();
-                    // let reader = BufReader::new(file);
-                    // for line in reader.lines() {
-                    //     let s = line.unwrap();
-                    //     let record_info: Vec<&str> = s.split('\t').collect();
-                    //     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib::mk_lib_database_metadata_openlib_edition_upsert(&sqlx_pool, record_info[1], record_info[4]).await;
-                    // }
                 }
 
-                if json_message["Type"] == "works"
-                    || json_message["Type"] == "all"
-                {
+                if json_message["Type"] == "works" || json_message["Type"] == "all" {
                     // works
                     if !Path::new(&"/mediakraken/ol_dump_works_latest.txt.gz").exists()
                         && !Path::new(&"/mediakraken/ol_dump_works_latest.txt").exists()
@@ -156,13 +134,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     println!("works4");
                     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy_work_upsert(&sqlx_pool,).await;
                     println!("works5");
-                    // let file = File::open("/mediakraken/ol_dump_works_latest.txt").unwrap();
-                    // let reader = BufReader::new(file);
-                    // for line in reader.lines() {
-                    //     let s = line.unwrap();
-                    //     let record_info: Vec<&str> = s.split('\t').collect();
-                    //     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib::mk_lib_database_metadata_openlib_work_upsert(&sqlx_pool, record_info[1], record_info[4]).await;
-                    // }
                 }
 
                 // match record_info[0] {
