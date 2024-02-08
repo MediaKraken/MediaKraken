@@ -5,6 +5,7 @@ use mk_lib_rabbitmq;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::error::Error;
+use std::fs;
 use std::fs::File;
 use std::io::{prelude::*, BufReader};
 use std::path::Path;
@@ -74,6 +75,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     println!("huh4");
                     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy_author_upsert(&sqlx_pool,).await;
                     println!("huh5");
+                    let _result = fs::remove_file("/mediakraken/ol_dump_authors_latest.txt");
                 }
 
                 if json_message["Type"] == "editions" || json_message["Type"] == "all" {
@@ -104,6 +106,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     println!("booger4");
                     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy_edition_upsert(&sqlx_pool,).await;
                     println!("booger5");
+                    let _result = fs::remove_file("/mediakraken/ol_dump_editions_latest.txt");
                 }
 
                 if json_message["Type"] == "works" || json_message["Type"] == "all" {
@@ -134,6 +137,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     println!("works4");
                     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy_work_upsert(&sqlx_pool,).await;
                     println!("works5");
+                    let _result = fs::remove_file("/mediakraken/ol_dump_works_latest.txt");
                 }
 
                 // match record_info[0] {
