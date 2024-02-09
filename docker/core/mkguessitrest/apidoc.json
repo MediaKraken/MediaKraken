@@ -1,7 +1,7 @@
 {
   "name": "GuessIt",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "Extracts as much information as possible from a video filename",
   "title": "GuessIt",
-  "url" : "https://api.guessit.io/v2"
+  "url": "https://api.guessit.io/v2"
 }

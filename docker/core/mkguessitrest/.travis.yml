@@ -7,14 +7,16 @@ python:
   - 3.7
   - 3.8
   - 3.9
+  - 3.10
+  - 3.11
   - pypy
   - pypy3
 matrix:
   include:
-    - python: 3.9
+    - python: 3.11
       dist: xenial
       sudo: true
-    - python: 3.9-dev
+    - python: 3.11-dev
       dist: xenial
       sudo: true
 install:
