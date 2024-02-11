@@ -1,4 +1,5 @@
 # image name and where they are from
+admin required https://www.freepik.com/icon/admin-with-cogwheels_78948#fromView=search&term=administrator&track=ais&page=2&position=2&uuid=719c5fd0-4922-49b2-b56c-9eac791009f3
 3D.png https://www.flaticon.com/free-icon/3d-glasses-for-cinema_49229
 add-button.png https://www.flaticon.com/free-icon/add-button_109789
 books.png https://www.flaticon.com/free-icon/books-stack-of-three_29302
