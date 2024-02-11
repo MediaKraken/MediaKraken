@@ -6,7 +6,7 @@ use axum::{
     routing::{get, post},
     Extension,
 };
-use axum_session_auth::{AuthSession, SessionPgPool};
+use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
 use mk_lib_database;
 use serde::{Deserialize, Serialize};
 use sqlx::{

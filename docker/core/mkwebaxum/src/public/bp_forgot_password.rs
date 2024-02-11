@@ -7,7 +7,7 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
-use axum_session_auth::{AuthSession, SessionPgPool};
+use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
 use sqlx::{
     postgres::{PgConnectOptions, PgPoolOptions},
     ConnectOptions, PgPool,

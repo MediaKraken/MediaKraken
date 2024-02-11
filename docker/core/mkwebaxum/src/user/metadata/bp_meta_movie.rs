@@ -6,13 +6,17 @@ use axum::{
     response::{Html, IntoResponse},
     Extension,
 };
-use axum_session_auth::{AuthSession, SessionPgPool};
+use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
 use mk_lib_common::mk_lib_common_pagination;
 use mk_lib_database;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::{PgPool, PgRow};
 use sqlx::{FromRow, Row};
+
+#[derive(Template)]
+#[template(path = "bss_error/bss_error_401.html")]
+struct TemplateError401Context {}
 
 #[derive(Debug, Deserialize, Serialize)]
 struct TemplateMetaMovieList {
@@ -42,22 +46,35 @@ pub async fn user_metadata_movie(
     Path(page): Path<i64>,
 ) -> impl IntoResponse {
     let current_user = auth.current_user.clone().unwrap_or_default();
-    let db_offset: i64 = (page * 30) - 30;
-    let total_pages: i64 =
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("User::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        let template = TemplateError401Context {};
+        let reply_html = template.render().unwrap();
+        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+    } else {
+        let current_user = auth.current_user.clone().unwrap_or_default();
+        let db_offset: i64 = (page * 30) - 30;
+        let total_pages: i64 =
         mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(
             &sqlx_pool,
             String::new(),
         )
         .await
         .unwrap();
-    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
-        total_pages,
-        page,
-        "/user/metadata/movie".to_string(),
-    )
-    .await
-    .unwrap();
-    let movie_list =
+        let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
+            total_pages,
+            page,
+            "/user/metadata/movie".to_string(),
+        )
+        .await
+        .unwrap();
+        let movie_list =
         mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(
             &sqlx_pool,
             String::new(),
@@ -66,63 +83,66 @@ pub async fn user_metadata_movie(
         )
         .await
         .unwrap();
-    let mut template_data_vec: Vec<TemplateMetaMovieList> = Vec::new();
-    for row_data in movie_list.iter() {
-        let mut watched_status: serde_json::Value = json!(false);
-        let mut request_status: serde_json::Value = json!(false);
-        let mut rating_status: serde_json::Value = json!(null);
-        let mut queue_status: serde_json::Value = json!(false);
-        if !row_data.mm_metadata_user_json.is_none()
-            && row_data
-                .mm_metadata_user_json
-                .as_ref()
-                .unwrap()
-                .get("UserStats")
-                .is_some()
-        {
-            let rating_json: serde_json::Value =
-                row_data.mm_metadata_user_json.as_ref().unwrap().clone();
-            rating_status = rating_json["UserStats"][current_user.id.to_string()]["Rating"].clone();
-            watched_status =
-                rating_json["UserStats"][current_user.id.to_string()]["Watched"].clone();
-            request_status =
-                rating_json["UserStats"][current_user.id.to_string()]["Request"].clone();
-            queue_status = rating_json["UserStats"][current_user.id.to_string()]["Queue"].clone();
+        let mut template_data_vec: Vec<TemplateMetaMovieList> = Vec::new();
+        for row_data in movie_list.iter() {
+            let mut watched_status: serde_json::Value = json!(false);
+            let mut request_status: serde_json::Value = json!(false);
+            let mut rating_status: serde_json::Value = json!(null);
+            let mut queue_status: serde_json::Value = json!(false);
+            if !row_data.mm_metadata_user_json.is_none()
+                && row_data
+                    .mm_metadata_user_json
+                    .as_ref()
+                    .unwrap()
+                    .get("UserStats")
+                    .is_some()
+            {
+                let rating_json: serde_json::Value =
+                    row_data.mm_metadata_user_json.as_ref().unwrap().clone();
+                rating_status =
+                    rating_json["UserStats"][current_user.id.to_string()]["Rating"].clone();
+                watched_status =
+                    rating_json["UserStats"][current_user.id.to_string()]["Watched"].clone();
+                request_status =
+                    rating_json["UserStats"][current_user.id.to_string()]["Request"].clone();
+                queue_status =
+                    rating_json["UserStats"][current_user.id.to_string()]["Queue"].clone();
+            }
+            let mut mm_poster: String = "/image/Movie-icon.png".to_string();
+            if row_data.mm_poster.len() > 0 {
+                mm_poster = row_data.mm_poster.clone();
+            }
+            let temp_meta_line = TemplateMetaMovieList {
+                template_metadata_guid: row_data.mm_metadata_guid,
+                template_metadata_name: row_data.mm_metadata_name.clone(),
+                template_metadata_date: row_data.mm_date.clone(),
+                template_metadata_poster: mm_poster,
+                template_metadata_user_watched: watched_status,
+                template_metadata_user_rating: rating_status,
+                template_metadata_user_request: request_status,
+                template_metadata_user_queue: queue_status,
+            };
+            template_data_vec.push(temp_meta_line);
         }
-        let mut mm_poster: String = "/image/Movie-icon.png".to_string();
-        if row_data.mm_poster.len() > 0 {
-            mm_poster = row_data.mm_poster.clone();
+        let mut template_data_exists = false;
+        if template_data_vec.len() > 0 {
+            template_data_exists = true;
         }
-        let temp_meta_line = TemplateMetaMovieList {
-            template_metadata_guid: row_data.mm_metadata_guid,
-            template_metadata_name: row_data.mm_metadata_name.clone(),
-            template_metadata_date: row_data.mm_date.clone(),
-            template_metadata_poster: mm_poster,
-            template_metadata_user_watched: watched_status,
-            template_metadata_user_rating: rating_status,
-            template_metadata_user_request: request_status,
-            template_metadata_user_queue: queue_status,
+        let page_usize = page as usize;
+        let template = TemplateMetaMovieContext {
+            template_data: &template_data_vec,
+            template_data_exists: &template_data_exists,
+            pagination_bar: &pagination_html,
+            page: &page_usize,
         };
-        template_data_vec.push(temp_meta_line);
+        let reply_html = template.render().unwrap();
+        (StatusCode::OK, Html(reply_html).into_response())
     }
-    let mut template_data_exists = false;
-    if template_data_vec.len() > 0 {
-        template_data_exists = true;
-    }
-    let page_usize = page as usize;
-    let template = TemplateMetaMovieContext {
-        template_data: &template_data_vec,
-        template_data_exists: &template_data_exists,
-        pagination_bar: &pagination_html,
-        page: &page_usize,
-    };
-    let reply_html = template.render().unwrap();
-    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_movie_detail.html")]
-struct TemplateMetaMovieDetailContext<'a>{
+struct TemplateMetaMovieDetailContext<'a> {
     template_data_json: &'a serde_json::Value,
     template_data_json_media_crew: &'a serde_json::Value,
 }
@@ -130,19 +150,35 @@ struct TemplateMetaMovieDetailContext<'a>{
 pub async fn user_metadata_movie_detail(
     Extension(sqlx_pool): Extension<PgPool>,
     Path(guid): Path<uuid::Uuid>,
+    method: Method,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
-    let movie_metadata =
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("User::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        let template = TemplateError401Context {};
+        let reply_html = template.render().unwrap();
+        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+    } else {
+        let movie_metadata =
         mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_detail_by_guid(
             &sqlx_pool, guid,
         )
         .await
         .unwrap();
-    let template = TemplateMetaMovieDetailContext {
-        template_data_json: &movie_metadata.get("mm_metadata_movie_json"),
-        template_data_json_media_crew: &json!({  }),
-    };
-    let reply_html = template.render().unwrap();
-    (StatusCode::OK, Html(reply_html).into_response())
+        let template = TemplateMetaMovieDetailContext {
+            template_data_json: &movie_metadata.get("mm_metadata_movie_json"),
+            template_data_json_media_crew: &json!({}),
+        };
+        let reply_html = template.render().unwrap();
+        (StatusCode::OK, Html(reply_html).into_response())
+    }
 }
 
 /*

@@ -215,14 +215,14 @@ pub async fn mk_lib_database_user_set_admin(
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("insert into mm_axum_user_permissions (user_id, token) values ($1, $2)")
         .bind(user_id)
-        .bind("Admin::Edit")
+        .bind("Admin::View")
         .execute(&mut *transaction)
         .await?;
-    sqlx::query("insert into mm_axum_user_permissions (user_id, token) values ($1, $2)")
-        .bind(user_id)
-        .bind("Category::View")
-        .execute(&mut *transaction)
-        .await?;
+    // sqlx::query("insert into mm_axum_user_permissions (user_id, token) values ($1, $2)")
+    //     .bind(user_id)
+    //     .bind("Category::View")
+    //     .execute(&mut *transaction)
+    //     .await?;
     sqlx::query("insert into mm_axum_user_permissions (user_id, token) values ($1, $2)")
         .bind(user_id)
         .bind("User::View")

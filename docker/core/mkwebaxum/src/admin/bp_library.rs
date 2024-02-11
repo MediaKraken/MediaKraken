@@ -5,11 +5,15 @@ use axum::{
     response::{Html, IntoResponse, Redirect},
     Extension,
 };
-use axum_session_auth::{AuthSession, SessionPgPool};
+use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
 use mk_lib_database;
 use mk_lib_rabbitmq;
 use serde_json::{json, Value};
 use sqlx::postgres::PgPool;
+
+#[derive(Template)]
+#[template(path = "bss_error/bss_error_403.html")]
+struct TemplateError403Context {}
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_library.html")]
@@ -26,36 +30,50 @@ pub async fn admin_library(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
-    let share_list =
-        mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_read(
-            &sqlx_pool,
-        )
-        .await
-        .unwrap();
-    let library_list =
-        mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_audit_read(
-            &sqlx_pool,
-        )
-        .await
-        .unwrap();
-    let share_user_list =
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("Admin::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        let template = TemplateError403Context {};
+        let reply_html = template.render().unwrap();
+        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+    } else {
+        let share_list =
+            mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_read(
+                &sqlx_pool,
+            )
+            .await
+            .unwrap();
+        let library_list =
+            mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_audit_read(
+                &sqlx_pool,
+            )
+            .await
+            .unwrap();
+        let share_user_list =
         mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_user_read(
             &sqlx_pool,
         )
         .await
         .unwrap();
-    let mut template_data_exists: bool = false;
-    if library_list.len() > 0 {
-        template_data_exists = true;
+        let mut template_data_exists: bool = false;
+        if library_list.len() > 0 {
+            template_data_exists = true;
+        }
+        let template = TemplateAdminLibraryContext {
+            template_data_share: &share_list,
+            template_data_libary: &library_list,
+            template_data_share_user: &share_user_list,
+            template_data_exists: &template_data_exists,
+        };
+        let reply_html = template.render().unwrap();
+        (StatusCode::OK, Html(reply_html).into_response())
     }
-    let template = TemplateAdminLibraryContext {
-        template_data_share: &share_list,
-        template_data_libary: &library_list,
-        template_data_share_user: &share_user_list,
-        template_data_exists: &template_data_exists,
-    };
-    let reply_html = template.render().unwrap();
-    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 pub async fn admin_library_media_scan(
@@ -63,21 +81,33 @@ pub async fn admin_library_media_scan(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
-    let (rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp")
-            .await
-            .unwrap();
-    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
-        rabbit_channel.clone(),
-        "mkmediascanner",
-        json!({"Type": "Library Scan"}).to_string(),
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
     )
+    .requires(Rights::any([Rights::permission("Admin::View")]))
+    .validate(&current_user, &method, None)
     .await
-    .unwrap();
-    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
+    {
+        Redirect::to("/error/403")
+    } else {
+        let (rabbit_connection, rabbit_channel) =
+            mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp")
+                .await
+                .unwrap();
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
+            rabbit_channel.clone(),
+            "mkmediascanner",
+            json!({"Type": "Library Scan"}).to_string(),
+        )
         .await
         .unwrap();
-    Redirect::to("/admin/library")
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
+            .await
+            .unwrap();
+        Redirect::to("/admin/library")
+    }
 }
 
 pub async fn admin_library_share_scan(
@@ -85,21 +115,33 @@ pub async fn admin_library_share_scan(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
-    let (rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp")
-            .await
-            .unwrap();
-    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
-        rabbit_channel.clone(),
-        "mksharescanner",
-        json!({"Type": "Share Scan"}).to_string(),
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
     )
+    .requires(Rights::any([Rights::permission("Admin::View")]))
+    .validate(&current_user, &method, None)
     .await
-    .unwrap();
-    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
+    {
+        Redirect::to("/error/403")
+    } else {
+        let (rabbit_connection, rabbit_channel) =
+            mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp")
+                .await
+                .unwrap();
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
+            rabbit_channel.clone(),
+            "mksharescanner",
+            json!({"Type": "Share Scan"}).to_string(),
+        )
         .await
         .unwrap();
-    Redirect::to("/admin/library")
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
+            .await
+            .unwrap();
+        Redirect::to("/admin/library")
+    }
 }
 
 /*

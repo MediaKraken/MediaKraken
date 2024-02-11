@@ -7,7 +7,7 @@ use axum::{
     routing::{get, post},
     Extension,
 };
-use axum_session_auth::{AuthSession, SessionPgPool};
+use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
 use bytesize::ByteSize;
 use core::fmt::Write;
 use mk_lib_common;
@@ -15,6 +15,10 @@ use mk_lib_database;
 use mk_lib_network;
 use serde_json::json;
 use sqlx::postgres::PgPool;
+
+#[derive(Template)]
+#[template(path = "bss_error/bss_error_403.html")]
+struct TemplateError403Context {}
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_torrent.html")]
@@ -27,21 +31,35 @@ pub async fn admin_torrent(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
-    let transmission_client =
-        mk_lib_network::mk_lib_network_transmission::mk_network_transmission_login()
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("Admin::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        let template = TemplateError403Context {};
+        let reply_html = template.render().unwrap();
+        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+    } else {
+        let transmission_client =
+            mk_lib_network::mk_lib_network_transmission::mk_network_transmission_login()
+                .await
+                .unwrap();
+        let transmission_torrents =
+            mk_lib_network::mk_lib_network_transmission::mk_network_transmission_list_torrents(
+                transmission_client,
+            )
             .await
             .unwrap();
-    let transmission_torrents =
-        mk_lib_network::mk_lib_network_transmission::mk_network_transmission_list_torrents(
-            transmission_client,
-        )
-        .await
-        .unwrap();
-    let template = AdminTorrentTemplate {
-        template_data: &transmission_torrents,
-    };
-    let reply_html = template.render().unwrap();
-    (StatusCode::OK, Html(reply_html).into_response())
+        let template = AdminTorrentTemplate {
+            template_data: &transmission_torrents,
+        };
+        let reply_html = template.render().unwrap();
+        (StatusCode::OK, Html(reply_html).into_response())
+    }
 }
 
 /*
