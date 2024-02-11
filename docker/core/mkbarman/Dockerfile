@@ -17,7 +17,7 @@ RUN apt-get update \
 #   python: Needed to run barman
 #   rsync: Needed to rsync basebackups from the database servers
 #   gettext-base: envsubst
-RUN bash -c 'echo "echo "deb https://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list' \
+RUN bash -c 'echo "deb https://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list' \
 	&& (wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add -) \
 	&& apt-get update \
 	&& apt-get install -y --no-install-recommends \

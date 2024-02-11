@@ -1,12 +1,19 @@
 use askama::Template;
 use axum::{
-    http::{Method, StatusCode},
+    http::{Method, Request, StatusCode},
     response::{Html, IntoResponse},
     Extension,
 };
-use axum_session_auth::{AuthSession, SessionPgPool};
 use mk_lib_database;
 use sqlx::postgres::PgPool;
+use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
+
+#[path = "../guard.rs"]
+mod guard;
+
+#[derive(Template)]
+#[template(path = "bss_error/bss_error_401.html")]
+struct TemplateError401Context {}
 
 #[derive(Template)]
 #[template(path = "bss_user/bss_user_home.html")]
@@ -20,8 +27,34 @@ pub async fn user_home(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
+    //let _result = guard::guard_page_by_user(method, auth, false).await;
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
+    )
+    .requires(Rights::any([
+        //Rights::permission("Category::View"),
+        Rights::permission("User::View"),
+    ]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        println!("here I am 2");
+        let template = TemplateError401Context {};
+        let reply_html = template.render().unwrap();
+        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+    }
+    else
+    {
     let mut new_media = false;
-    if mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_new_count(&sqlx_pool, 7).await.unwrap() > 0 {
+    if mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_new_count(
+        &sqlx_pool, 7,
+    )
+    .await
+    .unwrap()
+        > 0
+    {
         new_media = true;
     }
     let template = TemplateUserHomeContext {
@@ -29,5 +62,5 @@ pub async fn user_home(
         template_data_user_media_queue: &true,
     };
     let reply_html = template.render().unwrap();
-    (StatusCode::OK, Html(reply_html).into_response())
+    (StatusCode::OK, Html(reply_html).into_response())}
 }

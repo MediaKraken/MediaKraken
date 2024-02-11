@@ -35,7 +35,7 @@ pub struct SqlPermissionTokens {
 impl Default for User {
     fn default() -> Self {
         let mut permissions = HashSet::new();
-        permissions.insert("User::View".to_owned());
+        //permissions.insert("User::View".to_owned());
         permissions.insert("Category::View".to_owned());
         Self {
             id: 1,
