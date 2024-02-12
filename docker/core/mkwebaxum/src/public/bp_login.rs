@@ -24,7 +24,7 @@ pub async fn public_login() -> impl IntoResponse {
 
 #[derive(Deserialize)]
 pub struct LoginInput {
-    username: String,
+    email: String,
     password: String,
 }
 
