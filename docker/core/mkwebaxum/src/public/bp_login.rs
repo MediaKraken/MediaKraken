@@ -36,16 +36,18 @@ pub async fn public_login_post(
     let user_id: i64 =
         mk_lib_database::mk_lib_database_user::mk_lib_database_user_login_verification(
             &sqlx_pool,
-            &input_data.username,
+            &input_data.email,
             &input_data.password,
         )
         .await
         .unwrap();
-    // TODO show error when not found
     if user_id > 0 {
-        let _result = mk_lib_database::mk_lib_database_user::mk_lib_database_user_login(&sqlx_pool, user_id)
-            .await;
+        let _result =
+            mk_lib_database::mk_lib_database_user::mk_lib_database_user_login(&sqlx_pool, user_id)
+                .await;
         auth.login_user(user_id);
+    } else {
+        // TODO show error when not found
     }
     Redirect::to("/user/home")
 }

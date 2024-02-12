@@ -258,8 +258,8 @@ pub async fn mk_lib_database_user_login_verification(
     password: &String,
 ) -> Result<i64, sqlx::Error> {
     let row: (i64,) = sqlx::query_as(
-        "select id from mm_axum_users \
-        where username = $1 and password = crypt($2, password)",
+        "select coalesce((select id from mm_axum_users \
+        where username = $1 and password = crypt($2, password) limit 1), 0)",
     )
     .bind(username)
     .bind(password)
