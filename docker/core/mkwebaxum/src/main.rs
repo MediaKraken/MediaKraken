@@ -427,7 +427,7 @@ async fn main() {
         .route_with_tsr("/user/queue", get(user::bp_queue::user_queue))
         .route_with_tsr("/user/search", get(user::bp_search::user_search))
         .route_with_tsr("/user/sync/:page", get(user::bp_sync::user_sync))
-        .route_with_tsr("/logout", get(public::bp_logout::public_logout))
+        .route_with_tsr("/public/logout", get(public::bp_logout::public_logout))
         .route_with_tsr(
             "/public/login",
             get(public::bp_login::public_login).post(public::bp_login::public_login_post),
