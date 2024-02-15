@@ -3,6 +3,12 @@ name = "mktranscode"
 version = "0.0.1"
 edition = "2021"
 
+[profile.dev]
+panic = 'unwind'
+strip = "none"
+lto = false
+codegen-units = 16
+
 [profile.release]
 panic = 'abort'
 strip = "symbols"

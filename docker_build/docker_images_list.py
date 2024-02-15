@@ -43,254 +43,209 @@ PYPI_MIRROR_PORT = ':8081'
 # the data is directory, name of container, base image used to build container
 
 # base OS images to build off of, meaning there is a 'from' in the docker file(s) that use these
-STAGE_ONE_IMAGES = {
-    # 'AlpineBase3173Py3': ('mkbase_alpinepy3', 'alpine:3.17.3', 'base'),
-    #'AlpineBaseFFMPEG': ('mkbase_alpine_ffmpeg', 'alpine:3.17.3', 'base'),
-    #'DebianBaseFFMPEG': ('mkbase_debian_ffmpeg', 'debian:bookworm-20230703-slim', 'base'),
-    #'DebianBase11Py3': ('mkbase_debianpy3', 'python:3.12.0a3-bullseye', 'base'),
-    'RustBaseAlpine': ('mkbase_rust_alpine', 'rust:1.75.0-alpine', 'base'),
-    'RustBaseDebian': ('mkbase_rust_debian', 'rust:1.75.0', 'base'),
-}
+DOCKER_IMAGES = {
+    'RustBaseAlpine': ('mkbase_rust_alpine', 'base'),
+    'RustBaseDebian': ('mkbase_rust_debian', 'base'),
 
-STAGE_TWO_IMAGES = {}
 
-STAGE_CORE_IMAGES = {
     # barman postgresql backup server
-    'mkbarman': ('mkbarman', 'debian:buster', 'core'),
-
-    # broadcast server IP for web and client connectivity, must run from HOST
-    # 'mkbroadcast': ('mkbroadcast', 'scratch', 'core'),   # retired!  mkmulticast instead
+    'mkbarman': ('mkbarman', 'core'),
 
     # chat server via mumble
-    'mkchatmumble': ('mkchatmumble', 'alpine:3.14.2', 'core'),
+    'mkchatmumble': ('mkchatmumble', 'core'),
 
     # chat server via ts3 - free license version
-    'mkchatteamspeak': ('mkchatteamspeak', 'alpine:3.14.2', 'core'),
+    'mkchatteamspeak': ('mkchatteamspeak', 'core'),
 
     # process cron jobs from the database to amqp or direct container launch
-    'mkcron': ('mkcron', 'scratch', 'core'),
-
-    # database via postgresql
-    # 'mkdatabase': ('mkdatabase', 'debian:bullseye-slim', 'core'),
+    'mkcron': ('mkcron', 'core'),
 
     # database via postgresql/citus
-    'mkdatabase_citus': ('mkdatabase', 'alpine 3.18.3', 'core'),
+    'mkdatabase_citus': ('mkdatabase', 'core'),
 
     # download files/etc trailers/etc from ampq records
-    'mkdownload': ('mkdownload', 'scratch', 'core'),
+    'mkdownload': ('mkdownload', 'core'),
 
     # filebeat
-    'mkfilebeat': ('mkfilebeat', 'elastic/filebeat:7.17.10', 'core'),
+    'mkfilebeat': ('mkfilebeat', 'core'),
 
     # thegamesdb bulk data fetch
-    'mkgamesdbnetfetchbulk': ('mkgamesdbnetfetchbulk', 'scratch', 'core'),
+    'mkgamesdbnetfetchbulk': ('mkgamesdbnetfetchbulk', 'core'),
 
     # download manufactuer stuff from global cache
-    'mkglobalcache': ('mkglobalcache', 'scratch', 'core'),
+    'mkglobalcache': ('mkglobalcache', 'core'),
 
     # guessit via web rest
-    'mkguessitrest': ('mkguessitrest',
-                      'tiangolo/uwsgi-nginx-flask:python3.10-2023-08-28', 'core'),
-
-    # haproxy
-    # 'mkhaproxy': ('mkhaproxy', 'alpine:3.17', 'core'),
+    'mkguessitrest': ('mkguessitrest', 'core'),
 
     # runs control network/ir/if/etc
-    'mkhardwarecontrol': ('mkhardwarecontrol', 'scratch', 'core'),
+    'mkhardwarecontrol': ('mkhardwarecontrol', 'core'),
 
     # runs as HOST to find new hardware - run and exit
-    'mkhardwarescanner': ('mkhardwarescanner', 'scratch', 'core'),
+    'mkhardwarescanner': ('mkhardwarescanner', 'core'),
 
     # inotify of file system changes to amqp
-    'mkinotify': ('mkinotify', 'scratch', 'core'),
+    'mkinotify': ('mkinotify', 'core'),
 
     # download libretro cores that are newer - run and exit
-    'mklibretrocorefetchupdate': ('mklibretrocorefetchupdate', 'scratch', 'core'),
+    'mklibretrocorefetchupdate': ('mklibretrocorefetchupdate', 'core'),
 
     # scan media directories for new media - run and exit
-    'mkmediascanner': ('mkmediascanner', 'scratch', 'core'),
+    'mkmediascanner': ('mkmediascanner', 'core'),
 
     # process metadata for media
-    'mkmetadata': ('mkmetadata', 'scratch', 'core'),
+    'mkmetadata': ('mkmetadata', 'core'),
 
     # process metadata for mame and other game xml
-    'mkmetadatamame': ('mkmetadatamame', 'scratch', 'core'),
+    'mkmetadatamame': ('mkmetadatamame', 'core'),
 
     # "broadcast" multicast for discovery
-    'mkmulticast': ('mkmulticast', 'scratch', 'core'),
+    'mkmulticast': ('mkmulticast', 'core'),
 
     # musicbrainz load
-    'mkmusicbrainz': ('mkmusicbrainz', 'scratch', 'core'),
-
-    # nginx pagespeed - retired by apache
-    # nginx proxy for http to https and some bot blocking
-    # 'mknginx': ('mknginx', 'alpine:3.13', 'core'),
+    'mkmusicbrainz': ('mkmusicbrainz', 'core'),
 
     # nut
-    'mknut': ('mknut', 'alpine:3.17', 'core'),
+    'mknut': ('mknut', 'core'),
 
     # download open library dump of ids in database and insert into downloads - run and exit
-    'mkopenlibrarynetfetchbulk': ('mkopenlibrarynetfetchbulk', 'scratch', 'core'),
-
-    # since using pgpool in sqlx for all containers, I don't think this has a use atm
-    # database connection pooler
-    # 'mkpgbouncer': ('mkpgbouncer', 'alpine:3.17.1', 'core'),
+    'mkopenlibrarynetfetchbulk': ('mkopenlibrarynetfetchbulk', 'core'),
 
     # consume and process ampq records
-    'mkrabbitconsume': ('mkrabbitconsume', 'scratch', 'core'),
+    'mkrabbitconsume': ('mkrabbitconsume', 'core'),
 
     # amqp service (rabbitmq)
-    'mkrabbitmq': ('mkrabbitmq', 'alpine:3.11', 'core'),
+    'mkrabbitmq': ('mkrabbitmq', 'core'),
 
     # schedulesdirect update
-    'mkschedulesdirectupdate': ('mkschedulesdirectupdate', 'scratch', 'core'),
+    'mkschedulesdirectupdate': ('mkschedulesdirectupdate', 'core'),
 
     # scan for network shares
-    'mksharescanner': ('mksharescanner', 'scratch', 'core'),
+    'mksharescanner': ('mksharescanner', 'core'),
 
     # download tmdb dump of ids in database and insert into downloads - run and exit
-    'mktmdbnetfetchbulk': ('mktmdbnetfetchbulk', 'scratch', 'core'),
+    'mktmdbnetfetchbulk': ('mktmdbnetfetchbulk', 'core'),
 
     # download tmdb dump of ids that were updated - run and exit
-    'mktmdbnetfetchupdate': ('mktmdbnetfetchupdate', 'scratch', 'core'),
+    'mktmdbnetfetchupdate': ('mktmdbnetfetchupdate', 'core'),
 
     # transcode/STREAM media to client - run and exit
-    'mktranscode': ('mktranscode', 'scratch', 'core'),
+    'mktranscode': ('mktranscode', 'core'),
 
     # transmission server
-    'mktransmission': ('mktransmission', 'alpine:3.16.2', 'core'),
+    'mktransmission': ('mktransmission', 'core'),
 
     # tvheadend
-    'mktvheadend': ('mktvheadend', 'alpine:3.12', 'core'),
+    'mktvheadend': ('mktvheadend', 'core'),
 
     # website via rust and axum
-    'mkwebaxum': ('mkwebaxum', 'scratch', 'core'),
-}
+    'mkwebaxum': ('mkwebaxum', 'core'),
 
-STAGE_ONE_GAME_SERVERS = {
+
     # for hosting games via dosbox and web
-    'mkgamebasedosboxweb': ('mkgamebasedosboxweb', 'ubuntu:22.10', 'game_base'),
+    'mkgamebasedosboxweb': ('mkgamebasedosboxweb', 'game_base'),
 
     # for hosting games via retroarch and web
-    'mkgamebaseretroarchweb': ('mkgamebaseretroarchweb', 'debian:buster-slim', 'game_base'),
+    'mkgamebaseretroarchweb': ('mkgamebaseretroarchweb', 'game_base'),
 
     # for hosting games via steamcmd
-    'mkgamebasesteamcmd': ('mkgamebasesteamcmd', 'debian:10.9-slim', 'game_base'),
+    'mkgamebasesteamcmd': ('mkgamebasesteamcmd', 'game_base'),
 
     # for hosting games via steamcmd
-    'mkgamebasesteamcmdbullseye': ('mkgamebasesteamcmdbullseye', 'debian:bullseye-slim', 'game_base'),
+    'mkgamebasesteamcmdbullseye': ('mkgamebasesteamcmdbullseye', 'game_base'),
 
     # for hosting games via steamcmd as root
-    'mkgamebasesteamcmdroot': ('mkgamebasesteamcmdroot', 'debian:10.9-slim', 'game_base'),
+    'mkgamebasesteamcmdroot': ('mkgamebasesteamcmdroot', 'game_base'),
 
     # for hosting games via steamcmd as root
-    'mkgamebasesteamcmdbullseyeroot': ('mkgamebasesteamcmdbullseyeroot', 'debian:bullseye-slim', 'game_base'),
+    'mkgamebasesteamcmdbullseyeroot': ('mkgamebasesteamcmdbullseyeroot', 'game_base'),
 
     # for hosting software via wine
-    'mkgamebasewine': ('mkgamebasewine', 'debian:10.9-slim', 'game_base'),
-}
+    'mkgamebasewine': ('mkgamebasewine', 'game_base'),
 
-STAGE_TWO_GAME_SERVERS = {
+
     # Battlefield 1942
-    'mkgamebf42': ('mkgamebf42', 'ubuntu:14.04', 'game_server'),
+    'mkgamebf42': ('mkgamebf42', 'game_server'),
 
     # Factorio
-    'mkgamefactorio': ('mkgamefactorio', 'ubuntu:14.04', 'game_server'),
+    'mkgamefactorio': ('mkgamefactorio', 'game_server'),
 
     # FAKE
-    'mkgamekerbalspaceprogram': ('mkgamekerbalspaceprogram', 'FAKE', 'game_server'),
+    'mkgamekerbalspaceprogram': ('mkgamekerbalspaceprogram', 'game_server'),
 
     # Minecraft
-    'mkgameminecraft': ('mkgameminecraft', 'FAKE', 'game_server'),
+    'mkgameminecraft': ('mkgameminecraft', 'game_server'),
 
     # Quake 3 Arena
-    'mkgameq3a': ('mkgameq3a', 'FAKE', 'game_server'),
+    'mkgameq3a': ('mkgameq3a', 'game_server'),
 
     # FAKE
-    'mkgameq3a_cpma': ('mkgameq3a_cpma', 'FAKE', 'game_server'),
+    'mkgameq3a_cpma': ('mkgameq3a_cpma', 'game_server'),
 
     # FAKE
-    'mkgameq3a_osp': ('mkgameq3a_osp', 'FAKE', 'game_server'),
+    'mkgameq3a_osp': ('mkgameq3a_osp', 'game_server'),
 
     # FAKE
-    'mkgameq3a_rq3': ('mkgameq3a_rq3', 'FAKE', 'game_server'),
+    'mkgameq3a_rq3': ('mkgameq3a_rq3', 'game_server'),
 
     # Quake 2
-    'mkgamequake2': ('mkgamequake2', 'FAKE', 'game_server'),
+    'mkgamequake2': ('mkgamequake2', 'game_server'),
 
     # Quake 4
-    'mkgamequake4': ('mkgamequake4', 'FAKE', 'game_server'),
+    'mkgamequake4': ('mkgamequake4', 'game_server'),
 
     # Quake Live
-    'mkgamequakelive': ('mkgamequakelive', 'FAKE', 'game_server'),
+    'mkgamequakelive': ('mkgamequakelive', 'game_server'),
 
     # Arma 3
-    'mkgamesteamcmd_arma3': ('mkgamesteamcmd_arma3', 'FAKE', 'game_server'),
+    'mkgamesteamcmd_arma3': ('mkgamesteamcmd_arma3', 'game_server'),
 
     # CS:Go
-    'mkgamesteamcmd_csgo': ('mkgamesteamcmd_csgo', 'FAKE', 'game_server'),
+    'mkgamesteamcmd_csgo': ('mkgamesteamcmd_csgo', 'game_server'),
 
     # FAKE
-    'mkgamesteamcmd_doubleaction': ('mkgamesteamcmd_doubleaction', 'FAKE', 'game_server'),
+    'mkgamesteamcmd_doubleaction': ('mkgamesteamcmd_doubleaction', 'game_server'),
 
     # Fist Full of Frags
-    'mkgamesteamcmd_fistfuloffrags': ('mkgamesteamcmd_fistfuloffrags', 'FAKE', 'game_server'),
+    'mkgamesteamcmd_fistfuloffrags': ('mkgamesteamcmd_fistfuloffrags', 'game_server'),
 
     # FAKE
-    'mkgamesteamcmd_holdfastnaw': ('mkgamesteamcmd_holdfastnaw', 'FAKE', 'game_server'),
+    'mkgamesteamcmd_holdfastnaw': ('mkgamesteamcmd_holdfastnaw', 'game_server'),
 
     # FAKE
-    'mkgamesteamcmd_insurgency': ('mkgamesteamcmd_insurgency', 'FAKE', 'game_server'),
+    'mkgamesteamcmd_insurgency': ('mkgamesteamcmd_insurgency', 'game_server'),
 
     # FAKE
-    'mkgamesteamcmd_mordhau': ('mkgamesteamcmd_mordhau', 'FAKE', 'game_server'),
+    'mkgamesteamcmd_mordhau': ('mkgamesteamcmd_mordhau', 'game_server'),
 
     # FAKE
-    'mkgamesteamcmd_squad': ('mkgamesteamcmd_squad', 'FAKE', 'game_server'),
+    'mkgamesteamcmd_squad': ('mkgamesteamcmd_squad', 'game_server'),
 
     # Team Fortress II
-    'mkgamesteamcmd_tf2': ('mkgamesteamcmd_tf2', 'FAKE', 'game_server'),
+    'mkgamesteamcmd_tf2': ('mkgamesteamcmd_tf2', 'game_server'),
 
     # Valheim
-    'mkgamesteamcmd_valheim': ('mkgamesteamcmd_valheim', 'FAKE', 'game_server'),
+    'mkgamesteamcmd_valheim': ('mkgamesteamcmd_valheim', 'game_server'),
 
     # UT99
-    'mkgameut99': ('mkgameut99', 'FAKE', 'game_server'),
+    'mkgameut99': ('mkgameut99', 'game_server'),
 
     # UT2004
-    'mkgameut2004': ('mkgameut2004', 'FAKE', 'game_server'),
+    'mkgameut2004': ('mkgameut2004', 'game_server'),
 
     # FAKE
-    'mkgamewindward': ('mkgamewindward', 'FAKE', 'game_server'),
-}
+    'mkgamewindward': ('mkgamewindward', 'game_server'),
 
-STAGE_ONE_OPTIONS = {
-    'mkmoosefscgi': ('mkmoosefscgi', 'debian:buster', 'option'),
-    'mkmoosefschunkserver': ('mkmoosefschunkserver', 'debian:buster', 'option'),
-    'mkmoosefsmaster': ('mkmoosefsmaster', 'debian:buster', 'option'),
-    'mkmoosefsmetalogger': ('mkmoosefsmetalogger', 'debian:buster', 'option'),
-}
 
-STAGE_TWO_OPTIONS = {
+    'mkmoosefscgi': ('mkmoosefscgi', 'option'),
+    'mkmoosefschunkserver': ('mkmoosefschunkserver', 'option'),
+    'mkmoosefsmaster': ('mkmoosefsmaster', 'option'),
+    'mkmoosefsmetalogger': ('mkmoosefsmetalogger', 'option'),
 
-}
 
-STAGE_ONE_SECURITY_TOOLS = {
-
-}
-
-STAGE_TWO_SECURITY_TOOLS = {
-
-}
-
-STAGE_ONE_TESTING_TOOLS = {
-    'mkelk': ('mkelk', 'phusion/baseimage-focal-1.1.0', 'test'),
-    'mkftpserver': ('mkftpserver', 'alpine:3.14.2', 'test'),
-    'mkjenkins': ('mkjenkins', 'jenkins/jenkins:lts', 'test'),
-    'mkselenium': ('mkselenium', 'mkbase_alpinepy3', 'test'),
-    'mksonatype': ('mksonatype', 'sonatype/nexus3', 'test'),
-}
-
-STAGE_TWO_TESTING_TOOLS = {
-
+    'mkelk': ('mkelk', 'test'),
+    'mkftpserver': ('mkftpserver', 'test'),
+    'mkjenkins': ('mkjenkins', 'test'),
+    'mkselenium': ('mkselenium', 'test'),
+    'mksonatype': ('mksonatype', 'test'),
 }

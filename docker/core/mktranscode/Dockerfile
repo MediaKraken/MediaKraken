@@ -2,8 +2,11 @@
 ARG BRANCHTAG
 
 FROM mediakraken/mkbase_rust_alpine:"${BRANCHTAG}" as planner-mktranscode
+WORKDIR /mediakraken
+ENV CARGO_INCREMENTAL=0
 
-COPY . .
+COPY Cargo.toml .
+COPY mk_lib_* .
 
 RUN cargo chef prepare --recipe-path recipe.json
 
@@ -14,7 +17,8 @@ FROM planner-mktranscode AS cargo-build-ffmpeg
 
 ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig \
     SRC=/usr/local \
-    DEBIAN_FRONTEND="noninteractive"
+    DEBIAN_FRONTEND="noninteractive" \
+    CARGO_INCREMENTAL=0
 
 # https://aomedia.googlesource.com/aom
 ARG AOM=v3.8.0
@@ -362,23 +366,17 @@ RUN buildDeps="autoconf \
 ## Build from Chef
 ####################################################################################################
 FROM planner-mktranscode AS cargo-build-mktranscode
+WORKDIR /mediakraken
+ENV CARGO_INCREMENTAL=0
 
-COPY --from=planner-mktranscode recipe.json recipe.json
+COPY --from=planner-mktranscode /mediakraken/recipe.json recipe.json
 
 RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
 
-ARG BRANCHTAG
-
-WORKDIR /mediakraken
-
 COPY ./ .
 
-RUN if [ "${BRANCHTAG}" = "dev" ]; \
-  then cargo build --release --target x86_64-unknown-linux-musl \
-  && cp /mediakraken/target/x86_64-unknown-linux-musl/release/mk* /mediakraken/target/.; \
-  else cargo build --target x86_64-unknown-linux-musl \
-  && cp /mediakraken/target/x86_64-unknown-linux-musl/debug/mk* /mediakraken/target/.; \
-  fi
+RUN cargo build --release --target x86_64-unknown-linux-musl \
+  && cp /mediakraken/target/x86_64-unknown-linux-musl/release/mk* /mediakraken/target/.;
 RUN ldd /mediakraken/target/mktranscode | tr -s '[:blank:]' '\n' | grep '^/' | \
   xargs -I % sh -c 'mkdir -p $(dirname /mediakraken/deps%); cp % /mediakraken/deps%;'
 

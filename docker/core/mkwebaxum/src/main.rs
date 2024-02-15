@@ -4,6 +4,7 @@ extern crate lazy_static;
 use axum::http::{Method, Uri};
 use axum::{
     body::Body,
+    extract::FromRef,
     extract::{Request, State},
     response::{IntoResponse, Response},
     //http::StatusCode,
@@ -15,6 +16,7 @@ use axum::{
 };
 use axum_csrf::{CsrfConfig, CsrfToken};
 use axum_extra::routing::RouterExt;
+use axum_flash::{Flash, IncomingFlashes};
 use axum_handle_error_extract::HandleErrorLayer;
 use axum_prometheus::{EndpointLabel, PrometheusMetricLayerBuilder};
 use axum_server::tls_rustls::RustlsConfig;
@@ -23,10 +25,10 @@ use axum_session::{
     SessionStore,
 };
 use axum_session_auth::{AuthConfig, AuthSessionLayer};
-use mk_lib_database;
-use rcgen::generate_simple_self_signed;
 use hyper::StatusCode;
 use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
+use mk_lib_database;
+use rcgen::generate_simple_self_signed;
 use ring::digest;
 use serde_json::json;
 use sqlx::PgPool;
@@ -44,7 +46,6 @@ use tower_http::services::{ServeDir, ServeFile};
 type Client = hyper_util::client::legacy::Client<HttpConnector, Body>;
 mod axum_custom_filters;
 mod error_handling;
-mod guard;
 
 #[path = "admin"]
 pub mod admin {
@@ -130,9 +131,22 @@ pub mod user_playback {
     pub mod bp_video;
 }
 
+#[derive(Clone)]
+struct AppState {
+    flash_config: axum_flash::Config,
+}
+
+// Our state type must implement this trait. That is how the config
+// is passed to axum-flash in a type safe way.
+impl FromRef<AppState> for axum_flash::Config {
+    fn from_ref(state: &AppState) -> axum_flash::Config {
+        state.flash_config.clone()
+    }
+}
+
 #[tokio::main]
 async fn main() {
-    // TODO this needs to move to another container that doesn't start multiples
+    // TODO this needs to move to another container that doesn't start multiple containers
     // check for and create ssl certs if needed
     if Path::new("/mediakraken/certs/cacert.pem").exists() == false {
         // generate certs/keys
@@ -200,6 +214,11 @@ async fn main() {
     .await
     .unwrap();
 
+    let app_state = AppState {
+        // The key should probably come from configuration
+        flash_config: axum_flash::Config::new(Key::generate()),
+    };
+
     // build our application with routes
     let docker_results = mk_lib_common::mk_lib_common_docker::mk_common_docker_info()
         .await
@@ -220,9 +239,15 @@ async fn main() {
         )
         .route_with_tsr("/admin/hardware", get(admin::bp_hardware::admin_hardware))
         .route_with_tsr("/admin/home", get(admin::bp_home::admin_home))
-        .route_with_tsr("/admin/library", get(admin::bp_library::admin_library)) 
-        .route_with_tsr("/admin/library_media_scan", get(admin::bp_library::admin_library_media_scan)) 
-        .route_with_tsr("/admin/library_share_scan", get(admin::bp_library::admin_library_share_scan)) 
+        .route_with_tsr("/admin/library", get(admin::bp_library::admin_library))
+        .route_with_tsr(
+            "/admin/library_media_scan",
+            get(admin::bp_library::admin_library_media_scan),
+        )
+        .route_with_tsr(
+            "/admin/library_share_scan",
+            get(admin::bp_library::admin_library_share_scan),
+        )
         //.post(admin::bp_library::admin_library_post))
         .route_with_tsr("/admin/settings", get(admin::bp_settings::admin_settings))
         .route_with_tsr(
@@ -344,7 +369,7 @@ async fn main() {
         .route_with_tsr(
             "/user/metadata/collection_detail/:guid",
             get(user_media::bp_media_collection::user_media_collection_detail),
-        )        
+        )
         .route_with_tsr(
             "/user/metadata/game/:page",
             get(user_metadata::bp_meta_game::user_metadata_game),
@@ -463,7 +488,8 @@ async fn main() {
         )
         .route("/metrics", get(|| async move { metric_handle.render() }))
         .layer(prometheus_layer)
-        .layer(Extension(sqlx_pool));
+        .layer(Extension(sqlx_pool))
+        .with_state(app_state);
     // TODO .layer(
     //     ServiceBuilder::new()
     //         .layer(HandleErrorLayer::new(|_: BoxError| async {

@@ -24,7 +24,9 @@ pub async fn user_home(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
+    // if !auth.is_authenticated() {   Can I simply do this?   As a signed in user.....has access unless guest
     let current_user = auth.current_user.clone().unwrap_or_default();
+    println!("Current_user: {:?}", current_user);
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
         [Method::GET],
         false,

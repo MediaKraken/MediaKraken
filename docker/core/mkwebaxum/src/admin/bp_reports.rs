@@ -1,4 +1,3 @@
-use crate::guard;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -43,7 +42,6 @@ pub async fn admin_report_known_media(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let auth_response = guard::guard_page_by_user(method, auth, true);
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 =
             mk_lib_database::mk_lib_database_report::mk_lib_database_report_known_media_count(

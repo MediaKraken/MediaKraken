@@ -1,4 +1,3 @@
-use crate::guard;
 use askama::Template;
 use axum::{
     http::{Method, StatusCode},
@@ -38,7 +37,6 @@ pub async fn admin_cron(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let auth_response = guard::guard_page_by_user(method, auth, true);
         let cron_list =
             mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool)
                 .await

@@ -6,6 +6,7 @@ use axum::{
     routing::{get, post},
     Extension,
 };
+use axum_flash::{Flash, IncomingFlashes, Key};
 use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
 use mk_lib_database;
 use serde::{Deserialize, Serialize};
@@ -14,7 +15,6 @@ use sqlx::{
     ConnectOptions, PgPool,
 };
 use validator::Validate;
-use axum_flash::{IncomingFlashes, Flash, Key};
 
 #[derive(Template)]
 #[template(path = "bss_public/bss_public_register.html")]
@@ -28,26 +28,27 @@ pub async fn public_register() -> impl IntoResponse {
 
 #[derive(Deserialize)]
 pub struct RegisterInput {
-    email: String,
+    username: String,
     password: String,
 }
 
 pub async fn public_register_post(
     Extension(sqlx_pool): Extension<PgPool>,
+    mut flash: Flash,
     Form(input_data): Form<RegisterInput>,
 ) -> Redirect {
     let user_found = mk_lib_database::mk_lib_database_user::mk_lib_database_user_exists(
         &sqlx_pool,
-        &input_data.email,
+        &input_data.username,
     )
     .await
     .unwrap();
     if user_found == true {
-        // TODO flash error
+        flash.error("User already exists!");
     } else {
         let user_id: i64 = mk_lib_database::mk_lib_database_user::mk_lib_database_user_insert(
             &sqlx_pool,
-            &input_data.email,
+            &input_data.username,
             &input_data.password,
         )
         .await

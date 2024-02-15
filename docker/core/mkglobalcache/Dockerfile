@@ -2,8 +2,11 @@
 ARG BRANCHTAG
 
 FROM mediakraken/mkbase_rust_alpine:"${BRANCHTAG}" as planner-mkglobalcache
+WORKDIR /mediakraken
+ENV CARGO_INCREMENTAL=0
 
-COPY . .
+COPY Cargo.toml .
+COPY mk_lib_* .
 
 RUN cargo chef prepare --recipe-path recipe.json
 
@@ -11,23 +14,17 @@ RUN cargo chef prepare --recipe-path recipe.json
 ## Build from Chef
 ####################################################################################################
 FROM planner-mkglobalcache AS cargo-build-mkglobalcache
+WORKDIR /mediakraken
+ENV CARGO_INCREMENTAL=0
 
-COPY --from=planner-mkglobalcache recipe.json recipe.json
+COPY --from=planner-mkglobalcache /mediakraken/recipe.json recipe.json
 
 RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
 
-ARG BRANCHTAG
-
-WORKDIR /mediakraken
-
 COPY ./ .
 
-RUN if [ "${BRANCHTAG}" = "dev" ]; \
-  then cargo build --release --target x86_64-unknown-linux-musl \
-  && cp /mediakraken/target/x86_64-unknown-linux-musl/release/mk* /mediakraken/target/.; \
-  else cargo build --target x86_64-unknown-linux-musl \
-  && cp /mediakraken/target/x86_64-unknown-linux-musl/debug/mk* /mediakraken/target/.; \
-  fi
+RUN cargo build --release --target x86_64-unknown-linux-musl \
+  && cp /mediakraken/target/x86_64-unknown-linux-musl/release/mk* /mediakraken/target/.;
 RUN ldd /mediakraken/target/mkglobalcache | tr -s '[:blank:]' '\n' | grep '^/' | \
   xargs -I % sh -c 'mkdir -p $(dirname /mediakraken/deps%); cp % /mediakraken/deps%;'
 

@@ -3,6 +3,12 @@ name = "mkdownload"
 version = "0.0.1"
 edition = "2021"
 
+[profile.dev]
+panic = 'unwind'
+strip = "none"
+lto = false
+codegen-units = 16
+
 [profile.release]
 panic = 'abort'
 strip = "symbols"
@@ -27,6 +33,7 @@ sys-info = "0.9.1"
 tokio = { version = "1.36.0", features = ["full"] }
 uuid = { version = "1.7.0", features = ["serde", "v4"] }
 validator = { version = "0.16.1", features = ["derive"] }
+
 
 [dev-dependencies]
 tokio-test = "*"

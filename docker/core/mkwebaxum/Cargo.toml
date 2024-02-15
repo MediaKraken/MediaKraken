@@ -3,6 +3,12 @@ name = "mkwebapp"
 version = "0.0.1"
 edition = "2021"
 
+[profile.dev]
+panic = 'unwind'
+strip = "none"
+lto = false
+codegen-units = 16
+
 [profile.release]
 panic = 'abort'
 strip = "symbols"
@@ -10,11 +16,11 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_common = { path = "mk_lib_common" }
-mk_lib_database = { path = "mk_lib_database" }
-mk_lib_file = { path = "mk_lib_file", features = ["smb"] }
-mk_lib_network = { path = "mk_lib_network" }
-mk_lib_rabbitmq = { path = "mk_lib_rabbitmq" }
+mk_lib_common = { path = "../../../src/mk_lib_common" }
+mk_lib_database = { path = "../../../src/mk_lib_database" }
+mk_lib_file = { path = "../../../src/mk_lib_file", features = ["smb"] }
+mk_lib_network = { path = "../../../src/mk_lib_network" }
+mk_lib_rabbitmq = { path = "../../../src/mk_lib_rabbitmq" }
 
 askama = { version = "0.12.1", features = ["with-axum", "mime", "mime_guess"] }
 askama_axum = "0.4.0"
