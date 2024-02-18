@@ -12,7 +12,7 @@ mkcode - VSS Code build/git
         [source.crates-io]
         replace-with = "kellnr-cratesio"
         [source.kellnr-cratesio]
-        registry = "git://mkkellrn:9418/cratesio"    
+        registry = "sparse+http://mkkellrn:8000/api/v1/cratesio/"    
     nano /etc/docker/daemon.json
         {
         "insecure-registries" : ["mkregistry:5000"]
@@ -42,7 +42,7 @@ mkgocd - https://www.gocd.org/  FREE & OPEN SOURCE CI/CD SERVER
 mkjenkins - Jenkins is an open source automation server.
     docker/test/mkjenkins image
 
-mkkillrn - Rust Cargo repo/proxy
+mkkellrn - Rust Cargo repo/proxy
     start.sh script in home with key/etc
     http://mkkellrn:8000/#/
         root@mkcode:~/.cargo# cat config
@@ -50,7 +50,7 @@ mkkillrn - Rust Cargo repo/proxy
         replace-with = "kellnr-cratesio"
         [source.kellnr-cratesio]
         # Default port for Helm deployments is 30418
-        registry = "git://mkkellrn:9418/cratesio"
+        registry = "sparse+http://mkkellrn:8000/api/v1/cratesio/"
 
 mkmailhog - fake email server to view mail via web interface (receives build and deploy emails)
     http://mkmailhog:8025

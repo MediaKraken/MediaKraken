@@ -84,7 +84,7 @@ else:
 
 # below is needed for the source sync to work!
 os.chdir(os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken/docker_build'))
-# sync the latest code into the image locations for build
+# sync the latest scratch OS into the image locations for build
 pid_proc = subprocess.Popen(
     [os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken', 'docker_build/source_sync_local_lib.sh')])
 pid_proc.wait()

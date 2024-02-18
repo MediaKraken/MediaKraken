@@ -108,3 +108,34 @@ sudo usermod -aG docker pi
 
 cargo install cargo-cache
 cargo cache -a
+
+
+kellnr - think crates are dl'n to location not in the volume
+cargo build -p mk_lib_common
+cargo publish --registry kellnr -p mk_lib_common --allow-dirty --token=3dPvCZSd1V8xKpiCGqpXCBbkj4Jtyyqc
+add "me" token
+token = "3dPvCZSd1V8xKpiCGqpXCBbkj4Jtyyqc"
+  technically should be able to use Zy9HhJ02RJmg0GCrgLfaCVfU6IwDfhXD from the base docker image for kellnr
+
+publish order!
+mk_lib_common
+mk_lib_compression
+mk_lib_image
+mk_lib_logging
+mk_lib_rabbitmq
+mk_lib_database
+mk_lib_file
+mk_lib_network
+
+cargo publish --registry kellnr -p weectrl --allow-dirty --token=3dPvCZSd1V8xKpiCGqpXCBbkj4Jtyyqc
+
+git branch checkout feature/local-impl-of-ip-feature
+cargo publish --registry kellnr -p ssdp --allow-dirty --token=3dPvCZSd1V8xKpiCGqpXCBbkj4Jtyyqc
+
+mk_lib_hardware
+
+cargo publish --registry kellnr -p ed2k --allow-dirty --token=3dPvCZSd1V8xKpiCGqpXCBbkj4Jtyyqc
+
+mk_lib_hash
+
+mk_lib_metadata

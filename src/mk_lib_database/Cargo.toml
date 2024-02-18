@@ -10,6 +10,8 @@ lto = true
 codegen-units = 1
 
 [dependencies]
+mk_lib_common = { version="0.0.1", registry = "kellnr" }
+
 anyhow = "1.0.79"
 async-trait = "0.1.77"
 axum_session = { version = "0.12.1", features = ["postgres-rustls", "redis-db"] }
@@ -18,7 +20,6 @@ axum_session_auth = { version = "0.12.0", features = [
     "redis-db",
 ] }
 chrono = { version = "0.4.33", features = ["serde"] }
-mk_lib_common = { path = "../mk_lib_common" }
 serde = { version = "1.0.196", features = ["derive"] }
 serde_json = "1.0.113"
 sqlx = { version = "0.7.3", features = [

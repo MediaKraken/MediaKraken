@@ -16,11 +16,11 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_common = { path = "../../../src/mk_lib_common" }
-mk_lib_compression = { path = "../../../src/mk_lib_compression" }
-mk_lib_database = { path = "../../../src/mk_lib_database" }
-mk_lib_file = { path = "../../../src/mk_lib_file", features = ["smb"] }
-mk_lib_rabbitmq = { path = "../../../src/mk_lib_rabbitmq" }
+mk_lib_common = { version = "0.0.1", registry = "kellnr" }
+mk_lib_compression  = { version = "0.0.1", registry = "kellnr" }
+mk_lib_database  = { version = "0.0.1", registry = "kellnr" }
+mk_lib_file  = { version = "0.0.1", registry = "kellnr", features = ["smb"] }
+mk_lib_rabbitmq  = { version = "0.0.1", registry = "kellnr" }
 
 chrono = { version = "0.4.33", features = ["serde"] }
 reqwest = { version = "0.11.24", default-features = false, features = [

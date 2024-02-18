@@ -16,9 +16,9 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { path = "../../../src/mk_lib_database" }
-mk_lib_network = { path = "../../../src/mk_lib_network" }
-mk_lib_rabbitmq = { path = "../../../src/mk_lib_rabbitmq" }
+mk_lib_database = { version = "0.0.1", registry = "kellnr" }
+mk_lib_network = { version = "0.0.1", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.1", registry = "kellnr" }
 
 chrono = { version = "0.4.33", features = ["serde"] }
 ipnet = "2.9.0"

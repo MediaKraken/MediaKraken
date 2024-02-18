@@ -10,16 +10,17 @@ lto = true
 codegen-units = 1
 
 [dependencies]
+mk_lib_common = { version="0.0.1", registry = "kellnr" }
+mk_lib_database = { version="0.0.1", registry = "kellnr" }
+mk_lib_hash = { version="0.0.1", registry = "kellnr" }
+mk_lib_network = { version="0.0.1", registry = "kellnr" }
+
 discid = { version = "0.5.0", optional = true }
 flickr = "0.1.1"
 hls_m3u8 = "0.4.1"
 id3 = "1.12.0"
 #lib-mal = "0.5.1"  # myanimelist
 mangadex = "0.1.2"
-mk_lib_common = { path = "../mk_lib_common" }
-mk_lib_database = { path = "../mk_lib_database" }
-mk_lib_hash = { path = "../mk_lib_hash" }
-mk_lib_network = { path = "../mk_lib_network" }
 # musicbrainz_rs = { version = "0.5.0", features = ["async"] }
 omdb = "0.3.2"
 open-library = "0.7.1"

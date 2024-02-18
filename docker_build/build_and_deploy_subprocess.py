@@ -63,19 +63,6 @@ if args.image is not None:
                           'MediaKraken/docker',
                           docker_images_list.DOCKER_IMAGES[args.image][1],
                           args.image))
-    # flip the cargo files around
-    try:
-        shutil.copy(os.path.join(CWD_HOME_DIRECTORY,
-                                 'MediaKraken/docker',
-                                 docker_images_list.DOCKER_IMAGES[args.image][1],
-                                 docker_images_list.DOCKER_IMAGES[args.image][0],
-                                 'Cargo-docker.toml'), os.path.join(CWD_HOME_DIRECTORY,
-                                                                    'MediaKraken/docker',
-                                                                    docker_images_list.DOCKER_IMAGES[args.image][1],
-                                                                    docker_images_list.DOCKER_IMAGES[args.image][0],
-                                                                    'Cargo.toml'))
-    except FileNotFoundError:
-        pass
     # BuildKit is the default builder for users on Docker Desktop and Docker Engine v23.0 and later.
     # Let the mirror's be passed, if not used it will just throw a warning
     pid_build_proc = subprocess.Popen(shlex.split('docker build %s'
@@ -96,19 +83,6 @@ if args.image is not None:
                                       stderr=subprocess.PIPE,
                                       shell=False)
     (out, err) = pid_build_proc.communicate()
-    # flip the cargo files back around
-    try:
-        shutil.copy(os.path.join(CWD_HOME_DIRECTORY,
-                                 'MediaKraken/docker',
-                                 docker_images_list.DOCKER_IMAGES[args.image][1],
-                                 docker_images_list.DOCKER_IMAGES[args.image][0],
-                                 'Cargo-local.toml'), os.path.join(CWD_HOME_DIRECTORY,
-                                                                   'MediaKraken/docker',
-                                                                   docker_images_list.DOCKER_IMAGES[args.image][1],
-                                                                   docker_images_list.DOCKER_IMAGES[args.image][0],
-                                                                   'Cargo.toml'))
-    except FileNotFoundError:
-        pass
     email_body = err.decode("utf-8")
     subject_text = ' FAILED'
     if email_body.find('Successfully tagged mediakraken') != -1 or email_body.find('writing image sha256') != -1:
