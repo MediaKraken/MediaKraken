@@ -23,6 +23,11 @@ pub fn mk_file_smb_client_connect(
         SmbOptions::default().one_share_per_server(true),
     )
     .unwrap();
+    println!("IP: {:?}", share_to_mount.mm_network_share_ip);
+    println!("Path: {:?}", share_to_mount.mm_network_share_path);
+    //println!("User: {:?}", share_to_mount.mm_share_auth_user);
+    //println!("Pass: {:?}", share_to_mount.mm_share_auth_password.unwrap());
+    println!("Workgroup: {:?}", smb_workgroup);
     Ok(client)
 }
 
@@ -30,36 +35,28 @@ pub fn mk_file_smb_client_disconnect(client: SmbClient) {
     drop(client);
 }
 
-// fn mk_file_smb_client_file_dir_stat(
-//     client: &SmbClient,
-//     uri: &str,
-// ) -> Result<SmbStat, Box<dyn Error>> {
-//     let data_stat = client.stat(uri);
-//     // match data_stat {
-//     //     Ok(file_stat) => {
-//     //         println!("{:?}", file_stat.modified);
-//     //     }
-//     //     Err(_) => {
-//     //         println!("boom");
-//     //     }
-//     // };
-//     Ok(data_stat)
-// }
-
 // let mut file = client.stat("/abc/test.txt").unwrap();
 // let mut file = client.open_with("/abc/test.txt", SmbOpenOptions::default().read(true)).unwrap();
 
+#[derive(Debug, Clone)]
+pub struct File_Metadata {
+    pub name: String,
+    pub directory: bool,
+}
+
 // tree(&client, "/");
-pub fn mk_file_smb_client_tree(client: &SmbClient, uri: &str, mut file_data: &Vec<String>) {
+pub fn mk_file_smb_client_tree(client: &SmbClient, uri: &str) -> Vec<File_Metadata> {
+    let mut file_list: Vec<File_Metadata> = vec![];
     for entity in client.list_dir(uri).unwrap().into_iter() {
         let entity_uri = mk_file_smb_client_entity_uri(&entity, uri);
         let stat = client.stat(entity_uri.as_str()).unwrap();
-        mk_file_smb_client_print_entry(&entity, &stat);
-        // if is dir, iter directory
+        let mut new_file = File_Metadata {name: entity_uri, directory: false};
         if entity.get_type() == SmbDirentType::Dir {
-            mk_file_smb_client_tree(client, entity_uri.as_str(), &file_data.clone());
+            new_file.directory = true;
         }
+        file_list.push(new_file);
     }
+    file_list
 }
 
 fn mk_file_smb_client_entity_uri(entity: &SmbDirent, path: &str) -> String {

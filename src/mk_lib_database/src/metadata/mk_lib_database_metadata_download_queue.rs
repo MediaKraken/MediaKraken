@@ -8,7 +8,7 @@ pub struct DBDownloadQueueByProviderList {
     pub mm_download_guid: uuid::Uuid,
     pub mm_download_que_type: i16,
     pub mm_download_new_uuid: uuid::Uuid,
-    pub mm_download_provider_id: i32,
+    pub mm_download_provider_id: Option<i32>,
     pub mm_download_status: String,
     pub mm_download_path: Option<String>,
 }
@@ -100,6 +100,7 @@ pub async fn mk_lib_database_metadata_download_queue_insert(
     metadata_new_uuid: Uuid,
     metadata_provider_id: Option<i32>,
     metadata_status: String,
+    metadata_path: Option<&String>,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
@@ -108,8 +109,9 @@ pub async fn mk_lib_database_metadata_download_queue_insert(
         mm_download_que_type, \
         mm_download_new_uuid, \
         mm_download_provider_id, \
-        mm_download_status) \
-        values ($1, $2, $3, $4, $5, $6)",
+        mm_download_status, \
+        mm_download_path) \
+        values ($1, $2, $3, $4, $5, $6, $7)",
     )
     .bind(uuid::Uuid::new_v4())
     .bind(metadata_provider)
@@ -117,6 +119,7 @@ pub async fn mk_lib_database_metadata_download_queue_insert(
     .bind(metadata_new_uuid)
     .bind(metadata_provider_id)
     .bind(metadata_status)
+    .bind(metadata_path)
     .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;

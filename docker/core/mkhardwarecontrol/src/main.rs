@@ -11,7 +11,7 @@ use tokio::sync::Notify;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mkhardwarecontrol")
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkhardwarecontrol")
             .await
             .unwrap();
 
@@ -25,15 +25,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(payload) = msg.content {
                 let json_message: Value =
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                // #[cfg(debug_assertions)]
-                // {
-                //     mk_lib_logging::mk_logging_post_elk(
-                //         std::module_path!(),
-                //         json!({ "msg body": json_message }),
-                //     )
-                //     .await
-                //     .unwrap();
-                // }
                 if json_message["Type"] == "Hardware" {
                     if json_message["Subtype"] == "Lights" {
                         if json_message["Hardware"] == "Hue" {
@@ -54,16 +45,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         json_message["LightList"].to_string(),
                                         json_message["Color"].to_string(),
                                     ).await.unwrap();
+                            } else if json_message["Action"] == "Bright" {
+                                let _hardware_hue = mk_lib_hardware::mk_lib_hardware_phue::mk_hardware_phue_bridge_set_light(
+                                    json_message["Target"].to_string().parse::<IpAddr>().unwrap(),
+                                    json_message["ClientKey"].to_string(),
+                                    json_message["LightList"].to_string(),
+                                    json_message["Saturation"].as_u64(),
+                                    json_message["Brightness"].as_u64(),
+                                );
                             }
-                            // else if json_message["Action"] == "Bright" {
-                            //     mk_lib_hardware::mk_lib_hardware_phue::mk_hardware_phue_bridge_set_light(
-                            //         json_message["Target"].to_string().parse::<IpAddr>().unwrap(),
-                            //         json_message["ClientKey"].to_string(),
-                            //         json_message["LightList"].to_string(),
-                            //         json_message["Saturation"].into(),
-                            //         json_message["Brightness"] as i64(),
-                            //     );
-                            // }
                         }
                     }
                 }

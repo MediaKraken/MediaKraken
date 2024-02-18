@@ -35,7 +35,7 @@ pub struct SqlPermissionTokens {
 impl Default for User {
     fn default() -> Self {
         let mut permissions = HashSet::new();
-        permissions.insert("User::View".to_owned());
+        //permissions.insert("User::View".to_owned());
         permissions.insert("Category::View".to_owned());
         Self {
             id: 1,
@@ -215,14 +215,14 @@ pub async fn mk_lib_database_user_set_admin(
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("insert into mm_axum_user_permissions (user_id, token) values ($1, $2)")
         .bind(user_id)
-        .bind("Admin::Edit")
+        .bind("Admin::View")
         .execute(&mut *transaction)
         .await?;
-    sqlx::query("insert into mm_axum_user_permissions (user_id, token) values ($1, $2)")
-        .bind(user_id)
-        .bind("Category::View")
-        .execute(&mut *transaction)
-        .await?;
+    // sqlx::query("insert into mm_axum_user_permissions (user_id, token) values ($1, $2)")
+    //     .bind(user_id)
+    //     .bind("Category::View")
+    //     .execute(&mut *transaction)
+    //     .await?;
     sqlx::query("insert into mm_axum_user_permissions (user_id, token) values ($1, $2)")
         .bind(user_id)
         .bind("User::View")
@@ -258,8 +258,8 @@ pub async fn mk_lib_database_user_login_verification(
     password: &String,
 ) -> Result<i64, sqlx::Error> {
     let row: (i64,) = sqlx::query_as(
-        "select id from mm_axum_users \
-        where username = $1 and password = crypt($2, password)",
+        "select coalesce((select id from mm_axum_users \
+        where username = $1 and password = crypt($2, password) limit 1), 0)",
     )
     .bind(username)
     .bind(password)

@@ -4,6 +4,7 @@ version: '3.8'
 
 services:
   cadvisor:
+    # https://github.com/google/cadvisor
     image: gcr.io/cadvisor/cadvisor:v0.47.2
     hostname: '{{.Node.ID}}'
     volumes:
@@ -19,10 +20,11 @@ services:
         constraints: [ node.platform.os == linux ]
 
   certbot:
-    image: certbot/certbot:v2.6.0
+    # https://github.com/certbot/certbot/releases
+    image: certbot/certbot:v2.8.0
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
       placement:
         constraints: [ node.role == manager ]
   
@@ -38,7 +40,7 @@ services:
     stop_signal: SIGUSR1
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
     networks:
       - mediakraken_network
 
@@ -48,13 +50,18 @@ services:
     environment:
       - MAX_CONNECTIONS=125
       - MAX_WAL_SENDERS=10
-      - SHARED_BUFFERS=2048MB
+      # - MAX_WAL_SIZE=16GB  This parameter can only be set in the postgresql.conf file or on the server command line.
+      - SHARED_BUFFERS=4096MB
       - WORK_MEM=64MB
       - MAX_WORKER_PROCESSES=8
       - MAX_PARALLEL_WORKERS_PER_GATHER=2
       - MAX_PARALLEL_WORKERS=8
       - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
-    command: postgres -c shared_preload_libraries=citus
+      #- POSTGRES_INITDB_ARGS=--auth-host=trust  # for debug only
+      #- POSTGRES_INITDB_ARGS="--locale-provider=icu --icu-locale=en --auth-host=trust"   initdb: error: unrecognized locale provider: icu --icu-locale=en --auth-host=trust
+    command: postgres -c shared_preload_libraries=citus -c max_wal_size=16GB -c tcp_keepalives_idle=86400 -c config_file=/usr/local/share/postgresql/postgresql.conf.sample
+    ports: # for debugging only!!!!!
+      - "5432:5432"
     secrets:
       - db_password
     stop_grace_period: 30s
@@ -67,60 +74,9 @@ services:
     volumes:
       - mediakraken_vol_postgresql:/var/lib/postgresql/data
       - mediakraken_vol_postgresql_backup:/mediakraken/backup
-      - mediakraken_vol_postgresql_logging:/var/log/postgresql
+      - ./backups:/backups
     networks:
       - mediakraken_network
-
- #  # Postgresql server
-  #  database:
-  #    image: mediakraken/mkdatabase:${BRANCH}
-  #    environment:
-  #      - PGHOST=/tmp
-  #      - MAX_CONNECTIONS=20
-  #      - MAX_WAL_SENDERS=10
-  #      - PG_MODE=primary
-  #      - PG_PRIMARY_USER=${DBUSER}
-  #      - PG_PRIMARY_PASSWORD=${DBPASS}
-  #      - PG_ROOT_PASSWORD=${DBPASS}
-  #      - PG_PRIMARY_PORT=5432
-  #      - POSTGRES_DB=${DBDATABASE}
-  #      - POSTGRES_USER=${DBUSER}
-  #      - POSTGRES_PASSWORD=${DBPASS}
-  #    stop_grace_period: 30s
-  #    stop_signal: SIGTERM
-  #    networks:
-  #      - mediakraken_network_backend
-  #    deploy:
-  #      placement:
-  #        constraints:
-  #        - node.labels.type == primary
-  #        - node.role == worker
-  #
-  #  # Postgresql server replica
-  #  database-replica:
-  #    image: mediakraken/mkdatabase:${BRANCH}
-  #    environment:
-  #      - PGHOST=/tmp
-  #      - MAX_CONNECTIONS=20
-  #      - MAX_WAL_SENDERS=10
-  #      - PG_MODE=replica
-  #      - PG_PRIMARY_HOST=database
-  #      - PG_PRIMARY_PORT=5432
-  #      - PG_PRIMARY_USER=${DBUSER}
-  #      - PG_PRIMARY_PASSWORD=${DBPASS}
-  #      - PG_ROOT_PASSWORD=${DBPASS}
-  #      - POSTGRES_DB=${DBDATABASE}
-  #      - POSTGRES_USER=${DBUSER}
-  #      - POSTGRES_PASSWORD=${DBPASS}
-  #    stop_grace_period: 30s
-  #    stop_signal: SIGTERM
-  #    networks:
-  #      - mediakraken_network_backend
-  #    deploy:
-  #      placement:
-  #        constraints:
-  #        - node.labels.type != primary
-  #        - node.role == worker
 
   download:
     image: mediakraken/mkdownload:${BRANCH}
@@ -141,16 +97,41 @@ services:
     networks:
       - mediakraken_network
 
-  filebeat:
-    image: elastic/filebeat:7.17.10
+  elk:
+    # https://hub.docker.com/r/sebp/elk/
+    image: sebp/elk:oss-8.11.1
     environment:
-      - ELASTICSEARCH_HOSTS=mkelk.beaverbay.local:9200
-      - KIBANA_HOSTS=mkelk.beaverbay.local:5601
+      - ELASTICSEARCH_START=1
+      - LOGSTASH_START=1
+      - KIBANA_START=1
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    volumes:
+      - mediakraken_vol_elk:/var/lib/elasticsearch      
+    networks:
+      - mediakraken_network
+    ports:
+      #- "5000:5000"
+      #- "5044:5044"
+      - "5601:5601"
+      #- "9200:9200"
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [ node.role == manager ]
+
+  filebeat:
+    # https://www.docker.elastic.co/r/beats
+    image: docker.elastic.co/beats/filebeat-oss:8.11.3
+    environment:
+      - ELASTICSEARCH_HOSTS=mkstack_elk:9200
+      - KIBANA_HOSTS=mkstack_elk:5601
     volumes:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - mediakraken_vol_postgresql_logging:/var/log/postgresql:ro
-      - mediakraken_vol_nginx:/var/log/mediakraken/nginx:ro
+      # - mediakraken_vol_postgresql_logging:/var/log/postgresql:ro
+      # - mediakraken_vol_nginx:/var/log/mediakraken/nginx:ro
     deploy:
       mode: global
 
@@ -189,7 +170,7 @@ services:
       replicas: 1
 
   grafana:
-    image: grafana/grafana-oss:10.0.3
+    image: grafana/grafana-oss:10.0.10
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     environment:
@@ -293,23 +274,6 @@ services:
     networks:
       - mediakraken_network
   
-  # not used..........since filebeat collects the logs
-  # logspout:
-  #   image: gliderlabs/logspout:v3.2.14
-  #   environment:
-  #     - ROUTE_URIS="logstash+tcp://mkelk.beaverbay.local:5000"
-  #     - LOGSTASH_FIELDS="environment=production"
-  #     - ALLOW_TTY=true
-  #     - SYSLOG_TAG="{{index .Service.Name}}"
-  #     - SYSLOG_HOSTNAME="{{index .Node.Hostname}}"      
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock:ro
-  #     - /etc/hostname:/etc/host_hostname:ro
-  #   deploy:
-  #     mode: global
-  #   networks:
-  #     - mediakraken_network
-
   mediascanner:
     image: mediakraken/mkmediascanner:${BRANCH}
     secrets:
@@ -348,7 +312,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
 
   metadatamame:
     image: mediakraken/mkmetadatamame:${BRANCH}
@@ -372,7 +336,8 @@ services:
 
   # Container to monitor services running inside other containers
   metricbeat:
-    image: docker.elastic.co/beats/metricbeat:8.8.1
+    # https://www.docker.elastic.co/r/beats/metricbeat-oss
+    image: docker.elastic.co/beats/metricbeat-oss:8.11.3
     hostname: "{{.Node.Hostname}}-metricbeat"
     networks:
       - mediakraken_network
@@ -383,8 +348,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - mediakraken_vol_metricbeat:/usr/share/metricbeat/data
     environment:
-      - ELASTICSEARCH_HOST=mkelk.beaverbay.local
-      - KIBANA_HOST=mkelk.beaverbay.local
+      - ELASTICSEARCH_HOST=mkstack_elk
+      - KIBANA_HOST=mkstack_elk
     # disable strict permission checks
     command: ["--strict.perms=false", "-system.hostfs=/hostfs"]
     deploy:
@@ -404,8 +369,8 @@ services:
 #      - /:/hostfs:ro
 #      - /var/run/docker.sock:/var/run/docker.sock
 #    environment:
-#      - "HOST_ELASTICSEARCH=mkelk.beaverbay.local:9222"
-#      - "HOST_KIBANA=mkelk.beaverbay.local:5666"
+#      - "HOST_ELASTICSEARCH=mkstack_elk:9222"
+#      - "HOST_KIBANA=mkstack_elk:5666"
 #    extra_hosts:
 #      - "elasticsearch:172.17.0.1" # The IP of docker0 interface to access host from container
 #      - "kibana:172.17.0.1" # The IP of docker0 interface to access host from container
@@ -419,7 +384,7 @@ services:
 #      - "9425:9425"
 #    deploy:
 #      mode: replicated
-#      replicas: 1
+#      replicas: 0
 #      placement:
 #        constraints: [node.role == manager]
 #
@@ -477,29 +442,30 @@ services:
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     volumes:
-      - /home/spoot/mbdump:/mediakraken/mbdump
+      - mediakraken_vol_mbrainz_data:/mediakraken/mbdump
+      #- /home/spoot/mbdump:/mediakraken/mbdump
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
     networks:
       - mediakraken_network
 
-  nginx:
-    image: mediakraken/mknginx:${BRANCH}
-    entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh -h mkstack_webapp -p 8080 -t 180 -h mkstack_transmission -p 9091 -t 180 -- nginx
-    stop_grace_period: 30s
-    stop_signal: SIGTERM
-    volumes:
-      - mediakraken_vol_nginx:/var/log/mediakraken/nginx
-      - mediakraken_vol_certs:/etc/nginx/certs:ro
-      - mediakraken_vol_static:/mediakraken/static:ro
-    ports:
-      - "8900:8900"
-    networks:
-      - mediakraken_network
-    deploy:
-      mode: replicated
-      replicas: 1
+  # nginx:
+  #   image: mediakraken/mknginx:${BRANCH}
+  #   entrypoint: /usr/bin/wait-for-it-ash-busybox130.sh -h mkstack_webapp -p 8080 -t 180 -h mkstack_transmission -p 9091 -t 180 -- nginx
+  #   stop_grace_period: 30s
+  #   stop_signal: SIGTERM
+  #   volumes:
+  #     - mediakraken_vol_nginx:/var/log/mediakraken/nginx
+  #     - mediakraken_vol_certs:/etc/nginx/certs:ro
+  #     - mediakraken_vol_static:/mediakraken/static:ro
+  #   ports:
+  #     - "8900:8900"
+  #   networks:
+  #     - mediakraken_network
+  #   deploy:
+  #     mode: replicated
+  #     replicas: 1
 
   nut:
     image: mediakraken/mknut:${BRANCH}
@@ -529,6 +495,8 @@ services:
     command: sh -c "/wait && /mkopenlibrarynetfetchbulk"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
+    volumes:
+      - mediakraken_vol_openlibrary:/mediakraken
     networks:
       - mediakraken_network
     deploy:
@@ -536,7 +504,7 @@ services:
       replicas: 1
 
   pgadmin:
-    image: dpage/pgadmin4:7.5
+    image: dpage/pgadmin4:8.3
     stop_grace_period: 30s
     stop_signal: SIGTERM
     networks:
@@ -575,7 +543,7 @@ services:
   #     replicas: 1
 
   portainer:
-    image: portainer/portainer-ce:2.18.4-alpine
+    image: portainer/portainer-ce:2.19.4-alpine
     command: -H tcp://tasks.portaineragent:9001 --tlsskipverify
     ports:
       - "9000:9000"
@@ -588,7 +556,7 @@ services:
       replicas: 1
 
   portaineragent:
-    image: portainer/agent:linux-amd64-2.18.4-alpine
+    image: portainer/agent:linux-amd64-2.19.4-alpine
     environment:
       AGENT_CLUSTER_ADDR: tasks.portaineragent
       # AGENT_PORT: 9001
@@ -604,8 +572,8 @@ services:
         constraints: [ node.platform.os == linux ]
 
   # https://github.com/prometheus-community/postgres_exporter
-  postgres-exporter:
-    image: quay.io/prometheuscommunity/postgres-exporter:v0.13.2
+  postgres_exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.15.0
     environment:
       DATA_SOURCE_URI: mkstack_database:5432/postgres?sslmode=disable
       DATA_SOURCE_USER: postgres
@@ -615,20 +583,23 @@ services:
     networks:
       - mediakraken_network
     deploy:
-      placement:
-        constraints:
-          - node.role == manager
+      mode: replicated
+      replicas: 1
 
   # https://prometheus.io/download/
   # https://hub.docker.com/u/prom
   prometheus:
-    image: prom/prometheus:v2.37.9
+    image: prom/prometheus:v2.45.2
     ports:
       - 9090:9090
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - mediakraken_network
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
 
   rabbitconsume:
     image: mediakraken/mkrabbitconsume:${BRANCH}
@@ -658,6 +629,7 @@ services:
     stop_grace_period: 30s
     stop_signal: SIGTERM
     ports:
+      - "5672:5672"  # for testing only!!!
       # https management port
       # - "15671:15671"
       # http management port
@@ -672,7 +644,8 @@ services:
 
   # using stack instead of own image for RedisInsight
   redis:
-    image: redis/redis-stack:6.2.6-v9
+    # https://hub.docker.com/r/redis/redis-stack
+    image: redis/redis-stack:6.2.6-v10
     stop_grace_period: 30s
     stop_signal: SIGUSR1
     ports:
@@ -786,6 +759,7 @@ services:
   transmission:
     image: mediakraken/mktransmission:${BRANCH}
     ports:
+      - "9091:9091"  # for testing only!
       - "51413:51413/tcp"
       - "51413:51413/udp"
     volumes:
@@ -809,7 +783,7 @@ services:
       - mediakraken_network
     deploy:
       mode: replicated
-      replicas: 0
+      replicas: 0 # TODO renable after testing via mkcode
 
   webapp:
     image: mediakraken/mkwebaxum:${BRANCH}
@@ -825,6 +799,8 @@ services:
     command: sh -c "/wait && /mediakraken/mkwebapp"
     stop_grace_period: 30s
     stop_signal: SIGUSR1
+    ports:
+      - "8900:8080"
     volumes:
       # must not be read only as it stores cache here
       - mediakraken_vol_static:/mediakraken/static
@@ -841,29 +817,31 @@ services:
     networks:
       - mediakraken_network
     deploy:
+      mode: global
+      placement:
+        constraints: [ node.platform.os == linux ]
+
+  wireshark:
+    # https://hub.docker.com/r/linuxserver/wireshark/tags
+    image: linuxserver/wireshark:4.0.11
+    cap_add:
+      - NET_ADMIN
+    # security_opt:
+    #   - seccomp:unconfined
+    # network_mode: host
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - mediakraken_vol_wireshark:/config
+    ports:
+      - 3001:3001 #optional https
+    deploy:
       mode: replicated
       replicas: 1
-
-  # wireshark:
-  #   image: linuxserver/wireshark:4.0.6
-  #   cap_add:
-  #     - NET_ADMIN
-  #   security_opt:
-  #     - seccomp:unconfined
-  #   network_mode: host
-  #   environment:
-  #     - PUID=1000
-  #     - PGID=1000
-  #     - TZ=Etc/UTC
-  #   volumes:
-  #     - /path/to/config:/config
-  #   ports:
-  #     - 3001:3001 #optional https
-  #  deploy:
-  #    mode: replicated
-  #    replicas: 1
-  #    placement:
-  #      constraints: [ node.role == manager ]
+      placement:
+        constraints: [ node.role == manager ]
 
   # https://github.com/linuxserver/docker-wireguard
   wireguard:
@@ -884,7 +862,7 @@ services:
       - PERSISTENTKEEPALIVE_PEERS=all
       - LOG_CONFS=true
     volumes:
-      - /path/to/appdata/config:/config
+      - mediakraken_vol_wireguard:/config
       - /lib/modules:/lib/modules
     ports:
       - 51820:51820/udp
@@ -892,7 +870,7 @@ services:
       - net.ipv4.conf.all.src_valid_mark=1
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 0 # TODO renable after testing via mkcode
       placement:
         constraints: [ node.role == manager ]
 
@@ -909,19 +887,19 @@ volumes:
   mediakraken_vol_certs:
   mediakraken_vol_comics:
   mediakraken_vol_devices:
+  mediakraken_vol_elk:
   mediakraken_vol_emulation:
   mediakraken_vol_grafana:
   mediakraken_vol_metricbeat:
-  mediakraken_vol_mbrainz_conf:
   mediakraken_vol_mbrainz_data:
   mediakraken_vol_mumble:
-  mediakraken_vol_nginx:
+  # mediakraken_vol_nginx:
+  mediakraken_vol_openlibrary:
   mediakraken_vol_pgadmin:
   mediakraken_vol_phue:
   mediakraken_vol_portainer_data:
   mediakraken_vol_postgresql:
   mediakraken_vol_postgresql_backup:
-  mediakraken_vol_postgresql_logging:
   mediakraken_vol_rabbit:
   mediakraken_vol_redis:
   mediakraken_vol_static:
@@ -929,6 +907,8 @@ volumes:
   mediakraken_vol_transmission:
   mediakraken_vol_transmission_downloads:
   mediakraken_vol_transmission_incomplete:
+  mediakraken_vol_wireguard:
+  mediakraken_vol_wireshark:
 
 secrets:
   csrf_key:

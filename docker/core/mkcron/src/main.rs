@@ -7,7 +7,7 @@ use tokio::time::{sleep, Duration};
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
         .await
         .unwrap();
     let _db_check =
@@ -16,7 +16,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .unwrap();
 
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mkcron")
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkcron")
             .await
             .unwrap();
 
@@ -27,7 +27,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 .await
                 .unwrap();
         for row_data in cron_row {
-            let time_delta: chrono::Duration;
+            let mut time_delta: chrono::Duration;
             match row_data.mm_cron_schedule_type.as_str() {
                 "Week(s)" => {
                     time_delta = chrono::Duration::weeks(i64::from(row_data.mm_cron_schedule_time))

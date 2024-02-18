@@ -5,13 +5,18 @@ use axum::{
     response::{Html, IntoResponse},
     Extension,
 };
-use axum_session_auth::{AuthSession, SessionPgPool};
+use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
+use mk_lib_common;
 use mk_lib_database;
 use mk_lib_network;
 use num_format::{SystemLocale, ToFormattedString};
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPool;
 use sqlx::Row;
+
+#[derive(Template)]
+#[template(path = "bss_error/bss_error_403.html")]
+struct TemplateError403Context {}
 
 #[derive(Serialize)]
 struct TemplateHomeStreamListContext {
@@ -50,29 +55,42 @@ pub async fn admin_home(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
-    let user_list =
-        mk_lib_database::mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool, 0, 9999)
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("Admin::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        let template = TemplateError403Context {};
+        let reply_html = template.render().unwrap();
+        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+    } else {
+        let user_list =
+            mk_lib_database::mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool, 0, 9999)
+                .await
+                .unwrap();
+        let option_status_row =
+            mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_status_read(
+                &sqlx_pool,
+            )
             .await
             .unwrap();
-    let option_status_row =
-        mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_status_read(
-            &sqlx_pool,
+        let option_json: serde_json::Value = option_status_row.get("mm_options_json");
+        let status_json: serde_json::Value = option_status_row.get("mm_status_json");
+        let boot_seconds: libc::timeval = sys_info::boottime().unwrap();
+        let boot_duration = chrono::Duration::seconds(i64::from(boot_seconds.tv_sec));
+        let external_ip = mk_lib_network::mk_lib_network::mk_data_from_url(
+            "https://myexternalip.com/raw".to_string(),
         )
         .await
         .unwrap();
-    let option_json: serde_json::Value = option_status_row.get("mm_options_json");
-    let status_json: serde_json::Value = option_status_row.get("mm_status_json");
-    let boot_seconds: libc::timeval = sys_info::boottime().unwrap();
-    let boot_duration = chrono::Duration::seconds(i64::from(boot_seconds.tv_sec));
-    let external_ip = mk_lib_network::mk_lib_network::mk_data_from_url(
-        "https://myexternalip.com/raw".to_string(),
-    )
-    .await
-    .unwrap();
-    let mut server_streams = Vec::new();
-    let mut server_scans = Vec::new();
-    let locale = SystemLocale::default().unwrap();
-    let template = TemplateHomeContext {
+        let mut server_streams = Vec::new();
+        let mut server_scans = Vec::new();
+        let locale = SystemLocale::default().unwrap();
+        let template = TemplateHomeContext {
         template_data_server_info_server_name: &option_json["MediaKrakenServer"]["Server Name"],
         // following boottime only compiles #[cfg(not(windows))] in this case is fine
         template_data_server_uptime: &format!(
@@ -83,7 +101,7 @@ pub async fn admin_home(
         ),
         template_data_server_host_ip: &"255.255.255.255".to_string(),
         template_data_server_info_server_ip_external: &external_ip,
-        template_data_server_info_server_version: &"Fake Version".to_string(),
+        template_data_server_info_server_version: &mk_lib_common::mk_lib_common_version::WEB_VERSION.to_string(),
         template_data_count_media_files:
             &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_known_count(&sqlx_pool)
                 .await
@@ -106,8 +124,9 @@ pub async fn admin_home(
         template_server_users: &user_list,
         template_data_scan_info: &server_scans,
     };
-    let reply_html = template.render().unwrap();
-    (StatusCode::OK, Html(reply_html).into_response())
+        let reply_html = template.render().unwrap();
+        (StatusCode::OK, Html(reply_html).into_response())
+    }
 }
 
 /*

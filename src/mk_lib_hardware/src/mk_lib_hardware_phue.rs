@@ -41,15 +41,15 @@ pub async fn mk_hardware_phue_bridge_set_light(
     bridge_ip: IpAddr,
     client_key: String,
     light_id: String,
-    light_saturation: u8,
-    light_brightness: u8,
+    light_saturation: Option<u64>,
+    light_brightness: Option<u64>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let bridge = Bridge::new(bridge_ip, client_key);
     let light_modifier = light::StateModifier::new()
         .with_on(true)
-        .with_saturation(Adjust::Override(light_saturation))
+        .with_saturation(Adjust::Override(light_saturation.unwrap() as u8))
         .with_alert(Alert::Select)
-        .with_brightness(Adjust::Decrement(light_brightness));
+        .with_brightness(Adjust::Decrement(light_brightness.unwrap() as u8));
     let _response = bridge.set_light_state(light_id, &light_modifier).unwrap();
     Ok(())
 }

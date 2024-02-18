@@ -321,6 +321,145 @@ pub async fn mk_lib_database_update_schema(
         mk_lib_database_version_update(&sqlx_pool, 61).await?;
     }
 
+    if version_no < 62 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(
+            "CREATE TABLE IF NOT EXISTS mm_openlib_author (\
+                mm_openlib_author_id TEXT NOT NULL, \
+                mm_openlib_author_json JSONB NOT NULL);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_openlib_author_id_ndx \
+                ON mm_openlib_author USING btree (mm_openlib_author_id);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_openlib_author_json_ndx \
+                ON mm_openlib_author USING gin (mm_openlib_author_json);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE TABLE IF NOT EXISTS mm_openlib_edition (\
+                mm_openlib_edition_id TEXT NOT NULL, \
+                mm_openlib_edition_json JSONB NOT NULL);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_openlib_edition_id_ndx \
+                ON mm_openlib_edition USING btree (mm_openlib_edition_id);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_openlib_edition_json_ndx \
+            ON mm_openlib_edition USING gin (mm_openlib_edition_json);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE TABLE IF NOT EXISTS mm_openlib_work (\
+                mm_openlib_work_id TEXT NOT NULL, \
+                mm_openlib_work_json JSONB NOT NULL);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_openlib_work_id_ndx \
+                ON mm_openlib_work USING btree (mm_openlib_work_id);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_openlib_work_json_ndx \
+            ON mm_openlib_work USING gin (mm_openlib_work_json);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 62).await?;
+    }
+
+    if version_no < 63 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(
+            "CREATE TABLE IF NOT EXISTS mm_openlib_rating (\
+                mm_openlib_rating_id TEXT NOT NULL, \
+                mm_openlib_rating_json JSONB NOT NULL);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_openlib_rating_id_ndx \
+                ON mm_openlib_rating USING btree (mm_openlib_rating_id);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_openlib_rating_json_ndx \
+                ON mm_openlib_rating USING gin (mm_openlib_rating_json);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 63).await?;
+    }
+
+    if version_no < 64 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query("DROP INDEX IF EXISTS mm_openlib_author_id_ndx;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("DROP INDEX IF EXISTS mm_openlib_edition_id_ndx;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("DROP INDEX IF EXISTS mm_openlib_rating_id_ndx;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("DROP INDEX IF EXISTS mm_openlib_work_id_ndx;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(
+            "CREATE UNIQUE INDEX IF NOT EXISTS mm_openlib_author_id_ndx \
+                ON mm_openlib_author USING btree (mm_openlib_author_id);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE UNIQUE INDEX IF NOT EXISTS mm_openlib_edition_id_ndx \
+                ON mm_openlib_edition USING btree (mm_openlib_edition_id);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE UNIQUE INDEX IF NOT EXISTS mm_openlib_rating_id_ndx \
+                ON mm_openlib_rating USING btree (mm_openlib_rating_id);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE UNIQUE INDEX IF NOT EXISTS mm_openlib_work_id_ndx \
+                ON mm_openlib_work USING btree (mm_openlib_work_id);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 64).await?;
+    }
+
+    if version_no < 65 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query("DROP TABLE IF EXISTS mm_openlib_rating;")
+            .execute(&mut *transaction)
+            .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 65).await?;
+    }
+
     Ok(true)
 }
 

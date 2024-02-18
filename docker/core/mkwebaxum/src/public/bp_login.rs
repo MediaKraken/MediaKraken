@@ -5,6 +5,7 @@ use axum::{
     response::{Html, IntoResponse, Redirect},
     Extension,
 };
+use axum_flash::{Flash, IncomingFlashes, Key};
 use axum_session::SessionPgPool;
 use axum_session_auth::*;
 use mk_lib_database;
@@ -30,7 +31,8 @@ pub struct LoginInput {
 
 pub async fn public_login_post(
     Extension(sqlx_pool): Extension<PgPool>,
-    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    mut auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    mut flash: Flash,
     Form(input_data): Form<LoginInput>,
 ) -> Redirect {
     let user_id: i64 =
@@ -41,11 +43,14 @@ pub async fn public_login_post(
         )
         .await
         .unwrap();
-    // TODO show error when not found
     if user_id > 0 {
-        mk_lib_database::mk_lib_database_user::mk_lib_database_user_login(&sqlx_pool, user_id)
-            .await;
+        let _result =
+            mk_lib_database::mk_lib_database_user::mk_lib_database_user_login(&sqlx_pool, user_id)
+                .await;
         auth.login_user(user_id);
+        auth.remember_user(true);
+    } else {
+        flash.error("Unknown user or password incorrect!");
     }
     Redirect::to("/user/home")
 }

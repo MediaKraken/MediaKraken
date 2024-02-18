@@ -10,10 +10,9 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-flate2 = "1.0.26"
-serde_json = "1.0.96"
-stdext = "0.3.1"
-tar = "0.4.38"
+flate2 = "1.0.28"
+serde_json = "1.0.113"
+tar = "0.4.40"
 zip = "0.6.6"
 
 [dev-dependencies]

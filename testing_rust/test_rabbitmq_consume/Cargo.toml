@@ -11,8 +11,8 @@ codegen-units = 1
 
 [dependencies]
 mk_lib_rabbitmq = { path = "../../src/mk_lib_rabbitmq" }
-serde_json = "1.0.96"
-tokio = { version = "1.28.0", features = ["full"] }
+serde_json = "1.0.111"
+tokio = { version = "1.35.1", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"

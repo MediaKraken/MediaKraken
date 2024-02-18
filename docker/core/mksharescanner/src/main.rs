@@ -8,7 +8,7 @@ use tokio::sync::Notify;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
         .await
         .unwrap();
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
@@ -20,7 +20,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .unwrap();
 
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mksharescanner")
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mksharescanner")
             .await
             .unwrap();
 
@@ -42,13 +42,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .await
                     .unwrap();
                 for share_info in share_vec.iter() {
-                    if mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_exists( &sqlx_pool,
+                    if mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_exists(&sqlx_pool,
                             share_info.mm_share_ip,
                             share_info.mm_share_path.clone(),).await.unwrap() == false {
                         mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_insert(
                                 &sqlx_pool,
                                 share_info.mm_share_ip,
-                                share_info.mm_share_path.clone(),
+                                share_info.mm_share_path.clone().as_str().unwrap(),
                                 share_info.mm_share_comment.clone(),
                             )
                             .await.unwrap();

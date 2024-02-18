@@ -6,11 +6,15 @@ use axum::{
     response::{Html, IntoResponse},
     Extension,
 };
-use axum_session_auth::{AuthSession, SessionPgPool};
+use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
 use mk_lib_common::mk_lib_common_pagination;
 use mk_lib_database;
 use serde_json::json;
 use sqlx::postgres::PgPool;
+
+#[derive(Template)]
+#[template(path = "bss_error/bss_error_401.html")]
+struct TemplateError401Context {}
 
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_music_album.html")]
@@ -28,22 +32,35 @@ pub async fn user_media_music(
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
 ) -> impl IntoResponse {
-    let db_offset: i64 = (page * 30) - 30;
-    let total_pages: i64 =
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("User::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        let template = TemplateError401Context {};
+        let reply_html = template.render().unwrap();
+        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+    } else {
+        let db_offset: i64 = (page * 30) - 30;
+        let total_pages: i64 =
         mk_lib_database::database_media::mk_lib_database_media_music::mk_lib_database_media_music_count(
             &sqlx_pool,
             String::new(),
         )
         .await
         .unwrap();
-    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
-        total_pages,
-        page,
-        "/user/media/music/".to_string(),
-    )
-    .await
-    .unwrap();
-    let music_list =
+        let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
+            total_pages,
+            page,
+            "/user/media/music/".to_string(),
+        )
+        .await
+        .unwrap();
+        let music_list =
         mk_lib_database::database_media::mk_lib_database_media_music::mk_lib_database_media_music_read(
             &sqlx_pool,
             String::new(),
@@ -52,19 +69,20 @@ pub async fn user_media_music(
         )
         .await
         .unwrap();
-    let mut template_data_exists = false;
-    if music_list.len() > 0 {
-        template_data_exists = true;
+        let mut template_data_exists = false;
+        if music_list.len() > 0 {
+            template_data_exists = true;
+        }
+        let page_usize = page as usize;
+        let template = TemplateMediaMusicContext {
+            template_data: &music_list,
+            template_data_exists: &template_data_exists,
+            pagination_bar: &pagination_html,
+            page: &page_usize,
+        };
+        let reply_html = template.render().unwrap();
+        (StatusCode::OK, Html(reply_html).into_response())
     }
-    let page_usize = page as usize;
-    let template = TemplateMediaMusicContext {
-        template_data: &music_list,
-        template_data_exists: &template_data_exists,
-        pagination_bar: &pagination_html,
-        page: &page_usize,
-    };
-    let reply_html = template.render().unwrap();
-    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 #[derive(Template)]
@@ -80,12 +98,26 @@ pub async fn user_media_music_detail(
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
 ) -> impl IntoResponse {
-    let template = TemplateMediaMusicDetailContext {
-        template_data: json!({}),
-        template_data_exists: false,
-    };
-    let reply_html = template.render().unwrap();
-    (StatusCode::OK, Html(reply_html).into_response())
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("User::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        let template = TemplateError401Context {};
+        let reply_html = template.render().unwrap();
+        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+    } else {
+        let template = TemplateMediaMusicDetailContext {
+            template_data: json!({}),
+            template_data_exists: false,
+        };
+        let reply_html = template.render().unwrap();
+        (StatusCode::OK, Html(reply_html).into_response())
+    }
 }
 
 /*

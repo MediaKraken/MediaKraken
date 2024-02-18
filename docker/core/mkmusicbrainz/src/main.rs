@@ -12,14 +12,14 @@ use tokio::sync::Notify;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
         .await
         .unwrap();
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
         .await;
 
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mkmusicbrainz")
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkmusicbrainz")
             .await
             .unwrap();
 
@@ -31,17 +31,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {
-                let json_message: Value =
-                    serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                // #[cfg(debug_assertions)]
-                // {
-                //     mk_lib_logging::mk_logging_post_elk(
-                //         std::module_path!(),
-                //         json!({ "msg body": json_message }),
-                //     )
-                //     .await
-                //     .unwrap();
-                // }
                 let db_pass = fs::read_to_string("/run/secrets/db_password").unwrap();
                 env::set_var("PGPASSWORD", &db_pass);
                 // extensions, collations, types
@@ -113,11 +102,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                 // import dump tables
                 let pg_tables =
-                    mk_lib_database::mk_lib_database_postgresql::mk_lib_database_tables(
-                        &sqlx_pool,
-                    )
-                    .await
-                    .unwrap();
+                    mk_lib_database::mk_lib_database_postgresql::mk_lib_database_tables(&sqlx_pool)
+                        .await
+                        .unwrap();
                 for row_data in pg_tables.iter() {
                     // loop through tables and see if dump files exist
                     let table_name = row_data.table_name.replace("public.", "");

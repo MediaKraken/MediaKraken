@@ -3,20 +3,30 @@ extern crate lazy_static;
 
 use axum::http::{Method, Uri};
 use axum::{
-    http::StatusCode,
-    response::IntoResponse,
+    body::Body,
+    extract::FromRef,
+    extract::{Request, State},
+    response::{IntoResponse, Response},
+    //http::StatusCode,
     routing::{get, post},
-    BoxError, Extension, Json, Router,
+    BoxError,
+    Extension,
+    Json,
+    Router,
 };
 use axum_csrf::{CsrfConfig, CsrfToken};
 use axum_extra::routing::RouterExt;
+use axum_flash::{Flash, IncomingFlashes};
 use axum_handle_error_extract::HandleErrorLayer;
 use axum_prometheus::{EndpointLabel, PrometheusMetricLayerBuilder};
+use axum_server::tls_rustls::RustlsConfig;
 use axum_session::{
     Key, SessionConfig, SessionLayer, SessionPgPool, SessionPgSessionStore, SessionRedisPool,
     SessionStore,
 };
 use axum_session_auth::{AuthConfig, AuthSessionLayer};
+use hyper::StatusCode;
+use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
 use mk_lib_database;
 use rcgen::generate_simple_self_signed;
 use ring::digest;
@@ -26,13 +36,16 @@ use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 use std::time::Duration;
+use std::{net::SocketAddr, path::PathBuf};
 use tokio::signal;
 use tower::timeout::TimeoutLayer;
+use tower::ServiceExt;
 use tower::{timeout::error::Elapsed, ServiceBuilder};
+use tower_http::services::{ServeDir, ServeFile};
 
+type Client = hyper_util::client::legacy::Client<HttpConnector, Body>;
 mod axum_custom_filters;
 mod error_handling;
-mod guard;
 
 #[path = "admin"]
 pub mod admin {
@@ -44,6 +57,7 @@ pub mod admin {
     pub mod bp_hardware;
     pub mod bp_home;
     pub mod bp_library;
+    pub mod bp_reports;
     pub mod bp_settings;
     pub mod bp_torrent;
     pub mod bp_user;
@@ -117,9 +131,22 @@ pub mod user_playback {
     pub mod bp_video;
 }
 
+#[derive(Clone)]
+struct AppState {
+    flash_config: axum_flash::Config,
+}
+
+// Our state type must implement this trait. That is how the config
+// is passed to axum-flash in a type safe way.
+impl FromRef<AppState> for axum_flash::Config {
+    fn from_ref(state: &AppState) -> axum_flash::Config {
+        state.flash_config.clone()
+    }
+}
+
 #[tokio::main]
 async fn main() {
-    // TODO this needs to move to another container that doesn't start multiples
+    // TODO this needs to move to another container that doesn't start multiple containers
     // check for and create ssl certs if needed
     if Path::new("/mediakraken/certs/cacert.pem").exists() == false {
         // generate certs/keys
@@ -140,14 +167,6 @@ async fn main() {
     // this was for the db user password salt?
     // but using gen_salt in postgresql to let it pick the salt
     // if Path::new("/secure/data.zip").exists() == false {
-    //     #[cfg(debug_assertions)]
-    //     {
-    //         mk_lib_logging::mk_logging_post_elk(
-    //             std::module_path!(),
-    //             json!({"stuff": "data.zip not found, generating."}),
-    //         )
-    //         .await.unwrap();
-    //     }
     //     // create the hash salt
     //     if Path::new("/secure/data.zip").exists() == false {
     //         let mut file_salt = File::create("/secure/data.zip").unwrap();
@@ -159,7 +178,7 @@ async fn main() {
     // }
 
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
         .await
         .unwrap();
     let _result =
@@ -186,9 +205,30 @@ async fn main() {
         }))
         .with_default_metrics()
         .build_pair();
+
+    // configure certificate and private key used by https
+    let config = RustlsConfig::from_pem_file(
+        PathBuf::from("/mediakraken/certs/cacert.pem"),
+        PathBuf::from("/mediakraken/certs/privkey.pem"),
+    )
+    .await
+    .unwrap();
+
+    let app_state = AppState {
+        // The key should probably come from configuration
+        flash_config: axum_flash::Config::new(Key::generate()),
+    };
+
     // build our application with routes
+    let docker_results = mk_lib_common::mk_lib_common_docker::mk_common_docker_info()
+        .await
+        .unwrap();
+    let client: Client =
+        hyper_util::client::legacy::Client::<(), ()>::builder(TokioExecutor::new())
+            .build(HttpConnector::new());
     // route_with_tsr creates two routes.....one with trailing slash
     let app = Router::new()
+        .route_with_tsr("/admin", get(admin::bp_home::admin_home))
         .route_with_tsr("/admin/backup", get(admin::bp_backup::admin_backup))
         .route_with_tsr("/admin/cron", get(admin::bp_cron::admin_cron))
         .route_with_tsr("/admin/database", get(admin::bp_database::admin_database))
@@ -199,12 +239,24 @@ async fn main() {
         )
         .route_with_tsr("/admin/hardware", get(admin::bp_hardware::admin_hardware))
         .route_with_tsr("/admin/home", get(admin::bp_home::admin_home))
+        .route_with_tsr("/admin/library", get(admin::bp_library::admin_library))
         .route_with_tsr(
-            "/admin/library/:page",
-            get(admin::bp_library::admin_library),
+            "/admin/library_media_scan",
+            get(admin::bp_library::admin_library_media_scan),
         )
+        .route_with_tsr(
+            "/admin/library_share_scan",
+            get(admin::bp_library::admin_library_share_scan),
+        )
+        //.post(admin::bp_library::admin_library_post))
         .route_with_tsr("/admin/settings", get(admin::bp_settings::admin_settings))
+        .route_with_tsr(
+            "/admin/report_known_media/:page",
+            get(admin::bp_reports::admin_report_known_media),
+        )
         .route_with_tsr("/admin/torrent", get(admin::bp_torrent::admin_torrent))
+        .route_with_tsr("/admin/torrent/web", get(proxy_transmission_handler))
+        .with_state(client)
         .route_with_tsr("/admin/user/:page", get(admin::bp_user::admin_user))
         .route_with_tsr(
             "/user/internet/flickr",
@@ -237,14 +289,6 @@ async fn main() {
         .route_with_tsr(
             "/user/media/book_detail/:guid",
             get(user_media::bp_media_book::user_media_book_detail),
-        )
-        .route_with_tsr(
-            "/user/media/collection/:page",
-            get(user_media::bp_media_collection::user_media_collection),
-        )
-        .route_with_tsr(
-            "/user/media/collection_detail/:guid",
-            get(user_media::bp_media_collection::user_media_collection_detail),
         )
         .route_with_tsr(
             "/user/media/game/:page",
@@ -317,6 +361,14 @@ async fn main() {
         .route_with_tsr(
             "/user/metadata/book_detail/:guid",
             get(user_metadata::bp_meta_book::user_metadata_book_detail),
+        )
+        .route_with_tsr(
+            "/user/metadata/collection/:page",
+            get(user_media::bp_media_collection::user_media_collection),
+        )
+        .route_with_tsr(
+            "/user/metadata/collection_detail/:guid",
+            get(user_media::bp_media_collection::user_media_collection_detail),
         )
         .route_with_tsr(
             "/user/metadata/game/:page",
@@ -399,13 +451,13 @@ async fn main() {
         .route_with_tsr("/user/profile", get(user::bp_profile::user_profile))
         .route_with_tsr("/user/queue", get(user::bp_queue::user_queue))
         .route_with_tsr("/user/search", get(user::bp_search::user_search))
-        .route_with_tsr("/user/sync", get(user::bp_sync::user_sync))
-        .route_with_tsr("/logout", get(public::bp_logout::public_logout))
+        .route_with_tsr("/user/sync/:page", get(user::bp_sync::user_sync))
+        .route_with_tsr("/public/logout", get(public::bp_logout::public_logout))
         .route_with_tsr(
             "/public/login",
             get(public::bp_login::public_login).post(public::bp_login::public_login_post),
         )
-        .nest("/static", axum_static::static_router("static"))
+        .nest_service("/static", ServeDir::new("static"))
         .layer(
             AuthSessionLayer::<
                 mk_lib_database::mk_lib_database_user::User,
@@ -437,20 +489,20 @@ async fn main() {
         .route("/metrics", get(|| async move { metric_handle.render() }))
         .layer(prometheus_layer)
         .layer(Extension(sqlx_pool))
-        .layer(
-            ServiceBuilder::new()
-                .layer(HandleErrorLayer::new(|_: BoxError| async {
-                    StatusCode::REQUEST_TIMEOUT
-                }))
-                .layer(TimeoutLayer::new(Duration::from_secs(10))),
-        );
+        .with_state(app_state);
+    // TODO .layer(
+    //     ServiceBuilder::new()
+    //         .layer(HandleErrorLayer::new(|_: BoxError| async {
+    //             StatusCode::REQUEST_TIMEOUT
+    //         }))
+    //         .layer(TimeoutLayer::new(Duration::from_secs(10))),
+    // );
     // add a fallback service for handling routes to unknown paths
     let app = app.fallback(bp_error::general_not_found);
 
     // run our app with hyper
-    axum::Server::bind(&"0.0.0.0:8080".parse().unwrap())
+    axum_server::bind_rustls("0.0.0.0:8080".parse().unwrap(), config)
         .serve(app.into_make_service())
-        .with_graceful_shutdown(shutdown_signal())
         .await
         .unwrap();
 
@@ -478,4 +530,23 @@ async fn shutdown_signal() {
         _ = ctrl_c => {},
         _ = terminate => {},
     }
+}
+
+async fn proxy_transmission_handler(
+    State(client): State<Client>,
+    mut req: Request,
+) -> Result<Response, StatusCode> {
+    let path = req.uri().path();
+    let path_query = req
+        .uri()
+        .path_and_query()
+        .map(|v| v.as_str())
+        .unwrap_or(path);
+    let uri = format!("https://mkstack_transmission:9091{}", path_query);
+    *req.uri_mut() = Uri::try_from(uri).unwrap();
+    Ok(client
+        .request(req)
+        .await
+        .map_err(|_| StatusCode::BAD_REQUEST)?
+        .into_response())
 }

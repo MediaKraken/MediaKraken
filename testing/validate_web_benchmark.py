@@ -32,7 +32,7 @@ print(CWD_HOME_DIRECTORY, flush=True)
 #####################################
 # start up the application so can see running images for several tools
 #####################################
-os.chdir(os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken', 'docker_compose'))
+os.chdir(os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken', 'docker_swarm'))
 pid_proc = subprocess.Popen(shlex.split('./mediakraken_start.sh'),
                             stdout=subprocess.PIPE, shell=False)
 while True:
@@ -41,7 +41,7 @@ while True:
         break
     print(line.rstrip(), flush=True)
 pid_proc.wait()
-# this sleep is here so that everything has time to fully start like pika
+# this sleep is here so that everything has time to fully start
 time.sleep(60)
 
 """
@@ -51,9 +51,9 @@ ab -n 10000 -c 30 https://th-mediakraken-1/
 #####################################
 # stop the application
 #####################################
-os.chdir(os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken', 'docker_compose'))
+os.chdir(os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken', 'docker_swarm'))
 pid_proc = subprocess.Popen(shlex.split('./mediakraken_stop.sh'),
                             stdout=subprocess.PIPE, shell=False)
 pid_proc.wait()
-# this sleep is here so that everything has time to fully stop like pika
+# this sleep is here so that everything has time to fully stop
 time.sleep(60)

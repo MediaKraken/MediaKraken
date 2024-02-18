@@ -1,7 +1,5 @@
 // https://github.com/1148118271/ssh-rs/tree/main
 
-use ssh_rs::ssh;
-
 pub async fn mk_network_ssh_command(
     username: &str,
     password: &str,

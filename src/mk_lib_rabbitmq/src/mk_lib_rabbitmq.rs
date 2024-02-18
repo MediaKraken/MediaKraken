@@ -10,21 +10,25 @@ use amqprs::{
 };
 use tokio::sync::mpsc::UnboundedReceiver;
 
-pub async fn rabbitmq_ack(rabbit_channel: &Channel, rabbit_msg_id: u64) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn rabbitmq_ack(
+    rabbit_channel: &Channel,
+    rabbit_msg_id: u64,
+) -> Result<(), Box<dyn std::error::Error>> {
     rabbit_channel
-        .basic_ack(BasicAckArguments::new(
-            rabbit_msg_id,
-            false,
-        ))
+        .basic_ack(BasicAckArguments::new(rabbit_msg_id, false))
         .await
         .unwrap();
     Ok(())
 }
 
 pub async fn rabbitmq_connect(
-    rabbit_host: &str,
     rabbit_queue: &str,
 ) -> Result<(Connection, Channel), Box<dyn std::error::Error>> {
+    let mut rabbit_host = "mkstack_rabbitmq";
+    let hostname: String = sys_info::hostname().unwrap().trim().to_string();
+    if hostname == "mkcode" {
+        rabbit_host = "mkprod";
+    }
     // open a connection to RabbitMQ server
     let rabbit_connection = Connection::open(&OpenConnectionArguments::new(
         rabbit_host,

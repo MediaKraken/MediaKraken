@@ -4,9 +4,13 @@ use axum::{
     response::{Html, IntoResponse},
     Extension,
 };
-use axum_session_auth::{AuthSession, SessionPgPool};
+use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
 use mk_lib_database;
 use sqlx::postgres::PgPool;
+
+#[derive(Template)]
+#[template(path = "bss_error/bss_error_401.html")]
+struct TemplateError401Context {}
 
 #[derive(Template)]
 #[template(path = "bss_user/bss_user_media_search.html")]
@@ -17,9 +21,23 @@ pub async fn user_search(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
-    let template = UserSearchTemplate {};
-    let reply_html = template.render().unwrap();
-    (StatusCode::OK, Html(reply_html).into_response())
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("User::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        let template = TemplateError401Context {};
+        let reply_html = template.render().unwrap();
+        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+    } else {
+        let template = UserSearchTemplate {};
+        let reply_html = template.render().unwrap();
+        (StatusCode::OK, Html(reply_html).into_response())
+    }
 }
 
 /*
@@ -119,12 +137,6 @@ pub async fn url_bp_user_search_nav_media(request):
     """
     determine what search results screen to show
     """
-    // TODO!
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         "search session":
-                                                                             request.ctx.session[
-                                                                                 'search_page']})
     request.ctx.session['search_text'] = request.form.get('nav_search').strip()
     if request.ctx.session['search_page'] == 'media_3d':
         return redirect(request.app.url_for('name_blueprint_user_media_3d.url_bp_user_media_3d'))

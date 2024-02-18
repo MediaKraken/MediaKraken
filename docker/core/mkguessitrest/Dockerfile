@@ -1,4 +1,4 @@
-FROM tiangolo/uwsgi-nginx-flask:python3.8-alpine-2021-10-02
+FROM tiangolo/uwsgi-nginx-flask:python3.11-2024-02-05
 LABEL maintainer="Remi Alvergnat <toilal.dev@gmail.com>"
 
 COPY / /guessit-rest

@@ -42,17 +42,9 @@ pub async fn metadata_process(
     sqlx_pool: &sqlx::PgPool,
     provider_name: String,
     download_data: DBDownloadQueueByProviderList,
-    provider_api_key: &String,
+    provider_api_key: &str,
 ) -> Result<(), Box<dyn Error>> {
     // TODO art, posters, trailers, etc in here as well
-    #[cfg(debug_assertions)]
-    {
-        // mk_lib_logging::mk_logging_post_elk(
-        //         std::module_path!(),
-        //         json!({ "metadata_process status": download_data.mm_download_status,  "provider": provider_name, "id": download_data.mm_download_provider_id }),
-        //     )
-        //     .await.unwrap();
-    }
     if download_data.mm_download_status == "Search" {
         metadata_search(&sqlx_pool, provider_name, download_data, provider_api_key)
             .await
@@ -89,7 +81,7 @@ pub async fn metadata_update(
     _sqlx_pool: &sqlx::PgPool,
     _provider_name: String,
     _download_data: DBDownloadQueueByProviderList,
-    _provider_api_key: &String,
+    _provider_api_key: &str,
 ) -> Result<(), Box<dyn Error>> {
     // TODO horribly broken.  Need to add the dlid, that to update, etc
     Ok(())
@@ -99,17 +91,23 @@ pub async fn metadata_search(
     sqlx_pool: &sqlx::PgPool,
     provider_name: String,
     download_data: DBDownloadQueueByProviderList,
-    _provider_api_key: &String,
+    _provider_api_key: &str,
 ) -> Result<(), Box<dyn Error>> {
     let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
     let mut set_fetch: bool = false;
     let mut lookup_halt: bool = false;
-    let _update_provider = String::new();
+    let update_provider = String::new();
     let guessit_data: Metadata;
     if provider_name == "anidb" {
-        (metadata_uuid, guessit_data) = guessit::metadata_guessit(&sqlx_pool, &download_data)
-            .await
-            .unwrap();
+        guessit_data = guessit::metadata_guessit(
+            &sqlx_pool,
+            &download_data,
+            "fake".to_string(),
+            0,
+            metadata_uuid,
+        )
+        .await
+        .unwrap();
         if metadata_uuid == uuid::Uuid::nil() {
             metadata_uuid =
                 metadata_anime::metadata_anime_lookup(&sqlx_pool, &download_data, guessit_data)
@@ -179,7 +177,7 @@ pub async fn metadata_search(
         .await
         .unwrap();
         if metadata_uuid != uuid::Uuid::nil() {
-            // TODO add theme.mp3 dl"d above to media table
+            // TODO add theme.mp3 dl'd above to media table
             mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
                 &sqlx_pool,
                 download_data.mm_download_guid,
@@ -194,9 +192,15 @@ pub async fn metadata_search(
     } else if provider_name == "thegamesdb" {
         lookup_halt = true;
     } else if provider_name == "themoviedb" {
-        (metadata_uuid, guessit_data) = guessit::metadata_guessit(&sqlx_pool, &download_data)
-            .await
-            .unwrap();
+        guessit_data = guessit::metadata_guessit(
+            &sqlx_pool,
+            &download_data,
+            "fake".to_string(),
+            0,
+            metadata_uuid,
+        )
+        .await
+        .unwrap();
         if download_data.mm_download_que_type == mk_lib_common_enum_media_type::DLMediaType::MOVIE {
             if metadata_uuid == uuid::Uuid::nil() {
                 metadata_uuid =
@@ -290,12 +294,12 @@ pub async fn metadata_fetch(
     sqlx_pool: &sqlx::PgPool,
     provider_name: String,
     download_data: DBDownloadQueueByProviderList,
-    provider_api_key: &String,
+    provider_api_key: &str,
 ) -> Result<(), Box<dyn Error>> {
     if provider_name == "imvdb" {
         let _imvdb_id = provider_imvdb::provider_imvdb_video_fetch_by_id(
             &sqlx_pool,
-            download_data.mm_download_provider_id,
+            download_data.mm_download_provider_id.unwrap(),
             download_data.mm_download_new_uuid,
             provider_api_key,
         )
@@ -306,7 +310,7 @@ pub async fn metadata_fetch(
         {
             provider_tmdb::provider_tmdb_person_fetch(
                 sqlx_pool,
-                download_data.mm_download_provider_id,
+                download_data.mm_download_provider_id.unwrap(),
                 download_data.mm_download_new_uuid,
                 provider_api_key,
             )
@@ -317,7 +321,7 @@ pub async fn metadata_fetch(
             // removing the imdb check.....as com_tmdb_metadata_by_id converts it
             provider_tmdb::provider_tmdb_movie_fetch(
                 sqlx_pool,
-                download_data.mm_download_provider_id,
+                download_data.mm_download_provider_id.unwrap(),
                 download_data.mm_download_new_uuid,
                 provider_api_key,
             )
@@ -327,7 +331,7 @@ pub async fn metadata_fetch(
         {
             provider_tmdb::provider_tmdb_tv_fetch(
                 sqlx_pool,
-                download_data.mm_download_provider_id,
+                download_data.mm_download_provider_id.unwrap(),
                 download_data.mm_download_new_uuid,
                 provider_api_key,
             )
@@ -346,9 +350,8 @@ pub async fn metadata_castcrew(
     _sqlx_pool: &sqlx::PgPool,
     _provider_name: String,
     _download_data: DBDownloadQueueByProviderList,
-    _provider_api_key: &String,
+    _provider_api_key: &str,
 ) -> Result<(), Box<dyn Error>> {
-
     Ok(())
 }
 
@@ -369,10 +372,10 @@ pub async fn metadata_image(
     sqlx_pool: &sqlx::PgPool,
     _provider_name: String,
     download_data: DBDownloadQueueByProviderList,
-    _provider_api_key: &String,
+    _provider_api_key: &str,
 ) -> Result<(), Box<dyn Error>> {
     // TODO grab the actual image
-    mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
         download_data.mm_download_guid,
     )
@@ -384,10 +387,10 @@ pub async fn metadata_review(
     sqlx_pool: &sqlx::PgPool,
     _provider_name: String,
     download_data: DBDownloadQueueByProviderList,
-    _provider_api_key: &String,
+    _provider_api_key: &str,
 ) -> Result<(), Box<dyn Error>> {
     // review is last.....so can delete download que
-    mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
         download_data.mm_download_guid,
     )
@@ -399,10 +402,10 @@ pub async fn metadata_collection(
     sqlx_pool: &sqlx::PgPool,
     _provider_name: String,
     download_data: DBDownloadQueueByProviderList,
-    _provider_api_key: &String,
+    _provider_api_key: &str,
 ) -> Result<(), Box<dyn Error>> {
     // only one record for this so nuke it
-    mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
         download_data.mm_download_guid,
     )

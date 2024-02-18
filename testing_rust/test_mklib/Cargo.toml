@@ -13,17 +13,17 @@ codegen-units = 1
 mk_lib_common = { path = "../../src/mk_lib_common" }
 mk_lib_logging = { path = "../../src/mk_lib_logging" }
 mk_lib_metadata = { path = "../../src/mk_lib_metadata" }
-chrono = { version = "0.4.24", features = ["serde"] }
-docker-api = { version = "0.13", features = ["swarm"] }
-futures = "0.3.28"
-reqwest = { version = "0.11.17", default-features = false, features = [
+chrono = { version = "0.4.31", features = ["serde"] }
+docker-api = { version = "0.14.0", features = ["swarm"] }
+futures = "0.3.30"
+reqwest = { version = "0.11.23", default-features = false, features = [
     "json",
     "native-tls",
 ] }
-serde = { version = "1.0.160", features = ["derive"] }
-serde_json = "1.0.96"
+serde = { version = "1.0.195", features = ["derive"] }
+serde_json = "1.0.111"
 stdext = "0.3.1"
-tokio = { version = "1.28.0", features = ["full"] }
+tokio = { version = "1.35.1", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"

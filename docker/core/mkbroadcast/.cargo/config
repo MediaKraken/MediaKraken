@@ -1,4 +1,4 @@
-#[source.crates-io]
-#replace-with = "kellnr-cratesio"
-#[source.kellnr-cratesio]
-#registry = "git://mkkellrn:9418/cratesio"
+[source.crates-io]
+replace-with = "kellnr-cratesio"
+[source.kellnr-cratesio]
+registry = "sparse+http://mkkellrn:8000/api/v1/cratesio/"

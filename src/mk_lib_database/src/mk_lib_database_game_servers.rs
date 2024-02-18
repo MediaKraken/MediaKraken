@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 use sqlx::types::Uuid;
+use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_game_server_delete(
     sqlx_pool: &sqlx::PgPool,
@@ -106,7 +106,7 @@ pub async fn mk_lib_database_game_server_upsert(
     sqlx::query(
         "INSERT INTO mm_game_dedicated_servers(mm_game_server_guid, \
         mm_game_server_name, mm_game_server_json) VALUES($ 1, $2, $3) \
-        ON CONFLICT(mm_game_server_name) DO UPDATE SET mm_game_server_json = $ 4",
+        ON CONFLICT(mm_game_server_name) DO UPDATE SET mm_game_server_json = $4",
     )
     .bind(new_guid)
     .bind(server_name)

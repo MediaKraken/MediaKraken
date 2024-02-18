@@ -3,7 +3,6 @@ use mk_lib_database;
 use mk_lib_network;
 use mk_lib_rabbitmq;
 use serde::Deserialize;
-use serde_json::{json, Value};
 use std::error::Error;
 use tokio::sync::Notify;
 use uuid::Uuid;
@@ -22,7 +21,7 @@ struct MetadataGeneral {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
         .await
         .unwrap();
     let _result =
@@ -33,12 +32,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .await
             .unwrap();
 
-    let (_rabbit_connection, rabbit_channel) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect(
-        "mkstack_rabbitmq",
-        "mktmdbnetfetchupdate",
-    )
-    .await
-    .unwrap();
+    let (_rabbit_connection, rabbit_channel) =
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mktmdbnetfetchupdate")
+            .await
+            .unwrap();
 
     let mut rabbit_consumer = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer(
         "mktmdbnetfetchupdate",
@@ -49,19 +46,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
-            if let Some(payload) = msg.content {
-                let json_message: Value =
-                    serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                // #[cfg(debug_assertions)]
-                // {
-                //     mk_lib_logging::mk_logging_post_elk(
-                //         std::module_path!(),
-                //         json!({ "msg body": json_message }),
-                //     )
-                //     .await
-                //     .unwrap();
-                // }
-
+            if let Some(_payload) = msg.content {
                 // process movie changes
                 let url_result = mk_lib_network::mk_lib_network::mk_data_from_url(
                     format!(
@@ -97,7 +82,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                     mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                                     Uuid::new_v4(),
                                                                                                                    Some(json_item.id),
-                                                                                                                    "Fetch".to_string()).await;
+                                                                                                                    "Fetch".to_string(), None).await;
                         } else {
                             // it's on the database, so must update the record with latest information
                             let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
@@ -105,7 +90,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                     mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                                     Uuid::new_v4(),
                                                                                                                     Some(json_item.id),
-                                                                                                                    "Update".to_string()).await;
+                                                                                                                    "Update".to_string(), None).await;
                         }
                     }
                 }
@@ -141,7 +126,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                                         Uuid::new_v4(),
                                                                                                                         Some(json_item.id),
-                                                                                                                        "Fetch".to_string()).await;
+                                                                                                                        "Fetch".to_string(), None).await;
                         } else {
                             // it's on the database, so must update the record with latest information
                             let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
@@ -149,7 +134,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                                         Uuid::new_v4(),
                                                                                                                         Some(json_item.id),
-                                                                                                                        "Update".to_string()).await;
+                                                                                                                        "Update".to_string(), None).await;
                         }
                     }
                 }
@@ -185,7 +170,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
                                                                                                                         Uuid::new_v4(),
                                                                                                                         Some(json_item.id),
-                                                                                                                        "Fetch".to_string()).await;
+                                                                                                                        "Fetch".to_string(), None).await;
                         } else {
                             // it's on the database, so must update the record with latest information
                             let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
@@ -193,7 +178,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
                                                                                                                         Uuid::new_v4(),
                                                                                                                         Some(json_item.id),
-                                                                                                                        "Update".to_string()).await;
+                                                                                                                        "Update".to_string(), None).await;
                         }
                     }
                 }

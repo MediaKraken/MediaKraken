@@ -150,11 +150,13 @@ pub async fn mk_lib_database_network_share_delete(
 pub async fn mk_lib_database_network_share_insert(
     sqlx_pool: &sqlx::PgPool,
     network_share_ip: std::net::IpAddr,
-    network_share_path: serde_json::Value,
+    network_share_path: &str,
     network_share_comment: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let new_guid = uuid::Uuid::new_v4();
     let mut transaction = sqlx_pool.begin().await?;
+    let path_name = network_share_path.replace("\\\\", "/");
+    let path_vec: Vec<&str> = path_name.splitn(3, '/').collect();
     sqlx::query(
         "insert into mm_network_shares \
         (mm_network_share_guid, \
@@ -165,7 +167,7 @@ pub async fn mk_lib_database_network_share_insert(
     )
     .bind(new_guid)
     .bind(network_share_ip)
-    .bind(network_share_path.as_str())
+    .bind(path_vec[1])
     .bind(network_share_comment.as_str())
     .execute(&mut *transaction)
     .await?;

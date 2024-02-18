@@ -36,15 +36,6 @@ pub async fn mk_directory_walk(dir_path: String) -> Result<Vec<String>, Box<dyn 
     let walker = WalkDir::new(dir_path).into_iter();
     for entry in walker.filter_entry(|e| !mk_file_is_hidden(e)) {
         let entry = entry.unwrap();
-        // #[cfg(debug_assertions)]
-        // {
-        //     mk_lib_logging::mk_logging_post_elk(
-        //         std::module_path!(),
-        //         json!({ "walk file_name": entry.path().display().to_string() }),
-        //     )
-        //     .await
-        //     .unwrap();
-        // }
         file_list.push(entry.path().display().to_string());
     }
     Ok(file_list)

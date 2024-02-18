@@ -1,19 +1,10 @@
 // https://github.com/phw/rust-discid
 
-use discid::{DiscId};
+use discid::DiscId;
 use serde_json::json;
 use stdext::function_name;
 
 async fn print_disc_info(disc: DiscId) {
-    #[cfg(debug_assertions)]
-    {
-        mk_lib_logging::mk_logging_post_elk(
-            std::module_path!(),
-            json!({ "Function": function_name!() }),
-        )
-        .await
-        .unwrap();
-    }
     // #[cfg(debug_assertions)]
     // {
     //     mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "DiscId": disc.id(), "TOC": disc.toc_string(), "Submitvia": disc.submission_url() }))

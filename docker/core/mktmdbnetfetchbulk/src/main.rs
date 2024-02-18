@@ -36,19 +36,17 @@ struct MetadataPerson {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
         .await
         .unwrap();
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
         .await
         .unwrap();
 
-    let (_rabbit_connection, rabbit_channel) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect(
-        "mkstack_rabbitmq",
-        "mktmdbnetfetchbulk",
-    )
-    .await
-    .unwrap();
+    let (_rabbit_connection, rabbit_channel) =
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mktmdbnetfetchbulk")
+            .await
+            .unwrap();
 
     let mut rabbit_consumer =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mktmdbnetfetchbulk", &rabbit_channel)
@@ -60,15 +58,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(payload) = msg.content {
                 let json_message: Value =
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                // #[cfg(debug_assertions)]
-                // {
-                //     mk_lib_logging::mk_logging_post_elk(
-                //         std::module_path!(),
-                //         json!({ "msg body": json_message }),
-                //     )
-                //     .await
-                //     .unwrap();
-                // }
                 // let fetch_date: String = "05_30_2023".to_string();
                 // grab the movie id's
                 let _fetch_result_movie =
@@ -109,7 +98,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                             uuid::Uuid::new_v4(),
                                                                                                             metadata_struct.id,
-                                                                                                            "Fetch".to_string()).await.unwrap();
+                                                                                                            "Fetch".to_string(), None).await.unwrap();
                             }
                         }
                     }
@@ -152,7 +141,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                             uuid::Uuid::new_v4(),
                                                                                                             metadata_struct.id,
-                                                                                                            "Fetch".to_string()).await.unwrap();
+                                                                                                            "Fetch".to_string(), None).await.unwrap();
                             }
                         }
                     }
@@ -195,7 +184,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
                                                                                                             uuid::Uuid::new_v4(),
                                                                                                             metadata_struct.id,
-                                                                                                            "Fetch".to_string()).await.unwrap();
+                                                                                                            "Fetch".to_string(), None).await.unwrap();
                             }
                         }
                     }

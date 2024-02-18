@@ -52,7 +52,7 @@ struct ApiBrandsTypeCodeset {}
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
         .await
         .unwrap();
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
@@ -60,7 +60,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .unwrap();
 
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mkglobalcache")
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkglobalcache")
             .await
             .unwrap();
 
@@ -74,15 +74,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(payload) = msg.content {
                 let json_message: Value =
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                // #[cfg(debug_assertions)]
-                // {
-                //     mk_lib_logging::mk_logging_post_elk(
-                //         std::module_path!(),
-                //         json!({ "msg body": json_message }),
-                //     )
-                //     .await
-                //     .unwrap();
-                // }
                 // grab the manufacturer's from Global Cache
                 let fetch_brand_result: Vec<ApiBrands> = serde_json::from_str(
                     &mk_lib_network::mk_lib_network::mk_data_from_url(

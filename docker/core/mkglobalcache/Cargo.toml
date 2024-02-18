@@ -3,6 +3,12 @@ name = "mkglobalcache"
 version = "0.0.1"
 edition = "2021"
 
+[profile.dev]
+panic = 'unwind'
+strip = "none"
+lto = false
+codegen-units = 16
+
 [profile.release]
 panic = 'abort'
 strip = "symbols"
@@ -10,12 +16,13 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { path = "mk_lib_database" }
-mk_lib_network = { path = "mk_lib_network" }
-mk_lib_rabbitmq = { path = "mk_lib_rabbitmq" }
-serde = { version = "1.0.163", features = ["derive"] }
-serde_json = "1.0.96"
-tokio = { version = "1.28.2", features = ["full"] }
+mk_lib_database = { version = "0.0.1", registry = "kellnr" }
+mk_lib_network = { version = "0.0.1", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.1", registry = "kellnr" }
+
+serde = { version = "1.0.196", features = ["derive"] }
+serde_json = "1.0.113"
+tokio = { version = "1.36.0", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"

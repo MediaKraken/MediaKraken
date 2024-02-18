@@ -1,7 +1,7 @@
 // https://github.com/serialport/serialport-rs
 // apt install pkg-config libudev-dev
+// serialport = "4.2.2"
 
-// TODO port this to https://github.com/berkowski/tokio-serial
 use serialport::{available_ports, DataBits, SerialPort, SerialPortType, StopBits};
 use std::io::{self, Write};
 use std::time::Duration;
@@ -9,15 +9,7 @@ use std::time::Duration;
 pub async fn serial_port_discover() -> Result<(), Box<dyn std::error::Error>> {
     let ports = serialport::available_ports().expect("No ports found!");
     for p in ports {
-        #[cfg(debug_assertions)]
-        {
-            // mk_lib_logging::mk_logging_post_elk(
-            //     std::module_path!(),
-            //     json!({ "port": p.port_name }), //, "type": p.port_type }),
-            // )
-            // .await
-            // .unwrap();
-        }
+        println!("port: {}  type: {:?}", p.port_name, p.port_type);
     }
     Ok(())
 }

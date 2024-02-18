@@ -12,15 +12,15 @@ codegen-units = 1
 [dependencies]
 mk_lib_file = { path = "../../src/mk_lib_file" }
 mk_lib_network = { path = "../../src/mk_lib_network" }
-ipnet = "2.7.2"
+ipnet = "2.9.0"
 ipnetwork = "0.20.0"
 quickxml_to_serde = { version = "0.5.0", features = ["json_types"] }
-reqwest = { version = "0.11.17", default-features = false, features = ["json", "rustls-tls"] }
-serde = { version = "1.0.160", features = ["derive"] }
-serde_json = "1.0.96"
+reqwest = { version = "0.11.23", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1.0.195", features = ["derive"] }
+serde_json = "1.0.111"
 stdext = "0.3.1"
-tokio = { version = "1.28.0", features = ["full"] }
-walkdir = "2.3.3"
+tokio = { version = "1.35.1", features = ["full"] }
+walkdir = "2.4.0"
 
 [dev-dependencies]
 tokio-test = "*"

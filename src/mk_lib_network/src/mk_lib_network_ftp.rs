@@ -10,15 +10,6 @@ use suppaftp::{FtpResult, FtpStream, ImplFtpStream};
 //     user_name: &str,
 //     user_password: &str,
 // ) -> FtpResult<ImplFtpStream<NoTlsStream>> {
-//     #[cfg(debug_assertions)]
-//     {
-//         mk_lib_logging::mk_logging_post_elk(
-//             std::module_path!(),
-//             json!({ "Function": function_name!() }),
-//         )
-//         .await
-//         .unwrap();
-//     }
 //     // Create a connection to an FTP server and authenticate to it.
 //     let mut ftp_stream = FtpStream::connect(format!("{}:{}", host_ip, host_port)).unwrap();
 //     //let mut ftp_stream = ftp_stream.into_secure(NativeTlsConnector::from(TlsConnector::new().unwrap()), host_ip).unwrap();

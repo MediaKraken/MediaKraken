@@ -6,11 +6,15 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
-use axum_session_auth::{AuthSession, SessionPgPool};
+use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
 use mk_lib_database;
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use stdext::function_name;
+
+#[derive(Template)]
+#[template(path = "bss_error/bss_error_401.html")]
+struct TemplateError401Context {}
 
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_image_gallery.html")]
@@ -21,24 +25,21 @@ pub async fn user_media_image(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
-    let template = TemplateUserImageContext {};
-    let reply_html = template.render().unwrap();
-    (StatusCode::OK, Html(reply_html).into_response())
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("User::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        let template = TemplateError401Context {};
+        let reply_html = template.render().unwrap();
+        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+    } else {
+        let template = TemplateUserImageContext {};
+        let reply_html = template.render().unwrap();
+        (StatusCode::OK, Html(reply_html).into_response())
+    }
 }
-
-/*
-@blueprint_user_image.route('/user_imagegallery')
-@common_global.jinja_template.template('bss_user/media/bss_user_media_image_gallery.html')
-@common_global.auth.login_required
-pub async fn url_bp_user_image_gallery(request):
-    """
-    Display image gallery page
-    """
-    db_connection = await request.app.db_pool.acquire()
-    image_data = await request.app.db_functions.db_image_list(common_global.DLMediaType.Picture,
-                                                              db_connection=db_connection)
-    await request.app.db_pool.release(db_connection)
-    return {'image_data': image_data
-            }
-
- */

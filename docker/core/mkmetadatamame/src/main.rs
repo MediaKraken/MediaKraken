@@ -23,7 +23,7 @@ use tokio::sync::Notify;
 async fn main() -> Result<(), Box<dyn Error>> {
     // open the database
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
         .await
         .unwrap();
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
@@ -35,7 +35,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .unwrap();
 
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mkmetadatamame")
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkmetadatamame")
             .await
             .unwrap();
 

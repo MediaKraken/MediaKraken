@@ -2,12 +2,11 @@
 
 pub const USER_AGENT: &'static str = "...";
 use vimeo_rs as vimeo;
-use vimeo::{ProgressBar, ProgressStyle, MultiProgress};
 
 pub async fn provider_vimeo_video_fetch(
 ) {
     // let mut handles = vec![];
-    let bars = MultiProgress::new();
+    // let bars = MultiProgress::new();
     // let style = ProgressStyle::default_bar()
     //     .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] ({pos}/{len}) {msg}")
     //     .progress_chars("#>-");

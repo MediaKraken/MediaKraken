@@ -3,6 +3,12 @@ name = "mkbroadcast"
 version = "0.0.1"
 edition = "2021"
 
+[profile.dev]
+panic = 'unwind'
+strip = "none"
+lto = false
+codegen-units = 16
+
 [profile.release]
 panic = 'abort'
 strip = "symbols"
@@ -10,8 +16,9 @@ lto = true
 codegen-units = 1
 
 [dependencies]
+mk_lib_common = "0.0.1"
+
 chrono = { version = "0.4.23", features = ["serde"] }
-mk_lib_common = { path = "mk_lib_common" }
 # 0.31.0 breaks datalink
 pnet = "0.30.0"
 reqwest = { version = "0.11.13", default-features = false, features = [

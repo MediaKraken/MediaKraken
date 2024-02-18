@@ -2,3 +2,8 @@ MK_Benchmark_NGINX
 	Standard SSL proxy - Flask	1529.59 [#/sec] (mean)
 	Standard SSL proxy - Axum	?? [#/sec] (mean)
 	NGINX cache
+
+from mkcode
+ab -n 10000 -c 100 http://mkprod:8080/		Requests per second:    826.38 [#/sec] (mean) - "raw" non-ssl axum
+ab -n 10000 -c 100 https://mkprod:8900/		Requests per second:    629.54 [#/sec] (mean) - nginx ssl proxy
+ab -n 10000 -c 100 https://mkprod:8080/		Requests per second:    702.75 [#/sec] (mean) - ssl axum

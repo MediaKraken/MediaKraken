@@ -7,7 +7,7 @@ use std::error::Error;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
         .await
         .unwrap();
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
@@ -15,7 +15,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .unwrap();
 
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkstack_rabbitmq", "mkinotify")
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkinotify")
             .await
             .unwrap();
 
@@ -27,12 +27,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .unwrap()
     {
         let lib_path: String = row_data.mm_media_dir_path;
-        inotify
-            .add_watch(
-                &lib_path,
-                WatchMask::MODIFY | WatchMask::CREATE | WatchMask::DELETE,
-            )
-            .expect("Failed to add inotify watch");
+        match inotify.add_watch(
+            &lib_path,
+            WatchMask::MODIFY | WatchMask::CREATE | WatchMask::DELETE,
+        ) {
+            Ok(lib_path) => println!("Loaded add inotify watch: {:?}", lib_path),
+            Err(lib_path) => println!("Failed to add inotify watch: {:?}", lib_path),
+        }
     }
 
     let mut buffer = [0u8; 4096];

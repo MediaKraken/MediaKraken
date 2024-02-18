@@ -1,11 +1,21 @@
 use std::io::Read;
 use std::path::PathBuf;
+use std::process::{Command, Stdio};
 
 pub async fn mk_decompress_tar_gz_file(archive_file: &str) -> Result<(), std::io::Error> {
     let tar_gz = std::fs::File::open(archive_file)?;
     let tar = flate2::read::GzDecoder::new(tar_gz);
     let mut archive = tar::Archive::new(tar);
     archive.unpack(".")?;
+    Ok(())
+}
+
+pub async fn mk_decompress_tar_gz_file_gunzip(archive_file: &str) -> Result<(), std::io::Error> {
+    let _output = Command::new("gunzip")
+        .args([&archive_file])
+        .stdout(Stdio::piped())
+        .output()
+        .unwrap();
     Ok(())
 }
 
@@ -16,6 +26,13 @@ pub async fn mk_decompress_gz_data(archive_file: &str) -> Result<String, std::io
     gz.read_to_string(&mut gz_data)?;
     Ok(gz_data)
 }
+
+/*
+let tar_gz = File::create("archive.tar.gz")?;
+    let enc = GzEncoder::new(tar_gz, Compression::default());
+    let mut tar = tar::Builder::new(enc);
+    tar.append_dir_all("backup/logs", "/var/log")?;
+     */
 
 pub async fn mk_decompress_zip(
     archive_file: &str,

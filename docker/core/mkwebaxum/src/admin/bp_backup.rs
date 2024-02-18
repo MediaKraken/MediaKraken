@@ -1,5 +1,4 @@
 use crate::axum_custom_filters::filters;
-use crate::guard;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -8,11 +7,15 @@ use axum::{
     routing::{get, post},
     Extension,
 };
-use axum_session_auth::{AuthSession, SessionPgPool};
+use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
 use mk_lib_common::mk_lib_common_enum_backup_type;
 use mk_lib_common::mk_lib_common_pagination;
 use mk_lib_database;
 use sqlx::postgres::PgPool;
+
+#[derive(Template)]
+#[template(path = "bss_error/bss_error_403.html")]
+struct TemplateError403Context {}
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_backup.html")]
@@ -30,43 +33,52 @@ pub async fn admin_backup(
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
 ) -> impl IntoResponse {
-    //let current_user = auth.current_user.clone().unwrap_or_default();
-    let db_offset: i64 = (page * 30) - 30;
-    let total_pages: i64 =
-        mk_lib_database::mk_lib_database_backup::mk_lib_database_backup_count(
-            &sqlx_pool,
-        )
-        .await
-        .unwrap();
-    let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
-        total_pages,
-        page,
-        "/admin/backup".to_string(),
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
     )
+    .requires(Rights::any([Rights::permission("Admin::View")]))
+    .validate(&current_user, &method, None)
     .await
-    .unwrap();
-    let backup_list =
-        mk_lib_database::mk_lib_database_backup::mk_lib_database_backup_read(
-            &sqlx_pool,
-            db_offset,
-            30,
+    {
+        let template = TemplateError403Context {};
+        let reply_html = template.render().unwrap();
+        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+    } else {
+        // TODO show local backups here as well
+        let db_offset: i64 = (page * 30) - 30;
+        let total_pages: i64 =
+            mk_lib_database::mk_lib_database_backup::mk_lib_database_backup_count(&sqlx_pool)
+                .await
+                .unwrap();
+        let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
+            total_pages,
+            page,
+            "/admin/backup".to_string(),
         )
         .await
         .unwrap();
-    let mut template_data_exists = false;
-    if backup_list.len() > 0 {
-        template_data_exists = true;
+        let backup_list = mk_lib_database::mk_lib_database_backup::mk_lib_database_backup_read(
+            &sqlx_pool, db_offset, 30,
+        )
+        .await
+        .unwrap();
+        let mut template_data_exists = false;
+        if backup_list.len() > 0 {
+            template_data_exists = true;
+        }
+        let page_usize = page as usize;
+        let template = TemplateBackupContext {
+            template_data: &backup_list,
+            template_backup_class: &mk_lib_common_enum_backup_type::BACKUP_CLASS.clone(),
+            template_data_exists: &template_data_exists,
+            pagination_bar: &pagination_html,
+            page: &page_usize,
+        };
+        let reply_html = template.render().unwrap();
+        (StatusCode::OK, Html(reply_html).into_response())
     }
-    let page_usize = page as usize;
-    let template = TemplateBackupContext {
-        template_data: &backup_list,
-        template_backup_class: &mk_lib_common_enum_backup_type::BACKUP_CLASS.clone(),
-        template_data_exists: &template_data_exists,
-        pagination_bar: &pagination_html,
-        page: &page_usize,
-    };
-    let reply_html = template.render().unwrap();
-    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 /*
@@ -138,7 +150,7 @@ pub async fn url_bp_admin_backup_delete(request):
         os.remove(file_path)
     else:
         pass
-        // TODO, do the actual delete
+        // do the actual delete
     return json.dumps({'status': 'OK'})
 
 
