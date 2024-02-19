@@ -1,7 +1,7 @@
 [workspace]
 
 members = [
-    #    "test_axum_auth_minimal",
+    "test_axum_auth_minimal",
     "test_command",
     "test_dioxus",
     "test_docker",
@@ -13,13 +13,12 @@ members = [
     "test_host_ips",
     "test_libxml",
     "test_network_broadcast",
-    "test_mklib",
     "test_onvif",
     "test_postgresql",
     "test_postgresql_tokio",
-    #    "test_python",    
-    #    "test_python_pyo3",
-    #    "test_quick_xml",
+    "test_python",
+    "test_python_pyo3",
+    "test_quick_xml",
     "test_quick_xml_to_serde",
     "test_rabbitmq_consume",
     "test_rabbitmq_publish",
@@ -36,7 +35,6 @@ members = [
     "test_type_conversion",
     "test_upnp",
     "test_walkdir",
-    "test_webapp",
     "test_xml_rs",
     "test_xml_generator",
     "test_xml_rs_mame",
