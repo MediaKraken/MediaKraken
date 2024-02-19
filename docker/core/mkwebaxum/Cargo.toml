@@ -17,7 +17,7 @@ codegen-units = 1
 
 [dependencies]
 mk_lib_common = { version = "0.0.1", registry = "kellnr" }
-mk_lib_database = { version = "0.0.1", registry = "kellnr" }
+mk_lib_database = { version = "0.0.2", registry = "kellnr" }
 mk_lib_file = { version = "0.0.1", registry = "kellnr" }
 mk_lib_network = { version = "0.0.1", registry = "kellnr" }
 mk_lib_rabbitmq = { version = "0.0.1", registry = "kellnr" }
@@ -37,7 +37,7 @@ axum_session = { version = "0.12.4", features = [
     "postgres-rustls",
     "redis-db",
 ] }
-axum_session_auth = { version = "0.12.0", features = [
+axum_session_auth = { version = "0.12.1", features = [
     "postgres-rustls",
     "redis-db",
 ] }
