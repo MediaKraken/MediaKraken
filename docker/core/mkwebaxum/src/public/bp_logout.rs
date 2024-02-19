@@ -7,7 +7,7 @@ use axum::{
     Extension,
 };
 use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
-use mk_lib_database;
+use crate::mk_lib_database;
 use serde_json::json;
 use sqlx::{
     postgres::{PgConnectOptions, PgPoolOptions},

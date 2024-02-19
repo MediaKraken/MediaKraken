@@ -1,7 +1,6 @@
 [workspace]
 
 members = [
-    #    "test_axum_auth",
     #    "test_axum_auth_minimal",
     "test_command",
     "test_dioxus",
@@ -24,8 +23,6 @@ members = [
     "test_quick_xml_to_serde",
     "test_rabbitmq_consume",
     "test_rabbitmq_publish",
-    #    "test_rocket_auth",
-    #    "test_rocket_auth2",
     "test_roku",
     "test_roxmltree",
     "test_share_read",

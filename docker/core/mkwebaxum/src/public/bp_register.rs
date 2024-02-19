@@ -8,7 +8,7 @@ use axum::{
 };
 use axum_flash::{Flash, IncomingFlashes, Key};
 use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
-use mk_lib_database;
+use crate::mk_lib_database;
 use serde::{Deserialize, Serialize};
 use sqlx::{
     postgres::{PgConnectOptions, PgPoolOptions},

@@ -8,7 +8,7 @@ use axum::{
 use axum_flash::{Flash, IncomingFlashes, Key};
 use axum_session::SessionPgPool;
 use axum_session_auth::*;
-use mk_lib_database;
+use crate::mk_lib_database;
 use serde::Deserialize;
 use sqlx::PgPool;
 use validator::Validate;
@@ -44,6 +44,7 @@ pub async fn public_login_post(
         .await
         .unwrap();
     if user_id > 0 {
+        println!("Login User {:?}", user_id);
         let _result =
             mk_lib_database::mk_lib_database_user::mk_lib_database_user_login(&sqlx_pool, user_id)
                 .await;

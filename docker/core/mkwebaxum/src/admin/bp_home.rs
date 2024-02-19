@@ -7,7 +7,7 @@ use axum::{
 };
 use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
 use mk_lib_common;
-use mk_lib_database;
+use crate::mk_lib_database;
 use mk_lib_network;
 use num_format::{SystemLocale, ToFormattedString};
 use serde::{Deserialize, Serialize};
