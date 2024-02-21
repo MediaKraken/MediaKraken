@@ -199,6 +199,8 @@ async fn main() {
         .await
         .unwrap();
 
+    //session_store.initiate().await.unwrap();
+
     let (prometheus_layer, metric_handle) = PrometheusMetricLayerBuilder::new()
         .with_endpoint_label_type(EndpointLabel::MatchedPathWithFallbackFn(|path| {
             format!("{}_changed", path)
@@ -464,9 +466,10 @@ async fn main() {
                 i64,
                 SessionPgPool,
                 PgPool,
-            >::new(Some(sqlx_pool.clone().into()))
+            >::new(Some(sqlx_pool))
             .with_config(auth_config),
         )
+//            >::new(Some(sqlx_pool.clone().into()))
         .layer(SessionLayer::new(session_store))
         // after authsessionlayer so anyone can access
         .route_with_tsr("/public/about", get(public::bp_about::public_about))

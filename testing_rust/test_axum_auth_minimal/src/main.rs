@@ -20,8 +20,6 @@ async fn main() {
     let session_store =
         SessionStore::<SessionPgPool>::new(Some(pool.clone().into()), session_config);
 
-    session_store.initiate().await.unwrap();
-
     let app = Router::new()
         .route_with_tsr("/login", get(login))
         .route_with_tsr("/login2", get(bp_login::login).post(bp_login::login))
@@ -42,7 +40,7 @@ async fn main() {
 }
 
 async fn login(
-    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> String {
     auth.login_user(2);
     "You are logged in as a User please try /perm to check permissions".to_owned()
@@ -50,7 +48,7 @@ async fn login(
 
 async fn perm(
     method: Method,
-    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> String {
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database_user::User, i64, PgPool>::build([Method::GET], false)
