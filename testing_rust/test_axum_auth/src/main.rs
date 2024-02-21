@@ -182,7 +182,6 @@ impl SqlUser {
 
 #[tokio::main]
 async fn main() {
-    // TODO this needs to move to another container that doesn't start multiple containers
     // check for and create ssl certs if needed
     if Path::new("/mediakraken/certs/cacert.pem").exists() == false {
         // generate certs/keys
@@ -234,9 +233,6 @@ async fn main() {
         .layer(SessionLayer::new(session_store));
 
     // run it
-    // let listener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
-    // axum::serve(listener, app).await.unwrap();
-    // run our app with hyper
     axum_server::bind_rustls("0.0.0.0:3000".parse().unwrap(), config)
         .serve(app.into_make_service())
         .await

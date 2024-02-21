@@ -2,8 +2,8 @@ use async_trait::async_trait;
 use axum_session_auth::*;
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
+use sqlx::sqlite::{SqliteConnectOptions, SqlitePool, SqlitePoolOptions};
 use sqlx::FromRow;
-use sqlx::PgPool;
 use std::collections::HashSet;
 
 #[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
@@ -11,9 +11,9 @@ pub struct User {
     pub id: i64,
     pub anonymous: bool,
     pub username: String,
-    pub email: String,
-    pub last_signin: DateTime<Utc>,
-    pub last_signoff: DateTime<Utc>,
+    // pub email: String,
+    // pub last_signin: DateTime<Utc>,
+    // pub last_signoff: DateTime<Utc>,
     pub permissions: HashSet<String>,
 }
 
@@ -31,17 +31,17 @@ impl Default for User {
             id: 1,
             anonymous: true,
             username: "Guest".into(),
-            email: "guest@fake.com".into(),
-            last_signin: Utc::now(),
-            last_signoff: Utc::now(),
+            // email: "guest@fake.com".into(),
+            // last_signin: Utc::now(),
+            // last_signoff: Utc::now(),
             permissions: permissions,
         }
     }
 }
 
 #[async_trait]
-impl Authentication<User, i64, PgPool> for User {
-    async fn load_user(userid: i64, pool: Option<&PgPool>) -> Result<User, anyhow::Error> {
+impl Authentication<User, i64, SqlitePool> for User {
+    async fn load_user(userid: i64, pool: Option<&SqlitePool>) -> Result<User, anyhow::Error> {
         let pool = pool.unwrap();
         User::get_user(userid, pool)
             .await
@@ -62,14 +62,14 @@ impl Authentication<User, i64, PgPool> for User {
 }
 
 #[async_trait]
-impl HasPermission<PgPool> for User {
-    async fn has(&self, perm: &str, _pool: &Option<&PgPool>) -> bool {
+impl HasPermission<SqlitePool> for User {
+    async fn has(&self, perm: &str, _pool: &Option<&SqlitePool>) -> bool {
         self.permissions.contains(perm)
     }
 }
 
 impl User {
-    pub async fn get_user(id: i64, pool: &PgPool) -> Option<Self> {
+    pub async fn get_user(id: i64, pool: &SqlitePool) -> Option<Self> {
         let sqluser = sqlx::query_as::<_, SqlUser>("SELECT * FROM axum_users WHERE id = $1")
             .bind(id)
             .fetch_one(pool)
@@ -92,9 +92,9 @@ pub struct SqlUser {
     pub id: i64,
     pub anonymous: bool,
     pub username: String,
-    pub email: String,
-    pub last_signin: DateTime<Utc>,
-    pub last_signoff: DateTime<Utc>,
+    // pub email: String,
+    // pub last_signin: DateTime<Utc>,
+    // pub last_signoff: DateTime<Utc>,
 }
 
 impl SqlUser {
@@ -103,9 +103,9 @@ impl SqlUser {
             id: self.id,
             anonymous: self.anonymous,
             username: self.username,
-            email: self.email,
-            last_signin: self.last_signin,
-            last_signoff: self.last_signoff,
+            // email: self.email,
+            // last_signin: self.last_signin,
+            // last_signoff: self.last_signoff,
             permissions: if let Some(user_perms) = sql_user_perms {
                 user_perms
                     .into_iter()

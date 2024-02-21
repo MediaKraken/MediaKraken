@@ -2,7 +2,7 @@
 
 members = [
     "test_axum_auth",
-    #"test_axum_auth_minimal",
+    "test_axum_auth_minimal",
     "test_command",
     "test_dioxus",
     "test_docker",
