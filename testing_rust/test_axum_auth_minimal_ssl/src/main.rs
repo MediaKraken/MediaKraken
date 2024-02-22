@@ -51,6 +51,14 @@ async fn main() {
 
     mk_lib_database_user::User::create_user_tables(&pool).await;
 
+    // configure certificate and private key used by https
+    let config = RustlsConfig::from_pem_file(
+        PathBuf::from("/mediakraken/certs/cacert.pem"),
+        PathBuf::from("/mediakraken/certs/privkey.pem"),
+    )
+    .await
+    .unwrap();
+
     // build our application with some routes
     let app = Router::new()
         .route("/", get(bp_login::greet))
@@ -64,8 +72,10 @@ async fn main() {
         .layer(SessionLayer::new(session_store));
 
     // run it
-    let listener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
-    axum::serve(listener, app).await.unwrap();
+    axum_server::bind_rustls("0.0.0.0:3000".parse().unwrap(), config)
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
 }
 
 async fn connect_to_database() -> SqlitePool {
