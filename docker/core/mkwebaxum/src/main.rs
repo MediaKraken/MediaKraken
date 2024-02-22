@@ -466,7 +466,7 @@ async fn main() {
                 i64,
                 SessionPgPool,
                 PgPool,
-            >::new(Some(sqlx_pool))
+            >::new(Some(sqlx_pool.clone().into()))
             .with_config(auth_config),
         )
 //            >::new(Some(sqlx_pool.clone().into()))
@@ -504,7 +504,7 @@ async fn main() {
     let app = app.fallback(bp_error::general_not_found);
 
     // run our app with hyper
-    axum_server::tls_rustls::bind_rustls("0.0.0.0:8080".parse().unwrap(), config)
+    axum_server::tls_rustls::bind_rustls("0.0.0.0:8900".parse().unwrap(), config)
         .serve(app.into_make_service())
         .await
         .unwrap();
