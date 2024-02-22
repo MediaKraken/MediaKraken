@@ -233,7 +233,7 @@ async fn main() {
         .layer(SessionLayer::new(session_store));
 
     // run it
-    axum_server::bind_rustls("0.0.0.0:3000".parse().unwrap(), config)
+    axum_server::tls_rustls::bind_rustls("0.0.0.0:3000".parse().unwrap(), config)
         .serve(app.into_make_service())
         .await
         .unwrap();
