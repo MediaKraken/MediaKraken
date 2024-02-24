@@ -38,6 +38,7 @@ use std::path::Path;
 use std::time::Duration;
 use std::{net::SocketAddr, path::PathBuf};
 use tokio::signal;
+use tokio::net::TcpListener;
 use tower::timeout::TimeoutLayer;
 use tower::ServiceExt;
 use tower::{timeout::error::Elapsed, ServiceBuilder};
@@ -503,12 +504,16 @@ async fn main() {
     // add a fallback service for handling routes to unknown paths
     let app = app.fallback(bp_error::general_not_found);
 
+    // // run the app on http
+    // let listener = TcpListener::bind("0.0.0.0:8080").await.unwrap();
+    // axum::serve(listener, app).await.unwrap();
+
     // run our app with hyper
     axum_server::tls_rustls::bind_rustls("0.0.0.0:8080".parse().unwrap(), config)
         .serve(app.into_make_service())
         .await
         .unwrap();
-./
+
     //             bp_error::general_not_authorized,        401
     //             bp_error::general_not_administrator,     403
     //             bp_error::general_security,              401?

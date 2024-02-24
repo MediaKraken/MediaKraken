@@ -72,10 +72,14 @@ async fn main() {
         .layer(SessionLayer::new(session_store));
 
     // run it
-    axum_server::tls_rustls::bind_rustls("0.0.0.0:3000".parse().unwrap(), config)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    let listener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    axum::serve(listener, app).await.unwrap();
+
+    // // run it
+    // axum_server::tls_rustls::bind_rustls("0.0.0.0:3000".parse().unwrap(), config)
+    //     .serve(app.into_make_service())
+    //     .await
+    //     .unwrap();
 }
 
 async fn connect_to_database() -> SqlitePool {
