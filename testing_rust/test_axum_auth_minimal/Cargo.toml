@@ -10,6 +10,8 @@ lto = true
 codegen-units = 1
 
 [dependencies]
+mk_lib_database = { version = "0.0.2", registry = "kellnr" }
+
 anyhow = "1.0.80"
 async-trait = "0.1.77"
 axum = { version = "0.7.4", features = ["http2", "json", "ws"] }

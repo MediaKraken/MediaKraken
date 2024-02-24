@@ -11,7 +11,7 @@ pub struct User {
     pub id: i64,
     pub anonymous: bool,
     pub username: String,
-    // pub email: String,
+    pub email: String,
     // pub last_signin: DateTime<Utc>,
     // pub last_signoff: DateTime<Utc>,
     pub permissions: HashSet<String>,
@@ -31,7 +31,7 @@ impl Default for User {
             id: 1,
             anonymous: true,
             username: "Guest".into(),
-            // email: "guest@fake.com".into(),
+            email: "guest@fake.com".into(),
             // last_signin: Utc::now(),
             // last_signoff: Utc::now(),
             permissions: permissions,
@@ -95,7 +95,8 @@ impl User {
                 CREATE TABLE IF NOT EXISTS users (
                     "id" INTEGER PRIMARY KEY,
                     "anonymous" BOOLEAN NOT NULL,
-                    "username" VARCHAR(256) NOT NULL
+                    "username" VARCHAR(256) NOT NULL,
+                    "email" VARCHAR(256) NOT NULL
                 )
             "#,
         )
@@ -118,10 +119,11 @@ impl User {
         sqlx::query(
             r#"
                 INSERT INTO users
-                    (id, anonymous, username) SELECT 1, true, 'Guest'
+                    (id, anonymous, username, email) SELECT 1, true, 'Guest', 'fake@email.com'
                 ON CONFLICT(id) DO UPDATE SET
                     anonymous = EXCLUDED.anonymous,
-                    username = EXCLUDED.username
+                    username = EXCLUDED.username,
+                    email = EXCLUDED.email
             "#,
         )
         .execute(pool)
@@ -131,10 +133,11 @@ impl User {
         sqlx::query(
             r#"
                 INSERT INTO users
-                    (id, anonymous, username) SELECT 2, false, 'Test'
+                    (id, anonymous, username, email) SELECT 2, false, 'Test', 'fake@email.com'
                 ON CONFLICT(id) DO UPDATE SET
                     anonymous = EXCLUDED.anonymous,
-                    username = EXCLUDED.username
+                    username = EXCLUDED.username,
+                    email = EXCLUDED.email
             "#,
         )
         .execute(pool)
@@ -158,7 +161,7 @@ pub struct SqlUser {
     pub id: i64,
     pub anonymous: bool,
     pub username: String,
-    // pub email: String,
+    pub email: String,
     // pub last_signin: DateTime<Utc>,
     // pub last_signoff: DateTime<Utc>,
 }
@@ -169,7 +172,7 @@ impl SqlUser {
             id: self.id,
             anonymous: self.anonymous,
             username: self.username,
-            // email: self.email,
+            email: self.email,
             // last_signin: self.last_signin,
             // last_signoff: self.last_signoff,
             permissions: if let Some(user_perms) = sql_user_perms {

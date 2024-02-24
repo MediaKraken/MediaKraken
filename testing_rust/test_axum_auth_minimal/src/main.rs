@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use axum::{http::Method, routing::get, Router};
+use axum::{Extension, http::Method, routing::get, Router};
 use axum_server::tls_rustls::RustlsConfig;
 use axum_session::{SessionConfig, SessionLayer, SessionSqlitePool, SessionStore};
 use axum_session_auth::*;
@@ -12,6 +12,7 @@ use std::path::Path;
 use std::{collections::HashSet, str::FromStr};
 use std::{net::SocketAddr, path::PathBuf};
 use tokio::net::TcpListener;
+use mk_lib_database;
 
 #[path = "mk_lib_database_user.rs"]
 mod mk_lib_database_user;
@@ -58,10 +59,11 @@ async fn main() {
         .route("/login", get(bp_login::login))
         .route("/perm", get(bp_login::perm))
         .layer(
-            AuthSessionLayer::<mk_lib_database_user::User, i64, SessionSqlitePool, SqlitePool>::new(Some(pool))
+            AuthSessionLayer::<mk_lib_database_user::User, i64, SessionSqlitePool, SqlitePool>::new(Some(pool.clone().into()))
                 .with_config(auth_config),
         )
-        .layer(SessionLayer::new(session_store));
+        .layer(SessionLayer::new(session_store))
+        .layer(Extension(pool));
 
     // run it
     let listener = TcpListener::bind("0.0.0.0:3000").await.unwrap();

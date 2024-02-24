@@ -186,8 +186,6 @@ async fn main() {
         mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
             .await;
 
-    let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
-
     // let client = redis::Client::open("redis://default:@mkstack_redis:6379/0")
     //     .expect("Error while trying to open the redis connection");
     // let session_config = SessionConfig::default();
@@ -196,11 +194,10 @@ async fn main() {
     //     .unwrap();
 
     let session_config = SessionConfig::default().with_table_name("mm_session");
+    let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
     let session_store = SessionPgSessionStore::new(Some(sqlx_pool.clone().into()), session_config)
         .await
         .unwrap();
-
-    //session_store.initiate().await.unwrap();
 
     let (prometheus_layer, metric_handle) = PrometheusMetricLayerBuilder::new()
         .with_endpoint_label_type(EndpointLabel::MatchedPathWithFallbackFn(|path| {
