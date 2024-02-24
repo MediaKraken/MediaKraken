@@ -5,10 +5,9 @@ FROM mediakraken/mkbase_rust_alpine:"${BRANCHTAG}" as planner-mkrabbitconsume
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
 
-# COPY Cargo.toml Cargo.toml
-# COPY .cargo .cargo
-# RUN mkdir /mediakraken/src
-COPY . .
+COPY Cargo.toml Cargo.toml
+COPY .cargo .cargo
+COPY mk_lib_filler .
 
 RUN cargo chef prepare --recipe-path recipe.json
 

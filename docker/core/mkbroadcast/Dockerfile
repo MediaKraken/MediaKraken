@@ -3,7 +3,9 @@ ARG BRANCHTAG
 
 FROM mediakraken/mkbase_rust_alpine:"${BRANCHTAG}" as planner-mkbroadcast
 
-COPY . .
+COPY Cargo.toml Cargo.toml
+COPY .cargo .cargo
+COPY mk_lib_filler .
 
 RUN cargo chef prepare --recipe-path recipe.json
 

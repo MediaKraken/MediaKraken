@@ -6,6 +6,7 @@ members = [
     "mk_lib_compression",
     "mk_lib_database",
     "mk_lib_file",
+    "mk_lib_filler",
     "mk_lib_hardware",
     "mk_lib_hash",
     "mk_lib_image",
