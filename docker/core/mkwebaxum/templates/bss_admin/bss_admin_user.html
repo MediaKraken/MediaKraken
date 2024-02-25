@@ -46,7 +46,7 @@
                                                     <td>{{ loop.index + (page - 1) * 30 }}</td>
                                                     <td><a href="/admin/bss_admin_user_detail/{{row_data.id}}">{{
                                                             row_data.username }}</a></td>
-                                                    <td>{{ row_data.email }}</td>
+                                                    <td>{{ row_data.email.as_ref().unwrap() }}</td>
                                                     <div class="pull-right action-buttons">
                                                         <td>
                                                             <p data-placement="top" data-toggle="tooltip" title="Edit">

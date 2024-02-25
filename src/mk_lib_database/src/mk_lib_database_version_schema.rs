@@ -460,6 +460,17 @@ pub async fn mk_lib_database_update_schema(
         mk_lib_database_version_update(&sqlx_pool, 65).await?;
     }
 
+    if version_no < 66 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query("ALTER TABLE mm_axum_users ALTER COLUMN last_signin TYPE timestamp with time zone;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("ALTER TABLE mm_axum_users ALTER COLUMN last_signoff TYPE timestamp with time zone;")
+            .execute(&mut *transaction)
+            .await?;            transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 66).await?;
+    }
+
     Ok(true)
 }
 

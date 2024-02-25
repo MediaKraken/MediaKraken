@@ -43,6 +43,7 @@ use tower::timeout::TimeoutLayer;
 use tower::ServiceExt;
 use tower::{timeout::error::Elapsed, ServiceBuilder};
 use tower_http::services::{ServeDir, ServeFile};
+use redis_pool::{RedisPool, SingleRedisPool};
 
 type Client = hyper_util::client::legacy::Client<HttpConnector, Body>;
 mod axum_custom_filters;
@@ -186,12 +187,15 @@ async fn main() {
         mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
             .await;
 
-    // let client = redis::Client::open("redis://default:@mkstack_redis:6379/0")
-    //     .expect("Error while trying to open the redis connection");
+    // let client =
+    //     redis::Client::open("redis://default:@mkstack_redis:6379/0").expect("Error while tryiong to open the redis connection");
+    // let redis_pool = RedisPool::from(client);
     // let session_config = SessionConfig::default();
+    // let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
     // let session_store =
-    //     SessionStore::<SessionRedisPool>::new(Some(client.clone().into()), session_config).await
-    //     .unwrap();
+    //     SessionStore::<SessionRedisPool>::new(Some(redis_pool.clone().into()), session_config)
+    //         .await
+    //         .unwrap();
 
     let session_config = SessionConfig::default().with_table_name("mm_session");
     let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
@@ -491,6 +495,7 @@ async fn main() {
         .layer(prometheus_layer)
         .layer(Extension(sqlx_pool))
         .with_state(app_state);
+        // .with_state(redis_pool);
     // TODO .layer(
     //     ServiceBuilder::new()
     //         .layer(HandleErrorLayer::new(|_: BoxError| async {
