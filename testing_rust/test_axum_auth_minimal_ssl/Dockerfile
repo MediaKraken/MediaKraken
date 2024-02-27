@@ -1,7 +1,7 @@
 FROM mediakraken/mkbase_rust_alpine:dev as test-planner-mkwebapp
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
-ENV RUSTFLAGS="-Awarnings"
+#ENV RUSTFLAGS="--Awarnings"
 
 # COPY Cargo.toml Cargo.toml
 # COPY .cargo .cargo
@@ -16,7 +16,7 @@ RUN cargo chef prepare --recipe-path recipe.json
 FROM test-planner-mkwebapp as test-cargo-build-mkwebapp
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
-ENV RUSTFLAGS="-Awarnings"
+#ENV RUSTFLAGS="--Awarnings"
 
 COPY --from=test-planner-mkwebapp /mediakraken/recipe.json recipe.json
 
