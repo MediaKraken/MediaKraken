@@ -310,7 +310,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                             }
                                             // it should save a dl "Z" record for search/lookup/etc
                                             if save_dl_record == true {
-                                                println!("WHAT3");
                                                 // media id begin and download que insert
                                                 let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                                                         "Z".to_string(),

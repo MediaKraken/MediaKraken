@@ -1,4 +1,5 @@
 use crate::axum_custom_filters::filters;
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
     http::{Method, StatusCode},
@@ -7,7 +8,6 @@ use axum::{
 };
 use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
 use mk_lib_common;
-use crate::mk_lib_database;
 use mk_lib_network;
 use num_format::{SystemLocale, ToFormattedString};
 use serde::{Deserialize, Serialize};
@@ -45,6 +45,8 @@ struct TemplateHomeContext<'a> {
     template_data_count_matched_media: &'a String,
     template_data_count_meta_fetch: &'a String,
     template_data_count_streamed_media: &'a String,
+    template_server_notifications:
+        &'a Vec<mk_lib_database::mk_lib_database_notification::DBNotificationList>,
     template_server_streams: &'a Vec<TemplateHomeStreamListContext>,
     template_server_users: &'a Vec<mk_lib_database::mk_lib_database_user::DBUserList>,
     template_data_scan_info: &'a Vec<TemplateHomeScanListContext>,
@@ -68,6 +70,12 @@ pub async fn admin_home(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
+        let notification_list =
+            mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_read(
+                &sqlx_pool, 0, 9990
+            )
+            .await
+            .unwrap();
         let user_list =
             mk_lib_database::mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool, 0, 9999)
                 .await
@@ -122,6 +130,7 @@ pub async fn admin_home(
         template_data_count_streamed_media: &"0".to_string(),
         template_server_streams: &server_streams,
         template_server_users: &user_list,
+        template_server_notifications: &notification_list,
         template_data_scan_info: &server_scans,
     };
         let reply_html = template.render().unwrap();
