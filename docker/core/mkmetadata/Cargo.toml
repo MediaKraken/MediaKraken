@@ -20,9 +20,9 @@ mk_lib_common = { version = "0.0.1", registry = "kellnr" }
 mk_lib_database = { version = "0.0.4", registry = "kellnr" }
 mk_lib_metadata = { version = "0.0.1", registry = "kellnr" }
 
-chrono = { version = "0.4.33", features = ["serde"] }
+chrono = { version = "0.4.34", features = ["serde"] }
 flate2 = "1.0.28"
-governor = "0.6.0"
+governor = "0.6.3"
 musicbrainz_rs = "0.5.0"
 open-library = "0.7.1"
 rand = "0.8.5"
@@ -31,8 +31,8 @@ reqwest = { version = "0.11.24", default-features = false, features = [
     "native-tls",
 ] }
 roxmltree = "0.19.0"
-serde = { version = "1.0.196", features = ["derive"] }
-serde_json = "1.0.113"
+serde = { version = "1.0.197", features = ["derive"] }
+serde_json = "1.0.114"
 sqlx = { version = "0.7.3", features = [
     "chrono",
     "ipnetwork",
@@ -41,7 +41,7 @@ sqlx = { version = "0.7.3", features = [
     "postgres",
     "uuid",
 ] }
-stdext = "0.3.1"
+stdext = "0.3.2"
 substring = "1.4.5"
 sys-info = "0.9.1"
 tar = "0.4.40"

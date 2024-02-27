@@ -16,19 +16,19 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-chrono = { version = "0.4.33", features = ["serde"] }
+chrono = { version = "0.4.34", features = ["serde"] }
 # 0.31.0 breaks datalink
 pnet = "0.30.0"
 reqwest = { version = "0.11.24", default-features = false, features = [
     "json",
     "rustls-tls",
 ] }
-serde_json = "1.0.113"
+serde_json = "1.0.114"
 shiplift = { version = "0.7", default-features = false, features = [
     "unix-socket",
 ] }
-socket2 = { version = "0.5.5", features = ["all"] }
-stdext = "0.3.1"
+socket2 = { version = "0.5.6", features = ["all"] }
+stdext = "0.3.2"
 tokio = { version = "1.36.0", features = ["full"] }
 
 [dev-dependencies]
