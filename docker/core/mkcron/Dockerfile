@@ -4,6 +4,7 @@ ARG BRANCHTAG
 FROM mediakraken/mkbase_rust_alpine:"${BRANCHTAG}" as planner-mkcron
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
+ENV RUSTFLAGS="-Awarnings"
 
 COPY Cargo.toml Cargo.toml
 COPY .cargo .cargo
@@ -17,6 +18,7 @@ RUN cargo chef prepare --recipe-path recipe.json
 FROM planner-mkcron AS cargo-build-mkcron
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
+ENV RUSTFLAGS="-Awarnings"
 
 COPY --from=planner-mkcron /mediakraken/recipe.json recipe.json
 

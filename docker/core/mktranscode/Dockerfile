@@ -4,6 +4,7 @@ ARG BRANCHTAG
 FROM mediakraken/mkbase_rust_alpine:"${BRANCHTAG}" as planner-mktranscode
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
+ENV RUSTFLAGS="-Awarnings"
 
 COPY Cargo.toml Cargo.toml
 COPY .cargo .cargo
@@ -369,6 +370,7 @@ RUN buildDeps="autoconf \
 FROM planner-mktranscode AS cargo-build-mktranscode
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
+ENV RUSTFLAGS="-Awarnings"
 
 COPY --from=planner-mktranscode /mediakraken/recipe.json recipe.json
 
