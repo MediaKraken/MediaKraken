@@ -16,7 +16,7 @@ FROM planner-mkbroadcast AS cargo-build-mkbroadcast
 
 COPY --from=planner-mkbroadcast recipe.json recipe.json
 
-RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
+#RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
 
 ARG BRANCHTAG
 
