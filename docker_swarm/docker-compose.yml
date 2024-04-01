@@ -642,14 +642,11 @@ services:
       mode: replicated
       replicas: 1
 
-  # using stack instead of own image for RedisInsight
   redis:
-    # https://hub.docker.com/r/redis/redis-stack
-    image: redis/redis-stack:6.2.6-v10
+    # https://hub.docker.com/r/eqalpha/keydb
+    image: eqalpha/keydb:alpine_x86_64_v6.3.4
     stop_grace_period: 30s
     stop_signal: SIGUSR1
-    ports:
-      - "8001:8001"  # RedisInsight
     volumes:
       - mediakraken_vol_redis:/data
     deploy:
