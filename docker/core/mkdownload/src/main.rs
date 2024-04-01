@@ -77,6 +77,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         // TODO log error by user requested
                         continue;
                     }
+                } else if json_message["Type"].to_string() == "Subtitle" {
+                    let output = Command::new("subliminal")
+                        .args(["-l", "en", &json_message["Data"].as_str().unwrap()])
+                        .stdout(Stdio::piped())
+                        .output()
+                        .unwrap();
                 } else if json_message["Type"].to_string() == "Twitch" {
                     if validator::validate_url(json_message["URL"].to_string()) {
                         let _res = mk_lib_network::mk_lib_network::mk_download_file_from_url_tokio(

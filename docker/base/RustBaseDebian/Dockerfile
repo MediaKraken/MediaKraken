@@ -16,8 +16,8 @@ RUN wget https://github.com/mozilla/sccache/releases/download/v0.7.7/sccache-v0.
 # for layer cache later in build
 RUN cargo install cargo-chef
 
-ENV RUSTC_WRAPPER=/usr/local/bin/sccache
-ENV SCCACHE_REDIS="redis://mksccache:6379/mksccache"
+# ENV RUSTC_WRAPPER=/usr/local/bin/sccache
+# ENV SCCACHE_REDIS="redis://mksccache:6379/mksccache"
 ENV RUSTFLAGS="-C target-feature=-crt-static"
 
 # Create appuser

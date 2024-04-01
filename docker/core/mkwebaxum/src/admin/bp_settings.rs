@@ -17,6 +17,15 @@ struct TemplateError403Context {}
 #[template(path = "bss_admin/bss_admin_settings.html")]
 struct AdminSettingsTemplate;
 
+/*
+Cloud stuff
+    Provider
+    Active
+    API Key
+    Secret Key
+    Bucket/Path
+ */
+
 pub async fn admin_settings(
     Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
