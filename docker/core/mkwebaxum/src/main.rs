@@ -111,6 +111,7 @@ pub mod user_media {
     pub mod bp_media_music_video;
     pub mod bp_media_sports;
     pub mod bp_media_tv;
+    pub mod bp_media_upc_import;
 }
 
 #[path = "user/metadata"]
@@ -357,6 +358,14 @@ async fn main() {
         .route_with_tsr(
             "/user/media/tv_detail/:guid",
             get(user_media::bp_media_tv::user_media_tv_detail),
+        )
+        .route_with_tsr(
+            "/user/media/upc",
+            get(user_media::bp_media_upc_import::user_media_upc_import),
+        )
+        .route_with_tsr(
+            "/user/media/upc",
+            post(user_media::bp_media_upc_import::user_media_upc_import_post),
         )
         .route_with_tsr(
             "/user/metadata/book/:page",

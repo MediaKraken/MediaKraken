@@ -1,0 +1,17 @@
+[package]
+name = "pi_voice"
+version = "0.0.1"
+edition = "2021"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
+
+[dependencies]
+cpal = "0.15.3"
+fltk = { version = "1.4.30", features = ["fltk-bundled"] }
+
+[dev-dependencies]
+tokio-test = "*"

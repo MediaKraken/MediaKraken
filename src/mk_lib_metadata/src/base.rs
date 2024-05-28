@@ -25,6 +25,8 @@ mod metadata_tv;
 
 #[path = "provider/anidb.rs"]
 mod provider_anidb;
+#[path = "provider/barcodespider.rs"]
+mod provider_barcodespider;
 #[path = "provider/chart_lyrics.rs"]
 mod provider_chart_lyrics;
 #[path = "provider/imvdb.rs"]
@@ -37,6 +39,8 @@ mod provider_musicbrainz;
 mod provider_televisiontunes;
 #[path = "provider/tmdb.rs"]
 mod provider_tmdb;
+#[path = "provider/upcitemdb.rs"]
+mod provider_upcitemdb;
 
 pub async fn metadata_process(
     sqlx_pool: &sqlx::PgPool,
@@ -296,7 +300,15 @@ pub async fn metadata_fetch(
     download_data: DBDownloadQueueByProviderList,
     provider_api_key: &str,
 ) -> Result<(), Box<dyn Error>> {
-    if provider_name == "imvdb" {
+    if provider_name == "barcodespider" {
+        let _barcode_id = provider_barcodespider::provider_barcodespider_fetch_by_upc(
+            &sqlx_pool,
+            &download_data.mm_download_provider_id.unwrap(),
+            &provider_api_key,
+        )
+        .await
+        .unwrap();
+    } else if provider_name == "imvdb" {
         let _imvdb_id = provider_imvdb::provider_imvdb_video_fetch_by_id(
             &sqlx_pool,
             download_data.mm_download_provider_id.unwrap(),
@@ -337,8 +349,16 @@ pub async fn metadata_fetch(
             )
             .await;
         }
+    } else if provider_name == "upcitemdb" {
+        let _upcitemdb_id = provider_upcitemdb::provider_upcitemdb_fetch_by_upc(
+            &sqlx_pool,
+            &download_data.mm_download_provider_id.unwrap(),
+            &provider_api_key,
+        )
+        .await
+        .unwrap();
     }
-    mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
         download_data.mm_download_guid,
     )

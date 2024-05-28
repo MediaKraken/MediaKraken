@@ -462,14 +462,64 @@ pub async fn mk_lib_database_update_schema(
 
     if version_no < 66 {
         let mut transaction = sqlx_pool.begin().await?;
-        sqlx::query("ALTER TABLE mm_axum_users ALTER COLUMN last_signin TYPE timestamp with time zone;")
-            .execute(&mut *transaction)
-            .await?;
-        sqlx::query("ALTER TABLE mm_axum_users ALTER COLUMN last_signoff TYPE timestamp with time zone;")
-            .execute(&mut *transaction)
-            .await?;
+        sqlx::query(
+            "ALTER TABLE mm_axum_users ALTER COLUMN last_signin TYPE timestamp with time zone;",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "ALTER TABLE mm_axum_users ALTER COLUMN last_signoff TYPE timestamp with time zone;",
+        )
+        .execute(&mut *transaction)
+        .await?;
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 66).await?;
+    }
+
+    if version_no < 67 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(
+            "CREATE TABLE IF NOT EXISTS mm_bar_codes (\
+            mm_bar_code_uuid UUID NOT NULL, \
+            mm_bar_code_code TEXT NOT NULL, \
+            mm_bar_code_type SMALLINT NOT NULL, \
+            mm_bar_code_json JSONB);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE UNIQUE INDEX IF NOT EXISTS mm_bar_code_uuid_ndx \
+            ON mm_bar_codes USING btree (mm_bar_code_uuid);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_bar_code_code_ndx \
+            ON mm_bar_codes USING btree (mm_bar_code_code);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_bar_code_type_ndx \
+            ON mm_bar_codes USING btree (mm_bar_code_type);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE TABLE IF NOT EXISTS mm_bar_code_own (\
+            mm_bar_code_own_uuid UUID NOT NULL, \
+            mm_bar_code_own_user INTEGER NOT NULL);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_bar_code_own_ndx \
+            ON mm_bar_code_own USING btree (mm_bar_code_own_user, mm_bar_code_own_uuid);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 67).await?;
     }
 
     Ok(true)

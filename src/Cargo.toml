@@ -15,8 +15,5 @@ members = [
     "mk_lib_network",
     "mk_lib_rabbitmq",
     "ssdp-rs", 
-    "theater_controller_pi",
-    "theater_full",
-    "theater_thin",
-    "weectrl"    
+    "weectrl"
 ]

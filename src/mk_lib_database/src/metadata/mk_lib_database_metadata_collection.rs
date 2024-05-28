@@ -136,7 +136,7 @@ pub async fn mk_lib_database_metadata_collection_guid_by_tmdb(
     tmdb_id: String,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let row: (uuid::Uuid,) = sqlx::query_as(
-        "sselect mm_metadata_collection_guid from mm_metadata_collection
+        "select mm_metadata_collection_guid from mm_metadata_collection
         where mm_metadata_collection_json @> '{\"id\":$1}'",
     )
     .bind(tmdb_id)

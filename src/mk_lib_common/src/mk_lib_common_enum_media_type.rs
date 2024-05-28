@@ -1,4 +1,13 @@
 #[non_exhaustive]
+pub struct DLUPCMediaType;
+
+impl DLUPCMediaType {
+    pub const AUDIOCD: i16 = 1;
+    pub const GAME: i16 = 2;
+    pub const MEDIA: i16 = 3;
+    pub const MISC: i16 = 4;
+}
+
 pub struct DLMediaType;
 
 impl DLMediaType {

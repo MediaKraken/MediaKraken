@@ -3,6 +3,8 @@ use mk_lib_metadata;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
 use tokio::time::{sleep, Duration};
+use governor::{Quota, RateLimiter};
+use nonzero_ext::*;
 
 #[derive(Deserialize, Debug)]
 struct APIJson {
@@ -29,18 +31,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let option_api: APIJson = serde_json::from_value(option_json).unwrap();
 
     // launch thread per provider
-    let _handle_tmdb = tokio::spawn(async move {
+    let _handle_barcodespider = tokio::spawn(async move {
+        let api_call_limiter = RateLimiter::direct(Quota::per_second(nonzero!(50u32)));
         let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
             .await
             .unwrap();
-        loop {
+
+            loop {
             let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "themoviedb").await.unwrap();
             for download_data in metadata_to_process {
+                block_on(api_call_limiter.until_ready());
                 mk_lib_metadata::base::metadata_process(
                     &sqlx_pool,
-                    "themoviedb".to_string(),
+                    "barcodespider".to_string(),
                     download_data,
-                    option_api.themoviedb.as_str(),
+                    option_api.barcodespider.as_str(),
                 )
                 .await
                 .unwrap();
@@ -49,15 +54,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
         // sqlx_pool.close().await;
     });
+
     if option_api.musicbrainz.is_some() {
         let musicbrainz_api_key = option_api.musicbrainz.unwrap();
         let _handle_musicbrainz = tokio::spawn(async move {
+            let api_call_limiter = RateLimiter::direct(Quota::per_second(nonzero!(50u32)));
             let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
                 .await
                 .unwrap();
             loop {
                 let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "musicbrainz").await.unwrap();
                 for download_data in metadata_to_process {
+                    block_on(api_call_limiter.until_ready());
                     mk_lib_metadata::base::metadata_process(
                         &sqlx_pool,
                         "musicbrainz".to_string(),
@@ -72,18 +80,67 @@ async fn main() -> Result<(), Box<dyn Error>> {
             // sqlx_pool.close().await;
         });
     };
+
+    let _handle_tmdb = tokio::spawn(async move {
+        let api_call_limiter = RateLimiter::direct(Quota::per_second(nonzero!(50u32)));
+        let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
+            .await
+            .unwrap();
+        loop {
+            let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "themoviedb").await.unwrap();
+            for download_data in metadata_to_process {
+                block_on(api_call_limiter.until_ready());
+                mk_lib_metadata::base::metadata_process(
+                    &sqlx_pool,
+                    "themoviedb".to_string(),
+                    download_data,
+                    option_api.themoviedb.as_str(),
+                )
+                .await
+                .unwrap();
+            }
+            sleep(Duration::from_secs(1)).await;
+        }
+        // sqlx_pool.close().await;
+    });
+
     let _handle_thesportsdb = tokio::spawn(async move {
+        let api_call_limiter = RateLimiter::direct(Quota::per_second(nonzero!(50u32)));
         let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
             .await
             .unwrap();
         loop {
             let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "thesportsdb").await.unwrap();
             for download_data in metadata_to_process {
+                block_on(api_call_limiter.until_ready());
                 mk_lib_metadata::base::metadata_process(
                     &sqlx_pool,
                     "thesportsdb".to_string(),
                     download_data,
                     option_api.thesportsdb.as_str(),
+                )
+                .await
+                .unwrap();
+            }
+            sleep(Duration::from_secs(1)).await;
+        }
+        // sqlx_pool.close().await;
+    });
+
+    let _handle_upcitemdb = tokio::spawn(async move {
+        let api_call_limiter = RateLimiter::direct(Quota::per_second(nonzero!(50u32)));
+        let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
+            .await
+            .unwrap();
+        loop {
+            let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "themoviedb").await.unwrap();
+            for download_data in metadata_to_process {
+                block_on(api_call_limiter.until_ready());
+                mk_lib_metadata::base::metadata_process(
+                    &sqlx_pool,
+                    "upcitemdb".to_string(),
+                    download_data,
+                    option_api.upcitemdb.as_str(),
                 )
                 .await
                 .unwrap();

@@ -782,6 +782,17 @@ services:
       mode: replicated
       replicas: 0 # TODO renable after testing via mkcode
 
+  vosk:
+    # https://hub.docker.com/u/alphacep
+    image: alphacep/kaldi-en:latest
+    ports:
+      - 2700:2700
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [ node.role == manager ]
+
   webapp:
     image: mediakraken/mkwebaxum:${BRANCH}
     secrets:
