@@ -10,8 +10,11 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-cpal = "0.15.3"
+anyhow = "1.0.86"
+clap = "4.5.4"
+cpal = "0.15.3"  # libasound2-dev
 fltk = { version = "1.4.30", features = ["fltk-bundled"] }
+hound = "3.5.1"
 
 [dev-dependencies]
 tokio-test = "*"

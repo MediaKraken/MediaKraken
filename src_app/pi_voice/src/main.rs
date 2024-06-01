@@ -3,68 +3,235 @@ use fltk::{
     window::*,
 };
 mod choice;
+use clap::Parser;
+use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
+use cpal::{FromSample, Sample};
 use std::error::Error;
+use std::path::Path;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Message {
-    Increment,
-    Scanned,
+    Start,
+    Stop,
+    Recognise,
+}
+
+pub mod record {
+    use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
+    use cpal::{FromSample, Sample};
+    use hound::WavWriter;
+    use std::fs::File;
+    use std::io::BufWriter;
+    use std::path::Path;
+    use std::sync::{Arc, Mutex};
+
+    pub struct Recorder {
+        utils: Option<(Arc<Mutex<Option<WavWriter<BufWriter<File>>>>>, cpal::Stream)>,
+    }
+
+    impl Recorder {
+        pub fn new() -> Self {
+            Recorder { utils: None }
+        }
+        pub fn start_recording(&mut self, save_location: &Path) -> Result<(), anyhow::Error> {
+            if self.utils.is_some() {
+                return Err(anyhow::Error::msg(
+                    "Attempted to start recording when already recording!",
+                ));
+            }
+
+            cpal::default_host();
+            let host = cpal::default_host();
+
+            // Set up the input device and stream with the default input config.
+            let device = host.default_input_device().unwrap();
+
+            println!("Input device: {}", device.name()?);
+
+            let config = device
+                .default_input_config()
+                .expect("Failed to get default input config");
+            println!("Default input config: {:?}", config);
+
+            // The WAV file we're recording to.
+            let spec = wav_spec_from_config(&config);
+            let writer = hound::WavWriter::create(save_location, spec)?;
+            let writer = Arc::new(Mutex::new(Some(writer)));
+
+            // A flag to indicate that recording is in progress.
+            // println!("Begin recording...");
+
+            // Run the input stream on a separate thread.
+            let writer_2 = writer.clone();
+
+            let err_fn = move |err| {
+                eprintln!("an error occurred on stream: {}", err);
+            };
+
+            let stream = match config.sample_format() {
+                cpal::SampleFormat::I8 => device.build_input_stream(
+                    &config.into(),
+                    move |data, _: &_| write_input_data::<i8, i8>(data, &writer_2),
+                    err_fn,
+                    None,
+                )?,
+                cpal::SampleFormat::I16 => device.build_input_stream(
+                    &config.into(),
+                    move |data, _: &_| write_input_data::<i16, i16>(data, &writer_2),
+                    err_fn,
+                    None,
+                )?,
+                cpal::SampleFormat::I32 => device.build_input_stream(
+                    &config.into(),
+                    move |data, _: &_| write_input_data::<i32, i32>(data, &writer_2),
+                    err_fn,
+                    None,
+                )?,
+                cpal::SampleFormat::F32 => device.build_input_stream(
+                    &config.into(),
+                    move |data, _: &_| write_input_data::<f32, f32>(data, &writer_2),
+                    err_fn,
+                    None,
+                )?,
+                sample_format => {
+                    return Err(anyhow::Error::msg(format!(
+                        "Unsupported sample format '{sample_format}'"
+                    )))
+                }
+            };
+            // ========================
+
+            stream.play().unwrap();
+            self.utils = Some((writer, stream));
+            Ok(())
+        }
+        pub fn stop_recording(&mut self) -> Result<(), anyhow::Error> {
+            match self.utils.take() {
+                Some((writer, stream)) => {
+                    stream.pause().unwrap();
+                    writer.lock().unwrap().take().unwrap().finalize().unwrap();
+                    Ok(())
+                }
+                None => {
+                    return Err(anyhow::Error::msg(
+                        "Attempted to stop recording when not recording!",
+                    ));
+                }
+            }
+        }
+    }
+
+    fn sample_format(format: cpal::SampleFormat) -> hound::SampleFormat {
+        if format.is_float() {
+            hound::SampleFormat::Float
+        } else {
+            hound::SampleFormat::Int
+        }
+    }
+
+    fn wav_spec_from_config(config: &cpal::SupportedStreamConfig) -> hound::WavSpec {
+        hound::WavSpec {
+            channels: config.channels() as _,
+            sample_rate: config.sample_rate().0 as _,
+            bits_per_sample: (config.sample_format().sample_size() * 8) as _,
+            sample_format: sample_format(config.sample_format()),
+        }
+    }
+
+    type WavWriterHandle = Arc<Mutex<Option<hound::WavWriter<BufWriter<File>>>>>;
+
+    fn write_input_data<T, U>(input: &[T], writer: &WavWriterHandle)
+    where
+        T: Sample,
+        U: Sample + hound::Sample + FromSample<T>,
+    {
+        if let Ok(mut guard) = writer.try_lock() {
+            if let Some(writer) = guard.as_mut() {
+                for &sample in input.iter() {
+                    let sample: U = U::from_sample(sample);
+                    writer.write_sample(sample).ok();
+                }
+            }
+        }
+    }
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
+    use record::Recorder;
+    let mut recorder = Recorder::new();
+
     let app = app::App::default().with_scheme(app::Scheme::Gleam);
     let mut window_main = Window::default().with_size(800, 480); // pi 7" screen default
 
-    let mut button_sync = Button::new(666, 384, 133, 96, "Sync");
+    let host = cpal::default_host();
+
+    // Set up the input device and stream with the default input config.
+    let device = host.default_input_device().unwrap();
+    println!("Input device: {}", device.name()?);
+
+    let config = device
+        .default_input_config()
+        .expect("Failed to get default input config");
+    println!("Default input config: {:?}", config);
 
     let mut choice_media_type = choice::MyChoice::new(20, 20, 90, 30, None);
-    choice_media_type.add_choices(&["UHD", "BluRay", "DVD", "CD", "Book", "HDDVD", "LASERDISC", "GAME"]);
+    choice_media_type.add_choices(&[
+        "UHD",
+        "BluRay",
+        "DVD",
+        "CD",
+        "Book",
+        "HDDVD",
+        "LASERDISC",
+        "GAME",
+    ]);
     choice_media_type.set_current_choice(0);
     choice_media_type.button().set_frame(FrameType::BorderBox);
     choice_media_type.frame().set_frame(FrameType::BorderBox);
 
-    let mut out = Output::new(100, 200, 400, 120, "");
-    out.set_text_size(36);
+    let mut out = Output::new(20, 120, 500, 120, "");
+    out.set_text_size(20);
     out.set_value("Started");
 
-    let mut container_upc_codes = Pack::new(300, 25, 150, 40, "UPC Codes");
-
-    let mut frame_upc_known = Frame::default().with_size(40, 20).with_label(format!("Known: {}", total_codes).as_str());
-
-    container_upc_codes.end();
-    container_upc_codes.set_frame(FrameType::BorderFrame);
-    container_upc_codes.set_color(Color::Black);
-    container_upc_codes.set_type(PackType::Vertical);
+    let mut button_start_record_loop = Button::new(210, 0, 133, 25, "Start Loop");
+    let mut button_stop_record_loop = Button::new(210, 40, 133, 25, "Stop Loop");
+    let mut button_stop_and_recognise = Button::new(210, 80, 133, 25, "Recognise");
 
     // setup the event
     let (s, r) = app::channel::<Message>();
-    let mut upc_input = IntInput::new(100, 100, 400, 120, "UPC");
-    upc_input.set_trigger(CallbackTrigger::EnterKey);
-    upc_input.set_callback({
-        move |_| {
-            s.send(Message::Scanned);
-        }
-    });
 
     window_main.end();
     window_main.show();
     window_main.make_current();
 
-    upc_input.take_focus();
-    upc_input.set_visible_focus();
+    button_start_record_loop.set_callback(move |_| {
+        s.send(Message::Start);
+    });
+
+    button_stop_record_loop.set_callback(move |_| {
+        s.send(Message::Stop);
+    });
+
+    button_stop_and_recognise.set_callback(move |_| {
+        s.send(Message::Recognise);
+    });
 
     while app.wait() {
         if let Some(msg) = r.recv() {
             match msg {
-                Message::Increment => {
-                    println!("Increment");
+                Message::Start => {
+                    println!("Start");
+                    recorder
+                        .start_recording(Path::new("voice_file.wav"))
+                        .unwrap();
                 }
-                Message::Scanned => {
-                    println!("{}:", upc_input.value());
-
-                    upc_input.set_value("");
-                    upc_input.take_focus();
-                    upc_input.set_visible_focus();
+                Message::Stop => {
+                    println!("Stop");
+                    recorder.stop_recording();
+                }
+                Message::Recognise => {
+                    println!("Recognise");
+                    recorder.stop_recording();
                 }
             }
         }

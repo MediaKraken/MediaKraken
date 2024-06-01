@@ -19,7 +19,7 @@ codegen-units = 1
 chrono = { version = "0.4.34", features = ["serde"] }
 # 0.31.0 breaks datalink
 pnet = "0.30.0"
-reqwest = { version = "0.11.24", default-features = false, features = [
+reqwest = { version = "0.11.27", default-features = false, features = [
     "json",
     "rustls-tls",
 ] }
