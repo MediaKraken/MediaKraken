@@ -1,5 +1,5 @@
 # Download base image
-FROM alpine:3.19.1
+FROM alpine:3.20.0
 
 LABEL author="Quinn D Granfor, spootdev@gmail.com"
 
