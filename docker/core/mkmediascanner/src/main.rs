@@ -61,7 +61,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 .await
                 .unwrap()
             {
-                let share_info =
+                let share_info: mk_lib_database::mk_lib_database_network_share::DBShareList =
             mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_detail(
                 &sqlx_pool,
                 row_data.mm_media_dir_share_guid,

@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_network"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 
 [profile.release]
@@ -10,7 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_file = { version="0.0.1", registry = "kellnr" }
+mk_lib_file = { version="0.0.2", registry = "kellnr" }
 
 cidr-utils = { version = "0.5.11", features = [
     "serde",
@@ -46,7 +46,7 @@ serialport = "4.3.0"
 ssh-rs = { version = "0.5.0", features = ["scp"] }
 suppaftp = { version = "6.0.1", features = ["native-tls"] }
 surge-ping = "0.8.1"
-tokio = { version = "1.37.0", features = ["full"] }
+tokio = { version = "1.38.0", features = ["full"] }
 transmission-rpc = "0.4.2"
 wakey = "0.3.0"
 

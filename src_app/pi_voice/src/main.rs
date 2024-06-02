@@ -58,9 +58,6 @@ pub mod record {
             let writer = hound::WavWriter::create(save_location, spec)?;
             let writer = Arc::new(Mutex::new(Some(writer)));
 
-            // A flag to indicate that recording is in progress.
-            // println!("Begin recording...");
-
             // Run the input stream on a separate thread.
             let writer_2 = writer.clone();
 
@@ -193,8 +190,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     out.set_text_size(20);
     out.set_value("Started");
 
-    let mut button_start_record_loop = Button::new(210, 0, 133, 25, "Start Loop");
-    let mut button_stop_record_loop = Button::new(210, 40, 133, 25, "Stop Loop");
+    let mut button_start_record_loop = Button::new(210, 0, 133, 25, "Start Record");
+    let mut button_stop_record_loop = Button::new(210, 40, 133, 25, "Stop Record");
     let mut button_stop_and_recognise = Button::new(210, 80, 133, 25, "Recognise");
 
     // setup the event
@@ -232,6 +229,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                 Message::Recognise => {
                     println!("Recognise");
                     recorder.stop_recording();
+                    // TODO convert wav to proper format via ffmpeg?
+                    // TODO speech rec
                 }
             }
         }

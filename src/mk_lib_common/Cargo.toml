@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_common"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 
 [profile.release]
@@ -21,7 +21,7 @@ num-format = { version = "0.4.4", features = [
 ] }
 paginator = "0.2.6"
 serde_json = "1.0.117"
-tokio = { version = "1.37.0", features = ["full"] }
+tokio = { version = "1.38.0", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"

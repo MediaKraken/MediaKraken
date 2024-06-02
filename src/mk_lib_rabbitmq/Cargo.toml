@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_rabbitmq"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 
 [profile.release]
@@ -12,7 +12,7 @@ codegen-units = 1
 [dependencies]
 amqprs = "1.6.1"
 sys-info = "0.9.1"
-tokio = "1.37.0"
+tokio = "1.38.0"
 
 [dev-dependencies]
 tokio-test = "*"
