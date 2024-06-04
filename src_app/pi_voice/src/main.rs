@@ -8,6 +8,7 @@ use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{FromSample, Sample};
 use std::error::Error;
 use std::path::Path;
+use std::process::{Command, Stdio};
 
 #[derive(Debug, Clone, Copy)]
 pub enum Message {
@@ -97,11 +98,11 @@ pub mod record {
                 }
             };
             // ========================
-
             stream.play().unwrap();
             self.utils = Some((writer, stream));
             Ok(())
         }
+
         pub fn stop_recording(&mut self) -> Result<(), anyhow::Error> {
             match self.utils.take() {
                 Some((writer, stream)) => {
@@ -159,17 +160,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let app = app::App::default().with_scheme(app::Scheme::Gleam);
     let mut window_main = Window::default().with_size(800, 480); // pi 7" screen default
-
-    let host = cpal::default_host();
-
-    // Set up the input device and stream with the default input config.
-    let device = host.default_input_device().unwrap();
-    println!("Input device: {}", device.name()?);
-
-    let config = device
-        .default_input_config()
-        .expect("Failed to get default input config");
-    println!("Default input config: {:?}", config);
 
     let mut choice_media_type = choice::MyChoice::new(20, 20, 90, 30, None);
     choice_media_type.add_choices(&[
@@ -229,7 +219,20 @@ fn main() -> Result<(), Box<dyn Error>> {
                 Message::Recognise => {
                     println!("Recognise");
                     recorder.stop_recording();
-                    // TODO convert wav to proper format via ffmpeg?
+                    // convert wav to proper format via ffmpeg
+                    let output = Command::new("ffmpeg")
+                        .args([
+                            "-i",
+                            "voice_file.wav",
+                            "-ar",
+                            "16000",
+                            "-ac",
+                            "1",
+                            "voice_file_mono.wav",
+                        ])
+                        .stdout(Stdio::piped())
+                        .output()
+                        .unwrap();
                     // TODO speech rec
                 }
             }
