@@ -7,8 +7,8 @@ LABEL maintainer="Open Source Services [opensourceservices.fr]"
 COPY src/ .
 
 RUN apk add --no-cache \
-  busybox==1.36.1-r15 \
-  transmission-daemon==4.0.5-r0 \
+  busybox==1.36.1-r28 \
+  transmission-daemon==4.0.5-r2 \
   && mkdir -p /transmission/downloads \
   && mkdir -p /transmission/incomplete \
   && mkdir -p /etc/transmission-daemon \
