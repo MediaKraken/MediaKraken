@@ -33,14 +33,14 @@ pub async fn api_title_search(
     .unwrap();
     let tv_metadata = mk_lib_database::database_metadata::mk_lib_database_metadata::mk_lib_database_metadata_tv_read(
         &sqlx_pool, title,
-)
-.await
-.unwrap();
+    )
+    .await
+    .unwrap();
     let music_metadata = mk_lib_database::database_metadata::mk_lib_database_metadata::mk_lib_database_metadata_music_read(
-        &sqlx_pool, title,
-)
-.await
-.unwrap();
+            &sqlx_pool, title,
+    )
+    .await
+    .unwrap();
     let template = TemplateAPITitleSearchContext {
         template_data_movie_match: &movie_metadata,
         template_data_tv_match: &tv_metadata,

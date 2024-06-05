@@ -2,6 +2,7 @@ use fltk::{
     app, app::*, button::*, enums::*, frame::*, group::*, input::*, output::Output, prelude::*,
     window::*,
 };
+use fltk_webview::*;
 mod choice;
 use clap::Parser;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
@@ -34,7 +35,7 @@ pub mod record {
         pub fn new() -> Self {
             Recorder { utils: None }
         }
-        pub fn start_recording(&mut self, save_location: &Path) -> Result<(), anyhow::Error> {
+        pub fn start_recording(&mut self) -> Result<(), anyhow::Error> {
             if self.utils.is_some() {
                 return Err(anyhow::Error::msg(
                     "Attempted to start recording when already recording!",
@@ -56,7 +57,7 @@ pub mod record {
 
             // The WAV file we're recording to.
             let spec = wav_spec_from_config(&config);
-            let writer = hound::WavWriter::create(save_location, spec)?;
+            let writer = hound::WavWriter::create(Path::new("voice_file.wav"), spec)?;
             let writer = Arc::new(Mutex::new(Some(writer)));
 
             // Run the input stream on a separate thread.
@@ -159,7 +160,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut recorder = Recorder::new();
 
     let app = app::App::default().with_scheme(app::Scheme::Gleam);
-    let mut window_main = Window::default().with_size(800, 480); // pi 7" screen default
+    let mut window_main = Window::default().with_size(1800, 960);
 
     let mut choice_media_type = choice::MyChoice::new(20, 20, 90, 30, None);
     choice_media_type.add_choices(&[
@@ -176,7 +177,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     choice_media_type.button().set_frame(FrameType::BorderBox);
     choice_media_type.frame().set_frame(FrameType::BorderBox);
 
-    let mut out = Output::new(20, 120, 500, 120, "");
+    let mut out = Output::new(20, 120, 1700, 120, "");
     out.set_text_size(20);
     out.set_value("Started");
 
@@ -184,12 +185,17 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut button_stop_record_loop = Button::new(210, 40, 133, 25, "Stop Record");
     let mut button_stop_and_recognise = Button::new(210, 80, 133, 25, "Recognise");
 
+    let mut wv_win = Window::new(20, 250, 1700, 700, "");
+
     // setup the event
     let (s, r) = app::channel::<Message>();
 
     window_main.end();
     window_main.show();
     window_main.make_current();
+
+    let mut wv = Webview::create(false, &mut wv_win);
+    wv.navigate("https://mkprod:8900/api");
 
     button_start_record_loop.set_callback(move |_| {
         s.send(Message::Start);
@@ -208,9 +214,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             match msg {
                 Message::Start => {
                     println!("Start");
-                    recorder
-                        .start_recording(Path::new("voice_file.wav"))
-                        .unwrap();
+                    recorder.start_recording().unwrap();
                 }
                 Message::Stop => {
                     println!("Stop");
@@ -222,6 +226,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     // convert wav to proper format via ffmpeg
                     let output = Command::new("ffmpeg")
                         .args([
+                            "-y",
                             "-i",
                             "voice_file.wav",
                             "-ar",
@@ -233,7 +238,33 @@ fn main() -> Result<(), Box<dyn Error>> {
                         .stdout(Stdio::piped())
                         .output()
                         .unwrap();
-                    // TODO speech rec
+                    let stdout: String = String::from_utf8(output.stdout).unwrap();
+                    println!("{}", stdout);
+                    // speech rec via vosk
+                    let output = Command::new("python3")
+                        .args(["send_wav_to_((websocket.py"])
+                        .stdout(Stdio::piped())
+                        .output()
+                        .unwrap();
+                    let stdout = String::from_utf8(output.stdout).unwrap();
+                    let mut search_str = "".to_string();
+                    for line_item in stdout.as_str().lines() {
+                        if line_item.contains("\"text\" :") {
+                            search_str.push_str(
+                                line_item.replace("\"text\" :", "").replace("\"", "").trim(),
+                            );
+                            search_str.push_str(" ");
+                        }
+                    }
+                    // push output to page
+                    wv.navigate(
+                        format!(
+                            "https://mkprod:8900/api/titlesearch/{}",
+                            search_str.trim().replace(" ", "%20").as_str()
+                        )
+                        .as_str(),
+                    );
+                    // TODO allow user to match record and add to db via api
                 }
             }
         }

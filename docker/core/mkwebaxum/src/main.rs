@@ -29,6 +29,7 @@ use hyper::StatusCode;
 use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
 use mk_lib_database;
 use rcgen::generate_simple_self_signed;
+use redis_pool::{RedisPool, SingleRedisPool};
 use ring::digest;
 use serde_json::json;
 use sqlx::PgPool;
@@ -37,13 +38,12 @@ use std::io::Write;
 use std::path::Path;
 use std::time::Duration;
 use std::{net::SocketAddr, path::PathBuf};
-use tokio::signal;
 use tokio::net::TcpListener;
+use tokio::signal;
 use tower::timeout::TimeoutLayer;
 use tower::ServiceExt;
 use tower::{timeout::error::Elapsed, ServiceBuilder};
 use tower_http::services::{ServeDir, ServeFile};
-use redis_pool::{RedisPool, SingleRedisPool};
 
 type Client = hyper_util::client::legacy::Client<HttpConnector, Body>;
 mod axum_custom_filters;
@@ -86,6 +86,11 @@ pub mod user {
     pub mod bp_queue;
     pub mod bp_search;
     pub mod bp_sync;
+}
+
+#[path = "user/api"]
+pub mod user_api {
+    pub mod bp_api_title_search;
 }
 
 #[path = "user/internet"]
@@ -263,6 +268,10 @@ async fn main() {
         .route_with_tsr("/admin/torrent/web", get(proxy_transmission_handler))
         .with_state(client)
         .route_with_tsr("/admin/user/:page", get(admin::bp_user::admin_user))
+        .route_with_tsr(
+            "/user/api/titlesearch/:title",
+            get(user::user_api::bp_api_title_search::api_title_search),
+        )
         .route_with_tsr(
             "/user/internet/flickr",
             get(user_internet::bp_inter_flickr::user_inter_flickr),
@@ -480,7 +489,7 @@ async fn main() {
             >::new(Some(sqlx_pool.clone().into()))
             .with_config(auth_config),
         )
-//            >::new(Some(sqlx_pool.clone().into()))
+        //            >::new(Some(sqlx_pool.clone().into()))
         .layer(SessionLayer::new(session_store))
         // after authsessionlayer so anyone can access
         .route_with_tsr("/public/about", get(public::bp_about::public_about))
@@ -504,7 +513,7 @@ async fn main() {
         .layer(prometheus_layer)
         .layer(Extension(sqlx_pool))
         .with_state(app_state);
-        // .with_state(redis_pool);
+    // .with_state(redis_pool);
     // TODO .layer(
     //     ServiceBuilder::new()
     //         .layer(HandleErrorLayer::new(|_: BoxError| async {

@@ -14,7 +14,9 @@ anyhow = "1.0.86"
 clap = "4.5.4"
 cpal = "0.15.3"  # libasound2-dev
 fltk = { version = "1.4.30", features = ["fltk-bundled"] }
+fltk-webview = "0.4.2"  # libwebkit2gtk-4.1-dev
 hound = "3.5.1"
+serde_json = "1.0.117"
 
 [dev-dependencies]
 tokio-test = "*"

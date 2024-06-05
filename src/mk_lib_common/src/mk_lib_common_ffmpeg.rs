@@ -16,8 +16,8 @@ pub async fn mk_common_ffmpeg_get_info(
         .stdout(Stdio::piped())
         .output()
         .unwrap();
-    let stdout = String::from_utf8(output.stdout).unwrap();
-    let json_output = serde_json::from_str(&stdout).unwrap();
+    let stdout: String = String::from_utf8(output.stdout).unwrap();
+    let json_output: serde_json::Value = serde_json::from_str(&stdout).unwrap();
     Ok(json_output)
 }
 
