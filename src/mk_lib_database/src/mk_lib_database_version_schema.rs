@@ -522,6 +522,37 @@ pub async fn mk_lib_database_update_schema(
         mk_lib_database_version_update(&sqlx_pool, 67).await?;
     }
 
+    if version_no < 68 {
+        println!("Upgrade Version 68 1");
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query("ALTER TABLE mm_metadata_movie ADD COLUMN mm_metadata_movie_name_alt text;")
+            .execute(&mut *transaction)
+            .await?;
+        println!("Upgrade Version 68 2");
+            sqlx::query("ALTER TABLE mm_metadata_tvshow ADD COLUMN mm_metadata_tvshow_name_alt text;")
+            .execute(&mut *transaction)
+            .await?;
+        println!("Upgrade Version 68 3");
+            sqlx::query("alter table mm_metadata_movie \
+            add title_search tsvector \
+            generated always as	( \
+                setweight(to_tsvector('simple', coalesce(mm_metadata_movie_name, '')), 'A') || ' ' || \
+                setweight(to_tsvector('simple', coalesce(mm_metadata_movie_name_alt, '')), 'B') :: tsvector \
+            ) stored;")
+            .execute(&mut *transaction)
+            .await?;
+        println!("Upgrade Version 68 4");
+            sqlx::query("alter table mm_metadata_tvshow \
+            add title_search tsvector \
+            generated always as	( \
+                setweight(to_tsvector('simple', coalesce(mm_metadata_tvshow_name, '')), 'A') || ' ' || \
+                setweight(to_tsvector('simple', coalesce(mm_metadata_tvshow_name_alt, '')), 'B') :: tsvector \
+            ) stored;")
+            .execute(&mut *transaction)
+            .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 68).await?;
+    }
     Ok(true)
 }
 

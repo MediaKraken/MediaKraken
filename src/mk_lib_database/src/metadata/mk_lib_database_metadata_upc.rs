@@ -5,7 +5,7 @@ use sqlx::types::Uuid;
 
 pub async fn mk_lib_database_metadata_exists_upc(
     sqlx_pool: &sqlx::PgPool,
-    upc_code: &String,
+    upc_code: &i32,
 ) -> Result<bool, sqlx::Error> {
     let row: (bool,) = sqlx::query_as(
         "select exists(select 1 from mm_bar_codes \
@@ -19,7 +19,7 @@ pub async fn mk_lib_database_metadata_exists_upc(
 
 pub async fn mk_lib_database_metadata_exists_upc_own(
     sqlx_pool: &sqlx::PgPool,
-    upc_code: &String,
+    upc_code: &i32,
     user_id: i64,
 ) -> Result<bool, sqlx::Error> {
     let row: (bool,) = sqlx::query_as(
@@ -36,7 +36,7 @@ pub async fn mk_lib_database_metadata_exists_upc_own(
 
 pub async fn mk_lib_database_metadata_upc_insert(
     sqlx_pool: &sqlx::PgPool,
-    upc_code: &String,
+    upc_code: &i32,
     upc_code_type: &i8,
     data_json: &serde_json::Value,
 ) -> Result<(), sqlx::Error> {

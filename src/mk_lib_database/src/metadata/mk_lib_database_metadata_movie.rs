@@ -40,8 +40,8 @@ pub async fn mk_lib_database_metadata_movie_read(
              mm_metadata_movie_localimage_json->>'Poster' as mm_poster, \
              mm_metadata_movie_user_json \
              from mm_metadata_movie \
-             where mm_metadata_movie_name % $1 \
-             order by mm_metadata_movie_name, mm_date offset $2 limit $3",
+             where title_search @@ websearch_to_tsquery($1) \
+             order by mm_metadata_movie_name offset $2 limit $3",
         )
         .bind(search_value)
         .bind(offset)
@@ -107,13 +107,15 @@ pub async fn mk_lib_database_metadata_movie_insert(
         "insert into mm_metadata_movie (mm_metadata_movie_guid, \
         mm_metadata_movie_media_id, \
         mm_metadata_movie_name, \
+        mm_metadata_movie_name_alt, \
         mm_metadata_movie_json, \
         mm_metadata_movie_localimage_json) \
-        values ($1,$2,$3,$4,$5)",
+        values ($1,$2,$3,$4,$5,$6)",
     )
     .bind(uuid_id)
     .bind(series_id)
     .bind(data_json["title"].as_str().unwrap().to_string())
+    .bind(data_json["original_title"].as_str().unwrap().to_string())
     .bind(data_json)
     .bind(data_image_json)
     .execute(&mut *transaction)

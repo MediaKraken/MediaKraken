@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_database"
-version = "0.0.6"
+version = "0.0.10"
 edition = "2021"
 
 [profile.release]
@@ -14,14 +14,22 @@ mk_lib_common = { version = "0.0.2", registry = "kellnr" }
 
 anyhow = "1.0.86"
 async-trait = "0.1.80"
-axum_session = { version = "0.14.0", default-features = false, features = [
-    "advanced",
-    "key-store",
+axum_session = { version = "0.12.4", features = [
+    "postgres-rustls",
+    "redis-db",
 ] }
-axum_session_auth = { version = "0.14.0", default-features = false, features = [
-    "advanced",
-    "key-store",
+axum_session_auth = { version = "0.12.1", features = [
+    "postgres-rustls",
+    "redis-db",
 ] }
+# axum_session = { version = "0.14.0", default-features = false, features = [
+#     "advanced",
+#     "key-store",
+# ] }
+# axum_session_auth = { version = "0.14.0", default-features = false, features = [
+#     "advanced",
+#     "key-store",
+# ] }
 chrono = { version = "0.4.38", features = ["serde"] }
 serde = { version = "1.0.203", features = ["derive"] }
 serde_json = "1.0.117"

@@ -18,7 +18,7 @@ use axum_csrf::{CsrfConfig, CsrfToken};
 use axum_extra::routing::RouterExt;
 use axum_flash::{Flash, IncomingFlashes};
 use axum_handle_error_extract::HandleErrorLayer;
-use axum_prometheus::{EndpointLabel, PrometheusMetricLayerBuilder};
+use axum_prometheus::PrometheusMetricLayer;
 use axum_server::tls_rustls::RustlsConfig;
 use axum_session::{
     Key, SessionConfig, SessionLayer, SessionPgPool, SessionPgSessionStore, SessionRedisPool,
@@ -209,12 +209,7 @@ async fn main() {
         .await
         .unwrap();
 
-    let (prometheus_layer, metric_handle) = PrometheusMetricLayerBuilder::new()
-        .with_endpoint_label_type(EndpointLabel::MatchedPathWithFallbackFn(|path| {
-            format!("{}_changed", path)
-        }))
-        .with_default_metrics()
-        .build_pair();
+    let (prometheus_layer, metric_handle) = PrometheusMetricLayer::pair();
 
     // configure certificate and private key used by https
     let config = RustlsConfig::from_pem_file(
@@ -268,10 +263,6 @@ async fn main() {
         .route_with_tsr("/admin/torrent/web", get(proxy_transmission_handler))
         .with_state(client)
         .route_with_tsr("/admin/user/:page", get(admin::bp_user::admin_user))
-        .route_with_tsr(
-            "/user/api/titlesearch/:title",
-            get(user::user_api::bp_api_title_search::api_title_search),
-        )
         .route_with_tsr(
             "/user/internet/flickr",
             get(user_internet::bp_inter_flickr::user_inter_flickr),
@@ -370,11 +361,7 @@ async fn main() {
         )
         .route_with_tsr(
             "/user/media/upc",
-            get(user_media::bp_media_upc_import::user_media_upc_import),
-        )
-        .route_with_tsr(
-            "/user/media/upc",
-            post(user_media::bp_media_upc_import::user_media_upc_import_post),
+            get(user_media::bp_media_upc_import::user_media_upc_import).post(user_media::bp_media_upc_import::user_media_upc_import_post),
         )
         .route_with_tsr(
             "/user/metadata/book/:page",
@@ -489,9 +476,12 @@ async fn main() {
             >::new(Some(sqlx_pool.clone().into()))
             .with_config(auth_config),
         )
-        //            >::new(Some(sqlx_pool.clone().into()))
         .layer(SessionLayer::new(session_store))
         // after authsessionlayer so anyone can access
+        .route_with_tsr(
+            "/user/api/titlesearch/:title",
+            get(user_api::bp_api_title_search::api_title_search)
+        )        
         .route_with_tsr("/public/about", get(public::bp_about::public_about))
         .route_with_tsr("/error/401", get(bp_error::general_not_authorized))
         .route_with_tsr("/error/403", get(bp_error::general_not_administrator))
@@ -513,7 +503,6 @@ async fn main() {
         .layer(prometheus_layer)
         .layer(Extension(sqlx_pool))
         .with_state(app_state);
-    // .with_state(redis_pool);
     // TODO .layer(
     //     ServiceBuilder::new()
     //         .layer(HandleErrorLayer::new(|_: BoxError| async {

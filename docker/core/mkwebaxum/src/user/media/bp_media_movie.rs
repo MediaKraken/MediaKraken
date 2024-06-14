@@ -13,6 +13,10 @@ use serde_json::json;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
+#[template(path = "bss_error/bss_error_401.html")]
+struct TemplateError401Context {}
+
+#[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_movie.html")]
 struct TemplateMediaMovieContext<'a> {
     template_data:

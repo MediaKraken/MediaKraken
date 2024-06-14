@@ -302,7 +302,7 @@ pub async fn metadata_fetch(
 ) -> Result<(), Box<dyn Error>> {
     if provider_name == "barcodespider" {
         let _barcode_id = provider_barcodespider::provider_barcodespider_fetch_by_upc(
-            &sqlx_pool,
+            sqlx_pool,
             &download_data.mm_download_provider_id.unwrap(),
             &provider_api_key,
         )
@@ -310,7 +310,7 @@ pub async fn metadata_fetch(
         .unwrap();
     } else if provider_name == "imvdb" {
         let _imvdb_id = provider_imvdb::provider_imvdb_video_fetch_by_id(
-            &sqlx_pool,
+            sqlx_pool,
             download_data.mm_download_provider_id.unwrap(),
             download_data.mm_download_new_uuid,
             provider_api_key,
@@ -351,7 +351,7 @@ pub async fn metadata_fetch(
         }
     } else if provider_name == "upcitemdb" {
         let _upcitemdb_id = provider_upcitemdb::provider_upcitemdb_fetch_by_upc(
-            &sqlx_pool,
+            sqlx_pool,
             &download_data.mm_download_provider_id.unwrap(),
             &provider_api_key,
         )

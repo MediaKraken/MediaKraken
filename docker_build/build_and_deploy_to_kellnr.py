@@ -1,12 +1,18 @@
 import argparse
 import os
-import shlex
 import subprocess
-import sys
-import time
 
 CWD_HOME_DIRECTORY = os.getcwd().rsplit('MediaKraken', 1)[0]
 os.chdir(os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken/src'))
+
+parser = argparse.ArgumentParser(
+    description='This program builds and deploys MediaKraken Libraries')
+parser.add_argument('-e', '--email', required=False,
+                    help='Send results email', action="store_true")
+# set args.image variable if entered - ex. mkwebaxum
+parser.add_argument('-l', '--library', metavar='library', required=False,
+                    help='Library to build')
+args = parser.parse_args()
 
 # TODO check for failures?
 
@@ -23,6 +29,9 @@ libs_to_publish = ["mk_lib_common",
                    "mk_lib_network",
                    "mk_lib_hardware",
                    "mk_lib_metadata"]
+
+if args.library:
+    libs_to_publish = [args.library]
 
 for lib_name in libs_to_publish:
     print(lib_name)
