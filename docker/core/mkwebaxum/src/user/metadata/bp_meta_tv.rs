@@ -61,13 +61,13 @@ pub async fn user_metadata_tv(
         .await
         .unwrap();
         let tv_list = mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_read(
-        &sqlx_pool,
-        String::new(),
-        db_offset,
-        30,
-    )
-    .await
-    .unwrap();
+            &sqlx_pool,
+            String::new(),
+            db_offset,
+            30,
+        )
+        .await
+        .unwrap();
         let mut template_data_exists = false;
         if tv_list.len() > 0 {
             template_data_exists = true;

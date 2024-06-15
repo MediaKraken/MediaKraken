@@ -65,6 +65,11 @@ pub mod admin {
     pub mod bp_user;
 }
 
+#[path = "api"]
+pub mod api {
+    pub mod bp_api_title_search;
+}
+
 #[path = "error/bp_error.rs"]
 mod bp_error;
 
@@ -86,11 +91,6 @@ pub mod user {
     pub mod bp_queue;
     pub mod bp_search;
     pub mod bp_sync;
-}
-
-#[path = "user/api"]
-pub mod user_api {
-    pub mod bp_api_title_search;
 }
 
 #[path = "user/internet"]
@@ -479,8 +479,8 @@ async fn main() {
         .layer(SessionLayer::new(session_store))
         // after authsessionlayer so anyone can access
         .route_with_tsr(
-            "/user/api/titlesearch/:title",
-            get(user_api::bp_api_title_search::api_title_search)
+            "/api/titlesearch/:title",
+            get(api::bp_api_title_search::api_title_search)
         )        
         .route_with_tsr("/public/about", get(public::bp_about::public_about))
         .route_with_tsr("/error/401", get(bp_error::general_not_authorized))

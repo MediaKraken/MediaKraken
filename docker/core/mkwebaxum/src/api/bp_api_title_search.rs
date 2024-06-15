@@ -1,17 +1,16 @@
-use crate::mk_lib_database;
+use crate::axum_custom_filters::filters;
 use askama::Template;
 use axum::{
     extract::Path,
-    http::{Method, Request, StatusCode},
+    http::{Method, StatusCode},
     response::{Html, IntoResponse},
     Extension,
 };
-use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
-use sqlx::postgres::PgPool;
-
-#[derive(Template)]
-#[template(path = "bss_error/bss_error_401.html")]
-struct TemplateError401Context {}
+use crate::mk_lib_database;
+use serde::{Deserialize, Serialize};
+use serde_json::json;
+use sqlx::postgres::{PgPool, PgRow};
+use sqlx::{FromRow, Row};
 
 #[derive(Template)]
 #[template(path = "bss_api/bss_api_title_search.html")]
@@ -24,8 +23,6 @@ struct TemplateAPITitleSearchContext<'a> {
 pub async fn api_title_search(
     Extension(sqlx_pool): Extension<PgPool>,
     Path(title): Path<String>,
-    method: Method,
-    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let title = title.replace("%20", " ");
     let movie_metadata = mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(

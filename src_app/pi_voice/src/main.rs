@@ -259,7 +259,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     // push output to page
                     wv.navigate(
                         format!(
-                            "https://mkprod:8900/api/titlesearch/{}",
+                            "https://mkprod:8900/user/api/titlesearch/{}",
                             search_str.trim().replace(" ", "%20").as_str()
                         )
                         .as_str(),
