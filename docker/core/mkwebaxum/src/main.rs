@@ -20,11 +20,10 @@ use axum_flash::{Flash, IncomingFlashes};
 use axum_handle_error_extract::HandleErrorLayer;
 use axum_prometheus::PrometheusMetricLayer;
 use axum_server::tls_rustls::RustlsConfig;
-use axum_session::{
-    Key, SessionConfig, SessionLayer, SessionPgPool, SessionPgSessionStore, SessionRedisPool,
-    SessionStore,
-};
-use axum_session_auth::{AuthConfig, AuthSessionLayer};
+use axum_session::{Key, Session, SessionConfig, SessionLayer, SessionStore};
+use axum_session_sqlx::SessionPgPool;
+use axum_session_auth::*;
+use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
 use hyper::StatusCode;
 use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
 use mk_lib_database;
@@ -32,7 +31,7 @@ use rcgen::generate_simple_self_signed;
 use redis_pool::{RedisPool, SingleRedisPool};
 use ring::digest;
 use serde_json::json;
-use sqlx::PgPool;
+
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
@@ -205,7 +204,7 @@ async fn main() {
 
     let session_config = SessionConfig::default().with_table_name("mm_session");
     let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
-    let session_store = SessionPgSessionStore::new(Some(sqlx_pool.clone().into()), session_config)
+    let session_store =  SessionStore::<SessionPgPool>::new(Some(sqlx_pool.clone().into()), session_config)
         .await
         .unwrap();
 

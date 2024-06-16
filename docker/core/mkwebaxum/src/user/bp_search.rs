@@ -4,7 +4,9 @@ use axum::{
     response::{Html, IntoResponse},
     Extension,
 };
-use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
+use axum_session::{SessionConfig, SessionLayer};
+use axum_session_sqlx::{SessionPgPool};
+use axum_session_auth::*;
 use crate::mk_lib_database;
 use sqlx::postgres::PgPool;
 

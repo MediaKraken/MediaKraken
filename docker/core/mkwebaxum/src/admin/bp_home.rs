@@ -6,7 +6,9 @@ use axum::{
     response::{Html, IntoResponse},
     Extension,
 };
-use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
+use axum_session::{SessionConfig, SessionLayer};
+use axum_session_sqlx::{SessionPgPool};
+use axum_session_auth::*;
 use mk_lib_common;
 use mk_lib_network;
 use num_format::{SystemLocale, ToFormattedString};

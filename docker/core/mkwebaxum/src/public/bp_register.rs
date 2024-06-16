@@ -7,7 +7,9 @@ use axum::{
     Extension,
 };
 use axum_flash::{Flash, IncomingFlashes, Key};
-use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
+use axum_session::{SessionConfig, SessionLayer};
+use axum_session_sqlx::{SessionPgPool};
+use axum_session_auth::*;
 use crate::mk_lib_database;
 use serde::{Deserialize, Serialize};
 use sqlx::{

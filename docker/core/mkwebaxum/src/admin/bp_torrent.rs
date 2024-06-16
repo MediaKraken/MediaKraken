@@ -7,7 +7,9 @@ use axum::{
     routing::{get, post},
     Extension,
 };
-use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
+use axum_session::{SessionConfig, SessionLayer};
+use axum_session_sqlx::{SessionPgPool};
+use axum_session_auth::*;
 use bytesize::ByteSize;
 use core::fmt::Write;
 use mk_lib_common;

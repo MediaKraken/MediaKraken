@@ -8,7 +8,9 @@ use axum::{
     response::{Html, IntoResponse, Redirect},
     Extension,
 };
-use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
+use axum_session::{SessionConfig, SessionLayer};
+use axum_session_sqlx::{SessionPgPool};
+use axum_session_auth::*;
 use mk_lib_common::mk_lib_common_pagination;
 use mk_lib_metadata;
 use serde::{Deserialize, Serialize};

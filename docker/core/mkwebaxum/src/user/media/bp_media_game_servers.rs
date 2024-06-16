@@ -6,7 +6,9 @@ use axum::{
     routing::{get, post},
     Extension, Router,
 };
-use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
+use axum_session::{SessionConfig, SessionLayer};
+use axum_session_sqlx::{SessionPgPool};
+use axum_session_auth::*;
 use mk_lib_common::mk_lib_common_pagination;
 use crate::mk_lib_database;
 use serde_json::json;
