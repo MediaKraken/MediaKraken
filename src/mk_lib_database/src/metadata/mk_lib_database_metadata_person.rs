@@ -24,7 +24,7 @@ pub async fn mk_lib_database_metadata_person_count(
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_person \
-            where mmp_person_name % $1",
+            where mmp_person_name &@ $1",
         )
         .bind(search_value)
         .fetch_one(sqlx_pool)
@@ -59,8 +59,8 @@ pub async fn mk_lib_database_metadata_person_read(
             "select mm_metadata_person_guid, \
             mm_metadata_person_name, mm_metadata_person_image, \
             mm_metadata_person_meta_json->>'profile_path' as mmp_profile \
-            from mm_metadata_person where mm_metadata_person_name % $1 \
-            order by LOWER(mm_metadata_person_name) offset $2 limit $3",
+            from mm_metadata_person where mm_metadata_person_name &@ $1 \
+            offset $2 limit $3",
         )
         .bind(search_value)
         .bind(offset)

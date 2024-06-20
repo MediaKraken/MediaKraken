@@ -33,18 +33,19 @@ pub async fn mk_lib_database_metadata_tv_read(
 ) -> Result<Vec<DBMetaTVShowList>, sqlx::Error> {
     let select_query;
     if search_value != "" {
+        // doing union so exact matches show on top
         select_query = sqlx::query(
             "select mm_metadata_tvshow_guid, \
             mm_metadata_tvshow_name, \
             mm_metadata_tvshow_json->'first_air_date' as air_date, \
-            mm_metadata_tvshow_localimage_json->'Poster' \
-            as image_json from mm_metadata_tvshow \
-            where title_search @@ websearch_to_tsquery($1) \
-            order by LOWER(mm_metadata_tvshow_name), \
-            mm_metadata_tvshow_json->'first_air_date' \
-            offset $2 limit $3",
+            mm_metadata_tvshow_localimage_json->'Poster' as image_json \
+            from mm_metadata_tvshow \
+            where mm_metadata_tvshow_name &@ $1 \
+            or mm_metadata_tvshow_name_alt &@ $2
+            offset $3 limit $4",
         )
-        .bind(search_value)
+        .bind(&search_value)
+        .bind(&search_value)
         .bind(offset)
         .bind(limit);
     } else {
@@ -52,8 +53,8 @@ pub async fn mk_lib_database_metadata_tv_read(
             "select mm_metadata_tvshow_guid, \
             mm_metadata_tvshow_name, \
             mm_metadata_tvshow_json->'first_air_date' as air_date, \
-            mm_metadata_tvshow_localimage_json->'Poster' \
-            as image_json from mm_metadata_tvshow \
+            mm_metadata_tvshow_localimage_json->'Poster' as image_json \
+            from mm_metadata_tvshow \
             order by LOWER(mm_metadata_tvshow_name), \
             mm_metadata_tvshow_json->'first_air_date' \
             offset $1 limit $2",
@@ -80,7 +81,7 @@ pub async fn mk_lib_database_metadata_tv_count(
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_tvshow \
-            where mm_metadata_tvshow_name % $1",
+            where mm_metadata_tvshow_name &@ $1",
         )
         .bind(search_value)
         .fetch_one(sqlx_pool)

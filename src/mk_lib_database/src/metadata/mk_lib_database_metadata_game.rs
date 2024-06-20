@@ -55,7 +55,7 @@ pub async fn mk_lib_database_metadata_game_count(
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_game_software_info \
-            where gi_game_info_name %% $1",
+            where gi_game_info_name &@ $1",
         )
         .bind(search_value)
         .fetch_one(sqlx_pool)
@@ -93,8 +93,7 @@ pub async fn mk_lib_database_metadata_game_read(
              gi_game_info_json->'machine'->>'year' as gi_year, \
              gi_game_info_localimage, gs_game_system_name \
              from mm_metadata_game_software_info, mm_metadata_game_systems_info \
-             where gi_game_info_system_id = gs_game_system_id and gi_game_info_name % $1 \
-             order by gi_game_info_name, gi_year \
+             where gi_game_info_system_id = gs_game_system_id and gi_game_info_name &@ $1 \
              offset $2 limit $3",
         )
         .bind(search_value)

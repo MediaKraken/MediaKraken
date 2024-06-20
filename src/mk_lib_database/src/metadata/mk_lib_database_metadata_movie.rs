@@ -40,10 +40,12 @@ pub async fn mk_lib_database_metadata_movie_read(
              mm_metadata_movie_localimage_json->>'Poster' as mm_poster, \
              mm_metadata_movie_user_json \
              from mm_metadata_movie \
-             where title_search @@ websearch_to_tsquery($1) \
-             order by mm_metadata_movie_name offset $2 limit $3",
+             WHERE mm_metadata_movie_name &@ $1 \
+             or mm_metadata_movie_name_alt &@ $2
+             offset $3 limit $4",
         )
-        .bind(search_value)
+        .bind(&search_value)
+        .bind(&search_value)
         .bind(offset)
         .bind(limit);
     } else {
@@ -53,7 +55,7 @@ pub async fn mk_lib_database_metadata_movie_read(
             mm_metadata_movie_localimage_json->>'Poster' as mm_poster, \
             mm_metadata_movie_user_json \
             from mm_metadata_movie \
-            order by mm_metadata_movie_name, mm_date \
+            order by LOWER(mm_metadata_movie_name), mm_date \
             offset $1 limit $2",
         )
         .bind(offset)
@@ -79,7 +81,7 @@ pub async fn mk_lib_database_metadata_movie_count(
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_movie \
-            where mm_metadata_movie_name % $1",
+            where mm_metadata_movie_name &@ $1",
         )
         .bind(search_value)
         .fetch_one(sqlx_pool)

@@ -61,7 +61,10 @@ DOCKER_IMAGES = {
     'mkcron': ('mkcron', 'core'),
 
     # database via postgresql/citus
-    'mkdatabase_citus': ('mkdatabase', 'core'),
+    #'mkdatabase_citus': ('mkdatabase', 'core'),
+
+    # database via postgresql/citus/pgroonga
+    'mkdatabase_citus_pgroonga': ('mkdatabase', 'core'),
 
     # download files/etc trailers/etc from ampq records
     'mkdownload': ('mkdownload', 'core'),
@@ -110,6 +113,9 @@ DOCKER_IMAGES = {
 
     # download open library dump of ids in database and insert into downloads - run and exit
     'mkopenlibrarynetfetchbulk': ('mkopenlibrarynetfetchbulk', 'core'),
+
+    # pgbouncer
+    'mkpgbouncer': ('mkpgbouncer', 'core'),
 
     # consume and process ampq records
     'mkrabbitconsume': ('mkrabbitconsume', 'core'),

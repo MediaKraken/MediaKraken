@@ -17,7 +17,7 @@ codegen-units = 1
 
 [dependencies]
 mk_lib_common = { version = "0.0.2", registry = "kellnr" }
-mk_lib_database = { version = "0.0.11", registry = "kellnr" }
+mk_lib_database = { version = "0.0.19", registry = "kellnr" }
 mk_lib_file = { version = "0.0.2", registry = "kellnr" }
 mk_lib_metadata = { version = "0.0.5", registry = "kellnr" }
 mk_lib_network = { version = "0.0.2", registry = "kellnr" }
@@ -59,7 +59,7 @@ paginator = "0.2.6"
 rcgen = "0.12.1"
 redis_pool = "0.4.0"
 redis = { version = "0.25.4" }
-reqwest = { version = "0.11.27", default-features = false, features = [
+reqwest = { version = "0.12.4", default-features = false, features = [
     "json",
     "native-tls",
 ] }

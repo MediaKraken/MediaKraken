@@ -1,5 +1,8 @@
+
+FROM groonga/pgroonga:latest-alpine-16-slim
+
 # Download base image
-FROM alpine:3.20.1
+FROM alpine:3.20.0
 
 LABEL author="Quinn D Granfor, spootdev@gmail.com"
 
@@ -13,14 +16,28 @@ COPY docker-entrypoint-initdb.d /docker-entrypoint-initdb.d
 
 RUN sed -ri "s!^#?(listen_addresses)\s*=\s*\S+.*!\1 = '*'!" /usr/local/share/postgresql/postgresql.conf.sample; \
   grep -F "listen_addresses = '*'" /usr/local/share/postgresql/postgresql.conf.sample \
-  && mkdir -p /var/run/postgresql && chown -R postgres:postgres /var/run/postgresql \
-  && chown -R postgres:postgres /usr/local/share/postgresql/postgresql.conf.sample \
-  && chmod 3777 /var/run/postgresql
+  && mkdir -p /var/run/postgresql && chown -R postgres:postgres /var/run/postgresql && chown -R postgres:postgres /usr/local/share/postgresql/postgresql.conf.sample && chmod 3777 /var/run/postgresql
 
 ENV PGDATA /var/lib/postgresql/data
 # this 777 will be replaced by 700 at runtime (allows semi-arbitrary "--user" values)
 RUN mkdir -p "$PGDATA" && chown -R postgres:postgres "$PGDATA" && chmod 1777 "$PGDATA" \
   && chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# copy thirdpart lib files
+COPY --from=0 /usr/lib/libmsgpack-c.so.? /usr/lib/
+COPY --from=0 /usr/lib/liblz4.so.? /usr/lib/
+COPY --from=0 /usr/lib/libzstd.so.? /usr/lib/
+# copy MeCab files
+COPY --from=0 /usr/local/etc/mecabrc /usr/local/etc/
+COPY --from=0 /usr/local/lib/libmecab.so.? /usr/local/lib/
+COPY --from=0 /usr/local/lib/mecab/ /usr/local/lib/mecab/
+# copy Groonga lib files
+COPY --from=0 /usr/local/etc/groonga/ /usr/local/etc/groonga/
+COPY --from=0 /usr/local/lib/groonga/ /usr/local/lib/groonga/
+COPY --from=0 /usr/local/lib/libgroonga.so.? /usr/local/lib/
+# copy PGroonga extension files
+COPY --from=0 /usr/local/lib/postgresql/pgroonga*.so /usr/lib/postgresql16/
+COPY --from=0 /usr/local/share/postgresql/extension/pgroonga* /usr/share/postgresql/extension/
 
 VOLUME /var/lib/postgresql/data
 

@@ -9,7 +9,7 @@ pub async fn mk_lib_database_metadata_sports_count(
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_sports \
-            where mm_metadata_sports_name % $1",
+            where mm_metadata_sports_name &@ $1",
         )
         .bind(search_value)
         .fetch_one(sqlx_pool)
@@ -41,8 +41,7 @@ pub async fn mk_lib_database_metadata_sports_read(
         select_query = sqlx::query(
             "select mm_metadata_sports_guid, mm_metadata_sports_name \
             from mm_metadata_sports where mm_metadata_sports_guid \
-            where mm_metadata_sports_name % $1 \
-            order by LOWER(mm_metadata_sports_name) \
+            where mm_metadata_sports_name &@ $1 \
             offset $2 limit $3",
         )
         .bind(search_value)
