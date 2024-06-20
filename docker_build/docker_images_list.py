@@ -60,9 +60,6 @@ DOCKER_IMAGES = {
     # process cron jobs from the database to amqp or direct container launch
     'mkcron': ('mkcron', 'core'),
 
-    # database via postgresql/citus
-    #'mkdatabase_citus': ('mkdatabase', 'core'),
-
     # database via postgresql/citus/pgroonga
     'mkdatabase_citus_pgroonga': ('mkdatabase', 'core'),
 
