@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_metadata"
-version = "0.0.5"
+version = "0.0.6"
 edition = "2021"
 
 [profile.release]
@@ -11,7 +11,7 @@ codegen-units = 1
 
 [dependencies]
 mk_lib_common = { version="0.0.2", registry = "kellnr" }
-mk_lib_database = { version="0.0.9", registry = "kellnr" }
+mk_lib_database = { version="0.0.19", registry = "kellnr" }
 mk_lib_hash = { version="0.0.2", registry = "kellnr" }
 mk_lib_network = { version="0.0.2", registry = "kellnr" }
 
@@ -22,6 +22,7 @@ id3 = "1.13.1"
 #lib-mal = "0.5.1"  # myanimelist
 mangadex = "0.1.2"
 # musicbrainz_rs = { version = "0.5.0", features = ["async"] }
+nonzero_ext = "0.3.0"
 omdb = "0.3.2"
 open-library = "0.7.1"
 rand = "0.8.5"

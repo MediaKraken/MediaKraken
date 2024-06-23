@@ -200,15 +200,6 @@ def db_pgsql_vacuum_table(self, table_name):
         common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text={
             'Vacuum table missing': table_name})
 
-
-// TODO port query
-def db_pgsql_set_iso_level(self, isolation_level):
-    """
-    # set isolation level
-    """
-    self.sql3_conn.set_isolation_level(isolation_level)
-
-
 // TODO port query
 def db_pgsql_table_exits(self, table_name):
     """
@@ -219,13 +210,4 @@ def db_pgsql_table_exits(self, table_name):
 
 // TODO - see last analynze, etc
 # SELECT schemaname, relname, last_analyze FROM pg_stat_all_tables WHERE relname = 'city';
-
-// TODO port query
-pub async fn db_table_index_check(self, resource_name):
-    """
-    # check for table or index
-    """
-    // TODO little bobby tables
-    await self.db_cursor.execute("SELECT to_regclass('public.$1')", resource_name)
-    return await self.db_cursor.fetchval()
  */

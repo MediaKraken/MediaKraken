@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_hardware"
-version = "0.0.2"
+version = "0.0.3"
 edition = "2021"
 
 [profile.release]
@@ -32,7 +32,7 @@ spl06-007 = { version = "0.3.3", optional = true }
 #ssdp = { git = "https://github.com/ssnover/ssdp-rs", branch = "feature/local-impl-of-ip-feature" }
 ssdp = { version="0.7.0", registry = "kellnr" }
 tokio = "1.38.0"
-url = "2.5.0"
+url = "2.5.2"
 #weectrl = { git = "https://github.com/Hyperchaotic/weectrl" }
 weectrl = { version="2.0.2", registry = "kellnr" }
 yeelib_rs = "0.1.1"
