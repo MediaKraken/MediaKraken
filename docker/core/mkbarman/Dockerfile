@@ -26,7 +26,7 @@ RUN bash -c 'echo "deb https://apt.postgresql.org/pub/repos/apt bookworm-pgdg ma
 		libpq-dev \
 		libpython3-dev \
 		openssh-client \
-		postgresql-client-15 \
+		postgresql-client-16 \
 		python3 \
         python3-distutils \
 		rsync \
@@ -39,7 +39,7 @@ RUN bash -c 'echo "deb https://apt.postgresql.org/pub/repos/apt bookworm-pgdg ma
 
 # Set up some defaults for file/directory locations used in entrypoint.sh.
 ENV \
-	BARMAN_VERSION=3.10.0 \
+	BARMAN_VERSION=3.10.1 \
 	BARMAN_CRON_SRC=/private/cron.d \
 	BARMAN_DATA_DIR=/var/lib/barman \
 	BARMAN_LOG_DIR=/var/log/barman \
@@ -62,13 +62,14 @@ ENV \
     BARMAN_EXPORTER_CACHE_TIME=3600
 VOLUME ${BARMAN_DATA_DIR}
 
+RUN rm -rf /usr/lib/python3.11/EXTERNALLY-MANAGED
 COPY install_barman.sh /tmp/
 RUN /tmp/install_barman.sh && rm /tmp/install_barman.sh
 COPY barman.conf.template /etc/barman.conf.template
 COPY pg.conf.template /etc/barman/barman.d/pg.conf.template
 
 # Install barman exporter
-RUN pip install barman-exporter && mkdir /node_exporter
+RUN pip install --break-system-packages barman-exporter && mkdir /node_exporter
 VOLUME /node_exporter
 
 # Install the entrypoint script.  It will set up ssh-related things and then run
