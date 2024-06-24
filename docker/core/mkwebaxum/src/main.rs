@@ -169,21 +169,6 @@ async fn main() {
             .unwrap();
     }
 
-    // create crypto salt if needed
-    // TODO what was this for?
-    // this was for the db user password salt?
-    // but using gen_salt in postgresql to let it pick the salt
-    // if Path::new("/secure/data.zip").exists() == false {
-    //     // create the hash salt
-    //     if Path::new("/secure/data.zip").exists() == false {
-    //         let mut file_salt = File::create("/secure/data.zip").unwrap();
-    //         const CREDENTIAL_LEN: usize = digest::SHA512_OUTPUT_LEN;
-    //         let salt = [0u8; CREDENTIAL_LEN];
-    //         file_salt.write_all(&salt);
-    //     }
-    //     let salt = mk_lib_file::mk_read_file_data("/secure/data.zip");
-    // }
-
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
         .await
