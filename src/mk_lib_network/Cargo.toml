@@ -32,12 +32,12 @@ openweathermap_client = "0.4.0"
 phf = { version = "0.11.2", features = ["macros"] }
 pin-utils = "0.1.0"
 quickxml_to_serde = { version = "0.6.0", features = ["json_types"] }
-reqwest = { version = "0.11.27", default-features = false, features = [
+reqwest = { version = "0.12.5", default-features = false, features = [
     "json",
     "native-tls",
 ] }
-reqwest-middleware = "0.2.4"
-reqwest-retry = "0.2.3" # 0.3.0 breaks with jitter and base, but I can't find base
+reqwest-middleware = "0.3.1"
+reqwest-retry = "0.5.0"
 rss = "2.0.8"
 rsteam = "0.2.1"
 serde = { version = "1.0.203", features = ["derive"] }
