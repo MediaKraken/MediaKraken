@@ -70,7 +70,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .await
                     .unwrap();
                 } else if json_message["Type"].to_string() == "Youtube" {
-                    if validator::validate_url(json_message["URL"].to_string()) {
+                    if validator::ValidateUrl::validate_url(&json_message["URL"].to_string()) {
                         continue;
                         //println!("downloaded video to {:?}", rustube::download_best_quality(&json_message["URL"].to_string()).await.unwrap());
                     } else {
@@ -84,7 +84,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .output()
                         .unwrap();
                 } else if json_message["Type"].to_string() == "Twitch" {
-                    if validator::validate_url(json_message["URL"].to_string()) {
+                    if validator::ValidateUrl::validate_url(&json_message["URL"].to_string()) {
                         let _res = mk_lib_network::mk_lib_network::mk_download_file_from_url_tokio(
                             json_message["URL"].to_string(),
                             &json_message["Local Save Path"].to_string(),
