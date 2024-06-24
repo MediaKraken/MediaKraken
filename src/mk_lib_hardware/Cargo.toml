@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_hardware"
-version = "0.0.3"
+version = "0.0.4"
 edition = "2021"
 
 [profile.release]
@@ -10,7 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_network = { version="0.0.2", registry = "kellnr" }
+mk_lib_network = { version="0.0.3", registry = "kellnr" }
 
 futures = "0.3.30"
 futures-util = "0.3.30"

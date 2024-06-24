@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_network"
-version = "0.0.2"
+version = "0.0.3"
 edition = "2021"
 
 [profile.release]
@@ -10,7 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_file = { version="0.0.2", registry = "kellnr" }
+mk_lib_file = { version="0.0.3", registry = "kellnr" }
 
 cidr-utils = { version = "0.5.11", features = [
     "serde",
@@ -28,7 +28,7 @@ ldap3 = "0.11.4"
 lettre = "0.11.7"
 mini-telnet = "0.1.8"
 nonzero_ext = "0.3.0"
-openweathermap_client = "0.3.0"
+openweathermap_client = "0.4.0"
 phf = { version = "0.11.2", features = ["macros"] }
 pin-utils = "0.1.0"
 quickxml_to_serde = { version = "0.6.0", features = ["json_types"] }
