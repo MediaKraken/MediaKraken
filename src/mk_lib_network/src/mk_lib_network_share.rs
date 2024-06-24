@@ -38,10 +38,9 @@ pub async fn mk_network_share_scan_port_rustscan(
         .unwrap();
     let stdout = String::from_utf8(output.stdout).unwrap();
     let mut vec_share = Vec::new();
-    let mut ip_addr = String::new();
     for line in stdout.split("\n") {
         let text_line = &line.trim().to_string();
-        ip_addr = text_line.split(" ").next().unwrap().to_string();
+        let ip_addr = text_line.split(" ").next().unwrap().to_string();
         if text_line.contains("445") == true {
             // smb share
             vec_share.extend(
@@ -132,9 +131,6 @@ pub async fn mk_network_share_smb_detail(
                 for share_ndx in 0..v.as_array().unwrap().len() {
                     if v[share_ndx]["@key"].to_string().contains("$") {
                     } else {
-                        // println!("path: {}", v[share_ndx]["@key"]);
-                        // println!("elem: {}", v[share_ndx]["elem"]);
-                        // println!("elem: {}", v[share_ndx]["elem"][1]["#text"]);
                         let share_data = NMAPShareList {
                             mm_share_type: "smb".to_string(),
                             mm_share_ip: format!("{:?}", ip_addr).parse().unwrap(),
@@ -191,25 +187,3 @@ pub async fn mk_network_share_nfs_detail(
     }
     Ok(vec_share)
 }
-
-// use scan port above as it'll be way faster!
-// pub async fn mk_network_share_scan(
-//     subnet_prefix: String,
-// ) -> Result<Vec<NMAPShareList>, Box<dyn std::error::Error>> {
-//     let subnets = Ipv4Subnets::new(
-//         format!("{}.1", subnet_prefix).parse().unwrap(),
-//         format!("{}.255", subnet_prefix).parse().unwrap(),
-//         32,
-//     );
-//     println!("Subnets: {:?}", subnets);
-//     let mut vec_share = Vec::new();
-//     for ip_address in subnets.enumerate() {
-//         println!("IP Addr: {:?}", ip_address.1);
-//         // scan for smb
-//         vec_share.extend(mk_network_share_smb_detail(ip_address.1).await.unwrap());
-//         // scan for nfs
-//         vec_share.extend(mk_network_share_nfs_detail(ip_address.1).await.unwrap());
-//     }
-//     //println!("Vec: {:?}", vec_share);
-//     Ok(vec_share)
-// }

@@ -121,10 +121,6 @@ pub async fn user_media_movie_detail(
 }
 
 /*
-@blueprint_user_movie.route('/user_movie_detail/<guid>', methods=['GET', 'POST'])
-@common_global.jinja_template.template('bss_user/media/bss_user_media_movie_detail.html')
-@common_global.auth.login_required(user_keyword='user')
-pub async fn url_bp_user_movie_detail(request, user, guid):
     """
     Display move detail page
     """
@@ -318,7 +314,6 @@ pub async fn url_bp_user_movie_detail(request, user, guid):
         #     pass
 
         # find all devices to playback media on
-        // TODO have reactor return client list?
         playback_devices = []
         for device_item in await request.app.db_functions.db_device_list(
                 db_connection=db_connection):
@@ -339,6 +334,5 @@ pub async fn url_bp_user_movie_detail(request, user, guid):
             # data_watched_status=watched_status,
             # data_sync_status=sync_status
         }
-    await request.app.db_pool.release(db_connection)
 
  */

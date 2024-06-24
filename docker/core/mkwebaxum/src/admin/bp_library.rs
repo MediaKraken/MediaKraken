@@ -148,17 +148,6 @@ pub async fn admin_library_share_scan(
 
 /*
 
-@blueprint_admin_library.route('/admin_library_by_id', methods=['POST'])
-@common_global.auth.login_required
-pub async fn url_bp_admin_library_by_id(request):
-    db_connection = await request.app.db_pool.acquire()
-    result = await request.app.db_functions.db_library_path_by_uuid(request.form['id'],
-                                                                    db_connection=db_connection)
-    await request.app.db_pool.release(db_connection)
-    return json.dumps({'Id': result['mm_media_dir_guid'],
-                       'Path': result['mm_media_dir_path'],
-                       'Media Class': result['mm_media_dir_class_type']})
-
 @blueprint_admin_library.route("/admin_library_edit", methods=["GET", "POST"])
 @common_global.jinja_template.template('bss_admin/bss_admin_library_edit.html')
 @common_global.auth.login_required
@@ -199,7 +188,6 @@ pub async fn url_bp_admin_library_edit(request):
                 # which will break docker swarm....when master moves
                 # # smb/cifs mounts
                 # else if request.form['library_path'][0:3] == "smb":
-                #     // TODO
                 #     smb_stuff = common_network_cifs.CommonCIFSShare()
                 #     smb_stuff.com_cifs_connect(
                 #         ip_addr, user_name='guest', user_password='')

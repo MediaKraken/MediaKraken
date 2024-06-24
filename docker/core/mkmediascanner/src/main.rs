@@ -62,12 +62,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 .unwrap()
             {
                 let share_info: mk_lib_database::mk_lib_database_network_share::DBShareList =
-            mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_detail(
-                &sqlx_pool,
-                row_data.mm_media_dir_share_guid,
-            )
-            .await
-            .unwrap();
+                    mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_detail(
+                    &sqlx_pool,
+                    row_data.mm_media_dir_share_guid,
+                )
+                .await
+                .unwrap();
                 // TODO handle NFS shares as well
                 // log into share via smbclient
                 let smb_client = mk_lib_file::mk_lib_smb::mk_file_smb_client_connect(share_info);
@@ -325,12 +325,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         file_data.remove(0);
                                     }
                                     total_scanned += 1;
-                                    // let _result = mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_status_update(&sqlx_pool,
-                                    //                                                                         row_data.mm_media_dir_guid,
-                                    //                                                                         json!({"Status": format!("File scan: {:?}/{:?}",
-                                    //                                                                             total_scanned.to_formatted_string(&Locale::en),
-                                    //                                                                                     total_file_in_dir.to_formatted_string(&Locale::en)),
-                                    //                                                                         "Pct": (total_scanned / total_file_in_dir) * 100})).await;
                                     // end of for loop for each file in library
                                     // set to none so it doesn't show up anymore in admin status page
                                     mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_status_update(
