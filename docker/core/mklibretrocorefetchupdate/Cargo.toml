@@ -18,7 +18,7 @@ codegen-units = 1
 [dependencies]
 mk_lib_compression = { version = "0.0.2", registry = "kellnr" }
 mk_lib_hash = { version = "0.0.2", registry = "kellnr" }
-mk_lib_network = { version = "0.0.2", registry = "kellnr" }
+mk_lib_network = { version = "0.0.3", registry = "kellnr" }
 mk_lib_rabbitmq = { version = "0.0.2", registry = "kellnr" }
 
 chrono = { version = "0.4.38", features = ["serde"] }
