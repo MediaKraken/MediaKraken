@@ -17,7 +17,7 @@ codegen-units = 1
 
 [dependencies]
 mk_lib_database = { version = "0.0.19", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.2", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.3", registry = "kellnr" }
 
 chrono = { version = "0.4.38", features = ["serde"] }
 serde_json = "1.0.117"
