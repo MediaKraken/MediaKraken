@@ -44,22 +44,10 @@ pub async fn mk_data_from_url_to_json_custom_headers(
 pub async fn mk_data_from_url_to_json(
     url: String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    // let retry_policy = reqwest_retry::policies::ExponentialBackoff {
-    //     // How many times the policy will tell the middleware to retry the request.
-    //     max_n_retries: 100,
-    //     min_retry_interval: std::time::Duration::from_secs(30),
-    //     max_retry_interval: std::time::Duration::from_secs(300),
-    //     backoff_exponent: 2,
-    // };
-    // let retry_transient_middleware = RetryTransientMiddleware::new_with_policy(retry_policy);
-    // let client = ClientBuilder::new(Client::new())
-    //     .with(retry_transient_middleware)
-    //     .build();
     let retry_policy = ExponentialBackoff::builder().build_with_max_retries(100);
     let client = ClientBuilder::new(reqwest::Client::new())
         .with(RetryTransientMiddleware::new_with_policy(retry_policy))
         .build();
-    //let client = reqwest::Client::builder().build()?;
     let res: serde_json::Value = client
         .get(url)
         .timeout(Duration::from_secs(30))

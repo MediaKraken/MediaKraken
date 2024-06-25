@@ -1,7 +1,7 @@
 use chrono::prelude::*;
 use reqwest::Client;
 use reqwest_middleware::ClientBuilder;
-use reqwest_retry::RetryTransientMiddleware;
+use reqwest_retry::{RetryTransientMiddleware, policies::ExponentialBackoff};
 
 pub async fn mk_logging_post_elk(
     message_type: &str,
@@ -10,20 +10,11 @@ pub async fn mk_logging_post_elk(
     let utc: DateTime<Utc> = Utc::now();
     let data = serde_json::json!({"@timestamp": utc.format("%Y-%m-%dT%H:%M:%S.%f").to_string(),
         "message": message_text, "type": message_type, "user": {"id": "metaman"}});
-    let retry_policy = reqwest_retry::policies::ExponentialBackoff {
-        // How many times the policy will tell the middleware to retry the request.
-        max_n_retries: 100,
-        min_retry_interval: std::time::Duration::from_secs(30),
-        max_retry_interval: std::time::Duration::from_secs(300),
-        backoff_exponent: 2,
-        //jitter:  retry_policies::Jitter::Bounded,
-    };
-    let retry_transient_middleware = RetryTransientMiddleware::new_with_policy(retry_policy);
-    let client = ClientBuilder::new(Client::new())
-        .with(retry_transient_middleware)
+    let retry_policy = ExponentialBackoff::builder().build_with_max_retries(100);
+    let client = ClientBuilder::new(reqwest::Client::new())
+        .with(RetryTransientMiddleware::new_with_policy(retry_policy))
         .build();
-    //let client = reqwest::Client::new();
-    let echo_json = client
+    let echo_json: serde_json::Value = client
         .post(format!(
             "http://mkstack_elk:9200/{}/_doc",
             std::env::current_exe()
@@ -39,7 +30,5 @@ pub async fn mk_logging_post_elk(
         .await?
         .json()
         .await?;
-    //println!("{:#?}", data);
-    //println!("{:#?}", echo_json);
     Ok(echo_json)
 }
