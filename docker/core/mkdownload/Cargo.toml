@@ -31,7 +31,7 @@ serde_json = "1.0.117"
 stdext = "0.3.3"
 sys-info = "0.9.1"
 tokio = { version = "1.38.0", features = ["full"] }
-uuid = { version = "1.8.0", features = ["serde", "v4"] }
+uuid = { version = "1.9.1", features = ["serde", "v4"] }
 validator = { version = "0.18.1", features = ["derive"] }
 
 

@@ -50,7 +50,7 @@ twitch_api = { version = "0.7.0-rc.6", features = [
     "twitch_oauth2",
 ] }
 twitch_oauth2 = "0.13.0"
-uuid = { version = "1.8.0", features = ["serde", "v4"] }
+uuid = { version = "1.9.1", features = ["serde", "v4"] }
 vimeo-rs = { version = "0.2.1" }
 
 [features]
