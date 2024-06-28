@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.34.0 (cbf2835db)
+  labels:
+    io.kompose.service: mkstack-portaineragent
+  name: mkstack-portaineragent
+spec:
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-portaineragent
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mkstack-portaineragent
+    spec:
+      containers:
+        - env:
+            - name: AGENT_CLUSTER_ADDR
+              value: tasks.portaineragent
+          image: portainer/agent:linux-amd64-2.19.5-alpine
+          name: mkstack-portaineragent
+      restartPolicy: Always

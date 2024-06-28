@@ -16,7 +16,7 @@ pub async fn mk_logging_post_elk(
         .build();
     let echo_json: serde_json::Value = client
         .post(format!(
-            "http://mkstack_elk:9200/{}/_doc",
+            "http://mkstack-elk:9200/{}/_doc",
             std::env::current_exe()
                 .expect("Can't get the exec path")
                 .file_name()

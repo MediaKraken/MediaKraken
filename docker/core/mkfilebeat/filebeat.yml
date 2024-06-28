@@ -14,7 +14,7 @@ processors:
     host: "unix:///var/run/docker.sock"
 
 output.elasticsearch:
-  hosts: '${ELASTICSEARCH_HOSTS:mkstack_elk:9200}'
+  hosts: '${ELASTICSEARCH_HOSTS:mkstack-elk:9200}'
 
 filebeat.inputs:
   - type: log 

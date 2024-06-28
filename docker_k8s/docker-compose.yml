@@ -1,0 +1,814 @@
+---
+
+services:
+  # cadvisor:
+  #   # https://github.com/google/cadvisor
+  #   image: gcr.io/cadvisor/cadvisor:v0.47.2
+  #   hostname: '{{.Node.ID}}'
+  #   volumes:
+  #     - /:/rootfs:ro
+  #     - /var/run:/var/run:rw
+  #     - /sys:/sys:ro
+  #     - /var/lib/docker/:/var/lib/docker:ro
+  #   networks:
+  #     - portaineragent_agent_network
+  #   deploy:
+  #     mode: global
+
+  mkstack-certbot:
+    # https://github.com/certbot/certbot/releases
+    image: certbot/certbot:v2.8.0
+    deploy:
+      mode: replicated
+      replicas: 0 # TODO renable after testing via mkcode
+  
+  mkstack-cron:
+    image: mediakraken/mkcron:dev
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack-database:5432, mkstack-rabbitmq:5672
+      - WAIT_TIMEOUT=180
+    command: sh -c "/wait && /mkcron"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    deploy:
+      mode: replicated
+      replicas: 0 # TODO renable after testing via mkcode
+    networks:
+      - mediakraken_network
+
+  # Postgresql server
+  mkstack-database:
+    image: mediakraken/mkdatabase:dev
+    environment:
+      - MAX_CONNECTIONS=125
+      - MAX_WAL_SENDERS=10
+      # - MAX_WAL_SIZE=16GB  This parameter can only be set in the postgresql.conf file or on the server command line.
+      - SHARED_BUFFERS=4096MB
+      - WORK_MEM=64MB
+      - MAX_WORKER_PROCESSES=8
+      - MAX_PARALLEL_WORKERS_PER_GATHER=2
+      - MAX_PARALLEL_WORKERS=8
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+      #- POSTGRES_INITDB_ARGS=--auth-host=trust  # for debug only
+      #- POSTGRES_INITDB_ARGS="--locale-provider=icu --icu-locale=en --auth-host=trust"   initdb: error: unrecognized locale provider: icu --icu-locale=en --auth-host=trust
+    command: postgres -c shared_preload_libraries=citus -c max_wal_size=16GB -c tcp_keepalives_idle=86400 -c config_file=/usr/local/share/postgresql/postgresql.conf.sample
+    ports: # for debugging only!!!!!
+      - "5432:5432"
+    secrets:
+      - db_password
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    deploy:
+      mode: replicated
+      replicas: 1
+    volumes:
+      - mediakraken_vol_postgresql:/var/lib/postgresql/data
+      - mediakraken_vol_postgresql_backup:/mediakraken/backup
+      - ./backups:/backups
+    networks:
+      - mediakraken_network
+
+  mkstack-download:
+    image: mediakraken/mkdownload:dev
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack-database:5432, mkstack-rabbitmq:5672
+      - WAIT_TIMEOUT=180
+    command: sh -c "/wait && /mkdownload"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      - mediakraken_vol_comics:/Comics
+      - mediakraken_vol_static:/mediakraken/static
+    deploy:
+      mode: replicated
+      replicas: 1
+    networks:
+      - mediakraken_network
+
+  mkstack-elk:
+    # https://hub.docker.com/r/sebp/elk/
+    image: sebp/elk:oss-8.11.1
+    environment:
+      - ELASTICSEARCH_START=1
+      - LOGSTASH_START=1
+      - KIBANA_START=1
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    volumes:
+      - mediakraken_vol_elk:/var/lib/elasticsearch      
+    networks:
+      - mediakraken_network
+    ports:
+      #- "5000:5000"
+      #- "5044:5044"
+      - "5601:5601"
+      #- "9200:9200"
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mkstack-filebeat:
+    # https://www.docker.elastic.co/r/beats
+    image: docker.elastic.co/beats/filebeat-oss:8.11.3
+    environment:
+      - ELASTICSEARCH_HOSTS=mkstack-elk:9200
+      - KIBANA_HOSTS=mkstack-elk:5601
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # - mediakraken_vol_postgresql_logging:/var/log/postgresql:ro
+      # - mediakraken_vol_nginx:/var/log/mediakraken/nginx:ro
+    deploy:
+      mode: global
+
+  mkstack-gamesdbnetfetchbulk:
+    image: mediakraken/mkgamesdbnetfetchbulk:dev
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack-database:5432, mkstack-rabbitmq:5672
+      - WAIT_TIMEOUT=180
+    command: sh -c "/wait && /mkgamesdbnetfetchbulk"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      - mediakraken_vol_static:/static
+    deploy:
+      mode: replicated
+      replicas: 1
+    networks:
+      - mediakraken_network
+
+  mkstack-globalcache:
+    image: mediakraken/mkglobalcache:dev
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack-database:5432, mkstack-rabbitmq:5672
+      - WAIT_TIMEOUT=180
+    command: sh -c "/wait && /mkglobalcache"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mkstack-grafana:
+    image: grafana/grafana-oss:10.0.10
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=metaman
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=redis-datasource
+    ports:
+      - "3000:3000"
+    volumes:
+      - mediakraken_vol_grafana:/var/lib/grafana
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mkstack-guessitrest:
+    image: mediakraken/mkguessitrest:dev
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mkstack-hardwarecontrol:
+    image: mediakraken/mkhardwarecontrol:dev
+    volumes:
+      # TODO why not store this in the db with the device as postgresql crypt
+      # this stores the "push button" key
+      - mediakraken_vol_phue:/mediakraken/phue
+    environment:
+      - WAIT_HOSTS=mkstack-database:5432, mkstack-rabbitmq:5672
+      - WAIT_TIMEOUT=180
+    command: sh -c "/wait && /mkhardwarecontrol"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mkstack-hardwarescanner:
+    image: mediakraken/mkhardwarescanner:dev
+    secrets:
+      - db_password    
+    volumes:
+      # TODO why not store this in the db with the device as postgresql crypt
+      # this stores the "push button" key
+      - mediakraken_vol_phue:/mediakraken/phue
+    environment:
+      - WAIT_HOSTS=mkstack-database:5432, mkstack-rabbitmq:5672
+      - WAIT_TIMEOUT=180
+    command: sh -c "/wait && /mkhardwarescanner"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mkstack-inotify:
+    image: mediakraken/mkinotify:dev
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack-database:5432, mkstack-rabbitmq:5672
+      - WAIT_TIMEOUT=180
+    command: sh -c "/wait && /mkinotify"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mkstack-libretrocorefetchupdate:
+    image: mediakraken/mklibretrocorefetchupdate:dev
+    environment:
+      - WAIT_HOSTS=mkstack-rabbitmq:5672
+      - WAIT_TIMEOUT=180
+    command: sh -c "/wait && /mklibretrocorefetchupdate"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      - mediakraken_vol_emulation:/mediakraken/emulation    
+      - mediakraken_vol_static:/mediakraken/static
+    deploy:
+      mode: replicated
+      replicas: 1
+    networks:
+      - mediakraken_network
+  
+  mkstack-mediascanner:
+    image: mediakraken/mkmediascanner:dev
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack-database:5432, mkstack-rabbitmq:5672
+      - WAIT_TIMEOUT=180
+    command: sh -c "/wait && /mkmediascanner"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      - mediakraken_vol_static:/mediakraken/static
+    deploy:
+      mode: replicated
+      replicas: 1
+    networks:
+      - mediakraken_network
+
+  mkstack-metadata:
+    image: mediakraken/mkmetadata:dev
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack-database:5432, mkstack-rabbitmq:5672
+      - WAIT_TIMEOUT=180
+    command: sh -c "/wait && /mkmetadata"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      #- ./mkmount:/mediakraken/mnt
+      # stores posters/etc so webserver can present
+      - mediakraken_vol_static:/mediakraken/static
+      # stores the xml/json xref files for anime match
+      - mediakraken_vol_cache:/mediakraken/cache
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 0 # TODO renable after testing via mkcode
+
+  mkstack-metadatamame:
+    image: mediakraken/mkmetadatamame:dev
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack-database:5432, mkstack-rabbitmq:5672
+      - WAIT_TIMEOUT=180
+    command: sh -c "/wait && /mkmetadatamame"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      - mediakraken_vol_emulation:/mediakraken/emulation
+      # stores posters/etc so webserver can present
+      - mediakraken_vol_static:/mediakraken/static
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  # Container to monitor services running inside other containers
+  # mkstack-metricbeat:
+  #   # https://www.docker.elastic.co/r/beats/metricbeat-oss
+  #   image: docker.elastic.co/beats/metricbeat-oss:8.11.3
+  #   hostname: "{{.Node.Hostname}}-metricbeat"
+  #   networks:
+  #     - mediakraken_network
+  #   volumes:
+  #     - /proc:/hostfs/proc:ro
+  #     - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+  #     - /:/hostfs:ro
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - mediakraken_vol_metricbeat:/usr/share/metricbeat/data
+  #   environment:
+  #     - ELASTICSEARCH_HOST=mkstack-elk
+  #     - KIBANA_HOST=mkstack-elk
+  #   # disable strict permission checks
+  #   command: ["--strict.perms=false", "-system.hostfs=/hostfs"]
+  #   deploy:
+  #     mode: global
+
+  # runs the mumble chat server
+  mkstack-mumble:
+    image: mediakraken/mkchatmumble:dev
+    environment:
+      - SUPERUSER_PASSWORD=metaman
+      # - TZ=America/Phoenix   - left unset will default to UTC
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    ports:
+      - "64738:64738/tcp"
+      - "64738:64738/udp"
+    volumes:
+      - mediakraken_vol_mumble:/etc/mumble
+    deploy:
+      mode: replicated
+      replicas: 0
+
+  mkstack-multicast:
+    image: mediakraken/mkmulticast:dev
+    command: sh -c "/mkmulticast"
+    volumes:
+      # needed to get docker/swarm info
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mkstack-musicbrainz:
+    image: mediakraken/mkmusicbrainz:dev
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack-database:5432, mkstack-rabbitmq:5672
+      - WAIT_TIMEOUT=180
+    command: sh -c "/wait && /mkmusicbrainz"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      - mediakraken_vol_mbrainz_data:/mediakraken/mbdump
+      #- /home/spoot/mbdump:/mediakraken/mbdump
+    deploy:
+      mode: replicated
+      replicas: 0 # TODO renable after testing via mkcode
+    networks:
+      - mediakraken_network
+
+  mkstack-nut:
+    image: mediakraken/mknut:dev
+    environment:
+      - nut-upsd-password=/run/secrets/nut_password
+    secrets:
+      - nut_password
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    ports:
+      - "3493:3493"
+    deploy:
+      mode: replicated
+      replicas: 0
+    networks:
+      - mediakraken_network
+
+  mkstack-openlibrarynetfetchbulk:
+    image: mediakraken/mkopenlibrarynetfetchbulk:dev
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack-database:5432, mkstack-rabbitmq:5672
+      - WAIT_TIMEOUT=180
+    command: sh -c "/wait && /mkopenlibrarynetfetchbulk"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      - mediakraken_vol_openlibrary:/mediakraken
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mkstack-pgadmin:
+    image: dpage/pgadmin4:8.8
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    networks:
+      - mediakraken_network
+    ports:
+      - "5050:5050"
+    environment:
+      PGADMIN_LISTEN_PORT: 5050
+      PGADMIN_DEFAULT_EMAIL: spootdev@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: metaman
+      PGADMIN_DISABLE_POSTFIX: 1
+    volumes:
+      - mediakraken_vol_pgadmin:/var/lib/pgadmin
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mkstack-portainer:
+    image: portainer/portainer-ce:2.19.5-alpine
+    command: -H tcp://tasks.portaineragent:9001 --tlsskipverify
+    ports:
+      - "9000:9000"
+    volumes:
+      - mediakraken_vol_portainer_data:/data
+    networks:
+      - portaineragent_agent_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mkstack-portaineragent:
+    image: portainer/agent:linux-amd64-2.19.5-alpine
+    environment:
+      AGENT_CLUSTER_ADDR: tasks.portaineragent
+      # AGENT_PORT: 9001
+      # LOG_LEVEL: debug
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+    networks:
+      - portaineragent_agent_network
+    deploy:
+      mode: global
+
+  # https://github.com/prometheus-community/postgres_exporter
+  mkstack-postgres_exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.15.0
+    environment:
+      DATA_SOURCE_URI: mkstack-database:5432/postgres?sslmode=disable
+      DATA_SOURCE_USER: postgres
+      DATA_SOURCE_PASS_FILE : /run/secrets/db_password
+    secrets:
+      - db_password      
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  # https://prometheus.io/download/
+  # https://hub.docker.com/u/prom
+  mkstack-prometheus:
+    image: prom/prometheus:v2.45.2
+    ports:
+      - 9090:9090
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mkstack-rabbitconsume:
+    image: mediakraken/mkrabbitconsume:dev
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack-database:5432, mkstack-rabbitmq:5672
+      - WAIT_TIMEOUT=180
+    command: sh -c "/wait && /mkrabbitconsume"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      # so it can start docker containers
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mkstack-rabbitmq:
+    image: mediakraken/mkrabbitmq:dev
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+      - RABBITMQ_IO_THREAD_POOL_SIZE=256
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    ports:
+      - "5672:5672"  # for testing only!!!
+      # https management port
+      # - "15671:15671"
+      # http management port
+      - "15672:15672"
+    volumes:
+      - mediakraken_vol_rabbit:/var/lib/rabbitmq
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mkstack-redis:
+    # https://hub.docker.com/r/eqalpha/keydb
+    image: eqalpha/keydb:alpine_x86_64_v6.3.4
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      - mediakraken_vol_redis:/data
+    deploy:
+      mode: replicated
+      replicas: 1
+    networks:
+      - mediakraken_network
+
+  mkstack-schedulesdirectupdate:
+    image: mediakraken/mkschedulesdirectupdate:dev
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack-database:5432, mkstack-rabbitmq:5672
+      - WAIT_TIMEOUT=180
+    command: sh -c "/wait && /mkschedulesdirectupdate"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mkstack-sharescanner:
+    image: mediakraken/mksharescanner:dev
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack-database:5432, mkstack-rabbitmq:5672
+      - WAIT_TIMEOUT=180
+    command: sh -c "/wait && /mksharescanner"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  # runs the teamspeak3 chat server
+  mkstack-teamspeak:
+    image: mediakraken/mkchatteamspeak:dev
+    environment:
+      - TS3SERVER_LICENSE=accept
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    ports:
+      - "9987:9987/udp"
+      - "10011:10011"
+      - "30033:30033"
+    volumes:
+      - mediakraken_vol_teamspeak:/var/ts3server/
+    deploy:
+      mode: replicated
+      replicas: 0
+
+  mkstack-tmdbnetfetchbulk:
+    image: mediakraken/mktmdbnetfetchbulk:dev
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack-database:5432, mkstack-rabbitmq:5672
+      - WAIT_TIMEOUT=180
+    command: sh -c "/wait && /mktmdbnetfetchbulk"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mkstack-tmdbnetfetchupdate:
+    image: mediakraken/mktmdbnetfetchupdate:dev
+    secrets:
+      - db_password
+    environment:
+      - WAIT_HOSTS=mkstack-database:5432, mkstack-rabbitmq:5672
+      - WAIT_TIMEOUT=180
+    command: sh -c "/wait && /mktmdbnetfetchupdate"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mkstack-transcode:
+    image: mediakraken/mktranscode:dev
+    secrets:
+      - db_password
+    command: sh -c "/mktranscode"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    volumes:
+      - ./mkmount:/mediakraken/mnt:ro
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 0
+      restart_policy:
+        condition: none
+
+  mkstack-transmission:
+    image: mediakraken/mktransmission:dev
+    ports:
+      - "9091:9091"  # for testing only!
+      - "51413:51413/tcp"
+      - "51413:51413/udp"
+    volumes:
+      - mediakraken_vol_transmission:/etc/transmission-daemon
+      - mediakraken_vol_transmission_downloads:/transmission/downloads
+      - mediakraken_vol_transmission_incomplete:/transmission/incomplete
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mkstack-tvheadend:
+    image: mediakraken/mktvheadend:dev
+    secrets:
+      - db_password
+    command: sh -c "/mktvheadend"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: replicated
+      replicas: 0 # TODO renable after testing via mkcode
+
+  mkstack-vosk:
+    # https://hub.docker.com/u/alphacep
+    image: alphacep/kaldi-en:latest
+    ports:
+      - 2700:2700
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mkstack-webapp:
+    image: mediakraken/mkwebaxum:dev
+    secrets:
+      - db_password
+      - secure_key
+      - csrf_key
+    environment:
+      - WAIT_HOSTS=mkstack-database:5432, mkstack-rabbitmq:5672, mkstack-redis:6379
+      - WAIT_TIMEOUT=180
+      - LANG=en_US.UTF-8
+      - LC_ALL=en_US.UTF-8
+    command: sh -c "/wait && /mediakraken/mkwebapp"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    ports:
+      - "8900:8080"
+    volumes:
+      # must not be read only as it stores cache here
+      - mediakraken_vol_static:/mediakraken/static
+      - mediakraken_vol_certs:/mediakraken/certs
+      - mediakraken_vol_comics:/Comics
+      # needed to show docker/swarm info
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # this stores the "push button" key
+      - mediakraken_vol_phue:/phue
+      # server will generate salt/key
+      #- /var/opt/mediakraken/secure:/secure
+      # db backups
+      - mediakraken_vol_postgresql_backup:/backup
+    networks:
+      - mediakraken_network
+    deploy:
+      mode: global
+
+  mkstack-wireshark:
+    # https://hub.docker.com/r/linuxserver/wireshark/tags
+    image: linuxserver/wireshark:4.0.11
+    cap_add:
+      - NET_ADMIN
+    # security_opt:
+    #   - seccomp:unconfined
+    # network_mode: host
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+    volumes:
+      - mediakraken_vol_wireshark:/config
+    ports:
+      - 3001:3001 #optional https
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  # https://github.com/linuxserver/docker-wireguard
+  mkstack-wireguard:
+    image: lscr.io/linuxserver/wireguard:latest
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - SERVERURL=wireguard.domain.com
+      - SERVERPORT=51820
+      - PEERS=1
+      - PEERDNS=auto
+      - INTERNAL_SUBNET=10.13.13.0
+      - ALLOWEDIPS=0.0.0.0/0
+      - PERSISTENTKEEPALIVE_PEERS=all
+      - LOG_CONFS=true
+    volumes:
+      - mediakraken_vol_wireguard:/config
+      - /lib/modules:/lib/modules
+    ports:
+      - 51820:51820/udp
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1
+    deploy:
+      mode: replicated
+      replicas: 0 # TODO renable after testing via mkcode
+
+# Docker private networks
+networks:
+  portaineragent_agent_network:
+    driver: overlay
+  mediakraken_network:
+    driver: overlay
+
+volumes:
+  mediakraken_vol_cache:
+  mediakraken_vol_certs:
+  mediakraken_vol_comics:
+  mediakraken_vol_devices:
+  mediakraken_vol_elk:
+  mediakraken_vol_emulation:
+  mediakraken_vol_grafana:
+  mediakraken_vol_metricbeat:
+  mediakraken_vol_mbrainz_data:
+  mediakraken_vol_mumble:
+  mediakraken_vol_openlibrary:
+  mediakraken_vol_pgadmin:
+  mediakraken_vol_phue:
+  mediakraken_vol_portainer_data:
+  mediakraken_vol_postgresql:
+  mediakraken_vol_postgresql_backup:
+  mediakraken_vol_rabbit:
+  mediakraken_vol_redis:
+  mediakraken_vol_static:
+  mediakraken_vol_teamspeak:
+  mediakraken_vol_transmission:
+  mediakraken_vol_transmission_downloads:
+  mediakraken_vol_transmission_incomplete:
+  mediakraken_vol_wireguard:
+  mediakraken_vol_wireshark:
+
+secrets:
+  csrf_key:
+    external: true
+  db_password:
+    external: true
+  nut_password:
+    external: true
+  secure_key:
+    external: true

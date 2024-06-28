@@ -133,7 +133,7 @@ pub async fn user_media_movie_detail(
                  'Data': await
                  request.app.db_functions.db_read_media(guid, db_connection=db_connection)[
                      'mm_media_path']},
-                rabbit_host_name='mkstack_rabbitmq',
+                rabbit_host_name='mkstack-rabbitmq',
                 exchange_name='mkque_ex',
                 route_key='mkque')
             return redirect(

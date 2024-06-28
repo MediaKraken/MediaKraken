@@ -20,7 +20,7 @@ pub struct TorrentList {
 pub async fn mk_network_transmission_login() -> Result<transmission_rpc::TransClient> {
     let transmission_client = TransClient::with_auth(
         //"http://mkprod:9091/transmission/rpc".parse().unwrap(),
-        "http://mkstack_transmission:9091/transmission/rpc"
+        "http://mkstack-transmission:9091/transmission/rpc"
             .parse()
             .unwrap(),
         BasicAuth {

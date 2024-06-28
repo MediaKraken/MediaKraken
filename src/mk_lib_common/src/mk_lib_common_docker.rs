@@ -190,7 +190,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_mk_common_docker_container_inspect() {
-        let test_results = mk_common_docker_container_inspect("mkstack_example".to_string())
+        let test_results = mk_common_docker_container_inspect("mkstack-example".to_string())
             .await
             .unwrap();
         println!("Cont Inspect: {:?}", test_results);
@@ -204,7 +204,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_mk_common_docker_container_logs() {
-        let test_results = mk_common_docker_container_logs("mkstack_example".to_string())
+        let test_results = mk_common_docker_container_logs("mkstack-example".to_string())
             .await
             .unwrap();
         println!("Cont Logs: {:?}", test_results);
@@ -212,7 +212,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_mk_common_docker_container_stats() {
-        let test_results = mk_common_docker_container_stats("mkstack_example".to_string())
+        let test_results = mk_common_docker_container_stats("mkstack-example".to_string())
             .await
             .unwrap();
         println!("Cont Stats: {:?}", test_results);
@@ -220,7 +220,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_mk_common_docker_service_inspect() {
-        let test_results = mk_common_docker_service_inspect("mkstack_example".to_string())
+        let test_results = mk_common_docker_service_inspect("mkstack-example".to_string())
             .await
             .unwrap();
         println!("Service Inspect: {:?}", test_results);
@@ -234,7 +234,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_mk_common_docker_service_logs() {
-        let test_results = mk_common_docker_service_logs("mkstack_example".to_string())
+        let test_results = mk_common_docker_service_logs("mkstack-example".to_string())
             .await
             .unwrap();
         println!("Service Logs: {:?}", test_results);
@@ -242,7 +242,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_mk_common_docker_volume_inspect() {
-        let test_results = mk_common_docker_volume_inspect("mkstack_example".to_string())
+        let test_results = mk_common_docker_volume_inspect("mkstack-example".to_string())
             .await
             .unwrap();
         println!("Volume Inspect: {:?}", test_results);

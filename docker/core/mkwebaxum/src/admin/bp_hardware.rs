@@ -67,7 +67,7 @@ pub async fn url_bp_admin_hardware(request):
     if request.method == 'POST':
         # submit the message
         common_network_pika.com_net_pika_send({'Type': 'Hardware Scan'},
-                                              rabbit_host_name='mkstack_rabbitmq',
+                                              rabbit_host_name='mkstack-rabbitmq',
                                               exchange_name='mkque_hardware_ex',
                                               route_key='mkhardware')
         request['flash']("Scheduled hardware scan.", "success")

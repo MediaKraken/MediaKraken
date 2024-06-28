@@ -26,7 +26,7 @@ pub async fn mk_lib_database_open_pool(pool_connections: u32, connection_timeout
     } else if Path::new("/run/secrets/db_password").exists() {
         let db_pass = fs::read_to_string("/run/secrets/db_password").unwrap();
         connection_string = format!(
-            "postgresql://postgres:{}@mkstack_database/postgres?sslmode=disable",
+            "postgresql://postgres:{}@mkstack-database/postgres?sslmode=disable",
             encode(&db_pass)
         );
     } else {

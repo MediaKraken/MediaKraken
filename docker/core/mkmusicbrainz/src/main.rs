@@ -37,7 +37,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let _output = Command::new("psql")
                     .args([
                         "-h",
-                        "mkstack_database",
+                        "mkstack-database",
                         "-U",
                         "postgres",
                         "-f",
@@ -49,7 +49,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let _output = Command::new("psql")
                     .args([
                         "-h",
-                        "mkstack_database",
+                        "mkstack-database",
                         "-U",
                         "postgres",
                         "-f",
@@ -62,7 +62,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let _output = Command::new("psql")
                     .args([
                         "-h",
-                        "mkstack_database",
+                        "mkstack-database",
                         "-U",
                         "postgres",
                         "-f",
@@ -76,7 +76,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let _output = Command::new("psql")
                     .args([
                         "-h",
-                        "mkstack_database",
+                        "mkstack-database",
                         "-U",
                         "postgres",
                         "-f",
@@ -90,7 +90,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // let _output = Command::new("psql")
                 //     .args([
                 //         "-h",
-                //         "mkstack_database",
+                //         "mkstack-database",
                 //         "-U",
                 //         "postgres",
                 //         "-f",
@@ -117,7 +117,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         let output = Command::new("psql")
                             .args([
                                 "-h",
-                                "mkstack_database",
+                                "mkstack-database",
                                 "-d",
                                 "postgres",
                                 "-U",
@@ -142,7 +142,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             let output = Command::new("psql")
                                 .args([
                                     "-h",
-                                    "mkstack_database",
+                                    "mkstack-database",
                                     "-d",
                                     "postgres",
                                     "-U",
@@ -164,7 +164,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let _output = Command::new("psql")
                     .args([
                         "-h",
-                        "mkstack_database",
+                        "mkstack-database",
                         "-U",
                         "postgres",
                         "-f",
@@ -177,7 +177,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // let _output = Command::new("psql")
                 //     .args([
                 //         "-h",
-                //         "mkstack_database",
+                //         "mkstack-database",
                 //         "-U",
                 //         "postgres",
                 //         "-f",
@@ -189,7 +189,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let _output = Command::new("psql")
                     .args([
                         "-h",
-                        "mkstack_database",
+                        "mkstack-database",
                         "-U",
                         "postgres",
                         "-f",
@@ -202,7 +202,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // let _output = Command::new("psql")
                 //     .args([
                 //         "-h",
-                //         "mkstack_database",
+                //         "mkstack-database",
                 //         "-U",
                 //         "postgres",
                 //         "-f",

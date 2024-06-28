@@ -28,7 +28,7 @@ async fn main() {
     // let output = Command::new("psql")
     //     .args([
     //         // "-h",
-    //         // "mkstack_database",
+    //         // "mkstack-database",
     //         "-d",
     //         "postgres",
     //         "-U",

@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.34.0 (cbf2835db)
+  labels:
+    io.kompose.service: mkstack-pgadmin
+  name: mkstack-pgadmin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-pgadmin
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.34.0 (cbf2835db)
+      labels:
+        io.kompose.service: mkstack-pgadmin
+    spec:
+      containers:
+        - env:
+            - name: PGADMIN_DEFAULT_EMAIL
+              value: spootdev@gmail.com
+            - name: PGADMIN_DEFAULT_PASSWORD
+              value: metaman
+            - name: PGADMIN_DISABLE_POSTFIX
+              value: "1"
+            - name: PGADMIN_LISTEN_PORT
+              value: "5050"
+          image: dpage/pgadmin4:8.8
+          name: mkstack-pgadmin
+          ports:
+            - containerPort: 5050
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /var/lib/pgadmin
+              name: mediakraken-vol-pgadmin
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: mediakraken-vol-pgadmin
+          persistentVolumeClaim:
+            claimName: mediakraken-vol-pgadmin

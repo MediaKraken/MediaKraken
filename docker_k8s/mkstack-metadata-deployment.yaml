@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.34.0 (cbf2835db)
+  labels:
+    io.kompose.service: mkstack-metadata
+  name: mkstack-metadata
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-metadata
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.34.0 (cbf2835db)
+      labels:
+        io.kompose.service: mkstack-metadata
+    spec:
+      containers:
+        - args:
+            - sh
+            - -c
+            - /wait && /mkmetadata
+          env:
+            - name: WAIT_HOSTS
+              value: mkstack-database:5432, mkstack-rabbitmq:5672
+            - name: WAIT_TIMEOUT
+              value: "180"
+          image: mediakraken/mkmetadata:dev
+          name: mkstack-metadata
+          volumeMounts:
+            - mountPath: /run/secrets
+              name: db-password
+              subPath: db-password
+            - mountPath: /mediakraken/static
+              name: mediakraken-vol-static
+            - mountPath: /mediakraken/cache
+              name: mediakraken-vol-cache
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: db-password
+          secret:
+            items:
+              - key: db-password
+                path: db-password
+            secretName: db-password
+        - name: mediakraken-vol-static
+          persistentVolumeClaim:
+            claimName: mediakraken-vol-static
+        - name: mediakraken-vol-cache
+          persistentVolumeClaim:
+            claimName: mediakraken-vol-cache

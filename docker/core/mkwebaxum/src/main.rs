@@ -178,7 +178,7 @@ async fn main() {
             .await;
 
     // let client =
-    //     redis::Client::open("redis://default:@mkstack_redis:6379/0").expect("Error while tryiong to open the redis connection");
+    //     redis::Client::open("redis://default:@mkstack-redis:6379/0").expect("Error while tryiong to open the redis connection");
     // let redis_pool = RedisPool::from(client);
     // let session_config = SessionConfig::default();
     // let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
@@ -543,7 +543,7 @@ async fn proxy_transmission_handler(
         .path_and_query()
         .map(|v| v.as_str())
         .unwrap_or(path);
-    let uri = format!("https://mkstack_transmission:9091{}", path_query);
+    let uri = format!("https://mkstack-transmission:9091{}", path_query);
     *req.uri_mut() = Uri::try_from(uri).unwrap();
     Ok(client
         .request(req)
