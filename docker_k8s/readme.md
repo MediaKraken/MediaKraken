@@ -164,4 +164,4 @@ https://dl.k8s.io/release/v1.30.0/bin/windows/amd64/kubectl.exe
 # setup mediakraken
 kubectl create namespace mediakraken
 
-
+kubectl apply -f https://raw.githubusercontent.com/MediaKraken/MediaKraken/dev/docker_k8s/mkstack-multicast-deployment.yaml
