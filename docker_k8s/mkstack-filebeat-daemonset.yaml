@@ -7,6 +7,7 @@ metadata:
   labels:
     io.kompose.service: mkstack-filebeat
   name: mkstack-filebeat
+  namespace: mediakraken
 spec:
   selector:
     matchLabels:

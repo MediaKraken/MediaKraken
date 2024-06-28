@@ -7,6 +7,7 @@ metadata:
   labels:
     io.kompose.service: mkstack-redis
   name: mkstack-redis
+  namespace: mediakraken
 spec:
   replicas: 1
   selector:

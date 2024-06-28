@@ -7,6 +7,7 @@ metadata:
   labels:
     io.kompose.service: mkstack-wireguard
   name: mkstack-wireguard
+  namespace: mediakraken
 spec:
   replicas: 1
   selector:

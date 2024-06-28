@@ -7,6 +7,7 @@ metadata:
   labels:
     io.kompose.service: mkstack-openlibrarynetfetchbulk
   name: mkstack-openlibrarynetfetchbulk
+  namespace: mediakraken
 spec:
   replicas: 1
   selector:

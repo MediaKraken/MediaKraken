@@ -7,6 +7,7 @@ metadata:
   labels:
     io.kompose.service: mkstack-rabbitmq
   name: mkstack-rabbitmq
+  namespace: mediakraken
 spec:
   replicas: 1
   selector:
