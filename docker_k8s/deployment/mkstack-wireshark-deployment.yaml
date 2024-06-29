@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mkstack-wireshark
+  name: mkstack-wireshark
+  namespace: mediakraken
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-wireshark
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mkstack-wireshark
+    spec:
+      containers:
+        - env:
+            - name: PGID
+              value: "1000"
+            - name: PUID
+              value: "1000"
+            - name: TZ
+              value: Etc/UTC
+          image: linuxserver/wireshark:4.0.11
+          name: mkstack-wireshark
+          ports:
+            - containerPort: 3001
+              protocol: TCP
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+          volumeMounts:
+            - mountPath: /config
+              name: mediakraken-vol-wireshark
+      restartPolicy: Always
+      volumes:
+        - name: mediakraken-vol-wireshark
+          persistentVolumeClaim:
+            claimName: mediakraken-vol-wireshark

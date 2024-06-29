@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mkstack-guessitrest
+  name: mkstack-guessitrest
+  namespace: mediakraken
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-guessitrest
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mkstack-guessitrest
+    spec:
+      containers:
+        - image: mediakraken/mkguessitrest:dev
+          name: mkstack-guessitrest
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30

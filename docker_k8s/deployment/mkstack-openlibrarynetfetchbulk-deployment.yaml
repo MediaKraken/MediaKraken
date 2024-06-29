@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mkstack-openlibrarynetfetchbulk
+  name: mkstack-openlibrarynetfetchbulk
+  namespace: mediakraken
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-openlibrarynetfetchbulk
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mkstack-openlibrarynetfetchbulk
+    spec:
+      containers:
+        - args:
+            - sh
+            - -c
+            - /wait && /mkopenlibrarynetfetchbulk
+          env:
+            - name: WAIT_HOSTS
+              value: mkstack-database:5432, mkstack-rabbitmq:5672
+            - name: WAIT_TIMEOUT
+              value: "180"
+          image: mediakraken/mkopenlibrarynetfetchbulk:dev
+          name: mkstack-openlibrarynetfetchbulk
+          volumeMounts:
+            - mountPath: /run/secrets
+              name: db-password
+              subPath: db-password
+            - mountPath: /mediakraken
+              name: mediakraken-vol-openlibrary
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: db-password
+          secret:
+            items:
+              - key: db-password
+                path: db-password
+            secretName: db-password
+        - name: mediakraken-vol-openlibrary
+          persistentVolumeClaim:
+            claimName: mediakraken-vol-openlibrary

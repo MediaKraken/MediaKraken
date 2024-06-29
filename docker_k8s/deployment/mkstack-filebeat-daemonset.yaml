@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    io.kompose.service: mkstack-filebeat
+  name: mkstack-filebeat
+  namespace: mediakraken
+spec:
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-filebeat
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mkstack-filebeat
+    spec:
+      containers:
+        - env:
+            - name: ELASTICSEARCH_HOSTS
+              value: mkstack-elk:9200
+            - name: KIBANA_HOSTS
+              value: mkstack-elk:5601
+          image: docker.elastic.co/beats/filebeat-oss:8.11.3
+          name: mkstack-filebeat
+      restartPolicy: Always

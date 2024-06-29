@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mkstack-vosk
+  name: mkstack-vosk
+  namespace: mediakraken
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-vosk
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mkstack-vosk
+    spec:
+      containers:
+        - image: alphacep/kaldi-en:latest
+          name: mkstack-vosk
+          ports:
+            - containerPort: 2700
+              protocol: TCP
+      restartPolicy: Always

@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mkstack-certbot
+  name: mkstack-certbot
+  namespace: mediakraken
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-certbot
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mkstack-certbot
+    spec:
+      containers:
+        - image: certbot/certbot:v2.8.0
+          name: mkstack-certbot
+      restartPolicy: Always

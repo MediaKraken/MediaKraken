@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mkstack-mumble
+  name: mkstack-mumble
+  namespace: mediakraken
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-mumble
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mkstack-mumble
+    spec:
+      containers:
+        - env:
+            - name: SUPERUSER_PASSWORD
+              value: metaman
+          image: mediakraken/mkchatmumble:dev
+          name: mkstack-mumble
+          ports:
+            - containerPort: 64738
+              protocol: TCP
+            - containerPort: 64738
+              protocol: UDP
+          volumeMounts:
+            - mountPath: /etc/mumble
+              name: mediakraken-vol-mumble
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: mediakraken-vol-mumble
+          persistentVolumeClaim:
+            claimName: mediakraken-vol-mumble

@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mkstack-musicbrainz
+  name: mkstack-musicbrainz
+  namespace: mediakraken
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-musicbrainz
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mkstack-musicbrainz
+    spec:
+      containers:
+        - args:
+            - sh
+            - -c
+            - /wait && /mkmusicbrainz
+          env:
+            - name: WAIT_HOSTS
+              value: mkstack-database:5432, mkstack-rabbitmq:5672
+            - name: WAIT_TIMEOUT
+              value: "180"
+          image: mediakraken/mkmusicbrainz:dev
+          name: mkstack-musicbrainz
+          volumeMounts:
+            - mountPath: /run/secrets
+              name: db-password
+              subPath: db-password
+            - mountPath: /mediakraken/mbdump
+              name: mediakraken-vol-mbrainz-data
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: db-password
+          secret:
+            items:
+              - key: db-password
+                path: db-password
+            secretName: db-password
+        - name: mediakraken-vol-mbrainz-data
+          persistentVolumeClaim:
+            claimName: mediakraken-vol-mbrainz-data

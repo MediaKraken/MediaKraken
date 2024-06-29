@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mkstack-prometheus
+  name: mkstack-prometheus
+  namespace: mediakraken
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-prometheus
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mkstack-prometheus
+    spec:
+      containers:
+        - image: prom/prometheus:v2.45.2
+          name: mkstack-prometheus
+          ports:
+            - containerPort: 9090
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /etc/prometheus/prometheus.yml
+              name: mkstack-prometheus-claim0
+      restartPolicy: Always
+      volumes:
+        - name: mkstack-prometheus-claim0
+          persistentVolumeClaim:
+            claimName: mkstack-prometheus-claim0

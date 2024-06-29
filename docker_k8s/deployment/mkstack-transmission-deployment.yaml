@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mkstack-transmission
+  name: mkstack-transmission
+  namespace: mediakraken
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-transmission
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mkstack-transmission
+    spec:
+      containers:
+        - image: mediakraken/mktransmission:dev
+          name: mkstack-transmission
+          ports:
+            - containerPort: 9091
+              protocol: TCP
+            - containerPort: 51413
+              protocol: TCP
+            - containerPort: 51413
+              protocol: UDP
+          volumeMounts:
+            - mountPath: /etc/transmission-daemon
+              name: mediakraken-vol-transmission
+            - mountPath: /transmission/downloads
+              name: mediakraken-vol-transmission-downloads
+            - mountPath: /transmission/incomplete
+              name: mediakraken-vol-transmission-incomplete
+      restartPolicy: Always
+      volumes:
+        - name: mediakraken-vol-transmission
+          persistentVolumeClaim:
+            claimName: mediakraken-vol-transmission
+        - name: mediakraken-vol-transmission-downloads
+          persistentVolumeClaim:
+            claimName: mediakraken-vol-transmission-downloads
+        - name: mediakraken-vol-transmission-incomplete
+          persistentVolumeClaim:
+            claimName: mediakraken-vol-transmission-incomplete

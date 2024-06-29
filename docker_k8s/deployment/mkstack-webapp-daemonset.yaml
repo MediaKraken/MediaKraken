@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    io.kompose.service: mkstack-webapp
+  name: mkstack-webapp
+  namespace: mediakraken
+spec:
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-webapp
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mkstack-webapp
+    spec:
+      containers:
+        - args:
+            - sh
+            - -c
+            - /wait && /mediakraken/mkwebapp
+          env:
+            - name: LANG
+              value: en_US.UTF-8
+            - name: LC_ALL
+              value: en_US.UTF-8
+            - name: WAIT_HOSTS
+              value: mkstack-database:5432, mkstack-rabbitmq:5672, mkstack-redis:6379
+            - name: WAIT_TIMEOUT
+              value: "180"
+          image: mediakraken/mkwebaxum:dev
+          name: mkstack-webapp
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /run/secrets
+              name: db-password
+              subPath: db-password
+            - mountPath: /run/secrets
+              name: secure-key
+              subPath: secure-key
+            - mountPath: /run/secrets
+              name: csrf-key
+              subPath: csrf-key
+            - mountPath: /mediakraken/static
+              name: mediakraken-vol-static
+            - mountPath: /mediakraken/certs
+              name: mediakraken-vol-certs
+            - mountPath: /Comics
+              name: mediakraken-vol-comics
+            - mountPath: /phue
+              name: mediakraken-vol-phue
+            - mountPath: /backup
+              name: mediakraken-vol-postgresql-backup
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: db-password
+          secret:
+            items:
+              - key: db-password
+                path: db-password
+            secretName: db-password
+        - name: secure-key
+          secret:
+            items:
+              - key: secure-key
+                path: secure-key
+            secretName: secure-key
+        - name: csrf-key
+          secret:
+            items:
+              - key: csrf-key
+                path: csrf-key
+            secretName: csrf-key
+        - name: mediakraken-vol-static
+          persistentVolumeClaim:
+            claimName: mediakraken-vol-static
+        - name: mediakraken-vol-certs
+          persistentVolumeClaim:
+            claimName: mediakraken-vol-certs
+        - name: mediakraken-vol-comics
+          persistentVolumeClaim:
+            claimName: mediakraken-vol-comics
+        - name: mediakraken-vol-phue
+          persistentVolumeClaim:
+            claimName: mediakraken-vol-phue
+        - name: mediakraken-vol-postgresql-backup
+          persistentVolumeClaim:
+            claimName: mediakraken-vol-postgresql-backup
