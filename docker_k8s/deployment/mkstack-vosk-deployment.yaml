@@ -16,6 +16,7 @@ spec:
         io.kompose.service: mkstack-vosk
     spec:
       containers:
+        # https://hub.docker.com/u/alphacep
         - image: alphacep/kaldi-en:latest
           name: mkstack-vosk
           ports:

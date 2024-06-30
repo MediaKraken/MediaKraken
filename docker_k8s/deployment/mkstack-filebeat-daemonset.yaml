@@ -20,6 +20,7 @@ spec:
               value: mkstack-elk:9200
             - name: KIBANA_HOSTS
               value: mkstack-elk:5601
+          # https://www.docker.elastic.co/r/beats              
           image: docker.elastic.co/beats/filebeat-oss:8.11.3
           name: mkstack-filebeat
       restartPolicy: Always

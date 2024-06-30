@@ -18,6 +18,7 @@ spec:
         io.kompose.service: mkstack-redis
     spec:
       containers:
+        # https://hub.docker.com/r/eqalpha/keydb
         - image: eqalpha/keydb:alpine_x86_64_v6.3.4
           name: mkstack-redis
           volumeMounts:

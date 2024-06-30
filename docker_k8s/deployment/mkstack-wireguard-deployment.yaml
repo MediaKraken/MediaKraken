@@ -41,6 +41,7 @@ spec:
               value: wireguard.domain.com
             - name: TZ
               value: Etc/UTC
+          # https://github.com/linuxserver/docker-wireguard
           image: lscr.io/linuxserver/wireguard:latest
           name: mkstack-wireguard
           ports:

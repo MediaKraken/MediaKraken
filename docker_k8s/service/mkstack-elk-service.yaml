@@ -6,8 +6,17 @@ metadata:
   name: mkstack-elk
 spec:
   ports:
+    - name: "5000"
+      port: 5000
+      targetPort: 5000
+    - name: "5044"
+      port: 5044
+      targetPort: 5044
     - name: "5601"
       port: 5601
       targetPort: 5601
+    - name: "9200"
+      port: 9200
+      targetPort: 9200
   selector:
     io.kompose.service: mkstack-elk

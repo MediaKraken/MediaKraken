@@ -25,7 +25,8 @@ spec:
               value: metaman
             - name: GF_USERS_ALLOW_SIGN_UP
               value: "false"
-          image: grafana/grafana-oss:10.0.10
+          # https://hub.docker.com/r/grafana/grafana-oss/tags
+          image: grafana/grafana-oss:11.1.0
           name: mkstack-grafana
           ports:
             - containerPort: 3000

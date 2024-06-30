@@ -25,6 +25,7 @@ spec:
               value: "1000"
             - name: TZ
               value: Etc/UTC
+          # https://hub.docker.com/r/linuxserver/wireshark/tags
           image: linuxserver/wireshark:4.0.11
           name: mkstack-wireshark
           ports:

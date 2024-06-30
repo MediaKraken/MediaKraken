@@ -24,6 +24,7 @@ spec:
             - containerPort: 9090
               protocol: TCP
           volumeMounts:
+            # https://hub.docker.com/u/prom
             - mountPath: /etc/prometheus/prometheus.yml
               name: mkstack-prometheus-claim0
       restartPolicy: Always

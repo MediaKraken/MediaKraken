@@ -25,7 +25,8 @@ spec:
               value: "1"
             - name: LOGSTASH_START
               value: "1"
-          image: sebp/elk:oss-8.11.1
+          # https://hub.docker.com/r/sebp/elk/
+          image: sebp/elk:oss-8.13.4
           name: mkstack-elk
           ports:
             - containerPort: 5601

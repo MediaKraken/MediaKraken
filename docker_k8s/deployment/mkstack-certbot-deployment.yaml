@@ -16,6 +16,7 @@ spec:
         io.kompose.service: mkstack-certbot
     spec:
       containers:
-        - image: certbot/certbot:v2.8.0
+        # https://github.com/certbot/certbot/releases
+        - image: certbot/certbot:v2.11.0
           name: mkstack-certbot
       restartPolicy: Always
