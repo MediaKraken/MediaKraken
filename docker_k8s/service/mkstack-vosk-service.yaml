@@ -2,12 +2,12 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    io.kompose.service: mkstack-vosk
-  name: mkstack-vosk
+    io.kompose.service: mkstack-vosk-service
+  name: mkstack-vosk-service
 spec:
   ports:
     - name: "2700"
       port: 2700
       targetPort: 2700
   selector:
-    io.kompose.service: mkstack-vosk
+    io.kompose.service: mkstack-vosk-service

@@ -2,12 +2,12 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    io.kompose.service: mkstack-grafana
-  name: mkstack-grafana
+    io.kompose.service: mkstack-grafana-service
+  name: mkstack-grafana-service
 spec:
   ports:
     - name: "3000"
       port: 3000
       targetPort: 3000
   selector:
-    io.kompose.service: mkstack-grafana
+    io.kompose.service: mkstack-grafana-service

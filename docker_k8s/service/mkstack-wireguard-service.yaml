@@ -2,8 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    io.kompose.service: mkstack-wireguard
-  name: mkstack-wireguard
+    io.kompose.service: mkstack-wireguard-service
+  name: mkstack-wireguard-service
 spec:
   ports:
     - name: "51820"
@@ -11,4 +11,4 @@ spec:
       protocol: UDP
       targetPort: 51820
   selector:
-    io.kompose.service: mkstack-wireguard
+    io.kompose.service: mkstack-wireguard-service

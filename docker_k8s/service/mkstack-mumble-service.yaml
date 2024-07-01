@@ -2,8 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    io.kompose.service: mkstack-mumble
-  name: mkstack-mumble
+    io.kompose.service: mkstack-mumble-service
+  name: mkstack-mumble-service
 spec:
   ports:
     - name: "64738"
@@ -14,4 +14,4 @@ spec:
       protocol: UDP
       targetPort: 64738
   selector:
-    io.kompose.service: mkstack-mumble
+    io.kompose.service: mkstack-mumble-service
