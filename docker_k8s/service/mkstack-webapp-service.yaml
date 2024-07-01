@@ -4,6 +4,7 @@ metadata:
   labels:
     io.kompose.service: mkstack-webapp-service
   name: mkstack-webapp-service
+  namespace: mediakraken
 spec:
   ports:
     - name: "8900"

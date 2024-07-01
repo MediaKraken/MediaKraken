@@ -4,6 +4,7 @@ metadata:
   labels:
     io.kompose.service: mkstack-transmission-service
   name: mkstack-transmission-service
+  namespace: mediakraken
 spec:
   ports:
     - name: "9091"

@@ -4,6 +4,7 @@ metadata:
   labels:
     io.kompose.service: mkstack-mumble-service
   name: mkstack-mumble-service
+  namespace: mediakraken
 spec:
   ports:
     - name: "64738"

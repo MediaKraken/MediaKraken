@@ -4,6 +4,7 @@ metadata:
   labels:
     io.kompose.service: mkstack-rabbitmq-service
   name: mkstack-rabbitmq-service
+  namespace: mediakraken
 spec:
   ports:
     - name: "5672"

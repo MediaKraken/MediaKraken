@@ -4,6 +4,7 @@ metadata:
   labels:
     io.kompose.service: mkstack-wireguard-service
   name: mkstack-wireguard-service
+  namespace: mediakraken
 spec:
   ports:
     - name: "51820"

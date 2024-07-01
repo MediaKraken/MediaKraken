@@ -4,6 +4,7 @@ metadata:
   labels:
     io.kompose.service: mkstack-prometheus-service
   name: mkstack-prometheus-service
+  namespace: mediakraken
 spec:
   ports:
     - name: "9090"

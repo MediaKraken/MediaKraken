@@ -4,6 +4,7 @@ metadata:
   labels:
     io.kompose.service: mkstack-pgadmin-service
   name: mkstack-pgadmin-service
+  namespace: mediakraken
 spec:
   ports:
     - name: "5050"
