@@ -212,4 +212,6 @@ kubectl apply -f nfs.yaml
 kubectl get storageclasses
 kubectl describe storageclasses nfs-csi
 
-installed the db claim
+
+# installed all claims
+kubectl apply -f claim
