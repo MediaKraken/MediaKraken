@@ -179,6 +179,14 @@ apt install -y nfs-common
 zfs create wdblack/sharenfs
 zfs set atime=off wdblack/sharenfs
 
+
+# experiment
+zfs create wdblack/sharenfs8k
+zfs set atime=off wdblack/sharenfs8k
+zfs set recordsize=8K wdblack/sharenfs8k
+zfs set primarycache=metadata wdblack/sharenfs8k
+zfs set logbias=throughput wdblack/sharenfs8k
+
 <!-- zfs set sharenfs=on wdblack/sharenfs
 # zfs set sharenfs="on,rw=@192.168.1.0/24" wdblack/sharenfs
 zfs get sharenfs
@@ -193,22 +201,20 @@ chown -R nobody:nogroup /wdblack/sharenfs
 chmod -R 777 /wdblack/sharenfs/
 nano /etc/exports
 /wdblack/sharenfs 192.168.1.0/24(rw,sync,no_subtree_check)
+/wdblack/sharenfs8k 192.168.1.0/24(rw,sync,no_subtree_check)
 exportfs -a
 exportfs -r
 exportfs -v
 
 
 
-# TODO experiment
-zfs set recordsize=8K <pool>/postgres
-zfs set primarycache=metadata <pool>/postgres
-zfs set logbias=throughput <pool>/postgres
 
 
 
 
 # do the storage setup/claim/etc
-kubectl apply -f nfs.yaml
+kubectl apply -f nfs-pvc.yaml
+kubectl apply -f nfs-pvc-8k.yaml
 kubectl get storageclasses
 kubectl describe storageclasses nfs-csi
 
