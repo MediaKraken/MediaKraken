@@ -34,10 +34,10 @@ spec:
               protocol: TCP
           volumeMounts:
             - mountPath: /var/lib/rabbitmq
-              name: mediakraken-vol-rabbit
+              name: mkstack-rabbit-claim
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
-        - name: mediakraken-vol-rabbit
+        - name: mkstack-rabbit-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-rabbit
+            claimName: mkstack-rabbit-claim

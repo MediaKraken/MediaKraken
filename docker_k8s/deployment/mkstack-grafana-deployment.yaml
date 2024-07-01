@@ -33,10 +33,10 @@ spec:
               protocol: TCP
           volumeMounts:
             - mountPath: /var/lib/grafana
-              name: mediakraken-vol-grafana
+              name: mkstack-grafana-claim
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
-        - name: mediakraken-vol-grafana
+        - name: mkstack-grafana-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-grafana
+            claimName: mkstack-grafana-claim

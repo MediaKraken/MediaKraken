@@ -33,8 +33,6 @@ spec:
             - mountPath: /run/secrets
               name: db-password
               subPath: db-password
-            - mountPath: /mediakraken/phue
-              name: mediakraken-vol-phue
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
@@ -44,6 +42,3 @@ spec:
               - key: db-password
                 path: db-password
             secretName: db-password
-        - name: mediakraken-vol-phue
-          persistentVolumeClaim:
-            claimName: mediakraken-vol-phue

@@ -54,9 +54,9 @@ spec:
                 - SYS_MODULE
           volumeMounts:
             - mountPath: /config
-              name: mediakraken-vol-wireguard
+              name: mkstack-wireguard-claim
       restartPolicy: Always
       volumes:
-        - name: mediakraken-vol-wireguard
+        - name: mkstack-wireguard-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-wireguard
+            claimName: mkstack-wireguard-claim

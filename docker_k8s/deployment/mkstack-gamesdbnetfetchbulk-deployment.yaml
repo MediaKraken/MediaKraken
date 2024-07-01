@@ -44,6 +44,6 @@ spec:
               - key: db-password
                 path: db-password
             secretName: db-password
-        - name: mediakraken-vol-static
+        - name: mkstack-static-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-static
+            claimName: mkstack-static-claim

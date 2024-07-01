@@ -29,12 +29,5 @@ spec:
               value: "180"
           image: mediakraken/mkhardwarecontrol:dev
           name: mkstack-hardwarecontrol
-          volumeMounts:
-            - mountPath: /mediakraken/phue
-              name: mediakraken-vol-phue
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
-      volumes:
-        - name: mediakraken-vol-phue
-          persistentVolumeClaim:
-            claimName: mediakraken-vol-phue

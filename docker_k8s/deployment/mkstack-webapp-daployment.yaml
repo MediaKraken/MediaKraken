@@ -50,10 +50,6 @@ spec:
               name: mediakraken-vol-certs
             - mountPath: /Comics
               name: mediakraken-vol-comics
-            - mountPath: /phue
-              name: mediakraken-vol-phue
-            - mountPath: /backup
-              name: mediakraken-vol-postgresql-backup
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
@@ -84,9 +80,4 @@ spec:
         - name: mediakraken-vol-comics
           persistentVolumeClaim:
             claimName: mediakraken-vol-comics
-        - name: mediakraken-vol-phue
-          persistentVolumeClaim:
-            claimName: mediakraken-vol-phue
-        - name: mediakraken-vol-postgresql-backup
-          persistentVolumeClaim:
-            claimName: mediakraken-vol-postgresql-backup
+

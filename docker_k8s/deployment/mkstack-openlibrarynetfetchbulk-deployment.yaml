@@ -34,7 +34,7 @@ spec:
               name: db-password
               subPath: db-password
             - mountPath: /mediakraken
-              name: mediakraken-vol-openlibrary
+              name: mkstack-openlibrary-claim
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
@@ -44,6 +44,6 @@ spec:
               - key: db-password
                 path: db-password
             secretName: db-password
-        - name: mediakraken-vol-openlibrary
+        - name: mkstack-openlibrary-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-openlibrary
+            claimName: mkstack-openlibrary-claim

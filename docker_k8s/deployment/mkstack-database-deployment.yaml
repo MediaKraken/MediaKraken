@@ -55,10 +55,6 @@ spec:
               name: db-password
               subPath: db-password
             - mountPath: /var/lib/postgresql/data
-              name: mediakraken-vol-postgresql
-            - mountPath: /mediakraken/backup
-              name: mediakraken-vol-postgresql-backup
-            - mountPath: /backups
               name: mkstack-database-claim
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
@@ -69,12 +65,6 @@ spec:
               - key: db-password
                 path: db-password
             secretName: db-password
-        - name: mediakraken-vol-postgresql
-          persistentVolumeClaim:
-            claimName: mediakraken-vol-postgresql
-        - name: mediakraken-vol-postgresql-backup
-          persistentVolumeClaim:
-            claimName: mediakraken-vol-postgresql-backup
         - name: mkstack-database-claim
           persistentVolumeClaim:
             claimName: mkstack-database-claim

@@ -23,10 +23,10 @@ spec:
           name: mkstack-redis
           volumeMounts:
             - mountPath: /data
-              name: mediakraken-vol-redis
+              name: mkstack-redis-claim
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
-        - name: mediakraken-vol-redis
+        - name: mkstack-redis-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-redis
+            claimName: mkstack-redis-claim

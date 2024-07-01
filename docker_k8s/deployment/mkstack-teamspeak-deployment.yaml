@@ -32,10 +32,10 @@ spec:
               protocol: TCP
           volumeMounts:
             - mountPath: /var/ts3server
-              name: mediakraken-vol-teamspeak
+              name: mkstack-teamspeak-claim
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
-        - name: mediakraken-vol-teamspeak
+        - name: mkstack-teamspeak-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-teamspeak
+            claimName: mkstack-teamspeak-claim

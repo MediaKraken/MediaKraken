@@ -29,7 +29,7 @@ spec:
               name: db-password
               subPath: db-password
             - mountPath: /mediakraken/mnt
-              name: mkstack-transcode-claim0
+              name: mkstack-transcode-claim
               readOnly: true
       restartPolicy: Never
       terminationGracePeriodSeconds: 30
@@ -40,7 +40,7 @@ spec:
               - key: db-password
                 path: db-password
             secretName: db-password
-        - name: mkstack-transcode-claim0
+        - name: mkstack-transcode-claim
           persistentVolumeClaim:
-            claimName: mkstack-transcode-claim0
+            claimName: mkstack-transcode-claim
             readOnly: true

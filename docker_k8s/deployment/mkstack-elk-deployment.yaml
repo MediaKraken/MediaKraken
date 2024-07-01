@@ -33,10 +33,10 @@ spec:
               protocol: TCP
           volumeMounts:
             - mountPath: /var/lib/elasticsearch
-              name: mediakraken-vol-elk
+              name: mkstack-elk-claim
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
-        - name: mediakraken-vol-elk
+        - name: mkstack-elk-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-elk
+            claimName: mkstack-elk-claim

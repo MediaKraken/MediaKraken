@@ -30,10 +30,10 @@ spec:
               protocol: UDP
           volumeMounts:
             - mountPath: /etc/mumble
-              name: mediakraken-vol-mumble
+              name: mkstack-mumble-claim
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
-        - name: mediakraken-vol-mumble
+        - name: mkstack-mumble-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-mumble
+            claimName: mkstack-mumble-claim

@@ -37,9 +37,9 @@ spec:
                 - NET_ADMIN
           volumeMounts:
             - mountPath: /config
-              name: mediakraken-vol-wireshark
+              name: mkstack-wireshark-claim
       restartPolicy: Always
       volumes:
-        - name: mediakraken-vol-wireshark
+        - name: mkstack-wireshark-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-wireshark
+            claimName: mkstack-wireshark-claim

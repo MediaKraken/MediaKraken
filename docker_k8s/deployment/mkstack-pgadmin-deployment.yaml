@@ -34,10 +34,10 @@ spec:
               protocol: TCP
           volumeMounts:
             - mountPath: /var/lib/pgadmin
-              name: mediakraken-vol-pgadmin
+              name: mkstack-pgadmin-claim
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
-        - name: mediakraken-vol-pgadmin
+        - name: mkstack-pgadmin-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-pgadmin
+            claimName: mkstack-pgadmin-claim

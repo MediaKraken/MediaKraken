@@ -26,9 +26,9 @@ spec:
           volumeMounts:
             # https://hub.docker.com/u/prom
             - mountPath: /etc/prometheus/prometheus.yml
-              name: mkstack-prometheus-claim0
+              name: mkstack-prometheus-claim
       restartPolicy: Always
       volumes:
-        - name: mkstack-prometheus-claim0
+        - name: mkstack-prometheus-claim
           persistentVolumeClaim:
-            claimName: mkstack-prometheus-claim0
+            claimName: mkstack-prometheus-claim

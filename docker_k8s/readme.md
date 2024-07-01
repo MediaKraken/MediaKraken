@@ -215,3 +215,11 @@ kubectl describe storageclasses nfs-csi
 
 # installed all claims
 kubectl apply -f claim
+
+
+
+
+# secrets
+# kubectl create secret generic db-password --from-literal=username=devuser --from-literal=password='S!B\*d$zDsb='
+
+kubectl create secret generic db-password --from-literal=username=devuser --from-literal=password='S!B\*d$zDsb='
