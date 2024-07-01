@@ -207,11 +207,6 @@ exportfs -r
 exportfs -v
 
 
-
-
-
-
-
 # do the storage setup/claim/etc
 kubectl apply -f nfs-pvc.yaml
 kubectl apply -f nfs-pvc-8k.yaml
@@ -221,8 +216,6 @@ kubectl describe storageclasses nfs-csi
 
 # installed all claims
 kubectl apply -f claim
-
-
 
 
 # secrets

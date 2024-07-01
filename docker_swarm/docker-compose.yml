@@ -593,6 +593,7 @@ services:
       - 9090:9090
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - mediakraken_vol_prometheus:/prometheus
     networks:
       - mediakraken_network
     deploy:
@@ -907,6 +908,7 @@ volumes:
   mediakraken_vol_portainer_data:
   mediakraken_vol_postgresql:
   mediakraken_vol_postgresql_backup:
+  mediakraken_vol_prometheus:
   mediakraken_vol_rabbit:
   mediakraken_vol_redis:
   mediakraken_vol_static:
