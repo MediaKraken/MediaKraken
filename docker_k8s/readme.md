@@ -213,10 +213,14 @@ kubectl apply -f nfs-pvc-8k.yaml
 kubectl get storageclasses
 kubectl describe storageclasses nfs-csi
 
+kubectl get storageclass
 
 # installed all claims
 kubectl apply -f claim
 
+kubectl get persistentvolume --namespace mediakraken
+
+kubectl delete persistentvolumeclaim mkstack-database-claim  --namespace mediakraken
 
 # secrets
 # kubectl create secret generic db-password --from-literal=username=devuser --from-literal=password='S!B\*d$zDsb='
