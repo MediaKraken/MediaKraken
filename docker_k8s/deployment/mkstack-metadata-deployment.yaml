@@ -34,9 +34,9 @@ spec:
               name: db-password
               subPath: db-password
             - mountPath: /mediakraken/static
-              name: mediakraken-vol-static
+              name: mkstack-static-claim
             - mountPath: /mediakraken/cache
-              name: mediakraken-vol-cache
+              name: mkstack-cache-claim
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
@@ -46,9 +46,9 @@ spec:
               - key: db-password
                 path: db-password
             secretName: db-password
-        - name: mediakraken-vol-static
+        - name: mkstack-static-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-static
-        - name: mediakraken-vol-cache
+            claimName: mkstack-static-claim
+        - name: mkstack-cache-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-cache
+            claimName: mkstack-cache-claim

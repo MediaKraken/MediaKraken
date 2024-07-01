@@ -34,7 +34,7 @@ spec:
               name: db-password
               subPath: db-password
             - mountPath: /static
-              name: mediakraken-vol-static
+              name: mkstack-static-claim
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:

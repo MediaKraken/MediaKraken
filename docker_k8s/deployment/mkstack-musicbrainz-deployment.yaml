@@ -34,7 +34,7 @@ spec:
               name: db-password
               subPath: db-password
             - mountPath: /mediakraken/mbdump
-              name: mediakraken-vol-mbrainz-data
+              name: mkstack-mbrainz-claim
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
@@ -44,6 +44,6 @@ spec:
               - key: db-password
                 path: db-password
             secretName: db-password
-        - name: mediakraken-vol-mbrainz-data
+        - name: mkstack-mbrainz-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-mbrainz-data
+            claimName: mkstack-mbrainz-claim

@@ -29,19 +29,19 @@ spec:
               protocol: UDP
           volumeMounts:
             - mountPath: /etc/transmission-daemon
-              name: mediakraken-vol-transmission
+              name: mkstack-transmission-claim
             - mountPath: /transmission/downloads
-              name: mediakraken-vol-transmission-downloads
+              name: mkstack-transmission-downloads-claim
             - mountPath: /transmission/incomplete
-              name: mediakraken-vol-transmission-incomplete
+              name: mkstack-transmission-incomplete-claim
       restartPolicy: Always
       volumes:
-        - name: mediakraken-vol-transmission
+        - name: mkstack-transmission-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-transmission
-        - name: mediakraken-vol-transmission-downloads
+            claimName: mkstack-transmission-claim
+        - name: mkstack-transmission-downloads-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-transmission-downloads
-        - name: mediakraken-vol-transmission-incomplete
+            claimName: mkstack-transmission-downloads-claim
+        - name: mkstack-transmission-incomplete-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-transmission-incomplete
+            claimName: mkstack-transmission-incomplete-claim

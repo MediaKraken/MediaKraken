@@ -45,11 +45,11 @@ spec:
               name: csrf-key
               subPath: csrf-key
             - mountPath: /mediakraken/static
-              name: mediakraken-vol-static
+              name: mkstack-static-claim
             - mountPath: /mediakraken/certs
-              name: mediakraken-vol-certs
+              name: mkstack-certs-claim
             - mountPath: /Comics
-              name: mediakraken-vol-comics
+              name: mkstack-comics-claim
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
@@ -71,13 +71,13 @@ spec:
               - key: csrf-key
                 path: csrf-key
             secretName: csrf-key
-        - name: mediakraken-vol-static
+        - name: mkstack-static-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-static
-        - name: mediakraken-vol-certs
+            claimName: mkstack-static-claim
+        - name: mkstack-certs-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-certs
-        - name: mediakraken-vol-comics
+            claimName: mkstack-certs-claim
+        - name: mkstack-comics-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-comics
+            claimName: mkstack-comics-claim
 

@@ -29,9 +29,9 @@ spec:
               protocol: TCP
           volumeMounts:
             - mountPath: /data
-              name: mediakraken-vol-portainer-data
+              name: mkstack-portainer-claim
       restartPolicy: Always
       volumes:
-        - name: mediakraken-vol-portainer-data
+        - name: mkstack-portainer-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-portainer-data
+            claimName: mkstack-portainer-claim

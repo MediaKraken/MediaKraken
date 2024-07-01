@@ -34,9 +34,9 @@ spec:
               name: db-password
               subPath: db-password
             - mountPath: /Comics
-              name: mediakraken-vol-comics
+              name: mkstack-comics-claim
             - mountPath: /mediakraken/static
-              name: mediakraken-vol-static
+              name: mkstack-static-claim
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
@@ -46,9 +46,9 @@ spec:
               - key: db-password
                 path: db-password
             secretName: db-password
-        - name: mediakraken-vol-comics
+        - name: mkstack-comics-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-comics
-        - name: mediakraken-vol-static
+            claimName: mkstack-comics-claim
+        - name: mkstack-static-claim
           persistentVolumeClaim:
-            claimName: mediakraken-vol-static
+            claimName: mkstack-static-claim
