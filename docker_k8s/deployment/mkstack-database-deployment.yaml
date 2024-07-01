@@ -59,7 +59,7 @@ spec:
             - mountPath: /mediakraken/backup
               name: mediakraken-vol-postgresql-backup
             - mountPath: /backups
-              name: mkstack-database-claim2
+              name: mkstack-database-claim
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
@@ -75,6 +75,6 @@ spec:
         - name: mediakraken-vol-postgresql-backup
           persistentVolumeClaim:
             claimName: mediakraken-vol-postgresql-backup
-        - name: mkstack-database-claim2
+        - name: mkstack-database-claim
           persistentVolumeClaim:
-            claimName: mkstack-database-claim2
+            claimName: mkstack-database-claim

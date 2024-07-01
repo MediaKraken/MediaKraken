@@ -153,7 +153,7 @@ kompose convert -f docker-compose.yml
 
 
 
-# start apui
+# start api
 kubectl proxy --port=8080 &
 curl http://localhost:8080/api/
 
@@ -165,3 +165,51 @@ https://dl.k8s.io/release/v1.30.0/bin/windows/amd64/kubectl.exe
 kubectl create namespace mediakraken
 
 kubectl apply -f https://raw.githubusercontent.com/MediaKraken/MediaKraken/dev/docker_k8s/mkstack-multicast-deployment.yaml
+
+
+# on master
+https://github.com/kubernetes-csi/csi-driver-nfs/blob/master/docs/install-csi-driver-v4.7.0.md
+curl -skSL https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/v4.7.0/deploy/install-driver.sh | bash -s v4.7.0 --
+
+# worker nodes
+apt install -y nfs-common
+
+# was running fo rlast five months
+# storage
+zfs create wdblack/sharenfs
+zfs set atime=off wdblack/sharenfs
+
+<!-- zfs set sharenfs=on wdblack/sharenfs
+# zfs set sharenfs="on,rw=@192.168.1.0/24" wdblack/sharenfs
+zfs get sharenfs
+zfs share -a
+
+zfs set sharenfs=off pool54_62/batocera
+zfs set sharenfs=off wdblack/sharenfs
+zfs unshare -a
+systemctl restart nfs-kernel-server -->
+
+chown -R nobody:nogroup /wdblack/sharenfs
+chmod -R 777 /wdblack/sharenfs/
+nano /etc/exports
+/wdblack/sharenfs 192.168.1.0/24(rw,sync,no_subtree_check)
+exportfs -a
+exportfs -r
+exportfs -v
+
+
+
+# TODO experiment
+zfs set recordsize=8K <pool>/postgres
+zfs set primarycache=metadata <pool>/postgres
+zfs set logbias=throughput <pool>/postgres
+
+
+
+
+# do the storage setup/claim/etc
+kubectl apply -f nfs.yaml
+kubectl get storageclasses
+kubectl describe storageclasses nfs-csi
+
+installed the db claim
