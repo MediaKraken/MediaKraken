@@ -9,13 +9,13 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: mkstack-hardwarecontrol
+      io.kompose.service: mkstack-hardwarecontrol-service
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-hardwarecontrol
+        io.kompose.service: mkstack-hardwarecontrol-service
     spec:
       containers:
         - args:

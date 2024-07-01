@@ -9,13 +9,13 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: mkstack-metadatamame
+      io.kompose.service: mkstack-metadatamame-service
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-metadatamame
+        io.kompose.service: mkstack-metadatamame-service
     spec:
       containers:
         - args:

@@ -9,11 +9,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: mkstack-tmdbnetfetchbulk
+      io.kompose.service: mkstack-tmdbnetfetchbulk-service
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-tmdbnetfetchbulk
+        io.kompose.service: mkstack-tmdbnetfetchbulk-service
     spec:
       containers:
         - args:

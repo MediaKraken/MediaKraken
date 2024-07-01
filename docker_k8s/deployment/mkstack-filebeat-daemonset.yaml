@@ -8,11 +8,11 @@ metadata:
 spec:
   selector:
     matchLabels:
-      io.kompose.service: mkstack-filebeat
+      io.kompose.service: mkstack-filebeat-service
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-filebeat
+        io.kompose.service: mkstack-filebeat-service
     spec:
       containers:
         - env:

@@ -8,11 +8,11 @@ metadata:
 spec:
   selector:
     matchLabels:
-      io.kompose.service: mkstack-portaineragent
+      io.kompose.service: mkstack-portaineragent-service
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-portaineragent
+        io.kompose.service: mkstack-portaineragent-service
     spec:
       containers:
         - env:

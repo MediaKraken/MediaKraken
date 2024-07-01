@@ -9,13 +9,13 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: mkstack-openlibrarynetfetchbulk
+      io.kompose.service: mkstack-openlibrarynetfetchbulk-service
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-openlibrarynetfetchbulk
+        io.kompose.service: mkstack-openlibrarynetfetchbulk-service
     spec:
       containers:
         - args:

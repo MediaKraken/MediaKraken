@@ -9,11 +9,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: mkstack-schedulesdirectupdate
+      io.kompose.service: mkstack-schedulesdirectupdate-service
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-schedulesdirectupdate
+        io.kompose.service: mkstack-schedulesdirectupdate-service
     spec:
       containers:
         - args:

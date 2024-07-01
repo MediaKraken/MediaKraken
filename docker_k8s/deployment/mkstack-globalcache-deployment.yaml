@@ -9,11 +9,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: mkstack-globalcache
+      io.kompose.service: mkstack-globalcache-service
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-globalcache
+        io.kompose.service: mkstack-globalcache-service
     spec:
       containers:
         - args:

@@ -9,11 +9,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: mkstack-webapp
+      io.kompose.service: mkstack-webapp-service
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-webapp
+        io.kompose.service: mkstack-webapp-service
     spec:
       containers:
         - args:

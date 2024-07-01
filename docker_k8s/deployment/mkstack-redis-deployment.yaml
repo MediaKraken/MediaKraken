@@ -9,13 +9,13 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: mkstack-redis
+      io.kompose.service: mkstack-redis-service
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-redis
+        io.kompose.service: mkstack-redis-service
     spec:
       containers:
         # https://hub.docker.com/r/eqalpha/keydb

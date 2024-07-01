@@ -9,11 +9,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: mkstack-inotify
+      io.kompose.service: mkstack-inotify-service
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-inotify
+        io.kompose.service: mkstack-inotify-service
     spec:
       containers:
         - args:

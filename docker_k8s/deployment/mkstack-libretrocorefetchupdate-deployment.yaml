@@ -9,13 +9,13 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: mkstack-libretrocorefetchupdate
+      io.kompose.service: mkstack-libretrocorefetchupdate-service
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-libretrocorefetchupdate
+        io.kompose.service: mkstack-libretrocorefetchupdate-service
     spec:
       containers:
         - args:

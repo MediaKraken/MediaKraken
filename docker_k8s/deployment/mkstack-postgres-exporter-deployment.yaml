@@ -9,11 +9,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: mkstack-postgres-exporter
+      io.kompose.service: mkstack-postgres-exporter-service
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-postgres-exporter
+        io.kompose.service: mkstack-postgres-exporter-service
     spec:
       containers:
         - env:

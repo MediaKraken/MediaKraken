@@ -9,11 +9,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: mkstack-tvheadend
+      io.kompose.service: mkstack-tvheadend-service
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-tvheadend
+        io.kompose.service: mkstack-tvheadend-service
     spec:
       containers:
         - args:

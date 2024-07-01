@@ -9,11 +9,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: mkstack-certbot
+      io.kompose.service: mkstack-certbot-service
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-certbot
+        io.kompose.service: mkstack-certbot-service
     spec:
       containers:
         # https://github.com/certbot/certbot/releases

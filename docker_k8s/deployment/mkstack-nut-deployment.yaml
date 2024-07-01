@@ -9,11 +9,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: mkstack-nut
+      io.kompose.service: mkstack-nut-service
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-nut
+        io.kompose.service: mkstack-nut-service
     spec:
       containers:
         - env:

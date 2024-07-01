@@ -9,13 +9,13 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: mkstack-rabbitmq
+      io.kompose.service: mkstack-rabbitmq-service
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-rabbitmq
+        io.kompose.service: mkstack-rabbitmq-service
     spec:
       containers:
         - env:

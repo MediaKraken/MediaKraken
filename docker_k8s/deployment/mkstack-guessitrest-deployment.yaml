@@ -9,11 +9,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: mkstack-guessitrest
+      io.kompose.service: mkstack-guessitrest-service
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-guessitrest
+        io.kompose.service: mkstack-guessitrest-service
     spec:
       containers:
         - image: mediakraken/mkguessitrest:dev

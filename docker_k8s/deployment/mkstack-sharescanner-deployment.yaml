@@ -9,11 +9,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: mkstack-sharescanner
+      io.kompose.service: mkstack-sharescanner-service
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-sharescanner
+        io.kompose.service: mkstack-sharescanner-service
     spec:
       containers:
         - args:

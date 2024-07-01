@@ -9,13 +9,13 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: mkstack-teamspeak
+      io.kompose.service: mkstack-teamspeak-service
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-teamspeak
+        io.kompose.service: mkstack-teamspeak-service
     spec:
       containers:
         - env:
