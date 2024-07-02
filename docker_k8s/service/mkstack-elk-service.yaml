@@ -18,6 +18,6 @@ spec:
     - name: "9200"
       port: 9200
       targetPort: 9200
-      nodePort: 39200
+      nodePort: 30200
   selector:
     io.kompose.service: mkstack-elk-service

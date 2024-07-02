@@ -4,6 +4,7 @@ metadata:
   name: mkstack-rabbitmq-service
   namespace: mediakraken
 spec:
+  type: NodePort
   ports:
     - name: "5672"
       port: 5672
@@ -11,5 +12,6 @@ spec:
     - name: "15672"
       port: 15672
       targetPort: 15672
+      nodePort: 30672
   selector:
     io.kompose.service: mkstack-rabbitmq-service

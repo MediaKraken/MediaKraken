@@ -9,6 +9,6 @@ spec:
     - name: "5050"
       port: 5050
       targetPort: 5050
-      nodePort: 35050
+      nodePort: 30050
   selector:
     io.kompose.service: mkstack-pgadmin-service

@@ -9,6 +9,6 @@ spec:
     - name: "8900"
       port: 8900
       targetPort: 8080
-      nodePort: 38080
+      nodePort: 30080
   selector:
     io.kompose.service: mkstack-webapp-service
