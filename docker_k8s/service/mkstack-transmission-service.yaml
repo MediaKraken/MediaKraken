@@ -1,15 +1,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    io.kompose.service: mkstack-transmission-service
   name: mkstack-transmission-service
   namespace: mediakraken
 spec:
+  type: NodePort
   ports:
     - name: "9091"
       port: 9091
       targetPort: 9091
+      nodePort: 39091
     - name: "51413"
       port: 51413
       targetPort: 51413

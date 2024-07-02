@@ -17,6 +17,11 @@ spec:
       labels:
         io.kompose.service: mkstack-grafana-service
     spec:
+      securityContext:
+        fsGroup: 472
+        runAsGroup: 472
+        runAsNonRoot: true
+        runAsUser: 472 
       containers:
         - env:
             - name: GF_INSTALL_PLUGINS
