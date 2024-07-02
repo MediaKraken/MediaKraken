@@ -6,9 +6,11 @@ metadata:
   name: mkstack-wireshark-service
   namespace: mediakraken
 spec:
+  type: NodePort
   ports:
     - name: "3001"
       port: 3001
       targetPort: 3001
+      nodePort: 30001
   selector:
     io.kompose.service: mkstack-wireshark-service

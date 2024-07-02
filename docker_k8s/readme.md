@@ -199,6 +199,10 @@ systemctl restart nfs-kernel-server -->
 
 chown -R nobody:nogroup /wdblack/sharenfs
 chmod -R 777 /wdblack/sharenfs/
+
+chown -R nobody:nogroup /wdblack/sharenfs8k
+chmod -R 777 /wdblack/sharenfs8k/
+
 nano /etc/exports
 /wdblack/sharenfs 192.168.1.0/24(rw,sync,no_subtree_check)
 /wdblack/sharenfs8k 192.168.1.0/24(rw,sync,no_subtree_check)
@@ -219,10 +223,21 @@ kubectl get storageclass
 kubectl apply -f claim
 
 kubectl get persistentvolume --namespace mediakraken
+kubectl get pvc --namespace=mediakraken
 
 kubectl delete persistentvolumeclaim mkstack-database-claim  --namespace mediakraken
+
+kubectl get pods --namespace=mediakraken
+
+kubectl rollout restart deployment --namespace=mediakraken
+
+kubectl logs mkstack-grafana-78669db887-5d7tf --all-containers=true
 
 # secrets
 # kubectl create secret generic db-password --from-literal=username=devuser --from-literal=password='S!B\*d$zDsb='
 
 kubectl create secret generic db-password --from-literal=username=devuser --from-literal=password='S!B\*d$zDsb='
+
+
+
+kubectl get service --all-namespaces
