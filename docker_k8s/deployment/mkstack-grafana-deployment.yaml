@@ -6,11 +6,6 @@ metadata:
   name: mkstack-grafana
   namespace: mediakraken
 spec:
-  securityContext:
-    fsGroup: 472
-    runAsGroup: 472
-    runAsNonRoot: true
-    runAsUser: 472 
   replicas: 1
   selector:
     matchLabels:
@@ -23,6 +18,11 @@ spec:
         io.kompose.service: mkstack-grafana-service
     spec:
       containers:
+        securityContext:
+          fsGroup: 472
+          runAsGroup: 472
+          runAsNonRoot: true
+          runAsUser: 472 
         - env:
             - name: GF_INSTALL_PLUGINS
               value: redis-datasource

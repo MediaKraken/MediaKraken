@@ -240,6 +240,6 @@ kubectl create secret generic db-password --from-literal=username=devuser --from
 
 kubectl get secrets --namespace=mediakraken
 
-
+kubectl delete deployment --all --namespace=mediakraken
 
 kubectl get service --all-namespaces
