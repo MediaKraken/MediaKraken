@@ -18,11 +18,6 @@ spec:
         io.kompose.service: mkstack-grafana-service
     spec:
       containers:
-        securityContext:
-          fsGroup: 472
-          runAsGroup: 472
-          runAsNonRoot: true
-          runAsUser: 472 
         - env:
             - name: GF_INSTALL_PLUGINS
               value: redis-datasource
@@ -33,6 +28,11 @@ spec:
           # https://hub.docker.com/r/grafana/grafana-oss/tags
           image: grafana/grafana-oss:11.1.0
           name: mkstack-grafana
+          securityContext:
+            fsGroup: 472
+            runAsGroup: 472
+            runAsNonRoot: true
+            runAsUser: 472 
           ports:
             - containerPort: 3000
               protocol: TCP
