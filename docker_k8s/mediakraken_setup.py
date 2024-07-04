@@ -9,7 +9,7 @@ if not os.path.isfile('./mkstack-db_password.txt'):
     file_handle.write(random_key.replace(
         '"', '').replace("'", '').replace("%", ''))
     file_handle.close()
-    install_pid = subprocess.call(shlex.split('kubectl create secret generic db_password --from-file=./mkstack-db_password.txt'),
+    install_pid = subprocess.call(shlex.split('kubectl create secret generic db-password --from-file=./mkstack-db_password.txt'),
                                   stdout=subprocess.PIPE, shell=False)
 
 if not os.path.isfile('./mkstack-secure_key.txt'):
@@ -18,7 +18,7 @@ if not os.path.isfile('./mkstack-secure_key.txt'):
     file_handle.write(random_key.replace(
         '"', '').replace("'", '').replace("%", ''))
     file_handle.close()
-    install_pid = subprocess.call(shlex.split('kubectl create secret generic secure_key --from-file=./mkstack-secure_key.txt'),
+    install_pid = subprocess.call(shlex.split('kubectl create secret generic secure-key --from-file=./mkstack-secure_key.txt'),
                                   stdout=subprocess.PIPE, shell=False)
 
 if not os.path.isfile('./mkstack-csrf_key.txt'):
@@ -27,7 +27,7 @@ if not os.path.isfile('./mkstack-csrf_key.txt'):
     file_handle.write(random_key.replace(
         '"', '').replace("'", '').replace("%", ''))
     file_handle.close()
-    install_pid = subprocess.call(shlex.split('kubectl create secret generic csrf_key --from-file=./mkstack-csrf_key.txt'),
+    install_pid = subprocess.call(shlex.split('kubectl create secret generic csrf-key --from-file=./mkstack-csrf_key.txt'),
                                   stdout=subprocess.PIPE, shell=False)
 
 if not os.path.isfile('./mkstack-nut.txt'):
@@ -36,7 +36,7 @@ if not os.path.isfile('./mkstack-nut.txt'):
     file_handle.write(random_key.replace(
         '"', '').replace("'", '').replace("%", ''))
     file_handle.close()
-    install_pid = subprocess.call(shlex.split('kubectl create secret generic nut_password --from-file=./mkstack-nut.txt'),
+    install_pid = subprocess.call(shlex.split('kubectl create secret generic nut-password --from-file=./mkstack-nut.txt'),
                                   stdout=subprocess.PIPE, shell=False)
 
 # TODO when production, remove the secret files
