@@ -126,11 +126,8 @@ DOCKER_IMAGES = {
     # scan for network shares
     'mksharescanner': ('mksharescanner', 'core'),
 
-    # download tmdb dump of ids in database and insert into downloads - run and exit
+    # download tmdb dump/updates of ids in database and insert into downloads
     'mktmdbnetfetchbulk': ('mktmdbnetfetchbulk', 'core'),
-
-    # download tmdb dump of ids that were updated - run and exit
-    'mktmdbnetfetchupdate': ('mktmdbnetfetchupdate', 'core'),
 
     # transcode/STREAM media to client - run and exit
     'mktranscode': ('mktranscode', 'core'),
