@@ -41,8 +41,8 @@ ADD alpine-minirootfs-x86_64.tar.gz /
 COPY --from=cargo-build-mkschedulesdirectupdate /mediakraken/deps/* /
 
 # Import from builder.
-# COPY --from=cargo-build-mkschedulesdirectupdate /etc/passwd /etc/passwd
-# COPY --from=cargo-build-mkschedulesdirectupdate /etc/group /etc/group
+COPY --from=cargo-build-mkschedulesdirectupdate /etc/passwd /etc/passwd
+COPY --from=cargo-build-mkschedulesdirectupdate /etc/group /etc/group
 COPY --from=cargo-build-mkschedulesdirectupdate /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=cargo-build-mkschedulesdirectupdate /wait /wait
 
@@ -50,4 +50,4 @@ COPY --from=cargo-build-mkschedulesdirectupdate /wait /wait
 COPY --from=cargo-build-mkschedulesdirectupdate /mediakraken/target/mkschedulesdirectupdate /mkschedulesdirectupdate
 
 # Use an unprivileged user.
-# USER mediakraken:mediakraken
+USER mediakraken:mediakraken

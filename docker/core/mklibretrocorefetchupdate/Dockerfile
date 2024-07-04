@@ -44,8 +44,8 @@ RUN apk update && apk add --no-cache libssl3 libcrypto3 \
  && rm -rf /var/cache/apt/*
 
 # Import from builder.
-# COPY --from=cargo-build-mklibretrocorefetchupdate /etc/passwd /etc/passwd
-# COPY --from=cargo-build-mklibretrocorefetchupdate /etc/group /etc/group
+COPY --from=cargo-build-mklibretrocorefetchupdate /etc/passwd /etc/passwd
+COPY --from=cargo-build-mklibretrocorefetchupdate /etc/group /etc/group
 COPY --from=cargo-build-mklibretrocorefetchupdate /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=cargo-build-mklibretrocorefetchupdate /wait /wait
 
@@ -53,4 +53,4 @@ COPY --from=cargo-build-mklibretrocorefetchupdate /wait /wait
 COPY --from=cargo-build-mklibretrocorefetchupdate /mediakraken/target/mklibretrocorefetchupdate /mklibretrocorefetchupdate
 
 # Use an unprivileged user.
-# USER mediakraken:mediakraken
+USER mediakraken:mediakraken

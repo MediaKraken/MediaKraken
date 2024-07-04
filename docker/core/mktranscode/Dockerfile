@@ -396,8 +396,8 @@ RUN apk update && apk add --no-cache cifs-utils nfs-utils \
  && rm -rf /var/cache/apt/*
 
 # Import from builder.
-# COPY --from=cargo-build-mktranscode /etc/passwd /etc/passwd
-# COPY --from=cargo-build-mktranscode /etc/group /etc/group
+COPY --from=cargo-build-mktranscode /etc/passwd /etc/passwd
+COPY --from=cargo-build-mktranscode /etc/group /etc/group
 COPY --from=cargo-build-ffmpeg /usr/local/bin/ffmpeg /usr/local/bin/ffmpeg
 COPY --from=cargo-build-ffmpeg /usr/local/bin/ffprobe /usr/local/bin/ffprobe
 # COPY --from=ffmpeg-build-mktranscode /usr/local/lib /usr/local/lib
@@ -407,4 +407,4 @@ COPY --from=cargo-build-mktranscode /wait /wait
 COPY --from=cargo-build-mktranscode /mediakraken/target/mktranscode /mktranscode
 
 # Use an unprivileged user.
-# USER mediakraken:mediakraken
+USER mediakraken:mediakraken

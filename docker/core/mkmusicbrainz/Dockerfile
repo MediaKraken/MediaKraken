@@ -44,8 +44,8 @@ ADD alpine-minirootfs-x86_64.tar.gz /
 COPY --from=cargo-build-mkmusicbrainz /mediakraken/deps/* /
 
 # Import from builder.
-# COPY --from=cargo-build-mkmusicbrainz /etc/passwd /etc/passwd
-# COPY --from=cargo-build-mkmusicbrainz /etc/group /etc/group
+COPY --from=cargo-build-mkmusicbrainz /etc/passwd /etc/passwd
+COPY --from=cargo-build-mkmusicbrainz /etc/group /etc/group
 COPY --from=cargo-build-mkmusicbrainz /wait /wait
 COPY --from=cargo-build-mkmusicbrainz /usr/bin/psql /usr/bin/psql
 
@@ -55,4 +55,4 @@ COPY --from=cargo-build-mkmusicbrainz /mediakraken/target/mkmusicbrainz /mkmusic
 COPY scripts /scripts
 
 # Use an unprivileged user.
-# USER mediakraken:mediakraken
+USER mediakraken:mediakraken

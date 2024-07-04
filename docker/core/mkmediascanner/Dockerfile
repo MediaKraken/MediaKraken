@@ -44,12 +44,12 @@ RUN apk update && apk add --no-cache cifs-utils nfs-utils libsmbclient \
  && rm -rf /var/cache/apt/*
 
 # Import from builder.
-# COPY --from=cargo-build-mkmediascanner /etc/passwd /etc/passwd
-# COPY --from=cargo-build-mkmediascanner /etc/group /etc/group
+COPY --from=cargo-build-mkmediascanner /etc/passwd /etc/passwd
+COPY --from=cargo-build-mkmediascanner /etc/group /etc/group
 COPY --from=cargo-build-mkmediascanner /wait /wait
 
 # Copy our build
 COPY --from=cargo-build-mkmediascanner /mediakraken/target/mkmediascanner /mkmediascanner
 
 # Use an unprivileged user.
-# USER mediakraken:mediakraken
+USER mediakraken:mediakraken

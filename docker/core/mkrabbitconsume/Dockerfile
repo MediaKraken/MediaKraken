@@ -41,12 +41,12 @@ ADD alpine-minirootfs-x86_64.tar.gz /
 COPY --from=cargo-build-mkrabbitconsume /mediakraken/deps/* /
 
 # Import from builder.
-# COPY --from=cargo-build-mkrabbitconsume /etc/passwd /etc/passwd
-# COPY --from=cargo-build-mkrabbitconsume /etc/group /etc/group
+COPY --from=cargo-build-mkrabbitconsume /etc/passwd /etc/passwd
+COPY --from=cargo-build-mkrabbitconsume /etc/group /etc/group
 COPY --from=cargo-build-mkrabbitconsume /wait /wait
 
 # Copy our build
 COPY --from=cargo-build-mkrabbitconsume /mediakraken/target/mkrabbitconsume /mkrabbitconsume
 
 # Use an unprivileged user.
-# USER mediakraken:mediakraken
+USER mediakraken:mediakraken

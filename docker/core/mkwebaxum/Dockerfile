@@ -49,8 +49,8 @@ RUN apk update && apk add --no-cache musl-locales lang libssl3 libcrypto3 cifs-u
 #   && rm -rf /var/lib/apt/lists/*
 
 # Import from builder.
-# COPY --from=cargo-build-mkwebapp /etc/passwd /etc/passwd
-# COPY --from=cargo-build-mkwebapp /etc/group /etc/group
+COPY --from=cargo-build-mkwebapp /etc/passwd /etc/passwd
+COPY --from=cargo-build-mkwebapp /etc/group /etc/group
 COPY --from=cargo-build-mkwebapp /wait /wait
 COPY --from=cargo-build-mkwebapp /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=cargo-build-mkwebapp /mediakraken/templates /mediakraken/templates
@@ -60,4 +60,4 @@ COPY --from=cargo-build-mkwebapp /mediakraken/static /mediakraken/static
 COPY --from=cargo-build-mkwebapp /mediakraken/target/mkwebapp /mediakraken/mkwebapp
 
 # Use an unprivileged user.
-# USER mediakraken:mediakraken
+USER mediakraken:mediakraken

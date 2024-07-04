@@ -47,8 +47,8 @@ RUN chmod a+rx /yt-dlp \
  && pip3 install --no-cache-dir --trusted-host mksonatype -i http://mksonatype:8081/repository/pypi/simple dosage==3.0 cssselect==1.2.0 subliminal==2.1.0 --break-system-packages
 
 # Import from builder.
-# COPY --from=cargo-build-mkdownload /etc/passwd /etc/passwd
-# COPY --from=cargo-build-mkdownload /etc/group /etc/group
+COPY --from=cargo-build-mkdownload /etc/passwd /etc/passwd
+COPY --from=cargo-build-mkdownload /etc/group /etc/group
 COPY --from=cargo-build-mkdownload /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=cargo-build-mkdownload /wait /wait
 
@@ -56,4 +56,4 @@ COPY --from=cargo-build-mkdownload /wait /wait
 COPY --from=cargo-build-mkdownload /mediakraken/target/mkdownload /mkdownload
 
 # Use an unprivileged user.
-# USER mediakraken:mediakraken <- removed due throwing stuff in /mediakraken/static
+USER mediakraken:mediakraken

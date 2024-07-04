@@ -40,12 +40,12 @@ ADD alpine-minirootfs-x86_64.tar.gz /
 COPY --from=cargo-build-mkcron /mediakraken/deps/* /
 
 # Import from builder.
-# COPY --from=cargo-build-mkcron /etc/passwd /etc/passwd
-# COPY --from=cargo-build-mkcron /etc/group /etc/group
+COPY --from=cargo-build-mkcron /etc/passwd /etc/passwd
+COPY --from=cargo-build-mkcron /etc/group /etc/group
 COPY --from=cargo-build-mkcron /wait /wait
 
 # Copy our build
 COPY --from=cargo-build-mkcron /mediakraken/target/mkcron /mkcron
 
 # Use an unprivileged user.
-# USER mediakraken:mediakraken
+USER mediakraken:mediakraken

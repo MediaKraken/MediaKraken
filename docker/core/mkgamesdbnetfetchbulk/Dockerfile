@@ -41,8 +41,8 @@ ADD alpine-minirootfs-x86_64.tar.gz /
 COPY --from=cargo-build-mkgamesdbnetfetchbulk /mediakraken/deps/* /
 
 # Import from builder.
-# COPY --from=cargo-build-mkgamesdbnetfetchbulk /etc/passwd /etc/passwd
-# COPY --from=cargo-build-mkgamesdbnetfetchbulk /etc/group /etc/group
+COPY --from=cargo-build-mkgamesdbnetfetchbulk /etc/passwd /etc/passwd
+COPY --from=cargo-build-mkgamesdbnetfetchbulk /etc/group /etc/group
 COPY --from=cargo-build-mkgamesdbnetfetchbulk /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=cargo-build-mkgamesdbnetfetchbulk /wait /wait
 
@@ -50,4 +50,4 @@ COPY --from=cargo-build-mkgamesdbnetfetchbulk /wait /wait
 COPY --from=cargo-build-mkgamesdbnetfetchbulk /mediakraken/target/mkgamesdbnetfetchbulk /mkgamesdbnetfetchbulk
 
 # Use an unprivileged user.
-# USER mediakraken:mediakraken
+USER mediakraken:mediakraken
