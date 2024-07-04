@@ -6,11 +6,6 @@ metadata:
   name: mkstack-webapp
   namespace: mediakraken
 spec:
-  securityContext:
-    fsGroup: 1000
-    runAsGroup: 1000
-    runAsNonRoot: true
-    runAsUser: 1000
   replicas: 1
   selector:
     matchLabels:
@@ -20,6 +15,11 @@ spec:
       labels:
         io.kompose.service: mkstack-webapp-service
     spec:
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
       containers:
         - args:
             - sh
