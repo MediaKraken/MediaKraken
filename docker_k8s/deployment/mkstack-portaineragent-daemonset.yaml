@@ -4,7 +4,7 @@ metadata:
   labels:
     io.kompose.service: mkstack-portaineragent
   name: mkstack-portaineragent
-  namespace: mediakraken
+  namespace: portainer
 spec:
   selector:
     matchLabels:

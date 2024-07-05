@@ -31,7 +31,7 @@ spec:
             - mountPath: /mediakraken/mnt
               name: mkstack-transcode-claim
               readOnly: true
-      restartPolicy: Never
+      restartPolicy: OnFailure
       terminationGracePeriodSeconds: 30
       volumes:
         - name: db-password

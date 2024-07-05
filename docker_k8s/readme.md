@@ -163,6 +163,7 @@ https://dl.k8s.io/release/v1.30.0/bin/windows/amd64/kubectl.exe
 
 # setup mediakraken
 kubectl create namespace mediakraken
+kubectl create namespace portainer
 
 kubectl apply -f https://raw.githubusercontent.com/MediaKraken/MediaKraken/dev/docker_k8s/mkstack-multicast-deployment.yaml
 
@@ -230,6 +231,8 @@ kubectl delete persistentvolumeclaim mkstack-database-claim  --namespace mediakr
 kubectl get pods --namespace=mediakraken
 
 kubectl rollout restart deployment --namespace=mediakraken
+
+kubectl rollout restart deployment mkstack-portainer -n mediakraken
 
 kubectl logs mkstack-grafana-78669db887-5d7tf --all-containers=true
 

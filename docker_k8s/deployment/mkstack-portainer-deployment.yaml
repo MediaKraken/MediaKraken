@@ -4,7 +4,7 @@ metadata:
   labels:
     io.kompose.service: mkstack-portainer
   name: mkstack-portainer
-  namespace: mediakraken
+  namespace: portainer
 spec:
   replicas: 1
   selector:
