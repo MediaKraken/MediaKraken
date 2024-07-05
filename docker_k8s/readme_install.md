@@ -3,10 +3,8 @@ https://www.linuxtechi.com/install-kubernetes-cluster-on-debian/
 debian12 net
 ssh
 
-su
-apt-get install sudo curl gpg -y
-
-/sbin/adduser metaman sudo
+su 
+apt-get install sudo curl gpg -y && /sbin/adduser metaman sudo
 
 relog
 
@@ -16,10 +14,10 @@ sudo hostnamectl set-hostname "mkcube2.beaverbay.local"
 
 sudo hostnamectl set-hostname "mkcube3.beaverbay.local"
 
-nano /etc/hosts
-192.168.1.132   mkcube1.beaverbay.local   mkcube1
-192.168.1.134   mkcube2.beaverbay.local   mkcube2
-192.168.1.135   mkcube3.beaverbay.local   mkcube3
+sudo nano /etc/hosts
+192.168.1.142   mkcube1.beaverbay.local   mkcube1
+192.168.1.143   mkcube2.beaverbay.local   mkcube2
+192.168.1.144   mkcube3.beaverbay.local   mkcube3
 
 sudo swapoff -a
 sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
@@ -29,7 +27,6 @@ sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 In case, OS firewall is enabled on your Debian systems then allow following ports on master and worker nodes respectively.
 
 On Master node, run
-
 $ sudo ufw allow 6443/tcp
 $ sudo ufw allow 2379/tcp
 $ sudo ufw allow 2380/tcp
@@ -38,8 +35,8 @@ $ sudo ufw allow 10251/tcp
 $ sudo ufw allow 10252/tcp
 $ sudo ufw allow 10255/tcp
 $ sudo ufw reload
-On Worker Nodes,
 
+On Worker Nodes,
 $ sudo ufw allow 10250/tcp
 $ sudo ufw allow 30000:32767/tcp
 $ sudo ufw reload
@@ -51,8 +48,7 @@ overlay
 br_netfilter
 EOF
 
-sudo modprobe overlay
-sudo modprobe br_netfilter
+sudo modprobe overlay && sudo modprobe br_netfilter
 
 cat <<EOF | sudo tee /etc/sysctl.d/99-kubernetes-k8s.conf
 net.bridge.bridge-nf-call-iptables = 1
@@ -72,8 +68,10 @@ search SystemdCgroup and set to true
 
 sudo systemctl restart containerd
 
-echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+######SNAP2!!!!!!!!!!!!!!
+
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
 sudo apt update
 sudo apt install kubelet kubeadm kubectl -y
@@ -87,7 +85,7 @@ kind: InitConfiguration
 ---
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
-kubernetesVersion: "1.28.0" # Replace with your desired version
+kubernetesVersion: "1.30.0" # Replace with your desired version
 controlPlaneEndpoint: "mkcube1"
 ---
 apiVersion: kubelet.config.k8s.io/v1beta1
@@ -95,15 +93,16 @@ kind: KubeletConfiguration
 
 sudo kubeadm init --config kubelet.yaml
 
-um?
-
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
+/*
 # i had to do this to fix the config
 sudo kubeadm reset
+*/
 
+# verify master is working
 kubectl get nodes
 kubectl cluster-info
 
@@ -112,27 +111,27 @@ sudo kubeadm join mkcube1:6443 --token 21nm87.fakestuffiiau \
 --discovery-token-ca-cert-hash sha256:28b5fakestuff24b78009
 
 # MASTER at step 8
-kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.1/manifests/calico.yaml
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/calico.yaml
 
-
+/*
 on all nodes
 sudo ufw allow 179/tcp
 $ sudo ufw allow 4789/udp
 $ sudo ufw allow 51820/udp
 $ sudo ufw allow 51821/udp
 $ sudo ufw reload
+*/
 
-
-
+# verify cluster
 kubectl get pods -n kube-system
 
 
 # cluxster is up
-
+/*
 kubectl create deployment nginx-app --image=nginx --replicas 2
 kubectl expose deployment nginx-app --name=nginx-web-svc --type NodePort --port 80 --target-port 80
 kubectl describe svc nginx-web-svc
-
+*/
 
 see running pods
 kubectl get pods -A
@@ -145,35 +144,35 @@ https://www.youtube.com/watch?v=r2zuL9MW6wc
 
 
 # convert
+/*
 curl -L https://github.com/kubernetes/kompose/releases/download/v1.34.0/kompose-linux-amd64 -o kompose
 chmod +x kompose
 sudo mv ./kompose /usr/local/bin/kompose
 kompose convert -f docker-compose.yml
+*/
 
 
-
-
-# start api
+# start api on master
 kubectl proxy --port=8080 &
 curl http://localhost:8080/api/
 
 # windows doom
-https://dl.k8s.io/release/v1.30.0/bin/windows/amd64/kubectl.exe
+# https://dl.k8s.io/release/v1.30.0/bin/windows/amd64/kubectl.exe
 
 
 # setup mediakraken
 kubectl create namespace mediakraken
 kubectl create namespace portainer
 
-kubectl apply -f https://raw.githubusercontent.com/MediaKraken/MediaKraken/dev/docker_k8s/mkstack-multicast-deployment.yaml
+# kubectl apply -f https://raw.githubusercontent.com/MediaKraken/MediaKraken/dev/docker_k8s/mkstack-multicast-deployment.yaml
 
 
 # on master
-https://github.com/kubernetes-csi/csi-driver-nfs/blob/master/docs/install-csi-driver-v4.7.0.md
+# https://github.com/kubernetes-csi/csi-driver-nfs/blob/master/docs/install-csi-driver-v4.7.0.md
 curl -skSL https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/v4.7.0/deploy/install-driver.sh | bash -s v4.7.0 --
 
 # worker nodes
-apt install -y nfs-common
+sudo apt install -y nfs-common
 
 # was running fo rlast five months
 # storage
@@ -211,14 +210,30 @@ exportfs -a
 exportfs -r
 exportfs -v
 
-
-# do the storage setup/claim/etc
+# checkout dev branch of mediakraken
+# do the storage setup/claim/etc on master
+sudo apt-get install git
+git clone https://github.com/MediaKraken/MediaKraken
 kubectl apply -f nfs-pvc.yaml
 kubectl apply -f nfs-pvc-8k.yaml
 kubectl get storageclasses
 kubectl describe storageclasses nfs-csi
 
 kubectl get storageclass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # installed all claims
 kubectl apply -f claim
@@ -243,6 +258,27 @@ kubectl create secret generic db-password --from-literal=username=devuser --from
 
 kubectl get secrets --namespace=mediakraken
 
+kubectl get deployment --namespace=mediakraken
+
 kubectl delete deployment --all --namespace=mediakraken
 
 kubectl get service --all-namespaces
+
+# see if rbac enabled
+kubectl api-versions | grep rbac
+
+
+
+/*
+# upgrade of cluster...master nodes
+kubectl drain --ignore-daemonsets mkcube1.beaverbay.local
+
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+sudo apt update
+
+sudo apt-mark unhold kubeadm && \
+sudo apt-get update && sudo apt-get install -y kubeadm='1.30.2-*' && \
+sudo apt-mark hold kubeadm
+*/

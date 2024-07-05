@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mkstack-portainer-claim
-  namespace: mediakraken
+  namespace: portainer
 spec:
   accessModes:
     - ReadWriteMany
