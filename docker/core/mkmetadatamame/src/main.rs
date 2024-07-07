@@ -44,11 +44,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .await
             .unwrap();
 
-    println!("Here I am");
-    // let local = tokio::task::LocalSet::new();
-    // local.run_until(async move {
-    println!("Here I am 2");
-    //tokio::task::spawn_local(async move {
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {
