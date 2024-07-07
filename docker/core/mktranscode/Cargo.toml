@@ -20,7 +20,7 @@ mk_lib_common = { version = "0.0.2", registry = "kellnr" }
 mk_lib_compression  = { version = "0.0.2", registry = "kellnr" }
 mk_lib_database  = { version = "0.0.6", registry = "kellnr" }
 mk_lib_file  = { version = "0.0.2", registry = "kellnr", features = ["smb"] }
-mk_lib_rabbitmq  = { version = "0.0.2", registry = "kellnr" }
+mk_lib_rabbitmq  = { version = "0.0.4", registry = "kellnr" }
 
 chrono = { version = "0.4.38", features = ["serde"] }
 reqwest = { version = "0.12.5", default-features = false, features = [

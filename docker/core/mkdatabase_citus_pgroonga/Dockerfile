@@ -30,7 +30,7 @@ COPY --from=0 /usr/lib/libzstd.so.? /usr/lib/
 # copy MeCab files
 COPY --from=0 /usr/local/etc/mecabrc /usr/local/etc/
 COPY --from=0 /usr/local/lib/libmecab.so.? /usr/local/lib/
-COPY --from=0 /usr/local/lib/mecab/ /usr/local/lib/mecab/
+#COPY --from=0 /usr/local/lib/mecab/ /usr/local/lib/mecab/
 # copy Groonga lib files
 COPY --from=0 /usr/local/etc/groonga/ /usr/local/etc/groonga/
 COPY --from=0 /usr/local/lib/groonga/ /usr/local/lib/groonga/

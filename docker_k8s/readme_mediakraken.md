@@ -16,6 +16,9 @@ kubectl get storageclasses
 python3 mediakraken_setup.py
 
 # installed all claims
+kubectl apply -f namespace
+
+# installed all claims
 kubectl apply -f claim
 
 # installed all services
@@ -35,7 +38,7 @@ kubectl apply -f deployment
 kubectl get pods --namespace portainer
 kubectl logs mkstack-portainer-5f887dc8b4-vzksq --namespace portainer
 kubectl logs mkstack-portainer-5f887dc8b4-vzksq --all-containers --namespace portainer
-
+# https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer.yaml
 
 
 /*

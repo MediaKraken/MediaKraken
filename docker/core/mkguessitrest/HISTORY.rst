@@ -4,7 +4,7 @@ History
 2.1.5
 ------------------
 
-- Python 3.10
+- Python 3.11
 - Upgrade docker image to `tiangolo/uwsgi-nginx-flask:python3.11-2024-02-05`
 
 2.1.4

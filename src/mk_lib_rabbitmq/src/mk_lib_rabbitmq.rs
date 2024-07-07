@@ -26,9 +26,6 @@ pub async fn rabbitmq_connect(
 ) -> Result<(Connection, Channel), Box<dyn std::error::Error>> {
     let mut rabbit_host = "mkstack-rabbitmq";
     let hostname: String = sys_info::hostname().unwrap().trim().to_string();
-    if hostname == "mkcode" {
-        rabbit_host = "mkprod";
-    }
     // open a connection to RabbitMQ server
     let rabbit_connection = Connection::open(&OpenConnectionArguments::new(
         rabbit_host,
