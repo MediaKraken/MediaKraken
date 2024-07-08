@@ -22,24 +22,20 @@ spec:
             - sh
             - -c
             - /mktranscode
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-password
+                  key: mkstack-db-password.txt
           image: mediakraken/mktranscode:dev
           name: mkstack-transcode
           volumeMounts:
-            - mountPath: /run/secrets
-              name: db-password
-              subPath: db-password
             - mountPath: /mediakraken/mnt
               name: mkstack-transcode-claim
               readOnly: true
       restartPolicy: OnFailure
       terminationGracePeriodSeconds: 30
       volumes:
-        - name: db-password
-          secret:
-            items:
-              - key: db-password
-                path: db-password
-            secretName: db-password
         - name: mkstack-transcode-claim
           persistentVolumeClaim:
             claimName: mkstack-transcode-claim

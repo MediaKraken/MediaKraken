@@ -22,16 +22,5 @@ spec:
             - /mktvheadend
           image: mediakraken/mktvheadend:dev
           name: mkstack-tvheadend
-          volumeMounts:
-            - mountPath: /run/secrets
-              name: db-password
-              subPath: db-password
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
-      volumes:
-        - name: db-password
-          secret:
-            items:
-              - key: db-password
-                path: db-password
-            secretName: db-password

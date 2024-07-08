@@ -45,12 +45,6 @@ spec:
             - containerPort: 8080
               protocol: TCP
           volumeMounts:
-            - mountPath: /run/secrets
-              name: secure-key
-              subPath: secure-key
-            - mountPath: /run/secrets
-              name: csrf-key
-              subPath: csrf-key
             - mountPath: /mediakraken/static
               name: mkstack-static-claim
             - mountPath: /mediakraken/certs
@@ -60,18 +54,6 @@ spec:
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
-        - name: secure-key
-          secret:
-            items:
-              - key: secure-key
-                path: secure-key
-            secretName: secure-key
-        - name: csrf-key
-          secret:
-            items:
-              - key: csrf-key
-                path: csrf-key
-            secretName: csrf-key
         - name: mkstack-static-claim
           persistentVolumeClaim:
             claimName: mkstack-static-claim
@@ -81,4 +63,3 @@ spec:
         - name: mkstack-comics-claim
           persistentVolumeClaim:
             claimName: mkstack-comics-claim
-
