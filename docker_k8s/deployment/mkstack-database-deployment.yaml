@@ -18,10 +18,10 @@ spec:
         io.kompose.service: mkstack-database-service
     spec:
       securityContext:
-        fsGroup: 0
-        runAsGroup: 0
-        runAsNonRoot: false
-        runAsUser: 0
+        fsGroup: 70
+        runAsGroup: 70
+        runAsNonRoot: true
+        runAsUser: 70
       containers:
         - args:
             - postgres
