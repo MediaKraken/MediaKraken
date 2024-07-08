@@ -63,4 +63,4 @@ if not os.path.isfile('./mkstack-nut.txt'):
         print(line.rstrip(), flush=True)
     install_pid.wait()
 
-# TODO when production, remove the secret files
+print("Suggest transfering the key files to safe location!")
