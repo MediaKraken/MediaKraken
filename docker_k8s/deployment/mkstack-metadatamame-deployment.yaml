@@ -32,12 +32,14 @@ spec:
               value: mkstack-database:5432, mkstack-rabbitmq:5672
             - name: WAIT_TIMEOUT
               value: "180"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-password
+                  key: mkstack-db-password.txt
           image: mediakraken/mkmetadatamame:dev
           name: mkstack-metadatamame
           volumeMounts:
-            - mountPath: /run/secrets
-              name: db-password
-              subPath: db-password
             - mountPath: /mediakraken/emulation
               name: mkstack-emulation-claim
             - mountPath: /mediakraken/static
@@ -45,12 +47,6 @@ spec:
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
-        - name: db-password
-          secret:
-            items:
-              - key: db-password
-                path: db-password
-            secretName: db-password
         - name: mkstack-emulation-claim
           persistentVolumeClaim:
             claimName: mkstack-emulation-claim

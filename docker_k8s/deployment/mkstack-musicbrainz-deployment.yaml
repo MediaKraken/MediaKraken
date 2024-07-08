@@ -27,23 +27,19 @@ spec:
               value: mkstack-database:5432, mkstack-rabbitmq:5672
             - name: WAIT_TIMEOUT
               value: "180"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-password
+                  key: mkstack-db-password.txt
           image: mediakraken/mkmusicbrainz:dev
           name: mkstack-musicbrainz
           volumeMounts:
-            - mountPath: /run/secrets
-              name: db-password
-              subPath: db-password
             - mountPath: /mediakraken/mbdump
               name: mkstack-mbrainz-claim
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
-        - name: db-password
-          secret:
-            items:
-              - key: db-password
-                path: db-password
-            secretName: db-password
         - name: mkstack-mbrainz-claim
           persistentVolumeClaim:
             claimName: mkstack-mbrainz-claim
