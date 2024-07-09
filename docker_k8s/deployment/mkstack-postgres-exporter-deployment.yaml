@@ -23,7 +23,7 @@ spec:
                   name: db-password
                   key: mkstack-db-password.txt              
             - name: DATA_SOURCE_URI
-              value: mkstack-database:5432/postgres?sslmode=disable
+              value: mkstack-database-service:5432/postgres?sslmode=disable
             - name: DATA_SOURCE_USER
               value: postgres
           # https://github.com/prometheus-community/postgres_exporter
