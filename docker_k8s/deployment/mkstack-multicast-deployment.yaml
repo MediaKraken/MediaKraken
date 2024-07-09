@@ -23,6 +23,7 @@ spec:
             - -c
             - /mkmulticast
           image: mediakraken/mkmulticast:dev
+          imagePullPolicy: Always
           name: mkstack-multicast
       restartPolicy: Always
       terminationGracePeriodSeconds: 30

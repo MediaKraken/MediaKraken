@@ -17,6 +17,7 @@ spec:
     spec:
       containers:
         - image: mediakraken/mkguessitrest:dev
+          imagePullPolicy: Always
           name: mkstack-guessitrest
       restartPolicy: Always
       terminationGracePeriodSeconds: 30

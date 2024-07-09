@@ -30,7 +30,7 @@ spec:
               value: "1"
             - name: PGADMIN_LISTEN_PORT
               value: "5050"
-          image: dpage/pgadmin4:8.8
+          image: dpage/pgadmin4:8.9
           name: mkstack-pgadmin
           ports:
             - containerPort: 5050

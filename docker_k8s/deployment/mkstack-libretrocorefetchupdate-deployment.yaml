@@ -33,6 +33,7 @@ spec:
             - name: WAIT_TIMEOUT
               value: "180"
           image: mediakraken/mklibretrocorefetchupdate:dev
+          imagePullPolicy: Always
           name: mkstack-libretrocorefetchupdate
           volumeMounts:
             - mountPath: /mediakraken/emulation

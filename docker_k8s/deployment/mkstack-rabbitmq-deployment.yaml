@@ -26,6 +26,7 @@ spec:
             - name: RABBITMQ_IO_THREAD_POOL_SIZE
               value: "256"
           image: mediakraken/mkrabbitmq:dev
+          imagePullPolicy: Always
           name: mkstack-rabbitmq
           ports:
             - containerPort: 5672

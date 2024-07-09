@@ -20,6 +20,7 @@ spec:
             - name: nut-upsd-password
               value: /run/secrets/nut-password
           image: mediakraken/mknut:dev
+          imagePullPolicy: Always
           name: mkstack-nut
           ports:
             - containerPort: 3493

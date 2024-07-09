@@ -38,6 +38,7 @@ spec:
                   name: db-password
                   key: mkstack-db-password.txt
           image: mediakraken/mkmediascanner:dev
+          imagePullPolicy: Always
           name: mkstack-mediascanner
           volumeMounts:
             - mountPath: /mediakraken/static

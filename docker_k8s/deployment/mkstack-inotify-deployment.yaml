@@ -31,6 +31,7 @@ spec:
                   name: db-password
                   key: mkstack-db-password.txt
           image: mediakraken/mkinotify:dev
+          imagePullPolicy: Always
           name: mkstack-inotify
       restartPolicy: Always
       terminationGracePeriodSeconds: 30

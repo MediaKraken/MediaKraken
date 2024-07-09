@@ -21,6 +21,7 @@ spec:
             - -c
             - /mktvheadend
           image: mediakraken/mktvheadend:dev
+          imagePullPolicy: Always
           name: mkstack-tvheadend
       restartPolicy: Always
       terminationGracePeriodSeconds: 30

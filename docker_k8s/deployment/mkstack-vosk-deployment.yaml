@@ -18,6 +18,7 @@ spec:
       containers:
         # https://hub.docker.com/u/alphacep
         - image: alphacep/kaldi-en:latest
+          imagePullPolicy: Always
           name: mkstack-vosk
           ports:
             - containerPort: 2700

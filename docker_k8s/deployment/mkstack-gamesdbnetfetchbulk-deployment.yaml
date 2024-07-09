@@ -38,6 +38,7 @@ spec:
                   name: db-password
                   key: mkstack-db-password.txt
           image: mediakraken/mkgamesdbnetfetchbulk:dev
+          imagePullPolicy: Always
           name: mkstack-gamesdbnetfetchbulk
           volumeMounts:
             - mountPath: /static

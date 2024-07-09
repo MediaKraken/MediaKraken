@@ -48,6 +48,7 @@ spec:
               value: Etc/UTC
           # https://github.com/linuxserver/docker-wireguard
           image: lscr.io/linuxserver/wireguard:latest
+          imagePullPolicy: Always
           name: mkstack-wireguard
           ports:
             - containerPort: 51820

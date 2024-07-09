@@ -36,6 +36,7 @@ spec:
                   name: db-password
                   key: mkstack-db-password.txt
           image: mediakraken/mktmdbnetfetchbulk:dev
+          imagePullPolicy: Always
           name: mkstack-tmdbnetfetchbulk
       restartPolicy: Always
       terminationGracePeriodSeconds: 30

@@ -28,6 +28,7 @@ spec:
                   name: db-password
                   key: mkstack-db-password.txt
           image: mediakraken/mktranscode:dev
+          imagePullPolicy: Always
           name: mkstack-transcode
           volumeMounts:
             - mountPath: /mediakraken/mnt

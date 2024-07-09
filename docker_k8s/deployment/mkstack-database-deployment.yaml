@@ -54,6 +54,7 @@ spec:
             - name: WORK_MEM
               value: 64MB
           image: mediakraken/mkdatabase:dev
+          imagePullPolicy: Always
           name: mkstack-database
           ports:
             - containerPort: 5432

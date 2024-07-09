@@ -19,6 +19,7 @@ spec:
     spec:
       containers:
         - image: mediakraken/mktransmission:dev
+          imagePullPolicy: Always
           name: mkstack-transmission
           ports:
             - containerPort: 9091
