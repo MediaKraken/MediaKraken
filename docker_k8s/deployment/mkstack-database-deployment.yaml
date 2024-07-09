@@ -17,11 +17,11 @@ spec:
       labels:
         io.kompose.service: mkstack-database-service
     spec:
-      securityContext:
-        fsGroup: 70
-        runAsGroup: 70
-        runAsNonRoot: true
-        runAsUser: 70
+      # securityContext:
+      #   fsGroup: 70
+      #   runAsGroup: 70
+      #   runAsNonRoot: true
+      #   runAsUser: 70
       containers:
         - args:
             - postgres
@@ -34,8 +34,6 @@ spec:
             - -c
             - config_file=/usr/local/share/postgresql/postgresql.conf.sample
           env:
-            - name: PGDATA
-              value: "/var/lib/postgresql/data/pgdata"
             - name: MAX_CONNECTIONS
               value: "125"
             - name: MAX_PARALLEL_WORKERS
@@ -63,7 +61,7 @@ spec:
           volumeMounts:
             - mountPath: /var/lib/postgresql/data
               name: mkstack-database-claim
-              subPath: postgres
+              readOnly: false
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:

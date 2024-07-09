@@ -204,8 +204,8 @@ chown -R nobody:nogroup /wdblack/sharenfs8k
 chmod -R 777 /wdblack/sharenfs8k/
 
 nano /etc/exports
-/wdblack/sharenfs 192.168.1.0/24(rw,sync,no_subtree_check)
-/wdblack/sharenfs8k 192.168.1.0/24(rw,sync,no_subtree_check)
+/wdblack/sharenfs 192.168.1.0/24(rw,sync,no_subtree_check,no_root_squash)
+/wdblack/sharenfs8k 192.168.1.0/24(rw,sync,no_subtree_check,no_root_squash)
 exportfs -a
 exportfs -r
 exportfs -v
