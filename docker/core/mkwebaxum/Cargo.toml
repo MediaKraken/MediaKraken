@@ -21,7 +21,7 @@ mk_lib_database = { version = "0.0.20", registry = "kellnr" }
 mk_lib_file = { version = "0.0.2", registry = "kellnr" }
 mk_lib_metadata = { version = "0.0.5", registry = "kellnr" }
 mk_lib_network = { version = "0.0.4", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.4", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.5", registry = "kellnr" }
 
 askama = { version = "0.12.1", features = ["with-axum", "mime", "mime_guess"] }
 askama_axum = "0.4.0"
