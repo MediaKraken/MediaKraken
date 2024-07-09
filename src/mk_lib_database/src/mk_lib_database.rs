@@ -32,7 +32,7 @@ pub async fn mk_lib_database_open_pool(pool_connections: u32, connection_timeout
     } else {
         let db_pass = env::var("POSTGRES_PASSWORD").unwrap();
         connection_string = format!(
-            "postgresql://postgres:{}@mkdatabase/postgres?sslmode=disable",
+            "postgresql://postgres:{}@mkstack-pgadmin-service/postgres?sslmode=disable",
             encode(&db_pass)
         );
     }
