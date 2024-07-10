@@ -84,6 +84,9 @@ DOCKER_IMAGES = {
     # runs as HOST to find new hardware - run and exit
     'mkhardwarescanner': ('mkhardwarescanner', 'core'),
 
+    # used to init db and static files
+    'mkinit': ('mkinit', 'core'),
+
     # inotify of file system changes to amqp
     'mkinotify': ('mkinotify', 'core'),
 

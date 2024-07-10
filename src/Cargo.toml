@@ -2,6 +2,7 @@
 
 members = [
     "ed2k-rs",
+    "meta_directory_builder",
     "mk_lib_common",
     "mk_lib_compression",
     "mk_lib_database",

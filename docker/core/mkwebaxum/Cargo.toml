@@ -55,8 +55,6 @@ lazy_static = "1.4.0"
 libc = "0.2.155"
 num-format = { version = "0.4.4", features = ["with-system-locale"] }
 paginator = "0.2.6"
-# 13+ breaks my code
-rcgen = "0.12.1"
 redis_pool = "0.4.0"
 redis = { version = "0.25.4" }
 reqwest = { version = "0.12.5", default-features = false, features = [

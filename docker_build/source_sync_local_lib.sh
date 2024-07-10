@@ -35,6 +35,10 @@
 \rsync -a ../src/mk_lib_filler ../docker/core/mkhardwarescanner/. --exclude target
 \rsync -a alpine-minirootfs* ../docker/core/mkhardwarescanner/alpine-minirootfs-x86_64.tar.gz --exclude target
 
+# mkinit
+\rsync -a ../src/mk_lib_filler ../docker/core/mkinit/. --exclude target
+\rsync -a alpine-minirootfs* ../docker/core/mkinit/alpine-minirootfs-x86_64.tar.gz --exclude target
+
 # mkinotify
 \rsync -a ../src/mk_lib_filler ../docker/core/mkinotify/. --exclude target
 \rsync -a alpine-minirootfs* ../docker/core/mkinotify/alpine-minirootfs-x86_64.tar.gz --exclude target

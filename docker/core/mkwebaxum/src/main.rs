@@ -153,22 +153,6 @@ impl FromRef<AppState> for axum_flash::Config {
 
 #[tokio::main]
 async fn main() {
-    // TODO this needs to move to another container that doesn't start multiple containers
-    // check for and create ssl certs if needed
-    if Path::new("/mediakraken/certs/cacert.pem").exists() == false {
-        // generate certs/keys
-        let subject_alt_names = vec!["www.mediakraken.org".to_string(), "localhost".to_string()];
-        let cert = generate_simple_self_signed(subject_alt_names).unwrap();
-        let mut file_pem = File::create("/mediakraken/certs/cacert.pem").unwrap();
-        file_pem
-            .write_all(cert.serialize_pem().unwrap().as_bytes())
-            .unwrap();
-        let mut file_key_pem = File::create("/mediakraken/certs/privkey.pem").unwrap();
-        file_key_pem
-            .write_all(cert.serialize_private_key_pem().as_bytes())
-            .unwrap();
-    }
-
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
         .await
@@ -195,6 +179,7 @@ async fn main() {
 
     let (prometheus_layer, metric_handle) = PrometheusMetricLayer::pair();
 
+    // shouldn't have to check if certs exists...as the init container gens them before the db version is updated
     // configure certificate and private key used by https
     let config = RustlsConfig::from_pem_file(
         PathBuf::from("/mediakraken/certs/cacert.pem"),

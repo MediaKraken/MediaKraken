@@ -10,34 +10,11 @@ use tokio::sync::Notify;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    // create metadata paths, as before the db update will let it finish before
-    // other containers can use them
-    if !Path::new(&"/mediakraken/static/meta").exists() {
-        fs::create_dir("/mediakraken/static/meta")?;
-        let vec_of_metadata = vec!["poster", "backdrop", "trailer"];
-        for metadata_type in vec_of_metadata.iter() {
-            let file_name = format!("/mediakraken/static/meta/{}", metadata_type);
-            fs::create_dir(&file_name)?;
-            for c in b'a'..=b'z' {
-                for d in b'a'..=b'z' {
-                    for e in b'a'..=b'z' {
-                        for f in b'a'..=b'z' {
-                            fs::create_dir_all(format!(
-                                "{}/{}{}/{}{}",
-                                file_name, c as char, d as char, e as char, f as char
-                            ))?;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     // connect to db and do a version check
     let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
         .await
         .unwrap();
-    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, true)
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
         .await
         .unwrap();
     let option_config_json: Value =

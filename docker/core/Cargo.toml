@@ -7,6 +7,7 @@ members = [
     "mkglobalcache",
     "mkhardwarecontrol",
     "mkhardwarescanner",
+    "mkinit",
     "mkinotify",
     "mklibretrocorefetchupdate",
     "mkmediascanner",
