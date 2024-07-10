@@ -18,7 +18,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .output()
             .unwrap();
         }
-    }
 
     // check for and create ssl certs if needed
     if Path::new("/mediakraken/certs/cacert.pem").exists() == false {
