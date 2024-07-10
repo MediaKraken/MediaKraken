@@ -41,6 +41,11 @@ ADD meta.tar.gz /
 # deps has full /usr/lib/x86_64-linux-gnu path.....hence copy to /
 COPY --from=cargo-build-mkinit /mediakraken/deps/* /
 
+WORKDIR /mediakraken
+
+RUN apk update && apk add --no-cache tar \
+ && rm -rf /var/cache/apt/*
+
 # Import from builder.
 COPY --from=cargo-build-mkinit /etc/passwd /etc/passwd
 COPY --from=cargo-build-mkinit /etc/group /etc/group
