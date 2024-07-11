@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_file"
-version = "0.0.3"
+version = "0.0.4"
 edition = "2021"
 
 [profile.release]
@@ -12,17 +12,17 @@ codegen-units = 1
 [dependencies]
 mk_lib_database = { version = "0.0.20", registry = "kellnr", optional = true }
 
-aws-config = { version = "1.5.3", optional = true }
-aws-sdk-s3 = { version = "1.38.0", optional = true }
+aws-config = { version = "1.5.4", optional = true }
+aws-sdk-s3 = { version = "1.40.0", optional = true }
 libnfs = { version = "0.1.1", optional = true }
 pavao = { version = "0.2.6", optional = true }
 serde_json = "1.0.120"
 tokio = { version = "1.38.0", features = ["full"] }
-uuid = { version = "1.9.1", features = ["serde", "v4"] }
+uuid = { version = "1.10.0", features = ["serde", "v4"] }
 walkdir = "2.5.0"
 
 [features]
-nfs = ["libnfs"]
+nfs = ["libnfs", "mk_lib_database"]
 s3 = ["dep:aws-config", "dep:aws-sdk-s3"]
 share = ["mk_lib_database"]
 smb = ["pavao", "mk_lib_database"]

@@ -2,6 +2,9 @@ use std::error::Error;
 use std::fs;
 use std::path::Path;
 use std::process::{Command, Stdio};
+use std::fs::File;
+use std::io::Write;
+use rcgen::generate_simple_self_signed;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {

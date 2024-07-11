@@ -27,7 +27,6 @@ use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
 use hyper::StatusCode;
 use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
 use mk_lib_database;
-use rcgen::generate_simple_self_signed;
 use redis_pool::{RedisPool, SingleRedisPool};
 use ring::digest;
 use serde_json::json;
