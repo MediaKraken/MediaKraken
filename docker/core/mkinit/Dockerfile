@@ -37,14 +37,11 @@ RUN ldd /mediakraken/target/mkinit | tr -s '[:blank:]' '\n' | grep '^/' | \
 FROM scratch
 # otherwise throws file not found error
 ADD alpine-minirootfs-x86_64.tar.gz /
-ADD meta.tar.gz /
+ADD meta.tar.gz /tmp/
 # deps has full /usr/lib/x86_64-linux-gnu path.....hence copy to /
 COPY --from=cargo-build-mkinit /mediakraken/deps/* /
 
 WORKDIR /mediakraken
-
-RUN apk update && apk add --no-cache tar \
- && rm -rf /var/cache/apt/*
 
 # Import from builder.
 COPY --from=cargo-build-mkinit /etc/passwd /etc/passwd

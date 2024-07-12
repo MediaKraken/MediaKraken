@@ -11,11 +11,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // create metadata paths, as before the db update will let it finish before
     // other containers can use them
     if !Path::new(&"/mediakraken/static/meta").exists() {
-        // untar the tarball to /mediakraken/static
-        let output = Command::new("tar")
+        let output = Command::new("mv")
             .args([
-                "-xvzf",
-                "/mediakraken/media.tar.gz",
+                "/tmp/mediakraken/static/meta",
+                "/mediakraken/static/.",
             ])
             .stdout(Stdio::piped())
             .output()
