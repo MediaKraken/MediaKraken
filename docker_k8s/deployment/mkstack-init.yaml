@@ -26,7 +26,7 @@ spec:
         - args:
             - sh
             - -c
-            - /wait && /init
+            - /wait && /mkinit
           env:
             - name: WAIT_HOSTS
               value: mkstack-database-service:5432
@@ -37,7 +37,7 @@ spec:
                 secretKeyRef:
                   name: db-password
                   key: mkstack-db-password.txt
-          image: mediakraken/init:dev
+          image: mediakraken/mkinit:dev
           imagePullPolicy: Always
           name: mkstack-download
           volumeMounts:
