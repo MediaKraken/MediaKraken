@@ -39,7 +39,7 @@ spec:
                   key: mkstack-db-password.txt
           image: mediakraken/mkinit:dev
           imagePullPolicy: Always
-          name: mkstack-download
+          name: mkstack-init
           volumeMounts:
             - mountPath: /mediakraken/certs
               name: mkstack-certs-claim
