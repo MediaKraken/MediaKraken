@@ -8,7 +8,7 @@ LABEL author="Quinn D Granfor, spootdev@gmail.com"
 
 #   && apk add --no-cache postgresql-citus --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
 RUN apk update && apk add --no-cache bash su-exec tzdata zstd icu-data-full nss_wrapper \
-  && apk add --no-cache postgresql-citus postgresql16-contrib
+  && apk add --no-cache postgresql-citus postgresql16-contrib libarrow libxxhash
 
 ADD https://raw.githubusercontent.com/postgres/postgres/master/src/backend/utils/misc/postgresql.conf.sample /usr/local/share/postgresql/postgresql.conf.sample
 COPY docker-entrypoint.sh /usr/local/bin/

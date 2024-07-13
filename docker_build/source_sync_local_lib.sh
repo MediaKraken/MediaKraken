@@ -87,10 +87,6 @@
 \rsync -a ../src/mk_lib_filler ../docker/core/mktmdbnetfetchbulk/. --exclude target
 \rsync -a alpine-minirootfs* ../docker/core/mktmdbnetfetchbulk/alpine-minirootfs-x86_64.tar.gz --exclude target
 
-# mktmdbnetfetchupdate
-\rsync -a ../src/mk_lib_filler ../docker/core/mktmdbnetfetchupdate/. --exclude target
-\rsync -a alpine-minirootfs* ../docker/core/mktmdbnetfetchupdate/alpine-minirootfs-x86_64.tar.gz --exclude target
-
 # mktranscode
 \rsync -a ../src/mk_lib_filler ../docker/core/mktranscode/. --exclude target
 \rsync -a alpine-minirootfs* ../docker/core/mktranscode/alpine-minirootfs-x86_64.tar.gz --exclude target

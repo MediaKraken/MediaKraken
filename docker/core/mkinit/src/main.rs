@@ -1,25 +1,26 @@
+use rcgen::generate_simple_self_signed;
 use std::error::Error;
 use std::fs;
-use std::path::Path;
-use std::process::{Command, Stdio};
 use std::fs::File;
 use std::io::Write;
-use rcgen::generate_simple_self_signed;
+use std::path::Path;
+use std::process::{Command, Stdio};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // create metadata paths, as before the db update will let it finish before
     // other containers can use them
     if !Path::new(&"/mediakraken/static/meta").exists() {
-        let output = Command::new("mv")
-            .args([
-                "/tmp/mediakraken/static/meta",
-                "/mediakraken/static/.",
-            ])
+        // untar the tarball to /mediakraken/static
+        let output = Command::new("tar")
+            .args(["-xzf", "/tmp/meta.tar.gz"])
             .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
             .output()
             .unwrap();
-        }
+        let stdout: String = String::from_utf8(output.stdout).unwrap();
+        println!("output: {}", stdout);
+    }
 
     // check for and create ssl certs if needed
     if Path::new("/mediakraken/certs/cacert.pem").exists() == false {
