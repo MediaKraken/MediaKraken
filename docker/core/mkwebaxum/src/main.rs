@@ -52,7 +52,6 @@ pub mod admin {
     pub mod bp_backup;
     pub mod bp_cron;
     pub mod bp_database;
-    pub mod bp_docker;
     pub mod bp_game_servers;
     pub mod bp_hardware;
     pub mod bp_home;
@@ -193,9 +192,6 @@ async fn main() {
     };
 
     // build our application with routes
-    let docker_results = mk_lib_common::mk_lib_common_docker::mk_common_docker_info()
-        .await
-        .unwrap();
     let client: Client =
         hyper_util::client::legacy::Client::<(), ()>::builder(TokioExecutor::new())
             .build(HttpConnector::new());
@@ -205,7 +201,6 @@ async fn main() {
         .route_with_tsr("/admin/backup", get(admin::bp_backup::admin_backup))
         .route_with_tsr("/admin/cron", get(admin::bp_cron::admin_cron))
         .route_with_tsr("/admin/database", get(admin::bp_database::admin_database))
-        .route_with_tsr("/admin/docker", get(admin::bp_docker::admin_docker))
         .route_with_tsr(
             "/admin/game_servers/:page",
             get(admin::bp_game_servers::admin_game_servers),
