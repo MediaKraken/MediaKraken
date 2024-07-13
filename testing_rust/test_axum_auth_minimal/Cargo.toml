@@ -27,7 +27,7 @@ axum_session_auth = { version = "0.12.1", features = [
 axum-server = { version = "0.6.0", features = ["tls-rustls"] }
 axum_static = "1.2.3"
 chrono = { version = "0.4.34", features = ["serde"] }
-lazy_static = "1.4.0"
+lazy_static = "1.5.0"
 libc = "0.2.153"
 rcgen = "0.12.1"
 serde = { version = "1.0.196", features = ["derive"] }

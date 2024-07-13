@@ -20,7 +20,7 @@ axum-login = "0.15.3"
 axum-server = { version = "0.6.0", features = ["tls-rustls"] }
 axum_static = "1.7.1"
 chrono = { version = "0.4.38", features = ["serde"] }
-lazy_static = "1.4.0"
+lazy_static = "1.5.0"
 libc = "0.2.155"
 serde = { version = "1.0.204", features = ["derive"] }
 serde_json = "1.0.120"
