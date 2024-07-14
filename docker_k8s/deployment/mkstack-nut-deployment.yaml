@@ -18,23 +18,15 @@ spec:
       containers:
         - env:
             - name: nut-upsd-password
-              value: /run/secrets/nut-password
+              valueFrom:
+                secretKeyRef:
+                  name: nut-password
+                  key: mkstack-nut.txt
           image: mediakraken/mknut:dev
           imagePullPolicy: Always
           name: mkstack-nut
           ports:
             - containerPort: 3493
               protocol: TCP
-          volumeMounts:
-            - mountPath: /run/secrets
-              name: nut-password
-              subPath: nut-password
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
-      volumes:
-        - name: nut-password
-          secret:
-            items:
-              - key: nut-password
-                path: nut-password
-            secretName: nut-password
