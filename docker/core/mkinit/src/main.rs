@@ -10,13 +10,16 @@ use std::process::{Command, Stdio};
 async fn main() -> Result<(), Box<dyn Error>> {
     // create metadata paths, as before the db update will let it finish before
     // other containers can use them
-    if !Path::new(&"/mediakraken/metadata/meta").exists() {
-        // TODO create tarball cd /mediakraken/static && tar --use-compress-program=lz4 -cf meta.lz4 ./meta
-        // untar the tarball to /mediakraken/static
-        // TODO tar --use-compress-program=lz4 -xvf target.lz4 -C /destination
-        // TODO tar -cf meta.tar meta
+    if !Path::new(&"/mediakraken/metadata").exists() {
+        let output = Command::new("gunzip")
+            .args(["/tmp/meta.tar.gz"])
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .output()
+            .unwrap();
+        // untar the tarball to /mediakraken/metadata
         let output = Command::new("tar")
-            .args(["-xzf", "/tmp/meta.tar.gz"])
+            .args(["-xf", "/tmp/meta.tar -C /"])
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .output()
