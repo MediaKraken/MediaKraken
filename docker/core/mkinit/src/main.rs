@@ -14,6 +14,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         // TODO create tarball cd /mediakraken/static && tar --use-compress-program=lz4 -cf meta.lz4 ./meta
         // untar the tarball to /mediakraken/static
         // TODO tar --use-compress-program=lz4 -xvf target.lz4 -C /destination
+        // TODO tar -cf meta.tar meta
         let output = Command::new("tar")
             .args(["-xzf", "/tmp/meta.tar.gz"])
             .stdout(Stdio::piped())

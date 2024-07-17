@@ -41,16 +41,16 @@ spec:
           imagePullPolicy: Always
           name: mkstack-metadata
           volumeMounts:
-            - mountPath: /mediakraken/static
-              name: mkstack-static-claim
+            - mountPath: /mediakraken/metadata
+              name: mkstack-metadata-claim
             - mountPath: /mediakraken/cache
               name: mkstack-cache-claim
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
-        - name: mkstack-static-claim
+        - name: mkstack-metadata-claim
           persistentVolumeClaim:
-            claimName: mkstack-static-claim
+            claimName: mkstack-metadata-claim
         - name: mkstack-cache-claim
           persistentVolumeClaim:
             claimName: mkstack-cache-claim

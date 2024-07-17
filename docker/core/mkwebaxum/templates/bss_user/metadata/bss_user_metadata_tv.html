@@ -28,7 +28,7 @@
                             {% if row_data.image_json == "" %}
                             <img src="/static/image/missing_icon.jpg" loading="lazy" height="300" width="200">
                             {% else %}
-                            <img src="/static/{{row_data.image_json|unquote_json}}" loading="lazy" height="300" width="200">
+                            <img src="/metadata/{{row_data.image_json|unquote_json}}" loading="lazy" height="300" width="200">
                             {% endif %}
                         </a>
                         {#{% if row_data.mm_metadata_tvshow_name != None %}

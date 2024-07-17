@@ -430,6 +430,7 @@ async fn main() {
             get(public::bp_login::public_login).post(public::bp_login::public_login_post),
         )
         .nest_service("/static", ServeDir::new("static"))
+        .nest_service("/metadata", ServeDir::new("metadata"))
         .layer(
             AuthSessionLayer::<
                 mk_lib_database::mk_lib_database_user::User,

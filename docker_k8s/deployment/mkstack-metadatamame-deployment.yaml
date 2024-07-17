@@ -43,14 +43,14 @@ spec:
           volumeMounts:
             - mountPath: /mediakraken/emulation
               name: mkstack-emulation-claim
-            - mountPath: /mediakraken/static
-              name: mkstack-static-claim
+            - mountPath: /mediakraken/metadata
+              name: mkstack-metadata-claim
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
         - name: mkstack-emulation-claim
           persistentVolumeClaim:
             claimName: mkstack-emulation-claim
-        - name: mkstack-static-claim
+        - name: mkstack-metadata-claim
           persistentVolumeClaim:
-            claimName: mkstack-static-claim
+            claimName: mkstack-metadata-claim

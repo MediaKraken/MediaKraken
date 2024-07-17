@@ -109,7 +109,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             // do NOT remove the header.....this is the SAVE location
                             // TODO use image directory format
                             let file_save_name = format!(
-                                "/mediakraken/static/meta/trailer/{:?}",
+                                "/mediakraken/metadata/meta/trailer/{:?}",
                                 download_link.rsplitn(1, "/")
                             );
                             // verify it doesn't exist in meta folder
