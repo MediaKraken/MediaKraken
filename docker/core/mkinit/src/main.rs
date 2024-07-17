@@ -10,7 +10,7 @@ use std::process::{Command, Stdio};
 async fn main() -> Result<(), Box<dyn Error>> {
     // create metadata paths, as before the db update will let it finish before
     // other containers can use them
-    if !Path::new(&"/mediakraken/static/meta").exists() {
+    if !Path::new(&"/mediakraken/metadata/meta").exists() {
         // untar the tarball to /mediakraken/static
         let output = Command::new("tar")
             .args(["-xzf", "/tmp/meta.tar.gz"])

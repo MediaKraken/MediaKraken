@@ -17,6 +17,11 @@ spec:
       labels:
         io.kompose.service: mkstack-transmission-service
     spec:
+      securityContext:
+        fsGroup: 100
+        runAsGroup: 101
+        runAsNonRoot: true
+        runAsUser: 100
       containers:
         - image: mediakraken/mktransmission:dev
           imagePullPolicy: Always
@@ -29,7 +34,8 @@ spec:
             - containerPort: 51413
               protocol: UDP
           volumeMounts:
-            - mountPath: /etc/transmission-daemon
+            - mountPath: /etc/transmission-daemon/settings.json
+              subPath: settings.json
               name: mkstack-transmission-claim
             - mountPath: /transmission/downloads
               name: mkstack-transmission-downloads-claim

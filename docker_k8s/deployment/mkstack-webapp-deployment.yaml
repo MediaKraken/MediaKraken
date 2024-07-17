@@ -46,8 +46,8 @@ spec:
             - containerPort: 8080
               protocol: TCP
           volumeMounts:
-            - mountPath: /mediakraken/static
-              name: mkstack-static-claim
+            - mountPath: /mediakraken/metadata
+              name: mkstack-metadata-claim
             - mountPath: /mediakraken/certs
               name: mkstack-certs-claim
             - mountPath: /Comics
@@ -55,9 +55,9 @@ spec:
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
-        - name: mkstack-static-claim
+        - name: mkstack-metadata-claim
           persistentVolumeClaim:
-            claimName: mkstack-static-claim
+            claimName: mkstack-metadata-claim
         - name: mkstack-certs-claim
           persistentVolumeClaim:
             claimName: mkstack-certs-claim

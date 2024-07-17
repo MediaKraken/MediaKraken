@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: mkstack-static-claim
+  name: mkstack-metadata-claim
   namespace: mediakraken
 spec:
   accessModes:
