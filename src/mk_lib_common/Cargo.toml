@@ -21,7 +21,7 @@ num-format = { version = "0.4.4", features = [
 ] }
 paginator = "0.2.6"
 serde_json = "1.0.120"
-tokio = { version = "1.38.0", features = ["full"] }
+tokio = { version = "1.38.1", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"

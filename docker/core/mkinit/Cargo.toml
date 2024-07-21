@@ -20,7 +20,7 @@ mk_lib_database = { version = "0.0.21", registry = "kellnr" }
 
 # 13+ breaks my code
 rcgen = "0.12.1"
-tokio = { version = "1.38.0", features = ["full"] }
+tokio = { version = "1.38.1", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"

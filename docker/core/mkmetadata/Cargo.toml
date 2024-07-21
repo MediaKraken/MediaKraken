@@ -47,7 +47,7 @@ stdext = "0.3.3"
 substring = "1.4.5"
 sys-info = "0.9.1"
 tar = "0.4.41"
-tokio = { version = "1.38.0", features = ["full"] }
+tokio = { version = "1.38.1", features = ["full"] }
 torrent-name-parser = "0.12.1"
 uuid = { version = "1.10.0", features = ["serde", "v4"] }
 md-5 = "0.10.6"

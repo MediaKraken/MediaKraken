@@ -29,7 +29,7 @@ shiplift = { version = "0.7", default-features = false, features = [
 ] }
 socket2 = { version = "0.5.7", features = ["all"] }
 stdext = "0.3.3"
-tokio = { version = "1.38.0", features = ["full"] }
+tokio = { version = "1.38.1", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"
