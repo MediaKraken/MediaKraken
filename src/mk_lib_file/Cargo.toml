@@ -10,7 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { version = "0.0.21", registry = "kellnr", optional = true }
+mk_lib_database = { version = "0.0.22", registry = "kellnr", optional = true }
 
 aws-config = { version = "1.5.4", optional = true }
 aws-sdk-s3 = { version = "1.40.0", optional = true }

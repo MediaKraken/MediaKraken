@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_database"
-version = "0.0.21"
+version = "0.0.22"
 edition = "2021"
 
 [profile.release]
@@ -14,7 +14,7 @@ mk_lib_common = { version = "0.0.2", registry = "kellnr" }
 
 anyhow = "1.0.86"
 async-trait = "0.1.81"
-axum_session = { version = "0.14.0", default-features = false, features = [
+axum_session = { version = "0.14.1", default-features = false, features = [
     "advanced",
     "key-store",
 ] }
