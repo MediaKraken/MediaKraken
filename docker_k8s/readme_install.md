@@ -235,10 +235,23 @@ sudo apt-get install helm
 
 
 # helm stuff to play with
-https://artifacthub.io/packages/helm/bitnami/postgresql-ha
 https://artifacthub.io/packages/olm/community-operators/postgresql
+kube-prometheus-stack
+https://artifacthub.io/packages/helm/enapter/keydb
+https://artifacthub.io/packages/helm/bitnami/nats
+https://artifacthub.io/packages/helm/cluster-autoscaler/cluster-autoscaler
+https://artifacthub.io/packages/helm/cadvisor/cadvisor
+https://artifacthub.io/packages/helm/utkuozdemir/transmission-exporter
+https://artifacthub.io/packages/helm/geek-cookbook/wireguard
+https://artifacthub.io/packages/helm/radar-base/cert-manager-letsencrypt
+https://artifacthub.io/packages/helm/certs/certs
 
-
+https://github.com/killemov/Shift
+https://opentofu.org/docs/intro/install/
+https://semaphoreui.com/install/docker/2_10_20/
+https://artifacthub.io/packages/helm/codecentric/mailhog
+https://artifacthub.io/packages/helm/bitnami/jenkins
+https://artifacthub.io/packages/helm/phntom/docker-registry
 
 
 
