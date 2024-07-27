@@ -1,4 +1,4 @@
-FROM rust:1.79.0-alpine3.20
+FROM rust:1.80.0-alpine3.20
 RUN apk update && \
   apk add alpine-sdk sqlite-dev openssl-dev wget ca-certificates \
   nmap postgresql16-client libsmbclient samba-dev libnfs-dev \
