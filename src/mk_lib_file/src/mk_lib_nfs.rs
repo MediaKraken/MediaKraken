@@ -1,5 +1,6 @@
 use libnfs::*;
 use nix::{fcntl::OFlag, sys::stat::Mode};
+use std::error::Error;
 
 pub fn mk_file_nfs_client_connect(
     share_to_mount: mk_lib_database::mk_lib_database_network_share::DBShareList,

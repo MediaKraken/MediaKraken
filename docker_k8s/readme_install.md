@@ -235,10 +235,12 @@ sudo apt-get install helm
 
 
 # helm stuff to play with
+https://operatorhub.io/
+https://operatorhub.io/operator/redis-operator
+https://github.com/dragonflydb/dragonfly-operator/
 https://artifacthub.io/packages/olm/community-operators/postgresql
 kube-prometheus-stack
-https://artifacthub.io/packages/helm/enapter/keydb
-https://artifacthub.io/packages/helm/bitnami/nats
+
 https://artifacthub.io/packages/helm/cluster-autoscaler/cluster-autoscaler
 https://artifacthub.io/packages/helm/cadvisor/cadvisor
 https://artifacthub.io/packages/helm/utkuozdemir/transmission-exporter
@@ -254,6 +256,22 @@ https://artifacthub.io/packages/helm/bitnami/jenkins
 https://artifacthub.io/packages/helm/phntom/docker-registry
 
 
+# on master
+curl -sL https://github.com/operator-framework/operator-controller/releases/download/v0.12.0/install.sh | bash -s v0.12.0
+curl -sL https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.28.0/install.sh | bash -s v0.28.0
+
+
+/*
+docker run --name semaphore \
+-p 3000:3000 \
+-e SEMAPHORE_DB_DIALECT=bolt \
+-e SEMAPHORE_ADMIN=admin \
+-e SEMAPHORE_ADMIN_PASSWORD=changeme \
+-e SEMAPHORE_ADMIN_NAME="Admin" \
+-e SEMAPHORE_ADMIN_EMAIL=admin@localhost \
+-v semaphore_data:/var/lib/semaphore \
+-d semaphoreui/semaphore:v2.10.20
+*/
 
 # installed all claims
 kubectl apply -f claim
