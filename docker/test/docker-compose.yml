@@ -14,13 +14,12 @@ services:
       - MAX_PARALLEL_WORKERS_PER_GATHER=2
       - MAX_PARALLEL_WORKERS=4
       - POSTGRES_PASSWORD=metaman
-    command: postgres -c logging_collector=on -c log_directory='/var/log/postgresql' -c log_filename='postgresql-%Y-%m-%d_%H%M%S.log' -c log_statement='all' -c log_duration=on -c log_connections=off -c log_disconnections=off
+    command: postgres -c shared_preload_libraries=citus -c max_wal_size=16GB -c tcp_keepalives_idle=86400 -c config_file=/usr/local/share/postgresql/postgresql.conf.sample
     container_name: mkdatabase
     stop_grace_period: 30s
     stop_signal: SIGTERM
     volumes:
       - mediakraken_vol_test_postgresql:/var/lib/postgresql/data
-      - mediakraken_vol_test_postgresql_logging:/var/log/postgresql
     networks:
       - mediakraken_test_network
     ports:
@@ -29,7 +28,7 @@ services:
 
   # database management tool
   mktestpgadmin:
-    image: dpage/pgadmin4:7.6
+    image: dpage/pgadmin4:8.9
     stop_grace_period: 30s
     stop_signal: SIGTERM
     container_name: mkpgadmin
@@ -53,4 +52,3 @@ networks:
 volumes:
   mediakraken_vol_test_pgadmin:
   mediakraken_vol_test_postgresql:
-  mediakraken_vol_test_postgresql_logging:
