@@ -1,24 +1,54 @@
+terraform {
+  required_providers {
+    proxmox = {
+      source = "telmate/proxmox"
+      version = "3.0.1-rc3"
+    }
+  }
+}
+
 provider "proxmox" {
- pm_api_url   = "https://192.168.1.11:8006/api2/json"
- pm_user      = "metaman"
- pm_password  = "12d03d06-d66e-4950-abbf-41a2757cfed6"
+ pm_api_url = var.api_url
+ pm_api_token_id = var.token_id
+ pm_api_token_secret = var.token_secret
  pm_tls_insecure = true
 }
 
-resource "proxmox_vm_qemu" "mkcontrol1" {
- name       = "mkcontrol1"
- target_node = "pvezfs"
- clone      = "ubuntu-template"
- storage    = "local-lvm"
+resource "proxmox_vm_qemu" "mkk8scontrol" {
+ name       = "mkcontrol${count.index + 1}"
+ count      = 2
+ target_node = var.proxmox_host
+ clone      = "debian-12-cloudinit-template"
  cores      = 4
+ sockets    = 1
+ cpu        = "host"
  memory     = 8192
+ agent      = 1
+ os_type    = "cloud-init"
+ full_clone = "true"
+ scsihw     = "virtio-scsi-pci"
+ bootdisk   = "scsi0"
+
+ disks {
+   virtio {
+      virtio0 {
+        disk {
+          size = "16G"
+          storage = var.storage_name
+        }
+      }
+    }
+  }
+
+ network {
+    model   = "virtio"
+    bridge  = var.nic_name
+ }
+
+ lifecycle {
+   ignore_changes = [
+     network,
+   ]
+ }
 }
 
-resource "proxmox_vm_qemu" "mkcontrol2" {
- name       = "mkcontrol2"
- target_node = "pvezfs"
- clone      = "ubuntu-template"
- storage    = "local-lvm"
- cores      = 4
- memory     = 8192
-}
