@@ -153,7 +153,7 @@ pub async fn mk_lib_database_network_share_insert(
     network_share_path: &str,
     network_share_comment: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    let new_guid = uuid::Uuid::new_v4();
+    let new_guid = uuid::Uuid::new_v7();
     let mut transaction = sqlx_pool.begin().await?;
     let path_name = network_share_path.replace("\\\\", "/");
     let path_vec: Vec<&str> = path_name.splitn(3, '/').collect();

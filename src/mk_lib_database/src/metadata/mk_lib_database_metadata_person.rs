@@ -146,7 +146,7 @@ pub async fn mk_lib_database_metadata_person_insert(
     person_json: serde_json::Value,
     person_image_path: serde_json::Value,
 ) -> Result<Uuid, sqlx::Error> {
-    let new_guid = uuid::Uuid::new_v4();
+    let new_guid = uuid::Uuid::new_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_metadata_person (mmp_id, mmp_person_name, \
@@ -175,7 +175,7 @@ pub async fn mk_lib_database_metadata_person_insert_cast_crew(
     //     // TODO do an upsert instead
     //     if database::mk_lib_database_metadata_exists_person(sqlx_pool, person_id).await.unwrap() == 0
     //     {
-    //         let new_guid = Uuid::new_v4();
+    //         let new_guid = Uuid::new_v7();
     //         // Shouldn't need to verify fetch doesn't exist as the person insert
     //         // is right below.  As then the next person record read will find
     //         // the inserted record.

@@ -35,7 +35,7 @@ sys-info = "0.9.1"
 tar = "0.4.41"
 tokio = { version = "1.38.1", features = ["full"] }
 walkdir = "2.5.0"
-uuid = { version = "1.10.0", features = ["serde", "v4"] }
+uuid = { version = "1.10.0", features = ["serde", "v4", "v7"] }
 
 [dev-dependencies]
 tokio-test = "*"

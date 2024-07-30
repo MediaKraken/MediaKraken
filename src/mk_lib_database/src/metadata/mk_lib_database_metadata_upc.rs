@@ -40,7 +40,7 @@ pub async fn mk_lib_database_metadata_upc_insert(
     upc_code_type: &i8,
     data_json: &serde_json::Value,
 ) -> Result<(), sqlx::Error> {
-    let new_guid = uuid::Uuid::new_v4();
+    let new_guid = uuid::Uuid::new_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_bar_codes (mm_bar_code_uuid, \

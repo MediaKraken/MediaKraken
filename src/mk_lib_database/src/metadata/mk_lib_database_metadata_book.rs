@@ -102,7 +102,7 @@ pub async fn mk_lib_database_metadata_book_insert(
     sqlx_pool: &sqlx::PgPool,
     json_data: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    let new_guid = uuid::Uuid::new_v4();
+    let new_guid = uuid::Uuid::new_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_metadata_book (mm_metadata_book_guid, \

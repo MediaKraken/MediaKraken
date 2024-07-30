@@ -37,7 +37,7 @@ pub async fn provider_televisiontunes_theme_fetch(
             //     .unwrap();
         }
         let _result = mk_lib_network::mk_download_file_from_url(dl_url, &tv_show_theme_path).await;
-        metadata_uuid = uuid::Uuid::new_v4();
+        metadata_uuid = uuid::Uuid::new_v7();
     }
     Ok(metadata_uuid)
 }

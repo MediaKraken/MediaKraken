@@ -8,7 +8,7 @@ pub async fn mk_lib_database_metadata_review_insert(
     metadata_uuid: Uuid,
     review_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    let new_guid = Uuid::new_v4();
+    let new_guid = Uuid::new_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_review(mm_review_guid, mm_review_metadata_guid, \

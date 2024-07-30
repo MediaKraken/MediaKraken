@@ -49,7 +49,7 @@ pub async fn mk_lib_database_notification_insert(
         mm_notification_dismissible) \
         values ($1, $2, $3)",
     )
-    .bind(Uuid::new_v4())
+    .bind(Uuid::new_v7())
     .bind(mm_notification_text)
     .bind(mm_notification_dismissable)
     .execute(&mut *transaction)

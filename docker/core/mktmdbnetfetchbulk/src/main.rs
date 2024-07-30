@@ -108,7 +108,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                             "themoviedb".to_string(),
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
-                                                                                                            uuid::Uuid::new_v4(),
+                                                                                                            uuid::Uuid::new_v7(),
                                                                                                             metadata_struct.id,
                                                                                                             "Fetch".to_string(), None).await.unwrap();
                                 }
@@ -152,7 +152,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                             "themoviedb".to_string(),
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
-                                                                                                            uuid::Uuid::new_v4(),
+                                                                                                            uuid::Uuid::new_v7(),
                                                                                                             metadata_struct.id,
                                                                                                             "Fetch".to_string(), None).await.unwrap();
                                 }
@@ -196,7 +196,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                             "themoviedb".to_string(),
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
-                                                                                                            uuid::Uuid::new_v4(),
+                                                                                                            uuid::Uuid::new_v7(),
                                                                                                             metadata_struct.id,
                                                                                                             "Fetch".to_string(), None).await.unwrap();
                                 }
@@ -241,7 +241,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                                     "themoviedb".to_string(),
                                                                                                                     mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
-                                                                                                                    uuid::Uuid::new_v4(),
+                                                                                                                    uuid::Uuid::new_v7(),
                                                                                                                    Some(json_item.id),
                                                                                                                     "Fetch".to_string(), None).await;
                             } else {
@@ -249,7 +249,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                                     "themoviedb".to_string(),
                                                                                                                     mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
-                                                                                                                    uuid::Uuid::new_v4(),
+                                                                                                                    uuid::Uuid::new_v7(),
                                                                                                                     Some(json_item.id),
                                                                                                                     "Update".to_string(), None).await;
                             }
@@ -285,7 +285,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                                         "themoviedb".to_string(),
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
-                                                                                                                        uuid::Uuid::new_v4(),
+                                                                                                                        uuid::Uuid::new_v7(),
                                                                                                                         Some(json_item.id),
                                                                                                                         "Fetch".to_string(), None).await;
                             } else {
@@ -293,7 +293,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                                         "themoviedb".to_string(),
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
-                                                                                                                        uuid::Uuid::new_v4(),
+                                                                                                                        uuid::Uuid::new_v7(),
                                                                                                                         Some(json_item.id),
                                                                                                                         "Update".to_string(), None).await;
                             }
@@ -329,7 +329,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                                         "themoviedb".to_string(),
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
-                                                                                                                        uuid::Uuid::new_v4(),
+                                                                                                                        uuid::Uuid::new_v7(),
                                                                                                                         Some(json_item.id),
                                                                                                                         "Fetch".to_string(), None).await;
                             } else {
@@ -337,7 +337,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                                         "themoviedb".to_string(),
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
-                                                                                                                        uuid::Uuid::new_v4(),
+                                                                                                                        uuid::Uuid::new_v7(),
                                                                                                                         Some(json_item.id),
                                                                                                                         "Update".to_string(), None).await;
                             }

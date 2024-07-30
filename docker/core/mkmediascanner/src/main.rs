@@ -277,7 +277,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                             // create media_json data
                                             let media_json =
                                                 json!({ "Added": Utc::now().to_string() });
-                                            let media_id = Uuid::new_v4();
+                                            let media_id = Uuid::new_v7();
                                             let _result = mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_insert(
                                                 &sqlx_pool,
                                                 media_id,

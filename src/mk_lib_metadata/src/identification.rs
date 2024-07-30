@@ -102,7 +102,7 @@ pub async fn metadata_identification(
 
         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE_HOME
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PICTURE => {
-            metadata_uuid = uuid::Uuid::new_v4();
+            metadata_uuid = uuid::Uuid::new_v7();
         }
 
         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MUSIC

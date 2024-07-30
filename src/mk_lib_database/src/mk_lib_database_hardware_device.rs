@@ -14,7 +14,7 @@ pub async fn mk_lib_database_hardware_manufacturer_upsert(
         mm_hardware_manu_name, mm_hardware_manu_gc_id) values ($1, $2, $3) \
         ON CONFLICT (mm_hardware_manu_name) DO NOTHING",
     )
-    .bind(uuid::Uuid::new_v4())
+    .bind(uuid::Uuid::new_v7())
     .bind(manufacturer_name)
     .bind(manufacturer_id)
     .execute(&mut *transaction)
@@ -33,7 +33,7 @@ pub async fn mk_lib_database_hardware_type_upsert(
         mm_hardware_type_name) values ($1, $2) \
         ON CONFLICT (mm_hardware_type_name) DO NOTHING",
     )
-    .bind(uuid::Uuid::new_v4())
+    .bind(uuid::Uuid::new_v7())
     .bind(hardware_type)
     .execute(&mut *transaction)
     .await?;
@@ -54,7 +54,7 @@ pub async fn mk_lib_database_hardware_model_insert(
         mm_hardware_model_type, \
         mm_hardware_model_name) values ($1, $2, $3, $4)",
     )
-    .bind(uuid::Uuid::new_v4())
+    .bind(uuid::Uuid::new_v7())
     .bind(hardware_manufacturer)
     .bind(hardware_type)
     .bind(hardware_model)
@@ -141,7 +141,7 @@ pub async fn mk_lib_database_hardware_insert(
     model_name: String,
     json_data: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    let new_guid = uuid::Uuid::new_v4();
+    let new_guid = uuid::Uuid::new_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_hardware_json(mm_hardware_id, mm_hardware_manufacturer, \
