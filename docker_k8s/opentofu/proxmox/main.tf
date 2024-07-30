@@ -16,7 +16,7 @@ provider "proxmox" {
 
 resource "proxmox_vm_qemu" "mkk8scontrol" {
  name       = "mkcontrol${count.index + 1}"
- count      = 2
+ count      = 1
  target_node = var.proxmox_host
  clone      = "debian-12-cloudinit-template"
  cores      = 4
@@ -30,8 +30,8 @@ resource "proxmox_vm_qemu" "mkk8scontrol" {
  bootdisk   = "scsi0"
 
  disks {
-   virtio {
-      virtio0 {
+   scsi {
+      scsi0 {
         disk {
           size = "16G"
           storage = var.storage_name
@@ -41,8 +41,12 @@ resource "proxmox_vm_qemu" "mkk8scontrol" {
   }
 
  network {
-    model   = "virtio"
-    bridge  = var.nic_name
+  model   = "virtio"
+  bridge  = var.nic_name
+ }
+
+ vga {
+  type = "std"
  }
 
  lifecycle {

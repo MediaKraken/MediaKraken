@@ -21,6 +21,5 @@ qm importdisk 9000 debian-12-genericcloud-amd64-20240717-1811.qcow2 local-lvm
 qm set 9000 --scsihw virtio-scsi-pci --scsi0 local-lvm:vm-9000-disk-0
 qm set 9000 --boot c --bootdisk scsi0
 qm set 9000 --ide2 local-lvm:cloudinit
-qm set 9000 --serial0 socket --vga serial0
 qm set 9000 --agent enabled=1
 qm template 9000
