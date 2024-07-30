@@ -167,7 +167,7 @@ pub async fn mk_lib_database_meta_collection_insert(
     metadata_json: serde_json::Value,
     local_image_json: serde_json::Value,
 ) -> Result<Uuid, sqlx::Error> {
-    let new_guid = uuid::Uuid::new_v7();
+    let new_guid = uuid::Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_metadata_collection (mm_metadata_collection_guid, \

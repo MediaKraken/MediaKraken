@@ -207,7 +207,7 @@ pub async fn mk_lib_database_metadata_game_insert(
     game_name: String,
     game_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    let new_guid = uuid::Uuid::new_v7();
+    let new_guid = uuid::Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_metadata_game_software_info(gi_game_info_id, \
@@ -330,7 +330,7 @@ pub async fn mk_lib_database_metadata_game_category_insert(
     sqlx_pool: &sqlx::PgPool,
     category_name: String,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    let new_guid = uuid::Uuid::new_v7();
+    let new_guid = uuid::Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_game_category (gc_id, gc_category)
