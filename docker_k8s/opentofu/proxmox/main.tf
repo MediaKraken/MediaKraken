@@ -15,19 +15,24 @@ provider "proxmox" {
 }
 
 resource "proxmox_vm_qemu" "mkk8scontrol" {
+ vmid       = 1000
  name       = "mkcontrol${count.index + 1}"
+ desc       = "k8s Control Plane"
  count      = 1
  target_node = var.proxmox_host
- clone      = "debian-12-cloudinit-template"
+ clone      = "debian-12-cloudinit-template-mk"
+ hotplug    = "network,disk"
  cores      = 4
  sockets    = 1
  cpu        = "host"
  memory     = 8192
  agent      = 1
- os_type    = "cloud-init"
+ os_type    = "Linux"
  full_clone = "true"
  scsihw     = "virtio-scsi-pci"
+ boot       = "order=scsi0"
  bootdisk   = "scsi0"
+ onboot     = "true"
 
  disks {
    scsi {
@@ -43,6 +48,8 @@ resource "proxmox_vm_qemu" "mkk8scontrol" {
  network {
   model   = "virtio"
   bridge  = var.nic_name
+  firewall  = false
+  link_down = false
  }
 
  vga {
