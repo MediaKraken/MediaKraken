@@ -8,9 +8,8 @@ kubectl apply -f nfs-pvc.yaml
 kubectl apply -f nfs-pvc-8k.yaml
 kubectl get storageclasses
 
+
 # kubectl describe storageclasses nfs-csi
-
-
 
 # installed all secrets
 python3 mediakraken_setup.py

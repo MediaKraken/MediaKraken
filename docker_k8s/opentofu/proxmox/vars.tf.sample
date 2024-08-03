@@ -34,3 +34,12 @@ variable "token_secret" {
 #Blank var for use by terraform.tfvars
 variable "token_id" {
 }
+variable "vm_user" {
+    default = "admin"
+}
+variable "vm_user_password" {
+    default = "admin"
+}
+variable "vm_user_ssh" {
+    default = "sshadmin"
+}
