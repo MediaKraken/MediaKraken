@@ -9,14 +9,6 @@ pip3 install -r requirements.txt --break-system-packages
 
 cp -R ../MediaKraken/docker_k8s/opentofu/k8s/kubespray/mkcluster inventory/mkcluster
 
-ssh-copy-id root@192.168.1.50
-ssh-copy-id root@192.168.1.51
-ssh-copy-id root@192.168.1.52
-ssh-copy-id root@192.168.1.60
-ssh-copy-id root@192.168.1.61
-ssh-copy-id root@192.168.1.62
-
-
 ansible-playbook -b -v -u metaman -i inventory/mkcluster/inventory.ini cluster.yml
 
 

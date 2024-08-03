@@ -3,7 +3,6 @@ https://registry.terraform.io/providers/Telmate/proxmox/latest/docs
 https://pve.proxmox.com/wiki/Cloud-Init_Support
 
 
-
 # setup roles/etc for opentofu
 pveum role add terraform-role -privs "VM.Allocate VM.Clone VM.Config.CDROM VM.Config.CPU VM.Config.Cloudinit VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Monitor VM.Audit VM.PowerMgmt Datastore.AllocateSpace Datastore.Audit User.Modify Sys.Audit Sys.Console Sys.Modify VM.Migrate Pool.Allocate SDN.Use"
 pveum user add terraform@pve

@@ -1,3 +1,5 @@
+# I installed via kubespray now.
+
 https://www.linuxtechi.com/install-kubernetes-cluster-on-debian/
 
 debian12 net
@@ -174,7 +176,7 @@ curl -skSL https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/v4.7.
 # worker nodes
 sudo apt install -y nfs-common
 
-# was running fo rlast five months
+# was running for last five months
 # storage
 zfs create wdblack/sharenfs
 zfs set atime=off wdblack/sharenfs
