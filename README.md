@@ -12,28 +12,17 @@ Please see the WIKI for documentation.<BR>
 <h2 style="color:white;">Features (in progress):</h2>
 <UL style="color:white">
 <LI>100% Open Source, no "premium", paid betas, restricted access or other nonsense.
-<LI>Native server will run under MacOSX, Linux and Windows via Docker Swarm
+<LI>Native server will run under Linux via K8s
 <LI>Native client support for Android, iOS, MacOSX, Linux and Windows
-<LI>"Slave" servers for streaming to balance the load with many clients streaming at once via Docker Swarm
-	<ul>
-	<li>GPU acceleration support
-	</ul>
+<li>GPU acceleration support
 <li>"Link" servers together so they can display each others media
 <LI>Central database implemented via PostgreSQL w/Citus plugin for clustering
-<li>Remote control software to run on a touch tablet/phone
-<LI>Dedicated OS builds for the following:
-<ul>
-<LI>Client:
+<li>Remote control software to run on a touch tablet/phone/pi
+<LI>Dedicated OS builds for the following clients:
     <UL>
-    <li>img file for Raspberry Pi 3/4 (Linux based)
+    <li>img file for Raspberry Pi 3/4/5 (Linux based)
     <li>ISO/img for install on dedicated client hardware (Linux based)
     </UL>
-<LI>Server: Most server images are Alpine Linux with Docker Swarm and Docker Compose with the current images downloaded for immediate use.
-    <UL>
-    <li>OVA for Proxmox VE 8.x
-    <li>64-bit ISO/img for install on dedicated server hardware
-    </ul>
-</ul>
 <li>Offsite Storage Support
 </UL>
 </ul>

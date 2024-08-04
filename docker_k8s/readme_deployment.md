@@ -1,0 +1,77 @@
+# this setup is run from a debian linux install
+it will create proxmox vm's via opentofu
+it will then install k8s cluster via kubespray
+
+# install process
+
+## Setup Proxmox
+### Setup roles/etc for OpenTofu
+```pveum role add terraform-role -privs "VM.Allocate VM.Clone VM.Config.CDROM VM.Config.CPU VM.Config.Cloudinit VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Monitor VM.Audit VM.PowerMgmt Datastore.AllocateSpace Datastore.Audit User.Modify Sys.Audit Sys.Console Sys.Modify VM.Migrate Pool.Allocate SDN.Use"```
+
+```pveum user add terraform@pve```
+
+```pveum aclmod / -user terraform@pve -role terraform-role```
+
+```pveum user token add terraform@pve terraform-token --privsep=0```
+
+### Setup template to use
+Run the following commands on you Proxmox node
+
+```apt-get update && apt install libguestfs-tools -y```
+
+```wget https://cloud.debian.org/images/cloud/bookworm/20240717-1811/debian-12-genericcloud-amd64-20240717-1811.qcow2```
+
+```virt-customize -a debian-12-genericcloud-amd64-20240717-1811.qcow2 --install qemu-guest-agent --run-command 'systemctl enable qemu-guest-agent.service'```
+
+```virt-customize -a debian-12-genericcloud-amd64-20240717-1811.qcow2 --run-command "echo -n > /etc/machine-id"```
+
+```qm create 9000 --name "debian-12-cloudinit-template-mk" --memory 2048 --cores 2 --net0 virtio,bridge=vmbr0 && qm importdisk 9000 debian-12-genericcloud-amd64-20240717-1811.qcow2 local-lvm && qm set 9000 --scsihw virtio-scsi-pci --scsi0 local-lvm:vm-9000-disk-0 && qm set 9000 --boot c --bootdisk scsi0 && qm set 9000 --ide2 local-lvm:cloudinit && qm set 9000 --agent enabled=1 && qm template 9000```
+
+## Setup OpenTofu
+Run the following on your deployment node
+
+### Download the installer script:
+```wget --secure-protocol=TLSv1_2 --https-only https://get.opentofu.org/install-opentofu.sh -O install-opentofu.sh```
+### Give it execution permissions:
+```chmod +x install-opentofu.sh```
+### Run the installer:
+```./install-opentofu.sh --install-method deb```
+### Remove the installer:
+```rm install-opentofu.sh```
+
+## Setup Kubespray
+Run the following on your deployment node
+
+```git clone https://github.com/kubernetes-incubator/kubespray.git```
+
+```cp -rfp kubespray/inventory/sample MediaKraken/docker_k8s/opentofu/k8s/kubespray/mkcluster```
+
+```cd kubespray```
+
+```apt install python3-pip -y```
+
+```pip3 install -r requirements.txt --break-system-packages```
+
+```cp -R ../MediaKraken/docker_k8s/opentofu/k8s/kubespray/mkcluster inventory/mkcluster```
+
+```ansible-playbook -b -v -u metaman -i inventory/mkcluster/inventory.ini cluster.yml```
+
+# on the master nodes
+```mkdir -p $HOME/.kube && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown $(id -u):$(id -g) $HOME/.kube/config```
+
+```kubectl get nodes```
+
+
+<BR>
+# stuff below to do
+# on master
+create secrets
+
+# on worker nodes
+sudo apt install -y nfs-common
+
+curl -skSL https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/v4.7.0/deploy/install-driver.sh | bash -s v4.7.0 --
+
+helm install --create-namespace --namespace mkdatabase stackgres-operator \
+ --set-string adminui.service.type=LoadBalancer \
+ --set grafana.autoEmbed=true https://stackgres.io/downloads/stackgres-k8s/stackgres/latest/helm/stackgres-operator.tgz
