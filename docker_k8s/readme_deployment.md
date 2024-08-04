@@ -56,22 +56,24 @@ Run the following on your deployment node
 
 ```ansible-playbook -b -v -u metaman -i inventory/mkcluster/inventory.ini cluster.yml```
 
-# on the master nodes
-```mkdir -p $HOME/.kube && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown $(id -u):$(id -g) $HOME/.kube/config```
+# Setup kube config on master nodes (from docker_k8s direcory)
+```ansible-playbook -b -v -u metaman -i opentofu/k8s/kubespray/mkcluster/inventory.ini playbooks/kube.yml```
 
-```kubectl get nodes```
+# Setup Helm on master nodes (from docker_k8s direcory)
+```ansible-playbook -b -v -u metaman -i opentofu/k8s/kubespray/mkcluster/inventory.ini playbooks/helm.yml```
+
+# setup NFS capability
+```ansible-playbook -b -v -u metaman -i opentofu/k8s/kubespray/mkcluster/inventory.ini playbooks/nfs.yml```
+
+# setup operator
+```ansible-playbook -b -v -u metaman -i opentofu/k8s/kubespray/mkcluster/inventory.ini playbooks/operator.yml```
 
 
-<BR>
+
 # stuff below to do
-# on master
-create secrets
 
-# on worker nodes
-sudo apt install -y nfs-common
 
-curl -skSL https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/v4.7.0/deploy/install-driver.sh | bash -s v4.7.0 --
-
+# on one master to setup the pg cluster
 helm install --create-namespace --namespace mkdatabase stackgres-operator \
  --set-string adminui.service.type=LoadBalancer \
  --set grafana.autoEmbed=true https://stackgres.io/downloads/stackgres-k8s/stackgres/latest/helm/stackgres-operator.tgz

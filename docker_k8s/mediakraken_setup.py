@@ -5,7 +5,7 @@ from base64 import b64encode
 
 if not os.path.isfile('./mkstack-db-password.txt'):
     file_handle = open('./mkstack-db-password.txt', 'w+')
-    random_key = b64encode(os.urandom(32)).decode('utf-8')
+    random_key = b64encode(os.urandom(64)).decode('utf-8')
     file_handle.write(random_key.replace(
         '"', '').replace("'", '').replace("%", ''))
     file_handle.close()
@@ -20,7 +20,7 @@ if not os.path.isfile('./mkstack-db-password.txt'):
 
 if not os.path.isfile('./mkstack-secure-key.txt'):
     file_handle = open('./mkstack-secure-key.txt', 'w+')
-    random_key = b64encode(os.urandom(32)).decode('utf-8')
+    random_key = b64encode(os.urandom(64)).decode('utf-8')
     file_handle.write(random_key.replace(
         '"', '').replace("'", '').replace("%", ''))
     file_handle.close()
@@ -35,7 +35,7 @@ if not os.path.isfile('./mkstack-secure-key.txt'):
 
 if not os.path.isfile('./mkstack-csrf-key.txt'):
     file_handle = open('./mkstack-csrf-key.txt', 'w+')
-    random_key = b64encode(os.urandom(32)).decode('utf-8')
+    random_key = b64encode(os.urandom(64)).decode('utf-8')
     file_handle.write(random_key.replace(
         '"', '').replace("'", '').replace("%", ''))
     file_handle.close()
@@ -50,7 +50,7 @@ if not os.path.isfile('./mkstack-csrf-key.txt'):
 
 if not os.path.isfile('./mkstack-nut.txt'):
     file_handle = open('./mkstack-nut.txt', 'w+')
-    random_key = b64encode(os.urandom(32)).decode('utf-8')
+    random_key = b64encode(os.urandom(64)).decode('utf-8')
     file_handle.write(random_key.replace(
         '"', '').replace("'", '').replace("%", ''))
     file_handle.close()

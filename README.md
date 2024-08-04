@@ -1,7 +1,7 @@
 <p align="center"><img src="src/art/K1.png" alt="MediaKraken" height="200px"></p>
 
 <B>What is it?</B>
-Yet another media streaming server and client application suite. Also includes media management and remote conrol software to run on a tablet.<BR>
+Yet another media streaming server and client application suite. Also includes media management and remote conrol software to run on a tablet/pi.<BR>
 <BR>
 This program is still quite alpha.<BR>
 <BR>

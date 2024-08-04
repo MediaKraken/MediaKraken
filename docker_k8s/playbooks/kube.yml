@@ -1,0 +1,6 @@
+---
+- name : Setup kube config
+  hosts: kube_control_plane
+  tasks:
+    - name: Setup config
+      shell: mkdir -p $HOME/.kube && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown $(id -u):$(id -g) $HOME/.kube/config

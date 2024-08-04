@@ -1,0 +1,13 @@
+---
+- name : Setup nfs capability
+  hosts: kube_node
+  tasks:
+    - name: Setup NFS
+      shell: sudo apt install -y nfs-common
+
+- name : Setup nfs on cluster
+  hosts: mkk8scontrol1
+  tasks:
+    - name: Setup NFS k8s driver
+      shell: curl -skSL https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/v4.8.0/deploy/install-driver.sh | bash -s v4.8.0 --
+  

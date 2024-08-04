@@ -6,24 +6,21 @@ cd MediaKraken && git checkout dev
 cd docker_k8s
 kubectl apply -f nfs-pvc.yaml
 kubectl apply -f nfs-pvc-8k.yaml
-kubectl get storageclasses
+kubectl apply -f portainer-manifest.yaml
 
-
-# kubectl describe storageclasses nfs-csi
-
-# installed all secrets
+# install all secrets
 python3 mediakraken_setup.py
 
-# installed all claims
+# install all namespaces
 kubectl apply -f namespace
 
-# installed all claims
+# install all claims
 kubectl apply -f claim
 
-# installed all services
+# install all services
 kubectl apply -f service
 
-# installed all deployments
+# install all deployments
 kubectl apply -f deployment
 
 
