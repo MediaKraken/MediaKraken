@@ -6,6 +6,8 @@ it will then install k8s cluster via kubespray
 
 ## Setup Proxmox
 ### Setup roles/etc for OpenTofu
+Run the following commands on you Proxmox node
+
 ```pveum role add terraform-role -privs "VM.Allocate VM.Clone VM.Config.CDROM VM.Config.CPU VM.Config.Cloudinit VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Monitor VM.Audit VM.PowerMgmt Datastore.AllocateSpace Datastore.Audit User.Modify Sys.Audit Sys.Console Sys.Modify VM.Migrate Pool.Allocate SDN.Use"```
 
 ```pveum user add terraform@pve```
@@ -77,3 +79,32 @@ Run the following on your deployment node
 helm install --create-namespace --namespace mkdatabase stackgres-operator \
  --set-string adminui.service.type=LoadBalancer \
  --set grafana.autoEmbed=true https://stackgres.io/downloads/stackgres-k8s/stackgres/latest/helm/stackgres-operator.tgz
+
+cat << 'EOF' | kubectl create -f -
+apiVersion: stackgres.io/v1
+kind: SGCluster
+metadata:
+  name: simple
+spec:
+  instances: 2
+  postgres:
+    version: 'latest'
+  pods:
+    persistentVolume: 
+      size: '250Gi'
+      storageClass: nfs-csi-8k
+EOF
+
+kubectl get pods --watch
+
+# wait till 6/6
+
+kubectl exec -ti "$(kubectl get pod --selector app=StackGresCluster,stackgres.io/cluster=true,role=master -o name)" -c postgres-util -- psql
+
+
+# https://stackgres.io/doc/latest/quickstart/
+
+
+# https://www.dragonflydb.io/docs/getting-started/kubernetes-operator
+
+# kubectl apply -f "https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml"

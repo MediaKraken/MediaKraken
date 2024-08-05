@@ -1,12 +1,14 @@
 # checkout dev branch of mediakraken
 # do the storage setup/claim/etc on master
-sudo apt-get install git
+sudo apt-get install git -y
 git clone https://github.com/MediaKraken/MediaKraken
 cd MediaKraken && git checkout dev
 cd docker_k8s
 kubectl apply -f nfs-pvc.yaml
 kubectl apply -f nfs-pvc-8k.yaml
 kubectl apply -f portainer-manifest.yaml
+
+# TODO below
 
 # install all secrets
 python3 mediakraken_setup.py
