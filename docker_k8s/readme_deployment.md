@@ -6,7 +6,7 @@ it will then install k8s cluster via kubespray
 
 ## Setup Proxmox
 ### Setup roles/etc for OpenTofu
-Run the following commands on you Proxmox node
+Run the following commands on your Proxmox node
 
 ```pveum role add terraform-role -privs "VM.Allocate VM.Clone VM.Config.CDROM VM.Config.CPU VM.Config.Cloudinit VM.Config.Disk VM.Config.HWType VM.Config.Memory VM.Config.Network VM.Config.Options VM.Monitor VM.Audit VM.PowerMgmt Datastore.AllocateSpace Datastore.Audit User.Modify Sys.Audit Sys.Console Sys.Modify VM.Migrate Pool.Allocate SDN.Use"```
 
@@ -17,7 +17,7 @@ Run the following commands on you Proxmox node
 ```pveum user token add terraform@pve terraform-token --privsep=0```
 
 ### Setup template to use
-Run the following commands on you Proxmox node
+Run the following commands on your Proxmox node
 
 ```apt-get update && apt install libguestfs-tools -y```
 
@@ -59,13 +59,13 @@ Run the following on your deployment node
 ```ansible-playbook -b -v -u metaman -i inventory/mkcluster/inventory.ini cluster.yml```
 
 # Setup kube config on master nodes (from docker_k8s direcory)
-```ansible-playbook -b -v -u metaman -i opentofu/k8s/kubespray/mkcluster/inventory.ini playbooks/kube.yml```
+```ansible-playbook -b -v -u metaman -i opentofu/k8s/kubespray/mkcluster/inventory.ini playbooks/kube.yml --ask-sudo-pass```
 
 # Setup Helm on master nodes (from docker_k8s direcory)
 ```ansible-playbook -b -v -u metaman -i opentofu/k8s/kubespray/mkcluster/inventory.ini playbooks/helm.yml```
 
 # setup NFS capability
-```ansible-playbook -b -v -u metaman -i opentofu/k8s/kubespray/mkcluster/inventory.ini playbooks/nfs.yml```
+```ansible-playbook -b -v -u metaman -i opentofu/k8s/kubespray/mkcluster/inventory.ini playbooks/nfs.yml --ask-sudo-pass```
 
 # setup operator
 ```ansible-playbook -b -v -u metaman -i opentofu/k8s/kubespray/mkcluster/inventory.ini playbooks/operator.yml```
@@ -74,7 +74,13 @@ Run the following on your deployment node
 
 # stuff below to do
 
+# Add kubernetes-dashboard repository
+helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+# Deploy a Helm Release named "kubernetes-dashboard" using the kubernetes-dashboard chart
+helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
 
+
+# https://stackgres.io/doc/latest/quickstart/
 # on one master to setup the pg cluster
 helm install --create-namespace --namespace mkdatabase stackgres-operator \
  --set-string adminui.service.type=LoadBalancer \
@@ -102,9 +108,9 @@ kubectl get pods --watch
 kubectl exec -ti "$(kubectl get pod --selector app=StackGresCluster,stackgres.io/cluster=true,role=master -o name)" -c postgres-util -- psql
 
 
-# https://stackgres.io/doc/latest/quickstart/
 
 
 # https://www.dragonflydb.io/docs/getting-started/kubernetes-operator
+kubectl apply -f https://raw.githubusercontent.com/dragonflydb/dragonfly-operator/main/manifests/dragonfly-operator.yaml
 
-# kubectl apply -f "https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml"
+kubectl apply -f "https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml"

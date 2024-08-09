@@ -3,4 +3,7 @@
   hosts: kube_control_plane
   tasks:
     - name: Setup config
-      shell: mkdir -p $HOME/.kube && sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config && sudo chown $(id -u):$(id -g) $HOME/.kube/config
+      shell: mkdir -p /home/metaman/.kube && sudo cp -i /etc/kubernetes/admin.conf /home/metaman/.kube/config && sudo chown 1000:1000 /home/metaman/.kube/config
+      become: true
+      become_method: sudo
+  

@@ -37,9 +37,6 @@ resource "proxmox_vm_qemu" "mkk8scontrol" {
   nameserver  = "192.168.1.1"
   ciuser      = var.vm_user
   cipassword  = var.vm_user_password
-  # define_connection_info = "true"
-  # ssh_user    = var.vm_user_ssh
-  # ssh_private_key = file("~/.ssh/id_rsa.pub")
   sshkeys = file("~/.ssh/id_rsa.pub")
 
   disks {
@@ -101,9 +98,6 @@ resource "proxmox_vm_qemu" "mkk8sworker" {
   nameserver  = "192.168.1.1"
   ciuser      = var.vm_user
   cipassword  = var.vm_user_password
-  # define_connection_info = "true"
-  # ssh_user    = var.vm_user_ssh
-  # ssh_private_key = file("~/.ssh/id_rsa.pub")
   sshkeys = file("~/.ssh/id_rsa.pub")
 
   disks {
