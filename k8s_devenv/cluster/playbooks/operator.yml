@@ -1,0 +1,7 @@
+---
+- name : Setup operator on cluster
+  hosts: mkk8scontroldev1
+  tasks:
+    - name: Setup operator
+      shell: curl -sL https://github.com/operator-framework/operator-controller/releases/download/v0.12.0/install.sh | bash -s v0.12.0
+  

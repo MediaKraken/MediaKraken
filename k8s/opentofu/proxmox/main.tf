@@ -1,0 +1,139 @@
+terraform {
+  required_providers {
+    proxmox = {
+      source  = "telmate/proxmox"
+      version = "3.0.1-rc3"
+    }
+  }
+}
+
+provider "proxmox" {
+  pm_api_url          = var.api_url
+  pm_api_token_id     = var.token_id
+  pm_api_token_secret = var.token_secret
+  pm_tls_insecure     = true
+}
+
+resource "proxmox_vm_qemu" "mkk8scontrol" {
+  vmid        = "300${count.index}"
+  name        = "mkcontrol${count.index + 1}"
+  desc        = "k8s Control Plane"
+  count       = 3
+  target_node = var.proxmox_host
+  clone       = "debian-12-cloudinit-template-mk"
+  hotplug     = "network,disk"
+  cores       = 4
+  sockets     = 1
+  cpu         = "host"
+  memory      = 8192
+  numa        = true
+  agent       = 1
+  os_type     = "cloud-init"
+  full_clone  = "true"
+  scsihw      = "virtio-scsi-pci"
+  boot        = "order=scsi0"
+  bootdisk    = "scsi0"
+  onboot      = "true"
+  ipconfig0   = "ip=192.168.1.7${count.index}/24,gw=192.168.1.1"
+  nameserver  = "192.168.1.1"
+  ciuser      = var.vm_user
+  cipassword  = var.vm_user_password
+  sshkeys = file("~/.ssh/id_rsa.pub")
+
+  disks {
+    ide {
+      ide3 {
+        cloudinit {
+          storage = "local-lvm"
+        }
+      }
+    }
+    scsi {
+      scsi0 {
+        disk {
+          size    = "64G"
+          storage = var.storage_name
+        }
+      }
+    }
+  }
+
+  network {
+    model     = "virtio"
+    bridge    = var.nic_name
+    firewall  = false
+    link_down = false
+  }
+
+  vga {
+    type = "std"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      network,
+    ]
+  }
+}
+
+resource "proxmox_vm_qemu" "mkk8sworker" {
+  vmid        = "400${count.index}"
+  name        = "mkworker${count.index + 1}"
+  desc        = "k8s Worker Node"
+  count       = 3
+  target_node = var.proxmox_host
+  clone       = "debian-12-cloudinit-template-mk"
+  hotplug     = "network,disk"
+  cores       = 8
+  sockets     = 2
+  cpu         = "host"
+  memory      = 32768
+  numa        = true
+  agent       = 1
+  os_type     = "Linux"
+  full_clone  = "true"
+  scsihw      = "virtio-scsi-pci"
+  boot        = "order=scsi0"
+  bootdisk    = "scsi0"
+  onboot      = "true"
+  ipconfig0   = "ip=192.168.1.8${count.index}/24,gw=192.168.1.1"
+  nameserver  = "192.168.1.1"
+  ciuser      = var.vm_user
+  cipassword  = var.vm_user_password
+  sshkeys = file("~/.ssh/id_rsa.pub")
+
+  disks {
+    ide {
+      ide3 {
+        cloudinit {
+          storage = "local-lvm"
+        }
+      }
+    }
+    scsi {
+      scsi0 {
+        disk {
+          size    = "128G"
+          storage = var.storage_name
+        }
+      }
+    }
+  }
+
+  network {
+    model     = "virtio"
+    bridge    = var.nic_name
+    firewall  = false
+    link_down = false
+  }
+
+  vga {
+    type = "std"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      network,
+    ]
+  }
+}
