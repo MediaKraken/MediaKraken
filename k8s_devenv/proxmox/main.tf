@@ -137,7 +137,4 @@ resource "proxmox_vm_qemu" "mkk8sworkerdev" {
     ]
   }
 
-  provisioner "local-exec" {
-    command = "cd ../../kubespray"
-  }
 }
