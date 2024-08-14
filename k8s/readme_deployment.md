@@ -46,13 +46,15 @@ Run the following on your deployment node
 
 ```git clone https://github.com/kubernetes-incubator/kubespray.git```
 
-#```cp -rfp kubespray/inventory/sample MediaKraken/k8s/opentofu/k8s/kubespray/mkcluster```
+```cp -rfp kubespray/inventory/sample MediaKraken/k8s/opentofu/k8s/kubespray/mkcluster```
+```cp -rfp kubespray/inventory/sample MediaKraken/k8s_devenv/kubespray/mkclusterdev```
 
 ```cd kubespray```
 
 ```apt install python3-pip -y```
 
 ```pip3 install -r requirements.txt --break-system-packages```
+```change clustername in k8s-cluster.yml file```
 
 ```cp -R ../MediaKraken/k8s/opentofu/k8s/kubespray/mkcluster inventory/mkcluster```
 
