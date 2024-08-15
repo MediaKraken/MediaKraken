@@ -60,19 +60,13 @@ Run the following on your deployment node
 
 ```cp -R ../MediaKraken/k8s_devenv/kubespray/mkclusterdev inventory/mkclusterdev```
 
-```ansible-playbook -b -v -u metaman -i inventory/mkcluster/inventory.ini cluster.yml --ssh-common-args='-o StrictHostKeyChecking=accept-new'```
 
-# Setup kube config on master nodes (from docker_k8s direcory)
-```ansible-playbook -b -v -u metaman -i opentofu/k8s/kubespray/mkcluster/inventory.ini playbooks/kube.yml --ask-sudo-pass```
 
-# Setup Helm on master nodes (from docker_k8s direcory)
-```ansible-playbook -b -v -u metaman -i opentofu/k8s/kubespray/mkcluster/inventory.ini playbooks/helm.yml```
 
-# setup NFS capability
-```ansible-playbook -b -v -u metaman -i opentofu/k8s/kubespray/mkcluster/inventory.ini playbooks/nfs.yml --ask-sudo-pass```
+# follow opentofu/proxmox readme to create control planes and workers
 
-# setup operator
-```ansible-playbook -b -v -u metaman -i opentofu/k8s/kubespray/mkcluster/inventory.ini playbooks/operator.yml```
+# run tofu from cluster directory to build k8s cluster/operators/etc
+
 
 
 

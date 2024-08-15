@@ -80,7 +80,7 @@ resource "proxmox_vm_qemu" "mkk8sworkerdev" {
   vmid        = "110${count.index}"
   name        = "mkworkerdev${count.index + 1}"
   desc        = "k8s Worker Node"
-  count       = 1
+  count       = 2
   target_node = var.proxmox_host
   clone       = "debian-12-cloudinit-template-mk"
   hotplug     = "network,disk"
