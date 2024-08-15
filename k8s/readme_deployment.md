@@ -46,8 +46,8 @@ Run the following on your deployment node
 
 ```git clone https://github.com/kubernetes-incubator/kubespray.git```
 
-```cp -rfp kubespray/inventory/sample MediaKraken/k8s/opentofu/k8s/kubespray/mkcluster```
-```cp -rfp kubespray/inventory/sample MediaKraken/k8s_devenv/kubespray/mkclusterdev```
+```cp -rfp kubespray/inventory/sample MediaKraken/k8s/cluster/kubespray/mkcluster```
+```cp -rfp kubespray/inventory/sample MediaKraken/k8s_devenv/cluster/kubespray/mkclusterdev```
 
 ```cd kubespray```
 
@@ -56,9 +56,9 @@ Run the following on your deployment node
 ```pip3 install -r requirements.txt --break-system-packages```
 ```change clustername in k8s-cluster.yml file```
 
-```cp -R ../MediaKraken/k8s/opentofu/k8s/kubespray/mkcluster inventory/mkcluster```
+```cp -R ../MediaKraken/k8s/cluster/kubespray/mkcluster inventory/mkcluster```
 
-```cp -R ../MediaKraken/k8s_devenv/kubespray/mkclusterdev inventory/mkclusterdev```
+```cp -R ../MediaKraken/k8s_devenv/cluster/kubespray/mkclusterdev inventory/mkclusterdev```
 
 
 
@@ -71,11 +71,6 @@ Run the following on your deployment node
 
 
 # stuff below to do
-
-# Add kubernetes-dashboard repository
-helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
-# Deploy a Helm Release named "kubernetes-dashboard" using the kubernetes-dashboard chart
-helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
 
 
 # https://stackgres.io/doc/latest/quickstart/
@@ -107,8 +102,5 @@ kubectl exec -ti "$(kubectl get pod --selector app=StackGresCluster,stackgres.io
 
 
 
-
-# https://www.dragonflydb.io/docs/getting-started/kubernetes-operator
-kubectl apply -f https://raw.githubusercontent.com/dragonflydb/dragonfly-operator/main/manifests/dragonfly-operator.yaml
 
 kubectl apply -f "https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml"
