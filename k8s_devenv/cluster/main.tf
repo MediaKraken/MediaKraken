@@ -65,3 +65,33 @@ resource "terraform_data" "k8sdashboard" {
     terraform_data.dragonfly
   ]
 }
+
+resource "terraform_data" "mailhog" {
+  # setup mailhog
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkclusterdev/inventory.ini playbooks/mailhog.yml"
+  }
+  depends_on = [
+    terraform_data.k8sdashboard
+  ]
+}
+
+resource "terraform_data" "docker_registry" {
+  # setup docker registry
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkclusterdev/inventory.ini playbooks/docker-registry.yml"
+  }
+  depends_on = [
+    terraform_data.mailhog
+  ]
+}
+
+resource "terraform_data" "jenkins" {
+  # setup jenkins
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkclusterdev/inventory.ini playbooks/jenkins.yml"
+  }
+  depends_on = [
+    terraform_data.docker_registry
+  ]
+}

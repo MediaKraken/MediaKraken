@@ -158,9 +158,6 @@ kompose convert -f docker-compose.yml
 kubectl proxy --port=8080 &
 curl http://localhost:8080/api/
 
-# windows doom
-# https://dl.k8s.io/release/v1.30.0/bin/windows/amd64/kubectl.exe
-
 
 # setup mediakraken
 kubectl create namespace mediakraken
@@ -168,13 +165,6 @@ kubectl create namespace portainer
 
 # kubectl apply -f https://raw.githubusercontent.com/MediaKraken/MediaKraken/dev/docker_k8s/mkstack-multicast-deployment.yaml
 
-
-# on master
-# https://github.com/kubernetes-csi/csi-driver-nfs/blob/master/docs/install-csi-driver-v4.7.0.md
-curl -skSL https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/v4.7.0/deploy/install-driver.sh | bash -s v4.7.0 --
-
-# worker nodes
-sudo apt install -y nfs-common
 
 # was running for last five months
 # storage
@@ -223,36 +213,17 @@ kubectl describe storageclasses nfs-csi
 
 kubectl get storageclass
 
-
-
-# helm stuff
-curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
-sudo apt-get install apt-transport-https --yes
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
-sudo apt-get update
-sudo apt-get install helm
-
-
 # helm stuff to play with
-https://operatorhub.io/
-kube-prometheus-stack
-
 https://artifacthub.io/packages/helm/cluster-autoscaler/cluster-autoscaler
-https://artifacthub.io/packages/helm/cadvisor/cadvisor
+https://artifacthub.io/packages/helm/cadvisor/cadvisor    container monitor
 https://artifacthub.io/packages/helm/utkuozdemir/transmission-exporter
 https://artifacthub.io/packages/helm/geek-cookbook/wireguard
+
 https://artifacthub.io/packages/helm/radar-base/cert-manager-letsencrypt
 https://artifacthub.io/packages/helm/certs/certs
 
-https://github.com/killemov/Shift
-https://artifacthub.io/packages/helm/codecentric/mailhog
-https://artifacthub.io/packages/helm/bitnami/jenkins
-https://artifacthub.io/packages/helm/phntom/docker-registry
+https://github.com/killemov/Shift    transmission web ui
 
-
-# on master
-curl -sL https://github.com/operator-framework/operator-controller/releases/download/v0.12.0/install.sh | bash -s v0.12.0
-#curl -sL https://github.com/operator-framework/operator-lifecycle-manager/releases/download/v0.28.0/install.sh | bash -s v0.28.0
 
 
 /*
@@ -298,19 +269,3 @@ kubectl get service --all-namespaces
 
 # see if rbac enabled
 kubectl api-versions | grep rbac
-
-
-
-/*
-# upgrade of cluster...master nodes
-kubectl drain --ignore-daemonsets mkcube1.beaverbay.local
-
-echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-
-sudo apt update
-
-sudo apt-mark unhold kubeadm && \
-sudo apt-get update && sudo apt-get install -y kubeadm='1.30.2-*' && \
-sudo apt-mark hold kubeadm
-*/

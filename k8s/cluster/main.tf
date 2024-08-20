@@ -67,7 +67,7 @@ resource "terraform_data" "k8sdashboard" {
 }
 
 resource "terraform_data" "rabbitmq" {
-  # setup k8s dashboard
+  # setup rabbitmq
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkcluster/inventory.ini playbooks/rabbitmq.yml"
   }

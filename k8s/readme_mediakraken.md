@@ -8,8 +8,6 @@ kubectl apply -f nfs-pvc.yaml
 kubectl apply -f nfs-pvc-8k.yaml
 kubectl apply -f portainer-manifest.yaml
 
-# TODO below
-
 # install all secrets
 python3 mediakraken_setup.py
 
@@ -24,9 +22,6 @@ kubectl apply -f service
 
 # install all deployments
 kubectl apply -f deployment
-
-
-
 
 
 
@@ -68,19 +63,4 @@ kubectl get service --all-namespaces
 
 # see if rbac enabled
 kubectl api-versions | grep rbac
-*/
-
-
-/*
-# upgrade of cluster...master nodes
-kubectl drain --ignore-daemonsets mkcube1.beaverbay.local
-
-echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-
-sudo apt update
-
-sudo apt-mark unhold kubeadm && \
-sudo apt-get update && sudo apt-get install -y kubeadm='1.30.2-*' && \
-sudo apt-mark hold kubeadm
 */

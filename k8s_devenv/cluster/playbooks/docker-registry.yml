@@ -1,0 +1,10 @@
+---
+# https://artifacthub.io/packages/helm/phntom/docker-registry
+- name : Setup docker registry on cluster
+  hosts: mkk8scontrol1
+  tasks:
+    - name: Add repo
+      shell: helm repo add phntom https://phntom.kix.co.il/charts/
+
+    - name: Install docker registry
+      shell: helm install docker-registry-integ phntom/docker-registry

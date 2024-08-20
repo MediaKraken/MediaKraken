@@ -1,0 +1,10 @@
+---
+# https://artifacthub.io/packages/helm/bitnami/jenkins
+- name : Setup jenkis on cluster
+  hosts: mkk8scontrol1
+  tasks:
+    - name: Add repo
+      shell: helm repo add bitnami https://charts.bitnami.com/bitnami
+
+    - name: Install jenkins
+      shell: helm install my-jenkins bitnami/jenkins --version 13.4.19
