@@ -1,7 +1,7 @@
 ---
 # https://artifacthub.io/packages/helm/bitnami/jenkins
 - name : Setup jenkis on cluster
-  hosts: mkk8scontrol1
+  hosts: mkk8scontroldev1
   tasks:
     - name: Add repo
       shell: helm repo add bitnami https://charts.bitnami.com/bitnami

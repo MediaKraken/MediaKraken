@@ -1,6 +1,6 @@
 ---
 - name : Setup k8s dashboard on cluster
-  hosts: mkk8scontrol1
+  hosts: mkk8scontroldev1
   tasks:
     - name: Setup helm repo for dashboard
       shell: helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
