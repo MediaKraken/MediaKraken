@@ -223,8 +223,7 @@ https://artifacthub.io/packages/helm/radar-base/cert-manager-letsencrypt
 https://artifacthub.io/packages/helm/certs/certs
 
 https://github.com/killemov/Shift    transmission web ui
-
-
+instead of docker registry, look at https://goharbor.io/
 
 /*
 docker run --name semaphore \

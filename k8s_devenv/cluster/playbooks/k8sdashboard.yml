@@ -7,3 +7,11 @@
 
     - name: Install dashboard
       shell: helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
+
+    - name: copying file
+      copy:
+        src: ../config/dashboard-adminuser.yml
+        dest: ~/dashboard-adminuser.yml
+
+    - name: Setup access user for dashboard
+      shell: kubectl apply -f ~/dashboard-adminuser.yml

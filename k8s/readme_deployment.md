@@ -71,6 +71,9 @@ Run the following on your deployment node
 
 
 # stuff below to do
+kubectl proxy
+ssh -L 8001:127.0.0.1:8001 metaman@192.168.1.70
+http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard-kong-proxy:443/proxy/
 
 
 # https://stackgres.io/doc/latest/quickstart/

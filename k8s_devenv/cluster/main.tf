@@ -95,3 +95,13 @@ resource "terraform_data" "jenkins" {
     terraform_data.docker_registry
   ]
 }
+
+resource "terraform_data" "dashboard_access" {
+  # setup dashboard access
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkclusterdev/inventory.ini playbooks/k8sdashboard_user.yml"
+  }
+  depends_on = [
+    terraform_data.jenkins
+  ]
+}
