@@ -71,10 +71,21 @@ Run the following on your deployment node
 
 
 # stuff below to do
+# TODO had to split up the rbac user for dashboard by hand........
 kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
 ssh -L 8443:127.0.0.1:8443 metaman@192.168.1.50
 http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard-kong-proxy:443/proxy/
 
+on dev
+kubectl apply -f https://raw.githubusercontent.com/skooner-k8s/skooner/master/kubernetes-skooner.yaml
+kubectl apply -f https://raw.githubusercontent.com/skooner-k8s/skooner/master/kubernetes-skooner-nodeport.yaml
+kubectl get svc --namespace=kube-system
+http://192.168.1.50:31732/
+setup token for skooner
+kubectl create serviceaccount skooner-sa
+kubectl create clusterrolebinding skooner-sa --clusterrole=cluster-admin --serviceaccount=default:skooner-sa
+kubectl create token skooner-sa
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 
 # https://stackgres.io/doc/latest/quickstart/
 # on one master to setup the pg cluster
