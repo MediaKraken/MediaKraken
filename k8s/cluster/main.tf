@@ -56,15 +56,15 @@ resource "terraform_data" "dragonfly" {
   ]
 }
 
-resource "terraform_data" "k8sdashboard" {
-  # setup k8s dashboard
-  provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkcluster/inventory.ini playbooks/k8sdashboard.yml"
-  }
-  depends_on = [
-    terraform_data.dragonfly
-  ]
-}
+# resource "terraform_data" "k8sdashboard" {
+#   # setup k8s dashboard
+#   provisioner "local-exec" {
+#     command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkcluster/inventory.ini playbooks/k8sdashboard.yml"
+#   }
+#   depends_on = [
+#     terraform_data.dragonfly
+#   ]
+# }
 
 resource "terraform_data" "rabbitmq" {
   # setup rabbitmq
@@ -72,6 +72,6 @@ resource "terraform_data" "rabbitmq" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkcluster/inventory.ini playbooks/rabbitmq.yml"
   }
   depends_on = [
-    terraform_data.k8sdashboard
+    terraform_data.dragonfly
   ]
 }

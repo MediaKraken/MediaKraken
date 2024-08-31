@@ -83,7 +83,7 @@ no_proxy_exclude_workers: false
 ## This setting determines whether certs are generated via scripts.
 ## Chose 'none' if you provide your own certificates.
 ## Option is  "script", "none"
-# cert_management: script
+cert_management: script
 
 ## Set to true to allow pre-checks to fail and continue deployment
 # ignore_assert_errors: false
@@ -124,8 +124,10 @@ kube_webhook_token_auth_url_skip_tls_verify: false
 
 ## NTP Settings
 # Start the ntpd or chrony service and enable it at system boot.
-ntp_enabled: false
-ntp_manage_config: false
+ntp_enabled: true
+ntp_manage_config: true
+ntp_timezone: Etc/UTC
+ntp_force_sync_immediately: true
 ntp_servers:
   - "0.pool.ntp.org iburst"
   - "1.pool.ntp.org iburst"

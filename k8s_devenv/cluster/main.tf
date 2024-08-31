@@ -1,3 +1,18 @@
+# terraform {
+#   required_providers {
+#     helm = {
+#       source = "hashicorp/helm"
+#       version = "2.15.0"
+#     }
+#   }
+# }
+
+# provider "helm" {
+#   kubernetes {
+#     config_path = "~/.kube/config"  # Path to your Kubernetes config file
+#   }
+# }
+
 resource "terraform_data" "kubespray" {
   # create the cluster via kubespray
   provisioner "local-exec" {
@@ -56,15 +71,15 @@ resource "terraform_data" "dragonfly" {
   ]
 }
 
-resource "terraform_data" "k8sdashboard" {
-  # setup k8s dashboard
-  provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkclusterdev/inventory.ini playbooks/k8sdashboard.yml"
-  }
-  depends_on = [
-    terraform_data.dragonfly
-  ]
-}
+# resource "terraform_data" "k8sdashboard" {
+#   # setup k8s dashboard
+#   provisioner "local-exec" {
+#     command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkclusterdev/inventory.ini playbooks/k8sdashboard.yml"
+#   }
+#   depends_on = [
+#     terraform_data.dragonfly
+#   ]
+# }
 
 resource "terraform_data" "mailhog" {
   # setup mailhog
@@ -72,7 +87,7 @@ resource "terraform_data" "mailhog" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkclusterdev/inventory.ini playbooks/mailhog.yml"
   }
   depends_on = [
-    terraform_data.k8sdashboard
+    terraform_data.dragonfly
   ]
 }
 
@@ -95,3 +110,15 @@ resource "terraform_data" "jenkins" {
     terraform_data.docker_registry
   ]
 }
+
+# resource "helm_release" "metrics_server" {
+#   name       = "metrics-server"
+#   repository = "https://kubernetes-sigs.github.io/metrics-server"
+#   chart      = "metrics-server"
+#   namespace  = "kube-system"
+#   depends_on = [
+#     terraform_data.jenkins
+#   ]
+# }
+
+# helm install my-release oci://registry-1.docker.io/bitnamicharts/metrics-server --set apiService.create=true
