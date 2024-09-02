@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mkstack-openlibrary-claim
+  namespace: mkstack-mediakraken
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: nfs-csi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mkstack-openlibrarynetfetchbulk
+  name: mkstack-openlibrarynetfetchbulk
+  namespace: mkstack-mediakraken
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-openlibrarynetfetchbulk-service
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mkstack-openlibrarynetfetchbulk-service
+    spec:
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - args:
+            - sh
+            - -c
+            - /wait && /mkopenlibrarynetfetchbulk
+          env:
+            - name: WAIT_HOSTS
+              value: mkstack-database-service:5432, mkstack-rabbitmq-service:5672
+            - name: WAIT_TIMEOUT
+              value: "180"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-password
+                  key: mkstack-db-password.txt
+          image: mediakraken/mkopenlibrarynetfetchbulk:dev
+          imagePullPolicy: Always
+          name: mkstack-openlibrarynetfetchbulk
+          volumeMounts:
+            - mountPath: /mediakraken
+              name: mkstack-openlibrary-claim
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: mkstack-openlibrary-claim
+          persistentVolumeClaim:
+            claimName: mkstack-openlibrary-claim

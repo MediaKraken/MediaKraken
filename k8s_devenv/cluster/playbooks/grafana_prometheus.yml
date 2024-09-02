@@ -1,0 +1,10 @@
+---
+# https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
+- name : Setup monitoring on cluster
+  hosts: mkk8scontroldev1
+  tasks:
+    - name: Add repo
+      shell: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+    - name: Install monitoring
+      shell: helm install mk-kube-prometheus prometheus-community/kube-prometheus-stack

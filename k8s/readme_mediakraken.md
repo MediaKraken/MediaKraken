@@ -6,7 +6,7 @@ cd MediaKraken && git checkout dev
 cd docker_k8s
 kubectl apply -f nfs-pvc.yaml
 kubectl apply -f nfs-pvc-8k.yaml
-kubectl apply -f portainer-manifest.yaml
+#kubectl apply -f portainer-manifest.yaml
 
 # install all secrets
 python3 mediakraken_setup.py

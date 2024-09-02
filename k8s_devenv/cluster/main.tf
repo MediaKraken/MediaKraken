@@ -122,3 +122,13 @@ resource "terraform_data" "jenkins" {
 # }
 
 # helm install my-release oci://registry-1.docker.io/bitnamicharts/metrics-server --set apiService.create=true
+
+resource "terraform_data" "monitoring" {
+  # setup monitoring
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkclusterdev/inventory.ini playbooks/grafana_prometheus.yml"
+  }
+  depends_on = [
+    terraform_data.jenkins
+  ]
+}

@@ -1,6 +1,6 @@
 ---
 # https://artifacthub.io/packages/helm/bitnami/jenkins
-- name : Setup jenkis on cluster
+- name : Setup jenkins on cluster
   hosts: mkk8scontroldev1
   tasks:
     - name: Add repo

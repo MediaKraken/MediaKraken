@@ -1,0 +1,7 @@
+- name: Create a mkstack from K8S YAML File
+  hosts: mkk8scontrol1
+  tasks:
+    - name: Get K8S namespace
+      kubernetes.core.k8s:
+        state: present
+        src: manifests/create_namespace.yml

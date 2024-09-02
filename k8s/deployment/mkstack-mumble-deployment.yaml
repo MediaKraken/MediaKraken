@@ -4,7 +4,7 @@ metadata:
   labels:
     io.kompose.service: mkstack-mumble
   name: mkstack-mumble
-  namespace: mediakraken
+  namespace: mkstack-mediakraken
 spec:
   replicas: 1
   selector:

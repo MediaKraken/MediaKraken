@@ -75,3 +75,23 @@ resource "terraform_data" "rabbitmq" {
     terraform_data.dragonfly
   ]
 }
+
+resource "terraform_data" "monitoring" {
+  # setup monitoring
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkcluster/inventory.ini playbooks/grafana_prometheus.yml"
+  }
+  depends_on = [
+    terraform_data.rabbitmq
+  ]
+}
+
+resource "terraform_data" "mediakraken" {
+  # setup mediakraken
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkcluster/inventory.ini playbooks/mediakraken.yml"
+  }
+  depends_on = [
+    terraform_data.monitoring
+  ]
+}

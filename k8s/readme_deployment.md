@@ -41,6 +41,11 @@ Run the following on your deployment node
 ### Remove the installer:
 ```rm install-opentofu.sh```
 
+## install helm
+```curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3```
+```chmod 700 get_helm.sh```
+```./get_helm.sh```
+
 ## Setup Kubespray
 Run the following on your deployment node
 
@@ -60,7 +65,13 @@ Run the following on your deployment node
 
 ```cp -R ../MediaKraken/k8s_devenv/cluster/kubespray/mkclusterdev inventory/mkclusterdev```
 
+```ansible-galaxy collection install kubernetes.core```
+```ansible-galaxy collection install community.kubernetes```
+```ansible-galaxy collection install cloud.common```
 
+# on control plane - don't using helm instead now
+```sudo apt install python3-pip -y```
+```sudo pip3 install kubernetes --break-system-packages```
 
 
 # follow opentofu/proxmox readme to create control planes and workers
@@ -75,6 +86,19 @@ Run the following on your deployment node
 kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
 ssh -L 8443:127.0.0.1:8443 metaman@192.168.1.50
 http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard-kong-proxy:443/proxy/
+
+helm repo add kubeshark https://helm.kubeshark.co
+‍helm install kubeshark kubeshark/kubeshark
+
+https://grafana.com/grafana/dashboards/3020-teamspeak-3/
+
+https://artifacthub.io/packages/helm/geek-cookbook/network-ups-tools
+
+https://artifacthub.io/packages/helm/elastic/eck-operator
+
+https://artifacthub.io/packages/helm/geek-cookbook/wireguard
+
+https://stackgres.io/doc/latest/install/helm/
 
 on dev
 <!-- kubectl apply -f https://raw.githubusercontent.com/skooner-k8s/skooner/master/kubernetes-skooner.yaml

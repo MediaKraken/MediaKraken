@@ -1,0 +1,115 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mkstack-transmission-claim
+  namespace: mkstack-mediakraken
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: nfs-csi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mkstack-transmission-downloads-claim
+  namespace: mkstack-mediakraken
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Ti
+  storageClassName: nfs-csi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mkstack-transmission-incomplete-claim
+  namespace: mkstack-mediakraken
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Ti
+  storageClassName: nfs-csi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mkstack-transmission-service
+  namespace: mkstack-mediakraken
+spec:
+  type: NodePort
+  ports:
+    - name: "9091"
+      port: 9091
+      targetPort: 9091
+      nodePort: 30091
+    - name: "51413"
+      port: 51413
+      targetPort: 51413
+    - name: 51413-udp
+      port: 51413
+      protocol: UDP
+      targetPort: 51413
+  selector:
+    io.kompose.service: mkstack-transmission-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mkstack-transmission
+  name: mkstack-transmission
+  namespace: mkstack-mediakraken
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-transmission-service
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mkstack-transmission-service
+    spec:
+      securityContext:
+        fsGroup: 100
+        runAsGroup: 101
+        runAsNonRoot: true
+        runAsUser: 100
+      containers:
+        - image: mediakraken/mktransmission:dev
+          imagePullPolicy: Always
+          name: mkstack-transmission
+          ports:
+            - containerPort: 9091
+              protocol: TCP
+            - containerPort: 51413
+              protocol: TCP
+            - containerPort: 51413
+              protocol: UDP
+          volumeMounts:
+            - mountPath: /etc/transmission-daemon/settings.json
+              subPath: settings.json
+              name: mkstack-transmission-claim
+            - mountPath: /transmission/downloads
+              name: mkstack-transmission-downloads-claim
+            - mountPath: /transmission/incomplete
+              name: mkstack-transmission-incomplete-claim
+      restartPolicy: Always
+      volumes:
+        - name: mkstack-transmission-claim
+          persistentVolumeClaim:
+            claimName: mkstack-transmission-claim
+        - name: mkstack-transmission-downloads-claim
+          persistentVolumeClaim:
+            claimName: mkstack-transmission-downloads-claim
+        - name: mkstack-transmission-incomplete-claim
+          persistentVolumeClaim:
+            claimName: mkstack-transmission-incomplete-claim

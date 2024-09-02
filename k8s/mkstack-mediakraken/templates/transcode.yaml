@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mkstack-transcode-claim
+  namespace: mkstack-mediakraken
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: nfs-csi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mkstack-transcode
+  name: mkstack-transcode
+  namespace: mkstack-mediakraken
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-transcode-service
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mkstack-transcode-service
+    spec:
+      containers:
+        - args:
+            - sh
+            - -c
+            - /mktranscode
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-password
+                  key: mkstack-db-password.txt
+          image: mediakraken/mktranscode:dev
+          imagePullPolicy: Always
+          name: mkstack-transcode
+          volumeMounts:
+            - mountPath: /mediakraken/mnt
+              name: mkstack-transcode-claim
+              readOnly: true
+      restartPolicy: OnFailure
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: mkstack-transcode-claim
+          persistentVolumeClaim:
+            claimName: mkstack-transcode-claim
+            readOnly: true
