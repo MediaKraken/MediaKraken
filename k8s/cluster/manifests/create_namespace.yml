@@ -1,9 +1,0 @@
-- name: Create K8S resource
-  hosts: mkk8scontrol1
-  tasks:
-  - name: Get K8S namespace
-    kubernetes.core.k8s:
-      name: mkstack-mediakraken
-      api_version: v1
-      kind: Namespace
-      state: present
