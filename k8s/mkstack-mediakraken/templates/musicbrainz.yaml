@@ -44,7 +44,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: db-password
-                  key: mkstack-db-password.txt
+                  key: db-password
           image: mediakraken/mkmusicbrainz:dev
           imagePullPolicy: Always
           name: mkstack-musicbrainz

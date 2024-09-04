@@ -48,7 +48,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: db-password
-                  key: mkstack-db-password.txt
+                  key: db-password
             - name: SHARED_BUFFERS
               value: 4096MB
             - name: WORK_MEM

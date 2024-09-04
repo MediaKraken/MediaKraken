@@ -36,7 +36,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: db-password
-                  key: mkstack-db-password.txt
+                  key: db-password
           image: mediakraken/mkmediascanner:dev
           imagePullPolicy: Always
           name: mkstack-mediascanner

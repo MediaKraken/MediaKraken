@@ -34,7 +34,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: db-password
-                  key: mkstack-db-password.txt
+                  key: db-password
           image: mediakraken/mktmdbnetfetchbulk:dev
           imagePullPolicy: Always
           name: mkstack-tmdbnetfetchbulk
