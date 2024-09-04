@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_network"
-version = "0.0.5"
+version = "0.0.6"
 edition = "2021"
 
 [profile.release]
@@ -21,32 +21,32 @@ easy-upnp = "0.2.0"
 futures = "0.3.30"
 futures-util = "0.3.30"
 governor = "0.6.3"
-ibverbs = { version = "0.8.0", optional = true } # since docker, no infiniband
+ibverbs = { version = "0.8.1", optional = true } # since docker, no infiniband
 igd-next = "0.14.3"
 # ipnet = "2.7.2"
-ldap3 = "0.11.4"
-lettre = "0.11.7"
+ldap3 = "0.11.5"
+lettre = "0.11.8"
 mini-telnet = "0.1.8"
 nonzero_ext = "0.3.0"
 openweathermap_client = "0.4.0"
 phf = { version = "0.11.2", features = ["macros"] }
 pin-utils = "0.1.0"
 quickxml_to_serde = { version = "0.6.0", features = ["json_types"] }
-reqwest = { version = "0.12.5", default-features = false, features = [
+reqwest = { version = "0.12.7", default-features = false, features = [
     "json",
     "native-tls",
 ] }
-reqwest-middleware = "0.3.2"
-reqwest-retry = "0.5.0"
-rss = "2.0.8"
+reqwest-middleware = "0.3.3"
+reqwest-retry = "0.6.1"
+rss = "2.0.9"
 rsteam = "0.2.1"
-serde = { version = "1.0.204", features = ["derive"] }
-serde_json = "1.0.120"
-serialport = "4.3.0"
+serde = { version = "1.0.209", features = ["derive"] }
+serde_json = "1.0.127"
+serialport = "4.5.0"
 ssh-rs = { version = "0.5.0", features = ["scp"] }
 suppaftp = { version = "6.0.1", features = ["native-tls"] }
 surge-ping = "0.8.1"
-tokio = { version = "1.38.1", features = ["full"] }
+tokio = { version = "1.40.0", features = ["full"] }
 transmission-rpc = "0.4.3"
 wakey = "0.3.0"
 

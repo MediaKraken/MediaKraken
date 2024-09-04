@@ -22,9 +22,9 @@ axum_static = "1.7.1"
 chrono = { version = "0.4.38", features = ["serde"] }
 lazy_static = "1.5.0"
 libc = "0.2.155"
-serde = { version = "1.0.204", features = ["derive"] }
-serde_json = "1.0.120"
-sqlx = { version = "0.7.4", features = [
+serde = { version = "1.0.209", features = ["derive"] }
+serde_json = "1.0.127"
+sqlx = { version = "0.8.1", features = [
     "chrono",
     "json",
     "runtime-tokio",
@@ -35,7 +35,7 @@ sqlx = { version = "0.7.4", features = [
 ] }
 stdext = "0.3.1"
 time = "0.3.36"
-tokio = { version = "1.38.1", features = ["full"] }
+tokio = { version = "1.40.0", features = ["full"] }
 tower = { version = "0.4.13" }
 tower-sessions = { version = "0.12.2", default-features = false, features = [
     "signed",

@@ -18,7 +18,7 @@ reqwest = { version = "0.11.23", default-features = false, features = ["json", "
 rustls = "0.21.10"
 serde = { version = "1.0.195", features = ["derive"] }
 serde_json = "1.0.111"
-sqlx = { version = "0.7.3", features = [ "chrono", "json", "runtime-tokio", "postgres", "uuid" ] }
+sqlx = { version = "0.8.1", features = [ "chrono", "json", "runtime-tokio", "postgres", "uuid" ] }
 sys-info = "0.9.1"
 tar = "0.4.40"
 tokio = { version = "1.35.1", features = ["full"] }

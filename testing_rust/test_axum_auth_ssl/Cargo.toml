@@ -17,7 +17,7 @@ axum_session_auth = { version = "0.12.1", features = [
 axum-server = { version = "0.6.0", features = ["tls-rustls"] }
 tokio = { version = "1.36.0", features = ["full", "tracing"] }
 async-trait = "0.1.77"
-sqlx = { version = "0.7.3", features = [
+sqlx = { version = "0.8.1", features = [
     "macros",
     "migrate",
     "postgres",
