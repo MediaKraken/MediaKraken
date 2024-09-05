@@ -15,3 +15,7 @@
         --set-string grafana.secretUserKey=admin-user \
         --set-string grafana.secretPasswordKey=admin-password \
         stackgres-charts/stackgres-operator
+
+# kubectl wait -n stackgres deployment -l group=stackgres.io --for=condition=Available
+
+# helm delete stackgres-operator --namespace stackgres

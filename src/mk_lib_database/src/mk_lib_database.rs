@@ -9,7 +9,7 @@ pub async fn mk_lib_database_open_pool(
 ) -> Result<sqlx::PgPool, sqlx::Error> {
     let db_pass = env::var("POSTGRES_PASSWORD").unwrap();
     let connection_string = format!(
-        "postgresql://postgres:{}@mkstack-database-service/postgres?sslmode=disable",
+        "postgresql://postgres:{}@mkstack-database-service:6432/postgres?sslmode=disable",
         encode(&db_pass)
     );
     let sqlx_pool = PgPoolOptions::new()
