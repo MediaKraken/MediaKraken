@@ -9,11 +9,18 @@
     - name: Setup NFS shares
       shell: kubectl apply -f ~/nfs-pvc.yml
 
-    - name: Get K8S namespace
+    - name: Deploy mediakraken pods
       shell: helm install --create-namespace --namespace mkstack-mediakraken mkstack-mediakraken https://github.com/MediaKraken/MediaKraken/raw/dev/k8s/mkstack-mediakraken-0.1.2.tgz
+
+    - name: Deploy database pods
+      shell: helm install --create-namespace --namespace mkstack-stackgres mkstack-stackgres https://github.com/MediaKraken/MediaKraken/raw/dev/k8s/mkstack-stackgres-0.1.0.tgz
 
 # helm install --dry-run --debug --create-namespace --namespace mkstack-mediakraken mkstack-mediakraken https://github.com/MediaKraken/MediaKraken/raw/dev/k8s/mkstack-mediakraken-0.1.2.tgz
 
 # helm uninstall mkstack-mediakraken --namespace mkstack-mediakraken
 
 # helm package mkstack-mediakraken
+
+# helm install --create-namespace --namespace mkstack-stackgres mkstack-stackgres https://github.com/MediaKraken/MediaKraken/raw/dev/k8s/mkstack-stackgres-0.1.0.tgz
+
+# helm uninstall mkstack-stackgres --namespace mkstack-stackgres
