@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: maintenance-vacuum-freeze
-  namespace: demo-db
+  namespace: stackgres
 spec:
   schedule: "30 01 * * 6"
   successfulJobsHistoryLimit: 1
@@ -17,7 +17,7 @@ spec:
             - name: PGUSER
               value: "postgres"
             - name: PGDATABASE
-              value: "demo"
+              value: "postgres"
             - name: PGHOST
               value: "demo-db.demo-db.svc"
             - name: PGPASSWORD

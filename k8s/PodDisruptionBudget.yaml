@@ -2,7 +2,7 @@ apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
   name: demo-db-replicas-pdb
-  namespace: demo-db
+  namespace: stackgres
 spec:
   maxUnavailable: 1
   selector:
@@ -16,7 +16,7 @@ apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
   name: demo-db-primary-pdb
-  namespace: demo-db
+  namespace: stackgres
 spec:
   minAvailable: 1
   selector:

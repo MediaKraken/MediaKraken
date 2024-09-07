@@ -17,11 +17,7 @@ spec:
         client_idle_timeout: '30'
         query_wait_timeout: '300'
       databases:
-        demo:
-          pool_size: 400
-          dbname: 'demo'
-          reserve_pool: 5
         postgres:
-          pool_size: 10
+          pool_size: 400 
           dbname: 'postgres'
           reserve_pool: 5
