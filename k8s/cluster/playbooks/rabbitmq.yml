@@ -4,3 +4,20 @@
   tasks:
     - name: Install rabbitmq operator
       shell: kubectl apply -f https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml
+
+    - name: copying file
+      copy:
+        src: ../config/rabbitmq.yml
+        dest: ~/rabbitmq.yml
+
+    - name: Setup cluster of rabbitmq
+      shell: kubectl apply -f ~/rabbitmq.yml
+      # kubectl apply -f https://raw.githubusercontent.com/rabbitmq/cluster-operator/main/docs/examples/hello-world/rabbitmq.yaml
+
+    - name: Install rabbitmq monitor
+      shell: kubectl apply --filename https://raw.githubusercontent.com/rabbitmq/cluster-operator/main/observability/prometheus/monitors/rabbitmq-servicemonitor.yml
+
+    - name: Install rabbitmq operator monitor
+      shell: kubectl apply --filename https://raw.githubusercontent.com/rabbitmq/cluster-operator/main/observability/prometheus/monitors/rabbitmq-cluster-operator-podmonitor.yml
+
+# https://github.com/rabbitmq/cluster-operator/tree/main/observability/grafana/dashboards

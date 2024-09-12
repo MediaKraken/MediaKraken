@@ -6,7 +6,7 @@ metadata:
 spec:
   postgresVersion: "16.3"
   postgresql.conf:
-    shared_buffers: '34GB'
+    shared_buffers: '4GB'
     random_page_cost: '1'
     checkpoint_timeout: '15min'
     max_connections: '400'

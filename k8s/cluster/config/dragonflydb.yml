@@ -3,11 +3,11 @@ kind: Dragonfly
 metadata:
   labels:
     app.kubernetes.io/name: dragonfly
-    app.kubernetes.io/instance: dragonfly-sample
+    app.kubernetes.io/instance: mkstack-dragonfly
     app.kubernetes.io/part-of: dragonfly-operator
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: dragonfly-operator
-  name: dragonfly-sample
+  name: mkstack-dragonfly
 spec:
   replicas: 2
   resources:
