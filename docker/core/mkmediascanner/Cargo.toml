@@ -17,7 +17,7 @@ codegen-units = 1
 
 [dependencies]
 mk_lib_common = { version = "0.0.4", registry = "kellnr" }
-mk_lib_database = { version = "0.0.23", registry = "kellnr" }
+mk_lib_database = { version = "0.0.24", registry = "kellnr" }
 mk_lib_file = { version = "0.0.8", registry = "kellnr", features=["smb"] }   # features=["nfs", "smb"] }
 mk_lib_rabbitmq = { version = "0.0.7", registry = "kellnr" }
 
@@ -30,8 +30,8 @@ reqwest = { version = "0.12.7", default-features = false, features = [
     "rustls-tls",
 ] }
 rustls = "0.23.12"
-serde = { version = "1.0.209", features = ["derive"] }
-serde_json = "1.0.127"
+serde = { version = "1.0.210", features = ["derive"] }
+serde_json = "1.0.128"
 stdext = "0.3.3"
 sys-info = "0.9.1"
 tokio = { version = "1.40.0", features = ["full"] }

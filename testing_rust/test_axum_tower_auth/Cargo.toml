@@ -22,9 +22,9 @@ axum_static = "1.7.1"
 chrono = { version = "0.4.38", features = ["serde"] }
 lazy_static = "1.5.0"
 libc = "0.2.155"
-serde = { version = "1.0.209", features = ["derive"] }
-serde_json = "1.0.127"
-sqlx = { version = "0.8.1", features = [
+serde = { version = "1.0.210", features = ["derive"] }
+serde_json = "1.0.128"
+sqlx = { version = "0.8.2", features = [
     "chrono",
     "json",
     "runtime-tokio",

@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_metadata"
-version = "0.0.10"
+version = "0.0.11"
 edition = "2021"
 
 [profile.release]
@@ -11,7 +11,7 @@ codegen-units = 1
 
 [dependencies]
 mk_lib_common = { version="0.0.2", registry = "kellnr" }
-mk_lib_database = { version = "0.0.23", registry = "kellnr" }
+mk_lib_database = { version = "0.0.24", registry = "kellnr" }
 mk_lib_hash = { version="0.0.2", registry = "kellnr" }
 mk_lib_network = { version="0.0.6", registry = "kellnr" }
 
@@ -29,8 +29,8 @@ rand = "0.8.5"
 reqwest = "0.12.7"
 # rusty_ytdl = "0.6.2"  # breaks sscache
 select = "0.6.0"
-serde_json = "1.0.127"
-sqlx = { version = "0.8.1", features = [
+serde_json = "1.0.128"
+sqlx = { version = "0.8.2", features = [
     "chrono",
     "ipnetwork",
     "json",
@@ -41,7 +41,7 @@ sqlx = { version = "0.8.1", features = [
 soundcloud = "0.4.0"
 substring = "1.4.5"
 tokio = "1.40.0"
-tokio-util = { version = "0.7.11", features = ["compat"] }
+tokio-util = { version = "0.7.12", features = ["compat"] }
 torrent-name-parser = "0.12.1"
 twitch_api = { version = "0.7.0-rc.6", features = [
     "client",
