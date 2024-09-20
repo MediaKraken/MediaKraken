@@ -91,12 +91,42 @@ helm repo add kubeshark https://helm.kubeshark.co
 ‍helm install kubeshark kubeshark/kubeshark
 
 https://grafana.com/grafana/dashboards/3020-teamspeak-3/
-
+https://artifacthub.io/packages/helm/cloudhippie/ansible-semaphore
 https://artifacthub.io/packages/helm/geek-cookbook/network-ups-tools
-
+https://artifacthub.io/packages/helm/bitnami/vault
+https://artifacthub.io/packages/helm/oneuptime/oneuptime
+https://artifacthub.io/packages/helm/qonstrukt/unifi-controller
+https://artifacthub.io/packages/helm/geek-cookbook/owncast
+https://artifacthub.io/packages/helm/rock8s/plane
 https://artifacthub.io/packages/helm/elastic/eck-operator
+https://artifacthub.io/packages/helm/elk-stack/elk-stack
+https://artifacthub.io/packages/helm/fmjstudios/ntfy
+https://operatorhub.io/operator/elastic-cloud-eck
+https://artifacthub.io/packages/helm/crowdsec/crowdsec
+https://artifacthub.io/packages/helm/curie-df-helm-charts/nexus
+https://artifacthub.io/packages/helm/sagikazarmark/sftpgo
+https://artifacthub.io/packages/helm/bitnami/nats
+https://artifacthub.io/packages/helm/crystalnet/romm
+https://artifacthub.io/packages/helm/jfrog/artifactory-oss
+https://artifacthub.io/packages/container/jitesoft-trivy/trivy
+https://artifacthub.io/packages/helm/joxit/docker-registry-ui
+https://artifacthub.io/packages/container/jitesoft-trivy/trivy
+https://artifacthub.io/packages/helm/mojo2600/pihole
+https://artifacthub.io/packages/helm/wyrihaximusnet/pi-hole-exporter
+https://artifacthub.io/packages/helm/fmjstudios/vaultwarden
+https://artifacthub.io/packages/helm/docker-postfix/mail
+https://artifacthub.io/packages/helm/sonarqube/sonarqube-dce
+https://artifacthub.io/packages/helm/uptime-kuma/uptime-kuma
+https://artifacthub.io/packages/helm/agones/agones
+https://artifacthub.io/packages/helm/helm-hass/home-assistant
+
+https://artifacthub.io/packages/helm/bitnami/consul
+
+https://artifacthub.io/packages/helm/bitnami/sonarqube
 
 https://artifacthub.io/packages/helm/geek-cookbook/wireguard
+
+https://artifacthub.io/packages/helm/elk-stack/elk-stack
 
 https://stackgres.io/doc/latest/install/helm/
 

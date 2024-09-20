@@ -1,18 +1,3 @@
-# terraform {
-#   required_providers {
-#     helm = {
-#       source = "hashicorp/helm"
-#       version = "2.15.0"
-#     }
-#   }
-# }
-
-# provider "helm" {
-#   kubernetes {
-#     config_path = "~/.kube/config"  # Path to your Kubernetes config file
-#   }
-# }
-
 resource "terraform_data" "kubespray" {
   # create the cluster via kubespray
   provisioner "local-exec" {
