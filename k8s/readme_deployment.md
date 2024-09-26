@@ -90,10 +90,16 @@ http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kube
 helm repo add kubeshark https://helm.kubeshark.co
 ‍helm install kubeshark kubeshark/kubeshark
 
+https://artifacthub.io/packages/helm/geek-cookbook/unifi-poller
+https://artifacthub.io/packages/helm/loeken-at-home/vaultwarden
+https://artifacthub.io/packages/olm/community-operators/galaxy-operator
 https://grafana.com/grafana/dashboards/3020-teamspeak-3/
 https://artifacthub.io/packages/helm/cloudhippie/ansible-semaphore
 https://artifacthub.io/packages/helm/geek-cookbook/network-ups-tools
 https://artifacthub.io/packages/helm/bitnami/vault
+https://artifacthub.io/packages/helm/si-gitops/nut-exporter
+https://artifacthub.io/packages/helm/m0nsterrr/jellyfin
+https://artifacthub.io/packages/tekton-task/tekton-tasks/grype
 https://artifacthub.io/packages/helm/oneuptime/oneuptime
 https://artifacthub.io/packages/helm/qonstrukt/unifi-controller
 https://artifacthub.io/packages/helm/geek-cookbook/owncast
