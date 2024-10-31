@@ -242,7 +242,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     println!("{}", stdout);
                     // speech rec via vosk
                     let output = Command::new("python3")
-                        .args(["send_wav_to_((websocket.py"])
+                        .args(["send_wav_to_websocket.py"])
                         .stdout(Stdio::piped())
                         .output()
                         .unwrap();

@@ -1,9 +1,11 @@
-use governor::{Quota, RateLimiter};
 use mk_lib_database;
 use mk_lib_metadata;
+use mk_lib_network;
 use nonzero_ext::*;
+use ratelimit::Ratelimiter;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
+use std::time::Duration;
 use tokio::time::{sleep, Duration};
 
 #[derive(Deserialize, Debug)]
@@ -34,14 +36,24 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // launch thread per provider
     let _handle_barcodespider = tokio::spawn(async move {
-        let api_call_limiter = RateLimiter::direct(Quota::per_second(nonzero!(50u32)));
+        let daily_api_call_limiter = Ratelimiter::builder(
+            mk_lib_network::mk_lib_network_limiter::API_LIMIT["barcodespider"].2,
+            Duration::from_secs(86400),
+        )
+        .max_tokens(mk_lib_network::mk_lib_network_limiter::API_LIMIT["barcodespider"].2)
+        .initial_available(mk_lib_network::mk_lib_network_limiter::API_LIMIT["barcodespider"].2)
+        .build()
+        .unwrap();
         let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
             .await
             .unwrap();
         loop {
             let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "themoviedb").await.unwrap();
             for download_data in metadata_to_process {
-                futures::executor::block_on(api_call_limiter.until_ready());
+                if let Err(sleep) = daily_api_call_limiter.try_wait() {
+                    std::thread::sleep(sleep);
+                    continue;
+                }
                 mk_lib_metadata::base::metadata_process(
                     &sqlx_pool,
                     "barcodespider".to_string(),
@@ -59,14 +71,22 @@ async fn main() -> Result<(), Box<dyn Error>> {
     if option_api.musicbrainz.is_some() {
         let musicbrainz_api_key = option_api.musicbrainz.unwrap();
         let _handle_musicbrainz = tokio::spawn(async move {
-            let api_call_limiter = RateLimiter::direct(Quota::per_second(nonzero!(50u32)));
+            let api_call_limiter = Ratelimiter::builder(
+                mk_lib_network::mk_lib_network_limiter::API_LIMIT["musicbrainz"].0,
+                Duration::from_secs(mk_lib_network::mk_lib_network_limiter::API_LIMIT["musicbrainz"].1),
+            )
+            .build()
+            .unwrap();
             let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
                 .await
                 .unwrap();
             loop {
                 let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "musicbrainz").await.unwrap();
                 for download_data in metadata_to_process {
-                    futures::executor::block_on(api_call_limiter.until_ready());
+                    if let Err(sleep) = api_call_limiter.try_wait() {
+                        std::thread::sleep(sleep);
+                        continue;
+                    }
                     mk_lib_metadata::base::metadata_process(
                         &sqlx_pool,
                         "musicbrainz".to_string(),
@@ -83,14 +103,22 @@ async fn main() -> Result<(), Box<dyn Error>> {
     };
 
     let _handle_tmdb = tokio::spawn(async move {
-        let api_call_limiter = RateLimiter::direct(Quota::per_second(nonzero!(50u32)));
+        let api_call_limiter = Ratelimiter::builder(
+            mk_lib_network::mk_lib_network_limiter::API_LIMIT["themoviedb"].0,
+            Duration::from_secs(mk_lib_network::mk_lib_network_limiter::API_LIMIT["themoviedb"].1),
+        )
+        .build()
+        .unwrap();
         let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
             .await
             .unwrap();
         loop {
             let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "themoviedb").await.unwrap();
             for download_data in metadata_to_process {
-                futures::executor::block_on(api_call_limiter.until_ready());
+                if let Err(sleep) = api_call_limiter.try_wait() {
+                    std::thread::sleep(sleep);
+                    continue;
+                }
                 mk_lib_metadata::base::metadata_process(
                     &sqlx_pool,
                     "themoviedb".to_string(),
@@ -106,14 +134,22 @@ async fn main() -> Result<(), Box<dyn Error>> {
     });
 
     let _handle_thesportsdb = tokio::spawn(async move {
-        let api_call_limiter = RateLimiter::direct(Quota::per_second(nonzero!(50u32)));
+        let api_call_limiter = Ratelimiter::builder(
+            mk_lib_network::mk_lib_network_limiter::API_LIMIT["thesportsdb"].0,
+            Duration::from_secs(mk_lib_network::mk_lib_network_limiter::API_LIMIT["thesportsdb"].1),
+        )
+        .build()
+        .unwrap();
         let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
             .await
             .unwrap();
         loop {
             let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "thesportsdb").await.unwrap();
             for download_data in metadata_to_process {
-                futures::executor::block_on(api_call_limiter.until_ready());
+                if let Err(sleep) = api_call_limiter.try_wait() {
+                    std::thread::sleep(sleep);
+                    continue;
+                }
                 mk_lib_metadata::base::metadata_process(
                     &sqlx_pool,
                     "thesportsdb".to_string(),
@@ -129,14 +165,34 @@ async fn main() -> Result<(), Box<dyn Error>> {
     });
 
     let _handle_upcitemdb = tokio::spawn(async move {
-        let api_call_limiter = RateLimiter::direct(Quota::per_second(nonzero!(50u32)));
+        let daily_api_call_limiter = Ratelimiter::builder(
+            mk_lib_network::mk_lib_network_limiter::API_LIMIT["upcitemdb"].2,
+            Duration::from_secs(86400),
+        )
+        .max_tokens(mk_lib_network::mk_lib_network_limiter::API_LIMIT["upcitemdb"].2)
+        .initial_available(mk_lib_network::mk_lib_network_limiter::API_LIMIT["upcitemdb"].2)
+        .build()
+        .unwrap();
+        let api_call_limiter = Ratelimiter::builder(
+            mk_lib_network::mk_lib_network_limiter::API_LIMIT["upcitemdb"].0,
+            Duration::from_secs(mk_lib_network::mk_lib_network_limiter::API_LIMIT["upcitemdb"].1),
+        )
+        .build()
+        .unwrap();
         let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
             .await
             .unwrap();
         loop {
             let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "themoviedb").await.unwrap();
             for download_data in metadata_to_process {
-                futures::executor::block_on(api_call_limiter.until_ready());
+                if let Err(sleep) = daily_api_call_limiter.try_wait() {
+                    std::thread::sleep(sleep);
+                    continue;
+                }
+                if let Err(sleep) = api_call_limiter.try_wait() {
+                    std::thread::sleep(sleep);
+                    continue;
+                }
                 mk_lib_metadata::base::metadata_process(
                     &sqlx_pool,
                     "upcitemdb".to_string(),

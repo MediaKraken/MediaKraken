@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_metadata"
-version = "0.0.11"
+version = "0.0.13"
 edition = "2021"
 
 [profile.release]
@@ -10,10 +10,10 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_common = { version="0.0.2", registry = "kellnr" }
-mk_lib_database = { version = "0.0.24", registry = "kellnr" }
-mk_lib_hash = { version="0.0.2", registry = "kellnr" }
-mk_lib_network = { version="0.0.6", registry = "kellnr" }
+mk_lib_common = { version="0.0.5", registry = "kellnr" }
+mk_lib_database = { version = "0.0.25", registry = "kellnr" }
+mk_lib_hash = { version="0.0.5", registry = "kellnr" }
+mk_lib_network = { version="0.0.11", registry = "kellnr" }
 
 discid = { version = "0.5.0", optional = true }
 flickr = "0.1.1"
@@ -26,10 +26,10 @@ nonzero_ext = "0.3.0"
 omdb = "0.3.2"
 open-library = "0.7.1"
 rand = "0.8.5"
-reqwest = "0.12.7"
+reqwest = "0.12.8"
 # rusty_ytdl = "0.6.2"  # breaks sscache
 select = "0.6.0"
-serde_json = "1.0.128"
+serde_json = "1.0.132"
 sqlx = { version = "0.8.2", features = [
     "chrono",
     "ipnetwork",
@@ -49,8 +49,8 @@ twitch_api = { version = "0.7.0-rc.6", features = [
     "reqwest",
     "twitch_oauth2",
 ] }
-twitch_oauth2 = "0.13.0"
-uuid = { version = "1.10.0", features = ["serde", "v4"] }
+twitch_oauth2 = "0.14.0"
+uuid = { version = "1.11.0", features = ["serde", "v4"] }
 vimeo-rs = { version = "0.2.1" }
 
 [features]
