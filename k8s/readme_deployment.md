@@ -90,51 +90,121 @@ http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kube
 helm repo add kubeshark https://helm.kubeshark.co
 ‍helm install kubeshark kubeshark/kubeshark
 
-https://artifacthub.io/packages/helm/geek-cookbook/unifi-poller
-https://artifacthub.io/packages/helm/loeken-at-home/vaultwarden
-https://artifacthub.io/packages/olm/community-operators/galaxy-operator
-https://grafana.com/grafana/dashboards/3020-teamspeak-3/
-https://artifacthub.io/packages/helm/cloudhippie/ansible-semaphore
-https://artifacthub.io/packages/helm/geek-cookbook/network-ups-tools
-https://artifacthub.io/packages/helm/bitnami/vault
-https://artifacthub.io/packages/helm/si-gitops/nut-exporter
-https://artifacthub.io/packages/helm/m0nsterrr/jellyfin
-https://artifacthub.io/packages/tekton-task/tekton-tasks/grype
-https://artifacthub.io/packages/helm/oneuptime/oneuptime
-https://artifacthub.io/packages/helm/qonstrukt/unifi-controller
-https://artifacthub.io/packages/helm/geek-cookbook/owncast
-https://artifacthub.io/packages/helm/rock8s/plane
-https://artifacthub.io/packages/helm/elastic/eck-operator
-https://artifacthub.io/packages/helm/elk-stack/elk-stack
-https://artifacthub.io/packages/helm/fmjstudios/ntfy
-https://operatorhub.io/operator/elastic-cloud-eck
-https://artifacthub.io/packages/helm/crowdsec/crowdsec
-https://artifacthub.io/packages/helm/curie-df-helm-charts/nexus
-https://artifacthub.io/packages/helm/sagikazarmark/sftpgo
-https://artifacthub.io/packages/helm/bitnami/nats
-https://artifacthub.io/packages/helm/crystalnet/romm
-https://artifacthub.io/packages/helm/jfrog/artifactory-oss
-https://artifacthub.io/packages/container/jitesoft-trivy/trivy
-https://artifacthub.io/packages/helm/joxit/docker-registry-ui
-https://artifacthub.io/packages/container/jitesoft-trivy/trivy
-https://artifacthub.io/packages/helm/mojo2600/pihole
-https://artifacthub.io/packages/helm/wyrihaximusnet/pi-hole-exporter
-https://artifacthub.io/packages/helm/fmjstudios/vaultwarden
-https://artifacthub.io/packages/helm/docker-postfix/mail
-https://artifacthub.io/packages/helm/sonarqube/sonarqube-dce
-https://artifacthub.io/packages/helm/uptime-kuma/uptime-kuma
-https://artifacthub.io/packages/helm/agones/agones
-https://artifacthub.io/packages/helm/helm-hass/home-assistant
 
-https://artifacthub.io/packages/helm/bitnami/consul
+https://artifacthub.io/packages/olm/community-operators/galaxy-operator
+Ansible Galaxy is Ansible's official hub for sharing Ansible content.
+
+https://artifacthub.io/packages/helm/sonarqube/sonarqube-dce
+SonarQube is a self-managed, automatic code review tool that systematically helps you deliver clean code. 
+
+https://artifacthub.io/packages/helm/helm-hass/home-assistant
+This chart bootstraps a deployment on a cluster using the package manager.
 
 https://artifacthub.io/packages/helm/bitnami/sonarqube
+SonarQube(TM) is an open source quality management platform that analyzes and measures code's technical quality. It enables developers to detect code issues, vulnerabilities, and bugs in early stages.
 
-https://artifacthub.io/packages/helm/geek-cookbook/wireguard
+https://artifacthub.io/packages/helm/cloudhippie/ansible-semaphore
+Modern and open-source alternative to AWX/Tower
+https://semaphoreui.com/
+
+https://artifacthub.io/packages/helm/geek-cookbook/network-ups-tools
+Network UPS Tools is a collection of programs which provide a common interface for monitoring and administering UPS, PDU and SCD hardware.
+
+https://artifacthub.io/packages/helm/bitnami/vault
+Vault is a tool for securely managing and accessing secrets using a unified interface. Features secure storage, dynamic secrets, data encryption and revocation.
+
+https://artifacthub.io/packages/helm/m0nsterrr/jellyfin
+jellyfin helm chart for Kubernetes
+
+https://artifacthub.io/packages/helm/elastic/eck-operator
+Elastic Cloud on Kubernetes (ECK) operator
 
 https://artifacthub.io/packages/helm/elk-stack/elk-stack
+Helm chart for Filebeat and ELK stack deployment
+
+https://operatorhub.io/operator/elastic-cloud-eck
+Elastic Cloud on Kubernetes (ECK) is the official operator by Elastic for automating the deployment, provisioning, management, and orchestration of Elasticsearch, Kibana, APM Server, Beats, Enterprise Search, Elastic Agent, Elastic Maps Server, and Logstash on Kubernetes.
+
+https://artifacthub.io/packages/helm/bitnami/nats
+NATS is an open source, lightweight and high-performance messaging system. It is ideal for distributed systems and supports modern cloud architectures and pub-sub, request-reply and queuing models.
+
+https://artifacthub.io/packages/helm/jfrog/artifactory-oss
+JFrog Artifactory OSS is a free Artifactory edition to host Generic repositories.
+
+https://artifacthub.io/packages/helm/joxit/docker-registry-ui
+The simplest and most complete UI for your private registry
+
+https://artifacthub.io/packages/helm/crowdsec/crowdsec
+CrowdSec - Real-time & crowdsourced protection against aggressive IPs
+
+https://artifacthub.io/packages/helm/curie-df-helm-charts/nexus
+Sonatype Nexus is an open source repository manager
+
+https://artifacthub.io/packages/helm/sagikazarmark/sftpgo
+Fully featured and highly configurable SFTP server with optional FTP/S and WebDAV support.
+
+https://artifacthub.io/packages/container/jitesoft-trivy/trivy
+Scanner for vulnerabilities in container images, file systems, and Git repositories, as well as for configuration issues.
+
+https://artifacthub.io/packages/helm/mojo2600/pihole
+Installs pihole in kubernetes
+
+https://artifacthub.io/packages/helm/wyrihaximusnet/pi-hole-exporter
+Pi-Hole Exporter
+
+https://artifacthub.io/packages/helm/docker-postfix/mail
+An outgoing SMTP mail relay for your applications in Kubernetes cluster
+
+https://artifacthub.io/packages/helm/geek-cookbook/wireguard
+Fast, modern, secure VPN tunnel
+
+https://artifacthub.io/packages/helm/elk-stack/elk-stack
+Helm chart for Filebeat and ELK stack deployment
 
 https://stackgres.io/doc/latest/install/helm/
+Stackgres ha database
+
+https://artifacthub.io/packages/helm/uptime-kuma/uptime-kuma
+A self-hosted Monitoring tool like "Uptime-Robot".
+
+https://artifacthub.io/packages/tekton-task/tekton-tasks/grype
+A vulnerability scanner for container images and filesystems. 
+
+https://artifacthub.io/packages/helm/fmjstudios/ntfy
+ntfy lets you send push notifications to your phone or desktop via scripts from any computer, using simple HTTP PUT or POST requests
+
+https://grafana.com/grafana/dashboards/3020-teamspeak-3/
+Visualize collected metrics of all virtual server instances of a single Teamspeak 3 server using InfluxDB and Telegraf in combination with the telegraf-teamspeak3 executable script.
+
+https://artifacthub.io/packages/helm/fmjstudios/vaultwarden
+Unofficial Bitwarden compatible server
+
+https://artifacthub.io/packages/helm/qonstrukt/unifi-controller
+The UniFi Controller helm chart installs a unifi controller software
+
+https://artifacthub.io/packages/helm/rock8s/plane
+jira type tracking
+
+https://artifacthub.io/packages/helm/bitnami/consul
+HashiCorp Consul is a tool for discovering and configuring services in your infrastructure.
+
+https://artifacthub.io/packages/helm/oneuptime/oneuptime
+OneUptime is a comprehensive solution for monitoring and managing your online services.
+
+https://artifacthub.io/packages/helm/crystalnet/romm
+RomM (Rom Manager) is a web based retro roms manager integrated with IGDB.
+
+https://artifacthub.io/packages/helm/si-gitops/nut-exporter
+Installs NUT exporter in Kubernetes
+
+https://artifacthub.io/packages/helm/geek-cookbook/owncast
+live video and web chat server
+
+https://artifacthub.io/packages/helm/agones/agones
+Host, Run and Scale dedicated game servers on Kubernetes
+
+https://artifacthub.io/packages/helm/geek-cookbook/unifi-poller
+Collect ALL UniFi Controller, Site, Device & Client Data - Export to InfluxDB or Prometheus
 
 on dev
 <!-- kubectl apply -f https://raw.githubusercontent.com/skooner-k8s/skooner/master/kubernetes-skooner.yaml
