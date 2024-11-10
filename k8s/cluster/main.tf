@@ -86,12 +86,15 @@ resource "terraform_data" "monitoring" {
   ]
 }
 
-resource "terraform_data" "mediakraken" {
-  # setup mediakraken
-  provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkcluster/inventory.ini playbooks/mediakraken.yml"
-  }
-  depends_on = [
-    terraform_data.monitoring
-  ]
-}
+# resource "terraform_data" "mediakraken" {
+#   # setup mediakraken
+#   provisioner "local-exec" {
+#     command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkcluster/inventory.ini playbooks/mediakraken.yml"
+#   }
+#   depends_on = [
+#     terraform_data.monitoring
+#   ]
+# }
+
+# TODO wiregaurd
+# TODO postfix

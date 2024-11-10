@@ -80,6 +80,74 @@ Run the following on your deployment node
 
 
 
+####### stackgres exp
+kubectl create namespace stackgres
+helm install --namespace stackgres stackgres-operator --set-string adminui.service.type=LoadBalancer https://stackgres.io/downloads/stackgres-k8s/stackgres/latest/helm/stackgres-operator.tgz
+
+kubectl -n stackgres get svc --field-selector metadata.name=stackgres-restapi
+https://192.168.1.70:30569/admin/index.html
+
+extentions:
+pgcrypto
+pg_stat_statements
+pg_trgm
+
+custom
+
+/*
+
+NAME: stackgres-operator
+LAST DEPLOYED: Thu Nov  7 22:28:55 2024
+NAMESPACE: stackgres
+STATUS: deployed
+REVISION: 1
+NOTES:
+Release Name: stackgres-operator
+StackGres Version: 1.14.0
+
+   _____ _             _     _____
+  / ____| |           | |   / ____|
+ | (___ | |_ __ _  ___| | _| |  __ _ __ ___  ___
+  \___ \| __/ _` |/ __| |/ / | |_ | '__/ _ \/ __|
+  ____) | || (_| | (__|   <| |__| | | |  __/\__ \
+ |_____/ \__\__,_|\___|_|\_\\_____|_|  \___||___/
+                                  by OnGres, Inc.
+
+Check if the operator was successfully deployed and is available:
+
+    kubectl describe deployment -n stackgres stackgres-operator
+
+    kubectl wait -n stackgres deployment/stackgres-operator --for condition=Available
+
+Check if the restapi was successfully deployed and is available:
+
+    kubectl describe deployment -n stackgres stackgres-restapi
+
+    kubectl wait -n stackgres deployment/stackgres-restapi --for condition=Available
+To access StackGres Operator UI from localhost, run the below commands:
+
+    POD_NAME=$(kubectl get pods --namespace stackgres -l "stackgres.io/restapi=true" -o jsonpath="{.items[0].metadata.name}")
+
+    kubectl port-forward "$POD_NAME" 8443:9443 --namespace stackgres
+
+Read more about port forwarding here: http://kubernetes.io/docs/user-guide/kubectl/kubectl_port-forward/
+
+Now you can access the StackGres Operator UI on:
+
+https://localhost:8443
+To get the username, run the command:
+
+    kubectl get secret -n stackgres stackgres-restapi-admin --template '{{ printf "username = %s\n" (.data.k8sUsername | base64decode) }}'
+
+To get the generated password, run the command:
+
+    kubectl get secret -n stackgres stackgres-restapi-admin --template '{{ printf "password = %s\n" (.data.clearPassword | base64decode) }}'
+
+Remember to remove the generated password hint from the secret to avoid security flaws:
+
+    kubectl patch secret --namespace stackgres stackgres-restapi-admin --type json -p '[{"op":"remove","path":"/data/clearPassword"}]'
+
+*/
 
 # stuff below to do
 # TODO had to split up the rbac user for dashboard by hand........
@@ -92,20 +160,9 @@ helm repo add kubeshark https://helm.kubeshark.co
 
 
 # stuff to add to MK
-https://artifacthub.io/packages/helm/geek-cookbook/wireguard
-Fast, modern, secure VPN tunnel
-
-https://artifacthub.io/packages/helm/docker-postfix/mail
-An outgoing SMTP mail relay for your applications in Kubernetes cluster
-
-https://stackgres.io/doc/latest/install/helm/
-Stackgres ha database
-
 https://artifacthub.io/packages/helm/fmjstudios/ntfy
 ntfy lets you send push notifications to your phone or desktop via scripts from any computer, using simple HTTP PUT or POST requests
-
-https://grafana.com/grafana/dashboards/3020-teamspeak-3/
-Visualize collected metrics of all virtual server instances of a single Teamspeak 3 server using InfluxDB and Telegraf in combination with the telegraf-teamspeak3 executable script.
+https://www.youtube.com/watch?v=poDIT2ruQ9M
 
 https://operatorhub.io/operator/elastic-cloud-eck
 Elastic Cloud on Kubernetes (ECK) is the official operator by Elastic for automating the deployment, provisioning, management, and orchestration of Elasticsearch, Kibana, APM Server, Beats, Enterprise Search, Elastic Agent, Elastic Maps Server, and Logstash on Kubernetes.
@@ -114,29 +171,14 @@ https://artifacthub.io/packages/helm/bitnami/nats
 NATS is an open source, lightweight and high-performance messaging system. It is ideal for distributed systems and supports modern cloud architectures and pub-sub, request-reply and queuing models.
 
 # stuff to add to DEV stack CI/CD/etc
-https://artifacthub.io/packages/tekton-task/tekton-tasks/grype
-A vulnerability scanner for container images and filesystems. 
-
 https://artifacthub.io/packages/helm/sonarqube/sonarqube-dce
 SonarQube is a self-managed, automatic code review tool that systematically helps you deliver clean code. 
 
 https://artifacthub.io/packages/helm/bitnami/sonarqube
 SonarQube(TM) is an open source quality management platform that analyzes and measures code's technical quality. It enables developers to detect code issues, vulnerabilities, and bugs in early stages.
 
-https://artifacthub.io/packages/helm/joxit/docker-registry-ui
-The simplest and most complete UI for your private registry
-
-https://artifacthub.io/packages/container/jitesoft-trivy/trivy
-Scanner for vulnerabilities in container images, file systems, and Git repositories, as well as for configuration issues.
-
-https://artifacthub.io/packages/helm/sagikazarmark/sftpgo
-Fully featured and highly configurable SFTP server with optional FTP/S and WebDAV support.
-
 https://artifacthub.io/packages/helm/curie-df-helm-charts/nexus
 Sonatype Nexus is an open source repository manager
-
-https://artifacthub.io/packages/helm/rock8s/plane
-jira type tracking
 
 https://artifacthub.io/packages/helm/jfrog/artifactory-oss
 JFrog Artifactory OSS is a free Artifactory edition to host Generic repositories.

@@ -17,8 +17,8 @@ codegen-units = 1
 
 [dependencies]
 mk_lib_common = { version = "0.0.5", registry = "kellnr" }
-mk_lib_database = { version = "0.0.25", registry = "kellnr" }
-mk_lib_file = { version = "0.0.10", registry = "kellnr", features=["smb"] }
+mk_lib_database = { version = "0.0.26", registry = "kellnr" }
+mk_lib_file = { version = "0.0.11", registry = "kellnr", features=["smb"] }
    # features=["nfs", "smb"] }
 mk_lib_rabbitmq = { version = "0.0.8", registry = "kellnr" }
 

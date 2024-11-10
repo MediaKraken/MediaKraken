@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_hash"
-version = "0.0.5"
+version = "0.0.6"
 edition = "2021"
 
 [profile.release]
@@ -10,13 +10,13 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_file = { version="0.0.10", registry = "kellnr" }
+mk_lib_file = { version="0.0.11", registry = "kellnr" }
 
 blake3 = "1.5.4"
 crc32fast = "1.4.2"
 digest = "0.10.7"
 #ed2k = { git = "https://github.com/runfalk/ed2k-rs" }
-ed2k = { version="1.0.1", registry = "kellnr" }
+ed2k = { version="0.3.0", registry = "kellnr" }
 md-5 = "0.10.6"
 serde_json = "1.0.132"
 sha1 = "0.10.6"
