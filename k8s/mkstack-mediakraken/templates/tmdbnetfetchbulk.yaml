@@ -27,7 +27,7 @@ spec:
             - /wait && /mktmdbnetfetchbulk
           env:
             - name: WAIT_HOSTS
-              value: mkstack-database-service:5432, mkstack-rabbitmq-service:5672
+              value: mkdatabase.stackgres:5432, mkstack-rabbitmq-service:5672
             - name: WAIT_TIMEOUT
               value: "180"
             - name: POSTGRES_PASSWORD

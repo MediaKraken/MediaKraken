@@ -85,6 +85,7 @@ kubectl create namespace stackgres
 helm install --namespace stackgres stackgres-operator --set-string adminui.service.type=LoadBalancer https://stackgres.io/downloads/stackgres-k8s/stackgres/latest/helm/stackgres-operator.tgz
 
 kubectl -n stackgres get svc --field-selector metadata.name=stackgres-restapi
+kubectl get secret -n stackgres stackgres-restapi-admin --template '{{ printf "password = %s\n" (.data.clearPassword | base64decode) }}'
 https://192.168.1.70:30569/admin/index.html
 
 extentions:
@@ -94,60 +95,11 @@ pg_trgm
 
 custom
 
-/*
+kubectl get secrets -n stackgres mkdatabase -o jsonpath='{.data.superuser-password}' | base64 -d
+postgres
+02f0-e787-421b-beb
 
-NAME: stackgres-operator
-LAST DEPLOYED: Thu Nov  7 22:28:55 2024
-NAMESPACE: stackgres
-STATUS: deployed
-REVISION: 1
-NOTES:
-Release Name: stackgres-operator
-StackGres Version: 1.14.0
 
-   _____ _             _     _____
-  / ____| |           | |   / ____|
- | (___ | |_ __ _  ___| | _| |  __ _ __ ___  ___
-  \___ \| __/ _` |/ __| |/ / | |_ | '__/ _ \/ __|
-  ____) | || (_| | (__|   <| |__| | | |  __/\__ \
- |_____/ \__\__,_|\___|_|\_\\_____|_|  \___||___/
-                                  by OnGres, Inc.
-
-Check if the operator was successfully deployed and is available:
-
-    kubectl describe deployment -n stackgres stackgres-operator
-
-    kubectl wait -n stackgres deployment/stackgres-operator --for condition=Available
-
-Check if the restapi was successfully deployed and is available:
-
-    kubectl describe deployment -n stackgres stackgres-restapi
-
-    kubectl wait -n stackgres deployment/stackgres-restapi --for condition=Available
-To access StackGres Operator UI from localhost, run the below commands:
-
-    POD_NAME=$(kubectl get pods --namespace stackgres -l "stackgres.io/restapi=true" -o jsonpath="{.items[0].metadata.name}")
-
-    kubectl port-forward "$POD_NAME" 8443:9443 --namespace stackgres
-
-Read more about port forwarding here: http://kubernetes.io/docs/user-guide/kubectl/kubectl_port-forward/
-
-Now you can access the StackGres Operator UI on:
-
-https://localhost:8443
-To get the username, run the command:
-
-    kubectl get secret -n stackgres stackgres-restapi-admin --template '{{ printf "username = %s\n" (.data.k8sUsername | base64decode) }}'
-
-To get the generated password, run the command:
-
-    kubectl get secret -n stackgres stackgres-restapi-admin --template '{{ printf "password = %s\n" (.data.clearPassword | base64decode) }}'
-
-Remember to remove the generated password hint from the secret to avoid security flaws:
-
-    kubectl patch secret --namespace stackgres stackgres-restapi-admin --type json -p '[{"op":"remove","path":"/data/clearPassword"}]'
-
-*/
 
 # stuff below to do
 # TODO had to split up the rbac user for dashboard by hand........
@@ -253,31 +205,3 @@ kubectl create serviceaccount skooner-sa
 kubectl create clusterrolebinding skooner-sa --clusterrole=cluster-admin --serviceaccount=default:skooner-sa
 kubectl create token skooner-sa -->
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-
-# https://stackgres.io/doc/latest/quickstart/
-# on one master to setup the pg cluster
-helm install --create-namespace --namespace mkdatabase stackgres-operator \
- --set-string adminui.service.type=LoadBalancer \
- --set grafana.autoEmbed=true https://stackgres.io/downloads/stackgres-k8s/stackgres/latest/helm/stackgres-operator.tgz
-
-cat << 'EOF' | kubectl create -f -
-apiVersion: stackgres.io/v1
-kind: SGCluster
-metadata:
-  name: simple
-spec:
-  instances: 2
-  postgres:
-    version: 'latest'
-  pods:
-    persistentVolume: 
-      size: '250Gi'
-      storageClass: nfs-csi-8k
-EOF
-
-kubectl get pods --watch
-
-# wait till 6/6
-
-kubectl exec -ti "$(kubectl get pod --selector app=StackGresCluster,stackgres.io/cluster=true,role=master -o name)" -c postgres-util -- psql
-

@@ -9,13 +9,13 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: mkstack-database-service
+      io.kompose.service: mkdatabase.stackgres
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        io.kompose.service: mkstack-database-service
+        io.kompose.service: mkdatabase.stackgres
     spec:
       # securityContext:
       #   fsGroup: 70

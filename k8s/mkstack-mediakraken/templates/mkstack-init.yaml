@@ -29,7 +29,7 @@ spec:
             - /wait && /mkinit
           env:
             - name: WAIT_HOSTS
-              value: mkstack-database-service:5432
+              value: mkdatabase.stackgres:5432
             - name: WAIT_TIMEOUT
               value: "180"
             - name: POSTGRES_PASSWORD
