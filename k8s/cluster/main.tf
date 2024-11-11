@@ -47,13 +47,23 @@ resource "terraform_data" "nfs" {
   ]
 }
 
+resource "terraform_data" "monitoring" {
+  # setup monitoring
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkcluster/inventory.ini playbooks/grafana_prometheus.yml"
+  }
+  depends_on = [
+    terraform_data.nfs
+  ]
+}
+
 resource "terraform_data" "dragonfly" {
   # setup dragonfly operator and cluster
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkcluster/inventory.ini playbooks/dragonflydb.yml"
   }
   depends_on = [
-    terraform_data.nfs
+    terraform_data.monitoring
   ]
 }
 
@@ -77,25 +87,12 @@ resource "terraform_data" "rabbitmq" {
   ]
 }
 
-resource "terraform_data" "monitoring" {
-  # setup monitoring
-  provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkcluster/inventory.ini playbooks/grafana_prometheus.yml"
-  }
-  depends_on = [
-    terraform_data.rabbitmq
-  ]
-}
-
 # resource "terraform_data" "mediakraken" {
 #   # setup mediakraken
 #   provisioner "local-exec" {
 #     command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkcluster/inventory.ini playbooks/mediakraken.yml"
 #   }
 #   depends_on = [
-#     terraform_data.monitoring
+#     terraform_data.rabbitmq
 #   ]
 # }
-
-# TODO wiregaurd
-# TODO postfix

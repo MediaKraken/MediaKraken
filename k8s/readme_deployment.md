@@ -69,7 +69,7 @@ Run the following on your deployment node
 # if update of kubespray
 ```cp -i -R inventory/sample/. ../MediaKraken/k8s/cluster/kubespray/mkcluster/.```
 ```and do NOT stop over the inventory.ini```
-```purge the mkcluster in kubspray and recopy```
+```purge the mkcluster in kubespray and recopy```
 
 # follow opentofu/proxmox readme to create control planes and workers
 
