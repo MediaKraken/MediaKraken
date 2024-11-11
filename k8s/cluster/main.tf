@@ -3,6 +3,7 @@ resource "terraform_data" "kubespray" {
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory/mkcluster/inventory.ini cluster.yml --ssh-common-args='-o StrictHostKeyChecking=accept-new'"
     working_dir = "../../../kubespray"
+    # ansible-playbook -b -v -u ${var.vm_user} -i inventory/mkcluster/inventory.ini scale.yml --ssh-common-args='-o StrictHostKeyChecking=accept-new' --flush-cache -l mkk8sworker4
   }
 }
 

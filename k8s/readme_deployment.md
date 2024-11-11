@@ -51,28 +51,25 @@ Run the following on your deployment node
 
 ```git clone https://github.com/kubernetes-incubator/kubespray.git```
 
-```cp -rfp kubespray/inventory/sample MediaKraken/k8s/cluster/kubespray/mkcluster```
-```cp -rfp kubespray/inventory/sample MediaKraken/k8s_devenv/cluster/kubespray/mkclusterdev```
-
 ```cd kubespray```
 
 ```apt install python3-pip -y```
 
 ```pip3 install -r requirements.txt --break-system-packages```
-```change clustername in k8s-cluster.yml file```
+```change clustername in group_vars/k8s_cluster/k8s-cluster.yml file to mkcluster.local```
 
-```cp -R ../MediaKraken/k8s/cluster/kubespray/mkcluster inventory/mkcluster```
+```cp -R ../MediaKraken/k8s/cluster/kubespray/mkcluster inventory/.```
 
-```cp -R ../MediaKraken/k8s_devenv/cluster/kubespray/mkclusterdev inventory/mkclusterdev```
+```cp -R ../MediaKraken/k8s_devenv/cluster/kubespray/mkclusterdev inventory/.```
 
 ```ansible-galaxy collection install kubernetes.core```
 ```ansible-galaxy collection install community.kubernetes```
 ```ansible-galaxy collection install cloud.common```
 
-# on control plane - don't using helm instead now
-```sudo apt install python3-pip -y```
-```sudo pip3 install kubernetes --break-system-packages```
-
+# if update of kubespray
+```cp -i -R inventory/sample/. ../MediaKraken/k8s/cluster/kubespray/mkcluster/.```
+```and do NOT stop over the inventory.ini```
+```purge the mkcluster in kubspray and recopy```
 
 # follow opentofu/proxmox readme to create control planes and workers
 

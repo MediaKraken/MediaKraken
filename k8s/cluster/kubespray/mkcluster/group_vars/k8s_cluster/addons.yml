@@ -13,11 +13,11 @@ registry_enabled: false
 # registry_disk_size: "10Gi"
 
 # Metrics Server deployment
-metrics_server_enabled: true
+metrics_server_enabled: false
 # metrics_server_container_port: 10250
 # metrics_server_kubelet_insecure_tls: true
 # metrics_server_metric_resolution: 15s
-metrics_server_kubelet_preferred_address_types: "InternalIP,ExternalIP,Hostname"
+# metrics_server_kubelet_preferred_address_types: "InternalIP,ExternalIP,Hostname"
 # metrics_server_host_network: false
 # metrics_server_replicas: 1
 
@@ -96,10 +96,16 @@ rbd_provisioner_enabled: false
 # rbd_provisioner_storage_class: rbd
 # rbd_provisioner_reclaim_policy: Delete
 
+# Gateway API CRDs
+gateway_api_enabled: false
+# gateway_api_experimental_channel: false
+
 # Nginx ingress controller deployment
-ingress_nginx_enabled: true
+ingress_nginx_enabled: false
 # ingress_nginx_host_network: false
 # ingress_nginx_service_type: LoadBalancer
+# ingress_nginx_service_annotations:
+#   example.io/loadbalancerIPs: 1.2.3.4
 # ingress_nginx_service_nodeport_http: 30080
 # ingress_nginx_service_nodeport_https: 30081
 ingress_publish_status_address: ""
@@ -136,7 +142,7 @@ ingress_alb_enabled: false
 # alb_ingress_aws_debug: "false"
 
 # Cert manager deployment
-cert_manager_enabled: true
+cert_manager_enabled: false
 # cert_manager_namespace: "cert-manager"
 # cert_manager_tolerations:
 #   - key: node-role.kubernetes.io/control-plane
