@@ -1,14 +1,6 @@
 - name: Create a mkstack from K8S YAML File
   hosts: mkk8scontrol1
   tasks:
-    - name: copying file
-      copy:
-        src: ../config/nfs-pvc.yml
-        dest: ~/nfs-pvc.yml
-
-    - name: Setup NFS shares
-      shell: kubectl apply -f ~/nfs-pvc.yml
-
     - name: Deploy mediakraken pods
       shell: helm install --create-namespace --namespace mkstack-mediakraken mkstack-mediakraken https://github.com/MediaKraken/MediaKraken/raw/dev/k8s/mkstack-mediakraken-0.1.4.tgz
 
