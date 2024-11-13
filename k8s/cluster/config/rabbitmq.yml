@@ -31,9 +31,11 @@ spec:
             - key: app.kubernetes.io/name
               operator: In
               values:
-              - mkworker1
-              - mkworker2
-              - mkworker3
+              - mkk8sworker1
+              - mkk8sworker2
+              - mkk8sworker3
+              - mkk8sworker4
+              - mkk8sworker5
         topologyKey: kubernetes.io/hostname
   override:
     statefulSet:
