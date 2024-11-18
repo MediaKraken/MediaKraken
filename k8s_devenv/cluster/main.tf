@@ -96,18 +96,6 @@ resource "terraform_data" "jenkins" {
   ]
 }
 
-# resource "helm_release" "metrics_server" {
-#   name       = "metrics-server"
-#   repository = "https://kubernetes-sigs.github.io/metrics-server"
-#   chart      = "metrics-server"
-#   namespace  = "kube-system"
-#   depends_on = [
-#     terraform_data.jenkins
-#   ]
-# }
-
-# helm install my-release oci://registry-1.docker.io/bitnamicharts/metrics-server --set apiService.create=true
-
 resource "terraform_data" "monitoring" {
   # setup monitoring
   provisioner "local-exec" {

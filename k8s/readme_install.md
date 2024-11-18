@@ -17,14 +17,6 @@ kubectl get deployments --all-namespaces
 https://www.youtube.com/watch?v=r2zuL9MW6wc
 
 
-# convert
-/*
-curl -L https://github.com/kubernetes/kompose/releases/download/v1.34.0/kompose-linux-amd64 -o kompose
-chmod +x kompose
-sudo mv ./kompose /usr/local/bin/kompose
-kompose convert -f docker-compose.yml
-*/
-
 # setup mediakraken
 kubectl create namespace mediakraken
 kubectl create namespace portainer

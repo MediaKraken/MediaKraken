@@ -73,3 +73,5 @@ spec:
       nodePort: 30050
   selector:
     io.kompose.service: mkstack-pgadmin-service
+
+# TODO ingress this instead

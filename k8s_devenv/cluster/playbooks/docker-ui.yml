@@ -1,3 +1,11 @@
 ---
 # https://artifacthub.io/packages/helm/joxit/docker-registry-ui
 # The simplest and most complete UI for your private registry
+- name : Setup docker ui on cluster
+  hosts: mkk8scontroldev1
+  tasks:
+    - name: Add repo
+      shell: helm repo add joxit https://helm.joxit.dev
+
+    - name: Install docker ui
+      shell: helm upgrade --install docker-registry-ui joxit/docker-registry-ui

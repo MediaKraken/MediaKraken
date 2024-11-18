@@ -2,7 +2,7 @@ terraform {
   required_providers {
     proxmox = {
       source  = "telmate/proxmox"
-      version = "3.0.1-rc3"
+      version = "3.0.1-rc4"
     }
   }
 }
@@ -25,7 +25,7 @@ resource "proxmox_vm_qemu" "mkk8scontroldev" {
   cores       = 2
   sockets     = 1
   cpu         = "host"
-  memory      = 4096
+  memory      = 8192
   numa        = true
   agent       = 1
   os_type     = "cloud-init"
@@ -87,7 +87,7 @@ resource "proxmox_vm_qemu" "mkk8sworkerdev" {
   cores       = 4
   sockets     = 2
   cpu         = "host"
-  memory      = 16384
+  memory      = 32768
   numa        = true
   agent       = 1
   os_type     = "Linux"

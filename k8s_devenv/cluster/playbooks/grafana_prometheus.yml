@@ -7,4 +7,4 @@
       shell: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 
     - name: Install monitoring
-      shell: helm install mk-kube-prometheus prometheus-community/kube-prometheus-stack
+      shell: helm install monitoring prometheus-community/kube-prometheus-stack

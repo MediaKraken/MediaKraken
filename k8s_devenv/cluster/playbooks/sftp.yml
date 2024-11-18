@@ -1,3 +1,11 @@
 ---
 # https://artifacthub.io/packages/helm/sagikazarmark/sftpgo
 # Fully featured and highly configurable SFTP server with optional FTP/S and WebDAV support.
+- name : Setup sftp on cluster
+  hosts: mkk8scontroldev1
+  tasks:
+    - name: Add repo
+      shell: helm repo add skm https://charts.sagikazarmark.dev
+
+    - name: Install sftp
+      shell: helm install --generate-name --wait skm/sftpgo
