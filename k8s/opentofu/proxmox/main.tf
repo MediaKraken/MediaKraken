@@ -38,7 +38,8 @@ resource "proxmox_vm_qemu" "mkk8scontrol" {
   nameserver  = "192.168.1.1"
   ciuser      = var.vm_user
   cipassword  = var.vm_user_password
-  sshkeys = file("~/.ssh/id_rsa.pub")
+  sshkeys     = file("~/.ssh/id_rsa.pub")
+  tags        = "k8sprod"
 
   disks {
     ide {
@@ -87,7 +88,7 @@ resource "proxmox_vm_qemu" "mkk8sworker" {
   cores       = 8
   sockets     = 2
   cpu         = "host"
-  memory      = 32768
+  memory      = 65536
   numa        = true
   agent       = 1
   os_type     = "Linux"
@@ -100,7 +101,8 @@ resource "proxmox_vm_qemu" "mkk8sworker" {
   nameserver  = "192.168.1.1"
   ciuser      = var.vm_user
   cipassword  = var.vm_user_password
-  sshkeys = file("~/.ssh/id_rsa.pub")
+  sshkeys     = file("~/.ssh/id_rsa.pub")
+  tags        = "k8sprod"
 
   disks {
     ide {

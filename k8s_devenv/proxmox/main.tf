@@ -38,7 +38,8 @@ resource "proxmox_vm_qemu" "mkk8scontroldev" {
   nameserver  = "192.168.1.1"
   ciuser      = var.vm_user
   cipassword  = var.vm_user_password
-  sshkeys = file("~/.ssh/id_rsa.pub")
+  sshkeys     = file("~/.ssh/id_rsa.pub")
+  tags        = "k8sdev"
 
   disks {
     ide {
@@ -100,7 +101,8 @@ resource "proxmox_vm_qemu" "mkk8sworkerdev" {
   nameserver  = "192.168.1.1"
   ciuser      = var.vm_user
   cipassword  = var.vm_user_password
-  sshkeys = file("~/.ssh/id_rsa.pub")
+  sshkeys     = file("~/.ssh/id_rsa.pub")
+  tags        = "k8sdev"
 
   disks {
     ide {

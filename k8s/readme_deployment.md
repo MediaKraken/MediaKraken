@@ -109,10 +109,6 @@ helm repo add kubeshark https://helm.kubeshark.co
 
 
 # stuff to add to MK
-https://artifacthub.io/packages/helm/fmjstudios/ntfy
-ntfy lets you send push notifications to your phone or desktop via scripts from any computer, using simple HTTP PUT or POST requests
-https://www.youtube.com/watch?v=poDIT2ruQ9M
-
 https://operatorhub.io/operator/elastic-cloud-eck
 Elastic Cloud on Kubernetes (ECK) is the official operator by Elastic for automating the deployment, provisioning, management, and orchestration of Elasticsearch, Kibana, APM Server, Beats, Enterprise Search, Elastic Agent, Elastic Maps Server, and Logstash on Kubernetes.
 
@@ -120,17 +116,7 @@ https://artifacthub.io/packages/helm/bitnami/nats
 NATS is an open source, lightweight and high-performance messaging system. It is ideal for distributed systems and supports modern cloud architectures and pub-sub, request-reply and queuing models.
 
 # stuff to add to DEV stack CI/CD/etc
-https://artifacthub.io/packages/helm/sonarqube/sonarqube-dce
-SonarQube is a self-managed, automatic code review tool that systematically helps you deliver clean code. 
 
-https://artifacthub.io/packages/helm/bitnami/sonarqube
-SonarQube(TM) is an open source quality management platform that analyzes and measures code's technical quality. It enables developers to detect code issues, vulnerabilities, and bugs in early stages.
-
-https://artifacthub.io/packages/helm/curie-df-helm-charts/nexus
-Sonatype Nexus is an open source repository manager
-
-https://artifacthub.io/packages/helm/jfrog/artifactory-oss
-JFrog Artifactory OSS is a free Artifactory edition to host Generic repositories.
 
 # misc stuff to play with
 https://artifacthub.io/packages/helm/helm-hass/home-assistant
