@@ -1,6 +1,6 @@
 ---
 - name : Setup operator on cluster
-  hosts: mkk8scontroldev1
+  hosts: mkcontroldev1
   tasks:
     - name: Install curl (if not already installed)
       package:

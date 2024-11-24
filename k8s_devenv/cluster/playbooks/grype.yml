@@ -3,7 +3,7 @@
 # A vulnerability scanner for container images and filesystems.
 # TODO this is an old image.....do official release
 - name : Setup grype
-  hosts: mkk8scontroldev1
+  hosts: mkcontroldev1
   tasks:
     - name: Add grype
       shell: kubectl apply -f https://github.com/robertjr14/tektoncd-catalog/raw/main/task/grype/0.1/grype.yaml

@@ -1,7 +1,7 @@
 ---
 # https://stackgres.io/doc/latest/install/helm/
 - name : Setup stackgres on cluster
-  hosts: mkk8scontrol1
+  hosts: mkcontrol1
   tasks:
     - name: Add repo
       shell: helm repo add stackgres-charts https://stackgres.io/downloads/stackgres-k8s/stackgres/helm/

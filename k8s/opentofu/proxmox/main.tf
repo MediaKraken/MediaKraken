@@ -14,7 +14,7 @@ provider "proxmox" {
   pm_tls_insecure     = true
 }
 
-resource "proxmox_vm_qemu" "mkk8scontrol" {
+resource "proxmox_vm_qemu" "mkcontrol" {
   vmid        = "300${count.index}"
   name        = "mkcontrol${count.index + 1}"
   desc        = "k8s Control Plane"
@@ -77,7 +77,7 @@ resource "proxmox_vm_qemu" "mkk8scontrol" {
   }
 }
 
-resource "proxmox_vm_qemu" "mkk8sworker" {
+resource "proxmox_vm_qemu" "mkworker" {
   vmid        = "400${count.index}"
   name        = "mkworker${count.index + 1}"
   desc        = "k8s Worker Node"

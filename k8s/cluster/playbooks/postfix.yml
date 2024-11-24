@@ -2,7 +2,7 @@
 # https://artifacthub.io/packages/helm/docker-postfix/mail
 # An outgoing SMTP mail relay for your applications in Kubernetes cluster
 - name : Setup postfix on cluster
-  hosts: mkk8scontrol1
+  hosts: mkcontrol1
   tasks:
     - name: Setup helm repo for postfix
       shell: helm repo add bokysan https://bokysan.github.io/docker-postfix/

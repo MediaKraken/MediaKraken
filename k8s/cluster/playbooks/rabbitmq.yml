@@ -1,6 +1,6 @@
 ---
 - name : Setup k8s rabbitmq operator
-  hosts: mkk8scontrol1
+  hosts: mkcontrol1
   tasks:
     - name: Install rabbitmq operator
       shell: kubectl apply -f https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml

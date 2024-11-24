@@ -2,7 +2,7 @@
 # https://artifacthub.io/packages/helm/securecodebox/trivy
 # Scanner for vulnerabilities in container images, file systems, and Git repositories, as well as for configuration issues.
 - name : Setup trivy
-  hosts: mkk8scontroldev1
+  hosts: mkcontroldev1
   tasks:
     - name: Install the Operator & CRD's into the `securecodebox-system` namespace
       shell: helm --namespace securecodebox-system upgrade --install --create-namespace securecodebox-operator oci://ghcr.io/securecodebox/helm/operator

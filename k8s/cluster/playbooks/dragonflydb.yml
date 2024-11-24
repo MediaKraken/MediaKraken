@@ -1,7 +1,7 @@
 ---
 # https://github.com/dragonflydb/dragonfly-operator
 - name : Setup operator on cluster for dragonflydb
-  hosts: mkk8scontrol1
+  hosts: mkcontrol1
   tasks:
     - name: Setup operator
       shell: kubectl apply -f https://raw.githubusercontent.com/dragonflydb/dragonfly-operator/main/manifests/dragonfly-operator.yaml

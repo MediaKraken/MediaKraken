@@ -3,7 +3,7 @@ resource "terraform_data" "kubespray" {
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory/mkcluster/inventory.ini cluster.yml --ssh-common-args='-o StrictHostKeyChecking=accept-new'"
     working_dir = "../../../kubespray"
-    # ansible-playbook -b -v -u ${var.vm_user} -i inventory/mkcluster/inventory.ini scale.yml --ssh-common-args='-o StrictHostKeyChecking=accept-new' --flush-cache -l mkk8sworker4
+    # ansible-playbook -b -v -u ${var.vm_user} -i inventory/mkcluster/inventory.ini scale.yml --ssh-common-args='-o StrictHostKeyChecking=accept-new' --flush-cache -l mkworker4
   }
 }
 
@@ -67,15 +67,15 @@ resource "terraform_data" "dragonfly" {
   ]
 }
 
-# resource "terraform_data" "k8sdashboard" {
-#   # setup k8s dashboard
-#   provisioner "local-exec" {
-#     command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkcluster/inventory.ini playbooks/k8sdashboard.yml"
-#   }
-#   depends_on = [
-#     terraform_data.dragonfly
-#   ]
-# }
+resource "terraform_data" "k8sdashboard" {
+  # setup k8s dashboard
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkcluster/inventory.ini playbooks/k8sdashboard.yml"
+  }
+  depends_on = [
+    terraform_data.dragonfly
+  ]
+}
 
 resource "terraform_data" "rabbitmq" {
   # setup rabbitmq
@@ -83,7 +83,7 @@ resource "terraform_data" "rabbitmq" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -i kubespray/mkcluster/inventory.ini playbooks/rabbitmq.yml"
   }
   depends_on = [
-    terraform_data.dragonfly
+    terraform_data.k8sdashboard
   ]
 }
 
