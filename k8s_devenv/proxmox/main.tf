@@ -22,8 +22,8 @@ resource "proxmox_vm_qemu" "mkk8scontroldev" {
   target_node = var.proxmox_host
   clone       = "debian-12-cloudinit-template-mk"
   hotplug     = "network,disk"
-  cores       = 2
-  sockets     = 1
+  cores       = 1
+  sockets     = 2
   cpu         = "host"
   memory      = 8192
   numa        = true

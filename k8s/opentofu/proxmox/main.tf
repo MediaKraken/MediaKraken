@@ -22,8 +22,8 @@ resource "proxmox_vm_qemu" "mkk8scontrol" {
   target_node = var.proxmox_host
   clone       = "debian-12-cloudinit-template-mk"
   hotplug     = "network,disk"
-  cores       = 4
-  sockets     = 1
+  cores       = 2
+  sockets     = 2
   cpu         = "host"
   memory      = 8192
   numa        = true
@@ -39,7 +39,7 @@ resource "proxmox_vm_qemu" "mkk8scontrol" {
   ciuser      = var.vm_user
   cipassword  = var.vm_user_password
   sshkeys     = file("~/.ssh/id_rsa.pub")
-  tags        = "k8sprod"
+  tags        = "k8sdev"
 
   disks {
     ide {
@@ -102,7 +102,7 @@ resource "proxmox_vm_qemu" "mkk8sworker" {
   ciuser      = var.vm_user
   cipassword  = var.vm_user_password
   sshkeys     = file("~/.ssh/id_rsa.pub")
-  tags        = "k8sprod"
+  tags        = "k8sdev"
 
   disks {
     ide {
