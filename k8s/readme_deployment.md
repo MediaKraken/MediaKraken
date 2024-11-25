@@ -58,9 +58,7 @@ Run the following on your deployment node
 ```pip3 install -r requirements.txt --break-system-packages```
 ```change clustername in group_vars/k8s_cluster/k8s-cluster.yml file to mkcluster.local```
 
-```cp -R ../MediaKraken/k8s/cluster/kubespray/mkcluster inventory/.```
-
-```cp -R ../MediaKraken/k8s_devenv/cluster/kubespray/mkclusterdev inventory/.```
+```run kubespray_update.py in docker_build```
 
 ```ansible-galaxy collection install kubernetes.core```
 ```ansible-galaxy collection install community.kubernetes```
