@@ -7,4 +7,7 @@
       shell: helm repo add bitnami https://charts.bitnami.com/bitnami
 
     - name: Install jenkins
-      shell: helm install my-jenkins bitnami/jenkins --version 13.4.19
+      shell: helm install my-jenkins bitnami/jenkins --version 13.4.19 \
+        --set global.defaultStorageClass=nfs-csi \
+        --set jenkinsUser=admin \
+        --set jenkinsPassword=metaman
