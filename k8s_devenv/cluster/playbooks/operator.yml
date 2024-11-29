@@ -8,5 +8,4 @@
         state: present
 
     - name: Setup operator
-      shell: curl -sL https://github.com/operator-framework/operator-controller/releases/download/v0.18.0/install.sh | bash -s v0.18.0
-  
+      shell: curl -L -s https://github.com/operator-framework/operator-controller/releases/download/v1.0.0/install.sh | bash -s

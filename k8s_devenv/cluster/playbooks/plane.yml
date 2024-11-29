@@ -8,4 +8,5 @@
       shell: helm repo add rock8s https://charts.rock8s.com
 
     - name: Install plane
-      shell: helm install mk-plane rock8s/plane --version 1.0.22
+      shell: helm install mk-plane rock8s/plane --version 1.0.22 \
+        --set persistence.storageClass=nfs-csi

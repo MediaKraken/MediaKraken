@@ -15,3 +15,11 @@
 
     - name: Setup access user for dashboard
       shell: kubectl apply -f ~/dashboard-adminuser.yml
+
+    - name: copying file
+      copy:
+        src: ../config/dashboard_ingress.yml
+        dest: ~/dashboard_ingress.yml
+
+    - name: Setup ingress for dashboard
+      shell: kubectl apply -f ~/dashboard_ingress.yml

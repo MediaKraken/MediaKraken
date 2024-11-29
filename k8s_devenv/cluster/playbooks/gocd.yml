@@ -7,4 +7,5 @@
       shell: helm repo add gocd https://gocd.github.io/helm-chart
 
     - name: Install gocd
-      shell: helm install gocd_app gocd/gocd
+      shell: helm install gocd_app gocd/gocd \
+        --set server.persistence.storageClass=nfs-csi

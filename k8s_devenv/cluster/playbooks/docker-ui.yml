@@ -9,3 +9,5 @@
 
     - name: Install docker ui
       shell: helm upgrade --install docker-registry-ui joxit/docker-registry-ui
+
+# TODO this can host the registry too?

@@ -1,3 +1,12 @@
 ---
 # https://artifacthub.io/packages/helm/curie-df-helm-charts/nexus
 # Sonatype Nexus is an open source repository manager
+- name : Setup nexus on cluster
+  hosts: mkcontroldev1
+  tasks:
+    - name: Add repo
+      shell: helm repo add curiedfcharts https://curie-data-factory.github.io/helm-charts
+
+    - name: Install nexus
+      shell: helm upgrade --install --namespace default --values ./my-values.yaml my-release curiedfcharts/nexus \
+        --set persistence.storageClass=nfs-csi

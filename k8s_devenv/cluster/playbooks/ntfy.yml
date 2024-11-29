@@ -2,3 +2,12 @@
 # https://artifacthub.io/packages/helm/fmjstudios/ntfy
 # ntfy lets you send push notifications to your phone or desktop via scripts from any computer, using simple HTTP PUT or POST requests
 # https://www.youtube.com/watch?v=poDIT2ruQ9M
+- name : Setup ntfy on cluster
+  hosts: mkcontroldev1
+  tasks:
+    - name: Add repo
+      shell: helm repo add fmjstudios https://fmjstudios.github.io/helm
+
+    - name: Install ntfy
+      shell: helm install ntfy fmjstudios/ntfy --version 2.11.0 \
+        --set ntfy.data.pvc.storageClass=nfs-csi
