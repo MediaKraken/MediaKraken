@@ -5,23 +5,13 @@ resource "terraform_data" "dragonfly" {
   }
 }
 
-resource "terraform_data" "k8sdashboard" {
-  # setup k8s dashboard
-  provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/k8sdashboard.yml"
-  }
-  depends_on = [
-    terraform_data.dragonfly
-  ]
-}
-
 resource "terraform_data" "mailhog" {
   # setup mailhog
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/mailhog.yml"
   }
   depends_on = [
-    terraform_data.k8sdashboard
+    terraform_data.dragonfly
   ]
 }
 

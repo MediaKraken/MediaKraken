@@ -36,13 +36,22 @@ resource "terraform_data" "operator" {
   ]
 }
 
+resource "terraform_data" "nginxingress" {
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -e 'ansible_sudo_pass=${var.vm_user_password}' -i inventory.ini playbooks/nginx_ingress.yml"
+  }
+  depends_on = [
+    terraform_data.operator
+  ]
+}
+
 resource "terraform_data" "nfs" {
   # setup the NFS layer
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -e 'ansible_sudo_pass=${var.vm_user_password}' -i inventory.ini playbooks/nfs.yml"
   }
   depends_on = [
-    terraform_data.operator
+    terraform_data.nginxingress
   ]
 }
 

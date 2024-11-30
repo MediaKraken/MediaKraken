@@ -37,13 +37,22 @@ resource "terraform_data" "operator" {
   ]
 }
 
+resource "terraform_data" "nginxingress" {
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -e 'ansible_sudo_pass=${var.vm_user_password}' -i inventory.ini playbooks/nginx_ingress.yml"
+  }
+  depends_on = [
+    terraform_data.operator
+  ]
+}
+
 resource "terraform_data" "nfs" {
   # setup the NFS layer
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -e 'ansible_sudo_pass=${var.vm_user_password}' -i inventory.ini playbooks/nfs.yml"
   }
   depends_on = [
-    terraform_data.operator
+    terraform_data.nginxingress
   ]
 }
 
@@ -57,42 +66,12 @@ resource "terraform_data" "monitoring" {
   ]
 }
 
-resource "terraform_data" "dragonfly" {
-  # setup dragonfly operator and cluster
-  provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/dragonflydb.yml"
-  }
-  depends_on = [
-    terraform_data.monitoring
-  ]
-}
-
 resource "terraform_data" "k8sdashboard" {
   # setup k8s dashboard
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/k8sdashboard.yml"
   }
   depends_on = [
-    terraform_data.dragonfly
+    terraform_data.monitoring
   ]
 }
-
-resource "terraform_data" "rabbitmq" {
-  # setup rabbitmq
-  provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/rabbitmq.yml"
-  }
-  depends_on = [
-    terraform_data.k8sdashboard
-  ]
-}
-
-# resource "terraform_data" "mediakraken" {
-#   # setup mediakraken
-#   provisioner "local-exec" {
-#     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/mediakraken.yml"
-#   }
-#   depends_on = [
-#     terraform_data.rabbitmq
-#   ]
-# }
