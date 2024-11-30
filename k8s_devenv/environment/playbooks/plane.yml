@@ -1,0 +1,25 @@
+---
+# https://helm.plane.so/
+# jira type tracking
+- name : Setup plane on cluster
+  hosts: mkcontroldev1
+  tasks:
+    - name: Add repo
+      shell: helm repo add makeplane https://helm.plane.so/
+
+    - name: Install plane
+      shell: helm upgrade --install plane-app makeplane/plane-ce \
+        --create-namespace \
+        --namespace plane-ce \
+        --set planeVersion=stable \
+        --set ingress.appHost="plane.example.com" \
+        --set ingress.minioHost="plane-minio.example.com" \
+        --set ingress.rabbitmqHost="plane-mq.example.com" \
+        --set ingress.ingressClass=nginx \
+        --set postgres.storageClass=nfs-csi \
+        --set redis.storageClass=nfs-csi \
+        --set minio.storageClass=nfs-csi \
+        --set rabbitmq.storageClass=nfs-csi \
+        --timeout 20m \
+        --wait \
+        --wait-for-jobs

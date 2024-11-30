@@ -8,4 +8,18 @@
     - name: Install dashboard
       shell: helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
 
-# TODO do the ingress setup
+    - name: copying file
+      copy:
+        src: ../config/dashboard-adminuser.yml
+        dest: ~/dashboard-adminuser.yml
+
+    - name: Setup access user for dashboard
+      shell: kubectl apply -f ~/dashboard-adminuser.yml
+
+    - name: copying file
+      copy:
+        src: ../config/dashboard_ingress.yml
+        dest: ~/dashboard_ingress.yml
+
+    - name: Setup ingress for dashboard
+      shell: kubectl apply -f ~/dashboard_ingress.yml

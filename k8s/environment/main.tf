@@ -1,8 +1,9 @@
 resource "terraform_data" "kubespray" {
   # create the cluster via kubespray
   provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory/mkclusterdev/inventory.ini cluster.yml --ssh-common-args='-o StrictHostKeyChecking=accept-new'"
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory/mkcluster/inventory.ini cluster.yml --ssh-common-args='-o StrictHostKeyChecking=accept-new'"
     working_dir = "../../../kubespray"
+    # ansible-playbook -b -v -u ${var.vm_user} -i inventory/mkcluster/inventory.ini scale.yml --ssh-common-args='-o StrictHostKeyChecking=accept-new' --flush-cache -l mkworker4
   }
 }
 
@@ -46,12 +47,52 @@ resource "terraform_data" "nfs" {
   ]
 }
 
+resource "terraform_data" "monitoring" {
+  # setup monitoring
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/grafana_prometheus.yml"
+  }
+  depends_on = [
+    terraform_data.nfs
+  ]
+}
+
+resource "terraform_data" "dragonfly" {
+  # setup dragonfly operator and cluster
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/dragonflydb.yml"
+  }
+  depends_on = [
+    terraform_data.monitoring
+  ]
+}
+
 resource "terraform_data" "k8sdashboard" {
   # setup k8s dashboard
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/k8sdashboard.yml"
   }
   depends_on = [
-    terraform_data.nfs
+    terraform_data.dragonfly
   ]
 }
+
+resource "terraform_data" "rabbitmq" {
+  # setup rabbitmq
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/rabbitmq.yml"
+  }
+  depends_on = [
+    terraform_data.k8sdashboard
+  ]
+}
+
+# resource "terraform_data" "mediakraken" {
+#   # setup mediakraken
+#   provisioner "local-exec" {
+#     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/mediakraken.yml"
+#   }
+#   depends_on = [
+#     terraform_data.rabbitmq
+#   ]
+# }
