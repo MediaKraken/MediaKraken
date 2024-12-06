@@ -1,0 +1,14 @@
+# https://metallb.universe.tf/installation/
+- name : Setup metallb on cluster
+  hosts: mkcontroldev1
+  tasks:
+    - name: Install metallb
+      shell: kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
+
+    - name: copying file
+      copy:
+        src: ../config/metallb.yml
+        dest: ~/metallb.yml
+
+    - name: Setup metallb ip/lb
+      shell: kubectl apply -f ~/metallb.yml

@@ -1,25 +1,41 @@
+# https://www.youtube.com/watch?v=SUk_Nm5BiPw
+# https://github.com/devops-serge/install-kubernetes-dashboard
 ---
 - name : Setup k8s dashboard on cluster
   hosts: mkcontroldev1
   tasks:
     - name: Setup helm repo for dashboard
       shell: helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
-
-    - name: Install dashboard
-      shell: helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
+      # helm show values kubernetes-dashboard/kubernetes-dashboard --version 7.10 > k8sdashboard_values.yml
 
     - name: copying file
       copy:
-        src: ../config/dashboard-adminuser.yml
-        dest: ~/dashboard-adminuser.yml
+        src: ../config/k8sdashboard_values.yml
+        dest: ~/k8sdashboard_values.yml
+  
+    - name: Install dashboard
+      shell: helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
+        --create-namespace --namespace kubernetes-dashboard \
+        --values ~/k8sdashboard_values.yml \
+        --version 7.10.0
+
+    - name: copying file
+      copy:
+        src: ../config/dashboard_adminuser.yml
+        dest: ~/dashboard_adminuser.yml
 
     - name: Setup access user for dashboard
-      shell: kubectl apply -f ~/dashboard-adminuser.yml
+      shell: kubectl apply -f ~/dashboard_adminuser.yml
 
-    - name: copying file
-      copy:
-        src: ../config/dashboard_ingress.yml
-        dest: ~/dashboard_ingress.yml
+    # - name: copying file
+    #   copy:
+    #     src: ../config/dashboard_ingress.yml
+    #     dest: ~/dashboard_ingress.yml
 
-    - name: Setup ingress for dashboard
-      shell: kubectl apply -f ~/dashboard_ingress.yml
+    # - name: Setup ingress for dashboard
+    #   shell: kubectl apply -f ~/dashboard_ingress.yml
+
+
+
+# kubectl -n kubernetes-dashboard get svc
+# kubectl -n kubernetes-dashboard port-forward service/kubernetes-dashboard-kong-proxy 8000:443

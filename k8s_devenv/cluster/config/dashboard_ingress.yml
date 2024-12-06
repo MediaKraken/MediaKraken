@@ -13,13 +13,13 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: dashboard.local
+  - host: mkdev.beaverbay.local
     http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: kubernetes-dashboard
+            name: kubernetes-dashboard-kong-proxy
             port:
               number: 443

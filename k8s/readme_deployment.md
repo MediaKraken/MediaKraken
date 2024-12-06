@@ -79,8 +79,11 @@ Run the following on your deployment node
 kubectl create namespace stackgres
 helm install --namespace stackgres stackgres-operator --set-string adminui.service.type=LoadBalancer https://stackgres.io/downloads/stackgres-k8s/stackgres/latest/helm/stackgres-operator.tgz
 
+## grab the port number
 kubectl -n stackgres get svc --field-selector metadata.name=stackgres-restapi
+## grab the password
 kubectl get secret -n stackgres stackgres-restapi-admin --template '{{ printf "password = %s\n" (.data.clearPassword | base64decode) }}'
+## using the port from above
 https://192.168.1.70:30569/admin/index.html
 
 extentions:
@@ -97,10 +100,14 @@ postgres
 
 
 # stuff below to do
-# TODO had to split up the rbac user for dashboard by hand........
 kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
+kubectl get secret admin-user-token -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
+# then from mkcode do the following commands
 ssh -L 8443:127.0.0.1:8443 metaman@192.168.1.50
 http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard-kong-proxy:443/proxy/
+
+
+
 
 helm repo add kubeshark https://helm.kubeshark.co
 ‍helm install kubeshark kubeshark/kubeshark

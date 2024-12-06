@@ -10,16 +10,16 @@
 
     - name: copying file
       copy:
-        src: ../config/dashboard-adminuser.yml
-        dest: ~/dashboard-adminuser.yml
+        src: ../config/dashboard_adminuser.yml
+        dest: ~/dashboard_adminuser.yml
 
     - name: Setup access user for dashboard
-      shell: kubectl apply -f ~/dashboard-adminuser.yml
+      shell: kubectl apply -f ~/dashboard_adminuser.yml
 
-    - name: copying file
-      copy:
-        src: ../config/dashboard_ingress.yml
-        dest: ~/dashboard_ingress.yml
+    # - name: copying file
+    #   copy:
+    #     src: ../config/dashboard_ingress.yml
+    #     dest: ~/dashboard_ingress.yml
 
-    - name: Setup ingress for dashboard
-      shell: kubectl apply -f ~/dashboard_ingress.yml
+    # - name: Setup ingress for dashboard
+    #   shell: kubectl apply -f ~/dashboard_ingress.yml

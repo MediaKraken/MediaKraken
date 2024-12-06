@@ -1,5 +1,9 @@
 import os
 
+# remove old files
+os.system("rm -rf ../../kubespray/inventory/mkcluster")
+os.system("rm -rf ../../kubespray/inventory/mkclusterdev")
+
 # copy kubespray inventory to mk dirs
 os.system("cp -rf ../../kubespray/inventory/sample ../../kubespray/inventory/mkcluster")
 os.system("cp -rf ../../kubespray/inventory/sample ../../kubespray/inventory/mkclusterdev")
