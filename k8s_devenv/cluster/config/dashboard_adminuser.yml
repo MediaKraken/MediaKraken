@@ -20,9 +20,10 @@ subjects:
 ---
 apiVersion: v1
 kind: Secret
-type: kubernetes.io/service-account-token
 metadata:
-  name: admin-user-token
+  name: admin-user
   namespace: kubernetes-dashboard
   annotations:
-    kubernetes.io/service-account.name: "admin-user"
+    kubernetes.io/service-account.name: "admin-user"   
+type: kubernetes.io/service-account-token
+# kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
