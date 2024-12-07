@@ -99,14 +99,14 @@ postgres
 
 
 
-# stuff below to do
+<!-- # stuff below to do
 kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
 kubectl get secret admin-user-token -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
 # then from mkcode do the following commands
 ssh -L 8443:127.0.0.1:8443 metaman@192.168.1.50
-http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard-kong-proxy:443/proxy/
+http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard-kong-proxy:443/proxy/ -->
 
-
+# kubectl get service ingress-nginx-controller --namespace=ingress-nginx
 
 
 helm repo add kubeshark https://helm.kubeshark.co

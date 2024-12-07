@@ -18,8 +18,8 @@
 
     # - name: copying file
     #   copy:
-    #     src: ../config/dashboard_ingress.yml
-    #     dest: ~/dashboard_ingress.yml
+    #     src: ../config/k8sdashboard_ingress.yml
+    #     dest: ~/k8sdashboard_ingress.yml
 
     # - name: Setup ingress for dashboard
-    #   shell: kubectl apply -f ~/dashboard_ingress.yml
+    #   shell: kubectl apply -f ~/k8sdashboard_ingress.yml

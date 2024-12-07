@@ -26,16 +26,3 @@
 
     - name: Setup access user for dashboard
       shell: kubectl apply -f ~/dashboard_adminuser.yml
-
-    # - name: copying file
-    #   copy:
-    #     src: ../config/dashboard_ingress.yml
-    #     dest: ~/dashboard_ingress.yml
-
-    # - name: Setup ingress for dashboard
-    #   shell: kubectl apply -f ~/dashboard_ingress.yml
-
-
-
-# kubectl -n kubernetes-dashboard get svc
-# kubectl -n kubernetes-dashboard port-forward service/kubernetes-dashboard-kong-proxy 8000:443

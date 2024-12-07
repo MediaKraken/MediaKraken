@@ -9,3 +9,5 @@
     - name: Install monitoring
       shell: helm install monitoring prometheus-community/kube-prometheus-stack \
         --set global.storageClass=nfs-csi
+
+# pasword = prom-operator

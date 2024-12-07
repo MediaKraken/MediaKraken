@@ -64,12 +64,22 @@ resource "terraform_data" "nfs" {
   ]
 }
 
+resource "terraform_data" "monitoring" {
+  # setup monitoring
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/grafana_prometheus.yml"
+  }
+  depends_on = [
+    terraform_data.nfs
+  ]
+}
+
 resource "terraform_data" "k8sdashboard" {
   # setup k8s dashboard
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/k8sdashboard.yml"
   }
   depends_on = [
-    terraform_data.nfs
+    terraform_data.monitoring
   ]
 }
