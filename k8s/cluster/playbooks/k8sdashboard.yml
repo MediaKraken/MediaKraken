@@ -4,9 +4,18 @@
   tasks:
     - name: Setup helm repo for dashboard
       shell: helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+      # helm show values kubernetes-dashboard/kubernetes-dashboard --version 7.10 > k8sdashboard_values.yml
 
+    - name: copying file
+      copy:
+        src: ../config/k8sdashboard_values.yml
+        dest: ~/k8sdashboard_values.yml
+  
     - name: Install dashboard
-      shell: helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
+      shell: helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
+        --create-namespace --namespace kubernetes-dashboard \
+        --values ~/k8sdashboard_values.yml \
+        --version 7.10.0
 
     - name: copying file
       copy:
@@ -15,11 +24,3 @@
 
     - name: Setup access user for dashboard
       shell: kubectl apply -f ~/dashboard_adminuser.yml
-
-    # - name: copying file
-    #   copy:
-    #     src: ../config/k8sdashboard_ingress.yml
-    #     dest: ~/k8sdashboard_ingress.yml
-
-    # - name: Setup ingress for dashboard
-    #   shell: kubectl apply -f ~/k8sdashboard_ingress.yml

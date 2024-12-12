@@ -8,4 +8,10 @@
       shell: helm repo add jfrog https://charts.jfrog.io
 
     - name: Install jfrog
-      shell: helm upgrade --install artifactory-oss --set artifactory.postgresql.postgresqlPassword=metaman jfrog/artifactory-oss --namespace artifactory-oss --create-namespace
+      shell: helm upgrade --install artifactory-oss \
+        --set artifactory.postgresql.postgresqlPassword=metaman jfrog/artifactory-oss \
+        --namespace artifactory-oss --create-namespace \
+        --set artifactory.nginx.enabled=false \
+        --set artifactory.ingress.enabled=true \
+        --set artifactory.ingress.hosts[0]="mkdevjfrog.beaverbay.local" \
+        --set artifactory.persistence.storageClassName=nfs-csi

@@ -1,89 +1,33 @@
-resource "terraform_data" "kubespray" {
-  # create the cluster via kubespray
-  provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory/mkcluster/inventory.ini cluster.yml --ssh-common-args='-o StrictHostKeyChecking=accept-new'"
-    working_dir = "../../../kubespray"
-    # ansible-playbook -b -v -u ${var.vm_user} -i inventory/mkcluster/inventory.ini scale.yml --ssh-common-args='-o StrictHostKeyChecking=accept-new' --flush-cache -l mkworker4
-  }
-}
-
-resource "terraform_data" "kubeconfig" {
-  # setup the kube config
-  provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -e 'ansible_sudo_pass=${var.vm_user_password}' -i inventory.ini playbooks/kube.yml"
-  }
-  depends_on = [
-    terraform_data.kubespray
-  ]
-}
-
-resource "terraform_data" "helm" {
-  # setup helm
-  provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/helm.yml"
-  }
-  depends_on = [
-    terraform_data.kubeconfig
-  ]
-}
-
-resource "terraform_data" "operator" {
-  # setup operator for cluster
-  provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/operator.yml"
-  }
-  depends_on = [
-    terraform_data.helm
-  ]
-}
-
-resource "terraform_data" "nfs" {
-  # setup the NFS layer
-  provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -e 'ansible_sudo_pass=${var.vm_user_password}' -i inventory.ini playbooks/nfs.yml"
-  }
-  depends_on = [
-    terraform_data.operator
-  ]
-}
-
-resource "terraform_data" "monitoring" {
-  # setup monitoring
-  provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/grafana_prometheus.yml"
-  }
-  depends_on = [
-    terraform_data.nfs
-  ]
-}
-
 resource "terraform_data" "dragonfly" {
-  # setup dragonfly operator and cluster
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/dragonflydb.yml"
   }
-  depends_on = [
-    terraform_data.monitoring
-  ]
 }
 
-resource "terraform_data" "k8sdashboard" {
-  # setup k8s dashboard
+resource "terraform_data" "rabbitmq" {
   provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/k8sdashboard.yml"
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/rabbitmq.yml"
   }
   depends_on = [
     terraform_data.dragonfly
   ]
 }
 
-resource "terraform_data" "rabbitmq" {
-  # setup rabbitmq
+resource "terraform_data" "postfix" {
   provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/rabbitmq.yml"
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/postfix.yml"
   }
   depends_on = [
-    terraform_data.k8sdashboard
+    terraform_data.rabbitmq
+  ]
+}
+
+resource "terraform_data" "wireguard" {
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/wireguard.yml"
+  }
+  depends_on = [
+    terraform_data.postfix
   ]
 }
 
@@ -93,6 +37,6 @@ resource "terraform_data" "rabbitmq" {
 #     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/mediakraken.yml"
 #   }
 #   depends_on = [
-#     terraform_data.rabbitmq
+#     terraform_data.wireguard
 #   ]
 # }

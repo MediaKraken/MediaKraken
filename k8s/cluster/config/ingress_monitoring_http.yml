@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: http-ingress-local
+  name: monitoring-http-ingress-local
   namespace: monitoring
   annotations:
     # restrict to private network scopes
@@ -20,6 +20,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: mkstack-prometheus-grafana
+            name: monitoring-grafana
             port:
               number: 80

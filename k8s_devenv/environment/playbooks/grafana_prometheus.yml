@@ -8,6 +8,7 @@
 
     - name: Install monitoring
       shell: helm install monitoring prometheus-community/kube-prometheus-stack \
+        --create-namespace --namespace monitoring \
         --set global.storageClass=nfs-csi
 
 # kubectl get secret monitoring-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
