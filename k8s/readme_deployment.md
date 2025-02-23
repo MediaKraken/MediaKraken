@@ -130,9 +130,6 @@ This chart bootstraps a deployment on a cluster using the package manager.
 https://artifacthub.io/packages/helm/bitnami/vault
 Vault is a tool for securely managing and accessing secrets using a unified interface. Features secure storage, dynamic secrets, data encryption and revocation.
 
-https://artifacthub.io/packages/helm/m0nsterrr/jellyfin
-jellyfin helm chart for Kubernetes
-
 https://artifacthub.io/packages/helm/mojo2600/pihole
 Installs pihole in kubernetes
 
@@ -157,9 +154,6 @@ Collect ALL UniFi Controller, Site, Device & Client Data - Export to InfluxDB or
 
 https://artifacthub.io/packages/helm/fmjstudios/vaultwarden
 Unofficial Bitwarden compatible server
-
-https://artifacthub.io/packages/helm/qonstrukt/unifi-controller
-The UniFi Controller helm chart installs a unifi controller software
 
 https://artifacthub.io/packages/helm/crowdsec/crowdsec
 CrowdSec - Real-time & crowdsourced protection against aggressive IPs
