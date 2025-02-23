@@ -8,4 +8,5 @@
       shell: helm repo add k8s-at-home https://k8s-at-home.com/charts/
 
     - name: Install wireguard
-      shell: helm install wireguard k8s-at-home/wireguard
+      shell: helm install wireguard k8s-at-home/wireguard \
+        --create-namespace --namespace wireguard

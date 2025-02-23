@@ -8,4 +8,13 @@
 
     - name: Install gocd
       shell: helm install gocdapp gocd/gocd \
+        --create-namespace --namespace gocd \
         --set server.persistence.storageClass=nfs-csi
+
+    - name: copying file
+      copy:
+        src: ../config/ingress_gocd_http.yml
+        dest: ~/ingress_gocd_http.yml
+
+    - name: Setup cluster of ingress
+      shell: kubectl apply -f ~/ingress_gocd_http.yml

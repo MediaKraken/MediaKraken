@@ -15,3 +15,6 @@ os.system("sed -i -e 's/cluster_name: cluster.local/cluster_name: mkclusterdev.l
 # copy the inventory to mk dirs
 os.system("cp -f ../k8s/cluster/inventory.ini ../../kubespray/inventory/mkcluster/.")
 os.system("cp -f ../k8s_devenv/cluster/inventory.ini ../../kubespray/inventory/mkclusterdev/.")
+
+# install/upgrade requirements
+os.system("pip3 install -r ../../kubespray/requirements.txt --break-system-packages")

@@ -12,14 +12,14 @@ codegen-units = 1
 [dependencies]
 mk_lib_network = { version="0.0.3", registry = "kellnr" }
 
-fltk = { version = "1.4.34", features = ["fltk-bundled"] }
-fltk-theme = "0.7.3"
-reqwest = { version = "0.12.9", default-features = false, features = [
+fltk = { version = "1.5.4", features = ["fltk-bundled"] }
+fltk-theme = "0.7.5"
+reqwest = { version = "0.12.12", default-features = false, features = [
     "json",
     "rustls-tls",
 ] }
-serde = { version = "1.0.214", features = ["derive"] }
-serde_json = "1.0.132"
+serde = { version = "1.0.218", features = ["derive"] }
+serde_json = "1.0.139"
 stdext = "0.3.3"
 
 [dev-dependencies]

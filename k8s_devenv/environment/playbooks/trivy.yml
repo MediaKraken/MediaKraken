@@ -8,4 +8,5 @@
       shell: helm --namespace securecodebox-system upgrade --install --create-namespace securecodebox-operator oci://ghcr.io/securecodebox/helm/operator
 
     - name: Install trivy
-      shell: helm upgrade --install trivy oci://ghcr.io/securecodebox/helm/trivy
+      shell: helm upgrade --install trivy oci://ghcr.io/securecodebox/helm/trivy \
+        --create-namespace --namespace trivy

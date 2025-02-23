@@ -2,7 +2,7 @@ terraform {
   required_providers {
     proxmox = {
       source  = "telmate/proxmox"
-      version = "3.0.1-rc4"
+      version = "3.0.1-rc6"
     }
   }
 }
@@ -24,7 +24,7 @@ resource "proxmox_vm_qemu" "mkcontrol" {
   hotplug     = "network,disk"
   cores       = 4
   sockets     = 2
-  cpu         = "host"
+  cpu_type    = "host"
   memory      = 16384
   numa        = true
   agent       = 1
@@ -60,6 +60,7 @@ resource "proxmox_vm_qemu" "mkcontrol" {
   }
 
   network {
+    id        = 0
     model     = "virtio"
     bridge    = var.nic_name
     firewall  = false
@@ -87,7 +88,7 @@ resource "proxmox_vm_qemu" "mkworker" {
   hotplug     = "network,disk"
   cores       = 8
   sockets     = 2
-  cpu         = "host"
+  cpu_type    = "host"
   memory      = 65536
   numa        = true
   agent       = 1
@@ -123,6 +124,7 @@ resource "proxmox_vm_qemu" "mkworker" {
   }
 
   network {
+    id        = 0
     model     = "virtio"
     bridge    = var.nic_name
     firewall  = false

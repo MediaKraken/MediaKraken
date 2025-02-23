@@ -42,12 +42,11 @@ zfs set sharenfs=off wdblack/sharenfs
 zfs unshare -a
 systemctl restart nfs-kernel-server -->
 
-chown -R nobody:nogroup /wdblack/sharenfs
-chmod -R 777 /wdblack/sharenfs/
+chown -R nobody:nogroup /wdblack/sharenfs && chmod -R 777 /wdblack/sharenfs/
 
-chown -R nobody:nogroup /wdblack/sharenfs8k
-chmod -R 777 /wdblack/sharenfs8k/
+chown -R nobody:nogroup /wdblack/sharenfs8k && chmod -R 777 /wdblack/sharenfs8k/
 
+apt install nfs-kernel-server rpcbind
 nano /etc/exports
 /wdblack/sharenfs 192.168.1.0/24(rw,sync,no_subtree_check,no_root_squash)
 /wdblack/sharenfs8k 192.168.1.0/24(rw,sync,no_subtree_check,no_root_squash)

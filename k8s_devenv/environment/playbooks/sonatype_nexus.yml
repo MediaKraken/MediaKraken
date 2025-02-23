@@ -8,5 +8,6 @@
       shell: helm repo add curiedfcharts https://curie-data-factory.github.io/helm-charts
 
     - name: Install nexus
-      shell: helm upgrade --install --namespace default --values ./my-values.yaml my-release curiedfcharts/nexus \
+      shell: helm upgrade --install --values ./my-values.yaml my-release curiedfcharts/nexus \
+        --create-namespace --namespace nexus \
         --set persistence.storageClass=nfs-csi

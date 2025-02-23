@@ -7,4 +7,7 @@
       shell: helm repo add phntom https://phntom.kix.co.il/charts/
 
     - name: Install docker registry
-      shell: helm install docker-registry-integ phntom/docker-registry
+      shell: helm install docker-registry-integ phntom/docker-registry \
+        --create-namespace --namespace docker-registry \
+        --set persistence.size=25Gi \
+        --set persistence.storageClass=nfs-csi

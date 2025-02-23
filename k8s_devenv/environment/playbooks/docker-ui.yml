@@ -8,6 +8,7 @@
       shell: helm repo add joxit https://helm.joxit.dev
 
     - name: Install docker ui
-      shell: helm upgrade --install docker-registry-ui joxit/docker-registry-ui
-
-# TODO this can host the registry too?
+      shell: helm upgrade --install docker-registry-ui joxit/docker-registry-ui \
+        --create-namespace --namespace docker-registry \
+        --set registry.enabled=false \
+        --set ui.service.type=LoadBalancer

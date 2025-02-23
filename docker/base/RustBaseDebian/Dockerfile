@@ -1,6 +1,6 @@
 # don't use the slim version as it's just a stage one image
 # as too much stuff is missing causing stuff later to not compile
-FROM rust:1.83.0-bookworm
+FROM rust:1.85.0-bookworm
 RUN rustup target add x86_64-unknown-linux-musl
 RUN apt update && apt install libudev-dev wget ca-certificates libc-bin musl-tools clang -y \
   && update-ca-certificates \
@@ -8,9 +8,9 @@ RUN apt update && apt install libudev-dev wget ca-certificates libc-bin musl-too
   && chmod +x /wait
 
 # docker run -d --name redis-stack -p 6379:6379 -p 8001:8001 redis/redis-stack:latest
-RUN wget https://github.com/mozilla/sccache/releases/download/v0.8.1/sccache-v0.8.1-x86_64-unknown-linux-musl.tar.gz \
-    && tar xzf sccache-v0.8.1-x86_64-unknown-linux-musl.tar.gz \
-    && mv sccache-v0.8.1-x86_64-unknown-linux-musl/sccache /usr/local/bin/sccache \
+RUN wget https://github.com/mozilla/sccache/releases/download/v0.9.1/sccache-v0.9.1-x86_64-unknown-linux-musl.tar.gz \
+    && tar xzf sccache-v0.9.1-x86_64-unknown-linux-musl.tar.gz \
+    && mv sccache-v0.9.1-x86_64-unknown-linux-musl/sccache /usr/local/bin/sccache \
     && chmod +x /usr/local/bin/sccache
 
 # for layer cache later in build

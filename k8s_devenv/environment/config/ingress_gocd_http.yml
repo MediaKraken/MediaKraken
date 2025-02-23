@@ -2,8 +2,8 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: default-http-ingress-local
-  namespace: default
+  name: gocd-http-ingress-local
+  namespace: gocd
   annotations:
     # restrict to private network scopes
     # look at externalTrafficPolicy otherwise client ip is obfuscated "nginx.ingress.kubernetes.io/whitelist-source-range": "192.168.1.0/24"
@@ -13,16 +13,6 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: mkdevjenkins.beaverbay.local
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: my-jenkins
-            port:
-              number: 80
   - host: mkdevgocd.beaverbay.local
     http:
       paths:

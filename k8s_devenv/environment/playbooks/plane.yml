@@ -9,8 +9,7 @@
 
     - name: Install plane
       shell: helm upgrade --install plane-app makeplane/plane-ce \
-        --create-namespace \
-        --namespace plane-ce \
+        --create-namespace --namespace plane-ce \
         --set planeVersion=stable \
         --set ingress.appHost="mkdevplane.beaverbay.local" \
         --set ingress.minioHost="mkdevplane-minio.beaverbay.local" \
