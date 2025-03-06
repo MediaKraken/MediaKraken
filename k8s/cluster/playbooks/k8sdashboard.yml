@@ -15,7 +15,7 @@
       shell: helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
         --create-namespace --namespace kubernetes-dashboard \
         --values ~/k8sdashboard_values.yml \
-        --version 7.10.0
+        --version 7.10.4
 
     - name: copying file
       copy:

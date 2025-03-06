@@ -64,51 +64,48 @@ Run the following on your deployment node
 ```ansible-galaxy collection install community.kubernetes```
 ```ansible-galaxy collection install cloud.common```
 
-# if update of kubespray
-```cp -i -R inventory/sample/. ../MediaKraken/k8s/cluster/kubespray/mkcluster/.```
-```and do NOT stop over the inventory.ini```
-```purge the mkcluster in kubespray and recopy```
-
-# follow opentofu/proxmox readme to create control planes and workers
+# follow proxmox readme to create control planes and workers
+tofu init
+tofu plan
+tofu apply
 
 # run tofu from cluster directory to build k8s cluster/operators/etc
+tofu init
+tofu plan
+tofu apply
+some things might fail....wait a bit for parts to spin up and rerun apply
 
+# get/user/keys/etc for k8sdashboard
+ssh metaman@192.168.1.70
+kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
 
-
-####### stackgres exp
-kubectl create namespace stackgres
-helm install --namespace stackgres stackgres-operator --set-string adminui.service.type=LoadBalancer https://stackgres.io/downloads/stackgres-k8s/stackgres/latest/helm/stackgres-operator.tgz
-
-## grab the port number
-kubectl -n stackgres get svc --field-selector metadata.name=stackgres-restapi
-## grab the password
+# configure stackgres database cluster
 kubectl get secret -n stackgres stackgres-restapi-admin --template '{{ printf "password = %s\n" (.data.clearPassword | base64decode) }}'
-## using the port from above
-https://192.168.1.70:30569/admin/index.html
-
-extentions:
+## create db cluster
+https://mkprodstackgres.beaverbay.local
+### production profile
+mkdbinstance, 48GB, 12CPU
+in the pgcluster config (https://mkprodstackgres.beaverbay.local/admin/stackgres/sgpgconfig/postgres-16-generated-from-default-1740084487145/edit)
+shared_preload_libraries=pg_stat_statements,auto_explain,timescaledb
+need to restart
+### setup cluster
+stackgres cluster/custom
+mkdatabase
+3 instances
+version 16 (latest)
+no ssl
+1TB storage, nfs8k class
+monitoring and prometheus option
+#### new cluster extentions
 pgcrypto
 pg_stat_statements
 pg_trgm
-
-custom
-
-kubectl get secrets -n stackgres mkdatabase -o jsonpath='{.data.superuser-password}' | base64 -d
-postgres
-02f0-e787-421b-beb
-
+timescaledb
+vector 0.8.0
+vectorscale 0.3.0 - this only shows up for pg16
 
 
 <!-- # stuff below to do
-kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
-kubectl get secret admin-user-token -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
-# then from mkcode do the following commands
-ssh -L 8443:127.0.0.1:8443 metaman@192.168.1.50
-http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard-kong-proxy:443/proxy/ -->
-
-# kubectl get service ingress-nginx-controller --namespace=ingress-nginx
-
-
 helm repo add kubeshark https://helm.kubeshark.co
 ‍helm install kubeshark kubeshark/kubeshark
 
@@ -116,9 +113,6 @@ helm repo add kubeshark https://helm.kubeshark.co
 # stuff to add to MK
 https://operatorhub.io/operator/elastic-cloud-eck
 Elastic Cloud on Kubernetes (ECK) is the official operator by Elastic for automating the deployment, provisioning, management, and orchestration of Elasticsearch, Kibana, APM Server, Beats, Enterprise Search, Elastic Agent, Elastic Maps Server, and Logstash on Kubernetes.
-
-https://artifacthub.io/packages/helm/bitnami/nats
-NATS is an open source, lightweight and high-performance messaging system. It is ideal for distributed systems and supports modern cloud architectures and pub-sub, request-reply and queuing models.
 
 # stuff to add to DEV stack CI/CD/etc
 
@@ -129,12 +123,6 @@ This chart bootstraps a deployment on a cluster using the package manager.
 
 https://artifacthub.io/packages/helm/bitnami/vault
 Vault is a tool for securely managing and accessing secrets using a unified interface. Features secure storage, dynamic secrets, data encryption and revocation.
-
-https://artifacthub.io/packages/helm/mojo2600/pihole
-Installs pihole in kubernetes
-
-https://artifacthub.io/packages/helm/wyrihaximusnet/pi-hole-exporter
-Pi-Hole Exporter
 
 https://artifacthub.io/packages/helm/cloudhippie/ansible-semaphore
 Modern and open-source alternative to AWX/Tower
@@ -173,17 +161,11 @@ HashiCorp Consul is a tool for discovering and configuring services in your infr
 https://artifacthub.io/packages/helm/si-gitops/nut-exporter
 Installs NUT exporter in Kubernetes
 
+https://github.com/headlamp-k8s/headlamp
 
 
 
 
 on dev
-<!-- kubectl apply -f https://raw.githubusercontent.com/skooner-k8s/skooner/master/kubernetes-skooner.yaml
-kubectl apply -f https://raw.githubusercontent.com/skooner-k8s/skooner/master/kubernetes-skooner-nodeport.yaml
-kubectl get svc --namespace=kube-system
-http://192.168.1.50:31732/
-setup token for skooner
-kubectl create serviceaccount skooner-sa
-kubectl create clusterrolebinding skooner-sa --clusterrole=cluster-admin --serviceaccount=default:skooner-sa
-kubectl create token skooner-sa -->
+
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml

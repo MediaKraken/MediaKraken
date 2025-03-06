@@ -71,7 +71,6 @@ kubectl get storageclass
 https://artifacthub.io/packages/helm/cluster-autoscaler/cluster-autoscaler
 https://artifacthub.io/packages/helm/cadvisor/cadvisor    container monitor
 https://artifacthub.io/packages/helm/utkuozdemir/transmission-exporter
-https://artifacthub.io/packages/helm/geek-cookbook/wireguard
 
 https://artifacthub.io/packages/helm/radar-base/cert-manager-letsencrypt
 https://artifacthub.io/packages/helm/certs/certs

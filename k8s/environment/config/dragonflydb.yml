@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/created-by: dragonfly-operator
   name: mkstack-dragonfly
 spec:
-  replicas: 2
+  replicas: 3
   resources:
     requests:
       cpu: 1000m
