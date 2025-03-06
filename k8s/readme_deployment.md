@@ -80,6 +80,9 @@ ssh metaman@192.168.1.70
 kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
 
 
+
+
+
 // TODO install stackgres
 // TODO install mediakraken
 

@@ -1,6 +1,6 @@
 # https://kubernetes.github.io/ingress-nginx/deploy/
 - name : Setup nginx ingress on cluster
-  hosts: mkcontroldev1
+  hosts: mkcontrol1
   tasks:
     - name: Install nginx ingress
       shell: helm upgrade --install ingress-nginx ingress-nginx \
