@@ -79,6 +79,12 @@ some things might fail....wait a bit for parts to spin up and rerun apply
 ssh metaman@192.168.1.70
 kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
 
+
+// TODO install stackgres
+// TODO install mediakraken
+
+
+
 # configure stackgres database cluster
 kubectl get secret -n stackgres stackgres-restapi-admin --template '{{ printf "password = %s\n" (.data.clearPassword | base64decode) }}'
 ## create db cluster

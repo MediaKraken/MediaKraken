@@ -18,3 +18,7 @@ metadata:
 # spec:
 #   ipAddressPools:
 #   - first-pool
+
+# expand pool
+## kubectl get ipaddresspool -n metallb-system
+## kubectl edit ipaddresspool first-pool -n metallb-system
