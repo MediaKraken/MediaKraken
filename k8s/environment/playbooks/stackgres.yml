@@ -16,6 +16,14 @@
         --set-string grafana.secretPasswordKey=admin-password \
         stackgres-charts/stackgres-operator
 
+    - name: copying file
+      copy:
+        src: ../config/ingress_stackgres_https.yml
+        dest: ~/ingress_stackgres_https.yml
+
+    - name: Setup access user for stackgress ui
+      shell: kubectl apply -f ~/ingress_stackgres_https.yml
+
 # kubectl wait -n stackgres deployment -l group=stackgres.io --for=condition=Available
 
 # helm delete stackgres-operator --namespace stackgres

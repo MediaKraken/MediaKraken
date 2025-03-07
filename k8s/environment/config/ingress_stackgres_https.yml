@@ -13,7 +13,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: mkprodstackgres.beaverbay.local
+  - host: mkstackgres.beaverbay.local
     http:
       paths:
       - path: /

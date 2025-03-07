@@ -31,6 +31,15 @@ resource "terraform_data" "wireguard" {
   ]
 }
 
+resource "terraform_data" "stackgres" {
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/stackgres.yml"
+  }
+  depends_on = [
+    terraform_data.wireguard
+  ]
+}
+
 # resource "terraform_data" "mediakraken" {
 #   # setup mediakraken
 #   provisioner "local-exec" {

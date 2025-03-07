@@ -79,22 +79,19 @@ some things might fail....wait a bit for parts to spin up and rerun apply
 ssh metaman@192.168.1.70
 kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
 
-
-
-
-
-// TODO install stackgres
-// TODO install mediakraken
-
-
+# run tofu from environment directory to build k8s operators/etc and mediakraken itself
+tofu init
+tofu plan
+tofu apply
+some things might fail....wait a bit for parts to spin up and rerun apply
 
 # configure stackgres database cluster
 kubectl get secret -n stackgres stackgres-restapi-admin --template '{{ printf "password = %s\n" (.data.clearPassword | base64decode) }}'
 ## create db cluster
-https://mkprodstackgres.beaverbay.local
+https://mkstackgres.beaverbay.local
 ### production profile
 mkdbinstance, 48GB, 12CPU
-in the pgcluster config (https://mkprodstackgres.beaverbay.local/admin/stackgres/sgpgconfig/postgres-16-generated-from-default-1740084487145/edit)
+in the pgcluster config (https://mkstackgres.beaverbay.local/admin/stackgres/sgpgconfig/postgres-16-generated-from-default-1740084487145/edit)
 shared_preload_libraries=pg_stat_statements,auto_explain,timescaledb
 need to restart
 ### setup cluster

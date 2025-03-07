@@ -23,6 +23,18 @@ spec:
   persistence:
     storageClassName: nfs-csi
     storage: 25Gi
+  override:
+    statefulSet:
+      spec:
+        template:
+          spec:
+            containers:
+              - name: rabbitmq
+            securityContext:
+              fsGroup: 1000
+              runAsGroup: 1000
+              runAsNonRoot: true
+              runAsUser: 1000
 #   affinity:
 #     podAntiAffinity:
 #       requiredDuringSchedulingIgnoredDuringExecution:
