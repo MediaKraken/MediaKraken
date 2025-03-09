@@ -48,9 +48,6 @@ DOCKER_IMAGES = {
     'RustBaseDebian': ('mkbase_rust_debian', 'base'),
 
 
-    # barman postgresql backup server
-    'mkbarman': ('mkbarman', 'core'),
-
     # chat server via mumble
     'mkchatmumble': ('mkchatmumble', 'core'),
 
@@ -61,13 +58,10 @@ DOCKER_IMAGES = {
     'mkcron': ('mkcron', 'core'),
 
     # database via postgresql/citus/pgroonga
-    'mkdatabase_citus_pgroonga': ('mkdatabase', 'core'),
+    #'mkdatabase_citus_pgroonga': ('mkdatabase', 'core'),
 
     # download files/etc trailers/etc from ampq records
     'mkdownload': ('mkdownload', 'core'),
-
-    # filebeat
-    'mkfilebeat': ('mkfilebeat', 'core'),
 
     # thegamesdb bulk data fetch
     'mkgamesdbnetfetchbulk': ('mkgamesdbnetfetchbulk', 'core'),
@@ -114,14 +108,8 @@ DOCKER_IMAGES = {
     # download open library dump of ids in database and insert into downloads - run and exit
     'mkopenlibrarynetfetchbulk': ('mkopenlibrarynetfetchbulk', 'core'),
 
-    # pgbouncer
-    'mkpgbouncer': ('mkpgbouncer', 'core'),
-
     # consume and process ampq records
     'mkrabbitconsume': ('mkrabbitconsume', 'core'),
-
-    # amqp service (rabbitmq)
-    'mkrabbitmq': ('mkrabbitmq', 'core'),
 
     # schedulesdirect update
     'mkschedulesdirectupdate': ('mkschedulesdirectupdate', 'core'),
