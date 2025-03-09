@@ -9,6 +9,6 @@
       shell: helm repo add fmjstudios https://fmjstudios.github.io/helm
 
     - name: Install ntfy
-      shell: helm install ntfy fmjstudios/ntfy --version 2.11.0 \
+      shell: helm install ntfy fmjstudios/ntfy --version 0.2.2 \
         --create-namespace --namespace ntfy \
         --set ntfy.data.pvc.storageClass=nfs-csi

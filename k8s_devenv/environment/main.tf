@@ -45,22 +45,12 @@ resource "terraform_data" "jenkins" {
   ]
 }
 
-resource "terraform_data" "monitoring" {
-  # setup monitoring
-  provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/grafana_prometheus.yml"
-  }
-  depends_on = [
-    terraform_data.jenkins
-  ]
-}
-
 resource "terraform_data" "gocd" {
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/gocd.yml"
   }
   depends_on = [
-    terraform_data.monitoring
+    terraform_data.jenkins
   ]
 }
 

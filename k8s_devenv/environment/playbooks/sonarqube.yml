@@ -1,6 +1,13 @@
 ---
-# https://artifacthub.io/packages/helm/sonarqube/sonarqube-dce
-# SonarQube is a self-managed, automatic code review tool that systematically helps you deliver clean code. 
-
 # https://artifacthub.io/packages/helm/bitnami/sonarqube
-# SonarQube(TM) is an open source quality management platform that analyzes and measures code's technical quality. It enables developers to detect code issues, vulnerabilities, and bugs in early stages.
+- name : Setup sonarqube on cluster
+  hosts: mkcontroldev1
+  tasks:
+    - name: Install mailhog
+      shell: helm install my-sonarqube oci://registry-1.docker.io/bitnamicharts/sonarqube \
+        --create-namespace --namespace sonarqube \
+        --set metrics.enabled=true \
+        --set metrics.serviceMonitor.enabled=true \
+        --set ingress.enabled=true \
+        --set ingress.hostname=mkdevsonarqube \
+        --set global.defaultStorageClass=nfs-csi
