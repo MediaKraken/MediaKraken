@@ -6,11 +6,14 @@
     - name: Add repo
       shell: helm repo add codecentric https://codecentric.github.io/helm-charts
 
+    - name: copying file
+      copy:
+        src: ../config/mailhog_values.yml
+        dest: ~/mailhog_values.yml
+
     - name: Install mailhog
-      shell: helm install mailhog codecentric/mailhog \
-        --create-namespace --namespace mailhog \
-        --set ingress.enabled=true \
-        --set "ingress.hosts[0].host=mkdevmailhog.beaverbay.local,ingress.hosts[0].paths[0].path=/"
+      shell: helm install --values=mailhog_values.yml mailhog codecentric/mailhog \
+        --create-namespace --namespace mailhog
 
     # - name: copying file
     #   copy:
