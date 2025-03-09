@@ -8,12 +8,14 @@
 
     - name: Install mailhog
       shell: helm install mailhog codecentric/mailhog \
-        --create-namespace --namespace mailhog
+        --create-namespace --namespace mailhog \
+        --set ingress.enabled=true \
+        --set ingress.hosts="{ host: mkdevmailhog.beaverbay.local, paths: [{ path: \"/\", pathType: Prefix }] }"
 
-    - name: copying file
-      copy:
-        src: ../config/ingress_mailhog_http.yml
-        dest: ~/ingress_mailhog_http.yml
+    # - name: copying file
+    #   copy:
+    #     src: ../config/ingress_mailhog_http.yml
+    #     dest: ~/ingress_mailhog_http.yml
 
-    - name: Setup cluster of ingress
-      shell: kubectl apply -f ~/ingress_mailhog_http.yml
+    # - name: Setup cluster of ingress
+    #   shell: kubectl apply -f ~/ingress_mailhog_http.yml
