@@ -3,7 +3,7 @@
   hosts: mkcontroldev1
   tasks:
     - name: Install metallb
-      shell: kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.8/config/manifests/metallb-native.yaml
+      shell: kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml
 
     - name: copying file
       copy:
