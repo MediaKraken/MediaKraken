@@ -14,11 +14,3 @@
     - name: Install mailhog
       shell: helm install --values=mailhog_values.yml mailhog codecentric/mailhog \
         --create-namespace --namespace mailhog
-
-    # - name: copying file
-    #   copy:
-    #     src: ../config/ingress_mailhog_http.yml
-    #     dest: ~/ingress_mailhog_http.yml
-
-    # - name: Setup cluster of ingress
-    #   shell: kubectl apply -f ~/ingress_mailhog_http.yml
