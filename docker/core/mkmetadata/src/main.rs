@@ -19,7 +19,7 @@ struct APIJson {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // open the database
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
         .await
         .unwrap();
     let _result =
@@ -43,7 +43,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .initial_available(mk_lib_network::mk_lib_network_limiter::API_LIMIT["barcodespider"].2)
         .build()
         .unwrap();
-        let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
+        let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
             .await
             .unwrap();
         loop {
@@ -76,7 +76,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             )
             .build()
             .unwrap();
-            let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
+            let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
                 .await
                 .unwrap();
             loop {
@@ -108,7 +108,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         )
         .build()
         .unwrap();
-        let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
+        let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
             .await
             .unwrap();
         loop {
@@ -139,7 +139,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         )
         .build()
         .unwrap();
-        let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
+        let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
             .await
             .unwrap();
         loop {
@@ -178,7 +178,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         )
         .build()
         .unwrap();
-        let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
+        let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
             .await
             .unwrap();
         loop {

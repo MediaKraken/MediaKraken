@@ -1,7 +1,7 @@
 [package]
 name = "mksharescanner"
 version = "0.0.1"
-edition = "2021"
+edition = "2024"
 
 [profile.dev]
 panic = 'unwind'
@@ -16,9 +16,9 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { version = "0.0.26", registry = "kellnr" }
-mk_lib_network = { version = "0.0.12", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.8", registry = "kellnr" }
+mk_lib_database = { version = "0.0.27", registry = "kellnr" }
+mk_lib_network = { version = "0.0.13", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.9", registry = "kellnr" }
 
 chrono = { version = "0.4.38", features = ["serde"] }
 ipnet = "2.9.0"

@@ -1,7 +1,7 @@
 [package]
 name = "mkinit"
 version = "0.0.1"
-edition = "2021"
+edition = "2024"
 
 [profile.dev]
 panic = 'unwind'
@@ -16,7 +16,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { version = "0.0.26", registry = "kellnr" }
+mk_lib_database = { version = "0.0.27", registry = "kellnr" }
 
 # 13+ breaks my code
 rcgen = "0.12.1"

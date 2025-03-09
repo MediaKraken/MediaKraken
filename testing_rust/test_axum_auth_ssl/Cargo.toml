@@ -2,7 +2,7 @@
 name = "mktestaxumauthssl"
 version = "0.0.1"
 authors = ["Andrew Wheeler <genusistimelord@gmail.com>"]
-edition = "2021"
+edition = "2024"
 
 [dependencies]
 axum = { version = "0.7.4" }

@@ -2,7 +2,7 @@
   hosts: mkcontrol1
   tasks:
     - name: Deploy mediakraken pods
-      shell: helm install --create-namespace --namespace mkstack-mediakraken mkstack-mediakraken https://github.com/MediaKraken/MediaKraken/raw/dev/k8s/mkstack-mediakraken-0.1.4.tgz
+      shell: helm install --create-namespace --namespace mkstack-mediakraken mkstack-mediakraken https://github.com/MediaKraken/MediaKraken/raw/dev/k8s/mkstack-mediakraken-0.1.5.tgz
 
     # - name: Deploy database pods
     #   shell: helm install --create-namespace --namespace mkstack-stackgres mkstack-stackgres https://github.com/MediaKraken/MediaKraken/raw/dev/k8s/mkstack-stackgres-0.1.0.tgz

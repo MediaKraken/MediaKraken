@@ -7,10 +7,6 @@
 
 # copy the lock file so everything builds the same in docker as well
 
-# mkbroadcast
-#\rsync -a ../src/mk_lib_* ../docker/core/mkbroadcast/. --exclude target
-\rsync -a alpine-minirootfs* ../docker/core/mkbroadcast/alpine-minirootfs-x86_64.tar.gz --exclude target
-
 # mkcron
 \rsync -a ../src/mk_lib_filler ../docker/core/mkcron/. --exclude target
 \rsync -a alpine-minirootfs* ../docker/core/mkcron/alpine-minirootfs-x86_64.tar.gz --exclude target

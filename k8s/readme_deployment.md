@@ -87,11 +87,12 @@ some things might fail....wait a bit for parts to spin up and rerun apply
 
 # configure stackgres database cluster
 kubectl get secret -n stackgres stackgres-restapi-admin --template '{{ printf "password = %s\n" (.data.clearPassword | base64decode) }}'
+
 ## create db cluster
 https://mkstackgres.beaverbay.local
 ### production profile
 mkdbinstance, 48GB, 12CPU
-in the pgcluster config (https://mkstackgres.beaverbay.local/admin/stackgres/sgpgconfig/postgres-16-generated-from-default-1740084487145/edit)
+in the pgcluster config (https://mkstackgres.beaverbay.local/admin/stackgres/sgpgconfig/postgres-16-generated-from-default-1741405922020/edit)
 shared_preload_libraries=pg_stat_statements,auto_explain,timescaledb
 need to restart
 ### setup cluster
@@ -106,10 +107,13 @@ monitoring and prometheus option
 pgcrypto
 pg_stat_statements
 pg_trgm
-timescaledb
+timescaledb 2.18.2
 vector 0.8.0
 vectorscale 0.3.0 - this only shows up for pg16
 
+
+# setup graphana dash for rabbitmq
+import 10991
 
 <!-- # stuff below to do
 helm repo add kubeshark https://helm.kubeshark.co
