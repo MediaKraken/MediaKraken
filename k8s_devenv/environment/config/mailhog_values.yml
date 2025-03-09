@@ -36,7 +36,7 @@ service:
   externalIPs: []
   loadBalancerIP: ""
   loadBalancerSourceRanges: []
-  type: ClusterIP
+  type: LoadBalancer
   # Named target ports are not supported by GCE health checks, so when deploying on GKE
   # and exposing it via GCE ingress, the health checks fail and the load balancer returns a 502.
   namedTargetPort: true
@@ -64,7 +64,7 @@ containerSecurityContext:
 ingress:
   enabled: true
   ingressClassName: nginx
-  annotations: {}
+  annotations:
     kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   labels: {}
