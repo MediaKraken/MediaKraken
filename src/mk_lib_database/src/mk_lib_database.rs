@@ -26,7 +26,7 @@ pub async fn mk_lib_database_open_pool_read(
 ) -> Result<sqlx::PgPool, sqlx::Error> {
     let db_pass = env::var("POSTGRES_PASSWORD").unwrap();
     let connection_string = format!(
-        "postgresql://postgres:{}@mkdbinstance.stackgres:5432/postgres?sslmode=disable",
+        "postgresql://postgres:{}@mkdbinstance-replicas.stackgres:5432/postgres?sslmode=disable",
         encode(&db_pass)
     );
     let sqlx_pool = PgPoolOptions::new()

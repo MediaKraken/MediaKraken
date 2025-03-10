@@ -1,40 +1,20 @@
-"""
-  Copyright (C) 2021 Quinn D Granfor <spootdev@gmail.com>
-
-  This program is free software; you can redistribute it and/or
-  modify it under the terms of the GNU General Public License
-  version 2, as published by the Free Software Foundation.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-  General Public License version 2 for more details.
-
-  You should have received a copy of the GNU General Public License
-  version 2 along with this program; if not, write to the Free
-  Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-  MA 02110-1301, USA.
-"""
-
-# ALPINE_MIRROR = 'mksonatype'
+# ALPINE_MIRROR = 'mkdevnexus'
 ALPINE_MIRROR = 'dl-cdn.alpinelinux.org'
 
-CARGO_CRATES = "crates.io"
+# CENTOS_MIRROR = 'mkdevnexus:8081/repository/repo_yum/'
+CENTOS_MIRROR = 'http://mirror.centos.org/'
 
-CENTOS_MIRROR = 'mksonatype:8081/repository/repo_yum/'
-# CENTOS_MIRROR = 'http://mirror.centos.org/'
-
-DEBIAN_MIRROR = 'mksonatype:8081/repository/repo_apt/'
-# DEBIAN_MIRROR = 'ftp.us.debian.org'
+# DEBIAN_MIRROR = 'mkdevnexus:8081/repository/repo_apt/'
+DEBIAN_MIRROR = 'ftp.us.debian.org'
 
 DOCKER_REPOSITORY = 'mkregistry:5000'
 DOCKERHUB_REPOSITORY = 'index.docker.io:443'
 
-# pip3 install --trusted-host mksontatype -i http://mksonatype:8081/repository/pypi/simple -r requirements.txt
-# PYPI_MIRROR = 'pypi.python.org'
-# PYPI_MIRROR_PORT = ''
-PYPI_MIRROR = 'mksontatype'
-PYPI_MIRROR_PORT = ':8081'
+# pip3 install --trusted-host mkdevnexus -i http://mkdevnexus:8081/repository/pypi/simple -r requirements.txt
+PYPI_MIRROR = 'pypi.python.org'
+PYPI_MIRROR_PORT = ''
+# PYPI_MIRROR = 'mkdevnexus'
+# PYPI_MIRROR_PORT = ':8081'
 
 # PROXY_IP_PORT = '0.0.0.0:8080'
 # PROXY_USER_NAME = None

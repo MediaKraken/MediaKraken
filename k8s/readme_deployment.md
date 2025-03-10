@@ -171,9 +171,6 @@ HashiCorp Consul is a tool for discovering and configuring services in your infr
 https://artifacthub.io/packages/helm/si-gitops/nut-exporter
 Installs NUT exporter in Kubernetes
 
-https://github.com/headlamp-k8s/headlamp
-
-
 
 
 on dev

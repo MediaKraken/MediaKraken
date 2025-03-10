@@ -10,4 +10,7 @@
     - name: Install nexus
       shell: helm upgrade --install my-nexus curiedfcharts/nexus \
         --create-namespace --namespace nexus \
-        --set persistence.storageClass=nfs-csi
+        --set service.type=LoadBalancer \
+        --set persistence.storageClass=nfs-csi \
+        --set ingress.host=mkdevnexus.beaverbay.local
+# TODO https://github.com/sonatype/nxrm3-ha-repository/tree/main/nxrm-ha

@@ -23,11 +23,11 @@ ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig \
     CARGO_INCREMENTAL=0
 
 # https://aomedia.googlesource.com/aom
-ARG AOM=v3.9.0
+ARG AOM=v3.12.0
 # https://github.com/mstorsjo/fdk-aac
 ARG FDKAAC_VERSION=2.0.3
 # https://ffmpeg.org/download.html
-ARG FFMPEG_VERSION=7.1.0
+ARG FFMPEG_VERSION=7.1.1
 # FONTCONFIG=2.14.2 - 2.14.2-r3
 # FREETYPE=2.12.1 - 2.13.0-r5
 # TODO FRIBIDI=1.0.13  <- why is hebrew lang needed?
@@ -58,7 +58,7 @@ ARG ONEVPL=24.1.5
 # http://downloads.sourceforge.net/project/opencore-amr/opencore-amr
 ARG OPENCOREAMR=0.1.6
 # https://github.com/cisco/openh264
-ARG OPENH264=2.4.1
+ARG OPENH264=2.6.0
 # https://lib.openmpt.org/files/libopenmpt/src/
 ARG OPENMPT_VERSION=0.7.7+release.makefile
 # OPENJPEG=2.5.0 - 2.5.0-r3
@@ -67,7 +67,7 @@ ARG OPENMPT_VERSION=0.7.7+release.makefile
 # VORBIS=1.3.7 - 1.3.7-r1
 # VPX=1.13.0 -1.13.0-r1
 # https://bitbucket.org/multicoreware/x265_git
-ARG X265=3.6
+ARG X265=4.1
 # XVID=1.3.7 - 1.3.7-r1
 
 RUN buildDeps="autoconf \
@@ -124,18 +124,29 @@ RUN buildDeps="autoconf \
     export MAKEFLAGS="-j$(($(grep -c ^processor /proc/cpuinfo) + 1))" && \
     apk add --no-cache ${buildDeps} libgcc libstdc++ \
     ca-certificates busybox && \
-    pip3 install --no-cache-dir --trusted-host mksonatype -i http://mksonatype:8081/repository/pypi/simple meson cmake --break-system-packages
+    pip3 install --no-cache-dir meson cmake --break-system-packages
+    #pip3 install --no-cache-dir --trusted-host mksonatype -i http://mksonatype:8081/repository/pypi/simple meson cmake --break-system-packages
 
     # aom
+    # RUN echo "Begin: aom" && \
+    #   DIR=$(mktemp -d) && cd ${DIR} && \
+    #   git clone --branch ${AOM} --depth 1 https://aomedia.googlesource.com/aom && \
+    #   cd aom && \
+    #   mkdir -p aom_build && \
+    #   cd aom_build && \
+    #   cmake -DBUILD_STATIC_LIBS=0 .. && \
+    #   make -j`getconf _NPROCESSORS_ONLN` && \
+    #   make install
+
     RUN echo "Begin: aom" && \
       DIR=$(mktemp -d) && cd ${DIR} && \
       git clone --branch ${AOM} --depth 1 https://aomedia.googlesource.com/aom && \
       cd aom && \
       mkdir -p aom_build && \
       cd aom_build && \
-      cmake -DBUILD_STATIC_LIBS=0 .. && \
+      cmake .. -DENABLE_DOCS=0 -DENABLE_TESTS=0 && \
       make -j`getconf _NPROCESSORS_ONLN` && \
-      make install
+      make install      
 
     # x264
     RUN echo "Begin: x264" && \
