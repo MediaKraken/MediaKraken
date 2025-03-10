@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mkstack-openlibrary-claim
-  namespace: mkstack-mediakraken
+  namespace: mediakraken
 spec:
   accessModes:
     - ReadWriteMany
@@ -17,7 +17,7 @@ metadata:
   labels:
     io.kompose.service: mkstack-openlibrarynetfetchbulk
   name: mkstack-openlibrarynetfetchbulk
-  namespace: mkstack-mediakraken
+  namespace: mediakraken
 spec:
   replicas: 1
   selector:

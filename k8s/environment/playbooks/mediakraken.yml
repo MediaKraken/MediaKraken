@@ -2,10 +2,10 @@
   hosts: mkcontrol1
   tasks:
     - name: Deploy mediakraken pods
-      shell: helm install --create-namespace --namespace mkstack-mediakraken mkstack-mediakraken https://github.com/MediaKraken/MediaKraken/raw/dev/k8s/mkstack-mediakraken-0.1.5.tgz
+      shell: helm install --create-namespace --namespace mediakraken mkstack-mediakraken https://github.com/MediaKraken/MediaKraken/raw/dev/k8s/mkstack-mediakraken-0.1.6.tgz
 
-# helm install --dry-run --debug --create-namespace --namespace mkstack-mediakraken mkstack-mediakraken https://github.com/MediaKraken/MediaKraken/raw/dev/k8s/mkstack-mediakraken-0.1.2.tgz
+# helm install --dry-run --debug --create-namespace --namespace mediakraken mkstack-mediakraken https://github.com/MediaKraken/MediaKraken/raw/dev/k8s/mkstack-mediakraken-0.1.2.tgz
 
-# helm uninstall mkstack-mediakraken --namespace mkstack-mediakraken
+# helm uninstall mkstack-mediakraken --namespace mediakraken
 
 # helm package mkstack-mediakraken

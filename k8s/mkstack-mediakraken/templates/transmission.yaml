@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mkstack-transmission-claim
-  namespace: mkstack-mediakraken
+  namespace: mediakraken
 spec:
   accessModes:
     - ReadWriteMany
@@ -15,7 +15,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mkstack-transmission-downloads-claim
-  namespace: mkstack-mediakraken
+  namespace: mediakraken
 spec:
   accessModes:
     - ReadWriteMany
@@ -28,7 +28,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mkstack-transmission-incomplete-claim
-  namespace: mkstack-mediakraken
+  namespace: mediakraken
 spec:
   accessModes:
     - ReadWriteMany
@@ -41,7 +41,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mkstack-transmission-service
-  namespace: mkstack-mediakraken
+  namespace: mediakraken
 spec:
   type: NodePort
   ports:
@@ -65,7 +65,7 @@ metadata:
   labels:
     io.kompose.service: mkstack-transmission
   name: mkstack-transmission
-  namespace: mkstack-mediakraken
+  namespace: mediakraken
 spec:
   replicas: 1
   selector:

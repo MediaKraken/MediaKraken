@@ -4,7 +4,7 @@ metadata:
   labels:
     io.kompose.service: mkstack-hardwarescanner
   name: mkstack-hardwarescanner
-  namespace: mkstack-mediakraken
+  namespace: mediakraken
 spec:
   replicas: 1
   selector:

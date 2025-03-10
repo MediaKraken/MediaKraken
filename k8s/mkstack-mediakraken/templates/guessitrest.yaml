@@ -4,7 +4,7 @@ metadata:
   labels:
     io.kompose.service: mkstack-guessitrest
   name: mkstack-guessitrest
-  namespace: mkstack-mediakraken
+  namespace: mediakraken
 spec:
   replicas: 1
   selector:

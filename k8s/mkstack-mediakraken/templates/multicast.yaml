@@ -4,7 +4,7 @@ metadata:
   labels:
     io.kompose.service: mkstack-multicast
   name: mkstack-multicast
-  namespace: mkstack-mediakraken
+  namespace: mediakraken
 spec:
   replicas: 1
   selector:
