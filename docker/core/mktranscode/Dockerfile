@@ -144,7 +144,7 @@ RUN buildDeps="autoconf \
       cd aom && \
       mkdir -p aom_build && \
       cd aom_build && \
-      cmake .. -DENABLE_DOCS=0 -DENABLE_TESTS=0 && \
+      cmake .. -DENABLE_EXAMPLES=0 -DENABLE_DOCS=0 -DENABLE_TESTS=0 && \
       make -j`getconf _NPROCESSORS_ONLN` && \
       make install      
 

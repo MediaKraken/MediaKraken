@@ -4,12 +4,10 @@ metadata:
   name: mkstack-webapp-service
   namespace: mediakraken
 spec:
-  type: NodePort
+  type: LoadBalancer
   ports:
-    - name: "8080"
-      port: 8080
+    - port: 8080
       targetPort: 8080
-      nodePort: 30080
   selector:
     io.kompose.service: mkstack-webapp-service
 ---
