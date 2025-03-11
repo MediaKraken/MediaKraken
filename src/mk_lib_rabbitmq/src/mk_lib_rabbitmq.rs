@@ -26,7 +26,7 @@ pub async fn rabbitmq_connect(
 ) -> Result<(Connection, Channel), Box<dyn std::error::Error>> {
     // open a connection to RabbitMQ server
     let rabbit_connection = Connection::open(&OpenConnectionArguments::new(
-        "mkstack-rabbitmq-service",
+        "mkstack-rabbitmq-production.rabbitmq-system",
         5672,
         "guest",
         "guest",

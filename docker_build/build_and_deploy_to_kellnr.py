@@ -33,8 +33,10 @@ libs_to_publish = ["mk_lib_common",
 if args.library:
     libs_to_publish = [args.library]
 
+run_path = os.getcwd()
 for lib_name in libs_to_publish:
     print(lib_name)
+    os.chdir(run_path + "/../src/" + lib_name)
     # build the library
     pid_proc = subprocess.Popen(['cargo', 'build', '-p', lib_name])
     pid_proc.wait()

@@ -115,6 +115,8 @@ vectorscale 0.3.0 - this only shows up for pg16
 # setup graphana dash for rabbitmq
 import 10991
 
+# had to do the dragonfly db yml by hand and it fired up
+
 <!-- # stuff below to do
 helm repo add kubeshark https://helm.kubeshark.co
 ‍helm install kubeshark kubeshark/kubeshark

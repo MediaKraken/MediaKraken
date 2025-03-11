@@ -160,7 +160,7 @@ async fn main() {
             .await;
 
     // let client =
-    //     redis::Client::open("redis://default:@mkstack-redis-service:6379/0").expect("Error while trying to open the redis connection");
+    //     redis::Client::open("redis://default:@mkstack-dragonfly.dragonfly-operator-system:6379/0").expect("Error while trying to open the redis connection");
     // let redis_pool = RedisPool::from(client);
     // let session_config = SessionConfig::default();
     // let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));

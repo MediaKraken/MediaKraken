@@ -17,11 +17,11 @@ codegen-units = 1
 
 [dependencies]
 mk_lib_common = { version = "0.0.6", registry = "kellnr" }
-mk_lib_database = { version = "0.0.27", registry = "kellnr" }
-mk_lib_file = { version = "0.0.12", registry = "kellnr" }
-mk_lib_metadata = { version = "0.0.15", registry = "kellnr" }
-mk_lib_network = { version = "0.0.13", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.9", registry = "kellnr" }
+mk_lib_database = { version = "0.0.28", registry = "kellnr" }
+mk_lib_file = { version = "0.0.13", registry = "kellnr" }
+mk_lib_metadata = { version = "0.0.16", registry = "kellnr" }
+mk_lib_network = { version = "0.0.14", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.10", registry = "kellnr" }
 
 askama = { version = "0.12.1", features = ["with-axum", "mime", "mime_guess"] }
 askama_axum = "0.4.0"

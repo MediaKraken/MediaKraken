@@ -24,7 +24,7 @@ spec:
             - /wait && /mkhardwarecontrol
           env:
             - name: WAIT_HOSTS
-              value: mkdatabase.stackgres:5432, mkstack-rabbitmq-service:5672
+              value: mkdbinstance.stackgres:5432, mkstack-rabbitmq-production.rabbitmq-system:5672
             - name: WAIT_TIMEOUT
               value: "180"
           image: mediakraken/mkhardwarecontrol:dev
