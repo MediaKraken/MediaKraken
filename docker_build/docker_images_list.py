@@ -208,14 +208,7 @@ DOCKER_IMAGES = {
     'mkgamewindward': ('mkgamewindward', 'game_server'),
 
 
-    'mkmoosefscgi': ('mkmoosefscgi', 'option'),
-    'mkmoosefschunkserver': ('mkmoosefschunkserver', 'option'),
-    'mkmoosefsmaster': ('mkmoosefsmaster', 'option'),
-    'mkmoosefsmetalogger': ('mkmoosefsmetalogger', 'option'),
-
-
     'mkelk': ('mkelk', 'test'),
-    'mkftpserver': ('mkftpserver', 'test'),
     'mkjenkins': ('mkjenkins', 'test'),
     'mkselenium': ('mkselenium', 'test'),
     'mksonatype': ('mksonatype', 'test'),

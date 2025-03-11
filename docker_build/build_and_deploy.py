@@ -41,8 +41,6 @@ parser.add_argument('-e', '--email', required=False,
 # set args.image variable if entered - ex. mkwebaxum
 parser.add_argument('-i', '--image', metavar='image', required=False,
                     help='Image to build')
-parser.add_argument('-o', '--option', required=False,
-                    help='Build option images', action="store_true")
 parser.add_argument('-p', '--push', required=False,
                     help='Push images to Hub', action="store_true")
 parser.add_argument('-r', '--rebuild', required=False,
