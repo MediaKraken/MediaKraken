@@ -31,6 +31,9 @@ RUN cargo build --release --target x86_64-unknown-linux-musl \
 RUN ldd /mediakraken/target/mkinit | tr -s '[:blank:]' '\n' | grep '^/' | \
   xargs -I % sh -c 'mkdir -p $(dirname /mediakraken/deps%); cp % /mediakraken/deps%;'
 
+RUN ldd /usr/bin/psql | tr -s '[:blank:]' '\n' | grep '^/' | \
+  xargs -I % sh -c 'mkdir -p $(dirname /mediakraken/deps%); cp % /mediakraken/deps%;'
+
 ####################################################################################################
 ## Final image
 ####################################################################################################
@@ -48,9 +51,12 @@ RUN apk update && apk add --no-cache tar \
 COPY --from=cargo-build-mkinit /etc/passwd /etc/passwd
 COPY --from=cargo-build-mkinit /etc/group /etc/group
 COPY --from=cargo-build-mkinit /wait /wait
+COPY --from=cargo-build-mkinit /usr/bin/psql /usr/bin/psql
 
 # Copy our build
 COPY --from=cargo-build-mkinit /mediakraken/target/mkinit /mkinit
+
+COPY scripts /scripts
 
 # Use an unprivileged user.
 USER mediakraken:mediakraken

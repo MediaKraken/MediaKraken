@@ -111,6 +111,8 @@ timescaledb 2.18.2
 vector 0.8.0
 vectorscale 0.3.0 - this only shows up for pg16
 
+# get pg password
+kubectl get secret mkdbinstance --namespace=stackgres --template '{{ printf "%s" (index .data "superuser-password" | base64decode) }}'
 
 # setup graphana dash for rabbitmq
 import 10991

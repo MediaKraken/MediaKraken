@@ -313,11 +313,11 @@ pub async fn mk_lib_database_update_schema(
     }
 
     if version_no < 61 {
-        let mut transaction = sqlx_pool.begin().await?;
-        sqlx::query("CREATE EXTENSION IF NOT EXISTS citus WITH SCHEMA pg_catalog;")
-            .execute(&mut *transaction)
-            .await?;
-        transaction.commit().await?;
+        // let mut transaction = sqlx_pool.begin().await?;
+        // sqlx::query("CREATE EXTENSION IF NOT EXISTS citus WITH SCHEMA pg_catalog;")
+        //     .execute(&mut *transaction)
+        //     .await?;
+        // transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 61).await?;
     }
 
@@ -569,78 +569,96 @@ pub async fn mk_lib_database_update_schema(
     }
 
     if version_no < 70 {
+        // let mut transaction = sqlx_pool.begin().await?;
+        // sqlx::query("CREATE EXTENSION IF NOT EXISTS pgroonga")
+        //     .execute(&mut *transaction)
+        //     .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_movie_name \
+        //     ON mm_metadata_movie USING pgroonga (mm_metadata_movie_name);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_movie_name_alt \
+        //     ON mm_metadata_movie USING pgroonga (mm_metadata_movie_name_alt);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_tvshow_name \
+        //     ON mm_metadata_tvshow USING pgroonga (mm_metadata_tvshow_name);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_tvshow_name_alt \
+        //     ON mm_metadata_tvshow USING pgroonga (mm_metadata_tvshow_name_alt);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_person_name \
+        //     ON mm_metadata_person USING pgroonga (mm_metadata_person_name);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_book_name \
+        //     ON mm_metadata_book USING pgroonga (mm_metadata_book_name);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_collection_name \
+        //     ON mm_metadata_collection USING pgroonga (mm_metadata_collection_name);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_gs_game_system_name \
+        //     ON mm_metadata_game_systems_info USING pgroonga (gs_game_system_name);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_gi_game_info_name \
+        //     ON mm_metadata_game_software_info USING pgroonga (gi_game_info_name);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_sports_name \
+        //     ON mm_metadata_sports USING pgroonga (mm_metadata_sports_name);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_music_video_song \
+        //     ON mm_metadata_music_video USING pgroonga (mm_metadata_music_video_song);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 70).await?;
+    }
+
+    if version_no < 71 {
         let mut transaction = sqlx_pool.begin().await?;
-        sqlx::query("CREATE EXTENSION IF NOT EXISTS pgroonga")
+        sqlx::query("CREATE EXTENSION IF NOT EXISTS pg_stat_statements WITH SCHEMA pg_catalog;")
             .execute(&mut *transaction)
             .await?;
-        sqlx::query(
-            "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_movie_name \
-            ON mm_metadata_movie USING pgroonga (mm_metadata_movie_name);",
-        )
-        .execute(&mut *transaction)
-        .await?;
-        sqlx::query(
-            "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_movie_name_alt \
-            ON mm_metadata_movie USING pgroonga (mm_metadata_movie_name_alt);",
-        )
-        .execute(&mut *transaction)
-        .await?;
-        sqlx::query(
-            "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_tvshow_name \
-            ON mm_metadata_tvshow USING pgroonga (mm_metadata_tvshow_name);",
-        )
-        .execute(&mut *transaction)
-        .await?;
-        sqlx::query(
-            "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_tvshow_name_alt \
-            ON mm_metadata_tvshow USING pgroonga (mm_metadata_tvshow_name_alt);",
-        )
-        .execute(&mut *transaction)
-        .await?;
-        sqlx::query(
-            "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_person_name \
-            ON mm_metadata_person USING pgroonga (mm_metadata_person_name);",
-        )
-        .execute(&mut *transaction)
-        .await?;
-        sqlx::query(
-            "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_book_name \
-            ON mm_metadata_book USING pgroonga (mm_metadata_book_name);",
-        )
-        .execute(&mut *transaction)
-        .await?;
-        sqlx::query(
-            "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_collection_name \
-            ON mm_metadata_collection USING pgroonga (mm_metadata_collection_name);",
-        )
-        .execute(&mut *transaction)
-        .await?;
-        sqlx::query(
-            "CREATE INDEX IF NOT EXISTS pgroonga_gs_game_system_name \
-            ON mm_metadata_game_systems_info USING pgroonga (gs_game_system_name);",
-        )
-        .execute(&mut *transaction)
-        .await?;
-        sqlx::query(
-            "CREATE INDEX IF NOT EXISTS pgroonga_gi_game_info_name \
-            ON mm_metadata_game_software_info USING pgroonga (gi_game_info_name);",
-        )
-        .execute(&mut *transaction)
-        .await?;
-        sqlx::query(
-            "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_sports_name \
-            ON mm_metadata_sports USING pgroonga (mm_metadata_sports_name);",
-        )
-        .execute(&mut *transaction)
-        .await?;
-        sqlx::query(
-            "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_music_video_song \
-            ON mm_metadata_music_video USING pgroonga (mm_metadata_music_video_song);",
-        )
-        .execute(&mut *transaction)
-        .await?;
+        sqlx::query("CREATE EXTENSION IF NOT EXISTS timescaledb WITH SCHEMA pg_catalog;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA pg_catalog;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("CREATE EXTENSION IF NOT EXISTS vectorscale WITH SCHEMA pg_catalog;")
+            .execute(&mut *transaction)
+            .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool, 70).await?;
+        mk_lib_database_version_update(&sqlx_pool, 71).await?;
     }
 
     Ok(true)

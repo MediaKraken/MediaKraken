@@ -1,4 +1,5 @@
 use rcgen::generate_simple_self_signed;
+use std::env;
 use std::error::Error;
 use std::fs;
 use std::fs::File;
@@ -47,9 +48,38 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
         .await
         .unwrap();
+    // see if db exists
+    let db_exists = mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_exits(
+        &sqlx_pool,
+        "mm_version",
+    )
+    .await
+    .unwrap();
+    if db_exists == false {
+        let db_pass = env::var("POSTGRES_PASSWORD").unwrap();
+        unsafe {
+            env::set_var("PGPASSWORD", &db_pass);
+        }
+        let output = Command::new("psql")
+            .args([
+                "-h",
+                "mkdbinstance.stackgres",
+                "-U",
+                "postgres",
+                "-f",
+                "/scripts/create_schema.sql",
+            ])
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .output()
+            .unwrap();
+        let stdout: String = String::from_utf8(output.stdout).unwrap();
+        println!("stdout: {}", stdout);
+        let stderr: String = String::from_utf8(output.stderr).unwrap();
+        println!("stderr: {}", stderr);
+    }
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, true)
         .await
         .unwrap();
-
     Ok(())
 }
