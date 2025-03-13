@@ -1,1 +1,0 @@
-docker exec -t mkstack-database.1.x6y0bu7uruva68hs6ps9lazlv psql -U postgres postgres -f /backups/mkstack-database_dump_2024-01-30_16_06_36.sql

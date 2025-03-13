@@ -1,1 +1,0 @@
-docker exec -t mkstack-database pg_dump -U postgres > mkstack-database_dump_`date +%Y-%m-%d"_"%H_%M_%S`.sql
