@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_network"
-version = "0.0.14"
+version = "0.0.15"
 edition = "2024"
 
 [profile.release]
@@ -10,7 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_file = { version="0.0.13", registry = "kellnr" }
+mk_lib_file = { version="0.0.14", registry = "kellnr" }
 
 cidr-utils = { version = "0.5.11", features = [
     "serde",
