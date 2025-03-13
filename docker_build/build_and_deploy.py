@@ -112,11 +112,6 @@ else:
             if docker_images_list.DOCKER_IMAGES[build_image][1] == "game_server":
                 images_to_build.append(build_image)
 
-    if args.option:
-        for build_image in docker_images_list.DOCKER_IMAGES:
-            if docker_images_list.DOCKER_IMAGES[build_image][1] == "option":
-                images_to_build.append(build_image)
-
     if args.testing:
         for build_image in docker_images_list.DOCKER_IMAGES:
             if docker_images_list.DOCKER_IMAGES[build_image][1] == "test":
