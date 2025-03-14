@@ -1,4 +1,3 @@
-use rcgen::generate_simple_self_signed;
 use std::env;
 use std::error::Error;
 use std::fs;
@@ -27,21 +26,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .unwrap();
         let stdout: String = String::from_utf8(output.stdout).unwrap();
         println!("output: {}", stdout);
-    }
-
-    // check for and create ssl certs if needed
-    if Path::new("/mediakraken/certs/cacert.pem").exists() == false {
-        // generate certs/keys
-        let subject_alt_names = vec!["www.mediakraken.org".to_string(), "localhost".to_string()];
-        let cert = generate_simple_self_signed(subject_alt_names).unwrap();
-        let mut file_pem = File::create("/mediakraken/certs/cacert.pem").unwrap();
-        file_pem
-            .write_all(cert.serialize_pem().unwrap().as_bytes())
-            .unwrap();
-        let mut file_key_pem = File::create("/mediakraken/certs/privkey.pem").unwrap();
-        file_key_pem
-            .write_all(cert.serialize_private_key_pem().as_bytes())
-            .unwrap();
     }
 
     // connect to db and do a version check and upgrade if needed
