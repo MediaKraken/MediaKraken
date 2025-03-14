@@ -177,15 +177,6 @@ async fn main() {
 
     let (prometheus_layer, metric_handle) = PrometheusMetricLayer::pair();
 
-    // shouldn't have to check if certs exists...as the init container gens them before the db version is updated
-    // configure certificate and private key used by https
-    let config = RustlsConfig::from_pem_file(
-        PathBuf::from("/mediakraken/certs/cacert.pem"),
-        PathBuf::from("/mediakraken/certs/privkey.pem"),
-    )
-    .await
-    .unwrap();
-
     let app_state = AppState {
         // The key should probably come from configuration
         flash_config: axum_flash::Config::new(Key::generate()),
@@ -477,15 +468,9 @@ async fn main() {
     // add a fallback service for handling routes to unknown paths
     let app = app.fallback(bp_error::general_not_found);
 
-    // // run the app on http
-    // let listener = TcpListener::bind("0.0.0.0:8080").await.unwrap();
-    // axum::serve(listener, app).await.unwrap();
-
-    // run our app with hyper
-    axum_server::tls_rustls::bind_rustls("0.0.0.0:8080".parse().unwrap(), config)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    // run the app on http
+    let listener = TcpListener::bind("0.0.0.0:8080").await.unwrap();
+    axum::serve(listener, app).await.unwrap();
 
     //             bp_error::general_not_authorized,        401
     //             bp_error::general_not_administrator,     403
