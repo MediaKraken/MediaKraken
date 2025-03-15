@@ -120,10 +120,6 @@ import 10991
 # had to do the dragonfly db yml by hand and it fired up
 
 <!-- # stuff below to do
-helm repo add kubeshark https://helm.kubeshark.co
-‍helm install kubeshark kubeshark/kubeshark
-
-
 # stuff to add to MK
 https://operatorhub.io/operator/elastic-cloud-eck
 Elastic Cloud on Kubernetes (ECK) is the official operator by Elastic for automating the deployment, provisioning, management, and orchestration of Elasticsearch, Kibana, APM Server, Beats, Enterprise Search, Elastic Agent, Elastic Maps Server, and Logstash on Kubernetes.
