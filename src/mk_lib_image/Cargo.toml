@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_image"
-version = "0.0.6"
+version = "0.0.9"
 edition = "2024"
 
 [profile.release]
