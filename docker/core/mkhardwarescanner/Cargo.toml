@@ -21,21 +21,21 @@ mk_lib_hardware = { version = "0.0.12", registry = "kellnr" }
 mk_lib_network = { version = "0.0.15", registry = "kellnr" }
 mk_lib_rabbitmq = { version = "0.0.10", registry = "kellnr" }
 
-chrono = { version = "0.4.38", features = ["serde"] }
+chrono = { version = "0.4.40", features = ["serde"] }
 crab-dlna = "0.2.1"
-futures-util = "0.3.30"
+futures-util = "0.3.31"
 huelib = "0.13.2" # https://github.com/nn1ks/huelib-rs
 mdns = "3.0.0"
-reqwest = { version = "0.12.9", default-features = false, features = [
+reqwest = { version = "0.12.14", default-features = false, features = [
     "json",
     "rustls-tls",
 ] }
-serde = { version = "1.0.214", features = ["derive"] }
-serde_json = "1.0.132"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
 sonor = "2.0.0"
 stdext = "0.3.3"
 sys-info = "0.9.1"
-tokio = { version = "1.41.0", features = ["full"] }
+tokio = { version = "1.44.1", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"
