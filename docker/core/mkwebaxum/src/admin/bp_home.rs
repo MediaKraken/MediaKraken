@@ -74,7 +74,7 @@ pub async fn admin_home(
     } else {
         let notification_list =
             mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_read(
-                &sqlx_pool, 0, 9990
+                &sqlx_pool, 0, 9999
             )
             .await
             .unwrap();

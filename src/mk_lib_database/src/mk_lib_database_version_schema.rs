@@ -661,6 +661,15 @@ pub async fn mk_lib_database_update_schema(
         mk_lib_database_version_update(&sqlx_pool, 71).await?;
     }
 
+    if version_no < 72 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query("ALTER TABLE mm_notification RENAME COLUMN mm_notification_dismissable TO mm_notification_dismissible;")
+            .execute(&mut *transaction)
+            .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 72).await?;
+    }
+
     Ok(true)
 }
 
