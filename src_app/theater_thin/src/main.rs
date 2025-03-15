@@ -1,16 +1,6 @@
 use fltk::{app, prelude::*};
 use fltk::{enums::Color, *};
-
 use mk_lib_network;
-
-
-
-
-
-
-
-
-
 
 fn main() {
     let _server_list = mk_lib_network::mk_lib_network_mediakraken::mk_lib_network_find_mediakraken_server();
