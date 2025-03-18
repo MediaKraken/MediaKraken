@@ -16,7 +16,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { version = "0.0.40", registry = "kellnr" }
+mk_lib_database = { version = "0.0.42", registry = "kellnr" }
 mk_lib_hardware = { version = "0.0.16", registry = "kellnr" }
 mk_lib_network = { version = "0.0.10", registry = "kellnr" }
 mk_lib_rabbitmq = { version = "0.0.15", registry = "kellnr" }
