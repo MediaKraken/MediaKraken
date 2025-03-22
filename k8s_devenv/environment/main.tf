@@ -54,15 +54,6 @@ resource "terraform_data" "gocd" {
   ]
 }
 
-# resource "terraform_data" "grype" {
-#   provisioner "local-exec" {
-#     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/grype.yml"
-#   }
-#   depends_on = [
-#     terraform_data.gocd
-#   ]
-# }
-
 resource "terraform_data" "jfrog" {
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/jfrog_artifactory_oss.yml"

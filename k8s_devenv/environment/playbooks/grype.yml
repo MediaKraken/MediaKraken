@@ -1,9 +1,0 @@
----
-# https://artifacthub.io/packages/tekton-task/tekton-tasks/grype
-# A vulnerability scanner for container images and filesystems.
-- name : Setup grype
-  hosts: mkcontroldev1
-  tasks:
-    - name: Add grype
-      shell: kubectl apply -f https://github.com/tektoncd/catalog/raw/refs/heads/main/task/grype/0.1/grype.yaml \
-        --create-namespace --namespace grype
