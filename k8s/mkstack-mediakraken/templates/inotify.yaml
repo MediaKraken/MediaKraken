@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mkstack-inotify
+  name: mkstack-inotify
+  namespace: mediakraken
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-inotify-service
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mkstack-inotify-service
+    spec:
+      containers:
+        - args:
+            - sh
+            - -c
+            - /wait && /mkinotify
+          env:
+            - name: WAIT_HOSTS
+              value: mkdbinstance.stackgres:5432, mkstack-rabbitmq-production.rabbitmq-system:5672
+            - name: WAIT_TIMEOUT
+              value: "180"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-password
+                  key: db-password
+          image: mediakraken/mkinotify:dev
+          imagePullPolicy: Always
+          name: mkstack-inotify
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30

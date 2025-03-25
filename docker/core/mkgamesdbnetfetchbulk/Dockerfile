@@ -4,11 +4,11 @@ ARG BRANCHTAG
 FROM mediakraken/mkbase_rust_alpine:"${BRANCHTAG}" as planner-mkgamesdbnetfetchbulk
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
+#ENV RUSTFLAGS="--Awarnings"
 
-# COPY Cargo.toml Cargo.toml
-# COPY .cargo .cargo
-# RUN mkdir /mediakraken/src
-COPY . .
+COPY Cargo.toml Cargo.toml
+COPY .cargo .cargo
+COPY mk_lib_filler .
 
 RUN cargo chef prepare --recipe-path recipe.json
 
@@ -18,10 +18,11 @@ RUN cargo chef prepare --recipe-path recipe.json
 FROM planner-mkgamesdbnetfetchbulk AS cargo-build-mkgamesdbnetfetchbulk
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
+#ENV RUSTFLAGS="--Awarnings"
 
 COPY --from=planner-mkgamesdbnetfetchbulk /mediakraken/recipe.json recipe.json
 
-RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
+#RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
 
 COPY ./ .
 
@@ -40,8 +41,8 @@ ADD alpine-minirootfs-x86_64.tar.gz /
 COPY --from=cargo-build-mkgamesdbnetfetchbulk /mediakraken/deps/* /
 
 # Import from builder.
-# COPY --from=cargo-build-mkgamesdbnetfetchbulk /etc/passwd /etc/passwd
-# COPY --from=cargo-build-mkgamesdbnetfetchbulk /etc/group /etc/group
+COPY --from=cargo-build-mkgamesdbnetfetchbulk /etc/passwd /etc/passwd
+COPY --from=cargo-build-mkgamesdbnetfetchbulk /etc/group /etc/group
 COPY --from=cargo-build-mkgamesdbnetfetchbulk /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=cargo-build-mkgamesdbnetfetchbulk /wait /wait
 
@@ -49,4 +50,4 @@ COPY --from=cargo-build-mkgamesdbnetfetchbulk /wait /wait
 COPY --from=cargo-build-mkgamesdbnetfetchbulk /mediakraken/target/mkgamesdbnetfetchbulk /mkgamesdbnetfetchbulk
 
 # Use an unprivileged user.
-# USER mediakraken:mediakraken
+USER mediakraken:mediakraken

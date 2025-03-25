@@ -1,0 +1,19 @@
+---
+# https://artifacthub.io/packages/helm/stevehipwell-helm-charts-nexus3/nexus3#source-code
+# Sonatype Nexus is an open source repository manager
+- name : Setup nexus on cluster
+  hosts: mkcontroldev1
+  tasks:
+    - name: Install Nexus3
+      shell: helm upgrade --install nexus3 oci://ghcr.io/stevehipwell/helm-charts/nexus3 --version 5.8.2 \
+        --create-namespace --namespace nexus \
+        --set service.type=LoadBalancer \
+        --set ingress.enabled=true \
+        --set ingress.hosts[0]=mkdevnexus.beaverbay.local \
+        --set persistence.enabled=true \
+        --set persistence.storageClass=nfs-csi \
+        --set persistence.size=50Gi \
+        --set metrics.enabled=true \
+        --set metrics.serviceMonitor.enabled=true
+
+# enter pod and in /nexus-date/admin.password

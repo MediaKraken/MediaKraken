@@ -4,11 +4,11 @@ ARG BRANCHTAG
 FROM mediakraken/mkbase_rust_alpine:"${BRANCHTAG}" as planner-mkwebapp
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
+#ENV RUSTFLAGS="--Awarnings"
 
-# COPY Cargo.toml Cargo.toml
-# COPY .cargo .cargo
-# RUN mkdir /mediakraken/src
-COPY . .
+COPY Cargo.toml Cargo.toml
+COPY .cargo .cargo
+COPY mk_lib_filler .
 
 RUN cargo chef prepare --recipe-path recipe.json
 
@@ -18,10 +18,11 @@ RUN cargo chef prepare --recipe-path recipe.json
 FROM planner-mkwebapp as cargo-build-mkwebapp
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
+#ENV RUSTFLAGS="--Awarnings"
 
 COPY --from=planner-mkwebapp /mediakraken/recipe.json recipe.json
 
-RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
+#RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
 
 COPY ./ .
 
@@ -48,8 +49,8 @@ RUN apk update && apk add --no-cache musl-locales lang libssl3 libcrypto3 cifs-u
 #   && rm -rf /var/lib/apt/lists/*
 
 # Import from builder.
-# COPY --from=cargo-build-mkwebapp /etc/passwd /etc/passwd
-# COPY --from=cargo-build-mkwebapp /etc/group /etc/group
+COPY --from=cargo-build-mkwebapp /etc/passwd /etc/passwd
+COPY --from=cargo-build-mkwebapp /etc/group /etc/group
 COPY --from=cargo-build-mkwebapp /wait /wait
 COPY --from=cargo-build-mkwebapp /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=cargo-build-mkwebapp /mediakraken/templates /mediakraken/templates
@@ -59,4 +60,4 @@ COPY --from=cargo-build-mkwebapp /mediakraken/static /mediakraken/static
 COPY --from=cargo-build-mkwebapp /mediakraken/target/mkwebapp /mediakraken/mkwebapp
 
 # Use an unprivileged user.
-# USER mediakraken:mediakraken
+USER mediakraken:mediakraken

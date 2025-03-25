@@ -8,7 +8,7 @@ pub struct DBNotificationList {
     pub mm_notification_guid: uuid::Uuid,
     pub mm_notification_text: String,
     pub mm_notification_time: String,
-    pub mm_notification_dismissible: String,
+    pub mm_notification_dismissible: bool,
 }
 
 pub async fn mk_lib_database_notification_read(
@@ -49,7 +49,7 @@ pub async fn mk_lib_database_notification_insert(
         mm_notification_dismissible) \
         values ($1, $2, $3)",
     )
-    .bind(Uuid::new_v4())
+    .bind(Uuid::now_v7())
     .bind(mm_notification_text)
     .bind(mm_notification_dismissable)
     .execute(&mut *transaction)

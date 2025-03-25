@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mkstack-mumble-service
+  namespace: mediakraken
+spec:
+  type: NodePort
+  ports:
+    - name: "64738"
+      port: 64738
+      targetPort: 64738
+    - name: "64738-udp"
+      port: 64738
+      protocol: UDP
+      targetPort: 64738
+  selector:
+    io.kompose.service: mkstack-mumble-service

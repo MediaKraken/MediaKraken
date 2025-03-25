@@ -4,11 +4,11 @@ ARG BRANCHTAG
 FROM mediakraken/mkbase_rust_alpine:"${BRANCHTAG}" as planner-mkhardwarecontrol
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
+#ENV RUSTFLAGS="--Awarnings"
 
-# COPY Cargo.toml Cargo.toml
-# COPY .cargo .cargo
-# RUN mkdir /mediakraken/src
-COPY . .
+COPY Cargo.toml Cargo.toml
+COPY .cargo .cargo
+COPY mk_lib_filler .
 
 RUN cargo chef prepare --recipe-path recipe.json
 
@@ -18,10 +18,11 @@ RUN cargo chef prepare --recipe-path recipe.json
 FROM planner-mkhardwarecontrol AS cargo-build-mkhardwarecontrol
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
+#ENV RUSTFLAGS="--Awarnings"
 
 COPY --from=planner-mkhardwarecontrol /mediakraken/recipe.json recipe.json
 
-RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
+#RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
 
 COPY ./ .
 

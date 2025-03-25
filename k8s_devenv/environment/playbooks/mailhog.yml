@@ -1,0 +1,16 @@
+---
+# https://artifacthub.io/packages/helm/codecentric/mailhog
+- name : Setup mailhog on cluster
+  hosts: mkcontroldev1
+  tasks:
+    - name: Add repo
+      shell: helm repo add codecentric https://codecentric.github.io/helm-charts
+
+    - name: copying file
+      copy:
+        src: ../config/mailhog_values.yml
+        dest: ~/mailhog_values.yml
+
+    - name: Install mailhog
+      shell: helm install --values=~/mailhog_values.yml mailhog codecentric/mailhog \
+        --create-namespace --namespace mailhog

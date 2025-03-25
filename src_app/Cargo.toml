@@ -1,0 +1,9 @@
+[workspace]
+
+members = [
+    "pi_upc",
+    "pi_voice",
+    "theater_controller_pi",
+    "theater_full",
+    "theater_thin",
+]

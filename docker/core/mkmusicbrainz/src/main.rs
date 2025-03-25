@@ -12,7 +12,7 @@ use tokio::sync::Notify;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
         .await
         .unwrap();
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
@@ -28,16 +28,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .await
             .unwrap();
 
+    let db_pass = env::var("POSTGRES_PASSWORD").unwrap();
+    unsafe {
+        env::set_var("PGPASSWORD", &db_pass);
+    }
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {
-                let db_pass = fs::read_to_string("/run/secrets/db_password").unwrap();
-                env::set_var("PGPASSWORD", &db_pass);
                 // extensions, collations, types
                 let _output = Command::new("psql")
                     .args([
                         "-h",
-                        "mkstack_database",
+                        "mkdbinstance.stackgres",
                         "-U",
                         "postgres",
                         "-f",
@@ -49,7 +51,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let _output = Command::new("psql")
                     .args([
                         "-h",
-                        "mkstack_database",
+                        "mkdbinstance.stackgres",
                         "-U",
                         "postgres",
                         "-f",
@@ -62,7 +64,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let _output = Command::new("psql")
                     .args([
                         "-h",
-                        "mkstack_database",
+                        "mkdbinstance.stackgres",
                         "-U",
                         "postgres",
                         "-f",
@@ -76,7 +78,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let _output = Command::new("psql")
                     .args([
                         "-h",
-                        "mkstack_database",
+                        "mkdbinstance.stackgres",
                         "-U",
                         "postgres",
                         "-f",
@@ -90,7 +92,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // let _output = Command::new("psql")
                 //     .args([
                 //         "-h",
-                //         "mkstack_database",
+                //         "mkdbinstance.stackgres",
                 //         "-U",
                 //         "postgres",
                 //         "-f",
@@ -117,7 +119,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         let output = Command::new("psql")
                             .args([
                                 "-h",
-                                "mkstack_database",
+                                "mkdbinstance.stackgres",
                                 "-d",
                                 "postgres",
                                 "-U",
@@ -142,7 +144,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             let output = Command::new("psql")
                                 .args([
                                     "-h",
-                                    "mkstack_database",
+                                    "mkdbinstance.stackgres",
                                     "-d",
                                     "postgres",
                                     "-U",
@@ -164,7 +166,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let _output = Command::new("psql")
                     .args([
                         "-h",
-                        "mkstack_database",
+                        "mkdbinstance.stackgres",
                         "-U",
                         "postgres",
                         "-f",
@@ -177,7 +179,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // let _output = Command::new("psql")
                 //     .args([
                 //         "-h",
-                //         "mkstack_database",
+                //         "mkdbinstance.stackgres",
                 //         "-U",
                 //         "postgres",
                 //         "-f",
@@ -189,7 +191,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let _output = Command::new("psql")
                     .args([
                         "-h",
-                        "mkstack_database",
+                        "mkdbinstance.stackgres",
                         "-U",
                         "postgres",
                         "-f",
@@ -202,7 +204,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // let _output = Command::new("psql")
                 //     .args([
                 //         "-h",
-                //         "mkstack_database",
+                //         "mkdbinstance.stackgres",
                 //         "-U",
                 //         "postgres",
                 //         "-f",

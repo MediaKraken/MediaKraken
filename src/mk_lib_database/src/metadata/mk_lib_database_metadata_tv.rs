@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 use sqlx::types::Uuid;
+use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_metadata_exists_tv(
     sqlx_pool: &sqlx::PgPool,
@@ -27,22 +27,41 @@ pub struct DBMetaTVShowList {
 
 pub async fn mk_lib_database_metadata_tv_read(
     sqlx_pool: &sqlx::PgPool,
-    _search_value: String,
+    search_value: String,
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMetaTVShowList>, sqlx::Error> {
-    let select_query = sqlx::query(
-        "select mm_metadata_tvshow_guid, \
-        mm_metadata_tvshow_name, \
-        mm_metadata_tvshow_json->'first_air_date' as air_date, \
-        mm_metadata_tvshow_localimage_json->'Poster' \
-        as image_json from mm_metadata_tvshow \
-        order by LOWER(mm_metadata_tvshow_name), \
-        mm_metadata_tvshow_json->'first_air_date' \
-        offset $1 limit $2",
-    )
-    .bind(offset)
-    .bind(limit);
+    let select_query;
+    if search_value != "" {
+        // doing union so exact matches show on top
+        select_query = sqlx::query(
+            "select mm_metadata_tvshow_guid, \
+            mm_metadata_tvshow_name, \
+            mm_metadata_tvshow_json->'first_air_date' as air_date, \
+            mm_metadata_tvshow_localimage_json->'Poster' as image_json \
+            from mm_metadata_tvshow \
+            where mm_metadata_tvshow_name &@ $1 \
+            or mm_metadata_tvshow_name_alt &@ $2
+            offset $3 limit $4",
+        )
+        .bind(&search_value)
+        .bind(&search_value)
+        .bind(offset)
+        .bind(limit);
+    } else {
+        select_query = sqlx::query(
+            "select mm_metadata_tvshow_guid, \
+            mm_metadata_tvshow_name, \
+            mm_metadata_tvshow_json->'first_air_date' as air_date, \
+            mm_metadata_tvshow_localimage_json->'Poster' as image_json \
+            from mm_metadata_tvshow \
+            order by LOWER(mm_metadata_tvshow_name), \
+            mm_metadata_tvshow_json->'first_air_date' \
+            offset $1 limit $2",
+        )
+        .bind(offset)
+        .bind(limit);
+    }
     let table_rows: Vec<DBMetaTVShowList> = select_query
         .map(|row: PgRow| DBMetaTVShowList {
             mm_metadata_tvshow_guid: row.get("mm_metadata_tvshow_guid"),
@@ -62,7 +81,7 @@ pub async fn mk_lib_database_metadata_tv_count(
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_tvshow \
-            where mm_metadata_tvshow_name % $1",
+            where mm_metadata_tvshow_name &@ $1",
         )
         .bind(search_value)
         .fetch_one(sqlx_pool)
@@ -88,13 +107,15 @@ pub async fn mk_lib_database_metadata_tv_insert(
         "insert into mm_metadata_tvshow (mm_metadata_tvshow_guid, \
         mm_metadata_media_tvshow_id, \
         mm_metadata_tvshow_name, \
+        mm_metadata_tvshow_name_alt, \
         mm_metadata_tvshow_json, \
         mm_metadata_tvshow_localimage_json) \
-        values ($1,$2,$3,$4,$5)",
+        values ($1,$2,$3,$4,$5,$6)",
     )
     .bind(uuid_id)
     .bind(series_id)
     .bind(data_json["name"].to_string())
+    .bind(data_json["original_name"].to_string())
     .bind(data_json)
     .bind(data_image_json)
     .execute(&mut *transaction)

@@ -10,7 +10,7 @@ pub async fn mk_lib_database_metadata_collection_count(
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_collection \
-            where mm_metadata_collection_name = $1",
+            where mm_metadata_collection_name &@ $1",
         )
         .bind(search_value)
         .fetch_one(sqlx_pool)
@@ -44,9 +44,8 @@ pub async fn mk_lib_database_metadata_collection_read(
             mm_metadata_collection_name, \
             mm_metadata_collection_imagelocal_json from mm_metadata_collection \
             where mm_metadata_collection_guid in (select mm_metadata_collection_guid \
-            from mm_metadata_collection where mm_metadata_collection_name % $1 \
-            order by mm_metadata_collection_name \
-            offset $2 limit $3) order by mm_metadata_collection_name",
+            from mm_metadata_collection where mm_metadata_collection_name &@ $1 \
+            offset $2 limit $3)",
         )
         .bind(search_value)
         .bind(offset)
@@ -58,7 +57,8 @@ pub async fn mk_lib_database_metadata_collection_read(
             mm_metadata_collection_imagelocal_json from mm_metadata_collection \
             where mm_metadata_collection_guid in (select mm_metadata_collection_guid \
             from mm_metadata_collection order by mm_metadata_collection_name \
-            offset $1 limit $2) order by mm_metadata_collection_name",
+            order by LOWER(mm_metadata_collection_name) \
+            offset $1 limit $2)",
         )
         .bind(offset)
         .bind(limit);
@@ -136,7 +136,7 @@ pub async fn mk_lib_database_metadata_collection_guid_by_tmdb(
     tmdb_id: String,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let row: (uuid::Uuid,) = sqlx::query_as(
-        "sselect mm_metadata_collection_guid from mm_metadata_collection
+        "select mm_metadata_collection_guid from mm_metadata_collection
         where mm_metadata_collection_json @> '{\"id\":$1}'",
     )
     .bind(tmdb_id)
@@ -167,7 +167,7 @@ pub async fn mk_lib_database_meta_collection_insert(
     metadata_json: serde_json::Value,
     local_image_json: serde_json::Value,
 ) -> Result<Uuid, sqlx::Error> {
-    let new_guid = uuid::Uuid::new_v4();
+    let new_guid = uuid::Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_metadata_collection (mm_metadata_collection_guid, \

@@ -8,7 +8,7 @@ pub async fn mk_lib_database_metadata_review_insert(
     metadata_uuid: Uuid,
     review_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    let new_guid = Uuid::new_v4();
+    let new_guid = Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_review(mm_review_guid, mm_review_metadata_guid, \
@@ -47,11 +47,11 @@ pub async fn mk_lib_database_metadata_review_list_metadata(
     sqlx_pool: &sqlx::PgPool,
     metadata_uuid: Uuid,
 ) -> Result<Vec<DBMetaReviewList>, sqlx::Error> {
-    // TODO order by date
     // TODO order by rating? (optional?)
     let select_query = sqlx::query(
         "select mm_review_guid, mm_review_json \
-        from mm_review where mm_review_metadata_guid = $1",
+        from mm_review where mm_review_metadata_guid = $1 \
+        order by mm_review_json->'results'->>'created_at' desc",
     )
     .bind(metadata_uuid);
     let table_rows: Vec<DBMetaReviewList> = select_query

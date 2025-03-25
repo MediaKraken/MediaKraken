@@ -18,6 +18,7 @@ docker/core/mkgamesdbnetfetchbulk/alpine-minirootfs-x86_64.tar.gz
 docker/core/mkglobalcache/alpine-minirootfs-x86_64.tar.gz
 docker/core/mkhardwarecontrol/alpine-minirootfs-x86_64.tar.gz
 docker/core/mkhardwarescanner/alpine-minirootfs-x86_64.tar.gz
+docker/core/mkinit/alpine-minirootfs-x86_64.tar.gz
 docker/core/mkinotify/alpine-minirootfs-x86_64.tar.gz
 docker/core/mklibretrocorefetchupdate/alpine-minirootfs-x86_64.tar.gz
 docker/core/mkmusicbrainz/alpine-minirootfs-x86_64.tar.gz
@@ -25,11 +26,10 @@ docker/core/mkmulticast/alpine-minirootfs-x86_64.tar.gz
 docker/core/mkmetadatamame/alpine-minirootfs-x86_64.tar.gz
 docker/core/mkmetadata/alpine-minirootfs-x86_64.tar.gz
 docker/core/mkmediascanner/alpine-minirootfs-x86_64.tar.gz
-docker/core/mkschedulesdirectupdate/alpine-minirootfs-x86_64.tar.gz
-docker/core/mktranscode/alpine-minirootfs-x86_64.tar.gz
-docker/core/mkwebaxum/alpine-minirootfs-x86_64.tar.gz
 docker/core/mkopenlibrarynetfetchbulk/alpine-minirootfs-x86_64.tar.gz
 docker/core/mkrabbitconsume/alpine-minirootfs-x86_64.tar.gz
+docker/core/mkschedulesdirectupdate/alpine-minirootfs-x86_64.tar.gz
 docker/core/mksharescanner/alpine-minirootfs-x86_64.tar.gz
 docker/core/mktmdbnetfetchbulk/alpine-minirootfs-x86_64.tar.gz
-docker/core/mktmdbnetfetchupdate/alpine-minirootfs-x86_64.tar.gz
+docker/core/mktranscode/alpine-minirootfs-x86_64.tar.gz
+docker/core/mkwebaxum/alpine-minirootfs-x86_64.tar.gz

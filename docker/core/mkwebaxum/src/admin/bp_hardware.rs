@@ -4,8 +4,10 @@ use axum::{
     response::{Html, IntoResponse},
     Extension,
 };
-use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
-use mk_lib_database;
+use axum_session::{SessionConfig, SessionLayer};
+use axum_session_sqlx::{SessionPgPool};
+use axum_session_auth::*;
+use crate::mk_lib_database;
 use serde_json::json;
 use sqlx::postgres::PgPool;
 
@@ -65,7 +67,7 @@ pub async fn url_bp_admin_hardware(request):
     if request.method == 'POST':
         # submit the message
         common_network_pika.com_net_pika_send({'Type': 'Hardware Scan'},
-                                              rabbit_host_name='mkstack_rabbitmq',
+                                              rabbit_host_name='mkstack-rabbitmq',
                                               exchange_name='mkque_hardware_ex',
                                               route_key='mkhardware')
         request['flash']("Scheduled hardware scan.", "success")

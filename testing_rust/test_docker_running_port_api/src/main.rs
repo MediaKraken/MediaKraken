@@ -12,7 +12,7 @@ async fn main() {
     match result {
         Ok(images) => {
             for i in images {
-                //     if i.names[0] == "/mkstack_reactor" {
+                //     if i.names[0] == "/mkstack-reactor" {
                 print_type_of(&i.ports);
                 println!(
                     "{:?} {:?}",

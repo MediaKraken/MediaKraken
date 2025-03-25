@@ -10,3 +10,11 @@ ELK - Optional
 5044 - Logstash Beats interface (UDP?)
 5601 - Kibana web interface
 9200 - Elasticsearch JSON interface
+
+k8s
+30050 - PGAdmin4
+30080 - Main Web app
+    - Kibana Web interface
+    - RabbitMQ Management
+    - Grafana Dashboard
+    - Portainer

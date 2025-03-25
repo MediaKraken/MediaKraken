@@ -79,7 +79,7 @@ pub async fn mk_lib_database_cron_insert(
     cron_schedule: String,
     cron_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    let new_guid = uuid::Uuid::new_v4();
+    let new_guid = uuid::Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_cron (mm_cron_guid, mm_cron_name, mm_cron_description, \

@@ -127,9 +127,7 @@ pub struct PGExtensionActive {
 pub async fn mk_lib_database_extension_active(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<PGExtensionActive>, sqlx::Error> {
-    let select_query = sqlx::query(
-        "SELECT extname, extversion from pg_extension order by extname",
-    );
+    let select_query = sqlx::query("SELECT extname, extversion from pg_extension order by extname");
     let table_rows: Vec<PGExtensionActive> = select_query
         .map(|row: PgRow| PGExtensionActive {
             extname: row.get("extname"),
@@ -149,9 +147,8 @@ pub struct PGExtensionAvailable {
 pub async fn mk_lib_database_extension_available(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<PGExtensionAvailable>, sqlx::Error> {
-    let select_query = sqlx::query(
-        "SELECT name, default_version FROM pg_available_extensions order by name",
-    );
+    let select_query =
+        sqlx::query("SELECT name, default_version FROM pg_available_extensions order by name");
     let table_rows: Vec<PGExtensionAvailable> = select_query
         .map(|row: PgRow| PGExtensionAvailable {
             name: row.get("name"),
@@ -162,8 +159,21 @@ pub async fn mk_lib_database_extension_available(
     Ok(table_rows)
 }
 
-/*
+pub async fn mk_lib_database_table_exits(
+    sqlx_pool: &sqlx::PgPool,
+    table_name: &str,
+) -> Result<bool, sqlx::Error> {
+    let row: (bool,) = sqlx::query_as(
+        "SELECT EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' \
+        AND tablename = $1 limit 1) as found_record limit 1;",
+    )
+    .bind(table_name)
+    .fetch_one(sqlx_pool)
+    .await?;
+    Ok(row.0)
+}
 
+/*
 // TODO port query
 pub async fn db_pgsql_vacuum_stat_by_day(self, days=1):
     """
@@ -200,32 +210,6 @@ def db_pgsql_vacuum_table(self, table_name):
         common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text={
             'Vacuum table missing': table_name})
 
-
-// TODO port query
-def db_pgsql_set_iso_level(self, isolation_level):
-    """
-    # set isolation level
-    """
-    self.sql3_conn.set_isolation_level(isolation_level)
-
-
-// TODO port query
-def db_pgsql_table_exits(self, table_name):
-    """
-    Check to see if table exits. Will return NULL if not.
-    """
-    self.db_cursor.execute('SELECT to_regclass(%s)::text', (table_name,))
-    return self.db_cursor.fetchone()[0]
-
 // TODO - see last analynze, etc
 # SELECT schemaname, relname, last_analyze FROM pg_stat_all_tables WHERE relname = 'city';
-
-// TODO port query
-pub async fn db_table_index_check(self, resource_name):
-    """
-    # check for table or index
-    """
-    // TODO little bobby tables
-    await self.db_cursor.execute("SELECT to_regclass('public.$1')", resource_name)
-    return await self.db_cursor.fetchval()
  */

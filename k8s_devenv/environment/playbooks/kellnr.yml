@@ -1,0 +1,13 @@
+# https://github.com/kellnr/helm
+- name : Setup kellnr on cluster
+  hosts: mkcontroldev1
+  tasks:
+    - name: Add repo
+      shell: helm repo add kellnr https://kellnr.github.io/helm
+
+    - name: Install kellnr
+      shell: helm install kellnr kellnr/kellnr --set kellnr.origin.hostname="mkdevkellnr.beaverbay.local" \
+        --create-namespace --namespace kellnr \
+        --set pvc.enabled=true \
+        --set pvc.storage=10Gi \
+        --set pvc.storageClassName="nfs-csi"

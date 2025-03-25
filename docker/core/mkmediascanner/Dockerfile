@@ -4,11 +4,11 @@ ARG BRANCHTAG
 FROM mediakraken/mkbase_rust_alpine:"${BRANCHTAG}" as planner-mkmediascanner
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
+#ENV RUSTFLAGS="--Awarnings"
 
-# COPY Cargo.toml Cargo.toml
-# COPY .cargo .cargo
-# RUN mkdir /mediakraken/src
-COPY . .
+COPY Cargo.toml Cargo.toml
+COPY .cargo .cargo
+COPY mk_lib_filler .
 
 RUN cargo chef prepare --recipe-path recipe.json
 
@@ -18,10 +18,11 @@ RUN cargo chef prepare --recipe-path recipe.json
 FROM planner-mkmediascanner AS cargo-build-mkmediascanner
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
+#ENV RUSTFLAGS="--Awarnings"
 
 COPY --from=planner-mkmediascanner /mediakraken/recipe.json recipe.json
 
-RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
+#RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
 
 COPY ./ .
 
@@ -43,12 +44,12 @@ RUN apk update && apk add --no-cache cifs-utils nfs-utils libsmbclient \
  && rm -rf /var/cache/apt/*
 
 # Import from builder.
-# COPY --from=cargo-build-mkmediascanner /etc/passwd /etc/passwd
-# COPY --from=cargo-build-mkmediascanner /etc/group /etc/group
+COPY --from=cargo-build-mkmediascanner /etc/passwd /etc/passwd
+COPY --from=cargo-build-mkmediascanner /etc/group /etc/group
 COPY --from=cargo-build-mkmediascanner /wait /wait
 
 # Copy our build
 COPY --from=cargo-build-mkmediascanner /mediakraken/target/mkmediascanner /mkmediascanner
 
 # Use an unprivileged user.
-# USER mediakraken:mediakraken
+USER mediakraken:mediakraken

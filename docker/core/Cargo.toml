@@ -1,13 +1,13 @@
 [workspace]
 
 members = [
-    #"mkbroadcast",
     "mkcron",
     "mkdownload",
     "mkgamesdbnetfetchbulk",
     "mkglobalcache",
     "mkhardwarecontrol",
     "mkhardwarescanner",
+    "mkinit",
     "mkinotify",
     "mklibretrocorefetchupdate",
     "mkmediascanner",
@@ -20,7 +20,6 @@ members = [
     "mkschedulesdirectupdate",
     "mksharescanner",
     "mktmdbnetfetchbulk",
-    "mktmdbnetfetchupdate",
     "mktranscode",
     "mkwebaxum",
 ]

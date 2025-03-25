@@ -6,9 +6,11 @@ use axum::{
     response::{Html, IntoResponse},
     Extension,
 };
-use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
+use axum_session::{SessionConfig, SessionLayer};
+use axum_session_sqlx::{SessionPgPool};
+use axum_session_auth::*;
 use mk_lib_common::mk_lib_common_pagination;
-use mk_lib_database;
+use crate::mk_lib_database;
 use serde_json::json;
 use sqlx::postgres::PgPool;
 
@@ -61,13 +63,13 @@ pub async fn user_metadata_tv(
         .await
         .unwrap();
         let tv_list = mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_read(
-        &sqlx_pool,
-        String::new(),
-        db_offset,
-        30,
-    )
-    .await
-    .unwrap();
+            &sqlx_pool,
+            String::new(),
+            db_offset,
+            30,
+        )
+        .await
+        .unwrap();
         let mut template_data_exists = false;
         if tv_list.len() > 0 {
             template_data_exists = true;
@@ -144,7 +146,7 @@ pub async fn url_bp_user_metadata_tvshow_detail(request, guid):
             data_runtime = data_metadata['mm_metadata_tvshow_json']['episode_run_time']
     else:
         data_runtime = None
-    // TODO there must be sum rating on stuff......
+    // there must be sum rating on stuff......
     if 'rating' in data_metadata['mm_metadata_tvshow_json']:
         data_rating = data_metadata['mm_metadata_tvshow_json']['rating']
     else:

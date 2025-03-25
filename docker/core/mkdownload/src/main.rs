@@ -10,34 +10,11 @@ use tokio::sync::Notify;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    // create metadata paths, as before the db update will let it finish before
-    // other containers can use them
-    if !Path::new(&"/mediakraken/static/meta").exists() {
-        fs::create_dir("/mediakraken/static/meta")?;
-        let vec_of_metadata = vec!["poster", "backdrop", "trailer"];
-        for metadata_type in vec_of_metadata.iter() {
-            let file_name = format!("/mediakraken/static/meta/{}", metadata_type);
-            fs::create_dir(&file_name)?;
-            for c in b'a'..=b'z' {
-                for d in b'a'..=b'z' {
-                    for e in b'a'..=b'z' {
-                        for f in b'a'..=b'z' {
-                            fs::create_dir_all(format!(
-                                "{}/{}{}/{}{}",
-                                file_name, c as char, d as char, e as char, f as char
-                            ))?;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
+    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
         .await
         .unwrap();
-    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, true)
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
         .await
         .unwrap();
     let option_config_json: Value =
@@ -70,15 +47,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .await
                     .unwrap();
                 } else if json_message["Type"].to_string() == "Youtube" {
-                    if validator::validate_url(json_message["URL"].to_string()) {
+                    if validator::ValidateUrl::validate_url(&json_message["URL"].to_string()) {
                         continue;
                         //println!("downloaded video to {:?}", rustube::download_best_quality(&json_message["URL"].to_string()).await.unwrap());
                     } else {
                         // TODO log error by user requested
                         continue;
                     }
+                } else if json_message["Type"].to_string() == "Subtitle" {
+                    let output = Command::new("subliminal")
+                        .args(["-l", "en", &json_message["Data"].as_str().unwrap()])
+                        .stdout(Stdio::piped())
+                        .output()
+                        .unwrap();
                 } else if json_message["Type"].to_string() == "Twitch" {
-                    if validator::validate_url(json_message["URL"].to_string()) {
+                    if validator::ValidateUrl::validate_url(&json_message["URL"].to_string()) {
                         let _res = mk_lib_network::mk_lib_network::mk_download_file_from_url_tokio(
                             json_message["URL"].to_string(),
                             &json_message["Local Save Path"].to_string(),
@@ -126,7 +109,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             // do NOT remove the header.....this is the SAVE location
                             // TODO use image directory format
                             let file_save_name = format!(
-                                "/mediakraken/static/meta/trailer/{:?}",
+                                "/mediakraken/metadata/meta/trailer/{:?}",
                                 download_link.rsplitn(1, "/")
                             );
                             // verify it doesn't exist in meta folder

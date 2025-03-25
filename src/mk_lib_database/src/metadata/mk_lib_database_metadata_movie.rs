@@ -40,10 +40,12 @@ pub async fn mk_lib_database_metadata_movie_read(
              mm_metadata_movie_localimage_json->>'Poster' as mm_poster, \
              mm_metadata_movie_user_json \
              from mm_metadata_movie \
-             where mm_metadata_movie_name % $1 \
-             order by mm_metadata_movie_name, mm_date offset $2 limit $3",
+             WHERE mm_metadata_movie_name &@ $1 \
+             or mm_metadata_movie_name_alt &@ $2
+             offset $3 limit $4",
         )
-        .bind(search_value)
+        .bind(&search_value)
+        .bind(&search_value)
         .bind(offset)
         .bind(limit);
     } else {
@@ -53,7 +55,7 @@ pub async fn mk_lib_database_metadata_movie_read(
             mm_metadata_movie_localimage_json->>'Poster' as mm_poster, \
             mm_metadata_movie_user_json \
             from mm_metadata_movie \
-            order by mm_metadata_movie_name, mm_date \
+            order by LOWER(mm_metadata_movie_name), mm_date \
             offset $1 limit $2",
         )
         .bind(offset)
@@ -79,7 +81,7 @@ pub async fn mk_lib_database_metadata_movie_count(
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_movie \
-            where mm_metadata_movie_name % $1",
+            where mm_metadata_movie_name &@ $1",
         )
         .bind(search_value)
         .fetch_one(sqlx_pool)
@@ -107,13 +109,15 @@ pub async fn mk_lib_database_metadata_movie_insert(
         "insert into mm_metadata_movie (mm_metadata_movie_guid, \
         mm_metadata_movie_media_id, \
         mm_metadata_movie_name, \
+        mm_metadata_movie_name_alt, \
         mm_metadata_movie_json, \
         mm_metadata_movie_localimage_json) \
-        values ($1,$2,$3,$4,$5)",
+        values ($1,$2,$3,$4,$5,$6)",
     )
     .bind(uuid_id)
     .bind(series_id)
     .bind(data_json["title"].as_str().unwrap().to_string())
+    .bind(data_json["original_title"].as_str().unwrap().to_string())
     .bind(data_json)
     .bind(data_image_json)
     .execute(&mut *transaction)

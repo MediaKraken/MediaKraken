@@ -23,7 +23,7 @@ be linked to any number of tracks.
                                      "spootdev@gmail.com "
                                      "https://github.com/MediaKraken/MediaKraken_Deployment")
         if option_config_json['Docker Instances']['musicbrainz']:
-            musicbrainzngs.set_hostname('mkstack_mkmusicbrainz:5000')
+            musicbrainzngs.set_hostname('mkstack-mkmusicbrainz:5000')
         else:
             # If you are connecting to a development server
             if option_config_json['Metadata']['MusicBrainz']['Host'] != None:

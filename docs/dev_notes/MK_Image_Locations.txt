@@ -2,6 +2,7 @@
 admin required https://www.freepik.com/icon/admin-with-cogwheels_78948#fromView=search&term=administrator&track=ais&page=2&position=2&uuid=719c5fd0-4922-49b2-b56c-9eac791009f3
 3D.png https://www.flaticon.com/free-icon/3d-glasses-for-cinema_49229
 add-button.png https://www.flaticon.com/free-icon/add-button_109789
+barcode scanner  https://www.flaticon.com/free-icon/barcode-scan_12212621?term=barcode&page=2&position=29&origin=search&related_id=12212621 <a href="https://www.flaticon.com/free-icons/barcode-scan" title="barcode scan icons">Barcode scan icons created by Vino - Flaticon</a>
 books.png https://www.flaticon.com/free-icon/books-stack-of-three_29302
 bricks-wall-and-demolition-ball.png https://www.flaticon.com/free-icon/bricks-wall-and-demolition-ball_46445
 browser

@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mkstack-pgadmin-claim
+  namespace: mediakraken
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: nfs-csi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mkstack-pgadmin
+  name: mkstack-pgadmin
+  namespace: mediakraken
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-pgadmin-service
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mkstack-pgadmin-service
+    spec:
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+      containers:
+        - env:
+            - name: PGADMIN_DEFAULT_EMAIL
+              value: spootdev@gmail.com
+            - name: PGADMIN_DEFAULT_PASSWORD
+              value: metaman
+            - name: PGADMIN_DISABLE_POSTFIX
+              value: "1"
+            - name: PGADMIN_LISTEN_PORT
+              value: "5050"
+          image: dpage/pgadmin4:8.12
+          name: mkstack-pgadmin
+          ports:
+            - containerPort: 5050
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /var/lib/pgadmin
+              name: mkstack-pgadmin-claim
+              readOnly: false
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: mkstack-pgadmin-claim
+          persistentVolumeClaim:
+            claimName: mkstack-pgadmin-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mkstack-pgadmin-service
+  namespace: mediakraken
+spec:
+  type: NodePort
+  ports:
+    - name: "5050"
+      port: 5050
+      targetPort: 5050
+      nodePort: 30050
+  selector:
+    io.kompose.service: mkstack-pgadmin-service
+
+# TODO ingress this instead

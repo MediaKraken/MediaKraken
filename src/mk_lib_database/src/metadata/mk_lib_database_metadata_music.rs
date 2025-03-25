@@ -17,8 +17,8 @@ pub async fn mk_lib_database_metadata_music_count(
 ) -> Result<i64, sqlx::Error> {
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
-            "select count(*) from mm_metadata_album \
-            where mm_metadata_album_name % $1",
+            "select count(*) from mm_mtadata_album \
+            where mm_metadata_album_name &@ $1",
         )
         .bind(search_value)
         .fetch_one(sqlx_pool)
@@ -45,7 +45,7 @@ pub async fn mk_lib_database_metadata_music_read(
         select_query = sqlx::query(
             "select mm_metadata_album_guid, mm_metadata_album_name, \
             mm_metadata_album_json, mm_metadata_album_localimage \
-            from mm_metadata_album where mm_metadata_album_name % $1 \
+            from mm_metadata_album where LOWER(mm_metadata_album_name) % LOWER($1) \
             order by LOWER(mm_metadata_album_name) \
             offset $2 limit $3",
         )

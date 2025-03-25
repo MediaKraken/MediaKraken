@@ -1,0 +1,15 @@
+---
+# https://github.com/dragonflydb/dragonfly-operator
+- name : Setup operator on cluster for dragonflydb
+  hosts: mkcontrol1
+  tasks:
+    - name: Setup operator
+      shell: kubectl apply -f https://raw.githubusercontent.com/dragonflydb/dragonfly-operator/main/manifests/dragonfly-operator.yaml
+  
+    - name: copying file
+      copy:
+        src: ../config/dragonflydb.yml
+        dest: ~/dragonflydb.yml
+
+    - name: Setup cluster of dragonflydb
+      shell: kubectl apply -f ~/dragonflydb.yml

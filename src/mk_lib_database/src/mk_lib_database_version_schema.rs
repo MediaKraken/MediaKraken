@@ -260,7 +260,7 @@ pub async fn mk_lib_database_update_schema(
         )
         .execute(&mut *transaction)
         .await?;
-        let new_guid = uuid::Uuid::new_v4();
+        let new_guid = uuid::Uuid::now_v7();
         sqlx::query("INSERT INTO mm_share_auth (mm_share_auth_guid, mm_share_auth_user, mm_share_auth_password) \
             values ($1, 'guest', crypt('guest', gen_salt('bf', 10)));")
             .bind(new_guid)
@@ -313,11 +313,11 @@ pub async fn mk_lib_database_update_schema(
     }
 
     if version_no < 61 {
-        let mut transaction = sqlx_pool.begin().await?;
-        sqlx::query("CREATE EXTENSION IF NOT EXISTS citus WITH SCHEMA pg_catalog;")
-            .execute(&mut *transaction)
-            .await?;
-        transaction.commit().await?;
+        // let mut transaction = sqlx_pool.begin().await?;
+        // sqlx::query("CREATE EXTENSION IF NOT EXISTS citus WITH SCHEMA pg_catalog;")
+        //     .execute(&mut *transaction)
+        //     .await?;
+        // transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 61).await?;
     }
 
@@ -458,6 +458,216 @@ pub async fn mk_lib_database_update_schema(
             .await?;
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 65).await?;
+    }
+
+    if version_no < 66 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(
+            "ALTER TABLE mm_axum_users ALTER COLUMN last_signin TYPE timestamp with time zone;",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "ALTER TABLE mm_axum_users ALTER COLUMN last_signoff TYPE timestamp with time zone;",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 66).await?;
+    }
+
+    if version_no < 67 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(
+            "CREATE TABLE IF NOT EXISTS mm_bar_codes (\
+            mm_bar_code_uuid UUID NOT NULL, \
+            mm_bar_code_code TEXT NOT NULL, \
+            mm_bar_code_type SMALLINT NOT NULL, \
+            mm_bar_code_json JSONB);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE UNIQUE INDEX IF NOT EXISTS mm_bar_code_uuid_ndx \
+            ON mm_bar_codes USING btree (mm_bar_code_uuid);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_bar_code_code_ndx \
+            ON mm_bar_codes USING btree (mm_bar_code_code);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_bar_code_type_ndx \
+            ON mm_bar_codes USING btree (mm_bar_code_type);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE TABLE IF NOT EXISTS mm_bar_code_own (\
+            mm_bar_code_own_uuid UUID NOT NULL, \
+            mm_bar_code_own_user INTEGER NOT NULL);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_bar_code_own_ndx \
+            ON mm_bar_code_own USING btree (mm_bar_code_own_user, mm_bar_code_own_uuid);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 67).await?;
+    }
+
+    if version_no < 68 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query("ALTER TABLE mm_metadata_movie ADD COLUMN mm_metadata_movie_name_alt text;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("ALTER TABLE mm_metadata_tvshow ADD COLUMN mm_metadata_tvshow_name_alt text;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("alter table mm_metadata_movie \
+            add title_search tsvector \
+            generated always as	( \
+                setweight(to_tsvector('simple', coalesce(mm_metadata_movie_name, '')), 'A') || ' ' || \
+                setweight(to_tsvector('simple', coalesce(mm_metadata_movie_name_alt, '')), 'B') :: tsvector \
+            ) stored;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("alter table mm_metadata_tvshow \
+            add title_search tsvector \
+            generated always as	( \
+                setweight(to_tsvector('simple', coalesce(mm_metadata_tvshow_name, '')), 'A') || ' ' || \
+                setweight(to_tsvector('simple', coalesce(mm_metadata_tvshow_name_alt, '')), 'B') :: tsvector \
+            ) stored;")
+            .execute(&mut *transaction)
+            .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 68).await?;
+    }
+
+    if version_no < 69 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_metadata_movie_fts_ndx \
+                ON mm_metadata_movie USING gin (title_search);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_metadata_tvshow_fts_ndx \
+                ON mm_metadata_tvshow USING gin (title_search);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 69).await?;
+    }
+
+    if version_no < 70 {
+        // let mut transaction = sqlx_pool.begin().await?;
+        // sqlx::query("CREATE EXTENSION IF NOT EXISTS pgroonga")
+        //     .execute(&mut *transaction)
+        //     .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_movie_name \
+        //     ON mm_metadata_movie USING pgroonga (mm_metadata_movie_name);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_movie_name_alt \
+        //     ON mm_metadata_movie USING pgroonga (mm_metadata_movie_name_alt);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_tvshow_name \
+        //     ON mm_metadata_tvshow USING pgroonga (mm_metadata_tvshow_name);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_tvshow_name_alt \
+        //     ON mm_metadata_tvshow USING pgroonga (mm_metadata_tvshow_name_alt);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_person_name \
+        //     ON mm_metadata_person USING pgroonga (mm_metadata_person_name);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_book_name \
+        //     ON mm_metadata_book USING pgroonga (mm_metadata_book_name);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_collection_name \
+        //     ON mm_metadata_collection USING pgroonga (mm_metadata_collection_name);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_gs_game_system_name \
+        //     ON mm_metadata_game_systems_info USING pgroonga (gs_game_system_name);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_gi_game_info_name \
+        //     ON mm_metadata_game_software_info USING pgroonga (gi_game_info_name);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_sports_name \
+        //     ON mm_metadata_sports USING pgroonga (mm_metadata_sports_name);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // sqlx::query(
+        //     "CREATE INDEX IF NOT EXISTS pgroonga_mm_metadata_music_video_song \
+        //     ON mm_metadata_music_video USING pgroonga (mm_metadata_music_video_song);",
+        // )
+        // .execute(&mut *transaction)
+        // .await?;
+        // transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 70).await?;
+    }
+
+    if version_no < 71 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query("CREATE EXTENSION IF NOT EXISTS pg_stat_statements WITH SCHEMA pg_catalog;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("CREATE EXTENSION IF NOT EXISTS timescaledb WITH SCHEMA pg_catalog;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA pg_catalog;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("CREATE EXTENSION IF NOT EXISTS vectorscale WITH SCHEMA pg_catalog;")
+            .execute(&mut *transaction)
+            .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 71).await?;
+    }
+
+    if version_no < 72 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query("ALTER TABLE mm_notification RENAME COLUMN mm_notification_dismissable TO mm_notification_dismissible;")
+            .execute(&mut *transaction)
+            .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 72).await?;
     }
 
     Ok(true)

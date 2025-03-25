@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mkstack-multicast
+  name: mkstack-multicast
+  namespace: mediakraken
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-multicast-service
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mkstack-multicast-service
+    spec:
+      containers:
+        - args:
+            - sh
+            - -c
+            - /mkmulticast
+          image: mediakraken/mkmulticast:dev
+          imagePullPolicy: Always
+          name: mkstack-multicast
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30

@@ -23,8 +23,7 @@ pub async fn mk_lib_database_metadata_music_video_read(
             "select mm_metadata_music_video_guid, \
             mm_metadata_music_video_band, \
             mm_metadata_music_video_song, mm_metadata_music_video_localimage_json \
-            from mm_metadata_music_video where mm_metadata_music_video_song % $1 \
-            order by LOWER(mm_metadata_music_video_band), LOWER(mm_metadata_music_video_song) \
+            from mm_metadata_music_video where mm_metadata_music_video_song &@ $1 \
             offset $2 limit $3",
         )
         .bind(search_value)
@@ -81,7 +80,7 @@ pub async fn mk_lib_database_metadata_music_video_count(
         if search_value != "" {
             let row: (i64,) = sqlx::query_as(
                 "select count(*) from mm_metadata_music_video \
-                where mm_media_music_video_song % $1",
+                where mm_media_music_video_song &@ $1",
             )
             .bind(search_value)
             .fetch_one(sqlx_pool)
@@ -129,7 +128,7 @@ pub async fn mk_lib_database_metadata_music_video_insert(
     data_json: serde_json::Value,
     image_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    let new_guid = uuid::Uuid::new_v4();
+    let new_guid = uuid::Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_metadata_music_video (mm_metadata_music_video_guid, \

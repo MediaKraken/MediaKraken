@@ -5,8 +5,10 @@ use axum::{
     routing::{get, post},
     Extension,
 };
-use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
-use mk_lib_database;
+use axum_session::{SessionConfig, SessionLayer};
+use axum_session_sqlx::{SessionPgPool};
+use axum_session_auth::*;
+use crate::mk_lib_database;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -16,6 +18,15 @@ struct TemplateError403Context {}
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_settings.html")]
 struct AdminSettingsTemplate;
+
+/*
+Cloud stuff
+    Provider
+    Active
+    API Key
+    Secret Key
+    Bucket/Path
+ */
 
 pub async fn admin_settings(
     Extension(sqlx_pool): Extension<PgPool>,

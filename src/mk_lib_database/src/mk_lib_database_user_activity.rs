@@ -11,7 +11,7 @@ pub async fn mk_lib_database_activity_insert(
     activity_userid: Uuid,
     activity_severity: String,
 ) -> Result<Uuid, sqlx::Error> {
-    let new_guid = Uuid::new_v4();
+    let new_guid = Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_user_activity (mm_activity_guid, mm_activity_name, \

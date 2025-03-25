@@ -51,7 +51,7 @@ pub async fn mk_lib_database_link_insert(
     sqlx_pool: &sqlx::PgPool,
     link_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    let new_guid = Uuid::new_v4();
+    let new_guid = Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_link (mm_link_guid, mm_link_json) \

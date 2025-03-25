@@ -37,6 +37,7 @@ pub mod database_media {
     pub mod mk_lib_database_media_remote;
     pub mod mk_lib_database_media_sports;
     pub mod mk_lib_database_media_tv;
+    pub mod mk_lib_database_media_ups;
 }
 
 #[path = "metadata"]
@@ -61,4 +62,5 @@ pub mod database_metadata {
     pub mod mk_lib_database_metadata_sports;
     pub mod mk_lib_database_metadata_tv;
     pub mod mk_lib_database_metadata_tv_live;
+    pub mod mk_lib_database_metadata_upc;
 }

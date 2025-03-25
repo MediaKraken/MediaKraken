@@ -21,9 +21,9 @@ pub struct User {
     pub id: i64,
     pub anonymous: bool,
     pub username: String,
-    pub email: String,
-    pub last_signin: DateTime<Utc>,
-    pub last_signoff: DateTime<Utc>,
+    // pub email: String,
+    // pub last_signin: DateTime<Utc>,
+    // pub last_signoff: DateTime<Utc>,
     pub permissions: HashSet<String>,
 }
 
@@ -41,9 +41,9 @@ impl Default for User {
             id: 1,
             anonymous: true,
             username: "Guest".into(),
-            email: "guest@fake.com".into(),
-            last_signin: Utc::now(),
-            last_signoff: Utc::now(),
+            // email: "guest@fake.com".into(),
+            // last_signin: Utc::now(),
+            // last_signoff: Utc::now(),
             permissions: permissions,
         }
     }
@@ -80,7 +80,7 @@ impl HasPermission<PgPool> for User {
 
 impl User {
     pub async fn get_user(id: i64, pool: &PgPool) -> Option<Self> {
-        let sqluser = sqlx::query_as::<_, SqlUser>("SELECT * FROM mm_axum_users WHERE id = $1")
+        let sqluser = sqlx::query_as::<_, SqlUser>("SELECT id, anonymous, username FROM mm_axum_users WHERE id = $1")
             .bind(id)
             .fetch_one(pool)
             .await
@@ -102,9 +102,9 @@ pub struct SqlUser {
     pub id: i64,
     pub anonymous: bool,
     pub username: String,
-    pub email: String,
-    pub last_signin: DateTime<Utc>,
-    pub last_signoff: DateTime<Utc>,
+    // pub email: String,
+    // pub last_signin: DateTime<Utc>,
+    // pub last_signoff: DateTime<Utc>,
 }
 
 impl SqlUser {
@@ -113,9 +113,9 @@ impl SqlUser {
             id: self.id,
             anonymous: self.anonymous,
             username: self.username,
-            email: self.email,
-            last_signin: self.last_signin,
-            last_signoff: self.last_signoff,
+            // email: self.email,
+            // last_signin: self.last_signin,
+            // last_signoff: self.last_signoff,
             permissions: if let Some(user_perms) = sql_user_perms {
                 user_perms
                     .into_iter()
@@ -147,7 +147,7 @@ pub struct DBUserList {
     pub id: i64,
     pub anonymous: bool,
     pub username: String,
-    pub email: String,
+    pub email: Option<String>,
     pub last_signin: Option<DateTime<Utc>>,
     pub last_signoff: Option<DateTime<Utc>>,
 }

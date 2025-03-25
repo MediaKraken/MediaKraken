@@ -1,0 +1,3 @@
+---
+# https://grafana.com/grafana/dashboards/3020-teamspeak-3/
+# Visualize collected metrics of all virtual server instances of a single Teamspeak 3 server using InfluxDB and Telegraf in combination with the telegraf-teamspeak3 executable script.

@@ -24,14 +24,9 @@ pub async fn rabbitmq_ack(
 pub async fn rabbitmq_connect(
     rabbit_queue: &str,
 ) -> Result<(Connection, Channel), Box<dyn std::error::Error>> {
-    let mut rabbit_host = "mkstack_rabbitmq";
-    let hostname: String = sys_info::hostname().unwrap().trim().to_string();
-    if hostname == "mkcode" {
-        rabbit_host = "mkprod";
-    }
     // open a connection to RabbitMQ server
     let rabbit_connection = Connection::open(&OpenConnectionArguments::new(
-        rabbit_host,
+        "mkstack-rabbitmq-production.rabbitmq-system",
         5672,
         "guest",
         "guest",
@@ -69,7 +64,7 @@ pub async fn rabbitmq_consumer(
     rabbit_queue: &str,
     rabbit_channel: &Channel,
 ) -> Result<UnboundedReceiver<ConsumerMessage>, Box<dyn std::error::Error>> {
-    let rabbit_args = BasicConsumeArguments::new(rabbit_queue, "mkstack_consumer")
+    let rabbit_args = BasicConsumeArguments::new(rabbit_queue, "mkstack-consumer")
         .manual_ack(true)
         .finish();
     let (_ctag, rabbit_rx) = rabbit_channel.basic_consume_rx(rabbit_args).await.unwrap();

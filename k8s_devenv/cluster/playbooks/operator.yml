@@ -1,0 +1,11 @@
+---
+- name : Setup operator on cluster
+  hosts: mkcontroldev1
+  tasks:
+    - name: Install curl (if not already installed)
+      package:
+        name: curl
+        state: present
+
+    - name: Setup operator
+      shell: curl -L -s https://github.com/operator-framework/operator-controller/releases/download/v1.2.0/install.sh | bash -s

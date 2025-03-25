@@ -1,7 +1,7 @@
 [package]
 name = "mkwebapp"
 version = "0.0.1"
-edition = "2021"
+edition = "2024"
 
 [profile.dev]
 panic = 'unwind'
@@ -16,52 +16,54 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_common = { version = "0.0.1", registry = "kellnr" }
-mk_lib_database = { version = "0.0.1", registry = "kellnr" }
-mk_lib_file = { version = "0.0.1", registry = "kellnr" }
-mk_lib_network = { version = "0.0.1", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.1", registry = "kellnr" }
+mk_lib_common = { version = "0.0.27", registry = "kellnr" }
+mk_lib_database = { version = "0.0.58", registry = "kellnr" }
+mk_lib_file = { version = "0.0.36", registry = "kellnr" }
+mk_lib_metadata = { version = "0.0.39", registry = "kellnr" }
+mk_lib_network = { version = "0.0.28", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.31", registry = "kellnr" }
 
 askama = { version = "0.12.1", features = ["with-axum", "mime", "mime_guess"] }
 askama_axum = "0.4.0"
 askama-filters = "0.1.3"
-axum = { version = "0.7.4", features = ["form", "http2", "json", "ws"] }
-axum-client-ip = "0.5.0"
-axum_csrf = "0.9.0"
-axum-extra = "0.9.2"
-axum-flash = "0.8.0"
-axum-handle-error-extract = "0.1.0"
-axum-prometheus = "0.6.1"
-axum-server = { version = "0.6.0", features = ["tls-rustls"] }
-axum_session = { version = "0.12.4", features = [
-    "postgres-rustls",
-    "redis-db",
+async-trait = "0.1.88"
+axum = { version = "0.8.1", features = ["form", "http2", "json", "ws"] }
+axum-client-ip = "0.7.0"
+axum_csrf = "0.11.0"
+axum-extra = "0.10.0"
+axum-flash = { git = "https://github.com/aumetra/axum-flash", rev = "0832703" }
+axum-messages = "0.8.0"
+axum-prometheus = "0.8.0"
+axum-server = { version = "0.7.2", features = ["tls-rustls"] }
+axum_session = { version = "0.16.0", default-features = false, features = [
+    "advanced",
+    "key-store",
 ] }
-axum_session_auth = { version = "0.12.0", features = [
-    "postgres-rustls",
-    "redis-db",
+axum_session_auth = { version = "0.16.0", default-features = false, features = [
+    "advanced",
+    "key-store",
 ] }
-bytesize = { version = "1.3.0", features = ["serde"] }
-chrono = { version = "0.4.33", features = ["serde"] }
-docker-api = { version = "0.14.0", features = ["swarm"] }
-futures = "0.3.30"
-hyper = { version = "1.1.0", features = ["full"] }
-hyper-util = { version = "0.1.3", features = ["client-legacy"] }
+axum_session_sqlx = {version = "0.5.0", features = ["postgres", "tls-rustls"]}
+bytesize = { version = "1.3.2", features = ["serde"] }  # 2.0.1 breaks my code
+chrono = { version = "0.4.40", features = ["serde"] }
+futures = "0.3.31"
+hyper = { version = "1.6.0", features = ["full"] }
+hyper-util = { version = "0.1.10", features = ["client-legacy"] }
 ipnetwork = "0.20.0"
-lazy_static = "1.4.0"
-libc = "0.2.153"
+lazy_static = "1.5.0"
+libc = "0.2.171"
 num-format = { version = "0.4.4", features = ["with-system-locale"] }
 paginator = "0.2.6"
-rcgen = "0.12.1"
-redis = "0.24.0"
-reqwest = { version = "0.11.24", default-features = false, features = [
+redis_pool = "0.8.0"
+redis = { version = "0.29.1" }
+reqwest = { version = "0.12.14", default-features = false, features = [
     "json",
     "native-tls",
 ] }
-ring = "0.17.7"
-serde = { version = "1.0.196", features = ["derive"] }
-serde_json = "1.0.113"
-sqlx = { version = "0.7.3", features = [
+ring = "0.17.14"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.140"
+sqlx = { version = "0.8.3", features = [
     "chrono",
     "ipnetwork",
     "json",
@@ -69,14 +71,15 @@ sqlx = { version = "0.7.3", features = [
     "postgres",
     "uuid",
 ] }
-stdext = "0.3.1"
+stdext = "0.3.3"
 sys-info = "0.9.1"
-tokio = { version = "1.36.0", features = ["full"] }
-tower = { version = "0.4.13", features = ["retry", "timeout", "util"] }
-tower-http = { version = "0.5.1", features = ["fs"] }
-transmission-rpc = "0.4.2"
-uuid = { version = "1.7.0", features = ["serde", "v4"] }
-validator = { version = "0.16.1", features = ["derive"] }
+tokio = { version = "1.44.1", features = ["full"] }
+tower = { version = "0.5.2", features = ["retry", "timeout", "util"] }
+tower-http = { version = "0.6.2", features = ["fs"] }
+tower-sessions = "0.14.0"
+transmission-rpc = "0.5.0"
+uuid = { version = "1.16.0", features = ["serde", "v4", "v7"] }
+validator = { version = "0.20.0", features = ["derive"] }
 
 
 [dev-dependencies]

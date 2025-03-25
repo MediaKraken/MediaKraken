@@ -267,10 +267,10 @@ pub async fn provider_tmdb_meta_info_build(
     }
     // set local image json
     if !poster_file_path.trim().is_empty() {
-        poster_file_path = poster_file_path.replace("/mediakraken/static", "");
+        poster_file_path = poster_file_path.replace("/mediakraken/metadata", "");
     }
     if !backdrop_file_path.trim().is_empty() {
-        backdrop_file_path = backdrop_file_path.replace("/mediakraken/static", "");
+        backdrop_file_path = backdrop_file_path.replace("/mediakraken/metadata", "");
     }
     let image_json = json!({
     "Backdrop": backdrop_file_path,

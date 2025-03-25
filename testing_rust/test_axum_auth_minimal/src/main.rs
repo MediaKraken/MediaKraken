@@ -1,8 +1,18 @@
-use axum::{http::Method, routing::get, Router};
-use axum_extra::routing::RouterExt;
-use axum_session::{Key, SessionConfig, SessionLayer, SessionPgPool, SessionStore};
+use async_trait::async_trait;
+use axum::{Extension, http::Method, routing::get, Router};
+use axum_server::tls_rustls::RustlsConfig;
+use axum_session::{SessionConfig, SessionLayer, SessionSqlitePool, SessionStore};
 use axum_session_auth::*;
-use sqlx::{postgres::PgPoolOptions, PgPool};
+use rcgen::generate_simple_self_signed;
+use serde::{Deserialize, Serialize};
+use sqlx::sqlite::{SqliteConnectOptions, SqlitePool, SqlitePoolOptions};
+use std::fs::File;
+use std::io::Write;
+use std::path::Path;
+use std::{collections::HashSet, str::FromStr};
+use std::{net::SocketAddr, path::PathBuf};
+use tokio::net::TcpListener;
+use mk_lib_database;
 
 #[path = "mk_lib_database_user.rs"]
 mod mk_lib_database_user;
@@ -12,72 +22,60 @@ mod bp_login;
 
 #[tokio::main]
 async fn main() {
-    let pool = connect_to_database().await.unwrap();
-    let session_config = SessionConfig::default()
-        .with_table_name("mm_session")
-        .with_key(Key::generate());
-    let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
-    let session_store =
-        SessionStore::<SessionPgPool>::new(Some(pool.clone().into()), session_config);
-
-    session_store.initiate().await.unwrap();
-
-    let app = Router::new()
-        .route_with_tsr("/login", get(login))
-        .route_with_tsr("/login2", get(bp_login::login).post(bp_login::login))
-        .route_with_tsr("/perm", get(perm))
-        .route_with_tsr("/perm2", get(bp_login::perm).post(bp_login::perm))
-        .layer(
-            AuthSessionLayer::<mk_lib_database_user::User, i64, SessionPgPool, PgPool>::new(Some(
-                pool.clone().into(),
-            ))
-            .with_config(auth_config),
-        )
-        .layer(SessionLayer::new(session_store));
-
-    axum::Server::bind(&"0.0.0.0:3000".parse().unwrap())
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
-}
-
-async fn login(
-    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
-) -> String {
-    auth.login_user(2);
-    "You are logged in as a User please try /perm to check permissions".to_owned()
-}
-
-async fn perm(
-    method: Method,
-    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
-) -> String {
-    let current_user = auth.current_user.clone().unwrap_or_default();
-    if !Auth::<mk_lib_database_user::User, i64, PgPool>::build([Method::GET], false)
-        .requires(Rights::any([
-            Rights::permission("Category::View"),
-            Rights::permission("Admin::View"),
-        ]))
-        .validate(&current_user, &method, None)
-        .await
-    {
-        return format!(
-            "User {}, Does not have permissions needed to view this page please login",
-            current_user.username
-        );
+    // check for and create ssl certs if needed
+    if Path::new("/mediakraken/certs/cacert.pem").exists() == false {
+        // generate certs/keys
+        let subject_alt_names = vec!["www.mediakraken.org".to_string(), "localhost".to_string()];
+        let cert = generate_simple_self_signed(subject_alt_names).unwrap();
+        let mut file_pem = File::create("/mediakraken/certs/cacert.pem").unwrap();
+        file_pem
+            .write_all(cert.serialize_pem().unwrap().as_bytes())
+            .unwrap();
+        let mut file_key_pem = File::create("/mediakraken/certs/privkey.pem").unwrap();
+        file_key_pem
+            .write_all(cert.serialize_private_key_pem().as_bytes())
+            .unwrap();
     }
 
-    format!(
-        "User has Permissions needed. Here are the Users permissions: {:?}",
-        current_user.permissions
-    )
+    let pool = connect_to_database().await;
+
+    //This Defaults as normal Cookies.
+    //To enable Private cookies for integrity, and authenticity please check the next Example.
+    let session_config = SessionConfig::default().with_table_name("test_table");
+    let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
+
+    // create SessionStore and initiate the database tables
+    let session_store =
+        SessionStore::<SessionSqlitePool>::new(Some(pool.clone().into()), session_config)
+            .await
+            .unwrap();
+
+    mk_lib_database_user::User::create_user_tables(&pool).await;
+
+    // build our application with some routes
+    let app = Router::new()
+        .route("/", get(bp_login::greet))
+        .route("/greet", get(bp_login::greet))
+        .route("/login", get(bp_login::login))
+        .route("/perm", get(bp_login::perm))
+        .layer(
+            AuthSessionLayer::<mk_lib_database_user::User, i64, SessionSqlitePool, SqlitePool>::new(Some(pool.clone().into()))
+                .with_config(auth_config),
+        )
+        .layer(SessionLayer::new(session_store))
+        .layer(Extension(pool));
+
+    // run it
+    let listener = TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    axum::serve(listener, app).await.unwrap();
 }
 
-async fn connect_to_database() -> Result<sqlx::PgPool, sqlx::Error> {
-    let connection_string = "postgresql://postgres:metaman@mkstage/postgres".to_string();
-    let sqlx_pool = PgPoolOptions::new()
+async fn connect_to_database() -> SqlitePool {
+    let connect_opts = SqliteConnectOptions::from_str("sqlite::memory:").unwrap();
+
+    SqlitePoolOptions::new()
         .max_connections(5)
-        .connect(&connection_string)
-        .await?;
-    Ok(sqlx_pool)
+        .connect_with(connect_opts)
+        .await
+        .unwrap()
 }

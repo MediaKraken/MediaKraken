@@ -1,0 +1,26 @@
+---
+version: '3.8'
+
+services:
+  webapp:
+    image: mediakraken/mktest:dev
+    command: sh -c "/mediakraken/mkwebapp"
+    stop_grace_period: 30s
+    stop_signal: SIGUSR1
+    ports:
+      - "8900:3000"
+    volumes:
+      - mediakraken_vol_certs_test:/mediakraken/certs
+    networks:
+      - mediakraken_network_test
+    deploy:
+      mode: global
+      placement:
+        constraints: [ node.platform.os == linux ]
+
+networks:
+  mediakraken_network_test:
+    driver: overlay
+
+volumes:
+  mediakraken_vol_certs_test:

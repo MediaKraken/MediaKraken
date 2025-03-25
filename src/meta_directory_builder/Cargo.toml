@@ -1,0 +1,16 @@
+[package]
+name = "meta_directory_builder"
+version = "0.0.1"
+edition = "2024"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
+
+[dependencies]
+tokio = { version = "1.44.1", features = ["full"] }
+
+[dev-dependencies]
+tokio-test = "*"

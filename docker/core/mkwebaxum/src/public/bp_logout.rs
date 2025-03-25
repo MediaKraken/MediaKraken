@@ -6,8 +6,10 @@ use axum::{
     routing::{get, post},
     Extension,
 };
-use axum_session_auth::{Auth, AuthSession, Rights, SessionPgPool};
-use mk_lib_database;
+use axum_session::{SessionConfig, SessionLayer};
+use axum_session_sqlx::{SessionPgPool};
+use axum_session_auth::*;
+use crate::mk_lib_database;
 use serde_json::json;
 use sqlx::{
     postgres::{PgConnectOptions, PgPoolOptions},

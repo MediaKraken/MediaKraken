@@ -5,10 +5,9 @@ FROM mediakraken/mkbase_rust_alpine:"${BRANCHTAG}" as planner-mkcron
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
 
-# COPY Cargo.toml Cargo.toml
-# COPY .cargo .cargo
-# RUN mkdir /mediakraken/src
-COPY . .
+COPY Cargo.toml Cargo.toml
+COPY .cargo .cargo
+COPY mk_lib_filler .
 
 RUN cargo chef prepare --recipe-path recipe.json
 
@@ -18,6 +17,7 @@ RUN cargo chef prepare --recipe-path recipe.json
 FROM planner-mkcron AS cargo-build-mkcron
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
+#ENV RUSTFLAGS="-Awarnings"
 
 COPY --from=planner-mkcron /mediakraken/recipe.json recipe.json
 
@@ -40,12 +40,12 @@ ADD alpine-minirootfs-x86_64.tar.gz /
 COPY --from=cargo-build-mkcron /mediakraken/deps/* /
 
 # Import from builder.
-# COPY --from=cargo-build-mkcron /etc/passwd /etc/passwd
-# COPY --from=cargo-build-mkcron /etc/group /etc/group
+COPY --from=cargo-build-mkcron /etc/passwd /etc/passwd
+COPY --from=cargo-build-mkcron /etc/group /etc/group
 COPY --from=cargo-build-mkcron /wait /wait
 
 # Copy our build
 COPY --from=cargo-build-mkcron /mediakraken/target/mkcron /mkcron
 
 # Use an unprivileged user.
-# USER mediakraken:mediakraken
+USER mediakraken:mediakraken

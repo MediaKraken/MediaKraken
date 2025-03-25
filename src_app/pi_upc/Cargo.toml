@@ -1,0 +1,17 @@
+[package]
+name = "pi_upc"
+version = "0.0.1"
+edition = "2024"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
+
+[dependencies]
+fltk = { version = "1.5.4", features = ["fltk-bundled"] }
+sqlite = "0.36.2"
+
+[dev-dependencies]
+tokio-test = "*"

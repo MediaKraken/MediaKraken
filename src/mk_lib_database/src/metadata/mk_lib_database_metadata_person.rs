@@ -24,7 +24,7 @@ pub async fn mk_lib_database_metadata_person_count(
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_person \
-            where mmp_person_name % $1",
+            where mmp_person_name &@ $1",
         )
         .bind(search_value)
         .fetch_one(sqlx_pool)
@@ -59,8 +59,8 @@ pub async fn mk_lib_database_metadata_person_read(
             "select mm_metadata_person_guid, \
             mm_metadata_person_name, mm_metadata_person_image, \
             mm_metadata_person_meta_json->>'profile_path' as mmp_profile \
-            from mm_metadata_person where mm_metadata_person_name % $1 \
-            order by LOWER(mm_metadata_person_name) offset $2 limit $3",
+            from mm_metadata_person where mm_metadata_person_name &@ $1 \
+            offset $2 limit $3",
         )
         .bind(search_value)
         .bind(offset)
@@ -146,7 +146,7 @@ pub async fn mk_lib_database_metadata_person_insert(
     person_json: serde_json::Value,
     person_image_path: serde_json::Value,
 ) -> Result<Uuid, sqlx::Error> {
-    let new_guid = uuid::Uuid::new_v4();
+    let new_guid = uuid::Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_metadata_person (mmp_id, mmp_person_name, \
@@ -175,7 +175,7 @@ pub async fn mk_lib_database_metadata_person_insert_cast_crew(
     //     // TODO do an upsert instead
     //     if database::mk_lib_database_metadata_exists_person(sqlx_pool, person_id).await.unwrap() == 0
     //     {
-    //         let new_guid = Uuid::new_v4();
+    //         let new_guid = Uuid::now_v7();
     //         // Shouldn't need to verify fetch doesn't exist as the person insert
     //         // is right below.  As then the next person record read will find
     //         // the inserted record.

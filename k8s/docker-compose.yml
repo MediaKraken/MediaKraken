@@ -1,0 +1,33 @@
+---
+
+services:
+  # cadvisor:
+  #   # https://github.com/google/cadvisor
+  #   image: gcr.io/cadvisor/cadvisor:v0.47.2
+  #   hostname: '{{.Node.ID}}'
+  #   volumes:
+  #     - /:/rootfs:ro
+  #     - /var/run:/var/run:rw
+  #     - /sys:/sys:ro
+  #     - /var/lib/docker/:/var/lib/docker:ro
+  #   deploy:
+  #     mode: global
+    
+  # Container to monitor services running inside other containers
+  # mkstack-metricbeat:
+  #   # https://www.docker.elastic.co/r/beats/metricbeat-oss
+  #   image: docker.elastic.co/beats/metricbeat-oss:8.11.3
+  #   hostname: "{{.Node.Hostname}}-metricbeat"
+  #   volumes:
+  #     - /proc:/hostfs/proc:ro
+  #     - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+  #     - /:/hostfs:ro
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - mediakraken_vol_metricbeat:/usr/share/metricbeat/data
+  #   environment:
+  #     - ELASTICSEARCH_HOST=mkstack-elk
+  #     - KIBANA_HOST=mkstack-elk
+  #   # disable strict permission checks
+  #   command: ["--strict.perms=false", "-system.hostfs=/hostfs"]
+  #   deploy:
+  #     mode: global

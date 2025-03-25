@@ -1,0 +1,13 @@
+---
+# https://artifacthub.io/packages/helm/bitnami/sonarqube
+- name : Setup sonarqube on cluster
+  hosts: mkcontroldev1
+  tasks:
+    - name: Install mailhog
+      shell: helm install my-sonarqube oci://registry-1.docker.io/bitnamicharts/sonarqube \
+        --create-namespace --namespace sonarqube \
+        --set metrics.enabled=true \
+        --set metrics.serviceMonitor.enabled=true \
+        --set ingress.enabled=true \
+        --set ingress.hostname=mkdevsonarqube \
+        --set global.defaultStorageClass=nfs-csi

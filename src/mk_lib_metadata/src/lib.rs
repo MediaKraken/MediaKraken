@@ -18,6 +18,8 @@ pub mod tv;
 #[path = "provider"]
 pub mod metadata_provider {
     pub mod anidb;
+    pub mod barcodelookup;
+    pub mod barcodespider;
     pub mod chart_lyrics;
     pub mod comicvine;
     pub mod coverartarchive;
@@ -25,6 +27,7 @@ pub mod metadata_provider {
     pub mod discid;
     pub mod flickr;
     pub mod giant_bomb;
+    pub mod goupc;
     pub mod gutenberg;
     pub mod imdb;
     pub mod imvdb;
@@ -47,6 +50,7 @@ pub mod metadata_provider {
     pub mod thesportsdb;
     pub mod tmdb;
     pub mod twitch;
+    pub mod upcitemdb;
     pub mod vimeo;
     pub mod youtube;
 }

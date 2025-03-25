@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mkstack-download
+  name: mkstack-download
+  namespace: mediakraken
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-download-service
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mkstack-download-service
+    spec:
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - args:
+            - sh
+            - -c
+            - /wait && /mkdownload
+          env:
+            - name: WAIT_HOSTS
+              value: mkdbinstance.stackgres:5432, mkstack-rabbitmq-production.rabbitmq-system:5672
+            - name: WAIT_TIMEOUT
+              value: "180"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-password
+                  key: db-password
+          image: mediakraken/mkdownload:dev
+          imagePullPolicy: Always
+          name: mkstack-download
+          volumeMounts:
+            - mountPath: /Comics
+              name: mkstack-comics-claim
+            - mountPath: /mediakraken/metadata
+              name: mkstack-metadata-claim
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: mkstack-comics-claim
+          persistentVolumeClaim:
+            claimName: mkstack-comics-claim
+        - name: mkstack-metadata-claim
+          persistentVolumeClaim:
+            claimName: mkstack-metadata-claim

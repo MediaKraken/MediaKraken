@@ -24,7 +24,7 @@ pub async fn mk_lib_database_metadata_game_system_count(
     if search_value != String::new() {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_game_systems_info \
-            where gs_game_system_name % $1",
+            where gs_game_system_name &@ $1",
         )
         .bind(search_value)
         .fetch_one(sqlx_pool)
@@ -61,8 +61,7 @@ pub async fn mk_lib_database_metadata_game_system_read(
             gs_game_system_json->>'description' as gs_description, \
             gs_game_system_json->>'year' as gs_year, \
             gs_game_system_alias from mm_metadata_game_systems_info \
-            where gs_game_system_name % $1 \
-            order by gs_game_system_json->'description' \
+            where gs_game_system_name &@ $1 \
             offset $2 limit $3",
         )
         .bind(search_value)
@@ -98,7 +97,7 @@ pub async fn mk_lib_database_metadata_game_system_upsert(
     system_alias: String,
     system_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    let new_guid = uuid::Uuid::new_v4();
+    let new_guid = uuid::Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "INSERT INTO mm_metadata_game_systems_info \

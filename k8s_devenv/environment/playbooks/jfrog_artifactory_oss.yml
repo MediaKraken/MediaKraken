@@ -1,0 +1,17 @@
+---
+# https://artifacthub.io/packages/helm/jfrog/artifactory-oss
+# JFrog Artifactory OSS is a free Artifactory edition to host Generic repositories.
+- name : Setup jfrog on cluster
+  hosts: mkcontroldev1
+  tasks:
+    - name: Add repo
+      shell: helm repo add jfrog https://charts.jfrog.io
+
+    - name: Install jfrog
+      shell: helm upgrade --install artifactory-oss \
+        --set artifactory.postgresql.postgresqlPassword=metaman jfrog/artifactory-oss \
+        --namespace artifactory-oss --create-namespace \
+        --set artifactory.nginx.enabled=false \
+        --set artifactory.ingress.enabled=true \
+        --set artifactory.ingress.hosts[0]="mkdevjfrog.beaverbay.local" \
+        --set artifactory.persistence.storageClassName=nfs-csi

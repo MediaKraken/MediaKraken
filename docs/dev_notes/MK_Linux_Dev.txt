@@ -139,3 +139,12 @@ cargo publish --registry kellnr -p ed2k --allow-dirty --token=3dPvCZSd1V8xKpiCGq
 mk_lib_hash
 
 mk_lib_metadata
+
+
+
+
+
+
+
+
+cargo publish --registry kellnr -p mk_lib_database --allow-dirty --token=3dPvCZSd1V8xKpiCGqpXCBbkj4Jtyyqc

@@ -1,0 +1,12 @@
+---
+# https://artifacthub.io/packages/helm/geek-cookbook/wireguard
+# Fast, modern, secure VPN tunnel
+- name : Setup wiregaurd on cluster
+  hosts: mkcontrol1
+  tasks:
+    - name: Setup helm repo for wireguard
+      shell: helm repo add k8s-at-home https://k8s-at-home.com/charts/
+
+    - name: Install wireguard
+      shell: helm install wireguard k8s-at-home/wireguard \
+        --create-namespace --namespace wireguard

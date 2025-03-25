@@ -22,15 +22,6 @@ pub async fn mk_lib_network_find_mediakraken_server() -> Result<String, Box<dyn 
         Ok((len, remote_addr)) => {
             let data = &buf[..len];
             let response = String::from_utf8_lossy(data);
-            #[cfg(debug_assertions)]
-            {
-                // mk_lib_logging::mk_logging_post_elk(
-                //     std::module_path!(),
-                //     json!({ "client got data remote_addr": remote_addr, "response": response }),
-                // )
-                // .await
-                // .unwrap();
-            }
             Ok(response.to_string())
         }
         Err(err) => {

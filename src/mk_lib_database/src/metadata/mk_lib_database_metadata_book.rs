@@ -34,8 +34,8 @@ pub async fn mk_lib_database_metadata_book_read(
     if search_value != "" {
         select_query = sqlx::query(
             "select mm_metadata_book_guid, mm_metadata_book_name \
-            from mm_metadata_book where mm_metadata_book_name % $1 \
-            order by mm_metadata_book_name offset $2 limit $3",
+            from mm_metadata_book where mm_metadata_book_name &@ $1 \
+            offset $2 limit $3",
         )
         .bind(search_value)
         .bind(offset)
@@ -66,7 +66,7 @@ pub async fn mk_lib_database_metadata_book_count(
     if search_value != "" {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_book \
-            where mm_metadata_book_name % $1",
+            where mm_metadata_book_name &@ $1",
         )
         .bind(search_value)
         .fetch_one(sqlx_pool)
@@ -102,7 +102,7 @@ pub async fn mk_lib_database_metadata_book_insert(
     sqlx_pool: &sqlx::PgPool,
     json_data: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    let new_guid = uuid::Uuid::new_v4();
+    let new_guid = uuid::Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_metadata_book (mm_metadata_book_guid, \
