@@ -2,6 +2,7 @@ use chrono::prelude::*;
 use reqwest::Client;
 use reqwest_middleware::ClientBuilder;
 use reqwest_retry::{RetryTransientMiddleware, policies::ExponentialBackoff};
+use tokio::time::Duration;
 
 pub async fn mk_logging_post_elk(
     message_type: &str,
@@ -24,6 +25,7 @@ pub async fn mk_logging_post_elk(
                 .to_string_lossy()
                 .into_owned(),
         ))
+        .timeout(Duration::from_secs(30))
         .header("Content-Type", "application/json")
         .json(&data)
         .send()

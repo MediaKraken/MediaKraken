@@ -16,12 +16,12 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_common = { version = "0.0.12", registry = "kellnr" }
-mk_lib_database = { version = "0.0.43", registry = "kellnr" }
-mk_lib_file = { version = "0.0.14", registry = "kellnr" }
-mk_lib_metadata = { version = "0.0.23", registry = "kellnr" }
-mk_lib_network = { version = "0.0.13", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.15", registry = "kellnr" }
+mk_lib_common = { version = "0.0.27", registry = "kellnr" }
+mk_lib_database = { version = "0.0.58", registry = "kellnr" }
+mk_lib_file = { version = "0.0.36", registry = "kellnr" }
+mk_lib_metadata = { version = "0.0.39", registry = "kellnr" }
+mk_lib_network = { version = "0.0.28", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.31", registry = "kellnr" }
 
 askama = { version = "0.12.1", features = ["with-axum", "mime", "mime_guess"] }
 askama_axum = "0.4.0"
@@ -31,8 +31,8 @@ axum = { version = "0.8.1", features = ["form", "http2", "json", "ws"] }
 axum-client-ip = "0.7.0"
 axum_csrf = "0.11.0"
 axum-extra = "0.10.0"
-axum-flash = "0.8.0"
-axum-handle-error-extract = "0.1.0"
+axum-flash = { git = "https://github.com/aumetra/axum-flash", rev = "0832703" }
+axum-messages = "0.8.0"
 axum-prometheus = "0.8.0"
 axum-server = { version = "0.7.2", features = ["tls-rustls"] }
 axum_session = { version = "0.16.0", default-features = false, features = [
@@ -76,6 +76,7 @@ sys-info = "0.9.1"
 tokio = { version = "1.44.1", features = ["full"] }
 tower = { version = "0.5.2", features = ["retry", "timeout", "util"] }
 tower-http = { version = "0.6.2", features = ["fs"] }
+tower-sessions = "0.14.0"
 transmission-rpc = "0.5.0"
 uuid = { version = "1.16.0", features = ["serde", "v4", "v7"] }
 validator = { version = "0.20.0", features = ["derive"] }

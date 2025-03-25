@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_hardware"
-version = "0.0.17"
+version = "0.0.32"
 edition = "2024"
 
 [profile.release]

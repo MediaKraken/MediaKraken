@@ -17,7 +17,7 @@ use axum::{
 use axum_csrf::{CsrfConfig, CsrfToken};
 use axum_extra::routing::RouterExt;
 use axum_flash::{Flash, IncomingFlashes};
-use axum_handle_error_extract::HandleErrorLayer;
+//use axum_handle_error_extract::HandleErrorLayer;
 use axum_prometheus::PrometheusMetricLayer;
 use axum_server::tls_rustls::RustlsConfig;
 use axum_session::{Key, Session, SessionConfig, SessionLayer, SessionStore};
@@ -193,7 +193,7 @@ async fn main() {
         .route_with_tsr("/admin/cron", get(admin::bp_cron::admin_cron))
         .route_with_tsr("/admin/database", get(admin::bp_database::admin_database))
         .route_with_tsr(
-            "/admin/game_servers/:page",
+            "/admin/game_servers/{page}",
             get(admin::bp_game_servers::admin_game_servers),
         )
         .route_with_tsr("/admin/hardware", get(admin::bp_hardware::admin_hardware))
@@ -210,19 +210,19 @@ async fn main() {
         //.post(admin::bp_library::admin_library_post))
         .route_with_tsr("/admin/settings", get(admin::bp_settings::admin_settings))
         .route_with_tsr(
-            "/admin/report_known_media/:page",
+            "/admin/report_known_media/{page}",
             get(admin::bp_reports::admin_report_known_media),
         )
         .route_with_tsr("/admin/torrent", get(admin::bp_torrent::admin_torrent))
         .route_with_tsr("/admin/torrent/web", get(proxy_transmission_handler))
         .with_state(client)
-        .route_with_tsr("/admin/user/:page", get(admin::bp_user::admin_user))
+        .route_with_tsr("/admin/user/{page}", get(admin::bp_user::admin_user))
         .route_with_tsr(
             "/user/internet/flickr",
             get(user_internet::bp_inter_flickr::user_inter_flickr),
         )
         .route_with_tsr(
-            "/user/internet/flickr/:guid",
+            "/user/internet/flickr/{guid}",
             get(user_internet::bp_inter_flickr::user_inter_flickr_detail),
         )
         .route_with_tsr(
@@ -242,23 +242,23 @@ async fn main() {
             get(user_internet::bp_inter_youtube::user_inter_youtube),
         )
         .route_with_tsr(
-            "/user/media/book/:page",
+            "/user/media/book/{page}",
             get(user_media::bp_media_book::user_media_book),
         )
         .route_with_tsr(
-            "/user/media/book_detail/:guid",
+            "/user/media/book_detail/{guid}",
             get(user_media::bp_media_book::user_media_book_detail),
         )
         .route_with_tsr(
-            "/user/media/game/:page",
+            "/user/media/game/{page}",
             get(user_media::bp_media_game::user_media_game),
         )
         .route_with_tsr(
-            "/user/media/game_detail/:guid",
+            "/user/media/game_detail/{guid}",
             get(user_media::bp_media_game::user_media_game_detail),
         )
         .route_with_tsr(
-            "/user/media/game_servers/:page",
+            "/user/media/game_servers/{page}",
             get(user_media::bp_media_game_servers::user_media_game_servers),
         )
         .route_with_tsr(
@@ -266,7 +266,7 @@ async fn main() {
             get(user_media::bp_media_genre::user_media_genre),
         )
         .route_with_tsr(
-            "/user/media/home_media/:page",
+            "/user/media/home_media/{page}",
             get(user_media::bp_media_home_media::user_media_home_media),
         )
         .route_with_tsr(
@@ -274,43 +274,43 @@ async fn main() {
             get(user_media::bp_media_image::user_media_image),
         )
         .route_with_tsr(
-            "/user/media/movie/:page",
+            "/user/media/movie/{page}",
             get(user_media::bp_media_movie::user_media_movie),
         )
         .route_with_tsr(
-            "/user/media/movie_detail/:guid",
+            "/user/media/movie_detail/{guid}",
             get(user_media::bp_media_movie::user_media_movie_detail),
         )
         .route_with_tsr(
-            "/user/media/music/:page",
+            "/user/media/music/{page}",
             get(user_media::bp_media_music::user_media_music),
         )
         .route_with_tsr(
-            "/user/media/music_detail/:guid",
+            "/user/media/music_detail/{guid}",
             get(user_media::bp_media_music::user_media_music_detail),
         )
         .route_with_tsr(
-            "/user/media/music_video/:page",
+            "/user/media/music_video/{page}",
             get(user_media::bp_media_music_video::user_media_music_video),
         )
         .route_with_tsr(
-            "/user/media/music_video_detail/:guid",
+            "/user/media/music_video_detail/{guid}",
             get(user_media::bp_media_music_video::user_media_music_video_detail),
         )
         .route_with_tsr(
-            "/user/media/sports/:page",
+            "/user/media/sports/{page}",
             get(user_media::bp_media_sports::user_media_sports),
         )
         .route_with_tsr(
-            "/user/media/sports_detail/:guid",
+            "/user/media/sports_detail/{guid}",
             get(user_media::bp_media_sports::user_media_sports_detail),
         )
         .route_with_tsr(
-            "/user/media/tv/:page",
+            "/user/media/tv/{page}",
             get(user_media::bp_media_tv::user_media_tv),
         )
         .route_with_tsr(
-            "/user/media/tv_detail/:guid",
+            "/user/media/tv_detail/{guid}",
             get(user_media::bp_media_tv::user_media_tv_detail),
         )
         .route_with_tsr(
@@ -318,83 +318,83 @@ async fn main() {
             get(user_media::bp_media_upc_import::user_media_upc_import).post(user_media::bp_media_upc_import::user_media_upc_import_post),
         )
         .route_with_tsr(
-            "/user/metadata/book/:page",
+            "/user/metadata/book/{page}",
             get(user_metadata::bp_meta_book::user_metadata_book),
         )
         .route_with_tsr(
-            "/user/metadata/book_detail/:guid",
+            "/user/metadata/book_detail/{guid}",
             get(user_metadata::bp_meta_book::user_metadata_book_detail),
         )
         .route_with_tsr(
-            "/user/metadata/collection/:page",
+            "/user/metadata/collection/{page}",
             get(user_media::bp_media_collection::user_media_collection),
         )
         .route_with_tsr(
-            "/user/metadata/collection_detail/:guid",
+            "/user/metadata/collection_detail/{guid}",
             get(user_media::bp_media_collection::user_media_collection_detail),
         )
         .route_with_tsr(
-            "/user/metadata/game/:page",
+            "/user/metadata/game/{page}",
             get(user_metadata::bp_meta_game::user_metadata_game),
         )
         .route_with_tsr(
-            "/user/metadata/game_detail/:guid",
+            "/user/metadata/game_detail/{guid}",
             get(user_metadata::bp_meta_game::user_metadata_game_detail),
         )
         .route_with_tsr(
-            "/user/metadata/game_system/:page",
+            "/user/metadata/game_system/{page}",
             get(user_metadata::bp_meta_game_system::user_metadata_game_system),
         )
         .route_with_tsr(
-            "/user/metadata/game_system_detail/:guid",
+            "/user/metadata/game_system_detail/{guid}",
             get(user_metadata::bp_meta_game_system::user_metadata_game_system_detail),
         )
         .route_with_tsr(
-            "/user/metadata/movie/:page",
+            "/user/metadata/movie/{page}",
             get(user_metadata::bp_meta_movie::user_metadata_movie),
         )
         .route_with_tsr(
-            "/user/metadata/movie_detail/:guid",
+            "/user/metadata/movie_detail/{guid}",
             get(user_metadata::bp_meta_movie::user_metadata_movie_detail),
         )
         .route_with_tsr(
-            "/user/metadata/music/:page",
+            "/user/metadata/music/{page}",
             get(user_metadata::bp_meta_music::user_metadata_music),
         )
         .route_with_tsr(
-            "/user/metadata/music_detail/:guid",
+            "/user/metadata/music_detail/{guid}",
             get(user_metadata::bp_meta_music::user_metadata_music_detail),
         )
         .route_with_tsr(
-            "/user/metadata/music_video/:page",
+            "/user/metadata/music_video/{page}",
             get(user_metadata::bp_meta_music_video::user_metadata_music_video),
         )
         .route_with_tsr(
-            "/user/metadata/music_video_detail/:guid",
+            "/user/metadata/music_video_detail/{guid}",
             get(user_metadata::bp_meta_music_video::user_metadata_music_video_detail),
         )
         .route_with_tsr(
-            "/user/metadata/person/:page",
+            "/user/metadata/person/{page}",
             get(user_metadata::bp_meta_person::user_metadata_person),
         )
         .route_with_tsr(
-            "/user/metadata/person_detail/:guid",
+            "/user/metadata/person_detail/{guid}",
             get(user_metadata::bp_meta_person::user_metadata_person_detail),
         )
         .route_with_tsr(
-            "/user/metadata/sports/:page",
+            "/user/metadata/sports/{page}",
             get(user_metadata::bp_meta_sports::user_metadata_sports),
         )
         .route_with_tsr(
-            "/user/metadata/sports_detail/:guid",
+            "/user/metadata/sports_detail/{guid}",
             get(user_metadata::bp_meta_sports::user_metadata_sports_detail),
         )
         .route_with_tsr(
-            "/user/metadata/tv/:page",
+            "/user/metadata/tv/{page}",
             get(user_metadata::bp_meta_tv::user_metadata_tv),
         )
         .route_with_tsr(
-            "/user/metadata/tv_detail/:guid",
+            "/user/metadata/tv_detail/{guid}",
             get(user_metadata::bp_meta_tv::user_metadata_tv_detail),
         )
         .route_with_tsr(
@@ -414,7 +414,7 @@ async fn main() {
         .route_with_tsr("/user/profile", get(user::bp_profile::user_profile))
         .route_with_tsr("/user/queue", get(user::bp_queue::user_queue))
         .route_with_tsr("/user/search", get(user::bp_search::user_search))
-        .route_with_tsr("/user/sync/:page", get(user::bp_sync::user_sync))
+        .route_with_tsr("/user/sync/{page}", get(user::bp_sync::user_sync))
         .route_with_tsr("/public/logout", get(public::bp_logout::public_logout))
         .route_with_tsr(
             "/public/login",
@@ -434,7 +434,7 @@ async fn main() {
         .layer(SessionLayer::new(session_store))
         // after authsessionlayer so anyone can access
         .route_with_tsr(
-            "/api/titlesearch/:title",
+            "/api/titlesearch/{title}",
             get(api::bp_api_title_search::api_title_search)
         )        
         .route_with_tsr("/public/about", get(public::bp_about::public_about))
