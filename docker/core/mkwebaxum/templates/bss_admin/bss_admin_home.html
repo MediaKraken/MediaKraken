@@ -37,6 +37,9 @@
                                     <h5 class="mb-0">Notices</h5>
                                 </div>
                                 <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
                                     <tr>
                                         <th>#</th>
                                         <th>Notice</th>
@@ -45,6 +48,7 @@
                                     </tr>
                                     </thead>
                                     <tbody>
+                                    {% if !template_server_notifications.is_empty() %}
                                     {% for row_data in template_server_notifications %}
                                     <tr>
                                         <td>{{ loop.index }}</td>
@@ -61,6 +65,7 @@
                                         </div>
                                     </tr>
                                     {% endfor %}
+                                    {% endif %}
                                     </tbody>
                                         </table>
                                     </div>
@@ -99,6 +104,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
+                                    {% if !template_server_streams.is_empty() %}
                                 {% for row_data in template_server_streams %}
                                 <tr>
                                     <td>{{ loop.index }}</td>
@@ -117,6 +123,7 @@
                                     </div>
                                 </tr>
                                 {% endfor %}
+                                {% endif %}
                                 </tbody>
                                     </table>
                                 </div>
@@ -141,11 +148,16 @@
                                 </tr>
                                 </thead>
                                 <tbody>
+                                {% if !template_server_users.is_empty() %}
                                 {% for row_data in template_server_users %}
                                 <tr>
                                     <td>{{ loop.index }}</td>
                                     <td>{{ row_data.username }}</td>
+                                    {% if !row_data.last_signin.is_some() %}
+                                    <td>NA</td>
+                                    {% else %}
                                     <td>{{ row_data.last_signin.unwrap() }}</td>
+                                    {% endif %}
                                     <td>{{ row_data.username }}</td>
                                     <div class="pull-right action-buttons">
                                         <td>
@@ -158,6 +170,7 @@
                                     </div>
                                 </tr>
                                 {% endfor %}
+                                {% endif %}
                                 </tbody>
                                     </table>
                                 </div>
@@ -180,6 +193,7 @@
                                 </tr>
                                 </thead>
                                 <tbody>
+                                    {% if !template_data_scan_info.is_empty() %}
                                 {% for row_data in template_data_scan_info %}
                                 <tr>
                                     <td>{{ row_data.template_scan_path }}</td>
@@ -187,6 +201,7 @@
                                     <td>{{ row_data.template_scan_percentage }}</td>
                                 </tr>
                                 {% endfor %}
+                                {% endif %}
                                 </tbody>
                                     </table>
                                 </div>

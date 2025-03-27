@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 use sqlx::types::Uuid;
+use sqlx::{FromRow, Row};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBDownloadQueueByProviderList {
@@ -47,10 +47,12 @@ pub async fn mk_lib_database_download_queue_delete(
     sqlx_pool: &sqlx::PgPool,
     download_guid: uuid::Uuid,
 ) -> Result<(), sqlx::Error> {
+    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from mm_metadata_download_que where mm_download_guid = $1")
         .bind(download_guid)
-        .execute(sqlx_pool)
+        .execute(&mut *transaction)
         .await?;
+    transaction.commit().await?;
     Ok(())
 }
 

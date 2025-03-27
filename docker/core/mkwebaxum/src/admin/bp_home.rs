@@ -7,8 +7,8 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
+use axum_session_sqlx::SessionPgPool;
 use mk_lib_common;
 use mk_lib_network;
 use num_format::{SystemLocale, ToFormattedString};
@@ -74,7 +74,7 @@ pub async fn admin_home(
     } else {
         let notification_list =
             mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_read(
-                &sqlx_pool, 0, 9999
+                &sqlx_pool, 0, 9999,
             )
             .await
             .unwrap();
@@ -101,40 +101,41 @@ pub async fn admin_home(
         let mut server_scans = Vec::new();
         let locale = SystemLocale::default().unwrap();
         let template = TemplateHomeContext {
-        template_data_server_info_server_name: &option_json["MediaKrakenServer"]["Server Name"],
-        // following boottime only compiles #[cfg(not(windows))] in this case is fine
-        template_data_server_uptime: &format!(
-            "{:02}:{:02}:{:02}",
-            boot_duration.num_hours(),
-            boot_duration.num_minutes() % 60,
-            boot_duration.num_seconds() % 60,
-        ),
-        template_data_server_host_ip: &"255.255.255.255".to_string(),
-        template_data_server_info_server_ip_external: &external_ip,
-        template_data_server_info_server_version: &mk_lib_common::mk_lib_common_version::WEB_VERSION.to_string(),
-        template_data_count_media_files:
-            &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_known_count(&sqlx_pool)
+            template_data_server_info_server_name: &option_json["MediaKrakenServer"]["Server Name"],
+            // following boottime only compiles #[cfg(not(windows))] in this case is fine
+            template_data_server_uptime: &format!(
+                "{:02}:{:02}:{:02}",
+                boot_duration.num_hours(),
+                boot_duration.num_minutes() % 60,
+                boot_duration.num_seconds() % 60,
+            ),
+            template_data_server_host_ip: &"255.255.255.255".to_string(),
+            template_data_server_info_server_ip_external: &external_ip,
+            template_data_server_info_server_version: &mk_lib_common::mk_lib_common_version::WEB_VERSION.to_string(),
+            template_data_count_media_files:
+                &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_known_count(&sqlx_pool)
+                    .await
+                    .unwrap()
+                    .to_formatted_string(&locale),
+            template_data_count_matched_media:
+                &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_matched_count(&sqlx_pool)
+                    .await
+                    .unwrap()
+                    .to_formatted_string(&locale),
+            template_data_count_meta_fetch:
+                &mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(
+                    &sqlx_pool,
+                )
                 .await
                 .unwrap()
                 .to_formatted_string(&locale),
-        template_data_count_matched_media:
-            &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_matched_count(&sqlx_pool)
-                .await
-                .unwrap()
-                .to_formatted_string(&locale),
-        template_data_count_meta_fetch:
-            &mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(
-                &sqlx_pool,
-            )
-            .await
-            .unwrap()
-            .to_formatted_string(&locale),
-        template_data_count_streamed_media: &"0".to_string(),
-        template_server_streams: &server_streams,
-        template_server_users: &user_list,
-        template_server_notifications: &notification_list,
-        template_data_scan_info: &server_scans,
-    };
+            template_data_count_streamed_media: &"0".to_string(),
+            template_server_notifications: &notification_list,
+            template_server_streams: &server_streams,
+            template_server_users: &user_list,
+            template_data_scan_info: &server_scans,
+        };
+        println!("templates {}", template);
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
