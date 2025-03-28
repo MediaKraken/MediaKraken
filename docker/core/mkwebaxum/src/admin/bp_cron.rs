@@ -1,13 +1,14 @@
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
+    extract::Path,
     http::{Method, StatusCode},
-    response::{Html, IntoResponse},
+    response::{Html, IntoResponse, Redirect},
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
-use crate::mk_lib_database;
+use axum_session_sqlx::SessionPgPool;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -56,6 +57,54 @@ pub async fn admin_cron(
     }
 }
 
+pub async fn admin_cron_run(
+    Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    Path(guid): Path<uuid::Uuid>,
+) -> impl IntoResponse {
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("Admin::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        Redirect::to("/error/403")
+        // let template = TemplateError403Context {};
+        // let reply_html = template.render().unwrap();
+        // (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+    } else {
+        let row_data = mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_service_json(
+            &sqlx_pool, guid,
+        )
+        .await
+        .unwrap();
+        let (rabbit_connection, rabbit_channel) =
+            mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp")
+                .await
+                .unwrap();
+        let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
+            rabbit_channel.clone(),
+            row_data["route_key"].as_str().unwrap(),
+            row_data.to_string(),
+        )
+        .await
+        .unwrap();
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
+            .await
+            .unwrap();
+        let _result = mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_time_update(
+            &sqlx_pool, guid,
+        )
+        .await
+        .unwrap();
+        Redirect::to("/admin/cron")
+    }
+}
+
 /*
 @blueprint_admin_cron.route('/admin_cron_edit/<guid>', methods=['GET', 'POST'])
 @common_global.jinja_template.template('bss_admin/bss_admin_cron_edit.html')
@@ -76,30 +125,5 @@ pub async fn url_bp_admin_cron_edit(request, guid):
     return {
         'guid': guid, 'form': form
     }
-
-
-@blueprint_admin_cron.route('/cron_run/<guid>', methods=['GET', 'POST'])
-@common_global.auth.login_required(user_keyword='user')
-pub async fn url_bp_admin_cron_run(request, user, guid):
-    """
-    Run cron jobs
-    """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'admin cron run': guid})
-    db_connection = await request.app.db_pool.acquire()
-    cron_job_data = await request.app.db_functions.db_cron_info(guid, db_connection)
-    cron_json_data = cron_job_data['mm_cron_json']
-    # submit the message
-    common_network_pika.com_net_pika_send({'Type': cron_json_data['Type'],
-                                           'User': user.id,
-                                           'JSON': cron_json_data},
-                                          exchange_name=cron_json_data[
-                                              'exchange_key'],
-                                          route_key=cron_json_data['route_key'])
-    await request.app.db_functions.db_cron_time_update(cron_job_data['mm_cron_name'],
-                                                       db_connection=db_connection)
-    await request.app.db_pool.release(db_connection)
-    return redirect(request.app.url_for('name_blueprint_admin_cron.url_bp_admin_cron'))
 
  */

@@ -42,6 +42,19 @@ pub async fn mk_lib_database_cron_service_read(
     Ok(table_rows)
 }
 
+pub async fn mk_lib_database_cron_service_json(
+    sqlx_pool: &sqlx::PgPool,
+    cron_uuid: Uuid,
+) -> Result<serde_json::Value, sqlx::Error> {
+    let row: (serde_json::Value,) = sqlx::query_as(
+        "select mm_cron_json from mm_cron_jobs where mm_cron_guid = $1",
+    )
+    .bind(cron_uuid)
+    .fetch_one(sqlx_pool)
+    .await?;
+    Ok(row.0)
+}
+
 pub async fn mk_lib_database_cron_time_update(
     sqlx_pool: &sqlx::PgPool,
     cron_uuid: Uuid,
