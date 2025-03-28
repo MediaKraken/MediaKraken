@@ -42,7 +42,7 @@
                                             <td>{{ row_data.mm_cron_name }}</td>
                                             <td>{{ row_data.mm_cron_description }}</td>
                                             <td>{{ row_data.mm_cron_enabled }}</td>
-                                            <td>{{ row_data.mm_cron_schedule_type }}</td>
+                                            <td>{{ format!("{} {}", row_data.mm_cron_schedule_time, row_data.mm_cron_schedule_type) }}</td>
                                             <td>{{ row_data.mm_cron_last_run }}</td>
                                             <td>
                                                 <a href="/admin/cron_run/{{row_data.mm_cron_guid}}" id="play_button">
