@@ -18,3 +18,11 @@
 
     - name: Install rabbitmq operator monitor
       shell: kubectl apply --filename https://raw.githubusercontent.com/rabbitmq/cluster-operator/main/observability/prometheus/monitors/rabbitmq-cluster-operator-podmonitor.yml
+
+    - name: copying file
+      copy:
+        src: ../config/ingress_rabbit_http.yml
+        dest: ~/ingress_rabbit_http.yml
+
+    - name: Setup access user for rabbit ui
+      shell: kubectl apply -f ~/ingress_rabbit_http.yml
