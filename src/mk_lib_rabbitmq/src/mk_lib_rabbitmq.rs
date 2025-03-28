@@ -64,7 +64,7 @@ pub async fn rabbitmq_consumer(
     rabbit_queue: &str,
     rabbit_channel: &Channel,
 ) -> Result<UnboundedReceiver<ConsumerMessage>, Box<dyn std::error::Error>> {
-    let rabbit_args = BasicConsumeArguments::new(rabbit_queue, "mkstack-consumer")
+    let rabbit_args = BasicConsumeArguments::new(rabbit_queue, "mkrabbitconsume")
         .manual_ack(true)
         .finish();
     let (_ctag, rabbit_rx) = rabbit_channel.basic_consume_rx(rabbit_args).await.unwrap();
