@@ -16,10 +16,10 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_compression = { version = "0.0.29", registry = "kellnr" }
-mk_lib_hash = { version = "0.0.34", registry = "kellnr" }
-mk_lib_network = { version = "0.0.31", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.34", registry = "kellnr" }
+mk_lib_compression = { version = "0.0.31", registry = "kellnr" }
+mk_lib_hash = { version = "0.0.36", registry = "kellnr" }
+mk_lib_network = { version = "0.0.33", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.36", registry = "kellnr" }
 
 chrono = { version = "0.4.40", features = ["serde"] }
 crc32fast = "1.4.2"

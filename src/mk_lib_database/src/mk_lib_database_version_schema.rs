@@ -678,7 +678,7 @@ pub async fn mk_lib_database_update_schema(
           "route_key": "mktmdbnetfetchbulk",
         });
         sqlx::query(
-            "update mm_cron set mm_cron_json = $1 where mm_cron_name = 'The Movie Database';",
+            "update mm_cron_jobs set mm_cron_json = $1 where mm_cron_name = 'The Movie Database';",
         )
         .bind(json_data)
         .execute(&mut *transaction)
@@ -687,7 +687,7 @@ pub async fn mk_lib_database_update_schema(
           "Type": "HDTrailers",
           "route_key": "mkdownload",
         });
-        sqlx::query("update mm_cron set mm_cron_json = $1 where mm_cron_name = 'Trailer';")
+        sqlx::query("update mm_cron_jobs set mm_cron_json = $1 where mm_cron_name = 'Trailer';")
             .bind(json_data)
             .execute(&mut *transaction)
             .await?;
@@ -696,7 +696,7 @@ pub async fn mk_lib_database_update_schema(
           "route_key": "mkschedulesdirectupdate",
         });
         sqlx::query(
-            "update mm_cron set mm_cron_json = $1 where mm_cron_name = 'Schedules Direct';",
+            "update mm_cron_jobs set mm_cron_json = $1 where mm_cron_name = 'Schedules Direct';",
         )
         .bind(json_data)
         .execute(&mut *transaction)
@@ -705,26 +705,26 @@ pub async fn mk_lib_database_update_schema(
           "Type": "Library Scan",
           "route_key": "mkmediascanner",
         });
-        sqlx::query("update mm_cron set mm_cron_json = $1 where mm_cron_name = 'Media Scan';")
+        sqlx::query("update mm_cron_jobs set mm_cron_json = $1 where mm_cron_name = 'Media Scan';")
             .bind(json_data)
             .execute(&mut *transaction)
             .await?;
-        sqlx::query("delete from mm_cron where mm_cron_name = 'Sync';")
+        sqlx::query("delete from mm_cron_jobs where mm_cron_name = 'Sync';")
             .execute(&mut *transaction)
             .await?;
-        sqlx::query("delete from mm_cron where mm_cron_name = 'DB Vacuum';")
+        sqlx::query("delete from mm_cron_jobs where mm_cron_name = 'DB Vacuum';")
             .execute(&mut *transaction)
             .await?;
-        sqlx::query("delete from mm_cron where mm_cron_name = 'Retro game data';")
+        sqlx::query("delete from mm_cron_jobs where mm_cron_name = 'Retro game data';")
             .execute(&mut *transaction)
             .await?;
-        sqlx::query("delete from mm_cron where mm_cron_name = 'Anime';")
+        sqlx::query("delete from mm_cron_jobs where mm_cron_name = 'Anime';")
             .execute(&mut *transaction)
             .await?;
-        sqlx::query("delete from mm_cron where mm_cron_name = 'Collections';")
+        sqlx::query("delete from mm_cron_jobs where mm_cron_name = 'Collections';")
             .execute(&mut *transaction)
             .await?;
-        sqlx::query("delete from mm_cron where mm_cron_name = 'Backup';")
+        sqlx::query("delete from mm_cron_jobs where mm_cron_name = 'Backup';")
             .execute(&mut *transaction)
             .await?;
         transaction.commit().await?;
