@@ -1,5 +1,6 @@
 use crate::mk_lib_database_option_status;
-use serde_json::Value;
+use serde::{Deserialize, Serialize};
+use serde_json::{json, Value};
 
 pub async fn mk_lib_database_update_schema(
     sqlx_pool: &sqlx::PgPool,
@@ -670,6 +671,65 @@ pub async fn mk_lib_database_update_schema(
         mk_lib_database_version_update(&sqlx_pool, 72).await?;
     }
 
+    if version_no < 73 {
+        let mut transaction = sqlx_pool.begin().await?;
+        let json_data: serde_json::Value = json!({
+          "Type": "Update Metadata",
+          "route_key": "mktmdbnetfetchbulk",
+        });
+        sqlx::query(
+            "update mm_cron set mm_cron_json = $1 where mm_cron_name = 'The Movie Database';",
+        )
+        .bind(json_data)
+        .execute(&mut *transaction)
+        .await?;
+        let json_data: serde_json::Value = json!({
+          "Type": "HDTrailers",
+          "route_key": "mkdownload",
+        });
+        sqlx::query("update mm_cron set mm_cron_json = $1 where mm_cron_name = 'Trailer';")
+            .bind(json_data)
+            .execute(&mut *transaction)
+            .await?;
+        let json_data: serde_json::Value = json!({
+          "Type": "Update",
+          "route_key": "mkschedulesdirectupdate",
+        });
+        sqlx::query(
+            "update mm_cron set mm_cron_json = $1 where mm_cron_name = 'Schedules Direct';",
+        )
+        .bind(json_data)
+        .execute(&mut *transaction)
+        .await?;
+        let json_data: serde_json::Value = json!({
+          "Type": "Library Scan",
+          "route_key": "mkmediascanner",
+        });
+        sqlx::query("update mm_cron set mm_cron_json = $1 where mm_cron_name = 'Media Scan';")
+            .bind(json_data)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("delete from mm_cron where mm_cron_name = 'Sync';")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("delete from mm_cron where mm_cron_name = 'DB Vacuum';")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("delete from mm_cron where mm_cron_name = 'Retro game data';")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("delete from mm_cron where mm_cron_name = 'Anime';")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("delete from mm_cron where mm_cron_name = 'Collections';")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("delete from mm_cron where mm_cron_name = 'Backup';")
+            .execute(&mut *transaction)
+            .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 73).await?;
+    }
     Ok(true)
 }
 
