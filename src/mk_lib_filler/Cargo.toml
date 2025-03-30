@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_filler"
-version = "0.0.26"
+version = "0.0.29"
 edition = "2024"
 
 [profile.release]

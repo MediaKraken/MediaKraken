@@ -6,6 +6,8 @@ pub struct APIJson {
     pub themoviedb: String,
     pub musicbrainz: Option<String>,
     pub thesportsdb: String,
+    pub upcitemdb: Option<String>,
+    pub barcodespider: Option<String>,
 }
 
 pub async fn mk_lib_database_option_api_read(
