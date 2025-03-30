@@ -228,7 +228,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             )
             .await
             .unwrap();
-        println!("here");
         for download_data in metadata_to_process {
             println!("DL Data: {:?}", download_data);
             // process the "Z" record

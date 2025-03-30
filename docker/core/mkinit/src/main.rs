@@ -10,7 +10,7 @@ use std::process::{Command, Stdio};
 async fn main() -> Result<(), Box<dyn Error>> {
     // create metadata paths, as before the db update will let it finish before
     // other containers can use them
-    if !Path::new(&"/mediakraken/metadata").exists() {
+    if !Path::new(&"/mediakraken/metadata/aa").exists() {
         let output = Command::new("gunzip")
             .args(["/tmp/meta.tar.gz"])
             .stdout(Stdio::piped())
