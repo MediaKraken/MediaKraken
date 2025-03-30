@@ -41,7 +41,7 @@ struct ResponseMetadata {
 #[derive(Deserialize)]
 struct MetadataGeneral {
     id: i32,
-    adult: bool,
+    adult: Option<bool>,
 }
 
 #[tokio::main]
