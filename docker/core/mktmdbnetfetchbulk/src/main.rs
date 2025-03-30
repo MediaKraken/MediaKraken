@@ -41,7 +41,7 @@ struct ResponseMetadata {
 #[derive(Deserialize)]
 struct MetadataGeneral {
     id: i32,
-    _adult: bool,
+    adult: bool,
 }
 
 #[tokio::main]
@@ -69,6 +69,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(payload) = msg.content {
                 let json_message: Value =
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
+                println!(" [x] Received {:?}", json_message);
                 if json_message["Type"] == "Bulk" {
                     // let fetch_date: String = "05_30_2023".to_string();
                     // grab the movie id's
@@ -218,12 +219,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     )
                     .await
                     .unwrap();
+                    println!("one {:?}", url_result);
                     let resp: ResponseMetadata = serde_json::from_str(&url_result.trim()).unwrap();
                     for json_item in resp.results {
                         //for json_item in vec_result.iter() {
-                        //println!("item {}", json_item);
-                        println!("item {}", json_item.id);
-                        //println!("key {:?} item {:?}", json_key, json_item);
+                        println!("movie item {}", json_item.id);
                         // verify it's not already in the database
                         let result =
                             mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_exists_movie(
@@ -268,6 +268,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .unwrap();
                     let resp: ResponseMetadata = serde_json::from_str(&url_result.trim()).unwrap();
                     for json_item in resp.results {
+                        println!("tv item {}", json_item.id);
                         // verify it's not already in the database
                         let result =
                             mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_exists_tv(
@@ -312,6 +313,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .unwrap();
                     let resp: ResponseMetadata = serde_json::from_str(&url_result).unwrap();
                     for json_item in resp.results {
+                        println!("person item {}", json_item.id);
                         // verify it's not already in the database
                         let result =
                             mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_exists_person(
