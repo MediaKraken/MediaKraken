@@ -40,12 +40,13 @@ RUN ldd /usr/bin/psql | tr -s '[:blank:]' '\n' | grep '^/' | \
 FROM scratch
 # otherwise throws file not found error
 ADD alpine-minirootfs-x86_64.tar.gz /
-COPY meta.tar.gz /tmp/
+COPY meta.tar.gz /tmp/meta.tar.gz
 # deps has full /usr/lib/x86_64-linux-gnu path.....hence copy to /
 COPY --from=cargo-build-mkinit /mediakraken/deps/* /
 
-RUN apk update && apk add --no-cache tar \
- && rm -rf /var/cache/apt/*
+RUN apk update && apk add --no-cache gzip tar \
+ && rm -rf /var/cache/apt/* \
+ && chmod -R 777 /tmp
 
 # Import from builder.
 COPY --from=cargo-build-mkinit /etc/passwd /etc/passwd
@@ -59,4 +60,4 @@ COPY --from=cargo-build-mkinit /mediakraken/target/mkinit /mkinit
 COPY scripts /scripts
 
 # Use an unprivileged user.
-USER mediakraken:mediakraken
+#USER mediakraken:mediakraken

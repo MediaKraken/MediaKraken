@@ -10,22 +10,24 @@ use std::process::{Command, Stdio};
 async fn main() -> Result<(), Box<dyn Error>> {
     // create metadata paths, as before the db update will let it finish before
     // other containers can use them
-    if !Path::new(&"/mediakraken/metadata/aa").exists() {
-        let output = Command::new("gunzip")
-            .args(["/tmp/meta.tar.gz"])
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .output()
-            .unwrap();
+    if Path::new(&"/tmp/meta.tar.gz").exists() {
+        println!("Meta file exists")
+    }
+    if Path::new(&"/mediakraken/metadata").exists() {
+        println!("Meta directory exists")
+    }
+    if !Path::new(&"/mediakraken/metadata/backdrop/aa").exists() {
         // untar the tarball to /mediakraken/metadata
         let output = Command::new("tar")
-            .args(["-xf", "/tmp/meta.tar -C /"])
+            .args(["-xzf", "/tmp/meta.tar.gz", "-C", "/mediakraken/metadata"])
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .output()
             .unwrap();
         let stdout: String = String::from_utf8(output.stdout).unwrap();
-        println!("output: {}", stdout);
+        let stderr: String = String::from_utf8(output.stderr).unwrap();
+        println!("tar output: {}", stdout);
+        println!("tar erroutput: {}", stderr);
     }
 
     // connect to db and do a version check and upgrade if needed
