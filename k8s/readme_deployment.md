@@ -64,7 +64,7 @@ Run the following on your deployment node
 ```ansible-galaxy collection install community.kubernetes```
 ```ansible-galaxy collection install cloud.common```
 
-# follow proxmox readme to create control planes and workers
+# follow proxmox readme to create control planes and worker nodes
 tofu init
 tofu plan
 tofu apply
@@ -85,13 +85,20 @@ tofu plan
 tofu apply
 some things might fail....wait a bit for parts to spin up and rerun apply
 
+# longhorn ui auth
+ssh metaman@192.168.1.70
+USER=metaman; PASSWORD=metaman; echo "${USER}:$(openssl passwd -stdin -apr1 <<< ${PASSWORD})" >> auth
+kubectl -n longhorn-system create secret generic basic-auth --from-file=auth
+
 # configure stackgres database cluster
+## get the ui password
 kubectl get secret -n stackgres stackgres-restapi-admin --template '{{ printf "password = %s\n" (.data.clearPassword | base64decode) }}'
 
 ## create db cluster
 https://mkstackgres.beaverbay.local
 ### production profile
-mkdbinstance, 48GB, 12CPU
+mkdbinstance
+prodfile, 48GB, 12CPU
 in the pgcluster config (https://mkstackgres.beaverbay.local/admin/stackgres/sgpgconfig/postgres-16-generated-from-default-1741405922020/edit)
 shared_preload_libraries=pg_stat_statements,auto_explain,timescaledb
 need to restart
@@ -101,7 +108,7 @@ mkdatabase
 3 instances
 version 16 (latest)
 no ssl
-1TB storage, nfs8k class
+500gb storage, nfs8k class (local option now)
 monitoring and prometheus option
 #### new cluster extentions
 pgcrypto
@@ -109,7 +116,7 @@ pg_stat_statements
 pg_trgm
 timescaledb 2.18.2
 vector 0.8.0
-vectorscale 0.3.0 - this only shows up for pg16
+vectorscale 0.6.0 - this only shows up for pg16
 
 # get pg password
 kubectl get secret mkdbinstance --namespace=stackgres --template '{{ printf "%s" (index .data "superuser-password" | base64decode) }}'

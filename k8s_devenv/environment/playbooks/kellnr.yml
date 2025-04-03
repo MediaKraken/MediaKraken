@@ -10,4 +10,4 @@
         --create-namespace --namespace kellnr \
         --set pvc.enabled=true \
         --set pvc.storage=10Gi \
-        --set pvc.storageClassName="nfs-csi"
+        --set pvc.storageClassName=local-path

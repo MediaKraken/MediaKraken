@@ -1,0 +1,17 @@
+---
+- name : Setup longhorn on cluster
+  hosts: mkcontrol1
+  tasks:
+    - name: Setup longhorn repo
+      shell: helm repo add longhorn https://charts.longhorn.io
+  
+    - name: Install longhorn
+      shell: helm install longhorn longhorn/longhorn --namespace longhorn-system --create-namespace --version 1.8.1
+
+    - name: copying file
+      copy:
+        src: ../config/longhorn-ingress.yml
+        dest: ~/longhorn-ingress.yml
+
+    - name: Setup access user for longhorn ui
+      shell: kubectl apply -f ~/longhorn-ingress.yml

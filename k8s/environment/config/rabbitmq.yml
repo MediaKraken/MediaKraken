@@ -21,7 +21,7 @@ spec:
       default_pass=guest
       #log.console.level = debug
   persistence:
-    storageClassName: nfs-csi
+    storageClassName: local-path
     storage: 25Gi
   override:
     statefulSet:

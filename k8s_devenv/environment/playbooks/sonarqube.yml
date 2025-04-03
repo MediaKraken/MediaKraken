@@ -10,4 +10,4 @@
         --set metrics.serviceMonitor.enabled=true \
         --set ingress.enabled=true \
         --set ingress.hostname=mkdevsonarqube \
-        --set global.defaultStorageClass=nfs-csi
+        --set global.defaultStorageClass=local-path

@@ -10,4 +10,4 @@
       shell: helm install docker-registry-integ phntom/docker-registry \
         --create-namespace --namespace docker-registry \
         --set persistence.size=25Gi \
-        --set persistence.storageClass=nfs-csi
+        --set persistence.storageClass=local-path

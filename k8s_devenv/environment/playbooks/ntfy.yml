@@ -11,4 +11,4 @@
     - name: Install ntfy
       shell: helm install ntfy fmjstudios/ntfy --version 0.2.2 \
         --create-namespace --namespace ntfy \
-        --set ntfy.data.pvc.storageClass=nfs-csi
+        --set ntfy.data.pvc.storageClass=local-path

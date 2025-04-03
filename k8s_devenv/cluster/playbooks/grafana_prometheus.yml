@@ -9,7 +9,7 @@
     - name: Install monitoring
       shell: helm install monitoring prometheus-community/kube-prometheus-stack \
         --create-namespace --namespace monitoring \
-        --set global.storageClass=nfs-csi
+        --set global.storageClass=local-path
 
     - name: copying file
       copy:

@@ -9,7 +9,7 @@
     - name: Install gocd
       shell: helm install gocdapp gocd/gocd \
         --create-namespace --namespace gocd \
-        --set server.persistence.storageClass=nfs-csi
+        --set server.persistence.storageClass=local-path
 
     - name: copying file
       copy:

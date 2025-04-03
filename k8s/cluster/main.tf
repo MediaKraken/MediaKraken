@@ -55,13 +55,33 @@ resource "terraform_data" "nginxingress" {
   ]
 }
 
+resource "terraform_data" "localstorage" {
+  # setup the local storage driver
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -e 'ansible_sudo_pass=${var.vm_user_password}' -i inventory.ini playbooks/local_storage.yml"
+  }
+  depends_on = [
+    terraform_data.nginxingress
+  ]
+}
+
+resource "terraform_data" "longhorn" {
+  # setup the longhorn storage driver
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -e 'ansible_sudo_pass=${var.vm_user_password}' -i inventory.ini playbooks/longhorn.yml"
+  }
+  depends_on = [
+    terraform_data.localstorage
+  ]
+}
+
 resource "terraform_data" "nfs" {
   # setup the NFS layer
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -e 'ansible_sudo_pass=${var.vm_user_password}' -i inventory.ini playbooks/nfs.yml"
   }
   depends_on = [
-    terraform_data.nginxingress
+    terraform_data.localstorage
   ]
 }
 

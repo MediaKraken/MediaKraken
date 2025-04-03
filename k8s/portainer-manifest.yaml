@@ -36,7 +36,7 @@ spec:
   resources:
     requests:
       storage: "10Gi"
-  storageClassName: nfs-csi
+  storageClassName: local-path
 ---
 # Source: portainer/templates/rbac.yaml
 apiVersion: rbac.authorization.k8s.io/v1

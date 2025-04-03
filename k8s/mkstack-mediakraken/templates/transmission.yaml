@@ -9,7 +9,7 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: nfs-csi
+  storageClassName: local-path
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -22,7 +22,7 @@ spec:
   resources:
     requests:
       storage: 1Ti
-  storageClassName: nfs-csi
+  storageClassName: local-path
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -35,7 +35,7 @@ spec:
   resources:
     requests:
       storage: 1Ti
-  storageClassName: nfs-csi
+  storageClassName: local-path
 ---
 apiVersion: v1
 kind: Service
