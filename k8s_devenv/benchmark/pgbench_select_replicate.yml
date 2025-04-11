@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    io.kompose.service: pgbench-select-replicate
+  name: pgbench-select-replicate
+  namespace: mkbenchmark
+spec:
+  containers:
+  - name: pgbench-select-replicate
+    image: mediakraken/mkpgbench:dev
+    command: ["pgbench", "-h", "mkdbinstance-replicas.stackgres", "-p", "5432", "-U", "postgres", "-T", "30", "-j", "4", "-c", "12", "-S", "-n", "postgres"]
+    env:
+    - name: PGPASSWORD
+      value: 7a75-c67b-4b0f-9ed
+  restartPolicy: Never

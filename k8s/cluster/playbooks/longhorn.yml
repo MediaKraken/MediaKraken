@@ -13,5 +13,11 @@
         src: ../config/longhorn-ingress.yml
         dest: ~/longhorn-ingress.yml
 
-    - name: Setup access user for longhorn ui
+    - name: Setup ingress for longhorn
       shell: kubectl apply -f ~/longhorn-ingress.yml
+
+    - name: Setup access user for longhorn ui
+      shell: USER=metaman; PASSWORD=metaman; echo "${USER}:$(openssl passwd -stdin -apr1 <<< ${PASSWORD})" >> auth
+
+    - name: Setup secret for ui access
+      shell: kubectl -n longhorn-system create secret generic basic-auth --from-file=auth

@@ -207,6 +207,8 @@ DOCKER_IMAGES = {
 
     'mkelk': ('mkelk', 'test'),
     'mkjenkins': ('mkjenkins', 'test'),
+    'mkpgbench': ('mkpgbench', 'test'),
+    'mkora2pg': ('mkora2pg', 'test'),
     'mkselenium': ('mkselenium', 'test'),
     'mksonatype': ('mksonatype', 'test'),
 }

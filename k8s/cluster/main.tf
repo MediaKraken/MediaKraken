@@ -1,10 +1,18 @@
+resource "terraform_data" "localstoragedisk" {
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -e 'ansible_sudo_pass=${var.vm_user_password}' -i inventory.ini playbooks/local_storage_disks.yml --ssh-common-args='-o StrictHostKeyChecking=accept-new'"
+  }
+}
+
 resource "terraform_data" "kubespray" {
   # create the cluster via kubespray
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory/mkcluster/inventory.ini cluster.yml --ssh-common-args='-o StrictHostKeyChecking=accept-new'"
     working_dir = "../../../kubespray"
-    # ansible-playbook -b -v -u ${var.vm_user} -i inventory/mkcluster/inventory.ini scale.yml --ssh-common-args='-o StrictHostKeyChecking=accept-new' --flush-cache -l mkworker4
   }
+  depends_on = [
+    terraform_data.localstoragedisk
+  ]
 }
 
 resource "terraform_data" "kubeconfig" {

@@ -12,7 +12,7 @@ metadata:
   name: local-pv
 spec:
   capacity:
-    storage: 900Gi
+    storage: 500Gi
   volumeMode: Filesystem # Mount volume into Pod as a directory.
   accessModes:
   - ReadWriteMany
