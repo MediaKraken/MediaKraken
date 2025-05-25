@@ -8,6 +8,12 @@
     - name: Install longhorn
       shell: helm install longhorn longhorn/longhorn --namespace longhorn-system --create-namespace --version 1.8.1
 
+    # - name: Setup access user for longhorn ui
+    #   shell: USER=metaman; PASSWORD=metaman; echo "${USER}:$(openssl passwd -stdin -apr1 <<< ${PASSWORD})" >> auth
+
+    # - name: Setup secret for ui access
+    #   shell: kubectl -n longhorn-system create secret generic basic-auth --from-file=auth
+
     - name: copying file
       copy:
         src: ../config/longhorn-ingress.yml
@@ -16,8 +22,4 @@
     - name: Setup ingress for longhorn
       shell: kubectl apply -f ~/longhorn-ingress.yml
 
-    - name: Setup access user for longhorn ui
-      shell: USER=metaman; PASSWORD=metaman; echo "${USER}:$(openssl passwd -stdin -apr1 <<< ${PASSWORD})" >> auth
-
-    - name: Setup secret for ui access
-      shell: kubectl -n longhorn-system create secret generic basic-auth --from-file=auth
+# kubectl -n longhorn-system get svc

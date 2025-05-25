@@ -16,27 +16,27 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_common = { version = "0.0.35", registry = "kellnr" }
-mk_lib_database = { version = "0.0.66", registry = "kellnr" }
-mk_lib_file = { version = "0.0.44", registry = "kellnr", features=["smb"] }
+mk_lib_common = { version = "0.0.36", registry = "kellnr" }
+mk_lib_database = { version = "0.0.67", registry = "kellnr" }
+mk_lib_file = { version = "0.0.45", registry = "kellnr", features=["smb"] }
    # features=["nfs", "smb"] }
-mk_lib_rabbitmq = { version = "0.0.39", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.40", registry = "kellnr" }
 
-chrono = { version = "0.4.40", features = ["serde"] }
+chrono = { version = "0.4.41", features = ["serde"] }
 fancy-regex = "0.14.0"
 lazy_static = "1.5.0"
 num-format = "0.4.4"
-reqwest = { version = "0.12.14", default-features = false, features = [
+reqwest = { version = "0.12.15", default-features = false, features = [
     "json",
     "rustls-tls",
 ] }
-rustls = "0.23.23"
+rustls = "0.23.27"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 stdext = "0.3.3"
 sys-info = "0.9.1"
-tokio = { version = "1.44.1", features = ["full"] }
-uuid = { version = "1.16.0", features = ["serde", "v4", "v7"] }
+tokio = { version = "1.45.1", features = ["full"] }
+uuid = { version = "1.17.0", features = ["serde", "v4", "v7"] }
 walkdir = "2.5.0"
 
 [dev-dependencies]

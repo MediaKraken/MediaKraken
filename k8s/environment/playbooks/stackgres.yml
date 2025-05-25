@@ -27,3 +27,5 @@
 # kubectl wait -n stackgres deployment -l group=stackgres.io --for=condition=Available
 
 # helm delete stackgres-operator --namespace stackgres
+
+# helm upgrade -n "stackgres" "stackgres-operator" https://stackgres.io/downloads/stackgres-k8s/stackgres/1.16.1/helm/stackgres-operator.tgz

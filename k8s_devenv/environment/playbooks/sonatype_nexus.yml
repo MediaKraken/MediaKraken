@@ -16,4 +16,4 @@
         --set metrics.enabled=true \
         --set metrics.serviceMonitor.enabled=true
 
-# enter pod and in /nexus-date/admin.password
+# enter pod and in /opt/sonatype/sonatype-work/nexus3/admin.password

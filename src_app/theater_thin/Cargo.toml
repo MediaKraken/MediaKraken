@@ -12,8 +12,8 @@ codegen-units = 1
 [dependencies]
 mk_lib_network = { version="0.0.15", registry = "kellnr" }
 
-fltk = { version = "1.5.4", features = ["fltk-bundled"] }
-reqwest = { version = "0.12.14", default-features = false, features = [
+fltk = { version = "1.5.8", features = ["fltk-bundled"] }
+reqwest = { version = "0.12.15", default-features = false, features = [
     "json",
     "rustls-tls",
 ] }

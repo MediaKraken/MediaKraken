@@ -85,11 +85,6 @@ tofu plan
 tofu apply
 some things might fail....wait a bit for parts to spin up and rerun apply
 
-# longhorn ui auth
-ssh metaman@192.168.1.70
-USER=metaman; PASSWORD=metaman; echo "${USER}:$(openssl passwd -stdin -apr1 <<< ${PASSWORD})" >> auth
-kubectl -n longhorn-system create secret generic basic-auth --from-file=auth
-
 # configure stackgres database cluster
 ## get the ui password
 kubectl get secret -n stackgres stackgres-restapi-admin --template '{{ printf "password = %s\n" (.data.clearPassword | base64decode) }}'

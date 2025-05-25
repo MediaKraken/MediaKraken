@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_metadata"
-version = "0.0.47"
+version = "0.0.48"
 edition = "2024"
 
 [profile.release]
@@ -11,13 +11,13 @@ codegen-units = 1
 
 [dependencies]
 mk_lib_common = { version="0.0.11", registry = "kellnr" }
-mk_lib_database = { version = "0.0.66", registry = "kellnr" }
+mk_lib_database = { version = "0.0.67", registry = "kellnr" }
 mk_lib_hash = { version="0.0.9", registry = "kellnr" }
 mk_lib_network = { version="0.0.15", registry = "kellnr" }
 
 discid = { version = "0.5.0", optional = true }
 flickr = "0.1.1"
-hls_m3u8 = "0.5.0"
+hls_m3u8 = "0.5.1"
 id3 = "1.16.2"
 #lib-mal = "0.5.1"  # myanimelist
 mangadex = "0.1.2"
@@ -25,12 +25,12 @@ mangadex = "0.1.2"
 nonzero_ext = "0.3.0"
 omdb = "0.3.2"
 open-library = "0.7.1"
-rand = "0.9.0"
+rand = "0.9.1"
 reqwest = "0.12.15"
 # rusty_ytdl = "0.6.2"  # breaks sscache
 select = "0.6.1"
 serde_json = "1.0.140"
-sqlx = { version = "0.8.3", features = [
+sqlx = { version = "0.8.6", features = [
     "chrono",
     "ipnetwork",
     "json",
@@ -40,17 +40,17 @@ sqlx = { version = "0.8.3", features = [
 ] }
 soundcloud = "0.4.0"
 substring = "1.4.5"
-tokio = "1.44.1"
-tokio-util = { version = "0.7.14", features = ["compat"] }
+tokio = "1.45.1"
+tokio-util = { version = "0.7.15", features = ["compat"] }
 torrent-name-parser = "0.12.1"
-twitch_api = { version = "0.7.1", features = [
+twitch_api = { version = "0.7.2", features = [
     "client",
     "helix",
     "reqwest",
     "twitch_oauth2",
 ] }
 twitch_oauth2 = "0.15.2"
-uuid = { version = "1.16.0", features = ["serde", "v4"] }
+uuid = { version = "1.17.0", features = ["serde", "v4"] }
 vimeo-rs = { version = "0.2.1" }
 
 [features]

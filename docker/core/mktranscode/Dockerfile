@@ -46,7 +46,7 @@ ARG LIBMFX=22.5.4
 # LIBVA=2.18.0 - 2.18.0-r1
 # LIBVDPAU=1.5 - 1.5-r1
 # https://github.com/georgmartius/vid.stab
-ARG LIBVIDSTAB=1.1.1
+# ARG LIBVIDSTAB=1.1.1 - eol basically
 # https://github.com/Netflix/vmaf
 ARG LIBVMAF=3.0.0
 # https://github.com/oneapi-src/oneVPL
@@ -202,14 +202,14 @@ RUN buildDeps="autoconf \
       make -j`getconf _NPROCESSORS_ONLN` && \
       make install
 
-    # vistab
-    RUN echo "Begin: vistab" && \
-      DIR=$(mktemp -d) && cd ${DIR} && \
-      curl -L --insecure https://github.com/georgmartius/vid.stab/archive/refs/tags/v${LIBVIDSTAB}.tar.gz | \
-      tar -zx --strip-components=1 && \
-      cmake . && \
-      make -j`getconf _NPROCESSORS_ONLN` && \
-      make install
+    # # vistab
+    # RUN echo "Begin: vistab" && \
+    #   DIR=$(mktemp -d) && cd ${DIR} && \
+    #   curl -L --insecure https://github.com/georgmartius/vid.stab/archive/refs/tags/v${LIBVIDSTAB}.tar.gz | \
+    #   tar -zx --strip-components=1 && \
+    #   cmake . && \
+    #   make -j`getconf _NPROCESSORS_ONLN` && \
+    #   make install
 
     # # GMMLIB
     # RUN echo "Begin: gmmlib" && \
@@ -351,7 +351,6 @@ RUN buildDeps="autoconf \
           --enable-libtheora \
           --enable-libwebp \
           --enable-vaapi \
-          --enable-libvidstab \
           --enable-libvmaf \          
           --enable-libvorbis \
           --enable-libvpl \          
