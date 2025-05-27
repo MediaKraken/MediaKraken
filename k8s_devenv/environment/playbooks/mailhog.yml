@@ -12,5 +12,5 @@
         dest: ~/mailhog_values.yml
 
     - name: Install mailhog
-      shell: helm install --values=~/mailhog_values.yml mailhog codecentric/mailhog \
+      shell: helm install --values=/root/mailhog_values.yml mailhog codecentric/mailhog \
         --create-namespace --namespace mailhog
