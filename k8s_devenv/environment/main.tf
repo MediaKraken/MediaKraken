@@ -52,15 +52,6 @@ resource "terraform_data" "kellnr" {
   ]
 }
 
-# resource "terraform_data" "plane" {
-#   provisioner "local-exec" {
-#     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/plane.yml"
-#   }
-#   depends_on = [
-#     terraform_data.kellnr
-#   ]
-# }
-
 resource "terraform_data" "sftp" {
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/sftp.yml"
