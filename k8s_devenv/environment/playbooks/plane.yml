@@ -13,11 +13,11 @@
         --set planeVersion=stable \
         --set ingress.appHost="mkdevplane.beaverbay.local" \
         --set ingress.ingressClass=nginx \
-        --set env.storageClass=local-path \
-        --set postgres.storageClass=local-path \
-        --set redis.storageClass=local-path \
-        --set minio.storageClass=local-path \
-        --set rabbitmq.storageClass=local-path \
+        --set env.storageClass=longhorn \
+        --set postgres.storageClass=longhorn \
+        --set redis.storageClass=longhorn \
+        --set minio.storageClass=longhorn \
+        --set rabbitmq.storageClass=longhorn \
         --timeout 10m \
         --wait \
         --wait-for-jobs

@@ -9,8 +9,8 @@
     - name: Install harbor
       shell: helm install my-harbor bitnami/harbor --version 26.0.2 \
         --create-namespace --namespace harbor \
-        --set global.defaultStorageClass=local-path \
-        --set externalURL=k8sharbor.beaverbay.local \
+        --set global.defaultStorageClass=longhorn \
+        --set externalURL=mkdevharbor.beaverbay.local \
         --set exposureType=ingress \
         --set persistence.enabled=true \
-        --set persistence.persistentVolumeClaim.registry.storageClass=local-path
+        --set persistence.persistentVolumeClaim.registry.storageClass=longhorn

@@ -9,7 +9,7 @@
     - name: Install jenkins
       shell: helm install my-jenkins bitnami/jenkins --version 13.4.19 \
         --create-namespace --namespace jenkins \
-        --set global.defaultStorageClass=local-path \
+        --set global.defaultStorageClass=longhorn \
         --set jenkinsUser=admin \
         --set jenkinsPassword=metaman
 

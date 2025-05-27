@@ -14,4 +14,4 @@
         --set artifactory.nginx.enabled=false \
         --set artifactory.ingress.enabled=true \
         --set artifactory.ingress.hosts[0]="mkdevjfrog.beaverbay.local" \
-        --set artifactory.persistence.storageClassName=local-path
+        --set artifactory.persistence.storageClassName=longhorn
