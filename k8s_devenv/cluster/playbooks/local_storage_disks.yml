@@ -1,0 +1,43 @@
+---
+- name : Setup local disks
+  hosts: kube_node
+  tasks:
+    - name: Install lvm2 and iscsi
+      shell: sudo apt install -y lvm2 open-iscsi && sudo systemctl enable iscsid && sudo systemctl start iscsid
+      become: true
+      become_method: sudo
+
+    - name: Create vg
+      shell: sudo vgcreate vgk8s1 /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi1
+      become: true
+      become_method: sudo
+
+    - name: Create lv
+      shell: sudo lvcreate -l 100%VG -n vgk8s1lv vgk8s1
+      become: true
+      become_method: sudo
+
+    - name: Create file system
+      shell: sudo mkfs.ext4 /dev/vgk8s1/vgk8s1lv
+      become: true
+      become_method: sudo
+
+    - name: Update fstab
+      shell: sudo echo "/dev/mapper/vgk8s1-vgk8s1lv /mnt/volume/disk1 ext4 defaults 0 0" >> /etc/fstab && sudo systemctl daemon-reload
+      become: true
+      become_method: sudo
+
+    - name: Create mount points
+      shell: sudo mkdir -p /mnt/volume/disk1
+      become: true
+      become_method: sudo
+
+    - name: Mount disks
+      shell: sudo mount -a
+      become: true
+      become_method: sudo
+
+    - name: Change rights
+      shell: sudo chmod 777 /mnt/volume/disk1
+      become: true
+      become_method: sudo

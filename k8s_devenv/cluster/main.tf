@@ -1,9 +1,18 @@
+resource "terraform_data" "localstoragedisk" {
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -e 'ansible_sudo_pass=${var.vm_user_password}' -i inventory.ini playbooks/local_storage_disks.yml --ssh-common-args='-o StrictHostKeyChecking=accept-new'"
+  }
+}
+
 resource "terraform_data" "kubespray" {
   # create the cluster via kubespray
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory/mkclusterdev/inventory.ini cluster.yml --ssh-common-args='-o StrictHostKeyChecking=accept-new'"
     working_dir = "../../../kubespray"
   }
+  depends_on = [
+    terraform_data.localstoragedisk
+  ]
 }
 
 resource "terraform_data" "kubeconfig" {
@@ -19,7 +28,7 @@ resource "terraform_data" "kubeconfig" {
 resource "terraform_data" "helm" {
   # setup helm
   provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/helm.yml"
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/helm_version.yml"
   }
   depends_on = [
     terraform_data.kubeconfig
@@ -54,13 +63,33 @@ resource "terraform_data" "nginxingress" {
   ]
 }
 
+resource "terraform_data" "localstorage" {
+  # setup the local storage driver
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -e 'ansible_sudo_pass=${var.vm_user_password}' -i inventory.ini playbooks/local_path_storage.yml"
+  }
+  depends_on = [
+    terraform_data.nginxingress
+  ]
+}
+
+resource "terraform_data" "longhorn" {
+  # setup the longhorn storage driver
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -e 'ansible_sudo_pass=${var.vm_user_password}' -i inventory.ini playbooks/longhorn.yml"
+  }
+  depends_on = [
+    terraform_data.localstorage
+  ]
+}
+
 resource "terraform_data" "nfs" {
   # setup the NFS layer
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -e 'ansible_sudo_pass=${var.vm_user_password}' -i inventory.ini playbooks/nfs.yml"
   }
   depends_on = [
-    terraform_data.nginxingress
+    terraform_data.longhorn
   ]
 }
 

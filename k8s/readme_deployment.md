@@ -121,6 +121,10 @@ import 10991
 
 # had to do the dragonfly db yml by hand and it fired up
 
+# longhorn
+add disks to each nodes
+/mnt/volume/disk1
+
 <!-- # stuff below to do
 # stuff to add to MK
 https://operatorhub.io/operator/elastic-cloud-eck

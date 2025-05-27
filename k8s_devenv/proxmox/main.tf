@@ -120,6 +120,12 @@ resource "proxmox_vm_qemu" "mkworkerdev" {
           storage = var.storage_name
         }
       }
+      scsi1 {
+        disk {
+          size    = "1024G"
+          storage = var.storage_name
+        }
+      }
     }
   }
 
