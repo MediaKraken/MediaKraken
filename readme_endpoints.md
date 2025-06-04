@@ -7,7 +7,7 @@
 ## jenkins
 ### mkdevjenkins.beaverbay.local
 ## nexus artifactory - 404 ERROR!!!!!!!
-mkdevnexus.beaverbay.local
+mkdevnexus.beaverbay.local:8081
 ## kellnr repo - NO CONNECT
 mkdevkellnr.beaverbay.local
 http://mkdevkellnr:8000/api/v1/crates/

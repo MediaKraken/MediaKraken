@@ -1,0 +1,16 @@
+---
+# https://artifacthub.io/packages/helm/wekan/wekan
+- name : Setup wekan on cluster
+  hosts: mkcontroldev1
+  tasks:
+    - name: Add repo
+      shell: helm repo add wekan https://wekan.github.io/charts/
+
+    - name: Install wekan
+      shell: helm install wekan wekan/wekan --version 7.91.0 \
+        --create-namespace --namespace wekan \
+        --set autoscaling.enabled=false \
+        --set service.type=LoadBalancer \
+        --set endpoint=mkdevwekan.beaverbay.local \
+        --set root_url=https://mkdevwekan.beaverbay.local \
+        --set ingress.hosts[0]=mkdevwekan.beaverbay.local
