@@ -1,0 +1,12 @@
+---
+# https://artifacthub.io/packages/helm/gitlab/gitlab
+- name : Setup gitlab on cluster
+  hosts: mkcontroldev1
+  tasks:
+    - name: Add repo
+      shell: helm repo add gitlab http://charts.gitlab.io/
+
+    - name: Install gitlab
+      shell: helm install my-gitlab gitlab/gitlab --version 9.0.1 \
+        --create-namespace --namespace gitlab \
+        --set certmanager-issuer.email=spootdev@gmail.com

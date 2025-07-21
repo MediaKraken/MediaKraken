@@ -16,10 +16,10 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_common = { version = "0.0.36", registry = "kellnr" }
-mk_lib_database = { version = "0.0.67", registry = "kellnr" }
-mk_lib_metadata = { version = "0.0.48", registry = "kellnr" }
-mk_lib_network = { version = "0.0.37", registry = "kellnr" }
+mk_lib_common = { version = "0.0.37", registry = "kellnr" }
+mk_lib_database = { version = "0.0.68", registry = "kellnr" }
+mk_lib_metadata = { version = "0.0.49", registry = "kellnr" }
+mk_lib_network = { version = "0.0.38", registry = "kellnr" }
 
 chrono = { version = "0.4.41", features = ["serde"] }
 flate2 = "1.1.1"
@@ -30,7 +30,7 @@ nonzero_ext = "0.3.0"
 open-library = "0.7.1"
 rand = "0.9.1"
 ratelimit = "0.10.0"
-reqwest = { version = "0.12.15", default-features = false, features = [
+reqwest = { version = "0.12.22", default-features = false, features = [
     "json",
     "native-tls",
 ] }
@@ -49,7 +49,7 @@ stdext = "0.3.3"
 substring = "1.4.5"
 sys-info = "0.9.1"
 tar = "0.4.41"
-tokio = { version = "1.45.1", features = ["full"] }
+tokio = { version = "1.46.1", features = ["full"] }
 torrent-name-parser = "0.12.1"
 uuid = { version = "1.17.0", features = ["serde", "v4", "v7"] }
 md-5 = "0.10.6"

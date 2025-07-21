@@ -19,17 +19,17 @@ codegen-units = 1
 chrono = { version = "0.4.41", features = ["serde"] }
 # 0.31.0 breaks datalink
 pnet = "0.30.0"
-reqwest = { version = "0.12.15", default-features = false, features = [
+reqwest = { version = "0.12.22", default-features = false, features = [
     "json",
     "rustls-tls",
 ] }
-serde_json = "1.0.140"
+serde_json = "1.0.141"
 shiplift = { version = "0.7", default-features = false, features = [
     "unix-socket",
 ] }
 socket2 = { version = "0.5.9", features = ["all"] }
 stdext = "0.3.3"
-tokio = { version = "1.45.1", features = ["full"] }
+tokio = { version = "1.46.1", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"

@@ -16,12 +16,12 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { version = "0.0.67", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.40", registry = "kellnr" }
+mk_lib_database = { version = "0.0.68", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.41", registry = "kellnr" }
 
 chrono = { version = "0.4.41", features = ["serde"] }
-serde_json = "1.0.140"
-tokio = { version = "1.45.1", features = ["full"] }
+serde_json = "1.0.141"
+tokio = { version = "1.46.1", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"

@@ -1,6 +1,6 @@
 # dev environment
 ## k8s dashboard
-### mkdev.beaverbay.local
+### https://mkdev.beaverbay.local
 #### kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
 ## grafana dashboard
 ### mkdevgrafana.beaverbay.local
@@ -31,7 +31,7 @@ mkdevharbor.beaverbay.local
 
 # prod environment
 ## k8s dashboard
-mkk8s.beaverbay.local 	192.168.1.86
+https://mkk8s.beaverbay.local 	192.168.1.86
 ## grafana dashboard
 mkgrafana.beaverbay.local
 ## stackgres ui

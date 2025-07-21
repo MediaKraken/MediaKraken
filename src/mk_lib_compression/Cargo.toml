@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_compression"
-version = "0.0.35"
+version = "0.0.36"
 edition = "2024"
 
 [profile.release]
@@ -10,10 +10,10 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-flate2 = "1.1.1"
-serde_json = "1.0.140"
+flate2 = "1.1.2"
+serde_json = "1.0.141"
 tar = "0.4.44"
-zip = "4.0.0"
+zip = "4.3.0"
 
 [dev-dependencies]
 tokio-test = "*"

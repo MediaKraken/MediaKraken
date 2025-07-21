@@ -16,24 +16,24 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_compression = { version = "0.0.35", registry = "kellnr" }
-mk_lib_hash = { version = "0.0.40", registry = "kellnr" }
-mk_lib_network = { version = "0.0.37", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.40", registry = "kellnr" }
+mk_lib_compression = { version = "0.0.36", registry = "kellnr" }
+mk_lib_hash = { version = "0.0.41", registry = "kellnr" }
+mk_lib_network = { version = "0.0.38", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.41", registry = "kellnr" }
 
 chrono = { version = "0.4.41", features = ["serde"] }
 crc32fast = "1.4.2"
 flate2 = "1.1.1"
-reqwest = { version = "0.12.15", default-features = false, features = [
+reqwest = { version = "0.12.22", default-features = false, features = [
     "json",
     "native-tls",
 ] }
 serde = { version = "1.0.219", features = ["derive"] }
-serde_json = "1.0.140"
+serde_json = "1.0.141"
 stdext = "0.3.3"
 sys-info = "0.9.1"
 tar = "0.4.44"
-tokio = { version = "1.45.1", features = ["full"] }
+tokio = { version = "1.46.1", features = ["full"] }
 walkdir = "2.5.0"
 uuid = { version = "1.17.0", features = ["serde", "v4", "v7"] }
 
