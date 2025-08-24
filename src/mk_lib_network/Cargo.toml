@@ -22,17 +22,17 @@ futures = "0.3.31"
 futures-util = "0.3.31"
 #governor = "0.6.3"
 ibverbs = { version = "0.9.2", optional = true } # since docker, no infiniband
-igd-next = "0.16.1"
+igd-next = "0.16.2"
 # ipnet = "2.7.2"
 ldap3 = "0.11.5"
-lettre = "0.11.17"
+lettre = "0.11.18"
 mini-telnet = "0.1.8"
 nonzero_ext = "0.3.0"
 openweathermap_client = "0.6.0"
 phf = { version = "0.12.1", features = ["macros"] }
 pin-utils = "0.1.0"
 quickxml_to_serde = { version = "0.6.0", features = ["json_types"] }
-reqwest = { version = "0.12.22", default-features = false, features = [
+reqwest = { version = "0.12.23", default-features = false, features = [
     "json",
     "native-tls",
 ] }
@@ -41,12 +41,12 @@ reqwest-retry = "0.7.0"
 rss = "2.0.12"
 rsteam = "0.2.1"
 serde = { version = "1.0.219", features = ["derive"] }
-serde_json = "1.0.141"
+serde_json = "1.0.143"
 serialport = "4.7.2"
 ssh-rs = { version = "0.5.0", features = ["scp"] }
 suppaftp = { version = "6.3.0", features = ["native-tls"] }
 surge-ping = "0.8.2"
-tokio = { version = "1.46.1", features = ["full"] }
+tokio = { version = "1.47.1", features = ["full"] }
 transmission-rpc = "0.5.0"
 wakey = "0.3.0"
 

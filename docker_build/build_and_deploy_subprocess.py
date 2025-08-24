@@ -102,6 +102,7 @@ if args.image is not None:
             pid_push_proc.wait()
     if args.email:
         # send success/fail email
+        os.getenv()
         network_email.com_net_send_email(os.environ['MAILUSER'],
                                          os.environ['MAILPASS'],
                                          os.environ['MAILUSER'],

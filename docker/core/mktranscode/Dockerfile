@@ -30,7 +30,6 @@ ARG FDKAAC_VERSION=2.0.3
 ARG FFMPEG_VERSION=7.1.1
 # FONTCONFIG=2.14.2 - 2.14.2-r3
 # FREETYPE=2.12.1 - 2.13.0-r5
-# TODO FRIBIDI=1.0.13  <- why is hebrew lang needed?
 # https://github.com/intel/gmmlib
 #ARG GMMLIB=22.3.16
 # https://github.com/intel/media-driver

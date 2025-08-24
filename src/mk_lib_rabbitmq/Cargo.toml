@@ -12,7 +12,7 @@ codegen-units = 1
 [dependencies]
 amqprs = "2.1.2"
 sys-info = "0.9.1"
-tokio = "1.46.1"
+tokio = "1.47.1"
 
 [dev-dependencies]
 tokio-test = "*"
