@@ -10,13 +10,13 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-anyhow = "1.0.98"
-clap = "4.5.41"
+anyhow = "1.0.99"
+clap = "4.5.47"
 cpal = "0.16.0"  # libasound2-dev
-fltk = { version = "1.5.9", features = ["fltk-bundled"] }
+fltk = { version = "1.5.14", features = ["fltk-bundled"] }
 fltk-webview = "0.4.3"  # libwebkit2gtk-4.1-dev
 hound = "3.5.1"
-serde_json = "1.0.141"
+serde_json = "1.0.143"
 
 [dev-dependencies]
 tokio-test = "*"

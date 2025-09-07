@@ -1,5 +1,5 @@
 [package]
-name = "pi_audio"
+name = "mktestmarantz"
 version = "0.0.1"
 edition = "2024"
 
@@ -10,8 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-fltk = { version = "1.5.14", features = ["fltk-bundled"] }
-sqlite = "0.37.0"
-
-[dev-dependencies]
+mk_lib_network = { path = "../../src/mk_lib_network" }
+telnet = "0.2.4"
+tokio = { version = "1.47.1", features = ["full"] }
 tokio-test = "*"

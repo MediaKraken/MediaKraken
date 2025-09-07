@@ -38,3 +38,7 @@ for filename in glob('../src/mk_lib*/Cargo.toml', recursive=True):
 # loop through docker images
 for filename in glob('../docker/core/mk*/Cargo.toml', recursive=True):
     sed_file(filename)
+
+# loop through app directory
+for filename in glob('../src_app/*/Cargo.toml', recursive=True):
+    sed_file(filename)

@@ -33,6 +33,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let bytes_image_books = include_bytes!("../../../docker/core/mkwebaxum/static/image/books.png");
     let bytes_image_settings =
         include_bytes!("../../../docker/core/mkwebaxum/static/image/settings.png");
+    let bytes_image_return = include_bytes!("../../../docker/core/mkwebaxum/static/image/navigation/return.png");
 
     let _server_list =
         mk_lib_network::mk_lib_network_mediakraken::mk_lib_network_find_mediakraken_server();
@@ -109,8 +110,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut window_settings = Window::default().with_size(800, 480);
     let mut button_settings_back = Button::new(666, 384, 133, 96, "Back");
-    let mut image =
-        SharedImage::load("../../docker/core/mkwebaxum/static/image/navigation/return.png")?;
+    let mut image = fltk::image::PngImage::from_data(bytes_image_return)?;
     image.scale(133, 96, true, true);
     button_settings_back.set_image(Some(image));
     window_settings.end();

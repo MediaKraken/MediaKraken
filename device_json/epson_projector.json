@@ -1,0 +1,76 @@
+{
+    "Manufacturer": "Epson",
+    "Item Type": "Projector",
+    "Model Support":
+        {
+        "5030": "PowerLite Home Cinema 5030",
+        "5030UB": "PowerLite Home Cinema 5030 Ultra Black",
+        "4030": "ProCinema 4030"
+        },
+    "Protocol":
+        {
+            "Method:": "LAN",
+    "Power":
+        {
+        "On": "PWR ON",
+        "Off": "PWR OFF"
+        },
+    "Query":
+        {
+        "Aspect Ratio": "ASPECT?",
+        "Aspect Ratio-Result":
+            {
+            "00": "Normal",
+            "30": "Auto",
+            "40": "Full",
+            "50": "Zoom"
+            },
+        "Brightness": "BRIGHT?",
+        "Color Mode": "CMODE?",
+        "Color Mode-Result":
+            {
+            "06": "Dynamic",
+            "07": "Natural",
+            "0C": "Living",
+            "13": "THX",
+            "15": "Cinema",
+            "17": "3D Cinema",
+            "18": "3D Dynamic",
+            "19": "3D THX",
+            "20": "B&W Cinema",
+            "INIT": "Setting Only"
+            },
+        "Color Temp": "CTEMP?",
+        "Contrast": "CONTRAST?",
+        "Density": "DENSITY?",
+        "Gain Green": "GAING?",
+        "Gain Blue": "GAINB?",
+        "Gain Red": "GAINR?",
+        "Lamp Hours": "LAMP?",
+        "Overscan Ratio": "OVSCAN?",
+        "Overscan Ratio-Response":
+            {
+            "00": "Off",
+            "01": "2%",
+            "02": "4%",
+            "03": "6%",
+            "04": "8%",
+            "A0": "Auto",
+            "INIT": "Setting Only"
+            },
+        "Power State": "PWR?",
+        "Power State-Results":
+            {
+            "00": "Standby Mode (Network OFF)",
+            "01": "Lamp ON",
+            "02": "Warmup",
+            "03": "Cooldown",
+            "05": "Abnormality Standby",
+            "07": "WirelessHD Standby"
+            },
+        "Serial Number": "SNO?",
+        "Sharpness": "Null",
+        "Tint (Video)": "TINT?"
+        }
+    }
+}

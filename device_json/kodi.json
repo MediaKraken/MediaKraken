@@ -1,0 +1,70 @@
+{
+    "Manufacturer": "Base",
+    "Item Type": "PC",
+    "Protocol":
+        {
+        "Method:": "Kodi",
+        "Baud Rate": "9600",
+        "Data Length": "8",
+        "Parity Bit": "None",
+        "Start Bit": None,
+        "Stop Bit": "1",
+        "Flow Control": "None",
+        "Emulation": None,
+        "Transmission Method": None,
+        "Hardware Port": None,
+        "Host IP": None,
+        "Host Port": "9090",
+        "User": None,
+        "Password": None
+        },
+    "Model Support":
+        {
+        "Kodi": "Kodi Multimedia Client"
+        },
+    "Misc":
+        {
+        "OSD": "False|{\"jsonrpc\": \"2.0\", \"method\": \"Input.ShowOSD\"}",
+        },
+    "Navigation":
+        {
+        "Up": "False|{\"jsonrp\": \"2.0\", \"method\":\"Input.U\"}",
+        "Down": "False|{\"jsonrpc\": \"2.0\", \"method\": \"Input.Down\"}",
+        "Right": "False|{\"jsonrpc\": \"2.0\", \"method\": \"Input.Right\"}",
+        "Left": "False|{\"jsonrpc\": \"2.0\", \"method\": \"Input.Left\"}",
+        "Back": "False|{\"jsonrpc\": \"2.0\", \"method\": \"Input.Back\"}",
+        "Home": "False|{\"jsonrpc\": \"2.0\", \"method\": \"Input.Home\"}",
+        "Show Context": "False|{\"jsonrpc\": \"2.0\", \"method\": \"Input.ContextMenu\"}",
+        "Enter/Ok": "False|{\"jsonrpc\": \"2.0\", \"method\": \"Input.Select\"}",
+        "Play": "True|{\"jsonrpc\": \"2.0\", \"method\": \"Player.PlayPause\", \"params\": { \"playerid\": 1 , \"play\": true}, \"id\": 1}",
+        "Pause": "True|{\"jsonrpc\": \"2.0\", \"method\": \"Player.PlayPause\", \"params\": { \"playerid\": 1 , \"play\": false}, \"id\": 1}"
+        },
+    "Sound":
+        {
+        "Mute": "False|{\"jsonrpc\":\"2.0\",\"method\":\"Application.SetMute\",\"params\":{\"mute\":\"toggle\"}}",
+        },
+    "Query":
+        {
+        "Library":
+            {
+            "Media":
+                {
+                "Albums": "True|{\"jsonrpc\": \"2.0\", \"method\": \"AudioLibrary.GetAlbums\", \"params\": { \"limits\": { \"start\" : 0, \"end\": 50 }, \"properties\": [\"playcount\", \"artist\", \"genre\", \"rating\", \"thumbnail\", \"year\", \"mood\", \"style\"], \"sort\": { \"order\": \"ascending\", \"method\": \"album\", \"ignorearticle\": true } }, \"id\": \"libAlbums\"}",
+                "Artists": "True|{\"jsonrpc\": \"2.0\", \"method\": \"AudioLibrary.GetArtists\", \"params\": { \"limits\": { \"start\" : 0, \"end\": 75 }, \"properties\": [ \"thumbnail\", \"fanart\", \"born\", \"formed\", \"died\", \"disbanded\", \"yearsactive\", \"mood\", \"style\", \"genre\" ], \"sort\": { \"order\": \"ascending\", \"method\": \"artist\", \"ignorearticle\": true } }, \"id\": 1}",
+                "Movies": "True|{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMovies\", \"params\": { \"filter\": {\"field\": \"playcount\", \"operator\": \"is\", \"value\": \"0\"}, \"limits\": { \"start\" : 0, \"end\": 75 }, \"properties\" : [\"art\", \"rating\", \"thumbnail\", \"playcount\", \"file\"], \"sort\": { \"order\": \"ascending\", \"method\": \"label\", \"ignorearticle\": true } }, \"id\": \"libMovies\"}",
+                "Music Videos": "True|{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetMusicVideos\", \"params\": { \"properties\": [ \"title\", \"thumbnail\", \"artist\", \"album\", \"genre\", \"lastplayed\", \"year\", \"runtime\", \"fanart\", \"file\", \"streamdetails\" ], \"sort\": { \"order\": \"ascending\", \"method\": \"artist\", \"ignorearticle\": true } }, \"id\": \"libMusicVideos\"}",
+                "Songs": "True|{\"jsonrpc\": \"2.0\", \"method\": \"AudioLibrary.GetSongs\", \"params\": { \"limits\": { \"start\" : 0, \"end\": 25 }, \"properties\": [ \"artist\", \"duration\", \"album\", \"track\" ], \"sort\": { \"order\": \"ascending\", \"method\": \"track\", \"ignorearticle\": true } }, \"id\": \"libSongs\"}",
+                "TV Shows": "True|{\"jsonrpc\": \"2.0\", \"method\": \"VideoLibrary.GetTVShows\", \"params\": { \"filter\": {\"field\": \"playcount\", \"operator\": \"is\", \"value\": \"0\"}, \"limits\": { \"start\" : 0, \"end\": 75 }, \"properties\": [\"art\", \"genre\", \"plot\", \"title\", \"originaltitle\", \"year\", \"rating\", \"thumbnail\", \"playcount\", \"file\", \"fanart\"], \"sort\": { \"order\": \"ascending\", \"method\": \"label\" } }, \"id\": \"libTvShows\"}"
+                },
+            "Playlist":
+                {
+                "Audio": "True|{\"jsonrpc\": \"2.0\", \"method\": \"Playlist.GetItems\", \"params\": { \"properties\": [\"title\", \"album\", \"artist\", \"duration\"], \"playlistid\": 0 }, \"id\": 1}",
+                "Video": "True|{\"jsonrpc\": \"2.0\", \"method\": \"Playlist.GetItems\", \"params\": { \"properties\": [ \"runtime\", \"showtitle\", \"season\", \"title\", \"artist\" ], \"playlistid\": 1}, \"id\": 1}"
+                }
+            },
+        "API Commands": "True|{\"jsonrpc\": \"2.0\", \"method\": \"JSONRPC.Introspect\", \"params\": { \"filter\": { \"id\": \"AudioLibrary.GetAlbums\", \"type\": \"method\" } }, \"id\": 1 }",
+        "Codec (Playing Media)": "False|{\"jsonrpc\": \"2.0\", \"method\": \"Input.ShowCodec\"}",
+        "Info (Playing Media)": "False|{\"jsonrpc\": \"2.0\", \"method\": \"Input.Info\"}",
+        },
+    }
+    

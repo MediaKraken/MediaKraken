@@ -15,6 +15,7 @@ pub mod mk_lib_hardware_hdhomerun;
 pub mod mk_lib_hardware_lenbrook;
 pub mod mk_lib_hardware_lg;
 pub mod mk_lib_hardware_marantz;
+pub mod mk_lib_hardware_main_controller;
 pub mod mk_lib_hardware_nut;
 pub mod mk_lib_hardware_onkyo;
 //pub mod mk_lib_hardware_onvif;

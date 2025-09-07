@@ -18,6 +18,7 @@ pub mod mk_lib_network_ssdp;
 pub mod mk_lib_network_ssh;
 pub mod mk_lib_network_steam;
 pub mod mk_lib_network_telnet;
+pub mod mk_lib_network_telnet_mini;
 pub mod mk_lib_network_transmission;
 pub mod mk_lib_network_upnp;
 pub mod mk_lib_network_upnp_easy;

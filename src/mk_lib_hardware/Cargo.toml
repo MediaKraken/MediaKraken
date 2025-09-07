@@ -10,7 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_network = { version="0.0.15", registry = "kellnr" }
+mk_lib_network = { version="0.0.38", registry = "kellnr" }
 
 futures = "0.3.31"
 futures-util = "0.3.31"
@@ -31,7 +31,7 @@ sonos_discovery = "0.0.2"
 spl06-007 = { version = "0.3.3", optional = true }
 #ssdp = { git = "https://github.com/ssnover/ssdp-rs", branch = "feature/local-impl-of-ip-feature" }
 ssdp = { version="0.7.0", registry = "kellnr" }
-tokio = "1.46.1"
+tokio = "1.47.1"
 url = "2.5.7"
 #weectrl = { git = "https://github.com/Hyperchaotic/weectrl" }
 weectrl = { version="2.0.2", registry = "kellnr" }

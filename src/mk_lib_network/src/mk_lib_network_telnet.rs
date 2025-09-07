@@ -1,34 +1,13 @@
-use mini_telnet::Telnet;
-use std::time::Duration;
+use telnet::{Telnet, Event};
 
-pub async fn telnet_connect(
-    telnet_prompt: String,
-    telnet_ip: String,
-    telnet_port: String,
-    telnet_user: String,
-    telnet_password: String,
-) -> Result<Telnet, Box<dyn std::error::Error>> {
-    let mut telnet_instance = Telnet::builder()
-        .prompt(telnet_prompt)
-        .login_prompt("login: ", "Password: ")
-        .connect_timeout(Duration::from_secs(10))
-        .timeout(Duration::from_secs(5))
-        .connect(&format!("{}:{}", telnet_ip, telnet_port))
-        .await?;
-    telnet_instance
-        .login(&telnet_user, &telnet_password)
-        .await
-        .unwrap();
-    Ok(telnet_instance)
-}
-
-pub async fn telnet_execute_normal(mut telnet_instance: Telnet, telnet_command: String) {
-    telnet_instance
-        .normal_execute(&telnet_command)
-        .await
-        .unwrap();
-}
-
-pub async fn telnet_execute(mut telnet_instance: Telnet, telnet_command: String) {
-    telnet_instance.execute(&telnet_command).await.unwrap();
+pub async fn telnet_run_command(ip_address: String, port_number: u16, command_string: String, returned_data_blocks: u8) {
+    let mut telnet = Telnet::connect((ip_address, port_number), 256).expect("Couldn't connect to the server...");
+    telnet.write(&command_string.as_bytes()).expect("Read error");
+    println!("after write");
+    for (_i) in 0..returned_data_blocks {
+        let event = telnet.read().expect("Read error");
+        if let Event::Data(buffer) = event {
+            println!("Received: {}", String::from_utf8_lossy(&buffer));
+        }
+    }
 }
