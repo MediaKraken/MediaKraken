@@ -1,15 +1,6 @@
 
 
 /*
-
-class CommonHardwareMarantz:
-    """
-    Class for interfacing with Marantz equipment over network connection
-    """
-
-    def __init__(self, device_ip):
-        self.device = telnetlib.Telnet(device_ip)
-
     def com_hardware_marantz_command(self, command_string, resp_cnt):
         command_string = command_string.encode("ascii")
         print(("Sending cmd %s" % command_string), flush=True)
@@ -21,22 +12,6 @@ class CommonHardwareMarantz:
             resp.append(self.device.read_until('\r', 1)[:-1])
         print(("Response: ", resp), flush=True)
         return resp
-
-    def com_hardware_close(self):
-        self.device.close()
-
-    """
-    Power Commands
-    """
-
-    def com_hardware_marantz_check_power(self):
-        return self.com_hardware_marantz_command('PW?', 1)[0]
-
-    def com_hardware_marantz_power_on(self):
-        return self.com_hardware_marantz_command('PWON', 1)[0]
-
-    def com_hardware_marantz_power_standby(self):
-        return self.com_hardware_marantz_command('PWSTANDBY', 1)[0]
 
     """
     Volume Commands
@@ -60,13 +35,6 @@ class CommonHardwareMarantz:
 
     def com_hardware_marantz_volume_set(self, volume_value):
         self.com_hardware_marantz_command(('MV%s' % volume_value), 1)
-
-    def com_hardware_marantz_volume_up_down(self, volume_up=True):
-        if volume_up:
-            cmd = 'MVUP'
-        else:
-            cmd = 'MVDOWN'
-        self.com_hardware_marantz_command(cmd, 1)
 
     # CVFL UP<CR>
     # CVFL DOWN<CR>
@@ -163,15 +131,6 @@ class CommonHardwareMarantz:
     # CVTS 50<CR>
     # CVZRL<CR>
     # CV?<CR>
-
-    def com_hardware_marantz_mute_status(self):
-        return self.com_hardware_marantz_command(('MU?'), 1)
-
-    def com_hardware_marantz_mute_set(self, mute_status=True):
-        if mute_status:
-            self.com_hardware_marantz_command(('MUON'), 1)
-        else:
-            self.com_hardware_marantz_command(('MUOFF'), 1)
 
     """
     Input Settings Commands
@@ -659,12 +618,5 @@ class CommonHardwareMarantz:
 
 # testing against AV7703
 
-# connect test
-teststuff = CommonHardwareMarantz('10.0.0.209')
-
-print((teststuff.com_hardware_marantz_picture_mode_status()), flush=True)
-
-# connect close
-teststuff.com_hardware_marantz_close()
 */
 

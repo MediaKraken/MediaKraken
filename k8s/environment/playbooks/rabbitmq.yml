@@ -13,11 +13,17 @@
     - name: Setup cluster of rabbitmq
       shell: kubectl apply -f ~/rabbitmq.yml
 
-    - name: Install rabbitmq monitor
-      shell: kubectl apply --filename https://raw.githubusercontent.com/rabbitmq/cluster-operator/main/observability/prometheus/monitors/rabbitmq-servicemonitor.yml
+    # - name: Install rabbitmq monitor
+    #   shell: kubectl apply --filename https://raw.githubusercontent.com/rabbitmq/cluster-operator/main/observability/prometheus/monitors/rabbitmq-servicemonitor.yml
+
+    # - name: Install rabbitmq operator monitor
+    #   shell: kubectl apply --filename https://raw.githubusercontent.com/rabbitmq/cluster-operator/main/observability/prometheus/monitors/rabbitmq-cluster-operator-podmonitor.yml
 
     - name: Install rabbitmq operator monitor
-      shell: kubectl apply --filename https://raw.githubusercontent.com/rabbitmq/cluster-operator/main/observability/prometheus/monitors/rabbitmq-cluster-operator-podmonitor.yml
+      shell: kubectl label ServiceMonitor rabbitmq release=monitoring
+
+    - name: Install rabbitmq operator monitor
+      shell: kubectl label PodMonitor rabbitmq-cluster-operator release=monitoring
 
     - name: copying file
       copy:

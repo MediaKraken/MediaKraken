@@ -34,12 +34,12 @@ resource "proxmox_vm_qemu" "mkcontrol" {
   boot        = "order=scsi0"
   bootdisk    = "scsi0"
   onboot      = "true"
-  ipconfig0   = "ip=192.168.1.7${count.index}/24,gw=192.168.1.1"
+  ipconfig0   = "ip=192.168.50.5${count.index}/24,gw=192.168.50.1"
   nameserver  = "192.168.1.1"
   ciuser      = var.vm_user
   cipassword  = var.vm_user_password
   sshkeys     = file("~/.ssh/id_rsa.pub")
-  tags        = "k8sdev"
+  tags        = "k8s"
 
   disks {
     ide {
@@ -82,11 +82,11 @@ resource "proxmox_vm_qemu" "mkworker" {
   vmid        = "400${count.index}"
   name        = "mkworker${count.index + 1}"
   desc        = "k8s Worker Node"
-  count       = 5
+  count       = 3
   target_node = var.proxmox_host
   clone       = "debian-12-cloudinit-template-mk"
   hotplug     = "network,disk"
-  cores       = 8
+  cores       = 10
   sockets     = 2
   cpu_type    = "host"
   memory      = 65536
@@ -98,12 +98,12 @@ resource "proxmox_vm_qemu" "mkworker" {
   boot        = "order=scsi0"
   bootdisk    = "scsi0"
   onboot      = "true"
-  ipconfig0   = "ip=192.168.1.8${count.index}/24,gw=192.168.1.1"
+  ipconfig0   = "ip=192.168.50.6${count.index}/24,gw=192.168.50.1"
   nameserver  = "192.168.1.1"
   ciuser      = var.vm_user
   cipassword  = var.vm_user_password
   sshkeys     = file("~/.ssh/id_rsa.pub")
-  tags        = "k8sdev"
+  tags        = "k8s"
 
   disks {
     ide {
