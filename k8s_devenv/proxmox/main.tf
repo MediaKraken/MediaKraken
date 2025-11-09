@@ -2,7 +2,7 @@ terraform {
   required_providers {
     proxmox = {
       source  = "telmate/proxmox"
-      version = "3.0.1-rc6"
+      version = "3.0.2-rc05"
     }
   }
 }
@@ -17,16 +17,18 @@ provider "proxmox" {
 resource "proxmox_vm_qemu" "mkcontroldev" {
   vmid        = "100${count.index}"
   name        = "mkcontroldev${count.index + 1}"
-  desc        = "k8s Control Plane"
+  description = "k8s Control Plane"
   count       = 1
   target_node = var.proxmox_host
   clone       = "debian-12-cloudinit-template-mk"
   hotplug     = "network,disk"
-  cores       = 4
-  sockets     = 2
-  cpu_type    = "host"
+  cpu {
+    cores       = 4
+    sockets     = 2
+    type        = "host"
+    numa        = true
+  }
   memory      = 16384
-  numa        = true
   agent       = 1
   os_type     = "cloud-init"
   full_clone  = "true"
@@ -81,16 +83,18 @@ resource "proxmox_vm_qemu" "mkcontroldev" {
 resource "proxmox_vm_qemu" "mkworkerdev" {
   vmid        = "110${count.index}"
   name        = "mkworkerdev${count.index + 1}"
-  desc        = "k8s Worker Node"
+  description = "k8s Worker Node"
   count       = 3
   target_node = var.proxmox_host
   clone       = "debian-12-cloudinit-template-mk"
   hotplug     = "network,disk"
-  cores       = 6
-  sockets     = 2
-  cpu_type    = "host"
+  cpu {
+    cores       = 6
+    sockets     = 2
+    type        = "host"
+    numa        = true
+  }
   memory      = 32768
-  numa        = true
   agent       = 1
   os_type     = "Linux"
   full_clone  = "true"
