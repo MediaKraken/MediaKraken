@@ -3,7 +3,7 @@
   hosts: kube_node
   tasks:
     - name: Install lvm2 and iscsi
-      shell: sudo apt install -y lvm2 open-iscsi && sudo systemctl enable iscsid && sudo systemctl start iscsid
+      shell: sudo apt update -y && sudo apt install -y lvm2 open-iscsi && sudo systemctl enable iscsid && sudo systemctl start iscsid
       become: true
       become_method: sudo
 

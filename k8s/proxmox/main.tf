@@ -94,7 +94,7 @@ resource "proxmox_vm_qemu" "mkworker" {
     type        = "host"
     numa        = true
   }
-  memory      = 65536
+  memory      = 131072
   agent       = 1
   os_type     = "Linux"
   full_clone  = "true"

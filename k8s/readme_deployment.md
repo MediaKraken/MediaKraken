@@ -52,7 +52,7 @@ tofu apply
 some things might fail....wait a bit for parts to spin up and rerun apply
 
 # get/user/keys/etc for k8sdashboard
-ssh metaman@192.168.1.70
+ssh metaman@192.168.50.50
 kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
 
 # run tofu from environment directory to build k8s operators/etc and mediakraken itself
@@ -67,17 +67,50 @@ kubectl get secret -n stackgres stackgres-restapi-admin --template '{{ printf "p
 
 ## create db cluster
 https://mkstackgres.beaverbay.local
+### log db server
+mkdblogs
+32gb space
 ### production profile
 mkdbinstance
 prodfile, 48GB, 12CPU
+#### for now, set loadblanacer in cluster type
+full to use!!!!!!!!!!
+autovacuum_vacuum_cost_delay=2ms
+max_connections=200
+shared_buffers=12GB
+effective_cache_size=36GB
+maintenance_work_mem=2GB
+checkpoint_segments=6
+checkpoint_completion_target=0.9
+checkpoint_timeout=15min
+default_statistics_target=100
+random_page_cost=1
+effective_io_concurrency=200
+work_mem = 116508kB
+huge_pages=try
+min_wal_size=1GB
+max_wal_size=4GB
+max_worker_processes=10
+max_parallel_workers_per_gather=4
+max_parallel_workers=10
+max_parallel_maintenance_workers=4
+shared_preload_libraries=pg_stat_statements,auto_explain,timescaledb
+wal_buffers=16MB
+log_min_duration_statement=1s
+log_temp_files=0kB
+tcp_keepalives_count=9
+tcp_keepalives_idle=5min
+tcp_keepalives_interval=75s
+track_activity_query_size=4kB
+
 in the pgcluster config (https://mkstackgres.beaverbay.local/admin/stackgres/sgpgconfig/postgres-16-generated-from-default-1741405922020/edit)
 shared_preload_libraries=pg_stat_statements,auto_explain,timescaledb
 need to restart
 ### setup cluster
 stackgres cluster/custom
 mkdatabase
-3 instances
-version 16 (latest)
+2 instances
+version 17 (latest)
 no ssl
 500gb storage, nfs8k class (local option now)
 monitoring and prometheus option
@@ -85,9 +118,9 @@ monitoring and prometheus option
 pgcrypto
 pg_stat_statements
 pg_trgm
-timescaledb 2.18.2
-vector 0.8.0
-vectorscale 0.6.0 - this only shows up for pg16
+timescaledb
+vector
+vectorscale
 
 # get pg password
 kubectl get secret mkdbinstance --namespace=stackgres --template '{{ printf "%s" (index .data "superuser-password" | base64decode) }}'
@@ -95,11 +128,25 @@ kubectl get secret mkdbinstance --namespace=stackgres --template '{{ printf "%s"
 # setup graphana dash for rabbitmq
 import 10991
 
-# had to do the dragonfly db yml by hand and it fired up
+# had to do the dragonfly db yml by hand and it fired up????????
+
+# longhorn security
+USER=metaman; PASSWORD=metaman; echo "${USER}:$(openssl passwd -stdin -apr1 <<< ${PASSWORD})" >> auth
+kubectl -n longhorn-system create secret generic basic-auth --from-file=auth
 
 # longhorn
+remove schedule from preexiting drives
 add disks to each nodes
-/mnt/volume/disk1
+    call em metaman1, 2, 3
+    do NOT set reserved space
+/mnt/volume/disk2   is the one for images/etc
+
+volume 900gb metadata
+
+/dev/mapper/vgk8s1-vgk8s1lv 512gb
+/dev/mapper/vgk8s2-vgk8s2lv  1tb
+
+# set db secret
 
 <!-- # stuff below to do
 # stuff to add to MK
@@ -107,7 +154,6 @@ https://operatorhub.io/operator/elastic-cloud-eck
 Elastic Cloud on Kubernetes (ECK) is the official operator by Elastic for automating the deployment, provisioning, management, and orchestration of Elasticsearch, Kibana, APM Server, Beats, Enterprise Search, Elastic Agent, Elastic Maps Server, and Logstash on Kubernetes.
 
 # stuff to add to DEV stack CI/CD/etc
-
 
 # misc stuff to play with
 https://artifacthub.io/packages/helm/helm-hass/home-assistant
@@ -152,8 +198,6 @@ HashiCorp Consul is a tool for discovering and configuring services in your infr
 
 https://artifacthub.io/packages/helm/si-gitops/nut-exporter
 Installs NUT exporter in Kubernetes
-
-
 
 on dev
 

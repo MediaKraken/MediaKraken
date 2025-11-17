@@ -3,21 +3,21 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>MediaKraken API</title>
+    <title>MediaKraken API Media</title>
 </head>
 
 <body>
     <div id="the-movie-node">
         {% for row_data in template_data_movie_match %}
         <img src="/static{{row_data.mm_poster|safe}}" loading="lazy" height="300" width="200">
-        <a href="/user/api/movie_add/{{row_data.mm_metadata_guid}}">
+        <a href="/user/api/movie_detail/{{row_data.mm_metadata_guid}}">
                 {{row_data.mm_metadata_name}} - {{row_data.mm_date}}
             </a><BR>
         {% endfor %}
         <div id="the-tv-node">
             {% for row_data in template_data_tv_match %}
             <img src="/static{{row_data.image_json|safe}}" loading="lazy" height="300" width="200">
-            <a href="/user/api/tv_add/{{row_data.mm_metadata_tvshow_guid}}">
+            <a href="/user/api/tv_detail/{{row_data.mm_metadata_tvshow_guid}}">
                     {{row_data.mm_metadata_tvshow_name}} - {{row_data.air_date}}
                 </a><BR>
             {% endfor %}
@@ -25,7 +25,7 @@
         <div id="the-music-node">
             {% for row_data in template_data_music_match %}
             <img src="/static{{row_data.mm_metadata_album_localimage|safe}}" loading="lazy" height="200" width="200">
-            <a href="/user/metadata/music_album_add/{{row_data.mm_metadata_album_guid}}">
+            <a href="/user/metadata/music_album_detail/{{row_data.mm_metadata_album_guid}}">
                     {{row_data.mm_metadata_album_artist}} - {{row_data.mm_metadata_album_name}}
                 </a><BR>
             {% endfor %}
@@ -34,7 +34,6 @@
         <script src="/static/bootstrap/js/bootstrap.min.js"></script>
         <script src="/static/js/jquery-easing.min.js"></script>
         <script src="/static/js/script.min.js"></script>
-        <script src="/static/contextmenu/jquery.contextMenu.min.js"></script>
         <script src="/static/js/base_webapp.js"></script>
     </div>
 </body>

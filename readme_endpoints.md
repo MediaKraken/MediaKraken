@@ -31,7 +31,7 @@ mkdevharbor.beaverbay.local
 
 # prod environment
 ## k8s dashboard
-https://mkk8s.beaverbay.local 	192.168.1.86
+https://mkk8s.beaverbay.local 	192.168.50.200
 ## grafana dashboard
 mkgrafana.beaverbay.local
 ## stackgres ui
@@ -40,5 +40,5 @@ mkstackgres.beaverbay.local
 mkprometheus.beaverbay.local
 ## rabbitmq ui
 mkrabbitmq.beaverbay.local
-## lognhorn dashboard - 503 ERROR!!!!!!! 
+## longhorn dashboard - 503 ERROR!!!!!!! 
 mklonghorn.beaverbay.local

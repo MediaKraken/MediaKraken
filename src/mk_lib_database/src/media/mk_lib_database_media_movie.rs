@@ -42,7 +42,7 @@ pub async fn mk_lib_database_media_movie_random(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaMovieList {
-    pub mm_metadata_music_video_guid: uuid::Uuid,
+    pub mm_media_movie_video_guid: uuid::Uuid,
 }
 
 pub async fn mk_lib_database_media_movie_read(
@@ -59,7 +59,7 @@ pub async fn mk_lib_database_media_movie_read(
     }
     let table_rows: Vec<DBMediaMovieList> = select_query
         .map(|row: PgRow| DBMediaMovieList {
-            mm_metadata_music_video_guid: row.get("mm_metadata_music_video_guid"),
+            mm_media_movie_video_guid: row.get("mm_media_movie_video_guid"),
         })
         .fetch_all(sqlx_pool)
         .await?;
