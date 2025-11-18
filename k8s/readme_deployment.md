@@ -146,7 +146,14 @@ volume 900gb metadata
 /dev/mapper/vgk8s1-vgk8s1lv 512gb
 /dev/mapper/vgk8s2-vgk8s2lv  1tb
 
+
+##############
+helm package mkstack-mediakraken
+
+helm install --create-namespace --namespace mediakraken mkstack-mediakraken https://github.com/MediaKraken/MediaKraken/raw/dev/k8s/mkstack-mediakraken-0.1.8.tgz
+
 # set db secret
+kubectl create secret generic db-password --from-literal=username=devuser --from-literal=password='fakepassword' -n mediakraken
 
 <!-- # stuff below to do
 # stuff to add to MK
@@ -174,9 +181,6 @@ live video and web chat server
 
 https://artifacthub.io/packages/helm/agones/agones
 Host, Run and Scale dedicated game servers on Kubernetes
-
-https://artifacthub.io/packages/helm/geek-cookbook/unifi-poller
-Collect ALL UniFi Controller, Site, Device & Client Data - Export to InfluxDB or Prometheus
 
 https://artifacthub.io/packages/helm/fmjstudios/vaultwarden
 Unofficial Bitwarden compatible server
