@@ -1,0 +1,159 @@
+apiVersion: v1
+data:
+  password: bWV0YW1hbg==
+  username: bWV0YW1hbg==
+kind: Secret
+metadata:
+  name: dbcluster-app-user
+type: kubernetes.io/basic-auth
+---
+apiVersion: v1
+data:
+  password: bWV0YW1hbg==
+  username: bWV0YW1hbg==
+kind: Secret
+metadata:
+  name: dbcluster-superuser
+type: kubernetes.io/basic-auth
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: pgcluster-with-metrics
+  namespace: cnpg-system
+spec:
+  instances: 2
+  startDelay: 300
+  stopDelay: 300
+  imageName: ghcr.io/cloudnative-pg/postgis:18.1-3.6.1-202511171009-system-trixie 
+  primaryUpdateStrategy: unsupervised
+  storage:
+    size: 2Gi
+    pvcTemplate:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 2Gi
+      storageClassName: local-path
+      volumeMode: Filesystem
+  postgresql:
+    parameters:
+      shared_buffers: 256MB
+      pg_stat_statements.max: '10000'
+      pg_stat_statements.track: all
+      auto_explain.log_min_duration: '1s'  
+    pg_hba:
+      - host all all all md5  
+    extensions:
+      - name: pgvector
+        image:
+          reference: ghcr.io/cloudnative-pg/pgvector-testing:0.8.1-18-trixie
+  pgbouncer:
+      poolMode: session
+      parameters:
+        max_client_conn: "20000"
+        default_pool_size: "90"
+        autovacuum_vacuum_cost_delay: "2ms"
+        max_connections: "100"
+        shared_buffers: "12GB"
+        effective_cache_size: "36GB"
+        maintenance_work_mem: "2GB"
+        checkpoint_segments: "6"
+        checkpoint_completion_target: "0.9"
+        checkpoint_timeout: "15min"
+        default_statistics_target: "100"
+        random_page_cost: "1"
+        effective_io_concurrency: "200"
+        work_mem: "116508kB"
+        huge_pages: "try"
+        min_wal_size: "1GB"
+        max_wal_size: "4GB"
+        max_worker_processes: "10"
+        max_parallel_workers_per_gather: "4"
+        max_parallel_workers: "10"
+        max_parallel_maintenance_workers: "4"
+        shared_preload_libraries: "pg_stat_statements,auto_explain,timescaledb"
+        wal_buffers: "16MB"
+        log_min_duration_statement: "1s"
+        log_temp_files: "0kB"
+        tcp_keepalives_count: "9"
+        tcp_keepalives_idle: "5min"
+        tcp_keepalives_interval: "75s"
+        track_activity_query_size: "4kB"  
+  bootstrap:
+    initdb:
+      database: bmodatabase
+      owner: bmodbuser
+      secret:
+        name: dbcluster-app-user
+      postInitTemplateSQL:
+        - CREATE EXTENSION postgis;        
+        - CREATE EXTENSION pg_trgm;
+        - CREATE EXTENSION pgcrypto
+#        - CREATE EXTENSION timescaledb
+        - CREATE EXTENSION vector;
+    # Alternative bootstrap method: start from a backup
+    #recovery:
+    #  backup:
+    #    name: backup-devenv
+  enableSuperuserAccess: true
+  superuserSecret:
+    name: dbcluster-superuser    
+  backup:
+      barmanObjectStore:
+        destinationPath: "s3://mkdbbackups/test"
+        endpointURL: http://mkdbbackups.garage.beaverbay.local::3900
+        s3Credentials:
+          accessKeyId:
+            name: aws-creds
+            key: ACCESS_KEY_ID
+          secretAccessKey:
+            name: aws-creds
+            key: ACCESS_SECRET_KEY
+          region:
+            name: aws-creds
+            key: AWS_REGION
+        wal:
+#          compression: gzip
+          encryption:
+        data:
+#          compression: gzip
+          encryption:
+          immediateCheckpoint: false
+          jobs: 2          
+      retentionPolicy: "30d"
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "1"
+    limits:
+      memory: "48Gi"
+      cpu: "20"
+  affinity:
+    enablePodAntiAffinity: true
+    topologyKey: failure-domain.beta.kubernetes.io/zone
+  nodeMaintenanceWindow:
+    inProgress: false
+    reusePVC: false
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: pgcluster-with-metrics
+  namespace: cnpg-system
+spec:
+  selector:
+    matchLabels:
+      cnpg.io/cluster: pgcluster-with-metrics
+  podMetricsEndpoints:
+  - port: metrics
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Backup
+metadata:
+  name: backup-devenv
+  namespace: cnpg-system  
+spec:
+  cluster:
+    name: pgcluster-with-metrics

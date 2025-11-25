@@ -20,7 +20,7 @@ resource "proxmox_vm_qemu" "mkcontrol" {
   description = "k8s Control Plane"
   count       = 3
   target_node = var.proxmox_host
-  clone       = "debian-12-cloudinit-template-mk"
+  clone       = "debian-13-cloudinit-template-mk"
   hotplug     = "network,disk"
   cpu {
     cores       = 4
@@ -86,7 +86,7 @@ resource "proxmox_vm_qemu" "mkworker" {
   description = "k8s Worker Node"
   count       = 3
   target_node = var.proxmox_host
-  clone       = "debian-12-cloudinit-template-mk"
+  clone       = "debian-13-cloudinit-template-mk"
   hotplug     = "network,disk"
   cpu {
     cores       = 10

@@ -146,6 +146,18 @@ volume 900gb metadata
 /dev/mapper/vgk8s1-vgk8s1lv 512gb
 /dev/mapper/vgk8s2-vgk8s2lv  1tb
 
+############### cnpg stuff
+# gen password  
+## echo -n 'metaman' | base64
+### bWV0YW1hbg==
+
+# for the backup stuff......
+kubectl create secret generic aws-creds \
+  --from-literal=ACCESS_KEY_ID=GKd0ac807197ae9636872ceed1 \
+  --from-literal=ACCESS_SECRET_KEY=5442fe4af549468b0196d2bfd4d69ceb11c7faa42c001b56e0d70ad611cefa29 \
+  --from-literal=AWS_REGION=garage \
+  -n cnpg-system
+
 
 ##############
 helm package mkstack-mediakraken
@@ -153,7 +165,7 @@ helm package mkstack-mediakraken
 helm install --create-namespace --namespace mediakraken mkstack-mediakraken https://github.com/MediaKraken/MediaKraken/raw/dev/k8s/mkstack-mediakraken-0.1.8.tgz
 
 # set db secret
-kubectl create secret generic db-password --from-literal=username=devuser --from-literal=password='fakepassword' -n mediakraken
+kubectl create secret generic db-password --from-literal=username=devuser --from-literal=password='592d-9b85-41da-9d1' -n mediakraken
 
 <!-- # stuff below to do
 # stuff to add to MK

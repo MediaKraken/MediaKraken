@@ -1,0 +1,11 @@
+- name : Setup cloudnativepg operator on cluster
+  hosts: mkcontrol1
+  tasks:
+    - name: Install cloudnativepg
+      shell: kubectl apply --server-side -f \
+        https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.27/releases/cnpg-1.27.1.yaml
+
+    - name: Install cloudnativepg plugin
+      shell: curl -sSfL \
+        https://github.com/cloudnative-pg/cloudnative-pg/raw/main/hack/install-cnpg-plugin.sh | \
+        sudo sh -s -- -b /usr/local/bin

@@ -31,21 +31,39 @@ resource "terraform_data" "wireguard" {
   ]
 }
 
-resource "terraform_data" "stackgres" {
-  provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/stackgres.yml"
-  }
-  depends_on = [
-    terraform_data.wireguard
-  ]
-}
+# resource "terraform_data" "stackgres" {
+#   provisioner "local-exec" {
+#     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/stackgres.yml"
+#   }
+#   depends_on = [
+#     terraform_data.wireguard
+#   ]
+# }
 
 resource "terraform_data" "localai" {
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/local_ai.yml"
   }
   depends_on = [
-    terraform_data.stackgres
+    terraform_data.wireguard
+  ]
+}
+
+resource "terraform_data" "cloudnativepg" {
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/cloudnativepg.yml"
+  }
+  depends_on = [
+    terraform_data.wireguard
+  ]
+}
+
+resource "terraform_data" "pgadmin4" {
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/pgadmin4.yml"
+  }
+  depends_on = [
+    terraform_data.cloudnativepg
   ]
 }
 
@@ -55,6 +73,6 @@ resource "terraform_data" "localai" {
 #     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/mediakraken.yml"
 #   }
 #   depends_on = [
-#     terraform_data.localai
+#     terraform_data.pgadmin4
 #   ]
 # }
