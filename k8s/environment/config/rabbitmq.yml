@@ -48,8 +48,6 @@ spec:
 #               - mkworker1
 #               - mkworker2
 #               - mkworker3
-#               - mkworker4
-#               - mkworker5
 #         topologyKey: kubernetes.io/hostname
 #   override:
 #     statefulSet:
