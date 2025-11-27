@@ -66,7 +66,7 @@ some things might fail....wait a bit for parts to spin up and rerun apply
 kubectl get secret -n stackgres stackgres-restapi-admin --template '{{ printf "password = %s\n" (.data.clearPassword | base64decode) }}'
 
 ## create db cluster
-https://mkstackgres.beaverbay.local
+https://mkstackgres.mediakraken.org
 ### log db server
 mkdblogs
 32gb space
@@ -103,7 +103,7 @@ tcp_keepalives_idle=5min
 tcp_keepalives_interval=75s
 track_activity_query_size=4kB
 
-in the pgcluster config (https://mkstackgres.beaverbay.local/admin/stackgres/sgpgconfig/postgres-16-generated-from-default-1741405922020/edit)
+in the pgcluster config (https://mkstackgres.mediakraken.org/admin/stackgres/sgpgconfig/postgres-16-generated-from-default-1741405922020/edit)
 shared_preload_libraries=pg_stat_statements,auto_explain,timescaledb
 need to restart
 ### setup cluster
@@ -141,15 +141,22 @@ add disks to each nodes
     do NOT set reserved space
 /mnt/volume/disk2   is the one for images/etc
 
+volume, create volume
 volume 900gb metadata
+attach to host.....worker1
+now you have a shiney replicating volume
 
 /dev/mapper/vgk8s1-vgk8s1lv 512gb
 /dev/mapper/vgk8s2-vgk8s2lv  1tb
+
 
 ############### cnpg stuff
 # gen password  
 ## echo -n 'metaman' | base64
 ### bWV0YW1hbg==
+
+
+
 
 # for the backup stuff......
 kubectl create secret generic aws-creds \

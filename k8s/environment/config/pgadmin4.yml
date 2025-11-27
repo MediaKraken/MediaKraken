@@ -55,10 +55,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-      - k8spgadmin.beaverbay.local
+      - k8spgadmin.mediakraken.org
       secretName: letsencrypt-pgadmin-priv
   rules:
-  - host: k8spgadmin.beaverbay.local
+  - host: k8spgadmin.mediakraken.org
     http:
       paths:
       - path: /

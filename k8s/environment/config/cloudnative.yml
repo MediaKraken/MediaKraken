@@ -103,7 +103,7 @@ spec:
   backup:
       barmanObjectStore:
         destinationPath: "s3://mkdbbackups/test"
-        endpointURL: http://mkdbbackups.garage.beaverbay.local::3900
+        endpointURL: http://mkdbbackups.garage.mediakraken.org::3900
         s3Credentials:
           accessKeyId:
             name: aws-creds

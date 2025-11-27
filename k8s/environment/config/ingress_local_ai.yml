@@ -13,7 +13,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: mklocalai.beaverbay.local
+  - host: mklocalai.mediakraken.org
     http:
       paths:
       - path: /

@@ -13,7 +13,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: mkrabbitmq.beaverbay.local
+  - host: mkrabbitmq.mediakraken.org
     http:
       paths:
       - path: /

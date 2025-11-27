@@ -13,5 +13,5 @@
         --namespace artifactory-oss --create-namespace \
         --set artifactory.nginx.enabled=false \
         --set artifactory.ingress.enabled=true \
-        --set artifactory.ingress.hosts[0]="mkdevjfrog.beaverbay.local" \
+        --set artifactory.ingress.hosts[0]="mkdevjfrog.mediakraken.org" \
         --set artifactory.persistence.storageClassName=longhorn

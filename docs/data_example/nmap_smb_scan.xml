@@ -17,7 +17,7 @@
 <address addr="192.168.1.110" addrtype="ipv4"/>
 <address addr="3E:0C:8A:0F:0A:88" addrtype="mac"/>
 <hostnames>
-<hostname name="th-retronas-1.beaverbay.local" type="PTR"/>
+<hostname name="th-retronas-1.mediakraken.org" type="PTR"/>
 </hostnames>
 <ports><port protocol="tcp" portid="139"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="netbios-ssn" method="table" conf="3"/></port>
 <port protocol="udp" portid="137"><state state="open" reason="udp-response" reason_ttl="64"/><service name="netbios-ns" method="table" conf="3"/></port>

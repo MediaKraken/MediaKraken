@@ -105,7 +105,7 @@ app:
     hosts:
       # Keep 'localhost' host only if you want to access Dashboard using 'kubectl port-forward ...' on:
       # https://localhost:8443
-      - mkdev.beaverbay.local
+      - mkdev.mediakraken.org
     # - kubernetes.dashboard.domain.com
     ingressClassName: nginx
     # Use only if your ingress controllers support default ingress classes.

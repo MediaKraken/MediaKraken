@@ -1,44 +1,44 @@
 # dev environment
 ## k8s dashboard
-### https://mkdev.beaverbay.local
+### https://mkdev.mediakraken.org
 #### kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d
 ## grafana dashboard
-### mkdevgrafana.beaverbay.local
+### mkdevgrafana.mediakraken.org
 ## jenkins
-### mkdevjenkins.beaverbay.local
+### mkdevjenkins.mediakraken.org
 ## nexus artifactory - 404 ERROR!!!!!!!
-mkdevnexus.beaverbay.local:8081
+mkdevnexus.mediakraken.org:8081
 ## kellnr repo - NO CONNECT
-mkdevkellnr.beaverbay.local
+mkdevkellnr.mediakraken.org
 http://mkdevkellnr:8000/api/v1/crates/
 ## gocd
-### mkdevgocd.beaverbay.local
+### mkdevgocd.mediakraken.org
 ## prometheus dashboard
-### mkdevprometheus.beaverbay.local
+### mkdevprometheus.mediakraken.org
 ## mailhog ui
-### mkdevmailhog.beaverbay.local
+### mkdevmailhog.mediakraken.org
 ## mailhog smtp
-### mkdevmailhogsmtp.beaverbay.local 	192.168.1.66
+### mkdevmailhogsmtp.mediakraken.org 	192.168.1.66
 ## kellnr repo
-mkkellrn.beaverbay.local 	192.168.1.111
+mkkellrn.mediakraken.org 	192.168.1.111
 http://mkkellnr:8000/api/v1/crates/
 ## longhorn ui
-### mkdevlonghorn.beaverbay.local
+### mkdevlonghorn.mediakraken.org
 
-mkdevdragonflydb.beaverbay.local
-mkdevjfrog.beaverbay.local
-mkdevharbor.beaverbay.local
+mkdevdragonflydb.mediakraken.org
+mkdevjfrog.mediakraken.org
+mkdevharbor.mediakraken.org
 
 # prod environment
 ## k8s dashboard
-https://mkk8s.beaverbay.local 	192.168.50.200
+https://mkk8s.mediakraken.org 	192.168.50.200
 ## grafana dashboard
-mkgrafana.beaverbay.local
+mkgrafana.mediakraken.org
 ## stackgres ui
-mkstackgres.beaverbay.local
+mkstackgres.mediakraken.org
 ## prometheus dashboard
-mkprometheus.beaverbay.local
+mkprometheus.mediakraken.org
 ## rabbitmq ui
-mkrabbitmq.beaverbay.local
+mkrabbitmq.mediakraken.org
 ## longhorn dashboard - 503 ERROR!!!!!!! 
-mklonghorn.beaverbay.local
+mklonghorn.mediakraken.org

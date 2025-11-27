@@ -13,7 +13,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: mkdevjenkins.beaverbay.local
+  - host: mkdevjenkins.mediakraken.org
     http:
       paths:
       - path: /

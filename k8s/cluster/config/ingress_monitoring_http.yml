@@ -13,7 +13,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: mkgrafana.beaverbay.local
+  - host: mkgrafana.mediakraken.org
     http:
       paths:
       - path: /
@@ -23,7 +23,7 @@ spec:
             name: monitoring-grafana
             port:
               number: 80
-  - host: mkprometheus.beaverbay.local
+  - host: mkprometheus.mediakraken.org
     http:
       paths:
       - path: /
