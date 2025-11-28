@@ -40,5 +40,5 @@ mkstackgres.mediakraken.org
 mkprometheus.mediakraken.org
 ## rabbitmq ui
 mkrabbitmq.mediakraken.org
-## longhorn dashboard - 503 ERROR!!!!!!! 
+## longhorn dashboard
 mklonghorn.mediakraken.org

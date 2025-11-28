@@ -1,12 +1,3 @@
-
-# nice video
-https://www.youtube.com/watch?v=r2zuL9MW6wc
-
-
-# setup mediakraken
-kubectl create namespace mediakraken
-kubectl create namespace portainer
-
 # storage
 zfs create wdblack/sharenfs
 zfs set atime=off wdblack/sharenfs
