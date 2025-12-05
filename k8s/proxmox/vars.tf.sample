@@ -4,7 +4,7 @@ variable "proxmox_host" {
 }
 #Specify which template name you'd like to use
 variable "template_name" {
-    default = "ubuntu-2204-template"
+    default = "debian-13-cloudinit-template-mk"
 }
 #Establish which storage you would like to utilize
 variable "storage_name" {

@@ -50,15 +50,15 @@ metadata:
   annotations:
     "nginx.ingress.kubernetes.io/force-ssl-redirect": "true"
     "nginx.ingress.kubernetes.io/backend-protocol": "HTTP"
-    cert-manager.io/issuer: "letsencrypt-pgadmin"    
+    cert-manager.io/cluster-issuer: "letsencrypt-cluster"    
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
-      - k8spgadmin.mediakraken.org
+      - mkpgadmin.mediakraken.media
       secretName: letsencrypt-pgadmin-priv
   rules:
-  - host: k8spgadmin.mediakraken.org
+  - host: mkpgadmin.mediakraken.media
     http:
       paths:
       - path: /

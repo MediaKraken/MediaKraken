@@ -10,7 +10,7 @@
       shell: helm install my-harbor bitnami/harbor --version 26.0.2 \
         --create-namespace --namespace harbor \
         --set global.defaultStorageClass=longhorn \
-        --set externalURL=mkdevharbor.mediakraken.org \
+        --set externalURL=mkdevharbor.mediakraken.media \
         --set exposureType=ingress \
         --set persistence.enabled=true \
         --set persistence.persistentVolumeClaim.registry.storageClass=longhorn

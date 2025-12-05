@@ -45,12 +45,31 @@ resource "terraform_data" "operator" {
   ]
 }
 
+resource "terraform_data" "key_setup" {
+  # setup keys
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/key_setup.yml"
+  }
+  depends_on = [
+    terraform_data.operator
+  ]
+}
+
+resource "terraform_data" "certissuer" {
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -e 'ansible_sudo_pass=${var.vm_user_password}' -i inventory.ini playbooks/certissuer.yml"
+  }
+  depends_on = [
+    terraform_data.key_setup
+  ]
+}
+
 resource "terraform_data" "metallb" {
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -e 'ansible_sudo_pass=${var.vm_user_password}' -i inventory.ini playbooks/metallb.yml"
   }
   depends_on = [
-    terraform_data.operator
+    terraform_data.certissuer
   ]
 }
 

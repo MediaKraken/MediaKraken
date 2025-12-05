@@ -1,5 +1,3 @@
-# run to create the file with keys/etc
-
 cat > garage.toml <<EOF
 metadata_dir = "/var/lib/garage/meta"
 data_dir = "/var/lib/garage/data"

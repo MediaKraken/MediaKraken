@@ -11,6 +11,6 @@
         --create-namespace --namespace wekan \
         --set autoscaling.enabled=false \
         --set service.type=LoadBalancer \
-        --set endpoint=mkdevwekan.mediakraken.org \
-        --set root_url=https://mkdevwekan.mediakraken.org \
-        --set ingress.hosts[0]=mkdevwekan.mediakraken.org
+        --set endpoint=mkdevwekan.mediakraken.media \
+        --set root_url=https://mkdevwekan.mediakraken.media \
+        --set ingress.hosts[0]=mkdevwekan.mediakraken.media

@@ -61,8 +61,6 @@ spec:
           volumeMounts:
             - mountPath: /mediakraken/metadata
               name: mkstack-metadata-claim
-            - mountPath: /mediakraken/certs
-              name: mkstack-certs-claim
             - mountPath: /Comics
               name: mkstack-comics-claim
       restartPolicy: Always
@@ -71,9 +69,6 @@ spec:
         - name: mkstack-metadata-claim
           persistentVolumeClaim:
             claimName: mkstack-metadata-claim
-        - name: mkstack-certs-claim
-          persistentVolumeClaim:
-            claimName: mkstack-certs-claim
         - name: mkstack-comics-claim
           persistentVolumeClaim:
             claimName: mkstack-comics-claim

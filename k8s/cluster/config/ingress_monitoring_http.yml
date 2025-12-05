@@ -2,18 +2,21 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: monitoring-http-ingress-local
+  name: cert-http-monitoring-ingress-com
   namespace: monitoring
   annotations:
-    # restrict to private network scopes
-    # look at externalTrafficPolicy otherwise client ip is obfuscated "nginx.ingress.kubernetes.io/whitelist-source-range": "192.168.1.0/24"
     "nginx.ingress.kubernetes.io/force-ssl-redirect": "true"
-    "nginx.ingress.kubernetes.io/ssl-passthrough": "true"
     "nginx.ingress.kubernetes.io/backend-protocol": "HTTP"
+    cert-manager.io/cluster-issuer: "letsencrypt-cluster"   
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+      - mkgrafana.mediakraken.media
+      - mkprometheus.mediakraken.media
+      secretName: letsencrypt-monitoring-priv
   rules:
-  - host: mkgrafana.mediakraken.org
+  - host: mkgrafana.mediakraken.media
     http:
       paths:
       - path: /
@@ -23,7 +26,7 @@ spec:
             name: monitoring-grafana
             port:
               number: 80
-  - host: mkprometheus.mediakraken.org
+  - host: mkprometheus.mediakraken.media
     http:
       paths:
       - path: /

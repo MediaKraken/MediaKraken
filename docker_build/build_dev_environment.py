@@ -69,7 +69,7 @@ os.chdir("/var/opt/mediakraken")
 subprocess_run('docker-compose -f docker-compose.yml up -d')
 subprocess_run('docker-compose -f docker-compose-archery.yml up -d')
 
-print("setup has completed. Access Jenkins at http://th-mkbuild-1.mediakraken.org:8080"
+print("setup has completed. Access Jenkins at http://th-mkbuild-1.mediakraken.media:8080"
       " for build pipeline")
-# print("setup has completed. Access TeamCity at http://th-mkbuild-1.mediakraken.org:8111"
+# print("setup has completed. Access TeamCity at http://th-mkbuild-1.mediakraken.media:8111"
 #       " for build pipeline")

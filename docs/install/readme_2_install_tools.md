@@ -1,5 +1,8 @@
 # create a deployment node to install tools on
 ## I've been using debian........and instructions reflect that
+```
+apt install python3-pip python3-venv -y
+```
 
 ## Setup OpenTofu
 ```
@@ -18,17 +21,16 @@ chmod 700 get_helm.sh
 
 ## setup kubespray
 ```
+cd ~
 git clone https://github.com/kubernetes-incubator/kubespray.git
-
 cd kubespray
+python3 -m venv env_name
+source env_name/bin/activate
+pip3 install -r ~/kubespray/requirements.txt --break-system-packages
+pip3 install dotenv proxmoxer requests paramiko openssh_wrapper --break-system-packages
 
-apt install python3-pip -y
-
-TODO setup venv due to ansible versions
-pip3 install -r requirements.txt --break-system-packages
-change clustername in group_vars/k8s_cluster/k8s-cluster.yml file to mkcluster.local
-
-TODO run kubespray_update.py in docker_build
+TODO copy inventory/etc
+change clustername in inventory/mkcluster/group_vars/k8s_cluster/k8s-cluster.yml file to mkcluster.local
 
 ansible-galaxy collection install kubernetes.core
 ansible-galaxy collection install community.kubernetes

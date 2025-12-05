@@ -13,7 +13,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: mkdevgocd.mediakraken.org
+  - host: mkdevgocd.mediakraken.media
     http:
       paths:
       - path: /

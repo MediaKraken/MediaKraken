@@ -18,7 +18,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: mklonghorn.mediakraken.org
+  - host: mklonghorn.mediakraken.media
     http:
       paths:
       - pathType: Prefix

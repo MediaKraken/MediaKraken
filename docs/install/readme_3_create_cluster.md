@@ -15,13 +15,14 @@ tofu apply
 # use kubespray/ansible/helm to build out k8s cluster 
 ```
 cd ~/MediaKraken/k8s/cluster
+TODO edit the aws route password/keys
 tofu init
 tofu plan
 tofu apply
 some things might fail....wait a bit for parts to spin up and rerun 'tofu apply'
 ```
 
-# get/user/keys/etc for k8sdashboard
+# get token for k8sdashboard
 ```
 ssh metaman@192.168.50.50
 kubectl get secret admin-user -n kubernetes-dashboard -o jsonpath={".data.token"} | base64 -d

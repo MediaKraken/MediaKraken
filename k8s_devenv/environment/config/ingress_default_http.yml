@@ -13,7 +13,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: mkdevjenkins.mediakraken.org
+  - host: mkdevjenkins.mediakraken.media
     http:
       paths:
       - path: /
@@ -23,7 +23,7 @@ spec:
             name: my-jenkins
             port:
               number: 80
-  - host: mkdevgocd.mediakraken.org
+  - host: mkdevgocd.mediakraken.media
     http:
       paths:
       - path: /

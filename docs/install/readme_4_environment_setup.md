@@ -7,6 +7,10 @@ tofu apply
 some things might fail....wait a bit for parts to spin up and rerun 'tofu apply'
 ```
 
+# longhorn security on control node
+USER=metaman; PASSWORD=metaman; echo "${USER}:$(openssl passwd -stdin -apr1 <<< ${PASSWORD})" >> auth
+kubectl -n longhorn-system create secret generic basic-auth --from-file=auth
+
 
 
 #############################################
@@ -14,9 +18,6 @@ some things might fail....wait a bit for parts to spin up and rerun 'tofu apply'
 # setup graphana dash for rabbitmq
 import 10991
 
-# longhorn security
-USER=metaman; PASSWORD=metaman; echo "${USER}:$(openssl passwd -stdin -apr1 <<< ${PASSWORD})" >> auth
-kubectl -n longhorn-system create secret generic basic-auth --from-file=auth
 
 # longhorn
 remove schedule from preexiting drives

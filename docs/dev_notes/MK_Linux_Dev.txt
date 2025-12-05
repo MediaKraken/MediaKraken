@@ -31,7 +31,7 @@ cargo install cargo-edit
 apt-get install python3-dotenv
 nano /etc/docker/daemon.json
 {
-  "insecure-registries" : ["th-registry-1.mediakraken.org:5000"]
+  "insecure-registries" : ["th-registry-1.mediakraken.media:5000"]
 }
 
 EC2

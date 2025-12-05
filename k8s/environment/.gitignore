@@ -4,3 +4,4 @@ vars.tf
 terraform.tfstate.backup
 .terraform
 terraform.tfstate
+vars.ini

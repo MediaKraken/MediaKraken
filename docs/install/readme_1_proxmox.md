@@ -14,7 +14,7 @@ pveum user token add terraform@pve terraform-token --privsep=0
 
 ## Setup template to use
 ### Run the following commands on your Proxmox node
-### dhcp is required for virt-customize to run!
+### dhcpcd-base is required for virt-customize to run!
 ```
 apt-get update && apt install libguestfs-tools dhcpcd-base -y
 
@@ -32,3 +32,5 @@ qm set 10000 --ide2 local-lvm:cloudinit
 qm set 10000 --agent enabled=1
 qm template 10000
 ```
+
+TODO copy keys to var.tf and stuff

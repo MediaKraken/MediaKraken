@@ -28,13 +28,13 @@ spec:
   imageName: ghcr.io/cloudnative-pg/postgis:18.1-3.6.1-202511171009-system-trixie 
   primaryUpdateStrategy: unsupervised
   storage:
-    size: 2Gi
+    size: 500Gi
     pvcTemplate:
       accessModes:
         - ReadWriteOnce
       resources:
         requests:
-          storage: 2Gi
+          storage: 500Gi
       storageClassName: local-path
       volumeMode: Filesystem
   postgresql:
@@ -103,16 +103,16 @@ spec:
   backup:
       barmanObjectStore:
         destinationPath: "s3://mkdbbackups/test"
-        endpointURL: http://mkdbbackups.garage.mediakraken.org::3900
+        endpointURL: http://mkdbbackups.garage.mediakraken.media::3900
         s3Credentials:
           accessKeyId:
-            name: aws-creds
+            name: s3-backup-creds
             key: ACCESS_KEY_ID
           secretAccessKey:
-            name: aws-creds
+            name: s3-backup-creds
             key: ACCESS_SECRET_KEY
           region:
-            name: aws-creds
+            name: s3-backup-creds
             key: AWS_REGION
         wal:
 #          compression: gzip
