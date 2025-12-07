@@ -11,15 +11,7 @@ some things might fail....wait a bit for parts to spin up and rerun 'tofu apply'
 USER=metaman; PASSWORD=metaman; echo "${USER}:$(openssl passwd -stdin -apr1 <<< ${PASSWORD})" >> auth
 kubectl -n longhorn-system create secret generic basic-auth --from-file=auth
 
-
-
-#############################################
-
-# setup graphana dash for rabbitmq
-import 10991
-
-
-# longhorn
+# longhorn storage setup
 remove schedule from preexiting drives
 add disks to each nodes
     call em metaman1, 2, 3
@@ -34,3 +26,8 @@ now you have a shiney replicating volume
 /dev/mapper/vgk8s1-vgk8s1lv 512gb
 /dev/mapper/vgk8s2-vgk8s2lv  1tb
 
+
+#############################################
+
+# setup graphana dash for rabbitmq
+import 10991

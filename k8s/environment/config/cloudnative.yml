@@ -1,20 +1,21 @@
+---
 apiVersion: v1
-data:
-  password: bWV0YW1hbg==
-  username: bWV0YW1hbg==
 kind: Secret
 metadata:
   name: dbcluster-app-user
 type: kubernetes.io/basic-auth
+stringData:
+  username: metaman
+  password: metaman
 ---
 apiVersion: v1
-data:
-  password: bWV0YW1hbg==
-  username: bWV0YW1hbg==
 kind: Secret
 metadata:
   name: dbcluster-superuser
 type: kubernetes.io/basic-auth
+stringData:
+  username: postgres
+  password: metamanadmin
 ---
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
@@ -83,8 +84,8 @@ spec:
         track_activity_query_size: "4kB"  
   bootstrap:
     initdb:
-      database: bmodatabase
-      owner: bmodbuser
+      database: mkdatabase
+      owner: metaman
       secret:
         name: dbcluster-app-user
       postInitTemplateSQL:
