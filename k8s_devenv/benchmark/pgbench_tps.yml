@@ -10,7 +10,7 @@ spec:
   containers:
   - name: pgbench-tps
     image: mediakraken/mkpgbench:dev
-    command: ["pgbench", "-h", "mkdbinstance.stackgres", "-p", "5432", "-U", "postgres", "-c", "10", "-j", "2", "-t", "10000", "postgres"]
+    command: ["pgbench", "-h", "pgcluster-with-metrics-rw.cnpg-system", "-p", "5432", "-U", "postgres", "-c", "10", "-j", "2", "-t", "10000", "postgres"]
     env:
     - name: PGPASSWORD
       value: 7a75-c67b-4b0f-9ed

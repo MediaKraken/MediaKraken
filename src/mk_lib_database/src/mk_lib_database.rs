@@ -9,7 +9,7 @@ pub async fn mk_lib_database_open_pool_write(
 ) -> Result<sqlx::PgPool, sqlx::Error> {
     let db_pass = env::var("POSTGRES_PASSWORD").unwrap();
     let connection_string = format!(
-        "postgresql://postgres:{}@mkdbinstance.stackgres:5432/postgres?sslmode=disable",
+        "postgresql://mkdatabase:{}@pgcluster-with-metrics-rw.cnpg-system:5432/postgres?sslmode=preferred",
         encode(&db_pass)
     );
     let sqlx_pool = PgPoolOptions::new()
@@ -26,7 +26,7 @@ pub async fn mk_lib_database_open_pool_read(
 ) -> Result<sqlx::PgPool, sqlx::Error> {
     let db_pass = env::var("POSTGRES_PASSWORD").unwrap();
     let connection_string = format!(
-        "postgresql://postgres:{}@mkdbinstance-replicas.stackgres:5432/postgres?sslmode=disable",
+        "postgresql://mkdatabase:{}@pgcluster-with-metrics-ro.cnpg-system:5432/postgres?sslmode=preferred",
         encode(&db_pass)
     );
     let sqlx_pool = PgPoolOptions::new()

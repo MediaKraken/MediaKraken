@@ -88,6 +88,8 @@ kubectl logs mkstack-grafana-78669db887-5d7tf --all-containers=true
 
 kubectl create secret generic db-password --from-literal=username=devuser --from-literal=password='S!B\*d$zDsb='
 
+kubectl create secret generic db-password --from-literal=username=metaman --from-literal=password='metaman' -n mediakraken
+
 kubectl get secrets --namespace=mediakraken
 
 kubectl get deployment --namespace=mediakraken

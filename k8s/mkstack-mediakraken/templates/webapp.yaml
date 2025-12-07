@@ -19,7 +19,7 @@ metadata:
   name: mkstack-webapp
   namespace: mediakraken
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       io.kompose.service: mkstack-webapp-service
@@ -44,7 +44,7 @@ spec:
             - name: LC_ALL
               value: en_US.UTF-8
             - name: WAIT_HOSTS
-              value: mkdbinstance.stackgres:5432, mkstack-rabbitmq-production.rabbitmq-system:5672, mkstack-dragonfly.dragonfly-operator-system:6379
+              value: pgcluster-with-metrics-rw.cnpg-system:5432, mkstack-rabbitmq-production.rabbitmq-system:5672, mkstack-dragonfly.dragonfly-operator-system:6379
             - name: WAIT_TIMEOUT
               value: "180"
             - name: POSTGRES_PASSWORD

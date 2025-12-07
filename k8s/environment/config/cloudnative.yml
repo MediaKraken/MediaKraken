@@ -44,6 +44,33 @@ spec:
       pg_stat_statements.max: '10000'
       pg_stat_statements.track: all
       auto_explain.log_min_duration: '1s'  
+      autovacuum_vacuum_cost_delay: "2ms"
+      max_connections: "100"
+      shared_buffers: "12GB"
+      effective_cache_size: "36GB"
+      maintenance_work_mem: "2GB"
+      checkpoint_segments: "6"
+      checkpoint_completion_target: "0.9"
+      checkpoint_timeout: "15min"
+      default_statistics_target: "100"
+      random_page_cost: "1"
+      effective_io_concurrency: "200"
+      work_mem: "116508kB"
+      huge_pages: "try"
+      min_wal_size: "1GB"
+      max_wal_size: "4GB"
+      max_worker_processes: "10"
+      max_parallel_workers_per_gather: "4"
+      max_parallel_workers: "10"
+      max_parallel_maintenance_workers: "4"
+      shared_preload_libraries: "pg_stat_statements,auto_explain,timescaledb"
+      wal_buffers: "16MB"
+      log_min_duration_statement: "1s"
+      log_temp_files: "0kB"
+      tcp_keepalives_count: "9"
+      tcp_keepalives_idle: "5min"
+      tcp_keepalives_interval: "75s"
+      track_activity_query_size: "4kB"  
     pg_hba:
       - host all all all md5  
     extensions:
@@ -53,35 +80,8 @@ spec:
   pgbouncer:
       poolMode: session
       parameters:
-        max_client_conn: "20000"
-        default_pool_size: "90"
-        autovacuum_vacuum_cost_delay: "2ms"
-        max_connections: "100"
-        shared_buffers: "12GB"
-        effective_cache_size: "36GB"
-        maintenance_work_mem: "2GB"
-        checkpoint_segments: "6"
-        checkpoint_completion_target: "0.9"
-        checkpoint_timeout: "15min"
-        default_statistics_target: "100"
-        random_page_cost: "1"
-        effective_io_concurrency: "200"
-        work_mem: "116508kB"
-        huge_pages: "try"
-        min_wal_size: "1GB"
-        max_wal_size: "4GB"
-        max_worker_processes: "10"
-        max_parallel_workers_per_gather: "4"
-        max_parallel_workers: "10"
-        max_parallel_maintenance_workers: "4"
-        shared_preload_libraries: "pg_stat_statements,auto_explain,timescaledb"
-        wal_buffers: "16MB"
-        log_min_duration_statement: "1s"
-        log_temp_files: "0kB"
-        tcp_keepalives_count: "9"
-        tcp_keepalives_idle: "5min"
-        tcp_keepalives_interval: "75s"
-        track_activity_query_size: "4kB"  
+        max_client_conn: "1000"
+        default_pool_size: "10"
   bootstrap:
     initdb:
       database: mkdatabase

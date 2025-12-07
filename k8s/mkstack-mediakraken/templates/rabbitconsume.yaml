@@ -29,7 +29,7 @@ spec:
             - /wait && /mkrabbitconsume
           env:
             - name: WAIT_HOSTS
-              value: mkdbinstance.stackgres:5432, mkstack-rabbitmq-production.rabbitmq-system:5672
+              value: pgcluster-with-metrics-rw.cnpg-system:5432, mkstack-rabbitmq-production.rabbitmq-system:5672
             - name: WAIT_TIMEOUT
               value: "180"
             - name: POSTGRES_PASSWORD

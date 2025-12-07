@@ -49,7 +49,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let output = Command::new("psql")
             .args([
                 "-h",
-                "mkdbinstance.stackgres",
+                "pgcluster-with-metrics-rw.cnpg-system",
                 "-U",
                 "postgres",
                 "-f",
