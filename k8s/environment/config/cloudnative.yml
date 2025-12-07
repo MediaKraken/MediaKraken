@@ -3,6 +3,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: dbcluster-app-user
+  namespace: cnpg-system
 type: kubernetes.io/basic-auth
 stringData:
   username: metaman
@@ -12,6 +13,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: dbcluster-superuser
+  namespace: cnpg-system  
 type: kubernetes.io/basic-auth
 stringData:
   username: postgres
