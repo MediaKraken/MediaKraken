@@ -51,7 +51,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 "-h",
                 "pgcluster-with-metrics-rw.cnpg-system",
                 "-U",
-                "postgres",
+                "metaman",
                 "-f",
                 "/scripts/create_schema.sql",
             ])
