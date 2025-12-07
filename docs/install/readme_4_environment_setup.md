@@ -19,12 +19,12 @@ add disks to each nodes
 /mnt/volume/disk2   is the one for images/etc
 
 volume, create volume
-volume 900gb metadata
+volume 1900gb metadata
 attach to host.....worker1
 now you have a shiney replicating volume
 
 /dev/mapper/vgk8s1-vgk8s1lv 512gb
-/dev/mapper/vgk8s2-vgk8s2lv  1tb
+/dev/mapper/vgk8s2-vgk8s2lv  2tb
 
 
 #############################################

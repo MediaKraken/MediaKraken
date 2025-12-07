@@ -120,7 +120,7 @@ resource "proxmox_vm_qemu" "mkworker" {
     scsi {
       scsi0 {
         disk {
-          size    = "64G"
+          size    = "128G"
           storage = var.storage_name
         }
       }
@@ -132,7 +132,7 @@ resource "proxmox_vm_qemu" "mkworker" {
       }
       scsi2 {
         disk {
-          size    = "1024G"
+          size    = "2T"
           storage = var.storage_name
         }
       }
