@@ -51,7 +51,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: db-password
-                  key: db-password
+                  key: password
           image: mediakraken/mkwebaxum:dev
           imagePullPolicy: Always
           name: mkstack-webapp

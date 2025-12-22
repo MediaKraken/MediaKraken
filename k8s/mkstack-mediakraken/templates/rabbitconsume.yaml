@@ -36,7 +36,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: db-password
-                  key: db-password
+                  key: password
           image: mediakraken/mkrabbitconsume:dev
           imagePullPolicy: Always
           name: mkstack-rabbitconsume

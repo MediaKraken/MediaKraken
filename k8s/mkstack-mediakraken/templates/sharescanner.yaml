@@ -29,7 +29,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: db-password
-                  key: db-password
+                  key: password
           image: mediakraken/mksharescanner:dev
           imagePullPolicy: Always
           name: mkstack-sharescanner

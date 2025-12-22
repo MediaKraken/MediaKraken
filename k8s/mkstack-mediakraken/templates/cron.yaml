@@ -34,7 +34,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: db-password
-                  key: db-password
+                  key: password
           image: mediakraken/mkcron:dev
           imagePullPolicy: Always
           name: mkstack-cron

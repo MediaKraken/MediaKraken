@@ -31,7 +31,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: db-password
-                  key: db-password
+                  key: password
           image: mediakraken/mkhardwarescanner:dev
           imagePullPolicy: Always
           name: mkstack-hardwarescanner

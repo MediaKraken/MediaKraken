@@ -2,7 +2,7 @@ terraform {
   required_providers {
     proxmox = {
       source  = "telmate/proxmox"
-      version = "3.0.2-rc05"
+      version = "3.0.2-rc06"
     }
   }
 }
@@ -35,7 +35,7 @@ resource "proxmox_vm_qemu" "mkcontrol" {
   scsihw      = "virtio-scsi-pci"
   boot        = "order=scsi0"
   bootdisk    = "scsi0"
-  onboot      = "true"
+  start_at_node_boot      = "true"
   ipconfig0   = "ip=192.168.50.5${count.index}/24,gw=192.168.50.1"
   nameserver  = "192.168.1.1"
   ciuser      = var.vm_user
@@ -101,7 +101,7 @@ resource "proxmox_vm_qemu" "mkworker" {
   scsihw      = "virtio-scsi-pci"
   boot        = "order=scsi0"
   bootdisk    = "scsi0"
-  onboot      = "true"
+  start_at_node_boot      = "true"
   ipconfig0   = "ip=192.168.50.6${count.index}/24,gw=192.168.50.1"
   nameserver  = "192.168.1.1"
   ciuser      = var.vm_user

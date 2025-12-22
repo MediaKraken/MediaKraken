@@ -34,7 +34,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: db-password
-                  key: db-password
+                  key: password
           image: mediakraken/mkglobalcache:dev
           imagePullPolicy: Always
           name: mkstack-globalcache

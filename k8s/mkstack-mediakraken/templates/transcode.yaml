@@ -39,7 +39,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: db-password
-                  key: db-password
+                  key: password
           image: mediakraken/mktranscode:dev
           imagePullPolicy: Always
           name: mkstack-transcode

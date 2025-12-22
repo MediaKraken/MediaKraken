@@ -28,7 +28,7 @@ spec:
   instances: 2
   startDelay: 300
   stopDelay: 300
-  imageName: ghcr.io/cloudnative-pg/postgis:18.1-3.6.1-202511171009-system-trixie 
+  imageName: ghcr.io/cloudnative-pg/postgis:18.1-3.6.1-202512151010-system-trixie
   primaryUpdateStrategy: unsupervised
   storage:
     size: 300Gi
@@ -41,11 +41,15 @@ spec:
       storageClassName: local-path
       volumeMode: Filesystem
   postgresql:
+    shared_preload_libraries:
+      - "pg_stat_statements"
+      - "auto_explain"
+#      - "timescaledb"
     parameters:
       shared_buffers: 256MB
-#       pg_stat_statements.max: '10000'
-#       pg_stat_statements.track: all
-#       auto_explain.log_min_duration: '1s'  
+      pg_stat_statements.max: '10000'
+      pg_stat_statements.track: all
+      auto_explain.log_min_duration: '1s'  
 #       autovacuum_vacuum_cost_delay: "2ms"
       max_connections: "100"
       shared_buffers: "12GB"
@@ -63,7 +67,6 @@ spec:
       max_parallel_workers_per_gather: "4"
       max_parallel_workers: "10"
       max_parallel_maintenance_workers: "4"
-# #      shared_preload_libraries: "pg_stat_statements,auto_explain,timescaledb"
 #       log_min_duration_statement: "1s"
 #       log_temp_files: "0kB"
       tcp_keepalives_count: "9"
@@ -75,7 +78,10 @@ spec:
     extensions:
       - name: pgvector
         image:
-          reference: ghcr.io/cloudnative-pg/pgvector-testing:0.8.1-18-trixie
+          reference: ghcr.io/cloudnative-pg/pgvector-0.8.1-202512171405-18-trixie
+      # - name: timescaledb
+      #   image:
+      #     reference: ghcr.io/cloudnative-pg/timescaledb:2.23.1-18-trixie
   pgbouncer:
       poolMode: session
       parameters:
@@ -91,7 +97,7 @@ spec:
         - CREATE EXTENSION postgis;        
         - CREATE EXTENSION pg_trgm;
         - CREATE EXTENSION pgcrypto
-#        - CREATE EXTENSION timescaledb
+        #- CREATE EXTENSION timescaledb
         - CREATE EXTENSION vector;
     # Alternative bootstrap method: start from a backup
     #recovery:
@@ -99,10 +105,10 @@ spec:
     #    name: backup-devenv
   enableSuperuserAccess: true
   superuserSecret:
-    name: dbcluster-superuser    
+    name: dbcluster-superuser
   backup:
       barmanObjectStore:
-        destinationPath: "s3://mkdbbackups/test"
+        destinationPath: "s3://mkdbbackups/prod"
         endpointURL: http://mkdbbackups.garage.mediakraken.media::3900
         s3Credentials:
           accessKeyId:
