@@ -41,8 +41,6 @@ spec:
           imagePullPolicy: Always
           name: mkstack-init
           volumeMounts:
-            - mountPath: /mediakraken/certs
-              name: mkstack-certs-claim
             - mountPath: /mediakraken/metadata
               name: mkstack-metadata-claim
       restartPolicy: Always
@@ -51,6 +49,3 @@ spec:
         - name: mkstack-metadata-claim
           persistentVolumeClaim:
             claimName: mkstack-metadata-claim
-        - name: mkstack-certs-claim
-          persistentVolumeClaim:
-            claimName: mkstack-certs-claim
