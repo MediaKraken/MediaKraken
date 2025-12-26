@@ -2,7 +2,7 @@ terraform {
   required_providers {
     proxmox = {
       source  = "telmate/proxmox"
-      version = "3.0.2-rc05"
+      version = "3.0.2-rc06"
     }
   }
 }
@@ -18,7 +18,7 @@ resource "proxmox_vm_qemu" "mkcontroldev" {
   vmid        = "100${count.index}"
   name        = "mkcontroldev${count.index + 1}"
   description = "k8s Control Plane"
-  count       = 1
+  count       = 3
   target_node = var.proxmox_host
   clone       = "debian-12-cloudinit-template-mk"
   hotplug     = "network,disk"
@@ -35,8 +35,8 @@ resource "proxmox_vm_qemu" "mkcontroldev" {
   scsihw      = "virtio-scsi-pci"
   boot        = "order=scsi0"
   bootdisk    = "scsi0"
-  onboot      = "true"
-  ipconfig0   = "ip=192.168.1.5${count.index}/24,gw=192.168.1.1"
+  start_at_node_boot      = "true"
+  ipconfig0   = "ip=192.168.100.5${count.index}/24,gw=192.168.100.1"
   nameserver  = "192.168.1.1"
   ciuser      = var.vm_user
   cipassword  = var.vm_user_password
@@ -101,8 +101,8 @@ resource "proxmox_vm_qemu" "mkworkerdev" {
   scsihw      = "virtio-scsi-pci"
   boot        = "order=scsi0"
   bootdisk    = "scsi0"
-  onboot      = "true"
-  ipconfig0   = "ip=192.168.1.6${count.index}/24,gw=192.168.1.1"
+  start_at_node_boot      = "true"
+  ipconfig0   = "ip=192.168.100.6${count.index}/24,gw=192.168.100.1"
   nameserver  = "192.168.1.1"
   ciuser      = var.vm_user
   cipassword  = var.vm_user_password

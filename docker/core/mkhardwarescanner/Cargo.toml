@@ -16,12 +16,12 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { version = "0.0.69", registry = "kellnr" }
-mk_lib_hardware = { version = "0.0.43", registry = "kellnr" }
-mk_lib_network = { version = "0.0.39", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.42", registry = "kellnr" }
+mk_lib_database = { version = "0.0.70", registry = "kellnr" }
+mk_lib_hardware = { version = "0.0.44", registry = "kellnr" }
+mk_lib_network = { version = "0.0.40", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.43", registry = "kellnr" }
 
-chrono = { version = "0.4.41", features = ["serde"] }
+chrono = { version = "0.4.42", features = ["serde"] }
 crab-dlna = "0.2.1"
 futures-util = "0.3.31"
 huelib = "0.13.2" # https://github.com/nn1ks/huelib-rs
@@ -31,7 +31,7 @@ reqwest = { version = "0.12.23", default-features = false, features = [
     "rustls-tls",
 ] }
 serde = { version = "1.0.219", features = ["derive"] }
-serde_json = "1.0.143"
+serde_json = "1.0.147"
 sonor = "2.0.0"
 stdext = "0.3.3"
 sys-info = "0.9.1"

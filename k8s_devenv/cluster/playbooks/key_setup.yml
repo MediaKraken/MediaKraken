@@ -1,0 +1,8 @@
+---
+- name : Setup keys/etc on cluster
+  hosts: mkcontroldev1
+  tasks:
+    - name: create password.txt file
+      copy:
+        content: "{{ lookup('ansible.builtin.ini', 'vm_aws_secret_access_key', file='../vars.ini', section='aws', allow_no_value=False) }}"
+        dest: /root/password.txt

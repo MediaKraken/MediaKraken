@@ -35,6 +35,11 @@ spec:
             - sh
             - -c
             - /mktranscode
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-password
+                  key: username
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:

@@ -26,3 +26,6 @@
 
     - name: Setup access user for dashboard
       shell: kubectl apply -f ~/dashboard_adminuser.yml
+
+    - name: Setup creds for dashboard
+      shell: kubectl create secret generic aws-route53-creds --from-file=/root/password.txt -n kubernetes-dashboard

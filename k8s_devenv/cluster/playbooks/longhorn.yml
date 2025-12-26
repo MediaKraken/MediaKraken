@@ -14,12 +14,12 @@
     # - name: Setup secret for ui access
     #   shell: kubectl -n longhorn-system create secret generic basic-auth --from-file=auth
 
-    - name: copying file
-      copy:
-        src: ../config/longhorn-ingress.yml
-        dest: ~/longhorn-ingress.yml
+    # - name: copying file
+    #   copy:
+    #     src: ../config/longhorn-ingress.yml
+    #     dest: ~/longhorn-ingress.yml
 
-    - name: Setup ingress for longhorn
-      shell: kubectl apply -f ~/longhorn-ingress.yml
+    # - name: Setup ingress for longhorn
+    #   shell: kubectl apply -f ~/longhorn-ingress.yml
 
 # kubectl -n longhorn-system get svc

@@ -32,6 +32,11 @@ spec:
               value: pgcluster-with-metrics-rw.cnpg-system:5432
             - name: WAIT_TIMEOUT
               value: "180"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-password
+                  key: username
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:

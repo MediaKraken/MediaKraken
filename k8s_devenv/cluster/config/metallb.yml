@@ -5,19 +5,7 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-  - 192.168.1.65-192.168.1.69
-  # - 192.168.10.0/24
-  # - 192.168.9.1-192.168.9.5
-  # - fc00:f853:0ccd:e799::/124
----
-apiVersion: metallb.io/v1beta1
-kind: IPAddressPool
-metadata:
-  name: second-pool
-  namespace: metallb-system
-spec:
-  addresses:
-  - 192.168.1.40-192.168.1.49
+  - 192.168.100.200-192.168.100.250
   # - 192.168.10.0/24
   # - 192.168.9.1-192.168.9.5
   # - fc00:f853:0ccd:e799::/124
