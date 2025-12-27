@@ -114,3 +114,12 @@ resource "terraform_data" "gitea" {
     terraform_data.taiga
   ]
 }
+
+resource "terraform_data" "harbor" {
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/harbor.yml"
+  }
+  depends_on = [
+    terraform_data.gitea
+  ]
+}

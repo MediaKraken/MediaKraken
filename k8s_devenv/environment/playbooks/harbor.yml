@@ -1,16 +1,32 @@
 ---
-# https://artifacthub.io/packages/helm/bitnami/harbor
+# https://github.com/goharbor/harbor-helm
 - name : Setup harbor on cluster
   hosts: mkcontroldev1
   tasks:
     - name: Add repo
-      shell: helm repo add bitnami https://charts.bitnami.com/bitnami
+      shell: helm repo add harbor https://helm.goharbor.io
 
+    # setup the aws secret for route53 first TODO
     - name: Install harbor
-      shell: helm install my-harbor bitnami/harbor --version 26.0.2 \
+      shell: helm install my-harbor harbor/harbor --version 1.17.1 \
         --create-namespace --namespace harbor \
-        --set global.defaultStorageClass=longhorn \
-        --set externalURL=mkdevharbor.mediakraken.media \
-        --set exposureType=ingress \
-        --set persistence.enabled=true \
-        --set persistence.persistentVolumeClaim.registry.storageClass=longhorn
+        --set expose.type=ingress \
+        --set expose.ingress.className=nginx \
+        --set expose.tls.enabled=true \
+        --set externalURL=https://mkdevharbor.mediakraken.media \
+        --set expose.tls.certSource=secret \
+        --set expose.tls.secret.secretName=letsencrypt-harbor-priv \
+        --set expose.ingress.hosts.core=mkdevharbor.mediakraken.media \
+        --set expose.ingress.hosts.notary=mkdevnotary.mediakraken.media \
+        --set metrics.enabled=true \
+        --set persistence.persistentVolumeClaim.registry.storageClass=longhorn \
+        --set persistence.persistentVolumeClaim.jobservice.jobLog.storageClass=longhorn \
+        --set persistence.persistentVolumeClaim.database.storageClass=longhorn \
+        --set persistence.persistentVolumeClaim.redis.storageClass=longhorn \
+        --set persistence.persistentVolumeClaim.trivy.storageClass=longhorn \
+        --set persistence.enabled=true
+
+
+# kubectl get secret --namespace harbor my-harbor-core-envvars -o jsonpath="{.data.HARBOR_ADMIN_PASSWORD}" | base64 -d
+
+# helm uninstall my-harbor -n harbor

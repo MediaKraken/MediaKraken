@@ -1,7 +1,7 @@
 cargo publish --registry kellnr -p mk_lib_hardware --allow-dirty --token=3dPvCZSd1V8xKpiCGqpXCBbkj4Jtyyqc
 
 # web ui
-http://mkkellnr:8000/
+http://mkdevkellnr.mediakraken.media:8000/
 
 Order to Publish:  * has no deps
 mk_lib_common *

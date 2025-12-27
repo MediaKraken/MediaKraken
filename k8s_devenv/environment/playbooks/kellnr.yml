@@ -10,4 +10,8 @@
         --create-namespace --namespace kellnr \
         --set pvc.enabled=true \
         --set pvc.storage=10Gi \
-        --set pvc.storageClassName=longhorn
+        --set pvc.storageClassName=longhorn \
+        --set service.api.type=LoadBalancer \
+        --set ingress.enabled=true \
+        --set ingress.className=nginx \
+        --set ingress.tls.secretName=letsencrypt-kellnr-priv
