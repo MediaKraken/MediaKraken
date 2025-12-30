@@ -10,7 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_file = { version="0.0.20", registry = "kellnr" }
+mk_lib_file = { version="0.0.48", registry = "kellnr" }
 
 blake3 = "1.8.2"
 crc32fast = "1.5.0"

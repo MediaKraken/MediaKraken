@@ -29,7 +29,7 @@ https://mkdevmailhogsmtp.mediakraken.media 	192.168.1.66
 
 # kellnr repo
 mkkellrn.mediakraken.media 	192.168.1.111
-http://mkdevkellnr.mediakraken.media:8000/api/v1/crates/
+http://mkdevkellnrapi.mediakraken.media:8000/api/v1/crates/
 
 # longhorn ui
 https://mkdevlonghorn.mediakraken.media

@@ -72,7 +72,7 @@
                                                     <td>{{ row_data.mm_backup_location }}</td>
                                                     <td>{{ row_data.mm_backup_created }}</td>
                                                     <td>
-                                                        <a href="/admin/bss_admin_backup_restore/{{row_data.mm_backup_guid|uuid_to_str}}"
+                                                        <a href={{ "/admin/bss_admin_backup_restore/{:?}" | format(row_data.mm_backup_guid) }}
                                                             id="play_button">
                                                             <i class="fas fa-play" height="20" width="20"></i>
                                                         </a>

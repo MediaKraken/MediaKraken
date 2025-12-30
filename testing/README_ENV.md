@@ -12,7 +12,7 @@ mkcode - VSS Code build/git
         [source.crates-io]
         replace-with = "kellnr-cratesio"
         [source.kellnr-cratesio]
-        registry = "sparse+http://mkdevkellnr.mediakraken.media:8000/api/v1/cratesio/"    
+        registry = "sparse+http://mkdevkellnrapi.mediakraken.media:8000/api/v1/cratesio/"    
     nano /etc/docker/daemon.json
         {
         "insecure-registries" : ["mkregistry:5000"]
@@ -44,13 +44,13 @@ mkjenkins - Jenkins is an open source automation server.
 
 mkdevkellnr.mediakraken.media - Rust Cargo repo/proxy
     start.sh script in home with key/etc
-    http://mkdevkellnr.mediakraken.media:8000/#/
+    http://mkdevkellnrapi.mediakraken.media:8000/#/
         root@mkcode:~/.cargo# cat config
         [source.crates-io]
         replace-with = "kellnr-cratesio"
         [source.kellnr-cratesio]
         # Default port for Helm deployments is 30418
-        registry = "sparse+http://mkdevkellnr.mediakraken.media:8000/api/v1/cratesio/"
+        registry = "sparse+http://mkdevkellnrapi.mediakraken.media:8000/api/v1/cratesio/"
 
 mkmailhog - fake email server to view mail via web interface (receives build and deploy emails)
     http://mkmailhog:8025

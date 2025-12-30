@@ -58,7 +58,7 @@ for lib_name in libs_to_publish:
         subject_text = ' SUCCESS'
         # publish the libary
         pid_push_proc = subprocess.Popen(["cargo", "publish", "--registry", "kellnr", "-p",
-                                            lib_name, "--allow-dirty", "--token=3dPvCZSd1V8xKpiCGqpXCBbkj4Jtyyqc"],
+                                            lib_name, "--allow-dirty", "--token=5QcDi0JIg8gy2yfDy4aB44Pf3SouIbJH"],
                 stdout=subprocess.PIPE, shell=False)
         while True:
             line = pid_push_proc.stdout.readline()

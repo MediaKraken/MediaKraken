@@ -10,7 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_file = { version="0.0.20", registry = "kellnr" }
+mk_lib_file = { version="0.0.48", registry = "kellnr" }
 
 cidr-utils = { version = "0.5.11", features = [
     "serde",

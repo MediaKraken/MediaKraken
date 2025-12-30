@@ -22,12 +22,12 @@ ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig \
     DEBIAN_FRONTEND="noninteractive" \
     CARGO_INCREMENTAL=0
 
-# https://aomedia.googlesource.com/aom
-ARG AOM=v3.12.0
+# https://aomedia.googlesource.com/aom  <- this is av1
+ARG AOM=v3.13.1
 # https://github.com/mstorsjo/fdk-aac
 ARG FDKAAC_VERSION=2.0.3
 # https://ffmpeg.org/download.html
-ARG FFMPEG_VERSION=7.1.1
+ARG FFMPEG_VERSION=8.0.1
 # FONTCONFIG=2.14.2 - 2.14.2-r3
 # FREETYPE=2.12.1 - 2.13.0-r5
 # https://github.com/intel/gmmlib
@@ -35,11 +35,11 @@ ARG FFMPEG_VERSION=7.1.1
 # https://github.com/intel/media-driver
 #ARG IHD=23.4.3
 # https://github.com/ultravideo/kvazaar
-ARG KVAZAAR=2.3.1
+ARG KVAZAAR=2.3.2
 # LAME=3.100 - 3.100-r5
 # LIBASS=0.17.1 - 0.17.1-r0
 # https://dri.freedesktop.org/libdrm
-ARG LIBDRM=2.4.121
+ARG LIBDRM=2.4.131
 # https://github.com/Intel-Media-SDK/MediaSDK
 ARG LIBMFX=22.5.4
 # LIBVA=2.18.0 - 2.18.0-r1

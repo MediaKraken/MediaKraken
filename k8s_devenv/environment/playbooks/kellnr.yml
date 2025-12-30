@@ -14,4 +14,6 @@
         --set service.api.type=LoadBalancer \
         --set ingress.enabled=true \
         --set ingress.className=nginx \
-        --set ingress.tls.secretName=letsencrypt-kellnr-priv
+        --set ingress.tls.secretName=letsencrypt-kellnr-priv \
+        --set kellnr.proxy.enabled=true \
+        --set registry.auth_required=false
