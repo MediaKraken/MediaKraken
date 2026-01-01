@@ -12,5 +12,5 @@ codegen-units = 1
 [dependencies]
 mk_lib_network = { path = "../../src/mk_lib_network" }
 telnet = "0.2.4"
-tokio = { version = "1.47.1", features = ["full"] }
+tokio = { version = "1.48.0", features = ["full"] }
 tokio-test = "*"
