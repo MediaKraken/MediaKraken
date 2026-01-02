@@ -2,6 +2,7 @@
 # docker login --username=mediakraken
 
 import argparse
+import psutil
 import os
 import shlex
 import subprocess
@@ -118,14 +119,23 @@ else:
                 images_to_build.append(build_image)
 
 print("To Build:", images_to_build)
+running_pids = []
+max_running_pids = 3
 if len(images_to_build):
     for build_image in images_to_build:
         # -p for push all the time for now
         # -e for email all the time for now
         print("Launching build for:", build_image)
-        subprocess.Popen(['python3', os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken',
-                                                  'docker_build/build_and_deploy_subprocess.py'), '-i', build_image, '-v', git_branch, '-e', '-p'])
+        process = subprocess.Popen(['python3', os.path.join(CWD_HOME_DIRECTORY, 'MediaKraken',
+                                                            'docker_build/build_and_deploy_subprocess.py'), '-i', build_image, '-v', git_branch, '-e', '-p'])
+        running_pids.append(process.pid)
+        while len(running_pids) >= max_running_pids:
+            time.sleep(10)
+            for pid_check in running_pids:
+                if not psutil.pid_exists(pid_check):
+                    running_pids.remove(pid_check)
 
+# verify all subprocesses done
 processname = 'build_and_deploy_subprocess'
 while 1:
     tmp = os.popen("ps -Af").read()
