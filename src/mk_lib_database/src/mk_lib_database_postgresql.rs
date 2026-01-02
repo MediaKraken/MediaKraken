@@ -163,11 +163,10 @@ pub async fn mk_lib_database_table_exits(
     sqlx_pool: &sqlx::PgPool,
     table_name: &str,
 ) -> Result<bool, sqlx::Error> {
-    let row: (bool,) = sqlx::query_as(
+    let row: (bool,) = sqlx::query_as(format!(
         "SELECT EXISTS (SELECT 1 FROM pg_tables WHERE schemaname = 'public' \
-        AND tablename = $1 limit 1) as found_record limit 1;",
+        AND tablename = '{}' limit 1) as found_record limit 1;", table_name).as_str()
     )
-    .bind(table_name)
     .fetch_one(sqlx_pool)
     .await?;
     Ok(row.0)

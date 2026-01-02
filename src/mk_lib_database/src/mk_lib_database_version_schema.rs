@@ -644,23 +644,23 @@ pub async fn mk_lib_database_update_schema(
         mk_lib_database_version_update(&sqlx_pool, 70).await?;
     }
 
-    if version_no < 71 {
-        let mut transaction = sqlx_pool.begin().await?;
-        sqlx::query("CREATE EXTENSION IF NOT EXISTS pg_stat_statements WITH SCHEMA pg_catalog;")
-            .execute(&mut *transaction)
-            .await?;
-        sqlx::query("CREATE EXTENSION IF NOT EXISTS timescaledb WITH SCHEMA pg_catalog;")
-            .execute(&mut *transaction)
-            .await?;
-        sqlx::query("CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA pg_catalog;")
-            .execute(&mut *transaction)
-            .await?;
-        sqlx::query("CREATE EXTENSION IF NOT EXISTS vectorscale WITH SCHEMA pg_catalog;")
-            .execute(&mut *transaction)
-            .await?;
-        transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool, 71).await?;
-    }
+    // if version_no < 71 {
+    //     // let mut transaction = sqlx_pool.begin().await?;
+    //     sqlx::query("CREATE EXTENSION IF NOT EXISTS pg_stat_statements WITH SCHEMA pg_catalog;")
+    //         .execute(&mut *transaction)
+    //         .await?;
+    //     sqlx::query("CREATE EXTENSION IF NOT EXISTS timescaledb WITH SCHEMA pg_catalog;")
+    //         .execute(&mut *transaction)
+    //         .await?;
+    //     sqlx::query("CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA pg_catalog;")
+    //         .execute(&mut *transaction)
+    //         .await?;
+    //     sqlx::query("CREATE EXTENSION IF NOT EXISTS vectorscale WITH SCHEMA pg_catalog;")
+    //         .execute(&mut *transaction)
+    //         .await?;
+    //     transaction.commit().await?;
+    //     mk_lib_database_version_update(&sqlx_pool, 71).await?;
+    // }
 
     if version_no < 72 {
         let mut transaction = sqlx_pool.begin().await?;

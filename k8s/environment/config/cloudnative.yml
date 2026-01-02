@@ -99,6 +99,7 @@ spec:
         - CREATE EXTENSION pgcrypto
         #- CREATE EXTENSION timescaledb
         - CREATE EXTENSION vector;
+        #- CREATE EXTENSION vectorscale;
     # Alternative bootstrap method: start from a backup
     #recovery:
     #  backup:

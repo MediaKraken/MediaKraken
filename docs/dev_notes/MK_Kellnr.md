@@ -1,4 +1,6 @@
-cargo publish --registry kellnr -p mk_lib_common --allow-dirty --token=5QcDi0JIg8gy2yfDy4aB44Pf3SouIbJH
+cargo publish --registry kellnr -p ed2k --allow-dirty --token=Gandua8sU346qZkR41zFRMQiIyLvkFZ2
+
+cargo publish --registry kellnr -p weectrl --allow-dirty --token=Gandua8sU346qZkR41zFRMQiIyLvkFZ2
 
 # will ask for the token (generated in kellnr ui) - from src directory so .cargo exists
 cargo login --registry kellnr
@@ -15,6 +17,7 @@ mk_lib_logging *
 mk_lib_rabbitmq *
 ed2k-rs *
 weectrl *
+ssdp *
 
 mk_lib_database
     mk_lib_common

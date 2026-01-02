@@ -17,6 +17,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         println!("Meta directory exists")
     }
     if !Path::new(&"/mediakraken/metadata/backdrop/aa").exists() {
+        println!("Creating directories");
         // untar the tarball to /mediakraken/metadata
         let output = Command::new("tar")
             .args(["-xzf", "/tmp/meta.tar.gz", "-C", "/mediakraken/metadata"])
@@ -51,7 +52,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 "-h",
                 "pgcluster-with-metrics-rw.cnpg-system",
                 "-U",
-                "metaman",
+                env::var("POSTGRES_USER").unwrap().as_str(),
+                "-d",
+                "mkdatabase",
                 "-f",
                 "/scripts/create_schema.sql",
             ])

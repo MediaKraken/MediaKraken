@@ -10,7 +10,7 @@ pub async fn mk_lib_database_open_pool_write(
     let db_user = env::var("POSTGRES_USER").unwrap();
     let db_pass = env::var("POSTGRES_PASSWORD").unwrap();
     let connection_string = format!(
-        "postgresql://{}:{}@pgcluster-with-metrics-rw.cnpg-system:5432/postgres?sslmode=prefer",
+        "postgresql://{}:{}@pgcluster-with-metrics-rw.cnpg-system:5432/mkdatabase?sslmode=prefer",
         db_user,
         encode(&db_pass)
     );
@@ -29,7 +29,7 @@ pub async fn mk_lib_database_open_pool_read(
     let db_user = env::var("POSTGRES_USER").unwrap();    
     let db_pass = env::var("POSTGRES_PASSWORD").unwrap();
     let connection_string = format!(
-        "postgresql://{}:{}@pgcluster-with-metrics-ro.cnpg-system:5432/postgres?sslmode=prefer",
+        "postgresql://{}:{}@pgcluster-with-metrics-ro.cnpg-system:5432/mkdatabase?sslmode=prefer",
         db_user,
         encode(&db_pass)
     );

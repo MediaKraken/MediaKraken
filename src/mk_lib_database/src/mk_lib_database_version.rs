@@ -1,4 +1,5 @@
 use crate::mk_lib_database_version_schema;
+use crate::mk_lib_database_postgresql;
 use tokio::time::{sleep, Duration};
 
 pub static DATABASE_VERSION: i32 = 73;
@@ -23,6 +24,17 @@ pub async fn mk_lib_database_version_check(
     sqlx_pool: &sqlx::PgPool,
     update_schema: bool,
 ) -> Result<bool, sqlx::Error> {
+    // see if db exists
+    while mk_lib_database_postgresql::mk_lib_database_table_exits(
+        &sqlx_pool,
+        "mm_version",
+    )
+    .await
+    .unwrap() == false
+    {
+        sleep(Duration::from_secs(5)).await;
+    }
+    // start version check
     let mut version_match: bool = false;
     let version_no: i32 = mk_lib_database_version(&sqlx_pool).await.unwrap();
     if DATABASE_VERSION == version_no {
@@ -36,7 +48,7 @@ pub async fn mk_lib_database_version_check(
             version_match = true;
         } else {
             loop {
-                sleep(Duration::from_secs(1)).await;
+                sleep(Duration::from_secs(5)).await;
                 let version_no: i32 = mk_lib_database_version(&sqlx_pool).await.unwrap();
                 if DATABASE_VERSION == version_no {
                     version_match = true;

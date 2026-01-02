@@ -26,7 +26,10 @@ args = parser.parse_args()
 load_dotenv()
 
 # publish to kellnr
-libs_to_publish = ["mk_lib_common",
+libs_to_publish = ["ed2k",
+                   "ssdp",
+                   "weectrl",
+                   "mk_lib_common",
                    "mk_lib_compression",
                    "mk_lib_filler",
                    "mk_lib_image",
@@ -58,7 +61,7 @@ for lib_name in libs_to_publish:
         subject_text = ' SUCCESS'
         # publish the libary
         pid_push_proc = subprocess.Popen(["cargo", "publish", "--registry", "kellnr", "-p",
-                                            lib_name, "--allow-dirty", "--token=5QcDi0JIg8gy2yfDy4aB44Pf3SouIbJH"],
+                                            lib_name, "--allow-dirty", "--token=Gandua8sU346qZkR41zFRMQiIyLvkFZ2"],
                 stdout=subprocess.PIPE, shell=False)
         while True:
             line = pid_push_proc.stdout.readline()

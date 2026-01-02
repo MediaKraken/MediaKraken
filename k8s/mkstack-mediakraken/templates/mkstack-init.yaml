@@ -48,7 +48,7 @@ spec:
           volumeMounts:
             - mountPath: /mediakraken/metadata
               name: mkstack-metadata-claim
-      restartPolicy: Always
+      restartPolicy: Never
       terminationGracePeriodSeconds: 30
       volumes:
         - name: mkstack-metadata-claim

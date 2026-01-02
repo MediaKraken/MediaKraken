@@ -16,4 +16,5 @@
         --set ingress.className=nginx \
         --set ingress.tls.secretName=letsencrypt-kellnr-priv \
         --set kellnr.proxy.enabled=true \
+        --set kellnr.proxy.numThreads=50 \
         --set registry.auth_required=false
