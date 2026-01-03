@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_database"
-version = "0.0.76"
+version = "0.0.77"
 edition = "2024"
 
 [profile.release]
@@ -10,7 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_common = { version = "0.0.44", registry = "kellnr" }
+mk_lib_common = { version = "0.0.45", registry = "kellnr" }
 
 anyhow = "1.0.99"
 async-trait = "0.1.89"

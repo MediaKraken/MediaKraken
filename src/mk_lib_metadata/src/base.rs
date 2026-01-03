@@ -241,6 +241,23 @@ pub async fn metadata_search(
                 //         set_fetch = true;
                 // }
             }
+        } else if download_data.mm_download_que_type
+            == mk_lib_common_enum_media_type::DLMediaType::PERSON
+        {
+            if metadata_uuid == uuid::Uuid::nil() {
+                metadata_uuid =
+                    metadata_person::metadata_person_lookup(&sqlx_pool, &download_data, guessit_data)
+                        .await
+                        .unwrap();
+                // (metadata_uuid, match_result) = metadata_person.metadata_person_lookup(&sqlx_pool, download_data);
+                // // if match_result is an int, that means the lookup found a match but isn"t in db
+                // if metadata_uuid == uuid::Uuid::nil() && type(match_result) != int {
+                //     lookup_halt = true;
+                // }
+                // else if metadata_uuid != uuid::Uuid::nil() {
+                //         set_fetch = true;
+                // }
+            }
         } else {
             // this will hit from type 0's (trailers, etc)
             if metadata_uuid == uuid::Uuid::nil() {
