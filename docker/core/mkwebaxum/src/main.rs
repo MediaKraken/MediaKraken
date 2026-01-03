@@ -437,7 +437,7 @@ async fn main() {
         .route_with_tsr(
             "/api/titlesearch/{title}",
             get(api::bp_api_title_search::api_title_search)
-        )        
+        )
         .route_with_tsr("/public/about", get(public::bp_about::public_about))
         .route_with_tsr("/error/401", get(bp_error::general_not_authorized))
         .route_with_tsr("/error/403", get(bp_error::general_not_administrator))

@@ -110,7 +110,7 @@ pub async fn user_metadata_movie(
                 queue_status =
                     rating_json["UserStats"][current_user.id.to_string()]["Queue"].clone();
             }
-            let mut mm_poster: String = "/image/Movie-icon.png".to_string();
+            let mut mm_poster: String = "/static/image/Movie-icon.png".to_string();
             if row_data.mm_poster.len() > 0 {
                 mm_poster = row_data.mm_poster.clone();
             }
