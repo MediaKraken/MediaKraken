@@ -97,15 +97,6 @@ resource "terraform_data" "ntfy" {
   ]
 }
 
-resource "terraform_data" "taiga" {
-  provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/taiga.yml"
-  }
-  depends_on = [
-    terraform_data.ntfy
-  ]
-}
-
 resource "terraform_data" "gitea" {
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/gitea.yml"
