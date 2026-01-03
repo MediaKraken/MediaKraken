@@ -18,6 +18,8 @@ mod metadata_movie;
 mod metadata_music;
 #[path = "music_video.rs"]
 mod metadata_music_video;
+#[path = "person.rs"]
+mod metadata_person;
 #[path = "sports.rs"]
 mod metadata_sports;
 #[path = "tv.rs"]

@@ -31,11 +31,11 @@
                             <img src="/metadata/{{row_data.image_json|unquote_json}}" loading="lazy" height="300" width="200">
                             {% endif %}
                         </a>
-                        {#{% if row_data.mm_metadata_tvshow_name != None %}
+                        {% if row_data.mm_metadata_tvshow_name != "" %}
                         <div class="description">
                             <p class="description_content_left">{{row_data.mm_metadata_tvshow_name}}</p>
                         </div>
-                        {% endif %}#}
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
