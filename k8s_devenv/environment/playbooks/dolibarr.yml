@@ -1,0 +1,23 @@
+# https://artifacthub.io/packages/helm/cowboysysop/dolibarr
+- name : Setup dolibarr on cluster
+  hosts: mkcontroldev1
+  tasks:
+    - name: Add repo
+      shell: helm repo add cowboysysop https://cowboysysop.github.io/charts/
+
+    - name: Install dolibarr
+      shell: helm install my-dolibarr oci://ghcr.io/cowboysysop/charts/dolibarr \
+        --create-namespace --namespace dolibarr \
+        --set service.type=LoadBalancer \
+        --set dolibarr.admin.username="admin" \
+        --set dolibarr.admin.password="ChangeMe123!" \
+        --set dolibarr.externalUrl="http://mkdevdolibarr.mediakraken.media" \
+        --set persistence.enabled=true \
+        --set persistence.storageClass=longhorn \
+        --set persistence.size=20Gi \
+        --set ingress.enabled=true \
+        --set ingress.className=nginx \
+        --set ingress.hosts[0].host="mkdevdolibarr.mediakraken.media" \
+        --set ingress.hosts[0].paths[0]="/" \
+        --set ingress.tls[0].hosts[0]="mkdevdolibarr.mediakraken.media" \
+        --set ingress.tls[0].secretName="letsencrypt-dolibarr-priv"

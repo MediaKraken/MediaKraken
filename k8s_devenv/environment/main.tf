@@ -114,3 +114,21 @@ resource "terraform_data" "harbor" {
     terraform_data.gitea
   ]
 }
+
+# resource "terraform_data" "openproject" {
+#   provisioner "local-exec" {
+#     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/openproject.yml"
+#   }
+#   depends_on = [
+#     terraform_data.harbor
+#   ]
+# }
+
+# resource "terraform_data" "dolibarr" {
+#   provisioner "local-exec" {
+#     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/dolibarr.yml"
+#   }
+#   depends_on = [
+#     terraform_data.harbor
+#   ]
+# }
