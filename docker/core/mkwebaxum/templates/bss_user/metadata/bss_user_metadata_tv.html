@@ -9,7 +9,8 @@
         href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
     <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
     <link rel="stylesheet" href="/static/css/styles.min.css">
-    <link rel="stylesheet" href="/static/css/base_webapp_layout.css" media="all" type="text/css" />
+    <link rel="stylesheet" href="/static/css/base_webapp_layout.css">
+    <link rel="stylesheet" href="/static/contextmenu/jquery.contextMenu.min.css">    
 </head>
 
 <body>
@@ -20,7 +21,7 @@
             {% if pagination_bar != "" %}
             {{ pagination_bar|safe }}
             {% endif %}
-            <div id="the-tv-node">
+            <div id="the-tv-metadata-node">
                 {% for row_data in template_data %}
                 <div class="main_photo">
                     <div class="media_context_right" data-id={{row_data.mm_metadata_tvshow_guid}}>
@@ -53,5 +54,7 @@
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
     <script src="/static/js/jquery-easing.min.js"></script>
     <script src="/static/js/script.min.js"></script>
+    <script src="/static/contextmenu/jquery.contextMenu.min.js"></script>
+    <script src="/static/js/base_webapp.js"></script>
 </body>
 {% endblock %}
