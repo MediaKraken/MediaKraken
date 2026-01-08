@@ -157,6 +157,37 @@ pub async fn mk_lib_database_metadata_movie_detail_by_guid(
     Ok(row)
 }
 
+pub async fn mk_lib_database_metadata_movie_status(sqlx_pool: &sqlx::PgPool,
+    uuid_id: Uuid,
+    key: String,
+    user_uuid: Uuid,
+    ) -> Result<(), sqlx::Error> {
+    let mut transaction = sqlx_pool.begin().await?;
+    let row: (serde_json::Value,) = sqlx::query_as(
+        "select mm_metadata_movie_user_json from mm_metadata_movie \
+        where mm_metadata_movie_guid = $1",
+    )
+    .bind(uuid_id)
+    .fetch_one(sqlx_pool)
+    .await?;
+    // extract user json, update status, update
+    let mut user_json: serde_json::Value = row.0;
+    let user_id = user_uuid.to_string();
+    if user_json["UserStats"][&user_id].is_null() {
+        user_json["UserStats"][&user_id] = serde_json::json!({"Rating": false, "Watched": false, "Requested": false, "Queue": false});
+    }
+    // TODO set the "keys"
+    sqlx::query("update mm_metadata_movie \
+                set mm_metadata_movie_user_json = $1 \
+                where mm_metadata_movie_guid = $2")
+    .bind(user_json)
+    .bind(uuid_id)
+    .execute(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(())
+}
+
 /*
 
 // TODO port query
@@ -198,19 +229,6 @@ pub async fn db_meta_movie_status_update(self, metadata_guid, user_id, status_te
         json_data['UserStats'][str(user_id)] = {status_text: status_setting}
     await self.db_meta_movie_json_update(metadata_guid,
                                         json_data)
-
-
-// TODO port query
-pub async fn db_meta_movie_json_update(self, media_guid, metadata_json):
-    """
-    # update the metadata json
-    """
-    await db_conn.execute('update mm_metadata_movie'
-                          ' set mm_metadata_movie_user_json = $1'
-                          ' where mm_metadata_movie_guid = $2',
-                          metadata_json, media_guid)
-    await db_conn.execute('commit')
-
 
 # poster, backdrop, etc
 // TODO port query

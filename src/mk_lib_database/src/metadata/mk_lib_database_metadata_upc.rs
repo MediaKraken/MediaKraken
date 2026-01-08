@@ -9,7 +9,7 @@ pub async fn mk_lib_database_metadata_exists_upc(
 ) -> Result<bool, sqlx::Error> {
     let row: (bool,) = sqlx::query_as(
         "select exists(select 1 from mm_bar_codes \
-        where mm_bar_code_data = $1 limit 1) as found_record limit 1",
+        where mm_bar_code_code = $1 limit 1) as found_record limit 1",
     )
     .bind(upc_code)
     .fetch_one(sqlx_pool)
@@ -25,7 +25,7 @@ pub async fn mk_lib_database_metadata_exists_upc_own(
     let row: (bool,) = sqlx::query_as(
         "select exists(select 1 from mm_bar_codes, mm_bar_code_own \
         where mm_bar_code_uuid = mm_bar_code_own_uuid \
-        and mm_bar_code_data = $1 and mm_bar_code_own_user = $2 limit 1) as found_record limit 1",
+        and mm_bar_code_code = $1 and mm_bar_code_own_user = $2 limit 1) as found_record limit 1",
     )
     .bind(upc_code)
     .bind(user_id)

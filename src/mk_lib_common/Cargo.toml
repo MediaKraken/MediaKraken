@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_common"
-version = "0.0.45"
+version = "0.0.46"
 edition = "2024"
 
 [profile.release]

@@ -42,7 +42,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .unwrap();
             let api_key = option_api.barcodespider.as_ref().unwrap().as_str();
             loop {
-                let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "themoviedb").await.unwrap();
+                let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "barcodespider").await.unwrap();
                 for download_data in metadata_to_process {
                     if let Err(sleep) = daily_api_call_limiter.try_wait() {
                         std::thread::sleep(sleep);
@@ -194,7 +194,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .unwrap();
             let api_key = option_api.upcitemdb.as_ref().unwrap().as_str();
             loop {
-                let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "themoviedb").await.unwrap();
+                let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "upcitemdb").await.unwrap();
                 for download_data in metadata_to_process {
                     if let Err(sleep) = daily_api_call_limiter.try_wait() {
                         std::thread::sleep(sleep);

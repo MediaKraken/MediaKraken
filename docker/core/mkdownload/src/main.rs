@@ -8,6 +8,33 @@ use std::path::Path;
 use std::process::{Command, Stdio};
 use tokio::sync::Notify;
 
+#[derive(Debug, serde::Deserialize)]
+struct DigitalUPCNetRecord {
+    title: String,
+    year: String,
+    quality: String,
+    upc: String,
+    notes: Option<String>,
+    fah_id: Option<String>,
+}
+
+#[derive(Debug, serde::Deserialize)]
+struct UPCMasterNetRecord {
+    upc: String,
+    title: String,
+    description: Option<String>,
+    link: String,
+    notes: Option<String>,
+    type: String,
+    year: String,
+    genres: String,
+    rated: String,
+    length: String,
+    added: String,
+    alt_upc: Option<String>,
+    nw_bluray_upc: Option<String>,
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
@@ -70,6 +97,34 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     } else {
                         // TODO log error by user requested
                         continue;
+                    }
+                } else if json_message["Type"].to_string() == "DigitalUPCNet" {
+                    let sheet_data = mk_lib_metadata::mk_lib_metadata_provider_google_sheets::provider_google_sheets_fetch(
+                        "1po70GCN9JUwrWgycMueNfxpEvBjLd7DQkiMRUQFFsL8".to_string(),
+                        "tsv".to_string(),
+                    )
+                    .await
+                    .unwrap();
+                    // process sheet data TODO, this might be worthless d2d only
+                    let mut rdr = csv::Reader::from_reader(sheet_dataq.as_bytes());
+                    for result in rdr.deserialize() {
+                        let record: DigitalUPCNetRecord = result?;
+                        println!("{:?}", record);
+                        // TODO "one-time" load.....do this BEFORE upc master list
+                    }
+                } else if json_message["Type"].to_string() == "UPCMasterList" {
+                    let sheet_data = mk_lib_metadata::mk_lib_metadata_provider_google_sheets::provider_google_sheets_fetch(
+                        "1IgK7tIEKngP59PUOs_lsF4P1hbSRIG71tgxncpu1Mws".to_string(),
+                        "tsv".to_string(),
+                    )
+                    .await
+                    .unwrap();
+                    // process sheet data, this might be worthless d2d only
+                    let mut rdr = csv::Reader::from_reader(sheet_dataq.as_bytes());
+                    for result in rdr.deserialize() {
+                        let record: UPCMasterNetRecord = result?;
+                        println!("{:?}", record);
+                        // TODO "one-time" load
                     }
                 } else if json_message["Type"].to_string() == "Dosage" {
                     // This saves to ./Comics

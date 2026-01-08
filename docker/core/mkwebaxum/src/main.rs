@@ -416,6 +416,10 @@ async fn main() {
         .route_with_tsr("/user/queue", get(user::bp_queue::user_queue))
         .route_with_tsr("/user/search", get(user::bp_search::user_search))
         .route_with_tsr("/user/sync/{page}", get(user::bp_sync::user_sync))
+        .route_with_tsr("/user/user_media_movie_status/{uuid}/{key}", post(user_media::bp_media_movie::url_bp_user_media_movie_status))
+        .route_with_tsr("/user/user_metadata_movie_status/{uuid}/{key}", post(user_metadata::bp_meta_movie::url_bp_user_metadata_movie_status))
+        .route_with_tsr("/user/user_media_tv_status/{uuid}/{key}", post(user_media::bp_media_tv::url_bp_user_media_tv_status))
+        .route_with_tsr("/user/user_metadata_tv_status/{uuid}/{key}", post(user_metadata::bp_meta_tv::url_bp_user_metadata_tv_status))
         .route_with_tsr("/public/logout", get(public::bp_logout::public_logout))
         .route_with_tsr(
             "/public/login",

@@ -6,6 +6,7 @@ use axum::{
     response::{Html, IntoResponse},
     Extension,
 };
+use axum::response::Redirect;
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
@@ -183,6 +184,45 @@ pub async fn user_metadata_movie_detail(
     }
 }
 
+// @blueprint_user_metadata_movie.route('/user_metadata_movie_status/<guid>/<event_type>',
+//                                      methods=['GET', 'POST'])
+// @common_global.auth.login_required(user_keyword='user')
+// pub async fn url_bp_user_metadata_movie_status(request, user, guid, event_type):
+//     db_connection = await request.app.db_pool.acquire()
+//     await request.app.db_functions.db_meta_movie_status_update(guid,
+//                                                                user.id, event_type,
+//                                                                db_connection=db_connection)
+//     await request.app.db_pool.release(db_connection)
+//     return response.HTTPResponse('', status=200, headers={'Vary': 'Accept-Encoding'})
+
+
+pub async fn user_metadata_movie_status(
+    Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    Path(guid): Path<uuid::Uuid>,
+    Path(event_type): Path<String>,
+) -> impl IntoResponse {
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("User::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        Redirect::to("/error/401")
+    } else {
+        let _row_data = mk_lib_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_status(
+            &sqlx_pool, guid, event_type, current_user
+        )
+        .await
+        .unwrap();
+        Redirect::to("/admin/cron")
+    }
+}
+
 /*
 
 @blueprint_user_metadata_movie.route('/user_meta_movie_detail/<guid>')
@@ -332,24 +372,4 @@ pub async fn url_bp_user_metadata_movie_list(request, user):
         'media_movie': media,
         'pagination_bar': pagination,
     }
-
-
-@blueprint_user_metadata_movie.route('/user_meta_movie_status/<guid>/<event_type>',
-                                     methods=['GET', 'POST'])
-@common_global.auth.login_required(user_keyword='user')
-pub async fn url_bp_user_metadata_movie_status(request, user, guid, event_type):
-    """
-    Set media status for specified media, user
-    """
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
-                                                                     message_text={
-                                                                         'movie metadata status': guid,
-                                                                         'event': event_type})
-    db_connection = await request.app.db_pool.acquire()
-    await request.app.db_functions.db_meta_movie_status_update(guid,
-                                                               user.id, event_type,
-                                                               db_connection=db_connection)
-    await request.app.db_pool.release(db_connection)
-    return response.HTTPResponse('', status=200, headers={'Vary': 'Accept-Encoding'})
-
  */

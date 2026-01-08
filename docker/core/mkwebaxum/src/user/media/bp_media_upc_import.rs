@@ -100,28 +100,30 @@ pub async fn user_media_upc_import_post(
                 // TODO insert row into DB for user
             }
         } else {
-            // Lookup barcodespider
+            // Lookup upcitemdb
             let json_data: serde_json::Value =
-                mk_lib_metadata::metadata_provider::barcodespider::provider_barcodespider_fetch_by_upc(
+                mk_lib_metadata::metadata_provider::upcitemdb::provider_upcitemdb_fetch_by_upc(
                     &sqlx_pool,
                     &input_data.upc_code,
                     &"FAKETOKEN",
-                ) .await
+                )
+                .await
                 .unwrap();
-            if json_data["Status"] == "404" {
-                // Lookup upcitemdb since not on barcodespider
-                let json_data: serde_json::Value =
-                    mk_lib_metadata::metadata_provider::upcitemdb::provider_upcitemdb_fetch_by_upc(
-                        &sqlx_pool,
-                        &input_data.upc_code,
-                        &"FAKETOKEN",
-                    )
-                    .await
-                    .unwrap();
-                if json_data["Status"] == "404" {
-                    // TODO throw not found error
-                }
+            if json_data["code"] == "OK" {
             }
+            // if json_data["code"] == "INVALID_UPC" {
+            //     // Lookup barcodespider
+            //     let json_data: serde_json::Value =
+            //         mk_lib_metadata::metadata_provider::barcodespider::provider_barcodespider_fetch_by_upc(
+            //             &sqlx_pool,
+            //             &input_data.upc_code,
+            //             &"FAKETOKEN",
+            //         ) .await
+            //         .unwrap();
+            //     if json_data["item_response"]["code"] != "200" {
+            //         // TODO throw not found error
+            //     }
+            // }
         }
     }
     Redirect::to("/user/home")

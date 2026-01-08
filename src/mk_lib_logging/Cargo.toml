@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_logging"
-version = "0.0.46"
+version = "0.0.47"
 edition = "2024"
 
 [profile.release]
