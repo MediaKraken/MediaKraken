@@ -1,0 +1,44 @@
+{% block content %}
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>MediaKraken UPC Import</title>
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=FontName">
+    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.min.css">
+</head>
+
+<body>
+    {% include "bss_user/bss_user_include_menu.html" %}
+    <div>
+    <h2>Import Text File (Up to 500 Lines)</h2>
+    <input type="file" id="fileInput" accept=".txt">
+    <textarea id="output" placeholder="Imported lines will appear here..."></textarea>
+    <br><br>
+        <a href="/user/media/bss_user_media_upc_import_submit">
+            <button type="button">Submit UPC(s)</button>
+        </a>
+    </div>
+    {% include "bss_public/bss_public_footer.html" %}
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery-easing.min.js"></script>
+    <script src="/static/js/script.min.js"></script>
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function () {
+            const file = this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const lines = e.target.result.split(/\r?\n/);
+                const first50Lines = lines.slice(0, 500).join('\n');
+                document.getElementById('output').value = first50Lines;
+            };
+            reader.readAsText(file);
+        });
+    </script>
+</body>
+{% endblock %}

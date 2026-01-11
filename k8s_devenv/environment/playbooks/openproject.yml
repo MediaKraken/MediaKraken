@@ -1,16 +1,11 @@
-# https://www.openproject.org/docs/installation-and-operations/installation/helm-chart/
+---
 - name : Setup openproject on cluster
   hosts: mkcontroldev1
   tasks:
-    - name: Add repo
-      shell: helm repo add openproject https://charts.openproject.org
+    - name: copying file
+      copy:
+        src: ../config/openproject.yml
+        dest: ~/openproject.yml
 
-    - name: Install openproject
-      shell: helm upgrade --create-namespace --namespace openproject --install openproject openproject/openproject \
-        --set openproject.hosts[0]="mkdevopenproject.mediakraken.media" \
-        --set openproject.persistence.storageClass=longhorn \
-        --set openproject.persistence.size=50Gi \
-        --set openproject.ingress.enabled=true \
-        --set openproject.ingress.className=nginx \
-        --set openproject.ingress.tls[0].hosts[0]="mkdevopenproject.mediakraken.media" \
-        --set openproject.ingress.tls[0].secretName="letsencrypt-openproject-priv"
+    - name: Setup openproject
+      shell: kubectl apply -f ~/openproject.yml

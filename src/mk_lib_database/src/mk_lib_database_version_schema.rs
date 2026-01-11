@@ -730,6 +730,24 @@ pub async fn mk_lib_database_update_schema(
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 73).await?;
     }
+
+    if version_no < 74 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(
+            "ALTER TABLE mm_bar_codes ADD COLUMN mm_bar_code_metadata_uuid uuid;",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_bar_codes_metadata_uuid_ndx \
+                ON mm_bar_codes USING btree (mm_bar_code_metadata_uuid);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 74).await?;
+    }
+
     Ok(true)
 }
 
