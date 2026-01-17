@@ -16,8 +16,8 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { version = "0.0.78", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.50", registry = "kellnr" }
+mk_lib_database = { version = "0.0.87", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.59", registry = "kellnr" }
 
 reqwest = { version = "0.12.28", default-features = false, features = [
     "json",
@@ -28,7 +28,7 @@ serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.148"
 stdext = "0.3.3"
 sys-info = "0.9.1"
-tokio = { version = "1.48.0", features = ["full"] }
+tokio = { version = "1.49.0", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"

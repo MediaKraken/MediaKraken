@@ -21,15 +21,15 @@ use axum_flash::{Flash, IncomingFlashes};
 use axum_prometheus::PrometheusMetricLayer;
 use axum_server::tls_rustls::RustlsConfig;
 use axum_session::{Key, Session, SessionConfig, SessionLayer, SessionStore};
-use axum_session_sqlx::SessionPgPool;
 use axum_session_auth::*;
-use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
+use axum_session_sqlx::SessionPgPool;
 use hyper::StatusCode;
 use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
 use mk_lib_database;
 use redis_pool::{RedisPool, SingleRedisPool};
 use ring::digest;
 use serde_json::json;
+use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
 
 use std::fs::File;
 use std::io::Write;
@@ -171,9 +171,10 @@ async fn main() {
 
     let session_config = SessionConfig::default().with_table_name("mm_session");
     let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
-    let session_store =  SessionStore::<SessionPgPool>::new(Some(sqlx_pool.clone().into()), session_config)
-        .await
-        .unwrap();
+    let session_store =
+        SessionStore::<SessionPgPool>::new(Some(sqlx_pool.clone().into()), session_config)
+            .await
+            .unwrap();
 
     let (prometheus_layer, metric_handle) = PrometheusMetricLayer::pair();
 
@@ -191,7 +192,10 @@ async fn main() {
         .route_with_tsr("/admin", get(admin::bp_home::admin_home))
         .route_with_tsr("/admin/backup", get(admin::bp_backup::admin_backup))
         .route_with_tsr("/admin/cron", get(admin::bp_cron::admin_cron))
-        .route_with_tsr("/admin/cron_run/{guid}", get(admin::bp_cron::admin_cron_run))
+        .route_with_tsr(
+            "/admin/cron_run/{guid}",
+            get(admin::bp_cron::admin_cron_run),
+        )
         .route_with_tsr("/admin/database", get(admin::bp_database::admin_database))
         .route_with_tsr(
             "/admin/game_servers/{page}",
@@ -316,7 +320,8 @@ async fn main() {
         )
         .route_with_tsr(
             "/user/media/upc",
-            get(user_media::bp_media_upc_import::user_media_upc_import).post(user_media::bp_media_upc_import::user_media_upc_import_post),
+            get(user_media::bp_media_upc_import::user_media_upc_import)
+                .post(user_media::bp_media_upc_import::user_media_upc_import_post),
         )
         .route_with_tsr(
             "/user/metadata/book/{page}",
@@ -416,10 +421,22 @@ async fn main() {
         .route_with_tsr("/user/queue", get(user::bp_queue::user_queue))
         .route_with_tsr("/user/search", get(user::bp_search::user_search))
         .route_with_tsr("/user/sync/{page}", get(user::bp_sync::user_sync))
-        .route_with_tsr("/user/user_media_movie_status/{uuid}/{key}", post(user_media::bp_media_movie::url_bp_user_media_movie_status))
-        .route_with_tsr("/user/user_metadata_movie_status/{uuid}/{key}", post(user_metadata::bp_meta_movie::url_bp_user_metadata_movie_status))
-        .route_with_tsr("/user/user_media_tv_status/{uuid}/{key}", post(user_media::bp_media_tv::url_bp_user_media_tv_status))
-        .route_with_tsr("/user/user_metadata_tv_status/{uuid}/{key}", post(user_metadata::bp_meta_tv::url_bp_user_metadata_tv_status))
+        .route_with_tsr(
+            "/user/user_media_movie_status/{uuid}/{key}",
+            post(user_media::bp_media_movie::user_media_movie_status),
+        )
+        .route_with_tsr(
+            "/user/user_metadata_movie_status/{uuid}/{key}",
+            post(user_metadata::bp_meta_movie::user_metadata_movie_status),
+        )
+        .route_with_tsr(
+            "/user/user_media_tv_status/{uuid}/{key}",
+            post(user_media::bp_media_tv::user_media_tv_status),
+        )
+        .route_with_tsr(
+            "/user/user_metadata_tv_status/{uuid}/{key}",
+            post(user_metadata::bp_meta_tv::user_metadata_tv_status),
+        )
         .route_with_tsr("/public/logout", get(public::bp_logout::public_logout))
         .route_with_tsr(
             "/public/login",
@@ -440,7 +457,7 @@ async fn main() {
         // after authsessionlayer so anyone can access
         .route_with_tsr(
             "/api/titlesearch/{title}",
-            get(api::bp_api_title_search::api_title_search)
+            get(api::bp_api_title_search::api_title_search),
         )
         .route_with_tsr("/public/about", get(public::bp_about::public_about))
         .route_with_tsr("/error/401", get(bp_error::general_not_authorized))

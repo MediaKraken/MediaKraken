@@ -104,7 +104,7 @@ pub async fn user_media_upc_import_post(
             let json_data: serde_json::Value =
                 mk_lib_metadata::metadata_provider::upcitemdb::provider_upcitemdb_fetch_by_upc(
                     &sqlx_pool,
-                    &input_data.upc_code,
+                    vec![&input_data.upc_code],
                     &"FAKETOKEN",
                 )
                 .await

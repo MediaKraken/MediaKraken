@@ -124,6 +124,37 @@ pub async fn mk_lib_database_metadata_tv_insert(
     Ok(())
 }
 
+pub async fn mk_lib_database_metadata_tv_status(sqlx_pool: &sqlx::PgPool,
+    uuid_id: Uuid,
+    key: String,
+    user_id: i64,
+    ) -> Result<(), sqlx::Error> {
+    let mut transaction = sqlx_pool.begin().await?;
+    let row: (serde_json::Value,) = sqlx::query_as(
+        "select mm_metadata_tv_user_json from mm_metadata_tv \
+        where mm_metadata_tv_guid = $1",
+    )
+    .bind(uuid_id)
+    .fetch_one(sqlx_pool)
+    .await?;
+    // extract user json, update status, update
+    let mut user_json: serde_json::Value = row.0;
+    let user_id = user_id.to_string();
+    if user_json["UserStats"][&user_id].is_null() {
+        user_json["UserStats"][&user_id] = serde_json::json!({"Rating": false, "Watched": false, "Requested": false, "Queue": false});
+    }
+    // TODO set the "keys"
+    sqlx::query("update mm_metadata_tv \
+                set mm_metadata_tv_user_json = $1 \
+                where mm_metadata_tv_guid = $2")
+    .bind(user_json)
+    .bind(uuid_id)
+    .execute(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(())
+}
+
 /*
 
 // TODO port query

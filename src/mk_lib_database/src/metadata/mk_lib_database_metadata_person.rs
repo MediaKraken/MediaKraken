@@ -141,12 +141,11 @@ pub async fn mk_lib_database_meta_person_by_name(
 
 pub async fn mk_lib_database_metadata_person_insert(
     sqlx_pool: &sqlx::PgPool,
-    person_name: String,
+    uuid_id: Uuid,
     media_id: i32,
-    person_json: serde_json::Value,
+    person_json: &serde_json::Value,
     person_image_path: serde_json::Value,
 ) -> Result<Uuid, sqlx::Error> {
-    let new_guid = uuid::Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_metadata_person (mmp_id, mmp_person_name, \
@@ -154,15 +153,15 @@ pub async fn mk_lib_database_metadata_person_insert(
         mmp_person_image) \
         values ($1,$2,$3,$4,$5)",
     )
-    .bind(new_guid)
-    .bind(person_name)
+    .bind(uuid_id)
+    .bind(person_json["name"].as_str().unwrap().to_string())
     .bind(media_id)
     .bind(person_json)
     .bind(person_image_path)
     .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
-    Ok(new_guid)
+    Ok(uuid_id)
 }
 
 pub async fn mk_lib_database_metadata_person_insert_cast_crew(

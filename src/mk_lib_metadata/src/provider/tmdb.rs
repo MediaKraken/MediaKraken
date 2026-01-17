@@ -19,7 +19,7 @@ pub async fn provider_tmdb_movie_fetch(
         .await
         .unwrap();
     if result_json.get("success").is_some() && result_json["success"] == false {
-        println!("Skipn Movie: {}", tmdb_id);
+        println!("Skip Movie: {}", tmdb_id);
         return;
     }
     let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
@@ -52,9 +52,9 @@ pub async fn provider_tmdb_movie_fetch(
 }
 
 pub async fn provider_tmdb_person_fetch(
-    _sqlx_pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     tmdb_id: i32,
-    _metadata_uuid: Uuid,
+    metadata_uuid: Uuid,
     tmdb_api_key: &str,
 ) {
     // fetch and save json data via tmdb id
@@ -62,9 +62,18 @@ pub async fn provider_tmdb_person_fetch(
         .await
         .unwrap();
     if result_json.get("success").is_some() && result_json["success"] == false {
-        println!("Skipn Person: {}", tmdb_id);
+        println!("Skip Person: {}", tmdb_id);
         return;
-    }        
+    }
+    let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
+    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert(
+        sqlx_pool,
+        metadata_uuid,
+        tmdb_id,
+        &result_json,
+        image_json,
+    )
+    .await;
 }
 
 pub async fn provider_tmdb_tv_fetch(
@@ -78,7 +87,7 @@ pub async fn provider_tmdb_tv_fetch(
         .await
         .unwrap();
     if result_json.get("success").is_some() && result_json["success"] == false {
-        println!("Skipn TV: {}", tmdb_id);
+        println!("Skip TV: {}", tmdb_id);
         return;
     }    
     let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();

@@ -20,10 +20,3 @@ pub async fn mk_common_ffmpeg_get_info(
     let json_output: serde_json::Value = serde_json::from_str(&stdout).unwrap();
     Ok(json_output)
 }
-
-// https://developer.roku.com/docs/developer-program/media-playback/trick-mode/bif-file-creation.md
-pub async fn mk_common_ffmpeg_roku_bif_create(
-    media_file: &str,
-) -> Result<(), std::io::Error> {
-    Ok(())
-}

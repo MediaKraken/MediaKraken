@@ -160,7 +160,7 @@ pub async fn mk_lib_database_metadata_movie_detail_by_guid(
 pub async fn mk_lib_database_metadata_movie_status(sqlx_pool: &sqlx::PgPool,
     uuid_id: Uuid,
     key: String,
-    user_uuid: Uuid,
+    user_id: i64,
     ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
     let row: (serde_json::Value,) = sqlx::query_as(
@@ -172,7 +172,7 @@ pub async fn mk_lib_database_metadata_movie_status(sqlx_pool: &sqlx::PgPool,
     .await?;
     // extract user json, update status, update
     let mut user_json: serde_json::Value = row.0;
-    let user_id = user_uuid.to_string();
+    let user_id = user_id.to_string();
     if user_json["UserStats"][&user_id].is_null() {
         user_json["UserStats"][&user_id] = serde_json::json!({"Rating": false, "Watched": false, "Requested": false, "Queue": false});
     }

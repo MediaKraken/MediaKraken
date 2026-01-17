@@ -222,7 +222,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     println!("one {:?}", url_result);
                     let resp: ResponseMetadata = serde_json::from_str(&url_result.trim()).unwrap();
                     for json_item in resp.results {
-                        //for json_item in vec_result.iter() {
                         println!("movie item {}", json_item.id);
                         // verify it's not already in the database
                         let result =

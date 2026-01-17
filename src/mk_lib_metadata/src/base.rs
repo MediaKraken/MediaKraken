@@ -371,7 +371,7 @@ pub async fn metadata_fetch(
     } else if provider_name == "upcitemdb" {
         let _upcitemdb_id = provider_upcitemdb::provider_upcitemdb_fetch_by_upc(
             sqlx_pool,
-            &download_data.mm_download_provider_id.unwrap(),
+            vec![&download_data.mm_download_provider_id.unwrap()],
             &provider_api_key,
         )
         .await

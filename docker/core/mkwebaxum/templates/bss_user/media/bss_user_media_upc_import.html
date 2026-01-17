@@ -34,7 +34,7 @@
             const reader = new FileReader();
             reader.onload = function (e) {
                 const lines = e.target.result.split(/\r?\n/);
-                const first50Lines = lines.slice(0, 500).join('\n');
+                const first50Lines = lines.slice(0, 50).join('\n');
                 document.getElementById('output').value = first50Lines;
             };
             reader.readAsText(file);

@@ -214,8 +214,8 @@ pub async fn user_metadata_movie_status(
     {
         Redirect::to("/error/401")
     } else {
-        let _row_data = mk_lib_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_status(
-            &sqlx_pool, guid, event_type, current_user
+        let _row_data = mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_status(
+            &sqlx_pool, guid, event_type, current_user.id
         )
         .await
         .unwrap();

@@ -122,6 +122,33 @@ pub async fn user_metadata_tv_detail(
     }
 }
 
+pub async fn user_metadata_tv_status(
+    Extension(sqlx_pool): Extension<PgPool>,
+    method: Method,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    Path(guid): Path<uuid::Uuid>,
+    Path(event_type): Path<String>,
+) -> impl IntoResponse {
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("User::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        Redirect::to("/error/401")
+    } else {
+        let _row_data = mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_status(
+            &sqlx_pool, guid, event_type, current_user.id
+        )
+        .await
+        .unwrap();
+        Redirect::to("/admin/cron")
+    }
+}
+
 /*
 import natsort
 
