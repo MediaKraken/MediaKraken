@@ -3,6 +3,7 @@ use mk_lib_database;
 use mk_lib_rabbitmq;
 use std::error::Error;
 use tokio::time::{sleep, Duration};
+use std::env;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {

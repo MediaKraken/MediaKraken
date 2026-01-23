@@ -35,6 +35,11 @@ spec:
                 secretKeyRef:
                   name: db-password
                   key: password
+            - name: DEBUG
+              valueFrom:
+                secretKeyRef:
+                  name: run-env-type
+                  key: debug
           image: mediakraken/mkinotify:dev
           imagePullPolicy: Always
           name: mkstack-inotify

@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_logging"
-version = "0.0.56"
+version = "0.0.67"
 edition = "2024"
 
 [profile.release]
@@ -10,17 +10,17 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-chrono = { version = "0.4.42", features = ["serde"] }
-reqwest = { version = "0.12.28", default-features = false, features = [
+chrono = { version = "0.4.43", features = ["serde"] }
+reqwest = { version = "0.13.1", default-features = false, features = [
     "http2",
     "json",
     "native-tls",
 ] }
-reqwest-middleware = { version = "0.4.2", features = [
+reqwest-middleware = { version = "0.5.0", features = [
     "http2",
     "json",
 ] }
-reqwest-retry = "0.7.0"
+reqwest-retry = "0.9.0"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 stdext = "0.3.3"

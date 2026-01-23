@@ -71,24 +71,28 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
                 println!(" [x] Received {:?}", json_message);
                 if json_message["Type"] == "Bulk" {
+                    let mut record_limit = 0;
+                    if json_message["Limit"].is_number() {
+                        record_limit = json_message["Limit"].as_i64().unwrap_or(99999999999999999);
+                    }
                     // let fetch_date: String = "05_30_2023".to_string();
                     // grab the movie id's
-                    let _fetch_result_movie =
-                        mk_lib_network::mk_lib_network::mk_download_file_from_url(
+                    let fetch_result_movie =
+                        mk_lib_network::mk_lib_network::mk_network_download_file_to_vec(
                             format!(
                                 "http://files.tmdb.org/p/exports/movie_ids_{}.json.gz",
                                 json_message["Data"].as_str().unwrap()
                             )
-                            .replace("\"", ""),
-                            &"/movie.gz".to_string(),
+                            .replace("\"", "")
                         )
                         .await
                         .unwrap();
                     let json_result =
-                        mk_lib_compression::mk_lib_compression::mk_decompress_gz_data("/movie.gz")
+                        mk_lib_compression::mk_lib_compression::mk_decompress_gz_bytes(fetch_result_movie)
                             .await
                             .unwrap();
                     // Please note that the data is NOT in id order
+                    let mut record_count = 0;
                     for json_item in json_result.split('\n') {
                         if !json_item.trim().is_empty() {
                             let metadata_struct: MetadataMovie =
@@ -106,6 +110,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                               mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                                               metadata_struct.id.unwrap_or(0)).await.unwrap();
                                 if download_result == false {
+                                    record_count += 1;
+                                    if record_count > record_limit {
+                                        break;
+                                    }
                                     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                             "themoviedb".to_string(),
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
@@ -118,21 +126,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     }
 
                     // grab the TV id's
-                    let _fetch_result_tv =
-                        mk_lib_network::mk_lib_network::mk_download_file_from_url(
+                    let fetch_result_tv =
+                        mk_lib_network::mk_lib_network::mk_network_download_file_to_vec(
                             format!(
                                 "http://files.tmdb.org/p/exports/tv_series_ids_{}.json.gz",
                                 json_message["Data"].as_str().unwrap()
                             )
-                            .replace("\"", ""),
-                            &"/tv.gz".to_string(),
+                            .replace("\"", "")
                         )
                         .await
                         .unwrap();
                     let json_result =
-                        mk_lib_compression::mk_lib_compression::mk_decompress_gz_data("/tv.gz")
+                        mk_lib_compression::mk_lib_compression::mk_decompress_gz_bytes(fetch_result_tv)
                             .await
                             .unwrap();
+                    let mut record_count = 0;
                     for json_item in json_result.split('\n') {
                         if !json_item.trim().is_empty() {
                             let metadata_struct: MetadataTV =
@@ -150,6 +158,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                               mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                                               metadata_struct.id.unwrap_or(0)).await.unwrap();
                                 if download_result == false {
+                                    record_count += 1;
+                                    if record_count > record_limit {
+                                        break;
+                                    }
                                     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                             "themoviedb".to_string(),
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
@@ -162,21 +174,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     }
 
                     // grab the Person id's
-                    let _fetch_result_tv =
-                        mk_lib_network::mk_lib_network::mk_download_file_from_url(
+                    let fetch_result_person =
+                        mk_lib_network::mk_lib_network::mk_network_download_file_to_vec(
                             format!(
-                                "http://files.tmdb.org/p/exports/person_ids{}.json.gz",
+                                "http://files.tmdb.org/p/exports/person_ids_{}.json.gz",
                                 json_message["Data"].as_str().unwrap()
                             )
-                            .replace("\"", ""),
-                            &"/person.gz".to_string(),
+                            .replace("\"", "")
                         )
                         .await
                         .unwrap();
                     let json_result =
-                        mk_lib_compression::mk_lib_compression::mk_decompress_gz_data("/person.gz")
+                        mk_lib_compression::mk_lib_compression::mk_decompress_gz_bytes(fetch_result_person)
                             .await
                             .unwrap();
+                    let mut record_count = 0;
                     for json_item in json_result.split('\n') {
                         if !json_item.trim().is_empty() {
                             let metadata_struct: MetadataPerson =
@@ -194,6 +206,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                               mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
                                                                                                                               metadata_struct.id.unwrap_or(0)).await.unwrap();
                                 if download_result == false {
+                                    record_count += 1;
+                                    if record_count > record_limit {
+                                        break;
+                                    }
                                     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
                                                                                                             "themoviedb".to_string(),
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,

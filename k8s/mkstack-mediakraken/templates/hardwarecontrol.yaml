@@ -27,6 +27,11 @@ spec:
               value: pgcluster-with-metrics-rw.cnpg-system:5432, mkstack-rabbitmq-production.rabbitmq-system:5672
             - name: WAIT_TIMEOUT
               value: "180"
+            - name: DEBUG
+              valueFrom:
+                secretKeyRef:
+                  name: run-env-type
+                  key: debug
           image: mediakraken/mkhardwarecontrol:dev
           imagePullPolicy: Always
           name: mkstack-hardwarecontrol

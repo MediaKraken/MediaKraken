@@ -14,6 +14,7 @@ use std::str;
 use tokio::fs::File;
 use tokio::io::{self, AsyncWriteExt};
 use tokio::time::Duration;
+use bytes::Bytes;
 
 pub async fn custom_headers(map: &HashMap<String, String>) -> HeaderMap {
     let mut headers = HeaderMap::new();
@@ -68,6 +69,18 @@ pub async fn mk_data_from_url(url: String) -> Result<String, Box<dyn std::error:
     let response = reqwest::get(url).await?;
     let content = response.bytes().await?;
     Ok(str::from_utf8(&content).unwrap().to_string())
+}
+
+pub async fn mk_network_download_file_to_bytes(url: String) -> Result<Bytes, Box<dyn std::error::Error>> {
+    let response = reqwest::get(url).await?;
+    let body_bytes = response.bytes().await?;
+    Ok(body_bytes)
+}
+
+pub async fn mk_network_download_file_to_vec(url: String) -> Result<Vec<u8>, reqwest::Error> {
+    let response = reqwest::get(url).await?;
+    let bytes = response.bytes().await?.to_vec();
+    Ok(bytes)
 }
 
 pub async fn mk_download_file_from_url(

@@ -16,12 +16,13 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_common = { version = "0.0.55", registry = "kellnr" }
-mk_lib_database = { version = "0.0.87", registry = "kellnr" }
-mk_lib_metadata = { version = "0.0.67", registry = "kellnr" }
-mk_lib_network = { version = "0.0.56", registry = "kellnr" }
+mk_lib_common = { version = "0.0.66", registry = "kellnr" }
+mk_lib_database = { version = "0.0.98", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.67", registry = "kellnr" }
+mk_lib_metadata = { version = "0.0.78", registry = "kellnr" }
+mk_lib_network = { version = "0.0.67", registry = "kellnr" }
 
-chrono = { version = "0.4.42", features = ["serde"] }
+chrono = { version = "0.4.43", features = ["serde"] }
 flate2 = "1.1.1"
 futures = "0.3.31"
 governor = "0.8.1"

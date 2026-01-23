@@ -16,12 +16,13 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_common = { version = "0.0.55", registry = "kellnr" }
-mk_lib_database = { version = "0.0.87", registry = "kellnr" }
-mk_lib_file = { version = "0.0.64", registry = "kellnr" }
-mk_lib_metadata = { version = "0.0.67", registry = "kellnr" }
-mk_lib_network = { version = "0.0.56", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.59", registry = "kellnr" }
+mk_lib_common = { version = "0.0.66", registry = "kellnr" }
+mk_lib_database = { version = "0.0.98", registry = "kellnr" }
+mk_lib_file = { version = "0.0.75", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.67", registry = "kellnr" }
+mk_lib_metadata = { version = "0.0.78", registry = "kellnr" }
+mk_lib_network = { version = "0.0.67", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.70", registry = "kellnr" }
 
 askama = "0.15.1"
 askama_axum = "0.4.0"
@@ -44,7 +45,7 @@ axum_session_auth = { version = "0.17.0", default-features = false, features = [
 ] }
 axum_session_sqlx = {version = "0.6.1", features = ["postgres", "tls-rustls"]}
 bytesize = { version = "1.3.2", features = ["serde"] }  # 2.0.1 breaks my code
-chrono = { version = "0.4.42", features = ["serde"] }
+chrono = { version = "0.4.43", features = ["serde"] }
 futures = "0.3.31"
 hyper = { version = "1.8.1", features = ["full"] }
 hyper-util = { version = "0.1.19", features = ["client-legacy"] }

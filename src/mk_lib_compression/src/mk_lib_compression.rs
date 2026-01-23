@@ -1,6 +1,8 @@
 use std::io::Read;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
+use std::io::prelude::*;
+use std::io;
 
 pub async fn mk_decompress_tar_gz_file(archive_file: &str) -> Result<(), std::io::Error> {
     let tar_gz = std::fs::File::open(archive_file)?;
@@ -19,12 +21,19 @@ pub async fn mk_decompress_tar_gz_file_gunzip(archive_file: &str) -> Result<(), 
     Ok(())
 }
 
-pub async fn mk_decompress_gz_data(archive_file: &str) -> Result<String, std::io::Error> {
+pub async fn mk_decompress_gz_file(archive_file: &str) -> Result<String, std::io::Error> {
     let file_handle = std::fs::File::open(archive_file)?;
     let mut gz = flate2::read::GzDecoder::new(file_handle);
     let mut gz_data = String::new();
     gz.read_to_string(&mut gz_data)?;
     Ok(gz_data)
+}
+
+pub async fn mk_decompress_gz_bytes(bytes: Vec<u8>) -> io::Result<String> {
+   let mut gz = flate2::read::GzDecoder::new(&bytes[..]);
+   let mut s = String::new();
+   gz.read_to_string(&mut s)?;
+   Ok(s)
 }
 
 /*

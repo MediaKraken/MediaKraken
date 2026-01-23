@@ -50,6 +50,11 @@ spec:
                 secretKeyRef:
                   name: db-password
                   key: password
+            - name: DEBUG
+              valueFrom:
+                secretKeyRef:
+                  name: run-env-type
+                  key: debug
           image: mediakraken/mkmusicbrainz:dev
           imagePullPolicy: Always
           name: mkstack-musicbrainz

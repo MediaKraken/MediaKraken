@@ -3,4 +3,2346 @@ https://api.themoviedb.org/3/person/%s?api_key=fakeapikey&append_to_response=com
 https://api.themoviedb.org/3/person/35029?api_key=fakeapikey&append_to_response=combined_credits,external_ids,images
 
 
-{"adult":false,"also_known_as":["David Kenneth Harbour"],"biography":"David Kenneth Harbour (born April 10, 1975) is an American actor. He has received nominations for a Tony Award, a Golden Globe Award, and two Primetime Emmy Awards. \n\nDavid began his career acting in Shakespearean theatre productions. After his professional debut on Broadway in the 1999 revival of The Rainmaker, he was nominated for a Tony Award for his performance in a production of Who's Afraid of Virginia Woolf?. He made his television debut on Law & Order in 1999 and had supporting roles in films such as Brokeback Mountain (2005), Revolutionary Road (2008) and Black Mass (2015).\n\nHarbour gained global recognition for his portrayal of Jim Hopper in the Netflix science fiction series Stranger Things (2016–2025), for which he received a Critics' Choice Television Award as well as nominations for two Primetime Emmy Awards. His starring film roles include the title character in Hellboy (2019), Santa Claus in Violent Night (2022) and a former racer in the sports film Gran Turismo (2023). Harbour has played Red Guardian in the Marvel Cinematic Universe media franchise, beginning with the film Black Widow (2021).\n\nDescription above from the Wikipedia article David Harbour, licensed under CC-BY-SA, full list of contributors on Wikipedia.","birthday":"1975-04-10","deathday":null,"gender":2,"homepage":null,"id":35029,"imdb_id":"nm1092086","known_for_department":"Acting","name":"David Harbour","place_of_birth":"New York City, New York, USA","popularity":10.8548,"profile_path":"/qMFtMWlYVtFVyBoBhX5IoA5sN5a.jpg","combined_credits":{"cast":[{"adult":false,"backdrop_path":"/78dChJs7doULSEhIiOvGUcXQRGU.jpg","genre_ids":[28,35,14],"id":1078446,"original_language":"en","original_title":"Violent Night 2","overview":"The sequel to the 2022 film. Plot TBA.","popularity":1.1857,"poster_path":"/sI9m5PUoZT6upungDXVTSPTtfgX.jpg","release_date":"2026-12-02","title":"Violent Night 2","video":false,"vote_average":0.0,"vote_count":0,"character":"Santa","credit_id":"63d112e3a410c8125be6333a","order":0,"media_type":"movie"},{"adult":false,"backdrop_path":"/ra9aXj8PpUbUHwwTRSl5zsL6WHM.jpg","genre_ids":[18,10749],"id":4148,"original_language":"en","original_title":"Revolutionary Road","overview":"A young couple living in a Connecticut suburb during the mid-1950s struggle to come to terms with their personal problems while trying to raise their two children. Based on a novel by Richard Yates.","popularity":3.6738,"poster_path":"/cvkD3yiVXLg3as8EAG3LaTycONQ.jpg","release_date":"2008-12-19","title":"Revolutionary Road","video":false,"vote_average":6.98,"vote_count":4019,"character":"Shep Campbell","credit_id":"52fe43afc3a36847f8067945","order":5,"media_type":"movie"},{"adult":false,"backdrop_path":"/3CqMIX3ZlrD0pU3fpBL6DM0Cneb.jpg","genre_ids":[12,28,53,80],"id":10764,"original_language":"en","original_title":"Quantum of Solace","overview":"Betrayed by Vesper, the woman he loved, 007 fights the urge to make his latest mission personal. Pursuing his determination to uncover the truth, Bond and M interrogate Mr. White, who reveals that the organization that blackmailed Vesper is far more complex and dangerous than anyone had imagined.","popularity":8.1435,"poster_path":"/e3DXXLJHGqMx9yYpXsql1XNljmM.jpg","release_date":"2008-10-29","title":"Quantum of Solace","video":false,"vote_average":6.335,"vote_count":8301,"character":"Gregg Beam","credit_id":"52fe43b39251416c7501aacd","order":7,"media_type":"movie"},{"adult":false,"backdrop_path":"/sBOenwOZGRN5nZZGw4TxwtnfrEf.jpg","genre_ids":[28,35,14],"id":899112,"original_language":"en","original_title":"Violent Night","overview":"When a team of mercenaries breaks into a wealthy family compound on Christmas Eve, taking everyone inside hostage, the team isn’t prepared for a surprise combatant: Santa Claus is on the grounds, and he’s about to show why this Nick is no saint.","popularity":6.3345,"poster_path":"/e8CpMgdyihz9Td7amQDqubPuzfN.jpg","release_date":"2022-11-30","title":"Violent Night","video":false,"vote_average":7.234,"vote_count":2448,"character":"Santa","credit_id":"6193fff90f2fbd002cb3beb1","order":0,"media_type":"movie"},{"adult":false,"backdrop_path":"/eNmoAIVeAIlFVR4OqYuSsLiZpW9.jpg","genre_ids":[18,35,10749],"id":45077,"original_language":"en","original_title":"Every Day","overview":"Ned is in the throes of a mid-life crisis. His work as a writer on an outrageous, semi-pornographic TV show is less than satisfying. His fifteen year old son has just told him he is gay and his eleven year old is afraid of, well pretty much everything. When his wife, Jeannie, moves her sick and embittered father from Detroit into their home in NY, it puts added stress on an already strained marriage. And when a sexy female co-worker puts the moves on Ned, the temptation sends him spiraling.","popularity":1.2596,"poster_path":"/yEW8ALVxeZRWCLZEJIvejkL5TM0.jpg","release_date":"2010-01-14","title":"Every Day","video":false,"vote_average":5.1,"vote_count":94,"character":"Brian","credit_id":"52fe46aec3a36847f810c415","order":4,"media_type":"movie"},{"adult":false,"backdrop_path":"/yhmOI6bgD0akvpeXNWCQgHBTyzk.jpg","genre_ids":[35,10402,10749],"id":62492,"original_language":"en","original_title":"The Wedding Weekend","overview":"A group of guys who sang together in a college a cappella group reunite 15 years later to perform at a friend's wedding and discover how their lives have progressed -- and in some cases regressed -- since their college heyday.","popularity":1.4903,"poster_path":"/yV4RqXZ5nYptovzzdC6Uvj2dKWs.jpg","release_date":"2006-12-12","title":"The Wedding Weekend","video":false,"vote_average":3.542,"vote_count":12,"character":"David","credit_id":"52fe4680c3a368484e094201","order":0,"media_type":"movie"},{"adult":false,"backdrop_path":"/n6ggvrNiiDBGcymaomQPeVsIfUg.jpg","genre_ids":[53,80,9648],"id":16995,"original_language":"en","original_title":"State of Play","overview":"When a congressional aide is killed, a Washington, D.C. journalist starts investigating the case involving the Representative, his old college friend.","popularity":2.5953,"poster_path":"/mWsfeSFUM3NxWa62UrA9IIn240B.jpg","release_date":"2009-04-17","title":"State of Play","video":false,"vote_average":6.8,"vote_count":2069,"character":"PointCorp Insider","credit_id":"52fe46fc9251416c7508a2e5","order":13,"media_type":"movie"},{"adult":false,"backdrop_path":"/8R82TxhOmIOtkxl4SXeRyylpvJi.jpg","genre_ids":[18,10749],"id":80591,"original_language":"en","original_title":"W.E.","overview":"In 1998, an auction of the estate of the Duke and Duchess of Windsor causes great excitement. For one woman, Wally Winthrop, it has much more meaning. Wally becomes obsessed by their historic love story. As she learns more about the sacrifices involved, Wally gains her own courage to find happiness.","popularity":3.6967,"poster_path":"/aNE7gtJ8vrhG4vaDbetMa1SLxGi.jpg","release_date":"2011-09-01","title":"W.E.","video":false,"vote_average":6.325,"vote_count":305,"character":"Ernest","credit_id":"52fe47ca9251416c91075d85","order":5,"media_type":"movie"},{"adult":false,"backdrop_path":"/l53K8Fp1WcOMRL33CMsnnMUPiWg.jpg","genre_ids":[80,18,53],"id":77016,"original_language":"en","original_title":"End of Watch","overview":"Two young officers are marked for death after confiscating a small cache of money and firearms from the members of a notorious cartel during a routine traffic stop.","popularity":4.4469,"poster_path":"/pDeVKQICkcdwwjHxGj0MeS14YJ6.jpg","release_date":"2012-09-20","title":"End of Watch","video":false,"vote_average":7.346,"vote_count":3495,"character":"Van Hauser","credit_id":"52fe4957c3a368484e126941","order":4,"media_type":"movie"},{"adult":false,"backdrop_path":null,"genre_ids":[18,80],"id":967598,"original_language":"en","original_title":"The Trashers","overview":"The rise and fall of Jimmy Galante, a Danbury, Connecticut trash magnate and associate of the Genovese crime family.","popularity":1.2469,"poster_path":"/xh46P9YcIgFGtAg5peXDWBAlxCk.jpg","release_date":"","title":"The Trashers","video":false,"vote_average":0.0,"vote_count":0,"character":"Jimmy Galante","credit_id":"626705771967570067a0b9cf","order":0,"media_type":"movie"},{"adult":false,"backdrop_path":"/k23FPWl97XKpJ1oTaDyADzxWxs6.jpg","genre_ids":[80,18,9648,53],"id":169917,"original_language":"en","original_title":"A Walk Among the Tombstones","overview":"Private investigator Matthew Scudder is hired by a drug kingpin to find out who kidnapped and murdered his wife.","popularity":3.9308,"poster_path":"/euPgyPsiNFp6gOBB7nUFxvN5ZaY.jpg","release_date":"2014-09-18","title":"A Walk Among the Tombstones","video":false,"vote_average":6.329,"vote_count":2949,"character":"Ray","credit_id":"5303f333c3a3683aa100180e","order":2,"media_type":"movie"},{"adult":false,"backdrop_path":"/h2SEtzuABKmcZAnKBJ1za3kETTY.jpg","genre_ids":[16,35,27,12,878],"id":1205229,"original_language":"en","original_title":"Night of the Zoopocalypse","overview":"A wolf and mountain lion team up when a meteor unleashes a virus turning zoo animals into zombies. They join forces with other survivors to rescue the zoo and stop the deranged mutant leader from spreading the virus.","popularity":72.9089,"poster_path":"/nCejOVZcOxKS27nnbh28NKXOdXF.jpg","release_date":"2025-01-23","title":"Night of the Zoopocalypse","video":false,"vote_average":6.56,"vote_count":67,"character":"Dan (voice)","credit_id":"6553ee9553866e00c5b0bada","order":1,"media_type":"movie"},{"adult":false,"backdrop_path":"/wNAfVj1ObGNye5fQM4tJXJGtU0.jpg","genre_ids":[53,28,80],"id":156022,"original_language":"en","original_title":"The Equalizer","overview":"McCall believes he has put his mysterious past behind him and dedicated himself to beginning a new, quiet life. But when he meets Teri, a young girl under the control of ultra-violent Russian gangsters, he can’t stand idly by – he has to help her. Armed with hidden skills that allow him to serve vengeance against anyone who would brutalize the helpless, McCall comes out of his self-imposed retirement and finds his desire for justice reawakened. If someone has a problem, if the odds are stacked against them, if they have nowhere else to turn, McCall will help. He is The Equalizer.","popularity":11.7754,"poster_path":"/9u4yW7yPA0BQ2pv9XwiNzItwvp8.jpg","release_date":"2014-09-24","title":"The Equalizer","video":false,"vote_average":7.281,"vote_count":9672,"character":"Masters","credit_id":"54311ab10e0a264643002d7d","order":3,"media_type":"movie"},{"adult":false,"backdrop_path":"/jYCyTdPfgT01IOJWDnnetr9RDX6.jpg","genre_ids":[28,878,12],"id":986056,"original_language":"en","original_title":"Thunderbolts*","overview":"After finding themselves ensnared in a death trap, seven disillusioned castoffs must embark on a dangerous mission that will force them to confront the darkest corners of their pasts.","popularity":20.1132,"poster_path":"/hqcexYHbiTBfDIdDWxrxPtVndBX.jpg","release_date":"2025-04-30","title":"Thunderbolts*","video":false,"vote_average":7.312,"vote_count":3086,"character":"Alexei Shostakov","credit_id":"631ce40439549a008019b71c","order":4,"media_type":"movie"},{"adult":false,"backdrop_path":"/xFYpUmB01nswPgbzi8EOCT1ZYFu.jpg","genre_ids":[12,28,18],"id":980489,"original_language":"en","original_title":"Gran Turismo","overview":"The ultimate wish-fulfillment tale of a teenage Gran Turismo player whose gaming skills won him a series of Nissan competitions to become an actual professional racecar driver.","popularity":9.7187,"poster_path":"/51tqzRtKMMZEYUpSYkrUE7v9ehm.jpg","release_date":"2023-08-09","title":"Gran Turismo","video":false,"vote_average":7.733,"vote_count":3215,"character":"Jack Salter","credit_id":"63220a259a3c49007ddf4daf","order":1,"media_type":"movie"},{"adult":false,"backdrop_path":"/nAVntSurtINQNtYPU7ijgCtgz7W.jpg","genre_ids":[53,80,9648],"id":13483,"original_language":"en","original_title":"Awake","overview":"While undergoing heart surgery, a man experiences a phenomenon called ‘anesthetic awareness’, which leaves him awake but paralyzed throughout the operation. As various obstacles present themselves, his wife must make life-altering decisions while wrestling with her own personal drama.","popularity":2.6134,"poster_path":"/jIPIxaBcppLLkygko7tV5yuTIs1.jpg","release_date":"2007-11-28","title":"Awake","video":false,"vote_average":6.5,"vote_count":1442,"character":"Dracula","credit_id":"5496c9169251413f750045cd","order":9,"media_type":"movie"},{"adult":false,"backdrop_path":"/rbHjuU8zk7uTDVlxAFuxrTHEdds.jpg","genre_ids":[35,80,18],"id":51996,"original_language":"en","original_title":"Thin Ice","overview":"A dishonest insurance salesman's life quickly disintegrates during a Wisconsin winter when he teams up with a psychopath to steal a rare violin at the home of a reclusive farmer.","popularity":1.7597,"poster_path":"/15KTuJlR8GclVrgX0g58oACqiqv.jpg","release_date":"2012-02-17","title":"Thin Ice","video":false,"vote_average":6.511,"vote_count":174,"character":"Bob Egan","credit_id":"54e3b8399251417add00198c","order":3,"media_type":"movie"},{"adult":false,"backdrop_path":"/wAk0yKrhAmvsoMvlKs4QImhvK5X.jpg","genre_ids":[28,12,14],"id":297761,"original_language":"en","original_title":"Suicide Squad","overview":"From DC Comics comes the Suicide Squad, an antihero team of incarcerated supervillains who act as deniable assets for the United States government, undertaking high-risk black ops missions in exchange for commuted prison sentences.","popularity":6.1433,"poster_path":"/sk3FZgh3sRrmr8vyhaitNobMcfh.jpg","release_date":"2016-08-03","title":"Suicide Squad","video":false,"vote_average":5.9,"vote_count":21801,"character":"Dexter Tolliver","credit_id":"554389f2925141586f001d6b","order":14,"media_type":"movie"},{"adult":false,"backdrop_path":"/mK4J2Qk4S4UQGOeMqsgei9DyPwW.jpg","genre_ids":[18,80,36],"id":261023,"original_language":"en","original_title":"Black Mass","overview":"The true story of Whitey Bulger, the brother of a state senator and the most infamous violent criminal in the history of South Boston, who became an FBI informant to take down a Mafia family invading his turf.","popularity":3.8941,"poster_path":"/zfwciv4LIJkNQsfuhYGv0Nkiweg.jpg","release_date":"2015-09-17","title":"Black Mass","video":false,"vote_average":6.525,"vote_count":3510,"character":"John Morris","credit_id":"55ea9dd392514106d6002167","order":9,"media_type":"movie"},{"adult":false,"backdrop_path":"/fTrQsdMS2MUw00RnzH0r3JWHhts.jpg","genre_ids":[28,80,53],"id":1197306,"original_language":"en","original_title":"A Working Man","overview":"Levon Cade left behind a decorated military career in the black ops to live a simple life working construction. But when his boss's daughter, who is like family to him, is taken by human traffickers, his search to bring her home uncovers a world of corruption far greater than he ever could have imagined.","popularity":29.2457,"poster_path":"/6FRFIogh3zFnVWn7Z6zcYnIbRcX.jpg","release_date":"2025-03-26","title":"A Working Man","video":false,"vote_average":6.696,"vote_count":1731,"character":"Gunny Lefferty","credit_id":"6614b3423d7454016207b746","order":6,"media_type":"movie"},{"adult":false,"backdrop_path":"/9VEOQvCnd8T8wILgyqjKgyhALw4.jpg","genre_ids":[28,80,53],"id":324542,"original_language":"en","original_title":"Sleepless","overview":"Undercover Las Vegas police officer Vincent Downs, who has a lot of enemies, is caught in a high stakes web of corrupt cops and the mob-controlled casino underground. When a heist goes wrong, a crew of homicidal gangsters kidnap Downs’ teenage son T. In one sleepless night, Downs will have to rescue his son, evade an internal affairs investigation, and bring the kidnappers to justice.","popularity":1.4017,"poster_path":"/9WkUSY33MDPGmz0vtzbsfaxTHVa.jpg","release_date":"2017-01-12","title":"Sleepless","video":false,"vote_average":5.9,"vote_count":1301,"character":"Doug Dennison","credit_id":"56ec8131c3a3682256003b49","order":4,"media_type":"movie"},{"adult":false,"backdrop_path":null,"genre_ids":[53,18],"id":325165,"original_language":"en","original_title":"Midnight Son","overview":"Mild-mannered professor Edward leaves his wife, Rita, one night to meet a stranger from an Internet chat room. It is only during his journey that we begin to discover the real reason for the disintegration of Edward and Rita's marriage.","popularity":1.5572,"poster_path":"/oKzRzlyHmN1Yf5HCRCsLjYDyMvw.jpg","release_date":"2007-02-02","title":"Midnight Son","video":false,"vote_average":1.0,"vote_count":2,"character":"Mulligan","credit_id":"574c9176c3a368304000008a","order":2,"media_type":"movie"},{"adult":false,"backdrop_path":"/c8sODXEgANa49CdcHc9NgNBexdF.jpg","genre_ids":[36,18],"id":209262,"original_language":"en","original_title":"Parkland","overview":"November 22nd, 1963 was a day that changed the world forever — when young American President John F. Kennedy was assassinated in Dallas, Texas. This film follows, almost in real time, a handful of individuals forced to make split-second decisions after an event that would change their lives and forever alter the world’s landscape.","popularity":2.188,"poster_path":"/23jc1Hclf1FFxpyYs9A4SxfRbK3.jpg","release_date":"2013-10-02","title":"Parkland","video":false,"vote_average":6.2,"vote_count":378,"character":"Gordon Shanklin","credit_id":"57f9f559c3a3686ffa005bf3","order":11,"media_type":"movie"},{"adult":false,"backdrop_path":"/3eOINbgRs8WiWfQfViXeuZ3enrs.jpg","genre_ids":[878,28,12],"id":1003596,"original_language":"en","original_title":"Avengers: Doomsday","overview":"The Avengers, Wakandans, Fantastic Four, Thunderbolts, and X-Men all fight against Doctor Doom. Plot TBA.","popularity":25.9175,"poster_path":"/8HkIe2i4ScpCkcX9SzZ9IPasqWV.jpg","release_date":"2026-12-16","title":"Avengers: Doomsday","video":false,"vote_average":0.0,"vote_count":0,"character":"Alexei Shostakov / Red Guardian","credit_id":"66aa92ce9f6dabe412bfe47b","order":15,"media_type":"movie"},{"adult":false,"backdrop_path":"/rytc6Lf4447C0CDncwFa4gxe0vY.jpg","genre_ids":[878,28,12],"id":1003598,"original_language":"en","original_title":"Avengers: Secret Wars","overview":"An upcoming film in Phase Six of the Marvel Cinematic Universe (MCU) and the finale of The Multiverse Saga. Plot TBA.","popularity":8.5363,"poster_path":"/f0YBuh4hyiAheXhh4JnJWoKi9g5.jpg","release_date":"2027-12-16","title":"Avengers: Secret Wars","video":false,"vote_average":0.0,"vote_count":0,"character":"Alexei Shostakov / Red Guardian","credit_id":"66aa93687aeef07dc2cd341d","order":7,"media_type":"movie"},{"adult":false,"backdrop_path":"/vXzqV2RtJlT9WhNEM4NYWCEC6ZI.jpg","genre_ids":[18,10749],"id":142,"original_language":"en","original_title":"Brokeback Mountain","overview":"In 1960s Wyoming, two men develop a strong emotional and sexual relationship that endures as a lifelong connection complicating their lives as they get married and start families of their own.","popularity":6.9926,"poster_path":"/aByfQOQBNa4CMFwIgq3QrqY2ZHh.jpg","release_date":"2005-10-22","title":"Brokeback Mountain","video":false,"vote_average":7.785,"vote_count":7381,"character":"Randall Malone","credit_id":"58c99d629251410cb7000228","order":7,"media_type":"movie"},{"adult":false,"backdrop_path":"/djiDKVB07xTy7tDFbWb9k7KLI3E.jpg","genre_ids":[14,27,28,12],"id":456740,"original_language":"en","original_title":"Hellboy","overview":"Hellboy comes to England, where he must defeat Nimue, Merlin's consort and the Blood Queen. But their battle will bring about the end of the world, a fate he desperately tries to turn away.","popularity":5.0659,"poster_path":"/bk8LyaMqUtaQ9hUShuvFznQYQKR.jpg","release_date":"2019-04-10","title":"Hellboy","video":false,"vote_average":5.6,"vote_count":3626,"character":"Hellboy / Anung Un Rama","credit_id":"59112b0bc3a36864a703a266","order":0,"media_type":"movie"},{"adult":false,"backdrop_path":"/aBCn1z1tJGivVhY1nHSrXOQqQwG.jpg","genre_ids":[28,80,35],"id":40805,"original_language":"en","original_title":"The Green Hornet","overview":"Britt Reid, the heir to the largest newspaper fortune in Los Angeles, is a spoiled playboy who has been, thus far, happy to lead an aimless life. After his father dies, Britt meets Kato, a resourceful company employee. Realizing that they have the talent and resources to make something of their lives, Britt and Kato join forces as costumed crime-fighters to bring down the city's most-powerful criminal, Chudnofsky.","popularity":4.4647,"poster_path":"/1YrRviphr3eXPus9iHyQX56QgIE.jpg","release_date":"2011-01-12","title":"The Green Hornet","video":false,"vote_average":5.598,"vote_count":3398,"character":"Frank Scanlon","credit_id":"5a540d2fc3a3685ecd003c66","order":6,"media_type":"movie"},{"adult":false,"backdrop_path":"/5ggoa0kYhrx38wUPAYJyzXPzy9V.jpg","genre_ids":[18],"id":499790,"original_language":"en","original_title":"Human Affairs","overview":"This richly earnest drama follows Geneviève, a surrogate who must reckon with her ambivalence about the pregnancy and her precarious feelings for the parents-to-be","popularity":1.5483,"poster_path":"/9pIG5hQjD8cfp90PHlGH8SoCI1W.jpg","release_date":"2018-01-19","title":"Human Affairs","video":false,"vote_average":4.667,"vote_count":3,"character":"Ronnie","credit_id":"5a6315369251410b2500a027","order":3,"media_type":"movie"},{"adult":false,"backdrop_path":"/2QSZ4CPd8AoljAL76qM30dFft07.jpg","genre_ids":[28,53],"id":545609,"original_language":"en","original_title":"Extraction","overview":"A hardened gun-for-hire's latest mission becomes a soul-searching race to survive when he's sent into Bangladesh to rescue a drug lord's kidnapped son.","popularity":8.1518,"poster_path":"/nygOUcBKPHFTbxsYRFZVePqgPK6.jpg","release_date":"2020-04-23","title":"Extraction","video":false,"vote_average":7.301,"vote_count":6432,"character":"Gaspar","credit_id":"5bf603760e0a2626740c3a33","order":5,"media_type":"movie"},{"adult":false,"backdrop_path":"/dq18nCTTLpy9PmtzZI6Y2yAgdw5.jpg","genre_ids":[28,12,878],"id":497698,"original_language":"en","original_title":"Black Widow","overview":"Natasha Romanoff, also known as Black Widow, confronts the darker parts of her ledger when a dangerous conspiracy with ties to her past arises. Pursued by a force that will stop at nothing to bring her down, Natasha must deal with her history as a spy and the broken relationships left in her wake long before she became an Avenger.","popularity":11.761,"poster_path":"/7JPpIjhD2V0sKyFvhB9khUMa30d.jpg","release_date":"2021-07-07","title":"Black Widow","video":false,"vote_average":7.183,"vote_count":10948,"character":"Alexei","credit_id":"5ca5268e0e0a26015ca98b26","order":3,"media_type":"movie"},{"adult":false,"backdrop_path":null,"genre_ids":[99],"id":608972,"original_language":"en","original_title":"Tales of the Wild Hunt: Hellboy Reborn","overview":"Documentary on the making of the 2019 movie.","popularity":0.3666,"poster_path":"/iQkJ7xw5ztmUAyMnOG9MmUihGIq.jpg","release_date":"2019-07-23","title":"Tales of the Wild Hunt: Hellboy Reborn","video":false,"vote_average":5.8,"vote_count":5,"character":"Self","credit_id":"5d054e269251411a82ca0644","order":0,"media_type":"movie"},{"adult":false,"backdrop_path":"/fWBmMHi7ukR8pYmbBfPERjzdZwS.jpg","genre_ids":[35],"id":612701,"original_language":"en","original_title":"Frankenstein's Monster's Monster, Frankenstein","overview":"When actor David Harbour finds lost footage of his father's disastrous televised stage play of a literary classic, he uncovers shocking family secrets.","popularity":0.2814,"poster_path":"/aVrXQAk0lIRw123EghPfNlludjU.jpg","release_date":"2019-07-16","title":"Frankenstein's Monster's Monster, Frankenstein","video":false,"vote_average":5.8,"vote_count":79,"character":"David Harbour III / David Harbour Jr. / Frankenstein","credit_id":"5d1ba986955c650010834a02","order":0,"media_type":"movie"},{"adult":false,"backdrop_path":"/xIEhRa6CqnF49eeY12S6NpSH82W.jpg","genre_ids":[16,18],"id":666217,"original_language":"en","original_title":"Turtle Journey: The Crisis in Our Oceans","overview":"The story of a turtle family making their way home through a damaged and changing ocean. A powerful message about the threats the oceans are facing, and the importance of protecting them","popularity":0.1996,"poster_path":"/xZYVK31gugsbDxrlTl6RhbLtY8Q.jpg","release_date":"2020-01-14","title":"Turtle Journey: The Crisis in Our Oceans","video":false,"vote_average":7.3,"vote_count":5,"character":"Narrator","credit_id":"5e28b55d2dda89001758ac80","order":2,"media_type":"movie"},{"adult":false,"backdrop_path":null,"genre_ids":[27,53],"id":143083,"original_language":"en","original_title":"Isolation","overview":"In this eerie hospital chiller, a medical student wakes up in an isolation room, gravely ill with no idea how she got there or how to get out. Trying to make sense of her plight and save herself, she finds the hospital staff distinctly unhelpful.","popularity":0.2594,"poster_path":"/3f2winpfemIdpXgXMwu1ei0IfO1.jpg","release_date":"2011-10-04","title":"Isolation","video":false,"vote_average":4.4,"vote_count":8,"character":"Dr. Sloan","credit_id":"5e5c22969b86160015faac8e","order":0,"media_type":"movie"},{"adult":false,"backdrop_path":"/yA7MG24LZCtQhsKXhqJ5TfbjFoI.jpg","genre_ids":[18],"id":11184,"original_language":"en","original_title":"Kinsey","overview":"Kinsey is a portrait of researcher Alfred Kinsey, driven to uncover the most private secrets of a nation. What begins for Kinsey as a scientific endeavor soon takes on an intensely personal relevance, ultimately becoming an unexpected journey into the mystery of human behavior.","popularity":1.6637,"poster_path":"/cODCjWNRcZkwe4ONQs1GzRqYtRb.jpg","release_date":"2004-09-04","title":"Kinsey","video":false,"vote_average":6.609,"vote_count":501,"character":"Robert Kinsey","credit_id":"5e6a89a42f3b170019409d9b","order":18,"media_type":"movie"},{"adult":false,"backdrop_path":"/r9Zjh0K9vXjeIWNc9CJrqztgG2s.jpg","genre_ids":[28,18,53],"id":18428,"original_language":"en","original_title":"Confess","overview":"A young ex-hacker, disgruntled with his life, lashes back at those deemed responsible, uploading unfavorable video footage of them on the internet.","popularity":1.2485,"poster_path":"/9LnCsLRzdvjuiGyDPXzfsMUD1th.jpg","release_date":"2005-10-21","title":"Confess","video":false,"vote_average":4.1,"vote_count":13,"character":"Agent Jim McAllister","credit_id":"5e6a8a38459ad60013616c44","order":6,"media_type":"movie"},{"adult":false,"backdrop_path":"/An6oBoTRbPNdNDMuxTJ8GMuUujR.jpg","genre_ids":[18],"id":157919,"original_language":"en","original_title":"Knife Fight","overview":"A political strategist juggling three clients questions whether or not to take the high road, as the ugly side of his work begins to haunt him.","popularity":0.0602,"poster_path":"/loiYGqP01wLjbYpLE7Pd6pUT0sX.jpg","release_date":"2013-01-25","title":"Knife Fight","video":false,"vote_average":5.0,"vote_count":39,"character":"Stephen Green","credit_id":"5e6a8b6b2f3b170011406bd0","order":4,"media_type":"movie"},{"adult":false,"backdrop_path":"/80seex5P196f7pff3R8xqwd2Zo.jpg","genre_ids":[53,18,28],"id":134411,"original_language":"en","original_title":"Snitch","overview":"Construction company owner John Matthews learns that his estranged son, Jason, has been arrested for drug trafficking. Facing an unjust prison sentence for a first time offender courtesy of mandatory minimum sentence laws, Jason has nothing to offer for leniency in good conscience. Desperately, John convinces the DEA and the opportunistic DA Joanne Keeghan to let him go undercover to help make arrests big enough to free his son in return. With the unwitting help of an ex-con employee, John enters the narcotics underworld where every move could be his last in an operation that will demand all his resources, wits and courage to survive.","popularity":2.6633,"poster_path":"/1suKSCm8gVUIIOh4MgtWAtzkMe4.jpg","release_date":"2013-02-21","title":"Snitch","video":false,"vote_average":6.121,"vote_count":2437,"character":"Jay Price","credit_id":"5e6a8ba3cabfe400131032aa","order":7,"media_type":"movie"},{"adult":false,"backdrop_path":"/7ziw8iXMjEkbJ9nCkKsDLedYbRb.jpg","genre_ids":[18,10749],"id":261824,"original_language":"en","original_title":"X/Y","overview":"As Mark, Jen, Sylvia, and Jake navigate through their emotionally-arrested states, X/Y reveals the honest and wanton desire we all have to connect with someone and what is at stake when that connection fades.","popularity":1.467,"poster_path":"/fvOTgIb5cKwr7kbZuWIq6zyfinJ.jpg","release_date":"2014-04-19","title":"X/Y","video":false,"vote_average":4.688,"vote_count":24,"character":"Todd","credit_id":"5e6a8bf1357c0000133f7806","order":3,"media_type":"movie"},{"adult":false,"backdrop_path":"/bInicBgSHfQiWLbnRT5jxw9Grvm.jpg","genre_ids":[12,53,878],"id":74,"original_language":"en","original_title":"War of the Worlds","overview":"Ray Ferrier is a divorced dockworker and less-than-perfect father. Soon after his ex-wife and her new husband drop off his teenage son and young daughter for a rare weekend visit, a strange and powerful lightning storm touches down.","popularity":8.1268,"poster_path":"/6Biy7R9LfumYshur3YKhpj56MpB.jpg","release_date":"2005-06-28","title":"War of the Worlds","video":false,"vote_average":6.529,"vote_count":8907,"character":"Dock Worker","credit_id":"5f405a37c175b2003765fe9a","order":18,"media_type":"movie"},{"adult":false,"backdrop_path":"/ok7RdHhVngnwkvKj09tvtOvypG.jpg","genre_ids":[80,53],"id":649409,"original_language":"en","original_title":"No Sudden Move","overview":"A group of criminals are brought together under mysterious circumstances and have to work together to uncover what's really going on when their simple job goes completely sideways.","popularity":3.8241,"poster_path":"/kARdPEc4b32GQlHmJXMhGOCplEA.jpg","release_date":"2021-06-24","title":"No Sudden Move","video":false,"vote_average":6.4,"vote_count":764,"character":"Matt Wertz","credit_id":"5f722312d40d4c003960ecda","order":2,"media_type":"movie"},{"adult":false,"backdrop_path":"/25xur6csh3XXtQcOq4zx3cyvbEN.jpg","genre_ids":[27,35],"id":852096,"original_language":"en","original_title":"We Have a Ghost","overview":"After Kevin finds a ghost named Ernest haunting his new home, he becomes an overnight social media sensation. But when Kevin and Ernest go rogue to investigate the mystery of the latter's past, they become targets of the CIA.","popularity":1.8317,"poster_path":"/xo0fgAUoEeVQ7KsKeMWypyglvnf.jpg","release_date":"2023-02-24","title":"We Have a Ghost","video":false,"vote_average":6.484,"vote_count":657,"character":"Ernest","credit_id":"60f6e5b8c439c000465c8fb0","order":0,"media_type":"movie"},{"adult":false,"backdrop_path":"/jZTnq3dkO5n2aHlikRcpK81ryWa.jpg","genre_ids":[18],"id":137566,"original_language":"en","original_title":"Between Us","overview":"A New York couple and their Midwestern friends find that drastic changes have occurred in their respective lives since they last met.","popularity":0.3586,"poster_path":"/uieZWH2BOzJhANaSo60M1zjn72r.jpg","release_date":"2012-09-13","title":"Between Us","video":false,"vote_average":5.2,"vote_count":32,"character":"Joel","credit_id":"60f7e2b1d7fbda0079ef7631","order":2,"media_type":"movie"},{"adult":false,"backdrop_path":null,"genre_ids":[],"id":1371433,"original_language":"en","original_title":"The Invention of Love","overview":"An esoteric play portraying the life of poet A. E. Housman focusing specifically on his personal life and love for a college classmate.","popularity":0.3265,"poster_path":"/eJAUiD8gZCZhMOqF6u3G2R7V3VM.jpg","release_date":"2001-03-29","title":"The Invention of Love","video":false,"vote_average":0.0,"vote_count":0,"character":"Moses John Jackson","credit_id":"670dc8aa9f3531e6b26c38b5","order":2,"media_type":"movie"},{"adult":false,"backdrop_path":"/ucDMmWAYOiBhd6cZCDWVK9DIIQ4.jpg","genre_ids":[16,10751,35,28],"id":1297842,"original_language":"en","original_title":"GOAT","overview":"Will, a small goat with big dreams, gets a once-in-a-lifetime shot to join the pros and play roarball – a high-intensity, co-ed, full-contact sport dominated by the fastest, fiercest animals in the world. Will's new teammates aren't thrilled about having a little goat on their roster, but Will is determined to revolutionize the sport and prove once and for all that 'smalls can ball'! He has to do something he has never done before.","popularity":6.4874,"poster_path":"/oXIj3R3QxcQ9wkv9YBWouBNmnFZ.jpg","release_date":"2026-02-11","title":"GOAT","video":false,"vote_average":0.0,"vote_count":0,"character":"Archie Everhardt  (voice)","credit_id":"6846d43cfc6300d7b33fc8ff","order":3,"media_type":"movie"},{"adult":false,"backdrop_path":null,"genre_ids":[80,53],"id":1575461,"original_language":"en","original_title":"Evil Genius","overview":"Follows the true story of the 2003 death of Brian Wells, a notorious case known as the “collar bomb” or “pizza bomber” incident. The FBI investigation revealed an extraordinarily complex and bizarre plot, later described as one of the most intricate crimes in the Bureau’s history.","popularity":0.6144,"poster_path":null,"release_date":"","title":"Evil Genius","video":false,"vote_average":0.0,"vote_count":0,"character":"","credit_id":"690bcdc6710fc42b6bf6d2bf","order":1,"media_type":"movie"},{"adult":false,"backdrop_path":"/cGfQSdC2OoovVcCW1tchZCWxYIA.jpg","genre_ids":[99],"id":1610413,"original_language":"en","original_title":"One Last Adventure: The Making of Stranger Things 5","overview":"An inside look at the years of effort and craft that went into the final installment of the Duffer Brothers' generation-defining series.","popularity":26.147,"poster_path":"/aZhrAx5CevLfjXcGIG3wBXxDiAL.jpg","release_date":"2026-01-11","title":"One Last Adventure: The Making of Stranger Things 5","video":false,"vote_average":7.316,"vote_count":19,"character":"Self (uncredited)","credit_id":"6965e6477e4848a56b36dc55","order":63,"media_type":"movie"},{"adult":false,"backdrop_path":"/5BIY5hMbVDbe5SjkIDD9TI7hPCI.jpg","genre_ids":[10759,18],"id":2321,"origin_country":["US"],"original_language":"en","original_name":"The Unit","overview":"A covert team of special forces operatives risk their lives on undercover missions around the globe, while their wives maintain the homefront, protecting their husbands' secrets.","popularity":12.8893,"poster_path":"/ftwhXqizcVRo4pgqFnTysR9tAIM.jpg","first_air_date":"2006-03-07","name":"The Unit","vote_average":7.324,"vote_count":204,"character":"Gary Weber","credit_id":"525730ff760ee3776a349888","episode_count":1,"first_credit_air_date":"2007-11-06","media_type":"tv"},{"adult":false,"backdrop_path":"/obtdxPgmfykYwVnvuYXC5f2xKlQ.jpg","genre_ids":[80,18,9648],"id":2734,"origin_country":["US"],"original_language":"en","original_name":"Law & Order: Special Victims Unit","overview":"In the criminal justice system, sexually-based offenses are considered especially heinous. In New York City, the dedicated detectives who investigate these vicious felonies are members of an elite squad known as the Special Victims Unit. These are their stories.","popularity":225.0921,"poster_path":"/iofokHZoUB4Qhik4PflvJl8TT6a.jpg","first_air_date":"1999-09-20","name":"Law & Order: Special Victims Unit","vote_average":7.9,"vote_count":4091,"character":"Terry Jessup","credit_id":"525743ca760ee36aaa0dc9df","episode_count":1,"first_credit_air_date":"2002-11-08","media_type":"tv"},{"adult":false,"backdrop_path":"/wEfAUz1pAzZ4ufhT4cukMwsK8E2.jpg","genre_ids":[18],"id":2856,"origin_country":["US"],"original_language":"en","original_name":"The Book of Daniel","overview":"Rev. Daniel Webster is an unconventional Episcopalian priest who not only believes in Jesus, but actually sees him and discusses life with him. He is challenged on many levels as he struggles to be a good husband, father and minister, while navigating an often rocky relationship with the church hierarchy.","popularity":1.9892,"poster_path":"/2PxnIIu9UkVAFUkFBeuwDW4DdVH.jpg","first_air_date":"2006-01-06","name":"The Book of Daniel","vote_average":6.615,"vote_count":13,"character":"","credit_id":"525748a3760ee36aaa0feedc","episode_count":1,"first_credit_air_date":"2006-01-13","media_type":"tv"},{"adult":false,"backdrop_path":"/1GY7ih45OzZKjNCJ97XHxBCtuSU.jpg","genre_ids":[80,18,9648],"id":8358,"origin_country":["US"],"original_language":"en","original_name":"Lie to Me","overview":"The world's leading deception researcher, Dr. Cal Lightman, studies facial expression, body language and tone of voice to determine when a person is lying and why, which helps law enforcement and government agencies uncover the truth. But his skills also make it easier for him to deceive others.","popularity":18.6409,"poster_path":"/rrTeGVXHqppoTUydoWV6bCzZs1W.jpg","first_air_date":"2009-01-21","name":"Lie to Me","vote_average":7.887,"vote_count":1626,"character":"Frank Ambrose","credit_id":"525790cd760ee36aaa6d052c","episode_count":1,"first_credit_air_date":"2009-04-22","media_type":"tv"},{"adult":false,"backdrop_path":"/fQVsBMrzCIImbEXrlWXu8YHoqik.jpg","genre_ids":[16,35,10759],"id":128036,"origin_country":["US"],"original_language":"en","original_name":"Q-Force","overview":"A gay superspy and his scrappy LGBTQ squad fight to prove themselves to the agency that underestimated them. Today, West Hollywood… tomorrow, the world!","popularity":1.9041,"poster_path":"/30m8oSz46yESF57ihmWMIwneG7d.jpg","first_air_date":"2021-09-02","name":"Q-Force","vote_average":6.655,"vote_count":129,"character":"Buck (voice)","credit_id":"60d3a321bf0f63007d531d4b","episode_count":10,"first_credit_air_date":"2021-09-02","media_type":"tv"},{"adult":false,"backdrop_path":"/y8T8BhptuHFPR0hCGcUSMyUfUfm.jpg","genre_ids":[16,10765,10759],"id":219543,"origin_country":["US"],"original_language":"en","original_name":"Creature Commandos","overview":"Follow the exploits of the Creature Commandos, a secret team of incarcerated monsters recruited for missions deemed too dangerous for humans. When all else fails... they're your last, worst option.","popularity":18.3378,"poster_path":"/bB3G6Ug1jfsOUptb0RJsqrgMVta.jpg","first_air_date":"2024-12-05","name":"Creature Commandos","vote_average":7.762,"vote_count":277,"character":"Frankenstein (voice)","credit_id":"6436ef69fd4f8000b4a34611","episode_count":7,"first_credit_air_date":"2024-12-05","media_type":"tv"},{"adult":false,"backdrop_path":"/iNt4CmfX70UlqFG6Ixxnhto3IOA.jpg","genre_ids":[10767,35],"id":72649,"origin_country":["US"],"original_language":"en","original_name":"Hot Ones","overview":"The show with hot questions and even hotter wings invites a famous guest over to eat and then interviews them while they're struggling through the heat.","popularity":23.4028,"poster_path":"/4uudasFgKCVQFNGqfanD6wEGVS1.jpg","first_air_date":"2015-03-12","name":"Hot Ones","vote_average":7.152,"vote_count":69,"character":"Self","credit_id":"6102cdb77d5f4b005e83bfdc","episode_count":1,"first_credit_air_date":"2021-07-15","media_type":"tv"},{"adult":false,"backdrop_path":"/hvYSliOoNPqwshl6Y5MrCGIfN1.jpg","genre_ids":[18,35],"id":50846,"origin_country":["US"],"original_language":"en","original_name":"Rake","overview":"Keegan Deane's staggering lack of discretion and inability to self-censor land him the law cases that nobody else will touch. He always tries to do the right thing, but at the same time struggles to save himself from the many self-destructive elements that plague his own life, including women and gambling.","popularity":1.8473,"poster_path":"/5AdpBaq4nyKZclDrn9o4h7F15hP.jpg","first_air_date":"2014-01-23","name":"Rake","vote_average":5.167,"vote_count":30,"character":"David Potter","credit_id":"52597f3d760ee34661a91bf2","episode_count":13,"first_credit_air_date":"2014-01-23","media_type":"tv"},{"adult":false,"backdrop_path":"/7sJrNKwzyJWnFPFpDL9wnZ859LZ.jpg","genre_ids":[18,9648,80],"id":1415,"origin_country":["US"],"original_language":"en","original_name":"Elementary","overview":"A modern-day drama about a crime-solving duo that cracks the NYPD's most impossible cases. Following his fall from grace in London and a stint in rehab, eccentric Sherlock escapes to Manhattan where his wealthy father forces him to live with his worst nightmare - a sober companion, Dr. Watson.","popularity":44.4232,"poster_path":"/q9dObe29W4bDpgzUfOOH3ZnzDbR.jpg","first_air_date":"2012-09-27","name":"Elementary","vote_average":7.614,"vote_count":1750,"character":"Dr. Mason Baldwin","credit_id":"531acf26c3a3685c5d004372","episode_count":1,"first_credit_air_date":"2012-11-01","media_type":"tv"},{"adult":false,"backdrop_path":"/rZ9yTTDgwwY76DmqqZ69xSljHEz.jpg","genre_ids":[18],"id":60889,"origin_country":["US"],"original_language":"en","original_name":"State of Affairs","overview":"Each day the President is faced with dozens of life and death decisions, and to prioritize the biggest international crises facing the country, one top CIA analyst - Charleston Tucker - assembles the President's Daily Briefing.\n\nThis list of the most vital security issues facing the nation brings with it moral and political judgment calls for Charleston and her trusted group of brilliant analysts at the agency. Aside from the political minefields she has to walk, Charlie has a close personal relationship with the President because she was once engaged to her son before a tragic terrorist attack took his life. Charlie survived that attack and is now determined to bring the perpetrators to justice.\n\nNavigating a complex personal life and a pressure-cooker profession is, of course, a challenge, and Charlie sometimes engages in boundary-pushing behavior to avoid facing her grief. But when the clock strikes 2 a.m., she is all about her job - protecting her nation, serving her president and still trying to get to the bottom of her fiancé's murder that will reveal itself as a shocking mystery.","popularity":0.45,"poster_path":"/2a4kzJHXFzPYXV09XmRe9OM58L8.jpg","first_air_date":"2014-11-17","name":"State of Affairs","vote_average":5.563,"vote_count":72,"character":"David Patrick","credit_id":"645d323f3fe16000fed144bf","episode_count":13,"first_credit_air_date":"2014-11-17","media_type":"tv"},{"adult":false,"backdrop_path":"/mx7CXbxPGoQZ4cIGkMB4dvjQBV4.jpg","genre_ids":[18,10768],"id":61112,"origin_country":["US"],"original_language":"en","original_name":"Manhattan","overview":"Set against the backdrop of the greatest clandestine race against time in the history of science with the mission to build the world's first atomic bomb in Los Alamos, New Mexico. Flawed scientists and their families attempt to co-exist in a world where secrets and lies infiltrate every aspect of their lives.","popularity":6.6779,"poster_path":"/qZeMzP3mNC9JbufbSmZYT0Z7rpj.jpg","first_air_date":"2014-07-27","name":"Manhattan","vote_average":7.043,"vote_count":128,"character":"Reed Akley","credit_id":"6155263edcb6a3002a918266","episode_count":10,"first_credit_air_date":"2014-07-27","media_type":"tv"},{"adult":false,"backdrop_path":"/qLYumObEHeRHFMC6N3SfCrnBFjp.jpg","genre_ids":[18],"id":4601,"origin_country":["US"],"original_language":"en","original_name":"Law & Order: Criminal Intent","overview":"The third installment of the “Law & Order” franchise takes viewers deep into the minds of its criminals while following the intense psychological approaches the Major Case Squad uses to solve its crimes.","popularity":39.3506,"poster_path":"/zgBg8gTCELQg73awE7qAuV06c4Z.jpg","first_air_date":"2001-09-30","name":"Law & Order: Criminal Intent","vote_average":7.6,"vote_count":365,"character":"Paul Devildis","credit_id":"6465c981d1857201802b720e","episode_count":1,"first_credit_air_date":"2009-06-21","media_type":"tv"},{"adult":false,"backdrop_path":"/jQ0cQGugJABsFYvBhtWQQ8ftTGK.jpg","genre_ids":[99],"id":118924,"origin_country":["US"],"original_language":"en","original_name":"Marvel Studios Assembled","overview":"Go behind the scenes of the shows and movies of the Marvel Cinematic Universe, following the filmmakers, cast and crew, and Marvel heroes every step of the way.","popularity":14.7709,"poster_path":"/v2BHRwtQVkt5fssLdo5MpFgHJPY.jpg","first_air_date":"2021-03-12","name":"Marvel Studios Assembled","vote_average":7.188,"vote_count":215,"character":"Self","credit_id":"6182f4f6cb6db5002c2b26bc","episode_count":1,"first_credit_air_date":"2021-10-20","media_type":"tv"},{"adult":false,"backdrop_path":"/cwosIp9M9B6TcLnv0bBg86s0WUx.jpg","genre_ids":[80,18],"id":41727,"origin_country":["US"],"original_language":"en","original_name":"Banshee","overview":"Banshee is an American drama television series set in a small town in Pennsylvania Amish country and features an enigmatic ex-con posing as a murdered sheriff who imposes his own brand of justice while also cooking up plans that serve his own interests.","popularity":37.0923,"poster_path":"/5nXFiz8Rn8eezVjSTZBd7HmnF1G.jpg","first_air_date":"2013-01-11","name":"Banshee","vote_average":7.975,"vote_count":1322,"character":"Robert Dalton","credit_id":"5784f249925141045a0010a7","episode_count":2,"first_credit_air_date":"2015-03-13","media_type":"tv"},{"adult":false,"backdrop_path":"/8zbAoryWbtH0DKdev8abFAjdufy.jpg","genre_ids":[10765,9648,10759],"id":66732,"origin_country":["US"],"original_language":"en","original_name":"Stranger Things","overview":"When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces, and one strange little girl.","popularity":748.7554,"poster_path":"/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg","first_air_date":"2016-07-15","name":"Stranger Things","vote_average":8.585,"vote_count":20252,"character":"Jim Hopper","credit_id":"5759b986c3a3683e7c003967","episode_count":42,"first_credit_air_date":"2016-07-15","media_type":"tv"},{"adult":false,"backdrop_path":"/amtOltTVcK9vQtL1iQS6p3LBi05.jpg","genre_ids":[10767],"id":62223,"origin_country":["US"],"original_language":"en","original_name":"The Late Late Show with James Corden","overview":"Once Craig Ferguson retires, James Corden will be taking over The Late Late Show. The show is a late night talk show that interviews celebrities and has its own bits. And of course, it's all hosted by James Corden.","popularity":25.7037,"poster_path":"/qPmVoG8G9tc1nN8ZwGV2zYcknit.jpg","first_air_date":"2015-03-23","name":"The Late Late Show with James Corden","vote_average":5.254,"vote_count":142,"character":"Self - Guest","credit_id":"64e652651feac100fe5b7930","episode_count":1,"first_credit_air_date":"2022-12-01","media_type":"tv"},{"adult":false,"backdrop_path":"/o5TcV0QU960Aedxc3aRqNQ7yMG6.jpg","genre_ids":[16,35],"id":65228,"origin_country":["US"],"original_language":"en","original_name":"Animals.","overview":"An animated comedy focusing on the downtrodden creatures native to Earth’s least-habitable environment: New York City. Whether it’s lovelorn rats, gender-questioning pigeons or aging bedbugs in the midst of a midlife crisis, the awkward small talk, moral ambiguity and existential woes of non-human urbanites prove startlingly similar to our own.","popularity":3.004,"poster_path":"/n9w6Njoioimlr1mEyURF5HqeAhV.jpg","first_air_date":"2016-02-05","name":"Animals.","vote_average":6.219,"vote_count":73,"character":"Hawk (voice)","credit_id":"620030df326ec100436f71cc","episode_count":1,"first_credit_air_date":"2018-10-05","media_type":"tv"},{"adult":false,"backdrop_path":"/tExscftlsu5gxID7hZ1NNZLjvTJ.jpg","genre_ids":[99],"id":137646,"origin_country":["GB"],"original_language":"en","original_name":"Animal","overview":"This immersive series follows the world's most magnificent creatures, capturing never-before-seen moments from the heartwarming to the outrageous.","popularity":2.1838,"poster_path":"/dTUzqX7Ude2JskIBQVgldRLEaaS.jpg","first_air_date":"2021-11-10","name":"Animal","vote_average":8.1,"vote_count":36,"character":"Self - Narrator (voice)","credit_id":"6239611fe19de9001b1674aa","episode_count":1,"first_credit_air_date":"2022-03-18","media_type":"tv"},{"adult":false,"backdrop_path":"/dfX2UaHVE5c7kLBFbgmEZJuy4Ev.jpg","genre_ids":[10767,35],"id":61818,"origin_country":["US"],"original_language":"en","original_name":"Late Night with Seth Meyers","overview":"Seth Meyers, who is \"Saturday Night Live’s\" longest serving anchor on the show’s wildly popular \"Weekend Update,\" takes over as host of NBC’s \"Late Night\" — home to A-list celebrity guests, memorable comedy and the best in musical talent. As the Emmy Award-winning head writer for \"SNL,\" Meyers has established a reputation for sharp wit and perfectly timed comedy, and has gained fame for his spot-on jokes and satire. Meyers takes his departure from \"SNL\" to his new post at \"Late Night,\" as Jimmy Fallon moves to \"The Tonight Show\".","popularity":56.2489,"poster_path":"/jm95V8XjfvqmEhw0MN09wbg9Mi3.jpg","first_air_date":"2014-02-25","name":"Late Night with Seth Meyers","vote_average":5.269,"vote_count":119,"character":"Self","credit_id":"651e7921f04d0100e29d4a96","episode_count":2,"first_credit_air_date":"2019-10-08","media_type":"tv"},{"adult":false,"backdrop_path":"/udLLWKhTPFuACfEc9WuXkQpYCgl.jpg","genre_ids":[18],"id":49525,"origin_country":["US"],"original_language":"en","original_name":"Blue","overview":"Blue is a mother with a secret life. She'll do anything to keep it from her son. But her past has other plans.","popularity":3.4965,"poster_path":"/lvkDcuaJ4yMP8ExIcedBhc80sok.jpg","first_air_date":"2012-06-11","name":"Blue","vote_average":7.1,"vote_count":10,"character":"Cooper","credit_id":"6261b635f48e0d009c7ee02e","episode_count":3,"first_credit_air_date":"2012-06-11","media_type":"tv"},{"adult":false,"backdrop_path":"/oVd2HcKdEJdmBVxR3v4F5ylDi1Z.jpg","genre_ids":[35],"id":67443,"origin_country":["US"],"original_language":"en","original_name":"Crisis in Six Scenes","overview":"A comedy that takes place in the 1960s during turbulent times in the United States when a middle class suburban family is visited by a guest who turns their household completely upside down.","popularity":2.1144,"poster_path":"/fNb2QVOiqxmfDhn4r5F1zZRQog1.jpg","first_air_date":"2016-09-30","name":"Crisis in Six Scenes","vote_average":6.54,"vote_count":150,"character":"Vic","credit_id":"5a9596d49251415639001ce7","episode_count":6,"first_credit_air_date":"2016-09-30","media_type":"tv"},{"adult":false,"backdrop_path":"/tc7canPSAn2X14hYi6Rl3gZm1o4.jpg","genre_ids":[80,18],"id":549,"origin_country":["US"],"original_language":"en","original_name":"Law & Order","overview":"In cases ripped from the headlines, police investigate serious and often deadly crimes, weighing the evidence and questioning the suspects until someone is taken into custody. The district attorney's office then builds a case to convict the perpetrator by proving the person guilty beyond a reasonable doubt. Working together, these expert teams navigate all sides of the complex criminal justice system to make New York a safer place.","popularity":139.0492,"poster_path":"/haJ9eHytVO3H3JooMJG1DiWwDNm.jpg","first_air_date":"1990-09-13","name":"Law & Order","vote_average":7.4,"vote_count":657,"character":"Mike","credit_id":"62a066521e922521e5f1c096","episode_count":1,"first_credit_air_date":"1999-11-24","media_type":"tv"},{"adult":false,"backdrop_path":"/ky85K8xOEjBSMJvlGUlw6k9c3fE.jpg","genre_ids":[35,10767],"id":56219,"origin_country":["US"],"original_language":"en","original_name":"Drunk History","overview":"Historical reenactments from A-list talent as told by inebriated storytellers. A unique take on the familiar and less familiar people and events from America’s great past as great moments in history are retold with unforgettable results.","popularity":8.3121,"poster_path":"/6zTclFjUEm6aTodjYciYtwzh5tY.jpg","first_air_date":"2013-07-09","name":"Drunk History","vote_average":6.8,"vote_count":95,"character":"Vietnam Memorial Head","credit_id":"5b27f94c0e0a2677710009f3","episode_count":1,"first_credit_air_date":"2018-02-27","media_type":"tv"},{"adult":false,"backdrop_path":null,"genre_ids":[80],"id":206828,"origin_country":["US"],"original_language":"en","original_name":"DTF St. Louis","overview":"A love triangle among three adults experiencing middle-age malaise  leads to one of them ending up dead.","popularity":1.8916,"poster_path":null,"first_air_date":"","name":"DTF St. Louis","vote_average":0.0,"vote_count":0,"character":"","credit_id":"62e0434433a533051fba7344","episode_count":1,"first_credit_air_date":null,"media_type":"tv"},{"adult":false,"backdrop_path":"/gMMnf8VRg3Z98WaFmOLr9Jk8pIs.jpg","genre_ids":[35,10767],"id":63770,"origin_country":["US"],"original_language":"en","original_name":"The Late Show with Stephen Colbert","overview":"Stephen Colbert brings his signature satire and comedy to The Late Show with Stephen Colbert, the #1 show in late night, where he talks with an eclectic mix of guests about what is new and relevant in the worlds of politics, entertainment, business, music, technology, and more. Featuring bandleader Jon Batiste with his band Stay Human, the Emmy Award-nominated show is broadcast from the historic Ed Sullivan Theater.","popularity":46.7005,"poster_path":"/9jkThAGYj2yp8jsS6Nriy5mzKFT.jpg","first_air_date":"2015-09-08","name":"The Late Show with Stephen Colbert","vote_average":6.2,"vote_count":334,"character":"Self","credit_id":"62f74315109dec009c2798db","episode_count":1,"first_credit_air_date":"2019-11-15","media_type":"tv"},{"adult":false,"backdrop_path":"/vOKdx9SVqay7uSRc1kwXplJgnRG.jpg","genre_ids":[10767,99],"id":74851,"origin_country":["US"],"original_language":"en","original_name":"Beyond Stranger Things","overview":"Secrets from the \"Stranger Things 2\" universe are revealed as cast and guests discuss the latest episodes with host Jim Rash. Caution: spoilers ahead!","popularity":6.7264,"poster_path":"/rHCFO8RJ3Hg6a8KjWAsvAsa38hp.jpg","first_air_date":"2017-10-27","name":"Beyond Stranger Things","vote_average":7.4,"vote_count":116,"character":"Self","credit_id":"5bdba35b0e0a26334500270b","episode_count":2,"first_credit_air_date":"2017-10-27","media_type":"tv"},{"adult":false,"backdrop_path":"/qLYumObEHeRHFMC6N3SfCrnBFjp.jpg","genre_ids":[18],"id":4601,"origin_country":["US"],"original_language":"en","original_name":"Law & Order: Criminal Intent","overview":"The third installment of the “Law & Order” franchise takes viewers deep into the minds of its criminals while following the intense psychological approaches the Major Case Squad uses to solve its crimes.","popularity":39.3506,"poster_path":"/zgBg8gTCELQg73awE7qAuV06c4Z.jpg","first_air_date":"2001-09-30","name":"Law & Order: Criminal Intent","vote_average":7.6,"vote_count":365,"character":"Wesley John Kanderson","credit_id":"6354afcbf8e982007c5d0cef","episode_count":1,"first_credit_air_date":"2004-11-14","media_type":"tv"},{"adult":false,"backdrop_path":"/sSAX59Kf01lBRkBW4UcIL4kIoIm.jpg","genre_ids":[35,10763],"id":1667,"origin_country":["US"],"original_language":"en","original_name":"Saturday Night Live","overview":"A late-night live television sketch comedy and variety show created by Lorne Michaels. The show's comedy sketches, which parody contemporary culture and politics, are performed by a large and varying cast of repertory and newer cast members. Each episode is hosted by a celebrity guest, who usually delivers an opening monologue and performs in sketches with the cast, and features performances by a musical guest.","popularity":33.7332,"poster_path":"/s1cZBqbMwAF3w8S3Yo0j5nr2Yuo.jpg","first_air_date":"1975-10-11","name":"Saturday Night Live","vote_average":7.0,"vote_count":477,"character":"Self - Host","credit_id":"5d81c3c9f6787a002e9d7f8a","episode_count":1,"first_credit_air_date":"2019-10-12","media_type":"tv"},{"adult":false,"backdrop_path":"/p0l0zO9VF4HhdiS40mUjbgjdMcb.jpg","genre_ids":[80,18],"id":10457,"origin_country":["US"],"original_language":"en","original_name":"Hack","overview":"When corruption charges strip him of his job, his family and his pride, former cop Mike Olshansky forges a new identity as a Philadelphia cab driver, patrolling the city as a roving vigilante who works with local police.","popularity":5.7495,"poster_path":"/75EwfXIG8r6xZjcwg6FZIOmZa7s.jpg","first_air_date":"2002-09-27","name":"Hack","vote_average":7.65,"vote_count":10,"character":"Christopher Clark","credit_id":"63aeafc1c56d2d00f30e741a","episode_count":1,"first_credit_air_date":"2003-10-11","media_type":"tv"},{"adult":false,"backdrop_path":"/qI8PwP7R7Fbn78wocvkbFESvjbl.jpg","genre_ids":[10767],"id":102758,"origin_country":["US"],"original_language":"en","original_name":"Off Camera with Sam Jones","overview":"Photographer and director Sam Jones sits down with the myriad professionals of television and movies, and other celebrities (great skateboarders, for example), to discuss their development before fame, their passions beyond their careers, and gives them a space to open up about their insight into their business and their own abilities. Filmed in black and white, with a few deep cushion chairs and sparse set, the show relies on Sam's ability to relate to the guests and their will to speak freely with him.","popularity":11.5113,"poster_path":"/wFzCudeLabyjvwh0n5C9rEtCqVy.jpg","first_air_date":"2014-02-06","name":"Off Camera with Sam Jones","vote_average":4.0,"vote_count":4,"character":"Self","credit_id":"5ea8b459be55b70021e5472b","episode_count":1,"first_credit_air_date":"2019-04-08","media_type":"tv"},{"adult":false,"backdrop_path":"/tc7canPSAn2X14hYi6Rl3gZm1o4.jpg","genre_ids":[80,18],"id":549,"origin_country":["US"],"original_language":"en","original_name":"Law & Order","overview":"In cases ripped from the headlines, police investigate serious and often deadly crimes, weighing the evidence and questioning the suspects until someone is taken into custody. The district attorney's office then builds a case to convict the perpetrator by proving the person guilty beyond a reasonable doubt. Working together, these expert teams navigate all sides of the complex criminal justice system to make New York a safer place.","popularity":139.0492,"poster_path":"/haJ9eHytVO3H3JooMJG1DiWwDNm.jpg","first_air_date":"1990-09-13","name":"Law & Order","vote_average":7.4,"vote_count":657,"character":"Jay Carlin","credit_id":"64054c36e61e6d00d533acbf","episode_count":1,"first_credit_air_date":"2008-03-12","media_type":"tv"},{"adult":false,"backdrop_path":"/oNNdRpSQSdRIaWnSFejhw1qk51K.jpg","genre_ids":[18],"id":15621,"origin_country":["US"],"original_language":"en","original_name":"The Newsroom","overview":"A behind-the-scenes look at the people who make a nightly cable-news program. Focusing on a network anchor, his new executive producer, the newsroom staff and their boss, the series tracks their quixotic mission to do the news well in the face of corporate and commercial obstacles-not to mention their own personal entanglements.","popularity":12.8345,"poster_path":"/pOC3DmU47X98Sv5vaPnmgjG30eY.jpg","first_air_date":"2012-06-24","name":"The Newsroom","vote_average":8.078,"vote_count":680,"character":"Elliot Hirsch","credit_id":"5f46cf18efca000036bbd10f","episode_count":10,"first_credit_air_date":"2012-06-24","media_type":"tv"},{"adult":false,"backdrop_path":"/jvTeRgjFsp66xj8SWxhr7O2J4ud.jpg","genre_ids":[10751,16,35],"id":456,"origin_country":["US"],"original_language":"en","original_name":"The Simpsons","overview":"Set in Springfield, the average American town, the show focuses on the antics and everyday adventures of the Simpson family; Homer, Marge, Bart, Lisa and Maggie, as well as a virtual cast of thousands. Since the beginning, the series has been a pop culture icon, attracting hundreds of celebrities to guest star. The show has also made name for itself in its fearless satirical take on politics, media and American life in general.","popularity":177.7954,"poster_path":"/uWpG7GqfKGQqX4YMAo3nv5OrglV.jpg","first_air_date":"1989-12-17","name":"The Simpsons","vote_average":8.011,"vote_count":10527,"character":"Fred Kranepool (voice)","credit_id":"5f84706ae93e950037124c71","episode_count":1,"first_credit_air_date":"2020-09-27","media_type":"tv"},{"adult":false,"backdrop_path":"/lxQMxqao3vs2ehxESrkQU6acU86.jpg","genre_ids":[10765,16,10759],"id":138505,"origin_country":["US"],"original_language":"en","original_name":"Marvel Zombies","overview":"After the Avengers are overtaken by a zombie plague, a desperate group of survivors discover the key to bringing an end to the super-powered undead, racing across a dystopian landscape and risking life and limb to save their world.","popularity":10.1077,"poster_path":"/mwKj9ERGFXsWot0nXgQ5yMQf9I7.jpg","first_air_date":"2025-09-24","name":"Marvel Zombies","vote_average":7.261,"vote_count":284,"character":"Alexei Shostakov / Red Guardian (voice)","credit_id":"673716a571ef66978cfb0c86","episode_count":4,"first_credit_air_date":"2025-09-24","media_type":"tv"},{"adult":false,"backdrop_path":"/jnzoh5qoxRLFRIQAxnl6D3RStPC.jpg","genre_ids":[16,10759,10765],"id":91363,"origin_country":["US"],"original_language":"en","original_name":"What If...?","overview":"Taking inspiration from the comic books of the same name, each episode of this animated anthology series questions, revisits and twists classic Marvel Cinematic moments.","popularity":20.8311,"poster_path":"/lztz5XBMG1x6Y5ubz7CxfPFsAcW.jpg","first_air_date":"2021-08-11","name":"What If...?","vote_average":8.071,"vote_count":4520,"character":"Alexei Shostakov (voice)","credit_id":"676805cd919287ef53912a19","episode_count":1,"first_credit_air_date":"2024-12-22","media_type":"tv"},{"adult":false,"backdrop_path":"/jnzoh5qoxRLFRIQAxnl6D3RStPC.jpg","genre_ids":[16,10759,10765],"id":91363,"origin_country":["US"],"original_language":"en","original_name":"What If...?","overview":"Taking inspiration from the comic books of the same name, each episode of this animated anthology series questions, revisits and twists classic Marvel Cinematic moments.","popularity":20.8311,"poster_path":"/lztz5XBMG1x6Y5ubz7CxfPFsAcW.jpg","first_air_date":"2021-08-11","name":"What If...?","vote_average":8.071,"vote_count":4520,"character":"Alexei Shostakov / Red Guardian (voice)","credit_id":"676a8930fe3640664364acf5","episode_count":1,"first_credit_air_date":"2024-12-24","media_type":"tv"},{"adult":false,"backdrop_path":"/syfmYmITnWPJU3hhaP0ckny5hMN.jpg","genre_ids":[35,18],"id":18779,"origin_country":["US"],"original_language":"en","original_name":"Royal Pains","overview":"A young E.R. doctor who, after being wrongly blamed for a patient's death, moves to the Hamptons and becomes the reluctant \"doctor for hire\" to the rich and famous. When the attractive administrator of the local hospital asks him to treat the town's less fortunate, he finds himself walking the line between doing well for himself and doing good for others.","popularity":13.6878,"poster_path":"/4WW26JPHeG5mgrFkgjvv3Qmgcwg.jpg","first_air_date":"2009-06-04","name":"Royal Pains","vote_average":6.763,"vote_count":156,"character":"Dan Samuels","credit_id":"677af984eca85bd50872840d","episode_count":1,"first_credit_air_date":"2009-08-06","media_type":"tv"},{"adult":false,"backdrop_path":"/3hOxwqn1P2AY0d20VVtxN2f3Lfh.jpg","genre_ids":[35,10767],"id":6809,"origin_country":["ES"],"original_language":"es","original_name":"El hormiguero","overview":"El Hormiguero is a Spanish television program with a live audience focusing on comedy, science, and politics running since September 2006. It is hosted and produced by screenwriter Pablo Motos. The show aired on Spain's Cuatro channel from launch until June 2011 and is now broadcast on Antena 3. Recurring guests on the show include Luis Piedrahita, Raquel Martos, Marron & \"The Man in Black\", and puppet ants Trancas and Barrancas. It has proved a ratings success, and has expanded from a weekly 120-minute show to a daily 40-minute show in its third season, which began on September 17, 2007. The show won the Entertainment prize at the 2009 Rose d'Or ceremony.","popularity":20.7477,"poster_path":"/tT4hXTYXtZVadi6AZ0rhdVgNo2T.jpg","first_air_date":"2006-09-24","name":"El hormiguero","vote_average":4.808,"vote_count":39,"character":"Self - Guest","credit_id":"67e267df7b7313b5aef051cb","episode_count":1,"first_credit_air_date":"2019-03-19","media_type":"tv"},{"adult":false,"backdrop_path":"/55tcKzl0gZ0lR1q7TrVJm0h9lkT.jpg","genre_ids":[10764,10751],"id":2912,"origin_country":["US"],"original_language":"en","original_name":"Jeopardy!","overview":"America's favorite quiz show where contestants are presented with general knowledge clues in the form of answers, and must phrase their responses in question form.","popularity":35.1555,"poster_path":"/hfz0IgebqGENG6ZnuqKQKMFk2vy.jpg","first_air_date":"1984-09-10","name":"Jeopardy!","vote_average":6.9,"vote_count":150,"character":"Self - Clue Presenter","credit_id":"690d18a76b90fdef55c04da5","episode_count":1,"first_credit_air_date":"2025-10-16","media_type":"tv"},{"adult":false,"backdrop_path":"/zjJNOVA3SPjhGtGhGN8POG991bg.jpg","genre_ids":[10767,35],"id":1489,"origin_country":["US"],"original_language":"en","original_name":"Jimmy Kimmel Live!","overview":"Jimmy Kimmel Live! is an American late-night talk show, created and hosted by Jimmy Kimmel and broadcast on ABC.","popularity":17.218,"poster_path":"/bGB6bEbG4qL22C1SFupkdAxYC9i.jpg","first_air_date":"2003-01-26","name":"Jimmy Kimmel Live!","vote_average":5.5,"vote_count":191,"character":"Self - Guest","credit_id":"694f0945da04f43c218cdec1","episode_count":2,"first_credit_air_date":"2021-06-01","media_type":"tv"}],"crew":[{"adult":false,"backdrop_path":"/fWBmMHi7ukR8pYmbBfPERjzdZwS.jpg","genre_ids":[35],"id":612701,"original_language":"en","original_title":"Frankenstein's Monster's Monster, Frankenstein","overview":"When actor David Harbour finds lost footage of his father's disastrous televised stage play of a literary classic, he uncovers shocking family secrets.","popularity":0.2814,"poster_path":"/aVrXQAk0lIRw123EghPfNlludjU.jpg","release_date":"2019-07-16","title":"Frankenstein's Monster's Monster, Frankenstein","video":false,"vote_average":5.8,"vote_count":79,"credit_id":"5dbce0e954f6eb00184faf27","department":"Production","job":"Executive Producer","media_type":"movie"},{"adult":false,"backdrop_path":null,"genre_ids":[80],"id":206828,"origin_country":["US"],"original_language":"en","original_name":"DTF St. Louis","overview":"A love triangle among three adults experiencing middle-age malaise  leads to one of them ending up dead.","popularity":1.8916,"poster_path":null,"first_air_date":"","name":"DTF St. Louis","vote_average":0.0,"vote_count":0,"credit_id":"62e0439655bc35027f954aa5","department":"Production","episode_count":1,"first_credit_air_date":null,"job":"Executive Producer","media_type":"tv"}]},"external_ids":{"freebase_mid":"/m/02rd5rc","freebase_id":"/en/david_harbour","imdb_id":"nm1092086","tvrage_id":33924,"wikidata_id":"Q391359","facebook_id":null,"instagram_id":"dkharbour","tiktok_id":null,"twitter_id":"DavidKHarbour","youtube_id":null},"images":{"profiles":[{"aspect_ratio":0.667,"height":3000,"iso_3166_1":null,"iso_639_1":null,"file_path":"/qMFtMWlYVtFVyBoBhX5IoA5sN5a.jpg","vote_average":10.0,"vote_count":5,"width":2000},{"aspect_ratio":0.667,"height":3000,"iso_3166_1":null,"iso_639_1":null,"file_path":"/p26mt1tcKLnXDBAnyEmB5DrYORp.jpg","vote_average":10.0,"vote_count":5,"width":2000},{"aspect_ratio":0.667,"height":1050,"iso_3166_1":null,"iso_639_1":null,"file_path":"/chPekukMF5SNnW6b22NbYPqAStr.jpg","vote_average":5.25,"vote_count":19,"width":700},{"aspect_ratio":0.667,"height":1050,"iso_3166_1":null,"iso_639_1":null,"file_path":"/jkAiAq3tVC1hdmKEs25c61V3N5w.jpg","vote_average":3.954,"vote_count":11,"width":700},{"aspect_ratio":0.667,"height":691,"iso_3166_1":null,"iso_639_1":null,"file_path":"/gVq0ISl3aE9v6EPd6EMVwS5Uh33.jpg","vote_average":3.334,"vote_count":2,"width":461},{"aspect_ratio":0.667,"height":999,"iso_3166_1":null,"iso_639_1":null,"file_path":"/6ZHhqTaC0Y3PPp6MpemAANRSLA5.jpg","vote_average":3.334,"vote_count":1,"width":666},{"aspect_ratio":0.666,"height":965,"iso_3166_1":null,"iso_639_1":null,"file_path":"/dAD17XBv31ZS65ghkhTlUksQwYN.jpg","vote_average":3.334,"vote_count":1,"width":643},{"aspect_ratio":0.667,"height":1500,"iso_3166_1":null,"iso_639_1":null,"file_path":"/ifpCVFGak71eFaiirwqfU3Fp0Dn.jpg","vote_average":3.334,"vote_count":1,"width":1000},{"aspect_ratio":0.667,"height":1189,"iso_3166_1":null,"iso_639_1":null,"file_path":"/uJs65m5RBdnDtvTDIAkmrzs3kM3.jpg","vote_average":0.0,"vote_count":0,"width":793}]}}
+{
+  "adult": false,
+  "also_known_as": [
+    "David Kenneth Harbour"
+  ],
+  "biography": "David Kenneth Harbour (born April 10, 1975) is an American actor. He has received nominations for a Tony Award, a Golden Globe Award, and two Primetime Emmy Awards. \n\nDavid began his career acting in Shakespearean theatre productions. After his professional debut on Broadway in the 1999 revival of The Rainmaker, he was nominated for a Tony Award for his performance in a production of Who's Afraid of Virginia Woolf?. He made his television debut on Law & Order in 1999 and had supporting roles in films such as Brokeback Mountain (2005), Revolutionary Road (2008) and Black Mass (2015).\n\nHarbour gained global recognition for his portrayal of Jim Hopper in the Netflix science fiction series Stranger Things (2016–2025), for which he received a Critics' Choice Television Award as well as nominations for two Primetime Emmy Awards. His starring film roles include the title character in Hellboy (2019), Santa Claus in Violent Night (2022) and a former racer in the sports film Gran Turismo (2023). Harbour has played Red Guardian in the Marvel Cinematic Universe media franchise, beginning with the film Black Widow (2021).\n\nDescription above from the Wikipedia article David Harbour, licensed under CC-BY-SA, full list of contributors on Wikipedia.",
+  "birthday": "1975-04-10",
+  "deathday": null,
+  "gender": 2,
+  "homepage": null,
+  "id": 35029,
+  "imdb_id": "nm1092086",
+  "known_for_department": "Acting",
+  "name": "David Harbour",
+  "place_of_birth": "New York City, New York, USA",
+  "popularity": 10.8548,
+  "profile_path": "/qMFtMWlYVtFVyBoBhX5IoA5sN5a.jpg",
+  "combined_credits": {
+    "cast": [
+      {
+        "adult": false,
+        "backdrop_path": "/78dChJs7doULSEhIiOvGUcXQRGU.jpg",
+        "genre_ids": [
+          28,
+          35,
+          14
+        ],
+        "id": 1078446,
+        "original_language": "en",
+        "original_title": "Violent Night 2",
+        "overview": "The sequel to the 2022 film. Plot TBA.",
+        "popularity": 1.1857,
+        "poster_path": "/sI9m5PUoZT6upungDXVTSPTtfgX.jpg",
+        "release_date": "2026-12-02",
+        "title": "Violent Night 2",
+        "video": false,
+        "vote_average": 0,
+        "vote_count": 0,
+        "character": "Santa",
+        "credit_id": "63d112e3a410c8125be6333a",
+        "order": 0,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/ra9aXj8PpUbUHwwTRSl5zsL6WHM.jpg",
+        "genre_ids": [
+          18,
+          10749
+        ],
+        "id": 4148,
+        "original_language": "en",
+        "original_title": "Revolutionary Road",
+        "overview": "A young couple living in a Connecticut suburb during the mid-1950s struggle to come to terms with their personal problems while trying to raise their two children. Based on a novel by Richard Yates.",
+        "popularity": 3.6738,
+        "poster_path": "/cvkD3yiVXLg3as8EAG3LaTycONQ.jpg",
+        "release_date": "2008-12-19",
+        "title": "Revolutionary Road",
+        "video": false,
+        "vote_average": 6.98,
+        "vote_count": 4019,
+        "character": "Shep Campbell",
+        "credit_id": "52fe43afc3a36847f8067945",
+        "order": 5,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/3CqMIX3ZlrD0pU3fpBL6DM0Cneb.jpg",
+        "genre_ids": [
+          12,
+          28,
+          53,
+          80
+        ],
+        "id": 10764,
+        "original_language": "en",
+        "original_title": "Quantum of Solace",
+        "overview": "Betrayed by Vesper, the woman he loved, 007 fights the urge to make his latest mission personal. Pursuing his determination to uncover the truth, Bond and M interrogate Mr. White, who reveals that the organization that blackmailed Vesper is far more complex and dangerous than anyone had imagined.",
+        "popularity": 8.1435,
+        "poster_path": "/e3DXXLJHGqMx9yYpXsql1XNljmM.jpg",
+        "release_date": "2008-10-29",
+        "title": "Quantum of Solace",
+        "video": false,
+        "vote_average": 6.335,
+        "vote_count": 8301,
+        "character": "Gregg Beam",
+        "credit_id": "52fe43b39251416c7501aacd",
+        "order": 7,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/sBOenwOZGRN5nZZGw4TxwtnfrEf.jpg",
+        "genre_ids": [
+          28,
+          35,
+          14
+        ],
+        "id": 899112,
+        "original_language": "en",
+        "original_title": "Violent Night",
+        "overview": "When a team of mercenaries breaks into a wealthy family compound on Christmas Eve, taking everyone inside hostage, the team isn’t prepared for a surprise combatant: Santa Claus is on the grounds, and he’s about to show why this Nick is no saint.",
+        "popularity": 6.3345,
+        "poster_path": "/e8CpMgdyihz9Td7amQDqubPuzfN.jpg",
+        "release_date": "2022-11-30",
+        "title": "Violent Night",
+        "video": false,
+        "vote_average": 7.234,
+        "vote_count": 2448,
+        "character": "Santa",
+        "credit_id": "6193fff90f2fbd002cb3beb1",
+        "order": 0,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/eNmoAIVeAIlFVR4OqYuSsLiZpW9.jpg",
+        "genre_ids": [
+          18,
+          35,
+          10749
+        ],
+        "id": 45077,
+        "original_language": "en",
+        "original_title": "Every Day",
+        "overview": "Ned is in the throes of a mid-life crisis. His work as a writer on an outrageous, semi-pornographic TV show is less than satisfying. His fifteen year old son has just told him he is gay and his eleven year old is afraid of, well pretty much everything. When his wife, Jeannie, moves her sick and embittered father from Detroit into their home in NY, it puts added stress on an already strained marriage. And when a sexy female co-worker puts the moves on Ned, the temptation sends him spiraling.",
+        "popularity": 1.2596,
+        "poster_path": "/yEW8ALVxeZRWCLZEJIvejkL5TM0.jpg",
+        "release_date": "2010-01-14",
+        "title": "Every Day",
+        "video": false,
+        "vote_average": 5.1,
+        "vote_count": 94,
+        "character": "Brian",
+        "credit_id": "52fe46aec3a36847f810c415",
+        "order": 4,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/yhmOI6bgD0akvpeXNWCQgHBTyzk.jpg",
+        "genre_ids": [
+          35,
+          10402,
+          10749
+        ],
+        "id": 62492,
+        "original_language": "en",
+        "original_title": "The Wedding Weekend",
+        "overview": "A group of guys who sang together in a college a cappella group reunite 15 years later to perform at a friend's wedding and discover how their lives have progressed -- and in some cases regressed -- since their college heyday.",
+        "popularity": 1.4903,
+        "poster_path": "/yV4RqXZ5nYptovzzdC6Uvj2dKWs.jpg",
+        "release_date": "2006-12-12",
+        "title": "The Wedding Weekend",
+        "video": false,
+        "vote_average": 3.542,
+        "vote_count": 12,
+        "character": "David",
+        "credit_id": "52fe4680c3a368484e094201",
+        "order": 0,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/n6ggvrNiiDBGcymaomQPeVsIfUg.jpg",
+        "genre_ids": [
+          53,
+          80,
+          9648
+        ],
+        "id": 16995,
+        "original_language": "en",
+        "original_title": "State of Play",
+        "overview": "When a congressional aide is killed, a Washington, D.C. journalist starts investigating the case involving the Representative, his old college friend.",
+        "popularity": 2.5953,
+        "poster_path": "/mWsfeSFUM3NxWa62UrA9IIn240B.jpg",
+        "release_date": "2009-04-17",
+        "title": "State of Play",
+        "video": false,
+        "vote_average": 6.8,
+        "vote_count": 2069,
+        "character": "PointCorp Insider",
+        "credit_id": "52fe46fc9251416c7508a2e5",
+        "order": 13,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/8R82TxhOmIOtkxl4SXeRyylpvJi.jpg",
+        "genre_ids": [
+          18,
+          10749
+        ],
+        "id": 80591,
+        "original_language": "en",
+        "original_title": "W.E.",
+        "overview": "In 1998, an auction of the estate of the Duke and Duchess of Windsor causes great excitement. For one woman, Wally Winthrop, it has much more meaning. Wally becomes obsessed by their historic love story. As she learns more about the sacrifices involved, Wally gains her own courage to find happiness.",
+        "popularity": 3.6967,
+        "poster_path": "/aNE7gtJ8vrhG4vaDbetMa1SLxGi.jpg",
+        "release_date": "2011-09-01",
+        "title": "W.E.",
+        "video": false,
+        "vote_average": 6.325,
+        "vote_count": 305,
+        "character": "Ernest",
+        "credit_id": "52fe47ca9251416c91075d85",
+        "order": 5,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/l53K8Fp1WcOMRL33CMsnnMUPiWg.jpg",
+        "genre_ids": [
+          80,
+          18,
+          53
+        ],
+        "id": 77016,
+        "original_language": "en",
+        "original_title": "End of Watch",
+        "overview": "Two young officers are marked for death after confiscating a small cache of money and firearms from the members of a notorious cartel during a routine traffic stop.",
+        "popularity": 4.4469,
+        "poster_path": "/pDeVKQICkcdwwjHxGj0MeS14YJ6.jpg",
+        "release_date": "2012-09-20",
+        "title": "End of Watch",
+        "video": false,
+        "vote_average": 7.346,
+        "vote_count": 3495,
+        "character": "Van Hauser",
+        "credit_id": "52fe4957c3a368484e126941",
+        "order": 4,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": null,
+        "genre_ids": [
+          18,
+          80
+        ],
+        "id": 967598,
+        "original_language": "en",
+        "original_title": "The Trashers",
+        "overview": "The rise and fall of Jimmy Galante, a Danbury, Connecticut trash magnate and associate of the Genovese crime family.",
+        "popularity": 1.2469,
+        "poster_path": "/xh46P9YcIgFGtAg5peXDWBAlxCk.jpg",
+        "release_date": "",
+        "title": "The Trashers",
+        "video": false,
+        "vote_average": 0,
+        "vote_count": 0,
+        "character": "Jimmy Galante",
+        "credit_id": "626705771967570067a0b9cf",
+        "order": 0,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/k23FPWl97XKpJ1oTaDyADzxWxs6.jpg",
+        "genre_ids": [
+          80,
+          18,
+          9648,
+          53
+        ],
+        "id": 169917,
+        "original_language": "en",
+        "original_title": "A Walk Among the Tombstones",
+        "overview": "Private investigator Matthew Scudder is hired by a drug kingpin to find out who kidnapped and murdered his wife.",
+        "popularity": 3.9308,
+        "poster_path": "/euPgyPsiNFp6gOBB7nUFxvN5ZaY.jpg",
+        "release_date": "2014-09-18",
+        "title": "A Walk Among the Tombstones",
+        "video": false,
+        "vote_average": 6.329,
+        "vote_count": 2949,
+        "character": "Ray",
+        "credit_id": "5303f333c3a3683aa100180e",
+        "order": 2,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/h2SEtzuABKmcZAnKBJ1za3kETTY.jpg",
+        "genre_ids": [
+          16,
+          35,
+          27,
+          12,
+          878
+        ],
+        "id": 1205229,
+        "original_language": "en",
+        "original_title": "Night of the Zoopocalypse",
+        "overview": "A wolf and mountain lion team up when a meteor unleashes a virus turning zoo animals into zombies. They join forces with other survivors to rescue the zoo and stop the deranged mutant leader from spreading the virus.",
+        "popularity": 72.9089,
+        "poster_path": "/nCejOVZcOxKS27nnbh28NKXOdXF.jpg",
+        "release_date": "2025-01-23",
+        "title": "Night of the Zoopocalypse",
+        "video": false,
+        "vote_average": 6.56,
+        "vote_count": 67,
+        "character": "Dan (voice)",
+        "credit_id": "6553ee9553866e00c5b0bada",
+        "order": 1,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/wNAfVj1ObGNye5fQM4tJXJGtU0.jpg",
+        "genre_ids": [
+          53,
+          28,
+          80
+        ],
+        "id": 156022,
+        "original_language": "en",
+        "original_title": "The Equalizer",
+        "overview": "McCall believes he has put his mysterious past behind him and dedicated himself to beginning a new, quiet life. But when he meets Teri, a young girl under the control of ultra-violent Russian gangsters, he can’t stand idly by – he has to help her. Armed with hidden skills that allow him to serve vengeance against anyone who would brutalize the helpless, McCall comes out of his self-imposed retirement and finds his desire for justice reawakened. If someone has a problem, if the odds are stacked against them, if they have nowhere else to turn, McCall will help. He is The Equalizer.",
+        "popularity": 11.7754,
+        "poster_path": "/9u4yW7yPA0BQ2pv9XwiNzItwvp8.jpg",
+        "release_date": "2014-09-24",
+        "title": "The Equalizer",
+        "video": false,
+        "vote_average": 7.281,
+        "vote_count": 9672,
+        "character": "Masters",
+        "credit_id": "54311ab10e0a264643002d7d",
+        "order": 3,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/jYCyTdPfgT01IOJWDnnetr9RDX6.jpg",
+        "genre_ids": [
+          28,
+          878,
+          12
+        ],
+        "id": 986056,
+        "original_language": "en",
+        "original_title": "Thunderbolts*",
+        "overview": "After finding themselves ensnared in a death trap, seven disillusioned castoffs must embark on a dangerous mission that will force them to confront the darkest corners of their pasts.",
+        "popularity": 20.1132,
+        "poster_path": "/hqcexYHbiTBfDIdDWxrxPtVndBX.jpg",
+        "release_date": "2025-04-30",
+        "title": "Thunderbolts*",
+        "video": false,
+        "vote_average": 7.312,
+        "vote_count": 3086,
+        "character": "Alexei Shostakov",
+        "credit_id": "631ce40439549a008019b71c",
+        "order": 4,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/xFYpUmB01nswPgbzi8EOCT1ZYFu.jpg",
+        "genre_ids": [
+          12,
+          28,
+          18
+        ],
+        "id": 980489,
+        "original_language": "en",
+        "original_title": "Gran Turismo",
+        "overview": "The ultimate wish-fulfillment tale of a teenage Gran Turismo player whose gaming skills won him a series of Nissan competitions to become an actual professional racecar driver.",
+        "popularity": 9.7187,
+        "poster_path": "/51tqzRtKMMZEYUpSYkrUE7v9ehm.jpg",
+        "release_date": "2023-08-09",
+        "title": "Gran Turismo",
+        "video": false,
+        "vote_average": 7.733,
+        "vote_count": 3215,
+        "character": "Jack Salter",
+        "credit_id": "63220a259a3c49007ddf4daf",
+        "order": 1,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/nAVntSurtINQNtYPU7ijgCtgz7W.jpg",
+        "genre_ids": [
+          53,
+          80,
+          9648
+        ],
+        "id": 13483,
+        "original_language": "en",
+        "original_title": "Awake",
+        "overview": "While undergoing heart surgery, a man experiences a phenomenon called ‘anesthetic awareness’, which leaves him awake but paralyzed throughout the operation. As various obstacles present themselves, his wife must make life-altering decisions while wrestling with her own personal drama.",
+        "popularity": 2.6134,
+        "poster_path": "/jIPIxaBcppLLkygko7tV5yuTIs1.jpg",
+        "release_date": "2007-11-28",
+        "title": "Awake",
+        "video": false,
+        "vote_average": 6.5,
+        "vote_count": 1442,
+        "character": "Dracula",
+        "credit_id": "5496c9169251413f750045cd",
+        "order": 9,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/rbHjuU8zk7uTDVlxAFuxrTHEdds.jpg",
+        "genre_ids": [
+          35,
+          80,
+          18
+        ],
+        "id": 51996,
+        "original_language": "en",
+        "original_title": "Thin Ice",
+        "overview": "A dishonest insurance salesman's life quickly disintegrates during a Wisconsin winter when he teams up with a psychopath to steal a rare violin at the home of a reclusive farmer.",
+        "popularity": 1.7597,
+        "poster_path": "/15KTuJlR8GclVrgX0g58oACqiqv.jpg",
+        "release_date": "2012-02-17",
+        "title": "Thin Ice",
+        "video": false,
+        "vote_average": 6.511,
+        "vote_count": 174,
+        "character": "Bob Egan",
+        "credit_id": "54e3b8399251417add00198c",
+        "order": 3,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/wAk0yKrhAmvsoMvlKs4QImhvK5X.jpg",
+        "genre_ids": [
+          28,
+          12,
+          14
+        ],
+        "id": 297761,
+        "original_language": "en",
+        "original_title": "Suicide Squad",
+        "overview": "From DC Comics comes the Suicide Squad, an antihero team of incarcerated supervillains who act as deniable assets for the United States government, undertaking high-risk black ops missions in exchange for commuted prison sentences.",
+        "popularity": 6.1433,
+        "poster_path": "/sk3FZgh3sRrmr8vyhaitNobMcfh.jpg",
+        "release_date": "2016-08-03",
+        "title": "Suicide Squad",
+        "video": false,
+        "vote_average": 5.9,
+        "vote_count": 21801,
+        "character": "Dexter Tolliver",
+        "credit_id": "554389f2925141586f001d6b",
+        "order": 14,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/mK4J2Qk4S4UQGOeMqsgei9DyPwW.jpg",
+        "genre_ids": [
+          18,
+          80,
+          36
+        ],
+        "id": 261023,
+        "original_language": "en",
+        "original_title": "Black Mass",
+        "overview": "The true story of Whitey Bulger, the brother of a state senator and the most infamous violent criminal in the history of South Boston, who became an FBI informant to take down a Mafia family invading his turf.",
+        "popularity": 3.8941,
+        "poster_path": "/zfwciv4LIJkNQsfuhYGv0Nkiweg.jpg",
+        "release_date": "2015-09-17",
+        "title": "Black Mass",
+        "video": false,
+        "vote_average": 6.525,
+        "vote_count": 3510,
+        "character": "John Morris",
+        "credit_id": "55ea9dd392514106d6002167",
+        "order": 9,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/fTrQsdMS2MUw00RnzH0r3JWHhts.jpg",
+        "genre_ids": [
+          28,
+          80,
+          53
+        ],
+        "id": 1197306,
+        "original_language": "en",
+        "original_title": "A Working Man",
+        "overview": "Levon Cade left behind a decorated military career in the black ops to live a simple life working construction. But when his boss's daughter, who is like family to him, is taken by human traffickers, his search to bring her home uncovers a world of corruption far greater than he ever could have imagined.",
+        "popularity": 29.2457,
+        "poster_path": "/6FRFIogh3zFnVWn7Z6zcYnIbRcX.jpg",
+        "release_date": "2025-03-26",
+        "title": "A Working Man",
+        "video": false,
+        "vote_average": 6.696,
+        "vote_count": 1731,
+        "character": "Gunny Lefferty",
+        "credit_id": "6614b3423d7454016207b746",
+        "order": 6,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/9VEOQvCnd8T8wILgyqjKgyhALw4.jpg",
+        "genre_ids": [
+          28,
+          80,
+          53
+        ],
+        "id": 324542,
+        "original_language": "en",
+        "original_title": "Sleepless",
+        "overview": "Undercover Las Vegas police officer Vincent Downs, who has a lot of enemies, is caught in a high stakes web of corrupt cops and the mob-controlled casino underground. When a heist goes wrong, a crew of homicidal gangsters kidnap Downs’ teenage son T. In one sleepless night, Downs will have to rescue his son, evade an internal affairs investigation, and bring the kidnappers to justice.",
+        "popularity": 1.4017,
+        "poster_path": "/9WkUSY33MDPGmz0vtzbsfaxTHVa.jpg",
+        "release_date": "2017-01-12",
+        "title": "Sleepless",
+        "video": false,
+        "vote_average": 5.9,
+        "vote_count": 1301,
+        "character": "Doug Dennison",
+        "credit_id": "56ec8131c3a3682256003b49",
+        "order": 4,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": null,
+        "genre_ids": [
+          53,
+          18
+        ],
+        "id": 325165,
+        "original_language": "en",
+        "original_title": "Midnight Son",
+        "overview": "Mild-mannered professor Edward leaves his wife, Rita, one night to meet a stranger from an Internet chat room. It is only during his journey that we begin to discover the real reason for the disintegration of Edward and Rita's marriage.",
+        "popularity": 1.5572,
+        "poster_path": "/oKzRzlyHmN1Yf5HCRCsLjYDyMvw.jpg",
+        "release_date": "2007-02-02",
+        "title": "Midnight Son",
+        "video": false,
+        "vote_average": 1,
+        "vote_count": 2,
+        "character": "Mulligan",
+        "credit_id": "574c9176c3a368304000008a",
+        "order": 2,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/c8sODXEgANa49CdcHc9NgNBexdF.jpg",
+        "genre_ids": [
+          36,
+          18
+        ],
+        "id": 209262,
+        "original_language": "en",
+        "original_title": "Parkland",
+        "overview": "November 22nd, 1963 was a day that changed the world forever — when young American President John F. Kennedy was assassinated in Dallas, Texas. This film follows, almost in real time, a handful of individuals forced to make split-second decisions after an event that would change their lives and forever alter the world’s landscape.",
+        "popularity": 2.188,
+        "poster_path": "/23jc1Hclf1FFxpyYs9A4SxfRbK3.jpg",
+        "release_date": "2013-10-02",
+        "title": "Parkland",
+        "video": false,
+        "vote_average": 6.2,
+        "vote_count": 378,
+        "character": "Gordon Shanklin",
+        "credit_id": "57f9f559c3a3686ffa005bf3",
+        "order": 11,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/3eOINbgRs8WiWfQfViXeuZ3enrs.jpg",
+        "genre_ids": [
+          878,
+          28,
+          12
+        ],
+        "id": 1003596,
+        "original_language": "en",
+        "original_title": "Avengers: Doomsday",
+        "overview": "The Avengers, Wakandans, Fantastic Four, Thunderbolts, and X-Men all fight against Doctor Doom. Plot TBA.",
+        "popularity": 25.9175,
+        "poster_path": "/8HkIe2i4ScpCkcX9SzZ9IPasqWV.jpg",
+        "release_date": "2026-12-16",
+        "title": "Avengers: Doomsday",
+        "video": false,
+        "vote_average": 0,
+        "vote_count": 0,
+        "character": "Alexei Shostakov / Red Guardian",
+        "credit_id": "66aa92ce9f6dabe412bfe47b",
+        "order": 15,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/rytc6Lf4447C0CDncwFa4gxe0vY.jpg",
+        "genre_ids": [
+          878,
+          28,
+          12
+        ],
+        "id": 1003598,
+        "original_language": "en",
+        "original_title": "Avengers: Secret Wars",
+        "overview": "An upcoming film in Phase Six of the Marvel Cinematic Universe (MCU) and the finale of The Multiverse Saga. Plot TBA.",
+        "popularity": 8.5363,
+        "poster_path": "/f0YBuh4hyiAheXhh4JnJWoKi9g5.jpg",
+        "release_date": "2027-12-16",
+        "title": "Avengers: Secret Wars",
+        "video": false,
+        "vote_average": 0,
+        "vote_count": 0,
+        "character": "Alexei Shostakov / Red Guardian",
+        "credit_id": "66aa93687aeef07dc2cd341d",
+        "order": 7,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/vXzqV2RtJlT9WhNEM4NYWCEC6ZI.jpg",
+        "genre_ids": [
+          18,
+          10749
+        ],
+        "id": 142,
+        "original_language": "en",
+        "original_title": "Brokeback Mountain",
+        "overview": "In 1960s Wyoming, two men develop a strong emotional and sexual relationship that endures as a lifelong connection complicating their lives as they get married and start families of their own.",
+        "popularity": 6.9926,
+        "poster_path": "/aByfQOQBNa4CMFwIgq3QrqY2ZHh.jpg",
+        "release_date": "2005-10-22",
+        "title": "Brokeback Mountain",
+        "video": false,
+        "vote_average": 7.785,
+        "vote_count": 7381,
+        "character": "Randall Malone",
+        "credit_id": "58c99d629251410cb7000228",
+        "order": 7,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/djiDKVB07xTy7tDFbWb9k7KLI3E.jpg",
+        "genre_ids": [
+          14,
+          27,
+          28,
+          12
+        ],
+        "id": 456740,
+        "original_language": "en",
+        "original_title": "Hellboy",
+        "overview": "Hellboy comes to England, where he must defeat Nimue, Merlin's consort and the Blood Queen. But their battle will bring about the end of the world, a fate he desperately tries to turn away.",
+        "popularity": 5.0659,
+        "poster_path": "/bk8LyaMqUtaQ9hUShuvFznQYQKR.jpg",
+        "release_date": "2019-04-10",
+        "title": "Hellboy",
+        "video": false,
+        "vote_average": 5.6,
+        "vote_count": 3626,
+        "character": "Hellboy / Anung Un Rama",
+        "credit_id": "59112b0bc3a36864a703a266",
+        "order": 0,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/aBCn1z1tJGivVhY1nHSrXOQqQwG.jpg",
+        "genre_ids": [
+          28,
+          80,
+          35
+        ],
+        "id": 40805,
+        "original_language": "en",
+        "original_title": "The Green Hornet",
+        "overview": "Britt Reid, the heir to the largest newspaper fortune in Los Angeles, is a spoiled playboy who has been, thus far, happy to lead an aimless life. After his father dies, Britt meets Kato, a resourceful company employee. Realizing that they have the talent and resources to make something of their lives, Britt and Kato join forces as costumed crime-fighters to bring down the city's most-powerful criminal, Chudnofsky.",
+        "popularity": 4.4647,
+        "poster_path": "/1YrRviphr3eXPus9iHyQX56QgIE.jpg",
+        "release_date": "2011-01-12",
+        "title": "The Green Hornet",
+        "video": false,
+        "vote_average": 5.598,
+        "vote_count": 3398,
+        "character": "Frank Scanlon",
+        "credit_id": "5a540d2fc3a3685ecd003c66",
+        "order": 6,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/5ggoa0kYhrx38wUPAYJyzXPzy9V.jpg",
+        "genre_ids": [
+          18
+        ],
+        "id": 499790,
+        "original_language": "en",
+        "original_title": "Human Affairs",
+        "overview": "This richly earnest drama follows Geneviève, a surrogate who must reckon with her ambivalence about the pregnancy and her precarious feelings for the parents-to-be",
+        "popularity": 1.5483,
+        "poster_path": "/9pIG5hQjD8cfp90PHlGH8SoCI1W.jpg",
+        "release_date": "2018-01-19",
+        "title": "Human Affairs",
+        "video": false,
+        "vote_average": 4.667,
+        "vote_count": 3,
+        "character": "Ronnie",
+        "credit_id": "5a6315369251410b2500a027",
+        "order": 3,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/2QSZ4CPd8AoljAL76qM30dFft07.jpg",
+        "genre_ids": [
+          28,
+          53
+        ],
+        "id": 545609,
+        "original_language": "en",
+        "original_title": "Extraction",
+        "overview": "A hardened gun-for-hire's latest mission becomes a soul-searching race to survive when he's sent into Bangladesh to rescue a drug lord's kidnapped son.",
+        "popularity": 8.1518,
+        "poster_path": "/nygOUcBKPHFTbxsYRFZVePqgPK6.jpg",
+        "release_date": "2020-04-23",
+        "title": "Extraction",
+        "video": false,
+        "vote_average": 7.301,
+        "vote_count": 6432,
+        "character": "Gaspar",
+        "credit_id": "5bf603760e0a2626740c3a33",
+        "order": 5,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/dq18nCTTLpy9PmtzZI6Y2yAgdw5.jpg",
+        "genre_ids": [
+          28,
+          12,
+          878
+        ],
+        "id": 497698,
+        "original_language": "en",
+        "original_title": "Black Widow",
+        "overview": "Natasha Romanoff, also known as Black Widow, confronts the darker parts of her ledger when a dangerous conspiracy with ties to her past arises. Pursued by a force that will stop at nothing to bring her down, Natasha must deal with her history as a spy and the broken relationships left in her wake long before she became an Avenger.",
+        "popularity": 11.761,
+        "poster_path": "/7JPpIjhD2V0sKyFvhB9khUMa30d.jpg",
+        "release_date": "2021-07-07",
+        "title": "Black Widow",
+        "video": false,
+        "vote_average": 7.183,
+        "vote_count": 10948,
+        "character": "Alexei",
+        "credit_id": "5ca5268e0e0a26015ca98b26",
+        "order": 3,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": null,
+        "genre_ids": [
+          99
+        ],
+        "id": 608972,
+        "original_language": "en",
+        "original_title": "Tales of the Wild Hunt: Hellboy Reborn",
+        "overview": "Documentary on the making of the 2019 movie.",
+        "popularity": 0.3666,
+        "poster_path": "/iQkJ7xw5ztmUAyMnOG9MmUihGIq.jpg",
+        "release_date": "2019-07-23",
+        "title": "Tales of the Wild Hunt: Hellboy Reborn",
+        "video": false,
+        "vote_average": 5.8,
+        "vote_count": 5,
+        "character": "Self",
+        "credit_id": "5d054e269251411a82ca0644",
+        "order": 0,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/fWBmMHi7ukR8pYmbBfPERjzdZwS.jpg",
+        "genre_ids": [
+          35
+        ],
+        "id": 612701,
+        "original_language": "en",
+        "original_title": "Frankenstein's Monster's Monster, Frankenstein",
+        "overview": "When actor David Harbour finds lost footage of his father's disastrous televised stage play of a literary classic, he uncovers shocking family secrets.",
+        "popularity": 0.2814,
+        "poster_path": "/aVrXQAk0lIRw123EghPfNlludjU.jpg",
+        "release_date": "2019-07-16",
+        "title": "Frankenstein's Monster's Monster, Frankenstein",
+        "video": false,
+        "vote_average": 5.8,
+        "vote_count": 79,
+        "character": "David Harbour III / David Harbour Jr. / Frankenstein",
+        "credit_id": "5d1ba986955c650010834a02",
+        "order": 0,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/xIEhRa6CqnF49eeY12S6NpSH82W.jpg",
+        "genre_ids": [
+          16,
+          18
+        ],
+        "id": 666217,
+        "original_language": "en",
+        "original_title": "Turtle Journey: The Crisis in Our Oceans",
+        "overview": "The story of a turtle family making their way home through a damaged and changing ocean. A powerful message about the threats the oceans are facing, and the importance of protecting them",
+        "popularity": 0.1996,
+        "poster_path": "/xZYVK31gugsbDxrlTl6RhbLtY8Q.jpg",
+        "release_date": "2020-01-14",
+        "title": "Turtle Journey: The Crisis in Our Oceans",
+        "video": false,
+        "vote_average": 7.3,
+        "vote_count": 5,
+        "character": "Narrator",
+        "credit_id": "5e28b55d2dda89001758ac80",
+        "order": 2,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": null,
+        "genre_ids": [
+          27,
+          53
+        ],
+        "id": 143083,
+        "original_language": "en",
+        "original_title": "Isolation",
+        "overview": "In this eerie hospital chiller, a medical student wakes up in an isolation room, gravely ill with no idea how she got there or how to get out. Trying to make sense of her plight and save herself, she finds the hospital staff distinctly unhelpful.",
+        "popularity": 0.2594,
+        "poster_path": "/3f2winpfemIdpXgXMwu1ei0IfO1.jpg",
+        "release_date": "2011-10-04",
+        "title": "Isolation",
+        "video": false,
+        "vote_average": 4.4,
+        "vote_count": 8,
+        "character": "Dr. Sloan",
+        "credit_id": "5e5c22969b86160015faac8e",
+        "order": 0,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/yA7MG24LZCtQhsKXhqJ5TfbjFoI.jpg",
+        "genre_ids": [
+          18
+        ],
+        "id": 11184,
+        "original_language": "en",
+        "original_title": "Kinsey",
+        "overview": "Kinsey is a portrait of researcher Alfred Kinsey, driven to uncover the most private secrets of a nation. What begins for Kinsey as a scientific endeavor soon takes on an intensely personal relevance, ultimately becoming an unexpected journey into the mystery of human behavior.",
+        "popularity": 1.6637,
+        "poster_path": "/cODCjWNRcZkwe4ONQs1GzRqYtRb.jpg",
+        "release_date": "2004-09-04",
+        "title": "Kinsey",
+        "video": false,
+        "vote_average": 6.609,
+        "vote_count": 501,
+        "character": "Robert Kinsey",
+        "credit_id": "5e6a89a42f3b170019409d9b",
+        "order": 18,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/r9Zjh0K9vXjeIWNc9CJrqztgG2s.jpg",
+        "genre_ids": [
+          28,
+          18,
+          53
+        ],
+        "id": 18428,
+        "original_language": "en",
+        "original_title": "Confess",
+        "overview": "A young ex-hacker, disgruntled with his life, lashes back at those deemed responsible, uploading unfavorable video footage of them on the internet.",
+        "popularity": 1.2485,
+        "poster_path": "/9LnCsLRzdvjuiGyDPXzfsMUD1th.jpg",
+        "release_date": "2005-10-21",
+        "title": "Confess",
+        "video": false,
+        "vote_average": 4.1,
+        "vote_count": 13,
+        "character": "Agent Jim McAllister",
+        "credit_id": "5e6a8a38459ad60013616c44",
+        "order": 6,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/An6oBoTRbPNdNDMuxTJ8GMuUujR.jpg",
+        "genre_ids": [
+          18
+        ],
+        "id": 157919,
+        "original_language": "en",
+        "original_title": "Knife Fight",
+        "overview": "A political strategist juggling three clients questions whether or not to take the high road, as the ugly side of his work begins to haunt him.",
+        "popularity": 0.0602,
+        "poster_path": "/loiYGqP01wLjbYpLE7Pd6pUT0sX.jpg",
+        "release_date": "2013-01-25",
+        "title": "Knife Fight",
+        "video": false,
+        "vote_average": 5,
+        "vote_count": 39,
+        "character": "Stephen Green",
+        "credit_id": "5e6a8b6b2f3b170011406bd0",
+        "order": 4,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/80seex5P196f7pff3R8xqwd2Zo.jpg",
+        "genre_ids": [
+          53,
+          18,
+          28
+        ],
+        "id": 134411,
+        "original_language": "en",
+        "original_title": "Snitch",
+        "overview": "Construction company owner John Matthews learns that his estranged son, Jason, has been arrested for drug trafficking. Facing an unjust prison sentence for a first time offender courtesy of mandatory minimum sentence laws, Jason has nothing to offer for leniency in good conscience. Desperately, John convinces the DEA and the opportunistic DA Joanne Keeghan to let him go undercover to help make arrests big enough to free his son in return. With the unwitting help of an ex-con employee, John enters the narcotics underworld where every move could be his last in an operation that will demand all his resources, wits and courage to survive.",
+        "popularity": 2.6633,
+        "poster_path": "/1suKSCm8gVUIIOh4MgtWAtzkMe4.jpg",
+        "release_date": "2013-02-21",
+        "title": "Snitch",
+        "video": false,
+        "vote_average": 6.121,
+        "vote_count": 2437,
+        "character": "Jay Price",
+        "credit_id": "5e6a8ba3cabfe400131032aa",
+        "order": 7,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/7ziw8iXMjEkbJ9nCkKsDLedYbRb.jpg",
+        "genre_ids": [
+          18,
+          10749
+        ],
+        "id": 261824,
+        "original_language": "en",
+        "original_title": "X/Y",
+        "overview": "As Mark, Jen, Sylvia, and Jake navigate through their emotionally-arrested states, X/Y reveals the honest and wanton desire we all have to connect with someone and what is at stake when that connection fades.",
+        "popularity": 1.467,
+        "poster_path": "/fvOTgIb5cKwr7kbZuWIq6zyfinJ.jpg",
+        "release_date": "2014-04-19",
+        "title": "X/Y",
+        "video": false,
+        "vote_average": 4.688,
+        "vote_count": 24,
+        "character": "Todd",
+        "credit_id": "5e6a8bf1357c0000133f7806",
+        "order": 3,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/bInicBgSHfQiWLbnRT5jxw9Grvm.jpg",
+        "genre_ids": [
+          12,
+          53,
+          878
+        ],
+        "id": 74,
+        "original_language": "en",
+        "original_title": "War of the Worlds",
+        "overview": "Ray Ferrier is a divorced dockworker and less-than-perfect father. Soon after his ex-wife and her new husband drop off his teenage son and young daughter for a rare weekend visit, a strange and powerful lightning storm touches down.",
+        "popularity": 8.1268,
+        "poster_path": "/6Biy7R9LfumYshur3YKhpj56MpB.jpg",
+        "release_date": "2005-06-28",
+        "title": "War of the Worlds",
+        "video": false,
+        "vote_average": 6.529,
+        "vote_count": 8907,
+        "character": "Dock Worker",
+        "credit_id": "5f405a37c175b2003765fe9a",
+        "order": 18,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/ok7RdHhVngnwkvKj09tvtOvypG.jpg",
+        "genre_ids": [
+          80,
+          53
+        ],
+        "id": 649409,
+        "original_language": "en",
+        "original_title": "No Sudden Move",
+        "overview": "A group of criminals are brought together under mysterious circumstances and have to work together to uncover what's really going on when their simple job goes completely sideways.",
+        "popularity": 3.8241,
+        "poster_path": "/kARdPEc4b32GQlHmJXMhGOCplEA.jpg",
+        "release_date": "2021-06-24",
+        "title": "No Sudden Move",
+        "video": false,
+        "vote_average": 6.4,
+        "vote_count": 764,
+        "character": "Matt Wertz",
+        "credit_id": "5f722312d40d4c003960ecda",
+        "order": 2,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/25xur6csh3XXtQcOq4zx3cyvbEN.jpg",
+        "genre_ids": [
+          27,
+          35
+        ],
+        "id": 852096,
+        "original_language": "en",
+        "original_title": "We Have a Ghost",
+        "overview": "After Kevin finds a ghost named Ernest haunting his new home, he becomes an overnight social media sensation. But when Kevin and Ernest go rogue to investigate the mystery of the latter's past, they become targets of the CIA.",
+        "popularity": 1.8317,
+        "poster_path": "/xo0fgAUoEeVQ7KsKeMWypyglvnf.jpg",
+        "release_date": "2023-02-24",
+        "title": "We Have a Ghost",
+        "video": false,
+        "vote_average": 6.484,
+        "vote_count": 657,
+        "character": "Ernest",
+        "credit_id": "60f6e5b8c439c000465c8fb0",
+        "order": 0,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/jZTnq3dkO5n2aHlikRcpK81ryWa.jpg",
+        "genre_ids": [
+          18
+        ],
+        "id": 137566,
+        "original_language": "en",
+        "original_title": "Between Us",
+        "overview": "A New York couple and their Midwestern friends find that drastic changes have occurred in their respective lives since they last met.",
+        "popularity": 0.3586,
+        "poster_path": "/uieZWH2BOzJhANaSo60M1zjn72r.jpg",
+        "release_date": "2012-09-13",
+        "title": "Between Us",
+        "video": false,
+        "vote_average": 5.2,
+        "vote_count": 32,
+        "character": "Joel",
+        "credit_id": "60f7e2b1d7fbda0079ef7631",
+        "order": 2,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": null,
+        "genre_ids": [],
+        "id": 1371433,
+        "original_language": "en",
+        "original_title": "The Invention of Love",
+        "overview": "An esoteric play portraying the life of poet A. E. Housman focusing specifically on his personal life and love for a college classmate.",
+        "popularity": 0.3265,
+        "poster_path": "/eJAUiD8gZCZhMOqF6u3G2R7V3VM.jpg",
+        "release_date": "2001-03-29",
+        "title": "The Invention of Love",
+        "video": false,
+        "vote_average": 0,
+        "vote_count": 0,
+        "character": "Moses John Jackson",
+        "credit_id": "670dc8aa9f3531e6b26c38b5",
+        "order": 2,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/ucDMmWAYOiBhd6cZCDWVK9DIIQ4.jpg",
+        "genre_ids": [
+          16,
+          10751,
+          35,
+          28
+        ],
+        "id": 1297842,
+        "original_language": "en",
+        "original_title": "GOAT",
+        "overview": "Will, a small goat with big dreams, gets a once-in-a-lifetime shot to join the pros and play roarball – a high-intensity, co-ed, full-contact sport dominated by the fastest, fiercest animals in the world. Will's new teammates aren't thrilled about having a little goat on their roster, but Will is determined to revolutionize the sport and prove once and for all that 'smalls can ball'! He has to do something he has never done before.",
+        "popularity": 6.4874,
+        "poster_path": "/oXIj3R3QxcQ9wkv9YBWouBNmnFZ.jpg",
+        "release_date": "2026-02-11",
+        "title": "GOAT",
+        "video": false,
+        "vote_average": 0,
+        "vote_count": 0,
+        "character": "Archie Everhardt  (voice)",
+        "credit_id": "6846d43cfc6300d7b33fc8ff",
+        "order": 3,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": null,
+        "genre_ids": [
+          80,
+          53
+        ],
+        "id": 1575461,
+        "original_language": "en",
+        "original_title": "Evil Genius",
+        "overview": "Follows the true story of the 2003 death of Brian Wells, a notorious case known as the “collar bomb” or “pizza bomber” incident. The FBI investigation revealed an extraordinarily complex and bizarre plot, later described as one of the most intricate crimes in the Bureau’s history.",
+        "popularity": 0.6144,
+        "poster_path": null,
+        "release_date": "",
+        "title": "Evil Genius",
+        "video": false,
+        "vote_average": 0,
+        "vote_count": 0,
+        "character": "",
+        "credit_id": "690bcdc6710fc42b6bf6d2bf",
+        "order": 1,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/cGfQSdC2OoovVcCW1tchZCWxYIA.jpg",
+        "genre_ids": [
+          99
+        ],
+        "id": 1610413,
+        "original_language": "en",
+        "original_title": "One Last Adventure: The Making of Stranger Things 5",
+        "overview": "An inside look at the years of effort and craft that went into the final installment of the Duffer Brothers' generation-defining series.",
+        "popularity": 26.147,
+        "poster_path": "/aZhrAx5CevLfjXcGIG3wBXxDiAL.jpg",
+        "release_date": "2026-01-11",
+        "title": "One Last Adventure: The Making of Stranger Things 5",
+        "video": false,
+        "vote_average": 7.316,
+        "vote_count": 19,
+        "character": "Self (uncredited)",
+        "credit_id": "6965e6477e4848a56b36dc55",
+        "order": 63,
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/5BIY5hMbVDbe5SjkIDD9TI7hPCI.jpg",
+        "genre_ids": [
+          10759,
+          18
+        ],
+        "id": 2321,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Unit",
+        "overview": "A covert team of special forces operatives risk their lives on undercover missions around the globe, while their wives maintain the homefront, protecting their husbands' secrets.",
+        "popularity": 12.8893,
+        "poster_path": "/ftwhXqizcVRo4pgqFnTysR9tAIM.jpg",
+        "first_air_date": "2006-03-07",
+        "name": "The Unit",
+        "vote_average": 7.324,
+        "vote_count": 204,
+        "character": "Gary Weber",
+        "credit_id": "525730ff760ee3776a349888",
+        "episode_count": 1,
+        "first_credit_air_date": "2007-11-06",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/obtdxPgmfykYwVnvuYXC5f2xKlQ.jpg",
+        "genre_ids": [
+          80,
+          18,
+          9648
+        ],
+        "id": 2734,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Law & Order: Special Victims Unit",
+        "overview": "In the criminal justice system, sexually-based offenses are considered especially heinous. In New York City, the dedicated detectives who investigate these vicious felonies are members of an elite squad known as the Special Victims Unit. These are their stories.",
+        "popularity": 225.0921,
+        "poster_path": "/iofokHZoUB4Qhik4PflvJl8TT6a.jpg",
+        "first_air_date": "1999-09-20",
+        "name": "Law & Order: Special Victims Unit",
+        "vote_average": 7.9,
+        "vote_count": 4091,
+        "character": "Terry Jessup",
+        "credit_id": "525743ca760ee36aaa0dc9df",
+        "episode_count": 1,
+        "first_credit_air_date": "2002-11-08",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/wEfAUz1pAzZ4ufhT4cukMwsK8E2.jpg",
+        "genre_ids": [
+          18
+        ],
+        "id": 2856,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Book of Daniel",
+        "overview": "Rev. Daniel Webster is an unconventional Episcopalian priest who not only believes in Jesus, but actually sees him and discusses life with him. He is challenged on many levels as he struggles to be a good husband, father and minister, while navigating an often rocky relationship with the church hierarchy.",
+        "popularity": 1.9892,
+        "poster_path": "/2PxnIIu9UkVAFUkFBeuwDW4DdVH.jpg",
+        "first_air_date": "2006-01-06",
+        "name": "The Book of Daniel",
+        "vote_average": 6.615,
+        "vote_count": 13,
+        "character": "",
+        "credit_id": "525748a3760ee36aaa0feedc",
+        "episode_count": 1,
+        "first_credit_air_date": "2006-01-13",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/1GY7ih45OzZKjNCJ97XHxBCtuSU.jpg",
+        "genre_ids": [
+          80,
+          18,
+          9648
+        ],
+        "id": 8358,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Lie to Me",
+        "overview": "The world's leading deception researcher, Dr. Cal Lightman, studies facial expression, body language and tone of voice to determine when a person is lying and why, which helps law enforcement and government agencies uncover the truth. But his skills also make it easier for him to deceive others.",
+        "popularity": 18.6409,
+        "poster_path": "/rrTeGVXHqppoTUydoWV6bCzZs1W.jpg",
+        "first_air_date": "2009-01-21",
+        "name": "Lie to Me",
+        "vote_average": 7.887,
+        "vote_count": 1626,
+        "character": "Frank Ambrose",
+        "credit_id": "525790cd760ee36aaa6d052c",
+        "episode_count": 1,
+        "first_credit_air_date": "2009-04-22",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/fQVsBMrzCIImbEXrlWXu8YHoqik.jpg",
+        "genre_ids": [
+          16,
+          35,
+          10759
+        ],
+        "id": 128036,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Q-Force",
+        "overview": "A gay superspy and his scrappy LGBTQ squad fight to prove themselves to the agency that underestimated them. Today, West Hollywood… tomorrow, the world!",
+        "popularity": 1.9041,
+        "poster_path": "/30m8oSz46yESF57ihmWMIwneG7d.jpg",
+        "first_air_date": "2021-09-02",
+        "name": "Q-Force",
+        "vote_average": 6.655,
+        "vote_count": 129,
+        "character": "Buck (voice)",
+        "credit_id": "60d3a321bf0f63007d531d4b",
+        "episode_count": 10,
+        "first_credit_air_date": "2021-09-02",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/y8T8BhptuHFPR0hCGcUSMyUfUfm.jpg",
+        "genre_ids": [
+          16,
+          10765,
+          10759
+        ],
+        "id": 219543,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Creature Commandos",
+        "overview": "Follow the exploits of the Creature Commandos, a secret team of incarcerated monsters recruited for missions deemed too dangerous for humans. When all else fails... they're your last, worst option.",
+        "popularity": 18.3378,
+        "poster_path": "/bB3G6Ug1jfsOUptb0RJsqrgMVta.jpg",
+        "first_air_date": "2024-12-05",
+        "name": "Creature Commandos",
+        "vote_average": 7.762,
+        "vote_count": 277,
+        "character": "Frankenstein (voice)",
+        "credit_id": "6436ef69fd4f8000b4a34611",
+        "episode_count": 7,
+        "first_credit_air_date": "2024-12-05",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/iNt4CmfX70UlqFG6Ixxnhto3IOA.jpg",
+        "genre_ids": [
+          10767,
+          35
+        ],
+        "id": 72649,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Hot Ones",
+        "overview": "The show with hot questions and even hotter wings invites a famous guest over to eat and then interviews them while they're struggling through the heat.",
+        "popularity": 23.4028,
+        "poster_path": "/4uudasFgKCVQFNGqfanD6wEGVS1.jpg",
+        "first_air_date": "2015-03-12",
+        "name": "Hot Ones",
+        "vote_average": 7.152,
+        "vote_count": 69,
+        "character": "Self",
+        "credit_id": "6102cdb77d5f4b005e83bfdc",
+        "episode_count": 1,
+        "first_credit_air_date": "2021-07-15",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/hvYSliOoNPqwshl6Y5MrCGIfN1.jpg",
+        "genre_ids": [
+          18,
+          35
+        ],
+        "id": 50846,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Rake",
+        "overview": "Keegan Deane's staggering lack of discretion and inability to self-censor land him the law cases that nobody else will touch. He always tries to do the right thing, but at the same time struggles to save himself from the many self-destructive elements that plague his own life, including women and gambling.",
+        "popularity": 1.8473,
+        "poster_path": "/5AdpBaq4nyKZclDrn9o4h7F15hP.jpg",
+        "first_air_date": "2014-01-23",
+        "name": "Rake",
+        "vote_average": 5.167,
+        "vote_count": 30,
+        "character": "David Potter",
+        "credit_id": "52597f3d760ee34661a91bf2",
+        "episode_count": 13,
+        "first_credit_air_date": "2014-01-23",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/7sJrNKwzyJWnFPFpDL9wnZ859LZ.jpg",
+        "genre_ids": [
+          18,
+          9648,
+          80
+        ],
+        "id": 1415,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Elementary",
+        "overview": "A modern-day drama about a crime-solving duo that cracks the NYPD's most impossible cases. Following his fall from grace in London and a stint in rehab, eccentric Sherlock escapes to Manhattan where his wealthy father forces him to live with his worst nightmare - a sober companion, Dr. Watson.",
+        "popularity": 44.4232,
+        "poster_path": "/q9dObe29W4bDpgzUfOOH3ZnzDbR.jpg",
+        "first_air_date": "2012-09-27",
+        "name": "Elementary",
+        "vote_average": 7.614,
+        "vote_count": 1750,
+        "character": "Dr. Mason Baldwin",
+        "credit_id": "531acf26c3a3685c5d004372",
+        "episode_count": 1,
+        "first_credit_air_date": "2012-11-01",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/rZ9yTTDgwwY76DmqqZ69xSljHEz.jpg",
+        "genre_ids": [
+          18
+        ],
+        "id": 60889,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "State of Affairs",
+        "overview": "Each day the President is faced with dozens of life and death decisions, and to prioritize the biggest international crises facing the country, one top CIA analyst - Charleston Tucker - assembles the President's Daily Briefing.\n\nThis list of the most vital security issues facing the nation brings with it moral and political judgment calls for Charleston and her trusted group of brilliant analysts at the agency. Aside from the political minefields she has to walk, Charlie has a close personal relationship with the President because she was once engaged to her son before a tragic terrorist attack took his life. Charlie survived that attack and is now determined to bring the perpetrators to justice.\n\nNavigating a complex personal life and a pressure-cooker profession is, of course, a challenge, and Charlie sometimes engages in boundary-pushing behavior to avoid facing her grief. But when the clock strikes 2 a.m., she is all about her job - protecting her nation, serving her president and still trying to get to the bottom of her fiancé's murder that will reveal itself as a shocking mystery.",
+        "popularity": 0.45,
+        "poster_path": "/2a4kzJHXFzPYXV09XmRe9OM58L8.jpg",
+        "first_air_date": "2014-11-17",
+        "name": "State of Affairs",
+        "vote_average": 5.563,
+        "vote_count": 72,
+        "character": "David Patrick",
+        "credit_id": "645d323f3fe16000fed144bf",
+        "episode_count": 13,
+        "first_credit_air_date": "2014-11-17",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/mx7CXbxPGoQZ4cIGkMB4dvjQBV4.jpg",
+        "genre_ids": [
+          18,
+          10768
+        ],
+        "id": 61112,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Manhattan",
+        "overview": "Set against the backdrop of the greatest clandestine race against time in the history of science with the mission to build the world's first atomic bomb in Los Alamos, New Mexico. Flawed scientists and their families attempt to co-exist in a world where secrets and lies infiltrate every aspect of their lives.",
+        "popularity": 6.6779,
+        "poster_path": "/qZeMzP3mNC9JbufbSmZYT0Z7rpj.jpg",
+        "first_air_date": "2014-07-27",
+        "name": "Manhattan",
+        "vote_average": 7.043,
+        "vote_count": 128,
+        "character": "Reed Akley",
+        "credit_id": "6155263edcb6a3002a918266",
+        "episode_count": 10,
+        "first_credit_air_date": "2014-07-27",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/qLYumObEHeRHFMC6N3SfCrnBFjp.jpg",
+        "genre_ids": [
+          18
+        ],
+        "id": 4601,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Law & Order: Criminal Intent",
+        "overview": "The third installment of the “Law & Order” franchise takes viewers deep into the minds of its criminals while following the intense psychological approaches the Major Case Squad uses to solve its crimes.",
+        "popularity": 39.3506,
+        "poster_path": "/zgBg8gTCELQg73awE7qAuV06c4Z.jpg",
+        "first_air_date": "2001-09-30",
+        "name": "Law & Order: Criminal Intent",
+        "vote_average": 7.6,
+        "vote_count": 365,
+        "character": "Paul Devildis",
+        "credit_id": "6465c981d1857201802b720e",
+        "episode_count": 1,
+        "first_credit_air_date": "2009-06-21",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/jQ0cQGugJABsFYvBhtWQQ8ftTGK.jpg",
+        "genre_ids": [
+          99
+        ],
+        "id": 118924,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel Studios Assembled",
+        "overview": "Go behind the scenes of the shows and movies of the Marvel Cinematic Universe, following the filmmakers, cast and crew, and Marvel heroes every step of the way.",
+        "popularity": 14.7709,
+        "poster_path": "/v2BHRwtQVkt5fssLdo5MpFgHJPY.jpg",
+        "first_air_date": "2021-03-12",
+        "name": "Marvel Studios Assembled",
+        "vote_average": 7.188,
+        "vote_count": 215,
+        "character": "Self",
+        "credit_id": "6182f4f6cb6db5002c2b26bc",
+        "episode_count": 1,
+        "first_credit_air_date": "2021-10-20",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/cwosIp9M9B6TcLnv0bBg86s0WUx.jpg",
+        "genre_ids": [
+          80,
+          18
+        ],
+        "id": 41727,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Banshee",
+        "overview": "Banshee is an American drama television series set in a small town in Pennsylvania Amish country and features an enigmatic ex-con posing as a murdered sheriff who imposes his own brand of justice while also cooking up plans that serve his own interests.",
+        "popularity": 37.0923,
+        "poster_path": "/5nXFiz8Rn8eezVjSTZBd7HmnF1G.jpg",
+        "first_air_date": "2013-01-11",
+        "name": "Banshee",
+        "vote_average": 7.975,
+        "vote_count": 1322,
+        "character": "Robert Dalton",
+        "credit_id": "5784f249925141045a0010a7",
+        "episode_count": 2,
+        "first_credit_air_date": "2015-03-13",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/8zbAoryWbtH0DKdev8abFAjdufy.jpg",
+        "genre_ids": [
+          10765,
+          9648,
+          10759
+        ],
+        "id": 66732,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Stranger Things",
+        "overview": "When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces, and one strange little girl.",
+        "popularity": 748.7554,
+        "poster_path": "/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg",
+        "first_air_date": "2016-07-15",
+        "name": "Stranger Things",
+        "vote_average": 8.585,
+        "vote_count": 20252,
+        "character": "Jim Hopper",
+        "credit_id": "5759b986c3a3683e7c003967",
+        "episode_count": 42,
+        "first_credit_air_date": "2016-07-15",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/amtOltTVcK9vQtL1iQS6p3LBi05.jpg",
+        "genre_ids": [
+          10767
+        ],
+        "id": 62223,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Late Late Show with James Corden",
+        "overview": "Once Craig Ferguson retires, James Corden will be taking over The Late Late Show. The show is a late night talk show that interviews celebrities and has its own bits. And of course, it's all hosted by James Corden.",
+        "popularity": 25.7037,
+        "poster_path": "/qPmVoG8G9tc1nN8ZwGV2zYcknit.jpg",
+        "first_air_date": "2015-03-23",
+        "name": "The Late Late Show with James Corden",
+        "vote_average": 5.254,
+        "vote_count": 142,
+        "character": "Self - Guest",
+        "credit_id": "64e652651feac100fe5b7930",
+        "episode_count": 1,
+        "first_credit_air_date": "2022-12-01",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/o5TcV0QU960Aedxc3aRqNQ7yMG6.jpg",
+        "genre_ids": [
+          16,
+          35
+        ],
+        "id": 65228,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Animals.",
+        "overview": "An animated comedy focusing on the downtrodden creatures native to Earth’s least-habitable environment: New York City. Whether it’s lovelorn rats, gender-questioning pigeons or aging bedbugs in the midst of a midlife crisis, the awkward small talk, moral ambiguity and existential woes of non-human urbanites prove startlingly similar to our own.",
+        "popularity": 3.004,
+        "poster_path": "/n9w6Njoioimlr1mEyURF5HqeAhV.jpg",
+        "first_air_date": "2016-02-05",
+        "name": "Animals.",
+        "vote_average": 6.219,
+        "vote_count": 73,
+        "character": "Hawk (voice)",
+        "credit_id": "620030df326ec100436f71cc",
+        "episode_count": 1,
+        "first_credit_air_date": "2018-10-05",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/tExscftlsu5gxID7hZ1NNZLjvTJ.jpg",
+        "genre_ids": [
+          99
+        ],
+        "id": 137646,
+        "origin_country": [
+          "GB"
+        ],
+        "original_language": "en",
+        "original_name": "Animal",
+        "overview": "This immersive series follows the world's most magnificent creatures, capturing never-before-seen moments from the heartwarming to the outrageous.",
+        "popularity": 2.1838,
+        "poster_path": "/dTUzqX7Ude2JskIBQVgldRLEaaS.jpg",
+        "first_air_date": "2021-11-10",
+        "name": "Animal",
+        "vote_average": 8.1,
+        "vote_count": 36,
+        "character": "Self - Narrator (voice)",
+        "credit_id": "6239611fe19de9001b1674aa",
+        "episode_count": 1,
+        "first_credit_air_date": "2022-03-18",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/dfX2UaHVE5c7kLBFbgmEZJuy4Ev.jpg",
+        "genre_ids": [
+          10767,
+          35
+        ],
+        "id": 61818,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Late Night with Seth Meyers",
+        "overview": "Seth Meyers, who is \"Saturday Night Live’s\" longest serving anchor on the show’s wildly popular \"Weekend Update,\" takes over as host of NBC’s \"Late Night\" — home to A-list celebrity guests, memorable comedy and the best in musical talent. As the Emmy Award-winning head writer for \"SNL,\" Meyers has established a reputation for sharp wit and perfectly timed comedy, and has gained fame for his spot-on jokes and satire. Meyers takes his departure from \"SNL\" to his new post at \"Late Night,\" as Jimmy Fallon moves to \"The Tonight Show\".",
+        "popularity": 56.2489,
+        "poster_path": "/jm95V8XjfvqmEhw0MN09wbg9Mi3.jpg",
+        "first_air_date": "2014-02-25",
+        "name": "Late Night with Seth Meyers",
+        "vote_average": 5.269,
+        "vote_count": 119,
+        "character": "Self",
+        "credit_id": "651e7921f04d0100e29d4a96",
+        "episode_count": 2,
+        "first_credit_air_date": "2019-10-08",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/udLLWKhTPFuACfEc9WuXkQpYCgl.jpg",
+        "genre_ids": [
+          18
+        ],
+        "id": 49525,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Blue",
+        "overview": "Blue is a mother with a secret life. She'll do anything to keep it from her son. But her past has other plans.",
+        "popularity": 3.4965,
+        "poster_path": "/lvkDcuaJ4yMP8ExIcedBhc80sok.jpg",
+        "first_air_date": "2012-06-11",
+        "name": "Blue",
+        "vote_average": 7.1,
+        "vote_count": 10,
+        "character": "Cooper",
+        "credit_id": "6261b635f48e0d009c7ee02e",
+        "episode_count": 3,
+        "first_credit_air_date": "2012-06-11",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/oVd2HcKdEJdmBVxR3v4F5ylDi1Z.jpg",
+        "genre_ids": [
+          35
+        ],
+        "id": 67443,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Crisis in Six Scenes",
+        "overview": "A comedy that takes place in the 1960s during turbulent times in the United States when a middle class suburban family is visited by a guest who turns their household completely upside down.",
+        "popularity": 2.1144,
+        "poster_path": "/fNb2QVOiqxmfDhn4r5F1zZRQog1.jpg",
+        "first_air_date": "2016-09-30",
+        "name": "Crisis in Six Scenes",
+        "vote_average": 6.54,
+        "vote_count": 150,
+        "character": "Vic",
+        "credit_id": "5a9596d49251415639001ce7",
+        "episode_count": 6,
+        "first_credit_air_date": "2016-09-30",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/tc7canPSAn2X14hYi6Rl3gZm1o4.jpg",
+        "genre_ids": [
+          80,
+          18
+        ],
+        "id": 549,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Law & Order",
+        "overview": "In cases ripped from the headlines, police investigate serious and often deadly crimes, weighing the evidence and questioning the suspects until someone is taken into custody. The district attorney's office then builds a case to convict the perpetrator by proving the person guilty beyond a reasonable doubt. Working together, these expert teams navigate all sides of the complex criminal justice system to make New York a safer place.",
+        "popularity": 139.0492,
+        "poster_path": "/haJ9eHytVO3H3JooMJG1DiWwDNm.jpg",
+        "first_air_date": "1990-09-13",
+        "name": "Law & Order",
+        "vote_average": 7.4,
+        "vote_count": 657,
+        "character": "Mike",
+        "credit_id": "62a066521e922521e5f1c096",
+        "episode_count": 1,
+        "first_credit_air_date": "1999-11-24",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/ky85K8xOEjBSMJvlGUlw6k9c3fE.jpg",
+        "genre_ids": [
+          35,
+          10767
+        ],
+        "id": 56219,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Drunk History",
+        "overview": "Historical reenactments from A-list talent as told by inebriated storytellers. A unique take on the familiar and less familiar people and events from America’s great past as great moments in history are retold with unforgettable results.",
+        "popularity": 8.3121,
+        "poster_path": "/6zTclFjUEm6aTodjYciYtwzh5tY.jpg",
+        "first_air_date": "2013-07-09",
+        "name": "Drunk History",
+        "vote_average": 6.8,
+        "vote_count": 95,
+        "character": "Vietnam Memorial Head",
+        "credit_id": "5b27f94c0e0a2677710009f3",
+        "episode_count": 1,
+        "first_credit_air_date": "2018-02-27",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": null,
+        "genre_ids": [
+          80
+        ],
+        "id": 206828,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "DTF St. Louis",
+        "overview": "A love triangle among three adults experiencing middle-age malaise  leads to one of them ending up dead.",
+        "popularity": 1.8916,
+        "poster_path": null,
+        "first_air_date": "",
+        "name": "DTF St. Louis",
+        "vote_average": 0,
+        "vote_count": 0,
+        "character": "",
+        "credit_id": "62e0434433a533051fba7344",
+        "episode_count": 1,
+        "first_credit_air_date": null,
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/gMMnf8VRg3Z98WaFmOLr9Jk8pIs.jpg",
+        "genre_ids": [
+          35,
+          10767
+        ],
+        "id": 63770,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Late Show with Stephen Colbert",
+        "overview": "Stephen Colbert brings his signature satire and comedy to The Late Show with Stephen Colbert, the #1 show in late night, where he talks with an eclectic mix of guests about what is new and relevant in the worlds of politics, entertainment, business, music, technology, and more. Featuring bandleader Jon Batiste with his band Stay Human, the Emmy Award-nominated show is broadcast from the historic Ed Sullivan Theater.",
+        "popularity": 46.7005,
+        "poster_path": "/9jkThAGYj2yp8jsS6Nriy5mzKFT.jpg",
+        "first_air_date": "2015-09-08",
+        "name": "The Late Show with Stephen Colbert",
+        "vote_average": 6.2,
+        "vote_count": 334,
+        "character": "Self",
+        "credit_id": "62f74315109dec009c2798db",
+        "episode_count": 1,
+        "first_credit_air_date": "2019-11-15",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/vOKdx9SVqay7uSRc1kwXplJgnRG.jpg",
+        "genre_ids": [
+          10767,
+          99
+        ],
+        "id": 74851,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Beyond Stranger Things",
+        "overview": "Secrets from the \"Stranger Things 2\" universe are revealed as cast and guests discuss the latest episodes with host Jim Rash. Caution: spoilers ahead!",
+        "popularity": 6.7264,
+        "poster_path": "/rHCFO8RJ3Hg6a8KjWAsvAsa38hp.jpg",
+        "first_air_date": "2017-10-27",
+        "name": "Beyond Stranger Things",
+        "vote_average": 7.4,
+        "vote_count": 116,
+        "character": "Self",
+        "credit_id": "5bdba35b0e0a26334500270b",
+        "episode_count": 2,
+        "first_credit_air_date": "2017-10-27",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/qLYumObEHeRHFMC6N3SfCrnBFjp.jpg",
+        "genre_ids": [
+          18
+        ],
+        "id": 4601,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Law & Order: Criminal Intent",
+        "overview": "The third installment of the “Law & Order” franchise takes viewers deep into the minds of its criminals while following the intense psychological approaches the Major Case Squad uses to solve its crimes.",
+        "popularity": 39.3506,
+        "poster_path": "/zgBg8gTCELQg73awE7qAuV06c4Z.jpg",
+        "first_air_date": "2001-09-30",
+        "name": "Law & Order: Criminal Intent",
+        "vote_average": 7.6,
+        "vote_count": 365,
+        "character": "Wesley John Kanderson",
+        "credit_id": "6354afcbf8e982007c5d0cef",
+        "episode_count": 1,
+        "first_credit_air_date": "2004-11-14",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/sSAX59Kf01lBRkBW4UcIL4kIoIm.jpg",
+        "genre_ids": [
+          35,
+          10763
+        ],
+        "id": 1667,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Saturday Night Live",
+        "overview": "A late-night live television sketch comedy and variety show created by Lorne Michaels. The show's comedy sketches, which parody contemporary culture and politics, are performed by a large and varying cast of repertory and newer cast members. Each episode is hosted by a celebrity guest, who usually delivers an opening monologue and performs in sketches with the cast, and features performances by a musical guest.",
+        "popularity": 33.7332,
+        "poster_path": "/s1cZBqbMwAF3w8S3Yo0j5nr2Yuo.jpg",
+        "first_air_date": "1975-10-11",
+        "name": "Saturday Night Live",
+        "vote_average": 7,
+        "vote_count": 477,
+        "character": "Self - Host",
+        "credit_id": "5d81c3c9f6787a002e9d7f8a",
+        "episode_count": 1,
+        "first_credit_air_date": "2019-10-12",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/p0l0zO9VF4HhdiS40mUjbgjdMcb.jpg",
+        "genre_ids": [
+          80,
+          18
+        ],
+        "id": 10457,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Hack",
+        "overview": "When corruption charges strip him of his job, his family and his pride, former cop Mike Olshansky forges a new identity as a Philadelphia cab driver, patrolling the city as a roving vigilante who works with local police.",
+        "popularity": 5.7495,
+        "poster_path": "/75EwfXIG8r6xZjcwg6FZIOmZa7s.jpg",
+        "first_air_date": "2002-09-27",
+        "name": "Hack",
+        "vote_average": 7.65,
+        "vote_count": 10,
+        "character": "Christopher Clark",
+        "credit_id": "63aeafc1c56d2d00f30e741a",
+        "episode_count": 1,
+        "first_credit_air_date": "2003-10-11",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/qI8PwP7R7Fbn78wocvkbFESvjbl.jpg",
+        "genre_ids": [
+          10767
+        ],
+        "id": 102758,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Off Camera with Sam Jones",
+        "overview": "Photographer and director Sam Jones sits down with the myriad professionals of television and movies, and other celebrities (great skateboarders, for example), to discuss their development before fame, their passions beyond their careers, and gives them a space to open up about their insight into their business and their own abilities. Filmed in black and white, with a few deep cushion chairs and sparse set, the show relies on Sam's ability to relate to the guests and their will to speak freely with him.",
+        "popularity": 11.5113,
+        "poster_path": "/wFzCudeLabyjvwh0n5C9rEtCqVy.jpg",
+        "first_air_date": "2014-02-06",
+        "name": "Off Camera with Sam Jones",
+        "vote_average": 4,
+        "vote_count": 4,
+        "character": "Self",
+        "credit_id": "5ea8b459be55b70021e5472b",
+        "episode_count": 1,
+        "first_credit_air_date": "2019-04-08",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/tc7canPSAn2X14hYi6Rl3gZm1o4.jpg",
+        "genre_ids": [
+          80,
+          18
+        ],
+        "id": 549,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Law & Order",
+        "overview": "In cases ripped from the headlines, police investigate serious and often deadly crimes, weighing the evidence and questioning the suspects until someone is taken into custody. The district attorney's office then builds a case to convict the perpetrator by proving the person guilty beyond a reasonable doubt. Working together, these expert teams navigate all sides of the complex criminal justice system to make New York a safer place.",
+        "popularity": 139.0492,
+        "poster_path": "/haJ9eHytVO3H3JooMJG1DiWwDNm.jpg",
+        "first_air_date": "1990-09-13",
+        "name": "Law & Order",
+        "vote_average": 7.4,
+        "vote_count": 657,
+        "character": "Jay Carlin",
+        "credit_id": "64054c36e61e6d00d533acbf",
+        "episode_count": 1,
+        "first_credit_air_date": "2008-03-12",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/oNNdRpSQSdRIaWnSFejhw1qk51K.jpg",
+        "genre_ids": [
+          18
+        ],
+        "id": 15621,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Newsroom",
+        "overview": "A behind-the-scenes look at the people who make a nightly cable-news program. Focusing on a network anchor, his new executive producer, the newsroom staff and their boss, the series tracks their quixotic mission to do the news well in the face of corporate and commercial obstacles-not to mention their own personal entanglements.",
+        "popularity": 12.8345,
+        "poster_path": "/pOC3DmU47X98Sv5vaPnmgjG30eY.jpg",
+        "first_air_date": "2012-06-24",
+        "name": "The Newsroom",
+        "vote_average": 8.078,
+        "vote_count": 680,
+        "character": "Elliot Hirsch",
+        "credit_id": "5f46cf18efca000036bbd10f",
+        "episode_count": 10,
+        "first_credit_air_date": "2012-06-24",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/jvTeRgjFsp66xj8SWxhr7O2J4ud.jpg",
+        "genre_ids": [
+          10751,
+          16,
+          35
+        ],
+        "id": 456,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "The Simpsons",
+        "overview": "Set in Springfield, the average American town, the show focuses on the antics and everyday adventures of the Simpson family; Homer, Marge, Bart, Lisa and Maggie, as well as a virtual cast of thousands. Since the beginning, the series has been a pop culture icon, attracting hundreds of celebrities to guest star. The show has also made name for itself in its fearless satirical take on politics, media and American life in general.",
+        "popularity": 177.7954,
+        "poster_path": "/uWpG7GqfKGQqX4YMAo3nv5OrglV.jpg",
+        "first_air_date": "1989-12-17",
+        "name": "The Simpsons",
+        "vote_average": 8.011,
+        "vote_count": 10527,
+        "character": "Fred Kranepool (voice)",
+        "credit_id": "5f84706ae93e950037124c71",
+        "episode_count": 1,
+        "first_credit_air_date": "2020-09-27",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/lxQMxqao3vs2ehxESrkQU6acU86.jpg",
+        "genre_ids": [
+          10765,
+          16,
+          10759
+        ],
+        "id": 138505,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Marvel Zombies",
+        "overview": "After the Avengers are overtaken by a zombie plague, a desperate group of survivors discover the key to bringing an end to the super-powered undead, racing across a dystopian landscape and risking life and limb to save their world.",
+        "popularity": 10.1077,
+        "poster_path": "/mwKj9ERGFXsWot0nXgQ5yMQf9I7.jpg",
+        "first_air_date": "2025-09-24",
+        "name": "Marvel Zombies",
+        "vote_average": 7.261,
+        "vote_count": 284,
+        "character": "Alexei Shostakov / Red Guardian (voice)",
+        "credit_id": "673716a571ef66978cfb0c86",
+        "episode_count": 4,
+        "first_credit_air_date": "2025-09-24",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/jnzoh5qoxRLFRIQAxnl6D3RStPC.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765
+        ],
+        "id": 91363,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "What If...?",
+        "overview": "Taking inspiration from the comic books of the same name, each episode of this animated anthology series questions, revisits and twists classic Marvel Cinematic moments.",
+        "popularity": 20.8311,
+        "poster_path": "/lztz5XBMG1x6Y5ubz7CxfPFsAcW.jpg",
+        "first_air_date": "2021-08-11",
+        "name": "What If...?",
+        "vote_average": 8.071,
+        "vote_count": 4520,
+        "character": "Alexei Shostakov (voice)",
+        "credit_id": "676805cd919287ef53912a19",
+        "episode_count": 1,
+        "first_credit_air_date": "2024-12-22",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/jnzoh5qoxRLFRIQAxnl6D3RStPC.jpg",
+        "genre_ids": [
+          16,
+          10759,
+          10765
+        ],
+        "id": 91363,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "What If...?",
+        "overview": "Taking inspiration from the comic books of the same name, each episode of this animated anthology series questions, revisits and twists classic Marvel Cinematic moments.",
+        "popularity": 20.8311,
+        "poster_path": "/lztz5XBMG1x6Y5ubz7CxfPFsAcW.jpg",
+        "first_air_date": "2021-08-11",
+        "name": "What If...?",
+        "vote_average": 8.071,
+        "vote_count": 4520,
+        "character": "Alexei Shostakov / Red Guardian (voice)",
+        "credit_id": "676a8930fe3640664364acf5",
+        "episode_count": 1,
+        "first_credit_air_date": "2024-12-24",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/syfmYmITnWPJU3hhaP0ckny5hMN.jpg",
+        "genre_ids": [
+          35,
+          18
+        ],
+        "id": 18779,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Royal Pains",
+        "overview": "A young E.R. doctor who, after being wrongly blamed for a patient's death, moves to the Hamptons and becomes the reluctant \"doctor for hire\" to the rich and famous. When the attractive administrator of the local hospital asks him to treat the town's less fortunate, he finds himself walking the line between doing well for himself and doing good for others.",
+        "popularity": 13.6878,
+        "poster_path": "/4WW26JPHeG5mgrFkgjvv3Qmgcwg.jpg",
+        "first_air_date": "2009-06-04",
+        "name": "Royal Pains",
+        "vote_average": 6.763,
+        "vote_count": 156,
+        "character": "Dan Samuels",
+        "credit_id": "677af984eca85bd50872840d",
+        "episode_count": 1,
+        "first_credit_air_date": "2009-08-06",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/3hOxwqn1P2AY0d20VVtxN2f3Lfh.jpg",
+        "genre_ids": [
+          35,
+          10767
+        ],
+        "id": 6809,
+        "origin_country": [
+          "ES"
+        ],
+        "original_language": "es",
+        "original_name": "El hormiguero",
+        "overview": "El Hormiguero is a Spanish television program with a live audience focusing on comedy, science, and politics running since September 2006. It is hosted and produced by screenwriter Pablo Motos. The show aired on Spain's Cuatro channel from launch until June 2011 and is now broadcast on Antena 3. Recurring guests on the show include Luis Piedrahita, Raquel Martos, Marron & \"The Man in Black\", and puppet ants Trancas and Barrancas. It has proved a ratings success, and has expanded from a weekly 120-minute show to a daily 40-minute show in its third season, which began on September 17, 2007. The show won the Entertainment prize at the 2009 Rose d'Or ceremony.",
+        "popularity": 20.7477,
+        "poster_path": "/tT4hXTYXtZVadi6AZ0rhdVgNo2T.jpg",
+        "first_air_date": "2006-09-24",
+        "name": "El hormiguero",
+        "vote_average": 4.808,
+        "vote_count": 39,
+        "character": "Self - Guest",
+        "credit_id": "67e267df7b7313b5aef051cb",
+        "episode_count": 1,
+        "first_credit_air_date": "2019-03-19",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/55tcKzl0gZ0lR1q7TrVJm0h9lkT.jpg",
+        "genre_ids": [
+          10764,
+          10751
+        ],
+        "id": 2912,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Jeopardy!",
+        "overview": "America's favorite quiz show where contestants are presented with general knowledge clues in the form of answers, and must phrase their responses in question form.",
+        "popularity": 35.1555,
+        "poster_path": "/hfz0IgebqGENG6ZnuqKQKMFk2vy.jpg",
+        "first_air_date": "1984-09-10",
+        "name": "Jeopardy!",
+        "vote_average": 6.9,
+        "vote_count": 150,
+        "character": "Self - Clue Presenter",
+        "credit_id": "690d18a76b90fdef55c04da5",
+        "episode_count": 1,
+        "first_credit_air_date": "2025-10-16",
+        "media_type": "tv"
+      },
+      {
+        "adult": false,
+        "backdrop_path": "/zjJNOVA3SPjhGtGhGN8POG991bg.jpg",
+        "genre_ids": [
+          10767,
+          35
+        ],
+        "id": 1489,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "Jimmy Kimmel Live!",
+        "overview": "Jimmy Kimmel Live! is an American late-night talk show, created and hosted by Jimmy Kimmel and broadcast on ABC.",
+        "popularity": 17.218,
+        "poster_path": "/bGB6bEbG4qL22C1SFupkdAxYC9i.jpg",
+        "first_air_date": "2003-01-26",
+        "name": "Jimmy Kimmel Live!",
+        "vote_average": 5.5,
+        "vote_count": 191,
+        "character": "Self - Guest",
+        "credit_id": "694f0945da04f43c218cdec1",
+        "episode_count": 2,
+        "first_credit_air_date": "2021-06-01",
+        "media_type": "tv"
+      }
+    ],
+    "crew": [
+      {
+        "adult": false,
+        "backdrop_path": "/fWBmMHi7ukR8pYmbBfPERjzdZwS.jpg",
+        "genre_ids": [
+          35
+        ],
+        "id": 612701,
+        "original_language": "en",
+        "original_title": "Frankenstein's Monster's Monster, Frankenstein",
+        "overview": "When actor David Harbour finds lost footage of his father's disastrous televised stage play of a literary classic, he uncovers shocking family secrets.",
+        "popularity": 0.2814,
+        "poster_path": "/aVrXQAk0lIRw123EghPfNlludjU.jpg",
+        "release_date": "2019-07-16",
+        "title": "Frankenstein's Monster's Monster, Frankenstein",
+        "video": false,
+        "vote_average": 5.8,
+        "vote_count": 79,
+        "credit_id": "5dbce0e954f6eb00184faf27",
+        "department": "Production",
+        "job": "Executive Producer",
+        "media_type": "movie"
+      },
+      {
+        "adult": false,
+        "backdrop_path": null,
+        "genre_ids": [
+          80
+        ],
+        "id": 206828,
+        "origin_country": [
+          "US"
+        ],
+        "original_language": "en",
+        "original_name": "DTF St. Louis",
+        "overview": "A love triangle among three adults experiencing middle-age malaise  leads to one of them ending up dead.",
+        "popularity": 1.8916,
+        "poster_path": null,
+        "first_air_date": "",
+        "name": "DTF St. Louis",
+        "vote_average": 0,
+        "vote_count": 0,
+        "credit_id": "62e0439655bc35027f954aa5",
+        "department": "Production",
+        "episode_count": 1,
+        "first_credit_air_date": null,
+        "job": "Executive Producer",
+        "media_type": "tv"
+      }
+    ]
+  },
+  "external_ids": {
+    "freebase_mid": "/m/02rd5rc",
+    "freebase_id": "/en/david_harbour",
+    "imdb_id": "nm1092086",
+    "tvrage_id": 33924,
+    "wikidata_id": "Q391359",
+    "facebook_id": null,
+    "instagram_id": "dkharbour",
+    "tiktok_id": null,
+    "twitter_id": "DavidKHarbour",
+    "youtube_id": null
+  },
+  "images": {
+    "profiles": [
+      {
+        "aspect_ratio": 0.667,
+        "height": 3000,
+        "iso_3166_1": null,
+        "iso_639_1": null,
+        "file_path": "/qMFtMWlYVtFVyBoBhX5IoA5sN5a.jpg",
+        "vote_average": 10,
+        "vote_count": 5,
+        "width": 2000
+      },
+      {
+        "aspect_ratio": 0.667,
+        "height": 3000,
+        "iso_3166_1": null,
+        "iso_639_1": null,
+        "file_path": "/p26mt1tcKLnXDBAnyEmB5DrYORp.jpg",
+        "vote_average": 10,
+        "vote_count": 5,
+        "width": 2000
+      },
+      {
+        "aspect_ratio": 0.667,
+        "height": 1050,
+        "iso_3166_1": null,
+        "iso_639_1": null,
+        "file_path": "/chPekukMF5SNnW6b22NbYPqAStr.jpg",
+        "vote_average": 5.25,
+        "vote_count": 19,
+        "width": 700
+      },
+      {
+        "aspect_ratio": 0.667,
+        "height": 1050,
+        "iso_3166_1": null,
+        "iso_639_1": null,
+        "file_path": "/jkAiAq3tVC1hdmKEs25c61V3N5w.jpg",
+        "vote_average": 3.954,
+        "vote_count": 11,
+        "width": 700
+      },
+      {
+        "aspect_ratio": 0.667,
+        "height": 691,
+        "iso_3166_1": null,
+        "iso_639_1": null,
+        "file_path": "/gVq0ISl3aE9v6EPd6EMVwS5Uh33.jpg",
+        "vote_average": 3.334,
+        "vote_count": 2,
+        "width": 461
+      },
+      {
+        "aspect_ratio": 0.667,
+        "height": 999,
+        "iso_3166_1": null,
+        "iso_639_1": null,
+        "file_path": "/6ZHhqTaC0Y3PPp6MpemAANRSLA5.jpg",
+        "vote_average": 3.334,
+        "vote_count": 1,
+        "width": 666
+      },
+      {
+        "aspect_ratio": 0.666,
+        "height": 965,
+        "iso_3166_1": null,
+        "iso_639_1": null,
+        "file_path": "/dAD17XBv31ZS65ghkhTlUksQwYN.jpg",
+        "vote_average": 3.334,
+        "vote_count": 1,
+        "width": 643
+      },
+      {
+        "aspect_ratio": 0.667,
+        "height": 1500,
+        "iso_3166_1": null,
+        "iso_639_1": null,
+        "file_path": "/ifpCVFGak71eFaiirwqfU3Fp0Dn.jpg",
+        "vote_average": 3.334,
+        "vote_count": 1,
+        "width": 1000
+      },
+      {
+        "aspect_ratio": 0.667,
+        "height": 1189,
+        "iso_3166_1": null,
+        "iso_639_1": null,
+        "file_path": "/uJs65m5RBdnDtvTDIAkmrzs3kM3.jpg",
+        "vote_average": 0,
+        "vote_count": 0,
+        "width": 793
+      }
+    ]
+  }
+}

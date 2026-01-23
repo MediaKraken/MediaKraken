@@ -4,8 +4,10 @@ use mk_lib_network;
 use nonzero_ext::*;
 use ratelimit::Ratelimiter;
 use serde::{Deserialize, Serialize};
+use std::env;
 use std::error::Error;
 use tokio::time::{sleep, Duration};
+use serde_json::json;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -120,6 +122,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 if let Err(sleep) = api_call_limiter.try_wait() {
                     std::thread::sleep(sleep);
                     continue;
+                }
+                println!("debug {}", env::var("DEBUG").unwrap());
+                if env::var("DEBUG").unwrap() == "true"
+                {
+                    println!("TMDB here2");
+                    mk_lib_logging::mk_lib_logging::mk_logging_post_elk(
+                        std::module_path!(),
+                        json!({ "DL Guid": download_data.mm_download_guid, "Status": download_data.mm_download_status, "Provider": "themoviedb", "ID": download_data.mm_download_provider_id }),
+                        )
+                        .await
+                        .unwrap();
                 }
                 mk_lib_metadata::base::metadata_process(
                     &sqlx_pool,

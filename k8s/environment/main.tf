@@ -67,12 +67,21 @@ resource "terraform_data" "pgadmin4" {
   ]
 }
 
+resource "terraform_data" "elastic" {
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/elastic.yml"
+  }
+  depends_on = [
+    terraform_data.pgadmin4
+  ]
+}
+
 # resource "terraform_data" "mediakraken" {
 #   # setup mediakraken
 #   provisioner "local-exec" {
 #     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/mediakraken.yml"
 #   }
 #   depends_on = [
-#     terraform_data.pgadmin4
+#     terraform_data.elastic
 #   ]
 # }

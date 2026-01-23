@@ -37,6 +37,11 @@ spec:
                 secretKeyRef:
                   name: db-password
                   key: password
+            - name: DEBUG
+              valueFrom:
+                secretKeyRef:
+                  name: run-env-type
+                  key: debug
           image: mediakraken/mkhardwarescanner:dev
           imagePullPolicy: Always
           name: mkstack-hardwarescanner

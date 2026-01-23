@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_database"
-version = "0.0.87"
+version = "0.0.98"
 edition = "2024"
 
 [profile.release]
@@ -10,7 +10,8 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_common = { version = "0.0.55", registry = "kellnr" }
+mk_lib_common = { version = "0.0.66", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.67", registry = "kellnr" }
 
 anyhow = "1.0.99"
 async-trait = "0.1.89"
@@ -22,7 +23,7 @@ axum_session_auth = { version = "0.17.0", default-features = false, features = [
     "advanced",
     "key-store",
 ] }
-chrono = { version = "0.4.42", features = ["serde"] }
+chrono = { version = "0.4.43", features = ["serde"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
 sqlx = { version = "0.8.6", default-features = false, features = [

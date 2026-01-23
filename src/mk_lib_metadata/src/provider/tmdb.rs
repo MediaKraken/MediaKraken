@@ -7,6 +7,7 @@ use mk_lib_network::mk_lib_network;
 use serde_json::json;
 use sqlx::types::Uuid;
 use torrent_name_parser::Metadata;
+use std::env;
 
 pub async fn provider_tmdb_movie_fetch(
     sqlx_pool: &sqlx::PgPool,
@@ -61,9 +62,27 @@ pub async fn provider_tmdb_person_fetch(
     let result_json = provider_tmdb_person_fetch_by_id(tmdb_id, tmdb_api_key)
         .await
         .unwrap();
+    if env::var("DEBUG").unwrap() == "true"
+    {
+        mk_lib_logging::mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Type": "Person", "Result": result_json }),
+            )
+            .await
+            .unwrap();
+    }
     if result_json.get("success").is_some() && result_json["success"] == false {
         println!("Skip Person: {}", tmdb_id);
         return;
+    }
+    if env::var("DEBUG").unwrap() == "true"
+    {
+        mk_lib_logging::mk_lib_logging::mk_logging_post_elk(
+            std::module_path!(),
+            json!({ "Type": "Person After" }),
+            )
+            .await
+            .unwrap();
     }
     let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert(
@@ -245,7 +264,7 @@ pub async fn provider_tmdb_meta_info_build(
     let mut poster_file_path = String::new();
     if result_json.get("poster_path").is_some() && !result_json["poster_path"].is_null() {
         image_file_path += &result_json["poster_path"].as_str().unwrap().to_string();
-        println!("ifilepath {}", image_file_path);
+        //println!("ifilepath {}", image_file_path);
         let _result = mk_lib_network::mk_download_file_from_url(
             format!(
                 "https://image.tmdb.org/t/p/original{}",
@@ -263,7 +282,7 @@ pub async fn provider_tmdb_meta_info_build(
     let mut backdrop_file_path = String::new();
     if result_json.get("backdrop_path").is_some() && !result_json["backdrop_path"].is_null() {
         image_file_path += &result_json["backdrop_path"].as_str().unwrap().to_string();
-        println!("iifilepath {}", image_file_path);
+        //println!("iifilepath {}", image_file_path);
         let _result = mk_lib_network::mk_download_file_from_url(
             format!(
                 "https://image.tmdb.org/t/p/original{}",

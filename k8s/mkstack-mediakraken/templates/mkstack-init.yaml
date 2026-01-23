@@ -42,6 +42,11 @@ spec:
                 secretKeyRef:
                   name: db-password
                   key: password
+            - name: DEBUG
+              valueFrom:
+                secretKeyRef:
+                  name: run-env-type
+                  key: debug
           image: mediakraken/mkinit:dev
           imagePullPolicy: Always
           name: mkstack-init

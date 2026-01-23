@@ -40,6 +40,11 @@ spec:
                 secretKeyRef:
                   name: db-password
                   key: password
+            - name: DEBUG
+              valueFrom:
+                secretKeyRef:
+                  name: run-env-type
+                  key: debug
           image: mediakraken/mkschedulesdirectupdate:dev
           imagePullPolicy: Always
           name: mkstack-schedulesdirectupdate

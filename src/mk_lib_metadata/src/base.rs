@@ -3,6 +3,8 @@ use mk_lib_common::mk_lib_common_enum_media_type;
 use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 use std::error::Error;
 use torrent_name_parser::Metadata;
+use std::env;
+use serde_json::json;
 
 #[path = "adult.rs"]
 mod metadata_adult;
@@ -339,6 +341,15 @@ pub async fn metadata_fetch(
     } else if provider_name == "themoviedb" {
         if download_data.mm_download_que_type == mk_lib_common_enum_media_type::DLMediaType::PERSON
         {
+            if env::var("DEBUG").unwrap() == "true"
+            {
+                mk_lib_logging::mk_lib_logging::mk_logging_post_elk(
+                    std::module_path!(),
+                    json!({ "Type": "Person", "DL Guid": download_data.mm_download_guid, "Status": download_data.mm_download_status, "Provider": "themoviedb", "ID": download_data.mm_download_provider_id }),
+                    )
+                    .await
+                    .unwrap();
+            }
             provider_tmdb::provider_tmdb_person_fetch(
                 sqlx_pool,
                 download_data.mm_download_provider_id.unwrap(),
