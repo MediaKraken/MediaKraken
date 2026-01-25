@@ -64,10 +64,8 @@ pub async fn provider_tmdb_person_fetch(
         .unwrap();
     if env::var("DEBUG").unwrap() == "true"
     {
-        mk_lib_logging::mk_lib_logging_elk::mk_logging_post_elk_lib(
-            "INFO",
-            std::module_path!(),
-            json!({ "Type": "Person", "Result": result_json }),
+        mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
+            json!({ "Type": "Person", "Module": std::module_path!(), "Result": result_json }),
             )
             .await
             .unwrap();
@@ -78,10 +76,8 @@ pub async fn provider_tmdb_person_fetch(
     }
     if env::var("DEBUG").unwrap() == "true"
     {
-        mk_lib_logging::mk_lib_logging_elk::mk_logging_post_elk_lib(
-            "INFO",
-            std::module_path!(),
-            json!({ "Type": "Person After" }),
+        mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
+            json!({ "Type": "Person After", "Module": std::module_path!() }),
             )
             .await
             .unwrap();
@@ -271,6 +267,20 @@ pub async fn provider_tmdb_meta_info_build(
             format!(
                 "https://image.tmdb.org/t/p/original{}",
                 &result_json["poster_path"].as_str().unwrap().to_string()
+            ),
+            &image_file_path,
+        )
+        .await;
+        poster_file_path = image_file_path;
+    }
+    else if result_json["images"]["profiles"][0].get("file_path").is_some() 
+            && !result_json["images"]["profiles"][0]["file_path"].is_null() {
+        image_file_path += &result_json["images"]["profiles"][0]["file_path"].as_str().unwrap().to_string();
+        //println!("ifilepath {}", image_file_path);
+        let _result = mk_lib_network::mk_download_file_from_url(
+            format!(
+                "https://image.tmdb.org/t/p/original{}",
+                &result_json["images"]["profiles"][0]["file_path"].as_str().unwrap().to_string()
             ),
             &image_file_path,
         )

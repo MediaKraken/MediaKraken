@@ -1,16 +1,16 @@
 # from worker node
-curl -X POST "http://loki-gateway.monitoring.svc.mkcluster.local/loki/api/v1/push" \
+curl -X POST "http://loki-headless.monitoring.svc.mkcluster.local:3100/loki/api/v1/push" \
   -H "Content-Type: application/json" \
   -d '{
     "streams": [{
-      "stream": {"job": "storage-test"},
+      "stream": {"mediakraken": "storage-test"},
       "values": [["'"$(date +%s)"'000000000", "storage test message"]]
     }]
   }'
 
 # Query the log
-curl -G "http://loki-gateway.monitoring.svc.mkcluster.local/loki/api/v1/query_range" \
-  --data-urlencode 'query={job="storage-test"}' \
+curl -G "http://loki-headless.monitoring.svc.mkcluster.local:3100/loki/api/v1/query_range" \
+  --data-urlencode 'query={mediakraken="storage-test"}' \
   --data-urlencode 'limit=10'
 
 

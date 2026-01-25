@@ -1,10 +1,10 @@
 use crate::guessit;
 use mk_lib_common::mk_lib_common_enum_media_type;
 use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use serde_json::json;
+use std::env;
 use std::error::Error;
 use torrent_name_parser::Metadata;
-use std::env;
-use serde_json::json;
 
 #[path = "adult.rs"]
 mod metadata_adult;
@@ -247,10 +247,13 @@ pub async fn metadata_search(
             == mk_lib_common_enum_media_type::DLMediaType::PERSON
         {
             if metadata_uuid == uuid::Uuid::nil() {
-                metadata_uuid =
-                    metadata_person::metadata_person_lookup(&sqlx_pool, &download_data, guessit_data)
-                        .await
-                        .unwrap();
+                metadata_uuid = metadata_person::metadata_person_lookup(
+                    &sqlx_pool,
+                    &download_data,
+                    guessit_data,
+                )
+                .await
+                .unwrap();
                 // (metadata_uuid, match_result) = metadata_person.metadata_person_lookup(&sqlx_pool, download_data);
                 // // if match_result is an int, that means the lookup found a match but isn"t in db
                 // if metadata_uuid == uuid::Uuid::nil() && type(match_result) != int {
@@ -341,12 +344,9 @@ pub async fn metadata_fetch(
     } else if provider_name == "themoviedb" {
         if download_data.mm_download_que_type == mk_lib_common_enum_media_type::DLMediaType::PERSON
         {
-            if env::var("DEBUG").unwrap() == "true"
-            {
-                mk_lib_logging::mk_lib_logging_elk::mk_logging_post_elk_lib(
-                    "INFO",
-                    std::module_path!(),
-                    json!({ "Type": "Person", "DL Guid": download_data.mm_download_guid, "Status": download_data.mm_download_status, "Provider": "themoviedb", "ID": download_data.mm_download_provider_id }),
+            if env::var("DEBUG").unwrap() == "true" {
+                mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
+                    json!({ "Type": "Person", "Module": std::module_path!(), "DL Guid": download_data.mm_download_guid, "Status": download_data.mm_download_status, "Provider": "themoviedb", "ID": download_data.mm_download_provider_id }),
                     )
                     .await
                     .unwrap();

@@ -3292,11 +3292,11 @@ ALTER TABLE ONLY public.mm_user_queue
 
 --
 -- TOC entry 3278 (class 2606 OID 410781)
--- Name: mm_metadata_person mmp_id_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: mm_metadata_person mm_metadata_person_id_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.mm_metadata_person
-    ADD CONSTRAINT mmp_id_pk PRIMARY KEY (mm_metadata_person_guid);
+    ADD CONSTRAINT mm_metadata_person_id_pk PRIMARY KEY (mm_metadata_person_guid);
 
 
 --
