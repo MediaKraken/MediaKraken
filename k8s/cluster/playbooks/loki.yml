@@ -1,0 +1,30 @@
+---
+- name : Setup loki on cluster
+  hosts: mkcontrol1
+  tasks:
+    - name: copying file
+      copy:
+        src: ../config/loki_values.yml
+        dest: ~/loki_values.yml
+
+    - name: Add repo
+      shell: helm repo add grafana https://grafana.github.io/helm-charts
+
+    - name: Install loki into monitoring namespace
+      shell: helm install loki grafana/loki \
+        --namespace monitoring \
+        --create-namespace \
+        --set global.dnsService="coredns" \
+        --set global.dnsNamespace="kube-system" \
+        --set global.clusterDomain="mkcluster.local" \
+        -f ~/loki_values.yml
+
+    # - name: copying file
+    #   copy:
+    #     src: ../config/loki.yml
+    #     dest: ~/loki.yml
+
+    # - name: Setup loki config
+    #   shell: kubectl apply -f ~/loki.yml
+
+    # helm uninstall loki --namespace monitoring

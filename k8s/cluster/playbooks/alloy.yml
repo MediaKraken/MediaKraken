@@ -1,0 +1,21 @@
+---
+- name : Setup alloy on cluster
+  hosts: mkcontrol1
+  tasks:
+    - name: Add repo
+      shell: helm repo add grafana https://grafana.github.io/helm-charts
+
+    - name: Install alloy in monitoring
+      shell: helm install alloy grafana/alloy \
+        --namespace monitoring \
+        --set controller.type=daemonset \
+        --set alloy.configMap.name=alloy-config \
+        --set alloy.configMap.key=config.alloy
+
+    # - name: copying file
+    #   copy:
+    #     src: ../config/alloy.yml
+    #     dest: ~/alloy.yml
+
+    # - name: Setup alloy config
+    #   shell: kubectl apply -f ~/alloy.yml

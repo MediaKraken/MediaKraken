@@ -127,7 +127,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 if env::var("DEBUG").unwrap() == "true"
                 {
                     println!("TMDB here2");
-                    mk_lib_logging::mk_lib_logging::mk_logging_post_elk(
+                    mk_lib_logging::mk_lib_logging_elk::mk_logging_post_elk_lib(
+                        "INFO",
                         std::module_path!(),
                         json!({ "DL Guid": download_data.mm_download_guid, "Status": download_data.mm_download_status, "Provider": "themoviedb", "ID": download_data.mm_download_provider_id }),
                         )

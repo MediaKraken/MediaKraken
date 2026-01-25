@@ -4,10 +4,10 @@ use reqwest_middleware::ClientBuilder;
 use reqwest_retry::{RetryTransientMiddleware, policies::ExponentialBackoff};
 use tokio::time::Duration;
 
-pub async fn mk_logging_post_elk(
+pub async fn mk_logging_post_loki(
     message_type: &str,
     message_text: serde_json::Value,
-) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+) -> Result<(), Box<dyn std::error::Error>> {
     let utc: DateTime<Utc> = Utc::now();
     let data = serde_json::json!({"@timestamp": utc.format("%Y-%m-%dT%H:%M:%S.%f").to_string(),
         "message": message_text, "type": message_type, "user": {"id": "mediakraken"}});
@@ -15,23 +15,12 @@ pub async fn mk_logging_post_elk(
     let client = ClientBuilder::new(reqwest::Client::new())
         .with(RetryTransientMiddleware::new_with_policy(retry_policy))
         .build();
-    // the internal url for below if health checks/etc
-    let echo_json: serde_json::Value = client
-        .post(format!(
-            "http://elasticsearch-es-http.elastic-stack.svc.mkcluster.local:9200/{}/_doc",
-            std::env::current_exe()
-                .expect("Can't get the exec path")
-                .file_name()
-                .expect("Can't get the exec name")
-                .to_string_lossy()
-                .into_owned(),
-        ))
+    let response = client
+        .post("http://loki-gateway.monitoring.svc.mkcluster.local/loki/api/v1/push")
         .timeout(Duration::from_secs(30))
         .header("Content-Type", "application/json")
         .json(&data)
         .send()
-        .await?
-        .json()
         .await?;
-    Ok(echo_json)
+    Ok(())
 }

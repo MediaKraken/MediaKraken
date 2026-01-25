@@ -16,12 +16,12 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_common = { version = "0.0.66", registry = "kellnr" }
-mk_lib_database = { version = "0.0.98", registry = "kellnr" }
-mk_lib_file = { version = "0.0.75", registry = "kellnr", features=["smb"] }
+mk_lib_common = { version = "0.0.81", registry = "kellnr" }
+mk_lib_database = { version = "0.0.113", registry = "kellnr" }
+mk_lib_file = { version = "0.0.90", registry = "kellnr", features=["smb"] }
    # features=["nfs", "smb"] }
-mk_lib_logging = { version = "0.0.67", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.70", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.82", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.85", registry = "kellnr" }
 
 chrono = { version = "0.4.43", features = ["serde"] }
 fancy-regex = "0.14.0"

@@ -141,3 +141,21 @@ resource "terraform_data" "k8sdashboard" {
     terraform_data.monitoring
   ]
 }
+
+resource "terraform_data" "loki" {
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/loki.yml"
+  }
+  depends_on = [
+    terraform_data.k8sdashboard
+  ]
+}
+
+resource "terraform_data" "alloy" {
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/alloy.yml"
+  }
+  depends_on = [
+    terraform_data.loki
+  ]
+}

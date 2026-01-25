@@ -64,7 +64,8 @@ pub async fn provider_tmdb_person_fetch(
         .unwrap();
     if env::var("DEBUG").unwrap() == "true"
     {
-        mk_lib_logging::mk_lib_logging::mk_logging_post_elk(
+        mk_lib_logging::mk_lib_logging_elk::mk_logging_post_elk_lib(
+            "INFO",
             std::module_path!(),
             json!({ "Type": "Person", "Result": result_json }),
             )
@@ -77,7 +78,8 @@ pub async fn provider_tmdb_person_fetch(
     }
     if env::var("DEBUG").unwrap() == "true"
     {
-        mk_lib_logging::mk_lib_logging::mk_logging_post_elk(
+        mk_lib_logging::mk_lib_logging_elk::mk_logging_post_elk_lib(
+            "INFO",
             std::module_path!(),
             json!({ "Type": "Person After" }),
             )
