@@ -145,6 +145,22 @@ spec:
     inProgress: false
     reusePVC: false
 ---
+apiVersion: postgresql.cnpg.io/v1
+kind: Pooler
+metadata:
+  name: pgcluster-with-metrics-pgbouncer
+  namespace: cnpg-system
+spec:
+  cluster:
+    name: pgcluster-with-metrics
+  instances: 2
+  type: rw  # rw | ro
+  pgbouncer:
+    poolMode: session # session | transaction | statement
+    parameters:
+      max_client_conn: "5000"
+      default_pool_size: "90"
+---
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
