@@ -26,6 +26,7 @@ use axum_session_sqlx::SessionPgPool;
 use hyper::StatusCode;
 use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
 use mk_lib_database;
+use mk_lib_logging;
 use redis_pool::{RedisPool, SingleRedisPool};
 use ring::digest;
 use serde_json::json;
@@ -56,6 +57,7 @@ pub mod admin {
     pub mod bp_hardware;
     pub mod bp_home;
     pub mod bp_library;
+    pub mod bp_logging;
     pub mod bp_reports;
     pub mod bp_settings;
     pub mod bp_torrent;
@@ -203,6 +205,7 @@ async fn main() {
         )
         .route_with_tsr("/admin/hardware", get(admin::bp_hardware::admin_hardware))
         .route_with_tsr("/admin/home", get(admin::bp_home::admin_home))
+        .route_with_tsr("/admin/logging", get(admin::bp_logging::admin_logging))
         .route_with_tsr("/admin/library", get(admin::bp_library::admin_library))
         .route_with_tsr(
             "/admin/library_media_scan",

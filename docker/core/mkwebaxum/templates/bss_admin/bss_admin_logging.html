@@ -1,0 +1,65 @@
+{% block content %}
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>MediaKraken - Logging</title>
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=FontName">
+    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/static/css/styles.min.css">
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+        {% include "bss_admin/bss_admin_include_menu.html" %}
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content">
+                <div class="container-fluid">
+                    <fieldset>
+                        <legend><strong>View MediaKraken Logs</strong><br></legend>
+                        <div>
+                            {% if template_data_exists %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Log Time</th>
+                                            <th>Log Label</th>
+                                            <th>Log Line</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row_data in template_data %}
+                                        <tr>
+                                            <td>{{ loop.index }}</td>
+                                            <td>{{ row_data.timestamp_ns }}</td>
+                                            <td>{{ row_data.labels }}</td>
+                                            <td>{{ row_data.line }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <p id="general_text">No MediaKraken logs found.</p>
+                            {% endif %}
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            {% include "bss_public/bss_public_footer.html" %}
+        </div>
+    </div>
+    <script src="/static/js/jquery.tmpl.min.js"></script>
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/js/base_webapp_update.js"></script>
+    <script src="/static/js/base_webapp_run.js"></script>
+    <script src="/static/js/jquery-easing.min.js"></script>
+    <script src="/static/js/script.min.js"></script>
+</body>
+
+{% endblock %}

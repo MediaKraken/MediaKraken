@@ -15,8 +15,7 @@
 
 {% macro input(type, label, name, value="") %}
 <label for="{{ name }}">{{ label }}</label>
-<input type="{{ type }}" name="{{ name }}" id="{{ name }}" value="{{ self::value_for(name=name) }}" {% if name in errors
-    %} class="error" {% endif %} />
+<input type="{{ type }}" name="{{ name }}" id="{{ name }}" value="{{ self::value_for(name=name) }}" {% if name in errors %} class="error" {% endif %} />
 {{ self::errors_for(name=name) }}
 {% endmacro input %}
 
