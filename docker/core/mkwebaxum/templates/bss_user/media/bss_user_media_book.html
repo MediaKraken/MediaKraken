@@ -1,14 +1,12 @@
-{% block content %}
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>MediaKraken</title>
-    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=FontName">
+    <link rel="stylesheet" href="/static/css/base_webapp.css">
     <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
-    <link rel="stylesheet" href="/static/css/styles.min.css">
+
     <link rel="stylesheet" href="/static/css/base_webapp_layout.css">
     <link rel="stylesheet" href="/static/contextmenu/jquery.contextMenu.min.css">
 </head>
@@ -99,11 +97,9 @@
         </div>
     </div>
     {% include "bss_public/bss_public_footer.html" %}
-    <script src="/static/js/jquery.min.js"></script>
-    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/static/js/jquery-easing.min.js"></script>
-    <script src="/static/js/script.min.js"></script>
-    <script src="/static/contextmenu/jquery.contextMenu.min.js"></script>
-    <script src="/static/js/base_webapp.js"></script>
+    <script src="/static/js/jquery.min.js" defer></script>
+
+    <script src="/static/contextmenu/jquery.contextMenu.min.js" defer></script>
+    <script src="/static/js/base_webapp.js" defer></script>
 </body>
-{% endblock %}
+</html>

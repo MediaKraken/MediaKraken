@@ -16,19 +16,19 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_common = { version = "0.0.94", registry = "kellnr" }
-mk_lib_database = { version = "0.0.126", registry = "kellnr" }
-mk_lib_file = { version = "0.0.103", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.95", registry = "kellnr" }
-mk_lib_metadata = { version = "0.0.106", registry = "kellnr" }
-mk_lib_network = { version = "0.0.95", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.98", registry = "kellnr" }
+mk_lib_common = { version = "0.0.96", registry = "kellnr" }
+mk_lib_database = { version = "0.0.128", registry = "kellnr" }
+mk_lib_file = { version = "0.0.105", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.97", registry = "kellnr" }
+mk_lib_metadata = { version = "0.0.108", registry = "kellnr" }
+mk_lib_network = { version = "0.0.97", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.100", registry = "kellnr" }
 
-askama = "0.15.1"
+askama = "0.15.4"
 askama_axum = "0.4.0"
 async-trait = "0.1.89"
 axum = { version = "0.8.8", features = ["form", "http2", "json", "ws"] }
-axum-client-ip = "1.1.3"
+axum-client-ip = "1.3.1"
 axum_csrf = "0.11.0"
 axum-extra = { version = "0.12.5", features = ["routing"]}
 axum-flash = { git = "https://github.com/aumetra/axum-flash", rev = "0832703" }
@@ -51,18 +51,18 @@ hyper = { version = "1.8.1", features = ["full"] }
 hyper-util = { version = "0.1.19", features = ["client-legacy"] }
 ipnetwork = "0.21.1"
 lazy_static = "1.5.0"
-libc = "0.2.178"
+libc = "0.2.180"
 num-format = { version = "0.4.4", features = ["with-system-locale"] }
 paginator = "0.2.6"
-redis_pool = "0.9.0"
-redis = { version = "0.32.4" }
-reqwest = { version = "0.12.28", default-features = false, features = [
+redis_pool = "0.10.0"
+redis = { version = "1.0.3" }
+reqwest = { version = "0.13.1", default-features = false, features = [
     "json",
     "native-tls",
 ] }
 ring = "0.17.14"
 serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.148"
+serde_json = "1.0.149"
 sqlx = { version = "0.8.6", features = [
     "chrono",
     "ipnetwork",
@@ -74,11 +74,11 @@ sqlx = { version = "0.8.6", features = [
 stdext = "0.3.3"
 sys-info = "0.9.1"
 tokio = { version = "1.49.0", features = ["full"] }
-tower = { version = "0.5.2", features = ["retry", "timeout", "util"] }
+tower = { version = "0.5.3", features = ["retry", "timeout", "util"] }
 tower-http = { version = "0.6.8", features = ["fs"] }
 tower-sessions = "0.14.0"
 transmission-rpc = "0.5.0"
-uuid = { version = "1.19.0", features = ["serde", "v4", "v7"] }
+uuid = { version = "1.20.0", features = ["serde", "v4", "v7"] }
 validator = { version = "0.20.0", features = ["derive"] }
 
 

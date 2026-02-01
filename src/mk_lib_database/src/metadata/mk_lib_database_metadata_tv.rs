@@ -21,6 +21,7 @@ pub async fn mk_lib_database_metadata_exists_tv(
 pub struct DBMetaTVShowList {
     pub mm_metadata_tvshow_guid: uuid::Uuid,
     pub mm_metadata_tvshow_name: String,
+    pub mm_metadata_tvshow_name_alt: String,
     pub air_date: serde_json::Value,
     pub image_json: serde_json::Value,
 }
@@ -37,6 +38,7 @@ pub async fn mk_lib_database_metadata_tv_read(
         select_query = sqlx::query(
             "select mm_metadata_tvshow_guid, \
             mm_metadata_tvshow_name, \
+            mm_metadata_tvshow_name_alt, \
             mm_metadata_tvshow_json->'first_air_date' as air_date, \
             mm_metadata_tvshow_localimage_json->'Poster' as image_json \
             from mm_metadata_tvshow \
@@ -52,6 +54,7 @@ pub async fn mk_lib_database_metadata_tv_read(
         select_query = sqlx::query(
             "select mm_metadata_tvshow_guid, \
             mm_metadata_tvshow_name, \
+            mm_metadata_tvshow_name_alt, \
             mm_metadata_tvshow_json->'first_air_date' as air_date, \
             mm_metadata_tvshow_localimage_json->'Poster' as image_json \
             from mm_metadata_tvshow \
@@ -66,6 +69,7 @@ pub async fn mk_lib_database_metadata_tv_read(
         .map(|row: PgRow| DBMetaTVShowList {
             mm_metadata_tvshow_guid: row.get("mm_metadata_tvshow_guid"),
             mm_metadata_tvshow_name: row.get("mm_metadata_tvshow_name"),
+            mm_metadata_tvshow_name_alt: row.get("mm_metadata_tvshow_name_alt"),
             air_date: row.get("air_date"),
             image_json: row.get("image_json"),
         })

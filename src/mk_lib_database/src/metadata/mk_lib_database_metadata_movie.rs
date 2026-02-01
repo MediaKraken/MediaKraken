@@ -21,6 +21,7 @@ pub async fn mk_lib_database_metadata_exists_movie(
 pub struct DBMetaMovieList {
     pub mm_metadata_guid: uuid::Uuid,
     pub mm_metadata_name: String,
+    pub mm_metadata_movie_name_alt: String,
     pub mm_date: String, // DateTime<Utc>,
     pub mm_poster: String,
     pub mm_metadata_user_json: Option<serde_json::Value>,
@@ -36,6 +37,7 @@ pub async fn mk_lib_database_metadata_movie_read(
     if search_value != "" {
         select_query = sqlx::query(
             "select mm_metadata_movie_guid, mm_metadata_movie_name, \
+             mm_metadata_movie_name_alt, \
              mm_metadata_movie_json->>'release_date' as mm_date, \
              mm_metadata_movie_localimage_json->>'Poster' as mm_poster, \
              mm_metadata_movie_user_json \
@@ -51,6 +53,7 @@ pub async fn mk_lib_database_metadata_movie_read(
     } else {
         select_query = sqlx::query(
             "select mm_metadata_movie_guid, mm_metadata_movie_name, \
+            mm_metadata_movie_name_alt, \
             mm_metadata_movie_json->>'release_date' as mm_date, \
             mm_metadata_movie_localimage_json->>'Poster' as mm_poster, \
             mm_metadata_movie_user_json \
@@ -65,6 +68,7 @@ pub async fn mk_lib_database_metadata_movie_read(
         .map(|row: PgRow| DBMetaMovieList {
             mm_metadata_guid: row.get("mm_metadata_movie_guid"),
             mm_metadata_name: row.get("mm_metadata_movie_name"),
+            mm_metadata_movie_name_alt: row.get("mm_metadata_movie_name_alt"),
             mm_date: row.get("mm_date"),
             mm_poster: row.get("mm_poster"),
             mm_metadata_user_json: row.get("mm_metadata_movie_user_json"),

@@ -1,16 +1,15 @@
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>MediaKraken - Report Known Media</title>
-    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=FontName">
+    <link rel="stylesheet" href="/static/css/base_webapp.css">
     <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
-    <link rel="stylesheet" href="/static/css/styles.min.css">
 </head>
 
 <body id="page-top">
-    <div id="wrapper">
+    <div class="flex min-h-screen">
         {% include "bss_admin/bss_admin_include_menu.html" %}
         <div class="d-flex flex-column" id="content-wrapper">
             <div id="content">
@@ -53,9 +52,6 @@
         </div>
     </div><div>
     <script src="/static/js/jquery.tmpl.min.js"></script>
-    <script src="/static/js/jquery.min.js"></script>
-    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/static/js/jquery-easing.min.js"></script>
-    <script src="/static/js/script.min.js"></script>
+    <script src="/static/js/jquery.min.js" defer></script>
 </body>
-{% endblock %}
+</html>

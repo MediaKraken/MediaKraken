@@ -1,58 +1,84 @@
-{% block content %}
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>MediaKraken - Login</title>
-    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=FontName">
-    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
-    <link rel="stylesheet" href="/static/css/styles.min.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediaKraken – Login</title>
+
+  <link rel="stylesheet" href="/static/css/base_webapp.css">
+  <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
 </head>
 
-<body class="bg-gradient-primary">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-9 col-lg-12 col-xl-10">
-                <div class="card shadow-lg o-hidden border-0 my-5">
-                    <div class="card-body p-0">
-                        <div class="row">
-                            <div class="col-lg-6 d-none d-lg-flex">
-                                <div class="flex-grow-1 bg-login-image"
-                                    style="background-image: url(&quot;/static/image/K3.png&quot;);"></div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="p-5">
-                                    <div class="text-center">
-                                        <h4 class="text-dark mb-4">Welcome Back!</h4>
-                                    </div>
-                                    <form action="/public/login" class="user" method="post">
-                                        <div class="form-group">
-                                            <input type="text" class="form-control" name="username" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <input type="password" class="form-control" name="password" required>
-                                        </div>
-                                        <button class="btn btn-primary btn-block text-white btn-user"
-                                            type="submit">Login</button>
-                                    </form>
-                                    <div class="text-center"><a class="small" href="/public/forgot">Forgot Password?</a>
-                                    </div>
-                                    <div class="text-center"><a class="small" href="/public/register">Create an
-                                            Account!</a></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<body class="min-h-screen bg-gradient-to-br from-indigo-600 to-purple-700 flex flex-col">
+
+  <!-- Centered login container -->
+  <main class="flex-1 flex items-center justify-center px-4">
+    <div class="w-full max-w-5xl bg-white rounded-xl shadow-2xl overflow-hidden">
+
+      <div class="grid grid-cols-1 lg:grid-cols-2">
+
+        <!-- Left image (hidden on small screens) -->
+        <div
+          class="hidden lg:block bg-cover bg-center"
+          style="background-image: url('/static/image/K3.png');">
         </div>
+
+        <!-- Login form -->
+        <div class="p-8 md:p-12">
+          <div class="text-center mb-6">
+            <h4 class="text-2xl font-semibold text-gray-800">
+              Welcome Back!
+            </h4>
+          </div>
+
+          <form action="/public/login" method="post" class="space-y-4">
+
+            <input
+              type="text"
+              name="username"
+              required
+              placeholder="Username"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2
+                     focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+
+            <input
+              type="password"
+              name="password"
+              required
+              placeholder="Password"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2
+                     focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+
+            <button
+              type="submit"
+              class="w-full bg-indigo-600 hover:bg-indigo-700
+                     text-white font-semibold py-2 rounded-lg
+                     transition">
+              Login
+            </button>
+
+          </form>
+
+          <div class="mt-6 space-y-2 text-center text-sm">
+            <a href="/public/forgot" class="text-indigo-600 hover:underline">
+              Forgot Password?
+            </a>
+            <div>
+              <a href="/public/register" class="text-indigo-600 hover:underline">
+                Create an Account!
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
     </div>
-    {% include "bss_public/bss_public_footer.html" %}
-    <script src="/static/js/jquery.min.js"></script>
-    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/static/js/jquery-easing.min.js"></script>
-    <script src="/static/js/script.min.js"></script>
+  </main>
+
+  {% include "bss_public/bss_public_footer.html" %}
+
+  <script src="/static/js/jquery.min.js" defer></script>
 </body>
-{% endblock %}
+</html>

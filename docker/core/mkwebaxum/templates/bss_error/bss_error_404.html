@@ -1,30 +1,40 @@
-{% block content %}
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>MediaKraken - 404</title>
-    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=FontName">
-    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
-    <link rel="stylesheet" href="/static/css/styles.min.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediaKraken – 404</title>
+
+  <link rel="stylesheet" href="/static/css/base_webapp.css">
+  <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
 </head>
 
-<body>
-    {% include "bss_user/bss_user_include_menu.html" %}
-    <div>
-        <div class="jumbotron">
-            <h1 class="text-center">404 - File not found</h1>
-            <p class="text-center"><img
-                    src="/static/image/errors/worker-of-construction-working-with-a-shovel-beside-material-pile.png"
-                    loading="lazy"></p>
-        </div>
+<body class="min-h-screen flex flex-col bg-gray-100">
+
+  {% include "bss_user/bss_user_include_menu.html" %}
+
+  <!-- Main content -->
+  <main class="flex-1 flex items-center justify-center px-4">
+    <div class="bg-white rounded-xl shadow-lg max-w-xl w-full p-8 text-center">
+
+      <h1 class="text-3xl font-bold text-gray-800 mb-4">
+        404 – File not found
+      </h1>
+
+      <div class="flex justify-center">
+        <img
+          src="/static/image/errors/worker-of-construction-working-with-a-shovel-beside-material-pile.png"
+          alt="Not Found"
+          loading="lazy"
+          class="max-w-xs"
+        >
+      </div>
+
     </div>
-    {% include "bss_public/bss_public_footer.html" %}
-    <script src="/static/js/jquery.min.js"></script>
-    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/static/js/jquery-easing.min.js"></script>
-    <script src="/static/js/script.min.js"></script>
-</body>
-{% endblock %}
+  </main>
+
+  {% include "bss_public/bss_public_footer.html" %}
+
+  <script src="/static/js/jquery.min.js" defer></script>
+</body
+</html>

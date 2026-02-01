@@ -11,9 +11,9 @@ payload
 mktmdbnetfetchbulk
 content_type    application/json
 {
-    "Data": "01_20_2026",
+    "Data": "01_26_2026",
     "Type": "Bulk",
-    "Limit": 5
+    "Limit": 5000
 }
 
 mksharescanner
