@@ -8,6 +8,7 @@ use serde_json::json;
 use serde_json::Value;
 use std::error::Error;
 use tokio::sync::Notify;
+use chrono::Local;
 
 #[derive(Serialize, Deserialize)]
 struct MetadataMovie {
@@ -44,6 +45,27 @@ struct MetadataGeneral {
     adult: Option<bool>,
 }
 
+pub async fn find_date_to_use(url_template: &str) -> Result<String, Box<dyn Error>> {
+    let mut date_to_use = Local::now().format("%m_%d_%Y").to_string();
+    let mut found = false;
+    for _ in 0..7 {
+        let test_url = url_template.replace("{}", &date_to_use.clone());
+        if mk_lib_network::mk_lib_network::is_url_available(&test_url.clone().as_str()).await {
+            found = true;
+            break;
+        } else {
+            let date = chrono::NaiveDate::parse_from_str(&date_to_use, "%m_%d_%Y")?;
+            let previous_date = date - chrono::Duration::days(1);
+            date_to_use = previous_date.format("%m_%d_%Y").to_string();
+        }
+    }
+    if found {
+        Ok(date_to_use)
+    } else {
+        Err("No valid date found within the last 7 days".into())
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
@@ -71,17 +93,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
                 println!(" [x] Received {:?}", json_message);
                 if json_message["Type"] == "Bulk" {
-                    let mut record_limit = 0;
+                     let mut record_limit = 0;
                     if json_message["Limit"].is_number() {
-                        record_limit = json_message["Limit"].as_i64().unwrap_or(99999999999999999);
+                        record_limit = json_message["Limit"].as_i64().unwrap_or(i64::MAX);
                     }
-                    // let fetch_date: String = "05_30_2023".to_string();
+                    let date_to_use = find_date_to_use("http://files.tmdb.org/p/exports/movie_ids_{}.json.gz").await.unwrap();
                     // grab the movie id's
                     let fetch_result_movie =
                         mk_lib_network::mk_lib_network::mk_network_download_file_to_vec(
                             format!(
                                 "http://files.tmdb.org/p/exports/movie_ids_{}.json.gz",
-                                json_message["Data"].as_str().unwrap()
+                                date_to_use
                             )
                             .replace("\"", "")
                         )
@@ -125,12 +147,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         }
                     }
 
+                    let date_to_use = find_date_to_use("http://files.tmdb.org/p/exports/tv_series_ids_{}.json.gz").await.unwrap();
                     // grab the TV id's
                     let fetch_result_tv =
                         mk_lib_network::mk_lib_network::mk_network_download_file_to_vec(
                             format!(
                                 "http://files.tmdb.org/p/exports/tv_series_ids_{}.json.gz",
-                                json_message["Data"].as_str().unwrap()
+                                date_to_use
                             )
                             .replace("\"", "")
                         )
@@ -173,12 +196,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         }
                     }
 
+                    let date_to_use = find_date_to_use("http://files.tmdb.org/p/exports/person_ids_{}.json.gz").await.unwrap();
                     // grab the Person id's
                     let fetch_result_person =
                         mk_lib_network::mk_lib_network::mk_network_download_file_to_vec(
                             format!(
                                 "http://files.tmdb.org/p/exports/person_ids_{}.json.gz",
-                                json_message["Data"].as_str().unwrap()
+                                date_to_use
                             )
                             .replace("\"", "")
                         )

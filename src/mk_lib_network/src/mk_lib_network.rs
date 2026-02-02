@@ -16,6 +16,21 @@ use tokio::io::{self, AsyncWriteExt};
 use tokio::time::Duration;
 use bytes::Bytes;
 
+pub async fn is_url_available(url: &str) -> bool {
+    let client = Client::new();
+    // Try HEAD first (no body download)
+    if let Ok(resp) = client.head(url).send().await {
+        return resp.status().is_success();
+    }
+    // Fallback to GET (still async, body not read)
+    client
+        .get(url)
+        .send()
+        .await
+        .map(|resp| resp.status().is_success())
+        .unwrap_or(false)
+}
+
 pub async fn custom_headers(map: &HashMap<String, String>) -> HeaderMap {
     let mut headers = HeaderMap::new();
     for (key, value) in map.iter() {

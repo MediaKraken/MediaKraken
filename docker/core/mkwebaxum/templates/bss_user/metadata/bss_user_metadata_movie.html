@@ -1,58 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>MediaKraken</title>
-    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
-    <link rel="stylesheet" href="/static/css/base_webapp_layout.css">
-    <link rel="stylesheet" href="/static/css/base_webapp.css">
-    <link rel="stylesheet" href="/static/contextmenu/jquery.contextMenu.min.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediaKraken</title>
+
+  <link rel="stylesheet" href="/static/css/base_webapp.css">
+  <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+  <link rel="stylesheet" href="/static/contextmenu/jquery.contextMenu.min.css">
 </head>
 
-<body>
-    {% include "bss_user/bss_user_include_menu.html" %}
-    <div>
-        <div>
-            {% if template_data_exists %}
-            {% if pagination_bar != "" %}
-            {{ pagination_bar|safe }}
-            {% endif %}
-            <div id="the-movie-metadata-node">
-                {% for row_data in template_data %}
-                <div data-id={{row_data.template_metadata_guid}}>
-                    <a href="/user/metadata/movie_detail/{{row_data.template_metadata_guid}}">
-                        <div class="flex flex-col items-center gap-6 p-7 md:flex-row md:gap-8 rounded-2xl">
-                            {% if row_data.template_metadata_poster == "/static/image/Movie-icon.png" %}
-                                <div> <img class="size-48 shadow-xl rounded-md" alt="" src="/static/image/Movie-icon.png" loading="lazy" height="300" width="200" /> </div>
-                            {% else %}
-                                <div> <img class="size-48 shadow-xl rounded-md" alt="" src="/metadata{{row_data.template_metadata_poster|safe}}" loading="lazy" height="300" width="200" /> </div>
-                            {% endif %}
-                            <div class="flex items-center md:items-start"> 
-                                <span class="text-2xl font-medium">{{row_data.template_metadata_name}}</span> 
-                                <span class="font-medium text-sky-500">The Anti-Patterns</span> 
-                                <span class="flex gap-2 font-medium text-gray-600 dark:text-gray-400">
-                                    <span>No. 4</span>
-                                    <span>·</span>
-                                    <span>2025</span>
-                                </span>
-                            </div>
-                        </div>
-                    </a>
-                {% endfor %}
+<body class="bg-zinc-950 text-zinc-100">
+  {% include "bss_user/bss_user_include_menu.html" %}
+  {% include "bss_user/bss_user_include_side_menu.html" %}
+  <section class="mx-auto max-w-7xl px-6 py-12">
+
+    {% if template_data_exists %}
+
+    {% if pagination_bar != "" %}
+    {{ pagination_bar|safe }}
+    {% endif %}
+  
+    <div class="grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+
+      {% for row_data in template_data %}
+
+      <!-- Movie Card -->
+      <div data-id="{{ row_data.template_metadata_guid }}"
+        class="rounded-xl bg-zinc-900 p-4 transition hover:bg-zinc-800"
+        x-data="{ fav:false, watched:false, good:false, bad:false }">
+        <a href="/user/metadata/movie_detail/{{ row_data.template_metadata_guid }}" class="block">
+
+          <!-- Poster -->
+          {% if row_data.template_metadata_poster == "/static/image/Movie-icon.png" %}
+          <img src="/static/image/Movie-icon.png" alt="Movie poster" class="mb-4 aspect-[2/3] w-full rounded-lg object-cover"
+            loading="lazy" />
+          {% else %}
+          <img src="/metadata{{ row_data.template_metadata_poster|safe }}" alt="{{ row_data.template_metadata_name }}"
+            class="mb-4 aspect-[2/3] w-full rounded-lg object-cover" loading="lazy" />
+          {% endif %}
+
+          <!-- Titles -->
+          <h2 class="text-lg font-semibold leading-tight">
+            {{row_data.template_metadata_name}}
+          </h2>
+          <p class="text-sm italic text-zinc-400">
+            Original title: TODO
+          </p>
+
+          <!-- Meta -->
+          <div class="mt-3 flex flex-wrap items-center gap-2 text-sm text-zinc-300">
+            <span class="rounded bg-zinc-700 px-2 py-0.5 text-xs">
+              PG-13
+            </span>
+
+            <span>2h 49m</span>
+
+            <!-- Availability -->
+            <span class="font-medium text-green-400 text-right">
+              Available
+            </span>
+            <!--
+          text-yellow-400 → Limited
+          text-red-400    → Unavailable
+        -->
+          </div>
+
+          <!-- Rating + Actions -->
+          <div class="mt-3 flex flex-wrap items-center gap-3">
+            <!-- Star Rating -->
+            <span class="rounded bg-yellow-500 px-2 py-0.5 text-sm font-semibold text-black">
+              ★ 8.6
+            </span>
+
+            <!-- Action Icons -->
+            <div class="flex items-center gap-2">
+
+              <!-- Favorite -->
+              <button @click="fav=!fav" title="Favorite">
+                <svg class="h-5 w-5 transition" :class="fav ? 'fill-red-500' : 'fill-none stroke-zinc-400'"
+                  viewBox="0 0 24 24" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.687-4.5
+                   -1.935 0-3.597 1.126-4.313 2.733
+                   -.716-1.607-2.378-2.733-4.313-2.733
+                   C5.1 3.75 3 5.765 3 8.25
+                   c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                </svg>
+              </button>
+
+              <!-- Watched -->
+              <button @click="watched=!watched" title="Watched">
+                <svg class="h-5 w-5 transition" :class="watched ? 'stroke-blue-400' : 'stroke-zinc-400'" fill="none"
+                  viewBox="0 0 24 24" stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639
+                   C3.423 7.51 7.36 4.5 12 4.5
+                   c4.638 0 8.577 3.01 9.964 7.183
+                   .07.207.07.431 0 .639
+                   C20.577 16.49 16.64 19.5 12 19.5
+                   c-4.638 0-8.577-3.01-9.964-7.178z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </button>
+
+              <!-- Good -->
+              <button @click="good=!good" title="Good">
+                <svg class="h-5 w-5 transition"
+                  :class="good ? 'fill-green-400 stroke-green-400' : 'fill-none stroke-zinc-400'" viewBox="0 0 24 24"
+                  stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28
+                   a2 2 0 001.98-1.697l1.38-9
+                   A2 2 0 0018.66 9H14z" />
+                </svg>
+              </button>
+
+              <!-- Terrible -->
+              <button @click="bad=!bad" title="Terrible">
+                <svg class="h-5 w-5 transition"
+                  :class="bad ? 'fill-rose-400 stroke-rose-400' : 'fill-none stroke-zinc-400'" viewBox="0 0 24 24"
+                  stroke-width="1.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 15v4a3 3 0 003 3l4-9V2H5.72
+                   A2 2 0 003.74 3.697l-1.38 9
+                   A2 2 0 004.34 15H10z" />
+                </svg>
+              </button>
+
             </div>
-            {% if pagination_bar != "" %}
-            {{ pagination_bar|safe }}
-            {% endif %}
-            {% else %}
-            <p id="general_text">No movie metadata found.</p>
-            {% endif %}
-        </div>
+        </a>
+      </div>
     </div>
-    {% include "bss_public/bss_public_footer.html" %}
-    <script src="/static/js/jquery.min.js" defer></script>
-    <script src="/static/contextmenu/jquery.contextMenu.min.js" defer></script>
-    <script src="/static/js/base_webapp.js" defer></script>
-    <script src="/static/js/alpine.js" defer></script>
+
+    <!-- Repeat cards as needed -->
+    {% endfor %}
+    </div>
+    {% if pagination_bar != "" %}
+    {{ pagination_bar|safe }}
+    {% endif %}
+
+    {% else %}
+    <p class="text-center text-gray-500 mt-10">
+      No movie metadata found.
+    </p>
+    {% endif %}
+  </section>
+
+  {% include "bss_public/bss_public_footer.html" %}
+  <script src="/static/js/jquery.min.js" defer></script>
+  <script src="/static/contextmenu/jquery.contextMenu.min.js" defer></script>
+  <script src="/static/js/base_webapp.js" defer></script>
+  <script src="/static/js/alpine.js" defer></script>
 </body>
+
 </html>

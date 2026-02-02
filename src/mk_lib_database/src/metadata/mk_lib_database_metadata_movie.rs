@@ -108,6 +108,10 @@ pub async fn mk_lib_database_metadata_movie_insert(
 ) -> Result<(), sqlx::Error> {
     println!("ID: {:?}", series_id);
     println!("Json: {:?}", data_json);
+    let mut original_name = None;
+    if !data_json["original_title"].is_null() && data_json["title"] != data_json["original_title"] {
+        original_name = Some(data_json["original_title"].as_str().unwrap());
+    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_metadata_movie (mm_metadata_movie_guid, \
@@ -121,7 +125,7 @@ pub async fn mk_lib_database_metadata_movie_insert(
     .bind(uuid_id)
     .bind(series_id)
     .bind(data_json["title"].as_str().unwrap().to_string())
-    .bind(data_json["original_title"].as_str().unwrap().to_string())
+    .bind(original_name)
     .bind(data_json)
     .bind(data_image_json)
     .execute(&mut *transaction)

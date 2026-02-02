@@ -1,51 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>MediaKraken</title>
-    <link rel="stylesheet" href="/static/css/base_webapp.css">
-     <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
 
+<head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+        <title>MediaKraken</title>
+        <link rel="stylesheet" href="/static/css/base_webapp.css">
+        <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
 </head>
 
-<body>
-    {% include "bss_user/bss_user_include_menu.html" %}
-    <div>
-        {% if template_data_new_media %}
-        <a href="/user/media/new"><img src="/static/image/new.png" width="200" height="200" loading="lazy"></a>
-        {% endif %}
-        {% if template_data_user_media_queue %}
-        <a href="/user/media/queue"><img src="/static/image/rectangles_black.png" width="200" height="200"
-                loading="lazy"></a>
-        {% endif %}
-        <a href="/user/media/movie_genre/all"><img src="/static/image/movie_ticket.png" width="200" height="200"
-                loading="lazy"></a>
-        <a href="/user/media/music/1"><img src="/static/image/headphone.png" width="200" height="200"
-                loading="lazy"></a>
-        <a href="/user/media/tv/1"><img src="/static/image/television.png" width="200" height="200" loading="lazy"></a>
-        <a href="/user/media/sports/1"><img src="/static/image/stadium.png" width="200" height="200" loading="lazy"></a>
-        <a href="/user/media/live_tv/20170716/213500"><img src="/static/image/television_live.png" width="200"
-                height="200" loading="lazy"></a>
-        <a href="/user/media/images"><img src="/static/image/photo.png" width="200" height="200" loading="lazy"></a>
-        <a href="/user/media/game/1"><img src="/static/image/vid_game.png" width="200" height="200" loading="lazy"></a>
-        <a href="/user/media/book/1"><img src="/static/image/books.png" width="200" height="200" loading="lazy"></a>
-        <a href="/user/media/iradio"><img src="/static/image/radio.png" width="200" height="200" loading="lazy"></a>
-        <a href="/user/media/home_video/1"><img src="/static/image/vid_camera.png" width="200" height="200"
-                loading="lazy"></a>
-        <a href="/user/media/3d"><img src="/static/image/3D.png" width="200" height="200" loading="lazy"></a>
-        <a href="/user/internet"><img src="/static/image/earth.png" width="200" height="200" loading="lazy"></a>
-        <a href="/user/media/music_video/1"><img src="/static/image/listening-music-video-clip-with-auricular.png"
-                width="200" height="200" loading="lazy"></a>
-        <a href="/user/media/cctv"><img src="/static/image/surveillance-cctv-symbol-in-rounded-triangle.png" width="200"
-                height="200" loading="lazy"></a>
-        <a href="/user/media/search"><img src="/static/image/magnifying-glass.png" width="200" height="200"
-                loading="lazy"></a>
-        <a href="/user/hardware"><img src="/static/image/circuit-board.png" width="200" height="200" loading="lazy"></a>
-        <a href="/user/media/upc"><img src="/static/image/barcode-scan.png" width="200" height="200" loading="lazy"></a>
-    </div>
-    {% include "bss_public/bss_public_footer.html" %}
-    <script src="/static/js/jquery.min.js" defer></script>
+<body class="bg-gray-900 text-gray-100 font-sans">
+        {% include "bss_user/bss_user_include_menu.html" %}
+        {% include "bss_user/bss_user_include_side_menu.html" %}
+        <div>
+                {% if template_data_new_media %}
+                <a href="/user/media/new"><img src="/static/image/new.png" width="200" height="200" loading="lazy"></a>
+                {% endif %}
+                {% if template_data_user_media_queue %}
+                <a href="/user/media/queue"><img src="/static/image/rectangles_black.png" width="200" height="200"
+                                loading="lazy"></a>
+                {% endif %}
+                <!-- Movies Section -->
+                <section id="movies" class="container mx-auto px-6 py-12">
+                        <h2 class="text-3xl font-bold mb-8">Movies</h2>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                                <template x-for="item in media.filter(m => m.type === 'movies')" :key="item.id">
+                                        <div
+                                                class="bg-gray-800 rounded-lg overflow-hidden group relative cursor-pointer">
+                                                <img :src="item.image" alt=""
+                                                        class="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-300">
+                                                <div
+                                                        class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+                                                        <h3 class="text-lg font-bold mb-1" x-text="item.title"></h3>
+                                                        <p class="text-sm text-gray-300 mb-2" x-text="item.description">
+                                                        </p>
+                                                        <div class="flex space-x-3">
+                                                                <!-- Play SVG -->
+                                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                                        class="h-6 w-6 text-white hover:text-blue-400"
+                                                                        fill="none" viewBox="0 0 24 24"
+                                                                        stroke="currentColor">
+                                                                        <path stroke-linecap="round"
+                                                                                stroke-linejoin="round" stroke-width="2"
+                                                                                d="M14.752 11.168l-5.197-3.022A1 1 0 008 9.03v5.938a1 1 0 001.555.832l5.197-3.022a1 1 0 000-1.664z" />
+                                                                </svg>
+                                                                <!-- Info SVG -->
+                                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                                        class="h-6 w-6 text-white hover:text-blue-400"
+                                                                        fill="none" viewBox="0 0 24 24"
+                                                                        stroke="currentColor">
+                                                                        <path stroke-linecap="round"
+                                                                                stroke-linejoin="round" stroke-width="2"
+                                                                                d="M13 16h-1v-4h-1m1-4h.01M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
+                                                                </svg>
+                                                        </div>
+                                                </div>
+                                        </div>
+                                </template>
+                        </div>
+                </section>
+
+                <!-- TV Shows Section -->
+                <section id="tvshows" class="container mx-auto px-6 py-12">
+                        <h2 class="text-3xl font-bold mb-8">TV Shows</h2>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                                <template x-for="item in media.filter(m => m.type === 'tv')" :key="item.id">
+                                        <div
+                                                class="bg-gray-800 rounded-lg overflow-hidden group relative cursor-pointer">
+                                                <img :src="item.image" alt=""
+                                                        class="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-300">
+                                                <div
+                                                        class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+                                                        <h3 class="text-lg font-bold mb-1" x-text="item.title"></h3>
+                                                        <p class="text-sm text-gray-300 mb-2" x-text="item.description">
+                                                        </p>
+                                                        <div class="flex space-x-3">
+                                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                                        class="h-6 w-6 text-white hover:text-blue-400"
+                                                                        fill="none" viewBox="0 0 24 24"
+                                                                        stroke="currentColor">
+                                                                        <path stroke-linecap="round"
+                                                                                stroke-linejoin="round" stroke-width="2"
+                                                                                d="M14.752 11.168l-5.197-3.022A1 1 0 008 9.03v5.938a1 1 0 001.555.832l5.197-3.022a1 1 0 000-1.664z" />
+                                                                </svg>
+                                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                                        class="h-6 w-6 text-white hover:text-blue-400"
+                                                                        fill="none" viewBox="0 0 24 24"
+                                                                        stroke="currentColor">
+                                                                        <path stroke-linecap="round"
+                                                                                stroke-linejoin="round" stroke-width="2"
+                                                                                d="M13 16h-1v-4h-1m1-4h.01M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
+                                                                </svg>
+                                                        </div>
+                                                </div>
+                                        </div>
+                                </template>
+                        </div>
+                </section>
+
+                <!-- Music Section -->
+                <section id="music" class="container mx-auto px-6 py-12">
+                        <h2 class="text-3xl font-bold mb-8">Music</h2>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                                <template x-for="item in media.filter(m => m.type === 'music')" :key="item.id">
+                                        <div
+                                                class="bg-gray-800 rounded-lg overflow-hidden group relative cursor-pointer">
+                                                <img :src="item.image" alt=""
+                                                        class="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-300">
+                                                <div
+                                                        class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+                                                        <h3 class="text-lg font-bold mb-1" x-text="item.title"></h3>
+                                                        <p class="text-sm text-gray-300 mb-2" x-text="item.description">
+                                                        </p>
+                                                        <div class="flex space-x-3">
+                                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                                        class="h-6 w-6 text-white hover:text-blue-400"
+                                                                        fill="none" viewBox="0 0 24 24"
+                                                                        stroke="currentColor">
+                                                                        <path stroke-linecap="round"
+                                                                                stroke-linejoin="round" stroke-width="2"
+                                                                                d="M14.752 11.168l-5.197-3.022A1 1 0 008 9.03v5.938a1 1 0 001.555.832l5.197-3.022a1 1 0 000-1.664z" />
+                                                                </svg>
+                                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                                        class="h-6 w-6 text-white hover:text-blue-400"
+                                                                        fill="none" viewBox="0 0 24 24"
+                                                                        stroke="currentColor">
+                                                                        <path stroke-linecap="round"
+                                                                                stroke-linejoin="round" stroke-width="2"
+                                                                                d="M13 16h-1v-4h-1m1-4h.01M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
+                                                                </svg>
+                                                        </div>
+                                                </div>
+                                        </div>
+                                </template>
+                        </div>
+                </section>
+        </div>
+        {% include "bss_public/bss_public_footer.html" %}
+        <script src="/static/js/jquery.min.js" defer></script>
+        <!-- Alpine.js -->
+        <script>
+                function mediaApp() {
+                        return {
+                                media: [
+                                        { id: 1, type: 'movies', title: 'The Great Adventure', description: 'Action-packed thriller.', image: 'https://via.placeholder.com/400x300?text=Movie+1' },
+                                        { id: 2, type: 'movies', title: 'Romantic Escape', description: 'Heartwarming romance.', image: 'https://via.placeholder.com/400x300?text=Movie+2' },
+                                        { id: 3, type: 'tv', title: 'Mystery Manor', description: 'Suspenseful TV drama.', image: 'https://via.placeholder.com/400x300?text=TV+1' },
+                                        { id: 4, type: 'tv', title: 'Comedy Nights', description: 'Laugh out loud.', image: 'https://via.placeholder.com/400x300?text=TV+2' },
+                                        { id: 5, type: 'music', title: 'Top Hits 2026', description: 'Latest chartbusters.', image: 'https://via.placeholder.com/400x300?text=Music+1' },
+                                        { id: 6, type: 'music', title: 'Classical Moods', description: 'Relaxing symphonies.', image: 'https://via.placeholder.com/400x300?text=Music+2' }
+                                ]
+                        }
+                }
+        </script>
 
 </body>
+
 </html>

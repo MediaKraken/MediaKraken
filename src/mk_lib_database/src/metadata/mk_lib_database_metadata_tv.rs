@@ -106,6 +106,10 @@ pub async fn mk_lib_database_metadata_tv_insert(
     data_json: &serde_json::Value,
     data_image_json: serde_json::Value,
 ) -> Result<(), sqlx::Error> {
+    let mut original_name = None;
+    if !data_json["original_name"].is_null() && data_json["name"] != data_json["original_name"] {
+        original_name = Some(data_json["original_name"].as_str().unwrap());
+    }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_metadata_tvshow (mm_metadata_tvshow_guid, \
@@ -119,7 +123,7 @@ pub async fn mk_lib_database_metadata_tv_insert(
     .bind(uuid_id)
     .bind(series_id)
     .bind(data_json["name"].to_string())
-    .bind(data_json["original_name"].to_string())
+    .bind(original_name)
     .bind(data_json)
     .bind(data_image_json)
     .execute(&mut *transaction)

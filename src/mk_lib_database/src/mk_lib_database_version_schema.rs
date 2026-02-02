@@ -748,6 +748,8 @@ pub async fn mk_lib_database_update_schema(
         mk_lib_database_version_update(&sqlx_pool, 74).await?;
     }
 
+    // TODO, movie alt name, tv alt name and person alt name cleanup
+    
     Ok(true)
 }
 
