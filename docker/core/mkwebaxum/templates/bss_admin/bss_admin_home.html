@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>MediaKraken - Dashboard</title>
-    <link rel="stylesheet" href="/static/css/base_webapp.css">
-    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <title>MediaKraken - Dashboard</title>
+  <link rel="stylesheet" href="/static/css/base_webapp.css">
+  <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
 </head>
 
 <body id="page-top" class="bg-gray-100">
   <div class="flex min-h-screen">
-        {% include "bss_user/bss_user_include_menu.html" %}
-
+    {% include "bss_user/bss_user_include_menu.html" %}
     {% include "bss_admin/bss_admin_include_menu.html" %}
 
     <div id="content-wrapper" class="flex flex-col flex-1">
@@ -60,10 +60,8 @@
                       <td class="border px-2 py-1">{{ row_data.mm_notification_text }}</td>
                       <td class="border px-2 py-1">{{ row_data.mm_notification_time }}</td>
                       <td class="border px-2 py-1 text-center">
-                        <button
-                          class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded"
-                          data-id="{{ row_data.mm_notification_guid }}"
-                          onclick="ConfirmLibraryDelete(this)">
+                        <button class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded"
+                          data-id="{{ row_data.mm_notification_guid }}" onclick="ConfirmLibraryDelete(this)">
                           <i class="fas fa-trash-alt"></i>
                         </button>
                       </td>
@@ -108,4 +106,5 @@
 
   <script src="/static/js/jquery.min.js" defer></script>
 </body>
+
 </html>

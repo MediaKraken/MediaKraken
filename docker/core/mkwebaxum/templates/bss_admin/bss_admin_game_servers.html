@@ -1,72 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>MediaKraken - Game Servers</title>
-    <link rel="stylesheet" href="/static/css/base_webapp.css">
-    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+  <meta charset="utf-8">
+  <title>MediaKraken - Game Servers</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <!-- Tailwind v4 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Alpine.js (optional / future use) -->
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
 </head>
 
-<body id="page-top">
-    <div class="flex min-h-screen">
-        {% include "bss_user/bss_user_include_menu.html" %}
-        {% include "bss_admin/bss_admin_include_menu.html" %}
-        <div class="d-flex flex-column" id="content-wrapper">
-            <div id="content">
-                <div class="container-fluid">
-                    <div class="card shadow">
-                        <div class="card-header py-3">
-                            <fieldset>
-                                <legend>Game Servers</legend>
-                                <div>
-                                    {% if template_data_exists %}
-                                    {% if pagination_bar != "" %}
-                                    {{ pagination_bar|safe }}
-                                    {% endif %}
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Game Name</th>
-                                                    <th>Description</th>
-                                                    <th>Created</th>
-                                                    <th>Active</th>
-                                                    <th>Edit</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for row_data in template_data %}
-                                                <tr>
-                                                    <td>{{ loop.index + (page - 1) * 30 }}</td>
-                                                    <td><a
-                                                            href="/admin/bss_admin_game_server_detail/{{row_data.mm_game_server_guid}}">{{
-                                                            row_data.mm_game_server_name }}</a></td>
-                                                    <td>{{ row_data.mm_game_server_name }}</td>
-                                                </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    {% if pagination_bar != "" %}
-                                    {{ pagination_bar|safe }}
-                                    {% endif %}
-                                    {% else %}
-                                    <p>No game servers found. Contact administrator.</p>
-                                    {% endif %}
-                                </div>
-                            </fieldset>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% include "bss_public/bss_public_footer.html" %}
+<body class="bg-gray-100 text-gray-900">
+
+<div class="flex min-h-screen">
+  {% include "bss_user/bss_user_include_menu.html" %}
+  {% include "bss_admin/bss_admin_include_menu.html" %}
+
+  <main class="flex-1 p-6">
+
+    <section class="bg-white rounded shadow p-6">
+      <h2 class="text-xl font-semibold mb-4">
+        Game Servers
+      </h2>
+
+      {% if template_data_exists %}
+
+        {% if pagination_bar != "" %}
+        <div class="mb-4">
+          {{ pagination_bar|safe }}
         </div>
-    </div>
-    <script src="/static/js/jquery.tmpl.min.js"></script>
-    <script src="/static/js/jquery.min.js" defer></script>
-    <script src="/static/js/base_webapp_delete.js"></script>
+        {% endif %}
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full border border-gray-200 text-sm">
+            <thead class="bg-gray-50">
+              <tr class="text-left font-semibold">
+                <th class="px-3 py-2">#</th>
+                <th class="px-3 py-2">Game Name</th>
+                <th class="px-3 py-2">Description</th>
+              </tr>
+            </thead>
+
+            <tbody class="divide-y">
+              {% for row_data in template_data %}
+              <tr class="hover:bg-gray-50">
+                <td class="px-3 py-2">
+                  {{ loop.index + (page - 1) * 30 }}
+                </td>
+                <td class="px-3 py-2 font-medium">
+                  <a
+                    href="/admin/bss_admin_game_server_detail/{{ row_data.mm_game_server_guid }}"
+                    class="text-indigo-600 hover:text-indigo-800">
+                    {{ row_data.mm_game_server_name }}
+                  </a>
+                </td>
+                <td class="px-3 py-2">
+                  {{ row_data.mm_game_server_name }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% if pagination_bar != "" %}
+        <div class="mt-4">
+          {{ pagination_bar|safe }}
+        </div>
+        {% endif %}
+
+      {% else %}
+        <p class="text-gray-500">
+          No game servers found. Contact administrator.
+        </p>
+      {% endif %}
+    </section>
+
+  </main>
+</div>
+
+{% include "bss_public/bss_public_footer.html" %}
+
 </body>
 </html>

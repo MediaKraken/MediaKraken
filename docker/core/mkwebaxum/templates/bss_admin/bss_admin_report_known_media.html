@@ -1,58 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>MediaKraken - Report Known Media</title>
-    <link rel="stylesheet" href="/static/css/base_webapp.css">
-    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+  <meta charset="utf-8">
+  <title>MediaKraken - Report Known Media</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Tailwind v4 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
 </head>
 
-<body id="page-top">
-    <div class="flex min-h-screen">
-         {% include "bss_user/bss_user_include_menu.html" %}
-       {% include "bss_admin/bss_admin_include_menu.html" %}
-        <div class="d-flex flex-column" id="content-wrapper">
-            <div id="content">
-                <div class="container-fluid">
-                    <fieldset>
-                        <legend><strong>Media Report</strong></legend>
-                        <div>
-                            {% if pagination_bar != "" %}
-                            {{ pagination_bar|safe }}
-                            {% endif %}    
-                            <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>File Name</th>
-                                        <th>Media Type</th>
-                                        <th>Date Added</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for row_data in template_data %}
-                                    <tr>
-                                        <td>{{ loop.index + (page - 1) * 30 }}</td>
-                                        <td>{{ row_data.mm_media_path }}</td>
-                                        <td>{{ row_data.mm_media_class_enum }}</td>
-                                        <td>{{ row_data.mm_media_json_added }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        {% if pagination_bar != "" %}
-                        {{ pagination_bar|safe }}
-                        {% endif %}
-                    </fieldset>
-                </div>
-            </div>
-            {% include "bss_public/bss_public_footer.html" %}
+<body class="bg-gray-100 text-gray-900">
+
+<div class="flex min-h-screen">
+  {% include "bss_user/bss_user_include_menu.html" %}
+  {% include "bss_admin/bss_admin_include_menu.html" %}
+
+  <main class="flex-1 p-6">
+
+    <section class="bg-white rounded shadow p-6">
+      <h2 class="text-xl font-semibold mb-4">Media Report</h2>
+
+      {% if pagination_bar != "" %}
+        <div class="mb-2">
+          {{ pagination_bar|safe }}
         </div>
-    </div><div>
-    <script src="/static/js/jquery.tmpl.min.js"></script>
-    <script src="/static/js/jquery.min.js" defer></script>
+      {% endif %}
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full border border-gray-200 text-sm">
+          <thead class="bg-gray-50 font-semibold text-left">
+            <tr>
+              <th class="px-3 py-2 w-12">#</th>
+              <th class="px-3 py-2">File Name</th>
+              <th class="px-3 py-2">Media Type</th>
+              <th class="px-3 py-2">Date Added</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y">
+            {% for row_data in template_data %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-3 py-2 text-gray-500">{{ loop.index + (page - 1) * 30 }}</td>
+              <td class="px-3 py-2 break-all font-mono">{{ row_data.mm_media_path }}</td>
+              <td class="px-3 py-2">{{ row_data.mm_media_class_enum }}</td>
+              <td class="px-3 py-2 font-mono text-xs text-gray-600">{{ row_data.mm_media_json_added }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if pagination_bar != "" %}
+        <div class="mt-2">
+          {{ pagination_bar|safe }}
+        </div>
+      {% endif %}
+      
+    </section>
+
+  </main>
+</div>
+
+{% include "bss_public/bss_public_footer.html" %}
+
 </body>
 </html>

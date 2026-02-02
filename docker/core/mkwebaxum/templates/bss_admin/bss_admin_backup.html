@@ -1,140 +1,182 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>MediaKraken - Backup</title>
-    <link rel="stylesheet" href="/static/css/base_webapp.css">
-    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+  <meta charset="utf-8">
+  <title>MediaKraken - Backup</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <!-- Tailwind v4 CDN (or build locally) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Alpine.js -->
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
 </head>
 
-<body id="page-top">
-    <div class="flex min-h-screen">
-        {% include "bss_user/bss_user_include_menu.html" %}
-        {% include "bss_admin/bss_admin_include_menu.html" %}
-        <div class="d-flex flex-column" id="content-wrapper">
-            <div id="content">
-                <div class="container-fluid">
-                    <form action="/admin/backup" method="post">
-                        <div class="row flex-wrap">
-                            <div class="col">
-                                <fieldset>
-                                    <legend>Backup Configuration</legend>
-                                    <div class="form-group">
-                                        < input type=checkbox name="data_enabled">
-                                    </div>
-                                    <select>
-                                        <optgroup label="This is a group">
-                                            <option value="12" selected="">Daily</option>
-                                            <option value="13">Weekly</option>
-                                            <option value="14">Monthly</option>
-                                        </optgroup>
-                                    </select>
-                                    <input type="time">
-                                    <select name="Backup_Class" , id="backup_class">
-                                        {% for class_data in template_backup_class %}
-                                        <option value={{class_data.1}}>{{class_data.0}}</option>
-                                        {% endfor %}
-                                    </select>
-                                    <input class="btn btn-default btn-submit" type="submit" name="backup"
-                                        value="Update Backup">
-                                    <input class="btn btn-default btn-submit" type="submit" name="backup"
-                                        value="Submit Backup">
-                                </fieldset>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <fieldset>
-                                    {% if template_data_exists %}
-                                    {% if pagination_bar != "" %}
-                                    {{ pagination_bar|safe }}
-                                    {% endif %}
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Backup</th>
-                                                    <th>Location</th>
-                                                    <th>Size</th>
-                                                    <th>Restore</th>
-                                                    <th>Delete</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for row_data in template_data %}
-                                                <tr>
-                                                    <td>{{ loop.index + (page - 1) * 30 }}</td>
-                                                    <td>{{ row_data.mm_backup_description }}</td>
-                                                    <td>{{ row_data.mm_backup_location }}</td>
-                                                    <td>{{ row_data.mm_backup_created }}</td>
-                                                    <td>
-                                                        <a href={{ "/admin/bss_admin_backup_restore/{:?}" | format(row_data.mm_backup_guid) }}
-                                                            id="play_button">
-                                                            <i class="fas fa-play" height="20" width="20"></i>
-                                                        </a>
-                                                    </td>
-                                                    <div class="pull-right action-buttons">
-                                                        <td>
-                                                            <p data-placement="top" data-toggle="tooltip"
-                                                                title="Delete"><button class="btn btn-danger btn-xs" <a
-                                                                    data-id={{row_data.mm_backup_guid}}}}
-                                                                    onclick="ConfirmBackupDelete(this)"><i
-                                                                        class="fas fa-trash-alt" height="20"
-                                                                        width="20"></i></a>
-                                                        </td>
-                                                    </div>
-                                                </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <div class="modal fade" id="delete_backup" tabindex="-1" role="dialog"
-                                        aria-labelledby="edit" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <button type="button" class="close" data-dismiss="modal"
-                                                        aria-hidden="true"><i class="fas fa-trash-alt" height="20"
-                                                            width="20"></i></button>
-                                                    <h4 class="modal-title custom_align" id="Heading">Delete this backup
-                                                    </h4>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="alert alert-danger"><span
-                                                            class="fas fa-exclamation-triangle"></span> Are you sure you
-                                                        want to delete this backup?</div>
-                                                </div>
-                                                <div class="modal-footer ">
-                                                    <button type="button" class="btn btn-success"
-                                                        onclick="Backup_Delete()"><span
-                                                            class="fas fa-check-circle"></span> Yes</button>
-                                                    <button type="button" class="btn btn-default"
-                                                        data-dismiss="modal"><i class="fas fa-trash-alt" height="20"
-                                                            width="20"></i> No</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% if pagination_bar != "" %}
-                                    {{ pagination_bar|safe }}
-                                    {% endif %}
-                                    {% else %}
-                                    <p>No backups found.</p>
-                                    {% endif %}
-                                    <legend>Current Backups</legend>
-                                </fieldset>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            {% include "bss_public/bss_public_footer.html" %}
-        </div>
-    </div>
-    <script src="/static/js/jquery.min.js" defer></script>
+<body class="bg-gray-100 text-gray-900">
 
+<div class="flex min-h-screen">
+  {% include "bss_user/bss_user_include_menu.html" %}
+  {% include "bss_admin/bss_admin_include_menu.html" %}
+
+  <main class="flex-1 p-6" x-data="backupPage()">
+
+    <!-- Backup Configuration -->
+    <form action="/admin/backup" method="post" class="space-y-10">
+
+      <section class="bg-white rounded shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">Backup Configuration</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+
+          <!-- Enable Backup -->
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" name="data_enabled"
+                   class="h-4 w-4 text-indigo-600 border-gray-300 rounded">
+            <span>Enable Backups</span>
+          </label>
+
+          <!-- Frequency -->
+          <select class="border rounded px-3 py-2">
+            <optgroup label="Frequency">
+              <option value="12" selected>Daily</option>
+              <option value="13">Weekly</option>
+              <option value="14">Monthly</option>
+            </optgroup>
+          </select>
+
+          <!-- Time -->
+          <input type="time" class="border rounded px-3 py-2">
+
+          <!-- Backup Class -->
+          <select name="Backup_Class" id="backup_class"
+                  class="border rounded px-3 py-2">
+            {% for class_data in template_backup_class %}
+            <option value="{{ class_data.1 }}">{{ class_data.0 }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="mt-6 flex gap-3">
+          <button type="submit" name="backup"
+                  class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+            Update Backup
+          </button>
+
+          <button type="submit" name="backup"
+                  class="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800">
+            Submit Backup
+          </button>
+        </div>
+      </section>
+
+      <!-- Current Backups -->
+      <section class="bg-white rounded shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">Current Backups</h2>
+
+        {% if template_data_exists %}
+        <div class="overflow-x-auto">
+          <table class="min-w-full border border-gray-200">
+            <thead class="bg-gray-50">
+              <tr class="text-left text-sm font-semibold">
+                <th class="px-3 py-2">#</th>
+                <th class="px-3 py-2">Backup</th>
+                <th class="px-3 py-2">Location</th>
+                <th class="px-3 py-2">Created</th>
+                <th class="px-3 py-2">Restore</th>
+                <th class="px-3 py-2">Delete</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y">
+              {% for row_data in template_data %}
+              <tr class="hover:bg-gray-50">
+                <td class="px-3 py-2">
+                  {{ loop.index + (page - 1) * 30 }}
+                </td>
+                <td class="px-3 py-2">
+                  {{ row_data.mm_backup_description }}
+                </td>
+                <td class="px-3 py-2">
+                  {{ row_data.mm_backup_location }}
+                </td>
+                <td class="px-3 py-2">
+                  {{ row_data.mm_backup_created }}
+                </td>
+                <td class="px-3 py-2">
+                  <a href={{ "/admin/bss_admin_backup_restore/{:?}" | format(row_data.mm_backup_guid) }}
+                     class="text-indigo-600 hover:text-indigo-800">
+                    <i class="fas fa-play"></i>
+                  </a>
+                </td>
+                <td class="px-3 py-2">
+                  <button
+                    @click="openDelete('{{ row_data.mm_backup_guid }}')"
+                    class="text-red-600 hover:text-red-800">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+          <p class="text-gray-500">No backups found.</p>
+        {% endif %}
+      </section>
+    </form>
+
+    <!-- Delete Modal -->
+    <div x-show="showDelete"
+         x-cloak
+         class="fixed inset-0 bg-black/50 flex items-center justify-center">
+
+      <div class="bg-white rounded shadow-lg w-full max-w-md p-6">
+        <h3 class="text-lg font-semibold mb-3">Delete Backup</h3>
+
+        <p class="text-red-600 mb-6">
+          <i class="fas fa-exclamation-triangle mr-1"></i>
+          Are you sure you want to delete this backup?
+        </p>
+
+        <div class="flex justify-end gap-3">
+          <button @click="confirmDelete"
+                  class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+            Yes
+          </button>
+          <button @click="showDelete=false"
+                  class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
+            No
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function backupPage() {
+  return {
+    showDelete: false,
+    deleteGuid: null,
+
+    openDelete(guid) {
+      this.deleteGuid = guid
+      this.showDelete = true
+    },
+
+    confirmDelete() {
+      // submit delete via form or fetch
+      console.log('Delete backup:', this.deleteGuid)
+      this.showDelete = false
+    }
+  }
+}
+</script>
+
+{% include "bss_public/bss_public_footer.html" %}
 </body>
 </html>

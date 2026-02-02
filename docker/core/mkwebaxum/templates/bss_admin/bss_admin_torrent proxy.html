@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
@@ -11,16 +12,16 @@
 
 <body id="page-top">
     <div class="flex min-h-screen">
-         {% include "bss_user/bss_user_include_menu.html" %}
-       {% include "bss_admin/bss_admin_include_menu.html" %}
-        <div class="d-flex flex-column" id="content-wrapper">
-            <iframe src="https://{{template_data_host}}:8900/admin/transmission/web/"
-                title="MediaKraken Transmission"></iframe>
-        </div>
+        {% include "bss_user/bss_user_include_menu.html" %}
+        {% include "bss_admin/bss_admin_include_menu.html" %}
+        <iframe src="https://{{template_data_host}}:8900/admin/transmission/web/" title="MediaKraken Transmission"
+            class="w-full h-screen border-0" style="min-height: 80vh;">
+        </iframe>
         {% include "bss_public/bss_public_footer.html" %}
     </div>
     <script src="/static/js/jquery.tmpl.min.js"></script>
     <script src="/static/js/jquery.min.js" defer></script>
 
 </body>
+
 </html>

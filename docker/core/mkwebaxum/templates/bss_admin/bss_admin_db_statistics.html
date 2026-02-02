@@ -1,144 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>MediaKraken - Database</title>
-    <link rel="stylesheet" href="/static/css/base_webapp.css">
-    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+  <meta charset="utf-8">
+  <title>MediaKraken - Database</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <!-- Tailwind v4 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Alpine.js (optional for future use) -->
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
 </head>
 
-<body id="page-top">
-    <div class="flex min-h-screen">
-        {% include "bss_user/bss_user_include_menu.html" %}
-        {% include "bss_admin/bss_admin_include_menu.html" %}
-        <div class="d-flex flex-column" id="content-wrapper">
-            <div id="content">
-                <div class="container-fluid">
-                    <div class="card shadow">
-                        <div class="card-header py-3">
-                            <p class="text-primary m-0 font-weight-bold"><strong>PostgreSQL Version:
-                                    {{template_data_db_version}}</strong></p>
-                            <p class="text-primary m-0 font-weight-bold"><strong>Parallel Workers:
-                                    {{template_data_db_workers}}</strong></p>
-                        </div>
+<body class="bg-gray-100 text-gray-900">
 
-                        <div class="card-body">
-                            <fieldset>
-                                <legend>Database Extensions (Active)</legend>
-                            </fieldset>
-                            <div>
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Vesion</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for row_data in template_data_db_extension %}
-                                        <tr>
-                                            <td>{{ row_data.extname }}</td>
-                                            <td>{{ row_data.extversion }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+<div class="flex min-h-screen">
+  {% include "bss_user/bss_user_include_menu.html" %}
+  {% include "bss_admin/bss_admin_include_menu.html" %}
 
-                        <div class="card-body">
-                            <fieldset>
-                                <legend>Database Record Count</legend>
-                            </fieldset>
-                            <div>
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Table</th>
-                                            <th>Record(s)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for row_data in template_data_db_count %}
-                                        <tr>
-                                            <td>{{ row_data.table_name }}</td>
-                                            {% if row_data.table_rows != -1.0 %}
-                                            <td>{{ row_data.table_rows|number_format }}</td>
-                                            {% else %}
-                                            <td>0</td>
-                                            {% endif %}
-                                        </tr>
-                                        {% endfor %}
-                                        <tr>
-                                            <td><b>Total Rows:</b></td>
-                                            <td>{{ template_data_db_count_total|number_format }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+  <main class="flex-1 p-6">
 
-                        <div class="card-body">
-                            <fieldset>
-                                <legend>Database Table Size<br></legend>
-                            </fieldset>
-                            <div>
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Table</th>
-                                            <th>Size</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for row_data in template_data_db_size %}
-                                        <tr>
-                                            <td>{{ row_data.table_name }}</td>
-                                            <td>{{ row_data.table_size|byte_format }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                        <tr>
-                                            <td><b>Total Size:</b></td>
-                                            <td>{{ template_data_db_size_total|byte_format }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+    <section class="bg-white rounded shadow">
 
-                        <div class="card-body">
-                            <fieldset>
-                                <legend>Database Extensions (Available)</legend>
-                            </fieldset>
-                            <div>
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Vesion</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for row_data in template_data_db_extension_avail %}
-                                        <tr>
-                                            <td>{{ row_data.name }}</td>
-                                            <td>{{ row_data.default_version }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+      <!-- Header -->
+      <div class="border-b p-4 space-y-1">
+        <p class="text-indigo-600 font-semibold">
+          PostgreSQL Version:
+          <span class="text-gray-900">
+            {{ template_data_db_version }}
+          </span>
+        </p>
+        <p class="text-indigo-600 font-semibold">
+          Parallel Workers:
+          <span class="text-gray-900">
+            {{ template_data_db_workers }}
+          </span>
+        </p>
+      </div>
 
-                    </div>
-                </div>
-            </div>
-            {% include "bss_public/bss_public_footer.html" %}
+      <!-- Active Extensions -->
+      <div class="p-6">
+        <h2 class="text-lg font-semibold mb-3">
+          Database Extensions (Active)
+        </h2>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full border border-gray-200 text-sm">
+            <thead class="bg-gray-50">
+              <tr class="text-left font-semibold">
+                <th class="px-3 py-2">Name</th>
+                <th class="px-3 py-2">Version</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y">
+              {% for row_data in template_data_db_extension %}
+              <tr class="hover:bg-gray-50">
+                <td class="px-3 py-2">{{ row_data.extname }}</td>
+                <td class="px-3 py-2">{{ row_data.extversion }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-    </div>
-    <script src="/static/js/jquery.min.js" defer></script>
+      </div>
+
+      <!-- Record Count -->
+      <div class="border-t p-6">
+        <h2 class="text-lg font-semibold mb-3">
+          Database Record Count
+        </h2>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full border border-gray-200 text-sm">
+            <thead class="bg-gray-50">
+              <tr class="text-left font-semibold">
+                <th class="px-3 py-2">Table</th>
+                <th class="px-3 py-2">Record(s)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y">
+              {% for row_data in template_data_db_count %}
+              <tr class="hover:bg-gray-50">
+                <td class="px-3 py-2">{{ row_data.table_name }}</td>
+                <td class="px-3 py-2">
+                  {% if row_data.table_rows != -1.0 %}
+                    {{ row_data.table_rows|number_format }}
+                  {% else %}
+                    0
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+              <tr class="font-semibold bg-gray-50">
+                <td class="px-3 py-2">Total Rows</td>
+                <td class="px-3 py-2">
+                  {{ template_data_db_count_total|number_format }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Table Size -->
+      <div class="border-t p-6">
+        <h2 class="text-lg font-semibold mb-3">
+          Database Table Size
+        </h2>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full border border-gray-200 text-sm">
+            <thead class="bg-gray-50">
+              <tr class="text-left font-semibold">
+                <th class="px-3 py-2">Table</th>
+                <th class="px-3 py-2">Size</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y">
+              {% for row_data in template_data_db_size %}
+              <tr class="hover:bg-gray-50">
+                <td class="px-3 py-2">{{ row_data.table_name }}</td>
+                <td class="px-3 py-2">
+                  {{ row_data.table_size|byte_format }}
+                </td>
+              </tr>
+              {% endfor %}
+              <tr class="font-semibold bg-gray-50">
+                <td class="px-3 py-2">Total Size</td>
+                <td class="px-3 py-2">
+                  {{ template_data_db_size_total|byte_format }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Available Extensions -->
+      <div class="border-t p-6">
+        <h2 class="text-lg font-semibold mb-3">
+          Database Extensions (Available)
+        </h2>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full border border-gray-200 text-sm">
+            <thead class="bg-gray-50">
+              <tr class="text-left font-semibold">
+                <th class="px-3 py-2">Name</th>
+                <th class="px-3 py-2">Version</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y">
+              {% for row_data in template_data_db_extension_avail %}
+              <tr class="hover:bg-gray-50">
+                <td class="px-3 py-2">{{ row_data.name }}</td>
+                <td class="px-3 py-2">{{ row_data.default_version }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+{% include "bss_public/bss_public_footer.html" %}
 
 </body>
 </html>

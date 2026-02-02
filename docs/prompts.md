@@ -10,3 +10,7 @@ design and generate html and tailwindcss v4 code for movie detail page incluing 
 
 # main user landing page
 design and generate html5 and tailwindss v4 code for multimedia landing page showing movies, tv show, music in different sections. Use alpinejs for interactivity. Do not include pagination bar. svg instead of emoji. no upper navbar. no explore new media.
+
+
+# to convert html templates
+convert following to alpinejs, tailwindcss v4 and html5

@@ -1,97 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>MediaKraken - Settings</title>
-    <link rel="stylesheet" href="/static/css/base_webapp.css">
-    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediaKraken - Settings</title>
 
+  <!-- Tailwind v4 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
 </head>
 
-<body id="page-top">
-    <div class="flex min-h-screen">
-        {% include "bss_user/bss_user_include_menu.html" %}
-        {% include "bss_admin/bss_admin_include_menu.html" %}
-        <div class="d-flex flex-column" id="content-wrapper">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Server</h5>
-                </div>
-                <div class="card-body">
-                    <p class="card-text">
-                        < input label="Server Name" , type="text" , name="server.name">
-                            <br>
-                    </p>
-                    <p>
-                        < input label="Server MOTD" , type="text" , name="server.motd">
-                            <br>
-                    </p>
-                    <p>
-                        < input label="Purge Activity Data Older Than" , type="text" , name="server.purge_activity">
-                            <br>
-                    </p>
-                    <p>
-                        < input label="Lock account after failed attempts" , type="text" , name="server.lock_account">
-                            <br>
-                    </p>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">Metadata</h5>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">
-                            < input type=checkbox name="server.metadata_with_media" , label="Save metadata with media">
-                                <br>
-                        </p>
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Subtitles</h5>
-                            </div>
-                            <div class="card-body">
-                                <p class="card-text">
-                                    < input type=checkbox name="server.subtitle_for_media" , label="Subtitle">
-                                        <br><br>
-                                </p>
-                                <p class="card-text">
-                                    < input type=checkbox name="server.subtitle_opensubtitles" , label="OpenSubtitles">
-                                        <br>
-                                </p>
-                                <p class="card-text">
-                                    < input type=checkbox name="server.subtitle_skip_if_audio" ,
-                                        label="Skip if audio track in media">
-                                        <br>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Subservers via Docker</h5>
-                </div>
-                <div class="card-body">
-                    <p class="card-text">
-                        < input type=checkbox name="server.docker_mumble" , label="Mumble">
-                            <br>
-                    </p>
-                    <p>
-                        < input type=checkbox name="server.docker_teamspeak3" , label="Teamspeak 3">
-                            <br>
-                    </p>
-                    <p>
-                        < input type=checkbox name="server.docker_transmission" , label="Transmission">
-                            <br>
-                    </p>
-                    <br></p>
-                </div>
-            </div>
-            {% include "bss_public/bss_public_footer.html" %}
+<body class="bg-gray-100 text-gray-900">
+
+<div class="flex min-h-screen">
+  {% include "bss_user/bss_user_include_menu.html" %}
+  {% include "bss_admin/bss_admin_include_menu.html" %}
+
+  <main class="flex-1 p-6 space-y-6">
+
+    <!-- Server Settings -->
+    <section class="bg-white shadow rounded p-6 space-y-4">
+      <h2 class="text-lg font-semibold mb-2">Server Settings</h2>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block font-medium mb-1" for="server-name">Server Name</label>
+          <input id="server-name" name="server.name" type="text" class="w-full border rounded px-3 py-2">
         </div>
-    </div>
-    <script src="/static/js/jquery.min.js" defer></script>
+
+        <div>
+          <label class="block font-medium mb-1" for="server-motd">Server MOTD</label>
+          <input id="server-motd" name="server.motd" type="text" class="w-full border rounded px-3 py-2">
+        </div>
+
+        <div>
+          <label class="block font-medium mb-1" for="server-purge">Purge Activity Data Older Than</label>
+          <input id="server-purge" name="server.purge_activity" type="text" class="w-full border rounded px-3 py-2">
+        </div>
+
+        <div>
+          <label class="block font-medium mb-1" for="server-lock">Lock Account After Failed Attempts</label>
+          <input id="server-lock" name="server.lock_account" type="text" class="w-full border rounded px-3 py-2">
+        </div>
+      </div>
+    </section>
+
+    <!-- Metadata Settings -->
+    <section class="bg-white shadow rounded p-6 space-y-4">
+      <h2 class="text-lg font-semibold mb-2">Metadata</h2>
+      <div class="flex items-center space-x-2">
+        <input type="checkbox" id="metadata-with-media" name="server.metadata_with_media" class="h-4 w-4">
+        <label for="metadata-with-media">Save metadata with media</label>
+      </div>
+
+      <!-- Subtitles -->
+      <div class="bg-gray-50 p-4 rounded space-y-2 mt-2">
+        <h3 class="font-medium">Subtitles</h3>
+        <div class="flex items-center space-x-2">
+          <input type="checkbox" id="subtitle-media" name="server.subtitle_for_media" class="h-4 w-4">
+          <label for="subtitle-media">Subtitle</label>
+        </div>
+        <div class="flex items-center space-x-2">
+          <input type="checkbox" id="subtitle-opensubtitles" name="server.subtitle_opensubtitles" class="h-4 w-4">
+          <label for="subtitle-opensubtitles">OpenSubtitles</label>
+        </div>
+        <div class="flex items-center space-x-2">
+          <input type="checkbox" id="subtitle-skip-audio" name="server.subtitle_skip_if_audio" class="h-4 w-4">
+          <label for="subtitle-skip-audio">Skip if audio track in media</label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Subservers via Docker -->
+    <section class="bg-white shadow rounded p-6 space-y-4">
+      <h2 class="text-lg font-semibold mb-2">Subservers via Docker</h2>
+      <div class="flex flex-col space-y-2">
+        <div class="flex items-center space-x-2">
+          <input type="checkbox" id="docker-mumble" name="server.docker_mumble" class="h-4 w-4">
+          <label for="docker-mumble">Mumble</label>
+        </div>
+        <div class="flex items-center space-x-2">
+          <input type="checkbox" id="docker-teamspeak3" name="server.docker_teamspeak3" class="h-4 w-4">
+          <label for="docker-teamspeak3">Teamspeak 3</label>
+        </div>
+        <div class="flex items-center space-x-2">
+          <input type="checkbox" id="docker-transmission" name="server.docker_transmission" class="h-4 w-4">
+          <label for="docker-transmission">Transmission</label>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+{% include "bss_public/bss_public_footer.html" %}
+
+<script src="/static/js/jquery.min.js" defer></script>
 
 </body>
 </html>

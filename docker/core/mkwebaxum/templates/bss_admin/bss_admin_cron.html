@@ -1,133 +1,218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>MediaKraken - Cron</title>
-    <link rel="stylesheet" href="/static/css/base_webapp.css">
-    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+  <meta charset="utf-8">
+  <title>MediaKraken - Cron</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Tailwind v4 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Alpine.js -->
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
 </head>
 
-<body id="page-top">
-    <div class="flex min-h-screen">
-        {% include "bss_user/bss_user_include_menu.html" %}
-        {% include "bss_admin/bss_admin_include_menu.html" %}
-        <div class="d-flex flex-column" id="content-wrapper">
-            <div id="content">
-                <div class="container-fluid">
-                    <fieldset>
-                        <legend><strong>Cron/Housekeeping Jobs</strong><br></legend>
-                        <div>
-                            {% if template_data_exists %}
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Cron Name</th>
-                                            <th>Description</th>
-                                            <th>Enabled</th>
-                                            <th>Schedule</th>
-                                            <th>Last Run</th>
-                                            <th>Run</th>
-                                            <th>Edit</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for row_data in template_data %}
-                                        <tr>
-                                            <td>{{ loop.index }}</td>
-                                            <td>{{ row_data.mm_cron_name }}</td>
-                                            <td>{{ row_data.mm_cron_description }}</td>
-                                            <td>{{ row_data.mm_cron_enabled }}</td>
-                                            <td>{{ format!("{} {}", row_data.mm_cron_schedule_time, row_data.mm_cron_schedule_type) }}</td>
-                                            <td>{{ row_data.mm_cron_last_run }}</td>
-                                            <td>
-                                                <a href="/admin/cron_run/{{row_data.mm_cron_guid}}" id="play_button">
-                                                    <i class="fas fa-play" height="20" width="20"></i>
-                                                </a>
-                                            </td>
-                                            <div class="pull-right action-buttons">
-                                                <td>
-                                                    <p><button> <a data-id={{ row_data.mm_cron_guid }}
-                                                                data-toggle="modal" data-target="#editCronModal"
-                                                                onclick="EditCron(this)"><span
-                                                                    class="fas fa-pencil-alt"></span></button></a>
-                                                </td>
-                                            </div>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="modal fade" id="confirm_cron" tabindex="-1" role="dialog" aria-labelledby="edit"
-                                aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <button type="button" class="close" data-dismiss="modal"
-                                                aria-hidden="true"><i class="fas fa-trash-alt" height="20"
-                                                    width="20"></i></button>
-                                            <h4 class="modal-title custom_align" id="Heading">Run this Cron</h4>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="alert alert-danger"><span
-                                                    class="fas fa-exclamation-triangle"></span> Are you sure you want to
-                                                run this cron?</div>
-                                        </div>
-                                        <div class="modal-footer ">
-                                            <button type="button" class="btn btn-success" onclick="Cron_Run()"><span
-                                                    class="fas fa-check-circle"></span> Yes</button>
-                                            <button type="button" class="btn btn-default" data-dismiss="modal"><i
-                                                    class="fas fa-trash-alt" height="20" width="20"></i> No</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal fade" id="editCronModal" tabindex="-1" role="dialog"
-                                aria-labelledby="editModalLabel" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <button type="button" class="close" data-dismiss="modal"><span
-                                                    aria-hidden="true">&times;</span><span class="sr-only">Close</span>
-                                            </button>
-                                            <h4 class="modal-title" id="editModalLabel">Update Cron</h4>
-                                        </div>
-                                        <div class="modal-body">
-                                            <form role="form">
-                                                <div class="form-group">
-                                                    <label for="recipient-name" class="control-label">Path:</label>
-                                                    <input type="text" class="form-control" id="editPath">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="message-text" class="control-label">Media Class:</label>
-                                                    <textarea class="form-control" id="editClass"></textarea>
-                                                </div>
-                                            </form>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-default"
-                                                data-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-primary"
-                                                id="btnCronUpdate">Update</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% else %}
-                            <p id="general_text">No cron jobs found.</p>
-                            {% endif %}
-                        </div>
-                    </fieldset>
-                </div>
-            </div>
-            {% include "bss_public/bss_public_footer.html" %}
+<body class="bg-gray-100 text-gray-900">
+
+<div class="flex min-h-screen">
+  {% include "bss_user/bss_user_include_menu.html" %}
+  {% include "bss_admin/bss_admin_include_menu.html" %}
+
+  <main class="flex-1 p-6" x-data="cronPage()">
+
+    <section class="bg-white rounded shadow p-6">
+      <h2 class="text-xl font-semibold mb-6">
+        Cron / Housekeeping Jobs
+      </h2>
+
+      {% if template_data_exists %}
+      <div class="overflow-x-auto">
+        <table class="min-w-full border border-gray-200 text-sm">
+          <thead class="bg-gray-50">
+            <tr class="text-left font-semibold">
+              <th class="px-3 py-2">#</th>
+              <th class="px-3 py-2">Cron Name</th>
+              <th class="px-3 py-2">Description</th>
+              <th class="px-3 py-2">Enabled</th>
+              <th class="px-3 py-2">Schedule</th>
+              <th class="px-3 py-2">Last Run</th>
+              <th class="px-3 py-2 text-center">Run</th>
+              <th class="px-3 py-2 text-center">Edit</th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y">
+            {% for row_data in template_data %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-3 py-2">{{ loop.index }}</td>
+              <td class="px-3 py-2 font-medium">
+                {{ row_data.mm_cron_name }}
+              </td>
+              <td class="px-3 py-2">
+                {{ row_data.mm_cron_description }}
+              </td>
+              <td class="px-3 py-2">
+                <span
+                  class="px-2 py-1 rounded text-xs font-semibold"
+                  :class="'{{ row_data.mm_cron_enabled }}' === 'True'
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-red-100 text-red-700'">
+                  {{ row_data.mm_cron_enabled }}
+                </span>
+              </td>
+              <td class="px-3 py-2">
+                {{ format!("{} {}", row_data.mm_cron_schedule_time, row_data.mm_cron_schedule_type) }}
+              </td>
+              <td class="px-3 py-2">
+                {{ row_data.mm_cron_last_run }}
+              </td>
+              <td class="px-3 py-2 text-center">
+                <button
+                  @click="confirmRun('{{ row_data.mm_cron_guid }}')"
+                  class="text-indigo-600 hover:text-indigo-800"
+                  title="Run Cron">
+                  <i class="fas fa-play"></i>
+                </button>
+              </td>
+              <td class="px-3 py-2 text-center">
+                <button
+                  @click="openEdit(
+                    '{{ row_data.mm_cron_guid }}',
+                    '{{ row_data.mm_cron_name }}'
+                  )"
+                  class="text-indigo-600 hover:text-indigo-800"
+                  title="Edit Cron">
+                  <i class="fas fa-pencil-alt"></i>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <p class="text-gray-500">No cron jobs found.</p>
+      {% endif %}
+    </section>
+
+    <!-- Run Confirmation Modal -->
+    <div
+      x-show="showRunConfirm"
+      x-cloak
+      class="fixed inset-0 bg-black/50 flex items-center justify-center">
+
+      <div class="bg-white rounded shadow-lg w-full max-w-md p-6">
+        <h3 class="text-lg font-semibold mb-4">
+          Run Cron Job
+        </h3>
+
+        <p class="text-red-600 mb-6">
+          <i class="fas fa-exclamation-triangle mr-1"></i>
+          Are you sure you want to run this cron?
+        </p>
+
+        <div class="flex justify-end gap-3">
+          <button
+            @click="runCron"
+            class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+            Yes
+          </button>
+          <button
+            @click="showRunConfirm=false"
+            class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
+            No
+          </button>
         </div>
+      </div>
     </div>
-    <script src="/static/js/jquery.tmpl.min.js"></script>
-    <script src="/static/js/jquery.min.js" defer></script>
-    <script src="/static/js/base_webapp_update.js"></script>
-    <script src="/static/js/base_webapp_run.js"></script>
+
+    <!-- Edit Cron Modal -->
+    <div
+      x-show="showEdit"
+      x-cloak
+      class="fixed inset-0 bg-black/50 flex items-center justify-center">
+
+      <div class="bg-white rounded shadow-lg w-full max-w-lg p-6">
+        <h3 class="text-lg font-semibold mb-4">
+          Update Cron
+        </h3>
+
+        <form class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">
+              Path
+            </label>
+            <input
+              type="text"
+              x-model="editPath"
+              class="w-full border rounded px-3 py-2">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">
+              Media Class
+            </label>
+            <textarea
+              x-model="editClass"
+              class="w-full border rounded px-3 py-2"></textarea>
+          </div>
+        </form>
+
+        <div class="flex justify-end gap-3 mt-6">
+          <button
+            @click="showEdit=false"
+            class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
+            Close
+          </button>
+          <button
+            @click="updateCron"
+            class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+            Update
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+{% include "bss_public/bss_public_footer.html" %}
+
+<script>
+function cronPage() {
+  return {
+    showRunConfirm: false,
+    showEdit: false,
+    selectedGuid: null,
+    editPath: '',
+    editClass: '',
+
+    confirmRun(guid) {
+      this.selectedGuid = guid
+      this.showRunConfirm = true
+    },
+
+    runCron() {
+      window.location.href = `/admin/cron_run/${this.selectedGuid}`
+    },
+
+    openEdit(guid, name) {
+      this.selectedGuid = guid
+      this.editPath = name
+      this.editClass = ''
+      this.showEdit = true
+    },
+
+    updateCron() {
+      console.log('Update cron:', this.selectedGuid, this.editPath, this.editClass)
+      this.showEdit = false
+    }
+  }
+}
+</script>
+
 </body>
 </html>
