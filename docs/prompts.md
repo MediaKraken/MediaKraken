@@ -8,6 +8,23 @@ design and generate html and tailwindcss v4 code for movie detail page incluing 
 
 # tv show detail page - metadata
 
+# book detail page - metadata
+
+# music detail page - metadata
+
+# sports detail page - metadata
+# prob have to have many breakdowns
+
+# game detail page - metadata
+
+# game system detail page - metadata
+
+# videoplayback form for WEB playback
+
+# movie collection - metadata
+
+# music video detail page - metadata
+
 # main user landing page
 design and generate html5 and tailwindss v4 code for multimedia landing page showing movies, tv show, music in different sections. Use alpinejs for interactivity. Do not include pagination bar. svg instead of emoji. no upper navbar. no explore new media.
 
