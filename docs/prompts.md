@@ -74,3 +74,28 @@ design and generate html5 and tailwindss v4 code for multimedia landing page sho
 
 # to convert html templates
 convert following to alpinejs, tailwindcss v4 and html5.  svg instead of emoji.
+
+
+
+
+
+
+Lazy Loading + Skeleton Loaders = 🧠💥
+Best combo:
+Skeleton shows instantly
+Image loads when needed
+No layout jump
+Feels instant
+This is exactly how Netflix / TMDB / Prime do it.
+
+
+Optimize your movie page images for Core Web Vitals
+Add smart eager/lazy logic to your carousels
+Show a perfect LCP-friendly poster setup
+
+<img
+  src="poster.jpg"
+  loading="eager"
+  fetchpriority="high"
+  decoding="async"
+>
