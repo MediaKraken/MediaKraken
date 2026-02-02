@@ -14,11 +14,11 @@
         {% include "bss_user/bss_user_include_side_menu.html" %}
         <div>
                 {% if template_data_new_media %}
-                <a href="/user/media/new"><img src="/static/image/new.png" width="200" height="200" loading="lazy"></a>
+                <a href="/user/media/new"><img src="/static/image/new.png" width="200" height="200" loading="lazy" decoding="async"></a>
                 {% endif %}
                 {% if template_data_user_media_queue %}
                 <a href="/user/media/queue"><img src="/static/image/rectangles_black.png" width="200" height="200"
-                                loading="lazy"></a>
+                                loading="lazy" decoding="async"></a>
                 {% endif %}
                 <!-- Movies Section -->
                 <section id="movies" class="container mx-auto px-6 py-12">

@@ -22,9 +22,9 @@
                     <div class="media_context_right" data-id={{row_data.mm_metadata_music_video_guid}}>
                         <a href="/user/metadata/music_video_detail/{{row_data.mm_metadata_music_video_guid}}">
                             {% if row_data.mm_metadata_music_video_localimage_json == "" %}
-                            <img src="/static/image/Movie-icon.png" loading="lazy" height="300" width="200">
+                            <img src="/static/image/Movie-icon.png" loading="lazy" decoding="async" height="300" width="200">
                             {% else %}
-                            <img src="/metadata/{{row_data.mm_metadata_music_video_localimage_json}}" loading="lazy"
+                            <img src="/metadata/{{row_data.mm_metadata_music_video_localimage_json}}" loading="lazy" decoding="async"
                                 height="300" width="200">
                             {% endif %}
                         </a>

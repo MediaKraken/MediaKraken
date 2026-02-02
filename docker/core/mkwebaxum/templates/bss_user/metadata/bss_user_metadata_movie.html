@@ -34,10 +34,10 @@
           <!-- Poster -->
           {% if row_data.template_metadata_poster == "/static/image/Movie-icon.png" %}
           <img src="/static/image/Movie-icon.png" alt="Movie poster" class="mb-4 aspect-[2/3] w-full rounded-lg object-cover"
-            loading="lazy" />
+            loading="lazy" decoding="async" />
           {% else %}
           <img src="/metadata{{ row_data.template_metadata_poster|safe }}" alt="{{ row_data.template_metadata_name }}"
-            class="mb-4 aspect-[2/3] w-full rounded-lg object-cover" loading="lazy" />
+            class="mb-4 aspect-[2/3] w-full rounded-lg object-cover" loading="lazy" decoding="async" />
           {% endif %}
 
           <!-- Titles -->

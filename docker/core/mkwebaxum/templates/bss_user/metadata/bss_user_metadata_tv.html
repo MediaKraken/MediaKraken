@@ -31,10 +31,10 @@
             <a href="/user/metadata/tv_detail/{{row_data.mm_metadata_tvshow_guid}}" class="block">
               {% if row_data.image_json == "" %}
                 <img src="/static/image/missing_icon.jpg" alt="Missing Image"
-                     class="w-full h-75 object-cover" loading="lazy">
+                     class="w-full h-75 object-cover" loading="lazy" decoding="async">
               {% else %}
                 <img src="/metadata/{{row_data.image_json|unquote_json}}" alt="{{row_data.mm_metadata_tvshow_name}}"
-                     class="w-full h-75 object-cover" loading="lazy">
+                     class="w-full h-75 object-cover" loading="lazy" decoding="async">
               {% endif %}
             </a>
 
