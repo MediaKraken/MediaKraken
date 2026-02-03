@@ -99,3 +99,40 @@ Show a perfect LCP-friendly poster setup
   fetchpriority="high"
   decoding="async"
 >
+
+PAGE TYPE:
+Movie list
+
+LAYOUT:
+- Left sidebar (nav)
+- Main content fills remaining space
+- Max width inside main
+
+STYLE:
+- Dark theme
+- Compact, media-center UI
+- Tailwind CSS v4
+
+COMPONENTS:
+- Movie cards (grid)
+- Poster, title, alt title
+- MPAA rating, runtime
+- Star rating + inline action icons
+- Availability text (right-aligned)
+
+INTERACTIVITY:
+- Alpine.js for icon toggles
+- No pagination bar
+
+CONSTRAINTS:
+- Semantic HTML
+- Accessible (aria where appropriate)
+
+
+
+I assume:
+Mobile-first
+Flexbox / Grid only (no hacks)
+Semantic HTML
+Tailwind utilities only (no inline CSS)
+Alpine = light behavior, not heavy state

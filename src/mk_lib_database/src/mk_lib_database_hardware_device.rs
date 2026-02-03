@@ -112,8 +112,6 @@ pub struct DBDeviceList {
     pub mm_hardware_manufacturer: String,
     pub mm_hardware_model_type: String,
     pub mm_hardware_model_name: String,
-        pub mm_hardware_model_version: String,
-            pub mm_hardwarmm_hardware_ipe_model_name: String,
 }
 
 pub async fn mk_lib_database_hardware_device_read(
@@ -122,9 +120,7 @@ pub async fn mk_lib_database_hardware_device_read(
     let select_query = sqlx::query(
         "select mm_hardware_manufacturer, \
             mm_hardware_model_type, \
-            mm_hardware_model_name, \
-            mm_hardware_model_version, \
-            mm_hardware_ip \
+            mm_hardware_model_name \
             from mm_hardware_model order by mm_hardware_manufacturer, \
             mm_hardware_model_type, mm_hardware_model_name desc",
     );

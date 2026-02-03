@@ -10,7 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_network = { version = "0.0.100", registry = "kellnr" }
+mk_lib_network = { version = "0.0.101", registry = "kellnr" }
 
 fltk = { version = "1.5.22", features = ["fltk-bundled"] }
 fltk-theme = "0.7.9"
