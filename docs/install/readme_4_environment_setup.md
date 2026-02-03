@@ -31,3 +31,5 @@ now you have a shiney replicating volume -->
 
 # setup graphana dash for rabbitmq
 import 10991
+
+for cloudnativepg   20417
