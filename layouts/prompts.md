@@ -77,7 +77,7 @@ convert following to alpinejs, tailwindcss v4 and html5.  svg instead of emoji.
 
 
 
-
+Convert sidebar to Alpine-powered toggle
 
 
 Lazy Loading + Skeleton Loaders = 🧠💥
