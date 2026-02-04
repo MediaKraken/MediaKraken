@@ -10,213 +10,227 @@
 
 </head>
 
-<body class="bg-gray-100 text-gray-900">
+<body class="min-h-screen flex flex-col bg-gray-100 text-gray-900">
+    <!-- Top navbar -->
     {% include "bss_user/bss_user_include_menu.html" %}
-         {% include "bss_user/bss_user_include_side_menu.html" %}
-   <div class="max-w-6xl mx-auto p-6" x-data="moviePage()">
+    <!-- Below top nav -->
+    <div class="flex flex-1">
+        <!-- Left sidebar -->
+        {% include "bss_user/bss_user_include_side_menu.html" %}
+        <!-- Main content -->
+        <main class="flex-1 p-6 bg-gray-50 overflow-y-auto">
+            <div class="max-w-6xl mx-auto p-6" x-data="moviePage()">
 
-        <!-- HEADER -->
-        <div class="grid md:grid-cols-3 gap-6">
+                <!-- HEADER -->
+                <div class="grid md:grid-cols-3 gap-6">
 
-            <!-- Poster -->
-            <div class="aspect-[2/3] bg-gray-300 rounded-xl overflow-hidden shadow">
-                <img src="https://via.placeholder.com/400x600" alt="Poster" class="w-full h-full object-cover">
-            </div>
+                    <!-- Poster -->
+                    <div class="aspect-[2/3] bg-gray-300 rounded-xl overflow-hidden shadow">
+                        <img src="https://via.placeholder.com/400x600" alt="Poster" class="w-full h-full object-cover">
+                    </div>
 
-            <!-- Info -->
-            <div class="md:col-span-2 space-y-4">
+                    <!-- Info -->
+                    <div class="md:col-span-2 space-y-4">
 
-                <div>
-                    <h1 class="text-3xl font-bold">The Movie Title</h1>
-                    <p class="italic text-gray-500">Alternate Movie Title</p>
-                    <p class="mt-2 text-gray-700">“This is the movie tagline that hooks you.”</p>
-                </div>
+                        <div>
+                            <h1 class="text-3xl font-bold">The Movie Title</h1>
+                            <p class="italic text-gray-500">Alternate Movie Title</p>
+                            <p class="mt-2 text-gray-700">“This is the movie tagline that hooks you.”</p>
+                        </div>
 
-                <!-- Genres -->
-                <div class="flex flex-wrap gap-2">
-                    <template x-for="genre in genres" :key="genre">
-                        <button @click="toggleGenre(genre)" class="px-3 py-1 rounded-full border text-sm transition"
-                            :class="activeGenres.includes(genre)
+                        <!-- Genres -->
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="genre in genres" :key="genre">
+                                <button @click="toggleGenre(genre)"
+                                    class="px-3 py-1 rounded-full border text-sm transition" :class="activeGenres.includes(genre)
               ? 'bg-blue-600 text-white border-blue-600'
               : 'bg-white text-gray-700 border-gray-300'">
-                            <span x-text="genre"></span>
-                        </button>
-                    </template>
-                </div>
+                                    <span x-text="genre"></span>
+                                </button>
+                            </template>
+                        </div>
 
-                <!-- Rating -->
-                <div class="flex items-center gap-1">
-                    <template x-for="star in 5" :key="star">
-                        <button @click="rating = star">
-                            <svg class="w-6 h-6" viewBox="0 0 24 24"
-                                :class="star <= rating ? 'fill-yellow-400' : 'fill-gray-300'">
-                                <path d="M12 17.3l6.18 3.7-1.64-7.03L21.5 9.24l-7.19-.61L12 2
+                        <!-- Rating -->
+                        <div class="flex items-center gap-1">
+                            <template x-for="star in 5" :key="star">
+                                <button @click="rating = star">
+                                    <svg class="w-6 h-6" viewBox="0 0 24 24"
+                                        :class="star <= rating ? 'fill-yellow-400' : 'fill-gray-300'">
+                                        <path d="M12 17.3l6.18 3.7-1.64-7.03L21.5 9.24l-7.19-.61L12 2
                        9.69 8.63 2.5 9.24l4.96 4.73L5.82 21z" />
-                            </svg>
-                        </button>
-                    </template>
-                </div>
+                                    </svg>
+                                </button>
+                            </template>
+                        </div>
 
-                <!-- Actions -->
-                <div class="flex gap-5 pt-2">
+                        <!-- Actions -->
+                        <div class="flex gap-5 pt-2">
 
-                    <!-- Favorite -->
-                    <button @click="favorite = !favorite">
-                        <svg class="w-6 h-6" viewBox="0 0 24 24" :class="favorite ? 'fill-red-500' : 'fill-gray-300'">
-                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5
+                            <!-- Favorite -->
+                            <button @click="favorite = !favorite">
+                                <svg class="w-6 h-6" viewBox="0 0 24 24"
+                                    :class="favorite ? 'fill-red-500' : 'fill-gray-300'">
+                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5
                      2 6 4 4 6.5 4c1.74 0 3.41 1.01 4.13 2.44
                      C11.09 5.01 12.76 4 14.5 4 17 4 19 6 19 8.5
                      c0 3.78-3.4 6.86-8.55 11.54z" />
-                        </svg>
-                    </button>
+                                </svg>
+                            </button>
 
-                    <!-- Watched -->
-                    <button @click="watched = !watched">
-                        <svg class="w-6 h-6" viewBox="0 0 24 24" :class="watched ? 'fill-blue-500' : 'fill-gray-300'">
-                            <path d="M12 5c-7.633 0-12 7-12 7s4.367 7 12 7
+                            <!-- Watched -->
+                            <button @click="watched = !watched">
+                                <svg class="w-6 h-6" viewBox="0 0 24 24"
+                                    :class="watched ? 'fill-blue-500' : 'fill-gray-300'">
+                                    <path d="M12 5c-7.633 0-12 7-12 7s4.367 7 12 7
                      12-7 12-7-4.367-7-12-7zm0 11
                      c-2.209 0-4-1.791-4-4s1.791-4 4-4
                      4 1.791 4 4-1.791 4-4 4z" />
-                        </svg>
-                    </button>
+                                </svg>
+                            </button>
 
-                    <!-- Good -->
-                    <button @click="good = !good">
-                        <svg class="w-6 h-6" viewBox="0 0 24 24" :class="good ? 'fill-green-500' : 'fill-gray-300'">
-                            <path d="M9 16.17l-3.88-3.88L3.71 13.7
+                            <!-- Good -->
+                            <button @click="good = !good">
+                                <svg class="w-6 h-6" viewBox="0 0 24 24"
+                                    :class="good ? 'fill-green-500' : 'fill-gray-300'">
+                                    <path d="M9 16.17l-3.88-3.88L3.71 13.7
                      9 19l12-12-1.41-1.41z" />
-                        </svg>
-                    </button>
+                                </svg>
+                            </button>
 
-                    <!-- Terrible -->
-                    <button @click="terrible = !terrible">
-                        <svg class="w-6 h-6" viewBox="0 0 24 24" :class="terrible ? 'fill-red-700' : 'fill-gray-300'">
-                            <path d="M19 6.41L17.59 5 12 10.59
+                            <!-- Terrible -->
+                            <button @click="terrible = !terrible">
+                                <svg class="w-6 h-6" viewBox="0 0 24 24"
+                                    :class="terrible ? 'fill-red-700' : 'fill-gray-300'">
+                                    <path d="M19 6.41L17.59 5 12 10.59
                      6.41 5 5 6.41 10.59 12
                      5 17.59 6.41 19 12 13.41
                      17.59 19 19 17.59 13.41 12z" />
-                        </svg>
+                                </svg>
+                            </button>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CAST CAROUSEL -->
+                <div class="mt-10">
+                    <h2 class="text-xl font-semibold mb-3">Cast</h2>
+
+                    <div class="relative">
+                        <button @click="scroll('cast', -1)"
+                            class="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow rounded-full p-2 z-10">
+                            ‹
+                        </button>
+
+                        <div class="flex gap-4 overflow-x-auto scroll-smooth px-10" x-ref="cast">
+                            <template x-for="person in cast" :key="person.name">
+                                <a href="#" class="min-w-[120px] text-center">
+                                    <img :src="person.img" class="w-28 h-28 rounded-full object-cover mx-auto">
+                                    <p class="mt-2 text-sm font-medium" x-text="person.name"></p>
+                                </a>
+                            </template>
+                        </div>
+
+                        <button @click="scroll('cast', 1)"
+                            class="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow rounded-full p-2">
+                            ›
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CREW CAROUSEL -->
+                <div class="mt-10">
+                    <h2 class="text-xl font-semibold mb-3">Crew</h2>
+
+                    <div class="relative">
+                        <button @click="scroll('crew', -1)"
+                            class="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow rounded-full p-2 z-10">
+                            ‹
+                        </button>
+
+                        <div class="flex gap-4 overflow-x-auto scroll-smooth px-10" x-ref="crew">
+                            <template x-for="person in crew" :key="person.name">
+                                <a href="#" class="min-w-[140px] text-center">
+                                    <img :src="person.img" class="w-28 h-28 rounded-full object-cover mx-auto">
+                                    <p class="mt-2 text-sm font-medium" x-text="person.name"></p>
+                                    <p class="text-xs text-gray-500" x-text="person.role"></p>
+                                </a>
+                            </template>
+                        </div>
+
+                        <button @click="scroll('crew', 1)"
+                            class="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow rounded-full p-2">
+                            ›
+                        </button>
+                    </div>
+                </div>
+
+                <!-- REVIEWS ACCORDION -->
+                <div class="mt-10">
+                    <button @click="reviewsOpen = !reviewsOpen"
+                        class="w-full flex justify-between items-center bg-white p-4 rounded-lg shadow">
+                        <span class="font-semibold">User Reviews</span>
+                        <span x-text="reviewsOpen ? '−' : '+'"></span>
                     </button>
 
-                </div>
-            </div>
-        </div>
-
-        <!-- CAST CAROUSEL -->
-        <div class="mt-10">
-            <h2 class="text-xl font-semibold mb-3">Cast</h2>
-
-            <div class="relative">
-                <button @click="scroll('cast', -1)"
-                    class="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow rounded-full p-2 z-10">
-                    ‹
-                </button>
-
-                <div class="flex gap-4 overflow-x-auto scroll-smooth px-10" x-ref="cast">
-                    <template x-for="person in cast" :key="person.name">
-                        <a href="#" class="min-w-[120px] text-center">
-                            <img :src="person.img" class="w-28 h-28 rounded-full object-cover mx-auto">
-                            <p class="mt-2 text-sm font-medium" x-text="person.name"></p>
-                        </a>
-                    </template>
-                </div>
-
-                <button @click="scroll('cast', 1)"
-                    class="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow rounded-full p-2">
-                    ›
-                </button>
-            </div>
-        </div>
-
-        <!-- CREW CAROUSEL -->
-        <div class="mt-10">
-            <h2 class="text-xl font-semibold mb-3">Crew</h2>
-
-            <div class="relative">
-                <button @click="scroll('crew', -1)"
-                    class="absolute left-0 top-1/2 -translate-y-1/2 bg-white shadow rounded-full p-2 z-10">
-                    ‹
-                </button>
-
-                <div class="flex gap-4 overflow-x-auto scroll-smooth px-10" x-ref="crew">
-                    <template x-for="person in crew" :key="person.name">
-                        <a href="#" class="min-w-[140px] text-center">
-                            <img :src="person.img" class="w-28 h-28 rounded-full object-cover mx-auto">
-                            <p class="mt-2 text-sm font-medium" x-text="person.name"></p>
-                            <p class="text-xs text-gray-500" x-text="person.role"></p>
-                        </a>
-                    </template>
-                </div>
-
-                <button @click="scroll('crew', 1)"
-                    class="absolute right-0 top-1/2 -translate-y-1/2 bg-white shadow rounded-full p-2">
-                    ›
-                </button>
-            </div>
-        </div>
-
-        <!-- REVIEWS ACCORDION -->
-        <div class="mt-10">
-            <button @click="reviewsOpen = !reviewsOpen"
-                class="w-full flex justify-between items-center bg-white p-4 rounded-lg shadow">
-                <span class="font-semibold">User Reviews</span>
-                <span x-text="reviewsOpen ? '−' : '+'"></span>
-            </button>
-
-            <div x-show="reviewsOpen" x-transition class="mt-4 space-y-4">
-                <template x-for="review in reviews" :key="review.user">
-                    <div class="bg-white p-4 rounded-lg shadow">
-                        <p class="font-medium" x-text="review.user"></p>
-                        <p class="text-sm text-gray-600" x-text="review.text"></p>
+                    <div x-show="reviewsOpen" x-transition class="mt-4 space-y-4">
+                        <template x-for="review in reviews" :key="review.user">
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <p class="font-medium" x-text="review.user"></p>
+                                <p class="text-sm text-gray-600" x-text="review.text"></p>
+                            </div>
+                        </template>
                     </div>
-                </template>
+                </div>
+
             </div>
-        </div>
 
-    </div>
+            <script>
+                function moviePage() {
+                    return {
+                        rating: 4,
+                        favorite: false,
+                        watched: false,
+                        good: false,
+                        terrible: false,
+                        reviewsOpen: false,
 
-    <script>
-        function moviePage() {
-            return {
-                rating: 4,
-                favorite: false,
-                watched: false,
-                good: false,
-                terrible: false,
-                reviewsOpen: false,
+                        genres: ['Action', 'Drama', 'Sci-Fi', 'Thriller'],
+                        activeGenres: [],
 
-                genres: ['Action', 'Drama', 'Sci-Fi', 'Thriller'],
-                activeGenres: [],
+                        cast: [
+                            { name: 'Actor One', img: 'https://via.placeholder.com/150' },
+                            { name: 'Actor Two', img: 'https://via.placeholder.com/150' },
+                            { name: 'Actor Three', img: 'https://via.placeholder.com/150' }
+                        ],
 
-                cast: [
-                    { name: 'Actor One', img: 'https://via.placeholder.com/150' },
-                    { name: 'Actor Two', img: 'https://via.placeholder.com/150' },
-                    { name: 'Actor Three', img: 'https://via.placeholder.com/150' }
-                ],
+                        crew: [
+                            { name: 'Director One', role: 'Director', img: 'https://via.placeholder.com/150' },
+                            { name: 'Writer One', role: 'Writer', img: 'https://via.placeholder.com/150' }
+                        ],
 
-                crew: [
-                    { name: 'Director One', role: 'Director', img: 'https://via.placeholder.com/150' },
-                    { name: 'Writer One', role: 'Writer', img: 'https://via.placeholder.com/150' }
-                ],
+                        reviews: [
+                            { user: 'Alice', text: 'Amazing cinematography and story.' },
+                            { user: 'Bob', text: 'A bit long, but worth it.' }
+                        ],
 
-                reviews: [
-                    { user: 'Alice', text: 'Amazing cinematography and story.' },
-                    { user: 'Bob', text: 'A bit long, but worth it.' }
-                ],
+                        toggleGenre(genre) {
+                            this.activeGenres.includes(genre)
+                                ? this.activeGenres = this.activeGenres.filter(g => g !== genre)
+                                : this.activeGenres.push(genre)
+                        },
 
-                toggleGenre(genre) {
-                    this.activeGenres.includes(genre)
-                        ? this.activeGenres = this.activeGenres.filter(g => g !== genre)
-                        : this.activeGenres.push(genre)
-                },
-
-                scroll(ref, dir) {
-                    this.$refs[ref].scrollLeft += dir * 300
+                        scroll(ref, dir) {
+                            this.$refs[ref].scrollLeft += dir * 300
+                        }
+                    }
                 }
-            }
-        }
-    </script>
-
+            </script>
+</main>
+    </div>
+    {% include "bss_public/bss_public_footer.html" %}
+      <script src="/static/js/alpinejs_3.15.3.min.js" defer></script>
+  <script src="/static/js/base_webapp.js" defer></script>
 </body>
 
 </html>

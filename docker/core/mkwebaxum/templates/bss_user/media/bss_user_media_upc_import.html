@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
@@ -10,30 +11,43 @@
 </head>
 
 <body>
-    {% include "bss_user/bss_user_include_menu.html" %}
-         {% include "bss_user/bss_user_include_side_menu.html" %}
-   <div>
-    <h2>Import Text File (Up to 500 Lines)</h2>
-    <input type="file" id="fileInput" accept=".txt">
-    <textarea id="output" placeholder="Imported lines will appear here..."></textarea>
-    <br><br>
-        <a href="/user/media/bss_user_media_upc_import_submit">
-            <button type="button">Submit UPC(s)</button>
-        </a>
-    </div>
-    {% include "bss_public/bss_public_footer.html" %}
-    <script>
-        document.getElementById('fileInput').addEventListener('change', function () {
-            const file = this.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const lines = e.target.result.split(/\r?\n/);
-                const first50Lines = lines.slice(0, 50).join('\n');
-                document.getElementById('output').value = first50Lines;
-            };
-            reader.readAsText(file);
-        });
-    </script>
-</body>
+
+    <body class="min-h-screen flex flex-col bg-gray-100 text-gray-900">
+        <!-- Top navbar -->
+        {% include "bss_user/bss_user_include_menu.html" %}
+        <!-- Below top nav -->
+        <div class="flex flex-1">
+            <!-- Left sidebar -->
+            {% include "bss_user/bss_user_include_side_menu.html" %}
+            <!-- Main content -->
+            <main class="flex-1 p-6 bg-gray-50 overflow-y-auto">
+                <div>
+                    <h2>Import Text File (Up to 500 Lines)</h2>
+                    <input type="file" id="fileInput" accept=".txt">
+                    <textarea id="output" placeholder="Imported lines will appear here..."></textarea>
+                    <br><br>
+                    <a href="/user/media/bss_user_media_upc_import_submit">
+                        <button type="button">Submit UPC(s)</button>
+                    </a>
+                </div>
+                {% include "bss_public/bss_public_footer.html" %}
+                <script>
+                    document.getElementById('fileInput').addEventListener('change', function () {
+                        const file = this.files[0];
+                        if (!file) return;
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            const lines = e.target.result.split(/\r?\n/);
+                            const first50Lines = lines.slice(0, 50).join('\n');
+                            document.getElementById('output').value = first50Lines;
+                        };
+                        reader.readAsText(file);
+                    });
+                </script>
+            </main>
+        </div>
+          <script src="/static/js/alpinejs_3.15.3.min.js" defer></script>
+  <script src="/static/js/base_webapp.js" defer></script>
+    </body>
+
 </html>

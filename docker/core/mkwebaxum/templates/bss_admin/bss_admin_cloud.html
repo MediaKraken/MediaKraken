@@ -9,7 +9,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Alpine.js -->
-  <script defer src="/static/js/alpinejs_3.15.3.min.js"></script>
+  <script defer src=""/static/js/alpinejs_3.15.3.min.js""></script>
 
   <!-- Font Awesome -->
   <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
@@ -106,7 +106,10 @@
 
 {% include "bss_public/bss_public_footer.html" %}
 
-<script>
+
+  <script src="/static/js/alpinejs_3.15.3.min.js" defer></script>
+  <script src="/static/js/base_webapp.js" defer></script>
+  <script>
 function cloudConfig() {
   return {
     showEdit: false,
@@ -119,6 +122,5 @@ function cloudConfig() {
   }
 }
 </script>
-
 </body>
 </html>

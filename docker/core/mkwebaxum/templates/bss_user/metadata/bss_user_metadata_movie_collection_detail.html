@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
@@ -9,51 +10,60 @@
 
 </head>
 
-<body>
+<body class="min-h-screen flex flex-col bg-gray-100 text-gray-900">
+    <!-- Top navbar -->
     {% include "bss_user/bss_user_include_menu.html" %}
-         {% include "bss_user/bss_user_include_side_menu.html" %}
-   <div>
-        <div>
-            {% if template_data_exists %}
-            <div id="movie_detail">
-                <img alt="fs_bg_image" src="/static/data_background_image.png" loading="lazy" decoding="async" id="fs_bg_image" />
-                <div id="movie_image_div" class="table-responsive">
-                    <img class="center" src="/static/data_poster_image.png" loading="lazy" decoding="async">
-                    <table class="table table-hover">
-                        <tbody>
-                            <tr>
-                                <div style="clear: both;"></div>
-                            </tr>
-                        </tbody>
-                    </table>
+    <!-- Below top nav -->
+    <div class="flex flex-1">
+        <!-- Left sidebar -->
+        {% include "bss_user/bss_user_include_side_menu.html" %}
+        <!-- Main content -->
+        <main class="flex-1 p-6 bg-gray-50 overflow-y-auto">
+            <div>
+                {% if template_data_exists %}
+                <div id="movie_detail">
+                    <img alt="fs_bg_image" src="/static/data_background_image.png" loading="lazy" decoding="async"
+                        id="fs_bg_image" />
+                    <div id="movie_image_div" class="table-responsive">
+                        <img class="center" src="/static/data_poster_image.png" loading="lazy" decoding="async">
+                        <table class="table table-hover">
+                            <tbody>
+                                <tr>
+                                    <div style="clear: both;"></div>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="movie_detail_div" class="table-responsive">
+                        <table class="table table-hover">
+                            <tbody>
+                                <tr>
+                                    {# <div id="textbox">
+                                        <p class="alignleft">Title: {{data_name}}</p>
+                                    </div>
+                                    <div style="clear: both;"></div>
+                                    {% if data_genres %}
+                                    <p>Genres: {{data_genres}}</p>
+                                    {% endif %}
+                                    {% if json_metadata["overview"] %}
+                                    <div style="clear: both;"></div>
+                                    <p>Overview: {{json_metadata["overview"]}}</p>
+                                    {% endif %}
+                                    #}
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div id="movie_detail_div" class="table-responsive">
-                    <table class="table table-hover">
-                        <tbody>
-                            <tr>
-                               {# <div id="textbox">
-                                    <p class="alignleft">Title: {{data_name}}</p>
-                                </div>
-                                <div style="clear: both;"></div>
-                                {% if data_genres %}
-                                <p>Genres: {{data_genres}}</p>
-                                {% endif %}
-                                {% if json_metadata["overview"] %}
-                                <div style="clear: both;"></div>
-                                <p>Overview: {{json_metadata["overview"]}}</p>
-                                {% endif %}
-                                #}
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                {% else %}
+                <p id="general_text">No info found. ERROR! You should never see this message.</p>
+                {% endif %}
             </div>
-            {% else %}
-            <p id="general_text">No info found. ERROR! You should never see this message.</p>
-            {% endif %}
-        </div>
+        </main>
     </div>
     {% include "bss_public/bss_public_footer.html" %}
-
+  <script src="/static/js/alpinejs_3.15.3.min.js" defer></script>
+  <script src="/static/js/base_webapp.js" defer></script>
 </body>
+
 </html>
