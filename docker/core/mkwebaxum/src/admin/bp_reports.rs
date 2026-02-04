@@ -23,6 +23,8 @@ struct TemplateReportKnownMediaContext<'a> {
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
     page: &'a usize,
+        page_title: Option<String>,
+
 }
 
 pub async fn admin_report_known_media(

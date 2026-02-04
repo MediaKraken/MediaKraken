@@ -25,6 +25,8 @@ struct TemplateError403Context {}
 #[template(path = "bss_admin/bss_upc_import.html")]
 struct TemplateMediaUPCContext {
     template_data: serde_json::Value,
+        page_title: Option<String>,
+
 }
 
 pub async fn admin_upc_import(

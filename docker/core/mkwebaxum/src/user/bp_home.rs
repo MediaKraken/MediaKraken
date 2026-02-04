@@ -18,7 +18,9 @@ struct TemplateError401Context {}
 #[template(path = "bss_user/bss_user_home.html")]
 struct TemplateUserHomeContext<'a> {
     template_data_new_media: &'a bool,
-    template_data_user_media_queue: &'a bool,
+    template_data_user_media_queue: &'a bool,.
+        page_title: Option<String>,
+
 }
 
 pub async fn user_home(

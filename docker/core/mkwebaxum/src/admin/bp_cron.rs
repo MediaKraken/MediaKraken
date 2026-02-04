@@ -20,6 +20,8 @@ struct TemplateError403Context {}
 struct TemplateCronContext<'a> {
     template_data: &'a Vec<mk_lib_database::mk_lib_database_cron::DBCronList>,
     template_data_exists: &'a bool,
+        page_title: Option<String>,
+
 }
 
 pub async fn admin_cron(

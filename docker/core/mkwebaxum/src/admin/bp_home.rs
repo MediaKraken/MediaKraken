@@ -52,6 +52,8 @@ struct TemplateHomeContext<'a> {
     template_server_streams: &'a Vec<TemplateHomeStreamListContext>,
     template_server_users: &'a Vec<mk_lib_database::mk_lib_database_user::DBUserList>,
     template_data_scan_info: &'a Vec<TemplateHomeScanListContext>,
+        page_title: Option<String>,
+
 }
 
 pub async fn admin_home(

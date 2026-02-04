@@ -19,6 +19,8 @@ struct TemplateError401Context {}
 #[template(path = "bss_user/hardware/bss_user_hardware.html")]
 struct TemplateUserHardwareContext<'a> {
     template_data_phue_exists: &'a bool,
+        page_title: Option<String>,
+
 }
 
 pub async fn user_hardware(

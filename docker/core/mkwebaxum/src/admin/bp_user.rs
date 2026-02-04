@@ -25,6 +25,8 @@ struct TemplateAdminUserContext<'a> {
     template_data: &'a Vec<mk_lib_database::mk_lib_database_user::DBUserList>,
     pagination_bar: &'a String,
     page: &'a usize,
+        page_title: Option<String>,
+
 }
 
 pub async fn admin_user(

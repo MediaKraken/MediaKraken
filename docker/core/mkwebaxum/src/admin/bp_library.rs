@@ -25,6 +25,8 @@ struct TemplateAdminLibraryContext<'a> {
     template_data_share_user:
         &'a Vec<mk_lib_database::mk_lib_database_network_share::DBShareAuthUserList>,
     template_data_exists: &'a bool,
+        page_title: Option<String>,
+
 }
 
 pub async fn admin_library(

@@ -20,6 +20,8 @@ struct TemplateError403Context {}
 struct AdminHardwareTemplate<'a> {
     template_data: &'a Vec<mk_lib_database::mk_lib_database_hardware_device::DBDeviceList>,
     template_data_exists: &'a bool,
+        page_title: Option<String>,
+
 }
 
 pub async fn admin_hardware(

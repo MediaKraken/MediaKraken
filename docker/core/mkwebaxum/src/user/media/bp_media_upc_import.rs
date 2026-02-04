@@ -25,6 +25,8 @@ struct TemplateError401Context {}
 #[template(path = "bss_user/media/bss_user_media_upc_import.html")]
 struct TemplateMediaUPCContext {
     template_data: serde_json::Value,
+        page_title: Option<String>,
+
 }
 
 pub async fn user_media_upc_import(

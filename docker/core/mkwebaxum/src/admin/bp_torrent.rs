@@ -26,6 +26,8 @@ struct TemplateError403Context {}
 #[template(path = "bss_admin/bss_admin_torrent.html")]
 struct AdminTorrentTemplate<'a> {
     template_data: &'a Vec<mk_lib_network::mk_lib_network_transmission::TorrentList>,
+        page_title: Option<String>,
+
 }
 
 pub async fn admin_torrent(

@@ -20,6 +20,8 @@ struct TemplateError403Context {}
 struct TemplateLogContext<'a> {
     template_data: &'a Vec<mk_lib_logging::mk_lib_logging_loki::LokiLog>,
     template_data_exists: &'a bool,
+        page_title: Option<String>,
+
 }
 
 pub async fn admin_logging(

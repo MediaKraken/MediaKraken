@@ -25,6 +25,7 @@ struct TemplateMetaBookContext<'a> {
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
     page: &'a usize,
+    page_title: Option<String>,
 }
 
 pub async fn user_metadata_book(

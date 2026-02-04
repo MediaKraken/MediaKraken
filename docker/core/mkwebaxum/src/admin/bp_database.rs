@@ -28,6 +28,7 @@ struct AdminDBStatsTemplate<'a> {
         &'a Vec<mk_lib_database::mk_lib_database_postgresql::PGExtensionActive>,
     template_data_db_extension_avail:
         &'a Vec<mk_lib_database::mk_lib_database_postgresql::PGExtensionAvailable>,
+    page_title: Option<String>,
 }
 
 pub async fn admin_database(

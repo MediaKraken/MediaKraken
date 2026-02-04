@@ -21,6 +21,8 @@ struct TemplateError401Context {}
 struct TemplateUserInternetFlickr<'a> {
     // template_data: &'a Photos,
     template_data_exists: &'a bool,
+        page_title: Option<String>,
+
 }
 
 pub async fn user_inter_flickr(
