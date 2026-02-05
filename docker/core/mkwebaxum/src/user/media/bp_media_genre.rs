@@ -36,11 +36,11 @@ pub async fn user_media_genre(
     .validate(&current_user, &method, None)
     .await
     {
-        let template = TemplateError401Context {page_title: Some("MediaKraken Media Genre".to_string()),};
+        let template = TemplateError401Context {};
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let template = TemplateUserGenreContext {};
+        let template = TemplateUserGenreContext {page_title: Some("MediaKraken Media Genre".to_string()),};
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }

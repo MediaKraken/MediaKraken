@@ -23,7 +23,7 @@ struct TemplateError401Context {}
 #[template(path = "bss_user/media/bss_user_media_image_gallery.html")]
 struct TemplateUserImageContext {  page_title: Option<String>,
 }
-}
+
 
 pub async fn user_media_image(
     Extension(sqlx_pool): Extension<PgPool>,
