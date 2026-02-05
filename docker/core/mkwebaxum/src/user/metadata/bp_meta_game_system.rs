@@ -81,6 +81,7 @@ pub async fn user_metadata_game_system(
             template_data_exists: &template_data_exists,
             pagination_bar: &pagination_html,
             page: &page_usize,
+                    page_title: Some("MediaKraken Metadata Game Systems".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

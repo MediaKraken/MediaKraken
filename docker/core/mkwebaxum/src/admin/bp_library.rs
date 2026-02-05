@@ -74,6 +74,8 @@ pub async fn admin_library(
             template_data_libary: &library_list,
             template_data_share_user: &share_user_list,
             template_data_exists: &template_data_exists,
+                        page_title: Some("MediaKraken Admin Library".to_string()),
+
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

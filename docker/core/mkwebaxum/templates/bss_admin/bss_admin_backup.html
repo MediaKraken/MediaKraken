@@ -1,19 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>MediaKraken - Backup</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Tailwind v4 CDN (or build locally) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Alpine.js -->
-  <script defer src=""/static/js/alpinejs_3.15.3.min.js""></script>
-
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
-</head>
+{% include "bss_include_header.html" %}
 
 <body class="bg-gray-100 text-gray-900">
 
@@ -160,9 +147,7 @@
 
 
 {% include "bss_public/bss_public_footer.html" %}
-  <script src="/static/js/alpinejs_3.15.3.min.js" defer></script>
-  <script src="/static/js/base_webapp.js" defer></script>
-  <script>
+   <script>
 function backupPage() {
   return {
     showDelete: false,

@@ -1,11 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" x-data="{ showDeleteModal: false, deleteUserId: null }">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediaKraken - User</title>
-     <script src="https://cdn.tailwindcss.com"></script>
-</head>
+{% include "bss_include_header.html" %}
 <body class="bg-gray-100 min-h-screen flex flex-col">
 
     <!-- Header/Menu -->
@@ -101,11 +96,6 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-white shadow p-4 mt-6 text-center text-gray-500">
-        &copy; 2026 MediaKraken. All rights reserved.
-    </footer>
-  <script src="/static/js/alpinejs_3.15.3.min.js" defer></script>
-  <script src="/static/js/base_webapp.js" defer></script>
+{% include "bss_public/bss_public_footer.html" %}
 </body>
 </html>

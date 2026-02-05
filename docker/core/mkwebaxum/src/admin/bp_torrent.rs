@@ -60,6 +60,8 @@ pub async fn admin_torrent(
             .unwrap();
         let template = AdminTorrentTemplate {
             template_data: &transmission_torrents,
+                        page_title: Some("MediaKraken Admin Torrent".to_string()),
+
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

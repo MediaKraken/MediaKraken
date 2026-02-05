@@ -44,6 +44,7 @@ pub async fn user_hardware(
         let mut phue_exists: bool = true;
         let template = TemplateUserHardwareContext {
             template_data_phue_exists: &phue_exists,
+                    page_title: Some("MediaKraken Hardware".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

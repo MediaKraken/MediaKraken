@@ -136,6 +136,8 @@ pub async fn admin_home(
             template_server_streams: &server_streams,
             template_server_users: &user_list,
             template_data_scan_info: &server_scans,
+                        page_title: Some("MediaKraken Admin".to_string()),
+
         };
         println!("templates {}", template);
         let reply_html = template.render().unwrap();

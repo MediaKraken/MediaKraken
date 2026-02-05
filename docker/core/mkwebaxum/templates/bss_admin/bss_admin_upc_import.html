@@ -1,11 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" x-data="upcImport()" x-cloak>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediaKraken - UPC Import</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
-</head>
+{% include "bss_include_header.html" %}
 <body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
 
     <!-- Header/Menu -->
@@ -41,13 +36,8 @@
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-white shadow p-4 mt-6">
-        <!-- Include your footer template here -->
-    </footer>
-  <script src="/static/js/alpinejs_3.15.3.min.js" defer></script>
-  <script src="/static/js/base_webapp.js" defer></script>
-    <!-- Alpine.js Logic -->
+{% include "bss_public/bss_public_footer.html" %}
+     <!-- Alpine.js Logic -->
     <script>
         function upcImport() {
             return {

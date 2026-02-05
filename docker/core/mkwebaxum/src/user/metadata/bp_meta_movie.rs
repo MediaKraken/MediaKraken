@@ -25,6 +25,7 @@ struct TemplateError401Context {}
 struct TemplateMetaMovieList {
     template_metadata_guid: uuid::Uuid,
     template_metadata_name: String,
+    template_metadata_name_alt: String,
     template_metadata_date: String,
     template_metadata_poster: String,
     template_metadata_user_watched: serde_json::Value,
@@ -119,6 +120,7 @@ pub async fn user_metadata_movie(
             let temp_meta_line = TemplateMetaMovieList {
                 template_metadata_guid: row_data.mm_metadata_guid,
                 template_metadata_name: row_data.mm_metadata_name.clone(),
+                template_metadata_name_alt: row_data.mm_metadata_movie_name_alt.clone(),
                 template_metadata_date: row_data.mm_date.clone(),
                 template_metadata_poster: mm_poster,
                 template_metadata_user_watched: watched_status,
@@ -138,7 +140,7 @@ pub async fn user_metadata_movie(
             template_data_exists: &template_data_exists,
             pagination_bar: &pagination_html,
             page: &page_usize,
-            page_title: Some("MediaKraken Movie Metadata".to_string()),
+            page_title: Some("MediaKraken Metadata Movies".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

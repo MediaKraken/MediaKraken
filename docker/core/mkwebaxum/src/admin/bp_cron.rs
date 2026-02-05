@@ -53,6 +53,8 @@ pub async fn admin_cron(
         let template = TemplateCronContext {
             template_data: &cron_list,
             template_data_exists: &cron_data,
+                        page_title: Some("MediaKraken Admin Cron".to_string()),
+
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

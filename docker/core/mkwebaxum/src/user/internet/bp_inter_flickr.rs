@@ -46,6 +46,8 @@ pub async fn user_inter_flickr(
         let template = TemplateUserInternetFlickr {
             // template_data: ,
             template_data_exists: &false,
+                        page_title: Some("MediaKraken Flickr".to_string()),
+
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

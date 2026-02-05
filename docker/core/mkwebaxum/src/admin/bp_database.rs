@@ -102,6 +102,8 @@ pub async fn admin_database(
             template_data_db_workers: &pg_worker_count,
             template_data_db_extension: &pg_extension,
             template_data_db_extension_avail: &pg_extension_avail,
+                        page_title: Some("MediaKraken Admin Database".to_string()),
+
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

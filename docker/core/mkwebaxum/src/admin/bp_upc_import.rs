@@ -49,6 +49,8 @@ pub async fn admin_upc_import(
     } else {
         let template = TemplateMediaUPCContext {
             template_data: json!({}),
+                        page_title: Some("MediaKraken Admin UPC Import".to_string()),
+
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

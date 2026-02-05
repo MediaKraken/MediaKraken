@@ -55,6 +55,8 @@ pub async fn admin_hardware(
         let template = AdminHardwareTemplate {
             template_data: &hardware_list,
             template_data_exists: &hardware_data,
+                        page_title: Some("MediaKraken Admin Hardware".to_string()),
+
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

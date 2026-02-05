@@ -49,6 +49,7 @@ pub async fn user_media_upc_import(
     } else {
         let template = TemplateMediaUPCContext {
             template_data: json!({}),
+                    page_title: Some("MediaKraken UPC Import".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

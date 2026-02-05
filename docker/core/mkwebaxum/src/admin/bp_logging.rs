@@ -53,6 +53,8 @@ pub async fn admin_logging(
         let template = TemplateLogContext {
             template_data: &logging_list,
             template_data_exists: &logging_data,
+                        page_title: Some("MediaKraken Admin Logging".to_string()),
+
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
