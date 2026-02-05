@@ -16,7 +16,7 @@ struct TemplateError401Context {}
 
 #[derive(Template)]
 #[template(path = "bss_user/bss_user_queue.html")]
-struct UserQueueTemplate;
+struct UserQueueTemplate { page_title: Option<String>,}
 
 pub async fn user_queue(
     Extension(sqlx_pool): Extension<PgPool>,
@@ -36,7 +36,7 @@ pub async fn user_queue(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let template = UserQueueTemplate {};
+        let template = UserQueueTemplate {page_title: Some("MediaKraken Media Queue".to_string()),};
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }

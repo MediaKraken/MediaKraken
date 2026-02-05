@@ -96,6 +96,7 @@ pub async fn user_metadata_sports(
 struct TemplateMetaSportsDetailContext<'a> {
     template_data: &'a serde_json::Value,
     template_data_exists: &'a bool,
+ page_title: Option<String>,
 }
 
 pub async fn user_metadata_sports_detail(
@@ -120,6 +121,7 @@ pub async fn user_metadata_sports_detail(
         let template = TemplateMetaSportsDetailContext {
             template_data: &json!({}),
             template_data_exists: &false,
+            page_title: Some("MediaKraken Metadata Sports Detail".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

@@ -16,7 +16,9 @@ struct TemplateError401Context {}
 
 #[derive(Template)]
 #[template(path = "bss_user/internet/bss_user_internet.html")]
-struct UserInternetTemplate;
+struct UserInternetTemplate {
+        page_title: Option<String>,
+}
 
 pub async fn user_inter_home(
     Extension(sqlx_pool): Extension<PgPool>,
@@ -36,7 +38,7 @@ pub async fn user_inter_home(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let template = UserInternetTemplate {};
+        let template = UserInternetTemplate {page_title: Some("MediaKraken Internet".to_string()),};
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }

@@ -152,6 +152,7 @@ pub async fn user_metadata_movie(
 struct TemplateMetaMovieDetailContext<'a> {
     template_data_json: &'a serde_json::Value,
     template_data_json_media_crew: &'a serde_json::Value,
+     page_title: Option<String>,
 }
 
 pub async fn user_metadata_movie_detail(
@@ -182,6 +183,7 @@ pub async fn user_metadata_movie_detail(
         let template = TemplateMetaMovieDetailContext {
             template_data_json: &movie_metadata.get("mm_metadata_movie_json"),
             template_data_json_media_crew: &json!({}),
+            page_title: Some("MediaKraken Metadata Movie Detail".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

@@ -54,7 +54,8 @@ pub async fn user_hardware(
 #[derive(Template)]
 #[template(path = "bss_user/hardware/bss_user_hardware_phue.html")]
 struct TemplateUserHardwarePhueContext {
-    template_data_phue: i32,
+     template_data_phue: i32,
+        page_title: Option<String>,
 }
 
 pub async fn user_hardware_phue(
@@ -77,6 +78,7 @@ pub async fn user_hardware_phue(
     } else {
         let template = TemplateUserHardwarePhueContext {
             template_data_phue: 0,
+            page_title: Some("MediaKraken Hardware".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

@@ -16,7 +16,9 @@ struct TemplateError401Context {}
 
 #[derive(Template)]
 #[template(path = "bss_user/bss_user_media_search.html")]
-struct UserSearchTemplate;
+struct UserSearchTemplate {
+        page_title: Option<String>,
+}
 
 pub async fn user_search(
     Extension(sqlx_pool): Extension<PgPool>,
@@ -36,7 +38,7 @@ pub async fn user_search(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let template = UserSearchTemplate {};
+        let template = UserSearchTemplate {page_title: Some("MediaKraken Search".to_string()),};
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }

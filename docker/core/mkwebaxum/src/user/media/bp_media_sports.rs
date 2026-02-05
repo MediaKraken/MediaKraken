@@ -94,6 +94,8 @@ pub async fn user_media_sports(
 #[template(path = "bss_user/media/bss_user_media_sports_detail.html")]
 struct TemplateMediaSportsDetailContext {
     template_data: serde_json::Value,
+      page_title: Option<String>,
+
 }
 
 pub async fn user_media_sports_detail(
@@ -117,6 +119,7 @@ pub async fn user_media_sports_detail(
     } else {
         let template = TemplateMediaSportsDetailContext {
             template_data: json!({}),
+            page_title: Some("MediaKraken Sports Detail".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

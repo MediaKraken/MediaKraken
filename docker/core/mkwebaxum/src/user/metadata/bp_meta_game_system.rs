@@ -92,6 +92,7 @@ pub async fn user_metadata_game_system(
 #[template(path = "bss_user/metadata/bss_user_metadata_game_system_detail.html")]
 struct TemplateMetaGameSystemDetailContext {
     template_data: serde_json::Value,
+ page_title: Option<String>,
 }
 
 pub async fn user_metadata_game_system_detail(
@@ -122,6 +123,7 @@ pub async fn user_metadata_game_system_detail(
         .unwrap();
         let template = TemplateMetaGameSystemDetailContext {
             template_data: detail_data,
+            page_title: Some("MediaKraken Metadata Game System Detail".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

@@ -20,7 +20,7 @@ struct TemplateError401Context {}
 
 #[derive(Template)]
 #[template(path = "bss_user/playback/bss_user_playback_comic.html")]
-struct UserPlaybackComicTemplate;
+struct UserPlaybackComicTemplate { page_title: Option<String>,}
 
 pub async fn user_playback_comic(
     Extension(sqlx_pool): Extension<PgPool>,
@@ -40,7 +40,7 @@ pub async fn user_playback_comic(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let template = UserPlaybackComicTemplate {};
+        let template = UserPlaybackComicTemplate {page_title: Some("MediaKraken Comic Viewer".to_string()),};
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }

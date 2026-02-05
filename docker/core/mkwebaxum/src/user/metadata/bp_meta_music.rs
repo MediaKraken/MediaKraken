@@ -95,6 +95,7 @@ pub async fn user_metadata_music(
 #[template(path = "bss_user/metadata/bss_user_metadata_music_album_detail.html")]
 struct TemplateMetaMusicDetailContext {
     template_data: serde_json::Value,
+     page_title: Option<String>,
 }
 
 pub async fn user_metadata_music_detail(
@@ -118,6 +119,7 @@ pub async fn user_metadata_music_detail(
     } else {
         let template = TemplateMetaMusicDetailContext {
             template_data: json!({}),
+            page_title: Some("MediaKraken Metadata Music Detail".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

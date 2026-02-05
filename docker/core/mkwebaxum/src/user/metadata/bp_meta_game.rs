@@ -93,6 +93,7 @@ pub async fn user_metadata_game(
 #[template(path = "bss_user/metadata/bss_user_metadata_game_detail.html")]
 struct TemplateMetaGameDetailContext {
     template_data: serde_json::Value,
+     page_title: Option<String>,
 }
 
 pub async fn user_metadata_game_detail(
@@ -116,6 +117,7 @@ pub async fn user_metadata_game_detail(
     } else {
         let template = TemplateMetaGameDetailContext {
             template_data: json!({}),
+            page_title: Some("MediaKraken Metadata Game Detail".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

@@ -56,6 +56,8 @@ pub async fn user_inter_youtube(
 #[template(path = "bss_user/internet/bss_user_internet_youtube_detail.html")]
 struct UserInternetYoutubeDetailTemplate<'a> {
     template_youtube_video_guid: &'a String,
+           page_title: Option<String>,
+
 }
 
 pub async fn user_inter_youtube_detail(
@@ -78,6 +80,7 @@ pub async fn user_inter_youtube_detail(
     } else {
         let template = UserInternetYoutubeDetailTemplate {
             template_youtube_video_guid: &"fakeguid".to_string(),
+            page_title: Some("MediaKraken Youtube Detail".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

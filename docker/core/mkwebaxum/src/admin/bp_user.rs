@@ -26,7 +26,6 @@ struct TemplateAdminUserContext<'a> {
     pagination_bar: &'a String,
     page: &'a usize,
         page_title: Option<String>,
-
 }
 
 pub async fn admin_user(
@@ -82,7 +81,9 @@ pub async fn admin_user(
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_user_detail.html")]
-struct TemplateAdminUserDetailContext {}
+struct TemplateAdminUserDetailContext {
+        page_title: Option<String>,
+}
 
 pub async fn admin_user_detail(
     Extension(sqlx_pool): Extension<PgPool>,
@@ -103,7 +104,7 @@ pub async fn admin_user_detail(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let template = TemplateAdminUserDetailContext {};
+        let template = TemplateAdminUserDetailContext { page_title: Some("MediaKraken Admin User".to_string()),};
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }

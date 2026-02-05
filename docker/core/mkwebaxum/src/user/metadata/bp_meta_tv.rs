@@ -94,6 +94,7 @@ pub async fn user_metadata_tv(
 struct TemplateMetaTVDetailContext<'a> {
     template_data: &'a serde_json::Value,
     template_data_media_seasons_exists: &'a bool,
+     page_title: Option<String>,
 }
 
 pub async fn user_metadata_tv_detail(
@@ -118,6 +119,7 @@ pub async fn user_metadata_tv_detail(
         let template = TemplateMetaTVDetailContext {
             template_data: &json!({}),
             template_data_media_seasons_exists: &false,
+            page_title: Some("MediaKraken Metadata TV Show Detail".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

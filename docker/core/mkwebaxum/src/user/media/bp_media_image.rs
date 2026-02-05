@@ -21,7 +21,9 @@ struct TemplateError401Context {}
 
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_image_gallery.html")]
-struct TemplateUserImageContext {}
+struct TemplateUserImageContext {  page_title: Option<String>,
+}
+}
 
 pub async fn user_media_image(
     Extension(sqlx_pool): Extension<PgPool>,
@@ -41,7 +43,7 @@ pub async fn user_media_image(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let template = TemplateUserImageContext {};
+        let template = TemplateUserImageContext {page_title: Some("MediaKraken Image Gallery".to_string()),};
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }

@@ -16,7 +16,9 @@ struct TemplateError401Context {}
 
 #[derive(Template)]
 #[template(path = "bss_user/bss_user_profile.html")]
-struct UserProfileTemplate;
+struct UserProfileTemplate {
+        page_title: Option<String>,
+}
 
 pub async fn user_profile(
     Extension(sqlx_pool): Extension<PgPool>,
@@ -36,7 +38,7 @@ pub async fn user_profile(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let template = UserProfileTemplate {};
+        let template = UserProfileTemplate {page_title: Some("MediaKraken User Profile".to_string()),};
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }

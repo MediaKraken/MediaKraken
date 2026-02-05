@@ -18,7 +18,9 @@ struct TemplateError401Context {}
 
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_genre_video.html")]
-struct TemplateUserGenreContext {}
+struct TemplateUserGenreContext {
+        page_title: Option<String>,
+}
 
 pub async fn user_media_genre(
     Extension(sqlx_pool): Extension<PgPool>,
@@ -34,7 +36,7 @@ pub async fn user_media_genre(
     .validate(&current_user, &method, None)
     .await
     {
-        let template = TemplateError401Context {};
+        let template = TemplateError401Context {page_title: Some("MediaKraken Media Genre".to_string()),};
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {

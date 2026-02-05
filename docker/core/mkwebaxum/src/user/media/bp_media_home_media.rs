@@ -95,6 +95,7 @@ pub async fn user_media_home_media(
 #[template(path = "bss_user/media/bss_user_media_home_movie_detail.html")]
 struct TemplateMediaHomeDetailContext {
     template_data: serde_json::Value,
+    page_title: Option<String>,
 }
 
 pub async fn user_media_home_media_detail(
@@ -118,6 +119,7 @@ pub async fn user_media_home_media_detail(
     } else {
         let template = TemplateMediaHomeDetailContext {
             template_data: json!({}),
+            page_title: Some("MediaKraken Home Movie Detail".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

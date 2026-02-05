@@ -93,6 +93,7 @@ pub async fn user_media_game(
 #[template(path = "bss_user/media/bss_user_media_game_detail.html")]
 struct TemplateMediaGameDetailContext {
     template_data: serde_json::Value,
+       page_title: Option<String>,
 }
 
 pub async fn user_media_game_detail(
@@ -116,6 +117,7 @@ pub async fn user_media_game_detail(
     } else {
         let template = TemplateMediaGameDetailContext {
             template_data: json!({}),
+            page_title: Some("MediaKraken Game Detail".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

@@ -56,7 +56,10 @@ pub async fn user_inter_flickr(
 
 #[derive(Template)]
 #[template(path = "bss_user/internet/bss_user_internet_flickr_detail.html")]
-struct TemplateUserInternetFlickrDetail;
+struct TemplateUserInternetFlickrDetail<'a> {
+    template_data_exists: &'a bool,
+        page_title: Option<String>,
+}
 
 pub async fn user_inter_flickr_detail(
     Extension(sqlx_pool): Extension<PgPool>,
@@ -76,7 +79,10 @@ pub async fn user_inter_flickr_detail(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let template = TemplateUserInternetFlickrDetail {};
+        let template = TemplateUserInternetFlickrDetail {
+             template_data_exists: &false,
+          page_title: Some("MediaKraken Flickr Detail".to_string()),
+        };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }

@@ -96,6 +96,7 @@ pub async fn user_media_music(
 struct TemplateMediaMusicDetailContext {
     template_data: serde_json::Value,
     template_data_exists: bool,
+ page_title: Option<String>,
 }
 
 pub async fn user_media_music_detail(
@@ -120,6 +121,7 @@ pub async fn user_media_music_detail(
         let template = TemplateMediaMusicDetailContext {
             template_data: json!({}),
             template_data_exists: false,
+            page_title: Some("MediaKraken Music Detail".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

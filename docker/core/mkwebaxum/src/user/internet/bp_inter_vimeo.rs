@@ -54,7 +54,9 @@ pub async fn user_inter_vimeo(
 
 #[derive(Template)]
 #[template(path = "bss_user/internet/bss_user_internet_vimeo_detail.html")]
-struct UserInternetVimeoDetailTemplate;
+struct UserInternetVimeoDetailTemplate {
+        page_title: Option<String>,
+}
 
 pub async fn user_inter_vimeo_detail(
     Extension(sqlx_pool): Extension<PgPool>,
@@ -74,7 +76,7 @@ pub async fn user_inter_vimeo_detail(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let template = UserInternetVimeoDetailTemplate {};
+        let template = UserInternetVimeoDetailTemplate {page_title: Some("MediaKraken Vimeo Detail".to_string()),};
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }

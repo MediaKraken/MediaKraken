@@ -93,6 +93,8 @@ pub async fn user_media_book(
 #[template(path = "bss_user/media/bss_user_media_book_detail.html")]
 struct TemplateMediaBookDetailContext {
     template_data: serde_json::Value,
+     page_title: Option<String>,
+
 }
 
 pub async fn user_media_book_detail(
@@ -117,6 +119,7 @@ pub async fn user_media_book_detail(
         //let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
         let template = TemplateMediaBookDetailContext {
             template_data: json!({}),
+            page_title: Some("MediaKraken Book Detail".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
