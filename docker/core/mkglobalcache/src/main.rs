@@ -52,10 +52,10 @@ struct ApiBrandsTypeCodeset {}
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
+    let sqlx_pool_rw, sqlx_pool_ro = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
         .await
         .unwrap();
-    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await
         .unwrap();
 
@@ -91,7 +91,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     }
                     let _result =
         mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_manufacturer_upsert(
-                &sqlx_pool,
+                &sqlx_pool_rw,
                 brand_item.brand_name.replace("\"", ""),
                 brand_item
                     .brand_id
@@ -126,7 +126,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             println!("item_type: {:?}\n", item_type);
                         }
                         let _result = mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_type_upsert(
-                &sqlx_pool,
+                &sqlx_pool_rw,
                 item_type.brand_type.replace("\"", ""),
             )
             .await;
@@ -169,7 +169,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             }
                             let device_count =
                 mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_model_device_count_by_type(
-                        &sqlx_pool,
+                        &sqlx_pool_ro,
                         item_model.brand_name.replace("\"", ""),
                         item_model.brand_type.replace("\"", ""),
                         item_model.brand_model.replace("\"", ""),
@@ -179,7 +179,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             if device_count == 0 {
                                 let _result =
                     mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_model_insert(
-                            &sqlx_pool,
+                            &sqlx_pool_rw,
                             item_model.brand_name.replace("\"", ""),
                             item_model.brand_type.replace("\"", ""),
                             item_model.brand_model.replace("\"", ""),

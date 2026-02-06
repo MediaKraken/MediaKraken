@@ -20,12 +20,10 @@ struct TemplateError403Context {}
 struct TemplateLogContext<'a> {
     template_data: &'a Vec<mk_lib_logging::mk_lib_logging_loki::LokiLog>,
     template_data_exists: &'a bool,
-        page_title: Option<String>,
-
+    page_title: Option<String>,
 }
 
 pub async fn admin_logging(
-    Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -42,10 +40,9 @@ pub async fn admin_logging(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let logging_list =
-            mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_read("fake_query")
-                .await
-                .unwrap();
+        let logging_list = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_read("fake_query")
+            .await
+            .unwrap();
         let mut logging_data: bool = false;
         if logging_list.len() > 0 {
             logging_data = true;
@@ -53,8 +50,7 @@ pub async fn admin_logging(
         let template = TemplateLogContext {
             template_data: &logging_list,
             template_data_exists: &logging_data,
-                        page_title: Some("MediaKraken Admin Logging".to_string()),
-
+            page_title: Some("MediaKraken Admin Logging".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

@@ -1,3 +1,4 @@
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
     http::{Method, StatusCode},
@@ -5,9 +6,8 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
-use crate::mk_lib_database;
+use axum_session_sqlx::SessionPgPool;
 use serde_json::json;
 use sqlx::postgres::PgPool;
 
@@ -20,12 +20,11 @@ struct TemplateError403Context {}
 struct AdminHardwareTemplate<'a> {
     template_data: &'a Vec<mk_lib_database::mk_lib_database_hardware_device::DBDeviceList>,
     template_data_exists: &'a bool,
-        page_title: Option<String>,
-
+    page_title: Option<String>,
 }
 
 pub async fn admin_hardware(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -44,7 +43,7 @@ pub async fn admin_hardware(
     } else {
         let hardware_list =
             mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_device_read(
-                &sqlx_pool,
+                &sqlx_pool_ro,
             )
             .await
             .unwrap();
@@ -55,8 +54,7 @@ pub async fn admin_hardware(
         let template = AdminHardwareTemplate {
             template_data: &hardware_list,
             template_data_exists: &hardware_data,
-                        page_title: Some("MediaKraken Admin Hardware".to_string()),
-
+            page_title: Some("MediaKraken Admin Hardware".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

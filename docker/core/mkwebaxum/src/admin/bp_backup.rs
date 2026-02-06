@@ -1,4 +1,5 @@
 use crate::axum_custom_filters::filters;
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -8,11 +9,10 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
+use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_enum_backup_type;
 use mk_lib_common::mk_lib_common_pagination;
-use crate::mk_lib_database;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -31,7 +31,7 @@ struct TemplateBackupContext<'a> {
 }
 
 pub async fn admin_backup(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
@@ -52,7 +52,7 @@ pub async fn admin_backup(
         // TODO show local backups here as well
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 =
-            mk_lib_database::mk_lib_database_backup::mk_lib_database_backup_count(&sqlx_pool)
+            mk_lib_database::mk_lib_database_backup::mk_lib_database_backup_count(&sqlx_pool_ro)
                 .await
                 .unwrap();
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
@@ -63,7 +63,9 @@ pub async fn admin_backup(
         .await
         .unwrap();
         let backup_list = mk_lib_database::mk_lib_database_backup::mk_lib_database_backup_read(
-            &sqlx_pool, db_offset, 30,
+            &sqlx_pool_ro,
+            db_offset,
+            30,
         )
         .await
         .unwrap();

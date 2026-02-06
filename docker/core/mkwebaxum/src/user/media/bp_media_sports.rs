@@ -1,16 +1,16 @@
+use crate::mk_lib_database;
 use askama::Template;
+use axum::response::Redirect;
 use axum::{
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
     Extension,
 };
-use axum::response::Redirect;
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
+use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
-use crate::mk_lib_database;
 use serde_json::json;
 use sqlx::postgres::PgPool;
 
@@ -26,12 +26,11 @@ struct TemplateMediaSportsContext<'a> {
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
     page: &'a usize,
-        page_title: Option<String>,
-
+    page_title: Option<String>,
 }
 
 pub async fn user_media_sports(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
@@ -52,7 +51,7 @@ pub async fn user_media_sports(
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 =
         mk_lib_database::database_media::mk_lib_database_media_sports::mk_lib_database_media_sports_count(
-            &sqlx_pool,
+            &sqlx_pool_ro,
             String::new(),
         )
         .await
@@ -66,7 +65,7 @@ pub async fn user_media_sports(
         .unwrap();
         let sports_list =
         mk_lib_database::database_media::mk_lib_database_media_sports::mk_lib_database_media_sports_read(
-            &sqlx_pool,
+            &sqlx_pool_ro,
             String::new(),
             db_offset,
             30,
@@ -83,7 +82,7 @@ pub async fn user_media_sports(
             template_data_exists: &template_data_exists,
             pagination_bar: &pagination_html,
             page: &page_usize,
-                    page_title: Some("MediaKraken Sports".to_string()),
+            page_title: Some("MediaKraken Sports".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
@@ -94,12 +93,11 @@ pub async fn user_media_sports(
 #[template(path = "bss_user/media/bss_user_media_sports_detail.html")]
 struct TemplateMediaSportsDetailContext {
     template_data: serde_json::Value,
-      page_title: Option<String>,
-
+    page_title: Option<String>,
 }
 
 pub async fn user_media_sports_detail(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,

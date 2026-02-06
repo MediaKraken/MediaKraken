@@ -1,3 +1,4 @@
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -6,9 +7,8 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
-use crate::mk_lib_database;
+use axum_session_sqlx::SessionPgPool;
 use sqlx::postgres::PgPool;
 //use flickr::methods::favorites::Photos;
 
@@ -21,12 +21,10 @@ struct TemplateError401Context {}
 struct TemplateUserInternetFlickr<'a> {
     // template_data: &'a Photos,
     template_data_exists: &'a bool,
-        page_title: Option<String>,
-
+    page_title: Option<String>,
 }
 
 pub async fn user_inter_flickr(
-    Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -46,8 +44,7 @@ pub async fn user_inter_flickr(
         let template = TemplateUserInternetFlickr {
             // template_data: ,
             template_data_exists: &false,
-                        page_title: Some("MediaKraken Flickr".to_string()),
-
+            page_title: Some("MediaKraken Flickr".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
@@ -58,11 +55,10 @@ pub async fn user_inter_flickr(
 #[template(path = "bss_user/internet/bss_user_internet_flickr_detail.html")]
 struct TemplateUserInternetFlickrDetail<'a> {
     template_data_exists: &'a bool,
-        page_title: Option<String>,
+    page_title: Option<String>,
 }
 
 pub async fn user_inter_flickr_detail(
-    Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -80,8 +76,8 @@ pub async fn user_inter_flickr_detail(
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let template = TemplateUserInternetFlickrDetail {
-             template_data_exists: &false,
-          page_title: Some("MediaKraken Flickr Detail".to_string()),
+            template_data_exists: &false,
+            page_title: Some("MediaKraken Flickr Detail".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

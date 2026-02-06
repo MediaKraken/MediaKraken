@@ -32,12 +32,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // connect to db and do a version check and upgrade if needed
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
+    let sqlx_pool_rw, sqlx_pool_ro = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
         .await
         .unwrap();
     // see if db exists
     let db_exists = mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_exits(
-        &sqlx_pool,
+        &sqlx_pool_ro,
         "mm_version",
     )
     .await
@@ -67,7 +67,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let stderr: String = String::from_utf8(output.stderr).unwrap();
         println!("stderr: {}", stderr);
     }
-    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, true)
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, true)
         .await
         .unwrap();
     Ok(())

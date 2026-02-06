@@ -22,10 +22,10 @@ JSON - the complete record in JSON format               4
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 86400)
+    let sqlx_pool_rw, sqlx_pool_ro = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
         .await
         .unwrap();
-    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await
         .unwrap();
 
@@ -71,9 +71,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .unwrap();
                     }
                     println!("huh3");
-                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy(&sqlx_pool, "/mediakraken/ol_dump_authors_latest.txt",).await;
+                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy(&sqlx_pool_rw, "/mediakraken/ol_dump_authors_latest.txt",).await;
                     println!("huh4");
-                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy_author_upsert(&sqlx_pool,).await;
+                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy_author_upsert(&sqlx_pool_rw,).await;
                     println!("huh5");
                     let _result = fs::remove_file("/mediakraken/ol_dump_authors_latest.txt");
                 }
@@ -102,9 +102,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .unwrap();
                     }
                     println!("booger3");
-                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy(&sqlx_pool, "/mediakraken/ol_dump_editions_latest.txt",).await;
+                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy(&sqlx_pool_rw, "/mediakraken/ol_dump_editions_latest.txt",).await;
                     println!("booger4");
-                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy_edition_upsert(&sqlx_pool,).await;
+                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy_edition_upsert(&sqlx_pool_rw,).await;
                     println!("booger5");
                     let _result = fs::remove_file("/mediakraken/ol_dump_editions_latest.txt");
                 }
@@ -133,9 +133,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .unwrap();
                     }
                     println!("works3");
-                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy(&sqlx_pool, "/mediakraken/ol_dump_works_latest.txt",).await;
+                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy(&sqlx_pool_rw, "/mediakraken/ol_dump_works_latest.txt",).await;
                     println!("works4");
-                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy_work_upsert(&sqlx_pool,).await;
+                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_openlib_copy::mk_lib_database_copy_work_upsert(&sqlx_pool_rw,).await;
                     println!("works5");
                     let _result = fs::remove_file("/mediakraken/ol_dump_works_latest.txt");
                 }

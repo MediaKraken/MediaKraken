@@ -8,10 +8,10 @@ use tokio::sync::Notify;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
+    let sqlx_pool_rw, sqlx_pool_ro = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
         .await
         .unwrap();
-    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await
         .unwrap();
     let _option_config_json: Value =
@@ -42,11 +42,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .await
                     .unwrap();
                 for share_info in share_vec.iter() {
-                    if mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_exists(&sqlx_pool,
+                    if mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_exists(&sqlx_pool_ro,
                             share_info.mm_share_ip,
                             share_info.mm_share_path.clone(),).await.unwrap() == false {
                         mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_insert(
-                                &sqlx_pool,
+                                &sqlx_pool_rw,
                                 share_info.mm_share_ip,
                                 share_info.mm_share_path.clone().as_str().unwrap(),
                                 share_info.mm_share_comment.clone(),

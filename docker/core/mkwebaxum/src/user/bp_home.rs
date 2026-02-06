@@ -1,3 +1,4 @@
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
     http::{Method, Request, StatusCode},
@@ -5,9 +6,8 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
-use crate::mk_lib_database;
+use axum_session_sqlx::SessionPgPool;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -19,11 +19,11 @@ struct TemplateError401Context {}
 struct TemplateUserHomeContext<'a> {
     template_data_new_media: &'a bool,
     template_data_user_media_queue: &'a bool,
-        page_title: Option<String>,
+    page_title: Option<String>,
 }
 
 pub async fn user_home(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -42,7 +42,8 @@ pub async fn user_home(
     } else {
         let mut new_media = false;
         if mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_new_count(
-            &sqlx_pool, 7,
+            &sqlx_pool_ro,
+            7,
         )
         .await
         .unwrap()

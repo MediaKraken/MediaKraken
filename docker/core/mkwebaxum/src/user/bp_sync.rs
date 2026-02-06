@@ -1,3 +1,4 @@
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -6,10 +7,9 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
+use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
-use crate::mk_lib_database;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -23,12 +23,11 @@ struct TemplateSyncContext<'a> {
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
     page: &'a usize,
-        page_title: Option<String>,
-
+    page_title: Option<String>,
 }
 
 pub async fn user_sync(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
@@ -48,7 +47,7 @@ pub async fn user_sync(
     } else {
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 =
-            mk_lib_database::mk_lib_database_sync::mk_lib_database_sync_count(&sqlx_pool)
+            mk_lib_database::mk_lib_database_sync::mk_lib_database_sync_count(&sqlx_pool_ro)
                 .await
                 .unwrap();
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
@@ -59,7 +58,7 @@ pub async fn user_sync(
         .await
         .unwrap();
         let sync_list = mk_lib_database::mk_lib_database_sync::mk_lib_database_sync_list(
-            &sqlx_pool,
+            &sqlx_pool_ro,
             uuid::Uuid::nil(),
             db_offset,
             30,

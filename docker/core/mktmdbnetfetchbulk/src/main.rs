@@ -69,10 +69,10 @@ pub async fn find_date_to_use(url_template: &str) -> Result<String, Box<dyn Erro
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
+    let sqlx_pool_rw, sqlx_pool_ro = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
         .await
         .unwrap();
-    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await
         .unwrap();
 
@@ -121,13 +121,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 serde_json::from_str(json_item.trim()).unwrap();
                             let result =
                                 mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_exists_movie(
-                                    &sqlx_pool,
+                                    &sqlx_pool_rw,
                                     metadata_struct.id.unwrap_or(0),
                                 )
                                 .await
                                 .unwrap();
                             if result == false {
-                                let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
+                                let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
                                                                                                                               "themoviedb".to_string(),
                                                                                                                               mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                                               metadata_struct.id.unwrap_or(0)).await.unwrap();
@@ -136,7 +136,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     if record_count > record_limit {
                                         break;
                                     }
-                                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
                                                                                                             "themoviedb".to_string(),
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                             uuid::Uuid::now_v7(),
@@ -170,13 +170,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 serde_json::from_str(json_item.trim()).unwrap();
                             let result =
                                 mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_exists_tv(
-                                    &sqlx_pool,
+                                    &sqlx_pool_rw,
                                     metadata_struct.id.unwrap_or(0),
                                 )
                                 .await
                                 .unwrap();
                             if result == false {
-                                let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
+                                let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
                                                                                                                               "themoviedb".to_string(),
                                                                                                                               mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                                               metadata_struct.id.unwrap_or(0)).await.unwrap();
@@ -185,7 +185,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     if record_count > record_limit {
                                         break;
                                     }
-                                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
                                                                                                             "themoviedb".to_string(),
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                             uuid::Uuid::now_v7(),
@@ -219,13 +219,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 serde_json::from_str(json_item.trim()).unwrap();
                             let result =
                                 mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_exists_person(
-                                    &sqlx_pool,
+                                    &sqlx_pool_rw,
                                     metadata_struct.id.unwrap_or(0),
                                 )
                                 .await
                                 .unwrap();
                             if result == false {
-                                let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
+                                let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
                                                                                                                               "themoviedb".to_string(),
                                                                                                                               mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
                                                                                                                               metadata_struct.id.unwrap_or(0)).await.unwrap();
@@ -234,7 +234,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     if record_count > record_limit {
                                         break;
                                     }
-                                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
                                                                                                             "themoviedb".to_string(),
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
                                                                                                             uuid::Uuid::now_v7(),
@@ -266,18 +266,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         // verify it's not already in the database
                         let result =
                             mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_exists_movie(
-                                &sqlx_pool,
+                                &sqlx_pool_rw,
                                 json_item.id,
                             )
                             .await
                             .unwrap();
                         if result == false {
-                            let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
+                            let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
                                                                                                                                       "themoviedb".to_string(),
                                                                                                                                       mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                                                       json_item.id).await.unwrap();
                             if download_result == false {
-                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
                                                                                                                     "themoviedb".to_string(),
                                                                                                                     mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                                     uuid::Uuid::now_v7(),
@@ -285,7 +285,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                     "Fetch".to_string(), None).await;
                             } else {
                                 // it's on the database, so must update the record with latest information
-                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
                                                                                                                     "themoviedb".to_string(),
                                                                                                                     mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                                     uuid::Uuid::now_v7(),
@@ -311,18 +311,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         // verify it's not already in the database
                         let result =
                             mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_exists_tv(
-                                &sqlx_pool,
+                                &sqlx_pool_rw,
                                 json_item.id,
                             )
                             .await
                             .unwrap();
                         if result == false {
-                            let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
+                            let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
                                                                                                                                           "themoviedb".to_string(),
                                                                                                                                           mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                                                           json_item.id).await.unwrap();
                             if download_result == false {
-                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
                                                                                                                         "themoviedb".to_string(),
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                                         uuid::Uuid::now_v7(),
@@ -330,7 +330,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                         "Fetch".to_string(), None).await;
                             } else {
                                 // it's on the database, so must update the record with latest information
-                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
                                                                                                                         "themoviedb".to_string(),
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                                         uuid::Uuid::now_v7(),
@@ -356,18 +356,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         // verify it's not already in the database
                         let result =
                             mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_exists_person(
-                                &sqlx_pool,
+                                &sqlx_pool_rw,
                                 json_item.id,
                             )
                             .await
                             .unwrap();
                         if result == false {
-                            let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool,
+                            let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
                                                                                                                                           "themoviedb".to_string(),
                                                                                                                                           mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
                                                                                                                                           json_item.id).await.unwrap();
                             if download_result == false {
-                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
                                                                                                                         "themoviedb".to_string(),
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
                                                                                                                         uuid::Uuid::now_v7(),
@@ -375,7 +375,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                                         "Fetch".to_string(), None).await;
                             } else {
                                 // it's on the database, so must update the record with latest information
-                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
                                                                                                                         "themoviedb".to_string(),
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
                                                                                                                         uuid::Uuid::now_v7(),

@@ -31,8 +31,7 @@ struct AdminTorrentTemplate<'a> {
 }
 
 pub async fn admin_torrent(
-    Extension(sqlx_pool): Extension<PgPool>,
-    method: Method,
+     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let current_user = auth.current_user.clone().unwrap_or_default();
