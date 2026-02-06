@@ -21,7 +21,7 @@ pub async fn mk_lib_database_metadata_exists_movie(
 pub struct DBMetaMovieList {
     pub mm_metadata_guid: uuid::Uuid,
     pub mm_metadata_name: String,
-    pub mm_metadata_movie_name_alt: String,
+    pub mm_metadata_movie_name_alt: Option<String>,
     pub mm_date: String, // DateTime<Utc>,
     pub mm_poster: String,
     pub mm_metadata_user_json: Option<serde_json::Value>,

@@ -12,41 +12,43 @@
         {% include "bss_user/bss_user_include_side_menu.html" %}
         <!-- Main content -->
         <main class="flex-1 p-6 bg-gray-50 overflow-y-auto">
-        <div>
-            {% if template_data_exists %}
-            {% if pagination_bar != "" %}
-            {{ pagination_bar|safe }}
-            {% endif %}
-            <div id="the-node">
-                {% for row_data in template_data %}
-                <div class="main_photo">
-                    <div class="media_context_right" data-id={{row_data.mm_metadata_collection_guid}}>
-                        <a href="/user/metadata/collection_detail/{{row_data.mm_metadata_collection_guid}}">
-                            {#{% if row_data.mm_metadata_collection_imagelocal_json == "" ||
-                            row_data.mm_metadata_collection_imagelocal_json == None %}
-                            <img src="/static/image/Movie-icon.png" loading="lazy" decoding="async" height="300" width="200"></a>
-                        <div class="description">
-                            <p class="description_content_left">{{row_data.mm_metadata_collection_name}}</p>
+            <div>
+                {% if template_data_exists %}
+                {% if pagination_bar != "" %}
+                {{ pagination_bar|safe }}
+                {% endif %}
+                <div id="the-node">
+                    {% for row_data in template_data %}
+                    <div class="main_photo">
+                        <div class="media_context_right" data-id={{row_data.mm_metadata_collection_guid}}>
+                            <a href="/user/metadata/collection_detail/{{row_data.mm_metadata_collection_guid}}">
+                                {#{% if row_data.mm_metadata_collection_imagelocal_json == "" ||
+                                row_data.mm_metadata_collection_imagelocal_json == None %}
+                                <img src="/static/image/Movie-icon.png" loading="lazy" decoding="async" height="300"
+                                    width="200"></a>
+                            <div class="description">
+                                <p class="description_content_left">{{row_data.mm_metadata_collection_name}}</p>
+                            </div>
+                            {% else %}
+                            <img src="/metadata/{{row_data.mm_metadata_collection_imagelocal_json}}" loading="lazy"
+                                decoding="async" height="300" width="200">
+                            </a>
+                            {% endif %}#}
                         </div>
-                        {% else %}
-                        <img src="/metadata/{{row_data.mm_metadata_collection_imagelocal_json}}" loading="lazy" decoding="async"
-                            height="300" width="200">
-                        </a>
-                        {% endif %}#}
                     </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
+                {% if pagination_bar != "" %}
+                {{ pagination_bar|safe }}
+                {% endif %}
+                {% else %}
+                <p id="general_text">No collection metadata found.</p>
+                {% endif %}
             </div>
-            {% if pagination_bar != "" %}
-            {{ pagination_bar|safe }}
-            {% endif %}
-            {% else %}
-            <p id="general_text">No collection metadata found.</p>
-            {% endif %}
-        </div>
         </main>
     </div>
     {% include "bss_public/bss_public_footer.html" %}
-  
+
 </body>
+
 </html>

@@ -25,7 +25,7 @@ struct TemplateError401Context {}
 struct TemplateMetaMovieList {
     template_metadata_guid: uuid::Uuid,
     template_metadata_name: String,
-    template_metadata_name_alt: String,
+    template_metadata_name_alt: Option<String>,
     template_metadata_date: String,
     template_metadata_poster: String,
     template_metadata_user_watched: serde_json::Value,

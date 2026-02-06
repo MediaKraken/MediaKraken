@@ -21,7 +21,7 @@ pub async fn mk_lib_database_metadata_exists_tv(
 pub struct DBMetaTVShowList {
     pub mm_metadata_tvshow_guid: uuid::Uuid,
     pub mm_metadata_tvshow_name: String,
-    pub mm_metadata_tvshow_name_alt: String,
+    pub mm_metadata_tvshow_name_alt: Option<String>,
     pub air_date: serde_json::Value,
     pub image_json: serde_json::Value,
 }
