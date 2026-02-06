@@ -12,11 +12,11 @@ use serde_json::json;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // open the database
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
+    let sqlx_pool_rw, sqlx_pool_ro = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
         .await
         .unwrap();
     let _result =
-        mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+        mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
             .await;
 
     // pull options/api keys and set structs to contain the data
@@ -44,14 +44,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .unwrap();
             let api_key = option_api.barcodespider.as_ref().unwrap().as_str();
             loop {
-                let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "barcodespider").await.unwrap();
+                let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool_rw, "barcodespider").await.unwrap();
                 for download_data in metadata_to_process {
                     if let Err(sleep) = daily_api_call_limiter.try_wait() {
                         std::thread::sleep(sleep);
                         continue;
                     }
                     mk_lib_metadata::base::metadata_process(
-                        &sqlx_pool,
+                        &sqlx_pool_rw,
                         "barcodespider".to_string(),
                         download_data,
                         api_key,
@@ -83,14 +83,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .await
                     .unwrap();
             loop {
-                let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "musicbrainz").await.unwrap();
+                let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool_rw, "musicbrainz").await.unwrap();
                 for download_data in metadata_to_process {
                     if let Err(sleep) = api_call_limiter.try_wait() {
                         std::thread::sleep(sleep);
                         continue;
                     }
                     mk_lib_metadata::base::metadata_process(
-                        &sqlx_pool,
+                        &sqlx_pool_rw,
                         "musicbrainz".to_string(),
                         download_data,
                         musicbrainz_api_key.as_str(),
@@ -117,7 +117,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .await
             .unwrap();
         loop {
-            let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "themoviedb").await.unwrap();
+            let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool_rw, "themoviedb").await.unwrap();
             for download_data in metadata_to_process {
                 if let Err(sleep) = api_call_limiter.try_wait() {
                     std::thread::sleep(sleep);
@@ -134,7 +134,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .unwrap();
                 }
                 mk_lib_metadata::base::metadata_process(
-                    &sqlx_pool,
+                    &sqlx_pool_rw,
                     "themoviedb".to_string(),
                     download_data,
                     option_api.themoviedb.as_str(),
@@ -160,14 +160,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .await
             .unwrap();
         loop {
-            let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "thesportsdb").await.unwrap();
+            let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool_rw, "thesportsdb").await.unwrap();
             for download_data in metadata_to_process {
                 if let Err(sleep) = api_call_limiter.try_wait() {
                     std::thread::sleep(sleep);
                     continue;
                 }
                 mk_lib_metadata::base::metadata_process(
-                    &sqlx_pool,
+                    &sqlx_pool_rw,
                     "thesportsdb".to_string(),
                     download_data,
                     option_api.thesportsdb.as_str(),
@@ -206,7 +206,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .unwrap();
             let api_key = option_api.upcitemdb.as_ref().unwrap().as_str();
             loop {
-                let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool, "upcitemdb").await.unwrap();
+                let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(&sqlx_pool_rw, "upcitemdb").await.unwrap();
                 for download_data in metadata_to_process {
                     if let Err(sleep) = daily_api_call_limiter.try_wait() {
                         std::thread::sleep(sleep);
@@ -217,7 +217,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         continue;
                     }
                     mk_lib_metadata::base::metadata_process(
-                        &sqlx_pool,
+                        &sqlx_pool_rw,
                         "upcitemdb".to_string(),
                         download_data,
                         api_key,
@@ -236,21 +236,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
         // grab new batch of records to process by content provider
         let metadata_to_process =
             mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(
-                &sqlx_pool, "Z",
+                &sqlx_pool_rw, "Z",
             )
             .await
             .unwrap();
         for download_data in metadata_to_process {
             println!("DL Data: {:?}", download_data);
             // process the "Z" record
-            mk_lib_metadata::base::metadata_process(&sqlx_pool, "Z".to_string(), download_data, "")
+            mk_lib_metadata::base::metadata_process(&sqlx_pool_rw, "Z".to_string(), download_data, "")
                 .await
                 .unwrap();
             println!("here2");
             // update the media row with the json media id and the proper name
             // if metadata_uuid != uuid::Uuid::nil() {
             //     mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_update_metadata_guid(
-            //         &sqlx_pool,
+            //         &sqlx_pool_rw,
             //         &download_data.mm_download_provider_id.unwrap(),
             //         metadata_uuid,
             //         &download_data.mm_download_guid,

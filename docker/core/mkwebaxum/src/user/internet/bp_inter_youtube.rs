@@ -1,3 +1,4 @@
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -6,9 +7,8 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
-use crate::mk_lib_database;
+use axum_session_sqlx::SessionPgPool;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -20,12 +20,10 @@ struct TemplateError401Context {}
 struct UserInternetYoutubeTemplate<'a> {
     //template_data: &'a Vec<mk_lib_database::mk_lib_database_cron::DBCronList>,
     template_data_exists: &'a bool,
-        page_title: Option<String>,
-
+    page_title: Option<String>,
 }
 
 pub async fn user_inter_youtube(
-    Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -43,9 +41,8 @@ pub async fn user_inter_youtube(
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let template = UserInternetYoutubeTemplate {
-            
             template_data_exists: &false,
-                    page_title: Some("MediaKraken Youtube".to_string()),
+            page_title: Some("MediaKraken Youtube".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
@@ -56,12 +53,10 @@ pub async fn user_inter_youtube(
 #[template(path = "bss_user/internet/bss_user_internet_youtube_detail.html")]
 struct UserInternetYoutubeDetailTemplate<'a> {
     template_youtube_video_guid: &'a String,
-           page_title: Option<String>,
-
+    page_title: Option<String>,
 }
 
 pub async fn user_inter_youtube_detail(
-    Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {

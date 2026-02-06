@@ -172,7 +172,7 @@ pub async fn mk_lib_database_metadata_person_insert_cast_crew(
     //     let person_id = person_data["id"];
     //     let person_name = person_data["name"];
     //     // TODO do an upsert instead
-    //     if database::mk_lib_database_metadata_exists_person(sqlx_pool, person_id).await.unwrap() == 0
+    //     if database::mk_lib_database_metadata_exists_person(sqlx_pool_rw, person_id).await.unwrap() == 0
     //     {
     //         let new_guid = Uuid::now_v7();
     //         // Shouldn't need to verify fetch doesn't exist as the person insert
@@ -180,7 +180,7 @@ pub async fn mk_lib_database_metadata_person_insert_cast_crew(
     //         // the inserted record.
     //         // insert download record for bio/info
     //         database::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(
-    //             sqlx_pool,
+    //             sqlx_pool_rw,
     //             "themoviedb".to_string(),
     //             mk_lib_common_enum_media_type::DLMediaType::PERSON,
     //             new_guid,
@@ -188,7 +188,7 @@ pub async fn mk_lib_database_metadata_person_insert_cast_crew(
     //             "Fetch".to_string(),
     //         ).await;
     //         // insert person record
-    //         database::mk_lib_database_metadata_person_insert(sqlx_pool,
+    //         database::mk_lib_database_metadata_person_insert(sqlx_pool_rw,
     //                                                person_name,
     //                                                person_id,
     //                                                json!({}),

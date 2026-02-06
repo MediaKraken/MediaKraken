@@ -8,11 +8,11 @@ use std::env;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
+    let sqlx_pool_rw, sqlx_pool_ro = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
         .await
         .unwrap();
     let _db_check =
-        mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+        mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
             .await
             .unwrap();
 
@@ -58,7 +58,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 .await
                 .unwrap();
                 mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_time_update(
-                    &sqlx_pool,
+                    &sqlx_pool_rw,
                     row_data.mm_cron_guid,
                 )
                 .await?;

@@ -57,8 +57,8 @@ struct TemplateHomeContext<'a> {
 }
 
 pub async fn admin_home(
-    Extension(sqlx_pool): Extension<PgPool>,
-    method: Method,
+   Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
+   method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let current_user = auth.current_user.clone().unwrap_or_default();
@@ -76,17 +76,17 @@ pub async fn admin_home(
     } else {
         let notification_list =
             mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_read(
-                &sqlx_pool, 0, 9999,
+                &sqlx_pool_ro, 0, 9999,
             )
             .await
             .unwrap();
         let user_list =
-            mk_lib_database::mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool, 0, 9999)
+            mk_lib_database::mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool_ro, 0, 9999)
                 .await
                 .unwrap();
         let option_status_row =
             mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_status_read(
-                &sqlx_pool,
+                &sqlx_pool_ro,
             )
             .await
             .unwrap();
@@ -115,18 +115,18 @@ pub async fn admin_home(
             template_data_server_info_server_ip_external: &external_ip,
             template_data_server_info_server_version: &mk_lib_common::mk_lib_common_version::WEB_VERSION.to_string(),
             template_data_count_media_files:
-                &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_known_count(&sqlx_pool)
+                &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_known_count(&sqlx_pool_ro)
                     .await
                     .unwrap()
                     .to_formatted_string(&locale),
             template_data_count_matched_media:
-                &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_matched_count(&sqlx_pool)
+                &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_matched_count(&sqlx_pool_ro)
                     .await
                     .unwrap()
                     .to_formatted_string(&locale),
             template_data_count_meta_fetch:
                 &mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(
-                    &sqlx_pool,
+                    &sqlx_pool_ro,
                 )
                 .await
                 .unwrap()

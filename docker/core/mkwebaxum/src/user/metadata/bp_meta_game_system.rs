@@ -1,16 +1,16 @@
+use crate::mk_lib_database;
 use askama::Template;
+use axum::response::Redirect;
 use axum::{
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
     Extension,
 };
-use axum::response::Redirect;
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
+use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
-use crate::mk_lib_database;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -29,7 +29,7 @@ struct TemplateMetaGameSystemContext<'a> {
 }
 
 pub async fn user_metadata_game_system(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
@@ -50,7 +50,7 @@ pub async fn user_metadata_game_system(
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 =
         mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_count(
-            &sqlx_pool,
+            &sqlx_pool_ro,
             String::new(),
         )
         .await
@@ -64,7 +64,7 @@ pub async fn user_metadata_game_system(
         .unwrap();
         let game_system_list =
         mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_read(
-            &sqlx_pool,
+            &sqlx_pool_ro,
             String::new(),
             db_offset,
             30,
@@ -81,7 +81,7 @@ pub async fn user_metadata_game_system(
             template_data_exists: &template_data_exists,
             pagination_bar: &pagination_html,
             page: &page_usize,
-                    page_title: Some("MediaKraken Metadata Game Systems".to_string()),
+            page_title: Some("MediaKraken Metadata Game Systems".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
@@ -92,11 +92,11 @@ pub async fn user_metadata_game_system(
 #[template(path = "bss_user/metadata/bss_user_metadata_game_system_detail.html")]
 struct TemplateMetaGameSystemDetailContext {
     template_data: serde_json::Value,
- page_title: Option<String>,
+    page_title: Option<String>,
 }
 
 pub async fn user_metadata_game_system_detail(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
@@ -117,7 +117,7 @@ pub async fn user_metadata_game_system_detail(
         let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
         let detail_data =
         mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_detail(
-            &sqlx_pool, tmp_uuid,
+            &sqlx_pool_ro, tmp_uuid,
         )
         .await
         .unwrap();

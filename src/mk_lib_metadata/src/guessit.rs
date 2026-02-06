@@ -40,7 +40,7 @@ pub async fn metadata_guessit(
             metadata_last_year = 0;
         }
     } else {
-        mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_update_provider(&sqlx_pool,
+        mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_update_provider(&sqlx_pool_rw,
                                                                                                                  "ZZ".to_string(),
                                                                                                                  download_data.mm_download_guid).await.unwrap();
     }

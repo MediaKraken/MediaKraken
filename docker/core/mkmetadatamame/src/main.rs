@@ -23,10 +23,10 @@ use tokio::sync::Notify;
 async fn main() -> Result<(), Box<dyn Error>> {
     // open the database
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
+    let sqlx_pool_rw, sqlx_pool_ro = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
         .await
         .unwrap();
-    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await
         .unwrap();
     let option_config_json: serde_json::Value =
@@ -110,7 +110,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 // name is short name
                                 // description is long name
                                 mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
-                                        &sqlx_pool,
+                                        &sqlx_pool_rw,
                                         uuid::Uuid::nil(),
                                         json_data["machine"]["name"].to_string(),
                                         json_data["machine"]["description"].to_string(),
@@ -190,11 +190,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     let system_string_split: Vec<&str> =
                                         xml_line.split("\"").collect();
                                     println!("split: {:?}", system_string_split);
-                                    let system_counter = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_game_count_by_short_name(&sqlx_pool, &system_string_split[1].to_string()).await.unwrap();
+                                    let system_counter = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_game_count_by_short_name(&sqlx_pool_rw, &system_string_split[1].to_string()).await.unwrap();
                                     if system_counter == 0 {
-                                        game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool, system_string_split[1].to_string(), system_string_split[3].to_string(), json!({})).await.unwrap();
+                                        game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool_rw, system_string_split[1].to_string(), system_string_split[3].to_string(), json!({})).await.unwrap();
                                     } else {
-                                        game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(&sqlx_pool, &system_string_split[1].to_string()).await.unwrap();
+                                        game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(&sqlx_pool_rw, &system_string_split[1].to_string()).await.unwrap();
                                     }
                                 } else if xml_line.starts_with("<software") == true {
                                     xml_data = xml_line.to_string();
@@ -205,7 +205,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     // name is short name
                                     // description is long name
                                     mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
-                                        &sqlx_pool,
+                                        &sqlx_pool_rw,
                                         game_system_uuid,
                                         json_data["software"]["name"].to_string(),
                                         json_data["software"]["description"].to_string(),
@@ -262,12 +262,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             xml_data.push_str(xml_line);
                             let json_data =
                                 xml_string_to_json(xml_data.to_string(), &conf).unwrap();
-                            let mut game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(&sqlx_pool, &json_data["entry"]["software"]["item"]["list"].to_string()).await.unwrap();
+                            let mut game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(&sqlx_pool_rw, &json_data["entry"]["software"]["item"]["list"].to_string()).await.unwrap();
                             if game_system_uuid == uuid::Uuid::nil() {
-                                game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool, json_data["entry"]["software"]["item"]["list"].to_string(), String::new(), json!({})).await.unwrap();
+                                game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool_rw, json_data["entry"]["software"]["item"]["list"].to_string(), String::new(), json!({})).await.unwrap();
                             }
                             mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
-                                    &sqlx_pool,
+                                    &sqlx_pool_rw,
                                     game_system_uuid,
                                     json_data["entry"]["software"]["item"]["name"].to_string(),
                                     json_data["entry"]["text"].to_string(),
@@ -496,7 +496,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                 sys_graphics.trim_end_matches('\n').to_string();
                                         }
                                         // upsert the system
-                                        let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool,
+                                        let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool_rw,
                                                 sys_short_name.trim_end_matches('\n').to_string(),
                                                 sys_longname.clone(),
                                                 json!({

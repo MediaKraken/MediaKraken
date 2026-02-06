@@ -21,7 +21,7 @@ struct UserInternetTemplate {
 }
 
 pub async fn user_inter_home(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {

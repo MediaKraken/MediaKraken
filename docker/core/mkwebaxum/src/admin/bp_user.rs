@@ -1,3 +1,4 @@
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -7,10 +8,9 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
+use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
-use crate::mk_lib_database;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgPool;
@@ -25,11 +25,11 @@ struct TemplateAdminUserContext<'a> {
     template_data: &'a Vec<mk_lib_database::mk_lib_database_user::DBUserList>,
     pagination_bar: &'a String,
     page: &'a usize,
-        page_title: Option<String>,
+    page_title: Option<String>,
 }
 
 pub async fn admin_user(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
@@ -49,7 +49,7 @@ pub async fn admin_user(
     } else {
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 = mk_lib_database::mk_lib_database_user::mk_lib_database_user_count(
-            &sqlx_pool,
+            &sqlx_pool_ro,
             String::new(),
         )
         .await
@@ -62,7 +62,9 @@ pub async fn admin_user(
         .await
         .unwrap();
         let user_list = mk_lib_database::mk_lib_database_user::mk_lib_database_user_read(
-            &sqlx_pool, db_offset, 30,
+            &sqlx_pool_ro,
+            db_offset,
+            30,
         )
         .await
         .unwrap();
@@ -71,8 +73,7 @@ pub async fn admin_user(
             template_data: &user_list,
             pagination_bar: &pagination_html,
             page: &page_usize,
-                        page_title: Some("MediaKraken Admin User".to_string()),
-
+            page_title: Some("MediaKraken Admin User".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
@@ -82,11 +83,11 @@ pub async fn admin_user(
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_user_detail.html")]
 struct TemplateAdminUserDetailContext {
-        page_title: Option<String>,
+    page_title: Option<String>,
 }
 
 pub async fn admin_user_detail(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
@@ -104,7 +105,9 @@ pub async fn admin_user_detail(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let template = TemplateAdminUserDetailContext { page_title: Some("MediaKraken Admin User".to_string()),};
+        let template = TemplateAdminUserDetailContext {
+            page_title: Some("MediaKraken Admin User".to_string()),
+        };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
@@ -115,7 +118,7 @@ pub async fn admin_user_detail(
 // struct TemplateAdminUserDeleteContext {}
 
 // pub async fn admin_user_delete(
-//     Extension(sqlx_pool): Extension<PgPool>,
+//     Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,
 //     Path(guid): Path<uuid::Uuid>,
 //     method: Method,
 //     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,

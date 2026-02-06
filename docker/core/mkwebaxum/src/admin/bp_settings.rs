@@ -1,3 +1,4 @@
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
     http::{Method, StatusCode},
@@ -6,9 +7,8 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
-use crate::mk_lib_database;
+use axum_session_sqlx::SessionPgPool;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -18,7 +18,7 @@ struct TemplateError403Context {}
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_settings.html")]
 struct AdminSettingsTemplate {
-        page_title: Option<String>,
+    page_title: Option<String>,
 }
 
 /*
@@ -31,7 +31,7 @@ Cloud stuff
  */
 
 pub async fn admin_settings(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -48,7 +48,9 @@ pub async fn admin_settings(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let template = AdminSettingsTemplate {page_title: Some("MediaKraken Admin Settings".to_string()),};
+        let template = AdminSettingsTemplate {
+            page_title: Some("MediaKraken Admin Settings".to_string()),
+        };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }

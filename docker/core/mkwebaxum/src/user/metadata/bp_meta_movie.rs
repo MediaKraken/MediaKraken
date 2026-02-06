@@ -1,17 +1,17 @@
 use crate::axum_custom_filters::filters;
+use crate::mk_lib_database;
 use askama::Template;
+use axum::response::Redirect;
 use axum::{
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
     Extension,
 };
-use axum::response::Redirect;
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
+use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
-use crate::mk_lib_database;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::{PgPool, PgRow};
@@ -45,7 +45,7 @@ struct TemplateMetaMovieContext<'a> {
 }
 
 pub async fn user_metadata_movie(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
@@ -67,7 +67,7 @@ pub async fn user_metadata_movie(
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 =
         mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(
-            &sqlx_pool,
+            &sqlx_pool_ro,
             String::new(),
         )
         .await
@@ -81,7 +81,7 @@ pub async fn user_metadata_movie(
         .unwrap();
         let movie_list =
         mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(
-            &sqlx_pool,
+            &sqlx_pool_ro,
             String::new(),
             db_offset,
             30,
@@ -152,11 +152,11 @@ pub async fn user_metadata_movie(
 struct TemplateMetaMovieDetailContext<'a> {
     template_data_json: &'a serde_json::Value,
     template_data_json_media_crew: &'a serde_json::Value,
-     page_title: Option<String>,
+    page_title: Option<String>,
 }
 
 pub async fn user_metadata_movie_detail(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     Path(guid): Path<uuid::Uuid>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
@@ -176,7 +176,7 @@ pub async fn user_metadata_movie_detail(
     } else {
         let movie_metadata =
         mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_detail_by_guid(
-            &sqlx_pool, guid,
+            &sqlx_pool_ro, guid,
         )
         .await
         .unwrap();
@@ -201,9 +201,8 @@ pub async fn user_metadata_movie_detail(
 //     await request.app.db_pool.release(db_connection)
 //     return response.HTTPResponse('', status=200, headers={'Vary': 'Accept-Encoding'})
 
-
 pub async fn user_metadata_movie_status(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
@@ -221,7 +220,7 @@ pub async fn user_metadata_movie_status(
         Redirect::to("/error/401")
     } else {
         let _row_data = mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_status(
-            &sqlx_pool, guid, event_type, current_user.id
+            &sqlx_pool_rw, guid, event_type, current_user.id
         )
         .await
         .unwrap();

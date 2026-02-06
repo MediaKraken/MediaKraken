@@ -35,12 +35,13 @@ pub struct RegisterInput {
 }
 
 pub async fn public_register_post(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     mut flash: Flash,
     Form(input_data): Form<RegisterInput>,
 ) -> Redirect {
     let user_found = mk_lib_database::mk_lib_database_user::mk_lib_database_user_exists(
-        &sqlx_pool,
+        &sqlx_pool_ro,
         &input_data.username,
     )
     .await
@@ -49,14 +50,15 @@ pub async fn public_register_post(
         flash.error("User already exists!");
     } else {
         let user_id: i64 = mk_lib_database::mk_lib_database_user::mk_lib_database_user_insert(
-            &sqlx_pool,
+            &sqlx_pool_rw,
             &input_data.username,
             &input_data.password,
         )
         .await
         .unwrap();
+    // using rw here as I need to see the insert immediately
         if mk_lib_database::mk_lib_database_user::mk_lib_database_user_count(
-            &sqlx_pool,
+            &sqlx_pool_rw,
             String::new(),
         )
         .await
@@ -65,7 +67,7 @@ pub async fn public_register_post(
         // Use 2 as 1 is guest
         {
             let _result = mk_lib_database::mk_lib_database_user::mk_lib_database_user_set_admin(
-                &sqlx_pool, user_id,
+                &sqlx_pool_rw, user_id,
             )
             .await;
         }

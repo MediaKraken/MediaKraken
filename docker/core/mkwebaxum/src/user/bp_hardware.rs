@@ -1,3 +1,4 @@
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -6,9 +7,8 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
-use crate::mk_lib_database;
+use axum_session_sqlx::SessionPgPool;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -19,12 +19,11 @@ struct TemplateError401Context {}
 #[template(path = "bss_user/hardware/bss_user_hardware.html")]
 struct TemplateUserHardwareContext<'a> {
     template_data_phue_exists: &'a bool,
-        page_title: Option<String>,
-
+    page_title: Option<String>,
 }
 
 pub async fn user_hardware(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -44,7 +43,7 @@ pub async fn user_hardware(
         let mut phue_exists: bool = true;
         let template = TemplateUserHardwareContext {
             template_data_phue_exists: &phue_exists,
-                    page_title: Some("MediaKraken Hardware".to_string()),
+            page_title: Some("MediaKraken Hardware".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
@@ -54,12 +53,12 @@ pub async fn user_hardware(
 #[derive(Template)]
 #[template(path = "bss_user/hardware/bss_user_hardware_phue.html")]
 struct TemplateUserHardwarePhueContext {
-     template_data_phue: i32,
-        page_title: Option<String>,
+    template_data_phue: i32,
+    page_title: Option<String>,
 }
 
 pub async fn user_hardware_phue(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {

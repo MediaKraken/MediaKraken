@@ -26,7 +26,7 @@ pub async fn mk_lib_database_version_check(
 ) -> Result<bool, sqlx::Error> {
     // see if db exists
     while mk_lib_database_postgresql::mk_lib_database_table_exits(
-        &sqlx_pool,
+        &sqlx_pool_rw,
         "mm_version",
     )
     .await
@@ -43,7 +43,7 @@ pub async fn mk_lib_database_version_check(
     if version_match == false {
         if update_schema == true {
             // do db updates here
-            mk_lib_database_version_schema::mk_lib_database_update_schema(&sqlx_pool, version_no)
+            mk_lib_database_version_schema::mk_lib_database_update_schema(&sqlx_pool_rw, version_no)
                 .await?;
             version_match = true;
         } else {

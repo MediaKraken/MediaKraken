@@ -34,11 +34,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let stack_disc1 = Regex::new(r"(?i)-disc1(?!\d)").unwrap();
 
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
+    let sqlx_pool_rw, sqlx_pool_ro = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
         .await
         .unwrap();
     let _result =
-        mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+        mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
             .await;
 
     let (_rabbit_connection, rabbit_channel) =
@@ -56,14 +56,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
             // determine directories to audit
             for row_data in
                 mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_audit_read(
-                    &sqlx_pool,
+                    &sqlx_pool_ro,
                 )
                 .await
                 .unwrap()
             {
                 let share_info: mk_lib_database::mk_lib_database_network_share::DBShareList =
                     mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_detail(
-                    &sqlx_pool,
+                    &sqlx_pool_ro,
                     row_data.mm_media_dir_share_guid,
                 )
                 .await
@@ -83,7 +83,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     );
                                 if last_modified > row_data.mm_media_dir_last_scanned {
                                     let _result = mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_status_update(
-                                            &sqlx_pool,
+                                            &sqlx_pool_rw,
                                             row_data.mm_media_dir_guid,
                                             json!({"Status": "Added to scan", "Pct": 100}),
                                         )
@@ -91,12 +91,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     let original_media_class = row_data.mm_media_dir_class_enum;
                                     // update the timestamp now so any other media added DURING this scan don't get skipped
                                     let _result = mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_timestamp_update(
-                                            &sqlx_pool,
+                                            &sqlx_pool_rw,
                                             row_data.mm_media_dir_guid,
                                         )
                                         .await;
                                     let _result = mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_status_update(
-                                            &sqlx_pool,
+                                            &sqlx_pool_rw,
                                             row_data.mm_media_dir_guid,
                                             json!({"Status": "File search scan", "Pct": 0.0}),
                                         )
@@ -119,7 +119,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         ),
                                     );
                                         } else {
-                                            if mk_lib_database::mk_lib_database_library::mk_lib_database_library_file_exists(&sqlx_pool, &file_metadata.name).await.unwrap() == false {
+                                            if mk_lib_database::mk_lib_database_library::mk_lib_database_library_file_exists(&sqlx_pool_ro, &file_metadata.name).await.unwrap() == false {
                                         // set lower here so I can remove a lot of .lower() in the code below
                                         let file_lower = &file_metadata.name.to_lowercase();
                                         let file_extension = Path::new(&file_lower)
@@ -279,7 +279,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                 json!({ "Added": Utc::now().to_string() });
                                             let media_id = Uuid::now_v7();
                                             let _result = mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_insert(
-                                                &sqlx_pool,
+                                                &sqlx_pool_rw,
                                                 media_id,
                                                 new_class_type_uuid as i16,
                                                 &file_metadata.name,
@@ -311,7 +311,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                             // it should save a dl "Z" record for search/lookup/etc
                                             if save_dl_record == true {
                                                 // media id begin and download que insert
-                                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool,
+                                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
                                                                                                                                         "Z".to_string(),
                                                                                                                                         new_class_type_uuid,
                                                                                                                                         media_id,
@@ -328,7 +328,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     // end of for loop for each file in library
                                     // set to none so it doesn't show up anymore in admin status page
                                     mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_status_update(
-                                            &sqlx_pool,
+                                            &sqlx_pool_rw,
                                             row_data.mm_media_dir_guid,
                                             json!({"Status": "File scan complete", "Pct": 100}),
                                         )
@@ -337,7 +337,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     if total_files > 0 {
                                         // add notification to admin status page
                                         let _result = mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_insert(
-                                                &sqlx_pool,
+                                                &sqlx_pool_rw,
                                                 format!(
                                                     "{} file(s) added from {}",
                                                     total_files.to_formatted_string(&Locale::en),
@@ -352,7 +352,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             Err(_) => {
                                 // Lib path is not found on share
                                 let _result = mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_insert(
-                                        &sqlx_pool,
+                                        &sqlx_pool_rw,
                                         format!("Library path not found: {}", row_data.mm_media_dir_path),
                                         true,
                                     )
@@ -364,7 +364,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     Err(_) => {
                         // Fail share login
                         let _result = mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_insert(
-                                &sqlx_pool,
+                                &sqlx_pool_rw,
                                 format!("Unable to connect to share: {}", row_data.mm_media_dir_path),
                                 true,
                             )

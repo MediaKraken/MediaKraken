@@ -1,3 +1,4 @@
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -6,9 +7,8 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
-use crate::mk_lib_database;
+use axum_session_sqlx::SessionPgPool;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -20,12 +20,10 @@ struct TemplateError401Context {}
 struct UserInternetVimeoTemplate<'a> {
     //template_data: &'a Vec<mk_lib_database::mk_lib_database_cron::DBCronList>,
     template_data_exists: &'a bool,
-        page_title: Option<String>,
-
+    page_title: Option<String>,
 }
 
 pub async fn user_inter_vimeo(
-    Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -43,9 +41,8 @@ pub async fn user_inter_vimeo(
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let template = UserInternetVimeoTemplate {
-
             template_data_exists: &false,
-                    page_title: Some("MediaKraken Vimeo".to_string()),
+            page_title: Some("MediaKraken Vimeo".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
@@ -55,11 +52,10 @@ pub async fn user_inter_vimeo(
 #[derive(Template)]
 #[template(path = "bss_user/internet/bss_user_internet_vimeo_detail.html")]
 struct UserInternetVimeoDetailTemplate {
-        page_title: Option<String>,
+    page_title: Option<String>,
 }
 
 pub async fn user_inter_vimeo_detail(
-    Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -76,7 +72,9 @@ pub async fn user_inter_vimeo_detail(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let template = UserInternetVimeoDetailTemplate {page_title: Some("MediaKraken Vimeo Detail".to_string()),};
+        let template = UserInternetVimeoDetailTemplate {
+            page_title: Some("MediaKraken Vimeo Detail".to_string()),
+        };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }

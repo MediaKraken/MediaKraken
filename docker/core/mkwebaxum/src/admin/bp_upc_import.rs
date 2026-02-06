@@ -30,8 +30,8 @@ struct TemplateMediaUPCContext {
 }
 
 pub async fn admin_upc_import(
-    Extension(sqlx_pool): Extension<PgPool>,
-    method: Method,
+   Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
+  method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let current_user = auth.current_user.clone().unwrap_or_default();
@@ -64,7 +64,8 @@ pub struct UPCInput {
 }
 
 pub async fn admin_upc_import_post(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Form(input_data): Form<UPCInput>,
@@ -85,7 +86,7 @@ pub async fn admin_upc_import_post(
         // See if the barcode is on the DB
         let upc_exits: bool =
             mk_lib_database::database_metadata::mk_lib_database_metadata_upc::mk_lib_database_metadata_exists_upc(
-                &sqlx_pool,
+                &sqlx_pool_ro,
                 &input_data.upc_code,
             ) .await
             .unwrap();

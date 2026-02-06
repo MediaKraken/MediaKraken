@@ -1,3 +1,4 @@
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
     http::{Method, StatusCode},
@@ -5,9 +6,8 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
-use crate::mk_lib_database;
+use axum_session_sqlx::SessionPgPool;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -17,11 +17,11 @@ struct TemplateError401Context {}
 #[derive(Template)]
 #[template(path = "bss_user/bss_user_media_search.html")]
 struct UserSearchTemplate {
-        page_title: Option<String>,
+    page_title: Option<String>,
 }
 
 pub async fn user_search(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -38,7 +38,9 @@ pub async fn user_search(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let template = UserSearchTemplate {page_title: Some("MediaKraken Search".to_string()),};
+        let template = UserSearchTemplate {
+            page_title: Some("MediaKraken Search".to_string()),
+        };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }

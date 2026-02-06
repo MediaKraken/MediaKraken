@@ -12,7 +12,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
         .await
         .unwrap();
-    let _results = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+    let _results = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await;
 
     // pull options for metadata/chapters/images location
@@ -53,7 +53,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         let tmp_uuid =
                             uuid::Uuid::parse_str(&json_message["Media UUID"].to_string()).unwrap();
                         let _result = mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_ffmpeg_update_by_uuid(
-                        &sqlx_pool,
+                        &sqlx_pool_rw,
                         tmp_uuid,
                         ffprobe_data,
                     )

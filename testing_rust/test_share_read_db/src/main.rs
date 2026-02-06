@@ -13,12 +13,12 @@ async fn main() {
         .await
         .unwrap();
     let _result =
-        mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+        mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
             .await;
     // determine directories to audit
     for row_data in
         mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_audit_read(
-            &sqlx_pool,
+            &sqlx_pool_rw,
         )
         .await
         .unwrap()
@@ -26,7 +26,7 @@ async fn main() {
         println!("row: {:?}", row_data);
         let share_info =
             mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_detail(
-                &sqlx_pool,
+                &sqlx_pool_rw,
                 row_data.mm_media_dir_share_guid,
             )
             .await

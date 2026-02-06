@@ -9,8 +9,8 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
+use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
 use mk_lib_metadata;
 use serde::{Deserialize, Serialize};
@@ -25,12 +25,10 @@ struct TemplateError401Context {}
 #[template(path = "bss_user/media/bss_user_media_upc_import.html")]
 struct TemplateMediaUPCContext {
     template_data: serde_json::Value,
-        page_title: Option<String>,
-
+    page_title: Option<String>,
 }
 
 pub async fn user_media_upc_import(
-    Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -49,7 +47,7 @@ pub async fn user_media_upc_import(
     } else {
         let template = TemplateMediaUPCContext {
             template_data: json!({}),
-                    page_title: Some("MediaKraken UPC Import".to_string()),
+            page_title: Some("MediaKraken UPC Import".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
@@ -63,7 +61,8 @@ pub struct UPCInput {
 }
 
 pub async fn user_media_upc_import_post(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Form(input_data): Form<UPCInput>,
@@ -84,7 +83,7 @@ pub async fn user_media_upc_import_post(
         // See if the barcode is on the DB
         let upc_exits: bool =
             mk_lib_database::database_metadata::mk_lib_database_metadata_upc::mk_lib_database_metadata_exists_upc(
-                &sqlx_pool,
+                &sqlx_pool_ro,
                 &input_data.upc_code,
             ) .await
             .unwrap();
@@ -92,7 +91,7 @@ pub async fn user_media_upc_import_post(
             // See if the user owns the barcode scanned
             let user_owns: bool =
             mk_lib_database::database_metadata::mk_lib_database_metadata_upc::mk_lib_database_metadata_exists_upc_own(
-                &sqlx_pool,
+                &sqlx_pool_ro,
                 &input_data.upc_code,
                 current_user.id,
             ) .await
@@ -106,19 +105,18 @@ pub async fn user_media_upc_import_post(
             // Lookup upcitemdb
             let json_data: serde_json::Value =
                 mk_lib_metadata::metadata_provider::upcitemdb::provider_upcitemdb_fetch_by_upc(
-                    &sqlx_pool,
+                    &sqlx_pool_ro,
                     vec![&input_data.upc_code],
                     &"FAKETOKEN",
                 )
                 .await
                 .unwrap();
-            if json_data["code"] == "OK" {
-            }
+            if json_data["code"] == "OK" {}
             // if json_data["code"] == "INVALID_UPC" {
             //     // Lookup barcodespider
             //     let json_data: serde_json::Value =
             //         mk_lib_metadata::metadata_provider::barcodespider::provider_barcodespider_fetch_by_upc(
-            //             &sqlx_pool,
+            //             &sqlx_pool_rw,
             //             &input_data.upc_code,
             //             &"FAKETOKEN",
             //         ) .await

@@ -1,5 +1,7 @@
 use crate::axum_custom_filters::filters;
+use crate::mk_lib_database;
 use askama::Template;
+use axum::response::Redirect;
 use axum::{
     extract::Path,
     http::{Method, StatusCode},
@@ -7,11 +9,9 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
-use axum::response::Redirect;
+use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
-use crate::mk_lib_database;
 use serde_json::json;
 use sqlx::postgres::PgPool;
 
@@ -31,7 +31,7 @@ struct TemplateMetaTVContext<'a> {
 }
 
 pub async fn user_metadata_tv(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
@@ -52,7 +52,7 @@ pub async fn user_metadata_tv(
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 =
         mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_count(
-            &sqlx_pool,
+            &sqlx_pool_ro,
             String::new(),
         )
         .await
@@ -65,7 +65,7 @@ pub async fn user_metadata_tv(
         .await
         .unwrap();
         let tv_list = mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_read(
-            &sqlx_pool,
+            &sqlx_pool_ro,
             String::new(),
             db_offset,
             30,
@@ -94,11 +94,11 @@ pub async fn user_metadata_tv(
 struct TemplateMetaTVDetailContext<'a> {
     template_data: &'a serde_json::Value,
     template_data_media_seasons_exists: &'a bool,
-     page_title: Option<String>,
+    page_title: Option<String>,
 }
 
 pub async fn user_metadata_tv_detail(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
@@ -127,7 +127,7 @@ pub async fn user_metadata_tv_detail(
 }
 
 pub async fn user_metadata_tv_status(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
@@ -145,7 +145,7 @@ pub async fn user_metadata_tv_status(
         Redirect::to("/error/401")
     } else {
         let _row_data = mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_status(
-            &sqlx_pool, guid, event_type, current_user.id
+            &sqlx_pool_rw, guid, event_type, current_user.id
         )
         .await
         .unwrap();

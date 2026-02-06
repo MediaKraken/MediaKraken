@@ -151,15 +151,23 @@ impl FromRef<AppState> for axum_flash::Config {
     }
 }
 
+#[derive(Clone)]
+pub struct ReadWritePool(pub PgPool);
+
+#[derive(Clone)]
+pub struct ReadOnlyPool(pub PgPool);
+
 #[tokio::main]
 async fn main() {
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(50, 120)
+    let sqlx_pool_rw, sqlx_pool_ro = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
         .await
         .unwrap();
-    let _result =
-        mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
-            .await;
+    let _result = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(
+        &sqlx_pool_ro,
+        false,
+    )
+    .await;
 
     // let client =
     //     redis::Client::open("redis://default:@mkstack-dragonfly.dragonfly-operator-system:6379/0").expect("Error while trying to open the redis connection");
@@ -174,7 +182,7 @@ async fn main() {
     let session_config = SessionConfig::default().with_table_name("mm_session");
     let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
     let session_store =
-        SessionStore::<SessionPgPool>::new(Some(sqlx_pool.clone().into()), session_config)
+        SessionStore::<SessionPgPool>::new(Some(sqlx_pool_rw.clone().into()), session_config)
             .await
             .unwrap();
 
@@ -453,7 +461,7 @@ async fn main() {
                 i64,
                 SessionPgPool,
                 PgPool,
-            >::new(Some(sqlx_pool.clone().into()))
+            >::new(Some(sqlx_pool_rw.clone().into()))
             .with_config(auth_config),
         )
         .layer(SessionLayer::new(session_store))
@@ -481,7 +489,8 @@ async fn main() {
         )
         .route("/metrics", get(|| async move { metric_handle.render() }))
         .layer(prometheus_layer)
-        .layer(Extension(sqlx_pool))
+        .layer(Extension(ReadWritePool(sqlx_pool_rw)))
+        .layer(Extension(ReadOnlyPool(sqlx_pool_ro)))
         .with_state(app_state);
     // TODO .layer(
     //     ServiceBuilder::new()

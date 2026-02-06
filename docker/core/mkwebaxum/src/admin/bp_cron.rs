@@ -20,12 +20,11 @@ struct TemplateError403Context {}
 struct TemplateCronContext<'a> {
     template_data: &'a Vec<mk_lib_database::mk_lib_database_cron::DBCronList>,
     template_data_exists: &'a bool,
-        page_title: Option<String>,
-
+    page_title: Option<String>,
 }
 
 pub async fn admin_cron(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -43,7 +42,7 @@ pub async fn admin_cron(
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let cron_list =
-            mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool)
+            mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool_ro)
                 .await
                 .unwrap();
         let mut cron_data: bool = false;
@@ -53,8 +52,7 @@ pub async fn admin_cron(
         let template = TemplateCronContext {
             template_data: &cron_list,
             template_data_exists: &cron_data,
-                        page_title: Some("MediaKraken Admin Cron".to_string()),
-
+            page_title: Some("MediaKraken Admin Cron".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
@@ -62,7 +60,7 @@ pub async fn admin_cron(
 }
 
 pub async fn admin_cron_run(
-    Extension(sqlx_pool): Extension<PgPool>,
+    Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
@@ -82,7 +80,8 @@ pub async fn admin_cron_run(
         // (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let row_data = mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_service_json(
-            &sqlx_pool, guid,
+            &sqlx_pool_rw,
+            guid,
         )
         .await
         .unwrap();
@@ -101,7 +100,8 @@ pub async fn admin_cron_run(
             .await
             .unwrap();
         let _result = mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_time_update(
-            &sqlx_pool, guid,
+            &sqlx_pool_rw,
+            guid,
         )
         .await
         .unwrap();
