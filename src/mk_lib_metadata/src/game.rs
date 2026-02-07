@@ -12,7 +12,7 @@ pub async fn metadata_game_lookup(
     // TODO remove the file extension
     metadata_uuid =
         mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_uuid_by_name_and_system(
-            &sqlx_pool_rw,
+            &sqlx_pool,
             Path::new(&download_data.mm_download_path.as_ref().unwrap())
                 .file_name()
                 .unwrap()
@@ -31,7 +31,7 @@ pub async fn metadata_game_lookup(
         .unwrap();
         metadata_uuid =
             mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(
-                &sqlx_pool_rw, sha1_hash,
+                &sqlx_pool, sha1_hash,
             )
             .await
             .unwrap();

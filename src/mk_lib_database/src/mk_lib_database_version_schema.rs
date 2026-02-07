@@ -13,8 +13,8 @@ pub async fn mk_lib_database_update_schema(
                 .await
                 .unwrap();
         // option_json["MAME"]["Version"] = 240;
-        // mk_lib_database_option_status::mk_lib_database_option_update(&sqlx_pool_rw, option_json).await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 44).await?;
+        // mk_lib_database_option_status::mk_lib_database_option_update(&sqlx_pool, option_json).await?;
+        mk_lib_database_version_update(&sqlx_pool, 44).await?;
     }
     if version_no < 45 {
         let mut transaction = sqlx_pool.begin().await?;
@@ -31,7 +31,7 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 45).await?;
+        mk_lib_database_version_update(&sqlx_pool, 45).await?;
     }
     if version_no < 46 {
         let mut transaction = sqlx_pool.begin().await?;
@@ -52,7 +52,7 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 46).await?;
+        mk_lib_database_version_update(&sqlx_pool, 46).await?;
     }
     if version_no < 47 {
         let mut transaction = sqlx_pool.begin().await?;
@@ -67,7 +67,7 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 47).await?;
+        mk_lib_database_version_update(&sqlx_pool, 47).await?;
     }
     if version_no < 48 {
         let mut transaction = sqlx_pool.begin().await?;
@@ -90,7 +90,7 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 48).await?;
+        mk_lib_database_version_update(&sqlx_pool, 48).await?;
     }
     if version_no < 49 {
         let mut transaction = sqlx_pool.begin().await?;
@@ -102,7 +102,7 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 49).await?;
+        mk_lib_database_version_update(&sqlx_pool, 49).await?;
     }
 
     if version_no < 50 {
@@ -139,7 +139,7 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 50).await?;
+        mk_lib_database_version_update(&sqlx_pool, 50).await?;
     }
 
     if version_no < 51 {
@@ -157,7 +157,7 @@ pub async fn mk_lib_database_update_schema(
             .execute(&mut *transaction)
             .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 51).await?;
+        mk_lib_database_version_update(&sqlx_pool, 51).await?;
     }
 
     if version_no < 52 {
@@ -179,7 +179,7 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 52).await?;
+        mk_lib_database_version_update(&sqlx_pool, 52).await?;
     }
 
     if version_no < 53 {
@@ -188,7 +188,7 @@ pub async fn mk_lib_database_update_schema(
             .execute(&mut *transaction)
             .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 53).await?;
+        mk_lib_database_version_update(&sqlx_pool, 53).await?;
     }
 
     if version_no < 54 {
@@ -203,7 +203,7 @@ pub async fn mk_lib_database_update_schema(
             .execute(&mut *transaction)
             .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 54).await?;
+        mk_lib_database_version_update(&sqlx_pool, 54).await?;
     }
 
     if version_no < 55 {
@@ -218,7 +218,7 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 55).await?;
+        mk_lib_database_version_update(&sqlx_pool, 55).await?;
     }
 
     if version_no < 56 {
@@ -233,7 +233,7 @@ pub async fn mk_lib_database_update_schema(
             .execute(&mut *transaction)
             .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 56).await?;
+        mk_lib_database_version_update(&sqlx_pool, 56).await?;
     }
 
     if version_no < 57 {
@@ -271,7 +271,7 @@ pub async fn mk_lib_database_update_schema(
             .execute(&mut *transaction)
             .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 57).await?;
+        mk_lib_database_version_update(&sqlx_pool, 57).await?;
     }
 
     if version_no < 58 {
@@ -280,7 +280,7 @@ pub async fn mk_lib_database_update_schema(
             .execute(&mut *transaction)
             .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 58).await?;
+        mk_lib_database_version_update(&sqlx_pool, 58).await?;
     }
 
     if version_no < 59 {
@@ -301,7 +301,7 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 59).await?;
+        mk_lib_database_version_update(&sqlx_pool, 59).await?;
     }
 
     if version_no < 60 {
@@ -310,7 +310,7 @@ pub async fn mk_lib_database_update_schema(
             .execute(&mut *transaction)
             .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 60).await?;
+        mk_lib_database_version_update(&sqlx_pool, 60).await?;
     }
 
     if version_no < 61 {
@@ -319,7 +319,7 @@ pub async fn mk_lib_database_update_schema(
         //     .execute(&mut *transaction)
         //     .await?;
         // transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 61).await?;
+        mk_lib_database_version_update(&sqlx_pool, 61).await?;
     }
 
     if version_no < 62 {
@@ -382,7 +382,7 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 62).await?;
+        mk_lib_database_version_update(&sqlx_pool, 62).await?;
     }
 
     if version_no < 63 {
@@ -407,7 +407,7 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 63).await?;
+        mk_lib_database_version_update(&sqlx_pool, 63).await?;
     }
 
     if version_no < 64 {
@@ -449,7 +449,7 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 64).await?;
+        mk_lib_database_version_update(&sqlx_pool, 64).await?;
     }
 
     if version_no < 65 {
@@ -458,7 +458,7 @@ pub async fn mk_lib_database_update_schema(
             .execute(&mut *transaction)
             .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 65).await?;
+        mk_lib_database_version_update(&sqlx_pool, 65).await?;
     }
 
     if version_no < 66 {
@@ -474,7 +474,7 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 66).await?;
+        mk_lib_database_version_update(&sqlx_pool, 66).await?;
     }
 
     if version_no < 67 {
@@ -520,7 +520,7 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 67).await?;
+        mk_lib_database_version_update(&sqlx_pool, 67).await?;
     }
 
     if version_no < 68 {
@@ -548,7 +548,7 @@ pub async fn mk_lib_database_update_schema(
             .execute(&mut *transaction)
             .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 68).await?;
+        mk_lib_database_version_update(&sqlx_pool, 68).await?;
     }
 
     if version_no < 69 {
@@ -566,7 +566,7 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 69).await?;
+        mk_lib_database_version_update(&sqlx_pool, 69).await?;
     }
 
     if version_no < 70 {
@@ -641,7 +641,7 @@ pub async fn mk_lib_database_update_schema(
         // .execute(&mut *transaction)
         // .await?;
         // transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 70).await?;
+        mk_lib_database_version_update(&sqlx_pool, 70).await?;
     }
 
     // if version_no < 71 {
@@ -659,7 +659,7 @@ pub async fn mk_lib_database_update_schema(
     //         .execute(&mut *transaction)
     //         .await?;
     //     transaction.commit().await?;
-    //     mk_lib_database_version_update(&sqlx_pool_rw, 71).await?;
+    //     mk_lib_database_version_update(&sqlx_pool, 71).await?;
     // }
 
     if version_no < 72 {
@@ -668,7 +668,7 @@ pub async fn mk_lib_database_update_schema(
             .execute(&mut *transaction)
             .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 72).await?;
+        mk_lib_database_version_update(&sqlx_pool, 72).await?;
     }
 
     if version_no < 73 {
@@ -728,7 +728,7 @@ pub async fn mk_lib_database_update_schema(
             .execute(&mut *transaction)
             .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 73).await?;
+        mk_lib_database_version_update(&sqlx_pool, 73).await?;
     }
 
     if version_no < 74 {
@@ -745,7 +745,7 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut *transaction)
         .await?;
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool_rw, 74).await?;
+        mk_lib_database_version_update(&sqlx_pool, 74).await?;
     }
 
     // TODO, movie alt name, tv alt name and person alt name cleanup

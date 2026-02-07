@@ -15,6 +15,8 @@ use num_format::{SystemLocale, ToFormattedString};
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPool;
 use sqlx::Row;
+use crate::ReadWritePool;
+use crate::ReadOnlyPool;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]

@@ -160,7 +160,7 @@ pub struct ReadOnlyPool(pub PgPool);
 #[tokio::main]
 async fn main() {
     // connect to db and do a version check
-    let sqlx_pool_rw, sqlx_pool_ro = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
+    let (sqlx_pool_rw, sqlx_pool_ro) = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
         .await
         .unwrap();
     let _result = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(

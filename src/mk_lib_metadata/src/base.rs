@@ -54,31 +54,31 @@ pub async fn metadata_process(
 ) -> Result<(), Box<dyn Error>> {
     // TODO art, posters, trailers, etc in here as well
     if download_data.mm_download_status == "Search" {
-        metadata_search(&sqlx_pool_rw, provider_name, download_data, provider_api_key)
+        metadata_search(&sqlx_pool, provider_name, download_data, provider_api_key)
             .await
             .unwrap();
     } else if download_data.mm_download_status == "Update" {
-        metadata_update(&sqlx_pool_rw, provider_name, download_data, provider_api_key)
+        metadata_update(&sqlx_pool, provider_name, download_data, provider_api_key)
             .await
             .unwrap();
     } else if download_data.mm_download_status == "Fetch" {
-        metadata_fetch(&sqlx_pool_rw, provider_name, download_data, provider_api_key)
+        metadata_fetch(&sqlx_pool, provider_name, download_data, provider_api_key)
             .await
             .unwrap();
     } else if download_data.mm_download_status == "FetchCastCrew" {
-        metadata_castcrew(&sqlx_pool_rw, provider_name, download_data, provider_api_key)
+        metadata_castcrew(&sqlx_pool, provider_name, download_data, provider_api_key)
             .await
             .unwrap();
     } else if download_data.mm_download_status == "FetchReview" {
-        metadata_review(&sqlx_pool_rw, provider_name, download_data, provider_api_key)
+        metadata_review(&sqlx_pool, provider_name, download_data, provider_api_key)
             .await
             .unwrap();
     } else if download_data.mm_download_status == "FetchImage" {
-        metadata_image(&sqlx_pool_rw, provider_name, download_data, provider_api_key)
+        metadata_image(&sqlx_pool, provider_name, download_data, provider_api_key)
             .await
             .unwrap();
     } else if download_data.mm_download_status == "FetchCollection" {
-        metadata_collection(&sqlx_pool_rw, provider_name, download_data, provider_api_key)
+        metadata_collection(&sqlx_pool, provider_name, download_data, provider_api_key)
             .await
             .unwrap();
     }
@@ -108,7 +108,7 @@ pub async fn metadata_search(
     let guessit_data: Metadata;
     if provider_name == "anidb" {
         guessit_data = guessit::metadata_guessit(
-            &sqlx_pool_rw,
+            &sqlx_pool,
             &download_data,
             "fake".to_string(),
             0,
@@ -118,7 +118,7 @@ pub async fn metadata_search(
         .unwrap();
         if metadata_uuid == uuid::Uuid::nil() {
             metadata_uuid =
-                metadata_anime::metadata_anime_lookup(&sqlx_pool_rw, &download_data, guessit_data)
+                metadata_anime::metadata_anime_lookup(&sqlx_pool, &download_data, guessit_data)
                     .await
                     .unwrap();
             // if metadata_uuid == uuid::Uuid::nil() {
@@ -131,7 +131,7 @@ pub async fn metadata_search(
             // }
         }
     } else if provider_name == "chart_lyrics" {
-        //provider_chart_lyrics::provider_chart_lyrics_fetch(&sqlx_pool_rw, artist_name, song_name);
+        //provider_chart_lyrics::provider_chart_lyrics_fetch(&sqlx_pool, artist_name, song_name);
         lookup_halt = true;
     } else if provider_name == "comicvine" {
         lookup_halt = true;
@@ -141,7 +141,7 @@ pub async fn metadata_search(
         lookup_halt = true;
     } else if provider_name == "imvdb" {
         metadata_uuid =
-            metadata_music_video::metadata_music_video_lookup(&sqlx_pool_rw, &download_data)
+            metadata_music_video::metadata_music_video_lookup(&sqlx_pool, &download_data)
                 .await
                 .unwrap();
         // if metadata_uuid == uuid::Uuid::nil() {
@@ -152,7 +152,7 @@ pub async fn metadata_search(
         //     }
         // }
     } else if provider_name == "isbndb" {
-        // metadata_uuid = provider_isbndb::metadata_book_search_isbndb(&sqlx_pool_rw, download_data)
+        // metadata_uuid = provider_isbndb::metadata_book_search_isbndb(&sqlx_pool, download_data)
         //     .await
         //     .unwrap();
         if metadata_uuid == uuid::Uuid::nil() {
@@ -161,7 +161,7 @@ pub async fn metadata_search(
     } else if provider_name == "lastfm" {
         lookup_halt = true;
     } else if provider_name == "musicbrainz" {
-        metadata_uuid = metadata_music::metadata_music_lookup(&sqlx_pool_rw, &download_data)
+        metadata_uuid = metadata_music::metadata_music_lookup(&sqlx_pool, &download_data)
             .await
             .unwrap();
         if metadata_uuid == uuid::Uuid::nil() {
@@ -187,7 +187,7 @@ pub async fn metadata_search(
         if metadata_uuid != uuid::Uuid::nil() {
             // TODO add theme.mp3 dl'd above to media table
             mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
-                &sqlx_pool_rw,
+                &sqlx_pool,
                 download_data.mm_download_guid,
             )
             .await
@@ -201,7 +201,7 @@ pub async fn metadata_search(
         lookup_halt = true;
     } else if provider_name == "themoviedb" {
         guessit_data = guessit::metadata_guessit(
-            &sqlx_pool_rw,
+            &sqlx_pool,
             &download_data,
             "fake".to_string(),
             0,
@@ -212,11 +212,11 @@ pub async fn metadata_search(
         if download_data.mm_download_que_type == mk_lib_common_enum_media_type::DLMediaType::MOVIE {
             if metadata_uuid == uuid::Uuid::nil() {
                 metadata_uuid =
-                    metadata_movie::metadata_movie_lookup(&sqlx_pool_rw, &download_data, guessit_data)
+                    metadata_movie::metadata_movie_lookup(&sqlx_pool, &download_data, guessit_data)
                         .await
                         .unwrap();
                 // (metadata_uuid, match_result) = metadata_provider_themoviedb.movie_search_tmdb(
-                //     &sqlx_pool_rw,
+                //     &sqlx_pool,
                 //     download_data);
                 // // if match_result is an int, that means the lookup found a match but isn't in db
                 // if metadata_uuid == uuid::Uuid::nil() && type(match_result) != int {
@@ -231,10 +231,10 @@ pub async fn metadata_search(
         {
             if metadata_uuid == uuid::Uuid::nil() {
                 metadata_uuid =
-                    metadata_tv::metadata_tv_lookup(&sqlx_pool_rw, &download_data, guessit_data)
+                    metadata_tv::metadata_tv_lookup(&sqlx_pool, &download_data, guessit_data)
                         .await
                         .unwrap();
-                // (metadata_uuid, match_result) = metadata_tv.metadata_tv_lookup(&sqlx_pool_rw, download_data);
+                // (metadata_uuid, match_result) = metadata_tv.metadata_tv_lookup(&sqlx_pool, download_data);
                 // // if match_result is an int, that means the lookup found a match but isn"t in db
                 // if metadata_uuid == uuid::Uuid::nil() && type(match_result) != int {
                 //     lookup_halt = true;
@@ -248,13 +248,13 @@ pub async fn metadata_search(
         {
             if metadata_uuid == uuid::Uuid::nil() {
                 metadata_uuid = metadata_person::metadata_person_lookup(
-                    &sqlx_pool_rw,
+                    &sqlx_pool,
                     &download_data,
                     guessit_data,
                 )
                 .await
                 .unwrap();
-                // (metadata_uuid, match_result) = metadata_person.metadata_person_lookup(&sqlx_pool_rw, download_data);
+                // (metadata_uuid, match_result) = metadata_person.metadata_person_lookup(&sqlx_pool, download_data);
                 // // if match_result is an int, that means the lookup found a match but isn"t in db
                 // if metadata_uuid == uuid::Uuid::nil() && type(match_result) != int {
                 //     lookup_halt = true;
@@ -272,7 +272,7 @@ pub async fn metadata_search(
             }
         }
     } else if provider_name == "thesportsdb" {
-        metadata_uuid = metadata_sports::metadata_sports_lookup(&sqlx_pool_rw, &download_data)
+        metadata_uuid = metadata_sports::metadata_sports_lookup(&sqlx_pool, &download_data)
             .await
             .unwrap();
         // if metadata_uuid == uuid::Uuid::nil() {
@@ -326,7 +326,7 @@ pub async fn metadata_fetch(
 ) -> Result<(), Box<dyn Error>> {
     if provider_name == "barcodespider" {
         let _barcode_id = provider_barcodespider::provider_barcodespider_fetch_by_upc(
-            sqlx_pool_rw,
+            sqlx_pool,
             &download_data.mm_download_provider_id.unwrap(),
             &provider_api_key,
         )
@@ -334,7 +334,7 @@ pub async fn metadata_fetch(
         .unwrap();
     } else if provider_name == "imvdb" {
         let _imvdb_id = provider_imvdb::provider_imvdb_video_fetch_by_id(
-            sqlx_pool_rw,
+            sqlx_pool,
             download_data.mm_download_provider_id.unwrap(),
             download_data.mm_download_new_uuid,
             provider_api_key,
@@ -352,7 +352,7 @@ pub async fn metadata_fetch(
                     .unwrap();
             }
             provider_tmdb::provider_tmdb_person_fetch(
-                sqlx_pool_rw,
+                sqlx_pool,
                 download_data.mm_download_provider_id.unwrap(),
                 download_data.mm_download_new_uuid,
                 provider_api_key,
@@ -363,7 +363,7 @@ pub async fn metadata_fetch(
         {
             // removing the imdb check.....as com_tmdb_metadata_by_id converts it
             provider_tmdb::provider_tmdb_movie_fetch(
-                sqlx_pool_rw,
+                sqlx_pool,
                 download_data.mm_download_provider_id.unwrap(),
                 download_data.mm_download_new_uuid,
                 provider_api_key,
@@ -373,7 +373,7 @@ pub async fn metadata_fetch(
             == mk_lib_common_enum_media_type::DLMediaType::TV
         {
             provider_tmdb::provider_tmdb_tv_fetch(
-                sqlx_pool_rw,
+                sqlx_pool,
                 download_data.mm_download_provider_id.unwrap(),
                 download_data.mm_download_new_uuid,
                 provider_api_key,
@@ -382,7 +382,7 @@ pub async fn metadata_fetch(
         }
     } else if provider_name == "upcitemdb" {
         let _upcitemdb_id = provider_upcitemdb::provider_upcitemdb_fetch_by_upc(
-            sqlx_pool_rw,
+            sqlx_pool,
             vec![&download_data.mm_download_provider_id.unwrap()],
             &provider_api_key,
         )
@@ -390,7 +390,7 @@ pub async fn metadata_fetch(
         .unwrap();
     }
     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
-        sqlx_pool_rw,
+        sqlx_pool,
         download_data.mm_download_guid,
     )
     .await;
@@ -427,7 +427,7 @@ pub async fn metadata_image(
 ) -> Result<(), Box<dyn Error>> {
     // TODO grab the actual image
     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
-        sqlx_pool_rw,
+        sqlx_pool,
         download_data.mm_download_guid,
     )
     .await;
@@ -442,7 +442,7 @@ pub async fn metadata_review(
 ) -> Result<(), Box<dyn Error>> {
     // review is last.....so can delete download que
     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
-        sqlx_pool_rw,
+        sqlx_pool,
         download_data.mm_download_guid,
     )
     .await;
@@ -457,7 +457,7 @@ pub async fn metadata_collection(
 ) -> Result<(), Box<dyn Error>> {
     // only one record for this so nuke it
     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
-        sqlx_pool_rw,
+        sqlx_pool,
         download_data.mm_download_guid,
     )
     .await;

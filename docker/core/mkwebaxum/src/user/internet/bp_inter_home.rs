@@ -9,6 +9,8 @@ use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
 use crate::mk_lib_database;
 use sqlx::postgres::PgPool;
+use crate::ReadWritePool;
+use crate::ReadOnlyPool;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_401.html")]

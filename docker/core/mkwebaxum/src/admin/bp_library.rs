@@ -12,6 +12,8 @@ use axum_session_sqlx::SessionPgPool;
 use mk_lib_rabbitmq;
 use serde_json::{json, Value};
 use sqlx::postgres::PgPool;
+use crate::ReadWritePool;
+use crate::ReadOnlyPool;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]

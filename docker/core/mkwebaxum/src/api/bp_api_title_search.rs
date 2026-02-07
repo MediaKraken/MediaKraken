@@ -11,6 +11,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::{PgPool, PgRow};
 use sqlx::{FromRow, Row};
+use crate::ReadWritePool;
+use crate::ReadOnlyPool;
 
 #[derive(Template)]
 #[template(path = "bss_api/bss_api_title_search.html")]

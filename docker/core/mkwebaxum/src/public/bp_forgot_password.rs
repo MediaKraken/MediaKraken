@@ -15,6 +15,8 @@ use sqlx::{
     ConnectOptions, PgPool,
 };
 use stdext::function_name;
+use crate::ReadWritePool;
+use crate::ReadOnlyPool;
 
 #[derive(Template)]
 #[template(path = "bss_public/bss_public_forgot_password.html")]

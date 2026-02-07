@@ -17,6 +17,8 @@ use sqlx::{
     ConnectOptions, PgPool,
 };
 use validator::Validate;
+use crate::ReadWritePool;
+use crate::ReadOnlyPool;
 
 #[derive(Template)]
 #[template(path = "bss_public/bss_public_register.html")]

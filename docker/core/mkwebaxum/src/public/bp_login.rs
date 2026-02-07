@@ -13,6 +13,8 @@ use axum_session_sqlx::SessionPgPool;
 use serde::Deserialize;
 use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
 use validator::Validate;
+use crate::ReadWritePool;
+use crate::ReadOnlyPool;
 
 #[derive(Template)]
 #[template(path = "bss_public/bss_public_login.html")]

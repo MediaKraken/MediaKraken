@@ -31,5 +31,5 @@ pub async fn mk_lib_database_open_pool(
         .idle_timeout(Duration::new(connection_timeout, 0))
         .connect(&connection_string)
         .await?;
-    Ok(sqlx_pool_rw, sqlx_pool_ro)
+    Ok((sqlx_pool_rw, sqlx_pool_ro))
 }

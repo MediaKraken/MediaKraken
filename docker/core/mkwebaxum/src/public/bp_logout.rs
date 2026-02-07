@@ -15,6 +15,8 @@ use sqlx::{
     postgres::{PgConnectOptions, PgPoolOptions},
     ConnectOptions, PgPool,
 };
+use crate::ReadWritePool;
+use crate::ReadOnlyPool;
 
 pub async fn public_logout(
     Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,

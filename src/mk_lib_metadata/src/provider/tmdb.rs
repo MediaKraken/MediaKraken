@@ -25,7 +25,7 @@ pub async fn provider_tmdb_movie_fetch(
     }
     let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_insert(
-        sqlx_pool_rw,
+        sqlx_pool,
         metadata_uuid,
         tmdb_id,
         &result_json,
@@ -36,7 +36,7 @@ pub async fn provider_tmdb_movie_fetch(
         // cast/crew doesn't exist on all media
         if result_json["credits"].get("cast").is_some() {
             mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert_cast_crew(
-                sqlx_pool_rw,
+                sqlx_pool,
                 &result_json["credits"]["cast"],
             )
             .await;
@@ -44,7 +44,7 @@ pub async fn provider_tmdb_movie_fetch(
 
         if result_json["credits"].get("crew").is_some() {
             mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert_cast_crew(
-                sqlx_pool_rw,
+                sqlx_pool,
                 &result_json["credits"]["crew"],
             )
             .await;
@@ -84,7 +84,7 @@ pub async fn provider_tmdb_person_fetch(
     }
     let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert(
-        sqlx_pool_rw,
+        sqlx_pool,
         metadata_uuid,
         tmdb_id,
         &result_json,
@@ -109,7 +109,7 @@ pub async fn provider_tmdb_tv_fetch(
     }    
     let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_insert(
-        sqlx_pool_rw,
+        sqlx_pool,
         metadata_uuid,
         tmdb_id,
         &result_json,
@@ -120,7 +120,7 @@ pub async fn provider_tmdb_tv_fetch(
         // cast/crew doesn't exist on all media
         if result_json["credits"].get("cast").is_some() {
             mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert_cast_crew(
-                sqlx_pool_rw,
+                sqlx_pool,
                 &result_json["credits"]["cast"],
             )
             .await;
@@ -128,7 +128,7 @@ pub async fn provider_tmdb_tv_fetch(
 
         if result_json["credits"].get("crew").is_some() {
             mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert_cast_crew(
-                sqlx_pool_rw,
+                sqlx_pool,
                 &result_json["credits"]["crew"],
             )
             .await;
