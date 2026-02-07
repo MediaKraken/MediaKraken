@@ -1,8 +1,3 @@
-# metadata list for movie
-design and generate html5 and tailwindcss v4 code for list of movies showing the poster with title, alternate title, mpaa rating, runtime.
-Add clickable icons for favorite, watched, good, terrible after the star rating.
-after the runtime, add a green/yellow/red text (text-right) for available or not.
-svg instead of emoji.
 
 # movie detail page - metadata
 design and generate html5 and tailwindcss v4 code for movie detail page incluing cast carousel and crew carousel with left/right arrows.
@@ -53,7 +48,7 @@ svg instead of emoji.
 design and generate html5 and tailwindcss v4 code for **********
 Use alpinejs for interactivity. Do not include pagination bar.
 svg instead of emoji.
-
+s
 # videoplayback form for WEB playback
 design and generate html5 and tailwindcss v4 code for **********
 Use alpinejs for interactivity. Do not include pagination bar.
@@ -69,8 +64,6 @@ design and generate html5 and tailwindcss v4 code for **********
 Use alpinejs for interactivity. Do not include pagination bar.
 svg instead of emoji.
 
-# main user landing page
-design and generate html5 and tailwindss v4 code for multimedia landing page showing movies, tv show, music in different sections. Use alpinejs for interactivity. Do not include pagination bar. svg instead of emoji. no upper navbar. no explore new media.
 
 # to convert html templates
 convert following to alpinejs, tailwindcss v4 and html5.  svg instead of emoji.
@@ -99,44 +92,6 @@ Show a perfect LCP-friendly poster setup
   fetchpriority="high"
   decoding="async"
 >
-
-PAGE TYPE:
-Movie list
-
-LAYOUT:
-- Left sidebar (nav)
-- Main content fills remaining space
-- Max width inside main
-
-STYLE:
-- Dark theme
-- Compact, media-center UI
-- Tailwind CSS v4
-- askama templates
-
-COMPONENTS:
-- Movie cards (grid)  
-- Poster image, title, alt title
-- add clickable buttons for genres
-- MPAA rating, runtime
-- Star rating + inline action icons
-- Add clickable icons for favorite, watched, good, bad and trash after the star rating
-- Availability after the runtime, add a green/yellow/red text for available, requested, unavailable
-
-INTERACTIVITY:
-- Alpine.js for icon toggles
-- use x-data for the state logic
-- No pagination bar
-- async image loading along with skeleton loaders
-
-CONSTRAINTS:
-- Semantic HTML
-- Accessible (aria where appropriate)
-- svg instead of emoji
-
-
-
-
 
 
 
