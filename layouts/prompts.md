@@ -112,21 +112,31 @@ STYLE:
 - Dark theme
 - Compact, media-center UI
 - Tailwind CSS v4
+- askama templates
 
 COMPONENTS:
-- Movie cards (grid)
-- Poster, title, alt title
+- Movie cards (grid)  
+- Poster image, title, alt title
+- add clickable buttons for genres
 - MPAA rating, runtime
 - Star rating + inline action icons
-- Availability text (right-aligned)
+- Add clickable icons for favorite, watched, good, bad and trash after the star rating
+- Availability after the runtime, add a green/yellow/red text for available, requested, unavailable
 
 INTERACTIVITY:
 - Alpine.js for icon toggles
+- use x-data for the state logic
 - No pagination bar
+- async image loading along with skeleton loaders
 
 CONSTRAINTS:
 - Semantic HTML
 - Accessible (aria where appropriate)
+- svg instead of emoji
+
+
+
+
 
 
 
