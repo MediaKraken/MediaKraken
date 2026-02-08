@@ -28,6 +28,8 @@ INTERACTIVITY:
 - use x-data for the state logic
 - No pagination bar
 - async image loading along with skeleton loaders
+- Server-synced Alpine state
+- Hover trailer preview
 
 CONSTRAINTS:
 - Semantic HTML
@@ -40,3 +42,5 @@ TECHSTACK:
 - HTML5
 - Tailwindcss v4
 - Axum
+- axum_session_auth crate
+- axum_session_sqlx
