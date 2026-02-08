@@ -20,6 +20,21 @@
             display: none !important;
         }
     </style>
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('theme', {
+                dark: localStorage.theme === 'dark',
+                toggle() {
+                    this.dark = !this.dark
+                    localStorage.theme = this.dark ? 'dark' : 'light'
+                    document.documentElement.classList.toggle('dark', this.dark)
+                },
+                init() {
+                    document.documentElement.classList.toggle('dark', this.dark)
+                }
+            })
+        })
+    </script>    
 </head>
 
 <body class="min-h-screen flex flex-col bg-gray-100 text-gray-900">
