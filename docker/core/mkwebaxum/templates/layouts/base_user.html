@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
     <title>
         {% if let Some(title) = page_title %}
         {{ title }}
@@ -35,7 +36,7 @@
     </script>
 </head>
 
-<body x-init="$store.theme.init()"
+<body x-init="$store.theme.init()" x-cloak
     class="min-h-screen flex flex-col bg-zinc-100 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 transition-colors">
     {% include "partials/topnavbar.html" %}
     <div class="flex flex-1 overflow-hidden">
