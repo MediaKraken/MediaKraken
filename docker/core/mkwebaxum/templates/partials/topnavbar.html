@@ -1,4 +1,4 @@
-<header class="sticky top-0 z-[100] w-full bg-white dark:bg-zinc-900 shadow" x-data="themeToggle()" x-init="init()">
+<header class="sticky top-0 z-[100] w-full bg-white dark:bg-zinc-900 shadow">
     <nav class="bg-white dark:bg-zinc-900">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="relative flex items-center justify-between h-16">
@@ -100,16 +100,16 @@
                 <!-- Right -->
                 <div class="flex items-center space-x-3">
 
-                    <!-- Theme toggle -->
-                    <button @click="toggle()" class="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-zinc-800"
-                        aria-label="Toggle dark mode">
+                    <button @click="$store.theme.toggle()"
+                        class="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-zinc-800" aria-label="Toggle dark mode">
                         <!-- Sun -->
-                        <svg x-show="!dark" class="h-5 w-5 text-gray-700" fill="currentColor" viewBox="0 0 24 24">
+                        <svg x-show="!$store.theme.dark" class="h-5 w-5 text-gray-700 dark:text-zinc-300"
+                            fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 18a6 6 0 100-12 6 6 0 000 12z" />
                         </svg>
 
                         <!-- Moon -->
-                        <svg x-show="dark" x-cloak class="h-5 w-5 text-zinc-300" fill="currentColor"
+                        <svg x-show="$store.theme.dark" x-cloak class="h-5 w-5 text-zinc-300" fill="currentColor"
                             viewBox="0 0 24 24">
                             <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z" />
                         </svg>
