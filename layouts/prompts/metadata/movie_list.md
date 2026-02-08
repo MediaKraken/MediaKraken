@@ -8,7 +8,7 @@ LAYOUT:
 - Max width inside main
 
 STYLE:
-- theme toggle (light and dark mode)
+- Assumes dark/light via data-theme
 - Compact, media-center UI
 - Tailwind CSS v4
 - askama templates
@@ -35,6 +35,11 @@ CONSTRAINTS:
 - Semantic HTML
 - Accessible (aria where appropriate)
 - svg instead of emoji
+
+State:
+- Alpine local state
+- Receives flags from parent
+- Fully static
 
 TECHSTACK:
 - Rust
