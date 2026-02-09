@@ -48,7 +48,7 @@ pub async fn mk_lib_database_metadata_movie_read(
              'unavailable' as mm_availibility, \
              (mm_metadata_movie_json->'runtime')::int as mm_metadata_runtime, \
              mm_metadata_movie_json->>'tagline' as mm_metadata_tagline, \
-             jsonb_array_elements_text(mm_metadata_movie_json->'genres')::jsonb as mm_genre \
+             (mm_metadata_movie_json->'genres')::jsonb as mm_genre \
              from mm_metadata_movie \
              WHERE mm_metadata_movie_name &@ $1 \
              or mm_metadata_movie_name_alt &@ $2
@@ -68,7 +68,7 @@ pub async fn mk_lib_database_metadata_movie_read(
             'unavailable' as mm_availibility, \
             (mm_metadata_movie_json->'runtime')::int as mm_metadata_runtime, \
             mm_metadata_movie_json->>'tagline' as mm_metadata_tagline, \
-            jsonb_array_elements_text(mm_metadata_movie_json->'genres')::jsonb as mm_genre \
+            (mm_metadata_movie_json->'genres')::jsonb as mm_genre \
             from mm_metadata_movie \
             order by LOWER(mm_metadata_movie_name), mm_date \
             offset $1 limit $2",
