@@ -151,7 +151,7 @@ pub async fn user_metadata_movie(
                 template_metadata_poster: mm_poster,
                 template_metadata_runtime: row_data.mm_metadata_runtime,
                 template_metadata_rating: "pg13".to_string(),
-                template_metadata_star_rating: 8,
+                template_metadata_star_rating: 8/2,
                 template_metadata_availability: row_data.mm_metadata_availibility.clone(),
                 template_metadata_tagline: row_data.mm_metadata_movie_tagline.clone(),
                 template_metadata_genre: genres,

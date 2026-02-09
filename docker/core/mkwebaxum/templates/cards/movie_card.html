@@ -3,21 +3,24 @@
     favorite: {{ row_data.template_metadata_user_watched }},
     watched: {{ row_data.template_metadata_user_watched }},
     good: {{ row_data.template_metadata_user_watched }},
-    bad: {{ row_data.template_metadata_user_watched }}
+    bad: {{ row_data.template_metadata_user_watched }},
+    trash: {{ row_data.template_metadata_user_watched }}
   })">
   <!-- Poster -->
   <div class="relative aspect-[2/3] rounded-t-xl overflow-hidden bg-zinc-200 dark:bg-zinc-800">
     <!-- Skeleton -->
     <div x-show="!loaded" class="absolute inset-0 animate-pulse bg-zinc-300 dark:bg-zinc-700"></div>
-    {% if row_data.template_metadata_poster == "/static/image/Movie-icon.png" %}
-    <img src="/static/image/Movie-icon.png" alt="Poster for {{ row_data.template_metadata_name }}" loading="lazy"
-      @load="loaded = true" class="h-full w-full object-cover transition-opacity"
-      :class="loaded ? 'opacity-100' : 'opacity-0'" />
-    {% else %}
-    <img src="/metadata{{row_data.template_metadata_poster|safe}}"
-      alt="Poster for {{ row_data.template_metadata_name }}" loading="lazy" @load="loaded = true"
-      class="h-full w-full object-cover transition-opacity" :class="loaded ? 'opacity-100' : 'opacity-0'" />
-    {% endif %}
+    <a href="/user/metadata/movie_detail/{{row_data.template_metadata_guid}}" class="block">
+      {% if row_data.template_metadata_poster == "/static/image/Movie-icon.png" %}
+      <img src="/static/image/Movie-icon.png" alt="Poster for {{ row_data.template_metadata_name }}" loading="lazy"
+        @load="loaded = true" class="h-full w-full object-cover transition-opacity"
+        :class="loaded ? 'opacity-100' : 'opacity-0'" />
+      {% else %}
+      <img src="/metadata{{row_data.template_metadata_poster|safe}}"
+        alt="Poster for {{ row_data.template_metadata_name }}" loading="lazy" @load="loaded = true"
+        class="h-full w-full object-cover transition-opacity" :class="loaded ? 'opacity-100' : 'opacity-0'" />
+      {% endif %}
+    </a>
   </div>
 
   <!-- Content -->
@@ -37,20 +40,29 @@
       </div>
       {% endif %}
       {% endif %}
+      {% if let Some(alt_name) = row_data.template_metadata_tagline %}
+      {% if alt_name != "" %}
+      <div class="text-xs text-zinc-500 dark:text-zinc-400">
+        <p>
+          {{ alt_name }}
+        </p>
+      </div>
+      {% endif %}
+      {% endif %}
     </div>
 
     <!-- Meta -->
     <div class="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
       <span>{{ row_data.template_metadata_rating }}</span>
       <span>{{ row_data.template_metadata_runtime }} min</span>
-    </div>
-
-    <!-- Availability -->
-    <p class="text-xs font-medium
+      <span>
+        <p class="text-xs font-medium
         {% if row_data.template_metadata_availability == " available" %}text-green-600 {% elif
-      row_data.template_metadata_availability=="requested" %}text-yellow-500 {% else %}text-red-500{% endif %}">
-      {{ row_data.template_metadata_availability | capitalize }}
-    </p>
+          row_data.template_metadata_availability=="requested" %}text-yellow-500 {% else %}text-red-500{% endif %}">
+          {{ row_data.template_metadata_availability | capitalize }}
+        </p>
+      </span>
+    </div>
 
     <!-- Genres -->
     <div class="flex flex-wrap gap-1">

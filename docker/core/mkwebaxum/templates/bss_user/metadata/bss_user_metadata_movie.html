@@ -15,7 +15,7 @@
            lg:grid-cols-5
            xl:grid-cols-6">
     {% for row_data in template_data %}
-    {% include "partials/movie_card.html" %}
+    {% include "cards/movie_card.html" %}
     {% endfor %}
   </ul>
   {% if pagination_bar != "" %}
