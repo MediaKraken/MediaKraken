@@ -1,5 +1,7 @@
 use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
+use crate::ReadOnlyPool;
+use crate::ReadWritePool;
 use askama::Template;
 use axum::response::Redirect;
 use axum::{
@@ -16,8 +18,11 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::{PgPool, PgRow};
 use sqlx::{FromRow, Row};
-use crate::ReadWritePool;
-use crate::ReadOnlyPool;
+
+#[derive(Debug, Deserialize, Serialize)]
+struct Genre {
+    name: String,
+}
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_401.html")]
@@ -30,6 +35,12 @@ struct TemplateMetaMovieList {
     template_metadata_name_alt: Option<String>,
     template_metadata_date: String,
     template_metadata_poster: String,
+    template_metadata_runtime: i32,
+    template_metadata_rating: String,
+    template_metadata_star_rating: i8,
+    template_metadata_availability: String,
+    template_metadata_tagline: Option<String>,
+    template_metadata_genre: Vec<Genre>,
     template_metadata_user_watched: serde_json::Value,
     template_metadata_user_rating: serde_json::Value,
     template_metadata_user_request: serde_json::Value,
@@ -119,12 +130,31 @@ pub async fn user_metadata_movie(
             if row_data.mm_poster.len() > 0 {
                 mm_poster = row_data.mm_poster.clone();
             }
+
+            let genres: Vec<Genre> = row_data
+                .mm_metadata_genre_json
+                .as_array()
+                .into_iter()
+                .flatten()
+                .filter_map(|g| {
+                    g.get("name").and_then(|n| n.as_str()).map(|name| Genre {
+                        name: name.to_string(),
+                    })
+                })
+                .collect();
+
             let temp_meta_line = TemplateMetaMovieList {
                 template_metadata_guid: row_data.mm_metadata_guid,
                 template_metadata_name: row_data.mm_metadata_name.clone(),
                 template_metadata_name_alt: row_data.mm_metadata_movie_name_alt.clone(),
                 template_metadata_date: row_data.mm_date.clone(),
                 template_metadata_poster: mm_poster,
+                template_metadata_runtime: row_data.mm_metadata_runtime,
+                template_metadata_rating: "pg13".to_string(),
+                template_metadata_star_rating: 8,
+                template_metadata_availability: row_data.mm_metadata_availibility.clone(),
+                template_metadata_tagline: row_data.mm_metadata_movie_tagline.clone(),
+                template_metadata_genre: genres,
                 template_metadata_user_watched: watched_status,
                 template_metadata_user_rating: rating_status,
                 template_metadata_user_request: request_status,

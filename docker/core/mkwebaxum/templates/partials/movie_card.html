@@ -1,0 +1,107 @@
+<li class="group relative rounded-xl bg-white dark:bg-zinc-900
+         shadow-sm hover:shadow-md transition-shadow" x-data="movieCard({
+    favorite: {{ row_data.template_metadata_user_watched }},
+    watched: {{ row_data.template_metadata_user_watched }},
+    good: {{ row_data.template_metadata_user_watched }},
+    bad: {{ row_data.template_metadata_user_watched }}
+  })">
+  <!-- Poster -->
+  <div class="relative aspect-[2/3] rounded-t-xl overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+    <!-- Skeleton -->
+    <div x-show="!loaded" class="absolute inset-0 animate-pulse bg-zinc-300 dark:bg-zinc-700"></div>
+    {% if row_data.template_metadata_poster == "/static/image/Movie-icon.png" %}
+    <img src="/static/image/Movie-icon.png" alt="Poster for {{ row_data.template_metadata_name }}" loading="lazy"
+      @load="loaded = true" class="h-full w-full object-cover transition-opacity"
+      :class="loaded ? 'opacity-100' : 'opacity-0'" />
+    {% else %}
+    <img src="/metadata{{row_data.template_metadata_poster|safe}}"
+      alt="Poster for {{ row_data.template_metadata_name }}" loading="lazy" @load="loaded = true"
+      class="h-full w-full object-cover transition-opacity" :class="loaded ? 'opacity-100' : 'opacity-0'" />
+    {% endif %}
+  </div>
+
+  <!-- Content -->
+  <div class="p-3 space-y-2">
+    <!-- Title -->
+    <div>
+      <h2 class="text-sm font-semibold leading-tight line-clamp-2">
+        {{ row_data.template_metadata_name }}
+      </h2>
+      {% if let Some(alt_name) = row_data.template_metadata_name_alt %}
+      {% if alt_name != &row_data.template_metadata_name %}
+      <div class="text-xs text-zinc-500 dark:text-zinc-400">
+        <p>
+          <span class="font-medium">Also Known As:</span>
+          {{ alt_name }}
+        </p>
+      </div>
+      {% endif %}
+      {% endif %}
+    </div>
+
+    <!-- Meta -->
+    <div class="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
+      <span>{{ row_data.template_metadata_rating }}</span>
+      <span>{{ row_data.template_metadata_runtime }} min</span>
+    </div>
+
+    <!-- Availability -->
+    <p class="text-xs font-medium
+        {% if row_data.template_metadata_availability == " available" %}text-green-600 {% elif
+      row_data.template_metadata_availability=="requested" %}text-yellow-500 {% else %}text-red-500{% endif %}">
+      {{ row_data.template_metadata_availability | capitalize }}
+    </p>
+
+    <!-- Genres -->
+    <div class="flex flex-wrap gap-1">
+      {% for genre in row_data.template_metadata_genre %}
+      <button class="px-2 py-0.5 text-xs rounded-full
+                 bg-zinc-100 dark:bg-zinc-800
+                 hover:bg-indigo-100 dark:hover:bg-indigo-900">
+        {{ genre.name }}
+      </button>
+      {% endfor %}
+    </div>
+
+    <!-- Rating + Actions -->
+    <div class="flex items-center justify-between pt-1">
+      <!-- Stars -->
+      <div class="flex items-center gap-0.5" aria-label="Star rating">
+        {% for _ in 0..row_data.template_metadata_star_rating %}
+        {% include "icons/star_filled.svg" %}
+        {% endfor %}
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-2 text-zinc-500">
+        {% include "icons/heart.svg" %}
+        {% include "icons/check.svg" %}
+        {% include "icons/thumb_up.svg" %}
+        {% include "icons/thumb_down.svg" %}
+        {% include "icons/trash.svg" %}
+      </div>
+    </div>
+  </div>
+</li>
+<script>
+  function movieCard(initial) {
+    return {
+      loaded: false,
+      ...initial,
+
+      toggle(key) {
+        this[key] = !this[key]
+        this.save()
+      },
+
+      save: Alpine.debounce(function () {
+        // async fetch to Axum endpoint
+        fetch('/api/movie/update', {
+          method: 'POST',
+          body: JSON.stringify(this),
+          headers: { 'Content-Type': 'application/json' }
+        })
+      }, 400)
+    }
+  }
+</script>

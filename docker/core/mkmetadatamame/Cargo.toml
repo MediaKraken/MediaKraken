@@ -16,11 +16,11 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_compression = { version = "0.0.103", registry = "kellnr" }
-mk_lib_database = { version = "0.0.136", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.105", registry = "kellnr" }
-mk_lib_network = { version = "0.0.105", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.108", registry = "kellnr" }
+mk_lib_compression = { version = "0.0.114", registry = "kellnr" }
+mk_lib_database = { version = "0.0.147", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.116", registry = "kellnr" }
+mk_lib_network = { version = "0.0.116", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.119", registry = "kellnr" }
 
 async-std = "1.13.1"
 chrono = { version = "0.4.43", features = ["serde"] }

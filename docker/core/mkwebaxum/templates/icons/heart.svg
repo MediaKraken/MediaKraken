@@ -1,0 +1,11 @@
+<button
+  @click="toggle('favorite')"
+  :class="favorite ? 'text-red-500' : 'hover:text-red-500'"
+  aria-label="Favorite"
+>
+  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+    <path
+      d="M12 21s-7-4.35-7-10a4 4 0 018-1 4 4 0 018 1c0 5.65-7 10-7 10z"
+    />
+  </svg>
+</button>

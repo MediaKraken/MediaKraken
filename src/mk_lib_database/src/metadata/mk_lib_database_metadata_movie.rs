@@ -25,6 +25,10 @@ pub struct DBMetaMovieList {
     pub mm_date: String, // DateTime<Utc>,
     pub mm_poster: String,
     pub mm_metadata_user_json: Option<serde_json::Value>,
+    pub mm_metadata_genre_json: serde_json::Value,
+    pub mm_metadata_availibility: String,
+    pub mm_metadata_movie_tagline: Option<String>,
+    pub mm_metadata_runtime: i32,
 }
 
 pub async fn mk_lib_database_metadata_movie_read(
@@ -40,7 +44,11 @@ pub async fn mk_lib_database_metadata_movie_read(
              mm_metadata_movie_name_alt, \
              mm_metadata_movie_json->>'release_date' as mm_date, \
              mm_metadata_movie_localimage_json->>'Poster' as mm_poster, \
-             mm_metadata_movie_user_json \
+             mm_metadata_movie_user_json, \
+             'unavailable' as mm_availibility, \
+             (mm_metadata_movie_json->'runtime')::int as mm_metadata_runtime, \
+             mm_metadata_movie_json->>'tagline' as mm_metadata_tagline, \
+             jsonb_array_elements_text(mm_metadata_movie_json->'genres')::jsonb as mm_genre \
              from mm_metadata_movie \
              WHERE mm_metadata_movie_name &@ $1 \
              or mm_metadata_movie_name_alt &@ $2
@@ -56,7 +64,11 @@ pub async fn mk_lib_database_metadata_movie_read(
             mm_metadata_movie_name_alt, \
             mm_metadata_movie_json->>'release_date' as mm_date, \
             mm_metadata_movie_localimage_json->>'Poster' as mm_poster, \
-            mm_metadata_movie_user_json \
+            mm_metadata_movie_user_json, \
+            'unavailable' as mm_availibility, \
+            (mm_metadata_movie_json->'runtime')::int as mm_metadata_runtime, \
+            mm_metadata_movie_json->>'tagline' as mm_metadata_tagline, \
+            jsonb_array_elements_text(mm_metadata_movie_json->'genres')::jsonb as mm_genre \
             from mm_metadata_movie \
             order by LOWER(mm_metadata_movie_name), mm_date \
             offset $1 limit $2",
@@ -72,6 +84,10 @@ pub async fn mk_lib_database_metadata_movie_read(
             mm_date: row.get("mm_date"),
             mm_poster: row.get("mm_poster"),
             mm_metadata_user_json: row.get("mm_metadata_movie_user_json"),
+            mm_metadata_genre_json: row.get("mm_genre"),
+            mm_metadata_availibility: row.get("mm_availibility"),
+            mm_metadata_movie_tagline: row.get("mm_metadata_tagline"),
+            mm_metadata_runtime: row.get("mm_metadata_runtime"),
         })
         .fetch_all(sqlx_pool)
         .await?;
@@ -165,11 +181,12 @@ pub async fn mk_lib_database_metadata_movie_detail_by_guid(
     Ok(row)
 }
 
-pub async fn mk_lib_database_metadata_movie_status(sqlx_pool: &sqlx::PgPool,
+pub async fn mk_lib_database_metadata_movie_status(
+    sqlx_pool: &sqlx::PgPool,
     uuid_id: Uuid,
     key: String,
     user_id: i64,
-    ) -> Result<(), sqlx::Error> {
+) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
     let row: (serde_json::Value,) = sqlx::query_as(
         "select mm_metadata_movie_user_json from mm_metadata_movie \
@@ -185,9 +202,11 @@ pub async fn mk_lib_database_metadata_movie_status(sqlx_pool: &sqlx::PgPool,
         user_json["UserStats"][&user_id] = serde_json::json!({"Rating": false, "Watched": false, "Requested": false, "Queue": false});
     }
     // TODO set the "keys"
-    sqlx::query("update mm_metadata_movie \
+    sqlx::query(
+        "update mm_metadata_movie \
                 set mm_metadata_movie_user_json = $1 \
-                where mm_metadata_movie_guid = $2")
+                where mm_metadata_movie_guid = $2",
+    )
     .bind(user_json)
     .bind(uuid_id)
     .execute(&mut *transaction)
