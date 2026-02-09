@@ -108,7 +108,7 @@
 
       save: Alpine.debounce(function () {
         // async fetch to Axum endpoint
-        fetch('/api/movie/update', {
+        fetch('/api/movie/update/user/user_metadata_movie_status/{{row_data.template_metadata_guid}}', {
           method: 'POST',
           body: JSON.stringify(this),
           headers: { 'Content-Type': 'application/json' }
