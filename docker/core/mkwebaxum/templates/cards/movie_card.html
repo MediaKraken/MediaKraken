@@ -1,15 +1,17 @@
 <li class="group relative rounded-xl bg-white dark:bg-zinc-900
          shadow-sm hover:shadow-md transition-shadow" x-data="movieCard({
-    favorite: {{ row_data.template_metadata_user_watched }},
+    favorite: false,
     watched: {{ row_data.template_metadata_user_watched }},
-    good: {{ row_data.template_metadata_user_watched }},
-    bad: {{ row_data.template_metadata_user_watched }},
-    trash: {{ row_data.template_metadata_user_watched }}
+    good: false,
+    bad: false,
+    trash: false
   })">
   <!-- Poster -->
   <div class="relative aspect-[2/3] rounded-t-xl overflow-hidden bg-zinc-200 dark:bg-zinc-800">
     <!-- Skeleton -->
-    <div x-show="!loaded" class="absolute inset-0 animate-pulse bg-zinc-300 dark:bg-zinc-700"></div>
+    <div class="absolute inset-0 bg-zinc-300 dark:bg-zinc-700
+            transition-opacity" :class="loaded ? 'opacity-0 pointer-events-none' : 'opacity-100'">
+    </div>
     <a href="/user/metadata/movie_detail/{{row_data.template_metadata_guid}}" class="block">
       {% if row_data.template_metadata_poster == "/static/image/Movie-icon.png" %}
       <img src="/static/image/Movie-icon.png" alt="Poster for {{ row_data.template_metadata_name }}" loading="lazy"
@@ -55,12 +57,10 @@
     <div class="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400">
       <span>{{ row_data.template_metadata_rating }}</span>
       <span>{{ row_data.template_metadata_runtime }} min</span>
-      <span>
-        <p class="text-xs font-medium
-        {% if row_data.template_metadata_availability == " available" %}text-green-600 {% elif
-          row_data.template_metadata_availability=="requested" %}text-yellow-500 {% else %}text-red-500{% endif %}">
-          {{ row_data.template_metadata_availability | capitalize }}
-        </p>
+      <span class="text-xs font-medium
+  {% if row_data.template_metadata_availability == "available" %}text-green-600 {% elif
+        row_data.template_metadata_availability=="requested" %}text-yellow-500 {% else %}text-red-500{% endif %}">
+        {{ row_data.template_metadata_availability | capitalize }}
       </span>
     </div>
 
@@ -68,8 +68,9 @@
     <div class="flex flex-wrap gap-1">
       {% for genre in row_data.template_metadata_genre %}
       <button class="px-2 py-0.5 text-xs rounded-full
-                 bg-zinc-100 dark:bg-zinc-800
-                 hover:bg-indigo-100 dark:hover:bg-indigo-900">
+   bg-zinc-100 text-zinc-700
+   dark:bg-zinc-800 dark:text-zinc-300
+   hover:bg-indigo-100 dark:hover:bg-indigo-900">
         {{ genre.name }}
       </button>
       {% endfor %}
@@ -79,41 +80,33 @@
     <div class="flex items-center justify-between pt-1">
       <!-- Stars -->
       <div class="flex items-center gap-0.5" aria-label="Star rating">
-        {% for _ in 0..row_data.template_metadata_star_rating %}
         {% include "icons/star_filled.svg" %}
-        {% endfor %}
+        {{ row_data.template_metadata_star_rating }}
       </div>
 
       <!-- Actions -->
       <div class="flex items-center gap-2 text-zinc-500">
-        {% include "icons/heart.svg" %}
-        {% include "icons/check.svg" %}
-        {% include "icons/thumb_up.svg" %}
-        {% include "icons/thumb_down.svg" %}
-        {% include "icons/trash.svg" %}
+        <button @click="toggle('favorite')" class="transition-colors" :class="favorite
+          ? 'text-red-500'
+          : 'text-zinc-400 hover:text-red-400'">
+          {% include "icons/heart.svg" %}
+        </button>
+        <button @click="toggle('watched')" :class="watched ? 'text-green-500' : 'text-zinc-400 hover:text-green-400'">
+          {% include "icons/check.svg" %}
+        </button>
+
+        <button @click="toggle('good')" :class="good ? 'text-blue-500' : 'text-zinc-400 hover:text-blue-400'">
+          {% include "icons/thumb_up.svg" %}
+        </button>
+
+        <button @click="toggle('bad')" :class="bad ? 'text-yellow-500' : 'text-zinc-400 hover:text-yellow-400'">
+          {% include "icons/thumb_down.svg" %}
+        </button>
+
+        <button @click="toggle('trash')" :class="trash ? 'text-red-500' : 'text-zinc-400 hover:text-red-400'">
+          {% include "icons/trash.svg" %}
+        </button>
       </div>
     </div>
   </div>
 </li>
-<script>
-  function movieCard(initial) {
-    return {
-      loaded: false,
-      ...initial,
-
-      toggle(key) {
-        this[key] = !this[key]
-        this.save()
-      },
-
-      save: Alpine.debounce(function () {
-        // async fetch to Axum endpoint
-        fetch('/api/movie/update', {
-          method: 'POST',
-          body: JSON.stringify(this),
-          headers: { 'Content-Type': 'application/json' }
-        })
-      }, 400)
-    }
-  }
-</script>

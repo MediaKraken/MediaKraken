@@ -42,6 +42,7 @@ State:
 - Fully static
 
 TECHSTACK:
+- alpinejs
 - Rust
 - Askama
 - HTML5

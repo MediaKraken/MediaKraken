@@ -24,4 +24,14 @@ INTERACTIVITY:
 CONSTRAINTS:
 - Semantic HTML
 - Accessible (aria where appropriate)
-- svg instead of emoji
+- svg instead of emojiy
+
+TECHSTACK:
+- alpinejs
+- Rust
+- Askama
+- HTML5
+- Tailwindcss v4
+- Axum
+- axum_session_auth crate
+- axum_session_sqlx

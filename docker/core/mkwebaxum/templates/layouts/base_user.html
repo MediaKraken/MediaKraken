@@ -12,32 +12,63 @@
         MediaKraken
         {% endif %}
     </title>
-    <link rel="stylesheet" href="/static/css/base_webapp_2.css">
-    <script src="/static/js/alpinejs_3.15.3.min.js" defer></script>
+    <link rel="stylesheet" href="/static/css/base_webapp_4.css">
     <style>
         [x-cloak] {
             display: none !important;
         }
     </style>
-    <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.store('theme', {
-                dark: localStorage.theme === 'dark',
-                toggle() {
-                    this.dark = !this.dark
-                    localStorage.theme = this.dark ? 'dark' : 'light'
-                    document.documentElement.classList.toggle('dark', this.dark)
-                },
-                init() {
-                    document.documentElement.classList.toggle('dark', this.dark)
-                }
-            })
-        })
-    </script>
+<script>
+  (function () {
+    const theme =
+      localStorage.theme ??
+      (window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light');
+
+    localStorage.theme = theme;
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  })();
+</script>
+
+
+    <script defer src="/static/js/alpinejs_3.15.3.min.js"></script>
+
+<script defer>
+  document.addEventListener('alpine:init', () => {
+    Alpine.store('ui', {
+      dark: localStorage.theme === 'dark',
+      sidebarOpen: false,
+
+      init() {
+        document.documentElement.classList.toggle('dark', this.dark)
+      },
+
+      toggleTheme() {
+        this.dark = !this.dark
+        localStorage.theme = this.dark ? 'dark' : 'light'
+        document.documentElement.classList.toggle('dark', this.dark)
+      },
+
+      openSidebar() {
+        this.sidebarOpen = true
+      },
+
+      closeSidebar() {
+        this.sidebarOpen = false
+      },
+
+      toggleSidebar() {
+        this.sidebarOpen = !this.sidebarOpen
+      }
+    })
+  })
+</script>
+
 </head>
 
-<body x-init="$store.theme.init()" x-cloak
-    class="min-h-screen flex flex-col bg-zinc-100 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 transition-colors">
+<body x-data class="min-h-screen flex flex-col bg-zinc-100 text-zinc-900
+         dark:bg-zinc-950 dark:text-zinc-100 transition-colors">
     {% include "partials/topnavbar.html" %}
     <div class="flex flex-1 overflow-hidden">
         {% include "partials/sidebar_user.html" %}
@@ -47,5 +78,34 @@
     </div>
     {% include "bss_public/bss_public_footer.html" %}
 </body>
+
+<script defer>
+    function movieCard(initial) {
+        return {
+            loaded: false,
+            ...initial,
+
+            toggle(key) {
+                this[key] = !this[key]
+                this.save()
+            },
+
+            save: Alpine.debounce(function () {
+                fetch('/api/movie/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        guid: this.guid,
+                        favorite: this.favorite,
+                        watched: this.watched,
+                        good: this.good,
+                        bad: this.bad,
+                        trash: this.trash
+                    })
+                })
+            }, 400)
+        }
+    }
+</script>
 
 </html>

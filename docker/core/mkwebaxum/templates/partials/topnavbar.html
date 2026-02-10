@@ -1,5 +1,5 @@
-<header class="sticky top-0 z-[100] w-full bg-white dark:bg-zinc-900 shadow">
-    <nav class="bg-white dark:bg-zinc-900">
+<header class="sticky top-0 z-[100] w-full bg-white dark:bg-zinc-900 shadow-sm">
+    <nav class="bg-transparent">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="relative flex items-center justify-between h-16">
 
@@ -12,21 +12,24 @@
                         </span>
                     </div>
 
-                    <div class="hidden sm:ml-6 sm:flex sm:space-x-4">
-                        <a href="/user/home"
-                            class="text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 px-3 py-2 rounded-md text-sm font-medium">
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-1">
+                        <a href="/user/home" class="px-3 py-2 rounded-md text-sm font-medium
+                                  text-gray-700 dark:text-zinc-300
+                                  hover:bg-gray-100 dark:hover:bg-zinc-800">
                             Home
                         </a>
 
-                        <a href="/user/sync/1"
-                            class="text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 px-3 py-2 rounded-md text-sm font-medium">
+                        <a href="/user/sync/1" class="px-3 py-2 rounded-md text-sm font-medium
+                                  text-gray-700 dark:text-zinc-300
+                                  hover:bg-gray-100 dark:hover:bg-zinc-800">
                             Sync
                         </a>
 
-                        <!-- Metadata -->
+                        <!-- Metadata dropdown -->
                         <div class="relative group">
-                            <button class="text-gray-700 dark:text-zinc-300 group-hover:bg-gray-100 dark:group-hover:bg-zinc-800
-                                       px-3 py-2 rounded-md text-sm font-medium flex items-center transition-colors">
+                            <button class="px-3 py-2 rounded-md text-sm font-medium flex items-center
+                                       text-gray-700 dark:text-zinc-300
+                                       hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
                                 Metadata
                                 <svg class="ml-1 h-4 w-4 transition-transform group-hover:rotate-180" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">
@@ -37,61 +40,67 @@
 
                             <div class="absolute left-0 mt-2 w-[500px]
                                        bg-white dark:bg-zinc-800
-                                       border border-gray-100 dark:border-zinc-700
-                                       rounded-xl shadow-2xl
+                                       border border-gray-200 dark:border-zinc-700
+                                       rounded-xl shadow-xl
                                        opacity-0 invisible group-hover:opacity-100 group-hover:visible
                                        transition-all duration-200
                                        origin-top-left scale-95 group-hover:scale-100
                                        z-[999]">
                                 <div class="grid grid-cols-2 gap-6 p-6">
                                     <div>
-                                        <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-3">
-                                            Video</h3>
+                                        <h3 class="text-xs font-bold uppercase tracking-wider mb-3
+                                                   text-indigo-600 dark:text-indigo-400">
+                                            Video
+                                        </h3>
                                         <ul class="space-y-2">
-                                            <li><a href="/user/metadata/movie/1"
-                                                    class="text-sm text-gray-600 dark:text-zinc-300 hover:text-indigo-600 block">Movie</a>
-                                            </li>
-                                            <li><a href="/user/metadata/movie_collection/1"
-                                                    class="text-sm text-gray-600 dark:text-zinc-300 hover:text-indigo-600 block">Movie
-                                                    Collection</a></li>
-                                            <li><a href="/user/metadata/tv/1"
-                                                    class="text-sm text-gray-600 dark:text-zinc-300 hover:text-indigo-600 block">TV
-                                                    Show</a></li>
-                                            <li><a href="/user/metadata/sports/1"
-                                                    class="text-sm text-gray-600 dark:text-zinc-300 hover:text-indigo-600 block">Sports</a>
-                                            </li>
+                                            <li><a href="/user/metadata/movie/1" class="text-sm text-gray-600 dark:text-zinc-300
+                                                          hover:text-indigo-600 dark:hover:text-indigo-400">
+                                                    Movie</a></li>
+                                            <li><a href="/user/metadata/movie_collection/1" class="text-sm text-gray-600 dark:text-zinc-300
+                                                          hover:text-indigo-600 dark:hover:text-indigo-400">
+                                                    Movie Collection</a></li>
+                                            <li><a href="/user/metadata/tv/1" class="text-sm text-gray-600 dark:text-zinc-300
+                                                          hover:text-indigo-600 dark:hover:text-indigo-400">
+                                                    TV Show</a></li>
+                                            <li><a href="/user/metadata/sports/1" class="text-sm text-gray-600 dark:text-zinc-300
+                                                          hover:text-indigo-600 dark:hover:text-indigo-400">
+                                                    Sports</a></li>
                                         </ul>
                                     </div>
                                     <div>
-                                        <h3 class="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-3">
-                                            Media & People</h3>
+                                        <h3 class="text-xs font-bold uppercase tracking-wider mb-3
+                                                   text-indigo-600 dark:text-indigo-400">
+                                            Media & People
+                                        </h3>
                                         <ul class="space-y-2">
-                                            <li><a href="/user/metadata/game/1"
-                                                    class="text-sm text-gray-600 dark:text-zinc-300 hover:text-indigo-600 block">Game</a>
-                                            </li>
-                                            <li><a href="/user/metadata/music/1"
-                                                    class="text-sm text-gray-600 dark:text-zinc-300 hover:text-indigo-600 block">Music</a>
-                                            </li>
-                                            <li><a href="/user/metadata/book/1"
-                                                    class="text-sm text-gray-600 dark:text-zinc-300 hover:text-indigo-600 block">Periodical</a>
-                                            </li>
-                                            <li><a href="/user/metadata/person/1"
-                                                    class="text-sm text-gray-600 dark:text-zinc-300 hover:text-indigo-600 block">Person</a>
-                                            </li>
+                                            <li><a href="/user/metadata/game/1" class="text-sm text-gray-600 dark:text-zinc-300
+                                                          hover:text-indigo-600 dark:hover:text-indigo-400">
+                                                    Game</a></li>
+                                            <li><a href="/user/metadata/music/1" class="text-sm text-gray-600 dark:text-zinc-300
+                                                          hover:text-indigo-600 dark:hover:text-indigo-400">
+                                                    Music</a></li>
+                                            <li><a href="/user/metadata/book/1" class="text-sm text-gray-600 dark:text-zinc-300
+                                                          hover:text-indigo-600 dark:hover:text-indigo-400">
+                                                    Periodical</a></li>
+                                            <li><a href="/user/metadata/person/1" class="text-sm text-gray-600 dark:text-zinc-300
+                                                          hover:text-indigo-600 dark:hover:text-indigo-400">
+                                                    Person</a></li>
                                         </ul>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <a href="/user/profile"
-                            class="text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 px-3 py-2 rounded-md text-sm font-medium">
+                        <a href="/user/profile" class="px-3 py-2 rounded-md text-sm font-medium
+                                  text-gray-700 dark:text-zinc-300
+                                  hover:bg-gray-100 dark:hover:bg-zinc-800">
                             Profile
                         </a>
 
-                        <a href="/admin/home"
-                            class="text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800
-                                  px-3 py-2 rounded-md text-sm font-medium border-l pl-4 border-gray-200 dark:border-zinc-700">
+                        <a href="/admin/home" class="px-3 py-2 rounded-md text-sm font-medium
+                                  text-gray-700 dark:text-zinc-300
+                                  hover:bg-gray-100 dark:hover:bg-zinc-800
+                                  border-l border-gray-200 dark:border-zinc-700 pl-4">
                             Admin
                         </a>
                     </div>
@@ -99,29 +108,30 @@
 
                 <!-- Right -->
                 <div class="flex items-center space-x-3">
-
-                    <button @click="$store.theme.toggle()"
-                        class="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-zinc-800" aria-label="Toggle dark mode">
-                        <!-- Sun -->
-                        <svg x-show="!$store.theme.dark" class="h-5 w-5 text-gray-700 dark:text-zinc-300"
-                            fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 18a6 6 0 100-12 6 6 0 000 12z" />
+                    <!-- Theme toggle -->
+                    <button @click="$store.ui.toggleTheme()"
+                        class="rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-zinc-800">
+                        <svg x-show="!$store.ui.dark" class="h-5 w-5 text-gray-700">
+                            <!-- sun -->
                         </svg>
 
-                        <!-- Moon -->
-                        <svg x-show="$store.theme.dark" x-cloak class="h-5 w-5 text-zinc-300" fill="currentColor"
-                            viewBox="0 0 24 24">
-                            <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z" />
+                        <svg x-show="$store.ui.dark" x-cloak class="h-5 w-5 text-zinc-300">
+                            <!-- moon -->
                         </svg>
                     </button>
-
-                    <a href="/public/login"
-                        class="text-gray-700 dark:text-zinc-300 hover:text-indigo-600 px-3 py-2 text-sm font-medium">
+                    <!-- Mobile sidebar button -->
+                    <button @click="$store.ui.toggleSidebar()"
+                        class="md:hidden rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-zinc-800">
+                        ☰
+                    </button>
+                    <a href="/public/login" class="px-3 py-2 text-sm font-medium
+                              text-gray-700 dark:text-zinc-300
+                              hover:text-indigo-600 dark:hover:text-indigo-400">
                         Login
                     </a>
 
-                    <a href="#"
-                        class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition shadow-sm">
+                    <a href="#" class="bg-indigo-600 text-white px-4 py-2 rounded-lg
+                              text-sm font-semibold hover:bg-indigo-700 transition shadow-sm">
                         Sign Up
                     </a>
                 </div>
