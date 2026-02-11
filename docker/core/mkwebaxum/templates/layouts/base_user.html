@@ -4,7 +4,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="light dark">
+    <meta name="color-scheme" content="light dark"> 
+    
     <title>
         {% if let Some(title) = page_title %}
         {{ title }}
@@ -12,70 +13,69 @@
         MediaKraken
         {% endif %}
     </title>
-    <link rel="stylesheet" href="/static/css/base_webapp_4.css">
+    
+    <link rel="stylesheet" href="/static/css/base_webapp_5.css">
+    
     <style>
-        [x-cloak] {
-            display: none !important;
-        }
+        [x-cloak] { display: none !important; }
     </style>
-<script>
-  (function () {
-    const theme =
-      localStorage.theme ??
-      (window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light');
 
-    localStorage.theme = theme;
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-  })();
-</script>
+    <script>
+        (function() {
+            // Check LocalStorage OR System Preference
+            const isDark = localStorage.theme === 'dark' || 
+                (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
+            // Apply class immediately
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
 
     <script defer src="/static/js/alpinejs_3.15.3.min.js"></script>
 
-<script defer>
-  document.addEventListener('alpine:init', () => {
-    Alpine.store('ui', {
-      dark: localStorage.theme === 'dark',
-      sidebarOpen: false,
+    <script defer>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('ui', {
+                // Initialize state based on what the head script applied
+                dark: document.documentElement.classList.contains('dark'),
+                sidebarOpen: false,
 
-      init() {
-        document.documentElement.classList.toggle('dark', this.dark)
-      },
+                toggleTheme() {
+                    this.dark = !this.dark;
+                    
+                    // Toggle Class
+                    document.documentElement.classList.toggle('dark', this.dark);
+                    
+                    // Persist to LocalStorage
+                    localStorage.theme = this.dark ? 'dark' : 'light';
+                },
 
-      toggleTheme() {
-        this.dark = !this.dark
-        localStorage.theme = this.dark ? 'dark' : 'light'
-        document.documentElement.classList.toggle('dark', this.dark)
-      },
-
-      openSidebar() {
-        this.sidebarOpen = true
-      },
-
-      closeSidebar() {
-        this.sidebarOpen = false
-      },
-
-      toggleSidebar() {
-        this.sidebarOpen = !this.sidebarOpen
-      }
-    })
-  })
-</script>
-
+                openSidebar() { this.sidebarOpen = true },
+                closeSidebar() { this.sidebarOpen = false },
+                toggleSidebar() { this.sidebarOpen = !this.sidebarOpen }
+            })
+        })
+    </script>
 </head>
 
-<body x-data class="min-h-screen flex flex-col bg-zinc-100 text-zinc-900
-         dark:bg-zinc-950 dark:text-zinc-100 transition-colors">
+<body x-data 
+      x-cloak
+      class="min-h-screen flex flex-col bg-zinc-100 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 transition-colors duration-300">
+    
     {% include "partials/topnavbar.html" %}
+    
     <div class="flex flex-1 overflow-hidden">
         {% include "partials/sidebar_user.html" %}
+        
         <main id="main-content" class="flex-1 overflow-y-auto">
             {% block content %}{% endblock %}
         </main>
     </div>
+    
     {% include "bss_public/bss_public_footer.html" %}
 </body>
 
@@ -84,12 +84,10 @@
         return {
             loaded: false,
             ...initial,
-
             toggle(key) {
-                this[key] = !this[key]
-                this.save()
+                this[key] = !this[key];
+                this.save();
             },
-
             save: Alpine.debounce(function () {
                 fetch('/api/movie/update', {
                     method: 'POST',
@@ -107,5 +105,4 @@
         }
     }
 </script>
-
 </html>
