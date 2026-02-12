@@ -733,11 +733,9 @@ pub async fn mk_lib_database_update_schema(
 
     if version_no < 74 {
         let mut transaction = sqlx_pool.begin().await?;
-        sqlx::query(
-            "ALTER TABLE mm_bar_codes ADD COLUMN mm_bar_code_metadata_uuid uuid;",
-        )
-        .execute(&mut *transaction)
-        .await?;
+        sqlx::query("ALTER TABLE mm_bar_codes ADD COLUMN mm_bar_code_metadata_uuid uuid;")
+            .execute(&mut *transaction)
+            .await?;
         sqlx::query(
             "CREATE INDEX IF NOT EXISTS mm_bar_codes_metadata_uuid_ndx \
                 ON mm_bar_codes USING btree (mm_bar_code_metadata_uuid);",
@@ -748,8 +746,94 @@ pub async fn mk_lib_database_update_schema(
         mk_lib_database_version_update(&sqlx_pool, 74).await?;
     }
 
+    if version_no < 75 {
+        let mut transaction = sqlx_pool.begin().await?;
+        // remove user jsons from metadata tables
+        sqlx::query("ALTER TABLE mm_metadata_book DROP COLUMN mm_metadata_book_user_json;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("ALTER TABLE mm_metadata_movie DROP COLUMN mm_metadata_movie_user_json;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("ALTER TABLE mm_metadata_music DROP COLUMN mm_metadata_music_user_json;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(
+            "ALTER TABLE mm_metadata_music_video DROP COLUMN mm_metadata_music_video_user_json;",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query("ALTER TABLE mm_metadata_sports DROP COLUMN mm_metadata_sports_user_json;")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("ALTER TABLE mm_metadata_tvshow DROP COLUMN mm_metadata_tvshow_user_json;")
+            .execute(&mut *transaction)
+            .await?;
+        // create metadata status table
+        sqlx::query(
+            "CREATE TABLE IF NOT EXISTS mm_metadata_user_status ( \
+            mm_status_guid uuid NOT NULL, \
+            mm_status_user_id bigint NOT NULL, \
+            mm_status_user_json jsonb NOT NULL, \
+            mm_status_type_book uuid, \
+            mm_status_type_movie uuid, \
+            mm_status_type_music uuid, \
+            mm_status_type_music_video uuid, \
+            mm_status_type_sports uuid, \
+            mm_status_type_tvshow uuid, \
+            CONSTRAINT mm_metadata_user_status_pkey PRIMARY KEY (mm_status_guid));",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        // create indexes
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_metadata_user_status_user_id_ndx \
+                ON mm_metadata_user_status USING btree (mm_status_user_id);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_status_type_book_uuid_ndx \
+                ON mm_metadata_user_status USING btree (mm_status_type_book);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_status_type_movie_uuid_ndx \
+                ON mm_metadata_user_status USING btree (mm_status_type_movie);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mmm_status_type_music_uuid_ndx \
+                ON mm_metadata_user_status USING btree (mm_status_type_music);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_status_type_music_video_uuid_ndx \
+                ON mm_metadata_user_status USING btree (mm_status_type_music_video);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_status_type_sports_uuid_ndx \
+                ON mm_metadata_user_status USING btree (mm_status_type_sports);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "CREATE INDEX IF NOT EXISTS mm_status_type_tvshow_uuid_ndx \
+                ON mm_metadata_user_status USING btree (mm_status_type_tvshow);",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 75).await?;
+    }
+
     // TODO, movie alt name, tv alt name and person alt name cleanup
-    
+
     Ok(true)
 }
 

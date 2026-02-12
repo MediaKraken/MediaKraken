@@ -3,6 +3,16 @@ use std::env;
 use std::time::Duration;
 use urlencoding::encode;
 
+#[derive(Deserialize)]
+pub struct MediaStatusUpdatePayload {
+    pub guid: Uuid,
+    pub favorite: bool,
+    pub watched: bool,
+    pub good: bool,
+    pub bad: bool,
+    pub trash: bool,
+}
+
 pub async fn mk_lib_database_open_pool(
     pool_connections: u32,
     connection_timeout: u64,

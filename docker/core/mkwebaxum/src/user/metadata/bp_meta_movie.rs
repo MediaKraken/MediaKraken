@@ -237,8 +237,7 @@ pub async fn user_metadata_movie_status(
     Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
-    Path(guid): Path<uuid::Uuid>,
-    Path(event_type): Path<String>,
+    Json(payload): Json<mk_lib_database::mk_lib_database::MediaStatusUpdatePayload>,
 ) -> impl IntoResponse {
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
@@ -252,11 +251,10 @@ pub async fn user_metadata_movie_status(
         Redirect::to("/error/401")
     } else {
         let _row_data = mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_status(
-            &sqlx_pool_rw, guid, event_type, current_user.id
+            &sqlx_pool_rw, payload, current_user.id
         )
         .await
         .unwrap();
-        Redirect::to("/admin/cron")
     }
 }
 

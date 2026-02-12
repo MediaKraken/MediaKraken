@@ -184,28 +184,21 @@ pub async fn mk_lib_database_metadata_movie_detail_by_guid(
 pub async fn mk_lib_database_metadata_movie_status(
     sqlx_pool: &sqlx::PgPool,
     uuid_id: Uuid,
-    key: String,
+    payload: MediaStatusUpdatePayload,
     user_id: i64,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
-    let row: (serde_json::Value,) = sqlx::query_as(
-        "select mm_metadata_movie_user_json from mm_metadata_movie \
-        where mm_metadata_movie_guid = $1",
-    )
-    .bind(uuid_id)
-    .fetch_one(sqlx_pool)
-    .await?;
-    // extract user json, update status, update
-    let mut user_json: serde_json::Value = row.0;
-    let user_id = user_id.to_string();
-    if user_json["UserStats"][&user_id].is_null() {
-        user_json["UserStats"][&user_id] = serde_json::json!({"Rating": false, "Watched": false, "Requested": false, "Queue": false});
-    }
-    // TODO set the "keys"
+    let guid = uuid::Uuid::now_v7()
     sqlx::query(
-        "update mm_metadata_movie \
-                set mm_metadata_movie_user_json = $1 \
-                where mm_metadata_movie_guid = $2",
+        r#"iINSERT INTO mm_metadata_user_status (user_id, movie_guid, favorite, watched, good, bad, trash)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            ON CONFLICT (user_id, movie_guid) 
+            DO UPDATE SET 
+                favorite = EXCLUDED.favorite,
+                watched = EXCLUDED.watched,
+                good = EXCLUDED.good,
+                bad = EXCLUDED.bad,
+                trash = EXCLUDED.trash;"#,
     )
     .bind(user_json)
     .bind(uuid_id)
