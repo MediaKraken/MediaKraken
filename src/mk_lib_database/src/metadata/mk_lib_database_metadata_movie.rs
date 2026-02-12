@@ -183,25 +183,22 @@ pub async fn mk_lib_database_metadata_movie_detail_by_guid(
 
 pub async fn mk_lib_database_metadata_movie_status(
     sqlx_pool: &sqlx::PgPool,
-    uuid_id: Uuid,
     payload: MediaStatusUpdatePayload,
     user_id: i64,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
     let guid = uuid::Uuid::now_v7()
     sqlx::query(
-        r#"iINSERT INTO mm_metadata_user_status (user_id, movie_guid, favorite, watched, good, bad, trash)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
-            ON CONFLICT (user_id, movie_guid) 
-            DO UPDATE SET 
-                favorite = EXCLUDED.favorite,
-                watched = EXCLUDED.watched,
-                good = EXCLUDED.good,
-                bad = EXCLUDED.bad,
-                trash = EXCLUDED.trash;"#,
+        r#"INSERT INTO mm_metadata_user_status (mm_status_guid, mm_status_user_id,
+            mm_status_user_json, mm_status_type_movie)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (mm_status_user_id, mm_status_type_movie) 
+            DO UPDATE SET mm_status_user_json = $5;"#,
     )
-    .bind(user_json)
-    .bind(uuid_id)
+    .bind(guid)
+    .bind(user_id)
+    .bind(payload)
+    .bind(payload["guid"])
     .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;

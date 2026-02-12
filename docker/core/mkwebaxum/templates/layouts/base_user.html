@@ -88,7 +88,7 @@
                 this.save();
             },
             save: Alpine.debounce(function () {
-                fetch('/api/movie/update', {
+                fetch('/user/user_metadata_movie_status', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
