@@ -79,7 +79,7 @@
         </div>
 
         <div class="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-zinc-800 mt-2">
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-1">
                 <button @click="toggle('favorite')" class="transition-transform active:scale-125" 
                     :class="favorite ? 'text-red-500' : 'text-zinc-400 hover:text-red-400'">
                     {% include "icons/heart.svg" %}
@@ -88,11 +88,11 @@
                     :class="watched ? 'text-green-500' : 'text-zinc-400 hover:text-green-400'">
                     {% include "icons/check.svg" %}
                 </button>
-            </div>
-
-            <div class="flex items-center gap-2 border-l border-zinc-200 dark:border-zinc-700 pl-3">
                 <button @click="toggle('good')" :class="good ? 'text-blue-500' : 'text-zinc-400 hover:text-blue-400'">
                     {% include "icons/thumb_up.svg" %}
+                </button>
+                <button @click="toggle('bad')" :class="bad ? 'text-yellow-500' : 'text-zinc-400 hover:text-yellow-400'">
+                    {% include "icons/thumb_down.svg" %}
                 </button>
                 <button @click="toggle('trash')" :class="trash ? 'text-red-600' : 'text-zinc-400 hover:text-red-500'">
                     {% include "icons/trash.svg" %}
