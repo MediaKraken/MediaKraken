@@ -16,18 +16,18 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_common = { version = "0.0.116", registry = "kellnr" }
-mk_lib_database = { version = "0.0.148", registry = "kellnr" }
-mk_lib_file = { version = "0.0.125", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.117", registry = "kellnr" }
-mk_lib_metadata = { version = "0.0.128", registry = "kellnr" }
-mk_lib_network = { version = "0.0.117", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.120", registry = "kellnr" }
+mk_lib_common = { version = "0.0.117", registry = "kellnr" }
+mk_lib_database = { version = "0.0.149", registry = "kellnr" }
+mk_lib_file = { version = "0.0.126", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.118", registry = "kellnr" }
+mk_lib_metadata = { version = "0.0.129", registry = "kellnr" }
+mk_lib_network = { version = "0.0.118", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.121", registry = "kellnr" }
 
 askama = "0.15.4"
 askama_axum = "0.4.0"
 async-trait = "0.1.89"
-axum = { version = "0.8.8", features = ["form", "http2", "json", "ws"] }
+axum = { version = "0.8.8", features = ["form", "http2", "json", "ws", "macros"] }
 axum-client-ip = "1.3.1"
 axum_csrf = "0.11.0"
 axum-extra = { version = "0.12.5", features = ["routing"]}

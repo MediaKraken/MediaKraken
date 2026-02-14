@@ -32,6 +32,6 @@ TECHSTACK:
 - Askama
 - HTML5
 - Tailwindcss v4
-- Axum
+- Axum 0.8
 - axum_session_auth crate
 - axum_session_sqlx

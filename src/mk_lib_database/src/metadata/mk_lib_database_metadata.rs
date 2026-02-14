@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
+use uuid::Uuid;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetadataGenreCountList {

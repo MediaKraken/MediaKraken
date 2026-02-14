@@ -2,10 +2,11 @@ use sqlx::postgres::PgPoolOptions;
 use std::env;
 use std::time::Duration;
 use urlencoding::encode;
+use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct MediaStatusUpdatePayload {
-    pub guid: Uuid,
+    pub guid: uuid::Uuid,
     pub favorite: bool,
     pub watched: bool,
     pub good: bool,

@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
 use sqlx::{FromRow, Row};
+use crate::mk_lib_database::MediaStatusUpdatePayload;
 
 pub async fn mk_lib_database_metadata_exists_movie(
     sqlx_pool: &sqlx::PgPool,
@@ -187,7 +188,7 @@ pub async fn mk_lib_database_metadata_movie_status(
     user_id: i64,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
-    let guid = uuid::Uuid::now_v7()
+    let guid = uuid::Uuid::now_v7();
     sqlx::query(
         r#"INSERT INTO mm_metadata_user_status (mm_status_guid, mm_status_user_id,
             mm_status_user_json, mm_status_type_movie)
@@ -197,8 +198,8 @@ pub async fn mk_lib_database_metadata_movie_status(
     )
     .bind(guid)
     .bind(user_id)
-    .bind(payload)
-    .bind(payload["guid"])
+    .bind(serde_json::to_value(&payload).unwrap())
+    .bind(payload.guid)
     .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;

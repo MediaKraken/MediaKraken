@@ -4,6 +4,7 @@ use crate::ReadOnlyPool;
 use crate::ReadWritePool;
 use askama::Template;
 use axum::response::Redirect;
+use axum::response::Response;
 use axum::{
     extract::Path,
     http::{Method, StatusCode},
@@ -17,6 +18,7 @@ use mk_lib_common::mk_lib_common_pagination;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::{PgPool, PgRow};
+use sqlx::types::Json;
 use sqlx::{FromRow, Row};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -233,6 +235,7 @@ pub async fn user_metadata_movie_detail(
 //     await request.app.db_pool.release(db_connection)
 //     return response.HTTPResponse('', status=200, headers={'Vary': 'Accept-Encoding'})
 
+#[axum::debug_handler]
 pub async fn user_metadata_movie_status(
     Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,
     method: Method,
@@ -248,13 +251,14 @@ pub async fn user_metadata_movie_status(
     .validate(&current_user, &method, None)
     .await
     {
-        Redirect::to("/error/401")
+        return StatusCode::UNAUTHORIZED.into_response();
     } else {
         let _row_data = mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_status(
             &sqlx_pool_rw, payload, current_user.id
         )
         .await
         .unwrap();
+        StatusCode::OK.into_response()
     }
 }
 

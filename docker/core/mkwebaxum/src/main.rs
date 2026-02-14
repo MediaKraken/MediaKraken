@@ -437,7 +437,7 @@ async fn main() {
             post(user_media::bp_media_movie::user_media_movie_status),
         )
         .route_with_tsr(
-            "/user/user_metadata_movie_status",
+            "/user/user_metadata_movie_status/{uuid}",
             post(user_metadata::bp_meta_movie::user_metadata_movie_status),
         )
         .route_with_tsr(
