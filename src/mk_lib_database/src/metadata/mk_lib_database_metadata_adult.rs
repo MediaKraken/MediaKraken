@@ -15,7 +15,7 @@ pub async fn mk_lib_database_metadata_adult_read(
     limit: i64,
 ) -> Result<Vec<DBMetadataAdultList>, sqlx::Error> {
     let select_query;
-    if search_value != "" {
+    if !search_value.is_empty() {
         select_query = sqlx::query("").bind(search_value).bind(offset).bind(limit);
     } else {
         select_query = sqlx::query("").bind(offset).bind(limit);
@@ -34,7 +34,7 @@ pub async fn mk_lib_database_metadata_adult_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
-    if search_value != "" {
+    if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as("")
             .bind(search_value)
             .fetch_one(sqlx_pool)

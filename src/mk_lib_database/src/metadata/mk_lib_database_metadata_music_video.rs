@@ -18,7 +18,7 @@ pub async fn mk_lib_database_metadata_music_video_read(
     limit: i64,
 ) -> Result<Vec<DBMetaMusicVideoList>, sqlx::Error> {
     let select_query;
-    if search_value != "" {
+    if !search_value.is_empty() {
         select_query = sqlx::query(
             "select mm_metadata_music_video_guid, \
             mm_metadata_music_video_band, \
@@ -77,7 +77,7 @@ pub async fn mk_lib_database_metadata_music_video_count(
     imvdb_id: i32,
 ) -> Result<i64, sqlx::Error> {
     if imvdb_id == 0 {
-        if search_value != "" {
+        if !search_value.is_empty() {
             let row: (i64,) = sqlx::query_as(
                 "select count(*) from mm_metadata_music_video \
                 where mm_media_music_video_song &@ $1",

@@ -225,22 +225,26 @@ pub async fn user_metadata_movie_detail(
 }
 
 pub async fn user_metadata_movie_status(
-     State(state): State<AppState>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     axum::Json(payload): axum::Json<mk_lib_database::mk_lib_database::MediaStatusUpdatePayload>,
 ) -> impl IntoResponse {
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
-        [Method::GET],
+        [Method::POST],
         false,
     )
     .requires(Rights::any([Rights::permission("User::View")]))
     .validate(&current_user, &method, None)
     .await
     {
+        println!("here is the user: {:?}", current_user.id);
+        // let template = TemplateError401Context {};
+        // let reply_html = template.render().unwrap();
         return StatusCode::UNAUTHORIZED.into_response();
     } else {
+        println!("here is the payload4: {:?}", payload);
         let _row_data = mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_status(
             &state.sqlx_pool_rw, payload, current_user.id
         )

@@ -52,7 +52,7 @@ pub async fn mk_lib_database_metadata_game_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
-    if search_value != "" {
+    if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_game_software_info \
             where gi_game_info_name &@ $1",
@@ -86,7 +86,7 @@ pub async fn mk_lib_database_metadata_game_read(
     limit: i64,
 ) -> Result<Vec<DBMetaGameList>, sqlx::Error> {
     let select_query;
-    if search_value != "" {
+    if !search_value.is_empty() {
         select_query = sqlx::query(
             "select gi_game_info_id, gi_game_info_short_name, \
              gi_game_info_name, \

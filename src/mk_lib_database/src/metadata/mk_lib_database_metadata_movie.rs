@@ -40,7 +40,7 @@ pub async fn mk_lib_database_metadata_movie_read(
     limit: i64,
 ) -> Result<Vec<DBMetaMovieList>, sqlx::Error> {
     let select_query;
-    if search_value != "" {
+    if !search_value.is_empty() {
         select_query = sqlx::query(
             r#"select mm_metadata_movie_guid, mm_metadata_movie_name,
              mm_metadata_movie_name_alt,
@@ -108,7 +108,7 @@ pub async fn mk_lib_database_metadata_movie_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
-    if search_value != "" {
+    if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_movie \
             where mm_metadata_movie_name &@ $1",
@@ -132,8 +132,6 @@ pub async fn mk_lib_database_metadata_movie_insert(
     data_json: &serde_json::Value,
     data_image_json: serde_json::Value,
 ) -> Result<(), sqlx::Error> {
-    println!("ID: {:?}", series_id);
-    println!("Json: {:?}", data_json);
     let mut original_name = None;
     if !data_json["original_title"].is_null() && data_json["title"] != data_json["original_title"] {
         original_name = Some(data_json["original_title"].as_str().unwrap());
@@ -196,22 +194,28 @@ pub async fn mk_lib_database_metadata_movie_status(
     payload: MediaStatusUpdatePayload,
     user_id: i64,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = sqlx_pool.begin().await?;
+    println!("here is the payload2: {:?}", payload);
     let guid = uuid::Uuid::now_v7();
     sqlx::query(
-        r#"INSERT INTO mm_metadata_user_status (mm_status_guid, mm_status_user_id,
-            mm_status_user_json, mm_status_type_movie)
-            VALUES ($1, $2, $3, $4)
-            ON CONFLICT (mm_status_user_id, mm_status_type_movie) 
-            DO UPDATE SET mm_status_user_json = $5;"#,
+        r#"
+        INSERT INTO mm_metadata_user_status (
+            mm_status_guid,
+            mm_status_user_id,
+            mm_status_user_json,
+            mm_status_type_movie
+        )
+        VALUES ($1, $2, $3, $4)
+        ON CONFLICT (mm_status_user_id, mm_status_type_movie)
+        DO UPDATE
+        SET mm_status_user_json = EXCLUDED.mm_status_user_json
+        "#,
     )
-    .bind(guid)
-    .bind(user_id)
-    .bind(serde_json::to_value(&payload).unwrap())
-    .bind(payload.guid)
-    .execute(&mut *transaction)
+    .bind(guid) // $1
+    .bind(user_id) // $2
+    .bind(sqlx::types::Json(&payload)) // $3
+    .bind(payload.guid) // $4
+    .execute(sqlx_pool)
     .await?;
-    transaction.commit().await?;
     Ok(())
 }
 

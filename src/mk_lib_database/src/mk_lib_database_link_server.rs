@@ -69,7 +69,7 @@ pub async fn mk_lib_database_link_list_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
-    if search_value != "" {
+    if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_library_link \
             where mm_link_name % $1",

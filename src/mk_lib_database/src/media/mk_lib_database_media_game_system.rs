@@ -18,7 +18,7 @@ pub async fn mk_lib_database_media_game_system_read(
 ) -> Result<Vec<DBMediaGameSystemList>, sqlx::Error> {
     // TODO this should only return systems where there are games for it since it's "media"
     let select_query;
-    if search_value != "" {
+    if !search_value.is_empty() {
         select_query = sqlx::query(
             "select gs_game_system_id, \
             gs_game_system_name, \
@@ -59,7 +59,7 @@ pub async fn mk_lib_database_media_game_system_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
-    if search_value != "" {
+    if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_game_systems_info where gs_game_system_name = $1",
         )

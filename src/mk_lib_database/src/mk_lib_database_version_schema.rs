@@ -832,6 +832,47 @@ pub async fn mk_lib_database_update_schema(
         mk_lib_database_version_update(&sqlx_pool, 75).await?;
     }
 
+    if version_no < 76 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(
+            r#"CREATE UNIQUE INDEX IF NOT EXISTS mm_user_book_status_unique
+                ON mm_metadata_user_status (mm_status_user_id, mm_status_type_book);"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            r#"CREATE UNIQUE INDEX IF NOT EXISTS mm_user_movie_status_unique
+                ON mm_metadata_user_status (mm_status_user_id, mm_status_type_movie);"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            r#"CREATE UNIQUE INDEX IF NOT EXISTS mm_user_music_status_unique
+                ON mm_metadata_user_status (mm_status_user_id, mm_status_type_music);"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            r#"CREATE UNIQUE INDEX IF NOT EXISTS mm_user_music_video_status_unique
+                ON mm_metadata_user_status (mm_status_user_id, mm_status_type_music_video);"#,
+        )
+        .execute(&mut *transaction)
+        .await?;    
+        sqlx::query(
+            r#"CREATE UNIQUE INDEX IF NOT EXISTS mm_user_sports_status_unique
+                ON mm_metadata_user_status (mm_status_user_id, mm_status_type_sports);"#,
+        )
+        .execute(&mut *transaction)
+        .await?;  
+        sqlx::query(
+            r#"CREATE UNIQUE INDEX IF NOT EXISTS mm_user_tvshow_status_unique
+                ON mm_metadata_user_status (mm_status_user_id, mm_status_type_tvshow);"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 76).await?;
+    }
     // TODO, movie alt name, tv alt name and person alt name cleanup
 
     Ok(true)

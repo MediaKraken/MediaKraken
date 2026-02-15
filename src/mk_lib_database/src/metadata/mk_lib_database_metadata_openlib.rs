@@ -58,7 +58,7 @@ pub async fn mk_lib_database_metadata_openlib_work_read(
 ) -> Result<Vec<DBMetaOpenLibWorkList>, sqlx::Error> {
     // TODO sort by release date
     let select_query;
-    if search_value != "" {
+    if !search_value.is_empty() {
         select_query = sqlx::query(
             "select mm_openlib_work_id, mm_openlib_work_json \
             from mm_openlib_work where mm_metadata_book_name % $1 \
@@ -90,7 +90,7 @@ pub async fn mk_lib_database_metadata_openlib_work_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
-    if search_value != "" {
+    if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_openlib_work \
             where mm_openlib_work_json % $1",

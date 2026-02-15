@@ -21,7 +21,7 @@ pub async fn mk_lib_database_metadata_person_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
-    if search_value != "" {
+    if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_person \
             where mm_metadata_person_name &@ $1",
@@ -54,7 +54,7 @@ pub async fn mk_lib_database_metadata_person_read(
 ) -> Result<Vec<DBMetaPersonList>, sqlx::Error> {
     // TODO order by birth date
     let select_query;
-    if search_value != "" {
+    if !search_value.is_empty() {
         select_query = sqlx::query(
             "select mm_metadata_person_guid, \
             mm_metadata_person_name, mm_metadata_person_image, \

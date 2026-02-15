@@ -33,7 +33,7 @@ pub async fn mk_lib_database_metadata_tv_read(
     limit: i64,
 ) -> Result<Vec<DBMetaTVShowList>, sqlx::Error> {
     let select_query;
-    if search_value != "" {
+    if !search_value.is_empty() {
         // doing union so exact matches show on top
         select_query = sqlx::query(
             "select mm_metadata_tvshow_guid, \
@@ -82,7 +82,7 @@ pub async fn mk_lib_database_metadata_tv_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
-    if search_value != "" {
+    if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_tvshow \
             where mm_metadata_tvshow_name &@ $1",

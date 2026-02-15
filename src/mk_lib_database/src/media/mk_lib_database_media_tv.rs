@@ -17,7 +17,7 @@ pub async fn mk_lib_database_media_tv_read(
     limit: i64,
 ) -> Result<Vec<DBMediaTVShowList>, sqlx::Error> {
     let select_query;
-    if search_value != "" {
+    if !search_value.is_empty() {
         select_query = sqlx::query(
             "elect mm_metadata_tvshow_guid, \
             mm_metadata_tvshow_name, \

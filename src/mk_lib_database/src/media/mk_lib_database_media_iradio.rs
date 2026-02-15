@@ -51,7 +51,7 @@ pub async fn db_iradio_list(self, offset=0, records=None, active_station=True,
 pub async fn mk_lib_database_media_iradio_count(sqlx_pool: &sqlx::PgPool,
                                                   search_value: String)
                                                   -> Result<i32, sqlx::Error> {
-    if search_value != "" {
+    if !search_value.is_empty() {
         let row: (i32, ) = sqlx::query("")
             .bind(search_value)
             .fetch_one(sqlx_pool)

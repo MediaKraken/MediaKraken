@@ -6,7 +6,7 @@ pub async fn mk_lib_database_metadata_sports_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
-    if search_value != "" {
+    if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_metadata_sports \
             where mm_metadata_sports_name &@ $1",
@@ -37,7 +37,7 @@ pub async fn mk_lib_database_metadata_sports_read(
 ) -> Result<Vec<DBMetaSportsList>, sqlx::Error> {
     // TODO order by year
     let select_query;
-    if search_value != "" {
+    if !search_value.is_empty() {
         select_query = sqlx::query(
             "select mm_metadata_sports_guid, mm_metadata_sports_name \
             from mm_metadata_sports where mm_metadata_sports_guid \

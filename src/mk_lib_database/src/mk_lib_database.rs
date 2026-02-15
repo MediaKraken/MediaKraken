@@ -4,7 +4,7 @@ use std::time::Duration;
 use urlencoding::encode;
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MediaStatusUpdatePayload {
     pub guid: uuid::Uuid,
     pub favorite: bool,

@@ -15,7 +15,7 @@ pub async fn mk_lib_database_metadata_music_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
-    if search_value != "" {
+    if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_mtadata_album \
             where mm_metadata_album_name &@ $1",
@@ -41,7 +41,7 @@ pub async fn mk_lib_database_metadata_music_read(
     // TODO, only grab the poster locale from json
     // TODO order by release year
     let select_query;
-    if search_value != "" {
+    if !search_value.is_empty() {
         select_query = sqlx::query(
             "select mm_metadata_album_guid, mm_metadata_album_name, \
             mm_metadata_album_json, mm_metadata_album_localimage \

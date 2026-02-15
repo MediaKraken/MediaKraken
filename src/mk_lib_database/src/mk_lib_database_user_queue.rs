@@ -5,7 +5,7 @@ pub async fn mk_lib_database_meta_queue_count(
     user_uuid: Uuid,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
-    if search_value != "" {
+    if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
             "select count(*) from mm_user_queue \
             where mm_user_queue_name % $1 and mm_user_queue_user_id = $2",
