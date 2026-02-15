@@ -10,8 +10,8 @@ use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use sqlx::postgres::PgPool;
-use crate::ReadWritePool;
-use crate::ReadOnlyPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -34,7 +34,7 @@ struct AdminDBStatsTemplate<'a> {
 }
 
 pub async fn admin_database(
-    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -53,45 +53,45 @@ pub async fn admin_database(
     } else {
         let pg_version =
             mk_lib_database::mk_lib_database_version::mk_lib_database_postgresql_version(
-                &sqlx_pool_ro,
+               &state.sqlx_pool_ro,
             )
             .await
             .unwrap();
         let pg_table_size =
-            mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_size(&sqlx_pool_ro)
+            mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_size(&state.sqlx_pool_ro)
                 .await
                 .unwrap();
         let pg_table_size_total =
             mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_size_total(
-                &sqlx_pool_ro,
+               &state.sqlx_pool_ro,
             )
             .await
             .unwrap();
         let pg_table_row_count =
-            mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_rows(&sqlx_pool_ro)
+            mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_rows(&state.sqlx_pool_ro)
                 .await
                 .unwrap();
         let pg_table_row_count_total =
             mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_row_count(
-                &sqlx_pool_ro,
+               &state.sqlx_pool_ro,
             )
             .await
             .unwrap();
         let pg_worker_count =
             mk_lib_database::mk_lib_database_postgresql::mk_lib_database_parallel_workers(
-                &sqlx_pool_ro,
+                &state.sqlx_pool_ro,
             )
             .await
             .unwrap();
         let pg_extension =
             mk_lib_database::mk_lib_database_postgresql::mk_lib_database_extension_active(
-                &sqlx_pool_ro,
+                &state.sqlx_pool_ro,
             )
             .await
             .unwrap();
         let pg_extension_avail =
             mk_lib_database::mk_lib_database_postgresql::mk_lib_database_extension_available(
-                &sqlx_pool_ro,
+                &state.sqlx_pool_ro,
             )
             .await
             .unwrap();

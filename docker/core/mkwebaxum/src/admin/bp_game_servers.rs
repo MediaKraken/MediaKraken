@@ -11,8 +11,8 @@ use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
 use sqlx::postgres::PgPool;
-use crate::ReadWritePool;
-use crate::ReadOnlyPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -29,7 +29,7 @@ struct TemplateAdminGameServers<'a> {
 }
 
 pub async fn admin_game_servers(
-    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
@@ -50,7 +50,7 @@ pub async fn admin_game_servers(
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 =
             mk_lib_database::mk_lib_database_game_servers::mk_lib_database_game_server_count(
-                &sqlx_pool_ro,
+              &state.sqlx_pool_ro,
                 String::new(),
             )
             .await
@@ -64,7 +64,7 @@ pub async fn admin_game_servers(
         .unwrap();
         let dedicated_server_list =
             mk_lib_database::mk_lib_database_game_servers::mk_lib_database_game_server_read(
-                &sqlx_pool_ro,
+               &state.sqlx_pool_ro,
                 String::new(),
                 db_offset,
                 30,

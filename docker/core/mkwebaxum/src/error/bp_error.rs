@@ -3,8 +3,7 @@ use axum::{
     http::StatusCode,
     response::{Html, IntoResponse},
 };
-use crate::ReadWritePool;
-use crate::ReadOnlyPool;
+
 
 // https://docs.rs/http/latest/http/status/struct.StatusCode.html#
 // possible status codes

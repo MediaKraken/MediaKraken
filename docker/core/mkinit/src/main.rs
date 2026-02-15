@@ -67,7 +67,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let stderr: String = String::from_utf8(output.stderr).unwrap();
         println!("stderr: {}", stderr);
     }
-    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, true)
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_rw, true)
         .await
         .unwrap();
     Ok(())

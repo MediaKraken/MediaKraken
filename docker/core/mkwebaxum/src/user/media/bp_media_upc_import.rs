@@ -16,8 +16,8 @@ use mk_lib_metadata;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgPool;
-use crate::ReadWritePool;
-use crate::ReadOnlyPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_401.html")]
@@ -63,8 +63,7 @@ pub struct UPCInput {
 }
 
 pub async fn user_media_upc_import_post(
-    Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,
-    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
+     State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Form(input_data): Form<UPCInput>,
@@ -85,7 +84,7 @@ pub async fn user_media_upc_import_post(
         // See if the barcode is on the DB
         let upc_exits: bool =
             mk_lib_database::database_metadata::mk_lib_database_metadata_upc::mk_lib_database_metadata_exists_upc(
-                &sqlx_pool_ro,
+               &state.sqlx_pool_ro,
                 &input_data.upc_code,
             ) .await
             .unwrap();
@@ -93,7 +92,7 @@ pub async fn user_media_upc_import_post(
             // See if the user owns the barcode scanned
             let user_owns: bool =
             mk_lib_database::database_metadata::mk_lib_database_metadata_upc::mk_lib_database_metadata_exists_upc_own(
-                &sqlx_pool_ro,
+               &state.sqlx_pool_ro,
                 &input_data.upc_code,
                 current_user.id,
             ) .await
@@ -107,7 +106,7 @@ pub async fn user_media_upc_import_post(
             // Lookup upcitemdb
             let json_data: serde_json::Value =
                 mk_lib_metadata::metadata_provider::upcitemdb::provider_upcitemdb_fetch_by_upc(
-                    &sqlx_pool_ro,
+                   &state.sqlx_pool_ro,
                     vec![&input_data.upc_code],
                     &"FAKETOKEN",
                 )
@@ -118,7 +117,7 @@ pub async fn user_media_upc_import_post(
             //     // Lookup barcodespider
             //     let json_data: serde_json::Value =
             //         mk_lib_metadata::metadata_provider::barcodespider::provider_barcodespider_fetch_by_upc(
-            //             &sqlx_pool_rw,
+            //             &state.sqlx_pool_rw,
             //             &input_data.upc_code,
             //             &"FAKETOKEN",
             //         ) .await

@@ -1,7 +1,5 @@
 use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
-use crate::ReadOnlyPool;
-use crate::ReadWritePool;
 use askama::Template;
 use axum::response::Redirect;
 use axum::response::Response;
@@ -11,6 +9,7 @@ use axum::{
     response::{Html, IntoResponse},
     Extension,
 };
+use axum::extract::State;
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
@@ -18,8 +17,8 @@ use mk_lib_common::mk_lib_common_pagination;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::{PgPool, PgRow};
-use sqlx::types::Json;
 use sqlx::{FromRow, Row};
+use crate::AppState;
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Genre {
@@ -60,7 +59,7 @@ struct TemplateMetaMovieContext<'a> {
 }
 
 pub async fn user_metadata_movie(
-    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
@@ -82,7 +81,7 @@ pub async fn user_metadata_movie(
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 =
         mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(
-            &sqlx_pool_ro,
+           &state.sqlx_pool_ro,
             String::new(),
         )
         .await
@@ -96,8 +95,9 @@ pub async fn user_metadata_movie(
         .unwrap();
         let movie_list =
         mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(
-            &sqlx_pool_ro,
-            String::new(),
+            &state.sqlx_pool_ro,
+            "".to_string(),
+            current_user.id,
             db_offset,
             30,
         )
@@ -190,7 +190,7 @@ struct TemplateMetaMovieDetailContext<'a> {
 }
 
 pub async fn user_metadata_movie_detail(
-    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
+    State(state): State<AppState>,
     Path(guid): Path<uuid::Uuid>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
@@ -210,7 +210,7 @@ pub async fn user_metadata_movie_detail(
     } else {
         let movie_metadata =
         mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_detail_by_guid(
-            &sqlx_pool_ro, guid,
+            &state.sqlx_pool_ro, guid,
         )
         .await
         .unwrap();
@@ -224,23 +224,11 @@ pub async fn user_metadata_movie_detail(
     }
 }
 
-// @blueprint_user_metadata_movie.route('/user_metadata_movie_status/<guid>/<event_type>',
-//                                      methods=['GET', 'POST'])
-// @common_global.auth.login_required(user_keyword='user')
-// pub async fn url_bp_user_metadata_movie_status(request, user, guid, event_type):
-//     db_connection = await request.app.db_pool.acquire()
-//     await request.app.db_functions.db_meta_movie_status_update(guid,
-//                                                                user.id, event_type,
-//                                                                db_connection=db_connection)
-//     await request.app.db_pool.release(db_connection)
-//     return response.HTTPResponse('', status=200, headers={'Vary': 'Accept-Encoding'})
-
-#[axum::debug_handler]
 pub async fn user_metadata_movie_status(
-    Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,
+     State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
-    Json(payload): Json<mk_lib_database::mk_lib_database::MediaStatusUpdatePayload>,
+    axum::Json(payload): axum::Json<mk_lib_database::mk_lib_database::MediaStatusUpdatePayload>,
 ) -> impl IntoResponse {
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
@@ -254,7 +242,7 @@ pub async fn user_metadata_movie_status(
         return StatusCode::UNAUTHORIZED.into_response();
     } else {
         let _row_data = mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_status(
-            &sqlx_pool_rw, payload, current_user.id
+            &state.sqlx_pool_rw, payload, current_user.id
         )
         .await
         .unwrap();

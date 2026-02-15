@@ -15,8 +15,8 @@ use num_format::{SystemLocale, ToFormattedString};
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPool;
 use sqlx::Row;
-use crate::ReadWritePool;
-use crate::ReadOnlyPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -59,7 +59,7 @@ struct TemplateHomeContext<'a> {
 }
 
 pub async fn admin_home(
-   Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
+   State(state): State<AppState>,
    method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -78,17 +78,17 @@ pub async fn admin_home(
     } else {
         let notification_list =
             mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_read(
-                &sqlx_pool_ro, 0, 9999,
+                &state.sqlx_pool_ro, 0, 9999,
             )
             .await
             .unwrap();
         let user_list =
-            mk_lib_database::mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool_ro, 0, 9999)
+            mk_lib_database::mk_lib_database_user::mk_lib_database_user_read(&state.sqlx_pool_ro, 0, 9999)
                 .await
                 .unwrap();
         let option_status_row =
             mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_status_read(
-                &sqlx_pool_ro,
+               &state.sqlx_pool_ro,
             )
             .await
             .unwrap();
@@ -117,18 +117,18 @@ pub async fn admin_home(
             template_data_server_info_server_ip_external: &external_ip,
             template_data_server_info_server_version: &mk_lib_common::mk_lib_common_version::WEB_VERSION.to_string(),
             template_data_count_media_files:
-                &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_known_count(&sqlx_pool_ro)
+                &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_known_count(&state.sqlx_pool_ro)
                     .await
                     .unwrap()
                     .to_formatted_string(&locale),
             template_data_count_matched_media:
-                &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_matched_count(&sqlx_pool_ro)
+                &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_matched_count(&state.sqlx_pool_ro)
                     .await
                     .unwrap()
                     .to_formatted_string(&locale),
             template_data_count_meta_fetch:
                 &mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(
-                    &sqlx_pool_ro,
+                   &state.sqlx_pool_ro,
                 )
                 .await
                 .unwrap()

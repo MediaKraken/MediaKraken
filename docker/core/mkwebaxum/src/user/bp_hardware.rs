@@ -10,8 +10,8 @@ use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use sqlx::postgres::PgPool;
-use crate::ReadWritePool;
-use crate::ReadOnlyPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_401.html")]
@@ -25,7 +25,7 @@ struct TemplateUserHardwareContext<'a> {
 }
 
 pub async fn user_hardware(
-    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -60,7 +60,7 @@ struct TemplateUserHardwarePhueContext {
 }
 
 pub async fn user_hardware_phue(
-    Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,
+     State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {

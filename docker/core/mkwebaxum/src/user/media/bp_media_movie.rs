@@ -1,7 +1,5 @@
 use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
-use crate::ReadOnlyPool;
-use crate::ReadWritePool;
 use askama::Template;
 use axum::response::Redirect;
 use axum::response::Response;
@@ -11,13 +9,14 @@ use axum::{
     response::{Html, IntoResponse},
     Extension,
 };
+use axum::extract::State;
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
-use serde_json::json;
 use sqlx::postgres::PgPool;
-use sqlx::types::Json;
+use crate::AppState;
+use serde_json::json;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_401.html")]
@@ -35,7 +34,7 @@ struct TemplateMediaMovieContext<'a> {
 }
 
 pub async fn user_media_movie(
-    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
@@ -56,7 +55,7 @@ pub async fn user_media_movie(
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 =
         mk_lib_database::database_media::mk_lib_database_media_movie::mk_lib_database_media_movie_count(
-            &sqlx_pool_ro,
+           &state.sqlx_pool_ro,
             String::new(),
         )
         .await
@@ -70,7 +69,7 @@ pub async fn user_media_movie(
         .unwrap();
         let movie_list =
         mk_lib_database::database_media::mk_lib_database_media_movie::mk_lib_database_media_movie_read(
-            &sqlx_pool_ro,
+           &state.sqlx_pool_ro,
             String::new(),
             db_offset,
             30,
@@ -102,7 +101,7 @@ struct TemplateMediaMovieDetailContext {
 }
 
 pub async fn user_media_movie_detail(
-    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
@@ -129,42 +128,31 @@ pub async fn user_media_movie_detail(
     }
 }
 
-#[axum::debug_handler]
 pub async fn user_media_movie_status(
-    Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,
-     method: Method,
-      auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
-      Json(payload): Json<mk_lib_database::mk_lib_database::MediaStatusUpdatePayload>,
-) -> impl IntoResponse {
-    StatusCode::OK
+     State(state): State<AppState>,
+    method: Method,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    axum::Json(payload): axum::Json<mk_lib_database::mk_lib_database::MediaStatusUpdatePayload>,
+) -> impl IntoResponse  {
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("User::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+             return StatusCode::UNAUTHORIZED.into_response();
+    } else {
+        let _row_data = mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_status(
+            &state.sqlx_pool_rw, payload, current_user.id
+        )
+        .await
+        .unwrap();
+           StatusCode::OK.into_response()
+    }
 }
-
-// #[axum::debug_handler]
-// pub async fn user_media_movie_status(
-//     Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,
-//     method: Method,
-//     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
-//     Json(payload): Json<mk_lib_database::mk_lib_database::MediaStatusUpdatePayload>,
-// ) -> impl IntoResponse  {
-//     let current_user = auth.current_user.clone().unwrap_or_default();
-//     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
-//         [Method::GET],
-//         false,
-//     )
-//     .requires(Rights::any([Rights::permission("User::View")]))
-//     .validate(&current_user, &method, None)
-//     .await
-//     {
-//              return StatusCode::UNAUTHORIZED.into_response();
-//     } else {
-//         let _row_data = mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_status(
-//             &sqlx_pool_rw, payload, current_user.id
-//         )
-//         .await
-//         .unwrap();
-//            StatusCode::OK.into_response()
-//     }
-// }
 
 /*
    """

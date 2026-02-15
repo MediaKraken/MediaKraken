@@ -12,8 +12,8 @@ use axum_session_sqlx::SessionPgPool;
 use mk_lib_rabbitmq;
 use serde_json::{json, Value};
 use sqlx::postgres::PgPool;
-use crate::ReadWritePool;
-use crate::ReadOnlyPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -31,7 +31,7 @@ struct TemplateAdminLibraryContext<'a> {
 }
 
 pub async fn admin_library(
-    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -50,19 +50,19 @@ pub async fn admin_library(
     } else {
         let share_list =
             mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_read(
-                &sqlx_pool_ro,
+               &state.sqlx_pool_ro,
             )
             .await
             .unwrap();
         let library_list =
             mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_audit_read(
-                &sqlx_pool_ro,
+               &state.sqlx_pool_ro,
             )
             .await
             .unwrap();
         let share_user_list =
         mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_user_read(
-            &sqlx_pool_ro,
+           &state.sqlx_pool_ro,
         )
         .await
         .unwrap();

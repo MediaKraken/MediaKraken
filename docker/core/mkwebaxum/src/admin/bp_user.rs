@@ -14,8 +14,8 @@ use mk_lib_common::mk_lib_common_pagination;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgPool;
-use crate::ReadWritePool;
-use crate::ReadOnlyPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -31,7 +31,7 @@ struct TemplateAdminUserContext<'a> {
 }
 
 pub async fn admin_user(
-    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
@@ -51,7 +51,7 @@ pub async fn admin_user(
     } else {
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 = mk_lib_database::mk_lib_database_user::mk_lib_database_user_count(
-            &sqlx_pool_ro,
+           &state.sqlx_pool_ro,
             String::new(),
         )
         .await
@@ -64,7 +64,7 @@ pub async fn admin_user(
         .await
         .unwrap();
         let user_list = mk_lib_database::mk_lib_database_user::mk_lib_database_user_read(
-            &sqlx_pool_ro,
+          &state.sqlx_pool_ro,
             db_offset,
             30,
         )
@@ -89,7 +89,7 @@ struct TemplateAdminUserDetailContext {
 }
 
 pub async fn admin_user_detail(
-    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
@@ -120,7 +120,7 @@ pub async fn admin_user_detail(
 // struct TemplateAdminUserDeleteContext {}
 
 // pub async fn admin_user_delete(
-//     Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,
+//      State(state): State<AppState>,
 //     Path(guid): Path<uuid::Uuid>,
 //     method: Method,
 //     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,

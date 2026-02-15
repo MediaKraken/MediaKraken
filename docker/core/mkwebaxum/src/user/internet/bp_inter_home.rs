@@ -9,8 +9,8 @@ use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
 use crate::mk_lib_database;
 use sqlx::postgres::PgPool;
-use crate::ReadWritePool;
-use crate::ReadOnlyPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_401.html")]
@@ -23,7 +23,7 @@ struct UserInternetTemplate {
 }
 
 pub async fn user_inter_home(
-    Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,
+     State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {

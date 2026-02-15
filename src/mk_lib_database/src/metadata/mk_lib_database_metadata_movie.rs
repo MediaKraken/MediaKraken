@@ -1,8 +1,8 @@
+use crate::mk_lib_database::MediaStatusUpdatePayload;
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
 use sqlx::{FromRow, Row};
-use crate::mk_lib_database::MediaStatusUpdatePayload;
 
 pub async fn mk_lib_database_metadata_exists_movie(
     sqlx_pool: &sqlx::PgPool,
@@ -35,45 +35,54 @@ pub struct DBMetaMovieList {
 pub async fn mk_lib_database_metadata_movie_read(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
+    user_id: i64,
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMetaMovieList>, sqlx::Error> {
     let select_query;
     if search_value != "" {
         select_query = sqlx::query(
-            "select mm_metadata_movie_guid, mm_metadata_movie_name, \
-             mm_metadata_movie_name_alt, \
-             mm_metadata_movie_json->>'release_date' as mm_date, \
-             mm_metadata_movie_localimage_json->>'Poster' as mm_poster, \
-             mm_metadata_movie_user_json, \
-             'unavailable' as mm_availibility, \
-             (mm_metadata_movie_json->'runtime')::int as mm_metadata_runtime, \
-             mm_metadata_movie_json->>'tagline' as mm_metadata_tagline, \
-             (mm_metadata_movie_json->'genres')::jsonb as mm_genre \
-             from mm_metadata_movie \
-             WHERE mm_metadata_movie_name &@ $1 \
-             or mm_metadata_movie_name_alt &@ $2
-             offset $3 limit $4",
+            r#"select mm_metadata_movie_guid, mm_metadata_movie_name,
+             mm_metadata_movie_name_alt,
+             mm_metadata_movie_json->>'release_date' as mm_date,
+             mm_metadata_movie_localimage_json->>'Poster' as mm_poster,
+             'unavailable' as mm_availibility,
+             (mm_metadata_movie_json->'runtime')::int as mm_metadata_runtime,
+             mm_metadata_movie_json->>'tagline' as mm_metadata_tagline,
+             (mm_metadata_movie_json->'genres')::jsonb as mm_genre,
+             mm_status_user_json
+             from mm_metadata_movie
+             LEFT JOIN mm_metadata_user_status
+             ON mm_metadata_user_status.mm_status_type_movie = mm_metadata_movie.mm_metadata_movie_guid
+             and mm_metadata_user_status.mm_status_user_id = $1
+             WHERE mm_metadata_movie_name &@ $2
+             or mm_metadata_movie_name_alt &@ $3
+             offset $4 limit $5"#,
         )
+        .bind(&user_id)
         .bind(&search_value)
         .bind(&search_value)
         .bind(offset)
         .bind(limit);
     } else {
         select_query = sqlx::query(
-            "select mm_metadata_movie_guid, mm_metadata_movie_name, \
-            mm_metadata_movie_name_alt, \
-            mm_metadata_movie_json->>'release_date' as mm_date, \
-            mm_metadata_movie_localimage_json->>'Poster' as mm_poster, \
-            mm_metadata_movie_user_json, \
-            'unavailable' as mm_availibility, \
-            (mm_metadata_movie_json->'runtime')::int as mm_metadata_runtime, \
-            mm_metadata_movie_json->>'tagline' as mm_metadata_tagline, \
-            (mm_metadata_movie_json->'genres')::jsonb as mm_genre \
-            from mm_metadata_movie \
-            order by LOWER(mm_metadata_movie_name), mm_date \
-            offset $1 limit $2",
+            r#"select mm_metadata_movie_guid, mm_metadata_movie_name,
+            mm_metadata_movie_name_alt,
+            mm_metadata_movie_json->>'release_date' as mm_date,
+            mm_metadata_movie_localimage_json->>'Poster' as mm_poster,
+            'unavailable' as mm_availibility,
+            (mm_metadata_movie_json->'runtime')::int as mm_metadata_runtime,
+            mm_metadata_movie_json->>'tagline' as mm_metadata_tagline,
+            (mm_metadata_movie_json->'genres')::jsonb as mm_genre,
+            mm_status_user_json
+            from mm_metadata_movie
+            LEFT JOIN mm_metadata_user_status
+            ON mm_metadata_user_status.mm_status_type_movie = mm_metadata_movie.mm_metadata_movie_guid
+            and mm_metadata_user_status.mm_status_user_id = $1
+            order by LOWER(mm_metadata_movie_name), mm_date
+            offset $2 limit $3"#,
         )
+        .bind(&user_id)
         .bind(offset)
         .bind(limit);
     }
@@ -84,7 +93,7 @@ pub async fn mk_lib_database_metadata_movie_read(
             mm_metadata_movie_name_alt: row.get("mm_metadata_movie_name_alt"),
             mm_date: row.get("mm_date"),
             mm_poster: row.get("mm_poster"),
-            mm_metadata_user_json: row.get("mm_metadata_movie_user_json"),
+            mm_metadata_user_json: row.get("mm_status_user_json"),
             mm_metadata_genre_json: row.get("mm_genre"),
             mm_metadata_availibility: row.get("mm_availibility"),
             mm_metadata_movie_tagline: row.get("mm_metadata_tagline"),

@@ -141,6 +141,9 @@ pub mod user_playback {
 #[derive(Clone)]
 struct AppState {
     flash_config: axum_flash::Config,
+    pub sqlx_pool_rw: PgPool,
+    pub sqlx_pool_ro: PgPool,
+    client: Client,
 }
 
 // Our state type must implement this trait. That is how the config
@@ -150,12 +153,6 @@ impl FromRef<AppState> for axum_flash::Config {
         state.flash_config.clone()
     }
 }
-
-#[derive(Clone)]
-pub struct ReadWritePool(pub PgPool);
-
-#[derive(Clone)]
-pub struct ReadOnlyPool(pub PgPool);
 
 #[tokio::main]
 async fn main() {
@@ -188,15 +185,19 @@ async fn main() {
 
     let (prometheus_layer, metric_handle) = PrometheusMetricLayer::pair();
 
-    let app_state = AppState {
-        // The key should probably come from configuration
-        flash_config: axum_flash::Config::new(Key::generate()),
-    };
-
     // build our application with routes
     let client: Client =
         hyper_util::client::legacy::Client::<(), ()>::builder(TokioExecutor::new())
             .build(HttpConnector::new());
+
+    let app_state = AppState {
+        // The key should probably come from configuration
+        flash_config: axum_flash::Config::new(Key::generate()),
+        sqlx_pool_rw: sqlx_pool_rw.clone(),
+        sqlx_pool_ro: sqlx_pool_ro.clone(),
+        client: client.clone(),
+    };
+
     // route_with_tsr creates two routes.....one with trailing slash
     let app = Router::new()
         .route_with_tsr("/admin", get(admin::bp_home::admin_home))
@@ -231,7 +232,6 @@ async fn main() {
         )
         .route_with_tsr("/admin/torrent", get(admin::bp_torrent::admin_torrent))
         .route_with_tsr("/admin/torrent/web", get(proxy_transmission_handler))
-        .with_state(client)
         .route_with_tsr("/admin/user/{page}", get(admin::bp_user::admin_user))
         .route_with_tsr(
             "/user/internet/flickr",
@@ -433,11 +433,11 @@ async fn main() {
         .route_with_tsr("/user/search", get(user::bp_search::user_search))
         .route_with_tsr("/user/sync/{page}", get(user::bp_sync::user_sync))
         .route_with_tsr(
-            "/user/user_media_movie_status/{uuid}",
+            "/user/user_media_movie_status",
             post(user_media::bp_media_movie::user_media_movie_status),
         )
         .route_with_tsr(
-            "/user/user_metadata_movie_status/{uuid}",
+            "/user/user_metadata_movie_status",
             post(user_metadata::bp_meta_movie::user_metadata_movie_status),
         )
         .route_with_tsr(
@@ -489,8 +489,6 @@ async fn main() {
         )
         .route("/metrics", get(|| async move { metric_handle.render() }))
         .layer(prometheus_layer)
-        .layer(Extension(ReadWritePool(sqlx_pool_rw)))
-        .layer(Extension(ReadOnlyPool(sqlx_pool_ro)))
         .with_state(app_state);
     // TODO .layer(
     //     ServiceBuilder::new()
@@ -533,7 +531,7 @@ async fn shutdown_signal() {
 }
 
 async fn proxy_transmission_handler(
-    State(client): State<Client>,
+    State(state): State<AppState>,
     mut req: Request,
 ) -> Result<Response, StatusCode> {
     let path = req.uri().path();
@@ -544,7 +542,7 @@ async fn proxy_transmission_handler(
         .unwrap_or(path);
     let uri = format!("https://mkstack-transmission:9091{}", path_query);
     *req.uri_mut() = Uri::try_from(uri).unwrap();
-    Ok(client
+    Ok(state.client
         .request(req)
         .await
         .map_err(|_| StatusCode::BAD_REQUEST)?

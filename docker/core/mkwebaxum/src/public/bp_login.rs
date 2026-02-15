@@ -13,8 +13,8 @@ use axum_session_sqlx::SessionPgPool;
 use serde::Deserialize;
 use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
 use validator::Validate;
-use crate::ReadWritePool;
-use crate::ReadOnlyPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_public/bss_public_login.html")]
@@ -33,14 +33,14 @@ pub struct LoginInput {
 }
 
 pub async fn public_login_post(
-    Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,
+     State(state): State<AppState>,
     mut auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     mut flash: Flash,
     Form(input_data): Form<LoginInput>,
 ) -> Redirect {
     let user_id: i64 =
         mk_lib_database::mk_lib_database_user::mk_lib_database_user_login_verification(
-            &sqlx_pool_rw,
+            &state.sqlx_pool_rw,
             &input_data.username,
             &input_data.password,
         )
@@ -49,7 +49,7 @@ pub async fn public_login_post(
     if user_id > 0 {
         println!("Login User {:?}", user_id);
         let _result = mk_lib_database::mk_lib_database_user::mk_lib_database_user_login(
-            &sqlx_pool_rw,
+            &state.sqlx_pool_rw,
             user_id,
         )
         .await;

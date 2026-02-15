@@ -10,8 +10,8 @@ use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use sqlx::postgres::PgPool;
-use crate::ReadWritePool;
-use crate::ReadOnlyPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -26,7 +26,7 @@ struct TemplateCronContext<'a> {
 }
 
 pub async fn admin_cron(
-    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -44,7 +44,7 @@ pub async fn admin_cron(
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let cron_list =
-            mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_service_read(&sqlx_pool_ro)
+            mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_service_read(&state.sqlx_pool_ro)
                 .await
                 .unwrap();
         let mut cron_data: bool = false;
@@ -62,7 +62,7 @@ pub async fn admin_cron(
 }
 
 pub async fn admin_cron_run(
-    Extension(ReadWritePool(sqlx_pool_rw)): Extension<ReadWritePool>,
+     State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
@@ -82,7 +82,7 @@ pub async fn admin_cron_run(
         // (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let row_data = mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_service_json(
-            &sqlx_pool_rw,
+            &state.sqlx_pool_rw,
             guid,
         )
         .await
@@ -102,7 +102,7 @@ pub async fn admin_cron_run(
             .await
             .unwrap();
         let _result = mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_time_update(
-            &sqlx_pool_rw,
+            &state.sqlx_pool_rw,
             guid,
         )
         .await

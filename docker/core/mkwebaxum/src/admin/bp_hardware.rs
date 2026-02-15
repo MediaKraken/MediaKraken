@@ -10,8 +10,8 @@ use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use serde_json::json;
 use sqlx::postgres::PgPool;
-use crate::ReadWritePool;
-use crate::ReadOnlyPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -26,7 +26,7 @@ struct AdminHardwareTemplate<'a> {
 }
 
 pub async fn admin_hardware(
-    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -45,7 +45,7 @@ pub async fn admin_hardware(
     } else {
         let hardware_list =
             mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_device_read(
-                &sqlx_pool_ro,
+               &state.sqlx_pool_ro,
             )
             .await
             .unwrap();

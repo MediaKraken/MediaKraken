@@ -11,8 +11,8 @@ use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
 use sqlx::postgres::PgPool;
-use crate::ReadWritePool;
-use crate::ReadOnlyPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_401.html")]
@@ -29,7 +29,7 @@ struct TemplateSyncContext<'a> {
 }
 
 pub async fn user_sync(
-    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
@@ -49,7 +49,7 @@ pub async fn user_sync(
     } else {
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 =
-            mk_lib_database::mk_lib_database_sync::mk_lib_database_sync_count(&sqlx_pool_ro)
+            mk_lib_database::mk_lib_database_sync::mk_lib_database_sync_count(&state.sqlx_pool_ro)
                 .await
                 .unwrap();
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
@@ -60,7 +60,7 @@ pub async fn user_sync(
         .await
         .unwrap();
         let sync_list = mk_lib_database::mk_lib_database_sync::mk_lib_database_sync_list(
-            &sqlx_pool_ro,
+           &state.sqlx_pool_ro,
             uuid::Uuid::nil(),
             db_offset,
             30,

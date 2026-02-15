@@ -14,8 +14,8 @@ use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_enum_backup_type;
 use mk_lib_common::mk_lib_common_pagination;
 use sqlx::postgres::PgPool;
-use crate::ReadWritePool;
-use crate::ReadOnlyPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -33,7 +33,7 @@ struct TemplateBackupContext<'a> {
 }
 
 pub async fn admin_backup(
-    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
@@ -54,7 +54,7 @@ pub async fn admin_backup(
         // TODO show local backups here as well
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 =
-            mk_lib_database::mk_lib_database_backup::mk_lib_database_backup_count(&sqlx_pool_ro)
+            mk_lib_database::mk_lib_database_backup::mk_lib_database_backup_count(&state.sqlx_pool_ro)
                 .await
                 .unwrap();
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
@@ -65,7 +65,7 @@ pub async fn admin_backup(
         .await
         .unwrap();
         let backup_list = mk_lib_database::mk_lib_database_backup::mk_lib_database_backup_read(
-            &sqlx_pool_ro,
+            &state.sqlx_pool_ro,
             db_offset,
             30,
         )

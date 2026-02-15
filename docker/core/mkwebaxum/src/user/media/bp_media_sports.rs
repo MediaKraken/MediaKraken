@@ -13,8 +13,8 @@ use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
 use serde_json::json;
 use sqlx::postgres::PgPool;
-use crate::ReadWritePool;
-use crate::ReadOnlyPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_401.html")]
@@ -32,7 +32,7 @@ struct TemplateMediaSportsContext<'a> {
 }
 
 pub async fn user_media_sports(
-    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
@@ -53,7 +53,7 @@ pub async fn user_media_sports(
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 =
         mk_lib_database::database_media::mk_lib_database_media_sports::mk_lib_database_media_sports_count(
-            &sqlx_pool_ro,
+            &state.sqlx_pool_ro,
             String::new(),
         )
         .await
@@ -67,7 +67,7 @@ pub async fn user_media_sports(
         .unwrap();
         let sports_list =
         mk_lib_database::database_media::mk_lib_database_media_sports::mk_lib_database_media_sports_read(
-            &sqlx_pool_ro,
+            &state.sqlx_pool_ro,
             String::new(),
             db_offset,
             30,
@@ -99,7 +99,7 @@ struct TemplateMediaSportsDetailContext {
 }
 
 pub async fn user_media_sports_detail(
-    Extension(ReadOnlyPool(sqlx_pool_ro)): Extension<ReadOnlyPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
