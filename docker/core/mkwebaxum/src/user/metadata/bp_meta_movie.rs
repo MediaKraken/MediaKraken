@@ -1,6 +1,8 @@
 use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
+use crate::AppState;
 use askama::Template;
+use axum::extract::State;
 use axum::response::Redirect;
 use axum::response::Response;
 use axum::{
@@ -9,7 +11,6 @@ use axum::{
     response::{Html, IntoResponse},
     Extension,
 };
-use axum::extract::State;
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
@@ -18,7 +19,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::{PgPool, PgRow};
 use sqlx::{FromRow, Row};
-use crate::AppState;
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Genre {
@@ -77,6 +77,7 @@ pub async fn user_metadata_movie(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
+                        println!("here  0");
         let current_user = auth.current_user.clone().unwrap_or_default();
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 =
@@ -93,41 +94,57 @@ pub async fn user_metadata_movie(
         )
         .await
         .unwrap();
+                println!("here  1");
         let movie_list =
         mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(
             &state.sqlx_pool_ro,
-            "".to_string(),
+            String::new(),
             current_user.id,
             db_offset,
             30,
         )
         .await
         .unwrap();
+                println!("here  2");
         let mut template_data_vec: Vec<TemplateMetaMovieList> = Vec::new();
         for row_data in movie_list.iter() {
-            let mut watched_status: serde_json::Value = json!(false);
+                            println!("here  3");
+            let watched_status = row_data
+                .mm_status_user_json
+                .clone()
+                .unwrap_or_else(|| {
+                    json!({
+                        "bad": false,
+                        "good": false,
+                        "trash": false,
+                        "watched": false,
+                        "favorite": false
+                    })
+                });
+            println!("watched_status: {:?}", watched_status);
             let mut request_status: serde_json::Value = json!(false);
             let mut rating_status: serde_json::Value = json!(null);
             let mut queue_status: serde_json::Value = json!(false);
-            if !row_data.mm_metadata_user_json.is_none()
-                && row_data
-                    .mm_metadata_user_json
-                    .as_ref()
-                    .unwrap()
-                    .get("UserStats")
-                    .is_some()
-            {
-                let rating_json: serde_json::Value =
-                    row_data.mm_metadata_user_json.as_ref().unwrap().clone();
-                rating_status =
-                    rating_json["UserStats"][current_user.id.to_string()]["Rating"].clone();
-                watched_status =
-                    rating_json["UserStats"][current_user.id.to_string()]["Watched"].clone();
-                request_status =
-                    rating_json["UserStats"][current_user.id.to_string()]["Request"].clone();
-                queue_status =
-                    rating_json["UserStats"][current_user.id.to_string()]["Queue"].clone();
-            }
+
+            // if !row_data.mm_metadata_user_json.is_none()
+            //     && row_data
+            //         .mm_metadata_user_json
+            //         .as_ref()
+            //         .unwrap()
+            //         .get("UserStats")
+            //         .is_some()
+            // {
+            //     let rating_json: serde_json::Value =
+            //         row_data.mm_metadata_user_json.as_ref().unwrap().clone();
+            //     rating_status =
+            //         rating_json["UserStats"][current_user.id.to_string()]["Rating"].clone();
+            //     watched_status =
+            //         rating_json["UserStats"][current_user.id.to_string()]["Watched"].clone();
+            //     request_status =
+            //         rating_json["UserStats"][current_user.id.to_string()]["Request"].clone();
+            //     queue_status =
+            //         rating_json["UserStats"][current_user.id.to_string()]["Queue"].clone();
+            // }
             let mut mm_poster: String = "/static/image/Movie-icon.png".to_string();
             if row_data.mm_poster.len() > 0 {
                 mm_poster = row_data.mm_poster.clone();

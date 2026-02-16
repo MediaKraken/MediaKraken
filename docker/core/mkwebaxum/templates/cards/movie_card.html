@@ -3,11 +3,11 @@
            shadow-sm hover:shadow-md transition-all duration-300" 
     x-data="movieCard({
         guid: '{{row_data.template_metadata_guid}}',
-        favorite: false,
-        watched: {{ row_data.template_metadata_user_watched }},
-        good: false,
-        bad: false,
-        trash: false
+        favorite: {{ row_data.template_metadata_user_watched["favorite"] }},
+        watched: {{ row_data.template_metadata_user_watched["watched"] }},
+        good: {{ row_data.template_metadata_user_watched["good"] }},
+        bad: {{ row_data.template_metadata_user_watched["bad"] }},
+        trash: {{ row_data.template_metadata_user_watched["trash"] }}
     })">
     
     <div class="relative aspect-[2/3] rounded-t-xl overflow-hidden bg-zinc-200 dark:bg-zinc-800">

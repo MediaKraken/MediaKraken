@@ -16,9 +16,9 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { version = "0.0.156", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.125", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.128", registry = "kellnr" }
+mk_lib_database = { version = "0.0.158", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.127", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.130", registry = "kellnr" }
 
 chrono = { version = "0.4.43", features = ["serde"] }
 serde_json = "1.0.148"

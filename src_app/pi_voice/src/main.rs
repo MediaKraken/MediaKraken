@@ -247,7 +247,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                         .output()
                         .unwrap();
                     let stdout = String::from_utf8(output.stdout).unwrap();
-                    let mut search_str = "".to_string();
+                    let mut search_str = String::new();
                     for line_item in stdout.as_str().lines() {
                         if line_item.contains("\"text\" :") {
                             search_str.push_str(
