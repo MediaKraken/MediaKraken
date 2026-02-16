@@ -23,7 +23,7 @@
                      decoding="async"
                      @load="loaded = true" 
                      @error="loaded = true"
-                     x-init="if ($el.complete) loaded = true"
+                     x-init="$nextTick(() => { loaded = $el.complete })"
                      class="h-full w-full object-cover transition-opacity duration-500"
                      :class="loaded ? 'opacity-100' : 'opacity-0'" />
             {% else %}
@@ -33,7 +33,7 @@
                      decoding="async"
                      @load="loaded = true"
                      @error="loaded = true"
-                     x-init="if ($el.complete) loaded = true"
+                     x-init="$nextTick(() => { loaded = $el.complete })"
                      class="h-full w-full object-cover transition-opacity duration-500" 
                      :class="loaded ? 'opacity-100' : 'opacity-0'" />
             {% endif %}
