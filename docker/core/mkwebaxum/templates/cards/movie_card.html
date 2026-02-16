@@ -4,10 +4,10 @@
     x-data="movieCard({
         guid: '{{row_data.template_metadata_guid}}',
         favorite: {{ row_data.template_metadata_user_watched["favorite"] }},
-        watched: {{ row_data.template_metadata_user_watched["watched"] }},
+        watched: {{ row_data.template_metadata_user_watched["watched"] }},  
         good: {{ row_data.template_metadata_user_watched["good"] }},
         bad: {{ row_data.template_metadata_user_watched["bad"] }},
-        trash: {{ row_data.template_metadata_user_watched["trash"] }}
+        trash: {{ row_data.template_metadata_user_watched["trash"] }},
     })">
     
     <div class="relative aspect-[2/3] rounded-t-xl overflow-hidden bg-zinc-200 dark:bg-zinc-800">
@@ -20,14 +20,20 @@
                 <img src="/static/image/Movie-icon.png" 
                      alt="Poster for {{ row_data.template_metadata_name }}" 
                      loading="lazy"
+                     decoding="async"
                      @load="loaded = true" 
+                     @error="loaded = true"
+                     x-init="if ($el.complete) loaded = true"
                      class="h-full w-full object-cover transition-opacity duration-500"
                      :class="loaded ? 'opacity-100' : 'opacity-0'" />
             {% else %}
                 <img src="/metadata{{row_data.template_metadata_poster|safe}}"
                      alt="Poster for {{ row_data.template_metadata_name }}" 
                      loading="lazy" 
+                     decoding="async"
                      @load="loaded = true"
+                     @error="loaded = true"
+                     x-init="if ($el.complete) loaded = true"
                      class="h-full w-full object-cover transition-opacity duration-500" 
                      :class="loaded ? 'opacity-100' : 'opacity-0'" />
             {% endif %}

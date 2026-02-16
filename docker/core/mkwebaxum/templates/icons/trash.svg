@@ -1,7 +1,9 @@
 <button
   @click="toggle('trash')"
-  class="hover:text-red-600"
-  aria-label="Delete"
+  :class="trash 
+      ? 'text-red-600' 
+      : 'text-zinc-400 hover:text-red-600'"
+  aria-label="Trash"
 >
   <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
     <path d="M9 3h6a1 1 0 011 1v1h5v2H3V5h5V4a1
