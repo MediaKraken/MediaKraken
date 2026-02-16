@@ -43,6 +43,7 @@ use tower::timeout::TimeoutLayer;
 use tower::ServiceExt;
 use tower::{timeout::error::Elapsed, ServiceBuilder};
 use tower_http::services::{ServeDir, ServeFile};
+use tower_http::set_header::SetResponseHeaderLayer;
 
 type Client = hyper_util::client::legacy::Client<HttpConnector, Body>;
 mod axum_custom_filters;
@@ -157,9 +158,10 @@ impl FromRef<AppState> for axum_flash::Config {
 #[tokio::main]
 async fn main() {
     // connect to db and do a version check
-    let (sqlx_pool_rw, sqlx_pool_ro) = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
-        .await
-        .unwrap();
+    let (sqlx_pool_rw, sqlx_pool_ro) =
+        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
+            .await
+            .unwrap();
     let _result = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(
         &sqlx_pool_ro,
         false,
@@ -455,6 +457,10 @@ async fn main() {
         )
         .nest_service("/static", ServeDir::new("static"))
         .nest_service("/metadata", ServeDir::new("metadata"))
+        .layer(SetResponseHeaderLayer::overriding(
+            header::CACHE_CONTROL,
+            "public, max-age=31536000, immutable".parse().unwrap(),
+        ))
         .layer(
             AuthSessionLayer::<
                 mk_lib_database::mk_lib_database_user::User,
@@ -542,7 +548,8 @@ async fn proxy_transmission_handler(
         .unwrap_or(path);
     let uri = format!("https://mkstack-transmission:9091{}", path_query);
     *req.uri_mut() = Uri::try_from(uri).unwrap();
-    Ok(state.client
+    Ok(state
+        .client
         .request(req)
         .await
         .map_err(|_| StatusCode::BAD_REQUEST)?
