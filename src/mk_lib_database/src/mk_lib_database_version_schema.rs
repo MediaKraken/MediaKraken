@@ -857,13 +857,13 @@ pub async fn mk_lib_database_update_schema(
                 ON mm_metadata_user_status (mm_status_user_id, mm_status_type_music_video);"#,
         )
         .execute(&mut *transaction)
-        .await?;    
+        .await?;
         sqlx::query(
             r#"CREATE UNIQUE INDEX IF NOT EXISTS mm_user_sports_status_unique
                 ON mm_metadata_user_status (mm_status_user_id, mm_status_type_sports);"#,
         )
         .execute(&mut *transaction)
-        .await?;  
+        .await?;
         sqlx::query(
             r#"CREATE UNIQUE INDEX IF NOT EXISTS mm_user_tvshow_status_unique
                 ON mm_metadata_user_status (mm_status_user_id, mm_status_type_tvshow);"#,
@@ -873,6 +873,96 @@ pub async fn mk_lib_database_update_schema(
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 76).await?;
     }
+
+    if version_no < 77 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(
+            "ALTER TABLE mm_metadata_book ADD COLUMN photo_updated timestamptz DEFAULT now();",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "ALTER TABLE mm_metadata_movie ADD COLUMN photo_updated timestamptz DEFAULT now();",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "ALTER TABLE mm_metadata_music ADD COLUMN photo_updated timestamptz DEFAULT now();",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "ALTER TABLE mm_metadata_music_video ADD COLUMN photo_updated timestamptz DEFAULT now();",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "ALTER TABLE mm_metadata_person ADD COLUMN photo_updated timestamptz DEFAULT now();",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "ALTER TABLE mm_metadata_sports ADD COLUMN photo_updated timestamptz DEFAULT now();",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            "ALTER TABLE mm_metadata_tvshow ADD COLUMN photo_updated timestamptz DEFAULT now();",
+        )
+        .execute(&mut *transaction)
+        .await?;
+        // initial set
+        sqlx::query("UPDATE mm_metadata_book SET photo_updated = now();")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("UPDATE mm_metadata_movie SET photo_updated = now();")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("UPDATE mm_metadata_music SET photo_updated = now();")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("UPDATE mm_metadata_music_video SET photo_updated = now();")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("UPDATE mm_metadata_person SET photo_updated = now();")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("UPDATE mm_metadata_sports SET photo_updated = now();")
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query("UPDATE mm_metadata_tvshow SET photo_updated = now();")
+            .execute(&mut *transaction)
+            .await?;
+        // create function
+        // sqlx::query(r#"CREATE OR REPLACE FUNCTION touch_photo_updated_at()
+        //     RETURNS trigger
+        //     LANGUAGE plpgsql
+        //     AS $$
+        //     BEGIN
+        //         NEW.photo_updated := now();
+        //         RETURN NEW;
+        //     END;
+        //     $$;"#)
+        //     .execute(&mut *transaction)
+        //     .await?;
+        // create triggers
+        // sqlx::query(r#"CREATE TRIGGER trg_touch_movie_photo_updated_at
+        //     BEFORE UPDATE OF mm_metadata_movie_json
+        //     ON mm_metadata_movie
+        //     FOR EACH ROW
+        //     WHEN (OLD.mm_metadata_movie_json #>> '{backdrop_path}' IS DISTINCT 
+        //     FROM NEW.mm_metadata_movie_json #>> '{backdrop_path}')
+        //     OR (OLD.mm_metadata_movie_json #>> '{poster_path}' IS DISTINCT 
+        //     FROM NEW.mm_metadata_movie_json #>> '{poster_path}')
+        //     EXECUTE FUNCTION touch_photo_updated_at();"#)
+        //     .execute(&mut *transaction)
+        //     .await?;
+        // TODO create rest of triggers after verifying paths for rest of jsons
+        // TODO update mkmetadata program to download/update new images from update json
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 77).await?;
+    }
+
     // TODO, movie alt name, tv alt name and person alt name cleanup
 
     Ok(true)
