@@ -9,7 +9,7 @@ pub async fn mk_lib_database_update_schema(
     if version_no < 44 {
         // set mame version to 240
         let _option_json: Value =
-            mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
+            mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool_ro)
                 .await
                 .unwrap();
         // option_json["MAME"]["Version"] = 240;

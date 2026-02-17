@@ -46,7 +46,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await
         .unwrap();
     let option_config_json: Value =
-        mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
+        mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool_ro)
             .await
             .unwrap();
 

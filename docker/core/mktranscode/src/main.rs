@@ -17,7 +17,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // pull options for metadata/chapters/images location
     let option_json: serde_json::Value =
-        mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
+        mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool_ro)
             .await
             .unwrap();
 
