@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
 use sqlx::{FromRow, Row};
+use sqlx::types::chrono::DateTime;
+use sqlx::types::chrono::Utc;
 
 pub async fn mk_lib_database_metadata_exists_movie(
     sqlx_pool: &sqlx::PgPool,
@@ -30,6 +32,7 @@ pub struct DBMetaMovieList {
     pub mm_metadata_availibility: String,
     pub mm_metadata_movie_tagline: Option<String>,
     pub mm_metadata_runtime: i32,
+    pub photo_updated: DateTime<Utc>, // Maps to TIMESTAMPTZ
 }
 
 pub async fn mk_lib_database_metadata_movie_read(
@@ -50,7 +53,8 @@ pub async fn mk_lib_database_metadata_movie_read(
              (mm_metadata_movie_json->'runtime')::int as mm_metadata_runtime,
              mm_metadata_movie_json->>'tagline' as mm_metadata_tagline,
              (mm_metadata_movie_json->'genres')::jsonb as mm_genre,
-             mm_status_user_json
+             mm_status_user_json,
+             photo_updated
              from mm_metadata_movie
              LEFT JOIN mm_metadata_user_status
              ON mm_metadata_user_status.mm_status_type_movie = mm_metadata_movie.mm_metadata_movie_guid
@@ -74,7 +78,8 @@ pub async fn mk_lib_database_metadata_movie_read(
             (mm_metadata_movie_json->'runtime')::int as mm_metadata_runtime,
             mm_metadata_movie_json->>'tagline' as mm_metadata_tagline,
             (mm_metadata_movie_json->'genres')::jsonb as mm_genre,
-            mm_status_user_json
+            mm_status_user_json,
+            photo_updated
             from mm_metadata_movie
             LEFT JOIN mm_metadata_user_status
             ON mm_metadata_user_status.mm_status_type_movie = mm_metadata_movie.mm_metadata_movie_guid
@@ -98,6 +103,7 @@ pub async fn mk_lib_database_metadata_movie_read(
             mm_metadata_availibility: row.get("mm_availibility"),
             mm_metadata_movie_tagline: row.get("mm_metadata_tagline"),
             mm_metadata_runtime: row.get("mm_metadata_runtime"),
+            photo_updated: row.get("photo_updated"),
         })
         .fetch_all(sqlx_pool)
         .await?;

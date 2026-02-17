@@ -19,6 +19,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::{PgPool, PgRow};
 use sqlx::{FromRow, Row};
+use sqlx::types::chrono::DateTime;
+use sqlx::types::chrono::Utc;
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Genre {
@@ -41,6 +43,7 @@ struct TemplateMetaMovieList {
     template_metadata_star_rating: f32,
     template_metadata_availability: String,
     template_metadata_tagline: Option<String>,
+    template_metadata_photo_updated: DateTime<Utc>,
     template_metadata_genre: Vec<Genre>,
     template_metadata_user_watched: serde_json::Value,
     template_metadata_user_rating: serde_json::Value,
@@ -77,7 +80,6 @@ pub async fn user_metadata_movie(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-                        println!("here  0");
         let current_user = auth.current_user.clone().unwrap_or_default();
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 =
@@ -94,7 +96,6 @@ pub async fn user_metadata_movie(
         )
         .await
         .unwrap();
-                println!("here  1");
         let movie_list =
         mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(
             &state.sqlx_pool_ro,
@@ -105,7 +106,6 @@ pub async fn user_metadata_movie(
         )
         .await
         .unwrap();
-                println!("here  2");
         let mut template_data_vec: Vec<TemplateMetaMovieList> = Vec::new();
         for row_data in movie_list.iter() {
                             println!("here  3");
@@ -121,7 +121,6 @@ pub async fn user_metadata_movie(
                         "favorite": false
                     })
                 });
-            println!("watched_status: {:?}", watched_status);
             let mut request_status: serde_json::Value = json!(false);
             let mut rating_status: serde_json::Value = json!(null);
             let mut queue_status: serde_json::Value = json!(false);
@@ -145,6 +144,7 @@ pub async fn user_metadata_movie(
             //     queue_status =
             //         rating_json["UserStats"][current_user.id.to_string()]["Queue"].clone();
             // }
+
             let mut mm_poster: String = "/static/image/Movie-icon.png".to_string();
             if row_data.mm_poster.len() > 0 {
                 mm_poster = row_data.mm_poster.clone();
@@ -173,6 +173,7 @@ pub async fn user_metadata_movie(
                 template_metadata_star_rating: 8.4,
                 template_metadata_availability: row_data.mm_metadata_availibility.clone(),
                 template_metadata_tagline: row_data.mm_metadata_movie_tagline.clone(),
+                template_metadata_photo_updated row_data.photo_updated.clone(),
                 template_metadata_genre: genres,
                 template_metadata_user_watched: watched_status,
                 template_metadata_user_rating: rating_status,

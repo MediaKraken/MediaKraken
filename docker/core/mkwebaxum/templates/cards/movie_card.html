@@ -17,7 +17,7 @@
         
         <a href="/user/metadata/movie_detail/{{row_data.template_metadata_guid}}" class="block h-full">
             {% if row_data.template_metadata_poster == "/static/image/Movie-icon.png" %}
-                <img src="/static/image/Movie-icon.png" 
+                <img src="/static/image/Movie-icon.png?v=1" 
                      alt="Poster for {{ row_data.template_metadata_name }}" 
                      loading="lazy"
                      decoding="async"
@@ -27,7 +27,7 @@
                      class="h-full w-full object-cover transition-opacity duration-500"
                      :class="loaded ? 'opacity-100' : 'opacity-0'" />
             {% else %}
-                <img src="/metadata{{row_data.template_metadata_poster|safe}}"
+                <img src="/metadata{{row_data.template_metadata_poster|safe}}?v={{ row_data.template_metadata_photo_updated.timestamp()"
                      alt="Poster for {{ row_data.template_metadata_name }}" 
                      loading="lazy" 
                      decoding="async"

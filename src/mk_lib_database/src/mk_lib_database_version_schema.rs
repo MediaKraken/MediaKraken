@@ -892,34 +892,42 @@ pub async fn mk_lib_database_update_schema(
             );
             sqlx::query(&query).execute(&mut *transaction).await?;
         }
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 77).await?;
+    }
+
+    if version_no < 78 {
+        let mut transaction = sqlx_pool.begin().await?;
         // create function
-        // sqlx::query(r#"CREATE OR REPLACE FUNCTION touch_photo_updated_at()
-        //     RETURNS trigger
-        //     LANGUAGE plpgsql
-        //     AS $$
-        //     BEGIN
-        //         NEW.photo_updated := now();
-        //         RETURN NEW;
-        //     END;
-        //     $$;"#)
-        //     .execute(&mut *transaction)
-        //     .await?;
+        sqlx::query(
+            r#"CREATE OR REPLACE FUNCTION touch_photo_updated()
+            RETURNS trigger
+            LANGUAGE plpgsql
+            AS $$
+            BEGIN
+                NEW.photo_updated := now();
+                RETURN NEW;
+            END;
+            $$;"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
         // create triggers
-        // sqlx::query(r#"CREATE TRIGGER trg_touch_movie_photo_updated_at
-        //     BEFORE UPDATE OF mm_metadata_movie_json
-        //     ON mm_metadata_movie
-        //     FOR EACH ROW
-        //     WHEN (OLD.mm_metadata_movie_json #>> '{backdrop_path}' IS DISTINCT
-        //     FROM NEW.mm_metadata_movie_json #>> '{backdrop_path}')
-        //     OR (OLD.mm_metadata_movie_json #>> '{poster_path}' IS DISTINCT
-        //     FROM NEW.mm_metadata_movie_json #>> '{poster_path}')
-        //     EXECUTE FUNCTION touch_photo_updated_at();"#)
-        //     .execute(&mut *transaction)
-        //     .await?;
+        sqlx::query(
+            r#"CREATE TRIGGER trg_touch_movie_photo_updated_at
+            BEFORE UPDATE OF mm_metadata_movie_localimage_json
+            ON mm_metadata_movie
+            FOR EACH ROW
+            WHEN (OLD.mm_metadata_movie_localimage_json IS DISTINCT FROM
+            NEW.mm_metadata_movie_localimage_json)
+            EXECUTE FUNCTION touch_photo_updated;"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
         // TODO create rest of triggers after verifying paths for rest of jsons
         // TODO update mkmetadata program to download/update new images from update json
         transaction.commit().await?;
-        mk_lib_database_version_update(&sqlx_pool, 77).await?;
+        mk_lib_database_version_update(&sqlx_pool, 78).await?;
     }
 
     // TODO, movie alt name, tv alt name and person alt name cleanup
