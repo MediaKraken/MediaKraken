@@ -16,13 +16,13 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_common = { version = "0.0.126", registry = "kellnr" }
-mk_lib_database = { version = "0.0.158", registry = "kellnr" }
-mk_lib_file = { version = "0.0.135", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.127", registry = "kellnr" }
-mk_lib_metadata = { version = "0.0.138", registry = "kellnr" }
-mk_lib_network = { version = "0.0.127", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.130", registry = "kellnr" }
+mk_lib_common = { version = "0.0.128", registry = "kellnr" }
+mk_lib_database = { version = "0.0.160", registry = "kellnr" }
+mk_lib_file = { version = "0.0.137", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.129", registry = "kellnr" }
+mk_lib_metadata = { version = "0.0.140", registry = "kellnr" }
+mk_lib_network = { version = "0.0.129", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.132", registry = "kellnr" }
 
 askama = "0.15.4"
 askama_axum = "0.4.0"
@@ -75,7 +75,7 @@ stdext = "0.3.3"
 sys-info = "0.9.1"
 tokio = { version = "1.49.0", features = ["full"] }
 tower = { version = "0.5.3", features = ["retry", "timeout", "util"] }
-tower-http = { version = "0.6.8", features = ["fs"] }
+tower-http = { version = "0.6.8", features = ["fs", "set-header"] }
 tower-sessions = "0.14.0"
 transmission-rpc = "0.5.0"
 uuid = { version = "1.20.0", features = ["serde", "v4", "v7"] }

@@ -876,63 +876,22 @@ pub async fn mk_lib_database_update_schema(
 
     if version_no < 77 {
         let mut transaction = sqlx_pool.begin().await?;
-        sqlx::query(
-            "ALTER TABLE mm_metadata_book ADD COLUMN photo_updated timestamptz DEFAULT now();",
-        )
-        .execute(&mut *transaction)
-        .await?;
-        sqlx::query(
-            "ALTER TABLE mm_metadata_movie ADD COLUMN photo_updated timestamptz DEFAULT now();",
-        )
-        .execute(&mut *transaction)
-        .await?;
-        sqlx::query(
-            "ALTER TABLE mm_metadata_music ADD COLUMN photo_updated timestamptz DEFAULT now();",
-        )
-        .execute(&mut *transaction)
-        .await?;
-        sqlx::query(
-            "ALTER TABLE mm_metadata_music_video ADD COLUMN photo_updated timestamptz DEFAULT now();",
-        )
-        .execute(&mut *transaction)
-        .await?;
-        sqlx::query(
-            "ALTER TABLE mm_metadata_person ADD COLUMN photo_updated timestamptz DEFAULT now();",
-        )
-        .execute(&mut *transaction)
-        .await?;
-        sqlx::query(
-            "ALTER TABLE mm_metadata_sports ADD COLUMN photo_updated timestamptz DEFAULT now();",
-        )
-        .execute(&mut *transaction)
-        .await?;
-        sqlx::query(
-            "ALTER TABLE mm_metadata_tvshow ADD COLUMN photo_updated timestamptz DEFAULT now();",
-        )
-        .execute(&mut *transaction)
-        .await?;
-        // initial set
-        sqlx::query("UPDATE mm_metadata_book SET photo_updated = now();")
-            .execute(&mut *transaction)
-            .await?;
-        sqlx::query("UPDATE mm_metadata_movie SET photo_updated = now();")
-            .execute(&mut *transaction)
-            .await?;
-        sqlx::query("UPDATE mm_metadata_music SET photo_updated = now();")
-            .execute(&mut *transaction)
-            .await?;
-        sqlx::query("UPDATE mm_metadata_music_video SET photo_updated = now();")
-            .execute(&mut *transaction)
-            .await?;
-        sqlx::query("UPDATE mm_metadata_person SET photo_updated = now();")
-            .execute(&mut *transaction)
-            .await?;
-        sqlx::query("UPDATE mm_metadata_sports SET photo_updated = now();")
-            .execute(&mut *transaction)
-            .await?;
-        sqlx::query("UPDATE mm_metadata_tvshow SET photo_updated = now();")
-            .execute(&mut *transaction)
-            .await?;
+        let tables = vec![
+            "mm_metadata_book",
+            "mm_metadata_movie",
+            "mm_metadata_music",
+            "mm_metadata_music_video",
+            "mm_metadata_person",
+            "mm_metadata_sports",
+            "mm_metadata_tvshow",
+        ];
+        for table in tables {
+            let query = format!(
+                "ALTER TABLE {} ADD COLUMN IF NOT EXISTS photo_updated timestamptz DEFAULT now();",
+                table
+            );
+            sqlx::query(&query).execute(&mut *transaction).await?;
+        }
         // create function
         // sqlx::query(r#"CREATE OR REPLACE FUNCTION touch_photo_updated_at()
         //     RETURNS trigger
@@ -950,9 +909,9 @@ pub async fn mk_lib_database_update_schema(
         //     BEFORE UPDATE OF mm_metadata_movie_json
         //     ON mm_metadata_movie
         //     FOR EACH ROW
-        //     WHEN (OLD.mm_metadata_movie_json #>> '{backdrop_path}' IS DISTINCT 
+        //     WHEN (OLD.mm_metadata_movie_json #>> '{backdrop_path}' IS DISTINCT
         //     FROM NEW.mm_metadata_movie_json #>> '{backdrop_path}')
-        //     OR (OLD.mm_metadata_movie_json #>> '{poster_path}' IS DISTINCT 
+        //     OR (OLD.mm_metadata_movie_json #>> '{poster_path}' IS DISTINCT
         //     FROM NEW.mm_metadata_movie_json #>> '{poster_path}')
         //     EXECUTE FUNCTION touch_photo_updated_at();"#)
         //     .execute(&mut *transaction)
