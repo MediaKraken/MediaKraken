@@ -432,7 +432,8 @@ async fn main() {
         .route_with_tsr("/user/home", get(user::bp_home::user_home))
         .route_with_tsr("/user/profile", get(user::bp_profile::user_profile))
         .route_with_tsr("/user/queue", get(user::bp_queue::user_queue))
-        .route_with_tsr("/user/search", get(user::bp_search::user_search))
+        //.route_with_tsr("/user/search", get(user::bp_search::user_search))
+        .route("/user/search", get(user::bp_search::search_handler))
         .route_with_tsr("/user/sync/{page}", get(user::bp_sync::user_sync))
         .route_with_tsr(
             "/user/user_media_movie_status",

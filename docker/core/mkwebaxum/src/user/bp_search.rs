@@ -5,12 +5,16 @@ use axum::{
     response::{Html, IntoResponse},
     Extension,
 };
+use axum::{
+    extract::Query,
+};
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use sqlx::postgres::PgPool;
 use axum::extract::State;
 use crate::AppState;
+use serde::{Deserialize, Serialize};
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_401.html")]
@@ -46,6 +50,47 @@ pub async fn user_search(
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SearchParams {
+    pub q: String,
+    pub filter: Option<String>,
+}
+
+pub struct MyMediaType {
+    pub id: i64,
+    pub title: String,
+    pub year: i32,
+    pub poster_url: String,
+}
+
+#[derive(Template)]
+#[template(path = "bss_user/search.html")]
+pub struct SearchTemplate {
+    pub query: String,
+    pub filter: String,
+    pub results: Vec<MyMediaType>,
+}
+
+pub async fn search_handler(
+    Query(params): Query<SearchParams>,
+) -> Html<String> {
+
+    let filter = params.filter.unwrap_or_else(|| "available".to_string());
+
+    println!("Search: {} | Filter: {}", params.q, filter);
+
+    // TODO: call DB here
+    let results = vec![];
+
+    let template = SearchTemplate {
+        query: params.q,
+        filter,
+        results,
+    };
+
+    Html(template.render().unwrap())
 }
 
 /*

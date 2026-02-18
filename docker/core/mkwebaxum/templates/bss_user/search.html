@@ -1,0 +1,82 @@
+{% extends "layouts/base_user.html" %}
+
+{% block content %}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-zinc-100">
+            Search Results
+        </h1>
+
+        <p class="mt-2 text-sm text-gray-600 dark:text-zinc-400">
+            Showing results for 
+            <span class="font-semibold text-indigo-600 dark:text-indigo-400">
+                "{{ query }}"
+            </span>
+            ({{ filter | capitalize }})
+        </p>
+    </div>
+
+    {% if results.len() == 0 %}
+        <!-- Empty State -->
+        <div class="text-center py-20">
+            <div class="text-gray-400 dark:text-zinc-600 mb-4">
+                <svg class="mx-auto h-16 w-16" fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor">
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="1.5"
+                          d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </div>
+
+            <h3 class="text-lg font-semibold text-gray-700 dark:text-zinc-200">
+                No results found
+            </h3>
+
+            <p class="mt-2 text-sm text-gray-500 dark:text-zinc-400">
+                Try searching with a different keyword.
+            </p>
+        </div>
+    {% else %}
+
+        <!-- Results Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+
+            {% for item in results %}
+            <a href="/user/media/{{ item.id }}"
+               class="group relative rounded-xl bg-white dark:bg-zinc-900
+                      shadow-sm hover:shadow-md transition-shadow">
+
+                <!-- Poster -->
+                <div class="aspect-[2/3] overflow-hidden rounded-t-xl">
+                    <img src="{{ item.poster_url }}"
+                         alt="{{ item.title }}"
+                         class="w-full h-full object-cover
+                                group-hover:scale-105 transition-transform duration-300">
+                </div>
+
+                <!-- Info -->
+                <div class="p-4">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-zinc-100 truncate">
+                        {{ item.title }}
+                    </h3>
+
+                    <p class="mt-1 text-xs text-gray-500 dark:text-zinc-400">
+                        {{ item.year }}
+                    </p>
+                </div>
+
+            </a>
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
