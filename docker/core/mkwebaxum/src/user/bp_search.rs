@@ -71,6 +71,7 @@ pub struct SearchTemplate {
     pub query: String,
     pub filter: String,
     pub results: Vec<MyMediaType>,
+    pub page_title: Option<String>,
 }
 
 pub async fn search_handler(
