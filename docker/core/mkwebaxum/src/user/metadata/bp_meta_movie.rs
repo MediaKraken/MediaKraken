@@ -173,7 +173,7 @@ pub async fn user_metadata_movie(
                 template_metadata_star_rating: 8.4,
                 template_metadata_availability: row_data.mm_metadata_availibility.clone(),
                 template_metadata_tagline: row_data.mm_metadata_movie_tagline.clone(),
-                template_metadata_photo_updated row_data.photo_updated.clone(),
+                template_metadata_photo_updated: row_data.photo_updated.clone(),
                 template_metadata_genre: genres,
                 template_metadata_user_watched: watched_status,
                 template_metadata_user_rating: rating_status,

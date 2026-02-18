@@ -9,7 +9,7 @@ pub async fn mk_lib_database_update_schema(
     if version_no < 44 {
         // set mame version to 240
         let _option_json: Value =
-            mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool_ro)
+            mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
                 .await
                 .unwrap();
         // option_json["MAME"]["Version"] = 240;
@@ -900,27 +900,29 @@ pub async fn mk_lib_database_update_schema(
         let mut transaction = sqlx_pool.begin().await?;
         // create function
         sqlx::query(
-            r#"CREATE OR REPLACE FUNCTION touch_photo_updated()
-            RETURNS trigger
-            LANGUAGE plpgsql
-            AS $$
+            r#"
+            CREATE OR REPLACE FUNCTION touch_photo_updated()
+            RETURNS trigger AS $$
             BEGIN
-                NEW.photo_updated := now();
+                NEW.photo_updated := CURRENT_TIMESTAMP;
                 RETURN NEW;
             END;
-            $$;"#,
+            $$ LANGUAGE plpgsql;
+            "#
         )
         .execute(&mut *transaction)
         .await?;
         // create triggers
         sqlx::query(
-            r#"CREATE TRIGGER trg_touch_movie_photo_updated_at
+            r#"
+            CREATE TRIGGER trg_touch_movie_photo_updated_at
             BEFORE UPDATE OF mm_metadata_movie_localimage_json
             ON mm_metadata_movie
             FOR EACH ROW
-            WHEN (OLD.mm_metadata_movie_localimage_json IS DISTINCT FROM
-            NEW.mm_metadata_movie_localimage_json)
-            EXECUTE FUNCTION touch_photo_updated;"#,
+            WHEN (OLD.mm_metadata_movie_localimage_json IS DISTINCT FROM 
+                NEW.mm_metadata_movie_localimage_json)
+            EXECUTE FUNCTION touch_photo_updated();
+            "#
         )
         .execute(&mut *transaction)
         .await?;

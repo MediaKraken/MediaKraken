@@ -27,7 +27,7 @@
                      class="h-full w-full object-cover transition-opacity duration-500"
                      :class="loaded ? 'opacity-100' : 'opacity-0'" />
             {% else %}
-                <img src="/metadata{{row_data.template_metadata_poster|safe}}?v={{ row_data.template_metadata_photo_updated.timestamp()"
+                <img src="/metadata{{row_data.template_metadata_poster|safe}}?v={{row_data.template_metadata_photo_updated.timestamp()}}"
                      alt="Poster for {{ row_data.template_metadata_name }}" 
                      loading="lazy" 
                      decoding="async"
