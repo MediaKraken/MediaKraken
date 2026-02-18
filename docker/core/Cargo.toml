@@ -3,6 +3,7 @@
 members = [
     "mkcron",
     "mkdownload",
+    "mkfanotify",
     "mkgamesdbnetfetchbulk",
     "mkglobalcache",
     "mkhardwarecontrol",

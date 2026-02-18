@@ -1,0 +1,35 @@
+[package]
+name = "mkfanotify"
+version = "0.0.1"
+edition = "2024"
+
+[profile.dev]
+panic = 'unwind'
+strip = "none"
+lto = false
+codegen-units = 16
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
+
+[dependencies]
+mk_lib_database = { version = "0.0.162", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.131", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.134", registry = "kellnr" }
+
+chrono = { version = "0.4.43", features = ["serde"] }
+fanotify = "0.3"
+reqwest = { version = "0.12.28", default-features = false, features = [
+    "json",
+    "rustls-tls",
+] }
+rustls = "0.23.27"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.148"
+tokio = { version = "1.49.0", features = ["full"] }
+
+[dev-dependencies]
+tokio-test = "*"
