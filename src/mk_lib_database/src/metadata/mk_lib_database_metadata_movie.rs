@@ -32,6 +32,7 @@ pub struct DBMetaMovieList {
     pub mm_metadata_availibility: String,
     pub mm_metadata_movie_tagline: Option<String>,
     pub mm_metadata_runtime: i32,
+    pub mm_metadata_vote_average: Option<f64>,
     pub photo_updated: DateTime<Utc>, // Maps to TIMESTAMPTZ
 }
 
@@ -54,6 +55,7 @@ pub async fn mk_lib_database_metadata_movie_read(
              mm_metadata_movie_json->>'tagline' as mm_metadata_tagline,
              (mm_metadata_movie_json->'genres')::jsonb as mm_genre,
              mm_status_user_json,
+             ROUND(vote_average::numeric, 2)::float as mm_metadata_vote_average,
              photo_updated
              from mm_metadata_movie
              LEFT JOIN mm_metadata_user_status
@@ -79,6 +81,7 @@ pub async fn mk_lib_database_metadata_movie_read(
             mm_metadata_movie_json->>'tagline' as mm_metadata_tagline,
             (mm_metadata_movie_json->'genres')::jsonb as mm_genre,
             mm_status_user_json,
+            ROUND(vote_average::numeric, 2)::float as mm_metadata_vote_average,
             photo_updated
             from mm_metadata_movie
             LEFT JOIN mm_metadata_user_status
@@ -103,6 +106,7 @@ pub async fn mk_lib_database_metadata_movie_read(
             mm_metadata_availibility: row.get("mm_availibility"),
             mm_metadata_movie_tagline: row.get("mm_metadata_tagline"),
             mm_metadata_runtime: row.get("mm_metadata_runtime"),
+            mm_metadata_vote_average: row.get("mm_metadata_vote_average"),
             photo_updated: row.get("photo_updated"),
         })
         .fetch_all(sqlx_pool)

@@ -77,12 +77,16 @@ pub struct SearchTemplate {
 pub async fn search_handler(
     Query(params): Query<SearchParams>,
 ) -> Html<String> {
-
     let filter = params.filter.unwrap_or_else(|| "available".to_string());
-
     println!("Search: {} | Filter: {}", params.q, filter);
 
-    // TODO: call DB here
+    // TODO anime
+    // TODO book
+    // TODO game
+    // TODO movie
+    // TODO music
+    // TODO sports
+    // TODO tv
     let results = vec![];
 
     let template = SearchTemplate {
@@ -91,7 +95,6 @@ pub async fn search_handler(
         results,
         page_title: Some("MediaKraken Search Results".to_string()),
     };
-
     Html(template.render().unwrap())
 }
 

@@ -108,7 +108,6 @@ pub async fn user_metadata_movie(
         .unwrap();
         let mut template_data_vec: Vec<TemplateMetaMovieList> = Vec::new();
         for row_data in movie_list.iter() {
-                            println!("here  3");
             let watched_status = row_data
                 .mm_status_user_json
                 .clone()
@@ -170,7 +169,7 @@ pub async fn user_metadata_movie(
                 template_metadata_poster: mm_poster,
                 template_metadata_runtime: row_data.mm_metadata_runtime,
                 template_metadata_rating: "pg13".to_string(),
-                template_metadata_star_rating: 8.4,
+                template_metadata_star_rating: row_data.mm_metadata_vote_average,
                 template_metadata_availability: row_data.mm_metadata_availibility.clone(),
                 template_metadata_tagline: row_data.mm_metadata_movie_tagline.clone(),
                 template_metadata_photo_updated: row_data.photo_updated.clone(),
