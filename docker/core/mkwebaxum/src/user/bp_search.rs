@@ -89,7 +89,7 @@ pub async fn search_handler(
         query: params.q,
         filter,
         results,
-        "Search Results".to_string(),
+        page_title: Some("MediaKraken Search Results".to_string()),
     };
 
     Html(template.render().unwrap())

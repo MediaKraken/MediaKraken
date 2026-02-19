@@ -21,14 +21,13 @@ mk_lib_logging = { version = "0.0.131", registry = "kellnr" }
 mk_lib_rabbitmq = { version = "0.0.134", registry = "kellnr" }
 
 chrono = { version = "0.4.43", features = ["serde"] }
-fanotify = "0.3"
-reqwest = { version = "0.12.28", default-features = false, features = [
+fanotify-rs = "0.3.1"
+reqwest = { version = "0.13.2", default-features = false, features = [
     "json",
-    "rustls-tls",
+    "native-tls",
 ] }
-rustls = "0.23.27"
 serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.148"
+serde_json = "1.0.149"
 tokio = { version = "1.49.0", features = ["full"] }
 
 [dev-dependencies]
