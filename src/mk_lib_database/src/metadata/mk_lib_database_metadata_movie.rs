@@ -55,7 +55,7 @@ pub async fn mk_lib_database_metadata_movie_read(
              mm_metadata_movie_json->>'tagline' as mm_metadata_tagline,
              (mm_metadata_movie_json->'genres')::jsonb as mm_genre,
              mm_status_user_json,
-             ROUND(vote_average::numeric, 2)::float as mm_metadata_vote_average,
+             ROUND((mm_metadata_movie_json->'vote_average')::numeric, 1)::float as mm_metadata_vote_average,
              photo_updated
              from mm_metadata_movie
              LEFT JOIN mm_metadata_user_status
@@ -81,7 +81,7 @@ pub async fn mk_lib_database_metadata_movie_read(
             mm_metadata_movie_json->>'tagline' as mm_metadata_tagline,
             (mm_metadata_movie_json->'genres')::jsonb as mm_genre,
             mm_status_user_json,
-            ROUND(vote_average::numeric, 2)::float as mm_metadata_vote_average,
+            ROUND((mm_metadata_movie_json->'vote_average')::numeric, 1)::float as mm_metadata_vote_average,
             photo_updated
             from mm_metadata_movie
             LEFT JOIN mm_metadata_user_status
