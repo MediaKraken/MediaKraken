@@ -1,0 +1,50 @@
+<nav class="w-full border-b border-zinc-200 dark:border-zinc-800 py-3"
+     aria-label="Alphabetical Pagination">
+
+  <ul class="flex flex-wrap gap-1 justify-center text-sm font-medium">
+
+    <!-- # Symbols -->
+    <li>
+      <a href="?starts_with=%23"
+         class="px-3 py-1.5 rounded-md transition-colors
+         {% if current == Some("#".to_string()) %}
+            bg-indigo-600 text-white
+         {% else %}
+            text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800
+         {% endif %}">
+        #
+      </a>
+    </li>
+
+    <!-- Numbers -->
+    {% for n in 0..10 %}
+    <li>
+      <a href="?starts_with={{ n }}"
+         class="px-3 py-1.5 rounded-md transition-colors
+         {% if current == Some(n.to_string()) %}
+            bg-indigo-600 text-white
+         {% else %}
+            text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800
+         {% endif %}">
+        {{ n }}
+      </a>
+    </li>
+    {% endfor %}
+
+    <!-- Letters -->
+    {% for c in 'A'..='Z' %}
+    <li>
+      <a href="?starts_with={{ c }}"
+         class="px-3 py-1.5 rounded-md transition-colors
+         {% if current == Some(c.to_string()) %}
+            bg-indigo-600 text-white
+         {% else %}
+            text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800
+         {% endif %}">
+        {{ c }}
+      </a>
+    </li>
+    {% endfor %}
+
+  </ul>
+</nav>

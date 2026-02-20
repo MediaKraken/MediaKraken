@@ -11,6 +11,7 @@ use axum::{
     response::{Html, IntoResponse},
     Extension,
 };
+use axum::{extract::Query};
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
@@ -59,13 +60,31 @@ struct TemplateMetaMovieContext<'a> {
     pagination_bar: &'a String,
     page: &'a usize,
     page_title: Option<String>,
+    pub current: Option<String>,
 }
+
+#[derive(Debug, Deserialize)]
+pub struct FilterQuery {
+    pub starts_with: Option<String>,
+}
+
+// pub async fn movies(
+//     Query(params): Query<FilterQuery>,
+// ) -> Html<String> {
+//     let current = params.starts_with.clone();
+//     // SQL filtering example
+//     // "#" = symbols
+//     // "A" = starts with A
+//     // "5" = starts with number
+//     Html(format!("Selected: {:?}", current))
+// }
 
 pub async fn user_metadata_movie(
     State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
+    Query(params): Query<FilterQuery>,
 ) -> impl IntoResponse {
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
@@ -169,7 +188,7 @@ pub async fn user_metadata_movie(
                 template_metadata_poster: mm_poster,
                 template_metadata_runtime: row_data.mm_metadata_runtime,
                 template_metadata_rating: "pg13".to_string(),
-                template_metadata_star_rating: row_data.mm_metadata_vote_average,
+                template_metadata_star_rating: row_data.mm_metadata_vote_average.unwrap_or(0.0) as f32,
                 template_metadata_availability: row_data.mm_metadata_availibility.clone(),
                 template_metadata_tagline: row_data.mm_metadata_movie_tagline.clone(),
                 template_metadata_photo_updated: row_data.photo_updated.clone(),
@@ -192,6 +211,7 @@ pub async fn user_metadata_movie(
             pagination_bar: &pagination_html,
             page: &page_usize,
             page_title: Some("MediaKraken Metadata Movies".to_string()),
+            current: params.starts_with.clone(), 
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
