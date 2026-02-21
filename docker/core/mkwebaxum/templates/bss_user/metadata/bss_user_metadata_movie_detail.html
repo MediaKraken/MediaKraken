@@ -5,7 +5,27 @@
 
         <!-- Poster -->
         <div class="aspect-[2/3] bg-gray-300 rounded-xl overflow-hidden shadow">
-            <img src="/static/image/Movie-icon.png" alt="Poster" class="w-full h-full object-cover">
+             {% if row_data.template_metadata_poster == "/static/image/Movie-icon.png" %}
+                <img src="/static/image/Movie-icon.png?v=1" 
+                     alt="Poster for {{ row_data.template_metadata_name }}" 
+                     loading="lazy"
+                     decoding="async"
+                     @load="loaded = true" 
+                     @error="loaded = true"
+                     x-init="$nextTick(() => { loaded = $el.complete })"
+                     class="h-full w-full object-cover transition-opacity duration-500"
+                     :class="loaded ? 'opacity-100' : 'opacity-0'" />
+            {% else %}
+                <img src="/metadata{{row_data.template_metadata_poster|safe}}?v={{row_data.template_metadata_photo_updated.timestamp()}}"
+                     alt="Poster for {{ row_data.template_metadata_name }}" 
+                     loading="lazy" 
+                     decoding="async"
+                     @load="loaded = true"
+                     @error="loaded = true"
+                     x-init="$nextTick(() => { loaded = $el.complete })"
+                     class="h-full w-full object-cover transition-opacity duration-500" 
+                     :class="loaded ? 'opacity-100' : 'opacity-0'" />
+            {% endif %}
         </div>
 
         <!-- Info -->
