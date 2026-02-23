@@ -1,6 +1,6 @@
 cat > garage.toml <<EOF
-metadata_dir = "/var/lib/garage/meta"
-data_dir = "/var/lib/garage/data"
+metadata_dir = "/mnt/minio/garage/meta"
+data_dir = "/mnt/minio/garage/data"
 db_engine = "sqlite"
 
 replication_factor = 1
