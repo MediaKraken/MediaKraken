@@ -37,7 +37,7 @@ resource "proxmox_vm_qemu" "mkcontrol" {
   bootdisk    = "scsi0"
   start_at_node_boot      = "true"
   ipconfig0   = "ip=192.168.50.5${count.index}/24,gw=192.168.50.1"
-  nameserver  = "192.168.1.1"
+  nameserver  = "192.168.1.4"
   ciuser      = var.vm_user
   cipassword  = var.vm_user_password
   sshkeys     = file("~/.ssh/id_rsa.pub")
@@ -103,7 +103,7 @@ resource "proxmox_vm_qemu" "mkworker" {
   bootdisk    = "scsi0"
   start_at_node_boot      = "true"
   ipconfig0   = "ip=192.168.50.6${count.index}/24,gw=192.168.50.1"
-  nameserver  = "192.168.1.1"
+  nameserver  = "192.168.1.4"
   ciuser      = var.vm_user
   cipassword  = var.vm_user_password
   sshkeys     = file("~/.ssh/id_rsa.pub")

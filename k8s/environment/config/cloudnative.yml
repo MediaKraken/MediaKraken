@@ -109,7 +109,7 @@ spec:
   backup:
       barmanObjectStore:
         destinationPath: "s3://mkdbbackups/prod"
-        endpointURL: http://mkdbbackups.garage.mediakraken.media::3900
+        endpointURL: http://mkdbbackups.garage.mediakraken.media:3900
         s3Credentials:
           accessKeyId:
             name: s3-backup-creds
