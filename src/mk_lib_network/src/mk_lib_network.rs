@@ -15,6 +15,7 @@ use tokio::fs::File;
 use tokio::io::{self, AsyncWriteExt};
 use tokio::time::Duration;
 use bytes::Bytes;
+use futures_util::StreamExt;
 
 pub async fn is_url_available(url: &str) -> bool {
     let client = Client::new();
@@ -110,66 +111,57 @@ pub async fn mk_download_file_from_url(
     Ok(())
 }
 
+pub async fn mk_download_file_from_url_stream(
+    url: String,
+    file_name: &str, // Changed to &str for better ergonomics
+) -> Result<(), Box<dyn std::error::Error>> {
+    println!("Downloading from: {}", url);
+
+    let response = reqwest::get(url).await?;
+    let mut file = std::fs::File::create(file_name)?;
+    
+    // Get the body as a stream of chunks
+    let mut byte_stream = response.bytes_stream();
+
+    while let Some(chunk) = byte_stream.next().await {
+        let data = chunk?;
+        file.write_all(&data)?;
+    }
+
+    println!("Download complete: {}", file_name);
+    Ok(())
+}
+
 pub async fn mk_download_file_from_url_tokio(
     url: String,
-    file_name: &String,
+    file_name: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::builder()
         .user_agent("MediaKraken/0.0.1")
-        .build()
-        .expect("Could not build client");
-    // get response
-    let res = if let Ok(mut res) = client.get(&url).send().await {
-        // Try to open file
-        if let Ok(file) = tokio::fs::File::create(&file_name).await {
-            let mut writer = tokio::io::BufWriter::new(file);
-            // Write all bytes to file
-            loop {
-                match res.chunk().await {
-                    Ok(Some(bytes)) => {
-                        writer.write_all(&bytes).await;
-                    }
-                    Ok(None) => {
-                        writer.flush().await;
-                        break;
-                    }
-                    Err(e) => {
-                        #[cfg(debug_assertions)]
-                        {
-                            // mk_lib_logging::mk_logging_post_elk(
-                            //     std::module_path!(),
-                            //     json!({ format!("Could not get bytes from data: {:?}", &e ): url }),
-                            // )
-                            // .await
-                            // .unwrap();
-                        }
-                    }
-                }
-            }
-        } else {
-            #[cfg(debug_assertions)]
-            {
-                // mk_lib_logging::mk_logging_post_elk(
-                //     std::module_path!(),
-                //     json!({ format!("Could not open file for writing: {:?}", &file_name ): url }),
-                // )
-                // .await
-                // .unwrap();
-            }
-        }
-    } else {
-        if let Err(e) = client.get(&url).send().await {
-            #[cfg(debug_assertions)]
-            {
-                // mk_lib_logging::mk_logging_post_elk(
-                //     std::module_path!(),
-                //     json!({ format!("File error for {:?} with error {:#?}", &file_name, &e ): url }),
-                // )
-                // .await
-                // .unwrap();
-            }
-        }
-    };
+        .build()?;
+
+    // 1. Handle Request Errors
+    let mut res = client.get(&url).send().await.map_err(|e| {
+        // Log here if needed: format!("Network error: {}", e)
+        e
+    })?;
+
+    // 2. Handle File Creation Errors
+    let file = tokio::fs::File::create(file_name).await.map_err(|e| {
+        // Log here: format!("File system error: {}", e)
+        e
+    })?;
+    
+    let mut writer = tokio::io::BufWriter::new(file);
+
+    // 3. Stream and Write
+    while let Some(chunk) = res.chunk().await? {
+        writer.write_all(&chunk).await?;
+    }
+
+    // Ensure all buffers are pushed to disk
+    writer.flush().await?;
+
     Ok(())
 }
 

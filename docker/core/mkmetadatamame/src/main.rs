@@ -3,6 +3,7 @@ use mk_lib_database;
 use mk_lib_network;
 use quickxml_to_serde::{xml_string_to_json, Config, JsonArray, JsonType, NullValue};
 use serde_json::json;
+use serde_json::Value;
 use std::error::Error;
 use std::fs::File;
 use std::io::{prelude::*, BufReader};
@@ -29,10 +30,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await
         .unwrap();
-    let option_config_json: serde_json::Value =
-        mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool_ro)
-            .await
-            .unwrap();
 
     let (_rabbit_connection, rabbit_channel) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkmetadatamame")
@@ -48,12 +45,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {
                 println!("Here I am 3");
-                // let _json_message: Value =
-                //     serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
+                let json_message: Value =
+                    serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
                 // create mame game list
                 let file_name = format!(
                     "/mediakraken/emulation/mame0{}lx.zip",
-                    option_config_json["MAME"]["Version"]
+                    json_message["Version"]
                 );
                 println!("File: {}", file_name);
                 // only do the parse/import if not processed before
@@ -63,7 +60,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     mk_lib_network::mk_lib_network::mk_download_file_from_url(
                             format!(
                                 "https://github.com/mamedev/mame/releases/download/mame0{}/mame0{}lx.zip",
-                                option_config_json["MAME"]["Version"], option_config_json["MAME"]["Version"]
+                                json_message["Version"], json_message["Version"]
                             ),
                             &file_name,
                         )
@@ -72,7 +69,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     println!("File dl 2");
                     let unzip_file_name = format!(
                         "/mediakraken/emulation/mame0{}.xml",
-                        option_config_json["MAME"]["Version"]
+                        json_message["Version"]
                     );
                     if !Path::new(&unzip_file_name).exists() {
                         mk_lib_compression::mk_lib_compression::mk_decompress_zip(
@@ -129,7 +126,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // load games from hash files
                 let file_name = format!(
                     "/mediakraken/emulation/mame0{}.zip",
-                    option_config_json["MAME"]["Version"]
+                    json_message["Version"]
                 );
                 // only do the parse/import if not processed before
                 if !Path::new(&file_name).exists() {
@@ -137,7 +134,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     mk_lib_network::mk_lib_network::mk_download_file_from_url(
                         format!(
                             "https://github.com/mamedev/mame/archive/refs/tags/mame0{}.zip",
-                            option_config_json["MAME"]["Version"]
+                            json_message["Version"]
                         ),
                         &file_name,
                     )
@@ -153,7 +150,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                     let entries = fs::read_dir(format!(
                         "/mediakraken/emulation/mame-mame0{}/hash",
-                        option_config_json["MAME"]["Version"]
+                        json_message["Version"]
                     ))
                     .unwrap()
                     .map(|res| res.map(|e| e.path()))
@@ -224,7 +221,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // update mame game descriptions from history dat
                 let file_name = format!(
                     "/mediakraken/emulation/historyxml{}.zip",
-                    option_config_json["MAME"]["Version"]
+                    json_message["Version"]
                 );
                 // only do the parse/import if not processed before
                 if !Path::new(&file_name).exists() {
@@ -232,7 +229,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     mk_lib_network::mk_lib_network::mk_download_file_from_url(
                         format!(
                             "https://www.arcade-history.com/dats/history{}b.zip",
-                            option_config_json["MAME"]["Version"]
+                            json_message["Version"]
                         ),
                         &file_name,
                     )
@@ -297,14 +294,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // read the category file and create dict/list for it
                 let file_name = format!(
                     "/mediakraken/emulation/pS_CatVer_{}.zip",
-                    option_config_json["MAME"]["Version"]
+                    json_message["Version"]
                 );
                 // only do the parse/import if not processed before
                 if !Path::new(&file_name).exists() {
                     mk_lib_network::mk_lib_network::mk_download_file_from_url(
                             format!(
                                 "https://www.progettosnaps.net/download/?tipo=catver&file=pS_CatVer_{}.zip",
-                                option_config_json["MAME"]["Version"]
+                                json_message["Version"]
                             ),
                             &file_name,
                         )
@@ -357,12 +354,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // update mess system description
                 let file_name = format!(
                     "/mediakraken/emulation/pS_messinfo_{}.zip",
-                    option_config_json["MAME"]["Version"]
+                    json_message["Version"]
                 );
                 // only do the parse/import if not processed before
                 if !Path::new(&file_name).exists() {
                     mk_lib_network::mk_lib_network::mk_download_file_from_url(
-                            format!("https://www.progettosnaps.net/download/?tipo=messinfo&file=pS_messinfo_{}.zip", option_config_json["MAME"]["Version"]), &file_name)
+                            format!("https://www.progettosnaps.net/download/?tipo=messinfo&file=pS_messinfo_{}.zip", json_message["Version"]), &file_name)
                         .await
                         .unwrap();
                     mk_lib_compression::mk_lib_compression::mk_decompress_zip(

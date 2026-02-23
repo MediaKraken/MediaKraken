@@ -126,7 +126,7 @@ resource "proxmox_vm_qemu" "mkworker" {
       }
       scsi1 {
         disk {
-          size    = "512G"
+          size    = "1T"
           storage = var.storage_name
         }
       }

@@ -31,13 +31,13 @@ spec:
   imageName: ghcr.io/cloudnative-pg/postgis:18.1-3.6.1-202512151010-system-trixie
   primaryUpdateStrategy: unsupervised
   storage:
-    size: 300Gi
+    size: 900Gi
     pvcTemplate:
       accessModes:
         - ReadWriteOnce
       resources:
         requests:
-          storage: 300Gi
+          storage: 900Gi
       storageClassName: local-path
       volumeMode: Filesystem
   postgresql:

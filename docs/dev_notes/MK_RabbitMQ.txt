@@ -25,3 +25,18 @@ mkopenlibrarynetfetchbulk
 {
     "Type": "ratings"
 }
+
+
+
+mkmetadatamame
+content_type    application/json
+{
+    "Version": 285
+}
+
+
+mkopenlibrarynetfetchbulk
+content_type    application/json
+{
+    "Type": "START_BULK_LOAD"
+}

@@ -5,26 +5,18 @@
 
         <!-- Poster -->
         <div class="aspect-[2/3] bg-gray-300 rounded-xl overflow-hidden shadow">
-             {% if row_data.template_metadata_poster == "/static/image/Movie-icon.png" %}
-                <img src="/static/image/Movie-icon.png?v=1" 
-                     alt="Poster for {{ row_data.template_metadata_name }}" 
-                     loading="lazy"
-                     decoding="async"
-                     @load="loaded = true" 
-                     @error="loaded = true"
-                     x-init="$nextTick(() => { loaded = $el.complete })"
-                     class="h-full w-full object-cover transition-opacity duration-500"
-                     :class="loaded ? 'opacity-100' : 'opacity-0'" />
+            {% if row_data.template_metadata_poster == "/static/image/Movie-icon.png" %}
+            <img src="/static/image/Movie-icon.png?v=1" alt="Poster for {{ row_data.template_metadata_name }}"
+                loading="lazy" decoding="async" @load="loaded = true" @error="loaded = true"
+                x-init="$nextTick(() => { loaded = $el.complete })"
+                class="h-full w-full object-cover transition-opacity duration-500"
+                :class="loaded ? 'opacity-100' : 'opacity-0'" />
             {% else %}
-                <img src="/metadata{{row_data.template_metadata_poster|safe}}?v={{row_data.template_metadata_photo_updated.timestamp()}}"
-                     alt="Poster for {{ row_data.template_metadata_name }}" 
-                     loading="lazy" 
-                     decoding="async"
-                     @load="loaded = true"
-                     @error="loaded = true"
-                     x-init="$nextTick(() => { loaded = $el.complete })"
-                     class="h-full w-full object-cover transition-opacity duration-500" 
-                     :class="loaded ? 'opacity-100' : 'opacity-0'" />
+            <img src="/metadata{{row_data.template_metadata_poster|safe}}?v={{row_data.template_metadata_photo_updated.timestamp()}}"
+                alt="Poster for {{ row_data.template_metadata_name }}" loading="lazy" decoding="async"
+                @load="loaded = true" @error="loaded = true" x-init="$nextTick(() => { loaded = $el.complete })"
+                class="h-full w-full object-cover transition-opacity duration-500"
+                :class="loaded ? 'opacity-100' : 'opacity-0'" />
             {% endif %}
         </div>
 
@@ -34,74 +26,47 @@
             <div>
                 <h1 class="text-3xl font-bold">{{template_data_json["title"]}}</h1>
                 <p class="italic text-gray-500">{{template_data_json["original_title"]}}</p>
-                <p class="mt-2 text-gray-700">“{{template_data_json["tagline"]}}”</p>
+            {% if let Some(alt_name) = template_metadata_tagline %}
+                {% if alt_name != "" %}
+                <p class="text-[11px] italic text-zinc-500 dark:text-zinc-400 line-clamp-1">
+                    {{ alt_name }}
+                </p>
+                {% endif %}
+            {% endif %}
             </div>
 
-            <!-- Genres -->
-            <div class="flex flex-wrap gap-2">
-                <template x-for="genre in genres" :key="genre">
-                    <button @click="toggleGenre(genre)" class="px-3 py-1 rounded-full border text-sm transition" :class="activeGenres.includes(genre)
-              ? 'bg-blue-600 text-white border-blue-600'
-              : 'bg-white text-gray-700 border-gray-300'">
-                        <span x-text="genre"></span>
+            <div class="flex flex-wrap gap-1 mt-1">
+                {% for genre in row_data.template_metadata_genre %}
+                <span
+                    class="px-1.5 py-0.5 text-[10px] rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                    {{ genre.name }}
+                </span>
+                {% endfor %}
+            </div>
+
+            <div class="flex items-center justify-between pt-3 border-t border-zinc-100 dark:border-zinc-800 mt-2">
+                <div class="flex items-center gap-1">
+                    <button @click="toggle('favorite')" class="transition-transform active:scale-125"
+                        :class="favorite ? 'text-red-500' : 'text-zinc-400 hover:text-red-400'">
+                        {% include "icons/heart.svg" %}
                     </button>
-                </template>
-            </div>
-
-            <!-- Rating -->
-            <div class="flex items-center gap-1">
-                <template x-for="star in 5" :key="star">
-                    <button @click="rating = star">
-                        <svg class="w-6 h-6" viewBox="0 0 24 24"
-                            :class="star <= rating ? 'fill-yellow-400' : 'fill-gray-300'">
-                            <path d="M12 17.3l6.18 3.7-1.64-7.03L21.5 9.24l-7.19-.61L12 2
-                       9.69 8.63 2.5 9.24l4.96 4.73L5.82 21z" />
-                        </svg>
+                    <button @click="toggle('watched')" class="transition-transform active:scale-125"
+                        :class="watched ? 'text-green-500' : 'text-zinc-400 hover:text-green-400'">
+                        {% include "icons/check.svg" %}
                     </button>
-                </template>
-            </div>
-
-            <!-- Actions -->
-            <div class="flex gap-5 pt-2">
-
-                <!-- Favorite -->
-                <button @click="favorite = !favorite">
-                    <svg class="w-6 h-6" viewBox="0 0 24 24" :class="favorite ? 'fill-red-500' : 'fill-gray-300'">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5
-                     2 6 4 4 6.5 4c1.74 0 3.41 1.01 4.13 2.44
-                     C11.09 5.01 12.76 4 14.5 4 17 4 19 6 19 8.5
-                     c0 3.78-3.4 6.86-8.55 11.54z" />
-                    </svg>
-                </button>
-
-                <!-- Watched -->
-                <button @click="watched = !watched">
-                    <svg class="w-6 h-6" viewBox="0 0 24 24" :class="watched ? 'fill-blue-500' : 'fill-gray-300'">
-                        <path d="M12 5c-7.633 0-12 7-12 7s4.367 7 12 7
-                     12-7 12-7-4.367-7-12-7zm0 11
-                     c-2.209 0-4-1.791-4-4s1.791-4 4-4
-                     4 1.791 4 4-1.791 4-4 4z" />
-                    </svg>
-                </button>
-
-                <!-- Good -->
-                <button @click="good = !good">
-                    <svg class="w-6 h-6" viewBox="0 0 24 24" :class="good ? 'fill-green-500' : 'fill-gray-300'">
-                        <path d="M9 16.17l-3.88-3.88L3.71 13.7
-                     9 19l12-12-1.41-1.41z" />
-                    </svg>
-                </button>
-
-                <!-- Terrible -->
-                <button @click="terrible = !terrible">
-                    <svg class="w-6 h-6" viewBox="0 0 24 24" :class="terrible ? 'fill-red-700' : 'fill-gray-300'">
-                        <path d="M19 6.41L17.59 5 12 10.59
-                     6.41 5 5 6.41 10.59 12
-                     5 17.59 6.41 19 12 13.41
-                     17.59 19 19 17.59 13.41 12z" />
-                    </svg>
-                </button>
-
+                    <button @click="toggle('good')"
+                        :class="good ? 'text-blue-500' : 'text-zinc-400 hover:text-blue-400'">
+                        {% include "icons/thumb_up.svg" %}
+                    </button>
+                    <button @click="toggle('bad')"
+                        :class="bad ? 'text-yellow-500' : 'text-zinc-400 hover:text-yellow-400'">
+                        {% include "icons/thumb_down.svg" %}
+                    </button>
+                    <button @click="toggle('trash')"
+                        :class="trash ? 'text-red-600' : 'text-zinc-400 hover:text-red-500'">
+                        {% include "icons/trash.svg" %}
+                    </button>
+                </div>
             </div>
         </div>
     </div>
