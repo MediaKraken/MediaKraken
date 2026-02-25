@@ -86,10 +86,8 @@ async fn run_bulk_import(pool: Pool<Postgres>) -> anyhow::Result<()> {
         let p = pool.clone();
         let t = table.to_string(); // Clone for 'static task
         let url = format!("{}{}", BASE_URL, filename);
-        
-        import_set.spawn(async move { 
-            download_and_import(p, &t, &url).await 
-        });
+
+        import_set.spawn(async move { download_and_import(p, &t, &url).await });
     }
 
     while let Some(res) = import_set.join_next().await {
@@ -108,10 +106,7 @@ async fn run_bulk_import(pool: Pool<Postgres>) -> anyhow::Result<()> {
                 .execute(&mut *conn)
                 .await?;
 
-            let sql = format!(
-                "CREATE INDEX IF NOT EXISTS {}_key_idx ON {} (key);",
-                t, t
-            );
+            let sql = format!("CREATE INDEX IF NOT EXISTS {}_key_idx ON {} (key);", t, t);
             sqlx::query(&sql).execute(&mut *conn).await?;
             Ok::<(), anyhow::Error>(())
         });
@@ -122,24 +117,18 @@ async fn run_bulk_import(pool: Pool<Postgres>) -> anyhow::Result<()> {
     }
 
     println!("🔒 Converting tables to LOGGED for durability...");
-    let mut logging_set = JoinSet::new();
-    // 3. USE &jobs TO BORROW
+
     for (table, _) in &jobs {
-        let p = pool.clone();
-        let t = table.to_string(); // Clone for 'static task
-        logging_set.spawn(async move {
-            let mut conn = p.acquire().await?;
-            println!("Logging table {}...", t);
+        let mut conn = pool.acquire().await?;
 
-            let sql = format!("ALTER TABLE {} SET LOGGED;", t);
-            sqlx::query(&sql).execute(&mut *conn).await?;
+        println!("Logging table {}...", table);
 
-            Ok::<(), anyhow::Error>(())
-        });
-    }
+        sqlx::query("SET lock_timeout = '30s'")
+            .execute(&mut *conn)
+            .await?;
 
-    while let Some(res) = logging_set.join_next().await {
-        res??;
+        let sql = format!("ALTER TABLE {} SET LOGGED;", table);
+        sqlx::query(&sql).execute(&mut *conn).await?;
     }
 
     println!("🔄 Performing final table swap...");
