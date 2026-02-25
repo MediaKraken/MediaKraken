@@ -10,3 +10,14 @@ fn main() -> Result<(), Box<dyn Error>> {
     conn.print(job)?;
     Ok(())
 }
+
+/*
+    generate a 62x29mm label with the following checkboxes: MK, UHD, Bray, DVD, Disc, Box, Case, Ripd, UPC, Seen, Fav, Good, Bad, Trash
+    no headers and nothing checked
+    need it for a ql800 printer
+    without the rating, date and botton upc line
+ 
+    resize to 732 × 342 px
+    300 DPI exact print-ready PNG
+    732x342, tight, no border
+ */
