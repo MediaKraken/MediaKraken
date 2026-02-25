@@ -1,8 +1,8 @@
+use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPoolOptions;
 use std::env;
 use std::time::Duration;
 use urlencoding::encode;
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MediaStatusUpdatePayload {
@@ -23,12 +23,14 @@ pub async fn mk_lib_database_open_pool(
     let create_pool = |host: &str| {
         let connection_string = format!(
             "postgresql://{}:{}@{}:5432/mkdatabase?sslmode=prefer",
-            db_user, encode(&db_pass), host
+            db_user,
+            encode(&db_pass),
+            host
         );
         PgPoolOptions::new()
             .max_connections(pool_connections)
             .acquire_timeout(Duration::from_secs(connection_timeout))
-            .max_lifetime(Duration::from_secs(1800)) 
+            .max_lifetime(Duration::from_secs(1800))
             .connect_lazy(&connection_string)
     };
     let sqlx_pool_rw = create_pool("pgcluster-with-metrics-pgbouncer-rw.cnpg-system")?;

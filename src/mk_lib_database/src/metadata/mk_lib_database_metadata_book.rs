@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
-use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_metadata_book_detail(
     sqlx_pool: &sqlx::PgPool,
@@ -30,33 +30,28 @@ pub async fn mk_lib_database_metadata_book_read(
     limit: i64,
 ) -> Result<Vec<DBMetaBookList>, sqlx::Error> {
     // TODO sort by release date
-    let select_query;
     if !search_value.is_empty() {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_metadata_book_guid, mm_metadata_book_name \
             from mm_metadata_book where mm_metadata_book_name &@ $1 \
             offset $2 limit $3",
         )
         .bind(search_value)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
     } else {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_metadata_book_guid, mm_metadata_book_name \
             from mm_metadata_book order by mm_metadata_book_name \
             offset $1 limit $2",
         )
         .bind(offset)
-        .bind(limit);
-    }
-    let table_rows: Vec<DBMetaBookList> = select_query
-        .map(|row: PgRow| DBMetaBookList {
-            mm_metadata_book_guid: row.get("mm_metadata_book_guid"),
-            mm_metadata_book_name: row.get("mm_metadata_book_name"),
-        })
+        .bind(limit)
         .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
+        .await
+    }
 }
 
 pub async fn mk_lib_database_metadata_book_count(

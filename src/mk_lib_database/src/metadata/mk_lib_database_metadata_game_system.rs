@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
-use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_metadata_game_system_detail(
     sqlx_pool: &sqlx::PgPool,
@@ -54,9 +54,8 @@ pub async fn mk_lib_database_metadata_game_system_read(
     limit: i64,
 ) -> Result<Vec<DBMetaGameSystemList>, sqlx::Error> {
     // TODO might need to sort by release year as well for machines with multiple releases
-    let select_query;
     if search_value != String::new() {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select gs_game_system_id, gs_game_system_name, \
             gs_game_system_json->>'description' as gs_description, \
             gs_game_system_json->>'year' as gs_year, \
@@ -66,9 +65,11 @@ pub async fn mk_lib_database_metadata_game_system_read(
         )
         .bind(search_value)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
     } else {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select gs_game_system_id, gs_game_system_name, \
             gs_game_system_json->>'description' as gs_description, \
             gs_game_system_json->>'year' as gs_year, \
@@ -76,19 +77,10 @@ pub async fn mk_lib_database_metadata_game_system_read(
             order by gs_game_system_json->'description' offset $1 limit $2",
         )
         .bind(offset)
-        .bind(limit);
-    }
-    let table_rows: Vec<DBMetaGameSystemList> = select_query
-        .map(|row: PgRow| DBMetaGameSystemList {
-            gs_game_system_id: row.get("gs_game_system_id"),
-            gs_game_system_name: row.get("gs_game_system_name"),
-            gs_description: row.get("gs_description"),
-            gs_year: row.get("gs_year"),
-            gs_game_system_alias: row.get("gs_game_system_alias"),
-        })
+        .bind(limit)
         .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
+        .await
+    }
 }
 
 pub async fn mk_lib_database_metadata_game_system_upsert(

@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaMusicList {
@@ -40,9 +40,8 @@ pub async fn mk_lib_database_metadata_music_read(
 ) -> Result<Vec<DBMetaMusicList>, sqlx::Error> {
     // TODO, only grab the poster locale from json
     // TODO order by release year
-    let select_query;
     if !search_value.is_empty() {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_metadata_album_guid, mm_metadata_album_name, \
             mm_metadata_album_json, mm_metadata_album_localimage \
             from mm_metadata_album where LOWER(mm_metadata_album_name) % LOWER($1) \
@@ -51,28 +50,21 @@ pub async fn mk_lib_database_metadata_music_read(
         )
         .bind(search_value)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
     } else {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_metadata_album_guid, mm_metadata_album_name, \
             mm_metadata_album_json, mm_metadata_album_localimage \
             from mm_metadata_album order by LOWER(mm_metadata_album_name) \
             offset $1 limit $2",
         )
         .bind(offset)
-        .bind(limit);
-    }
-    let table_rows: Vec<DBMetaMusicList> = select_query
-        .map(|row: PgRow| DBMetaMusicList {
-            mm_metadata_album_guid: row.get("mm_metadata_album_guid"),
-            mm_metadata_album_artist: row.get("mm_metadata_album_artist"),
-            mm_metadata_album_name: row.get("mm_metadata_album_name"),
-            mm_metadata_album_json: row.get("mm_metadata_album_json"),
-            mm_metadata_album_localimage: row.get("mm_metadata_album_localimage"),
-        })
+        .bind(limit)
         .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
+        .await
+    }
 }
 
 /*

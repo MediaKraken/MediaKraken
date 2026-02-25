@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
-use sqlx::{FromRow, Row};
-use sqlx::postgres::PgRow;
+use sqlx::FromRow;
 use sqlx::types::Uuid;
 
 pub async fn mk_lib_database_link_delete(
@@ -28,22 +27,16 @@ pub async fn mk_lib_database_link_read(
     offset: i64,
     records: i64,
 ) -> Result<Vec<DBLinkList>, sqlx::Error> {
-    let select_query = sqlx::query(
+    let table_rows: Vec<DBLinkList> = sqlx::query_as(
         "select mm_link_guid, mm_link_name, \
         mm_link_json from mm_link \
         order by mm_link_name \
         offset $1 limit $2",
     )
     .bind(offset)
-    .bind(records);
-    let table_rows: Vec<DBLinkList> = select_query
-        .map(|row: PgRow| DBLinkList {
-            mm_link_guid: row.get("mm_link_guid"),
-            mm_link_name: row.get("mm_link_name"),
-            mm_link_json: row.get("mm_link_json"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    .bind(records)
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 

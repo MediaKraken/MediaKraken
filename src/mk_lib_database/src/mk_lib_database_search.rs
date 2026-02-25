@@ -1,7 +1,3 @@
-
-
-
-
 /*
 // TODO port query
 def db_search(self, search_string, search_type='Local', search_movie=True, search_tvshow=True,

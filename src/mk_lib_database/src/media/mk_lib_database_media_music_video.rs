@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaMusicVideoList {
@@ -13,19 +13,20 @@ pub async fn mk_lib_database_media_music_video_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMediaMusicVideoList>, sqlx::Error> {
-    let select_query;
     if !search_value.is_empty() {
-        select_query = sqlx::query("").bind(search_value).bind(offset).bind(limit);
+        sqlx::query_as("")
+            .bind(search_value)
+            .bind(offset)
+            .bind(limit)
+            .fetch_all(sqlx_pool)
+            .await
     } else {
-        select_query = sqlx::query("").bind(offset).bind(limit);
+        sqlx::query_as("")
+            .bind(offset)
+            .bind(limit)
+            .fetch_all(sqlx_pool)
+            .await
     }
-    let table_rows: Vec<DBMediaMusicVideoList> = select_query
-        .map(|row: PgRow| DBMediaMusicVideoList {
-            mm_metadata_music_video_guid: row.get("mm_metadata_music_video_guid"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
 }
 
 pub async fn mk_lib_database_media_music_video_count(

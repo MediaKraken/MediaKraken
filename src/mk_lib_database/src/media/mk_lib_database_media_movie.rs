@@ -1,8 +1,8 @@
 use mk_lib_common::mk_lib_common_enum_media_type;
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
-use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_media_movie_genre_count(
     sqlx_pool: &sqlx::PgPool,
@@ -51,19 +51,20 @@ pub async fn mk_lib_database_media_movie_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMediaMovieList>, sqlx::Error> {
-    let select_query;
     if !search_value.is_empty() {
-        select_query = sqlx::query("").bind(search_value).bind(offset).bind(limit);
+        sqlx::query_as("")
+            .bind(search_value)
+            .bind(offset)
+            .bind(limit)
+            .fetch_all(sqlx_pool)
+            .await
     } else {
-        select_query = sqlx::query("").bind(offset).bind(limit);
+        sqlx::query_as("")
+            .bind(offset)
+            .bind(limit)
+            .fetch_all(sqlx_pool)
+            .await
     }
-    let table_rows: Vec<DBMediaMovieList> = select_query
-        .map(|row: PgRow| DBMediaMovieList {
-            mm_media_movie_video_guid: row.get("mm_media_movie_video_guid"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
 }
 
 pub async fn mk_lib_database_media_movie_count(

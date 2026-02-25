@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 use sqlx::types::Uuid;
 
 pub async fn mk_lib_database_metadata_game_detail(
@@ -85,9 +85,8 @@ pub async fn mk_lib_database_metadata_game_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMetaGameList>, sqlx::Error> {
-    let select_query;
     if !search_value.is_empty() {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select gi_game_info_id, gi_game_info_short_name, \
              gi_game_info_name, \
              gi_game_info_json->'machine'->>'year' as gi_year, \
@@ -98,9 +97,11 @@ pub async fn mk_lib_database_metadata_game_read(
         )
         .bind(search_value)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
     } else {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select gi_game_info_id, gi_game_info_short_name, \
             gi_game_info_name, \
             gi_game_info_json->'machine'->>'year' as gi_year, \
@@ -110,20 +111,10 @@ pub async fn mk_lib_database_metadata_game_read(
             offset $1 limit $2",
         )
         .bind(offset)
-        .bind(limit);
-    }
-    let table_rows: Vec<DBMetaGameList> = select_query
-        .map(|row: PgRow| DBMetaGameList {
-            gi_game_info_id: row.get("gi_game_info_id"),
-            gi_game_info_short_name: row.get("gi_game_info_short_name"),
-            gi_game_info_name: row.get("gi_game_info_name"),
-            gi_year: row.get("gi_year"),
-            gi_game_info_localimage: row.get("gi_game_info_localimage"),
-            gs_game_system_name: row.get("gs_game_system_name"),
-        })
+        .bind(limit)
         .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
+        .await
+    }
 }
 
 pub async fn mk_lib_database_metadata_game_uuid_by_name_and_system(
@@ -168,10 +159,9 @@ pub async fn mk_lib_database_metadata_game_by_name_and_system(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMetaGameNameMatchList>, sqlx::Error> {
-    let select_query;
     if game_system_short_name != "" {
         // TODO fix game_system_short_name in query below
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select gi_id, gi_game_info_json \
             from mm_metadata_game_software_info \
             where gi_game_info_name = $1 and game_system_short_name = $2",
@@ -179,25 +169,21 @@ pub async fn mk_lib_database_metadata_game_by_name_and_system(
         .bind(game_name)
         .bind(game_system_short_name)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
     } else {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select gi_id, gi_game_info_json \
             from mm_metadata_game_software_info \
             where gi_game_info_name = $1 and gi_game_info_system_id IS NULL",
         )
         .bind(game_name)
         .bind(offset)
-        .bind(limit);
-    }
-    let table_rows: Vec<DBMetaGameNameMatchList> = select_query
-        .map(|row: PgRow| DBMetaGameNameMatchList {
-            gi_id: row.get("gi_id"),
-            gi_game_info_json: row.get("gi_game_info_json"),
-        })
+        .bind(limit)
         .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
+        .await
+    }
 }
 
 pub async fn mk_lib_database_metadata_game_insert(

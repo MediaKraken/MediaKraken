@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaBookList {
@@ -15,9 +15,8 @@ pub async fn mk_lib_database_media_book_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMediaBookList>, sqlx::Error> {
-    let select_query;
     if !search_value.is_empty() {
-        select_query = sqlx::query(
+        sqlx::query_as(
             r#"select mm_metadata_book_guid, mm_metadata_book_name
             from mm_metadata_book, mm_media
             where mm_media_metadata_guid = mm_metadata_book_guid
@@ -27,9 +26,11 @@ pub async fn mk_lib_database_media_book_read(
         )
         .bind(search_value)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
     } else {
-        select_query = sqlx::query(
+        sqlx::query_as(
             r#"select mm_metadata_book_guid, mm_metadata_book_name
             from mm_metadata_book, mm_media
             where mm_media_metadata_guid = mm_metadata_book_guid
@@ -37,17 +38,10 @@ pub async fn mk_lib_database_media_book_read(
             offset $1 limit $2"#,
         )
         .bind(offset)
-        .bind(limit);
-    }
-    let table_rows: Vec<DBMediaBookList> = select_query
-        .map(|row: PgRow| DBMediaBookList {
-            mm_metadata_book_guid: row.get("mm_metadata_book_guid"),
-            mm_metadata_book_name: row.get("mm_metadata_book_name"),
-            mm_metadata_book_cover: row.get("mm_metadata_book_cover"),
-        })
+        .bind(limit)
         .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
+        .await
+    }
 }
 
 pub async fn mk_lib_database_media_book_count(

@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
+use sqlx::FromRow;
 use sqlx::types::Uuid;
-use sqlx::{FromRow, Row};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBDownloadQueueByProviderList {
@@ -17,7 +16,7 @@ pub async fn mk_lib_database_download_queue_by_provider(
     sqlx_pool: &sqlx::PgPool,
     provider_name: &str,
 ) -> Result<Vec<DBDownloadQueueByProviderList>, sqlx::Error> {
-    let select_query = sqlx::query(
+    let table_rows: Vec<DBDownloadQueueByProviderList> = sqlx::query_as(
         "select mm_download_guid, \
         mm_download_que_type, \
         mm_download_new_uuid, \
@@ -28,18 +27,9 @@ pub async fn mk_lib_database_download_queue_by_provider(
         where mm_download_provider = $1 \
         order by mm_download_que_type limit 50",
     )
-    .bind(provider_name);
-    let table_rows: Vec<DBDownloadQueueByProviderList> = select_query
-        .map(|row: PgRow| DBDownloadQueueByProviderList {
-            mm_download_guid: row.get("mm_download_guid"),
-            mm_download_que_type: row.get("mm_download_que_type"),
-            mm_download_new_uuid: row.get("mm_download_new_uuid"),
-            mm_download_provider_id: row.get("mm_download_provider_id"),
-            mm_download_status: row.get("mm_download_status"),
-            mm_download_path: row.get("mm_download_path"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    .bind(provider_name)
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 

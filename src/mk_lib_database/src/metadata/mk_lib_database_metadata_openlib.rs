@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_metadata_openlib_author_detail(
     sqlx_pool: &sqlx::PgPool,
@@ -57,33 +57,28 @@ pub async fn mk_lib_database_metadata_openlib_work_read(
     limit: i64,
 ) -> Result<Vec<DBMetaOpenLibWorkList>, sqlx::Error> {
     // TODO sort by release date
-    let select_query;
     if !search_value.is_empty() {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_openlib_work_id, mm_openlib_work_json \
             from mm_openlib_work where mm_metadata_book_name % $1 \
             order by mm_openlib_work_json offset $2 limit $3",
         )
         .bind(search_value)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
     } else {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_openlib_work_id, mm_openlib_work_json \
             from mm_openlib_work order by mm_openlib_work_json \
             offset $1 limit $2",
         )
         .bind(offset)
-        .bind(limit);
-    }
-    let table_rows: Vec<DBMetaOpenLibWorkList> = select_query
-        .map(|row: PgRow| DBMetaOpenLibWorkList {
-            mm_openlib_work_id: row.get("mm_openlib_work_id"),
-            mm_openlib_work_name: row.get("mm_openlib_work_json"),
-        })
+        .bind(limit)
         .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
+        .await
+    }
 }
 
 pub async fn mk_lib_database_metadata_openlib_work_count(

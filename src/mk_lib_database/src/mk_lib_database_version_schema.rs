@@ -1,6 +1,6 @@
 use crate::mk_lib_database_option_status;
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
 pub async fn mk_lib_database_update_schema(
     sqlx_pool: &sqlx::PgPool,
@@ -908,7 +908,7 @@ pub async fn mk_lib_database_update_schema(
                 RETURN NEW;
             END;
             $$ LANGUAGE plpgsql;
-            "#
+            "#,
         )
         .execute(&mut *transaction)
         .await?;
@@ -922,7 +922,7 @@ pub async fn mk_lib_database_update_schema(
             WHEN (OLD.mm_metadata_movie_localimage_json IS DISTINCT FROM 
                 NEW.mm_metadata_movie_localimage_json)
             EXECUTE FUNCTION touch_photo_updated();
-            "#
+            "#,
         )
         .execute(&mut *transaction)
         .await?;

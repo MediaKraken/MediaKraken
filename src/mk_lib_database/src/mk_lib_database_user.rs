@@ -1,11 +1,10 @@
 use async_trait::async_trait;
-use axum_session_auth::*;
 use axum_session_auth::Authentication;
+use axum_session_auth::*;
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgPool;
-use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 use std::collections::HashSet;
 
 /*
@@ -80,11 +79,13 @@ impl HasPermission<PgPool> for User {
 
 impl User {
     pub async fn get_user(id: i64, pool: &PgPool) -> Option<Self> {
-        let sqluser = sqlx::query_as::<_, SqlUser>("SELECT id, anonymous, username FROM mm_axum_users WHERE id = $1")
-            .bind(id)
-            .fetch_one(pool)
-            .await
-            .ok()?;
+        let sqluser = sqlx::query_as::<_, SqlUser>(
+            "SELECT id, anonymous, username FROM mm_axum_users WHERE id = $1",
+        )
+        .bind(id)
+        .fetch_one(pool)
+        .await
+        .ok()?;
         // lets just get all the tokens the user can use, we will only use the full permissions if modifing them.
         let sql_user_perms = sqlx::query_as::<_, SqlPermissionTokens>(
             "SELECT token FROM mm_axum_user_permissions WHERE user_id = $1",
@@ -157,23 +158,14 @@ pub async fn mk_lib_database_user_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBUserList>, sqlx::Error> {
-    let select_query = sqlx::query(
+    let table_rows: Vec<DBUserList> = sqlx::query_as(
         "select id, anonymous, username, email, last_signin, last_signoff \
         from mm_axum_users order by LOWER(username) offset $1 limit $2",
     )
     .bind(offset)
-    .bind(limit);
-    let table_rows: Vec<DBUserList> = select_query
-        .map(|row: PgRow| DBUserList {
-            id: row.get("id"),
-            anonymous: row.get("anonymous"),
-            username: row.get("username"),
-            email: row.get("email"),
-            last_signin: row.get("last_signin"),
-            last_signoff: row.get("last_signoff"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    .bind(limit)
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 

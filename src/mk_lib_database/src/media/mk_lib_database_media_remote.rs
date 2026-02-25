@@ -1,4 +1,3 @@
-
 pub async fn mk_lib_database_remote_media_count(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<i64, sqlx::Error> {

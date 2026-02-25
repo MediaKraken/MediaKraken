@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 use sqlx::types::Uuid;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
@@ -17,9 +17,8 @@ pub async fn mk_lib_database_metadata_music_video_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMetaMusicVideoList>, sqlx::Error> {
-    let select_query;
     if !search_value.is_empty() {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_metadata_music_video_guid, \
             mm_metadata_music_video_band, \
             mm_metadata_music_video_song, mm_metadata_music_video_localimage_json \
@@ -28,9 +27,11 @@ pub async fn mk_lib_database_metadata_music_video_read(
         )
         .bind(search_value)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
     } else {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_metadata_music_video_guid, \
             mm_metadata_music_video_band, \
             mm_metadata_music_video_song, mm_metadata_music_video_localimage_json \
@@ -38,19 +39,10 @@ pub async fn mk_lib_database_metadata_music_video_read(
             LOWER(mm_metadata_music_video_song) offset $1 limit $2",
         )
         .bind(offset)
-        .bind(limit);
-    }
-    let table_rows: Vec<DBMetaMusicVideoList> = select_query
-        .map(|row: PgRow| DBMetaMusicVideoList {
-            mm_metadata_music_video_guid: row.get("mm_metadata_music_video_guid"),
-            mm_metadata_music_video_band: row.get("mm_metadata_music_video_band"),
-            mm_metadata_music_video_song: row.get("mm_metadata_music_video_song"),
-            mm_metadata_music_video_localimage_json: row
-                .get("mm_metadata_music_video_localimage_json"),
-        })
+        .bind(limit)
         .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
+        .await
+    }
 }
 
 pub async fn mk_lib_database_metadata_music_video_lookup(
