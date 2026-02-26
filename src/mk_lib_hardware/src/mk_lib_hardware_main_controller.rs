@@ -1,21 +1,4 @@
-use crate::mk_lib_hardware_alexa;
-use crate::mk_lib_hardware_ampro;
-use crate::mk_lib_hardware_appletv;
-use crate::mk_lib_hardware_chromecast;
-use crate::mk_lib_hardware_crestron;
-use crate::mk_lib_hardware_firetv;
-use crate::mk_lib_hardware_hdhomerun;
-use crate::mk_lib_hardware_lg;
-use crate::mk_lib_hardware_marantz;
-use crate::mk_lib_hardware_onkyo;
-use crate::mk_lib_hardware_phue;
-use crate::mk_lib_hardware_pioneer;
-use crate::mk_lib_hardware_roku;
-use crate::mk_lib_hardware_samsung;
-use crate::mk_lib_hardware_tivo;
-use crate::mk_lib_hardware_yamaha;
 use serde::{Deserialize, Serialize};
-use serde_json;
 use serde_json::json;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -26,8 +9,12 @@ pub struct DeviceJson {
 }
 //let mut device_json_array: Vec<DeviceJson> = Vec::new();
 
-pub async fn mk_hardware_main_command(machine_brand: String, machine_type: String, 
-    machine_model: String, command_type: String, command_value: String
+pub async fn mk_hardware_main_command(
+    _machine_brand: String,
+    _machine_type: String,
+    _machine_model: String,
+    _command_type: String,
+    _command_value: String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     // TODO pull from the web api?
     // TODO loop through the json files and find brand, type, model
