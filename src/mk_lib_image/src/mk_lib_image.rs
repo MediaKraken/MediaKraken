@@ -3,21 +3,16 @@ pub async fn mk_image_file_resize(
     image_save_path: &str,
     width: u32,
     height: u32,
-) {
+) -> Result<(), Box<dyn std::error::Error>> {
     if width == 0 || height == 0 {
-        return;
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "width and height must be greater than zero",
+        )
+        .into());
     }
 
-    let image_data = match image::open(base_image_path) {
-        Ok(data) => data,
-        Err(err) => {
-            eprintln!(
-                "mk_image_file_resize: failed to open image '{}': {}",
-                base_image_path, err
-            );
-            return;
-        }
-    };
+    let image_data = image::open(base_image_path)?;
 
     let resized_image = if image_data.width() == width && image_data.height() == height {
         image_data
@@ -25,10 +20,7 @@ pub async fn mk_image_file_resize(
         image_data.resize(width, height, image::imageops::FilterType::Nearest)
     };
 
-    if let Err(err) = resized_image.save_with_format(image_save_path, image::ImageFormat::Png) {
-        eprintln!(
-            "mk_image_file_resize: failed to save image '{}': {}",
-            image_save_path, err
-        );
-    }
+    resized_image.save_with_format(image_save_path, image::ImageFormat::Png)?;
+
+    Ok(())
 }
