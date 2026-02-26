@@ -4,7 +4,7 @@ use mk_lib_rabbitmq;
 use std::error::Error;
 use tokio::time::{Duration, MissedTickBehavior, interval};
 
-fn cron_schedule_to_duration(schedule_type: &str, schedule_time: i32) -> chrono::Duration {
+fn cron_schedule_to_duration(schedule_type: &str, schedule_time: i16) -> chrono::Duration {
     match schedule_type {
         "Week(s)" => chrono::Duration::weeks(schedule_time.into()),
         "Day(s)" => chrono::Duration::days(schedule_time.into()),
