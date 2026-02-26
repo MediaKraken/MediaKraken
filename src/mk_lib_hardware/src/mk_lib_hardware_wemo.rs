@@ -1,8 +1,8 @@
 // https://github.com/Hyperchaotic/weectrl
 
+use futures::prelude::*;
 use std::time::Duration;
 use weectrl::{DiscoveryMode, WeeController};
-use futures::prelude::*;
 
 pub async fn mk_lib_hardware_wemo_discover() {
     let controller = WeeController::new();
@@ -11,7 +11,7 @@ pub async fn mk_lib_hardware_wemo_discover() {
         DiscoveryMode::CacheAndBroadcast,
         true,
         Duration::from_secs(5),
-    );    
+    );
     while let Some(d) = discovery_future.next().await {
         println!(
             " Found device {}, ID: {}, state: {:?}.",
@@ -23,10 +23,12 @@ pub async fn mk_lib_hardware_wemo_discover() {
             true,
             Duration::from_secs(5),
         );
-        println!(
-            " - Subscribed {} - {:?} seconds to resubscribe.\n",
-            d.friendly_name,
-            res.unwrap()
-        );
+        match res {
+            Ok(subscribe_seconds) => println!(
+                " - Subscribed {} - {:?} seconds to resubscribe.\n",
+                d.friendly_name, subscribe_seconds
+            ),
+            Err(error) => eprintln!(" - Failed to subscribe {} - {error}", d.friendly_name),
+        }
     }
 }

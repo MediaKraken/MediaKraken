@@ -3,8 +3,9 @@
 use smartcast::Device;
 
 pub async fn mk_hardware_vizio_discover() -> Result<(), smartcast::Error> {
-    let ssdp_devices = smartcast::discover_devices().await?;
-    let dev_by_ssdp = ssdp_devices[0].clone();
+    let Some(dev_by_ssdp) = smartcast::discover_devices().await?.into_iter().next() else {
+        return Ok(());
+    };
     let ip_addr = dev_by_ssdp.ip();
     let uuid = dev_by_ssdp.uuid();
     let _dev_by_ip = Device::from_ip(ip_addr).await?;
