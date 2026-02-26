@@ -4,10 +4,31 @@ pub async fn mk_image_file_resize(
     width: u32,
     height: u32,
 ) {
-    let tiny = image::open(base_image_path).unwrap();
-    let scaled = tiny.resize(width, height, image::imageops::FilterType::Nearest);
-    let mut output = std::fs::File::create(image_save_path).unwrap();
-    scaled
-        .write_to(&mut output, image::ImageFormat::Png)
-        .unwrap();
+    if width == 0 || height == 0 {
+        return;
+    }
+
+    let image_data = match image::open(base_image_path) {
+        Ok(data) => data,
+        Err(err) => {
+            eprintln!(
+                "mk_image_file_resize: failed to open image '{}': {}",
+                base_image_path, err
+            );
+            return;
+        }
+    };
+
+    let resized_image = if image_data.width() == width && image_data.height() == height {
+        image_data
+    } else {
+        image_data.resize(width, height, image::imageops::FilterType::Nearest)
+    };
+
+    if let Err(err) = resized_image.save_with_format(image_save_path, image::ImageFormat::Png) {
+        eprintln!(
+            "mk_image_file_resize: failed to save image '{}': {}",
+            image_save_path, err
+        );
+    }
 }
