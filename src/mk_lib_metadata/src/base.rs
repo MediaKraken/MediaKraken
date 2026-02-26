@@ -53,35 +53,31 @@ pub async fn metadata_process(
     provider_api_key: &str,
 ) -> Result<(), Box<dyn Error>> {
     // TODO art, posters, trailers, etc in here as well
-    if download_data.mm_download_status == "Search" {
-        metadata_search(&sqlx_pool, provider_name, download_data, provider_api_key)
-            .await
-            .unwrap();
-    } else if download_data.mm_download_status == "Update" {
-        metadata_update(&sqlx_pool, provider_name, download_data, provider_api_key)
-            .await
-            .unwrap();
-    } else if download_data.mm_download_status == "Fetch" {
-        metadata_fetch(&sqlx_pool, provider_name, download_data, provider_api_key)
-            .await
-            .unwrap();
-    } else if download_data.mm_download_status == "FetchCastCrew" {
-        metadata_castcrew(&sqlx_pool, provider_name, download_data, provider_api_key)
-            .await
-            .unwrap();
-    } else if download_data.mm_download_status == "FetchReview" {
-        metadata_review(&sqlx_pool, provider_name, download_data, provider_api_key)
-            .await
-            .unwrap();
-    } else if download_data.mm_download_status == "FetchImage" {
-        metadata_image(&sqlx_pool, provider_name, download_data, provider_api_key)
-            .await
-            .unwrap();
-    } else if download_data.mm_download_status == "FetchCollection" {
-        metadata_collection(&sqlx_pool, provider_name, download_data, provider_api_key)
-            .await
-            .unwrap();
+    match download_data.mm_download_status.as_str() {
+        "Search" => {
+            metadata_search(sqlx_pool, provider_name, download_data, provider_api_key).await?
+        }
+        "Update" => {
+            metadata_update(sqlx_pool, provider_name, download_data, provider_api_key).await?
+        }
+        "Fetch" => {
+            metadata_fetch(sqlx_pool, provider_name, download_data, provider_api_key).await?
+        }
+        "FetchCastCrew" => {
+            metadata_castcrew(sqlx_pool, provider_name, download_data, provider_api_key).await?
+        }
+        "FetchReview" => {
+            metadata_review(sqlx_pool, provider_name, download_data, provider_api_key).await?
+        }
+        "FetchImage" => {
+            metadata_image(sqlx_pool, provider_name, download_data, provider_api_key).await?
+        }
+        "FetchCollection" => {
+            metadata_collection(sqlx_pool, provider_name, download_data, provider_api_key).await?
+        }
+        _ => {}
     }
+
     Ok(())
 }
 
