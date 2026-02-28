@@ -8,7 +8,6 @@ use clap::Parser;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{FromSample, Sample};
 use std::error::Error;
-use std::path::Path;
 use std::process::{Command, Stdio};
 
 #[derive(Debug, Clone, Copy)]
@@ -42,7 +41,6 @@ pub mod record {
                 ));
             }
 
-            cpal::default_host();
             let host = cpal::default_host();
 
             // Set up the input device and stream with the default input config.
@@ -99,7 +97,7 @@ pub mod record {
                 }
             };
             // ========================
-            stream.play().unwrap();
+            stream.play()?;
             self.utils = Some((writer, stream));
             Ok(())
         }
@@ -107,8 +105,10 @@ pub mod record {
         pub fn stop_recording(&mut self) -> Result<(), anyhow::Error> {
             match self.utils.take() {
                 Some((writer, stream)) => {
-                    stream.pause().unwrap();
-                    writer.lock().unwrap().take().unwrap().finalize().unwrap();
+                    stream.pause()?;
+                    if let Some(writer) = writer.lock().ok().and_then(|mut lock| lock.take()) {
+                        writer.finalize()?;
+                    }
                     Ok(())
                 }
                 None => {
@@ -214,15 +214,21 @@ fn main() -> Result<(), Box<dyn Error>> {
             match msg {
                 Message::Start => {
                     println!("Start");
-                    recorder.start_recording().unwrap();
+                    if let Err(err) = recorder.start_recording() {
+                        eprintln!("failed to start recording: {err}");
+                    }
                 }
                 Message::Stop => {
                     println!("Stop");
-                    recorder.stop_recording();
+                    if let Err(err) = recorder.stop_recording() {
+                        eprintln!("failed to stop recording: {err}");
+                    }
                 }
                 Message::Recognise => {
                     println!("Recognise");
-                    recorder.stop_recording();
+                    if let Err(err) = recorder.stop_recording() {
+                        eprintln!("failed to stop recording before recognition: {err}");
+                    }
                     // convert wav to proper format via ffmpeg
                     let output = Command::new("ffmpeg")
                         .args([
@@ -236,34 +242,48 @@ fn main() -> Result<(), Box<dyn Error>> {
                             "voice_file_mono.wav",
                         ])
                         .stdout(Stdio::piped())
-                        .output()
-                        .unwrap();
-                    let stdout: String = String::from_utf8(output.stdout).unwrap();
+                        .output()?;
+                    let stdout: String = String::from_utf8(output.stdout)?;
                     println!("{}", stdout);
                     // speech rec via vosk
                     let output = Command::new("python3")
                         .args(["send_wav_to_websocket.py"])
                         .stdout(Stdio::piped())
-                        .output()
-                        .unwrap();
-                    let stdout = String::from_utf8(output.stdout).unwrap();
+                        .output()?;
+                    let stdout = String::from_utf8(output.stdout)?;
                     let mut search_str = String::new();
-                    for line_item in stdout.as_str().lines() {
-                        if line_item.contains("\"text\" :") {
-                            search_str.push_str(
-                                line_item.replace("\"text\" :", "").replace("\"", "").trim(),
-                            );
-                            search_str.push_str(" ");
+                    for line_item in stdout.lines() {
+                        let line_item = line_item.trim();
+                        let text = serde_json::from_str::<serde_json::Value>(line_item)
+                            .ok()
+                            .and_then(|value| {
+                                value
+                                    .get("text")
+                                    .and_then(serde_json::Value::as_str)
+                                    .map(str::to_owned)
+                            })
+                            .or_else(|| {
+                                line_item
+                                    .strip_prefix("\"text\" :")
+                                    .map(|value| value.trim().trim_matches('"').to_owned())
+                            });
+
+                        if let Some(text) = text.filter(|text| !text.is_empty()) {
+                            if !search_str.is_empty() {
+                                search_str.push(' ');
+                            }
+                            search_str.push_str(text.as_str());
                         }
                     }
                     // push output to page
-                    wv.navigate(
-                        format!(
-                            "https://mkprod:8900/api/titlesearch/{}",
-                            search_str.trim().replace(" ", "%20").as_str()
-                        )
-                        .as_str(),
-                    );
+                    let search_query = search_str.trim().replace(' ', "%20");
+                    if !search_query.is_empty() {
+                        wv.navigate(
+                            format!("https://mkprod:8900/api/titlesearch/{search_query}").as_str(),
+                        );
+                    } else {
+                        eprintln!("no recognized text found in websocket output");
+                    }
                 }
             }
         }
