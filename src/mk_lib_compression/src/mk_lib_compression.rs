@@ -1,8 +1,9 @@
+use std::io;
+use std::io::BufWriter;
 use std::io::Read;
+use std::io::prelude::*;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
-use std::io::prelude::*;
-use std::io;
 
 pub async fn mk_decompress_tar_gz_file(archive_file: &str) -> Result<(), std::io::Error> {
     let tar_gz = std::fs::File::open(archive_file)?;
@@ -13,11 +14,16 @@ pub async fn mk_decompress_tar_gz_file(archive_file: &str) -> Result<(), std::io
 }
 
 pub async fn mk_decompress_tar_gz_file_gunzip(archive_file: &str) -> Result<(), std::io::Error> {
-    let _output = Command::new("gunzip")
+    let status = Command::new("gunzip")
         .args([&archive_file])
-        .stdout(Stdio::piped())
-        .output()
-        .unwrap();
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()?;
+    if !status.success() {
+        return Err(io::Error::other(format!(
+            "gunzip exited with status: {status}"
+        )));
+    }
     Ok(())
 }
 
@@ -30,10 +36,14 @@ pub async fn mk_decompress_gz_file(archive_file: &str) -> Result<String, std::io
 }
 
 pub async fn mk_decompress_gz_bytes(bytes: Vec<u8>) -> io::Result<String> {
-   let mut gz = flate2::read::GzDecoder::new(&bytes[..]);
-   let mut s = String::new();
-   gz.read_to_string(&mut s)?;
-   Ok(s)
+    mk_decompress_gz_slice(&bytes)
+}
+
+pub fn mk_decompress_gz_slice(bytes: &[u8]) -> io::Result<String> {
+    let mut gz = flate2::read::GzDecoder::new(bytes);
+    let mut s = String::new();
+    gz.read_to_string(&mut s)?;
+    Ok(s)
 }
 
 /*
@@ -49,10 +59,10 @@ pub async fn mk_decompress_zip(
     output_path: &str,
 ) -> Result<(), std::io::Error> {
     let fname = std::path::Path::new(archive_file);
-    let file = std::fs::File::open(&fname).unwrap();
-    let mut archive = zip::ZipArchive::new(file).unwrap();
+    let file = std::fs::File::open(fname)?;
+    let mut archive = zip::ZipArchive::new(file)?;
     for i in 0..archive.len() {
-        let mut file = archive.by_index(i).unwrap();
+        let mut file = archive.by_index(i)?;
         let mut outpath = match file.enclosed_name() {
             Some(path) => path.to_owned(),
             None => continue,
@@ -82,7 +92,7 @@ pub async fn mk_decompress_zip(
             //     .await
             //     .unwrap();
             // }
-            std::fs::create_dir_all(&outpath).unwrap();
+            std::fs::create_dir_all(&outpath)?;
         } else {
             // #[cfg(debug_assertions)]
             // {
@@ -94,23 +104,25 @@ pub async fn mk_decompress_zip(
             // }
             if let Some(p) = outpath.parent() {
                 if !p.exists() {
-                    std::fs::create_dir_all(&p).unwrap();
+                    std::fs::create_dir_all(p)?;
                 }
             }
-            let mut outfile = std::fs::File::create(&outpath).unwrap();
-            std::io::copy(&mut file, &mut outfile).unwrap();
+            let outfile = std::fs::File::create(&outpath)?;
+            let mut writer = BufWriter::new(outfile);
+            std::io::copy(&mut file, &mut writer)?;
+            writer.flush()?;
         }
         // Get and Set permissions
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
             if let Some(mode) = file.unix_mode() {
-                std::fs::set_permissions(&outpath, std::fs::Permissions::from_mode(mode)).unwrap();
+                std::fs::set_permissions(&outpath, std::fs::Permissions::from_mode(mode))?;
             }
         }
     }
     if remove_zip {
-        std::fs::remove_file(archive_file).unwrap();
+        std::fs::remove_file(archive_file)?;
     }
     Ok(())
 }
