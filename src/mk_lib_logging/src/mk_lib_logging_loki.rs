@@ -1,13 +1,18 @@
 use chrono::prelude::*;
 use reqwest::Client;
-use reqwest_middleware::ClientBuilder;
-use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
+use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
+use reqwest_retry::{RetryTransientMiddleware, policies::ExponentialBackoff};
 use serde::Deserialize;
 use serde_json::json;
 use std::collections::HashMap;
 use std::env;
-use std::path::Path;
+use std::sync::OnceLock;
 use tokio::time::Duration;
+
+const LOKI_PUSH_URL: &str =
+    "http://loki-headless.monitoring.svc.mkcluster.local:3100/loki/api/v1/push";
+const LOKI_QUERY_URL: &str =
+    "http://loki-headless.monitoring.svc.mkcluster.local:3100/loki/api/v1/query_range";
 
 #[derive(Debug, Deserialize)]
 struct LokiResponse {
@@ -30,6 +35,21 @@ pub struct LokiLog {
     pub timestamp_ns: i128,
     pub labels: String,
     pub line: String,
+}
+
+fn retrying_client() -> &'static ClientWithMiddleware {
+    static CLIENT: OnceLock<ClientWithMiddleware> = OnceLock::new();
+    CLIENT.get_or_init(|| {
+        let retry_policy = ExponentialBackoff::builder().build_with_max_retries(100);
+        ClientBuilder::new(reqwest::Client::new())
+            .with(RetryTransientMiddleware::new_with_policy(retry_policy))
+            .build()
+    })
+}
+
+fn query_client() -> &'static Client {
+    static CLIENT: OnceLock<Client> = OnceLock::new();
+    CLIENT.get_or_init(Client::new)
 }
 
 pub async fn mk_logging_loki_push(
@@ -55,17 +75,16 @@ pub async fn mk_logging_loki_push(
             }
         ]
     });
-    let retry_policy = ExponentialBackoff::builder().build_with_max_retries(100);
-    let client = ClientBuilder::new(reqwest::Client::new())
-        .with(RetryTransientMiddleware::new_with_policy(retry_policy))
-        .build();
-    let response = client
-        .post("http://loki-headless.monitoring.svc.mkcluster.local:3100/loki/api/v1/push")
+
+    retrying_client()
+        .post(LOKI_PUSH_URL)
         .timeout(Duration::from_secs(30))
         .header("Content-Type", "application/json")
         .json(&payload)
         .send()
-        .await?;
+        .await?
+        .error_for_status()?;
+
     Ok(())
 }
 
@@ -86,16 +105,33 @@ fn stream_to_logql(labels: &HashMap<String, String>) -> String {
 pub async fn mk_logging_loki_read(
     message_type: &str,
 ) -> Result<Vec<LokiLog>, Box<dyn std::error::Error>> {
-    let client = Client::new();
-    let query = r#"{mediakraken=~"mk*"}"#;
-    let resp: LokiResponse = client
-        .get("http://loki-headless.monitoring.svc.mkcluster.local:3100/loki/api/v1/query_range")
-        .query(&[("query", query), ("limit", "100"), ("direction", "backward")])
+    let query = if message_type.is_empty() {
+        r#"{mediakraken=~"mk*"}"#.to_string()
+    } else {
+        format!(r#"{{mediakraken=~"mk*"}} |= "{message_type}""#)
+    };
+
+    let resp: LokiResponse = query_client()
+        .get(LOKI_QUERY_URL)
+        .query(&[
+            ("query", query.as_str()),
+            ("limit", "100"),
+            ("direction", "backward"),
+        ])
         .send()
         .await?
+        .error_for_status()?
         .json()
         .await?;
-    let mut logs = Vec::new();
+
+    let capacity = resp
+        .data
+        .result
+        .iter()
+        .map(|stream| stream.values.len())
+        .sum::<usize>();
+    let mut logs = Vec::with_capacity(capacity);
+
     for stream in resp.data.result {
         let stream_str = stream_to_logql(&stream.stream);
         for [ts, line] in stream.values {
