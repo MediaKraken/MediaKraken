@@ -253,18 +253,37 @@ fn main() -> Result<(), Box<dyn Error>> {
                     let stdout = String::from_utf8(output.stdout)?;
                     let mut search_str = String::new();
                     for line_item in stdout.lines() {
-                        if let Some(text) = line_item.trim().strip_prefix("\"text\" :") {
+                        let line_item = line_item.trim();
+                        let text = serde_json::from_str::<serde_json::Value>(line_item)
+                            .ok()
+                            .and_then(|value| {
+                                value
+                                    .get("text")
+                                    .and_then(serde_json::Value::as_str)
+                                    .map(str::to_owned)
+                            })
+                            .or_else(|| {
+                                line_item
+                                    .strip_prefix("\"text\" :")
+                                    .map(|value| value.trim().trim_matches('"').to_owned())
+                            });
+
+                        if let Some(text) = text.filter(|text| !text.is_empty()) {
                             if !search_str.is_empty() {
                                 search_str.push(' ');
                             }
-                            search_str.push_str(text.trim().trim_matches('"'));
+                            search_str.push_str(text.as_str());
                         }
                     }
                     // push output to page
                     let search_query = search_str.trim().replace(' ', "%20");
-                    wv.navigate(
-                        format!("https://mkprod:8900/api/titlesearch/{search_query}").as_str(),
-                    );
+                    if !search_query.is_empty() {
+                        wv.navigate(
+                            format!("https://mkprod:8900/api/titlesearch/{search_query}").as_str(),
+                        );
+                    } else {
+                        eprintln!("no recognized text found in websocket output");
+                    }
                 }
             }
         }
