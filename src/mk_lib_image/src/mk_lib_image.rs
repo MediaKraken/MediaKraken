@@ -3,11 +3,24 @@ pub async fn mk_image_file_resize(
     image_save_path: &str,
     width: u32,
     height: u32,
-) {
-    let tiny = image::open(base_image_path).unwrap();
-    let scaled = tiny.resize(width, height, image::imageops::FilterType::Nearest);
-    let mut output = std::fs::File::create(image_save_path).unwrap();
-    scaled
-        .write_to(&mut output, image::ImageFormat::Png)
-        .unwrap();
+) -> Result<(), Box<dyn std::error::Error>> {
+    if width == 0 || height == 0 {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "width and height must be greater than zero",
+        )
+        .into());
+    }
+
+    let image_data = image::open(base_image_path)?;
+
+    let resized_image = if image_data.width() == width && image_data.height() == height {
+        image_data
+    } else {
+        image_data.resize(width, height, image::imageops::FilterType::Nearest)
+    };
+
+    resized_image.save_with_format(image_save_path, image::ImageFormat::Png)?;
+
+    Ok(())
 }
