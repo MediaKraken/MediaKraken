@@ -3,7 +3,8 @@ use fltk::{enums::Color, *};
 use mk_lib_network;
 
 fn main() {
-    let _server_list = mk_lib_network::mk_lib_network_mediakraken::mk_lib_network_find_mediakraken_server();
+    let _server_list =
+        mk_lib_network::mk_lib_network_mediakraken::mk_lib_network_find_mediakraken_server();
     let app = app::App::default().with_scheme(app::AppScheme::Gtk);
     let mut win = window::Window::new(100, 100, 800, 600, "Media Player");
 
@@ -17,10 +18,15 @@ fn main() {
     win.make_resizable(true);
 
     let handle = mpv_win.raw_handle();
-    std::process::Command::new("mpv")
-        .args(&[&format!("--wid={}", handle as u64), "../libvlc/video.mp4"])
+    if let Err(error) = std::process::Command::new("mpv")
+        .arg(format!("--wid={}", handle as u64))
+        .arg("../libvlc/video.mp4")
         .spawn()
-        .unwrap();
+    {
+        eprintln!("Failed to launch mpv: {error}");
+    }
 
-    app.run().unwrap();
+    if let Err(error) = app.run() {
+        eprintln!("Application exited with error: {error}");
+    }
 }
