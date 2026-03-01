@@ -173,7 +173,7 @@ pub async fn mk_network_service_available(host_dns: &str, host_port: &str, wait_
     } else if std::path::Path::new("/mediakraken/wait-for-it-ash.sh").exists() {
         command_string = "/mediakraken/wait-for-it-ash.sh";
     }
-    std::process::Command::new(command_string)
+    if let Err(error) = std::process::Command::new(command_string)
         .arg("-h")
         .arg(host_dns)
         .arg("-p")
@@ -181,7 +181,9 @@ pub async fn mk_network_service_available(host_dns: &str, host_port: &str, wait_
         .arg("-t")
         .arg(wait_seconds)
         .spawn()
-        .ok();
+    {
+        panic!("failed to launch wait script {command_string}: {error}");
+    }
 }
 
 // cargo test -- --show-output
