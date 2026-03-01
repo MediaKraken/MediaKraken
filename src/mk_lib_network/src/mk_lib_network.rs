@@ -1,30 +1,26 @@
+use bytes::Bytes;
+use futures_util::StreamExt;
+use reqwest::Client;
 use reqwest::header::CONTENT_TYPE;
 use reqwest::header::USER_AGENT;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
-use reqwest::Client;
+use reqwest_middleware::ClientBuilder;
 use reqwest_retry::{RetryTransientMiddleware, policies::ExponentialBackoff};
-use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
-use reqwest::{Error, Response};
 use std::collections::HashMap;
-use std::io::prelude::*;
-use std::io::Cursor;
-use std::io::Write;
-use std::path::PathBuf;
 use std::str;
-use tokio::fs::File;
-use tokio::io::{self, AsyncWriteExt};
+use std::sync::LazyLock;
+use tokio::io::AsyncWriteExt;
 use tokio::time::Duration;
-use bytes::Bytes;
-use futures_util::StreamExt;
+
+static SHARED_HTTP_CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
 
 pub async fn is_url_available(url: &str) -> bool {
-    let client = Client::new();
     // Try HEAD first (no body download)
-    if let Ok(resp) = client.head(url).send().await {
+    if let Ok(resp) = SHARED_HTTP_CLIENT.head(url).send().await {
         return resp.status().is_success();
     }
     // Fallback to GET (still async, body not read)
-    client
+    SHARED_HTTP_CLIENT
         .get(url)
         .send()
         .await
@@ -35,10 +31,12 @@ pub async fn is_url_available(url: &str) -> bool {
 pub async fn custom_headers(map: &HashMap<String, String>) -> HeaderMap {
     let mut headers = HeaderMap::new();
     for (key, value) in map.iter() {
-        headers.insert(
-            HeaderName::from_bytes(key.as_bytes()).unwrap(),
-            HeaderValue::from_bytes(value.as_bytes()).unwrap(),
-        );
+        if let (Ok(header_name), Ok(header_value)) = (
+            HeaderName::from_bytes(key.as_bytes()),
+            HeaderValue::from_bytes(value.as_bytes()),
+        ) {
+            headers.insert(header_name, header_value);
+        }
     }
     headers
 }
@@ -82,19 +80,21 @@ pub async fn mk_data_from_url_to_json(
 }
 
 pub async fn mk_data_from_url(url: String) -> Result<String, Box<dyn std::error::Error>> {
-    let response = reqwest::get(url).await?;
+    let response = SHARED_HTTP_CLIENT.get(url).send().await?;
     let content = response.bytes().await?;
-    Ok(str::from_utf8(&content).unwrap().to_string())
+    Ok(str::from_utf8(&content)?.to_string())
 }
 
-pub async fn mk_network_download_file_to_bytes(url: String) -> Result<Bytes, Box<dyn std::error::Error>> {
-    let response = reqwest::get(url).await?;
+pub async fn mk_network_download_file_to_bytes(
+    url: String,
+) -> Result<Bytes, Box<dyn std::error::Error>> {
+    let response = SHARED_HTTP_CLIENT.get(url).send().await?;
     let body_bytes = response.bytes().await?;
     Ok(body_bytes)
 }
 
 pub async fn mk_network_download_file_to_vec(url: String) -> Result<Vec<u8>, reqwest::Error> {
-    let response = reqwest::get(url).await?;
+    let response = SHARED_HTTP_CLIENT.get(url).send().await?;
     let bytes = response.bytes().await?.to_vec();
     Ok(bytes)
 }
@@ -104,10 +104,10 @@ pub async fn mk_download_file_from_url(
     file_name: &String,
 ) -> Result<(), Box<dyn std::error::Error>> {
     println!("url: {}", url);
-    let response = reqwest::get(url).await?;
-    let mut file = std::fs::File::create(file_name)?;
-    let mut content = Cursor::new(response.bytes().await?);
-    std::io::copy(&mut content, &mut file)?;
+    let response = SHARED_HTTP_CLIENT.get(url).send().await?;
+    let mut file = tokio::fs::File::create(file_name).await?;
+    file.write_all(&response.bytes().await?).await?;
+    file.flush().await?;
     Ok(())
 }
 
@@ -117,16 +117,18 @@ pub async fn mk_download_file_from_url_stream(
 ) -> Result<(), Box<dyn std::error::Error>> {
     println!("Downloading from: {}", url);
 
-    let response = reqwest::get(url).await?;
-    let mut file = std::fs::File::create(file_name)?;
-    
+    let response = SHARED_HTTP_CLIENT.get(url).send().await?;
+    let mut file = tokio::fs::File::create(file_name).await?;
+
     // Get the body as a stream of chunks
     let mut byte_stream = response.bytes_stream();
 
     while let Some(chunk) = byte_stream.next().await {
         let data = chunk?;
-        file.write_all(&data)?;
+        file.write_all(&data).await?;
     }
+
+    file.flush().await?;
 
     println!("Download complete: {}", file_name);
     Ok(())
@@ -136,9 +138,7 @@ pub async fn mk_download_file_from_url_tokio(
     url: String,
     file_name: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let client = Client::builder()
-        .user_agent("MediaKraken/0.0.1")
-        .build()?;
+    let client = Client::builder().user_agent("MediaKraken/0.0.1").build()?;
 
     // 1. Handle Request Errors
     let mut res = client.get(&url).send().await.map_err(|e| {
@@ -151,7 +151,7 @@ pub async fn mk_download_file_from_url_tokio(
         // Log here: format!("File system error: {}", e)
         e
     })?;
-    
+
     let mut writer = tokio::io::BufWriter::new(file);
 
     // 3. Stream and Write
@@ -173,7 +173,7 @@ pub async fn mk_network_service_available(host_dns: &str, host_port: &str, wait_
     } else if std::path::Path::new("/mediakraken/wait-for-it-ash.sh").exists() {
         command_string = "/mediakraken/wait-for-it-ash.sh";
     }
-    std::process::Command::new(command_string)
+    if let Err(error) = std::process::Command::new(command_string)
         .arg("-h")
         .arg(host_dns)
         .arg("-p")
@@ -181,7 +181,9 @@ pub async fn mk_network_service_available(host_dns: &str, host_port: &str, wait_
         .arg("-t")
         .arg(wait_seconds)
         .spawn()
-        .unwrap();
+    {
+        panic!("failed to launch wait script {command_string}: {error}");
+    }
 }
 
 // cargo test -- --show-output
