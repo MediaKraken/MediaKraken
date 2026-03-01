@@ -1,8 +1,7 @@
 use chrono::{Duration, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
+use sqlx::FromRow;
 use sqlx::types::Uuid;
-use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_media_update_metadata_guid(
     sqlx_pool: &sqlx::PgPool,
@@ -52,21 +51,16 @@ pub async fn mk_lib_database_media_unmatched_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMediaUnmatchedList>, sqlx::Error> {
-    let select_query = sqlx::query(
+    let table_rows: Vec<DBMediaUnmatchedList> = sqlx::query_as(
         "select mm_media_guid, \
         mm_media_path from mm_media \
         where mm_media_metadata_guid is NULL \
         order by mm_media_path offset $1 limit $2",
     )
     .bind(offset)
-    .bind(limit);
-    let table_rows: Vec<DBMediaUnmatchedList> = select_query
-        .map(|row: PgRow| DBMediaUnmatchedList {
-            mm_media_guid: row.get("mm_media_guid"),
-            mm_media_path: row.get("mm_media_path"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    .bind(limit)
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 
@@ -101,19 +95,15 @@ pub async fn mk_lib_database_media_known(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMediaKnownList>, sqlx::Error> {
-    let select_query = sqlx::query(
+    let table_rows: Vec<DBMediaKnownList> = sqlx::query_as(
         "select mm_media_path \
         from mm_media where mm_media_guid \
         order by mm_media_path offset $1 limit $2",
     )
     .bind(offset)
-    .bind(limit);
-    let table_rows: Vec<DBMediaKnownList> = select_query
-        .map(|row: PgRow| DBMediaKnownList {
-            mm_media_path: row.get("mm_media_path"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    .bind(limit)
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 
@@ -199,7 +189,7 @@ pub async fn mk_lib_database_media_duplicate(
     limit: i64,
 ) -> Result<Vec<DBMediaDuplicateList>, sqlx::Error> {
     // TODO technically this will "dupe" things like subtitles atm
-    let select_query = sqlx::query(
+    let table_rows: Vec<DBMediaDuplicateList> = sqlx::query_as(
         "select mm_media_metadata_guid, \
         mm_media_name, count(*) as mm_count \
         from mm_media, mm_metadata_movie \
@@ -210,15 +200,9 @@ pub async fn mk_lib_database_media_duplicate(
         offset $1 limit $2",
     )
     .bind(offset)
-    .bind(limit);
-    let table_rows: Vec<DBMediaDuplicateList> = select_query
-        .map(|row: PgRow| DBMediaDuplicateList {
-            mm_media_metadata_guid: row.get("mm_media_metadata_guid"),
-            mm_media_name: row.get("mm_media_name"),
-            mm_count: row.get("mm_count"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    .bind(limit)
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 
@@ -235,7 +219,7 @@ pub async fn mk_lib_database_media_duplicate_detail(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMediaDuplicateDetailList>, sqlx::Error> {
-    let select_query = sqlx::query(
+    let table_rows: Vec<DBMediaDuplicateDetailList> = sqlx::query_as(
         "select mm_media_guid, \
         mm_media_path, mm_media_ffprobe_json \
         from mm_media where mm_media_guid \
@@ -244,15 +228,9 @@ pub async fn mk_lib_database_media_duplicate_detail(
     )
     .bind(mm_metadata_guid)
     .bind(offset)
-    .bind(limit);
-    let table_rows: Vec<DBMediaDuplicateDetailList> = select_query
-        .map(|row: PgRow| DBMediaDuplicateDetailList {
-            mm_media_guid: row.get("mm_media_guid"),
-            mm_media_path: row.get("mm_media_path"),
-            mm_media_ffprobe_json: row.get("mm_media_ffprobe_json"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    .bind(limit)
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 
@@ -315,7 +293,7 @@ pub async fn mk_lib_database_media_new(
     let date_added = (Utc::now() - Duration::days(days_old))
         .format("%Y-%m-%d")
         .to_string();
-    let select_query = sqlx::query(
+    let table_rows: Vec<DBMediaKnownList> = sqlx::query_as(
         "select mm_media_name, \
          mm_media_guid, \
          mm_media_class_guid \
@@ -327,13 +305,9 @@ pub async fn mk_lib_database_media_new(
     )
     .bind(date_added)
     .bind(offset)
-    .bind(limit);
-    let table_rows: Vec<DBMediaKnownList> = select_query
-        .map(|row: PgRow| DBMediaKnownList {
-            mm_media_path: row.get("mm_media_path"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    .bind(limit)
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 

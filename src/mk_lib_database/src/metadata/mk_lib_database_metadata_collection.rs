@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 use sqlx::types::Uuid;
 
 pub async fn mk_lib_database_metadata_collection_count(
@@ -37,9 +37,8 @@ pub async fn mk_lib_database_metadata_collection_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMetaCollectionList>, sqlx::Error> {
-    let select_query;
     if !search_value.is_empty() {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_metadata_collection_guid, \
             mm_metadata_collection_name, \
             mm_metadata_collection_imagelocal_json from mm_metadata_collection \
@@ -49,9 +48,11 @@ pub async fn mk_lib_database_metadata_collection_read(
         )
         .bind(search_value)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
     } else {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_metadata_collection_guid, \
             mm_metadata_collection_name, \
             mm_metadata_collection_imagelocal_json from mm_metadata_collection \
@@ -61,18 +62,10 @@ pub async fn mk_lib_database_metadata_collection_read(
             offset $1 limit $2)",
         )
         .bind(offset)
-        .bind(limit);
-    }
-    let table_rows: Vec<DBMetaCollectionList> = select_query
-        .map(|row: PgRow| DBMetaCollectionList {
-            mm_metadata_collection_guid: row.get("mm_metadata_collection_guid"),
-            mm_metadata_collection_name: row.get("mm_metadata_collection_name"),
-            mm_metadata_collection_imagelocal_json: row
-                .get("mm_metadata_collection_imagelocal_json"),
-        })
+        .bind(limit)
         .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
+        .await
+    }
 }
 
 pub async fn mk_lib_database_meta_collection_detail(
@@ -100,19 +93,14 @@ pub async fn mk_lib_database_meta_collection_by_name(
     sqlx_pool: &sqlx::PgPool,
     collection_name: String,
 ) -> Result<Vec<DBMetaCollectionByNameList>, sqlx::Error> {
-    let select_query = sqlx::query(
+    let table_rows: Vec<DBMetaCollectionByNameList> = sqlx::query_as(
         "select mm_metadata_guid, mm_metadata_json \
          from mm_metadata_movie where mm_metadata_json->'belongs_to_collection'::text \
          <> '{}'::text order by mm_metadata_json->'belongs_to_collection'",
     )
-    .bind(collection_name);
-    let table_rows: Vec<DBMetaCollectionByNameList> = select_query
-        .map(|row: PgRow| DBMetaCollectionByNameList {
-            mm_metadata_guid: row.get("mm_metadata_guid"),
-            mm_metadata_json: row.get("mm_metadata_json"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    .bind(collection_name)
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 

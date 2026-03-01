@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_media_music_count(
     sqlx_pool: &sqlx::PgPool,
@@ -42,9 +42,8 @@ pub async fn mk_lib_database_media_music_read(
     limit: i64,
 ) -> Result<Vec<DBMediaMusicList>, sqlx::Error> {
     // TODO only grab the image part of the json for list, might want runtime, etc as well
-    let select_query;
     if !search_value.is_empty() {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_metadata_album_guid, mm_metadata_album_name, \
             mm_metadata_album_json from mm_metadata_album, mm_media \
             where mm_media_metadata_guid = mm_metadata_album_guid \
@@ -55,9 +54,11 @@ pub async fn mk_lib_database_media_music_read(
         )
         .bind(search_value)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
     } else {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_metadata_album_guid, mm_metadata_album_name, \
             mm_metadata_album_json from mm_metadata_album, mm_media \
             where mm_media_metadata_guid = mm_metadata_album_guid \
@@ -66,15 +67,8 @@ pub async fn mk_lib_database_media_music_read(
             offset $1 limit $2",
         )
         .bind(offset)
-        .bind(limit);
-    }
-    let table_rows: Vec<DBMediaMusicList> = select_query
-        .map(|row: PgRow| DBMediaMusicList {
-            mm_metadata_album_guid: row.get("mm_metadata_album_guid"),
-            mm_metadata_album_name: row.get("mm_metadata_album_name"),
-            mm_metadata_album_json: row.get("mm_metadata_album_json"),
-        })
+        .bind(limit)
         .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
+        .await
+    }
 }

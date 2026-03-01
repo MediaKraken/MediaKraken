@@ -1,7 +1,6 @@
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
+use sqlx::FromRow;
 use sqlx::types::Uuid;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
@@ -19,26 +18,15 @@ pub struct DBCronList {
 pub async fn mk_lib_database_cron_service_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBCronList>, sqlx::Error> {
-    let select_query = sqlx::query(
+    let table_rows: Vec<DBCronList> = sqlx::query_as(
         "select mm_cron_guid, \
         mm_cron_name, mm_cron_description, mm_cron_enabled, \
         mm_cron_schedule_type, mm_cron_schedule_time, \
         mm_cron_last_run, mm_cron_json from mm_cron_jobs \
         order by mm_cron_name",
-    );
-    let table_rows: Vec<DBCronList> = select_query
-        .map(|row: PgRow| DBCronList {
-            mm_cron_guid: row.get("mm_cron_guid"),
-            mm_cron_name: row.get("mm_cron_name"),
-            mm_cron_description: row.get("mm_cron_description"),
-            mm_cron_enabled: row.get("mm_cron_enabled"),
-            mm_cron_schedule_type: row.get("mm_cron_schedule_type"),
-            mm_cron_schedule_time: row.get("mm_cron_schedule_time"),
-            mm_cron_last_run: row.get("mm_cron_last_run"),
-            mm_cron_json: row.get("mm_cron_json"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    )
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 
@@ -46,12 +34,11 @@ pub async fn mk_lib_database_cron_service_json(
     sqlx_pool: &sqlx::PgPool,
     cron_uuid: Uuid,
 ) -> Result<serde_json::Value, sqlx::Error> {
-    let row: (serde_json::Value,) = sqlx::query_as(
-        "select mm_cron_json from mm_cron_jobs where mm_cron_guid = $1",
-    )
-    .bind(cron_uuid)
-    .fetch_one(sqlx_pool)
-    .await?;
+    let row: (serde_json::Value,) =
+        sqlx::query_as("select mm_cron_json from mm_cron_jobs where mm_cron_guid = $1")
+            .bind(cron_uuid)
+            .fetch_one(sqlx_pool)
+            .await?;
     Ok(row.0)
 }
 
@@ -59,15 +46,13 @@ pub async fn mk_lib_database_cron_time_update(
     sqlx_pool: &sqlx::PgPool,
     cron_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "update mm_cron_jobs set mm_cron_last_run = NOW() \
         where mm_cron_guid = $1",
     )
     .bind(cron_uuid)
-    .execute(&mut *transaction)
+    .execute(sqlx_pool)
     .await?;
-    transaction.commit().await?;
     Ok(())
 }
 
@@ -75,12 +60,10 @@ pub async fn mk_lib_database_cron_delete(
     sqlx_pool: &sqlx::PgPool,
     cron_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from mm_cron where mm_cron_guid = $1")
         .bind(cron_uuid)
-        .execute(&mut *transaction)
+        .execute(sqlx_pool)
         .await?;
-    transaction.commit().await?;
     Ok(())
 }
 
@@ -93,7 +76,6 @@ pub async fn mk_lib_database_cron_insert(
     cron_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let new_guid = uuid::Uuid::now_v7();
-    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_cron (mm_cron_guid, mm_cron_name, mm_cron_description, \
         mm_cron_enabled, mm_cron_schedule, mm_cron_last_run, mm_cron_json) \
@@ -105,9 +87,8 @@ pub async fn mk_lib_database_cron_insert(
     .bind(cron_enabled)
     .bind(cron_schedule)
     .bind(cron_json)
-    .execute(&mut *transaction)
+    .execute(sqlx_pool)
     .await?;
-    transaction.commit().await?;
     Ok(new_guid)
 }
 

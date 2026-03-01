@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
+use sqlx::FromRow;
 use sqlx::types::Uuid;
 
 pub async fn mk_lib_database_metadata_exists_upc(

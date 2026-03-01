@@ -1,6 +1,6 @@
-use crate::mk_lib_database_version_schema;
 use crate::mk_lib_database_postgresql;
-use tokio::time::{sleep, Duration};
+use crate::mk_lib_database_version_schema;
+use tokio::time::{Duration, sleep};
 
 pub static DATABASE_VERSION: i32 = 78;
 
@@ -25,12 +25,10 @@ pub async fn mk_lib_database_version_check(
     update_schema: bool,
 ) -> Result<bool, sqlx::Error> {
     // see if db exists
-    while mk_lib_database_postgresql::mk_lib_database_table_exits(
-        &sqlx_pool,
-        "mm_version",
-    )
-    .await
-    .unwrap() == false
+    while mk_lib_database_postgresql::mk_lib_database_table_exits(&sqlx_pool, "mm_version")
+        .await
+        .unwrap()
+        == false
     {
         sleep(Duration::from_secs(5)).await;
     }

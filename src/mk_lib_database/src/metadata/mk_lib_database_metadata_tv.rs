@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
+use sqlx::FromRow;
 use sqlx::types::Uuid;
-use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_metadata_exists_tv(
     sqlx_pool: &sqlx::PgPool,
@@ -32,10 +31,9 @@ pub async fn mk_lib_database_metadata_tv_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMetaTVShowList>, sqlx::Error> {
-    let select_query;
     if !search_value.is_empty() {
         // doing union so exact matches show on top
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_metadata_tvshow_guid, \
             mm_metadata_tvshow_name, \
             mm_metadata_tvshow_name_alt, \
@@ -49,9 +47,11 @@ pub async fn mk_lib_database_metadata_tv_read(
         .bind(&search_value)
         .bind(&search_value)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
     } else {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_metadata_tvshow_guid, \
             mm_metadata_tvshow_name, \
             mm_metadata_tvshow_name_alt, \
@@ -63,19 +63,10 @@ pub async fn mk_lib_database_metadata_tv_read(
             offset $1 limit $2",
         )
         .bind(offset)
-        .bind(limit);
-    }
-    let table_rows: Vec<DBMetaTVShowList> = select_query
-        .map(|row: PgRow| DBMetaTVShowList {
-            mm_metadata_tvshow_guid: row.get("mm_metadata_tvshow_guid"),
-            mm_metadata_tvshow_name: row.get("mm_metadata_tvshow_name"),
-            mm_metadata_tvshow_name_alt: row.get("mm_metadata_tvshow_name_alt"),
-            air_date: row.get("air_date"),
-            image_json: row.get("image_json"),
-        })
+        .bind(limit)
         .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
+        .await
+    }
 }
 
 pub async fn mk_lib_database_metadata_tv_count(
@@ -132,11 +123,12 @@ pub async fn mk_lib_database_metadata_tv_insert(
     Ok(())
 }
 
-pub async fn mk_lib_database_metadata_tv_status(sqlx_pool: &sqlx::PgPool,
+pub async fn mk_lib_database_metadata_tv_status(
+    sqlx_pool: &sqlx::PgPool,
     uuid_id: Uuid,
     key: String,
     user_id: i64,
-    ) -> Result<(), sqlx::Error> {
+) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
     let row: (serde_json::Value,) = sqlx::query_as(
         "select mm_metadata_tv_user_json from mm_metadata_tv \
@@ -152,9 +144,11 @@ pub async fn mk_lib_database_metadata_tv_status(sqlx_pool: &sqlx::PgPool,
         user_json["UserStats"][&user_id] = serde_json::json!({"Rating": false, "Watched": false, "Requested": false, "Queue": false});
     }
     // TODO set the "keys"
-    sqlx::query("update mm_metadata_tv \
+    sqlx::query(
+        "update mm_metadata_tv \
                 set mm_metadata_tv_user_json = $1 \
-                where mm_metadata_tv_guid = $2")
+                where mm_metadata_tv_guid = $2",
+    )
     .bind(user_json)
     .bind(uuid_id)
     .execute(&mut *transaction)

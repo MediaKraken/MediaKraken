@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaTVShowList {
@@ -16,9 +16,8 @@ pub async fn mk_lib_database_media_tv_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMediaTVShowList>, sqlx::Error> {
-    let select_query;
     if !search_value.is_empty() {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "elect mm_metadata_tvshow_guid, \
             mm_metadata_tvshow_name, \
             count(*) as mm_count, \
@@ -32,9 +31,11 @@ pub async fn mk_lib_database_media_tv_read(
         )
         .bind(search_value)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
     } else {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_metadata_tvshow_guid, \
             mm_metadata_tvshow_name, \
             count(*) as mm_count, \
@@ -47,18 +48,10 @@ pub async fn mk_lib_database_media_tv_read(
             offset $1 limit $2",
         )
         .bind(offset)
-        .bind(limit);
-    }
-    let table_rows: Vec<DBMediaTVShowList> = select_query
-        .map(|row: PgRow| DBMediaTVShowList {
-            mm_metadata_tvshow_guid: row.get("mm_metadata_tvshow_guid"),
-            mm_metadata_tvshow_name: row.get("mm_metadata_tvshow_name"),
-            mm_count: row.get("mm_count"),
-            mm_poster: row.get("mm_poster"),
-        })
+        .bind(limit)
         .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
+        .await
+    }
 }
 
 pub async fn mk_lib_database_media_tv_count(

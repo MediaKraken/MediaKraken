@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaGameSystemList {
@@ -17,9 +17,8 @@ pub async fn mk_lib_database_media_game_system_read(
     limit: i64,
 ) -> Result<Vec<DBMediaGameSystemList>, sqlx::Error> {
     // TODO this should only return systems where there are games for it since it's "media"
-    let select_query;
     if !search_value.is_empty() {
-        select_query = sqlx::query(
+        sqlx::query_as(
             r#"select gs_game_system_id,
             gs_game_system_name,
             gs_game_system_alias,
@@ -30,9 +29,11 @@ pub async fn mk_lib_database_media_game_system_read(
         )
         .bind(search_value)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
     } else {
-        select_query = sqlx::query(
+        sqlx::query_as(
             r#"select gs_game_system_id,
             gs_game_system_name,
             gs_game_system_alias,
@@ -41,18 +42,10 @@ pub async fn mk_lib_database_media_game_system_read(
             offset $1 limit $2"#,
         )
         .bind(offset)
-        .bind(limit);
-    }
-    let table_rows: Vec<DBMediaGameSystemList> = select_query
-        .map(|row: PgRow| DBMediaGameSystemList {
-            gs_game_system_id: row.get("gs_game_system_id"),
-            gs_game_system_name: row.get("gs_game_system_name"),
-            gs_game_system_alias: row.get("gs_game_system_alias"),
-            gs_game_system_poster: row.get("gs_game_system_poster"),
-        })
+        .bind(limit)
         .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
+        .await
+    }
 }
 
 pub async fn mk_lib_database_media_game_system_count(

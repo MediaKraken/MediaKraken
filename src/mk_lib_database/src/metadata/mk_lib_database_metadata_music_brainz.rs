@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaMusicList {
@@ -38,9 +38,8 @@ pub async fn mk_lib_database_metadata_music_album_read(
 ) -> Result<Vec<DBMetaMusicList>, sqlx::Error> {
     // TODO, only grab the poster locale from json
     // TODO order by release year
-    let select_query;
     if search_value != String::new() {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select release.id as brainz_id, release.name as brainz_name, artist.name as brainz_artist \
             from release, artist \
             where artist.id = artist_credit and mm_metadata_album_name % $1 \
@@ -49,9 +48,11 @@ pub async fn mk_lib_database_metadata_music_album_read(
         )
         .bind(search_value)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+            .fetch_all(sqlx_pool)
+            .await
     } else {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select release.id as brainz_id, release.name as brainz_name, artist.name as brainz_artist \
             from release, artist \
             where artist.id = artist_credit \
@@ -59,17 +60,10 @@ pub async fn mk_lib_database_metadata_music_album_read(
             offset $1 limit $2",
         )
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+            .fetch_all(sqlx_pool)
+            .await
     }
-    let table_rows: Vec<DBMetaMusicList> = select_query
-        .map(|row: PgRow| DBMetaMusicList {
-            mm_metadata_album_id: row.get("brainz_id"),
-            mm_metadata_album_name: row.get("brainz_name"),
-            mm_metadata_album_artist: row.get("brainz_artist"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
 }
 
 /*

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
-use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_sync_delete(
     sqlx_pool: &sqlx::PgPool,
@@ -78,9 +78,8 @@ pub async fn mk_lib_database_sync_list(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBSyncList>, sqlx::Error> {
-    let select_query;
     if user_id == uuid::Uuid::nil() {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_sync_guid, mm_sync_path, \
             mm_sync_path_to, mm_sync_options_json \
             from mm_media_sync where mm_sync_guid in (select mm_sync_guid \
@@ -89,9 +88,11 @@ pub async fn mk_lib_database_sync_list(
             order by mm_sync_options_json->'Priority' desc, mm_sync_path",
         )
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
     } else {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_sync_guid, mm_sync_path, \
             mm_sync_path_to, mm_sync_options_json \
             from mm_media_sync where mm_sync_guid in (select mm_sync_guid \
@@ -102,16 +103,8 @@ pub async fn mk_lib_database_sync_list(
         )
         .bind(user_id)
         .bind(offset)
-        .bind(limit);
-    }
-    let table_rows: Vec<DBSyncList> = select_query
-        .map(|row: PgRow| DBSyncList {
-            mm_sync_guid: row.get("mm_sync_guid"),
-            mm_sync_path: row.get("mm_sync_path"),
-            mm_sync_path_to: row.get("mm_sync_path_to"),
-            mm_sync_options_json: row.get("mm_sync_options_json"),
-        })
+        .bind(limit)
         .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
+        .await
+    }
 }

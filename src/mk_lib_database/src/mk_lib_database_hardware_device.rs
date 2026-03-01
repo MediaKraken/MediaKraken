@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
+use sqlx::FromRow;
 use sqlx::types::Uuid;
-use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_hardware_manufacturer_upsert(
     sqlx_pool: &sqlx::PgPool,
@@ -117,21 +116,15 @@ pub struct DBDeviceList {
 pub async fn mk_lib_database_hardware_device_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBDeviceList>, sqlx::Error> {
-    let select_query = sqlx::query(
+    let table_rows: Vec<DBDeviceList> = sqlx::query_as(
         "select mm_hardware_manufacturer, \
             mm_hardware_model_type, \
             mm_hardware_model_name \
             from mm_hardware_model order by mm_hardware_manufacturer, \
             mm_hardware_model_type, mm_hardware_model_name desc",
-    );
-    let table_rows: Vec<DBDeviceList> = select_query
-        .map(|row: PgRow| DBDeviceList {
-            mm_hardware_manufacturer: row.get("mm_hardware_manufacturer"),
-            mm_hardware_model_type: row.get("mm_hardware_model_type"),
-            mm_hardware_model_name: row.get("mm_hardware_model_name"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    )
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 

@@ -1,7 +1,6 @@
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
+use sqlx::FromRow;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBBackupList {
@@ -17,7 +16,7 @@ pub async fn mk_lib_database_backup_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBBackupList>, sqlx::Error> {
-    let select_query = sqlx::query(
+    let table_rows: Vec<DBBackupList> = sqlx::query_as(
         "select mm_backup_guid, mm_backup_description, \
             mm_backup_location_type, mm_backup_location, mm_backup_created \
             from mm_backup \
@@ -25,23 +24,13 @@ pub async fn mk_lib_database_backup_read(
             offset $1 limit $2",
     )
     .bind(offset)
-    .bind(limit);
-    let table_rows: Vec<DBBackupList> = select_query
-        .map(|row: PgRow| DBBackupList {
-            mm_backup_guid: row.get("mm_backup_guid"),
-            mm_backup_description: row.get("mm_backup_description"),
-            mm_backup_location_type: row.get("mm_backup_location_type"),
-            mm_backup_location: row.get("mm_backup_location"),
-            mm_backup_created: row.get("mm_backup_created"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    .bind(limit)
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 
-pub async fn mk_lib_database_backup_count(
-    sqlx_pool: &sqlx::PgPool,
-) -> Result<i64, sqlx::Error> {
+pub async fn mk_lib_database_backup_count(sqlx_pool: &sqlx::PgPool) -> Result<i64, sqlx::Error> {
     let row: (i64,) = sqlx::query_as("select count(*) from mm_backup")
         .fetch_one(sqlx_pool)
         .await?;

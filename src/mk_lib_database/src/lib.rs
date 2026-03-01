@@ -65,7 +65,6 @@ pub mod database_metadata {
     pub mod mk_lib_database_metadata_upc;
 }
 
-
 #[path = "releases"]
 pub mod database_releases {
     pub mod mk_lib_database_release;

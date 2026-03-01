@@ -1,18 +1,16 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
-use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_game_server_delete(
     sqlx_pool: &sqlx::PgPool,
     game_server_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query("delete from mm_game_dedicated_servers where mm_game_server_guid = $1")
         .bind(game_server_uuid)
-        .execute(&mut *transaction)
+        .execute(sqlx_pool)
         .await?;
-    transaction.commit().await?;
     Ok(())
 }
 
@@ -29,9 +27,8 @@ pub async fn mk_lib_database_game_server_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBGameServerList>, sqlx::Error> {
-    let select_query;
     if !search_value.is_empty() {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_game_server_guid, mm_game_server_name, \
             mm_game_server_json from mm_game_dedicated_servers \
             where mm_game_server_name = $1 \
@@ -39,25 +36,20 @@ pub async fn mk_lib_database_game_server_read(
         )
         .bind(search_value)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
     } else {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_game_server_guid, mm_game_server_name, \
             mm_game_server_json from mm_game_dedicated_servers \
             order by mm_game_server_name offset $1 limit $2",
         )
         .bind(offset)
-        .bind(limit);
-    }
-    let table_rows: Vec<DBGameServerList> = select_query
-        .map(|row: PgRow| DBGameServerList {
-            mm_game_server_guid: row.get("mm_game_server_guid"),
-            mm_game_server_name: row.get("mm_game_server_name"),
-            mm_game_server_json: row.get("mm_game_server_json"),
-        })
+        .bind(limit)
         .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
+        .await
+    }
 }
 
 pub async fn mk_lib_database_game_server_detail(
@@ -102,7 +94,6 @@ pub async fn mk_lib_database_game_server_upsert(
 ) -> Result<uuid::Uuid, sqlx::Error> {
     // TODO um, would return "invalid" uuid on update
     let new_guid = uuid::Uuid::now_v7();
-    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "INSERT INTO mm_game_dedicated_servers(mm_game_server_guid, \
         mm_game_server_name, mm_game_server_json) VALUES($ 1, $2, $3) \
@@ -112,8 +103,7 @@ pub async fn mk_lib_database_game_server_upsert(
     .bind(server_name)
     .bind(&server_json)
     .bind(&server_json)
-    .execute(&mut *transaction)
+    .execute(sqlx_pool)
     .await?;
-    transaction.commit().await?;
     Ok(new_guid)
 }

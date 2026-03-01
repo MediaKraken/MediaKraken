@@ -1,7 +1,7 @@
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaTVLiveList {
@@ -37,20 +37,13 @@ pub struct MetaTVStationList {
 pub async fn mk_lib_database_meta_tv_live_station_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<MetaTVStationList>, sqlx::Error> {
-    let select_query = sqlx::query(
+    let table_rows: Vec<MetaTVStationList> = sqlx::query_as(
         "select mm_tv_stations_id, mm_tv_station_name, \
         mm_tv_station_id, mm_tv_station_channel \
         from mm_tv_stations",
-    );
-    let table_rows: Vec<MetaTVStationList> = select_query
-        .map(|row: PgRow| MetaTVStationList {
-            mm_tv_stations_id: row.get("mm_tv_stations_id"),
-            mm_tv_station_name: row.get("mm_tv_station_name"),
-            mm_tv_station_id: row.get("mm_tv_station_id"),
-            mm_tv_station_channel: row.get("mm_tv_station_channel"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    )
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 

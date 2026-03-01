@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
+use sqlx::FromRow;
 use sqlx::types::Uuid;
 
 pub async fn mk_lib_database_metadata_review_insert(
@@ -48,18 +47,13 @@ pub async fn mk_lib_database_metadata_review_list_metadata(
     metadata_uuid: Uuid,
 ) -> Result<Vec<DBMetaReviewList>, sqlx::Error> {
     // TODO order by rating? (optional?)
-    let select_query = sqlx::query(
+    let table_rows: Vec<DBMetaReviewList> = sqlx::query_as(
         "select mm_review_guid, mm_review_json \
         from mm_review where mm_review_metadata_guid = $1 \
         order by mm_review_json->'results'->>'created_at' desc",
     )
-    .bind(metadata_uuid);
-    let table_rows: Vec<DBMetaReviewList> = select_query
-        .map(|row: PgRow| DBMetaReviewList {
-            mm_review_guid: row.get("mm_review_guid"),
-            mm_review_json: row.get("mm_review_json"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    .bind(metadata_uuid)
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }

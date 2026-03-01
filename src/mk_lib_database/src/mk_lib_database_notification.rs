@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
+use sqlx::FromRow;
 use sqlx::types::Uuid;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
@@ -16,23 +15,16 @@ pub async fn mk_lib_database_notification_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBNotificationList>, sqlx::Error> {
-    let select_query = sqlx::query(
+    let table_rows: Vec<DBNotificationList> = sqlx::query_as(
         "select mm_notification_guid, mm_notification_text, \
         mm_notification_time, \
         mm_notification_dismissible from mm_notification \
         order by mm_notification_time desc offset $1 limit $2",
     )
     .bind(offset)
-    .bind(limit);
-    let table_rows: Vec<DBNotificationList> = select_query
-        .map(|row: PgRow| DBNotificationList {
-            mm_notification_guid: row.get("mm_notification_guid"),
-            mm_notification_text: row.get("mm_notification_text"),
-            mm_notification_time: row.get("mm_notification_time"),
-            mm_notification_dismissible: row.get("mm_notification_dismissible"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    .bind(limit)
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 
@@ -41,7 +33,6 @@ pub async fn mk_lib_database_notification_insert(
     mm_notification_text: String,
     mm_notification_dismissable: bool,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         "insert into mm_notification (mm_notification_guid, \
         mm_notification_text, \
@@ -52,9 +43,8 @@ pub async fn mk_lib_database_notification_insert(
     .bind(Uuid::now_v7())
     .bind(mm_notification_text)
     .bind(mm_notification_dismissable)
-    .execute(&mut *transaction)
+    .execute(sqlx_pool)
     .await?;
-    transaction.commit().await?;
     Ok(())
 }
 

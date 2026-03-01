@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_metadata_sports_count(
     sqlx_pool: &sqlx::PgPool,
@@ -36,9 +36,8 @@ pub async fn mk_lib_database_metadata_sports_read(
     limit: i64,
 ) -> Result<Vec<DBMetaSportsList>, sqlx::Error> {
     // TODO order by year
-    let select_query;
     if !search_value.is_empty() {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_metadata_sports_guid, mm_metadata_sports_name \
             from mm_metadata_sports where mm_metadata_sports_guid \
             where mm_metadata_sports_name &@ $1 \
@@ -46,25 +45,21 @@ pub async fn mk_lib_database_metadata_sports_read(
         )
         .bind(search_value)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
     } else {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_metadata_sports_guid, mm_metadata_sports_name \
             from mm_metadata_sports
             order by LOWER(mm_metadata_sports_name) \
             offset $1 limit $2",
         )
         .bind(offset)
-        .bind(limit);
-    }
-    let table_rows: Vec<DBMetaSportsList> = select_query
-        .map(|row: PgRow| DBMetaSportsList {
-            mm_metadata_sports_guid: row.get("mm_metadata_sports_guid"),
-            mm_metadata_sports_name: row.get("mm_metadata_sports_name"),
-        })
+        .bind(limit)
         .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
+        .await
+    }
 }
 
 /*

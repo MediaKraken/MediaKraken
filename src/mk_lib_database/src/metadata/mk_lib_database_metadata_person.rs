@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
-use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_metadata_exists_person(
     sqlx_pool: &sqlx::PgPool,
@@ -53,9 +53,8 @@ pub async fn mk_lib_database_metadata_person_read(
     limit: i64,
 ) -> Result<Vec<DBMetaPersonList>, sqlx::Error> {
     // TODO order by birth date
-    let select_query;
     if !search_value.is_empty() {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_metadata_person_guid, \
             mm_metadata_person_name, mm_metadata_person_image, \
             mm_metadata_person_meta_json->>'profile_path' as mm_metadata_person_profile \
@@ -64,9 +63,11 @@ pub async fn mk_lib_database_metadata_person_read(
         )
         .bind(search_value)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
     } else {
-        select_query = sqlx::query(
+        sqlx::query_as(
             "select mm_metadata_person_guid, \
             mm_metadata_person_name, mm_metadata_person_image, \
             mm_metadata_person_meta_json->>'profile_path' as mm_metadata_person_profile \
@@ -74,18 +75,10 @@ pub async fn mk_lib_database_metadata_person_read(
             offset $1 limit $2",
         )
         .bind(offset)
-        .bind(limit);
-    }
-    let table_rows: Vec<DBMetaPersonList> = select_query
-        .map(|row: PgRow| DBMetaPersonList {
-            mm_metadata_person_guid: row.get("mm_metadata_person_guid"),
-            mm_metadata_person_name: row.get("mm_metadata_person_name"),
-            mm_metadata_person_image: row.get("mm_metadata_person_image"),
-            mm_metadata_person_profile: row.get("mm_metadata_person_profile"),
-        })
+        .bind(limit)
         .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
+        .await
+    }
 }
 
 pub async fn mk_lib_database_meta_person_detail(
@@ -117,7 +110,7 @@ pub async fn mk_lib_database_meta_person_by_name(
     sqlx_pool: &sqlx::PgPool,
     person_name: String,
 ) -> Result<Vec<DBMetaPersonNameList>, sqlx::Error> {
-    let select_query = sqlx::query(
+    let table_rows: Vec<DBMetaPersonNameList> = sqlx::query_as(
         "select mm_metadata_person_guid, mm_metadata_person_person_media_id, \
         mm_metadata_person_person_meta_json, \
         mm_metadata_person_person_image, \
@@ -125,17 +118,9 @@ pub async fn mk_lib_database_meta_person_by_name(
         from mm_metadata_person \
         where mm_metadata_person_person_name = $1",
     )
-    .bind(person_name);
-    let table_rows: Vec<DBMetaPersonNameList> = select_query
-        .map(|row: PgRow| DBMetaPersonNameList {
-            mm_metadata_person_id: row.get("mm_metadata_person_guid"),
-            mm_metadata_person_person_media_id: row.get("mm_metadata_person_person_media_id"),
-            mm_metadata_person_person_meta_json: row.get("mm_metadata_person_person_meta_json"),
-            mm_metadata_person_person_image: row.get("mm_metadata_person_person_image"),
-            mm_metadata_person_person_name: row.get("mm_metadata_person_person_name"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    .bind(person_name)
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 
@@ -221,13 +206,15 @@ pub async fn mk_lib_database_metadata_person_update(
     person_image: serde_json::Value,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query("update mm_metadata_person set mm_metadata_person_meta_json = $1, \
-        mm_metadata_person_image = $2 where mm_metadata_person_media_id = $3")
-        .bind(person_bio)
-        .bind(person_image)
-        .bind(person_media_id)
-        .execute(&mut *transaction)
-        .await?;
+    sqlx::query(
+        "update mm_metadata_person set mm_metadata_person_meta_json = $1, \
+        mm_metadata_person_image = $2 where mm_metadata_person_media_id = $3",
+    )
+    .bind(person_bio)
+    .bind(person_image)
+    .bind(person_media_id)
+    .execute(&mut *transaction)
+    .await?;
     transaction.commit().await?;
     Ok(())
 }

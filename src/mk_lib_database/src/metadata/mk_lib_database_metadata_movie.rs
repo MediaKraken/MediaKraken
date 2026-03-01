@@ -1,8 +1,8 @@
 use crate::mk_lib_database::MediaStatusUpdatePayload;
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
-use sqlx::{FromRow, Row};
 use sqlx::types::chrono::DateTime;
 use sqlx::types::chrono::Utc;
 
@@ -43,9 +43,8 @@ pub async fn mk_lib_database_metadata_movie_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMetaMovieList>, sqlx::Error> {
-    let select_query;
     if !search_value.is_empty() {
-        select_query = sqlx::query(
+        sqlx::query_as(
             r#"select mm_metadata_movie_guid, mm_metadata_movie_name,
              mm_metadata_movie_name_alt,
              mm_metadata_movie_json->>'release_date' as mm_date,
@@ -69,9 +68,11 @@ pub async fn mk_lib_database_metadata_movie_read(
         .bind(&search_value)
         .bind(&search_value)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+            .fetch_all(sqlx_pool)
+            .await
     } else {
-        select_query = sqlx::query(
+        sqlx::query_as(
             r#"select mm_metadata_movie_guid, mm_metadata_movie_name,
             mm_metadata_movie_name_alt,
             mm_metadata_movie_json->>'release_date' as mm_date,
@@ -92,26 +93,10 @@ pub async fn mk_lib_database_metadata_movie_read(
         )
         .bind(&user_id)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+            .fetch_all(sqlx_pool)
+            .await
     }
-    let table_rows: Vec<DBMetaMovieList> = select_query
-        .map(|row: PgRow| DBMetaMovieList {
-            mm_metadata_guid: row.get("mm_metadata_movie_guid"),
-            mm_metadata_name: row.get("mm_metadata_movie_name"),
-            mm_metadata_movie_name_alt: row.get("mm_metadata_movie_name_alt"),
-            mm_date: row.get("mm_date"),
-            mm_poster: row.get("mm_poster"),
-            mm_status_user_json: row.get("mm_status_user_json"),
-            mm_metadata_genre_json: row.get("mm_genre"),
-            mm_metadata_availibility: row.get("mm_availibility"),
-            mm_metadata_movie_tagline: row.get("mm_metadata_tagline"),
-            mm_metadata_runtime: row.get("mm_metadata_runtime"),
-            mm_metadata_vote_average: row.get("mm_metadata_vote_average"),
-            photo_updated: row.get("photo_updated"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
 }
 
 pub async fn mk_lib_database_metadata_movie_count(

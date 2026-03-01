@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_media_game_clone_read(
     sqlx_pool: &sqlx::PgPool,
@@ -34,11 +34,13 @@ pub async fn mk_lib_database_media_game_category_update(
     game_id: uuid::Uuid,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query(r#"update mm_metadata_game_software_info set gi_gc_category = $1 where gi_id = $2"#)
-        .bind(category)
-        .bind(game_id)
-        .execute(&mut *transaction)
-        .await?;
+    sqlx::query(
+        r#"update mm_metadata_game_software_info set gi_gc_category = $1 where gi_id = $2"#,
+    )
+    .bind(category)
+    .bind(game_id)
+    .execute(&mut *transaction)
+    .await?;
     transaction.commit().await?;
     Ok(())
 }
@@ -54,19 +56,20 @@ pub async fn mk_lib_database_media_game_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMediaGameList>, sqlx::Error> {
-    let select_query;
     if !search_value.is_empty() {
-        select_query = sqlx::query("").bind(search_value).bind(offset).bind(limit);
+        sqlx::query_as("")
+            .bind(search_value)
+            .bind(offset)
+            .bind(limit)
+            .fetch_all(sqlx_pool)
+            .await
     } else {
-        select_query = sqlx::query("").bind(offset).bind(limit);
+        sqlx::query_as("")
+            .bind(offset)
+            .bind(limit)
+            .fetch_all(sqlx_pool)
+            .await
     }
-    let table_rows: Vec<DBMediaGameList> = select_query
-        .map(|row: PgRow| DBMediaGameList {
-            mm_metadata_game_guid: row.get("mm_metadata_game_guid"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
 }
 
 pub async fn mk_lib_database_media_game_count(
