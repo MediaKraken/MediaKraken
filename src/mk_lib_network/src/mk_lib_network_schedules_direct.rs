@@ -34,11 +34,20 @@ impl From<reqwest::Error> for SchedulesDirectError {
     }
 }
 
-#[derive(Debug, Clone)]
 pub struct SchedulesDirectClient {
     http_client: reqwest::Client,
-    base_url: String,
+    base_url: &'static str,
     token: String,
+}
+
+impl std::fmt::Debug for SchedulesDirectClient {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("SchedulesDirectClient")
+            .field("http_client", &self.http_client)
+            .field("base_url", &self.base_url)
+            .field("token", &"REDACTED")
+            .finish()
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -95,7 +104,7 @@ impl SchedulesDirectClient {
 
         Ok(Self {
             http_client,
-            base_url: SCHEDULES_DIRECT_API_BASE.to_string(),
+            base_url: SCHEDULES_DIRECT_API_BASE,
             token,
         })
     }
