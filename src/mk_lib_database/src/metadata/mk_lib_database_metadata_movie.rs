@@ -166,22 +166,49 @@ pub async fn mk_lib_database_metadata_movie_guid_by_tmdb(
     Ok(row.0)
 }
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMetaMovieDetail {
+    pub mm_metadata_guid: uuid::Uuid,
+    pub mm_metadata_name: String,
+    pub mm_metadata_movie_name_alt: Option<String>,
+    pub mm_date: String, // DateTime<Utc>,
+    pub mm_poster: String,
+    pub mm_status_user_json: Option<serde_json::Value>,
+    pub mm_metadata_genre_json: serde_json::Value,
+    pub mm_metadata_availibility: String,
+    pub mm_metadata_movie_tagline: Option<String>,
+    pub mm_metadata_runtime: i32,
+    pub mm_metadata_vote_average: Option<f64>,
+    pub photo_updated: DateTime<Utc>, // Maps to TIMESTAMPTZ
+}
+
 pub async fn mk_lib_database_metadata_movie_detail_by_guid(
     sqlx_pool: &sqlx::PgPool,
     uuid_id: Uuid,
-) -> Result<PgRow, sqlx::Error> {
-    let row = sqlx::query(
-        "select mm_metadata_movie_media_id, \
-        mm_metadata_movie_json, \
-        mm_metadata_movie_localimage_json, \
-        mm_metadata_movie_user_json \
-        from mm_metadata_movie \
-        where mm_metadata_movie_guid = $1",
+    user_id: i64,
+) -> Result<DBMetaMovieDetail, sqlx::Error> {
+    sqlx::query_as(
+        r#"select mm_metadata_movie_guid, mm_metadata_movie_name,
+             mm_metadata_movie_name_alt,
+             mm_metadata_movie_json->>'release_date' as mm_date,
+             mm_metadata_movie_localimage_json->>'Poster' as mm_poster,
+             'unavailable' as mm_availibility,
+             (mm_metadata_movie_json->'runtime')::int as mm_metadata_runtime,
+             mm_metadata_movie_json->>'tagline' as mm_metadata_tagline,
+             (mm_metadata_movie_json->'genres')::jsonb as mm_genre,
+             mm_status_user_json,
+             ROUND((mm_metadata_movie_json->'vote_average')::numeric, 1)::float as mm_metadata_vote_average,
+             photo_updated
+             from mm_metadata_movie
+             LEFT JOIN mm_metadata_user_status
+             ON mm_metadata_user_status.mm_status_type_movie = mm_metadata_movie.mm_metadata_movie_guid
+             and mm_metadata_user_status.mm_status_user_id = $1
+             WHERE mm_metadata_movie_guid = $2"#,
     )
+    .bind(&user_id)
     .bind(uuid_id)
     .fetch_one(sqlx_pool)
-    .await?;
-    Ok(row)
+    .await
 }
 
 pub async fn mk_lib_database_metadata_movie_status(
@@ -226,35 +253,6 @@ pub async fn db_meta_movie_by_media_uuid(self, media_guid):
                                   ' from mm_media, mm_metadata_movie'
                                   ' where mm_media_metadata_guid = mm_metadata_guid'
                                   ' and mm_media_guid = $1', media_guid)
-
-// TODO port query
-pub async fn db_meta_movie_status_update(self, metadata_guid, user_id, status_text,
-                                      db_connection=None):
-    """
-    # set status's for metadata
-    """
-    # do before the select to save db lock time
-    if status_text == 'watched' or status_text == 'requested':
-        status_setting = true
-    else:
-        status_setting = status_text
-        status_text = 'Rating'
-    // grab the user json for the metadata
-    json_data = await db_conn.fetchrow('SELECT mm_metadata_movie_user_json'
-                                       ' from mm_metadata_movie'
-                                       ' where mm_metadata_guid = $1 FOR UPDATE',
-                                       metadata_guid)
-    // split this off so coroutine doesn't get mad
-    try:
-        json_data = json_data['mm_metadata_user_json']
-    except:
-        json_data = {'UserStats': {}}
-    if str(user_id) in json_data['UserStats']:
-        json_data['UserStats'][str(user_id)][status_text] = status_setting
-    else:
-        json_data['UserStats'][str(user_id)] = {status_text: status_setting}
-    await self.db_meta_movie_json_update(metadata_guid,
-                                        json_data)
 
 # poster, backdrop, etc
 // TODO port query

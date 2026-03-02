@@ -5,15 +5,15 @@
 
         <!-- Poster -->
         <div class="aspect-[2/3] bg-gray-300 rounded-xl overflow-hidden shadow">
-            {% if row_data.template_metadata_poster == "/static/image/Movie-icon.png" %}
-            <img src="/static/image/Movie-icon.png?v=1" alt="Poster for {{ row_data.template_metadata_name }}"
+            {% if template_metadata_poster == "/static/image/Movie-icon.png" %}
+            <img src="/static/image/Movie-icon.png?v=1" alt="Poster for {{template_data_json["title"]}}"
                 loading="lazy" decoding="async" @load="loaded = true" @error="loaded = true"
                 x-init="$nextTick(() => { loaded = $el.complete })"
                 class="h-full w-full object-cover transition-opacity duration-500"
                 :class="loaded ? 'opacity-100' : 'opacity-0'" />
             {% else %}
-            <img src="/metadata{{row_data.template_metadata_poster|safe}}?v={{row_data.template_metadata_photo_updated.timestamp()}}"
-                alt="Poster for {{ row_data.template_metadata_name }}" loading="lazy" decoding="async"
+            <img src="/metadata{{template_metadata_poster|safe}}?v={{template_metadata_photo_updated.timestamp()}}"
+                alt="Poster for {{template_data_json["title"]}}" loading="lazy" decoding="async"
                 @load="loaded = true" @error="loaded = true" x-init="$nextTick(() => { loaded = $el.complete })"
                 class="h-full w-full object-cover transition-opacity duration-500"
                 :class="loaded ? 'opacity-100' : 'opacity-0'" />
@@ -36,7 +36,7 @@
             </div>
 
             <div class="flex flex-wrap gap-1 mt-1">
-                {% for genre in row_data.template_metadata_genre %}
+                {% for genre in template_metadata_genre %}
                 <span
                     class="px-1.5 py-0.5 text-[10px] rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
                     {{ genre.name }}

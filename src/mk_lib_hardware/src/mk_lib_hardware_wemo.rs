@@ -28,7 +28,7 @@ pub async fn mk_lib_hardware_wemo_discover() {
                 " - Subscribed {} - {:?} seconds to resubscribe.\n",
                 d.friendly_name, subscribe_seconds
             ),
-            Err(error) => eprintln!(" - Failed to subscribe {} - {error}", d.friendly_name),
+            Err(error) => eprintln!(" - Failed to subscribe {:?} - {:?}", d.friendly_name, error),
         }
     }
 }

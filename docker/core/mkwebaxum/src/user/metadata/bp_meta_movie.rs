@@ -222,7 +222,20 @@ pub async fn user_metadata_movie(
 #[template(path = "bss_user/metadata/bss_user_metadata_movie_detail.html")]
 struct TemplateMetaMovieDetailContext<'a> {
     template_data_json: &'a serde_json::Value,
+    template_metadata_name_alt: Option<String>,
     template_data_json_media_crew: &'a serde_json::Value,
+    template_metadata_poster: String,
+    template_metadata_backdrop: String,
+    template_metadata_rating: String,
+    template_metadata_star_rating: f32,
+    template_metadata_availability: String,
+    template_metadata_tagline: Option<String>,
+    template_metadata_photo_updated: DateTime<Utc>,
+    template_metadata_genre: Vec<Genre>,
+    template_metadata_user_watched: serde_json::Value,
+    template_metadata_user_rating: serde_json::Value,
+    template_metadata_user_request: serde_json::Value,
+    template_metadata_user_queue: serde_json::Value,
     page_title: Option<String>,
 }
 
@@ -247,10 +260,44 @@ pub async fn user_metadata_movie_detail(
     } else {
         let movie_metadata =
         mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_detail_by_guid(
-            &state.sqlx_pool_ro, guid,
+            &state.sqlx_pool_ro, guid, current_user.id
         )
         .await
         .unwrap();
+
+        let watched_status = movie_metadata
+            .mm_status_type_movie
+            .clone()
+            .unwrap_or_else(|| {
+                json!({
+                    "bad": false,
+                    "good": false,
+                    "trash": false,
+                    "watched": false,
+                    "favorite": false
+                })
+            });
+        let mut request_status: serde_json::Value = json!(false);
+        let mut rating_status: serde_json::Value = json!(null);
+        let mut queue_status: serde_json::Value = json!(false);
+
+        let mut mm_poster: String = "/static/image/Movie-icon.png".to_string();
+        if movie_metadata.mm_poster.len() > 0 {
+            mm_poster = movie_metadata.mm_poster.clone();
+        }
+
+        let genres: Vec<Genre> = movie_metadata
+            .mm_genre
+            .as_array()
+            .into_iter()
+            .flatten()
+            .filter_map(|g| {
+                g.get("name").and_then(|n| n.as_str()).map(|name| Genre {
+                    name: name.to_string(),
+                })
+            })
+            .collect();
+
         let template = TemplateMetaMovieDetailContext {
             template_data_json: &movie_metadata.get("mm_metadata_movie_json"),
             template_data_json_media_crew: &json!({}),
