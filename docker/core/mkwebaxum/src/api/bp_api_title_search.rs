@@ -1,25 +1,24 @@
+use crate::AppState;
 use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
-use crate::AppState;
 use askama::Template;
 use axum::extract::State;
 use axum::{
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
-    Extension,
 };
-use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
-use serde::{Deserialize, Serialize};
-use serde_json::json;
-use sqlx::postgres::{PgPool, PgRow};
-use sqlx::{FromRow, Row};
+use sqlx::postgres::PgPool;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_401.html")]
 struct TemplateError401Context {}
+
+#[derive(Template)]
+#[template(path = "bss_error/bss_error_500.html")]
+struct TemplateError500Context {}
 
 #[derive(Template)]
 #[template(path = "bss_api/bss_api_title_search.html")]
@@ -53,22 +52,39 @@ pub async fn api_title_search(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let title = title.replace("%20", " ");
-        let movie_metadata = mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(
-        &state.sqlx_pool_ro, title.clone(), current_user.id, 0, 100
-    )
-    .await
-    .unwrap();
-        let tv_metadata = mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_read(
-        &state.sqlx_pool_ro, title.clone(), 0, 100
-    )
-    .await
-    .unwrap();
-        let music_metadata = mk_lib_database::database_metadata::mk_lib_database_metadata_music::mk_lib_database_metadata_music_read(
-            &state.sqlx_pool_ro, title.clone(), 0, 100
-    )
-    .await
-    .unwrap();
+        let normalized_title = title.replace("%20", " ");
+        let movie_title = normalized_title.clone();
+        let tv_title = normalized_title.clone();
+        let music_title = normalized_title;
+
+        let (movie_metadata, tv_metadata, music_metadata) = match tokio::try_join!(
+            mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(
+                &state.sqlx_pool_ro,
+                movie_title,
+                current_user.id,
+                0,
+                100,
+            ),
+            mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_read(
+                &state.sqlx_pool_ro,
+                tv_title,
+                0,
+                100,
+            ),
+            mk_lib_database::database_metadata::mk_lib_database_metadata_music::mk_lib_database_metadata_music_read(
+                &state.sqlx_pool_ro,
+                music_title,
+                0,
+                100,
+            )
+        ) {
+            Ok(results) => results,
+            Err(_) => {
+                let template = TemplateError500Context {};
+                let reply_html = template.render().unwrap();
+                return (StatusCode::INTERNAL_SERVER_ERROR, Html(reply_html).into_response());
+            },
+        };
         let template = TemplateAPITitleSearchContext {
             template_data_movie_match: &movie_metadata,
             template_data_tv_match: &tv_metadata,
