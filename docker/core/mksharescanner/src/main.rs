@@ -75,18 +75,23 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
+            let mut should_ack = true;
+
             if let Some(payload) = msg.content.as_deref() {
                 if let Err(err) = process_message(payload, &sqlx_pool_rw, &sqlx_pool_ro).await {
+                    should_ack = false;
                     eprintln!("failed to process mksharescanner message: {err}");
                 }
             }
 
-            if let Some(deliver) = msg.deliver {
-                let _ = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
-                    &rabbit_channel,
-                    deliver.delivery_tag(),
-                )
-                .await;
+            if should_ack {
+                if let Some(deliver) = msg.deliver {
+                    let _ = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
+                        &rabbit_channel,
+                        deliver.delivery_tag(),
+                    )
+                    .await;
+                }
             }
         }
     });
