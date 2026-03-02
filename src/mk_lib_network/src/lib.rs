@@ -11,6 +11,7 @@ pub mod mk_lib_network_mediakraken;
 pub mod mk_lib_network_openweather;
 pub mod mk_lib_network_ping;
 pub mod mk_lib_network_rss;
+pub mod mk_lib_network_schedules_direct;
 pub mod mk_lib_network_serial;
 pub mod mk_lib_network_share;
 pub mod mk_lib_network_speedtest;
