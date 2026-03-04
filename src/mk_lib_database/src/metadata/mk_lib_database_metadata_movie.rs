@@ -40,6 +40,7 @@ pub async fn mk_lib_database_metadata_movie_read(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
     user_id: i64,
+    starts_with: String,
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMetaMovieList>, sqlx::Error> {
@@ -89,10 +90,12 @@ pub async fn mk_lib_database_metadata_movie_read(
             LEFT JOIN mm_metadata_user_status
             ON mm_metadata_user_status.mm_status_type_movie = mm_metadata_movie.mm_metadata_movie_guid
             and mm_metadata_user_status.mm_status_user_id = $1
+            WHERE LOWER(mm_metadata_movie_name) >= $2 
             order by LOWER(mm_metadata_movie_name), mm_date
-            offset $2 limit $3"#,
+            offset $3 limit $4"#,
         )
         .bind(&user_id)
+        .bind(&starts_with.to_lower())
         .bind(offset)
         .bind(limit)
             .fetch_all(sqlx_pool)
