@@ -10,8 +10,8 @@
     <div id="the-movie-node">
         {% for row_data in template_data_movie_match %}
         <img src="/static{{row_data.mm_poster|safe}}" loading="lazy" decoding="async" height="300" width="200">
-        <a href="/user/api/movie_add/{{row_data.mm_metadata_guid}}">
-                {{row_data.mm_metadata_name}} - {{row_data.mm_date}}
+        <a href="/user/api/movie_add/{{row_data.mm_metadata_movie_guid}}">
+                {{row_data.mm_metadata_movie_name}} - {{row_data.mm_date}}
             </a><BR>
         {% endfor %}
         <div id="the-tv-node">

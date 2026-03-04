@@ -169,7 +169,7 @@ pub async fn user_metadata_movie(
             }
 
             let genres: Vec<Genre> = row_data
-                .mm_metadata_genre_json
+                .mm_genre
                 .as_array()
                 .into_iter()
                 .flatten()
@@ -181,16 +181,16 @@ pub async fn user_metadata_movie(
                 .collect();
 
             let temp_meta_line = TemplateMetaMovieList {
-                template_metadata_guid: row_data.mm_metadata_guid,
-                template_metadata_name: row_data.mm_metadata_name.clone(),
+                template_metadata_guid: row_data.mm_metadata_movie_guid,
+                template_metadata_name: row_data.mm_metadata_movie_name.clone(),
                 template_metadata_name_alt: row_data.mm_metadata_movie_name_alt.clone(),
                 template_metadata_date: row_data.mm_date.clone(),
                 template_metadata_poster: mm_poster,
                 template_metadata_runtime: row_data.mm_metadata_runtime,
                 template_metadata_rating: "pg13".to_string(),
                 template_metadata_star_rating: row_data.mm_metadata_vote_average.unwrap_or(0.0) as f32,
-                template_metadata_availability: row_data.mm_metadata_availibility.clone(),
-                template_metadata_tagline: row_data.mm_metadata_movie_tagline.clone(),
+                template_metadata_availability: row_data.mm_availibility.clone(),
+                template_metadata_tagline: row_data.mm_metadata_tagline.clone(),
                 template_metadata_photo_updated: row_data.photo_updated.clone(),
                 template_metadata_genre: genres,
                 template_metadata_user_watched: watched_status,
@@ -286,7 +286,7 @@ pub async fn user_metadata_movie_detail(
         }
 
         let genres: Vec<Genre> = movie_metadata
-            .mm_metadata_genre_json
+            .mm_genre
             .as_array()
             .into_iter()
             .flatten()
@@ -298,14 +298,14 @@ pub async fn user_metadata_movie_detail(
             .collect();
 
         let template = TemplateMetaMovieDetailContext {
-            template_data_json: &movie_metadata.mm_metadata_json,
+            template_data_json: &movie_metadata.mm_metadata_movie_json,
             template_metadata_name_alt: movie_metadata.mm_metadata_movie_name_alt.clone(),
             template_metadata_poster: mm_poster,
             template_metadata_backdrop: "/static/image/Movie-icon.png".to_string(),
             template_metadata_rating: "pg13".to_string(),
             template_metadata_star_rating: movie_metadata.mm_metadata_vote_average.unwrap_or(0.0) as f32,
-            template_metadata_availability: movie_metadata.mm_metadata_availibility.clone(),
-            template_metadata_tagline: movie_metadata.mm_metadata_movie_tagline.clone(),
+            template_metadata_availability: movie_metadata.mm_availibility.clone(),
+            template_metadata_tagline: movie_metadata.mm_metadata_tagline.clone(),
             template_metadata_photo_updated: movie_metadata.photo_updated.clone(),
             template_metadata_genre: genres,
             template_metadata_user_watched: watched_status,

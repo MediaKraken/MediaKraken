@@ -22,15 +22,15 @@ pub async fn mk_lib_database_metadata_exists_movie(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaMovieList {
-    pub mm_metadata_guid: uuid::Uuid,
-    pub mm_metadata_name: String,
+    pub mm_metadata_movie_guid: uuid::Uuid,
+    pub mm_metadata_movie_name: String,
     pub mm_metadata_movie_name_alt: Option<String>,
     pub mm_date: String, // DateTime<Utc>,
     pub mm_poster: String,
     pub mm_status_user_json: Option<serde_json::Value>,
-    pub mm_metadata_genre_json: serde_json::Value,
-    pub mm_metadata_availibility: String,
-    pub mm_metadata_movie_tagline: Option<String>,
+    pub mm_genre: serde_json::Value,
+    pub mm_availibility: String,
+    pub mm_metadata_tagline: Option<String>,
     pub mm_metadata_runtime: i32,
     pub mm_metadata_vote_average: Option<f64>,
     pub photo_updated: DateTime<Utc>, // Maps to TIMESTAMPTZ
@@ -45,7 +45,8 @@ pub async fn mk_lib_database_metadata_movie_read(
 ) -> Result<Vec<DBMetaMovieList>, sqlx::Error> {
     if !search_value.is_empty() {
         sqlx::query_as(
-            r#"select mm_metadata_movie_guid, mm_metadata_movie_name,
+            r#"select mm_metadata_movie_guid, 
+             mm_metadata_movie_name,
              mm_metadata_movie_name_alt,
              mm_metadata_movie_json->>'release_date' as mm_date,
              mm_metadata_movie_localimage_json->>'Poster' as mm_poster,
@@ -168,19 +169,20 @@ pub async fn mk_lib_database_metadata_movie_guid_by_tmdb(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaMovieDetail {
-    pub mm_metadata_guid: uuid::Uuid,
-    pub mm_metadata_name: String,
+    pub mm_metadata_movie_guid: uuid::Uuid,
+    pub mm_metadata_movie_name: String,
     pub mm_metadata_movie_name_alt: Option<String>,
     pub mm_date: String, // DateTime<Utc>,
     pub mm_poster: String,
+    pub mm_backrop: Option<String>,
     pub mm_status_user_json: Option<serde_json::Value>,
-    pub mm_metadata_genre_json: serde_json::Value,
-    pub mm_metadata_availibility: String,
-    pub mm_metadata_movie_tagline: Option<String>,
+    pub mm_genre: serde_json::Value,
+    pub mm_availibility: String,
+    pub mm_metadata_tagline: Option<String>,
     pub mm_metadata_runtime: i32,
     pub mm_metadata_vote_average: Option<f64>,
     pub photo_updated: DateTime<Utc>, // Maps to TIMESTAMPTZ
-    pub mm_metadata_json: serde_json::Value,
+    pub mm_metadata_movie_json: serde_json::Value,
 }
 
 pub async fn mk_lib_database_metadata_movie_detail_by_guid(
@@ -193,6 +195,7 @@ pub async fn mk_lib_database_metadata_movie_detail_by_guid(
              mm_metadata_movie_name_alt,
              mm_metadata_movie_json->>'release_date' as mm_date,
              mm_metadata_movie_localimage_json->>'Poster' as mm_poster,
+            mm_metadata_movie_localimage_json->>'Backdrop' as mm_backrop,
              'unavailable' as mm_availibility,
              (mm_metadata_movie_json->'runtime')::int as mm_metadata_runtime,
              mm_metadata_movie_json->>'tagline' as mm_metadata_tagline,
