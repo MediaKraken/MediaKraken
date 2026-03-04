@@ -180,6 +180,7 @@ pub struct DBMetaMovieDetail {
     pub mm_metadata_runtime: i32,
     pub mm_metadata_vote_average: Option<f64>,
     pub photo_updated: DateTime<Utc>, // Maps to TIMESTAMPTZ
+    pub mm_metadata_json: serde_json::Value,
 }
 
 pub async fn mk_lib_database_metadata_movie_detail_by_guid(
@@ -198,7 +199,7 @@ pub async fn mk_lib_database_metadata_movie_detail_by_guid(
              (mm_metadata_movie_json->'genres')::jsonb as mm_genre,
              mm_status_user_json,
              ROUND((mm_metadata_movie_json->'vote_average')::numeric, 1)::float as mm_metadata_vote_average,
-             photo_updated
+             photo_updated, mm_metadata_movie_json
              from mm_metadata_movie
              LEFT JOIN mm_metadata_user_status
              ON mm_metadata_user_status.mm_status_type_movie = mm_metadata_movie.mm_metadata_movie_guid

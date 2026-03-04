@@ -24,8 +24,8 @@ use sqlx::types::chrono::DateTime;
 use sqlx::types::chrono::Utc;
 
 #[derive(Debug, Deserialize, Serialize)]
-struct Genre {
-    name: String,
+pub struct Genre {
+    pub name: String,
 }
 
 #[derive(Template)]
@@ -223,7 +223,6 @@ pub async fn user_metadata_movie(
 struct TemplateMetaMovieDetailContext<'a> {
     template_data_json: &'a serde_json::Value,
     template_metadata_name_alt: Option<String>,
-    template_data_json_media_crew: &'a serde_json::Value,
     template_metadata_poster: String,
     template_metadata_backdrop: String,
     template_metadata_rating: String,
@@ -266,7 +265,7 @@ pub async fn user_metadata_movie_detail(
         .unwrap();
 
         let watched_status = movie_metadata
-            .mm_status_type_movie
+            .mm_status_user_json
             .clone()
             .unwrap_or_else(|| {
                 json!({
@@ -287,7 +286,7 @@ pub async fn user_metadata_movie_detail(
         }
 
         let genres: Vec<Genre> = movie_metadata
-            .mm_genre
+            .mm_metadata_genre_json
             .as_array()
             .into_iter()
             .flatten()
@@ -299,8 +298,20 @@ pub async fn user_metadata_movie_detail(
             .collect();
 
         let template = TemplateMetaMovieDetailContext {
-            template_data_json: &movie_metadata.get("mm_metadata_movie_json"),
-            template_data_json_media_crew: &json!({}),
+            template_data_json: &movie_metadata.mm_metadata_json,
+            template_metadata_name_alt: movie_metadata.mm_metadata_movie_name_alt.clone(),
+            template_metadata_poster: mm_poster,
+            template_metadata_backdrop: "/static/image/Movie-icon.png".to_string(),
+            template_metadata_rating: "pg13".to_string(),
+            template_metadata_star_rating: movie_metadata.mm_metadata_vote_average.unwrap_or(0.0) as f32,
+            template_metadata_availability: movie_metadata.mm_metadata_availibility.clone(),
+            template_metadata_tagline: movie_metadata.mm_metadata_movie_tagline.clone(),
+            template_metadata_photo_updated: movie_metadata.photo_updated.clone(),
+            template_metadata_genre: genres,
+            template_metadata_user_watched: watched_status,
+            template_metadata_user_rating: rating_status,
+            template_metadata_user_request: request_status,
+            template_metadata_user_queue: queue_status,
             page_title: Some("MediaKraken Metadata Movie Detail".to_string()),
         };
         let reply_html = template.render().unwrap();

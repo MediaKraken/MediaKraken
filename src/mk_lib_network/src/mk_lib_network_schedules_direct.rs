@@ -83,6 +83,7 @@ impl SchedulesDirectClient {
         let http_client = reqwest::Client::builder()
             .user_agent("MediaKraken")
             .build()?;
+
         let login_payload = SchedulesDirectLoginRequest { username, password };
 
         let response = http_client
@@ -155,7 +156,8 @@ impl SchedulesDirectClient {
         Ok(response.json::<T>().await?)
     }
 
-    async fn post_json<TReq: Serialize, TResp: for<'de> Deserialize<'de>>(
+    // ✅ FIX 2 APPLIED HERE
+    async fn post_json<TReq: Serialize + ?Sized, TResp: for<'de> Deserialize<'de>>(
         &self,
         path: &str,
         payload: &TReq,
