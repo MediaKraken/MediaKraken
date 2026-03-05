@@ -5,17 +5,25 @@ use std::error::Error;
 #[path = "./mk_lib_common_internationalization.rs"]
 mod mk_lib_common_internationalization;
 
+fn build_suffix(starts_with: Option<&str>) -> String {
+    match starts_with {
+        Some(sw) if !sw.is_empty() => {
+            // "#", spaces, etc. get encoded safely
+            let enc = urlencoding::encode(sw);
+            format!("?starts_with={enc}")
+        }
+        _ => String::new(),
+    }
+}
+
 pub async fn mk_lib_common_paginate(
     total_items: i64,
     page: i64,
     base_url: String,
+    starts_with: Option<&str>,
 ) -> Result<String, Box<dyn Error>> {
     // Convert total items → total pages (30 per page)
-    let total_pages = if total_items > 0 {
-        (total_items + 29) / 30
-    } else {
-        0
-    };
+    let total_pages = if total_items > 0 { (total_items + 29) / 30 } else { 0 };
 
     let mut pagination_html = String::new();
 
@@ -25,8 +33,10 @@ pub async fn mk_lib_common_paginate(
 <ul class="flex items-center gap-1 whitespace-nowrap text-sm">"#,
         );
 
+        let suffix = build_suffix(starts_with);
+
         let paginator = Paginator::builder(total_pages as usize)
-            .current_page(page as usize)
+            .current_page(page.max(1) as usize)
             .build_paginator()
             .unwrap();
 
@@ -35,22 +45,24 @@ pub async fn mk_lib_common_paginate(
                 PageItem::Prev(p) => {
                     write!(
                         pagination_html,
-                        r#"<li><a href="{url}/{p}"
+                        r#"<li><a href="{url}/{p}{suffix}"
 class="px-3 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-200"
 aria-label="Previous">&laquo;</a></li>"#,
                         url = base_url,
-                        p = p
+                        p = p,
+                        suffix = suffix
                     )?;
                 }
 
                 PageItem::Page(p) => {
                     write!(
                         pagination_html,
-                        r#"<li><a href="{url}/{p}"
+                        r#"<li><a href="{url}/{p}{suffix}"
 class="px-3 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-200">
 {label}</a></li>"#,
                         url = base_url,
                         p = p,
+                        suffix = suffix,
                         label = mk_lib_common_internationalization::
                             mk_lib_common_internationalization_number_format(p.get() as i64)?
                     )?;
@@ -67,19 +79,18 @@ class="px-3 py-2 rounded-md bg-indigo-600 text-white font-semibold border border
                 }
 
                 PageItem::Ignore => {
-                    pagination_html.push_str(
-                        r#"<li><span class="px-3 py-2 text-gray-400">…</span></li>"#,
-                    );
+                    pagination_html.push_str(r#"<li><span class="px-3 py-2 text-gray-400">…</span></li>"#);
                 }
 
                 PageItem::Next(p) => {
                     write!(
                         pagination_html,
-                        r#"<li><a href="{url}/{p}"
+                        r#"<li><a href="{url}/{p}{suffix}"
 class="px-3 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-200"
 aria-label="Next">&raquo;</a></li>"#,
                         url = base_url,
-                        p = p
+                        p = p,
+                        suffix = suffix
                     )?;
                 }
 

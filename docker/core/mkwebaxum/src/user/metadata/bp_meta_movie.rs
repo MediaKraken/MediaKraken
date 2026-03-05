@@ -113,6 +113,7 @@ pub async fn user_metadata_movie(
             total_pages,
             page,
             "/user/metadata/movie".to_string(),
+            params.starts_with.as_deref(),
         )
         .await
         .unwrap();
