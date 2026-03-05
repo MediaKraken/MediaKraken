@@ -1,14 +1,13 @@
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
 use sqlx::types::Uuid;
+use sqlx::FromRow;
 
 pub async fn mk_lib_database_metadata_exists_tv(
     sqlx_pool: &sqlx::PgPool,
     metadata_id: i32,
 ) -> Result<bool, sqlx::Error> {
     let row: (bool,) = sqlx::query_as(
-        "select exists(select 1 from mm_metadata_tvshow \
-        where mm_metadata_media_tvshow_id = $1 limit 1) as found_record limit 1",
+        r#"select exists(select 1 from mm_metadata_tvshow where mm_metadata_media_tvshow_id = $1 limit 1) as found_record limit 1"#,
     )
     .bind(metadata_id)
     .fetch_one(sqlx_pool)
@@ -34,15 +33,8 @@ pub async fn mk_lib_database_metadata_tv_read(
     if !search_value.is_empty() {
         // doing union so exact matches show on top
         sqlx::query_as(
-            "select mm_metadata_tvshow_guid, \
-            mm_metadata_tvshow_name, \
-            mm_metadata_tvshow_name_alt, \
-            mm_metadata_tvshow_json->'first_air_date' as air_date, \
-            mm_metadata_tvshow_localimage_json->'Poster' as image_json \
-            from mm_metadata_tvshow \
-            where mm_metadata_tvshow_name &@ $1 \
-            or mm_metadata_tvshow_name_alt &@ $2
-            offset $3 limit $4",
+            r#"select mm_metadata_tvshow_guid, mm_metadata_tvshow_name, mm_metadata_tvshow_name_alt, mm_metadata_tvshow_json->'first_air_date' as air_date, mm_metadata_tvshow_localimage_json->'Poster' as image_json from mm_metadata_tvshow where mm_metadata_tvshow_name &@ $1 or mm_metadata_tvshow_name_alt &@ $2
+            offset $3 limit $4"#,
         )
         .bind(&search_value)
         .bind(&search_value)
@@ -52,15 +44,7 @@ pub async fn mk_lib_database_metadata_tv_read(
         .await
     } else {
         sqlx::query_as(
-            "select mm_metadata_tvshow_guid, \
-            mm_metadata_tvshow_name, \
-            mm_metadata_tvshow_name_alt, \
-            mm_metadata_tvshow_json->'first_air_date' as air_date, \
-            mm_metadata_tvshow_localimage_json->'Poster' as image_json \
-            from mm_metadata_tvshow \
-            order by LOWER(mm_metadata_tvshow_name), \
-            mm_metadata_tvshow_json->'first_air_date' \
-            offset $1 limit $2",
+            r#"select mm_metadata_tvshow_guid, mm_metadata_tvshow_name, mm_metadata_tvshow_name_alt, mm_metadata_tvshow_json->'first_air_date' as air_date, mm_metadata_tvshow_localimage_json->'Poster' as image_json from mm_metadata_tvshow order by LOWER(mm_metadata_tvshow_name), mm_metadata_tvshow_json->'first_air_date' offset $1 limit $2"#,
         )
         .bind(offset)
         .bind(limit)
@@ -75,15 +59,14 @@ pub async fn mk_lib_database_metadata_tv_count(
 ) -> Result<i64, sqlx::Error> {
     if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
-            "select count(*) from mm_metadata_tvshow \
-            where mm_metadata_tvshow_name &@ $1",
+            r#"select count(*) from mm_metadata_tvshow where mm_metadata_tvshow_name &@ $1"#,
         )
         .bind(search_value)
         .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     } else {
-        let row: (i64,) = sqlx::query_as("select count(*) from mm_metadata_tvshow")
+        let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_metadata_tvshow"#)
             .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
@@ -103,13 +86,7 @@ pub async fn mk_lib_database_metadata_tv_insert(
     }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
-        "insert into mm_metadata_tvshow (mm_metadata_tvshow_guid, \
-        mm_metadata_media_tvshow_id, \
-        mm_metadata_tvshow_name, \
-        mm_metadata_tvshow_name_alt, \
-        mm_metadata_tvshow_json, \
-        mm_metadata_tvshow_localimage_json) \
-        values ($1,$2,$3,$4,$5,$6)",
+        r#"insert into mm_metadata_tvshow (mm_metadata_tvshow_guid, mm_metadata_media_tvshow_id, mm_metadata_tvshow_name, mm_metadata_tvshow_name_alt, mm_metadata_tvshow_json, mm_metadata_tvshow_localimage_json) values ($1,$2,$3,$4,$5,$6)"#,
     )
     .bind(uuid_id)
     .bind(series_id)
@@ -131,8 +108,7 @@ pub async fn mk_lib_database_metadata_tv_status(
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
     let row: (serde_json::Value,) = sqlx::query_as(
-        "select mm_metadata_tv_user_json from mm_metadata_tv \
-        where mm_metadata_tv_guid = $1",
+        r#"select mm_metadata_tv_user_json from mm_metadata_tv where mm_metadata_tv_guid = $1"#,
     )
     .bind(uuid_id)
     .fetch_one(sqlx_pool)
@@ -145,9 +121,7 @@ pub async fn mk_lib_database_metadata_tv_status(
     }
     // TODO set the "keys"
     sqlx::query(
-        "update mm_metadata_tv \
-                set mm_metadata_tv_user_json = $1 \
-                where mm_metadata_tv_guid = $2",
+        r#"update mm_metadata_tv set mm_metadata_tv_user_json = $1 where mm_metadata_tv_guid = $2"#,
     )
     .bind(user_json)
     .bind(uuid_id)

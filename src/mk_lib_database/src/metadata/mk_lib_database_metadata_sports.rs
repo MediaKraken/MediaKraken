@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
 use sqlx::postgres::PgRow;
+use sqlx::FromRow;
 
 pub async fn mk_lib_database_metadata_sports_count(
     sqlx_pool: &sqlx::PgPool,
@@ -8,15 +8,14 @@ pub async fn mk_lib_database_metadata_sports_count(
 ) -> Result<i64, sqlx::Error> {
     if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
-            "select count(*) from mm_metadata_sports \
-            where mm_metadata_sports_name &@ $1",
+            r#"select count(*) from mm_metadata_sports where mm_metadata_sports_name &@ $1"#,
         )
         .bind(search_value)
         .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     } else {
-        let row: (i64,) = sqlx::query_as("select count(*) from mm_metadata_sports")
+        let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_metadata_sports"#)
             .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
@@ -38,10 +37,7 @@ pub async fn mk_lib_database_metadata_sports_read(
     // TODO order by year
     if !search_value.is_empty() {
         sqlx::query_as(
-            "select mm_metadata_sports_guid, mm_metadata_sports_name \
-            from mm_metadata_sports where mm_metadata_sports_guid \
-            where mm_metadata_sports_name &@ $1 \
-            offset $2 limit $3",
+            r#"select mm_metadata_sports_guid, mm_metadata_sports_name from mm_metadata_sports where mm_metadata_sports_guid where mm_metadata_sports_name &@ $1 offset $2 limit $3"#,
         )
         .bind(search_value)
         .bind(offset)
@@ -50,10 +46,8 @@ pub async fn mk_lib_database_metadata_sports_read(
         .await
     } else {
         sqlx::query_as(
-            "select mm_metadata_sports_guid, mm_metadata_sports_name \
-            from mm_metadata_sports
-            order by LOWER(mm_metadata_sports_name) \
-            offset $1 limit $2",
+            r#"select mm_metadata_sports_guid, mm_metadata_sports_name from mm_metadata_sports
+            order by LOWER(mm_metadata_sports_name) offset $1 limit $2"#,
         )
         .bind(offset)
         .bind(limit)

@@ -14,12 +14,7 @@ pub async fn mk_lib_database_activity_insert(
     let new_guid = Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
-        "insert into mm_user_activity (mm_activity_guid, mm_activity_name, \
-        mm_activity_overview, mm_activity_short_overview, \
-        mm_activity_type, mm_activity_itemid, \
-        mm_activity_userid, mm_activity_datecreated, \
-        mm_activity_log_severity) \
-        values ($1,$2,$3,$4,$5,$6,$7,$8,$9)",
+        r#"insert into mm_user_activity (mm_activity_guid, mm_activity_name, mm_activity_overview, mm_activity_short_overview, mm_activity_type, mm_activity_itemid, mm_activity_userid, mm_activity_datecreated, mm_activity_log_severity) values ($1,$2,$3,$4,$5,$6,$7,$8,$9)"#,
     )
     .bind(new_guid)
     .bind(activity_name)
@@ -42,8 +37,7 @@ pub async fn mk_lib_database_activity_delete(
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
-        "delete from mm_user_activity \
-        where mm_activity_datecreated < now() - interval $1 day;",
+        r#"delete from mm_user_activity where mm_activity_datecreated < now() - interval $1 day;"#,
     )
     .bind(day_range)
     .execute(&mut *transaction)

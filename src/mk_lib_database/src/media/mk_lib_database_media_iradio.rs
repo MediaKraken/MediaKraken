@@ -51,13 +51,13 @@ pub async fn mk_lib_database_media_iradio_count(sqlx_pool: &sqlx::PgPool,
                                                   search_value: String)
                                                   -> Result<i32, sqlx::Error> {
     if !search_value.is_empty() {
-        let row: (i32, ) = sqlx::query("")
+        let row: (i32, ) = sqlx::query(r#""#)
             .bind(search_value)
             .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
     } else {
-        let row: (i32, ) = sqlx::query("")
+        let row: (i32, ) = sqlx::query(r#""#)
             .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)

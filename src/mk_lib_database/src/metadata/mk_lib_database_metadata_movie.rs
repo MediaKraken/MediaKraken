@@ -1,18 +1,17 @@
 use crate::mk_lib_database::MediaStatusUpdatePayload;
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
 use sqlx::postgres::PgRow;
-use sqlx::types::Uuid;
 use sqlx::types::chrono::DateTime;
 use sqlx::types::chrono::Utc;
+use sqlx::types::Uuid;
+use sqlx::FromRow;
 
 pub async fn mk_lib_database_metadata_exists_movie(
     sqlx_pool: &sqlx::PgPool,
     metadata_id: i32,
 ) -> Result<bool, sqlx::Error> {
     let row: (bool,) = sqlx::query_as(
-        "select exists(select 1 from mm_metadata_movie \
-        where mm_metadata_movie_media_id = $1 limit 1) as found_record limit 1",
+        r#"select exists(select 1 from mm_metadata_movie where mm_metadata_movie_media_id = $1 limit 1) as found_record limit 1"#,
     )
     .bind(metadata_id)
     .fetch_one(sqlx_pool)
@@ -109,15 +108,14 @@ pub async fn mk_lib_database_metadata_movie_count(
 ) -> Result<i64, sqlx::Error> {
     if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
-            "select count(*) from mm_metadata_movie \
-            where mm_metadata_movie_name &@ $1",
+            r#"select count(*) from mm_metadata_movie where mm_metadata_movie_name &@ $1"#,
         )
         .bind(search_value)
         .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     } else {
-        let row: (i64,) = sqlx::query_as("select count(*) from mm_metadata_movie")
+        let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_metadata_movie"#)
             .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
@@ -137,13 +135,7 @@ pub async fn mk_lib_database_metadata_movie_insert(
     }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
-        "insert into mm_metadata_movie (mm_metadata_movie_guid, \
-        mm_metadata_movie_media_id, \
-        mm_metadata_movie_name, \
-        mm_metadata_movie_name_alt, \
-        mm_metadata_movie_json, \
-        mm_metadata_movie_localimage_json) \
-        values ($1,$2,$3,$4,$5,$6)",
+        r#"insert into mm_metadata_movie (mm_metadata_movie_guid, mm_metadata_movie_media_id, mm_metadata_movie_name, mm_metadata_movie_name_alt, mm_metadata_movie_json, mm_metadata_movie_localimage_json) values ($1,$2,$3,$4,$5,$6)"#,
     )
     .bind(uuid_id)
     .bind(series_id)
@@ -162,7 +154,7 @@ pub async fn mk_lib_database_metadata_movie_guid_by_tmdb(
     uuid_id: Uuid,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let row: (uuid::Uuid,) = sqlx::query_as(
-        "select mm_metadata_guid from mm_metadata_movie where mm_metadata_movie_media_id = $1",
+        r#"select mm_metadata_guid from mm_metadata_movie where mm_metadata_movie_media_id = $1"#,
     )
     .bind(uuid_id)
     .fetch_one(sqlx_pool)

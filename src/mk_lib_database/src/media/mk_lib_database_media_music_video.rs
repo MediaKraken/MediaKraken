@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
 use sqlx::postgres::PgRow;
+use sqlx::FromRow;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaMusicVideoList {
@@ -14,14 +14,14 @@ pub async fn mk_lib_database_media_music_video_read(
     limit: i64,
 ) -> Result<Vec<DBMediaMusicVideoList>, sqlx::Error> {
     if !search_value.is_empty() {
-        sqlx::query_as("")
+        sqlx::query_as(r#""#)
             .bind(search_value)
             .bind(offset)
             .bind(limit)
             .fetch_all(sqlx_pool)
             .await
     } else {
-        sqlx::query_as("")
+        sqlx::query_as(r#""#)
             .bind(offset)
             .bind(limit)
             .fetch_all(sqlx_pool)

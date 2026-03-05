@@ -1,7 +1,7 @@
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
 use sqlx::types::Uuid;
+use sqlx::FromRow;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBLibraryList {
@@ -14,8 +14,8 @@ pub async fn mk_lib_database_library_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBLibraryList>, sqlx::Error> {
     let table_rows: Vec<DBLibraryList> = sqlx::query_as(
-        "select mm_media_dir_guid, mm_media_dir_path, mm_media_dir_share_guid \
-        from mm_library_dir",
+        r#"select mm_media_dir_guid, mm_media_dir_path, mm_media_dir_share_guid
+        from mm_library_dir"#,
     )
     .fetch_all(sqlx_pool)
     .await?;
@@ -35,12 +35,12 @@ pub async fn mk_lib_database_library_path_audit_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBLibraryAuditList>, sqlx::Error> {
     let table_rows: Vec<DBLibraryAuditList> = sqlx::query_as(
-        "select mm_media_dir_guid, \
-        mm_media_dir_path, \
-        mm_media_dir_class_enum, \
-        mm_media_dir_last_scanned, \
-        mm_media_dir_share_guid \
-        from mm_library_dir",
+        r#"select mm_media_dir_guid,
+        mm_media_dir_path,
+        mm_media_dir_class_enum,
+        mm_media_dir_last_scanned,
+        mm_media_dir_share_guid
+        from mm_library_dir"#,
     )
     .fetch_all(sqlx_pool)
     .await?;
@@ -57,9 +57,9 @@ pub async fn mk_lib_database_library_path_status(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBLibraryPathStatus>, sqlx::Error> {
     let table_rows: Vec<DBLibraryPathStatus> = sqlx::query_as(
-        "select mm_media_dir_path, mm_media_dir_status \
-        from mm_library_dir where mm_media_dir_status IS NOT NULL \
-        order by mm_media_dir_path",
+        r#"select mm_media_dir_path, mm_media_dir_status
+        from mm_library_dir where mm_media_dir_status IS NOT NULL
+        order by mm_media_dir_path"#,
     )
     .fetch_all(sqlx_pool)
     .await?;
@@ -72,8 +72,8 @@ pub async fn mk_lib_database_library_path_status_update(
     library_status_json: serde_json::Value,
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
-        "update mm_library_dir set mm_media_dir_status = $1 \
-        where mm_media_dir_guid = $2",
+        r#"update mm_library_dir set mm_media_dir_status = $1
+        where mm_media_dir_guid = $2"#,
     )
     .bind(library_status_json)
     .bind(library_uuid)
@@ -87,8 +87,8 @@ pub async fn mk_lib_database_library_path_timestamp_update(
     library_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
     sqlx::query(
-        "update mm_library_dir set mm_media_dir_last_scanned = NOW() \
-        where mm_media_dir_guid = $1",
+        r#"update mm_library_dir set mm_media_dir_last_scanned = NOW()
+        where mm_media_dir_guid = $1"#,
     )
     .bind(library_uuid)
     .execute(sqlx_pool)
@@ -101,9 +101,9 @@ pub async fn mk_lib_database_library_file_exists(
     file_name: &str,
 ) -> Result<bool, sqlx::Error> {
     let row: (bool,) = sqlx::query_as(
-        "select exists(select 1 from mm_media \
-        where mm_media_path = $1) \
-        as found_record",
+        r#"select exists(select 1 from mm_media
+        where mm_media_path = $1)
+        as found_record"#,
     )
     .bind(file_name)
     .fetch_one(sqlx_pool)
@@ -112,7 +112,7 @@ pub async fn mk_lib_database_library_file_exists(
 }
 
 pub async fn mk_lib_database_library_count(sqlx_pool: &sqlx::PgPool) -> Result<i64, sqlx::Error> {
-    let row: (i64,) = sqlx::query_as("select count(*) from mm_library_dir")
+    let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_library_dir"#)
         .fetch_one(sqlx_pool)
         .await?;
     Ok(row.0)

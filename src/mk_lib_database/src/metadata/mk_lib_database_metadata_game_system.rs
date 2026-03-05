@@ -1,15 +1,14 @@
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
+use sqlx::FromRow;
 
 pub async fn mk_lib_database_metadata_game_system_detail(
     sqlx_pool: &sqlx::PgPool,
     game_sys_uuid: Uuid,
 ) -> Result<serde_json::Value, sqlx::Error> {
     let row: (serde_json::Value,) = sqlx::query_as(
-        "select gs_game_system_json from mm_metadata_game_systems_info \
-        where gs_id = $1",
+        r#"select gs_game_system_json from mm_metadata_game_systems_info where gs_id = $1"#,
     )
     .bind(game_sys_uuid)
     .fetch_one(sqlx_pool)
@@ -23,15 +22,14 @@ pub async fn mk_lib_database_metadata_game_system_count(
 ) -> Result<i64, sqlx::Error> {
     if search_value != String::new() {
         let row: (i64,) = sqlx::query_as(
-            "select count(*) from mm_metadata_game_systems_info \
-            where gs_game_system_name &@ $1",
+            r#"select count(*) from mm_metadata_game_systems_info where gs_game_system_name &@ $1"#,
         )
         .bind(search_value)
         .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     } else {
-        let row: (i64,) = sqlx::query_as("select count(*) from mm_metadata_game_systems_info")
+        let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_metadata_game_systems_info"#)
             .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
@@ -56,12 +54,7 @@ pub async fn mk_lib_database_metadata_game_system_read(
     // TODO might need to sort by release year as well for machines with multiple releases
     if search_value != String::new() {
         sqlx::query_as(
-            "select gs_game_system_id, gs_game_system_name, \
-            gs_game_system_json->>'description' as gs_description, \
-            gs_game_system_json->>'year' as gs_year, \
-            gs_game_system_alias from mm_metadata_game_systems_info \
-            where gs_game_system_name &@ $1 \
-            offset $2 limit $3",
+            r#"select gs_game_system_id, gs_game_system_name, gs_game_system_json->>'description' as gs_description, gs_game_system_json->>'year' as gs_year, gs_game_system_alias from mm_metadata_game_systems_info where gs_game_system_name &@ $1 offset $2 limit $3"#,
         )
         .bind(search_value)
         .bind(offset)
@@ -70,11 +63,7 @@ pub async fn mk_lib_database_metadata_game_system_read(
         .await
     } else {
         sqlx::query_as(
-            "select gs_game_system_id, gs_game_system_name, \
-            gs_game_system_json->>'description' as gs_description, \
-            gs_game_system_json->>'year' as gs_year, \
-            gs_game_system_alias from mm_metadata_game_systems_info \
-            order by gs_game_system_json->'description' offset $1 limit $2",
+            r#"select gs_game_system_id, gs_game_system_name, gs_game_system_json->>'description' as gs_description, gs_game_system_json->>'year' as gs_year, gs_game_system_alias from mm_metadata_game_systems_info order by gs_game_system_json->'description' offset $1 limit $2"#,
         )
         .bind(offset)
         .bind(limit)
@@ -92,14 +81,7 @@ pub async fn mk_lib_database_metadata_game_system_upsert(
     let new_guid = uuid::Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
-        "INSERT INTO mm_metadata_game_systems_info \
-        (gs_game_system_id, \
-        gs_game_system_name, \
-        gs_game_system_alias, \
-        gs_game_system_json) \
-        VALUES ($1, $2, $3, $4) \
-        ON CONFLICT (gs_game_system_name) \
-        DO UPDATE SET gs_game_system_alias = $5, gs_game_system_json = $6",
+        r#"INSERT INTO mm_metadata_game_systems_info (gs_game_system_id, gs_game_system_name, gs_game_system_alias, gs_game_system_json) VALUES ($1, $2, $3, $4) ON CONFLICT (gs_game_system_name) DO UPDATE SET gs_game_system_alias = $5, gs_game_system_json = $6"#,
     )
     .bind(new_guid)
     .bind(system_name)
@@ -118,9 +100,7 @@ pub async fn mk_lib_database_metadata_game_system_guid_by_short_name(
     game_system_short_name: &String,
 ) -> Result<Uuid, sqlx::Error> {
     let row: (Uuid,) = sqlx::query_as(
-        "select gs_game_system_id \
-        from mm_metadata_game_systems_info \
-        where gs_game_system_name = $1",
+        r#"select gs_game_system_id from mm_metadata_game_systems_info where gs_game_system_name = $1"#,
     )
     .bind(game_system_short_name)
     .fetch_one(sqlx_pool)
@@ -134,9 +114,7 @@ pub async fn mk_lib_database_metadata_game_system_game_count_by_short_name(
 ) -> Result<i64, sqlx::Error> {
     // TODO this query doesn't return game count.......
     let row: (i64,) = sqlx::query_as(
-        "select count(*) \
-        from mm_metadata_game_systems_info \
-        where gs_game_system_name = $1",
+        r#"select count(*) from mm_metadata_game_systems_info where gs_game_system_name = $1"#,
     )
     .bind(game_system_short_name)
     .fetch_one(sqlx_pool)

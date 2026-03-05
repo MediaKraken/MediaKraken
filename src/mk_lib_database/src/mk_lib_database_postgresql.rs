@@ -4,10 +4,7 @@ use sqlx::FromRow;
 pub async fn mk_lib_database_table_row_count(sqlx_pool: &sqlx::PgPool) -> Result<f32, sqlx::Error> {
     // query provided by postgresql wiki
     let row: (f32,) = sqlx::query_as(
-        "SELECT sum(reltuples) \
-        FROM pg_class C LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace) \
-        WHERE nspname NOT IN ('pg_catalog', 'information_schema') \
-        AND relkind='r'",
+        r#"SELECT sum(reltuples) FROM pg_class C LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace) WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND relkind='r'"#,
     )
     .fetch_one(sqlx_pool)
     .await?;
@@ -26,10 +23,7 @@ pub async fn mk_lib_database_table_rows(
 ) -> Result<Vec<PGTableRows>, sqlx::Error> {
     // query provided by postgresql wiki
     let table_rows: Vec<PGTableRows> = sqlx::query_as(
-        "SELECT nspname AS schemaname,relname,reltuples \
-        FROM pg_class C LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace) \
-        WHERE nspname NOT IN ('pg_catalog', 'information_schema') \
-        AND relkind='r' ORDER BY reltuples DESC",
+        r#"SELECT nspname AS schemaname,relname,reltuples FROM pg_class C LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace) WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND relkind='r' ORDER BY reltuples DESC"#,
     )
     .fetch_all(sqlx_pool)
     .await?;
@@ -44,11 +38,11 @@ pub struct PGTable {
 pub async fn mk_lib_database_tables(sqlx_pool: &sqlx::PgPool) -> Result<Vec<PGTable>, sqlx::Error> {
     // this does NOT return sequences like the tables size does
     let table_rows: Vec<PGTable> = sqlx::query_as(
-        "SELECT tablename
+        r#"SELECT tablename
         FROM pg_catalog.pg_tables
         WHERE schemaname != 'pg_catalog' AND 
         schemaname != 'information_schema'
-        order by tablename;",
+        order by tablename;"#,
     )
     .fetch_all(sqlx_pool)
     .await?;
@@ -66,12 +60,7 @@ pub async fn mk_lib_database_table_size(
 ) -> Result<Vec<PGTableSize>, sqlx::Error> {
     // query provided by postgresql wiki
     let table_rows: Vec<PGTableSize> = sqlx::query_as(
-        "SELECT relname AS \"relation\", \
-        pg_total_relation_size(C.oid) AS \"total_size\" FROM pg_class C \
-        LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace) \
-        WHERE nspname NOT IN ('pg_catalog', 'information_schema') \
-        AND C.relkind <> 'i' AND nspname!~ '^pg_toast' \
-        ORDER BY pg_total_relation_size(C.oid) DESC",
+        r##"SELECT relname AS "relation", pg_total_relation_size(C.oid) AS "total_size" FROM pg_class C LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace) WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND C.relkind <> 'i' AND nspname!~ '^pg_toast' ORDER BY pg_total_relation_size(C.oid) DESC"##,
     )
     .fetch_all(sqlx_pool)
     .await?;
@@ -83,10 +72,7 @@ pub async fn mk_lib_database_table_size_total(
 ) -> Result<i64, sqlx::Error> {
     // query provided by postgresql wiki
     let row: (i64,) = sqlx::query_as(
-        "SELECT sum(pg_total_relation_size(C.oid))::bigint AS \"total_size\" FROM pg_class C \
-        LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace) \
-        WHERE nspname NOT IN ('pg_catalog', 'information_schema') \
-        AND C.relkind <> 'i' AND nspname!~ '^pg_toast'",
+        r##"SELECT sum(pg_total_relation_size(C.oid))::bigint AS "total_size" FROM pg_class C LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace) WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND C.relkind <> 'i' AND nspname!~ '^pg_toast'"##,
     )
     .fetch_one(sqlx_pool)
     .await?;
@@ -96,7 +82,7 @@ pub async fn mk_lib_database_table_size_total(
 pub async fn mk_lib_database_parallel_workers(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<String, sqlx::Error> {
-    let row: (String,) = sqlx::query_as("show max_parallel_workers_per_gather")
+    let row: (String,) = sqlx::query_as(r#"show max_parallel_workers_per_gather"#)
         .fetch_one(sqlx_pool)
         .await?;
     Ok(row.0)
@@ -112,7 +98,7 @@ pub async fn mk_lib_database_extension_active(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<PGExtensionActive>, sqlx::Error> {
     let table_rows: Vec<PGExtensionActive> =
-        sqlx::query_as("SELECT extname, extversion from pg_extension order by extname")
+        sqlx::query_as(r#"SELECT extname, extversion from pg_extension order by extname"#)
             .fetch_all(sqlx_pool)
             .await?;
     Ok(table_rows)
@@ -127,10 +113,11 @@ pub struct PGExtensionAvailable {
 pub async fn mk_lib_database_extension_available(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<PGExtensionAvailable>, sqlx::Error> {
-    let table_rows: Vec<PGExtensionAvailable> =
-        sqlx::query_as("SELECT name, default_version FROM pg_available_extensions order by name")
-            .fetch_all(sqlx_pool)
-            .await?;
+    let table_rows: Vec<PGExtensionAvailable> = sqlx::query_as(
+        r#"SELECT name, default_version FROM pg_available_extensions order by name"#,
+    )
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 

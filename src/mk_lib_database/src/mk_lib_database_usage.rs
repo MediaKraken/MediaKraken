@@ -11,9 +11,7 @@ pub async fn mk_lib_database_usage_top10_movie(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBMUsageMovieList>, sqlx::Error> {
     let table_rows: Vec<DBMUsageMovieList> = sqlx::query_as(
-        "select mm_metadata_name, \
-        mm_metadata_user_json->'Watched'->'Times' as mm_metadata_times \
-        from mm_metadata_movie order by mm_metadata_user_json->'Watched'->'Times' desc limit 10",
+        r#"select mm_metadata_name, mm_metadata_user_json->'Watched'->'Times' as mm_metadata_times from mm_metadata_movie order by mm_metadata_user_json->'Watched'->'Times' desc limit 10"#,
     )
     .fetch_all(sqlx_pool)
     .await?;
@@ -30,10 +28,7 @@ pub async fn mk_lib_database_usage_top10_tv(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBUsageTVList>, sqlx::Error> {
     let table_rows: Vec<DBUsageTVList> = sqlx::query_as(
-        "select mm_metadata_tvshow_name, \
-        mm_metadata_tvshow_user_json->'Watched'->'Times' as mm_metadata_times \
-        from mm_metadata_tvshow order by mm_metadata_tvshow_user_json->'Watched'->'Times' \
-        desc limit 10",
+        r#"select mm_metadata_tvshow_name, mm_metadata_tvshow_user_json->'Watched'->'Times' as mm_metadata_times from mm_metadata_tvshow order by mm_metadata_tvshow_user_json->'Watched'->'Times' desc limit 10"#,
     )
     .fetch_all(sqlx_pool)
     .await?;
