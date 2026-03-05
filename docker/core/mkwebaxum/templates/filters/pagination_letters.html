@@ -5,7 +5,7 @@
 
     <!-- # Symbols -->
     <li>
-      <a href="?starts_with=%23"
+      <a href="{{ base_path }}/1?starts_with=%23"
          class="px-2 py-1.5 rounded-md transition-colors
          {% if current == Some("#".to_string()) %}
             bg-indigo-600 text-white
@@ -19,7 +19,7 @@
     <!-- Numbers -->
     {% for n in 0..10 %}
     <li>
-      <a href="?starts_with={{ n }}"
+      <a href="{{ base_path }}/1?starts_with={{ n }}"
          class="px-2 py-1.5 rounded-md transition-colors
          {% if current == Some(n.to_string()) %}
             bg-indigo-600 text-white
@@ -34,7 +34,7 @@
     <!-- Letters -->
     {% for c in 'A'..='Z' %}
     <li>
-      <a href="?starts_with={{ c }}"
+      <a href="{{ base_path }}/1?starts_with={{ c }}"
          class="px-2 py-1.5 rounded-md transition-colors
          {% if current == Some(c.to_string()) %}
             bg-indigo-600 text-white

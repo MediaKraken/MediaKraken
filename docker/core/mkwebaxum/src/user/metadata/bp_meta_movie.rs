@@ -61,6 +61,7 @@ struct TemplateMetaMovieContext<'a> {
     page: &'a usize,
     page_title: Option<String>,
     pub current: Option<String>,
+    pub base_path: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -213,6 +214,7 @@ pub async fn user_metadata_movie(
             page: &page_usize,
             page_title: Some("MediaKraken Metadata Movies".to_string()),
             current: params.starts_with.clone(), 
+            base_path: "/user/metadata/movie".to_string(),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
