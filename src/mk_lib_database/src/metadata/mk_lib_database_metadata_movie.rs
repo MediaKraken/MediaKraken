@@ -95,7 +95,7 @@ pub async fn mk_lib_database_metadata_movie_read(
             offset $3 limit $4"#,
         )
         .bind(&user_id)
-        .bind(&starts_with.to_lower())
+        .bind(&starts_with.to_lowercase())
         .bind(offset)
         .bind(limit)
             .fetch_all(sqlx_pool)

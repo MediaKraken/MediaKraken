@@ -120,7 +120,7 @@ pub async fn user_metadata_movie(
             &state.sqlx_pool_ro,
             String::new(),
             current_user.id,
-            params.starts_with.clone(),
+            params.starts_with.clone().unwrap_or_default(),
             db_offset,
             30,
         )
