@@ -8,9 +8,9 @@ pub async fn mk_lib_database_media_music_count(
 ) -> Result<i64, sqlx::Error> {
     if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
-            "elect count(*) from mm_metadata_album, mm_media \
-            where mm_media_metadata_guid = mm_metadata_album_guid \
-            and mm_metadata_album_name % $1",
+            r#"select count(*) from mm_metadata_album, mm_media
+            where mm_media_metadata_guid = mm_metadata_album_guid
+            and mm_metadata_album_name % $1"#,
         )
         .bind(search_value)
         .fetch_one(sqlx_pool)
@@ -18,9 +18,9 @@ pub async fn mk_lib_database_media_music_count(
         Ok(row.0)
     } else {
         let row: (i64,) = sqlx::query_as(
-            "select count(*) from \
-            (select distinct mm_metadata_album_guid from mm_metadata_album, mm_media \
-            where mm_media_metadata_guid = mm_metadata_album_guid) as temp",
+            r#"select count(*) from
+            (select distinct mm_metadata_album_guid from mm_metadata_album, mm_media
+            where mm_media_metadata_guid = mm_metadata_album_guid) as temp"#,
         )
         .fetch_one(sqlx_pool)
         .await?;
@@ -44,13 +44,13 @@ pub async fn mk_lib_database_media_music_read(
     // TODO only grab the image part of the json for list, might want runtime, etc as well
     if !search_value.is_empty() {
         sqlx::query_as(
-            "select mm_metadata_album_guid, mm_metadata_album_name, \
-            mm_metadata_album_json from mm_metadata_album, mm_media \
-            where mm_media_metadata_guid = mm_metadata_album_guid \
-            and mm_metadata_album_name % $1 \
-            group by mm_metadata_album_guid \
-            order by LOWER(mm_metadata_album_name) \
-            offset $2 limit $3",
+            r#"select mm_metadata_album_guid, mm_metadata_album_name,
+            mm_metadata_album_json from mm_metadata_album, mm_media
+            where mm_media_metadata_guid = mm_metadata_album_guid
+            and mm_metadata_album_name % $1
+            group by mm_metadata_album_guid
+            order by LOWER(mm_metadata_album_name)
+            offset $2 limit $3"#,
         )
         .bind(search_value)
         .bind(offset)
@@ -59,12 +59,12 @@ pub async fn mk_lib_database_media_music_read(
         .await
     } else {
         sqlx::query_as(
-            "select mm_metadata_album_guid, mm_metadata_album_name, \
-            mm_metadata_album_json from mm_metadata_album, mm_media \
-            where mm_media_metadata_guid = mm_metadata_album_guid \
-            group by mm_metadata_album_guid \
-            order by LOWER(mm_metadata_album_name) \
-            offset $1 limit $2",
+            r#"select mm_metadata_album_guid, mm_metadata_album_name,
+            mm_metadata_album_json from mm_metadata_album, mm_media
+            where mm_media_metadata_guid = mm_metadata_album_guid
+            group by mm_metadata_album_guid
+            order by LOWER(mm_metadata_album_name)
+            offset $1 limit $2"#,
         )
         .bind(offset)
         .bind(limit)

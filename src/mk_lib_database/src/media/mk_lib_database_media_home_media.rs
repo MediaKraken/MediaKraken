@@ -37,9 +37,9 @@ pub async fn mk_lib_database_media_home_media_count(
 ) -> Result<i64, sqlx::Error> {
     if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
-            "select count(*) from mm_media \
+            r#"select count(*) from mm_media
             where mmr_media_class_guid = $1
-            and mm_media_path % $2",
+            and mm_media_path % $2"#,
         )
         .bind(mk_lib_common_enum_media_type::DLMediaType::MOVIE_HOME)
         .bind(search_value)
@@ -48,8 +48,8 @@ pub async fn mk_lib_database_media_home_media_count(
         Ok(row.0)
     } else {
         let row: (i64,) = sqlx::query_as(
-            "select count(*) from mm_media \
-            where mmr_media_class_guid = $1",
+            r#"select count(*) from mm_media
+            where mmr_media_class_guid = $1"#,
         )
         .bind(mk_lib_common_enum_media_type::DLMediaType::MOVIE_HOME)
         .fetch_one(sqlx_pool)

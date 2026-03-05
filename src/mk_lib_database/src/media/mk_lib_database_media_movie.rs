@@ -8,16 +8,16 @@ pub async fn mk_lib_database_media_movie_genre_count(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<PgRow>, sqlx::Error> {
     let rows: Vec<PgRow> = sqlx::query(
-        "select mm_metadata_json->'genres' as gen, \
-        count(mm_metadata_json->'genres') as gen_count \
-        from ((select distinct on (mm_media_metadata_guid) \
-        mm_metadata_json from mm_media, mm_metadata_movie \
-        where mm_media_class_guid = $1 \
-        and mm_media_metadata_guid = mm_metadata_guid) union (select distinct \
-        on (mmr_media_metadata_guid) mm_metadata_json from mm_media_remote, \
-        mm_metadata_movie where mmr_media_class_guid = $2 \
-        and mmr_media_metadata_guid = mm_metadata_guid)) \
-        as temp group by gen",
+        r#"select mm_metadata_json->'genres' as gen,
+        count(mm_metadata_json->'genres') as gen_count
+        from ((select distinct on (mm_media_metadata_guid)
+        mm_metadata_json from mm_media, mm_metadata_movie
+        where mm_media_class_guid = $1
+        and mm_media_metadata_guid = mm_metadata_guid) union (select distinct
+        on (mmr_media_metadata_guid) mm_metadata_json from mm_media_remote,
+        mm_metadata_movie where mmr_media_class_guid = $2
+        and mmr_media_metadata_guid = mm_metadata_guid))
+        as temp group by gen"#,
     )
     .bind(mk_lib_common_enum_media_type::DLMediaType::MOVIE)
     .bind(mk_lib_common_enum_media_type::DLMediaType::MOVIE)
@@ -30,10 +30,10 @@ pub async fn mk_lib_database_media_movie_random(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<(Uuid, Uuid), sqlx::Error> {
     let row: (Uuid, Uuid) = sqlx::query_as(
-        "select mm_metadata_guid, mm_media_guid \
-        from mm_media, mm_metadata_movie \
-        where mm_media_metadata_guid = mm_metadata_guid \
-        and random() < 0.01 limit 1",
+        r#"select mm_metadata_guid, mm_media_guid
+        from mm_media, mm_metadata_movie
+        where mm_media_metadata_guid = mm_metadata_guid
+        and random() < 0.01 limit 1"#,
     )
     .fetch_one(sqlx_pool)
     .await?;

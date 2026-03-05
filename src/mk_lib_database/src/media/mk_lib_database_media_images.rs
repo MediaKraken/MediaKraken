@@ -6,8 +6,8 @@ pub async fn mk_lib_database_metadata_image_count(
     class_id: i32,
 ) -> Result<i64, sqlx::Error> {
     let row: (i64,) = sqlx::query_as(
-        "select count(*) from mm_media \
-        where mm_media_class_guid = $1",
+        r#"select count(*) from mm_media
+        where mm_media_class_guid = $1"#,
     )
     .bind(class_id)
     .fetch_one(sqlx_pool)
@@ -27,8 +27,9 @@ pub async fn mk_lib_database_metadata_image_read(
     limit: i64,
 ) -> Result<Vec<MediaImageList>, sqlx::Error> {
     let table_rows: Vec<MediaImageList> = sqlx::query_as(
-        "select mm_media_path from mm_media \
-        where mm_media_class_guid = $1 offset $2 limit $3",
+        r#"select mm_media_path from mm_media
+        where mm_media_class_guid = $1
+        offset $2 limit $3"#,
     )
     .bind(class_id)
     .bind(offset)

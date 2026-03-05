@@ -35,9 +35,9 @@ pub async fn mk_lib_database_media_music_video_count(
 ) -> Result<i64, sqlx::Error> {
     if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
-            "select count(*) from mm_metadata_music_video, mm_media \
-            where mm_media_metadata_guid = mm_metadata_music_video_guid group \
-            and mm_media_music_video_song % $1",
+            r#"select count(*) from mm_metadata_music_video, mm_media
+            where mm_media_metadata_guid = mm_metadata_music_video_guid group
+            and mm_media_music_video_song % $1"#,
         )
         .bind(search_value)
         .fetch_one(sqlx_pool)
@@ -45,8 +45,8 @@ pub async fn mk_lib_database_media_music_video_count(
         Ok(row.0)
     } else {
         let row: (i64,) = sqlx::query_as(
-            "select count(*) from mm_metadata_music_video, mm_media \
-            where mm_media_metadata_guid = mm_metadata_music_video_guid",
+            r#"select count(*) from mm_metadata_music_video, mm_media
+            where mm_media_metadata_guid = mm_metadata_music_video_guid"#,
         )
         .fetch_one(sqlx_pool)
         .await?;

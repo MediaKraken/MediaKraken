@@ -51,7 +51,8 @@ pub async fn mk_lib_database_media_book_count(
     if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
             r#"select count(*) from mm_metadata_book,
-            mm_media where mm_media_metadata_guid = mm_metadata_book_guid
+            mm_media
+            where mm_media_metadata_guid = mm_metadata_book_guid
             and mm_metadata_book_name % $1"#,
         )
         .bind(search_value)
@@ -61,7 +62,8 @@ pub async fn mk_lib_database_media_book_count(
     } else {
         let row: (i64,) = sqlx::query_as(
             r#"select count(*) from mm_metadata_book,
-            mm_media where mm_media_metadata_guid = mm_metadata_book_guid"#,
+            mm_media
+            where mm_media_metadata_guid = mm_metadata_book_guid"#,
         )
         .fetch_one(sqlx_pool)
         .await?;

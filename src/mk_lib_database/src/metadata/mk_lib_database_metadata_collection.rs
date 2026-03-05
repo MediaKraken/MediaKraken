@@ -9,17 +9,19 @@ pub async fn mk_lib_database_metadata_collection_count(
 ) -> Result<i64, sqlx::Error> {
     if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
-            "select count(*) from mm_metadata_collection \
-            where mm_metadata_collection_name &@ $1",
+            r#"select count(*) from mm_metadata_collection
+            where mm_metadata_collection_name &@ $1"#,
         )
         .bind(search_value)
         .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     } else {
-        let row: (i64,) = sqlx::query_as("select count(*) from mm_metadata_collection")
-            .fetch_one(sqlx_pool)
-            .await?;
+        let row: (i64,) = sqlx::query_as(
+            r#"select count(*) from mm_metadata_collection"#,
+        )
+        .fetch_one(sqlx_pool)
+        .await?;
         Ok(row.0)
     }
 }
@@ -39,12 +41,15 @@ pub async fn mk_lib_database_metadata_collection_read(
 ) -> Result<Vec<DBMetaCollectionList>, sqlx::Error> {
     if !search_value.is_empty() {
         sqlx::query_as(
-            "select mm_metadata_collection_guid, \
-            mm_metadata_collection_name, \
-            mm_metadata_collection_imagelocal_json from mm_metadata_collection \
-            where mm_metadata_collection_guid in (select mm_metadata_collection_guid \
-            from mm_metadata_collection where mm_metadata_collection_name &@ $1 \
-            offset $2 limit $3)",
+            r#"select mm_metadata_collection_guid,
+            mm_metadata_collection_name,
+            mm_metadata_collection_imagelocal_json from mm_metadata_collection
+            where mm_metadata_collection_guid in (
+                select mm_metadata_collection_guid
+                from mm_metadata_collection
+                where mm_metadata_collection_name &@ $1
+                offset $2 limit $3
+            )"#,
         )
         .bind(search_value)
         .bind(offset)
@@ -53,13 +58,16 @@ pub async fn mk_lib_database_metadata_collection_read(
         .await
     } else {
         sqlx::query_as(
-            "select mm_metadata_collection_guid, \
-            mm_metadata_collection_name, \
-            mm_metadata_collection_imagelocal_json from mm_metadata_collection \
-            where mm_metadata_collection_guid in (select mm_metadata_collection_guid \
-            from mm_metadata_collection order by mm_metadata_collection_name \
-            order by LOWER(mm_metadata_collection_name) \
-            offset $1 limit $2)",
+            r#"select mm_metadata_collection_guid,
+            mm_metadata_collection_name,
+            mm_metadata_collection_imagelocal_json from mm_metadata_collection
+            where mm_metadata_collection_guid in (
+                select mm_metadata_collection_guid
+                from mm_metadata_collection
+                order by mm_metadata_collection_name
+                order by LOWER(mm_metadata_collection_name)
+                offset $1 limit $2
+            )"#,
         )
         .bind(offset)
         .bind(limit)
@@ -73,9 +81,9 @@ pub async fn mk_lib_database_meta_collection_detail(
     collection_uuid: String,
 ) -> Result<PgRow, sqlx::Error> {
     let row: PgRow = sqlx::query(
-        "select mm_metadata_collection_json, \
-        mm_metadata_collection_imagelocal_json from mm_metadata_collection \
-        where mm_metadata_collection_guid = $1",
+        r#"select mm_metadata_collection_json,
+        mm_metadata_collection_imagelocal_json from mm_metadata_collection
+        where mm_metadata_collection_guid = $1"#,
     )
     .bind(collection_uuid)
     .fetch_one(sqlx_pool)
@@ -94,9 +102,11 @@ pub async fn mk_lib_database_meta_collection_by_name(
     collection_name: String,
 ) -> Result<Vec<DBMetaCollectionByNameList>, sqlx::Error> {
     let table_rows: Vec<DBMetaCollectionByNameList> = sqlx::query_as(
-        "select mm_metadata_guid, mm_metadata_json \
-         from mm_metadata_movie where mm_metadata_json->'belongs_to_collection'::text \
-         <> '{}'::text order by mm_metadata_json->'belongs_to_collection'",
+        r#"select mm_metadata_guid, mm_metadata_json
+         from mm_metadata_movie
+         where mm_metadata_json->'belongs_to_collection'::text
+         <> '{}'::text
+         order by mm_metadata_json->'belongs_to_collection'"#,
     )
     .bind(collection_name)
     .fetch_all(sqlx_pool)
@@ -109,9 +119,9 @@ pub async fn mk_lib_database_metadata_collection_guid_by_name(
     collection_name: String,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let row: (uuid::Uuid,) = sqlx::query_as(
-        "select mm_metadata_collection_guid \
-        from mm_metadata_collection \
-        where mm_metadata_collection_name->>'name' = $1",
+        r#"select mm_metadata_collection_guid
+        from mm_metadata_collection
+        where mm_metadata_collection_name->>'name' = $1"#,
     )
     .bind(collection_name)
     .fetch_one(sqlx_pool)
@@ -124,29 +134,14 @@ pub async fn mk_lib_database_metadata_collection_guid_by_tmdb(
     tmdb_id: String,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let row: (uuid::Uuid,) = sqlx::query_as(
-        "select mm_metadata_collection_guid from mm_metadata_collection
-        where mm_metadata_collection_json @> '{\"id\":$1}'",
+        r#"select mm_metadata_collection_guid from mm_metadata_collection
+        where mm_metadata_collection_json @> '{"id":$1}'"#,
     )
     .bind(tmdb_id)
     .fetch_one(sqlx_pool)
     .await?;
     Ok(row.0)
 }
-
-/*
-
-// TODO port query
-pub async fn db_collection_update(self, collection_guid, guid_json):
-    """
-    Update the ids listed within a collection
-    """
-    await db_conn.execute('update mm_metadata_collection'
-                          ' set mm_metadata_collection_media_ids = $1,'
-                          ' mm_metadata_collection_json = $2'
-                          ' where mm_metadata_collection_guid = $3',
-                          TODOfield, json.dumps(guid_json), collection_guid)
-
- */
 
 pub async fn mk_lib_database_meta_collection_insert(
     sqlx_pool: &sqlx::PgPool,
@@ -158,10 +153,13 @@ pub async fn mk_lib_database_meta_collection_insert(
     let new_guid = uuid::Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
-        "insert into mm_metadata_collection (mm_metadata_collection_guid, \
-        mm_metadata_collection_name, mm_metadata_collection_media_ids, \
-        mm_metadata_collection_json, mm_metadata_collection_imagelocal_json) \
-        values ($1,$2,$3,$4,$5)",
+        r#"insert into mm_metadata_collection (
+        mm_metadata_collection_guid,
+        mm_metadata_collection_name,
+        mm_metadata_collection_media_ids,
+        mm_metadata_collection_json,
+        mm_metadata_collection_imagelocal_json
+        ) values ($1,$2,$3,$4,$5)"#,
     )
     .bind(new_guid)
     .bind(collection_name)
