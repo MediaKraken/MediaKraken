@@ -64,6 +64,7 @@ pub async fn user_media_movie(
             total_pages,
             page,
             "/user/media/movie".to_string(),
+            None,
         )
         .await
         .unwrap();

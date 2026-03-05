@@ -62,6 +62,7 @@ pub async fn user_media_book(
             total_pages,
             page,
             "/user/media/book".to_string(),
+            None,
         )
         .await
         .unwrap();

@@ -63,6 +63,7 @@ pub async fn user_metadata_person(
             total_pages,
             page,
             "/user/metadata/person".to_string(),
+            None,
         )
         .await
         .unwrap();

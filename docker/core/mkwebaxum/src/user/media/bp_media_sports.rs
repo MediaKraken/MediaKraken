@@ -62,6 +62,7 @@ pub async fn user_media_sports(
             total_pages,
             page,
             "/user/media/sports".to_string(),
+            None,
         )
         .await
         .unwrap();

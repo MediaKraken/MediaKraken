@@ -60,6 +60,7 @@ pub async fn admin_user(
             total_pages,
             page,
             "/admin/user".to_string(),
+            None,
         )
         .await
         .unwrap();

@@ -63,6 +63,7 @@ pub async fn user_metadata_tv(
             total_pages,
             page,
             "/user/metadata/tv".to_string(),
+            None,
         )
         .await
         .unwrap();

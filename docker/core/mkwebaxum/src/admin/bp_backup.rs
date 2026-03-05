@@ -61,6 +61,7 @@ pub async fn admin_backup(
             total_pages,
             page,
             "/admin/backup".to_string(),
+            None,
         )
         .await
         .unwrap();

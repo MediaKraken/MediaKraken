@@ -64,6 +64,7 @@ pub async fn user_media_collection(
             total_pages,
             page,
             "/user/media/collection".to_string(),
+            None,
         )
         .await
         .unwrap();

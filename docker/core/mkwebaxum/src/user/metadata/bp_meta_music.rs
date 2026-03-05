@@ -63,6 +63,7 @@ pub async fn user_metadata_music(
             total_pages,
             page,
             "/user/metadata/music".to_string(),
+            None,
         )
         .await
         .unwrap();

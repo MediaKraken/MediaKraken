@@ -63,6 +63,7 @@ pub async fn user_media_tv(
             total_pages,
             page,
             "/user/media/tv".to_string(),
+            None,
         )
         .await
         .unwrap();

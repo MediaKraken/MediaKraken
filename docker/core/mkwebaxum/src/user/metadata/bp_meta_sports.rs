@@ -63,6 +63,7 @@ pub async fn user_metadata_sports(
             total_pages,
             page,
             "/user/metadata/sports".to_string(),
+            None,
         )
         .await
         .unwrap();

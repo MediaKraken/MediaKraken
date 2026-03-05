@@ -58,6 +58,7 @@ pub async fn admin_report_known_media(
             total_pages,
             page,
             "/admin/report_known_media".to_string(),
+            None,
         )
         .await
         .unwrap();

@@ -63,6 +63,7 @@ pub async fn user_media_music_video(
             total_pages,
             page,
             "/user/media/music_video".to_string(),
+            None,
         )
         .await
         .unwrap();

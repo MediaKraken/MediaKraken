@@ -61,6 +61,7 @@ pub async fn user_metadata_game_system(
             total_pages,
             page,
             "/user/metadata/game_system".to_string(),
+            None,
         )
         .await
         .unwrap();

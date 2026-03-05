@@ -63,6 +63,7 @@ pub async fn user_media_game_servers(
             total_pages,
             page,
             "/user/media/game_servers".to_string(),
+            None,
         )
         .await
         .unwrap();

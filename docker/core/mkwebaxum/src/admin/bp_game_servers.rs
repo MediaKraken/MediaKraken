@@ -59,6 +59,7 @@ pub async fn admin_game_servers(
             total_pages,
             page,
             "/admin/game_servers".to_string(),
+            None,
         )
         .await
         .unwrap();

@@ -56,6 +56,7 @@ pub async fn user_sync(
             total_pages,
             page,
             "/user/metadata/book".to_string(),
+            None,
         )
         .await
         .unwrap();

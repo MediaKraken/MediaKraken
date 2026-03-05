@@ -63,6 +63,7 @@ pub async fn user_media_home_media(
             total_pages,
             page,
             "/user/media/home_media".to_string(),
+            None,
         )
         .await
         .unwrap();
