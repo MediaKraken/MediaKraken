@@ -1,7 +1,7 @@
 use mk_lib_common::mk_lib_common_enum_media_type;
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
 use sqlx::postgres::PgRow;
+use sqlx::FromRow;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaHomeMediaList {
@@ -16,14 +16,14 @@ pub async fn mk_lib_database_media_home_media_read(
     limit: i64,
 ) -> Result<Vec<DBMediaHomeMediaList>, sqlx::Error> {
     if !search_value.is_empty() {
-        sqlx::query_as("")
+        sqlx::query_as(r#""#)
             .bind(search_value)
             .bind(offset)
             .bind(limit)
             .fetch_all(sqlx_pool)
             .await
     } else {
-        sqlx::query_as("")
+        sqlx::query_as(r#""#)
             .bind(offset)
             .bind(limit)
             .fetch_all(sqlx_pool)

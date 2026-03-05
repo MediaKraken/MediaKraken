@@ -1,14 +1,13 @@
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
 use sqlx::types::Uuid;
+use sqlx::FromRow;
 
 pub async fn mk_lib_database_metadata_exists_upc(
     sqlx_pool: &sqlx::PgPool,
     upc_code: &i32,
 ) -> Result<bool, sqlx::Error> {
     let row: (bool,) = sqlx::query_as(
-        "select exists(select 1 from mm_bar_codes \
-        where mm_bar_code_code = $1 limit 1) as found_record limit 1",
+        r#"select exists(select 1 from mm_bar_codes where mm_bar_code_code = $1 limit 1) as found_record limit 1"#,
     )
     .bind(upc_code)
     .fetch_one(sqlx_pool)
@@ -22,9 +21,7 @@ pub async fn mk_lib_database_metadata_exists_upc_own(
     user_id: i64,
 ) -> Result<bool, sqlx::Error> {
     let row: (bool,) = sqlx::query_as(
-        "select exists(select 1 from mm_bar_codes, mm_bar_code_own \
-        where mm_bar_code_uuid = mm_bar_code_own_uuid \
-        and mm_bar_code_code = $1 and mm_bar_code_own_user = $2 limit 1) as found_record limit 1",
+        r#"select exists(select 1 from mm_bar_codes, mm_bar_code_own where mm_bar_code_uuid = mm_bar_code_own_uuid and mm_bar_code_code = $1 and mm_bar_code_own_user = $2 limit 1) as found_record limit 1"#,
     )
     .bind(upc_code)
     .bind(user_id)
@@ -42,11 +39,7 @@ pub async fn mk_lib_database_metadata_upc_insert(
     let new_guid = uuid::Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
-        "insert into mm_bar_codes (mm_bar_code_uuid, \
-        mm_bar_code_code, \
-        mm_bar_code_type \
-        mm_bar_code_json) \
-        values ($1, $2, $3, $4)",
+        r#"insert into mm_bar_codes (mm_bar_code_uuid, mm_bar_code_code, mm_bar_code_type mm_bar_code_json) values ($1, $2, $3, $4)"#,
     )
     .bind(new_guid)
     .bind(upc_code)
@@ -65,9 +58,7 @@ pub async fn mk_lib_database_metadata_upc_own_insert(
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
-        "insert into mm_bar_codes (mm_bar_code_own_uuid, \
-        mm_bar_code_own_user) \
-        values ($1, $2)",
+        r#"insert into mm_bar_codes (mm_bar_code_own_uuid, mm_bar_code_own_user) values ($1, $2)"#,
     )
     .bind(upc_uuid)
     .bind(user_id)

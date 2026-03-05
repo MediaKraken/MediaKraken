@@ -1,13 +1,13 @@
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
 use sqlx::types::Uuid;
+use sqlx::FromRow;
 
 pub async fn mk_lib_database_link_delete(
     sqlx_pool: &sqlx::PgPool,
     link_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query("delete from mm_link where mm_link_guid = $1")
+    sqlx::query(r#"delete from mm_link where mm_link_guid = $1"#)
         .bind(link_uuid)
         .execute(&mut *transaction)
         .await?;
@@ -28,10 +28,7 @@ pub async fn mk_lib_database_link_read(
     records: i64,
 ) -> Result<Vec<DBLinkList>, sqlx::Error> {
     let table_rows: Vec<DBLinkList> = sqlx::query_as(
-        "select mm_link_guid, mm_link_name, \
-        mm_link_json from mm_link \
-        order by mm_link_name \
-        offset $1 limit $2",
+        r#"select mm_link_guid, mm_link_name, mm_link_json from mm_link order by mm_link_name offset $1 limit $2"#,
     )
     .bind(offset)
     .bind(records)
@@ -46,14 +43,11 @@ pub async fn mk_lib_database_link_insert(
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let new_guid = Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query(
-        "insert into mm_link (mm_link_guid, mm_link_json) \
-        values ($1, $2)",
-    )
-    .bind(new_guid)
-    .bind(link_json)
-    .execute(&mut *transaction)
-    .await?;
+    sqlx::query(r#"insert into mm_link (mm_link_guid, mm_link_json) values ($1, $2)"#)
+        .bind(new_guid)
+        .bind(link_json)
+        .execute(&mut *transaction)
+        .await?;
     transaction.commit().await?;
     Ok(new_guid)
 }
@@ -63,16 +57,14 @@ pub async fn mk_lib_database_link_list_count(
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
     if !search_value.is_empty() {
-        let row: (i64,) = sqlx::query_as(
-            "select count(*) from mm_library_link \
-            where mm_link_name % $1",
-        )
-        .bind(search_value)
-        .fetch_one(sqlx_pool)
-        .await?;
+        let row: (i64,) =
+            sqlx::query_as(r#"select count(*) from mm_library_link where mm_link_name % $1"#)
+                .bind(search_value)
+                .fetch_one(sqlx_pool)
+                .await?;
         Ok(row.0)
     } else {
-        let row: (i64,) = sqlx::query_as("select count(*) from mm_library_link")
+        let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_library_link"#)
             .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)

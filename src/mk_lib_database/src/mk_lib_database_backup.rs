@@ -17,11 +17,7 @@ pub async fn mk_lib_database_backup_read(
     limit: i64,
 ) -> Result<Vec<DBBackupList>, sqlx::Error> {
     let table_rows: Vec<DBBackupList> = sqlx::query_as(
-        "select mm_backup_guid, mm_backup_description, \
-            mm_backup_location_type, mm_backup_location, mm_backup_created \
-            from mm_backup \
-            order by mm_backup_created desc \
-            offset $1 limit $2",
+        r#"select mm_backup_guid, mm_backup_description, mm_backup_location_type, mm_backup_location, mm_backup_created from mm_backup order by mm_backup_created desc offset $1 limit $2"#,
     )
     .bind(offset)
     .bind(limit)
@@ -31,7 +27,7 @@ pub async fn mk_lib_database_backup_read(
 }
 
 pub async fn mk_lib_database_backup_count(sqlx_pool: &sqlx::PgPool) -> Result<i64, sqlx::Error> {
-    let row: (i64,) = sqlx::query_as("select count(*) from mm_backup")
+    let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_backup"#)
         .fetch_one(sqlx_pool)
         .await?;
     Ok(row.0)

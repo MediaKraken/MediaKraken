@@ -1,13 +1,13 @@
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
+use sqlx::FromRow;
 
 pub async fn mk_lib_database_game_server_delete(
     sqlx_pool: &sqlx::PgPool,
     game_server_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
-    sqlx::query("delete from mm_game_dedicated_servers where mm_game_server_guid = $1")
+    sqlx::query(r#"delete from mm_game_dedicated_servers where mm_game_server_guid = $1"#)
         .bind(game_server_uuid)
         .execute(sqlx_pool)
         .await?;
@@ -29,10 +29,7 @@ pub async fn mk_lib_database_game_server_read(
 ) -> Result<Vec<DBGameServerList>, sqlx::Error> {
     if !search_value.is_empty() {
         sqlx::query_as(
-            "select mm_game_server_guid, mm_game_server_name, \
-            mm_game_server_json from mm_game_dedicated_servers \
-            where mm_game_server_name = $1 \
-            order by mm_game_server_name offset $2 limit $3",
+            r#"select mm_game_server_guid, mm_game_server_name, mm_game_server_json from mm_game_dedicated_servers where mm_game_server_name = $1 order by mm_game_server_name offset $2 limit $3"#,
         )
         .bind(search_value)
         .bind(offset)
@@ -41,9 +38,7 @@ pub async fn mk_lib_database_game_server_read(
         .await
     } else {
         sqlx::query_as(
-            "select mm_game_server_guid, mm_game_server_name, \
-            mm_game_server_json from mm_game_dedicated_servers \
-            order by mm_game_server_name offset $1 limit $2",
+            r#"select mm_game_server_guid, mm_game_server_name, mm_game_server_json from mm_game_dedicated_servers order by mm_game_server_name offset $1 limit $2"#,
         )
         .bind(offset)
         .bind(limit)
@@ -57,8 +52,7 @@ pub async fn mk_lib_database_game_server_detail(
     game_server_uuid: Uuid,
 ) -> Result<PgRow, sqlx::Error> {
     let row: PgRow = sqlx::query(
-        "select mm_game_server_name, mm_game_server_json \
-        from mm_game_dedicated_servers where mm_game_server_guid = $1",
+        r#"select mm_game_server_name, mm_game_server_json from mm_game_dedicated_servers where mm_game_server_guid = $1"#,
     )
     .bind(game_server_uuid)
     .fetch_one(sqlx_pool)
@@ -72,15 +66,14 @@ pub async fn mk_lib_database_game_server_count(
 ) -> Result<i64, sqlx::Error> {
     if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
-            "select count(*) from mm_game_dedicated_servers \
-            where mm_game_server_name = $1",
+            r#"select count(*) from mm_game_dedicated_servers where mm_game_server_name = $1"#,
         )
         .bind(search_value)
         .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     } else {
-        let row: (i64,) = sqlx::query_as("select count(*) from mm_game_dedicated_servers")
+        let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_game_dedicated_servers"#)
             .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
@@ -95,9 +88,7 @@ pub async fn mk_lib_database_game_server_upsert(
     // TODO um, would return "invalid" uuid on update
     let new_guid = uuid::Uuid::now_v7();
     sqlx::query(
-        "INSERT INTO mm_game_dedicated_servers(mm_game_server_guid, \
-        mm_game_server_name, mm_game_server_json) VALUES($ 1, $2, $3) \
-        ON CONFLICT(mm_game_server_name) DO UPDATE SET mm_game_server_json = $4",
+        r#"INSERT INTO mm_game_dedicated_servers(mm_game_server_guid, mm_game_server_name, mm_game_server_json) VALUES($ 1, $2, $3) ON CONFLICT(mm_game_server_name) DO UPDATE SET mm_game_server_json = $4"#,
     )
     .bind(new_guid)
     .bind(server_name)
