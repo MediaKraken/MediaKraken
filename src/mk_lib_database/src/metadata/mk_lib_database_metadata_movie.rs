@@ -89,7 +89,8 @@ pub async fn mk_lib_database_metadata_movie_read(
             LEFT JOIN mm_metadata_user_status
             ON mm_metadata_user_status.mm_status_type_movie = mm_metadata_movie.mm_metadata_movie_guid
             and mm_metadata_user_status.mm_status_user_id = $1
-            WHERE LOWER(mm_metadata_movie_name) >= $2 
+            WHERE LOWER(mm_metadata_movie_name) >= lower(left($2, 1))
+            AND LOWER(mm_metadata_movie_name) < chr(ascii(lower(left($2, 1))) + 1) 
             order by LOWER(mm_metadata_movie_name), mm_date
             offset $3 limit $4"#,
         )
@@ -105,6 +106,7 @@ pub async fn mk_lib_database_metadata_movie_read(
 pub async fn mk_lib_database_metadata_movie_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
+    starts_with: String,
 ) -> Result<i64, sqlx::Error> {
     if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
@@ -115,7 +117,10 @@ pub async fn mk_lib_database_metadata_movie_count(
         .await?;
         Ok(row.0)
     } else {
-        let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_metadata_movie"#)
+        let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_metadata_movie 
+            WHERE LOWER(mm_metadata_movie_name) >= lower(left($1, 1))
+            AND LOWER(mm_metadata_movie_name) < chr(ascii(lower(left($1, 1))) + 1)"#)
+            .bind(starts_with.to_lowercase())
             .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)

@@ -187,6 +187,7 @@ pub async fn user_metadata_movie(
         mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(
            &state.sqlx_pool_ro,
             String::new(),
+            params.starts_with.clone().unwrap_or_default(),
         )
         .await
         .unwrap();
