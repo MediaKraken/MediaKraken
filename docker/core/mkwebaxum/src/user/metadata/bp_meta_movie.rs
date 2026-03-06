@@ -1,27 +1,28 @@
+use crate::AppState;
 use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
-use crate::AppState;
 use askama::Template;
+use axum::extract::Query;
 use axum::extract::State;
 use axum::response::Redirect;
 use axum::response::Response;
 use axum::{
+    Extension,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
-    Extension,
 };
-use axum::{extract::Query};
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
-use mk_lib_common::mk_lib_common_pagination;
+use core::fmt::Write;
+use paginator::{PageItem, Paginator};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::{PgPool, PgRow};
-use sqlx::{FromRow, Row};
 use sqlx::types::chrono::DateTime;
 use sqlx::types::chrono::Utc;
+use sqlx::{FromRow, Row};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Genre {
@@ -69,6 +70,86 @@ pub struct FilterQuery {
     pub starts_with: Option<String>,
 }
 
+fn build_movie_pagination(
+    total_items: i64,
+    page: i64,
+    starts_with: Option<&str>,
+) -> Result<String, std::fmt::Error> {
+    let total_pages = if total_items > 0 {
+        (total_items + 29) / 30
+    } else {
+        0
+    };
+
+    if total_pages <= 1 {
+        return Ok(String::new());
+    }
+
+    let mut pagination_html = String::from(
+        r#"<nav class="mt-6 flex justify-center" aria-label="Pagination">
+<ul class="flex items-center gap-1 whitespace-nowrap text-sm">"#,
+    );
+
+    let suffix = match starts_with {
+        Some(sw) if !sw.is_empty() => {
+            if sw == "#" {
+                "?starts_with=%23".to_string()
+            } else {
+                format!("?starts_with={sw}")
+            }
+        }
+        _ => String::new(),
+    };
+
+    let paginator = Paginator::builder(total_pages as usize)
+        .current_page(page.max(1) as usize)
+        .build_paginator()
+        .map_err(|_| std::fmt::Error)?;
+
+    for item in paginator.paginate() {
+        match item {
+            PageItem::Prev(p) => {
+                write!(
+                    pagination_html,
+                    r#"<li><a href="/user/metadata/movie/{p}{suffix}"
+class="px-3 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-200"
+aria-label="Previous">&laquo;</a></li>"#,
+                )?;
+            }
+            PageItem::Page(p) => {
+                write!(
+                    pagination_html,
+                    r#"<li><a href="/user/metadata/movie/{p}{suffix}"
+class="px-3 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-200">{p}</a></li>"#,
+                )?;
+            }
+            PageItem::CurrentPage(p) => {
+                write!(
+                    pagination_html,
+                    r#"<li><span
+class="px-3 py-2 rounded-md bg-indigo-600 text-white font-semibold border border-indigo-600">{p}</span></li>"#,
+                )?;
+            }
+            PageItem::Ignore => {
+                pagination_html
+                    .push_str(r#"<li><span class="px-3 py-2 text-gray-400">…</span></li>"#);
+            }
+            PageItem::Next(p) => {
+                write!(
+                    pagination_html,
+                    r#"<li><a href="/user/metadata/movie/{p}{suffix}"
+class="px-3 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-200"
+aria-label="Next">&raquo;</a></li>"#,
+                )?;
+            }
+            _ => {}
+        }
+    }
+
+    pagination_html.push_str("</ul></nav>");
+    Ok(pagination_html)
+}
+
 // pub async fn movies(
 //     Query(params): Query<FilterQuery>,
 // ) -> Html<String> {
@@ -109,14 +190,8 @@ pub async fn user_metadata_movie(
         )
         .await
         .unwrap();
-        let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
-            total_pages,
-            page,
-            "/user/metadata/movie".to_string(),
-            params.starts_with.as_deref(),
-        )
-        .await
-        .unwrap();
+        let pagination_html =
+            build_movie_pagination(total_pages, page, params.starts_with.as_deref()).unwrap();
         let movie_list =
         mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(
             &state.sqlx_pool_ro,
@@ -130,18 +205,15 @@ pub async fn user_metadata_movie(
         .unwrap();
         let mut template_data_vec: Vec<TemplateMetaMovieList> = Vec::new();
         for row_data in movie_list.iter() {
-            let watched_status = row_data
-                .mm_status_user_json
-                .clone()
-                .unwrap_or_else(|| {
-                    json!({
-                        "bad": false,
-                        "good": false,
-                        "trash": false,
-                        "watched": false,
-                        "favorite": false
-                    })
-                });
+            let watched_status = row_data.mm_status_user_json.clone().unwrap_or_else(|| {
+                json!({
+                    "bad": false,
+                    "good": false,
+                    "trash": false,
+                    "watched": false,
+                    "favorite": false
+                })
+            });
             let mut request_status: serde_json::Value = json!(false);
             let mut rating_status: serde_json::Value = json!(null);
             let mut queue_status: serde_json::Value = json!(false);
@@ -191,7 +263,8 @@ pub async fn user_metadata_movie(
                 template_metadata_poster: mm_poster,
                 template_metadata_runtime: row_data.mm_metadata_runtime,
                 template_metadata_rating: "pg13".to_string(),
-                template_metadata_star_rating: row_data.mm_metadata_vote_average.unwrap_or(0.0) as f32,
+                template_metadata_star_rating: row_data.mm_metadata_vote_average.unwrap_or(0.0)
+                    as f32,
                 template_metadata_availability: row_data.mm_availibility.clone(),
                 template_metadata_tagline: row_data.mm_metadata_tagline.clone(),
                 template_metadata_photo_updated: row_data.photo_updated.clone(),
@@ -214,7 +287,7 @@ pub async fn user_metadata_movie(
             pagination_bar: &pagination_html,
             page: &page_usize,
             page_title: Some("MediaKraken Metadata Movies".to_string()),
-            current: params.starts_with.clone(), 
+            current: params.starts_with.clone(),
             base_path: "/user/metadata/movie".to_string(),
         };
         let reply_html = template.render().unwrap();
@@ -307,7 +380,8 @@ pub async fn user_metadata_movie_detail(
             template_metadata_poster: mm_poster,
             template_metadata_backdrop: "/static/image/Movie-icon.png".to_string(),
             template_metadata_rating: "pg13".to_string(),
-            template_metadata_star_rating: movie_metadata.mm_metadata_vote_average.unwrap_or(0.0) as f32,
+            template_metadata_star_rating: movie_metadata.mm_metadata_vote_average.unwrap_or(0.0)
+                as f32,
             template_metadata_availability: movie_metadata.mm_availibility.clone(),
             template_metadata_tagline: movie_metadata.mm_metadata_tagline.clone(),
             template_metadata_photo_updated: movie_metadata.photo_updated.clone(),
