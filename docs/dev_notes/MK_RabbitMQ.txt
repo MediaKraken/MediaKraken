@@ -12,7 +12,7 @@ mktmdbnetfetchbulk
 content_type    application/json
 {
     "Type": "Bulk",
-    "Limit": 5000
+    "Limit": 1000
 }
 
 

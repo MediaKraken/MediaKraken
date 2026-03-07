@@ -16,12 +16,12 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_common = { version = "0.0.150", registry = "kellnr" }
-mk_lib_compression = { version = "0.0.149", registry = "kellnr" }
-mk_lib_database = { version = "0.0.182", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.151", registry = "kellnr" }
-mk_lib_network = { version = "0.0.151", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.154", registry = "kellnr" }
+mk_lib_common = { version = "0.0.156", registry = "kellnr" }
+mk_lib_compression = { version = "0.0.155", registry = "kellnr" }
+mk_lib_database = { version = "0.0.188", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.157", registry = "kellnr" }
+mk_lib_network = { version = "0.0.157", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.160", registry = "kellnr" }
 
 chrono = { version = "0.4.43", features = ["serde"] }
 reqwest = { version = "0.13.1", default-features = false, features = [
