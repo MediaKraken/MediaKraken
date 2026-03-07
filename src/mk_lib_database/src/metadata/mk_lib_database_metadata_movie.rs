@@ -1,10 +1,10 @@
 use crate::mk_lib_database::MediaStatusUpdatePayload;
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
+use sqlx::types::Uuid;
 use sqlx::types::chrono::DateTime;
 use sqlx::types::chrono::Utc;
-use sqlx::types::Uuid;
-use sqlx::FromRow;
 
 pub async fn mk_lib_database_metadata_exists_movie(
     sqlx_pool: &sqlx::PgPool,
@@ -89,8 +89,7 @@ pub async fn mk_lib_database_metadata_movie_read(
             LEFT JOIN mm_metadata_user_status
             ON mm_metadata_user_status.mm_status_type_movie = mm_metadata_movie.mm_metadata_movie_guid
             and mm_metadata_user_status.mm_status_user_id = $1
-            WHERE LOWER(mm_metadata_movie_name) >= lower(left($2, 1))
-            AND LOWER(mm_metadata_movie_name) < chr(ascii(lower(left($2, 1))) + 1) 
+            WHERE left(LOWER(mm_metadata_movie_name), 1) = left(lower($2), 1)
             order by LOWER(mm_metadata_movie_name), mm_date
             offset $3 limit $4"#,
         )
@@ -117,12 +116,13 @@ pub async fn mk_lib_database_metadata_movie_count(
         .await?;
         Ok(row.0)
     } else {
-        let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_metadata_movie 
-            WHERE LOWER(mm_metadata_movie_name) >= lower(left($1, 1))
-            AND LOWER(mm_metadata_movie_name) < chr(ascii(lower(left($1, 1))) + 1)"#)
-            .bind(starts_with.to_lowercase())
-            .fetch_one(sqlx_pool)
-            .await?;
+        let row: (i64,) = sqlx::query_as(
+            r#"select count(*) from mm_metadata_movie 
+            WHERE left(LOWER(mm_metadata_movie_name), 1) = left(lower($1), 1)"#,
+        )
+        .bind(starts_with.to_lowercase())
+        .fetch_one(sqlx_pool)
+        .await?;
         Ok(row.0)
     }
 }
