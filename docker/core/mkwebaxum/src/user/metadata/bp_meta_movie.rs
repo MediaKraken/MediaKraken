@@ -96,7 +96,7 @@ fn build_movie_pagination(
         0
     };
 
-    if total_pages <= 1 {
+    if total_pages <= 0 {
         return Ok(String::new());
     }
 
@@ -115,6 +115,16 @@ fn build_movie_pagination(
         }
         _ => String::new(),
     };
+
+    if total_pages == 1 {
+        write!(
+            pagination_html,
+            r#"<li><a href="/user/metadata/movie/1{suffix}"
+class="px-3 py-2 rounded-md bg-indigo-600 text-white font-semibold border border-indigo-600">1</a></li>"#,
+        )?;
+        pagination_html.push_str("</ul></nav>");
+        return Ok(pagination_html);
+    }
 
     let paginator = Paginator::builder(total_pages as usize)
         .current_page(page.max(1) as usize)
