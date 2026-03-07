@@ -70,6 +70,21 @@ pub struct FilterQuery {
     pub starts_with: Option<String>,
 }
 
+fn normalize_starts_with(raw: Option<&str>) -> Option<String> {
+    let value = raw.map(str::trim).filter(|value| !value.is_empty())?;
+    let first_char = value.chars().next()?;
+
+    if first_char == '#' {
+        return Some("#".to_string());
+    }
+
+    if first_char.is_ascii_alphanumeric() {
+        return Some(first_char.to_ascii_uppercase().to_string());
+    }
+
+    Some("#".to_string())
+}
+
 fn build_movie_pagination(
     total_items: i64,
     page: i64,
@@ -81,7 +96,7 @@ fn build_movie_pagination(
         0
     };
 
-    if total_pages <= 1 {
+    if total_pages <= 0 {
         return Ok(String::new());
     }
 
@@ -100,6 +115,16 @@ fn build_movie_pagination(
         }
         _ => String::new(),
     };
+
+    if total_pages == 1 {
+        write!(
+            pagination_html,
+            r#"<li><a href="/user/metadata/movie/1{suffix}"
+class="px-3 py-2 rounded-md bg-indigo-600 text-white font-semibold border border-indigo-600">1</a></li>"#,
+        )?;
+        pagination_html.push_str("</ul></nav>");
+        return Ok(pagination_html);
+    }
 
     let paginator = Paginator::builder(total_pages as usize)
         .current_page(page.max(1) as usize)
@@ -168,6 +193,7 @@ pub async fn user_metadata_movie(
     Path(page): Path<i64>,
     Query(params): Query<FilterQuery>,
 ) -> impl IntoResponse {
+    let starts_with = normalize_starts_with(params.starts_with.as_deref());
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
         [Method::GET],
@@ -187,18 +213,18 @@ pub async fn user_metadata_movie(
         mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(
            &state.sqlx_pool_ro,
             String::new(),
-            params.starts_with.clone().unwrap_or_default(),
+            starts_with.clone().unwrap_or_default(),
         )
         .await
         .unwrap();
         let pagination_html =
-            build_movie_pagination(total_pages, page, params.starts_with.as_deref()).unwrap();
+            build_movie_pagination(total_pages, page, starts_with.as_deref()).unwrap();
         let movie_list =
         mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(
             &state.sqlx_pool_ro,
             String::new(),
             current_user.id,
-            params.starts_with.clone().unwrap_or_default(),
+            starts_with.clone().unwrap_or_default(),
             db_offset,
             30,
         )
@@ -288,7 +314,7 @@ pub async fn user_metadata_movie(
             pagination_bar: &pagination_html,
             page: &page_usize,
             page_title: Some("MediaKraken Metadata Movies".to_string()),
-            current: params.starts_with.clone(),
+            current: starts_with.clone(),
             base_path: "/user/metadata/movie".to_string(),
         };
         let reply_html = template.render().unwrap();
