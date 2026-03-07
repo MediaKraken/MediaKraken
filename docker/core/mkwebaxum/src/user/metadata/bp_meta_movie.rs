@@ -151,8 +151,9 @@ class="px-3 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-2
             PageItem::CurrentPage(p) => {
                 write!(
                     pagination_html,
-                    r#"<li><span
-class="px-3 py-2 rounded-md bg-indigo-600 text-white font-semibold border border-indigo-600">{p}</span></li>"#,
+                    r#"<li><a href="/user/metadata/movie/{p}{suffix}"
+class="px-3 py-2 rounded-md bg-indigo-600 text-white font-semibold border border-indigo-600"
+aria-current="page">{p}</a></li>"#,
                 )?;
             }
             PageItem::Ignore => {
