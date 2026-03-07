@@ -89,12 +89,15 @@ pub async fn mk_lib_database_metadata_movie_read(
             LEFT JOIN mm_metadata_user_status
             ON mm_metadata_user_status.mm_status_type_movie = mm_metadata_movie.mm_metadata_movie_guid
             and mm_metadata_user_status.mm_status_user_id = $1
-            WHERE left(LOWER(mm_metadata_movie_name), 1) = left(lower($2), 1)
+            WHERE (
+                ($2 = '#' AND left(lower(mm_metadata_movie_name), 1) !~ '^[a-z0-9]$')
+                OR ($2 <> '#' AND lower(mm_metadata_movie_name) LIKE lower($2) || '%')
+            )
             order by LOWER(mm_metadata_movie_name), mm_date
             offset $3 limit $4"#,
         )
         .bind(&user_id)
-        .bind(&starts_with.to_lowercase())
+        .bind(&starts_with)
         .bind(offset)
         .bind(limit)
             .fetch_all(sqlx_pool)
@@ -118,9 +121,12 @@ pub async fn mk_lib_database_metadata_movie_count(
     } else {
         let row: (i64,) = sqlx::query_as(
             r#"select count(*) from mm_metadata_movie 
-            WHERE left(LOWER(mm_metadata_movie_name), 1) = left(lower($1), 1)"#,
+            WHERE (
+                ($1 = '#' AND left(lower(mm_metadata_movie_name), 1) !~ '^[a-z0-9]$')
+                OR ($1 <> '#' AND lower(mm_metadata_movie_name) LIKE lower($1) || '%')
+            )"#,
         )
-        .bind(starts_with.to_lowercase())
+        .bind(starts_with)
         .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
