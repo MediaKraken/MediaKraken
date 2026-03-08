@@ -78,9 +78,11 @@
 
         <div class="flex flex-wrap gap-1 mt-1">
             {% for genre in row_data.template_metadata_genre %}
-                <span class="px-1.5 py-0.5 text-[10px] rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                <a href="/user/metadata/movie/1?genre={{ genre.query_value }}"
+                   class="px-1.5 py-0.5 text-[10px] rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                   aria-label="Filter movies by genre {{ genre.name }}">
                     {{ genre.name }}
-                </span>
+                </a>
             {% endfor %}
         </div>
 

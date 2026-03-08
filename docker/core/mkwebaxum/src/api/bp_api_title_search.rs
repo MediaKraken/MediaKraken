@@ -1,13 +1,13 @@
+use crate::AppState;
 use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
-use crate::AppState;
 use askama::Template;
 use axum::extract::State;
 use axum::{
+    Extension,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
-    Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
@@ -55,7 +55,7 @@ pub async fn api_title_search(
     } else {
         let title = title.replace("%20", " ");
         let movie_metadata = mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(
-        &state.sqlx_pool_ro, title.clone(), current_user.id, "a".to_string(), 0, 100
+        &state.sqlx_pool_ro, title.clone(), current_user.id, "a".to_string(), String::new(), 0, 100
     )
     .await
     .unwrap();
