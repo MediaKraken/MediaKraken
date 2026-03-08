@@ -104,7 +104,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                 // import dump tables
                 let pg_tables =
-                    mk_lib_database::mk_lib_database_postgresql::mk_lib_database_tables(&sqlx_pool)
+                    mk_lib_database::mk_lib_database_postgresql::mk_lib_database_tables(&sqlx_pool_rw)
                         .await
                         .unwrap();
                 for row_data in pg_tables.iter() {
