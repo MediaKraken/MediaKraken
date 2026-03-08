@@ -40,6 +40,7 @@ pub async fn mk_lib_database_metadata_movie_read(
     search_value: String,
     user_id: i64,
     starts_with: String,
+    genre_name: String,
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMetaMovieList>, sqlx::Error> {
@@ -61,13 +62,24 @@ pub async fn mk_lib_database_metadata_movie_read(
              LEFT JOIN mm_metadata_user_status
              ON mm_metadata_user_status.mm_status_type_movie = mm_metadata_movie.mm_metadata_movie_guid
              and mm_metadata_user_status.mm_status_user_id = $1
-             WHERE mm_metadata_movie_name &@ $2
-             or mm_metadata_movie_name_alt &@ $3
-             offset $4 limit $5"#,
+             WHERE (
+                mm_metadata_movie_name &@ $2
+                OR mm_metadata_movie_name_alt &@ $3
+             )
+             AND (
+                $4 = ''
+                OR EXISTS (
+                    SELECT 1
+                    FROM jsonb_array_elements(mm_metadata_movie_json->'genres') AS genre
+                    WHERE lower(genre->>'name') = lower($4)
+                )
+             )
+             offset $5 limit $6"#,
         )
         .bind(&user_id)
+         .bind(&search_value)
         .bind(&search_value)
-        .bind(&search_value)
+        .bind(&genre_name)
         .bind(offset)
         .bind(limit)
             .fetch_all(sqlx_pool)
@@ -93,11 +105,20 @@ pub async fn mk_lib_database_metadata_movie_read(
                 ($2 = '#' AND left(lower(mm_metadata_movie_name), 1) !~ '^[a-z0-9]$')
                 OR ($2 <> '#' AND lower(mm_metadata_movie_name) LIKE lower($2) || '%')
             )
+            AND (
+                $3 = ''
+                OR EXISTS (
+                    SELECT 1
+                    FROM jsonb_array_elements(mm_metadata_movie_json->'genres') AS genre
+                    WHERE lower(genre->>'name') = lower($3)
+                )
+            )
             order by LOWER(mm_metadata_movie_name), mm_date
-            offset $3 limit $4"#,
+            offset $4 limit $5"#,
         )
         .bind(&user_id)
-        .bind(&starts_with)
+         .bind(&starts_with)
+        .bind(&genre_name)
         .bind(offset)
         .bind(limit)
             .fetch_all(sqlx_pool)
@@ -109,12 +130,23 @@ pub async fn mk_lib_database_metadata_movie_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
     starts_with: String,
+    genre_name: String,
 ) -> Result<i64, sqlx::Error> {
     if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
-            r#"select count(*) from mm_metadata_movie where mm_metadata_movie_name &@ $1"#,
+            r#"select count(*) from mm_metadata_movie
+            where mm_metadata_movie_name &@ $1
+            AND (
+                $2 = ''
+                OR EXISTS (
+                    SELECT 1
+                    FROM jsonb_array_elements(mm_metadata_movie_json->'genres') AS genre
+                    WHERE lower(genre->>'name') = lower($2)
+                )
+            )"#,
         )
         .bind(search_value)
+        .bind(genre_name)
         .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
@@ -124,9 +156,18 @@ pub async fn mk_lib_database_metadata_movie_count(
             WHERE (
                 ($1 = '#' AND left(lower(mm_metadata_movie_name), 1) !~ '^[a-z0-9]$')
                 OR ($1 <> '#' AND lower(mm_metadata_movie_name) LIKE lower($1) || '%')
+            )
+            AND (
+                $2 = ''
+                OR EXISTS (
+                    SELECT 1
+                    FROM jsonb_array_elements(mm_metadata_movie_json->'genres') AS genre
+                    WHERE lower(genre->>'name') = lower($2)
+                )
             )"#,
         )
         .bind(starts_with)
+        .bind(genre_name)
         .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
