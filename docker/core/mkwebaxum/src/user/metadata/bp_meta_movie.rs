@@ -27,6 +27,7 @@ use sqlx::{FromRow, Row};
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Genre {
     pub name: String,
+    pub query_value: String,
 }
 
 #[derive(Template)]
@@ -62,12 +63,15 @@ struct TemplateMetaMovieContext<'a> {
     page: &'a usize,
     page_title: Option<String>,
     pub current: Option<String>,
+    pub genre_filter: Option<String>,
+    pub genre_filter_query: Option<String>,
     pub base_path: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct FilterQuery {
     pub starts_with: Option<String>,
+    pub genre: Option<String>,
 }
 
 fn normalize_starts_with(raw: Option<&str>) -> Option<String> {
@@ -89,6 +93,7 @@ fn build_movie_pagination(
     total_items: i64,
     page: i64,
     starts_with: Option<&str>,
+    genre: Option<&str>,
 ) -> Result<String, std::fmt::Error> {
     let total_pages = if total_items > 0 {
         (total_items + 29) / 30
@@ -105,15 +110,22 @@ fn build_movie_pagination(
 <ul class="flex items-center gap-1 whitespace-nowrap text-sm">"#,
     );
 
-    let suffix = match starts_with {
-        Some(sw) if !sw.is_empty() => {
-            if sw == "#" {
-                "?starts_with=%23".to_string()
-            } else {
-                format!("?starts_with={sw}")
-            }
+    let mut query_params: Vec<String> = Vec::new();
+    if let Some(sw) = starts_with.filter(|sw| !sw.is_empty()) {
+        if sw == "#" {
+            query_params.push("starts_with=%23".to_string());
+        } else {
+            query_params.push(format!("starts_with={sw}"));
         }
-        _ => String::new(),
+    }
+    if let Some(genre_name) = genre.filter(|genre_name| !genre_name.is_empty()) {
+        query_params.push(format!("genre={}", urlencoding::encode(genre_name)));
+    }
+
+    let suffix = if query_params.is_empty() {
+        String::new()
+    } else {
+        format!("?{}", query_params.join("&"))
     };
 
     if total_pages == 1 {
@@ -195,6 +207,12 @@ pub async fn user_metadata_movie(
     Query(params): Query<FilterQuery>,
 ) -> impl IntoResponse {
     let starts_with = normalize_starts_with(params.starts_with.as_deref());
+    let genre = params
+        .genre
+        .as_deref()
+        .map(str::trim)
+        .filter(|genre| !genre.is_empty())
+        .map(ToOwned::to_owned);
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
         [Method::GET],
@@ -215,17 +233,20 @@ pub async fn user_metadata_movie(
            &state.sqlx_pool_ro,
             String::new(),
             starts_with.clone().unwrap_or_default(),
+            genre.clone().unwrap_or_default(),
         )
         .await
         .unwrap();
         let pagination_html =
-            build_movie_pagination(total_pages, page, starts_with.as_deref()).unwrap();
+            build_movie_pagination(total_pages, page, starts_with.as_deref(), genre.as_deref())
+                .unwrap();
         let movie_list =
         mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(
             &state.sqlx_pool_ro,
             String::new(),
             current_user.id,
             starts_with.clone().unwrap_or_default(),
+            genre.clone().unwrap_or_default(),
             db_offset,
             30,
         )
@@ -279,6 +300,7 @@ pub async fn user_metadata_movie(
                 .filter_map(|g| {
                     g.get("name").and_then(|n| n.as_str()).map(|name| Genre {
                         name: name.to_string(),
+                        query_value: urlencoding::encode(name).into_owned(),
                     })
                 })
                 .collect();
@@ -316,6 +338,10 @@ pub async fn user_metadata_movie(
             page: &page_usize,
             page_title: Some("MediaKraken Metadata Movies".to_string()),
             current: starts_with.clone(),
+            genre_filter: genre.clone(),
+            genre_filter_query: genre
+                .as_ref()
+                .map(|value| urlencoding::encode(value).into_owned()),
             base_path: "/user/metadata/movie".to_string(),
         };
         let reply_html = template.render().unwrap();
