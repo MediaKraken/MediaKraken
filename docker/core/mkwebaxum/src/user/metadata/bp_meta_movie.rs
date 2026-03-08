@@ -424,6 +424,7 @@ pub async fn user_metadata_movie_detail(
             .filter_map(|g| {
                 g.get("name").and_then(|n| n.as_str()).map(|name| Genre {
                     name: name.to_string(),
+                    query_value: urlencoding::encode(name).into_owned(),
                 })
             })
             .collect();
