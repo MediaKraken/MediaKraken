@@ -160,7 +160,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                     if debug_enabled {
                         println!("TMDB here2");
-                        mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
+                        if let Err(err) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
                             json!({
                                 "Module": std::module_path!(),
                                 "DL Guid": download_data.mm_download_guid,
@@ -168,9 +168,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 "Provider": "themoviedb",
                                 "ID": download_data.mm_download_provider_id
                             }),
-                        )
-                        .await
-                        .unwrap();
+                        ).await {
+                            eprintln!("loki push error: {err}");
+                        }
                     }
 
                     mk_lib_metadata::base::metadata_process(
