@@ -1,9 +1,11 @@
 use anyhow::{anyhow, Context, Result};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use clap::Parser;
+use futures_util::TryStreamExt;
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::postgres::{PgPoolOptions, PgQueryResult};
 use sqlx::{Column, MySql, Pool, Postgres, QueryBuilder, Row, TypeInfo};
+use std::collections::HashMap;
 
 #[derive(Debug, Parser)]
 #[command(
@@ -25,13 +27,6 @@ struct Cli {
 
     #[arg(
         long,
-        env = "COLUMN_LIST",
-        help = "Comma-separated list of columns to copy, in order (example: name,email,created_at)."
-    )]
-    columns: String,
-
-    #[arg(
-        long,
         env = "SERIAL_COLUMN",
         default_value = "id",
         help = "BIGSERIAL column name in PostgreSQL table."
@@ -45,6 +40,12 @@ struct Cli {
         help = "Rows per insert batch."
     )]
     batch_size: usize,
+}
+
+#[derive(Debug, Clone)]
+struct ColumnPair {
+    mysql_column: String,
+    postgres_column: String,
 }
 
 #[derive(Debug, Clone)]
@@ -64,7 +65,6 @@ enum SqlValue {
 #[tokio::main]
 async fn main() -> Result<()> {
     let cli = Cli::parse();
-    let columns = parse_columns(&cli.columns)?;
 
     let mysql = MySqlPoolOptions::new()
         .max_connections(5)
@@ -77,6 +77,15 @@ async fn main() -> Result<()> {
         .connect(&cli.postgres_url)
         .await
         .context("failed to connect to PostgreSQL")?;
+
+    let columns = discover_columns(
+        &mysql,
+        &postgres,
+        &cli.mysql_table,
+        &cli.postgres_table,
+        &cli.serial_column,
+    )
+    .await?;
 
     set_bigserial_start(&postgres, &cli.postgres_table, &cli.serial_column).await?;
     println!(
@@ -98,21 +107,6 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-fn parse_columns(input: &str) -> Result<Vec<String>> {
-    let cols = input
-        .split(',')
-        .map(str::trim)
-        .filter(|c| !c.is_empty())
-        .map(ToOwned::to_owned)
-        .collect::<Vec<_>>();
-
-    if cols.is_empty() {
-        return Err(anyhow!("at least one column is required"));
-    }
-
-    Ok(cols)
-}
-
 async fn set_bigserial_start(
     postgres: &Pool<Postgres>,
     table: &str,
@@ -129,14 +123,118 @@ async fn set_bigserial_start(
             )
         })?;
 
-    let result = sqlx::query("SELECT setval($1::regclass, $2::bigint, false)")
+    sqlx::query("SELECT setval($1::regclass, $2::bigint, false)")
         .bind(sequence_name)
         .bind(1_000_000_000_i64)
         .execute(postgres)
         .await
-        .context("failed to set sequence value")?;
+        .context("failed to set sequence value")
+}
 
-    Ok(result)
+async fn discover_columns(
+    mysql: &Pool<MySql>,
+    postgres: &Pool<Postgres>,
+    mysql_table_input: &str,
+    postgres_table_input: &str,
+    serial_column: &str,
+) -> Result<Vec<ColumnPair>> {
+    let (mysql_schema_opt, mysql_table) = parse_table_name(mysql_table_input)?;
+    let mysql_schema = match mysql_schema_opt {
+        Some(schema) => schema,
+        None => sqlx::query_scalar::<_, String>("SELECT DATABASE()")
+            .fetch_one(mysql)
+            .await
+            .context("failed to resolve current MySQL database")?,
+    };
+
+    let (postgres_schema_opt, postgres_table) = parse_table_name(postgres_table_input)?;
+    let postgres_schema = postgres_schema_opt.unwrap_or_else(|| "public".to_string());
+
+    let mysql_columns: Vec<String> = sqlx::query_scalar(
+        "SELECT column_name
+         FROM information_schema.columns
+         WHERE table_schema = ? AND table_name = ?
+         ORDER BY ordinal_position",
+    )
+    .bind(&mysql_schema)
+    .bind(&mysql_table)
+    .fetch_all(mysql)
+    .await
+    .with_context(|| format!("failed to load columns for MySQL table '{mysql_table_input}'"))?;
+
+    let postgres_columns: Vec<String> = sqlx::query_scalar(
+        "SELECT column_name
+         FROM information_schema.columns
+         WHERE table_schema = $1 AND table_name = $2
+         ORDER BY ordinal_position",
+    )
+    .bind(&postgres_schema)
+    .bind(&postgres_table)
+    .fetch_all(postgres)
+    .await
+    .with_context(|| {
+        format!("failed to load columns for PostgreSQL table '{postgres_table_input}'")
+    })?;
+
+    let mysql_lookup: HashMap<String, String> = mysql_columns
+        .into_iter()
+        .map(|c| (c.to_ascii_lowercase(), c))
+        .collect();
+
+    let serial_lower = serial_column.to_ascii_lowercase();
+    let column_pairs = postgres_columns
+        .into_iter()
+        .filter(|pg_col| pg_col.to_ascii_lowercase() != serial_lower)
+        .filter_map(|pg_col| {
+            mysql_lookup
+                .get(&pg_col.to_ascii_lowercase())
+                .map(|mysql_col| ColumnPair {
+                    mysql_column: mysql_col.clone(),
+                    postgres_column: pg_col,
+                })
+        })
+        .collect::<Vec<_>>();
+
+    if column_pairs.is_empty() {
+        return Err(anyhow!(
+            "no shared non-serial columns found between MySQL table '{}' and PostgreSQL table '{}'",
+            mysql_table_input,
+            postgres_table_input
+        ));
+    }
+
+    Ok(column_pairs)
+}
+
+fn parse_table_name(input: &str) -> Result<(Option<String>, String)> {
+    let parts: Vec<&str> = input.split('.').collect();
+    match parts.as_slice() {
+        [table] => Ok((None, sanitize_identifier(table)?)),
+        [schema, table] => Ok((
+            Some(sanitize_identifier(schema)?),
+            sanitize_identifier(table)?,
+        )),
+        _ => Err(anyhow!(
+            "invalid table identifier '{}'; expected table or schema.table",
+            input
+        )),
+    }
+}
+
+fn sanitize_identifier(identifier: &str) -> Result<String> {
+    let valid = !identifier.is_empty()
+        && identifier
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '_');
+
+    if !valid {
+        return Err(anyhow!(
+            "invalid identifier '{}': only [A-Za-z0-9_] is allowed",
+            identifier
+        ));
+    }
+
+    Ok(identifier.to_string())
 }
 
 async fn copy_rows(
@@ -144,7 +242,7 @@ async fn copy_rows(
     postgres: &Pool<Postgres>,
     mysql_table: &str,
     postgres_table: &str,
-    columns: &[String],
+    columns: &[ColumnPair],
     batch_size: usize,
 ) -> Result<u64> {
     if batch_size == 0 {
@@ -155,52 +253,64 @@ async fn copy_rows(
         "SELECT {} FROM {}",
         columns
             .iter()
-            .map(|c| format!("`{}`", c.replace('`', "``")))
+            .map(|c| format!("`{}`", c.mysql_column.replace('`', "``")))
             .collect::<Vec<_>>()
             .join(", "),
         mysql_table
     );
 
-    let rows = sqlx::query(&select_sql)
-        .fetch_all(mysql)
-        .await
-        .with_context(|| format!("failed to read data from MySQL table '{mysql_table}'"))?;
-
-    let converted_rows = rows
-        .iter()
-        .map(|row| convert_row(row, columns.len()))
-        .collect::<Result<Vec<_>>>()?;
-
-    if converted_rows.is_empty() {
-        return Ok(0);
-    }
+    let mut stream = sqlx::query(&select_sql).fetch(mysql);
 
     let mut total_inserted = 0_u64;
-    for chunk in converted_rows.chunks(batch_size) {
-        let mut qb = QueryBuilder::<Postgres>::new(format!(
-            "INSERT INTO {} ({}) ",
-            postgres_table,
-            columns
-                .iter()
-                .map(|c| format!("\"{}\"", c.replace('"', "\"\"")))
-                .collect::<Vec<_>>()
-                .join(", ")
-        ));
+    let mut pending = Vec::with_capacity(batch_size);
 
-        qb.push_values(chunk, |mut b, values| {
-            for value in values {
-                bind_sql_value(&mut b, value);
-            }
-        });
+    while let Some(row) = stream
+        .try_next()
+        .await
+        .with_context(|| format!("failed to read data from MySQL table '{mysql_table}'"))?
+    {
+        pending.push(convert_row(&row, columns.len())?);
 
-        let result = qb.build().execute(postgres).await.with_context(|| {
-            format!("failed to insert batch into PostgreSQL table '{postgres_table}'")
-        })?;
+        if pending.len() >= batch_size {
+            total_inserted += flush_batch(postgres, postgres_table, columns, &pending).await?;
+            pending.clear();
+        }
+    }
 
-        total_inserted += result.rows_affected();
+    if !pending.is_empty() {
+        total_inserted += flush_batch(postgres, postgres_table, columns, &pending).await?;
     }
 
     Ok(total_inserted)
+}
+
+async fn flush_batch(
+    postgres: &Pool<Postgres>,
+    postgres_table: &str,
+    columns: &[ColumnPair],
+    rows: &[Vec<SqlValue>],
+) -> Result<u64> {
+    let mut qb = QueryBuilder::<Postgres>::new(format!(
+        "INSERT INTO {} ({}) ",
+        postgres_table,
+        columns
+            .iter()
+            .map(|c| format!("\"{}\"", c.postgres_column.replace('"', "\"\"")))
+            .collect::<Vec<_>>()
+            .join(", ")
+    ));
+
+    qb.push_values(rows, |mut b, values| {
+        for value in values {
+            bind_sql_value(&mut b, value);
+        }
+    });
+
+    qb.build()
+        .execute(postgres)
+        .await
+        .map(|result| result.rows_affected())
+        .with_context(|| format!("failed to insert batch into PostgreSQL table '{postgres_table}'"))
 }
 
 fn convert_row(row: &sqlx::mysql::MySqlRow, column_count: usize) -> Result<Vec<SqlValue>> {
