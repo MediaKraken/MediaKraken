@@ -88,6 +88,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 println!(" [x] Received {:?}", json_message);
                 if json_message["Type"] == "Bulk" {
                     let mut record_limit = i64::MAX;
+                    let skip_rows = json_message["Skip"].as_u64().unwrap_or(0) as usize;
                     if json_message["Limit"].is_number() {
                         record_limit = json_message["Limit"].as_i64().unwrap_or(i64::MAX);
                     }
@@ -114,8 +115,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .unwrap();
                     // Please note that the data is NOT in id order
                     let mut record_count = 0;
+                    let mut skipped_rows = 0usize;
                     for json_item in json_result.lines() {
                         if !json_item.trim().is_empty() {
+                            if skipped_rows < skip_rows {
+                                skipped_rows += 1;
+                                continue;
+                            }
                             let metadata_struct: MetadataMovie =
                                 serde_json::from_str(json_item.trim()).unwrap();
                             let Some(metadata_id) = metadata_struct.id else {
@@ -172,8 +178,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .await
                         .unwrap();
                     let mut record_count = 0;
+                    let mut skipped_rows = 0usize;
                     for json_item in json_result.lines() {
                         if !json_item.trim().is_empty() {
+                            if skipped_rows < skip_rows {
+                                skipped_rows += 1;
+                                continue;
+                            }
                             let metadata_struct: MetadataTV =
                                 serde_json::from_str(json_item.trim()).unwrap();
                             let Some(metadata_id) = metadata_struct.id else {
@@ -229,8 +240,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .await
                         .unwrap();
                     let mut record_count = 0;
+                    let mut skipped_rows = 0usize;
                     for json_item in json_result.lines() {
                         if !json_item.trim().is_empty() {
+                            if skipped_rows < skip_rows {
+                                skipped_rows += 1;
+                                continue;
+                            }
                             let metadata_struct: MetadataPerson =
                                 serde_json::from_str(json_item.trim()).unwrap();
                             let Some(metadata_id) = metadata_struct.id else {
