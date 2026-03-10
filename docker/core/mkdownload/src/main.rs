@@ -41,35 +41,6 @@ async fn process_message(json_message: Value, option_config_json: &Value) {
             )
             .await;
         }
-        // TODO log error by user requested
-        // } else if json_message["Type"].to_string() == "DigitalUPCNet" {
-        //     let sheet_data = mk_lib_metadata::mk_lib_metadata_provider_google_sheets::provider_google_sheets_fetch(
-        //         "1po70GCN9JUwrWgycMueNfxpEvBjLd7DQkiMRUQFFsL8".to_string(),
-        //         "tsv".to_string(),
-        //     )
-        //     .await
-        //     .unwrap();
-        //     // process sheet data TODO, this might be worthless d2d only
-        //     let mut rdr = csv::Reader::from_reader(sheet_dataq.as_bytes());
-        //     for result in rdr.deserialize() {
-        //         let record: DigitalUPCNetRecord = result?;
-        //         println!("{:?}", record);
-        //         // TODO "one-time" load.....do this BEFORE upc master list
-        //     }
-        // } else if json_message["Type"].to_string() == "UPCMasterList" {
-        //     let sheet_data = mk_lib_metadata::mk_lib_metadata_provider_google_sheets::provider_google_sheets_fetch(
-        //         "1IgK7tIEKngP59PUOs_lsF4P1hbSRIG71tgxncpu1Mws".to_string(),
-        //         "tsv".to_string(),
-        //     )
-        //     .await
-        //     .unwrap();
-        //     // process sheet data, this might be worthless d2d only
-        //     let mut rdr = csv::Reader::from_reader(sheet_dataq.as_bytes());
-        //     for result in rdr.deserialize() {
-        //         let record: UPCMasterNetRecord = result?;
-        //         println!("{:?}", record);
-        //         // TODO "one-time" load
-        //     }
     } else if json_message["Type"].to_string() == "Dosage" {
         // This saves to ./Comics
         let output = Command::new("dosage")
