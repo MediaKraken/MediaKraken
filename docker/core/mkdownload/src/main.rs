@@ -106,6 +106,33 @@ async fn process_message(json_message: Value, option_config_json: &Value) {
 //     fah_id: Option<String>,
 // }
 
+fn sync_project_gutenberg(
+    destination: &str,
+    source: Option<&str>,
+    dry_run: bool,
+) -> Result<(), Box<dyn Error>> {
+    if !Path::new(destination).exists() {
+        return Err(format!("Destination does not exist: {destination}").into());
+    }
+
+    let rsync_source = source.unwrap_or("rsync://mirrors.xmission.com/gutenberg/");
+    let mut command = Command::new("rsync");
+    command.args(["-avz", "--delete"]);
+
+    if dry_run {
+        command.arg("--dry-run");
+    }
+
+    command.args([rsync_source, destination]);
+
+    let status = command.status()?;
+    if status.success() {
+        Ok(())
+    } else {
+        Err(format!("rsync failed with status: {status}").into())
+    }
+}
+
 // #[derive(Debug, serde::Deserialize)]
 // struct UPCMasterNetRecord {
 //     upc: String,
