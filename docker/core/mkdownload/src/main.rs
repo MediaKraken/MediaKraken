@@ -2,6 +2,7 @@ use mk_lib_database;
 use mk_lib_network;
 use mk_lib_rabbitmq;
 use serde_json::{Value, json};
+use std::collections::HashSet;
 use std::env;
 use std::error::Error;
 use std::fs;
@@ -53,47 +54,140 @@ async fn process_message(json_message: Value, option_config_json: &Value) {
             // TODO parse list and store the strips, see notes in data example
         }
     } else if json_message["Type"].to_string() == "HDTrailers" {
-        // try to grab the RSS feed itself
-        let data: serde_json::Value = serde_json::from_str(
-            &mk_lib_network::mk_lib_network::mk_data_from_url(
-                "http://feeds.hd-trailers.net/hd-trailers".to_string(),
-            )
-            .await
-            .unwrap(),
-        )
-        .unwrap();
-        let an_array = data["rss"]["channel"]["item"].as_array().unwrap();
-        for item in an_array.iter() {
-            if (item["title"].to_string().contains("(Trailer")
-                && option_config_json["Metadata"]["Trailer"]["Trailer"] == true)
-                || (item["title"].to_string().contains("(Behind")
-                    && option_config_json["Metadata"]["Trailer"]["Behind"] == true)
-                || (item["title"].to_string().contains("(Clip")
-                    && option_config_json["Metadata"]["Trailer"]["Clip"] == true)
-                || (item["title"].to_string().contains("(Featurette")
-                    && option_config_json["Metadata"]["Trailer"]["Featurette"] == true)
-                || (item["title"].to_string().contains("(Carpool")
-                    && option_config_json["Metadata"]["Trailer"]["Carpool"] == true)
-            {
-                let download_link = item["enclosure"]["@url"].to_string();
-                // do NOT remove the header.....this is the SAVE location
-                // TODO use image directory format
-                let file_save_name = format!(
-                    "/mediakraken/metadata/meta/trailer/{:?}",
-                    download_link.rsplitn(1, "/")
-                );
-                // verify it doesn't exist in meta folder before downloading
-                if !Path::new(&file_save_name).exists() {
-                    mk_lib_network::mk_lib_network::mk_download_file_from_url(
-                        download_link.to_string(),
-                        &file_save_name.to_string(),
-                    )
-                    .await
-                    .unwrap();
+        if let Ok(download_links) = hdtrailers_collect_best_links().await {
+            for download_link in download_links {
+                if let Some(filename) = hdtrailers_extract_filename(&download_link) {
+                    let file_save_name = format!("/mediakraken/metadata/meta/trailer/{filename}");
+                    if !Path::new(&file_save_name).exists() {
+                        let _ = mk_lib_network::mk_lib_network::mk_download_file_from_url(
+                            download_link,
+                            &file_save_name,
+                        )
+                        .await;
+                    }
                 }
             }
         }
     }
+}
+
+async fn hdtrailers_collect_best_links() -> Result<Vec<String>, Box<dyn Error>> {
+    let homepage_html = mk_lib_network::mk_lib_network::mk_data_from_url(
+        "https://www.hd-trailers.net/".to_string(),
+    )
+    .await?;
+
+    let mut movie_pages = HashSet::new();
+    for href in hdtrailers_extract_hrefs(&homepage_html) {
+        if href.starts_with("https://www.hd-trailers.net/movie/") {
+            movie_pages.insert(href);
+        } else if href.starts_with("/movie/") {
+            movie_pages.insert(format!("https://www.hd-trailers.net{href}"));
+        }
+    }
+
+    let mut best_links = Vec::new();
+    for movie_page in movie_pages {
+        let page_html = match mk_lib_network::mk_lib_network::mk_data_from_url(movie_page).await {
+            Ok(value) => value,
+            Err(_) => continue,
+        };
+
+        if let Some(best) = hdtrailers_find_best_video_link(&page_html) {
+            best_links.push(best);
+        }
+    }
+
+    Ok(best_links)
+}
+
+fn hdtrailers_extract_hrefs(html: &str) -> Vec<String> {
+    let mut hrefs = Vec::new();
+    let mut offset = 0;
+
+    while let Some(pos) = html[offset..].find("href=") {
+        let start = offset + pos + 5;
+        let Some(delimiter) = html[start..].chars().next() else {
+            break;
+        };
+        if delimiter != '"' && delimiter != '\'' {
+            offset = start;
+            continue;
+        }
+
+        let value_start = start + delimiter.len_utf8();
+        let Some(value_end_rel) = html[value_start..].find(delimiter) else {
+            break;
+        };
+        let value_end = value_start + value_end_rel;
+        hrefs.push(html[value_start..value_end].to_string());
+        offset = value_end + delimiter.len_utf8();
+    }
+
+    hrefs
+}
+
+fn hdtrailers_find_best_video_link(html: &str) -> Option<String> {
+    let mut best_link: Option<String> = None;
+    let mut best_score = 0_u64;
+
+    for href in hdtrailers_extract_hrefs(html) {
+        let lower = href.to_ascii_lowercase();
+        if !(lower.ends_with(".mp4")
+            || lower.ends_with(".mov")
+            || lower.ends_with(".m4v")
+            || lower.ends_with(".webm"))
+        {
+            continue;
+        }
+
+        let score = hdtrailers_link_score(&lower);
+        if score > best_score {
+            best_score = score;
+            best_link = Some(href);
+        }
+    }
+
+    best_link
+}
+
+fn hdtrailers_link_score(link: &str) -> u64 {
+    let mut score = 0_u64;
+
+    for height in [4320_u64, 2160, 1080, 720, 576, 480, 360] {
+        let token = format!("{height}p");
+        if link.contains(&token) {
+            score = score.max(height);
+        }
+    }
+
+    for part in link.split(|value: char| !(value.is_ascii_alphanumeric() || value == 'x')) {
+        let Some((left, right)) = part.split_once('x') else {
+            continue;
+        };
+        if left.is_empty() || right.is_empty() {
+            continue;
+        }
+        if !left.chars().all(|value| value.is_ascii_digit())
+            || !right.chars().all(|value| value.is_ascii_digit())
+        {
+            continue;
+        }
+
+        if let (Ok(width), Ok(height)) = (left.parse::<u64>(), right.parse::<u64>()) {
+            score = score.max(width.saturating_mul(height));
+        }
+    }
+
+    score
+}
+
+fn hdtrailers_extract_filename(url: &str) -> Option<String> {
+    let file_name = url.rsplit('/').next()?;
+    if file_name.is_empty() {
+        return None;
+    }
+    Some(file_name.to_string())
 }
 
 // #[derive(Debug, serde::Deserialize)]
