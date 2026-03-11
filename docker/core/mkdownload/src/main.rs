@@ -1,13 +1,13 @@
 use mk_lib_database;
 use mk_lib_network;
 use mk_lib_rabbitmq;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
+use std::env;
 use std::error::Error;
 use std::fs;
 use std::path::Path;
 use std::process::{Command, Stdio};
 use tokio::sync::Notify;
-use std::env;
 
 // #[derive(Debug, serde::Deserialize)]
 // struct DigitalUPCNetRecord {
@@ -18,6 +18,33 @@ use std::env;
 //     notes: Option<String>,
 //     fah_id: Option<String>,
 // }
+
+fn sync_project_gutenberg(
+    destination: &str,
+    source: Option<&str>,
+    dry_run: bool,
+) -> Result<(), Box<dyn Error>> {
+    if !Path::new(destination).exists() {
+        return Err(format!("Destination does not exist: {destination}").into());
+    }
+
+    let rsync_source = source.unwrap_or("rsync://mirrors.xmission.com/gutenberg/");
+    let mut command = Command::new("rsync");
+    command.args(["-avz", "--delete"]);
+
+    if dry_run {
+        command.arg("--dry-run");
+    }
+
+    command.args([rsync_source, destination]);
+
+    let status = command.status()?;
+    if status.success() {
+        Ok(())
+    } else {
+        Err(format!("rsync failed with status: {status}").into())
+    }
+}
 
 // #[derive(Debug, serde::Deserialize)]
 // struct UPCMasterNetRecord {
@@ -39,9 +66,10 @@ use std::env;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let (sqlx_pool_rw, sqlx_pool_ro) = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
-        .await
-        .unwrap();
+    let (sqlx_pool_rw, sqlx_pool_ro) =
+        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
+            .await
+            .unwrap();
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await
         .unwrap();
@@ -178,6 +206,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 .unwrap();
                             }
                         }
+                    }
+                } else if json_message["Type"] == "Gutenberg" {
+                    if let Some(destination) = json_message["Local Save Path"].as_str() {
+                        let source = json_message["URL"].as_str();
+                        let dry_run = json_message["Dry Run"].as_bool().unwrap_or(false);
+                        let _ = sync_project_gutenberg(destination, source, dry_run);
                     }
                 }
                 let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
