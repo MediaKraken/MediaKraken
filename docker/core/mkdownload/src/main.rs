@@ -1,17 +1,60 @@
 use mk_lib_database;
 use mk_lib_network;
 use mk_lib_rabbitmq;
+use reqwest::{Client, StatusCode};
 use serde_json::{Value, json};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::env;
 use std::error::Error;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::Arc;
+use tokio::io::AsyncWriteExt;
 use tokio::sync::{Notify, Semaphore};
+use tokio::time::{Duration, sleep};
 
 const DEFAULT_MAX_CONCURRENT_DOWNLOADS: usize = 4;
+const IA_SEARCH_ROWS: usize = 25;
+const IA_SEARCH_DELAY: Duration = Duration::from_secs(2);
+const IA_DOWNLOAD_DELAY: Duration = Duration::from_secs(1);
+const IA_MAX_RETRIES: usize = 3;
+const IA_DEFAULT_OUTPUT_DIR: &str = "/mediakraken/metadata/meta/trailer/internet_archive";
+const IA_DEFAULT_STATE_FILE: &str =
+    "/mediakraken/metadata/meta/trailer/internet_archive_state.json";
+const IA_DEFAULT_MAX_PAGES: usize = 1;
+
+#[derive(Debug, serde::Serialize, serde::Deserialize, Default)]
+struct IATrailerState {
+    downloaded_ids: HashSet<String>,
+    downloaded_files: HashMap<String, String>,
+}
+
+#[derive(Debug, serde::Deserialize)]
+struct IASearchResponse {
+    response: IASearchDocs,
+}
+
+#[derive(Debug, serde::Deserialize)]
+struct IASearchDocs {
+    docs: Vec<IASearchDoc>,
+}
+
+#[derive(Debug, serde::Deserialize)]
+struct IASearchDoc {
+    identifier: String,
+}
+
+#[derive(Debug, serde::Deserialize)]
+struct IAMetadataResponse {
+    files: Vec<IAArchiveFile>,
+}
+
+#[derive(Debug, serde::Deserialize)]
+struct IAArchiveFile {
+    name: Option<String>,
+    format: Option<String>,
+}
 
 async fn process_message(json_message: Value, option_config_json: &Value) {
     if json_message["Type"].to_string() == "File" {
@@ -67,6 +110,12 @@ async fn process_message(json_message: Value, option_config_json: &Value) {
                     }
                 }
             }
+        }
+    } else if json_message["Type"].to_string() == "IATrailer"
+        || json_message["Type"].to_string() == "IAMovies"
+    {
+        if let Err(error) = process_ia_trailer_request(&json_message).await {
+            eprintln!("{} request failed: {error}", json_message["Type"]);
         }
     }
 }
