@@ -31,6 +31,7 @@ struct OpenLibraryWorkRow {
 
 struct OpenLibraryBrowseItem {
     work_id: String,
+    route_work_id: String,
     title: String,
     author_name: String,
     first_publish_year: String,
@@ -152,19 +153,19 @@ pub async fn user_inter_openlibrary_detail(
         return render_401();
     }
 
-    if !is_valid_work_id(&work_id) {
+    let Some(canonical_work_id) = canonicalize_work_id(&work_id) else {
         return (
             StatusCode::BAD_REQUEST,
             Html(String::from("Invalid work id")).into_response(),
         );
-    }
+    };
 
     let row_result = sqlx::query_as::<_, OpenLibraryWorkRow>(
         r#"select mm_openlib_work_id, mm_openlib_work_json
            from mm_openlib_work
            where mm_openlib_work_id = $1"#,
     )
-    .bind(&work_id)
+    .bind(&canonical_work_id)
     .fetch_optional(&state.sqlx_pool_ro)
     .await;
 
@@ -232,8 +233,11 @@ fn map_work_to_browse_item(row: &OpenLibraryWorkRow) -> OpenLibraryBrowseItem {
     let cover_url = read_i64(&row.mm_openlib_work_json, "cover_i")
         .map(|cover| format!("https://covers.openlibrary.org/b/id/{cover}-M.jpg"));
 
+    let route_work_id = row.mm_openlib_work_id.trim_start_matches('/').to_string();
+
     OpenLibraryBrowseItem {
         work_id: row.mm_openlib_work_id.clone(),
+        route_work_id,
         title,
         author_name,
         first_publish_year,
@@ -312,9 +316,21 @@ fn read_string_array(value: &Value, key: &str) -> Vec<String> {
         .unwrap_or_default()
 }
 
-fn is_valid_work_id(work_id: &str) -> bool {
-    !work_id.is_empty()
-        && work_id
-            .chars()
-            .all(|char| char.is_ascii_alphanumeric() || char == '_')
+fn canonicalize_work_id(work_id: &str) -> Option<String> {
+    let trimmed = work_id.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+
+    let canonical = if trimmed.starts_with('/') {
+        trimmed.to_string()
+    } else {
+        format!("/{trimmed}")
+    };
+
+    if canonical.len() > 255 {
+        return None;
+    }
+
+    Some(canonical)
 }
