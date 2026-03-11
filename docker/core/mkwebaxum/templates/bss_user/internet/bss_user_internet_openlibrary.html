@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include "bss_include_header.html" %}
+
+<body class="bg-slate-950 text-slate-100">
+    {% include "bss_user/bss_user_include_menu.html" %}
+    {% include "bss_user/bss_user_include_side_menu.html" %}
+
+    <main class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8" x-data="{ onlyWithCovers: false }">
+        <section class="mb-6 flex flex-col gap-4 rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-2xl font-semibold">OpenLibrary Browse</h1>
+                <p class="text-sm text-slate-300">Browse preloaded OpenLibrary works from the local database.</p>
+            </div>
+            <button
+                type="button"
+                class="rounded-lg border border-slate-600 px-4 py-2 text-sm font-medium hover:border-slate-400 hover:bg-slate-800"
+                aria-label="Toggle only records with covers"
+                @click="onlyWithCovers = !onlyWithCovers"
+                :class="onlyWithCovers ? 'border-teal-400 bg-teal-950/40 text-teal-200' : ''"
+            >
+                <span x-text="onlyWithCovers ? 'Showing: With cover' : 'Showing: All works'"></span>
+            </button>
+        </section>
+
+        {% if has_items %}
+        <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {% for item in items %}
+            <article
+                class="flex flex-col gap-3 rounded-xl border border-slate-800 bg-slate-900 p-4"
+                x-show="!onlyWithCovers || {{ item.cover_url.is_some() }}"
+                x-cloak
+            >
+                <div class="flex gap-3">
+                    {% if let Some(url) = item.cover_url %}
+                    <img src="{{ url }}" alt="{{ item.title }} cover" class="h-28 w-20 rounded object-cover" loading="lazy" decoding="async" />
+                    {% else %}
+                    <div class="flex h-28 w-20 items-center justify-center rounded bg-slate-800 text-xs text-slate-400">No cover</div>
+                    {% endif %}
+
+                    <div class="min-w-0 flex-1">
+                        <h2 class="truncate text-base font-semibold">{{ item.title }}</h2>
+                        <p class="mt-1 text-sm text-slate-300">{{ item.author_name }}</p>
+                        <dl class="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-400">
+                            <div>
+                                <dt>First Published</dt>
+                                <dd class="text-slate-200">{{ item.first_publish_year }}</dd>
+                            </div>
+                            <div>
+                                <dt>Editions</dt>
+                                <dd class="text-slate-200">{{ item.edition_count }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    {% for subject in item.subject_preview %}
+                    <span class="rounded-full bg-slate-800 px-2 py-1 text-xs text-slate-300">{{ subject }}</span>
+                    {% endfor %}
+                    {% if item.subject_more_count > 0 %}
+                    <span class="rounded-full bg-slate-800 px-2 py-1 text-xs text-slate-400">+{{ item.subject_more_count }} more</span>
+                    {% endif %}
+                </div>
+
+                <a
+                    href="/user/internet/openlibrary_detail/{{ item.route_work_id }}"
+                    class="mt-1 inline-flex items-center justify-center rounded-lg bg-teal-700 px-3 py-2 text-sm font-medium hover:bg-teal-600"
+                    aria-label="View OpenLibrary details for {{ item.title }}"
+                >
+                    View details
+                </a>
+            </article>
+            {% endfor %}
+        </section>
+        {% else %}
+        <section class="rounded-xl border border-slate-800 bg-slate-900 p-6 text-center text-slate-300">
+            No OpenLibrary works were found in the database.
+        </section>
+        {% endif %}
+
+        <nav class="mt-6 flex items-center justify-between" aria-label="OpenLibrary pagination">
+            <div>
+                {% if let Some(previous_page) = pagination_prev %}
+                <a href="/user/internet/openlibrary/{{ previous_page }}" class="rounded-lg border border-slate-600 px-4 py-2 text-sm hover:border-slate-400 hover:bg-slate-800" aria-label="Go to previous page">Previous</a>
+                {% endif %}
+            </div>
+            <p class="text-sm text-slate-300">Page {{ page }}</p>
+            <div>
+                {% if let Some(next_page) = pagination_next %}
+                <a href="/user/internet/openlibrary/{{ next_page }}" class="rounded-lg border border-slate-600 px-4 py-2 text-sm hover:border-slate-400 hover:bg-slate-800" aria-label="Go to next page">Next</a>
+                {% endif %}
+            </div>
+        </nav>
+    </main>
+
+    {% include "bss_public/bss_public_footer.html" %}
+</body>
+
+</html>

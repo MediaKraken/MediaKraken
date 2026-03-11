@@ -177,7 +177,7 @@ When making changes, the agent should (at minimum) describe how to verify:
 
 ## 12) Quick Project Glossary (Optional)
 
-- MediaKraken: Rust/Axum app + Askama templates + Tailwind/Alpine UI
+- MediaKraken: Rust/Axum app + Askama templates + Tailwindv4/Alpine UI
 - DB: Postgres via SQLx
 - CNPG: CloudNativePG for Postgres ops
 - Garage S3: object storage backend for backups/WAL
