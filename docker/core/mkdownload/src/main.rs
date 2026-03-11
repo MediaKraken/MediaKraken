@@ -5,7 +5,7 @@ use serde_json::{Value, json};
 use std::env;
 use std::error::Error;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::Arc;
 use tokio::sync::{Notify, Semaphore};
@@ -184,5 +184,211 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let guard = Notify::new();
     guard.notified().await;
+    Ok(())
+}
+
+async fn process_ia_trailer_request(json_message: &Value) -> Result<(), Box<dyn Error>> {
+    let output_dir = json_message
+        .get("OutputDir")
+        .and_then(Value::as_str)
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from(IA_DEFAULT_OUTPUT_DIR));
+    let state_file = json_message
+        .get("StateFile")
+        .and_then(Value::as_str)
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from(IA_DEFAULT_STATE_FILE));
+    let max_pages = json_message
+        .get("MaxPages")
+        .and_then(Value::as_u64)
+        .and_then(|value| usize::try_from(value).ok())
+        .unwrap_or(IA_DEFAULT_MAX_PAGES);
+
+    tokio::fs::create_dir_all(&output_dir).await?;
+
+    let mut state = ia_load_state(&state_file).await?;
+    let client = Client::builder()
+        .user_agent("mediakraken-mkdownload-ia-trailer/0.1 (+https://archive.org)")
+        .build()?;
+
+    for page in 1..=max_pages {
+        let docs = ia_search_trailer_items(&client, page).await?;
+        if docs.is_empty() {
+            break;
+        }
+
+        for doc in docs {
+            if state.downloaded_ids.contains(&doc.identifier) {
+                continue;
+            }
+
+            if let Some(filename) = ia_fetch_best_trailer_file(&client, &doc.identifier).await? {
+                let saved_path =
+                    ia_download_file(&client, &doc.identifier, &filename, &output_dir).await?;
+                state.downloaded_ids.insert(doc.identifier.clone());
+                state.downloaded_files.insert(
+                    doc.identifier.clone(),
+                    saved_path.to_string_lossy().to_string(),
+                );
+                ia_save_state(&state_file, &state).await?;
+                sleep(IA_DOWNLOAD_DELAY).await;
+            }
+        }
+
+        sleep(IA_SEARCH_DELAY).await;
+    }
+
+    Ok(())
+}
+
+async fn ia_search_trailer_items(
+    client: &Client,
+    page: usize,
+) -> Result<Vec<IASearchDoc>, Box<dyn Error>> {
+    let query = "mediatype:movies AND subject:trailer";
+    let url = format!(
+        "https://archive.org/advancedsearch.php?q={}&fl[]=identifier&sort[]=downloads+desc&rows={}&page={}&output=json",
+        urlencoding::encode(query),
+        IA_SEARCH_ROWS,
+        page
+    );
+    let response: IASearchResponse = ia_fetch_json_with_backoff(client, &url).await?;
+    Ok(response.response.docs)
+}
+
+async fn ia_fetch_best_trailer_file(
+    client: &Client,
+    identifier: &str,
+) -> Result<Option<String>, Box<dyn Error>> {
+    let metadata_url = format!(
+        "https://archive.org/metadata/{}",
+        urlencoding::encode(identifier)
+    );
+    let metadata: IAMetadataResponse = ia_fetch_json_with_backoff(client, &metadata_url).await?;
+
+    let preferred_extensions = [".mp4", ".m4v", ".mkv", ".webm"];
+    let mut best: Option<String> = None;
+
+    for file in metadata.files {
+        let Some(name) = file.name else {
+            continue;
+        };
+
+        let name_lower = name.to_ascii_lowercase();
+        let format_lower = file.format.unwrap_or_default().to_ascii_lowercase();
+        let likely_trailer = name_lower.contains("trailer") || format_lower.contains("trailer");
+        let video_format = preferred_extensions
+            .iter()
+            .any(|ext| name_lower.ends_with(ext))
+            || format_lower.contains("mpeg4")
+            || format_lower.contains("h.264")
+            || format_lower.contains("matroska")
+            || format_lower.contains("webm");
+
+        if likely_trailer && video_format {
+            return Ok(Some(name));
+        }
+
+        if best.is_none() && video_format {
+            best = Some(name);
+        }
+    }
+
+    Ok(best)
+}
+
+async fn ia_download_file(
+    client: &Client,
+    identifier: &str,
+    filename: &str,
+    output_dir: &Path,
+) -> Result<PathBuf, Box<dyn Error>> {
+    let url = format!(
+        "https://archive.org/download/{}/{}",
+        urlencoding::encode(identifier),
+        urlencoding::encode(filename)
+    );
+
+    let mut response = ia_get_with_backoff(client, &url).await?;
+    let output_name = ia_sanitize_filename(identifier, filename);
+    let output_path = output_dir.join(output_name);
+    let mut file = tokio::fs::File::create(&output_path).await?;
+
+    while let Some(chunk) = response.chunk().await? {
+        file.write_all(&chunk).await?;
+    }
+    file.flush().await?;
+
+    Ok(output_path)
+}
+
+async fn ia_fetch_json_with_backoff<T>(client: &Client, url: &str) -> Result<T, Box<dyn Error>>
+where
+    T: for<'de> serde::Deserialize<'de>,
+{
+    let response = ia_get_with_backoff(client, url).await?;
+    Ok(response.json::<T>().await?)
+}
+
+async fn ia_get_with_backoff(
+    client: &Client,
+    url: &str,
+) -> Result<reqwest::Response, Box<dyn Error>> {
+    let mut attempt = 0;
+    loop {
+        attempt += 1;
+        let response = client.get(url).send().await?;
+
+        if response.status() == StatusCode::TOO_MANY_REQUESTS {
+            let retry_after = response
+                .headers()
+                .get("retry-after")
+                .and_then(|value| value.to_str().ok())
+                .and_then(|value| value.parse::<u64>().ok())
+                .unwrap_or(5);
+
+            if attempt > IA_MAX_RETRIES {
+                return Err(
+                    format!("rate limited after {IA_MAX_RETRIES} retries for {url}").into(),
+                );
+            }
+
+            sleep(Duration::from_secs(retry_after)).await;
+            continue;
+        }
+
+        if !response.status().is_success() {
+            return Err(format!("request failed ({}): {url}", response.status()).into());
+        }
+
+        return Ok(response);
+    }
+}
+
+fn ia_sanitize_filename(identifier: &str, filename: &str) -> String {
+    let source = format!("{identifier}_{filename}");
+    source
+        .chars()
+        .map(|value| {
+            if value.is_ascii_alphanumeric() || value == '.' || value == '-' || value == '_' {
+                value
+            } else {
+                '_'
+            }
+        })
+        .collect()
+}
+
+async fn ia_load_state(path: &Path) -> Result<IATrailerState, Box<dyn Error>> {
+    match tokio::fs::read(path).await {
+        Ok(bytes) => Ok(serde_json::from_slice(&bytes)?),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(IATrailerState::default()),
+        Err(error) => Err(error.into()),
+    }
+}
+
+async fn ia_save_state(path: &Path, state: &IATrailerState) -> Result<(), Box<dyn Error>> {
+    let data = serde_json::to_vec_pretty(state)?;
+    tokio::fs::write(path, data).await?;
     Ok(())
 }
