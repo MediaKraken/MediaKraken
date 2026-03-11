@@ -1,23 +1,79 @@
 ---
-- name : Setup velero on cluster
+- name: Setup velero on cluster
   hosts: mkcontrol1
+  vars:
+    velero_namespace: velero
+    velero_release_name: velero
+    velero_chart_ref: vmware-tanzu/velero
+    velero_chart_version: "9.1.0"
+
+    velero_provider: aws
+    velero_plugin_image: velero/velero-plugin-for-aws:v1.10.1
+
+    velero_backup_location_name: default
+    velero_snapshot_location_name: default
+    velero_bucket: CHANGE_ME_BUCKET
+    velero_region: us-east-1
+    velero_s3_url: http://CHANGE_ME_S3_ENDPOINT:9000
+
+    velero_credentials_file: /tmp/velero-credentials
+    velero_access_key_id: CHANGE_ME_ACCESS_KEY_ID
+    velero_secret_access_key: CHANGE_ME_SECRET_ACCESS_KEY
+
+    velero_backup_schedule_name: daily
+    velero_backup_schedule: "0 2 * * *"
+    velero_backup_ttl: "240h"
   tasks:
     - name: Setup velero repo
-      shell: helm repo add vmware-tanzu https://vmware-tanzu.github.io/helm-charts
-  
-    - name: Install velero
-      shell: helm install velero vmware-tanzu/velero \
-        --namespace velero \
-        --create-namespace \
-        --set-file credentials.secretContents.cloud=<FULL PATH TO FILE> \
-        --set configuration.backupStorageLocation[0].name=<BACKUP STORAGE LOCATION NAME> \
-        --set configuration.backupStorageLocation[0].provider=<PROVIDER NAME> \
-        --set configuration.backupStorageLocation[0].bucket=<BUCKET NAME> \
-        --set configuration.backupStorageLocation[0].config.region=<REGION> \
-        --set configuration.volumeSnapshotLocation[0].name=<VOLUME SNAPSHOT LOCATION NAME> \
-        --set configuration.volumeSnapshotLocation[0].provider=<PROVIDER NAME> \
-        --set configuration.volumeSnapshotLocation[0].config.region=<REGION> \
-        --set initContainers[0].name=velero-plugin-for-<PROVIDER NAME> \
-        --set initContainers[0].image=velero/velero-plugin-for-<PROVIDER NAME>:<PROVIDER PLUGIN TAG> \
-        --set initContainers[0].volumeMounts[0].mountPath=/target \
+      ansible.builtin.shell: helm repo add vmware-tanzu https://vmware-tanzu.github.io/helm-charts
+
+    - name: Update helm repos
+      ansible.builtin.shell: helm repo update
+
+    - name: Write velero credentials file
+      ansible.builtin.copy:
+        dest: "{{ velero_credentials_file }}"
+        mode: "0600"
+        content: |
+          [default]
+          aws_access_key_id={{ velero_access_key_id }}
+          aws_secret_access_key={{ velero_secret_access_key }}
+      no_log: true
+
+    - name: Install or upgrade velero
+      ansible.builtin.shell: >-
+        helm upgrade --install {{ velero_release_name }} {{ velero_chart_ref }}
+        --namespace {{ velero_namespace }}
+        --create-namespace
+        --version {{ velero_chart_version }}
+        --set-file credentials.secretContents.cloud={{ velero_credentials_file }}
+        --set configuration.backupStorageLocation[0].name={{ velero_backup_location_name }}
+        --set configuration.backupStorageLocation[0].provider={{ velero_provider }}
+        --set configuration.backupStorageLocation[0].bucket={{ velero_bucket }}
+        --set configuration.backupStorageLocation[0].config.region={{ velero_region }}
+        --set configuration.backupStorageLocation[0].config.s3Url={{ velero_s3_url }}
+        --set configuration.backupStorageLocation[0].config.s3ForcePathStyle=true
+        --set configuration.volumeSnapshotLocation[0].name={{ velero_snapshot_location_name }}
+        --set configuration.volumeSnapshotLocation[0].provider={{ velero_provider }}
+        --set configuration.volumeSnapshotLocation[0].config.region={{ velero_region }}
+        --set initContainers[0].name=velero-plugin-for-{{ velero_provider }}
+        --set initContainers[0].image={{ velero_plugin_image }}
+        --set initContainers[0].volumeMounts[0].mountPath=/target
         --set initContainers[0].volumeMounts[0].name=plugins
+
+    - name: Create scheduled cluster backup
+      ansible.builtin.shell: >-
+        kubectl apply -f - <<'MANIFEST'
+        apiVersion: velero.io/v1
+        kind: Schedule
+        metadata:
+          name: {{ velero_backup_schedule_name }}
+          namespace: {{ velero_namespace }}
+        spec:
+          schedule: "{{ velero_backup_schedule }}"
+          template:
+            ttl: "{{ velero_backup_ttl }}"
+            includedNamespaces:
+              - "*"
+            snapshotVolumes: true
+        MANIFEST
