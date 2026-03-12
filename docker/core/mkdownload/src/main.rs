@@ -2,17 +2,18 @@ use mk_lib_database;
 use mk_lib_network;
 use mk_lib_rabbitmq;
 use reqwest::{Client, StatusCode};
-use serde_json::{Value, json};
+use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::env;
-use std::error::Error;
-use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::Arc;
 use tokio::io::AsyncWriteExt;
 use tokio::sync::{Notify, Semaphore};
-use tokio::time::{Duration, sleep};
+use tokio::time::{sleep, Duration};
+
+type AppError = Box<dyn std::error::Error>;
+type TaskError = String;
 
 const DEFAULT_MAX_CONCURRENT_DOWNLOADS: usize = 4;
 const IA_SEARCH_ROWS: usize = 25;
@@ -56,75 +57,136 @@ struct IAArchiveFile {
     format: Option<String>,
 }
 
-async fn process_message(json_message: Value, option_config_json: &Value) {
-    if json_message["Type"].to_string() == "File" {
-        // do NOT remove the header.....this is the SAVE location
-        mk_lib_network::mk_lib_network::mk_download_file_from_url(
-            json_message["URL"].to_string(),
-            &json_message["Local Save Path"].to_string(),
-        )
-        .await
-        .unwrap();
-    } else if json_message["Type"].to_string() == "Youtube" {
-        if validator::ValidateUrl::validate_url(&json_message["URL"].to_string()) {
-            //println!("downloaded video to {:?}", rustube::download_best_quality(&json_message["URL"].to_string()).await.unwrap());
-            return;
+async fn process_message(json_message: Value, _option_config_json: &Value) {
+    match json_message["Type"].as_str() {
+        Some("File") => {
+            if let (Some(url), Some(local_save_path)) = (
+                json_message["URL"].as_str(),
+                json_message["Local Save Path"].as_str(),
+            ) {
+                let local_save_path = local_save_path.to_string();
+
+                if let Err(error) = mk_lib_network::mk_lib_network::mk_download_file_from_url(
+                    url.to_string(),
+                    &local_save_path,
+                )
+                .await
+                {
+                    eprintln!("file download failed: {error}");
+                }
+            } else {
+                eprintln!("File message missing URL or Local Save Path");
+            }
         }
-        // TODO log error by user requested
-    } else if json_message["Type"].to_string() == "Subtitle" {
-        let _output = Command::new("subliminal")
-            .args(["-l", "en", &json_message["Data"].as_str().unwrap()])
-            .stdout(Stdio::piped())
-            .output()
-            .unwrap();
-    } else if json_message["Type"].to_string() == "Twitch" {
-        if validator::ValidateUrl::validate_url(&json_message["URL"].to_string()) {
-            let _res = mk_lib_network::mk_lib_network::mk_download_file_from_url_tokio(
-                json_message["URL"].to_string(),
-                &json_message["Local Save Path"].to_string(),
-            )
-            .await;
-        }
-    } else if json_message["Type"].to_string() == "Dosage" {
-        // This saves to ./Comics
-        let output = Command::new("dosage")
-            .args(["--adult", &json_message["Data"].as_str().unwrap()])
-            .stdout(Stdio::piped())
-            .output()
-            .unwrap();
-        let _stdout = String::from_utf8(output.stdout).unwrap();
-        if json_message["Data"].as_str().unwrap() == "--list" {
-            // TODO parse list and store the strips, see notes in data example
-        }
-    } else if json_message["Type"].to_string() == "HDTrailers" {
-        if let Ok(download_links) = hdtrailers_collect_best_links().await {
-            for download_link in download_links {
-                if let Some(filename) = hdtrailers_extract_filename(&download_link) {
-                    let file_save_name = format!("/mediakraken/metadata/meta/trailer/{filename}");
-                    if !Path::new(&file_save_name).exists() {
-                        let _ = mk_lib_network::mk_lib_network::mk_download_file_from_url(
-                            download_link,
-                            &file_save_name,
-                        )
-                        .await;
-                    }
+        Some("Youtube") => {
+            if let Some(url) = json_message["URL"].as_str() {
+                if validator::ValidateUrl::validate_url(url) {
+                    return;
                 }
             }
         }
-    } else if json_message["Type"].to_string() == "IATrailer"
-        || json_message["Type"].to_string() == "IAMovies"
-    {
-        if let Err(error) = process_ia_trailer_request(&json_message).await {
-            eprintln!("{} request failed: {error}", json_message["Type"]);
+        Some("Subtitle") => {
+            if let Some(data) = json_message["Data"].as_str() {
+                let result = Command::new("subliminal")
+                    .args(["-l", "en", data])
+                    .stdout(Stdio::piped())
+                    .output();
+
+                if let Err(error) = result {
+                    eprintln!("subtitle download failed: {error}");
+                }
+            } else {
+                eprintln!("Subtitle message missing Data");
+            }
+        }
+        Some("Twitch") => {
+            if let (Some(url), Some(local_save_path)) = (
+                json_message["URL"].as_str(),
+                json_message["Local Save Path"].as_str(),
+            ) {
+                let local_save_path = local_save_path.to_string();
+
+                if validator::ValidateUrl::validate_url(url) {
+                    if let Err(error) =
+                        mk_lib_network::mk_lib_network::mk_download_file_from_url_tokio(
+                            url.to_string(),
+                            &local_save_path,
+                        )
+                        .await
+                    {
+                        eprintln!("twitch download failed: {error}");
+                    }
+                }
+            } else {
+                eprintln!("Twitch message missing URL or Local Save Path");
+            }
+        }
+        Some("Dosage") => {
+            if let Some(data) = json_message["Data"].as_str() {
+                let output = Command::new("dosage")
+                    .args(["--adult", data])
+                    .stdout(Stdio::piped())
+                    .output();
+
+                match output {
+                    Ok(output) => {
+                        let _stdout = String::from_utf8_lossy(&output.stdout);
+                        if data == "--list" {
+                            // TODO parse list and store the strips
+                        }
+                    }
+                    Err(error) => eprintln!("dosage failed: {error}"),
+                }
+            } else {
+                eprintln!("Dosage message missing Data");
+            }
+        }
+        Some("HDTrailers") => match hdtrailers_collect_best_links().await {
+            Ok(download_links) => {
+                for download_link in download_links {
+                    if let Some(filename) = hdtrailers_extract_filename(&download_link) {
+                        let file_save_name =
+                            format!("/mediakraken/metadata/meta/trailer/{filename}");
+
+                        if !Path::new(&file_save_name).exists() {
+                            if let Err(error) =
+                                mk_lib_network::mk_lib_network::mk_download_file_from_url(
+                                    download_link,
+                                    &file_save_name,
+                                )
+                                .await
+                            {
+                                eprintln!("hdtrailers download failed: {error}");
+                            }
+                        }
+                    }
+                }
+            }
+            Err(error) => eprintln!("hdtrailers collect failed: {error}"),
+        },
+        Some("IATrailer") | Some("IAMovies") => {
+            if let Err(error) = process_ia_trailer_request(&json_message).await {
+                eprintln!(
+                    "{} request failed: {error}",
+                    json_message["Type"].as_str().unwrap_or("unknown")
+                );
+            }
+        }
+        Some(other) => {
+            eprintln!("unknown message type: {other}");
+        }
+        None => {
+            eprintln!("message missing Type");
         }
     }
 }
 
-async fn hdtrailers_collect_best_links() -> Result<Vec<String>, Box<dyn Error>> {
+async fn hdtrailers_collect_best_links() -> Result<Vec<String>, TaskError> {
     let homepage_html = mk_lib_network::mk_lib_network::mk_data_from_url(
         "https://www.hd-trailers.net/".to_string(),
     )
-    .await?;
+    .await
+    .map_err(|e| e.to_string())?;
 
     let mut movie_pages = HashSet::new();
     for href in hdtrailers_extract_hrefs(&homepage_html) {
@@ -239,21 +301,11 @@ fn hdtrailers_extract_filename(url: &str) -> Option<String> {
     Some(file_name.to_string())
 }
 
-// #[derive(Debug, serde::Deserialize)]
-// struct DigitalUPCNetRecord {
-//     title: String,
-//     year: String,
-//     quality: String,
-//     upc: String,
-//     notes: Option<String>,
-//     fah_id: Option<String>,
-// }
-
 fn sync_project_gutenberg(
     destination: &str,
     source: Option<&str>,
     dry_run: bool,
-) -> Result<(), Box<dyn Error>> {
+) -> Result<(), AppError> {
     if !Path::new(destination).exists() {
         return Err(format!("Destination does not exist: {destination}").into());
     }
@@ -276,47 +328,22 @@ fn sync_project_gutenberg(
     }
 }
 
-// #[derive(Debug, serde::Deserialize)]
-// struct UPCMasterNetRecord {
-//     upc: String,
-//     title: String,
-//     description: Option<String>,
-//     link: String,
-//     notes: Option<String>,
-//     upc_type: String,
-//     year: String,
-//     genres: String,
-//     rated: String,
-//     length: String,
-//     added: String,
-//     alt_upc: Option<String>,
-//     nw_bluray_upc: Option<String>,
-// }
-
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
-    // connect to db and do a version check
-    let (sqlx_pool_rw, sqlx_pool_ro) =
-        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
-            .await
-            .unwrap();
+async fn main() -> Result<(), AppError> {
+    let (_sqlx_pool_rw, sqlx_pool_ro) =
+        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120).await?;
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
-        .await
-        .unwrap();
+        .await?;
+
     let option_config_json: Value =
         mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool_ro)
-            .await
-            .unwrap();
+            .await?;
 
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkdownload")
-            .await
-            .unwrap();
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkdownload").await?;
 
     let mut rabbit_consumer =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mkdownload", &rabbit_channel)
-            .await
-            .unwrap();
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mkdownload", &rabbit_channel).await?;
 
     let max_concurrent_downloads = env::var("MKDOWNLOAD_CONCURRENT_WORKERS")
         .ok()
@@ -328,26 +355,56 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let option_config_json = Arc::new(option_config_json);
     let rabbit_channel = Arc::new(rabbit_channel);
 
-    tokio::spawn(async move {
-        while let Some(msg) = rabbit_consumer.recv().await {
-            if let Some(payload) = msg.content {
-                let json_message: Value =
-                    serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                let delivery_tag = msg.deliver.unwrap().delivery_tag();
-                let worker_limit = Arc::clone(&worker_limit);
-                let option_config_json = Arc::clone(&option_config_json);
-                let rabbit_channel = Arc::clone(&rabbit_channel);
+    tokio::spawn({
+        let worker_limit = Arc::clone(&worker_limit);
+        let option_config_json = Arc::clone(&option_config_json);
+        let rabbit_channel = Arc::clone(&rabbit_channel);
 
-                tokio::spawn(async move {
-                    if let Ok(_permit) = worker_limit.acquire_owned().await {
-                        process_message(json_message, option_config_json.as_ref()).await;
-                        let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
-                            &rabbit_channel,
-                            delivery_tag,
-                        )
-                        .await;
-                    }
-                });
+        async move {
+            while let Some(msg) = rabbit_consumer.recv().await {
+                if let Some(payload) = msg.content {
+                    let json_message: Value =
+                        match serde_json::from_str(&String::from_utf8_lossy(&payload)) {
+                            Ok(value) => value,
+                            Err(error) => {
+                                eprintln!("invalid JSON message: {error}");
+                                continue;
+                            }
+                        };
+
+                    let delivery_tag = match msg.deliver {
+                        Some(deliver) => deliver.delivery_tag(),
+                        None => {
+                            eprintln!("rabbit message missing delivery metadata");
+                            continue;
+                        }
+                    };
+
+                    let worker_limit = Arc::clone(&worker_limit);
+                    let option_config_json = Arc::clone(&option_config_json);
+                    let rabbit_channel = Arc::clone(&rabbit_channel);
+
+                    tokio::spawn(async move {
+                        match worker_limit.acquire_owned().await {
+                            Ok(_permit) => {
+                                process_message(json_message, option_config_json.as_ref()).await;
+
+                                if let Err(error) =
+                                    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
+                                        &rabbit_channel,
+                                        delivery_tag,
+                                    )
+                                    .await
+                                {
+                                    eprintln!("rabbit ack failed: {error}");
+                                }
+                            }
+                            Err(error) => {
+                                eprintln!("failed to acquire worker permit: {error}");
+                            }
+                        }
+                    });
+                }
             }
         }
     });
@@ -357,7 +414,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-async fn process_ia_trailer_request(json_message: &Value) -> Result<(), Box<dyn Error>> {
+async fn process_ia_trailer_request(json_message: &Value) -> Result<(), TaskError> {
     let output_dir = json_message
         .get("OutputDir")
         .and_then(Value::as_str)
@@ -374,12 +431,15 @@ async fn process_ia_trailer_request(json_message: &Value) -> Result<(), Box<dyn 
         .and_then(|value| usize::try_from(value).ok())
         .unwrap_or(IA_DEFAULT_MAX_PAGES);
 
-    tokio::fs::create_dir_all(&output_dir).await?;
+    tokio::fs::create_dir_all(&output_dir)
+        .await
+        .map_err(|e| e.to_string())?;
 
     let mut state = ia_load_state(&state_file).await?;
     let client = Client::builder()
         .user_agent("mediakraken-mkdownload-ia-trailer/0.1 (+https://archive.org)")
-        .build()?;
+        .build()
+        .map_err(|e| e.to_string())?;
 
     for page in 1..=max_pages {
         let docs = ia_search_trailer_items(&client, page).await?;
@@ -414,7 +474,7 @@ async fn process_ia_trailer_request(json_message: &Value) -> Result<(), Box<dyn 
 async fn ia_search_trailer_items(
     client: &Client,
     page: usize,
-) -> Result<Vec<IASearchDoc>, Box<dyn Error>> {
+) -> Result<Vec<IASearchDoc>, TaskError> {
     let query = "mediatype:movies AND subject:trailer";
     let url = format!(
         "https://archive.org/advancedsearch.php?q={}&fl[]=identifier&sort[]=downloads+desc&rows={}&page={}&output=json",
@@ -429,7 +489,7 @@ async fn ia_search_trailer_items(
 async fn ia_fetch_best_trailer_file(
     client: &Client,
     identifier: &str,
-) -> Result<Option<String>, Box<dyn Error>> {
+) -> Result<Option<String>, TaskError> {
     let metadata_url = format!(
         "https://archive.org/metadata/{}",
         urlencoding::encode(identifier)
@@ -447,9 +507,7 @@ async fn ia_fetch_best_trailer_file(
         let name_lower = name.to_ascii_lowercase();
         let format_lower = file.format.unwrap_or_default().to_ascii_lowercase();
         let likely_trailer = name_lower.contains("trailer") || format_lower.contains("trailer");
-        let video_format = preferred_extensions
-            .iter()
-            .any(|ext| name_lower.ends_with(ext))
+        let video_format = preferred_extensions.iter().any(|ext| name_lower.ends_with(ext))
             || format_lower.contains("mpeg4")
             || format_lower.contains("h.264")
             || format_lower.contains("matroska")
@@ -472,7 +530,7 @@ async fn ia_download_file(
     identifier: &str,
     filename: &str,
     output_dir: &Path,
-) -> Result<PathBuf, Box<dyn Error>> {
+) -> Result<PathBuf, TaskError> {
     let url = format!(
         "https://archive.org/download/{}/{}",
         urlencoding::encode(identifier),
@@ -482,32 +540,31 @@ async fn ia_download_file(
     let mut response = ia_get_with_backoff(client, &url).await?;
     let output_name = ia_sanitize_filename(identifier, filename);
     let output_path = output_dir.join(output_name);
-    let mut file = tokio::fs::File::create(&output_path).await?;
+    let mut file = tokio::fs::File::create(&output_path)
+        .await
+        .map_err(|e| e.to_string())?;
 
-    while let Some(chunk) = response.chunk().await? {
-        file.write_all(&chunk).await?;
+    while let Some(chunk) = response.chunk().await.map_err(|e| e.to_string())? {
+        file.write_all(&chunk).await.map_err(|e| e.to_string())?;
     }
-    file.flush().await?;
+    file.flush().await.map_err(|e| e.to_string())?;
 
     Ok(output_path)
 }
 
-async fn ia_fetch_json_with_backoff<T>(client: &Client, url: &str) -> Result<T, Box<dyn Error>>
+async fn ia_fetch_json_with_backoff<T>(client: &Client, url: &str) -> Result<T, TaskError>
 where
     T: for<'de> serde::Deserialize<'de>,
 {
     let response = ia_get_with_backoff(client, url).await?;
-    Ok(response.json::<T>().await?)
+    response.json::<T>().await.map_err(|e| e.to_string())
 }
 
-async fn ia_get_with_backoff(
-    client: &Client,
-    url: &str,
-) -> Result<reqwest::Response, Box<dyn Error>> {
+async fn ia_get_with_backoff(client: &Client, url: &str) -> Result<reqwest::Response, TaskError> {
     let mut attempt = 0;
     loop {
         attempt += 1;
-        let response = client.get(url).send().await?;
+        let response = client.get(url).send().await.map_err(|e| e.to_string())?;
 
         if response.status() == StatusCode::TOO_MANY_REQUESTS {
             let retry_after = response
@@ -518,9 +575,9 @@ async fn ia_get_with_backoff(
                 .unwrap_or(5);
 
             if attempt > IA_MAX_RETRIES {
-                return Err(
-                    format!("rate limited after {IA_MAX_RETRIES} retries for {url}").into(),
-                );
+                return Err(format!(
+                    "rate limited after {IA_MAX_RETRIES} retries for {url}"
+                ));
             }
 
             sleep(Duration::from_secs(retry_after)).await;
@@ -528,7 +585,7 @@ async fn ia_get_with_backoff(
         }
 
         if !response.status().is_success() {
-            return Err(format!("request failed ({}): {url}", response.status()).into());
+            return Err(format!("request failed ({}): {url}", response.status()));
         }
 
         return Ok(response);
@@ -549,16 +606,18 @@ fn ia_sanitize_filename(identifier: &str, filename: &str) -> String {
         .collect()
 }
 
-async fn ia_load_state(path: &Path) -> Result<IATrailerState, Box<dyn Error>> {
+async fn ia_load_state(path: &Path) -> Result<IATrailerState, TaskError> {
     match tokio::fs::read(path).await {
-        Ok(bytes) => Ok(serde_json::from_slice(&bytes)?),
+        Ok(bytes) => serde_json::from_slice(&bytes).map_err(|e| e.to_string()),
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(IATrailerState::default()),
-        Err(error) => Err(error.into()),
+        Err(error) => Err(error.to_string()),
     }
 }
 
-async fn ia_save_state(path: &Path, state: &IATrailerState) -> Result<(), Box<dyn Error>> {
-    let data = serde_json::to_vec_pretty(state)?;
-    tokio::fs::write(path, data).await?;
+async fn ia_save_state(path: &Path, state: &IATrailerState) -> Result<(), TaskError> {
+    let data = serde_json::to_vec_pretty(state).map_err(|e| e.to_string())?;
+    tokio::fs::write(path, data)
+        .await
+        .map_err(|e| e.to_string())?;
     Ok(())
 }
