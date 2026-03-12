@@ -5,9 +5,11 @@
 
 <body class="bg-gray-100 text-gray-900">
 
-<div class="flex min-h-screen">
+<div class="flex min-h-screen flex-col">
   {% include "bss_user/bss_user_include_menu.html" %}
-  {% include "bss_admin/bss_admin_include_menu.html" %}
+
+  <div class="flex flex-1">
+    {% include "bss_admin/bss_admin_include_menu.html" %}
 
   <main class="flex-1 p-6">
 
@@ -70,6 +72,7 @@
     </section>
 
   </main>
+  </div>
 </div>
 
 {% include "bss_public/bss_public_footer.html" %}
