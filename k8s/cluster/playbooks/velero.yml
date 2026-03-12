@@ -62,7 +62,7 @@
         --set initContainers[0].volumeMounts[0].name=plugins
 
     - name: Create scheduled cluster backup
-      ansible.builtin.shell: >-
+      ansible.builtin.shell: |
         kubectl apply -f - <<'MANIFEST'
         apiVersion: velero.io/v1
         kind: Schedule
