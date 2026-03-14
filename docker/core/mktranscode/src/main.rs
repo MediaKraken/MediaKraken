@@ -22,6 +22,41 @@ async fn run_cast_command(device_name: &str, command_flag: &str, extra: Option<&
     let _result = process.status().await;
 }
 
+fn json_value_to_string(value: &Value) -> Option<String> {
+    value
+        .as_str()
+        .map(ToString::to_string)
+        .or_else(|| value.as_i64().map(|inner| inner.to_string()))
+        .or_else(|| value.as_u64().map(|inner| inner.to_string()))
+        .or_else(|| value.as_f64().map(|inner| inner.to_string()))
+        .or_else(|| value.as_bool().map(|inner| inner.to_string()))
+}
+
+fn cast_stream_argument(json_message: &Value) -> Option<(&'static str, String)> {
+    let data = &json_message["Data"];
+    let stream_target = data
+        .as_object()
+        .and_then(|data_object| {
+            data_object
+                .get("URL")
+                .or_else(|| data_object.get("Url"))
+                .or_else(|| data_object.get("url"))
+                .or_else(|| data_object.get("Media Path"))
+                .or_else(|| data_object.get("Path"))
+        })
+        .and_then(json_value_to_string)
+        .or_else(|| json_value_to_string(data))
+        .or_else(|| json_value_to_string(&json_message["Media Path"]));
+
+    stream_target.map(|target| {
+        if target.starts_with("http://") || target.starts_with("https://") {
+            ("-playurl", target)
+        } else {
+            ("-playfile", target)
+        }
+    })
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // open the database
@@ -87,6 +122,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             run_cast_command(device_name, "-mute", None).await;
                         } else if json_message["Command"] == "Pause" {
                             run_cast_command(device_name, "-pause", None).await;
+                        } else if json_message["Command"] == "Play" {
+                            if let Some((command_flag, stream_target)) =
+                                cast_stream_argument(&json_message)
+                            {
+                                run_cast_command(device_name, command_flag, Some(&stream_target))
+                                    .await;
+                            }
                         } else if json_message["Command"] == "Rewind" {
                         } else if json_message["Command"] == "Stop" {
                             run_cast_command(device_name, "-stop", None).await;
