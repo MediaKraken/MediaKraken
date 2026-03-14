@@ -29,6 +29,7 @@ pub mod mk_lib_hardware_pi_lcd_i2c;
 pub mod mk_lib_hardware_pioneer;
 pub mod mk_lib_hardware_roku;
 pub mod mk_lib_hardware_samsung;
+pub mod mk_lib_hardware_sane;
 pub mod mk_lib_hardware_sonos;
 pub mod mk_lib_hardware_synology;
 pub mod mk_lib_hardware_tivo;
