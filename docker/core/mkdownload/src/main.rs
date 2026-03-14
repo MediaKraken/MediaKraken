@@ -1,16 +1,20 @@
 use mk_lib_database;
+use mk_lib_hash;
 use mk_lib_network;
 use mk_lib_rabbitmq;
 use reqwest::{Client, StatusCode};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::env;
+use std::ffi::OsStr;
+use std::os::unix::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::Arc;
 use tokio::io::AsyncWriteExt;
 use tokio::sync::{Notify, Semaphore};
-use tokio::time::{sleep, Duration};
+use tokio::time::{Duration, sleep};
+use walkdir::{DirEntry, WalkDir};
 
 type AppError = Box<dyn std::error::Error>;
 type TaskError = String;
@@ -172,6 +176,11 @@ async fn process_message(json_message: Value, _option_config_json: &Value) {
                 );
             }
         }
+        Some("LibretroCoreFetchUpdate") | Some("mklibretrocorefetchupdate") => {
+            if let Err(error) = process_libretro_core_fetch_update().await {
+                eprintln!("libretro core update failed: {error}");
+            }
+        }
         Some(other) => {
             eprintln!("unknown message type: {other}");
         }
@@ -301,6 +310,103 @@ fn hdtrailers_extract_filename(url: &str) -> Option<String> {
     Some(file_name.to_string())
 }
 
+fn is_hidden(entry: &DirEntry) -> bool {
+    entry
+        .file_name()
+        .to_str()
+        .map(|s| s.starts_with('.'))
+        .unwrap_or(false)
+}
+
+fn parse_version_components(version: &str) -> Option<Vec<u32>> {
+    let parsed = version
+        .split('.')
+        .map(str::parse::<u32>)
+        .collect::<Result<Vec<_>, _>>()
+        .ok()?;
+    if parsed.is_empty() {
+        return None;
+    }
+    Some(parsed)
+}
+
+fn latest_stable_version(index_html: &str) -> Option<String> {
+    index_html
+        .split("href=\"")
+        .skip(1)
+        .filter_map(|segment| segment.split('"').next())
+        .filter_map(|href| href.strip_suffix('/'))
+        .filter(|version| version.chars().all(|c| c.is_ascii_digit() || c == '.'))
+        .filter_map(|version| parse_version_components(version).map(|parts| (parts, version)))
+        .max_by(|(left, _), (right, _)| left.cmp(right))
+        .map(|(_, version)| version.to_string())
+}
+
+async fn process_libretro_core_fetch_update() -> Result<(), TaskError> {
+    let mut emulation_cores = HashMap::new();
+    let walker = WalkDir::new("/mediakraken/emulation/cores").into_iter();
+    for entry in walker
+        .filter_entry(|e| !is_hidden(e))
+        .filter_map(Result::ok)
+        .filter(|d| d.path().extension() == Some(OsStr::from_bytes(b"zip")))
+        .filter(|e| !e.file_type().is_dir())
+    {
+        let file_name = entry.path().display().to_string();
+        let crc = mk_lib_hash::mk_lib_hash_crc32::mk_file_hash_crc32(&file_name)
+            .await
+            .map_err(|e| e.to_string())?;
+        emulation_cores.insert(file_name, crc);
+    }
+
+    let stable_root = "http://buildbot.libretro.com/stable/";
+    let stable_index = mk_lib_network::mk_lib_network::mk_data_from_url(stable_root.to_string())
+        .await
+        .map_err(|e| e.to_string())?;
+    let latest_version = latest_stable_version(&stable_index)
+        .ok_or_else(|| "unable to determine latest libretro stable version".to_string())?;
+    let libtro_url = format!("{}{}/linux/x86_64/", stable_root, latest_version);
+    let fetch_result = mk_lib_network::mk_lib_network::mk_data_from_url(format!(
+        "{}{}",
+        &libtro_url, ".index-extended"
+    ))
+    .await
+    .map_err(|e| e.to_string())?;
+
+    for libretro_core in fetch_result.lines().filter(|line| !line.is_empty()) {
+        let mut iter = libretro_core.splitn(3, ' ');
+        let Some(_core_date) = iter.next() else {
+            continue;
+        };
+        let Some(core_crc32) = iter.next() else {
+            continue;
+        };
+        let Some(core_name) = iter.next() else {
+            continue;
+        };
+
+        let path_core_name = format!(
+            "/mediakraken/emulation/cores/{}",
+            core_name.replace(".zip", "")
+        );
+
+        let download_core = match emulation_cores.get(&path_core_name) {
+            Some(existing_crc) => existing_crc != core_crc32,
+            None => true,
+        };
+
+        if download_core {
+            mk_lib_network::mk_lib_network::mk_download_file_from_url(
+                format!("{}{}", &libtro_url, core_name),
+                &format!("/mediakraken/emulation/cores/{}", core_name),
+            )
+            .await
+            .map_err(|e| e.to_string())?;
+        }
+    }
+
+    Ok(())
+}
+
 fn sync_project_gutenberg(
     destination: &str,
     source: Option<&str>,
@@ -389,12 +495,11 @@ async fn main() -> Result<(), AppError> {
                             Ok(_permit) => {
                                 process_message(json_message, option_config_json.as_ref()).await;
 
-                                if let Err(error) =
-                                    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
-                                        &rabbit_channel,
-                                        delivery_tag,
-                                    )
-                                    .await
+                                if let Err(error) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
+                                    &rabbit_channel,
+                                    delivery_tag,
+                                )
+                                .await
                                 {
                                     eprintln!("rabbit ack failed: {error}");
                                 }
@@ -507,7 +612,9 @@ async fn ia_fetch_best_trailer_file(
         let name_lower = name.to_ascii_lowercase();
         let format_lower = file.format.unwrap_or_default().to_ascii_lowercase();
         let likely_trailer = name_lower.contains("trailer") || format_lower.contains("trailer");
-        let video_format = preferred_extensions.iter().any(|ext| name_lower.ends_with(ext))
+        let video_format = preferred_extensions
+            .iter()
+            .any(|ext| name_lower.ends_with(ext))
             || format_lower.contains("mpeg4")
             || format_lower.contains("h.264")
             || format_lower.contains("matroska")

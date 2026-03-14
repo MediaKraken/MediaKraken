@@ -17,6 +17,7 @@ codegen-units = 1
 
 [dependencies]
 mk_lib_database = { version = "0.0.192", registry = "kellnr" }
+mk_lib_hash = { version = "0.0.164", registry = "kellnr" }
 mk_lib_logging = { version = "0.0.161", registry = "kellnr" }
 mk_lib_network = { version = "0.0.161", registry = "kellnr" }
 mk_lib_rabbitmq = { version = "0.0.164", registry = "kellnr" }
@@ -36,6 +37,7 @@ tokio = { version = "1.49.0", features = ["full"] }
 urlencoding = "2.1.3"
 uuid = { version = "1.19.0", features = ["serde", "v4", "v7"] }
 validator = { version = "0.20.0", features = ["derive"] }
+walkdir = "2.5.0"
 
 
 [dev-dependencies]
