@@ -253,7 +253,7 @@ async fn main() {
             get(user_internet::bp_inter_openlibrary::user_inter_openlibrary),
         )
         .route_with_tsr(
-            "/user/internet/openlibrary_detail/*work_id",
+            "/user/internet/openlibrary_detail/{work_id}",
             get(user_internet::bp_inter_openlibrary::user_inter_openlibrary_detail),
         )
         .route_with_tsr(

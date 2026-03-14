@@ -84,7 +84,7 @@ pub async fn search_handler(Query(params): Query<SearchParams>) -> Html<String> 
     // Logic to aggregate results based on active filters
     for f in &active_filters {
         match f.as_str() {
-            // "movie" => results.extend(fetch_movies(&params.q).await),
+            //"movie" => results.extend(fetch_movies(&params.q).await),
             // "book" => results.extend(fetch_books(&params.q).await),
             // "anime" => results.extend(fetch_anime(&params.q).await),
             // "game" => results.extend(fetch_games(&params.q).await),
