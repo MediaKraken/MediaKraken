@@ -80,9 +80,35 @@ async fn process_message(json_message: Value, _option_config_json: &Value) {
         }
         Some("Youtube") => {
             if let Some(url) = json_message["URL"].as_str() {
-                if validator::ValidateUrl::validate_url(url) {
+                if !validator::ValidateUrl::validate_url(url) {
+                    eprintln!("Youtube message contains an invalid URL");
                     return;
                 }
+
+                let mut yt_dlp_command = Command::new("/yt-dlp");
+                yt_dlp_command.arg("--no-progress");
+
+                if let Some(local_save_path) = json_message["Local Save Path"].as_str() {
+                    yt_dlp_command.args(["-o", local_save_path]);
+                }
+
+                let result = yt_dlp_command
+                    .arg(url)
+                    .stdout(Stdio::piped())
+                    .stderr(Stdio::piped())
+                    .output();
+
+                match result {
+                    Ok(output) => {
+                        if !output.status.success() {
+                            let error = String::from_utf8_lossy(&output.stderr);
+                            eprintln!("youtube download failed: {error}");
+                        }
+                    }
+                    Err(error) => eprintln!("youtube download command failed: {error}"),
+                }
+            } else {
+                eprintln!("Youtube message missing URL");
             }
         }
         Some("Subtitle") => {
@@ -389,12 +415,11 @@ async fn main() -> Result<(), AppError> {
                             Ok(_permit) => {
                                 process_message(json_message, option_config_json.as_ref()).await;
 
-                                if let Err(error) =
-                                    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
-                                        &rabbit_channel,
-                                        delivery_tag,
-                                    )
-                                    .await
+                                if let Err(error) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
+                                    &rabbit_channel,
+                                    delivery_tag,
+                                )
+                                .await
                                 {
                                     eprintln!("rabbit ack failed: {error}");
                                 }
@@ -507,7 +532,9 @@ async fn ia_fetch_best_trailer_file(
         let name_lower = name.to_ascii_lowercase();
         let format_lower = file.format.unwrap_or_default().to_ascii_lowercase();
         let likely_trailer = name_lower.contains("trailer") || format_lower.contains("trailer");
-        let video_format = preferred_extensions.iter().any(|ext| name_lower.ends_with(ext))
+        let video_format = preferred_extensions
+            .iter()
+            .any(|ext| name_lower.ends_with(ext))
             || format_lower.contains("mpeg4")
             || format_lower.contains("h.264")
             || format_lower.contains("matroska")
