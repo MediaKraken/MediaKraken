@@ -36,7 +36,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await
         .unwrap();
     // see if db exists
-    let db_exists = mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_exits(
+    let db_exists = mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_exists(
         &sqlx_pool_ro,
         "mm_version",
     )
