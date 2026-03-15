@@ -7,7 +7,7 @@ use std::collections::{HashMap, HashSet};
 use std::env;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock, RwLock};
 use tokio::io::AsyncWriteExt;
 use tokio::sync::{Notify, Semaphore};
 use tokio::time::{sleep, Duration};
@@ -24,6 +24,7 @@ const IA_DEFAULT_OUTPUT_DIR: &str = "/mediakraken/metadata/meta/trailer/internet
 const IA_DEFAULT_STATE_FILE: &str =
     "/mediakraken/metadata/meta/trailer/internet_archive_state.json";
 const IA_DEFAULT_MAX_PAGES: usize = 1;
+static DOSAGE_STRIP_CACHE: OnceLock<RwLock<Vec<String>>> = OnceLock::new();
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Default)]
 struct IATrailerState {
@@ -156,9 +157,9 @@ async fn process_message(json_message: Value, _option_config_json: &Value) {
 
                 match output {
                     Ok(output) => {
-                        let _stdout = String::from_utf8_lossy(&output.stdout);
+                        let stdout = String::from_utf8_lossy(&output.stdout);
                         if data == "--list" {
-                            // TODO parse list and store the strips
+                            dosage_store_strips(dosage_parse_strip_list(&stdout));
                         }
                     }
                     Err(error) => eprintln!("dosage failed: {error}"),
@@ -204,6 +205,69 @@ async fn process_message(json_message: Value, _option_config_json: &Value) {
         None => {
             eprintln!("message missing Type");
         }
+    }
+}
+
+fn dosage_parse_strip_list(list_output: &str) -> Vec<String> {
+    let mut strips = Vec::new();
+
+    for raw_line in list_output.lines() {
+        let line = raw_line.trim_end();
+        if line.is_empty()
+            || line.starts_with("Available comic scrapers:")
+            || line.starts_with("Comics tagged with ")
+            || line.starts_with("Non-english comics ")
+            || line.starts_with("Some comics are disabled")
+            || line.ends_with("supported comics.")
+            || line.starts_with("  ")
+            || line.starts_with('*')
+        {
+            continue;
+        }
+
+        let mut segment_start = 0_usize;
+        let bytes = line.as_bytes();
+        let mut idx = 0_usize;
+
+        while idx < bytes.len() {
+            if bytes[idx] == b' ' {
+                let gap_start = idx;
+                while idx < bytes.len() && bytes[idx] == b' ' {
+                    idx += 1;
+                }
+
+                if idx - gap_start >= 2 {
+                    let item = line[segment_start..gap_start].trim();
+                    if !item.is_empty() {
+                        strips.push(item.to_string());
+                    }
+                    segment_start = idx;
+                }
+                continue;
+            }
+
+            idx += 1;
+        }
+
+        let item = line[segment_start..].trim();
+        if !item.is_empty() {
+            strips.push(item.to_string());
+        }
+    }
+
+    strips
+}
+
+fn dosage_store_strips(strips: Vec<String>) {
+    if strips.is_empty() {
+        return;
+    }
+
+    let strip_cache = DOSAGE_STRIP_CACHE.get_or_init(|| RwLock::new(Vec::new()));
+    if let Ok(mut cache) = strip_cache.write() {
+        *cache = strips;
+    } else {
+        eprintln!("dosage strip cache lock poisoned");
     }
 }
 
