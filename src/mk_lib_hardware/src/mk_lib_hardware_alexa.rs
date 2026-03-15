@@ -9,7 +9,7 @@ pub async fn mk_lib_hardware_alexa_discover() -> Vec<Url> {
     request.set(Man);
     request.set(MX(5));
 
-    let Ok(target) = ssdp::FieldMap::new(ALEXA_DISCOVERY_TARGET) else {
+    let Some(target) = ssdp::FieldMap::new(ALEXA_DISCOVERY_TARGET) else {
         return Vec::new();
     };
 
@@ -37,7 +37,7 @@ pub async fn mk_lib_hardware_alexa_discover() -> Vec<Url> {
                 return None;
             }
 
-            let location = response.get_raw("Location")?.first()?;
+            let location = response.get_raw("LOCATION")?.first()?;
             Url::parse(&String::from_utf8_lossy(location)).ok()
         })
         .collect()

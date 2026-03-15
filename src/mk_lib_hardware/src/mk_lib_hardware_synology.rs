@@ -9,7 +9,7 @@ pub async fn mk_lib_hardware_synology_discover() -> Vec<Url> {
     request.set(Man);
     request.set(MX(5));
 
-    let Ok(target) = ssdp::FieldMap::new(SYNOLOGY_DISCOVERY_TARGET) else {
+    let Some(target) = ssdp::FieldMap::new(SYNOLOGY_DISCOVERY_TARGET) else {
         return Vec::new();
     };
 
@@ -27,7 +27,7 @@ pub async fn mk_lib_hardware_synology_discover() -> Vec<Url> {
                 .into_iter()
                 .flatten()
                 .chain(response.get_raw("USN").into_iter().flatten())
-                .chain(response.get_raw("Location").into_iter().flatten())
+                .chain(response.get_raw("LOCATION").into_iter().flatten())
                 .any(|value| {
                     String::from_utf8_lossy(value)
                         .to_ascii_lowercase()
@@ -38,7 +38,7 @@ pub async fn mk_lib_hardware_synology_discover() -> Vec<Url> {
                 return None;
             }
 
-            let location = response.get_raw("Location")?.first()?;
+            let location = response.get_raw("LOCATION")?.first()?;
             Url::parse(&String::from_utf8_lossy(location)).ok()
         })
         .collect()

@@ -1,39 +1,42 @@
-// https://crates.io/crates/mdns
-
 use futures_util::{pin_mut, stream::StreamExt};
-use serde_json::json;
+use serde::Serialize;
+use std::collections::HashSet;
 use std::time::Duration;
 
-const CHROMECAST_SERVICE_NAME: &'static str = "_googlecast._tcp.local";
+const CHROMECAST_SERVICE_NAME: &str = "_googlecast._tcp.local";
+
+#[derive(Debug, Clone, Serialize)]
+pub struct ChromecastDevice {
+    pub hostname: String,
+    pub address: String,
+}
 
 pub async fn mk_hardware_chromecast_discover(
-) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    let stream = mdns::discover::all(CHROMECAST_SERVICE_NAME, Duration::from_secs(15))?.listen();
+) -> Result<Vec<ChromecastDevice>, Box<dyn std::error::Error>> {
+    let stream =
+        mdns::discover::all(CHROMECAST_SERVICE_NAME, Duration::from_secs(15))?.listen();
+
     pin_mut!(stream);
+
+    let mut seen = HashSet::new();
+    let mut devices = Vec::new();
+
     while let Some(Ok(response)) = stream.next().await {
-        let addr = response.socket_address();
-        let host = response.hostname();
-        if let (Some(host), Some(addr)) = (host, addr) {
-            #[cfg(debug_assertions)]
-            {
-                // mk_lib_logging::mk_logging_post_elk(
-                //     std::module_path!(),
-                //     json!({ "found cast device": host, "at": addr }),
-                // )
-                // .await
-                // .unwrap();
-            }
-        } else {
-            #[cfg(debug_assertions)]
-            {
-                // mk_lib_logging::mk_logging_post_elk(
-                //     std::module_path!(),
-                //     json!({ "cast device does not advertise address": "" }),
-                // )
-                // .await
-                // .unwrap();
-            }
+        let Some(hostname) = response.hostname() else {
+            continue;
+        };
+
+        let Some(addr) = response.socket_address() else {
+            continue;
+        };
+
+        let hostname = hostname.to_string();
+        let address = addr.to_string();
+
+        if seen.insert((hostname.clone(), address.clone())) {
+            devices.push(ChromecastDevice { hostname, address });
         }
     }
-    Ok(json!({}))
+
+    Ok(devices)
 }

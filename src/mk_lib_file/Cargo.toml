@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_file"
-version = "0.0.169"
+version = "0.0.170"
 edition = "2024"
 [profile.release]
 panic = 'abort'
@@ -9,8 +9,8 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { version = "0.0.192", registry = "kellnr", optional = true }
-mk_lib_logging = { version = "0.0.161", registry = "kellnr" }
+mk_lib_database = { version = "0.0.193", registry = "kellnr", optional = true }
+mk_lib_logging = { version = "0.0.162", registry = "kellnr" }
 
 aws-config = { version = "1.8.12", optional = true }
 aws-sdk-s3 = { version = "1.119.0", optional = true }

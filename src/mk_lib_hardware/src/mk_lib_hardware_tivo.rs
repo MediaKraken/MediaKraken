@@ -1,15 +1,15 @@
-use ssdp::header::{HeaderMut, MX, Man, ST};
-use ssdp::message::SearchRequest;
+use ssdp::header::{HeaderRef, HeaderMut, MX, Man, ST};
+use ssdp::message::{Multicast, SearchRequest};
 use url::Url;
 
 const TIVO_SSDP_SEARCH_TARGET: &str = "TiVoMediaServer:1";
 
-pub async fn mk_lib_hardware_tivo_discover() -> Vec<Url> {
+pub fn mk_lib_hardware_tivo_discover() -> Vec<Url> {
     let mut request = SearchRequest::new();
     request.set(Man);
     request.set(MX(5));
 
-    let Ok(st_field) = ssdp::FieldMap::new(TIVO_SSDP_SEARCH_TARGET) else {
+    let Some(st_field) = ssdp::FieldMap::new(TIVO_SSDP_SEARCH_TARGET) else {
         return Vec::new();
     };
     request.set(ST::Target(st_field));
@@ -21,9 +21,10 @@ pub async fn mk_lib_hardware_tivo_discover() -> Vec<Url> {
     responses
         .into_iter()
         .filter_map(|(res, _)| {
-            let location_header = res.get_raw("Location")?;
-            let first_value = location_header.first()?;
-            Url::parse(&String::from_utf8_lossy(first_value)).ok()
+            let raw_values = res.get_raw("LOCATION")?;
+            let first_value = raw_values.first()?;
+            let location = std::str::from_utf8(first_value).ok()?.trim();
+            Url::parse(location).ok()
         })
         .collect()
 }

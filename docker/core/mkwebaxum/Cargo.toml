@@ -16,13 +16,13 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_common = { version = "0.0.160", registry = "kellnr" }
-mk_lib_database = { version = "0.0.192", registry = "kellnr" }
-mk_lib_file = { version = "0.0.169", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.161", registry = "kellnr" }
-mk_lib_metadata = { version = "0.0.172", registry = "kellnr" }
-mk_lib_network = { version = "0.0.161", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.164", registry = "kellnr" }
+mk_lib_common = { version = "0.0.161", registry = "kellnr" }
+mk_lib_database = { version = "0.0.193", registry = "kellnr" }
+mk_lib_file = { version = "0.0.170", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.162", registry = "kellnr" }
+mk_lib_metadata = { version = "0.0.173", registry = "kellnr" }
+mk_lib_network = { version = "0.0.162", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.165", registry = "kellnr" }
 
 askama = "0.15.4"
 askama_axum = "0.4.0"
