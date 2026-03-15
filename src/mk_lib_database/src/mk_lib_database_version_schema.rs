@@ -843,6 +843,17 @@ pub async fn mk_lib_database_update_schema(
         mk_lib_database_version_update(&sqlx_pool, 78).await?;
     }
 
+    if version_no < 79 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(r#"LTER TABLE ONLY mm_radio
+                ADD CONSTRAINT mm_radio_address_uk UNIQUE (mm_radio_address);
+            "#)
+            .execute(&mut *transaction)
+            .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 79).await?;
+    }
+
     // TODO, movie alt name, tv alt name and person alt name cleanup
 
     Ok(true)

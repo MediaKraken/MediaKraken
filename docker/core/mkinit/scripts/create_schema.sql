@@ -3198,16 +3198,7 @@ ALTER TABLE ONLY public.mm_options_and_status
 
 ALTER TABLE ONLY public.mm_software_publisher
     ADD CONSTRAINT mm_publisher_id PRIMARY KEY (mm_publisher_guid);
-
-
---
--- TOC entry 3305 (class 2606 OID 410761)
--- Name: mm_radio mm_radio_guid_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.mm_radio
-    ADD CONSTRAINT mm_radio_guid_pk PRIMARY KEY (mm_radio_guid);
-
+,
 
 --
 -- TOC entry 3310 (class 2606 OID 410763)
