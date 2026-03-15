@@ -845,7 +845,7 @@ pub async fn mk_lib_database_update_schema(
 
     if version_no < 79 {
         let mut transaction = sqlx_pool.begin().await?;
-        sqlx::query(r#"LTER TABLE ONLY mm_radio
+        sqlx::query(r#"ALTER TABLE ONLY mm_radio
                 ADD CONSTRAINT mm_radio_address_uk UNIQUE (mm_radio_address);
             "#)
             .execute(&mut *transaction)
