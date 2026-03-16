@@ -7,7 +7,7 @@ use sqlx::types::Uuid;
 
 pub async fn provider_barcodespider_fetch_by_upc(
     sqlx_pool: &sqlx::PgPool,
-    upc_code: &i32,
+    upc_code: &str,
     api_token: &str,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
