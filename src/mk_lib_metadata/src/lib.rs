@@ -25,6 +25,7 @@ pub mod metadata_provider {
     pub mod coverartarchive;
     #[cfg(feature = "discid")]
     pub mod discid;
+    pub mod ebay;
     pub mod flickr;
     pub mod giant_bomb;
     pub mod goupc;
