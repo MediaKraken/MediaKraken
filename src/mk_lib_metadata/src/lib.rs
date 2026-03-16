@@ -17,6 +17,7 @@ pub mod tv;
 
 #[path = "provider"]
 pub mod metadata_provider {
+    pub mod amazon;
     pub mod anidb;
     pub mod barcodelookup;
     pub mod barcodespider;

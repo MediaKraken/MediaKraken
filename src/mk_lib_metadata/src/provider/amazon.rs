@@ -1,6 +1,6 @@
 use reqwest::Url;
 use select::document::Document;
-use select::predicate::{Attr, Name};
+use select::predicate::{Attr, Name, Predicate};
 
 const AMAZON_SEARCH_URL: &str = "https://www.amazon.com/s";
 const MEDIA_FORMAT_KEYWORDS: [&str; 12] = [
