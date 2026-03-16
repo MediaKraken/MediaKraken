@@ -8,7 +8,7 @@ use std::fmt::Write;
 
 pub async fn provider_upcitemdb_fetch_by_upc(
     sqlx_pool: &sqlx::PgPool,
-    upc_code: Vec<&i32>,
+    upc_code: Vec<&str>,
     api_token: &str,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     // join up upc code for query below
