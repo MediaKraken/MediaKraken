@@ -15,7 +15,17 @@ pub mod filters {
 
     pub fn t_as_i64<T: std::fmt::Display>(s: T) -> i64 {
         let s = s.to_string();
-        s.parse::<i64>().unwrap_or(0)
+        if let Ok(value) = s.parse::<i64>() {
+            return value;
+        }
+
+        if let Ok(value) = s.parse::<f64>() {
+            if value.is_finite() {
+                return value.round() as i64;
+            }
+        }
+
+        0
     }
 
     pub fn t_as_u64<T: std::fmt::Display>(s: T) -> u64 {
@@ -65,30 +75,20 @@ pub mod filters {
         s: T,
         _env: &dyn askama::Values,
     ) -> askama::Result<String> {
-        let result = mk_lib_common::mk_lib_common_internationalization::mk_lib_common_internationalization_number_format(t_as_i64(s)).unwrap();
+        let result = mk_lib_common::mk_lib_common_internationalization::mk_lib_common_internationalization_number_format(t_as_i64(s));
         Ok(result)
     }
-    // pub fn number_format(s: &f32) -> ::askama::Result<String> {
-    //     let result = mk_lib_common::mk_lib_common_internationalization::mk_lib_common_internationalization_number_format(s.clone() as i64).unwrap();
-    //     Ok(result)
-    // }
 
     #[askama::filter_fn]
     pub fn byte_format<T: std::fmt::Display>(
         s: T,
         _env: &dyn askama::Values,
     ) -> askama::Result<String> {
-        let result = mk_lib_common::mk_lib_common_bytesize::mk_lib_common_bytesize(t_as_u64(s)).unwrap();
+        let result =
+            mk_lib_common::mk_lib_common_bytesize::mk_lib_common_bytesize(t_as_u64(s)).unwrap();
         Ok(result)
-    }    
-    // pub fn byte_format(s: &i64) -> ::askama::Result<String> {
-    //     let result = mk_lib_common::mk_lib_common_bytesize::mk_lib_common_bytesize(s.clone() as u64).unwrap();
-    //     Ok(result)
-    // }
+    }
 
-    // pub fn unquote_json(s: &serde_json::Value) -> ::askama::Result<String> {
-    //     Ok(s.to_string().replace("\"", ""))
-    // }
     #[askama::filter_fn]
     pub fn unquote_json<T: std::fmt::Display>(
         s: T,
@@ -97,6 +97,4 @@ pub mod filters {
         let s = s.to_string();
         Ok(s.replace("\"", ""))
     }
-
 }
-

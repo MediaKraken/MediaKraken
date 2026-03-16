@@ -64,8 +64,8 @@ class="px-3 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-2
                         p = p,
                         suffix = suffix,
                         label = mk_lib_common_internationalization::
-                            mk_lib_common_internationalization_number_format(p.get() as i64)?
-                    )?;
+                            mk_lib_common_internationalization_number_format(p.get() as i64)
+                    );
                 }
 
                 PageItem::CurrentPage(p) => {
