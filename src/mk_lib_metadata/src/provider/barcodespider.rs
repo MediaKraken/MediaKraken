@@ -5,8 +5,8 @@ use mk_lib_network::mk_lib_network;
 const BASE_API_URL: &str = "https://api.barcodespider.com/v1/lookup";
 
 pub async fn provider_barcodespider_fetch_by_upc(
-    _sqlx_pool: &sqlx::PgPool,
-    upc_code: &i32,
+    sqlx_pool: &sqlx::PgPool,
+    upc_code: &str,
     api_token: &str,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let api_response = mk_lib_network::mk_data_from_url_to_json(format!(
