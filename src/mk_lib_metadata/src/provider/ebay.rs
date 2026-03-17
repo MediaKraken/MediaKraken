@@ -21,7 +21,8 @@ pub async fn provider_ebay_fetch_by_upc(
 
     let html = reqwest::Client::new()
         .get(search_url)
-        .header(reqwest::header::USER_AGENT, "MediaKraken/1.0")
+        .header(reqwest::header::USER_AGENT, 
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
         .send()
         .await?
         .error_for_status()?
