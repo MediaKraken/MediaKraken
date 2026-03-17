@@ -6,13 +6,15 @@ pub struct APIJson {
     pub themoviedb: String,
     pub musicbrainz: Option<String>,
     pub thesportsdb: String,
+    pub upcitemdb: Option<String>,
+    pub barcodespider: Option<String>,
 }
 
 pub async fn mk_lib_database_option_api_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<serde_json::Value, sqlx::Error> {
     let row: (serde_json::Value,) =
-        sqlx::query_as("select mm_options_json->'API' from mm_options_and_status")
+        sqlx::query_as(r#"select mm_options_json->'API' from mm_options_and_status"#)
             .fetch_one(sqlx_pool)
             .await?;
     Ok(row.0)
@@ -22,7 +24,7 @@ pub async fn mk_lib_database_option_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<serde_json::Value, sqlx::Error> {
     let row: (serde_json::Value,) =
-        sqlx::query_as("select mm_options_json from mm_options_and_status")
+        sqlx::query_as(r#"select mm_options_json from mm_options_and_status"#)
             .fetch_one(sqlx_pool)
             .await?;
     Ok(row.0)
@@ -32,7 +34,7 @@ pub async fn mk_lib_database_status_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<serde_json::Value, sqlx::Error> {
     let row: (serde_json::Value,) =
-        sqlx::query_as("select mm_status_json from mm_options_and_status")
+        sqlx::query_as(r#"select mm_status_json from mm_options_and_status"#)
             .fetch_one(sqlx_pool)
             .await?;
     Ok(row.0)
@@ -41,12 +43,9 @@ pub async fn mk_lib_database_status_read(
 pub async fn mk_lib_database_option_status_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<PgRow, sqlx::Error> {
-    let rows = sqlx::query(
-        "select mm_options_json, mm_status_json \
-        from mm_options_and_status",
-    )
-    .fetch_one(sqlx_pool)
-    .await?;
+    let rows = sqlx::query(r#"select mm_options_json, mm_status_json from mm_options_and_status"#)
+        .fetch_one(sqlx_pool)
+        .await?;
     Ok(rows)
 }
 
@@ -56,7 +55,7 @@ pub async fn mk_lib_database_option_update(
 ) -> Result<(), sqlx::Error> {
     // no need for where clause as it's only the one record
     let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query("update mm_options_and_status set mm_options_json = $1")
+    sqlx::query(r#"update mm_options_and_status set mm_options_json = $1"#)
         .bind(option_json)
         .execute(&mut *transaction)
         .await?;
@@ -71,7 +70,7 @@ pub async fn mk_lib_database_option_status_update(
 ) -> Result<(), sqlx::Error> {
     // no need for where clause as it's only the one record
     let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query("update mm_options_and_status set mm_options_json = $1, mm_status_json = $2")
+    sqlx::query(r#"update mm_options_and_status set mm_options_json = $1, mm_status_json = $2"#)
         .bind(option_json)
         .bind(status_json)
         .execute(&mut *transaction)
@@ -86,7 +85,7 @@ pub async fn mk_lib_database_status_update_scan(
 ) -> Result<(), sqlx::Error> {
     // no need for where clause as it's only the one record
     let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query("update mm_options_and_status set mm_status_json = $1")
+    sqlx::query(r#"update mm_options_and_status set mm_status_json = $1"#)
         .bind(status_json)
         .execute(&mut *transaction)
         .await?;

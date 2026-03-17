@@ -1,15 +1,14 @@
 // https://docs.rs/blake3/1.0.0/blake3/
 
-use blake3;
-use mk_lib_file::mk_lib_file;
+use crate::hash_file_reader::read_file_chunks;
 use std::error::Error;
 
 pub async fn mk_file_hash_blake3(file_to_read: &str) -> Result<String, Box<dyn Error>> {
     let mut hasher = blake3::Hasher::new();
-    let mut file_data = mk_lib_file::mk_read_file_data_u8(&file_to_read)
-        .await
-        .unwrap();
-    hasher.update(&mut file_data);
+    read_file_chunks(file_to_read, |chunk| {
+        hasher.update(chunk);
+    })
+    .await?;
     let checksum = hasher.finalize();
     Ok(format!("{}", checksum))
 }

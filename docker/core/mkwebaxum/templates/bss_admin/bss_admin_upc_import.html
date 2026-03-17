@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" x-data="upcImport()" x-cloak>
+{% include "bss_include_header.html" %}
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
+
+    <!-- Header/Menu -->
+    <header class="bg-white shadow p-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold">MediaKraken - UPC Import</h1>
+        <!-- Include your menu templates here -->
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow p-4 max-w-3xl mx-auto bg-white shadow rounded-lg mt-6">
+        <h2 class="text-lg font-semibold mb-4">Import Text File (Up to 500 Lines)</h2>
+
+        <!-- File Input -->
+        <input type="file" id="fileInput" accept=".txt"
+               @change="handleFileUpload($event)"
+               class="block w-full text-gray-700 border border-gray-300 rounded p-2 mb-4">
+
+        <!-- Textarea Preview -->
+        <textarea id="output"
+                  x-model="fileContent"
+                  placeholder="Imported lines will appear here..."
+                  rows="15"
+                  class="block w-full border border-gray-300 rounded p-2 mb-4 resize-none font-mono"></textarea>
+
+        <!-- Submit Button -->
+        <div class="flex justify-end">
+            <a href="/admin/bss_admin_upc_import_submit">
+                <button type="button"
+                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    Submit UPC(s)
+                </button>
+            </a>
+        </div>
+    </main>
+
+{% include "bss_public/bss_public_footer.html" %}
+     <!-- Alpine.js Logic -->
+    <script>
+        function upcImport() {
+            return {
+                fileContent: '',
+                handleFileUpload(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        const lines = e.target.result.split(/\r?\n/);
+                        // Limit to 500 lines
+                        this.fileContent = lines.slice(0, 500).join('\n');
+                    };
+                    reader.readAsText(file);
+                }
+            }
+        }
+    </script>
+
+</body>
+</html>

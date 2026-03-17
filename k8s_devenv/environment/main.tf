@@ -15,33 +15,13 @@ resource "terraform_data" "mailhog" {
   ]
 }
 
-resource "terraform_data" "docker_registry" {
-  # setup docker registry
-  provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/docker-registry.yml"
-  }
-  depends_on = [
-    terraform_data.mailhog
-  ]
-}
-
-resource "terraform_data" "docker_ui" {
-  # setup docker ui
-  provisioner "local-exec" {
-    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/docker-ui.yml"
-  }
-  depends_on = [
-    terraform_data.docker_registry
-  ]
-}
-
 resource "terraform_data" "jenkins" {
   # setup jenkins
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/jenkins.yml"
   }
   depends_on = [
-    terraform_data.docker_ui
+    terraform_data.mailhog
   ]
 }
 
@@ -71,15 +51,6 @@ resource "terraform_data" "kellnr" {
     terraform_data.jfrog
   ]
 }
-
-# resource "terraform_data" "plane" {
-#   provisioner "local-exec" {
-#     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/plane.yml"
-#   }
-#   depends_on = [
-#     terraform_data.kellnr
-#   ]
-# }
 
 resource "terraform_data" "sftp" {
   provisioner "local-exec" {
@@ -125,3 +96,39 @@ resource "terraform_data" "ntfy" {
     terraform_data.trivy
   ]
 }
+
+resource "terraform_data" "gitea" {
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/gitea.yml"
+  }
+  depends_on = [
+    terraform_data.taiga
+  ]
+}
+
+resource "terraform_data" "harbor" {
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/harbor.yml"
+  }
+  depends_on = [
+    terraform_data.gitea
+  ]
+}
+
+resource "terraform_data" "openproject" {
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/openproject.yml"
+  }
+  depends_on = [
+    terraform_data.harbor
+  ]
+}
+
+# resource "terraform_data" "dolibarr" {
+#   provisioner "local-exec" {
+#     command = "ansible-playbook -b -v -u ${var.vm_user} -i inventory.ini playbooks/dolibarr.yml"
+#   }
+#   depends_on = [
+#     terraform_data.harbor
+#   ]
+# }

@@ -1,3 +1,4 @@
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -6,11 +7,12 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
+use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
-use crate::mk_lib_database;
 use sqlx::postgres::PgPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -23,10 +25,11 @@ struct TemplateReportKnownMediaContext<'a> {
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
     page: &'a usize,
+    page_title: Option<String>,
 }
 
 pub async fn admin_report_known_media(
-    Extension(sqlx_pool): Extension<PgPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
@@ -47,7 +50,7 @@ pub async fn admin_report_known_media(
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 =
             mk_lib_database::mk_lib_database_report::mk_lib_database_report_known_media_count(
-                &sqlx_pool,
+               &state.sqlx_pool_ro,
             )
             .await
             .unwrap();
@@ -55,12 +58,15 @@ pub async fn admin_report_known_media(
             total_pages,
             page,
             "/admin/report_known_media".to_string(),
+            None,
         )
         .await
         .unwrap();
         let report_list =
             mk_lib_database::mk_lib_database_report::mk_lib_database_report_known_media_read(
-                &sqlx_pool, db_offset, 30,
+                &state.sqlx_pool_ro,
+                db_offset,
+                30,
             )
             .await
             .unwrap();
@@ -74,6 +80,7 @@ pub async fn admin_report_known_media(
             template_data_exists: &report_data,
             pagination_bar: &pagination_html,
             page: &page_usize,
+            page_title: Some("MediaKraken Admin Report".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

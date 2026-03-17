@@ -1,23 +1,78 @@
 use mk_lib_common::mk_lib_common_ffmpeg;
 use mk_lib_database;
 use mk_lib_rabbitmq;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::error::Error;
-use std::process::{Command, Stdio};
+use tokio::process::Command;
 use tokio::sync::Notify;
+
+const STREAM2CHROMECAST_PATH: &str = "/mediakraken/stream2chromecast/stream2chromecast.py";
+
+async fn run_cast_command(device_name: &str, command_flag: &str, extra: Option<&str>) {
+    let mut process = Command::new("python3");
+    process.args([
+        STREAM2CHROMECAST_PATH,
+        "-devicename",
+        device_name,
+        command_flag,
+    ]);
+    if let Some(extra_arg) = extra {
+        process.arg(extra_arg);
+    }
+    let _result = process.status().await;
+}
+
+fn json_value_to_string(value: &Value) -> Option<String> {
+    value
+        .as_str()
+        .map(ToString::to_string)
+        .or_else(|| value.as_i64().map(|inner| inner.to_string()))
+        .or_else(|| value.as_u64().map(|inner| inner.to_string()))
+        .or_else(|| value.as_f64().map(|inner| inner.to_string()))
+        .or_else(|| value.as_bool().map(|inner| inner.to_string()))
+}
+
+fn cast_stream_argument(json_message: &Value) -> Option<(&'static str, String)> {
+    let data = &json_message["Data"];
+    let stream_target = data
+        .as_object()
+        .and_then(|data_object| {
+            data_object
+                .get("URL")
+                .or_else(|| data_object.get("Url"))
+                .or_else(|| data_object.get("url"))
+                .or_else(|| data_object.get("Media Path"))
+                .or_else(|| data_object.get("Path"))
+        })
+        .and_then(json_value_to_string)
+        .or_else(|| json_value_to_string(data))
+        .or_else(|| json_value_to_string(&json_message["Media Path"]));
+
+    stream_target.map(|target| {
+        if target.starts_with("http://") || target.starts_with("https://") {
+            ("-playurl", target)
+        } else {
+            ("-playfile", target)
+        }
+    })
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // open the database
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
-        .await
-        .unwrap();
-    let _results = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
-        .await;
+    let (sqlx_pool_rw, sqlx_pool_ro) =
+        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
+            .await
+            .unwrap();
+    let _results = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(
+        &sqlx_pool_ro,
+        false,
+    )
+    .await;
 
     // pull options for metadata/chapters/images location
     let option_json: serde_json::Value =
-        mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
+        mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool_ro)
             .await
             .unwrap();
 
@@ -53,89 +108,40 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         let tmp_uuid =
                             uuid::Uuid::parse_str(&json_message["Media UUID"].to_string()).unwrap();
                         let _result = mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_ffmpeg_update_by_uuid(
-                        &sqlx_pool,
+                        &sqlx_pool_rw,
                         tmp_uuid,
                         ffprobe_data,
                     )
                     .await;
                     } else if json_message["Subtype"] == "Cast" {
+                        let device_name = json_message["Device"].as_str().unwrap_or_default();
                         if json_message["Command"] == "Chapter Back" {
                         } else if json_message["Command"] == "Chapter Forward" {
                         } else if json_message["Command"] == "Fast Forward" {
                         } else if json_message["Command"] == "Mute" {
-                            let output = Command::new("python3")
-                                .args([
-                                    "/mediakraken/stream2chromecast/stream2chromecast.py",
-                                    "-devicename",
-                                    &json_message["Device"].to_string(),
-                                    "-mute",
-                                ])
-                                .stdout(Stdio::piped())
-                                .output()
-                                .unwrap();
-                            let stdout = String::from_utf8(output.stdout).unwrap();
+                            run_cast_command(device_name, "-mute", None).await;
                         } else if json_message["Command"] == "Pause" {
-                            let output = Command::new("python3")
-                                .args([
-                                    "/mediakraken/stream2chromecast/stream2chromecast.py",
-                                    "-devicename",
-                                    &json_message["Device"].to_string(),
-                                    "-pause",
-                                ])
-                                .stdout(Stdio::piped())
-                                .output()
-                                .unwrap();
-                            let stdout = String::from_utf8(output.stdout).unwrap();
+                            run_cast_command(device_name, "-pause", None).await;
+                        } else if json_message["Command"] == "Play" {
+                            if let Some((command_flag, stream_target)) =
+                                cast_stream_argument(&json_message)
+                            {
+                                run_cast_command(device_name, command_flag, Some(&stream_target))
+                                    .await;
+                            }
                         } else if json_message["Command"] == "Rewind" {
                         } else if json_message["Command"] == "Stop" {
-                            let output = Command::new("python3")
-                                .args([
-                                    "/mediakraken/stream2chromecast/stream2chromecast.py",
-                                    "-devicename",
-                                    &json_message["Device"].to_string(),
-                                    "-stop",
-                                ])
-                                .stdout(Stdio::piped())
-                                .output()
-                                .unwrap();
-                            let stdout = String::from_utf8(output.stdout).unwrap();
+                            run_cast_command(device_name, "-stop", None).await;
                         } else if json_message["Command"] == "Volume Down" {
-                            let output = Command::new("python3")
-                                .args([
-                                    "/mediakraken/stream2chromecast/stream2chromecast.py",
-                                    "-devicename",
-                                    &json_message["Device"].to_string(),
-                                    "-voldown",
-                                ])
-                                .stdout(Stdio::piped())
-                                .output()
-                                .unwrap();
-                            let stdout = String::from_utf8(output.stdout).unwrap();
+                            run_cast_command(device_name, "-voldown", None).await;
                         } else if json_message["Command"] == "Volume Set" {
-                            let output = Command::new("python3")
-                                .args([
-                                    "/mediakraken/stream2chromecast/stream2chromecast.py",
-                                    "-devicename",
-                                    &json_message["Device"].to_string(),
-                                    "-setvol",
-                                    &json_message["Data"].to_string(),
-                                ])
-                                .stdout(Stdio::piped())
-                                .output()
-                                .unwrap();
-                            let stdout = String::from_utf8(output.stdout).unwrap();
+                            let volume = json_message["Data"]
+                                .as_str()
+                                .map(String::from)
+                                .unwrap_or_else(|| json_message["Data"].to_string());
+                            run_cast_command(device_name, "-setvol", Some(&volume)).await;
                         } else if json_message["Command"] == "Volume Up" {
-                            let output = Command::new("python3")
-                                .args([
-                                    "/mediakraken/stream2chromecast/stream2chromecast.py",
-                                    "-devicename",
-                                    &json_message["Device"].to_string(),
-                                    "-volup",
-                                ])
-                                .stdout(Stdio::piped())
-                                .output()
-                                .unwrap();
-                            let stdout = String::from_utf8(output.stdout).unwrap();
+                            run_cast_command(device_name, "-volup", None).await;
                         }
                     } else if json_message["Subtype"] == "ChapterImage" {
                         // begin image generation
@@ -147,9 +153,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         if json_message["Data"].get("chapters").is_some() {
                             // for chapter_data in json_message["Data"]["chapters"].iter() {
                             //     chapter_count += 1;
-                                // file path, time, output name
-                                // check image save option whether to
-                                // save this in media folder or metadata folder
+                            // file path, time, output name
+                            // check image save option whether to
+                            // save this in media folder or metadata folder
                             //     if option_json["MetadataImageLocal"] == false {
                             //         image_file_path = os.path.join(
                             //             common_metadata.com_meta_image_file_path(
@@ -177,7 +183,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             //             .path
                             //             .join(image_file_path, chapter_count.as_str() + ".png");
                             //     }
-                                 // format the seconds to what ffmpeg is looking for
+                            // format the seconds to what ffmpeg is looking for
                             //     (minutes, seconds) =
                             //         divmod(float(chapter_data["start_time"]), 60);
                             //     (hours, minutes) = divmod(minutes, 60);
@@ -199,7 +205,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             //         .output()
                             //         .unwrap();
                             //     let stdout = String::from_utf8(output.stdout).unwrap();
-                                 // as the worker might see it as finished if allowed to continue
+                            // as the worker might see it as finished if allowed to continue
                             //     chapter_image_list[chapter_data["tags"]["title"]] =
                             //         image_file_path;
                             //     first_image = false;

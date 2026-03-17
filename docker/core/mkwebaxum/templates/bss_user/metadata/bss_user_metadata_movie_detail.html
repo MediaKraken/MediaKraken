@@ -1,103 +1,204 @@
+{% extends "layouts/base_user.html" %}
+
 {% block content %}
+<section class="max-w-6xl mx-auto px-4 py-6 sm:px-6 md:ml-64" x-data="moviePage()">
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>MediaKraken</title>
-    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
-    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
-    <link rel="stylesheet" href="/static/css/styles.min.css">
-</head>
+    <!-- HEADER -->
+    <div class="grid gap-6 lg:grid-cols-[260px_1fr]">
 
-<body>
-    {% include "bss_user/bss_user_include_menu.html" %}
-    <div>
-        <div>
+        <!-- Poster -->
+        <div class="aspect-[2/3] overflow-hidden rounded-2xl bg-zinc-200 shadow-sm dark:bg-zinc-800">
+            {% if template_metadata_poster == "/static/image/Movie-icon.png" %}
+            <img src="/static/image/Movie-icon.png?v=1" alt="Poster for {{template_data_json["title"]}}"
+                loading="lazy" decoding="async" @load="loaded = true" @error="loaded = true"
+                x-init="$nextTick(() => { loaded = $el.complete })"
+                class="h-full w-full object-cover transition-opacity duration-500"
+                :class="loaded ? 'opacity-100' : 'opacity-0'" />
+            {% else %}
+            <img src="/metadata{{template_metadata_poster|safe}}?v={{template_metadata_photo_updated.timestamp()}}"
+                alt="Poster for {{template_data_json["title"]}}" loading="lazy" decoding="async"
+                @load="loaded = true" @error="loaded = true" x-init="$nextTick(() => { loaded = $el.complete })"
+                class="h-full w-full object-cover transition-opacity duration-500"
+                :class="loaded ? 'opacity-100' : 'opacity-0'" />
+            {% endif %}
+        </div>
+
+        <!-- Info -->
+        <div class="space-y-5">
+
             <div>
-                <div class="container">
-                    <div class="row">
-                        <div class="col-xl-12">
-                            <div class="row">
-                                <div class="col-xl-3"><img class="img-fluid" src="/static/image/Movie-icon.png"
-                                        width="200" height="300"></div>
-                                <div class="col-xl-9">
-                                    <div class="card"></div>
-                                    <div class="row">
-                                        <div class="col-xl-7"><span><b>Title:</b> {{template_data_json["title"]}}</span></div>
-                                        <div class="col"><span class="text-right"><b>Release Date:</b>
-                                                {{template_data_json["release_date"]}}</span></div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col">
-                                            <p><b>Tagline:</b> {{template_data_json["tagline"]}}<br><br></p>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col">
-                                            <p><b>Alternate Title:</b> {{template_data_json["original_title"]}}<br><br></p>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col">
-                                            <p>rating icon............clickable genre buttons<br><br></p>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col">
-                                            <p>star rating image........cast, crew, reviewws, homepage</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col">
-                            <p><b>Overview:</b> {{template_data_json["overview"]}}</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col">
-                            <div>
-                                <div>
-                                    {#{% if template_data_json_media_crew %}
-                                    <div class="row">
-                                        <div class="card">
-                                            <div class="card-header">
-                                                Crew
-                                            </div>
-                                            <div class="card-body">
-                                                <p class="card-text">
-                                                <div class="grid">
-                                                    {#{% for crew_info in template_data_json_media_crew %}
-                                                    <div class="col-1-4">
-                                                        <a
-                                                            href="/user/media/bss_user_media_playback/hls/{{data_guid}}/{{chapter_info[0]|space_to_html}}/0/0">
-                                                            <img src="/static/meta/images/{{chapter_info[1]}}"
-                                                                height="150" width="150">
-                                                        </a>
-                                                    </div>
-                                                    {% endfor %}#}
-                                                </div>
-                                                <p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endif %}#}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <h1 class="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">{{template_data_json["title"]}}</h1>
+                <p class="italic text-zinc-500 dark:text-zinc-400">{{template_data_json["original_title"]}}</p>
+                {% if let Some(alt_name) = template_metadata_tagline %}
+                {% if alt_name != "" %}
+                <p class="mt-1 text-sm italic text-zinc-600 dark:text-zinc-400">
+                    {{ alt_name }}
+                </p>
+                {% endif %}
+                {% endif %}
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                {% for genre in template_metadata_genre %}
+                <span
+                    class="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                    {{ genre.name }}
+                </span>
+                {% endfor %}
+            </div>
+
+            <div class="rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-900">
+                <div class="flex items-center gap-2">
+                    <button @click="toggle('favorite')" aria-label="Toggle favorite"
+                        class="rounded-md p-1 transition-transform active:scale-110"
+                        :class="favorite ? 'text-red-500' : 'text-zinc-400 hover:text-red-400'">
+                        {% include "icons/heart.svg" %}
+                    </button>
+                    <button @click="toggle('watched')" aria-label="Toggle watched"
+                        class="rounded-md p-1 transition-transform active:scale-110"
+                        :class="watched ? 'text-green-500' : 'text-zinc-400 hover:text-green-400'">
+                        {% include "icons/check.svg" %}
+                    </button>
+                    <button @click="toggle('good')" aria-label="Toggle thumbs up"
+                        class="rounded-md p-1 transition-transform active:scale-110"
+                        :class="good ? 'text-blue-500' : 'text-zinc-400 hover:text-blue-400'">
+                        {% include "icons/thumb_up.svg" %}
+                    </button>
+                    <button @click="toggle('bad')" aria-label="Toggle thumbs down"
+                        class="rounded-md p-1 transition-transform active:scale-110"
+                        :class="bad ? 'text-yellow-500' : 'text-zinc-400 hover:text-yellow-400'">
+                        {% include "icons/thumb_down.svg" %}
+                    </button>
+                    <button @click="toggle('trash')" aria-label="Toggle trash"
+                        class="rounded-md p-1 transition-transform active:scale-110"
+                        :class="trash ? 'text-red-600' : 'text-zinc-400 hover:text-red-500'">
+                        {% include "icons/trash.svg" %}
+                    </button>
                 </div>
             </div>
         </div>
     </div>
-    {% include "bss_public/bss_public_footer.html" %}
-    <script src="/static/js/jquery.min.js"></script>
-    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/static/js/jquery-easing.min.js"></script>
-    <script src="/static/js/script.min.js"></script>
-</body>
+
+    <!-- CAST CAROUSEL -->
+    <div class="mt-10">
+        <h2 class="mb-3 text-xl font-semibold text-zinc-900 dark:text-zinc-100">Cast</h2>
+
+        <div class="relative">
+            <button @click="scroll('cast', -1)" aria-label="Scroll cast left"
+                class="absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full border border-zinc-200 bg-white p-2 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                ‹
+            </button>
+
+            <div class="flex gap-4 overflow-x-auto scroll-smooth px-10" x-ref="cast">
+                <template x-for="person in cast" :key="person.name">
+                    <a href="#" class="min-w-[120px] text-center">
+                        <img :src="person.img" class="mx-auto h-28 w-28 rounded-full object-cover">
+                        <p class="mt-2 text-sm font-medium text-zinc-800 dark:text-zinc-200" x-text="person.name"></p>
+                    </a>
+                </template>
+            </div>
+
+            <button @click="scroll('cast', 1)" aria-label="Scroll cast right"
+                class="absolute right-0 top-1/2 -translate-y-1/2 rounded-full border border-zinc-200 bg-white p-2 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                ›
+            </button>
+        </div>
+    </div>
+
+    <!-- CREW CAROUSEL -->
+    <div class="mt-10">
+        <h2 class="mb-3 text-xl font-semibold text-zinc-900 dark:text-zinc-100">Crew</h2>
+
+        <div class="relative">
+            <button @click="scroll('crew', -1)" aria-label="Scroll crew left"
+                class="absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full border border-zinc-200 bg-white p-2 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                ‹
+            </button>
+
+            <div class="flex gap-4 overflow-x-auto scroll-smooth px-10" x-ref="crew">
+                <template x-for="person in crew" :key="person.name">
+                    <a href="#" class="min-w-[140px] text-center">
+                        <img :src="person.img" class="mx-auto h-28 w-28 rounded-full object-cover">
+                        <p class="mt-2 text-sm font-medium text-zinc-800 dark:text-zinc-200" x-text="person.name"></p>
+                        <p class="text-xs text-zinc-500 dark:text-zinc-400" x-text="person.role"></p>
+                    </a>
+                </template>
+            </div>
+
+            <button @click="scroll('crew', 1)" aria-label="Scroll crew right"
+                class="absolute right-0 top-1/2 -translate-y-1/2 rounded-full border border-zinc-200 bg-white p-2 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                ›
+            </button>
+        </div>
+    </div>
+
+    <!-- REVIEWS ACCORDION -->
+    <div class="mt-10">
+        <button @click="reviewsOpen = !reviewsOpen"
+            class="flex w-full items-center justify-between rounded-lg border border-zinc-200 bg-white p-4 text-left shadow-sm dark:border-zinc-700 dark:bg-zinc-900"
+            aria-label="Toggle user reviews">
+            <span class="font-semibold text-zinc-900 dark:text-zinc-100">User Reviews</span>
+            <span x-text="reviewsOpen ? '−' : '+'" class="text-zinc-600 dark:text-zinc-300"></span>
+        </button>
+
+        <div x-show="reviewsOpen" x-transition class="mt-4 space-y-4">
+            <template x-for="review in reviews" :key="review.user">
+                <div class="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                    <p class="font-medium text-zinc-900 dark:text-zinc-100" x-text="review.user"></p>
+                    <p class="text-sm text-zinc-600 dark:text-zinc-400" x-text="review.text"></p>
+                </div>
+            </template>
+        </div>
+    </div>
+
+</section>
+
+<script>
+    function moviePage() {
+        return {
+            rating: 4,
+            loaded: false,
+            favorite: false,
+            watched: false,
+            good: false,
+            bad: false,
+            trash: false,
+            reviewsOpen: false,
+
+            genres: ['Action', 'Drama', 'Sci-Fi', 'Thriller'],
+            activeGenres: [],
+
+            cast: [
+                { name: 'Actor One', img: 'https://via.placeholder.com/150' },
+                { name: 'Actor Two', img: 'https://via.placeholder.com/150' },
+                { name: 'Actor Three', img: 'https://via.placeholder.com/150' }
+            ],
+
+            crew: [
+                { name: 'Director One', role: 'Director', img: 'https://via.placeholder.com/150' },
+                { name: 'Writer One', role: 'Writer', img: 'https://via.placeholder.com/150' }
+            ],
+
+            reviews: [
+                { user: 'Alice', text: 'Amazing cinematography and story.' },
+                { user: 'Bob', text: 'A bit long, but worth it.' }
+            ],
+
+            toggle(stateName) {
+                this[stateName] = !this[stateName]
+            },
+
+            toggleGenre(genre) {
+                this.activeGenres.includes(genre)
+                    ? this.activeGenres = this.activeGenres.filter(g => g !== genre)
+                    : this.activeGenres.push(genre)
+            },
+
+            scroll(ref, dir) {
+                this.$refs[ref].scrollLeft += dir * 300
+            }
+        }
+    }
+</script>
+
 {% endblock %}

@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    io.kompose.service: pgbench-tuple
+  name: pgbench-tuple
+  namespace: mkbenchmark
+spec:
+  containers:
+  - name: pgbench-tuple
+    image: mediakraken/mkpgbench:dev
+    command: ["pgbench", "-h", "pgcluster-with-metrics-rw.cnpg-system", "-p", "5432", "-U", "postgres", "-i", "-s", "1000", "postgres"]
+    env:
+    - name: PGPASSWORD
+      value: 7a75-c67b-4b0f-9ed
+  restartPolicy: Never

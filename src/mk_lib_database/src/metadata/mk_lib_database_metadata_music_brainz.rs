@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
+use sqlx::FromRow;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaMusicList {
@@ -14,16 +14,13 @@ pub async fn mk_lib_database_metadata_music_album_count(
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
     if search_value != String::new() {
-        let row: (i64,) = sqlx::query_as(
-            "select count(*) from release \
-            where name % $1",
-        )
-        .bind(search_value)
-        .fetch_one(sqlx_pool)
-        .await?;
+        let row: (i64,) = sqlx::query_as(r#"select count(*) from release where name % $1"#)
+            .bind(search_value)
+            .fetch_one(sqlx_pool)
+            .await?;
         Ok(row.0)
     } else {
-        let row: (i64,) = sqlx::query_as("select count(*) from release")
+        let row: (i64,) = sqlx::query_as(r#"select count(*) from release"#)
             .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
@@ -38,38 +35,24 @@ pub async fn mk_lib_database_metadata_music_album_read(
 ) -> Result<Vec<DBMetaMusicList>, sqlx::Error> {
     // TODO, only grab the poster locale from json
     // TODO order by release year
-    let select_query;
     if search_value != String::new() {
-        select_query = sqlx::query(
-            "select release.id as brainz_id, release.name as brainz_name, artist.name as brainz_artist \
-            from release, artist \
-            where artist.id = artist_credit and mm_metadata_album_name % $1 \
-            order by LOWER(name) \
-            offset $2 limit $3",
+        sqlx::query_as(
+            r#"select release.id as brainz_id, release.name as brainz_name, artist.name as brainz_artist from release, artist where artist.id = artist_credit and mm_metadata_album_name % $1 order by LOWER(name) offset $2 limit $3"#,
         )
         .bind(search_value)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+            .fetch_all(sqlx_pool)
+            .await
     } else {
-        select_query = sqlx::query(
-            "select release.id as brainz_id, release.name as brainz_name, artist.name as brainz_artist \
-            from release, artist \
-            where artist.id = artist_credit \
-            order by LOWER(release.name), LOWER(artist.name) \
-            offset $1 limit $2",
+        sqlx::query_as(
+            r#"select release.id as brainz_id, release.name as brainz_name, artist.name as brainz_artist from release, artist where artist.id = artist_credit order by LOWER(release.name), LOWER(artist.name) offset $1 limit $2"#,
         )
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+            .fetch_all(sqlx_pool)
+            .await
     }
-    let table_rows: Vec<DBMetaMusicList> = select_query
-        .map(|row: PgRow| DBMetaMusicList {
-            mm_metadata_album_id: row.get("brainz_id"),
-            mm_metadata_album_name: row.get("brainz_name"),
-            mm_metadata_album_artist: row.get("brainz_artist"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
 }
 
 /*

@@ -11,8 +11,11 @@ payload
 mktmdbnetfetchbulk
 content_type    application/json
 {
-    "Data": "06_27_2023"
+    "Type": "Bulk",
+    "Limit": 10000,
+    "Skip": 120000
 }
+
 
 mksharescanner
 {
@@ -22,4 +25,19 @@ mksharescanner
 mkopenlibrarynetfetchbulk
 {
     "Type": "ratings"
+}
+
+
+
+mkmetadatamame
+content_type    application/json
+{
+    "Version": 285
+}
+
+
+mkopenlibrarynetfetchbulk
+content_type    application/json
+{
+    "Type": "START_BULK_LOAD"
 }

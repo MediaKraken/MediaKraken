@@ -1,0 +1,33 @@
+---
+# https://www.elastic.co/docs/deploy-manage/deploy/cloud-on-k8s/deploy-an-orchestrator
+# https://www.elastic.co/docs/deploy-manage/deploy/cloud-on-k8s/managing-deployments-using-helm-chart
+- name : Setup elastic on cluster
+  hosts: mkcontrol1
+  tasks:
+    - name: Setup helm repo for elastic
+      shell: helm repo add elastic https://helm.elastic.co
+
+    - name: Install elastic operator
+      shell: helm install elastic-operator elastic/eck-operator -n elastic-system --create-namespace \
+        --set=webhook.timeout=120s \
+        --set=operator.defaultResources.limits.cpu=2000m \
+        --set=operator.defaultResources.limits.memory=4Gi \
+        --set=volumeClaimTemplates.storageClassName=longhorn \
+        --set=volumeClaimTemplate.resources.requests.storage=10Gi
+
+    - name: Install elastic stack
+      shell: helm install es-quickstart elastic/eck-stack -n elastic-stack --create-namespace \
+        --set=ingress.enabled=true --set=ingress.hosts[0].host=elastic.mediakraken.media --set=ingress.hosts[0].path="/" \
+        --values https://raw.githubusercontent.com/elastic/cloud-on-k8s/3.2/deploy/eck-stack/examples/elasticsearch/hot-warm-cold.yaml \
+        --values https://raw.githubusercontent.com/elastic/cloud-on-k8s/3.2/deploy/eck-stack/examples/kibana/http-configuration.yaml \
+        --values https://raw.githubusercontent.com/elastic/cloud-on-k8s/3.2/deploy/eck-stack/examples/logstash/basic-eck.yaml
+
+# kubectl get secret elasticsearch-es-elastic-user -o=jsonpath='{.data.elastic}' | base64 --decode
+
+    # - name: copying file
+    #   copy:
+    #     src: ../config/elastic.yml
+    #     dest: ~/elastic.yml
+
+    # - name: Setup elastic
+    #   shell: kubectl apply -f ~/elastic.yml

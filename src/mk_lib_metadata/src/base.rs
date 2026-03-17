@@ -1,6 +1,8 @@
 use crate::guessit;
 use mk_lib_common::mk_lib_common_enum_media_type;
 use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use serde_json::json;
+use std::env;
 use std::error::Error;
 use torrent_name_parser::Metadata;
 
@@ -18,6 +20,8 @@ mod metadata_movie;
 mod metadata_music;
 #[path = "music_video.rs"]
 mod metadata_music_video;
+#[path = "person.rs"]
+mod metadata_person;
 #[path = "sports.rs"]
 mod metadata_sports;
 #[path = "tv.rs"]
@@ -49,35 +53,31 @@ pub async fn metadata_process(
     provider_api_key: &str,
 ) -> Result<(), Box<dyn Error>> {
     // TODO art, posters, trailers, etc in here as well
-    if download_data.mm_download_status == "Search" {
-        metadata_search(&sqlx_pool, provider_name, download_data, provider_api_key)
-            .await
-            .unwrap();
-    } else if download_data.mm_download_status == "Update" {
-        metadata_update(&sqlx_pool, provider_name, download_data, provider_api_key)
-            .await
-            .unwrap();
-    } else if download_data.mm_download_status == "Fetch" {
-        metadata_fetch(&sqlx_pool, provider_name, download_data, provider_api_key)
-            .await
-            .unwrap();
-    } else if download_data.mm_download_status == "FetchCastCrew" {
-        metadata_castcrew(&sqlx_pool, provider_name, download_data, provider_api_key)
-            .await
-            .unwrap();
-    } else if download_data.mm_download_status == "FetchReview" {
-        metadata_review(&sqlx_pool, provider_name, download_data, provider_api_key)
-            .await
-            .unwrap();
-    } else if download_data.mm_download_status == "FetchImage" {
-        metadata_image(&sqlx_pool, provider_name, download_data, provider_api_key)
-            .await
-            .unwrap();
-    } else if download_data.mm_download_status == "FetchCollection" {
-        metadata_collection(&sqlx_pool, provider_name, download_data, provider_api_key)
-            .await
-            .unwrap();
+    match download_data.mm_download_status.as_str() {
+        "Search" => {
+            metadata_search(sqlx_pool, provider_name, download_data, provider_api_key).await?
+        }
+        "Update" => {
+            metadata_update(sqlx_pool, provider_name, download_data, provider_api_key).await?
+        }
+        "Fetch" => {
+            metadata_fetch(sqlx_pool, provider_name, download_data, provider_api_key).await?
+        }
+        "FetchCastCrew" => {
+            metadata_castcrew(sqlx_pool, provider_name, download_data, provider_api_key).await?
+        }
+        "FetchReview" => {
+            metadata_review(sqlx_pool, provider_name, download_data, provider_api_key).await?
+        }
+        "FetchImage" => {
+            metadata_image(sqlx_pool, provider_name, download_data, provider_api_key).await?
+        }
+        "FetchCollection" => {
+            metadata_collection(sqlx_pool, provider_name, download_data, provider_api_key).await?
+        }
+        _ => {}
     }
+
     Ok(())
 }
 
@@ -239,6 +239,26 @@ pub async fn metadata_search(
                 //         set_fetch = true;
                 // }
             }
+        } else if download_data.mm_download_que_type
+            == mk_lib_common_enum_media_type::DLMediaType::PERSON
+        {
+            if metadata_uuid == uuid::Uuid::nil() {
+                metadata_uuid = metadata_person::metadata_person_lookup(
+                    &sqlx_pool,
+                    &download_data,
+                    guessit_data,
+                )
+                .await
+                .unwrap();
+                // (metadata_uuid, match_result) = metadata_person.metadata_person_lookup(&sqlx_pool, download_data);
+                // // if match_result is an int, that means the lookup found a match but isn"t in db
+                // if metadata_uuid == uuid::Uuid::nil() && type(match_result) != int {
+                //     lookup_halt = true;
+                // }
+                // else if metadata_uuid != uuid::Uuid::nil() {
+                //         set_fetch = true;
+                // }
+            }
         } else {
             // this will hit from type 0's (trailers, etc)
             if metadata_uuid == uuid::Uuid::nil() {
@@ -300,15 +320,16 @@ pub async fn metadata_fetch(
     download_data: DBDownloadQueueByProviderList,
     provider_api_key: &str,
 ) -> Result<(), Box<dyn Error>> {
-    if provider_name == "barcodespider" {
-        let _barcode_id = provider_barcodespider::provider_barcodespider_fetch_by_upc(
-            sqlx_pool,
-            &download_data.mm_download_provider_id.unwrap(),
-            &provider_api_key,
-        )
-        .await
-        .unwrap();
-    } else if provider_name == "imvdb" {
+    // if provider_name == "barcodespider" {
+    //     let _barcode_id = provider_barcodespider::provider_barcodespider_fetch_by_upc(
+    //         sqlx_pool,
+    //         &download_data.mm_download_provider_id.unwrap(),
+    //         &provider_api_key,
+    //     )
+    //     .await
+    //     .unwrap();
+    // } else 
+    if provider_name == "imvdb" {
         let _imvdb_id = provider_imvdb::provider_imvdb_video_fetch_by_id(
             sqlx_pool,
             download_data.mm_download_provider_id.unwrap(),
@@ -320,6 +341,13 @@ pub async fn metadata_fetch(
     } else if provider_name == "themoviedb" {
         if download_data.mm_download_que_type == mk_lib_common_enum_media_type::DLMediaType::PERSON
         {
+            if env::var("DEBUG").unwrap() == "true" {
+                mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
+                    json!({ "Type": "Person", "Module": std::module_path!(), "DL Guid": download_data.mm_download_guid, "Status": download_data.mm_download_status, "Provider": "themoviedb", "ID": download_data.mm_download_provider_id }),
+                    )
+                    .await
+                    .unwrap();
+            }
             provider_tmdb::provider_tmdb_person_fetch(
                 sqlx_pool,
                 download_data.mm_download_provider_id.unwrap(),
@@ -349,15 +377,16 @@ pub async fn metadata_fetch(
             )
             .await;
         }
-    } else if provider_name == "upcitemdb" {
-        let _upcitemdb_id = provider_upcitemdb::provider_upcitemdb_fetch_by_upc(
-            sqlx_pool,
-            &download_data.mm_download_provider_id.unwrap(),
-            &provider_api_key,
-        )
-        .await
-        .unwrap();
     }
+    //  else if provider_name == "upcitemdb" {
+    //     let _upcitemdb_id = provider_upcitemdb::provider_upcitemdb_fetch_by_upc(
+    //         sqlx_pool,
+    //         vec![&download_data.mm_download_provider_id.unwrap()],
+    //         &provider_api_key,
+    //     )
+    //     .await
+    //     .unwrap();
+    // }
     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,
         download_data.mm_download_guid,

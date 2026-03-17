@@ -1,3 +1,4 @@
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -6,11 +7,12 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
+use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
-use crate::mk_lib_database;
 use sqlx::postgres::PgPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -23,10 +25,11 @@ struct TemplateAdminGameServers<'a> {
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
     page: &'a usize,
+    page_title: Option<String>,
 }
 
 pub async fn admin_game_servers(
-    Extension(sqlx_pool): Extension<PgPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
@@ -47,7 +50,7 @@ pub async fn admin_game_servers(
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 =
             mk_lib_database::mk_lib_database_game_servers::mk_lib_database_game_server_count(
-                &sqlx_pool,
+              &state.sqlx_pool_ro,
                 String::new(),
             )
             .await
@@ -56,12 +59,13 @@ pub async fn admin_game_servers(
             total_pages,
             page,
             "/admin/game_servers".to_string(),
+            None,
         )
         .await
         .unwrap();
         let dedicated_server_list =
             mk_lib_database::mk_lib_database_game_servers::mk_lib_database_game_server_read(
-                &sqlx_pool,
+               &state.sqlx_pool_ro,
                 String::new(),
                 db_offset,
                 30,
@@ -78,6 +82,7 @@ pub async fn admin_game_servers(
             template_data_exists: &template_data_exists,
             pagination_bar: &pagination_html,
             page: &page_usize,
+            page_title: Some("MediaKraken Admin Game Servers".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

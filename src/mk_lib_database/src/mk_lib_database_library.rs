@@ -1,8 +1,7 @@
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
-use sqlx::{FromRow, Row};
+use sqlx::FromRow;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBLibraryList {
@@ -14,18 +13,12 @@ pub struct DBLibraryList {
 pub async fn mk_lib_database_library_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBLibraryList>, sqlx::Error> {
-    let select_query = sqlx::query(
-        "select mm_media_dir_guid, mm_media_dir_path, mm_media_dir_share_guid \
-        from mm_library_dir",
-    );
-    let table_rows: Vec<DBLibraryList> = select_query
-        .map(|row: PgRow| DBLibraryList {
-            mm_media_dir_guid: row.get("mm_media_dir_guid"),
-            mm_media_dir_path: row.get("mm_media_dir_path"),
-            mm_media_dir_share_guid: row.get("mm_media_dir_share_guid"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    let table_rows: Vec<DBLibraryList> = sqlx::query_as(
+        r#"select mm_media_dir_guid, mm_media_dir_path, mm_media_dir_share_guid
+        from mm_library_dir"#,
+    )
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 
@@ -41,24 +34,16 @@ pub struct DBLibraryAuditList {
 pub async fn mk_lib_database_library_path_audit_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBLibraryAuditList>, sqlx::Error> {
-    let select_query = sqlx::query(
-        "select mm_media_dir_guid, \
-        mm_media_dir_path, \
-        mm_media_dir_class_enum, \
-        mm_media_dir_last_scanned, \
-        mm_media_dir_share_guid \
-        from mm_library_dir",
-    );
-    let table_rows: Vec<DBLibraryAuditList> = select_query
-        .map(|row: PgRow| DBLibraryAuditList {
-            mm_media_dir_guid: row.get("mm_media_dir_guid"),
-            mm_media_dir_path: row.get("mm_media_dir_path"),
-            mm_media_dir_class_enum: row.get("mm_media_dir_class_enum"),
-            mm_media_dir_last_scanned: row.get("mm_media_dir_last_scanned"),
-            mm_media_dir_share_guid: row.get("mm_media_dir_share_guid"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    let table_rows: Vec<DBLibraryAuditList> = sqlx::query_as(
+        r#"select mm_media_dir_guid,
+        mm_media_dir_path,
+        mm_media_dir_class_enum,
+        mm_media_dir_last_scanned,
+        mm_media_dir_share_guid
+        from mm_library_dir"#,
+    )
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 
@@ -71,18 +56,13 @@ pub struct DBLibraryPathStatus {
 pub async fn mk_lib_database_library_path_status(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBLibraryPathStatus>, sqlx::Error> {
-    let select_query = sqlx::query(
-        "select mm_media_dir_path, mm_media_dir_status \
-        from mm_library_dir where mm_media_dir_status IS NOT NULL \
-        order by mm_media_dir_path",
-    );
-    let table_rows: Vec<DBLibraryPathStatus> = select_query
-        .map(|row: PgRow| DBLibraryPathStatus {
-            mm_media_dir_path: row.get("mm_media_dir_path"),
-            mm_media_dir_status: row.get("mm_media_dir_status"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    let table_rows: Vec<DBLibraryPathStatus> = sqlx::query_as(
+        r#"select mm_media_dir_path, mm_media_dir_status
+        from mm_library_dir where mm_media_dir_status IS NOT NULL
+        order by mm_media_dir_path"#,
+    )
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 
@@ -91,16 +71,14 @@ pub async fn mk_lib_database_library_path_status_update(
     library_uuid: uuid::Uuid,
     library_status_json: serde_json::Value,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
-        "update mm_library_dir set mm_media_dir_status = $1 \
-        where mm_media_dir_guid = $2",
+        r#"update mm_library_dir set mm_media_dir_status = $1
+        where mm_media_dir_guid = $2"#,
     )
     .bind(library_status_json)
     .bind(library_uuid)
-    .execute(&mut *transaction)
+    .execute(sqlx_pool)
     .await?;
-    transaction.commit().await?;
     Ok(())
 }
 
@@ -108,26 +86,24 @@ pub async fn mk_lib_database_library_path_timestamp_update(
     sqlx_pool: &sqlx::PgPool,
     library_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
-        "update mm_library_dir set mm_media_dir_last_scanned = NOW() \
-        where mm_media_dir_guid = $1",
+        r#"update mm_library_dir set mm_media_dir_last_scanned = NOW()
+        where mm_media_dir_guid = $1"#,
     )
     .bind(library_uuid)
-    .execute(&mut *transaction)
+    .execute(sqlx_pool)
     .await?;
-    transaction.commit().await?;
     Ok(())
 }
 
 pub async fn mk_lib_database_library_file_exists(
     sqlx_pool: &sqlx::PgPool,
-    file_name: &String,
+    file_name: &str,
 ) -> Result<bool, sqlx::Error> {
     let row: (bool,) = sqlx::query_as(
-        "select exists(select 1 from mm_media \
-        where mm_media_path = $1 limit 1) \
-        as found_record limit 1",
+        r#"select exists(select 1 from mm_media
+        where mm_media_path = $1)
+        as found_record"#,
     )
     .bind(file_name)
     .fetch_one(sqlx_pool)
@@ -136,7 +112,7 @@ pub async fn mk_lib_database_library_file_exists(
 }
 
 pub async fn mk_lib_database_library_count(sqlx_pool: &sqlx::PgPool) -> Result<i64, sqlx::Error> {
-    let row: (i64,) = sqlx::query_as("select count(*) from mm_library_dir")
+    let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_library_dir"#)
         .fetch_one(sqlx_pool)
         .await?;
     Ok(row.0)

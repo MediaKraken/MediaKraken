@@ -1,0 +1,163 @@
+<aside
+  :class="$store.ui.sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
+  x-cloak
+  @click.outside="$store.ui.closeSidebar()"
+  class="fixed inset-y-0 left-0 z-40 w-64 transform flex flex-col
+         bg-white dark:bg-zinc-950 
+         border-r border-zinc-200 dark:border-zinc-800
+         shadow-lg md:shadow-none md:static md:inset-auto
+         transition-transform duration-300 ease-in-out"
+>
+    <!-- Header -->
+    <div class="flex h-16 items-center justify-center border-b
+             border-zinc-200 text-zinc-500
+dark:border-zinc-800 dark:text-zinc-400">
+        <span class="text-xs font-bold uppercase tracking-widest">
+            Media
+        </span>
+    </div>
+
+    <!-- Nav -->
+    <nav class="flex-1 space-y-1 px-4 py-4 overflow-y-auto">
+
+        <!-- Primary -->
+        <div class="pb-4">
+            <a href="/user/media/new" class="flex items-center rounded-lg px-3 py-2 text-sm font-medium
+       text-zinc-700 hover:bg-zinc-200
+       dark:text-zinc-200 dark:hover:bg-zinc-800
+       transition-colors">
+                <span class="w-5 flex justify-center">
+                    {% include "icons/fire.svg" %}
+                </span>
+                <span class="ml-3">New Releases</span>
+            </a>
+
+            <a href="/user/media/queue" class="flex items-center rounded-lg px-3 py-2 text-sm font-medium
+       text-zinc-700 hover:bg-zinc-200
+       dark:text-zinc-200 dark:hover:bg-zinc-800
+       transition-colors">
+                <span class="w-5 flex justify-center">
+                    {% include "icons/list.svg" %}
+                </span>
+                <span class="ml-3">My Queue</span>
+            </a>
+
+            <a href="/user/media/physical/1" class="flex items-center rounded-lg px-3 py-2 text-sm font-medium
+       text-zinc-700 hover:bg-zinc-200
+       dark:text-zinc-200 dark:hover:bg-zinc-800
+       transition-colors">
+                <span class="w-5 flex justify-center">
+                    {% include "icons/physical_media.svg" %}
+                </span>
+                <span class="ml-3">My Physical Media</span>
+            </a>
+        </div>
+
+        <hr class="my-2 border-gray-200 dark:border-zinc-800">
+
+        <!-- Video -->
+        <div class="py-2">
+            <h3 class="mb-2 px-3 text-xs font-semibold uppercase tracking-wider
+    text-zinc-500 dark:text-zinc-400">
+                Video
+            </h3>
+
+            <a href="/user/media/movie_genre/all" class="flex items-center rounded-lg px-3 py-2 text-sm font-medium
+       text-zinc-700 hover:bg-zinc-200
+       dark:text-zinc-200 dark:hover:bg-zinc-800
+       transition-colors">
+                <span class="w-5 flex justify-center">{% include "icons/film.svg" %}</span>
+                <span class="ml-3">Movies</span>
+            </a>
+
+            <a href="/user/media/tv/1" class="flex items-center rounded-lg px-3 py-2 text-sm font-medium
+       text-zinc-700 hover:bg-zinc-200
+       dark:text-zinc-200 dark:hover:bg-zinc-800
+       transition-colors">
+                <span class="w-5 flex justify-center">{% include "icons/tv.svg" %}</span>
+                <span class="ml-3">TV Shows</span>
+            </a>
+
+            <a href="/user/media/live_tv/..." class="flex items-center rounded-lg px-3 py-2 text-sm font-medium
+       text-zinc-700 hover:bg-zinc-200
+       dark:text-zinc-200 dark:hover:bg-zinc-800
+       transition-colors">
+                <span class="w-5 flex justify-center">{% include "icons/satellite.svg" %}</span>
+                <span class="ml-3">Live TV</span>
+            </a>
+        </div>
+
+        <!-- Entertainment -->
+        <div class="py-2">
+            <h3 class="mb-2 px-3 text-xs font-semibold uppercase tracking-wider
+    text-zinc-500 dark:text-zinc-400">
+                Entertainment
+            </h3>
+
+            <a href="/user/media/music/1" class="flex items-center rounded-lg px-3 py-2 text-sm font-medium
+       text-zinc-700 hover:bg-zinc-200
+       dark:text-zinc-200 dark:hover:bg-zinc-800
+       transition-colors">
+                <span class="w-5 flex justify-center">{% include "icons/music.svg" %}</span>
+                <span class="ml-3">Music</span>
+            </a>
+
+            <a href="/user/media/game/1" class="flex items-center rounded-lg px-3 py-2 text-sm font-medium
+       text-zinc-700 hover:bg-zinc-200
+       dark:text-zinc-200 dark:hover:bg-zinc-800
+       transition-colors">
+                <span class="w-5 flex justify-center">{% include "icons/gamepad.svg" %}</span>
+                <span class="ml-3">Games</span>
+            </a>
+
+            <a href="/user/media/book/1" class="flex items-center rounded-lg px-3 py-2 text-sm font-medium
+       text-zinc-700 hover:bg-zinc-200
+       dark:text-zinc-200 dark:hover:bg-zinc-800
+       transition-colors">
+                <span class="w-5 flex justify-center">{% include "icons/book.svg" %}</span>
+                <span class="ml-3">Books</span>
+            </a>
+
+            <a href="/user/media/iradio/1" class="flex items-center rounded-lg px-3 py-2 text-sm font-medium
+       text-zinc-700 hover:bg-zinc-200
+       dark:text-zinc-200 dark:hover:bg-zinc-800
+       transition-colors">
+                <span class="w-5 flex justify-center">{% include "icons/iradio.svg" %}</span>
+                <span class="ml-3">iRadio</span>
+            </a>
+        </div>
+
+        <!-- System -->
+        <div class="py-2">
+            <h3 class="mb-2 px-3 text-xs font-semibold uppercase tracking-wider
+    text-zinc-500 dark:text-zinc-400">
+                System
+            </h3>
+
+            <a href="/user/hardware" class="flex items-center rounded-lg px-3 py-2 text-sm font-medium
+       text-zinc-700 hover:bg-zinc-200
+       dark:text-zinc-200 dark:hover:bg-zinc-800
+       transition-colors">
+                <span class="w-5 flex justify-center">{% include "icons/server.svg" %}</span>
+                <span class="ml-3">Hardware</span>
+            </a>
+
+            <a href="/user/media/cctv" class="flex items-center rounded-lg px-3 py-2 text-sm font-medium
+       text-zinc-700 hover:bg-zinc-200
+       dark:text-zinc-200 dark:hover:bg-zinc-800
+       transition-colors">
+                <span class="w-5 flex justify-center">{% include "icons/video.svg" %}</span>
+                <span class="ml-3">CCTV</span>
+            </a>
+
+            <!-- Active -->
+            <a href="/user/media/search" aria-current="page" class="flex items-center rounded-lg px-3 py-2 text-sm font-medium
+       text-zinc-700 hover:bg-zinc-200
+       dark:text-zinc-200 dark:hover:bg-zinc-800
+       transition-colors">
+                <span class="w-5 flex justify-center">{% include "icons/search.svg" %}</span>
+                <span class="ml-3">Global Search</span>
+            </a>
+        </div>
+    </nav>
+</aside>

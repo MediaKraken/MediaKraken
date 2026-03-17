@@ -19,7 +19,7 @@ metadata:
   name: mkstack-webapp
   namespace: mediakraken
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       io.kompose.service: mkstack-webapp-service
@@ -44,14 +44,24 @@ spec:
             - name: LC_ALL
               value: en_US.UTF-8
             - name: WAIT_HOSTS
-              value: mkdbinstance.stackgres:5432, mkstack-rabbitmq-production.rabbitmq-system:5672, mkstack-dragonfly.dragonfly-operator-system:6379
+              value: pgcluster-with-metrics-rw.cnpg-system:5432, mkstack-rabbitmq-production.rabbitmq-system:5672, mkstack-dragonfly.dragonflydb:6379
             - name: WAIT_TIMEOUT
               value: "180"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-password
+                  key: username
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: db-password
-                  key: db-password
+                  key: password
+            - name: DEBUG
+              valueFrom:
+                secretKeyRef:
+                  name: run-env-type
+                  key: debug
           image: mediakraken/mkwebaxum:dev
           imagePullPolicy: Always
           name: mkstack-webapp
@@ -61,8 +71,6 @@ spec:
           volumeMounts:
             - mountPath: /mediakraken/metadata
               name: mkstack-metadata-claim
-            - mountPath: /mediakraken/certs
-              name: mkstack-certs-claim
             - mountPath: /Comics
               name: mkstack-comics-claim
       restartPolicy: Always
@@ -71,9 +79,6 @@ spec:
         - name: mkstack-metadata-claim
           persistentVolumeClaim:
             claimName: mkstack-metadata-claim
-        - name: mkstack-certs-claim
-          persistentVolumeClaim:
-            claimName: mkstack-certs-claim
         - name: mkstack-comics-claim
           persistentVolumeClaim:
             claimName: mkstack-comics-claim

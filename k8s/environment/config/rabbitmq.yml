@@ -1,6 +1,8 @@
 apiVersion: rabbitmq.com/v1beta1
 kind: RabbitmqCluster
 metadata:
+  labels:
+    app: rabbitmq
   name: mkstack-rabbitmq-production
   namespace: rabbitmq-system
 spec:
@@ -21,7 +23,7 @@ spec:
       default_pass=guest
       #log.console.level = debug
   persistence:
-    storageClassName: nfs-csi
+    storageClassName: local-path
     storage: 25Gi
   override:
     statefulSet:
@@ -46,8 +48,6 @@ spec:
 #               - mkworker1
 #               - mkworker2
 #               - mkworker3
-#               - mkworker4
-#               - mkworker5
 #         topologyKey: kubernetes.io/hostname
 #   override:
 #     statefulSet:

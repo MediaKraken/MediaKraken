@@ -1,24 +1,68 @@
-<nav class="navbar navbar-dark navbar-expand align-items-start sidebar sidebar-dark accordion bg-gradient-primary p-0">
-    <div class="container-fluid d-flex flex-column p-0">
-        <a class="navbar-brand d-flex justify-content-center align-items-center sidebar-brand m-0" href="/user/home">
-            <div class="sidebar-brand-icon rotate-n-15"><i class="fas fa-pastafarianism"></i></div>&nbsp;Mediakraken
+<nav>
+  <div class="flex flex-col items-center w-40 h-full overflow-hidden text-gray-700 bg-gray-100 rounded">
+    <a class="flex items-center w-full px-3 mt-3" href="/user/home">
+          <i class="fas fa-pastafarianism w-6 h-6 text-current"></i>
+      <span class="ml-2 text-sm font-bold">MediaKraken</span>
+    </a>
+    <div class="w-full px-2">
+      <div class="flex flex-col items-center w-full mt-3 border-t border-gray-300">
+        <a class="flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/home">
+          <i class="fas fa-tachometer-alt w-6 h-6 text-current"></i>
+          <span class="ml-2 text-sm font-medium">Dasboard</span>
         </a>
-        <ul class="nav navbar-nav text-light" id="accordionSidebar">
-            <li class="nav-item" role="presentation">
-                <a class="nav-link" href="/admin/home"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a>
-                <a class="nav-link" href="/admin/backup/1"><i class="far fa-hdd"></i><span>Backup</span></a>
-                <a class="nav-link" href="/admin/cron"><i class="fas fa-toolbox"></i><span>Cron/Housekeeping</span></a>
-                <a class="nav-link" href="/admin/cloud"><i class="fas fa-cloud"></i><span>Cloud</span></a>
-                <a class="nav-link" href="/admin/database"><i class="fas fa-database"></i><span>DB Statistics</span></a>
-                <a class="nav-link" href="/admin/game_metadata"><i class="fas fa-gamepad"></i><span>Game Metadata</span></a>
-                <a class="nav-link" href="/admin/hardware"><i class="fas fa-microchip"></i><span>Hardware</span></a>
-                <a class="nav-link" href="/admin/library"><i class="fas fa-ticket-alt"></i><span>Library</span></a>
-                <a class="nav-link" href="/admin/report_known_media/1"><i class="fas fa-clipboard-list"></i><span>Report - Known Media</span></a>
-                <a class="nav-link" href="/admin/settings"><i class="fas fa-cogs"></i><span>Settings</span></a>
-                <a class="nav-link" href="/admin/server_links"><i class="fas fa-link"></i><span>Server Links</span></a>
-                <a class="nav-link" href="/admin/torrent"><i class="fas fa-bolt"></i><span>Torrent Management</span></a>
-                <a class="nav-link" href="/admin/user/1"><i class="fas fa-user-alt"></i><span>Users</span></a>
-            </li>
-        </ul>
+        <a class="flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/backup/1">
+          <i class="fas fa-hdd w-6 h-6 text-current"></i>
+          <span class="ml-2 text-sm font-medium">Backups</span>
+        </a>
+        <a class="flex items-center w-full h-12 px-3 mt-2 bg-gray-300 rounded" href="/admin/cron">
+          <i class="fas fa-toolbox w-6 h-6 text-current"></i>
+          <span class="ml-2 text-sm font-medium">Cron</span>
+        </a>
+        <a class="flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/cloud">
+          <i class="fas fa-cloud w-6 h-6 text-current"></i>
+          <span class="ml-2 text-sm font-medium">Cloud</span>
+        </a>
+      </div>
+      <div class="flex flex-col items-center w-full mt-2 border-t border-gray-300">
+        <a class="flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/database">
+          <i class="fas fa-database w-6 h-6 text-current"></i>
+          <span class="ml-2 text-sm font-medium">Database</span>
+        </a>
+        <a class="flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/game_metadata">
+          <i class="fas fa-gamepad w-6 h-6 text-current"></i>
+          <span class="ml-2 text-sm font-medium">Game Metadata</span>
+        </a>
+        <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/hardware">
+          <i class="fas fa-microchip w-6 h-6 text-current"></i>
+          <span class="ml-2 text-sm font-medium">Hardware</span>
+        </a>
+        <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/library">
+          <i class="fas fa-ticket-alt w-6 h-6 text-current"></i>
+          <span class="ml-2 text-sm font-medium">Library</span>
+        </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/logging">
+          <i class="fas fa-history w-6 h-6 text-current"></i>
+          <span class="ml-2 text-sm font-medium">Logging</span>
+        </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/report_known_media/1">
+          <i class="fas fa-clipboard-list w-6 h-6 text-current"></i>
+          <span class="ml-2 text-sm font-medium">Reporting</span>
+        </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/settings">
+          <i class="fas fa-cogs w-6 h-6 text-current"></i>
+          <span class="ml-2 text-sm font-medium">Settings</span>
+        </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/server_links">
+          <i class="fas fa-link w-6 h-6 text-current"></i>
+          <span class="ml-2 text-sm font-medium">Server Links</span>
+        </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/torrent">
+          <i class="fas fa-bolt w-6 h-6 text-current"></i>
+          <span class="ml-2 text-sm font-medium">Torrent Management</span>
+        </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/upc">
+          <i class="fas fa-barcode w-6 h-6 text-current"></i>
+          <span class="ml-2 text-sm font-medium">UPC Import</span>
+        </a>
+        <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/user/1">
+          <i class="fas fa-user-alt w-6 h-6 text-current"></i>
+          <span class="ml-2 text-sm font-medium">Users</span>
+        </a>
+      </div>
     </div>
+  </div>
 </nav>

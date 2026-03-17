@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
+use sqlx::FromRow;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaSportsList {
@@ -13,33 +13,34 @@ pub async fn mk_lib_database_media_sports_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMediaSportsList>, sqlx::Error> {
-    let select_query;
-    if search_value != "" {
-        select_query = sqlx::query("").bind(search_value).bind(offset).bind(limit);
+    if !search_value.is_empty() {
+        sqlx::query_as(r#""#)
+            .bind(search_value)
+            .bind(offset)
+            .bind(limit)
+            .fetch_all(sqlx_pool)
+            .await
     } else {
-        select_query = sqlx::query("").bind(offset).bind(limit);
+        sqlx::query_as(r#""#)
+            .bind(offset)
+            .bind(limit)
+            .fetch_all(sqlx_pool)
+            .await
     }
-    let table_rows: Vec<DBMediaSportsList> = select_query
-        .map(|row: PgRow| DBMediaSportsList {
-            mm_metadata_music_video_guid: row.get("mm_metadata_music_video_guid"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
 }
 
 pub async fn mk_lib_database_media_sports_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
-    if search_value != "" {
-        let row: (i64,) = sqlx::query_as("")
+    if !search_value.is_empty() {
+        let row: (i64,) = sqlx::query_as(r#""#)
             .bind(search_value)
             .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
     } else {
-        let row: (i64,) = sqlx::query_as("").fetch_one(sqlx_pool).await?;
+        let row: (i64,) = sqlx::query_as(r#""#).fetch_one(sqlx_pool).await?;
         Ok(row.0)
     }
 }

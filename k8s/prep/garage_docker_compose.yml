@@ -1,0 +1,26 @@
+services:
+  garage:
+    image: dxflrs/garage:v2.1.0
+    container_name: garage
+    volumes:
+      - /mnt/garage/garage.toml:/etc/garage.toml
+      - /mnt/garage/meta:/var/lib/garage/meta
+      - /mnt/garage/data:/var/lib/garage/data
+    restart: unless-stopped
+    ports:
+      - 3900:3900  # S3 API
+      - 3901:3901  # RPC
+      - 3902:3902  # S3 Web
+      - 3903:3903  # Admin API
+
+  webui:
+    image: khairul169/garage-webui:latest
+    container_name: garage-webui
+    restart: unless-stopped
+    volumes:
+      - /mnt/garage/garage.toml:/etc/garage.toml:ro
+    ports:
+      - 3909:3909
+    environment:
+      API_BASE_URL: "http://garage.mediakraken.media:3903"
+      S3_ENDPOINT_URL: "http://garage.mediakraken.media:3900"

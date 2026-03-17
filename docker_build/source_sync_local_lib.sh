@@ -15,6 +15,10 @@
 \rsync -a ../src/mk_lib_filler ../docker/core/mkdownload/. --exclude target
 \rsync -a alpine-minirootfs* ../docker/core/mkdownload/alpine-minirootfs-x86_64.tar.gz --exclude target
 
+# mkfanotify
+\rsync -a ../src/mk_lib_filler ../docker/core/mkfanotify/. --exclude target
+\rsync -a alpine-minirootfs* ../docker/core/mkfanotify/alpine-minirootfs-x86_64.tar.gz --exclude target
+
 # mkgamesdbnetfetchbulk
 \rsync -a ../src/mk_lib_filler ../docker/core/mkgamesdbnetfetchbulk/. --exclude target
 \rsync -a alpine-minirootfs* ../docker/core/mkgamesdbnetfetchbulk/alpine-minirootfs-x86_64.tar.gz --exclude target

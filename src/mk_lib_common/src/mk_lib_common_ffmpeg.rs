@@ -1,4 +1,6 @@
-use std::process::{Command, Stdio};
+use std::io::{Error, ErrorKind};
+use std::process::Stdio;
+use tokio::process::Command;
 
 pub async fn mk_common_ffmpeg_get_info(
     media_file: &str,
@@ -15,15 +17,17 @@ pub async fn mk_common_ffmpeg_get_info(
         ])
         .stdout(Stdio::piped())
         .output()
-        .unwrap();
-    let stdout: String = String::from_utf8(output.stdout).unwrap();
-    let json_output: serde_json::Value = serde_json::from_str(&stdout).unwrap();
-    Ok(json_output)
-}
+        .await?;
 
-// https://developer.roku.com/docs/developer-program/media-playback/trick-mode/bif-file-creation.md
-pub async fn mk_common_ffmpeg_roku_bif_create(
-    media_file: &str,
-) -> Result<(), std::io::Error> {
-    Ok(())
+    if !output.status.success() {
+        return Err(Error::new(
+            ErrorKind::Other,
+            format!(
+                "ffprobe failed for '{media_file}' with status {}",
+                output.status
+            ),
+        ));
+    }
+
+    serde_json::from_slice(&output.stdout).map_err(|err| Error::new(ErrorKind::InvalidData, err))
 }

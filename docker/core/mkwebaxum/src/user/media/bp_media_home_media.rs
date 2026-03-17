@@ -1,4 +1,6 @@
+use crate::mk_lib_database;
 use askama::Template;
+use axum::response::Redirect;
 use axum::{
     extract::Path,
     http::{Method, StatusCode},
@@ -6,12 +8,13 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
+use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
-use crate::mk_lib_database;
 use serde_json::json;
 use sqlx::postgres::PgPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_401.html")]
@@ -26,10 +29,11 @@ struct TemplateMediaHomeContext<'a> {
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
     page: &'a usize,
+    page_title: Option<String>,
 }
 
 pub async fn user_media_home_media(
-    Extension(sqlx_pool): Extension<PgPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
@@ -50,7 +54,7 @@ pub async fn user_media_home_media(
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 =
         mk_lib_database::database_media::mk_lib_database_media_home_media::mk_lib_database_media_home_media_count(
-            &sqlx_pool,
+           &state.sqlx_pool_ro,
             String::new(),
         )
         .await
@@ -59,12 +63,13 @@ pub async fn user_media_home_media(
             total_pages,
             page,
             "/user/media/home_media".to_string(),
+            None,
         )
         .await
         .unwrap();
         let home_list =
         mk_lib_database::database_media::mk_lib_database_media_home_media::mk_lib_database_media_home_media_read(
-            &sqlx_pool,
+           &state.sqlx_pool_ro,
             String::new(),
             db_offset,
             30,
@@ -81,6 +86,7 @@ pub async fn user_media_home_media(
             template_data_exists: &template_data_exists,
             pagination_bar: &pagination_html,
             page: &page_usize,
+            page_title: Some("MediaKraken Home Movies".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
@@ -91,10 +97,11 @@ pub async fn user_media_home_media(
 #[template(path = "bss_user/media/bss_user_media_home_movie_detail.html")]
 struct TemplateMediaHomeDetailContext {
     template_data: serde_json::Value,
+    page_title: Option<String>,
 }
 
 pub async fn user_media_home_media_detail(
-    Extension(sqlx_pool): Extension<PgPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
@@ -114,6 +121,7 @@ pub async fn user_media_home_media_detail(
     } else {
         let template = TemplateMediaHomeDetailContext {
             template_data: json!({}),
+            page_title: Some("MediaKraken Home Movie Detail".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

@@ -1,0 +1,26 @@
+{
+  "name": "mkwebaxum",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.18",
+    "autoprefixer": "^10.4.24",
+    "chokidar": "^5.0.0",
+    "daisyui": "^5.5.14",
+    "flyonui": "^2.4.1",
+    "glob": "^13.0.0",
+    "postcss": "^8.5.6",
+    "postcss-cli": "^11.0.1",
+    "tailwindcss": "^4.1.18"
+  },
+  "dependencies": {
+    "help": "^3.0.2"
+  }
+}

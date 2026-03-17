@@ -1,5 +1,5 @@
 # Download base image
-FROM th-registry-1.beaverbay.local:5000/mediakraken/mkbase_alpinepy3:dev
+FROM th-registry-1.mediakraken.media:5000/mediakraken/mkbase_alpinepy3:dev
 
 ARG ALPMIRROR
 

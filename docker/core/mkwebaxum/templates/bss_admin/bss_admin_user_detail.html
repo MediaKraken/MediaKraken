@@ -1,26 +1,58 @@
-{% block content %}
+<!DOCTYPE html>
+<html lang="en" x-data>
+{% include "bss_include_header.html" %}
+<body class="bg-gray-100 min-h-screen flex flex-col">
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>MediaKraken - User Detail</title>
-    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
-    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
-    <link rel="stylesheet" href="/static/css/styles.min.css">
-</head>
+    <!-- Header/Menu -->
+    <header class="bg-white shadow p-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold">MediaKraken</h1>
+        <!-- Include your menus here -->
+        <nav class="space-x-4">
+            <!-- Example menu links -->
+            <a href="#" class="text-blue-600 hover:underline">Dashboard</a>
+            <a href="#" class="text-blue-600 hover:underline">Users</a>
+        </nav>
+    </header>
 
-<body id="page-top">
-    <div id="wrapper">
-        {% include "bss_admin/bss_admin_include_menu.html" %}
-        {% include "bss_public/bss_public_footer.html" %}
-    </div>
-    <script src="/static/js/jquery.tmpl.min.js"></script>
-    <script src="/static/js/jquery.min.js"></script>
-    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/static/js/base_webapp_delete.js"></script>
-    <script src="/static/js/jquery-easing.min.js"></script>
-    <script src="/static/js/script.min.js"></script>
-</body>
-{% endblock %}
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto p-4">
+        <div class="bg-white shadow rounded-lg p-6">
+            <h2 class="text-lg font-semibold mb-4">User Details</h2>
+
+            <!-- Example User Detail Fields -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block font-medium text-gray-700">Username:</label>
+                    <p class="mt-1 text-gray-900">john_doe</p>
+                </div>
+                <div>
+                    <label class="block font-medium text-gray-700">Email:</label>
+                    <p class="mt-1 text-gray-900">john@example.com</p>
+                </div>
+                <div>
+                    <label class="block font-medium text-gray-700">Role:</label>
+                    <p class="mt-1 text-gray-900">Administrator</p>
+                </div>
+                <div>
+                    <label class="block font-medium text-gray-700">Status:</label>
+                    <p class="mt-1 text-green-600">Active</p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="mt-6 flex space-x-4">
+                <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    Edit User
+                </button>
+                <button class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                        @click="if(confirm('Are you sure you want to delete this user?')) alert('User deleted!')">
+                    Delete User
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+{% include "bss_public/bss_public_footer.html" %}
+ </body>
+</html>

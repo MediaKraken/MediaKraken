@@ -1,26 +1,42 @@
+use bytes::Bytes;
+use futures_util::StreamExt;
+use reqwest::Client;
 use reqwest::header::CONTENT_TYPE;
 use reqwest::header::USER_AGENT;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
-use reqwest::Client;
 use reqwest_middleware::ClientBuilder;
 use reqwest_retry::{RetryTransientMiddleware, policies::ExponentialBackoff};
 use std::collections::HashMap;
-use std::io::prelude::*;
-use std::io::Cursor;
-use std::io::Write;
-use std::path::PathBuf;
 use std::str;
-use tokio::fs::File;
-use tokio::io::{self, AsyncWriteExt};
+use std::sync::LazyLock;
+use tokio::io::AsyncWriteExt;
 use tokio::time::Duration;
+
+static SHARED_HTTP_CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
+
+pub async fn is_url_available(url: &str) -> bool {
+    // Try HEAD first (no body download)
+    if let Ok(resp) = SHARED_HTTP_CLIENT.head(url).send().await {
+        return resp.status().is_success();
+    }
+    // Fallback to GET (still async, body not read)
+    SHARED_HTTP_CLIENT
+        .get(url)
+        .send()
+        .await
+        .map(|resp| resp.status().is_success())
+        .unwrap_or(false)
+}
 
 pub async fn custom_headers(map: &HashMap<String, String>) -> HeaderMap {
     let mut headers = HeaderMap::new();
     for (key, value) in map.iter() {
-        headers.insert(
-            HeaderName::from_bytes(key.as_bytes()).unwrap(),
-            HeaderValue::from_bytes(value.as_bytes()).unwrap(),
-        );
+        if let (Ok(header_name), Ok(header_value)) = (
+            HeaderName::from_bytes(key.as_bytes()),
+            HeaderValue::from_bytes(value.as_bytes()),
+        ) {
+            headers.insert(header_name, header_value);
+        }
     }
     headers
 }
@@ -64,9 +80,23 @@ pub async fn mk_data_from_url_to_json(
 }
 
 pub async fn mk_data_from_url(url: String) -> Result<String, Box<dyn std::error::Error>> {
-    let response = reqwest::get(url).await?;
+    let response = SHARED_HTTP_CLIENT.get(url).send().await?;
     let content = response.bytes().await?;
-    Ok(str::from_utf8(&content).unwrap().to_string())
+    Ok(str::from_utf8(&content)?.to_string())
+}
+
+pub async fn mk_network_download_file_to_bytes(
+    url: String,
+) -> Result<Bytes, Box<dyn std::error::Error>> {
+    let response = SHARED_HTTP_CLIENT.get(url).send().await?;
+    let body_bytes = response.bytes().await?;
+    Ok(body_bytes)
+}
+
+pub async fn mk_network_download_file_to_vec(url: String) -> Result<Vec<u8>, reqwest::Error> {
+    let response = SHARED_HTTP_CLIENT.get(url).send().await?;
+    let bytes = response.bytes().await?.to_vec();
+    Ok(bytes)
 }
 
 pub async fn mk_download_file_from_url(
@@ -74,73 +104,64 @@ pub async fn mk_download_file_from_url(
     file_name: &String,
 ) -> Result<(), Box<dyn std::error::Error>> {
     println!("url: {}", url);
-    let response = reqwest::get(url).await?;
-    let mut file = std::fs::File::create(file_name)?;
-    let mut content = Cursor::new(response.bytes().await?);
-    std::io::copy(&mut content, &mut file)?;
+    let response = SHARED_HTTP_CLIENT.get(url).send().await?;
+    let mut file = tokio::fs::File::create(file_name).await?;
+    file.write_all(&response.bytes().await?).await?;
+    file.flush().await?;
+    Ok(())
+}
+
+pub async fn mk_download_file_from_url_stream(
+    url: String,
+    file_name: &str, // Changed to &str for better ergonomics
+) -> Result<(), Box<dyn std::error::Error>> {
+    println!("Downloading from: {}", url);
+
+    let response = SHARED_HTTP_CLIENT.get(url).send().await?;
+    let mut file = tokio::fs::File::create(file_name).await?;
+
+    // Get the body as a stream of chunks
+    let mut byte_stream = response.bytes_stream();
+
+    while let Some(chunk) = byte_stream.next().await {
+        let data = chunk?;
+        file.write_all(&data).await?;
+    }
+
+    file.flush().await?;
+
+    println!("Download complete: {}", file_name);
     Ok(())
 }
 
 pub async fn mk_download_file_from_url_tokio(
     url: String,
-    file_name: &String,
+    file_name: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let client = Client::builder()
-        .user_agent("MediaKraken/0.0.1")
-        .build()
-        .expect("Could not build client");
-    // get response
-    let res = if let Ok(mut res) = client.get(&url).send().await {
-        // Try to open file
-        if let Ok(file) = tokio::fs::File::create(&file_name).await {
-            let mut writer = tokio::io::BufWriter::new(file);
-            // Write all bytes to file
-            loop {
-                match res.chunk().await {
-                    Ok(Some(bytes)) => {
-                        writer.write_all(&bytes).await;
-                    }
-                    Ok(None) => {
-                        writer.flush().await;
-                        break;
-                    }
-                    Err(e) => {
-                        #[cfg(debug_assertions)]
-                        {
-                            // mk_lib_logging::mk_logging_post_elk(
-                            //     std::module_path!(),
-                            //     json!({ format!("Could not get bytes from data: {:?}", &e ): url }),
-                            // )
-                            // .await
-                            // .unwrap();
-                        }
-                    }
-                }
-            }
-        } else {
-            #[cfg(debug_assertions)]
-            {
-                // mk_lib_logging::mk_logging_post_elk(
-                //     std::module_path!(),
-                //     json!({ format!("Could not open file for writing: {:?}", &file_name ): url }),
-                // )
-                // .await
-                // .unwrap();
-            }
-        }
-    } else {
-        if let Err(e) = client.get(&url).send().await {
-            #[cfg(debug_assertions)]
-            {
-                // mk_lib_logging::mk_logging_post_elk(
-                //     std::module_path!(),
-                //     json!({ format!("File error for {:?} with error {:#?}", &file_name, &e ): url }),
-                // )
-                // .await
-                // .unwrap();
-            }
-        }
-    };
+    let client = Client::builder().user_agent("MediaKraken/0.0.1").build()?;
+
+    // 1. Handle Request Errors
+    let mut res = client.get(&url).send().await.map_err(|e| {
+        // Log here if needed: format!("Network error: {}", e)
+        e
+    })?;
+
+    // 2. Handle File Creation Errors
+    let file = tokio::fs::File::create(file_name).await.map_err(|e| {
+        // Log here: format!("File system error: {}", e)
+        e
+    })?;
+
+    let mut writer = tokio::io::BufWriter::new(file);
+
+    // 3. Stream and Write
+    while let Some(chunk) = res.chunk().await? {
+        writer.write_all(&chunk).await?;
+    }
+
+    // Ensure all buffers are pushed to disk
+    writer.flush().await?;
+
     Ok(())
 }
 
@@ -152,7 +173,7 @@ pub async fn mk_network_service_available(host_dns: &str, host_port: &str, wait_
     } else if std::path::Path::new("/mediakraken/wait-for-it-ash.sh").exists() {
         command_string = "/mediakraken/wait-for-it-ash.sh";
     }
-    std::process::Command::new(command_string)
+    if let Err(error) = std::process::Command::new(command_string)
         .arg("-h")
         .arg(host_dns)
         .arg("-p")
@@ -160,7 +181,9 @@ pub async fn mk_network_service_available(host_dns: &str, host_port: &str, wait_
         .arg("-t")
         .arg(wait_seconds)
         .spawn()
-        .unwrap();
+    {
+        panic!("failed to launch wait script {command_string}: {error}");
+    }
 }
 
 // cargo test -- --show-output

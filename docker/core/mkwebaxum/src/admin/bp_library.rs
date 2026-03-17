@@ -1,3 +1,4 @@
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -6,12 +7,13 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
-use crate::mk_lib_database;
+use axum_session_sqlx::SessionPgPool;
 use mk_lib_rabbitmq;
 use serde_json::{json, Value};
 use sqlx::postgres::PgPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -25,10 +27,11 @@ struct TemplateAdminLibraryContext<'a> {
     template_data_share_user:
         &'a Vec<mk_lib_database::mk_lib_database_network_share::DBShareAuthUserList>,
     template_data_exists: &'a bool,
+    page_title: Option<String>,
 }
 
 pub async fn admin_library(
-    Extension(sqlx_pool): Extension<PgPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -47,19 +50,19 @@ pub async fn admin_library(
     } else {
         let share_list =
             mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_read(
-                &sqlx_pool,
+               &state.sqlx_pool_ro,
             )
             .await
             .unwrap();
         let library_list =
             mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_audit_read(
-                &sqlx_pool,
+               &state.sqlx_pool_ro,
             )
             .await
             .unwrap();
         let share_user_list =
         mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_user_read(
-            &sqlx_pool,
+           &state.sqlx_pool_ro,
         )
         .await
         .unwrap();
@@ -72,6 +75,7 @@ pub async fn admin_library(
             template_data_libary: &library_list,
             template_data_share_user: &share_user_list,
             template_data_exists: &template_data_exists,
+            page_title: Some("MediaKraken Admin Library".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
@@ -79,7 +83,6 @@ pub async fn admin_library(
 }
 
 pub async fn admin_library_media_scan(
-    Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -113,7 +116,6 @@ pub async fn admin_library_media_scan(
 }
 
 pub async fn admin_library_share_scan(
-    Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {

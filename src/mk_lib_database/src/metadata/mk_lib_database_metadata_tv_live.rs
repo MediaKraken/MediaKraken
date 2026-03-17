@@ -1,7 +1,7 @@
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
+use sqlx::FromRow;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaTVLiveList {
@@ -15,10 +15,7 @@ pub async fn mk_lib_database_meta_tv_live_read(
     broadcast_time: DateTime<Utc>,
 ) -> Result<Vec<PgRow>, sqlx::Error> {
     let rows: Vec<PgRow> = sqlx::query(
-        "select mm_tv_station_name, mm_tv_station_channel, \
-        mm_tv_schedule_json from mm_tv_stations, mm_tv_schedule \
-        where mm_tv_schedule_station_id = mm_tv_station_id and mm_tv_schedule_date = $1 \
-        order by LOWER(mm_tv_station_name), mm_tv_schedule_json->'airDateTime'",
+        r#"select mm_tv_station_name, mm_tv_station_channel, mm_tv_schedule_json from mm_tv_stations, mm_tv_schedule where mm_tv_schedule_station_id = mm_tv_station_id and mm_tv_schedule_date = $1 order by LOWER(mm_tv_station_name), mm_tv_schedule_json->'airDateTime'"#,
     )
     .bind(broadcast_time)
     .fetch_all(sqlx_pool)
@@ -37,20 +34,11 @@ pub struct MetaTVStationList {
 pub async fn mk_lib_database_meta_tv_live_station_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<MetaTVStationList>, sqlx::Error> {
-    let select_query = sqlx::query(
-        "select mm_tv_stations_id, mm_tv_station_name, \
-        mm_tv_station_id, mm_tv_station_channel \
-        from mm_tv_stations",
-    );
-    let table_rows: Vec<MetaTVStationList> = select_query
-        .map(|row: PgRow| MetaTVStationList {
-            mm_tv_stations_id: row.get("mm_tv_stations_id"),
-            mm_tv_station_name: row.get("mm_tv_station_name"),
-            mm_tv_station_id: row.get("mm_tv_station_id"),
-            mm_tv_station_channel: row.get("mm_tv_station_channel"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    let table_rows: Vec<MetaTVStationList> = sqlx::query_as(
+        r#"select mm_tv_stations_id, mm_tv_station_name, mm_tv_station_id, mm_tv_station_channel from mm_tv_stations"#,
+    )
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 
@@ -60,9 +48,7 @@ pub async fn mk_lib_database_meta_tv_station_exists(
     channel_id: String,
 ) -> Result<i32, sqlx::Error> {
     let row: (i32,) = sqlx::query_as(
-        "select exists(select 1 from mm_tv_stations \
-        where mm_tv_station_id = $1 \
-        and mm_tv_station_channel = $2 limit 1) limit 1",
+        r#"select exists(select 1 from mm_tv_stations where mm_tv_station_id = $1 and mm_tv_station_channel = $2 limit 1) limit 1"#,
     )
     .bind(station_id)
     .bind(channel_id)

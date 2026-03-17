@@ -1,0 +1,19 @@
+---
+- name : Setup local ai on cluster
+  hosts: mkcontrol1
+  tasks:
+    - name: copying file
+      copy:
+        src: ../config/local_ai.yml
+        dest: ~/local_ai.yml
+
+    - name: Setup cluster of local_ai
+      shell: kubectl apply -f ~/local_ai.yml
+
+    - name: copying file
+      copy:
+        src: ../config/ingress_local_ai.yml
+        dest: ~/ingress_local_ai.yml
+
+    - name: Setup cluster of local_ai ingress
+      shell: kubectl apply -f ~/ingress_local_ai.yml

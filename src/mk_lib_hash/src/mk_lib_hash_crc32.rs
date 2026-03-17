@@ -1,13 +1,10 @@
+use crate::hash_file_reader::read_file_chunks;
 use crc32fast::Hasher;
-use mk_lib_file::mk_lib_file;
 use std::error::Error;
 
 pub async fn mk_file_hash_crc32(file_to_read: &str) -> Result<String, Box<dyn Error>> {
     let mut hasher = Hasher::new();
-    let mut file_data = mk_lib_file::mk_read_file_data_u8(&file_to_read)
-        .await
-        .unwrap();
-    hasher.update(&mut file_data);
+    read_file_chunks(file_to_read, |chunk| hasher.update(chunk)).await?;
     let checksum = hasher.finalize();
     Ok(format!("{:x}", checksum))
 }

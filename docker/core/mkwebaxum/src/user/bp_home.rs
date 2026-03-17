@@ -1,3 +1,4 @@
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
     http::{Method, Request, StatusCode},
@@ -5,10 +6,11 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
-use crate::mk_lib_database;
+use axum_session_sqlx::SessionPgPool;
 use sqlx::postgres::PgPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_401.html")]
@@ -19,16 +21,15 @@ struct TemplateError401Context {}
 struct TemplateUserHomeContext<'a> {
     template_data_new_media: &'a bool,
     template_data_user_media_queue: &'a bool,
+    page_title: Option<String>,
 }
 
 pub async fn user_home(
-    Extension(sqlx_pool): Extension<PgPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
-    // if !auth.is_authenticated() {   Can I simply do this?   As a signed in user.....has access unless guest
     let current_user = auth.current_user.clone().unwrap_or_default();
-    println!("Current_user: {:?}", current_user);
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
         [Method::GET],
         false,
@@ -43,7 +44,8 @@ pub async fn user_home(
     } else {
         let mut new_media = false;
         if mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_new_count(
-            &sqlx_pool, 7,
+            &state.sqlx_pool_ro,
+            7,
         )
         .await
         .unwrap()
@@ -54,6 +56,7 @@ pub async fn user_home(
         let template = TemplateUserHomeContext {
             template_data_new_media: &new_media,
             template_data_user_media_queue: &true,
+            page_title: Some("MediaKraken".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

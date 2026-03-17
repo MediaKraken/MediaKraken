@@ -37,6 +37,6 @@ pub async fn provider_opensubtitles_create_hash(
         let hash_string = format!("{:01$x}", hash_val, 16);
         Ok(hash_string)
     } else {
-        Ok("".to_string())
+        Ok(String::new())
     }
 }

@@ -40,6 +40,9 @@ DOCKER_IMAGES = {
     # download files/etc trailers/etc from ampq records
     'mkdownload': ('mkdownload', 'core'),
 
+    # file change nofications to amqp
+    'mkfanotify': ('mkfanotify', 'core'),
+
     # thegamesdb bulk data fetch
     'mkgamesdbnetfetchbulk': ('mkgamesdbnetfetchbulk', 'core'),
 
@@ -207,6 +210,8 @@ DOCKER_IMAGES = {
 
     'mkelk': ('mkelk', 'test'),
     'mkjenkins': ('mkjenkins', 'test'),
+    'mkpgbench': ('mkpgbench', 'test'),
+    'mkora2pg': ('mkora2pg', 'test'),
     'mkselenium': ('mkselenium', 'test'),
     'mksonatype': ('mksonatype', 'test'),
 }

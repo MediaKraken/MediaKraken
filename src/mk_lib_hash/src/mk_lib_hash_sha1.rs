@@ -1,10 +1,10 @@
+use crate::hash_file_reader::read_file_chunks;
 use sha1::{Digest, Sha1};
-use std::{fs, io};
+use std::io;
 
 pub async fn mk_file_hash_sha1(file_to_read: &str) -> io::Result<String> {
-    let mut file = fs::File::open(&file_to_read)?;
     let mut hasher = Sha1::new();
-    let _n = io::copy(&mut file, &mut hasher)?;
+    read_file_chunks(file_to_read, |chunk| hasher.update(chunk)).await?;
     let hash = hasher.finalize();
     Ok(format!("{:x}", hash))
 }

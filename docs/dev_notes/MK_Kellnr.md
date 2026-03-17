@@ -1,7 +1,12 @@
-cargo publish --registry kellnr -p mk_lib_hardware --allow-dirty --token=3dPvCZSd1V8xKpiCGqpXCBbkj4Jtyyqc
+cargo publish --registry kellnr -p ed2k --allow-dirty --token=Gandua8sU346qZkR41zFRMQiIyLvkFZ2
+
+cargo publish --registry kellnr -p weectrl --allow-dirty --token=Gandua8sU346qZkR41zFRMQiIyLvkFZ2
+
+# will ask for the token (generated in kellnr ui) - from src directory so .cargo exists
+cargo login --registry kellnr
 
 # web ui
-http://mkkellnr:8000/
+http://mkdevkellnrapi.mediakraken.media:8000/
 
 Order to Publish:  * has no deps
 mk_lib_common *
@@ -10,6 +15,9 @@ mk_lib_filler *
 mk_lib_image *
 mk_lib_logging *
 mk_lib_rabbitmq *
+ed2k-rs *
+weectrl *
+ssdp *
 
 mk_lib_database
     mk_lib_common
@@ -17,10 +25,13 @@ mk_lib_file
     mk_lib_database
 mk_lib_hash
     mk_lib_file
+    ed2k-rs
 mk_lib_network
     mk_lib_file
 mk_lib_hardware
     mk_lib_network
+    ssdp-rs
+    weectrl
 mk_lib_metadata
     mk_lib_common
     mk_lib_database

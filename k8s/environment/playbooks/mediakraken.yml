@@ -4,6 +4,12 @@
     - name: Deploy mediakraken pods
       shell: helm install --create-namespace --namespace mediakraken mkstack-mediakraken https://github.com/MediaKraken/MediaKraken/raw/dev/k8s/mkstack-mediakraken-0.1.6.tgz
 
+    - name: Setup creds for mediakraken
+      shell: kubectl create secret generic aws-route53-creds --from-file=/root/password.txt -n mediakraken
+
+    - name: Setup creds for mediakraken for harbor access
+      shell: kubectl create secret docker-registry dockerregistry-secret --docker-server=k8sharbor.mediakraken.media --docker-username=metaman --docker-password=metaman --docker-email=spootdev@gmail.com -n mediakraken
+      
 # helm install --dry-run --debug --create-namespace --namespace mediakraken mkstack-mediakraken https://github.com/MediaKraken/MediaKraken/raw/dev/k8s/mkstack-mediakraken-0.1.2.tgz
 
 # helm uninstall mkstack-mediakraken --namespace mediakraken

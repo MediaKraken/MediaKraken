@@ -1,3 +1,4 @@
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
     extract::Path,
@@ -7,9 +8,8 @@ use axum::{
     Extension, Router,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
-use crate::mk_lib_database;
+use axum_session_sqlx::SessionPgPool;
 use serde_json::json;
 use sqlx::postgres::PgPool;
 use stdext::function_name;
@@ -20,10 +20,10 @@ struct TemplateError401Context {}
 
 #[derive(Template)]
 #[template(path = "bss_user/playback/bss_user_playback_video.html")]
-struct UserPlaybackVideoTemplate;
-
+struct UserPlaybackVideoTemplate {
+    page_title: Option<String>,
+}
 pub async fn user_playback_video(
-    Extension(sqlx_pool): Extension<PgPool>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -40,7 +40,9 @@ pub async fn user_playback_video(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let template = UserPlaybackVideoTemplate {};
+        let template = UserPlaybackVideoTemplate {
+            page_title: Some("MediaKraken Video Playback".to_string()),
+        };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }

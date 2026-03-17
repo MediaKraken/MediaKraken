@@ -1,57 +1,76 @@
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>MediaKraken</title>
-    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
-    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
-    <link rel="stylesheet" href="/static/css/styles.min.css">
-    <link rel="stylesheet" href="/static/css/base_webapp_layout.css" media="all" type="text/css" />
-</head>
+{% include "bss_include_header.html" %}
 
-<body>
-    {% include "bss_user/bss_user_include_menu.html" %}
-    <div>
-        <div>
-            {% if template_data_exists %}
-            {% if pagination_bar != "" %}
-            {{ pagination_bar|safe }}
-            {% endif %}
-            <div id="the-tv-node">
-                {% for row_data in template_data %}
-                <div class="main_photo">
-                    <div class="media_context_right" data-id={{row_data.mm_metadata_tvshow_guid}}>
-                        <a href="/user/metadata/tv_detail/{{row_data.mm_metadata_tvshow_guid}}">
-                            {% if row_data.image_json == "" %}
-                            <img src="/static/image/missing_icon.jpg" loading="lazy" height="300" width="200">
-                            {% else %}
-                            <img src="/metadata/{{row_data.image_json|unquote_json}}" loading="lazy" height="300" width="200">
-                            {% endif %}
-                        </a>
-                        {#{% if row_data.mm_metadata_tvshow_name != None %}
-                        <div class="description">
-                            <p class="description_content_left">{{row_data.mm_metadata_tvshow_name}}</p>
-                        </div>
-                        {% endif %}#}
-                    </div>
-                </div>
-                {% endfor %}
+<body class="min-h-screen flex flex-col bg-gray-100 text-gray-900">
+  <!-- Top navbar -->
+  {% include "bss_user/bss_user_include_menu.html" %}
+  <!-- Below top nav -->
+  <div class="flex flex-1">
+    <!-- Left sidebar -->
+    {% include "partials/sidebar_user.html" %}
+    <!-- Main content -->
+    <main class="flex-1 p-6 bg-gray-50 overflow-y-auto">
+      <div>
+        {% if template_data_exists %}
+
+        <!-- Pagination top -->
+        {% if pagination_bar != "" %}
+        {{ pagination_bar|safe }}
+        {% endif %}
+
+        <!-- TV metadata grid -->
+        <div id="the-tv-metadata-node" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+
+          {% for row_data in template_data %}
+          <div class="bg-white rounded-lg shadow hover:shadow-lg overflow-hidden relative">
+
+            <a href="/user/metadata/tv_detail/{{row_data.mm_metadata_tvshow_guid}}" class="block">
+              {% if row_data.image_json == "" %}
+              <img src="/static/image/missing_icon.jpg" alt="Missing Image" class="w-full h-75 object-cover"
+                loading="lazy" decoding="async">
+              {% else %}
+              <img src="/metadata/{{row_data.image_json|unquote_json}}" alt="{{row_data.mm_metadata_tvshow_name}}"
+                class="w-full h-75 object-cover" loading="lazy" decoding="async">
+              {% endif %}
+            </a>
+
+            {% if row_data.mm_metadata_tvshow_name != "" %}
+            <div class="p-2 text-left bg-gray-50">
+              <p class="text-sm font-medium text-gray-800 truncate">
+                {{ row_data.mm_metadata_tvshow_name }}
+              </p>
             </div>
-            {% if pagination_bar != "" %}
-            {{ pagination_bar|safe }}
             {% endif %}
-            {% else %}
-            <p id="general_text">No TV show metadata found.</p>
+
+            {% if let Some(alt_name) = row_data.mm_metadata_tvshow_name_alt %}
+              {% if alt_name != &row_data.mm_metadata_tvshow_name %}
+                <div class="p-2 text-left bg-gray-50">
+                  <p>
+                    <span class="font-medium">Also Known As:</span>
+                    {{ alt_name }}
+                  </p>
+                </div>
+              {% endif %}
             {% endif %}
+          </div>
+          {% endfor %}
+
         </div>
-    </div>
-    {% include "bss_public/bss_public_footer.html" %}
-    <script src="/static/js/jquery.min.js"></script>
-    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/static/js/jquery-easing.min.js"></script>
-    <script src="/static/js/script.min.js"></script>
+
+        <!-- Pagination bottom -->
+        {% if pagination_bar != "" %}
+        {{ pagination_bar|safe }}
+        {% endif %}
+
+        {% else %}
+        <p id="general_text" class="text-center text-gray-500">No TV show metadata found.</p>
+        {% endif %}
+      </div>
+    </main>
+  </div>
+  {% include "bss_public/bss_public_footer.html" %}
 </body>
-{% endblock %}
+
+</html>

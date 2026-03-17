@@ -8,8 +8,8 @@ spec:
     - ReadWriteMany
   resources:
     requests:
-      storage: 250Gi
-  storageClassName: nfs-csi
+      storage: 500Gi
+  storageClassName: longhorn
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -42,14 +42,24 @@ spec:
             - /wait && /mkmetadata
           env:
             - name: WAIT_HOSTS
-              value: mkdbinstance.stackgres:5432, mkstack-rabbitmq-production.rabbitmq-system:5672
+              value: pgcluster-with-metrics-rw.cnpg-system:5432, mkstack-rabbitmq-production.rabbitmq-system:5672
             - name: WAIT_TIMEOUT
               value: "180"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-password
+                  key: username
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: db-password
-                  key: db-password
+                  key: password
+            - name: DEBUG
+              valueFrom:
+                secretKeyRef:
+                  name: run-env-type
+                  key: debug
           image: mediakraken/mkmetadata:dev
           imagePullPolicy: Always
           name: mkstack-metadata

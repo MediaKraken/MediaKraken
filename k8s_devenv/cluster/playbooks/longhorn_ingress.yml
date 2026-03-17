@@ -1,0 +1,11 @@
+---
+- name : Setup longhorn ingress on cluster
+  hosts: mkcontroldev1
+  tasks:
+    - name: copying file
+      copy:
+        src: ../config/longhorn-ingress.yml
+        dest: ~/longhorn-ingress.yml
+
+    - name: Setup ingress for longhorn
+      shell: kubectl apply -f ~/longhorn-ingress.yml

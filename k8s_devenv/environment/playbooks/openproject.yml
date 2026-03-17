@@ -1,0 +1,11 @@
+---
+- name : Setup openproject on cluster
+  hosts: mkcontroldev1
+  tasks:
+    - name: copying file
+      copy:
+        src: ../config/openproject.yml
+        dest: ~/openproject.yml
+
+    - name: Setup openproject
+      shell: kubectl apply -f ~/openproject.yml

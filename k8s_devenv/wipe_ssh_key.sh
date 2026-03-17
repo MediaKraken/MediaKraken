@@ -1,0 +1,6 @@
+ssh-keygen -f "/root/.ssh/known_hosts" -R "192.168.100.50"
+ssh-keygen -f "/root/.ssh/known_hosts" -R "192.168.100.51"
+ssh-keygen -f "/root/.ssh/known_hosts" -R "192.168.100.52"
+ssh-keygen -f "/root/.ssh/known_hosts" -R "192.168.100.60"
+ssh-keygen -f "/root/.ssh/known_hosts" -R "192.168.100.61"
+ssh-keygen -f "/root/.ssh/known_hosts" -R "192.168.100.62"

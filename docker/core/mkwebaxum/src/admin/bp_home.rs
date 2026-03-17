@@ -7,14 +7,16 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
+use axum_session_sqlx::SessionPgPool;
 use mk_lib_common;
 use mk_lib_network;
 use num_format::{SystemLocale, ToFormattedString};
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPool;
 use sqlx::Row;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -52,11 +54,13 @@ struct TemplateHomeContext<'a> {
     template_server_streams: &'a Vec<TemplateHomeStreamListContext>,
     template_server_users: &'a Vec<mk_lib_database::mk_lib_database_user::DBUserList>,
     template_data_scan_info: &'a Vec<TemplateHomeScanListContext>,
+        page_title: Option<String>,
+
 }
 
 pub async fn admin_home(
-    Extension(sqlx_pool): Extension<PgPool>,
-    method: Method,
+   State(state): State<AppState>,
+   method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let current_user = auth.current_user.clone().unwrap_or_default();
@@ -74,17 +78,17 @@ pub async fn admin_home(
     } else {
         let notification_list =
             mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_read(
-                &sqlx_pool, 0, 9999
+                &state.sqlx_pool_ro, 0, 9999,
             )
             .await
             .unwrap();
         let user_list =
-            mk_lib_database::mk_lib_database_user::mk_lib_database_user_read(&sqlx_pool, 0, 9999)
+            mk_lib_database::mk_lib_database_user::mk_lib_database_user_read(&state.sqlx_pool_ro, 0, 9999)
                 .await
                 .unwrap();
         let option_status_row =
             mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_status_read(
-                &sqlx_pool,
+               &state.sqlx_pool_ro,
             )
             .await
             .unwrap();
@@ -101,40 +105,43 @@ pub async fn admin_home(
         let mut server_scans = Vec::new();
         let locale = SystemLocale::default().unwrap();
         let template = TemplateHomeContext {
-        template_data_server_info_server_name: &option_json["MediaKrakenServer"]["Server Name"],
-        // following boottime only compiles #[cfg(not(windows))] in this case is fine
-        template_data_server_uptime: &format!(
-            "{:02}:{:02}:{:02}",
-            boot_duration.num_hours(),
-            boot_duration.num_minutes() % 60,
-            boot_duration.num_seconds() % 60,
-        ),
-        template_data_server_host_ip: &"255.255.255.255".to_string(),
-        template_data_server_info_server_ip_external: &external_ip,
-        template_data_server_info_server_version: &mk_lib_common::mk_lib_common_version::WEB_VERSION.to_string(),
-        template_data_count_media_files:
-            &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_known_count(&sqlx_pool)
+            template_data_server_info_server_name: &option_json["MediaKrakenServer"]["Server Name"],
+            // following boottime only compiles #[cfg(not(windows))] in this case is fine
+            template_data_server_uptime: &format!(
+                "{:02}:{:02}:{:02}",
+                boot_duration.num_hours(),
+                boot_duration.num_minutes() % 60,
+                boot_duration.num_seconds() % 60,
+            ),
+            template_data_server_host_ip: &"255.255.255.255".to_string(),
+            template_data_server_info_server_ip_external: &external_ip,
+            template_data_server_info_server_version: &mk_lib_common::mk_lib_common_version::WEB_VERSION.to_string(),
+            template_data_count_media_files:
+                &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_known_count(&state.sqlx_pool_ro)
+                    .await
+                    .unwrap()
+                    .to_formatted_string(&locale),
+            template_data_count_matched_media:
+                &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_matched_count(&state.sqlx_pool_ro)
+                    .await
+                    .unwrap()
+                    .to_formatted_string(&locale),
+            template_data_count_meta_fetch:
+                &mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(
+                   &state.sqlx_pool_ro,
+                )
                 .await
                 .unwrap()
                 .to_formatted_string(&locale),
-        template_data_count_matched_media:
-            &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_matched_count(&sqlx_pool)
-                .await
-                .unwrap()
-                .to_formatted_string(&locale),
-        template_data_count_meta_fetch:
-            &mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(
-                &sqlx_pool,
-            )
-            .await
-            .unwrap()
-            .to_formatted_string(&locale),
-        template_data_count_streamed_media: &"0".to_string(),
-        template_server_streams: &server_streams,
-        template_server_users: &user_list,
-        template_server_notifications: &notification_list,
-        template_data_scan_info: &server_scans,
-    };
+            template_data_count_streamed_media: &"0".to_string(),
+            template_server_notifications: &notification_list,
+            template_server_streams: &server_streams,
+            template_server_users: &user_list,
+            template_data_scan_info: &server_scans,
+                        page_title: Some("MediaKraken Admin".to_string()),
+
+        };
+        println!("templates {}", template);
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }

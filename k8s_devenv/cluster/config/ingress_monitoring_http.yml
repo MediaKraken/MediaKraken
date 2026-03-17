@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: monitoring-http-ingress-local
+  name: cert-monitoring-http-ingress-local
   namespace: monitoring
   annotations:
     # restrict to private network scopes
@@ -10,10 +10,16 @@ metadata:
     "nginx.ingress.kubernetes.io/force-ssl-redirect": "true"
     "nginx.ingress.kubernetes.io/ssl-passthrough": "true"
     "nginx.ingress.kubernetes.io/backend-protocol": "HTTP"
+    cert-manager.io/cluster-issuer: "letsencrypt-cluster"
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+      - mkdevgrafana.mediakraken.media
+      - mkdevprometheus.mediakraken.media
+      secretName: letsencrypt-monitoring-priv
   rules:
-  - host: mkdevgrafana.beaverbay.local
+  - host: mkdevgrafana.mediakraken.media
     http:
       paths:
       - path: /
@@ -23,7 +29,7 @@ spec:
             name: monitoring-grafana
             port:
               number: 80
-  - host: mkdevprometheus.beaverbay.local
+  - host: mkdevprometheus.mediakraken.media
     http:
       paths:
       - path: /

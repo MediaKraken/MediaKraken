@@ -1,0 +1,3 @@
+[aws]
+vm_aws_access_key=fakeaccesskey
+vm_aws_secret_access_key=fakesecretaccesskey

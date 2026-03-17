@@ -185,7 +185,7 @@ async fn main() {
     // check for and create ssl certs if needed
     if Path::new("/mediakraken/certs/cacert.pem").exists() == false {
         // generate certs/keys
-        let subject_alt_names = vec!["www.mediakraken.org".to_string(), "localhost".to_string()];
+        let subject_alt_names = vec!["www.mediakraken.media".to_string(), "localhost".to_string()];
         let cert = generate_simple_self_signed(subject_alt_names).unwrap();
         let mut file_pem = File::create("/mediakraken/certs/cacert.pem").unwrap();
         file_pem

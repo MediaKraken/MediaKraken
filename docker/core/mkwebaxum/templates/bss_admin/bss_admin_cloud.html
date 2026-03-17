@@ -1,71 +1,113 @@
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+{% include "bss_include_header.html" %}
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>MediaKraken - Cloud</title>
-    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i">
-    <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
-    <link rel="stylesheet" href="/static/css/styles.min.css">
-</head>
+<body class="bg-gray-100 text-gray-900">
 
-<body id="page-top">
-    <div id="wrapper">
-        {% include "bss_admin/bss_admin_include_menu.html" %}
-        <div class="d-flex flex-column" id="content-wrapper">
-            <div id="content">
-                <div class="container-fluid">
-                    <fieldset>
-                        <legend><strong>Cloud storage configuration</strong></legend>
-                        <div>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Provider</th>
-                                            <th>Active</th>
-                                            <th>API Key</th>
-                                            <th>Secret Key</th>
-                                            <th>Bucket/Path</th>
-                                            <th>Edit</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for row_data in template_data %}
-                                        <tr>
-                                            <td>{{ loop.index }}</td>
-                                            <td>{{ row_data[0] }}</td>
-                                            <td>{{ row_data[1] }}</td>
-                                            <td>{{ row_data[2] }}</td>
-                                            <td>{{ row_data[3] }}</td>
-                                            <td>{{ row_data[4] }}</td>
-                                            <div class="pull-right action-buttons">
-                                                <td>
-                                                    <p data-placement="top" data-toggle="tooltip" title="Edit"><button
-                                                            class="btn btn-primary btn-xs" <a data-id={{ row_data[0] }}
-                                                            onclick="EditCloud(this)"><span
-                                                                class="fas pencil-alt"></span></button></a>
-                                                </td>
-                                            </div>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                    </fieldset>
-                </div>
-            </div>
-            {% include "bss_public/bss_public_footer.html" %}
+<div class="flex min-h-screen flex-col">
+  {% include "bss_user/bss_user_include_menu.html" %}
+
+  <div class="flex flex-1">
+    {% include "bss_admin/bss_admin_include_menu.html" %}
+
+  <main class="flex-1 p-6" x-data="cloudConfig()">
+
+    <section class="bg-white rounded shadow p-6">
+      <h2 class="text-xl font-semibold mb-6">
+        Cloud Storage Configuration
+      </h2>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full border border-gray-200 text-sm">
+          <thead class="bg-gray-50">
+            <tr class="text-left font-semibold">
+              <th class="px-3 py-2">#</th>
+              <th class="px-3 py-2">Provider</th>
+              <th class="px-3 py-2">Active</th>
+              <th class="px-3 py-2">API Key</th>
+              <th class="px-3 py-2">Secret Key</th>
+              <th class="px-3 py-2">Bucket / Path</th>
+              <th class="px-3 py-2 text-center">Edit</th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y">
+            {% for row_data in template_data %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-3 py-2">{{ loop.index }}</td>
+              <td class="px-3 py-2 font-medium">{{ row_data[0] }}</td>
+              <td class="px-3 py-2">
+                <span
+                  class="px-2 py-1 rounded text-xs font-semibold"
+                  :class="'{{ row_data[1] }}' === 'True'
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-red-100 text-red-700'">
+                  {{ row_data[1] }}
+                </span>
+              </td>
+              <td class="px-3 py-2 truncate max-w-xs">{{ row_data[2] }}</td>
+              <td class="px-3 py-2 truncate max-w-xs">{{ row_data[3] }}</td>
+              <td class="px-3 py-2 truncate max-w-xs">{{ row_data[4] }}</td>
+              <td class="px-3 py-2 text-center">
+                <button
+                  @click="editCloud('{{ row_data[0] }}')"
+                  class="text-indigo-600 hover:text-indigo-800"
+                  title="Edit">
+                  <i class="fas fa-pencil-alt"></i>
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Edit Modal (placeholder) -->
+    <div
+      x-show="showEdit"
+      x-cloak
+      class="fixed inset-0 bg-black/50 flex items-center justify-center">
+
+      <div class="bg-white rounded shadow-lg w-full max-w-lg p-6">
+        <h3 class="text-lg font-semibold mb-4">
+          Edit Cloud Provider
+        </h3>
+
+        <p class="text-sm text-gray-600 mb-6">
+          Provider: <strong x-text="selectedProvider"></strong>
+        </p>
+
+        <!-- Future edit form goes here -->
+
+        <div class="flex justify-end gap-3">
+          <button
+            @click="showEdit=false"
+            class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
+            Close
+          </button>
         </div>
+      </div>
     </div>
-    <div>
-        <script src="/static/js/jquery.tmpl.min.js"></script>
-        <script src="/static/js/jquery.min.js"></script>
-        <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-        <script src="/static/js/base_webapp_update.js"></script>
-    </div>
+
+  </main>
+  </div>
+</div>
+
+{% include "bss_public/bss_public_footer.html" %}
+
+  <script>
+function cloudConfig() {
+  return {
+    showEdit: false,
+    selectedProvider: null,
+
+    editCloud(provider) {
+      this.selectedProvider = provider
+      this.showEdit = true
+    }
+  }
+}
+</script>
 </body>
-{% endblock %}
+</html>

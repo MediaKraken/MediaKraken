@@ -1,0 +1,21 @@
+---
+- name: Install certs/issuers
+  hosts: mkcontrol1
+  tasks:
+    - name: copying file
+      copy:
+        src: ../config/certissuer.yml
+        dest: ~/certissuer.yml
+
+    - name: Replace key in a file
+      ansible.builtin.replace:
+        path: ~/certissuer.yml
+        regexp: "vm_aws_access_key"
+        replace: "{{ lookup('ansible.builtin.ini', 'vm_aws_access_key', file='../vars.ini', section='aws', allow_no_value=False) }}"
+        backup: no
+
+    - name: Setup issuers
+      shell: kubectl apply -f ~/certissuer.yml
+
+    - name: Setup secret
+      shell: kubectl create secret generic aws-route53-creds --from-file=/root/password.txt -n cert-manager

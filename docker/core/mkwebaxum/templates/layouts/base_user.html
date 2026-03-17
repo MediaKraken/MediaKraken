@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark"> 
+    
+    <title>
+        {% if let Some(title) = page_title %}
+        {{ title }}
+        {% else %}
+        MediaKraken
+        {% endif %}
+    </title>
+    
+    <link rel="stylesheet" href="/static/css/base_webapp_8.css">
+    
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+
+    <script>
+        (function() {
+            // Check LocalStorage OR System Preference
+            const isDark = localStorage.theme === 'dark' || 
+                (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+            // Apply class immediately
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
+
+    <script defer src="/static/js/alpinejs_3.15.3.min.js"></script>
+
+    <script defer>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('ui', {
+                // Initialize state based on what the head script applied
+                dark: document.documentElement.classList.contains('dark'),
+                sidebarOpen: false,
+
+                toggleTheme() {
+                    this.dark = !this.dark;
+                    
+                    // Toggle Class
+                    document.documentElement.classList.toggle('dark', this.dark);
+                    
+                    // Persist to LocalStorage
+                    localStorage.theme = this.dark ? 'dark' : 'light';
+                },
+
+                openSidebar() { this.sidebarOpen = true },
+                closeSidebar() { this.sidebarOpen = false },
+                toggleSidebar() { this.sidebarOpen = !this.sidebarOpen }
+            })
+        })
+    </script>
+</head>
+
+<body x-data 
+      x-cloak
+      class="min-h-screen flex flex-col bg-zinc-100 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 transition-colors duration-300">
+    
+    {% include "partials/topnavbar.html" %}
+    
+    <div class="flex flex-1 overflow-hidden">
+        {% include "partials/sidebar_user.html" %}
+        
+        <main id="main-content" class="flex-1 overflow-y-auto md:ml-64">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    
+</body>
+
+<script defer>
+    function movieCard(initial) {
+        return {
+            loaded: false,
+            ...initial,
+            toggle(key) {
+                this[key] = !this[key];
+                this.save();
+            },
+            save: Alpine.debounce(function () {
+                fetch('/user/user_metadata_movie_status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        guid: this.guid,
+                        favorite: this.favorite,
+                        watched: this.watched,
+                        good: this.good,
+                        bad: this.bad,
+                        trash: this.trash
+                    })
+                })
+            }, 400)
+        }
+    }
+</script>
+</html>

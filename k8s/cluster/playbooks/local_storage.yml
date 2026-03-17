@@ -1,0 +1,11 @@
+---
+- name : Setup local disks
+  hosts: mkcontrol1
+  tasks:
+    - name: copying file
+      copy:
+        src: ../config/local_path_storage.yml
+        dest: ~/local_path_storage.yml
+
+    - name: Setup local disk
+      shell: kubectl apply -f ~/local_path_storage.yml

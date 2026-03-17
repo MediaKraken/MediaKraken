@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
+    "brother_print_label",
     "pi_upc",
     "pi_voice",
     "theater_controller_pi",

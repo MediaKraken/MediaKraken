@@ -9,7 +9,7 @@
     - name: Install monitoring
       shell: helm install monitoring prometheus-community/kube-prometheus-stack \
         --create-namespace --namespace monitoring \
-        --set global.storageClass=nfs-csi
+        --set global.storageClass=local-path
 
     - name: copying file
       copy:
@@ -18,6 +18,9 @@
 
     - name: Setup access user for monitoring
       shell: kubectl apply -f ~/ingress_monitoring_http.yml
+
+    - name: Setup creds for monitoring
+      shell: kubectl create secret generic aws-route53-creds --from-file=/root/password.txt -n monitoring
 
 # kubectl get secret --namespace monitoring-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 # password = prom-operator

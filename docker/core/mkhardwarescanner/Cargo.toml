@@ -16,26 +16,27 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { version = "0.0.58", registry = "kellnr" }
-mk_lib_hardware = { version = "0.0.32", registry = "kellnr" }
-mk_lib_network = { version = "0.0.28", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.31", registry = "kellnr" }
+mk_lib_database = { version = "0.0.199", registry = "kellnr" }
+mk_lib_hardware = { version = "0.0.172", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.168", registry = "kellnr" }
+mk_lib_network = { version = "0.0.168", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.171", registry = "kellnr" }
 
-chrono = { version = "0.4.40", features = ["serde"] }
+chrono = { version = "0.4.43", features = ["serde"] }
 crab-dlna = "0.2.1"
 futures-util = "0.3.31"
 huelib = "0.13.2" # https://github.com/nn1ks/huelib-rs
 mdns = "3.0.0"
-reqwest = { version = "0.12.14", default-features = false, features = [
+reqwest = { version = "0.12.28", default-features = false, features = [
     "json",
     "rustls-tls",
 ] }
-serde = { version = "1.0.219", features = ["derive"] }
-serde_json = "1.0.140"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.148"
 sonor = "2.0.0"
 stdext = "0.3.3"
 sys-info = "0.9.1"
-tokio = { version = "1.44.1", features = ["full"] }
+tokio = { version = "1.49.0", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"

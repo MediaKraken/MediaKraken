@@ -12,10 +12,10 @@ use tokio::sync::Notify;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
+    let (sqlx_pool_rw, sqlx_pool_ro) = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
         .await
         .unwrap();
-    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await;
 
     let (_rabbit_connection, rabbit_channel) =
@@ -39,7 +39,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let _output = Command::new("psql")
                     .args([
                         "-h",
-                        "mkdbinstance.stackgres",
+                        "pgcluster-with-metrics-rw.cnpg-system",
                         "-U",
                         "postgres",
                         "-f",
@@ -51,7 +51,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let _output = Command::new("psql")
                     .args([
                         "-h",
-                        "mkdbinstance.stackgres",
+                        "pgcluster-with-metrics-rw.cnpg-system",
                         "-U",
                         "postgres",
                         "-f",
@@ -64,7 +64,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let _output = Command::new("psql")
                     .args([
                         "-h",
-                        "mkdbinstance.stackgres",
+                        "pgcluster-with-metrics-rw.cnpg-system",
                         "-U",
                         "postgres",
                         "-f",
@@ -78,7 +78,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let _output = Command::new("psql")
                     .args([
                         "-h",
-                        "mkdbinstance.stackgres",
+                        "pgcluster-with-metrics-rw.cnpg-system",
                         "-U",
                         "postgres",
                         "-f",
@@ -92,7 +92,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // let _output = Command::new("psql")
                 //     .args([
                 //         "-h",
-                //         "mkdbinstance.stackgres",
+                //         "pgcluster-with-metrics-rw.cnpg-system",
                 //         "-U",
                 //         "postgres",
                 //         "-f",
@@ -104,7 +104,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                 // import dump tables
                 let pg_tables =
-                    mk_lib_database::mk_lib_database_postgresql::mk_lib_database_tables(&sqlx_pool)
+                    mk_lib_database::mk_lib_database_postgresql::mk_lib_database_tables(&sqlx_pool_rw)
                         .await
                         .unwrap();
                 for row_data in pg_tables.iter() {
@@ -119,7 +119,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         let output = Command::new("psql")
                             .args([
                                 "-h",
-                                "mkdbinstance.stackgres",
+                                "pgcluster-with-metrics-rw.cnpg-system",
                                 "-d",
                                 "postgres",
                                 "-U",
@@ -144,7 +144,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             let output = Command::new("psql")
                                 .args([
                                     "-h",
-                                    "mkdbinstance.stackgres",
+                                    "pgcluster-with-metrics-rw.cnpg-system",
                                     "-d",
                                     "postgres",
                                     "-U",
@@ -166,7 +166,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let _output = Command::new("psql")
                     .args([
                         "-h",
-                        "mkdbinstance.stackgres",
+                        "pgcluster-with-metrics-rw.cnpg-system",
                         "-U",
                         "postgres",
                         "-f",
@@ -179,7 +179,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // let _output = Command::new("psql")
                 //     .args([
                 //         "-h",
-                //         "mkdbinstance.stackgres",
+                //         "pgcluster-with-metrics-rw.cnpg-system",
                 //         "-U",
                 //         "postgres",
                 //         "-f",
@@ -191,7 +191,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let _output = Command::new("psql")
                     .args([
                         "-h",
-                        "mkdbinstance.stackgres",
+                        "pgcluster-with-metrics-rw.cnpg-system",
                         "-U",
                         "postgres",
                         "-f",
@@ -204,7 +204,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // let _output = Command::new("psql")
                 //     .args([
                 //         "-h",
-                //         "mkdbinstance.stackgres",
+                //         "pgcluster-with-metrics-rw.cnpg-system",
                 //         "-U",
                 //         "postgres",
                 //         "-f",

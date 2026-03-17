@@ -7,6 +7,7 @@ use mk_lib_network::mk_lib_network;
 use serde_json::json;
 use sqlx::types::Uuid;
 use torrent_name_parser::Metadata;
+use std::env;
 
 pub async fn provider_tmdb_movie_fetch(
     sqlx_pool: &sqlx::PgPool,
@@ -19,7 +20,7 @@ pub async fn provider_tmdb_movie_fetch(
         .await
         .unwrap();
     if result_json.get("success").is_some() && result_json["success"] == false {
-        println!("Skipn Movie: {}", tmdb_id);
+        println!("Skip Movie: {}", tmdb_id);
         return;
     }
     let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
@@ -52,19 +53,44 @@ pub async fn provider_tmdb_movie_fetch(
 }
 
 pub async fn provider_tmdb_person_fetch(
-    _sqlx_pool: &sqlx::PgPool,
+    sqlx_pool: &sqlx::PgPool,
     tmdb_id: i32,
-    _metadata_uuid: Uuid,
+    metadata_uuid: Uuid,
     tmdb_api_key: &str,
 ) {
     // fetch and save json data via tmdb id
     let result_json = provider_tmdb_person_fetch_by_id(tmdb_id, tmdb_api_key)
         .await
         .unwrap();
+    if env::var("DEBUG").unwrap() == "true"
+    {
+        mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
+            json!({ "Type": "Person", "Module": std::module_path!(), "Result": result_json }),
+            )
+            .await
+            .unwrap();
+    }
     if result_json.get("success").is_some() && result_json["success"] == false {
-        println!("Skipn Person: {}", tmdb_id);
+        println!("Skip Person: {}", tmdb_id);
         return;
-    }        
+    }
+    if env::var("DEBUG").unwrap() == "true"
+    {
+        mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
+            json!({ "Type": "Person After", "Module": std::module_path!() }),
+            )
+            .await
+            .unwrap();
+    }
+    let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
+    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert(
+        sqlx_pool,
+        metadata_uuid,
+        tmdb_id,
+        &result_json,
+        image_json,
+    )
+    .await;
 }
 
 pub async fn provider_tmdb_tv_fetch(
@@ -78,7 +104,7 @@ pub async fn provider_tmdb_tv_fetch(
         .await
         .unwrap();
     if result_json.get("success").is_some() && result_json["success"] == false {
-        println!("Skipn TV: {}", tmdb_id);
+        println!("Skip TV: {}", tmdb_id);
         return;
     }    
     let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
@@ -236,11 +262,25 @@ pub async fn provider_tmdb_meta_info_build(
     let mut poster_file_path = String::new();
     if result_json.get("poster_path").is_some() && !result_json["poster_path"].is_null() {
         image_file_path += &result_json["poster_path"].as_str().unwrap().to_string();
-        println!("ifilepath {}", image_file_path);
+        //println!("ifilepath {}", image_file_path);
         let _result = mk_lib_network::mk_download_file_from_url(
             format!(
                 "https://image.tmdb.org/t/p/original{}",
                 &result_json["poster_path"].as_str().unwrap().to_string()
+            ),
+            &image_file_path,
+        )
+        .await;
+        poster_file_path = image_file_path;
+    }
+    else if result_json["images"]["profiles"][0].get("file_path").is_some() 
+            && !result_json["images"]["profiles"][0]["file_path"].is_null() {
+        image_file_path += &result_json["images"]["profiles"][0]["file_path"].as_str().unwrap().to_string();
+        //println!("ifilepath {}", image_file_path);
+        let _result = mk_lib_network::mk_download_file_from_url(
+            format!(
+                "https://image.tmdb.org/t/p/original{}",
+                &result_json["images"]["profiles"][0]["file_path"].as_str().unwrap().to_string()
             ),
             &image_file_path,
         )
@@ -254,7 +294,7 @@ pub async fn provider_tmdb_meta_info_build(
     let mut backdrop_file_path = String::new();
     if result_json.get("backdrop_path").is_some() && !result_json["backdrop_path"].is_null() {
         image_file_path += &result_json["backdrop_path"].as_str().unwrap().to_string();
-        println!("iifilepath {}", image_file_path);
+        //println!("iifilepath {}", image_file_path);
         let _result = mk_lib_network::mk_download_file_from_url(
             format!(
                 "https://image.tmdb.org/t/p/original{}",

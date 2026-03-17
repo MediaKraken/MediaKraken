@@ -17,7 +17,7 @@ fn main() -> io::Result<()> {
     //let file = File::open("C:/Users/qgranfor/Downloads/mame0241.xml")?;
     let file = File::open("/home/spoot/Downloads/mame0241lx/mame0241.xml")?;
     let reader = BufReader::new(file);
-    let mut xml_data: String = "".to_string();
+    let mut xml_data: String = String::new();
     let conf = Config::new_with_custom_values(true, "", "text", NullValue::Ignore)
         .add_json_type_override("/machine/@name", JsonArray::Infer(JsonType::AlwaysString))
         .add_json_type_override("/year", JsonArray::Infer(JsonType::AlwaysString))

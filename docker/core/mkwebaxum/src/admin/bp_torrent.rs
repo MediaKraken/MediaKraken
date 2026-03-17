@@ -17,6 +17,8 @@ use crate::mk_lib_database;
 use mk_lib_network;
 use serde_json::json;
 use sqlx::postgres::PgPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -26,11 +28,12 @@ struct TemplateError403Context {}
 #[template(path = "bss_admin/bss_admin_torrent.html")]
 struct AdminTorrentTemplate<'a> {
     template_data: &'a Vec<mk_lib_network::mk_lib_network_transmission::TorrentList>,
+        page_title: Option<String>,
+
 }
 
 pub async fn admin_torrent(
-    Extension(sqlx_pool): Extension<PgPool>,
-    method: Method,
+     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let current_user = auth.current_user.clone().unwrap_or_default();
@@ -58,6 +61,8 @@ pub async fn admin_torrent(
             .unwrap();
         let template = AdminTorrentTemplate {
             template_data: &transmission_torrents,
+                        page_title: Some("MediaKraken Admin Torrent".to_string()),
+
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

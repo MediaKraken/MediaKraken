@@ -1,8 +1,7 @@
 use chrono::{Duration, Utc};
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
+use sqlx::FromRow;
 use sqlx::types::Uuid;
-use sqlx::{FromRow, Row};
 
 pub async fn mk_lib_database_media_update_metadata_guid(
     sqlx_pool: &sqlx::PgPool,
@@ -12,15 +11,15 @@ pub async fn mk_lib_database_media_update_metadata_guid(
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
-        "update mm_media set mm_media_metadata_guid = $1 \
-        where mm_media_guid = $2",
+        r#"update mm_media set mm_media_metadata_guid = $1
+        where mm_media_guid = $2"#,
     )
     .bind(mm_metadata_guid)
     .bind(mm_media_guid)
     .execute(&mut *transaction)
     .await?;
     if mm_download_uuid != &uuid::Uuid::nil() {
-        sqlx::query("delete from mm_metadata_download_que where mm_download_guid = $1")
+        sqlx::query(r#"delete from mm_metadata_download_que where mm_download_guid = $1"#)
             .bind(mm_download_uuid)
             .execute(&mut *transaction)
             .await?;
@@ -33,8 +32,8 @@ pub async fn mk_lib_database_media_unmatched_count(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<i64, sqlx::Error> {
     let row: (i64,) = sqlx::query_as(
-        "select count(*) from mm_media \
-        where mm_media_metadata_guid is NULL",
+        r#"select count(*) from mm_media
+        where mm_media_metadata_guid is NULL"#,
     )
     .fetch_one(sqlx_pool)
     .await?;
@@ -52,21 +51,16 @@ pub async fn mk_lib_database_media_unmatched_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMediaUnmatchedList>, sqlx::Error> {
-    let select_query = sqlx::query(
-        "select mm_media_guid, \
-        mm_media_path from mm_media \
-        where mm_media_metadata_guid is NULL \
-        order by mm_media_path offset $1 limit $2",
+    let table_rows: Vec<DBMediaUnmatchedList> = sqlx::query_as(
+        r#"select mm_media_guid,
+        mm_media_path from mm_media
+        where mm_media_metadata_guid is NULL
+        order by mm_media_path offset $1 limit $2"#,
     )
     .bind(offset)
-    .bind(limit);
-    let table_rows: Vec<DBMediaUnmatchedList> = select_query
-        .map(|row: PgRow| DBMediaUnmatchedList {
-            mm_media_guid: row.get("mm_media_guid"),
-            mm_media_path: row.get("mm_media_path"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    .bind(limit)
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 
@@ -74,8 +68,8 @@ pub async fn mk_lib_database_media_matched_count(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<i64, sqlx::Error> {
     let row: (i64,) = sqlx::query_as(
-        "select count(*) from mm_media \
-        where mm_media_metadata_guid is not NULL",
+        r#"select count(*) from mm_media
+        where mm_media_metadata_guid is not NULL"#,
     )
     .fetch_one(sqlx_pool)
     .await?;
@@ -85,7 +79,7 @@ pub async fn mk_lib_database_media_matched_count(
 pub async fn mk_lib_database_media_known_count(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<i64, sqlx::Error> {
-    let row: (i64,) = sqlx::query_as("select count(*) from mm_media")
+    let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_media"#)
         .fetch_one(sqlx_pool)
         .await?;
     Ok(row.0)
@@ -101,19 +95,15 @@ pub async fn mk_lib_database_media_known(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMediaKnownList>, sqlx::Error> {
-    let select_query = sqlx::query(
-        "select mm_media_path \
-        from mm_media where mm_media_guid \
-        order by mm_media_path offset $1 limit $2",
+    let table_rows: Vec<DBMediaKnownList> = sqlx::query_as(
+        r#"select mm_media_path
+        from mm_media where mm_media_guid
+        order by mm_media_path offset $1 limit $2"#,
     )
     .bind(offset)
-    .bind(limit);
-    let table_rows: Vec<DBMediaKnownList> = select_query
-        .map(|row: PgRow| DBMediaKnownList {
-            mm_media_path: row.get("mm_media_path"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    .bind(limit)
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 
@@ -128,9 +118,9 @@ pub async fn mk_lib_database_media_insert(
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
-        "insert into mm_media (mm_media_guid, mm_media_class_enum, \
-         mm_media_path, mm_media_metadata_guid, mm_media_ffprobe_json, mm_media_json) \
-         values ($1, $2, $3, $4, $5, $6)",
+        r#"insert into mm_media (mm_media_guid, mm_media_class_enum,
+         mm_media_path, mm_media_metadata_guid, mm_media_ffprobe_json, mm_media_json)
+         values ($1, $2, $3, $4, $5, $6)"#,
     )
     .bind(mm_media_guid)
     .bind(mm_media_class_enum)
@@ -149,8 +139,8 @@ pub async fn mk_lib_database_media_duplicate_detail_count(
     mm_metadata_guid: Uuid,
 ) -> Result<i64, sqlx::Error> {
     let row: (i64,) = sqlx::query_as(
-        "select count(*) from mm_media \
-        where mm_media_metadata_guid = $1",
+        r#"select count(*) from mm_media
+        where mm_media_metadata_guid = $1"#,
     )
     .bind(mm_metadata_guid)
     .fetch_one(sqlx_pool)
@@ -163,9 +153,9 @@ pub async fn mk_lib_database_media_duplicate_count(
 ) -> Result<i64, sqlx::Error> {
     // TODO technically this will "dupe" things like subtitles atm
     let row: (i64,) = sqlx::query_as(
-        "select count(*) from (select mm_media_metadata_guid \
-        from mm_media where mm_media_metadata_guid is not null \
-        group by mm_media_metadata_guid HAVING count(*) > 1) as total",
+        r#"select count(*) from (select mm_media_metadata_guid
+        from mm_media where mm_media_metadata_guid is not null
+        group by mm_media_metadata_guid HAVING count(*) > 1) as total"#,
     )
     .fetch_one(sqlx_pool)
     .await?;
@@ -177,8 +167,8 @@ pub async fn mk_lib_database_media_path_by_uuid(
     mm_media_guid: Uuid,
 ) -> Result<String, sqlx::Error> {
     let row: (String,) = sqlx::query_as(
-        "select mm_media_path from mm_media \
-        where mm_media_guid = $1",
+        r#"select mm_media_path from mm_media
+        where mm_media_guid = $1"#,
     )
     .bind(mm_media_guid)
     .fetch_one(sqlx_pool)
@@ -199,26 +189,20 @@ pub async fn mk_lib_database_media_duplicate(
     limit: i64,
 ) -> Result<Vec<DBMediaDuplicateList>, sqlx::Error> {
     // TODO technically this will "dupe" things like subtitles atm
-    let select_query = sqlx::query(
-        "select mm_media_metadata_guid, \
-        mm_media_name, count(*) as mm_count \
-        from mm_media, mm_metadata_movie \
-        where mm_media_metadata_guid is not null \
-        and mm_media_metadata_guid = mm_metadata_guid \
-        group by mm_media_metadata_guid, \
-        mm_media_name HAVING count(*) > 1 order by LOWER(mm_media_name) \
-        offset $1 limit $2",
+    let table_rows: Vec<DBMediaDuplicateList> = sqlx::query_as(
+        r#"select mm_media_metadata_guid,
+        mm_media_name, count(*) as mm_count
+        from mm_media, mm_metadata_movie
+        where mm_media_metadata_guid is not null
+        and mm_media_metadata_guid = mm_metadata_guid
+        group by mm_media_metadata_guid,
+        mm_media_name HAVING count(*) > 1 order by LOWER(mm_media_name)
+        offset $1 limit $2"#,
     )
     .bind(offset)
-    .bind(limit);
-    let table_rows: Vec<DBMediaDuplicateList> = select_query
-        .map(|row: PgRow| DBMediaDuplicateList {
-            mm_media_metadata_guid: row.get("mm_media_metadata_guid"),
-            mm_media_name: row.get("mm_media_name"),
-            mm_count: row.get("mm_count"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    .bind(limit)
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 
@@ -235,24 +219,18 @@ pub async fn mk_lib_database_media_duplicate_detail(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMediaDuplicateDetailList>, sqlx::Error> {
-    let select_query = sqlx::query(
-        "select mm_media_guid, \
-        mm_media_path, mm_media_ffprobe_json \
-        from mm_media where mm_media_guid \
-        in (select mm_media_guid from mm_media \
-        where mm_media_metadata_guid = $1 offset $2 limit $3",
+    let table_rows: Vec<DBMediaDuplicateDetailList> = sqlx::query_as(
+        r#"select mm_media_guid,
+        mm_media_path, mm_media_ffprobe_json
+        from mm_media where mm_media_guid
+        in (select mm_media_guid from mm_media
+        where mm_media_metadata_guid = $1 offset $2 limit $3"#,
     )
     .bind(mm_metadata_guid)
     .bind(offset)
-    .bind(limit);
-    let table_rows: Vec<DBMediaDuplicateDetailList> = select_query
-        .map(|row: PgRow| DBMediaDuplicateDetailList {
-            mm_media_guid: row.get("mm_media_guid"),
-            mm_media_path: row.get("mm_media_path"),
-            mm_media_ffprobe_json: row.get("mm_media_ffprobe_json"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    .bind(limit)
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 
@@ -261,10 +239,10 @@ pub async fn mk_lib_database_media_image_path_by_uuid(
     mm_media_guid: Uuid,
 ) -> Result<serde_json::Value, sqlx::Error> {
     let row: (serde_json::Value,) = sqlx::query_as(
-        "select mm_metadata_localimage_json \
-        from mm_media, mm_metadata_movie \
-        where mm_media_metadata_guid = mm_metadata_guid \
-        and mm_media_guid = $1",
+        r#"select mm_metadata_localimage_json
+        from mm_media, mm_metadata_movie
+        where mm_media_metadata_guid = mm_metadata_guid
+        and mm_media_guid = $1"#,
     )
     .bind(mm_media_guid)
     .fetch_one(sqlx_pool)
@@ -279,8 +257,8 @@ pub async fn mk_lib_database_media_ffmpeg_update_by_uuid(
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
-        "update mm_media set mm_media_ffprobe_json = $1 \
-        where mm_media_guid = $2",
+        r#"update mm_media set mm_media_ffprobe_json = $1
+        where mm_media_guid = $2"#,
     )
     .bind(ffmpeg_json)
     .bind(mm_media_guid)
@@ -298,7 +276,9 @@ pub async fn mk_lib_database_media_new_count(
         .format("%Y-%m-%d")
         .to_string();
     let row: (i64,) = sqlx::query_as(
-        "select count(*) from mm_media, mm_metadata_movie where mm_media_metadata_guid = mm_metadata_movie_guid and mm_media_json->>'DateAdded' >= $1",
+        r#"select count(*) from mm_media, mm_metadata_movie 
+        where mm_media_metadata_guid = mm_metadata_movie_guid 
+        and mm_media_json->>'DateAdded' >= $1"#,
     )
     .bind(date_added)
     .fetch_one(sqlx_pool)
@@ -315,25 +295,21 @@ pub async fn mk_lib_database_media_new(
     let date_added = (Utc::now() - Duration::days(days_old))
         .format("%Y-%m-%d")
         .to_string();
-    let select_query = sqlx::query(
-        "select mm_media_name, \
-         mm_media_guid, \
-         mm_media_class_guid \
-         from mm_media, mm_metadata_movie \
-         where mm_media_metadata_guid = mm_metadata_movie_guid \
-         and mm_media_json->>'DateAdded' >= $1 \
-         order by LOWER(mm_media_name), \
-         mm_media_class_guid offset $2 limit $3",
+    let table_rows: Vec<DBMediaKnownList> = sqlx::query_as(
+        r#"select mm_media_name,
+         mm_media_guid,
+         mm_media_class_guid
+         from mm_media, mm_metadata_movie
+         where mm_media_metadata_guid = mm_metadata_movie_guid
+         and mm_media_json->>'DateAdded' >= $1
+         order by LOWER(mm_media_name),
+         mm_media_class_guid offset $2 limit $3"#,
     )
     .bind(date_added)
     .bind(offset)
-    .bind(limit);
-    let table_rows: Vec<DBMediaKnownList> = select_query
-        .map(|row: PgRow| DBMediaKnownList {
-            mm_media_path: row.get("mm_media_path"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    .bind(limit)
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 

@@ -1,10 +1,30 @@
 use mk_lib_database;
 use mk_lib_network;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use serde_json::Value;
 use std::error::Error;
 use tokio::sync::Notify;
+
+fn sanitize(value: &str) -> String {
+    value.replace('"', "")
+}
+
+fn encode_brand_path(value: &str) -> String {
+    value
+        .replace(':', "xcolx")
+        .replace('&', "xampx")
+        .replace('+', "xaddx")
+        .replace(' ', "%20")
+        .replace('/', "xfslx")
+}
+
+fn encode_type_path(value: &str) -> String {
+    value
+        .replace('&', "%26")
+        .replace('+', "xaddx")
+        .replace(' ', "%20")
+        .replace('/', "xfslx")
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 struct ApiBrands {
@@ -46,16 +66,14 @@ struct ApiBrandsTypeModels {
     brand_link: serde_json::Value,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-struct ApiBrandsTypeCodeset {}
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
-        .await
-        .unwrap();
-    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+    let (sqlx_pool_rw, sqlx_pool_ro) =
+        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
+            .await
+            .unwrap();
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await
         .unwrap();
 
@@ -85,112 +103,91 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 .unwrap();
                 // loop through all brands
                 for brand_item in fetch_brand_result.iter() {
+                    let brand_name = sanitize(&brand_item.brand_name);
+                    let brand_id = sanitize(&brand_item.brand_id).parse::<i32>().unwrap();
+                    let brand_name_path = encode_brand_path(&brand_name);
+
                     #[cfg(debug_assertions)]
                     {
                         println!("{:?}\n", brand_item);
                     }
                     let _result =
         mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_manufacturer_upsert(
-                &sqlx_pool,
-                brand_item.brand_name.replace("\"", ""),
-                brand_item
-                    .brand_id
-                    .replace("\"", "")
-                    .parse::<i32>()
-                    .unwrap(),
+                &sqlx_pool_rw,
+                brand_name.clone(),
+                brand_id,
             )
             .await;
                     // fetch types for the manufacturer (dvd, cd, etc)
                     let fetch_result_type: Vec<ApiBrandsTypes> = serde_json::from_str(
-                        &mk_lib_network::mk_lib_network::mk_data_from_url(
-                            format!(
-                                "https://irdb.globalcache.com:8081/api/brands/{}/types",
-                                brand_item
-                                    .brand_name
-                                    .replace("\"", "")
-                                    .replace(":", "xcolx")
-                                    .replace("&", "xampx")
-                                    .replace("+", "xaddx")
-                                    .replace(" ", "%20")
-                                    .replace("/", "xfslx"),
-                            )
-                            .to_string(),
-                        )
+                        &mk_lib_network::mk_lib_network::mk_data_from_url(format!(
+                            "https://irdb.globalcache.com:8081/api/brands/{}/types",
+                            brand_name_path,
+                        ))
                         .await
                         .unwrap(),
                     )
                     .unwrap();
                     for item_type in fetch_result_type.iter() {
+                        let type_name = sanitize(&item_type.brand_type);
+                        let type_name_path = encode_type_path(&type_name);
+
                         #[cfg(debug_assertions)]
                         {
                             println!("item_type: {:?}\n", item_type);
                         }
                         let _result = mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_type_upsert(
-                &sqlx_pool,
-                item_type.brand_type.replace("\"", ""),
+                &sqlx_pool_rw,
+                type_name.clone(),
             )
             .await;
                         let fetch_model_type: Vec<ApiBrandsTypeModels> = serde_json::from_str(
-                            &mk_lib_network::mk_lib_network::mk_data_from_url(
-                                format!(
-                        "https://irdb.globalcache.com:8081/api/brands/{}/types/{}/models",
-                        item_type
-                            .brand_name
-                            .replace("\"", "")
-                            .replace(":", "xcolx")
-                            .replace("&", "xampx")
-                            .replace("+", "xaddx")
-                            .replace(" ", "%20")
-                            .replace("/", "xfslx"),
-                        item_type
-                            .brand_type
-                            .replace("\"", "")
-                            .replace("&", "%26")
-                            .replace("+", "xaddx")
-                            .replace(" ", "%20")
-                            .replace("/", "xfslx"),
-                        // .replace("Receiver/Preamp", "ReceiverxfslxPreamp")
-                        // .replace("TV/DVD/VCR", "TVxfslxDVDxfslxVCR")
-                        // .replace("TV/DVD", "TVxfslxDVD")
-                        // .replace("TV/VCR", "TVxfslxVCR")
-                        // .replace("DVD/VCR", "DVDxfslxVCR")
-                    )
-                                .to_string(),
-                            )
+                            &mk_lib_network::mk_lib_network::mk_data_from_url(format!(
+                                "https://irdb.globalcache.com:8081/api/brands/{}/types/{}/models",
+                                brand_name_path,
+                                type_name_path,
+                                // .replace("Receiver/Preamp", "ReceiverxfslxPreamp")
+                                // .replace("TV/DVD/VCR", "TVxfslxDVDxfslxVCR")
+                                // .replace("TV/DVD", "TVxfslxDVD")
+                                // .replace("TV/VCR", "TVxfslxVCR")
+                                // .replace("DVD/VCR", "DVDxfslxVCR")
+                            ))
                             .await
                             .unwrap(),
                         )
                         .unwrap();
                         // loop through all the models
                         for item_model in fetch_model_type.iter() {
+                            let model_name = sanitize(&item_model.brand_model);
+
                             #[cfg(debug_assertions)]
                             {
                                 println!("model_item: {:?}\n", item_model);
                             }
                             let device_count =
                 mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_model_device_count_by_type(
-                        &sqlx_pool,
-                        item_model.brand_name.replace("\"", ""),
-                        item_model.brand_type.replace("\"", ""),
-                        item_model.brand_model.replace("\"", ""),
+                        &sqlx_pool_ro,
+                        brand_name.clone(),
+                        type_name.clone(),
+                        model_name.clone(),
                     )
                     .await
                     .unwrap();
                             if device_count == 0 {
                                 let _result =
                     mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_model_insert(
-                            &sqlx_pool,
-                            item_model.brand_name.replace("\"", ""),
-                            item_model.brand_type.replace("\"", ""),
-                            item_model.brand_model.replace("\"", ""),
+                            &sqlx_pool_rw,
+                            brand_name.clone(),
+                            type_name.clone(),
+                            model_name,
                         )
                         .await;
                                 /*
-                                                let fetch_codeset: Vec<ApiBrandsTypeCodeset> = serde_json::from_str(
-                                                    &mk_lib_network::mk_data_from_url(
-                                                        format!(
-                                                            "https://irdb.globalcache.com:8081/api/codesets/{}",
-                                                            item_model.brand_model_id.replace("\"", "").replace("&", "%26")
+                                let fetch_codeset: Vec<ApiBrandsTypeCodeset> = serde_json::from_str(
+                                    &mk_lib_network::mk_data_from_url(
+                                        format!(
+                                            "https://irdb.globalcache.com:8081/api/codesets/{}",
+                                            item_model.brand_model_id.replace("\"", "").replace("&", "%26")
                                                         )
                                                         .to_string(),
                                                     )

@@ -18,3 +18,6 @@ os.system("cp -f ../k8s_devenv/cluster/inventory.ini ../../kubespray/inventory/m
 
 # install/upgrade requirements
 os.system("pip3 install -r ../../kubespray/requirements.txt --break-system-packages")
+
+# rm -Rf kubespray
+# git clone --depth 1 https://github.com/kubernetes-sigs/kubespray

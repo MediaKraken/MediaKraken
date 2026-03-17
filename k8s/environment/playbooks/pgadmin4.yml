@@ -1,0 +1,11 @@
+---
+- name : Setup k8s pgadmin4
+  hosts: mkcontrol1
+  tasks:
+    - name: copying file
+      copy:
+        src: ../config/pgadmin4.yml
+        dest: ~/pgadmin4.yml
+
+    - name: Setup pgadmin4
+      shell: kubectl apply -f ~/pgadmin4.yml

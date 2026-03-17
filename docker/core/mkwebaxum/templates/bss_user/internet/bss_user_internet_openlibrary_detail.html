@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include "bss_include_header.html" %}
+
+<body class="bg-slate-950 text-slate-100">
+    {% include "bss_user/bss_user_include_menu.html" %}
+    {% include "partials/sidebar_user.html" %}
+
+    <main class="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+        <a href="/user/internet/openlibrary/1" class="mb-4 inline-flex rounded-lg border border-slate-600 px-3 py-2 text-sm hover:border-slate-400 hover:bg-slate-800" aria-label="Back to OpenLibrary browse">← Back to browse</a>
+
+        <article class="rounded-xl border border-slate-800 bg-slate-900 p-5" x-data="{ showSubjects: true }">
+            <header class="flex flex-col gap-4 sm:flex-row">
+                {% if let Some(url) = item.cover_url %}
+                <img src="{{ url }}" alt="{{ item.title }} cover" class="h-64 w-44 rounded object-cover" loading="lazy" decoding="async" />
+                {% else %}
+                <div class="flex h-64 w-44 items-center justify-center rounded bg-slate-800 text-sm text-slate-400">No cover image</div>
+                {% endif %}
+
+                <div class="min-w-0">
+                    <p class="text-xs uppercase tracking-wide text-slate-400">OpenLibrary Work ID: {{ item.work_id }}</p>
+                    <h1 class="mt-1 text-3xl font-semibold">{{ item.title }}</h1>
+                    <p class="mt-2 text-slate-300">First published: {{ item.first_publish_year }}</p>
+
+                    {% if item.authors.len() > 0 %}
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        {% for author in item.authors %}
+                        <span class="rounded-full bg-slate-800 px-3 py-1 text-sm text-slate-200">{{ author }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </header>
+
+            <section class="mt-5">
+                <h2 class="text-lg font-medium">Description</h2>
+                <p class="mt-2 whitespace-pre-wrap text-slate-200">{{ item.description }}</p>
+            </section>
+
+            <section class="mt-5">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-medium">Subjects</h2>
+                    <button type="button" class="rounded-md border border-slate-600 px-3 py-1 text-sm hover:border-slate-400 hover:bg-slate-800" @click="showSubjects = !showSubjects" :aria-label="showSubjects ? 'Hide subjects' : 'Show subjects'">
+                        <span x-text="showSubjects ? 'Hide' : 'Show'"></span>
+                    </button>
+                </div>
+
+                <div class="mt-3 flex flex-wrap gap-2" x-show="showSubjects" x-cloak>
+                    {% if item.subjects.len() > 0 %}
+                    {% for subject in item.subjects %}
+                    <span class="rounded-full bg-teal-900/30 px-3 py-1 text-sm text-teal-100">{{ subject }}</span>
+                    {% endfor %}
+                    {% else %}
+                    <p class="text-slate-400">No subjects available.</p>
+                    {% endif %}
+                </div>
+            </section>
+        </article>
+    </main>
+
+    {% include "bss_public/bss_public_footer.html" %}
+</body>
+
+</html>

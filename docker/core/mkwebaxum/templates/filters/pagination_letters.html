@@ -1,0 +1,60 @@
+<nav class="w-full border-b border-zinc-200 dark:border-zinc-800 py-3"
+     aria-label="Alphabetical Pagination">
+
+  <ul class="flex flex-wrap gap-1 justify-center text-sm font-medium">
+
+    <!-- # Symbols -->
+    <li>
+      <a href="{{ base_path }}/1?starts_with=%23{% if let Some(genre_name) = genre_filter_query %}&genre={{ genre_name }}{% endif %}"
+         class="px-2 py-1.5 rounded-md transition-colors
+         {% if current == Some("#".to_string()) %}
+            bg-indigo-600 text-white
+         {% else %}
+            text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800
+         {% endif %}">
+        #
+      </a>
+    </li>
+
+    <!-- Numbers -->
+    {% for n in 0..10 %}
+    <li>
+      <a href="{{ base_path }}/1?starts_with={{ n }}{% if let Some(genre_name) = genre_filter_query %}&genre={{ genre_name }}{% endif %}"
+         class="px-2 py-1.5 rounded-md transition-colors
+         {% if current == Some(n.to_string()) %}
+            bg-indigo-600 text-white
+         {% else %}
+            text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800
+         {% endif %}">
+        {{ n }}
+      </a>
+    </li>
+    {% endfor %}
+
+    <!-- Letters -->
+    {% for c in 'A'..='Z' %}
+    <li>
+      <a href="{{ base_path }}/1?starts_with={{ c }}{% if let Some(genre_name) = genre_filter_query %}&genre={{ genre_name }}{% endif %}"
+         class="px-2 py-1.5 rounded-md transition-colors
+         {% if current == Some(c.to_string()) %}
+            bg-indigo-600 text-white
+         {% else %}
+            text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800
+         {% endif %}">
+        {{ c }}
+      </a>
+    </li>
+    {% endfor %}
+
+  </ul>
+</nav>
+
+{% if current.is_some() || genre_filter.is_some() %}
+<div class="mt-3 flex justify-center">
+  <a href="{{ base_path }}/1"
+     class="inline-flex items-center rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+     aria-label="Clear all movie filters">
+    Clear filters
+  </a>
+</div>
+{% endif %}

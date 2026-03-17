@@ -16,6 +16,7 @@ use sqlx::{
 };
 use stdext::function_name;
 
+
 #[derive(Template)]
 #[template(path = "bss_public/bss_public_forgot_password.html")]
 struct ForgotPasswordTemplate;

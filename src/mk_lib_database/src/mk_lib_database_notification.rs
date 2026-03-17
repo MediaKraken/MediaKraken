@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 use sqlx::types::Uuid;
+use sqlx::FromRow;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBNotificationList {
@@ -16,23 +15,13 @@ pub async fn mk_lib_database_notification_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBNotificationList>, sqlx::Error> {
-    let select_query = sqlx::query(
-        "select mm_notification_guid, mm_notification_text, \
-        mm_notification_time, \
-        mm_notification_dismissible from mm_notification \
-        order by mm_notification_time desc offset $1 limit $2",
+    let table_rows: Vec<DBNotificationList> = sqlx::query_as(
+        r#"select mm_notification_guid, mm_notification_text, mm_notification_time, mm_notification_dismissible from mm_notification order by mm_notification_time desc offset $1 limit $2"#,
     )
     .bind(offset)
-    .bind(limit);
-    let table_rows: Vec<DBNotificationList> = select_query
-        .map(|row: PgRow| DBNotificationList {
-            mm_notification_guid: row.get("mm_notification_guid"),
-            mm_notification_text: row.get("mm_notification_text"),
-            mm_notification_time: row.get("mm_notification_time"),
-            mm_notification_dismissible: row.get("mm_notification_dismissible"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    .bind(limit)
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 
@@ -41,20 +30,14 @@ pub async fn mk_lib_database_notification_insert(
     mm_notification_text: String,
     mm_notification_dismissable: bool,
 ) -> Result<(), sqlx::Error> {
-    let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
-        "insert into mm_notification (mm_notification_guid, \
-        mm_notification_text, \
-        mm_notification_time = NOW(), \
-        mm_notification_dismissible) \
-        values ($1, $2, $3)",
+        r#"insert into mm_notification (mm_notification_guid, mm_notification_text, mm_notification_time = NOW(), mm_notification_dismissible) values ($1, $2, $3)"#,
     )
     .bind(Uuid::now_v7())
     .bind(mm_notification_text)
     .bind(mm_notification_dismissable)
-    .execute(&mut *transaction)
+    .execute(sqlx_pool)
     .await?;
-    transaction.commit().await?;
     Ok(())
 }
 
@@ -63,7 +46,7 @@ pub async fn mk_lib_database_notification_delete(
     mk_notification_guid: Uuid,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query("delete from mm_notification where mm_notification_guid = $1")
+    sqlx::query(r#"delete from mm_notification where mm_notification_guid = $1"#)
         .bind(mk_notification_guid)
         .execute(&mut *transaction)
         .await?;

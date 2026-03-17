@@ -69,7 +69,7 @@ ingress:
     # kubernetes.io/tls-acme: "true"
   labels: {}
   hosts:
-    - host: mkdevmailhog.beaverbay.local
+    - host: mkdevmailhog.mediakraken.media
       paths:
         - path: "/"
           pathType: Prefix

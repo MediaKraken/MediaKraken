@@ -1,6 +1,6 @@
 #[macro_use]
 extern crate lazy_static;
-
+use axum::http::header;
 use axum::http::{Method, Uri};
 use axum::{
     body::Body,
@@ -21,15 +21,16 @@ use axum_flash::{Flash, IncomingFlashes};
 use axum_prometheus::PrometheusMetricLayer;
 use axum_server::tls_rustls::RustlsConfig;
 use axum_session::{Key, Session, SessionConfig, SessionLayer, SessionStore};
-use axum_session_sqlx::SessionPgPool;
 use axum_session_auth::*;
-use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
+use axum_session_sqlx::SessionPgPool;
 use hyper::StatusCode;
 use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
 use mk_lib_database;
+use mk_lib_logging;
 use redis_pool::{RedisPool, SingleRedisPool};
 use ring::digest;
 use serde_json::json;
+use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
 
 use std::fs::File;
 use std::io::Write;
@@ -42,6 +43,7 @@ use tower::timeout::TimeoutLayer;
 use tower::ServiceExt;
 use tower::{timeout::error::Elapsed, ServiceBuilder};
 use tower_http::services::{ServeDir, ServeFile};
+use tower_http::set_header::SetResponseHeaderLayer;
 
 type Client = hyper_util::client::legacy::Client<HttpConnector, Body>;
 mod axum_custom_filters;
@@ -56,6 +58,7 @@ pub mod admin {
     pub mod bp_hardware;
     pub mod bp_home;
     pub mod bp_library;
+    pub mod bp_logging;
     pub mod bp_reports;
     pub mod bp_settings;
     pub mod bp_torrent;
@@ -94,6 +97,7 @@ pub mod user {
 pub mod user_internet {
     pub mod bp_inter_flickr;
     pub mod bp_inter_home;
+    pub mod bp_inter_openlibrary;
     pub mod bp_inter_twitchtv;
     pub mod bp_inter_vimeo;
     pub mod bp_inter_youtube;
@@ -111,9 +115,9 @@ pub mod user_media {
     pub mod bp_media_movie;
     pub mod bp_media_music;
     pub mod bp_media_music_video;
+    pub mod bp_media_physical;
     pub mod bp_media_sports;
     pub mod bp_media_tv;
-    pub mod bp_media_upc_import;
 }
 
 #[path = "user/metadata"]
@@ -139,6 +143,9 @@ pub mod user_playback {
 #[derive(Clone)]
 struct AppState {
     flash_config: axum_flash::Config,
+    pub sqlx_pool_rw: PgPool,
+    pub sqlx_pool_ro: PgPool,
+    client: Client,
 }
 
 // Our state type must implement this trait. That is how the config
@@ -152,12 +159,15 @@ impl FromRef<AppState> for axum_flash::Config {
 #[tokio::main]
 async fn main() {
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(50, 120)
-        .await
-        .unwrap();
-    let _result =
-        mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
-            .await;
+    let (sqlx_pool_rw, sqlx_pool_ro) =
+        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
+            .await
+            .unwrap();
+    let _result = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(
+        &sqlx_pool_ro,
+        false,
+    )
+    .await;
 
     // let client =
     //     redis::Client::open("redis://default:@mkstack-dragonfly.dragonfly-operator-system:6379/0").expect("Error while trying to open the redis connection");
@@ -171,26 +181,35 @@ async fn main() {
 
     let session_config = SessionConfig::default().with_table_name("mm_session");
     let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
-    let session_store =  SessionStore::<SessionPgPool>::new(Some(sqlx_pool.clone().into()), session_config)
-        .await
-        .unwrap();
+    let session_store =
+        SessionStore::<SessionPgPool>::new(Some(sqlx_pool_rw.clone().into()), session_config)
+            .await
+            .unwrap();
 
     let (prometheus_layer, metric_handle) = PrometheusMetricLayer::pair();
-
-    let app_state = AppState {
-        // The key should probably come from configuration
-        flash_config: axum_flash::Config::new(Key::generate()),
-    };
 
     // build our application with routes
     let client: Client =
         hyper_util::client::legacy::Client::<(), ()>::builder(TokioExecutor::new())
             .build(HttpConnector::new());
+
+    let app_state = AppState {
+        // The key should probably come from configuration
+        flash_config: axum_flash::Config::new(Key::generate()),
+        sqlx_pool_rw: sqlx_pool_rw.clone(),
+        sqlx_pool_ro: sqlx_pool_ro.clone(),
+        client: client.clone(),
+    };
+
     // route_with_tsr creates two routes.....one with trailing slash
     let app = Router::new()
         .route_with_tsr("/admin", get(admin::bp_home::admin_home))
         .route_with_tsr("/admin/backup", get(admin::bp_backup::admin_backup))
         .route_with_tsr("/admin/cron", get(admin::bp_cron::admin_cron))
+        .route_with_tsr(
+            "/admin/cron_run/{guid}",
+            get(admin::bp_cron::admin_cron_run),
+        )
         .route_with_tsr("/admin/database", get(admin::bp_database::admin_database))
         .route_with_tsr(
             "/admin/game_servers/{page}",
@@ -198,6 +217,7 @@ async fn main() {
         )
         .route_with_tsr("/admin/hardware", get(admin::bp_hardware::admin_hardware))
         .route_with_tsr("/admin/home", get(admin::bp_home::admin_home))
+        .route_with_tsr("/admin/logging", get(admin::bp_logging::admin_logging))
         .route_with_tsr("/admin/library", get(admin::bp_library::admin_library))
         .route_with_tsr(
             "/admin/library_media_scan",
@@ -215,7 +235,6 @@ async fn main() {
         )
         .route_with_tsr("/admin/torrent", get(admin::bp_torrent::admin_torrent))
         .route_with_tsr("/admin/torrent/web", get(proxy_transmission_handler))
-        .with_state(client)
         .route_with_tsr("/admin/user/{page}", get(admin::bp_user::admin_user))
         .route_with_tsr(
             "/user/internet/flickr",
@@ -228,6 +247,14 @@ async fn main() {
         .route_with_tsr(
             "/user/internet",
             get(user_internet::bp_inter_home::user_inter_home),
+        )
+        .route_with_tsr(
+            "/user/internet/openlibrary/{page}",
+            get(user_internet::bp_inter_openlibrary::user_inter_openlibrary),
+        )
+        .route_with_tsr(
+            "/user/internet/openlibrary_detail/{work_id}",
+            get(user_internet::bp_inter_openlibrary::user_inter_openlibrary_detail),
         )
         .route_with_tsr(
             "/user/internet/twitchtv",
@@ -298,6 +325,10 @@ async fn main() {
             get(user_media::bp_media_music_video::user_media_music_video_detail),
         )
         .route_with_tsr(
+            "/user/media/physical/{page}",
+            get(user_media::bp_media_physical::user_media_physical),
+        )
+        .route_with_tsr(
             "/user/media/sports/{page}",
             get(user_media::bp_media_sports::user_media_sports),
         )
@@ -313,10 +344,11 @@ async fn main() {
             "/user/media/tv_detail/{guid}",
             get(user_media::bp_media_tv::user_media_tv_detail),
         )
-        .route_with_tsr(
-            "/user/media/upc",
-            get(user_media::bp_media_upc_import::user_media_upc_import).post(user_media::bp_media_upc_import::user_media_upc_import_post),
-        )
+        // .route_with_tsr(
+        //     "/user/media/upc",
+        //     get(user_media::bp_media_upc_import::user_media_upc_import)
+        //         .post(user_media::bp_media_upc_import::user_media_upc_import_post),
+        // )
         .route_with_tsr(
             "/user/metadata/book/{page}",
             get(user_metadata::bp_meta_book::user_metadata_book),
@@ -413,8 +445,25 @@ async fn main() {
         .route_with_tsr("/user/home", get(user::bp_home::user_home))
         .route_with_tsr("/user/profile", get(user::bp_profile::user_profile))
         .route_with_tsr("/user/queue", get(user::bp_queue::user_queue))
-        .route_with_tsr("/user/search", get(user::bp_search::user_search))
+        //.route_with_tsr("/user/search", get(user::bp_search::user_search))
+        .route("/user/search", get(user::bp_search::search_handler))
         .route_with_tsr("/user/sync/{page}", get(user::bp_sync::user_sync))
+        .route_with_tsr(
+            "/user/user_media_movie_status",
+            post(user_media::bp_media_movie::user_media_movie_status),
+        )
+        .route_with_tsr(
+            "/user/user_metadata_movie_status",
+            post(user_metadata::bp_meta_movie::user_metadata_movie_status),
+        )
+        .route_with_tsr(
+            "/user/user_media_tv_status/{uuid}/{key}",
+            post(user_media::bp_media_tv::user_media_tv_status),
+        )
+        .route_with_tsr(
+            "/user/user_metadata_tv_status/{uuid}/{key}",
+            post(user_metadata::bp_meta_tv::user_metadata_tv_status),
+        )
         .route_with_tsr("/public/logout", get(public::bp_logout::public_logout))
         .route_with_tsr(
             "/public/login",
@@ -422,21 +471,25 @@ async fn main() {
         )
         .nest_service("/static", ServeDir::new("static"))
         .nest_service("/metadata", ServeDir::new("metadata"))
+        .layer(SetResponseHeaderLayer::overriding(
+            axum::http::header::CACHE_CONTROL,
+            axum::http::HeaderValue::from_static("public, max-age=31536000, immutable"),
+        ))
         .layer(
             AuthSessionLayer::<
                 mk_lib_database::mk_lib_database_user::User,
                 i64,
                 SessionPgPool,
                 PgPool,
-            >::new(Some(sqlx_pool.clone().into()))
+            >::new(Some(sqlx_pool_rw.clone().into()))
             .with_config(auth_config),
         )
         .layer(SessionLayer::new(session_store))
         // after authsessionlayer so anyone can access
         .route_with_tsr(
             "/api/titlesearch/{title}",
-            get(api::bp_api_title_search::api_title_search)
-        )        
+            get(api::bp_api_title_search::api_title_search),
+        )
         .route_with_tsr("/public/about", get(public::bp_about::public_about))
         .route_with_tsr("/error/401", get(bp_error::general_not_authorized))
         .route_with_tsr("/error/403", get(bp_error::general_not_administrator))
@@ -456,7 +509,6 @@ async fn main() {
         )
         .route("/metrics", get(|| async move { metric_handle.render() }))
         .layer(prometheus_layer)
-        .layer(Extension(sqlx_pool))
         .with_state(app_state);
     // TODO .layer(
     //     ServiceBuilder::new()
@@ -499,7 +551,7 @@ async fn shutdown_signal() {
 }
 
 async fn proxy_transmission_handler(
-    State(client): State<Client>,
+    State(state): State<AppState>,
     mut req: Request,
 ) -> Result<Response, StatusCode> {
     let path = req.uri().path();
@@ -510,7 +562,8 @@ async fn proxy_transmission_handler(
         .unwrap_or(path);
     let uri = format!("https://mkstack-transmission:9091{}", path_query);
     *req.uri_mut() = Uri::try_from(uri).unwrap();
-    Ok(client
+    Ok(state
+        .client
         .request(req)
         .await
         .map_err(|_| StatusCode::BAD_REQUEST)?

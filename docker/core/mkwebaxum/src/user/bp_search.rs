@@ -1,13 +1,17 @@
+use crate::mk_lib_database;
+use crate::AppState;
 use askama::Template;
+use axum::extract::Query;
+use axum::extract::State;
 use axum::{
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
-use crate::mk_lib_database;
+use axum_session_sqlx::SessionPgPool;
+use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -16,10 +20,12 @@ struct TemplateError401Context {}
 
 #[derive(Template)]
 #[template(path = "bss_user/bss_user_media_search.html")]
-struct UserSearchTemplate;
+struct UserSearchTemplate {
+    page_title: Option<String>,
+}
 
 pub async fn user_search(
-    Extension(sqlx_pool): Extension<PgPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -36,10 +42,65 @@ pub async fn user_search(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let template = UserSearchTemplate {};
+        let template = UserSearchTemplate {
+            page_title: Some("MediaKraken Search".to_string()),
+        };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
+}
+
+#[derive(Deserialize)]
+pub struct SearchParams {
+    pub q: String,
+    #[serde(default)]
+    pub filter: Vec<String>,
+}
+
+pub struct MyMediaType {
+    pub id: i64,
+    pub title: String,
+    pub year: i32,
+    pub poster_url: String,
+}
+
+#[derive(Template)]
+#[template(path = "bss_user/search.html")]
+pub struct SearchTemplate {
+    pub query: String,
+    pub filters: Vec<String>,
+    pub results: Vec<MyMediaType>,
+    pub page_title: Option<String>,
+}
+
+pub async fn search_handler(Query(params): Query<SearchParams>) -> Html<String> {
+    let mut results = Vec::new();
+    // If no filters are selected, maybe default to "all"
+    let active_filters = if params.filter.is_empty() {
+        vec!["all".to_string()]
+    } else {
+        params.filter
+    };
+    // Logic to aggregate results based on active filters
+    for f in &active_filters {
+        match f.as_str() {
+            //"movie" => results.extend(fetch_movies(&params.q).await),
+            // "book" => results.extend(fetch_books(&params.q).await),
+            // "anime" => results.extend(fetch_anime(&params.q).await),
+            // "game" => results.extend(fetch_games(&params.q).await),
+            // "music" => results.extend(fetch_music(&params.q).await),
+            // "sports" => results.extend(fetch_sports(&params.q).await),
+            // "tv" => results.extend(fetch_tv(&params.q).await),
+            _ => {} // Handle "all" or unknowns
+        }
+    }
+    let template = SearchTemplate {
+        query: params.q,
+        filters: active_filters,
+        results,
+        page_title: Some("MediaKraken Search Results".to_string()),
+    };
+    Html(template.render().expect("Render failed"))
 }
 
 /*

@@ -39,12 +39,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .output()
         .unwrap();
     println!("Creating Tarball");
-    //  tar czf meta.tar.gz /mediakraken/metadata
+    //  tar czf meta.tar.gz -C /mediakraken/metadata .
     let _output = Command::new("tar")
         .args([
             "-cf",
             "meta.tar",
+            "-C",
             "/mediakraken/metadata",
+            ".",
         ])
         .stdout(Stdio::piped())
         .output()

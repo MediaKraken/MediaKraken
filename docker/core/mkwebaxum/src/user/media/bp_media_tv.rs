@@ -1,5 +1,7 @@
 use crate::axum_custom_filters::filters;
+use crate::mk_lib_database;
 use askama::Template;
+use axum::response::Redirect;
 use axum::{
     extract::Path,
     http::{Method, StatusCode},
@@ -7,12 +9,13 @@ use axum::{
     Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
+use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
-use crate::mk_lib_database;
 use serde_json::json;
 use sqlx::postgres::PgPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_401.html")]
@@ -26,10 +29,11 @@ struct TemplateMediaTVContext<'a> {
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
     page: &'a usize,
+    page_title: Option<String>,
 }
 
 pub async fn user_media_tv(
-    Extension(sqlx_pool): Extension<PgPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
@@ -50,7 +54,7 @@ pub async fn user_media_tv(
         let db_offset: i64 = (page * 30) - 30;
         let total_pages: i64 =
         mk_lib_database::database_media::mk_lib_database_media_tv::mk_lib_database_media_tv_count(
-            &sqlx_pool,
+            &state.sqlx_pool_ro,
             String::new(),
         )
         .await
@@ -59,12 +63,13 @@ pub async fn user_media_tv(
             total_pages,
             page,
             "/user/media/tv".to_string(),
+            None,
         )
         .await
         .unwrap();
         let tv_list =
         mk_lib_database::database_media::mk_lib_database_media_tv::mk_lib_database_media_tv_read(
-            &sqlx_pool,
+            &state.sqlx_pool_ro,
             String::new(),
             db_offset,
             30,
@@ -81,6 +86,7 @@ pub async fn user_media_tv(
             template_data_exists: &template_data_exists,
             pagination_bar: &pagination_html,
             page: &page_usize,
+            page_title: Some("MediaKraken TV Shows".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
@@ -92,10 +98,11 @@ pub async fn user_media_tv(
 struct TemplateMediaTVDetailContext {
     template_data: serde_json::Value,
     template_data_exists: bool,
+    page_title: Option<String>,
 }
 
 pub async fn user_media_tv_detail(
-    Extension(sqlx_pool): Extension<PgPool>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,
@@ -116,9 +123,38 @@ pub async fn user_media_tv_detail(
         let template = TemplateMediaTVDetailContext {
             template_data: json!({}),
             template_data_exists: false,
+            page_title: Some("MediaKraken TV Show Detail".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
+    }
+}
+
+pub async fn user_media_tv_status(
+     State(state): State<AppState>,
+    method: Method,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    Path(guid): Path<uuid::Uuid>,
+    Path(event_type): Path<String>,
+) -> impl IntoResponse {
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("User::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        Redirect::to("/error/401")
+    } else {
+        let _row_data = mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_status(
+            &state.sqlx_pool_rw, guid, event_type, current_user.id
+        )
+        .await
+        .unwrap();
+        // TODO wrong link
+        Redirect::to("/admin/cron")
     }
 }
 

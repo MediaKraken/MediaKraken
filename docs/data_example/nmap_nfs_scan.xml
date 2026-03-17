@@ -16,7 +16,7 @@
 <address addr="192.168.1.110" addrtype="ipv4"/>
 <address addr="3E:0C:8A:0F:0A:88" addrtype="mac"/>
 <hostnames>
-<hostname name="th-retronas-1.beaverbay.local" type="PTR"/>
+<hostname name="th-retronas-1.mediakraken.media" type="PTR"/>
 </hostnames>
 <ports><port protocol="tcp" portid="111"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="rpcbind" version="2-4" extrainfo="RPC #100000" method="probed" conf="10"/><script id="nfs-showmount" output="&#xa;  /data/retronas *&#xa;"/><script id="rpcinfo" output="&#xa;  program version    port/proto  service&#xa;  100000  2,3,4        111/tcp   rpcbind&#xa;  100000  2,3,4        111/udp   rpcbind&#xa;  100000  3,4          111/tcp6  rpcbind&#xa;  100000  3,4          111/udp6  rpcbind&#xa;  100003  2,3         2049/udp   nfs&#xa;  100003  2,3         2049/udp6  nfs&#xa;  100003  2,3,4       2049/tcp   nfs&#xa;  100003  2,3,4       2049/tcp6  nfs&#xa;  100005  1,2,3      37880/udp   mountd&#xa;  100005  1,2,3      41642/udp6  mountd&#xa;  100005  1,2,3      51685/tcp6  mountd&#xa;  100005  1,2,3      58399/tcp   mountd&#xa;  100021  1,3,4      34763/udp6  nlockmgr&#xa;  100021  1,3,4      36551/tcp   nlockmgr&#xa;  100021  1,3,4      39799/tcp6  nlockmgr&#xa;  100021  1,3,4      55984/udp   nlockmgr&#xa;  100227  2,3         2049/tcp   nfs_acl&#xa;  100227  2,3         2049/tcp6  nfs_acl&#xa;  100227  2,3         2049/udp   nfs_acl&#xa;  100227  2,3         2049/udp6  nfs_acl&#xa;"><table key="100003">
 <table key="tcp6">

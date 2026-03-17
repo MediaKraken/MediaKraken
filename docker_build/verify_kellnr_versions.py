@@ -9,10 +9,10 @@ def sed_file(filename):
         if line.find("mk_lib_") == 0:
             lib = line.split(" ")[0]
             old_version = line.split("\"")[1]
-            print(filename, lib, old_version, list_of_crates[lib])
+            print("File:", filename, lib, old_version, list_of_crates[lib])
             if list_of_crates[lib] != old_version: 
                 command_to_run = "sed -i 's/" + lib + " = { version = \"" + old_version + "\"/" + lib + " = { version = \"" + list_of_crates[lib] + "\"" + "/g' " + filename
-                print(command_to_run)
+                print("Top:", command_to_run)
                 pid = subprocess.Popen(command_to_run, shell=True)
                 pid.wait()
 
@@ -27,6 +27,7 @@ for filename in glob('../src/mk_lib_*/Cargo.toml', recursive=True):
     list_of_crates[lines[1].strip().split(" ")[2].replace("\"", "")] = new_version
     f.close()
     command_to_run = "sed -i '3 s/version = \"" + old_version + "\"/version = \"" + new_version + "\"/g' " + filename
+    print("Bottom:", command_to_run)
     pid = subprocess.Popen(command_to_run, shell=True)
     pid.wait()
 print("My Kellnr Cargos: ", list_of_crates)
@@ -37,4 +38,8 @@ for filename in glob('../src/mk_lib*/Cargo.toml', recursive=True):
 
 # loop through docker images
 for filename in glob('../docker/core/mk*/Cargo.toml', recursive=True):
+    sed_file(filename)
+
+# loop through app directory
+for filename in glob('../src_app/*/Cargo.toml', recursive=True):
     sed_file(filename)

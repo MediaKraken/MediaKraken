@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include "bss_include_header.html" %}
+<body class="bg-gray-100 text-gray-900">
+
+<div class="flex min-h-screen flex-col">
+  {% include "bss_user/bss_user_include_menu.html" %}
+
+  <div class="flex flex-1">
+    {% include "bss_admin/bss_admin_include_menu.html" %}
+
+  <main class="flex-1 p-6" x-data>
+
+    <section class="bg-white rounded shadow p-6">
+      <h2 class="text-xl font-semibold mb-4">
+        View MediaKraken Logs
+      </h2>
+
+      {% if template_data_exists %}
+      <div class="overflow-x-auto">
+        <table class="min-w-full border border-gray-200 text-sm">
+          <thead class="bg-gray-50">
+            <tr class="text-left font-semibold">
+              <th class="px-3 py-2 w-12">#</th>
+              <th class="px-3 py-2 whitespace-nowrap">Log Time</th>
+              <th class="px-3 py-2 whitespace-nowrap">Log Label</th>
+              <th class="px-3 py-2">Log Line</th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y">
+            {% for row_data in template_data %}
+            <tr class="hover:bg-gray-50 align-top">
+              <td class="px-3 py-2 text-gray-500">
+                {{ loop.index }}
+              </td>
+              <td class="px-3 py-2 font-mono text-xs whitespace-nowrap">
+                {{ row_data.timestamp_ns }}
+              </td>
+              <td class="px-3 py-2 font-mono text-xs text-indigo-700">
+                {{ row_data.labels }}
+              </td>
+              <td class="px-3 py-2 font-mono text-xs break-all">
+                {{ row_data.line }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <p class="text-gray-500 italic">
+          No MediaKraken logs found.
+        </p>
+      {% endif %}
+    </section>
+
+  </main>
+  </div>
+</div>
+
+{% include "bss_public/bss_public_footer.html" %}
+</body>
+</html>

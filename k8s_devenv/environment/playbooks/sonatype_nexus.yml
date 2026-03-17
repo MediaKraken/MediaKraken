@@ -9,11 +9,11 @@
         --create-namespace --namespace nexus \
         --set service.type=LoadBalancer \
         --set ingress.enabled=true \
-        --set ingress.hosts[0]=mkdevnexus.beaverbay.local \
+        --set ingress.hosts[0]=mkdevnexus.mediakraken.media \
         --set persistence.enabled=true \
-        --set persistence.storageClass=nfs-csi \
+        --set persistence.storageClass=longhorn \
         --set persistence.size=50Gi \
         --set metrics.enabled=true \
         --set metrics.serviceMonitor.enabled=true
 
-# enter pod and in /nexus-date/admin.password
+# enter pod and in /opt/sonatype/sonatype-work/nexus3/admin.password

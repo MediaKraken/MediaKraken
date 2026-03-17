@@ -1,4 +1,3 @@
-use mk_lib_compression;
 use mk_lib_hash;
 use mk_lib_network;
 use mk_lib_rabbitmq;
@@ -16,6 +15,30 @@ fn is_hidden(entry: &DirEntry) -> bool {
         .to_str()
         .map(|s| s.starts_with("."))
         .unwrap_or(false)
+}
+
+fn parse_version_components(version: &str) -> Option<Vec<u32>> {
+    let parsed = version
+        .split('.')
+        .map(str::parse::<u32>)
+        .collect::<Result<Vec<_>, _>>()
+        .ok()?;
+    if parsed.is_empty() {
+        return None;
+    }
+    Some(parsed)
+}
+
+fn latest_stable_version(index_html: &str) -> Option<String> {
+    index_html
+        .split("href=\"")
+        .skip(1)
+        .filter_map(|segment| segment.split('\"').next())
+        .filter_map(|href| href.strip_suffix('/'))
+        .filter(|version| version.chars().all(|c| c.is_ascii_digit() || c == '.'))
+        .filter_map(|version| parse_version_components(version).map(|parts| (parts, version)))
+        .max_by(|(left, _), (right, _)| left.cmp(right))
+        .map(|(_, version)| version.to_string())
 }
 
 #[tokio::main]
@@ -65,10 +88,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 println!("hash: {:?}", emulation_cores);
 
                 // date crc32 core_filename.zip
-                let libtro_url = "http://buildbot.libretro.com/nightly/linux/x86_64/latest/";
+                let stable_root = "http://buildbot.libretro.com/stable/";
+                let stable_index =
+                    mk_lib_network::mk_lib_network::mk_data_from_url(stable_root.to_string())
+                        .await
+                        .unwrap();
+                let latest_version = latest_stable_version(&stable_index).unwrap();
+                let libtro_url = format!("{}{}/linux/x86_64/", stable_root, latest_version);
                 let fetch_result = mk_lib_network::mk_lib_network::mk_data_from_url(format!(
                     "{}{}",
-                    libtro_url, ".index-extended"
+                    &libtro_url, ".index-extended"
                 ))
                 .await
                 .unwrap();
@@ -98,16 +127,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         if download_core {
                             // download the missing or newer core
                             mk_lib_network::mk_lib_network::mk_download_file_from_url(
-                                format!("{}{}", libtro_url, core_name),
+                                format!("{}{}", &libtro_url, core_name),
                                 &format!("/mediakraken/emulation/cores/{}", core_name),
-                            )
-                            .await
-                            .unwrap();
-                            // unzip the core for use
-                            mk_lib_compression::mk_lib_compression::mk_decompress_zip(
-                                &format!("/mediakraken/emulation/cores/{}", core_name),
-                                false,
-                                "/mediakraken/emulation/cores/",
                             )
                             .await
                             .unwrap();

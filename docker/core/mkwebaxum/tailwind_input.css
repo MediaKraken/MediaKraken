@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+@theme {
+  /* Your theme variables here */
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Use 'components' for custom classes like this */
+@layer components {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-zinc-300 dark:bg-zinc-700 rounded-full;
+  }
+}

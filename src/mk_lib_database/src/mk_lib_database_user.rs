@@ -1,11 +1,10 @@
 use async_trait::async_trait;
-use axum_session_auth::*;
 use axum_session_auth::Authentication;
+use axum_session_auth::*;
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPool;
-use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
+use sqlx::FromRow;
 use std::collections::HashSet;
 
 /*
@@ -80,14 +79,16 @@ impl HasPermission<PgPool> for User {
 
 impl User {
     pub async fn get_user(id: i64, pool: &PgPool) -> Option<Self> {
-        let sqluser = sqlx::query_as::<_, SqlUser>("SELECT id, anonymous, username FROM mm_axum_users WHERE id = $1")
-            .bind(id)
-            .fetch_one(pool)
-            .await
-            .ok()?;
+        let sqluser = sqlx::query_as::<_, SqlUser>(
+            r#"SELECT id, anonymous, username FROM mm_axum_users WHERE id = $1"#,
+        )
+        .bind(id)
+        .fetch_one(pool)
+        .await
+        .ok()?;
         // lets just get all the tokens the user can use, we will only use the full permissions if modifing them.
         let sql_user_perms = sqlx::query_as::<_, SqlPermissionTokens>(
-            "SELECT token FROM mm_axum_user_permissions WHERE user_id = $1",
+            r#"SELECT token FROM mm_axum_user_permissions WHERE user_id = $1"#,
         )
         .bind(id)
         .fetch_all(pool)
@@ -133,8 +134,7 @@ pub async fn mk_lib_database_user_exists(
     user_name: &String,
 ) -> Result<bool, sqlx::Error> {
     let row: (bool,) = sqlx::query_as(
-        "select exists(select 1 from mm_axum_users \
-        where username = $1 limit 1) limit 1",
+        r#"select exists(select 1 from mm_axum_users where username = $1 limit 1) limit 1"#,
     )
     .bind(user_name)
     .fetch_one(sqlx_pool)
@@ -157,23 +157,13 @@ pub async fn mk_lib_database_user_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBUserList>, sqlx::Error> {
-    let select_query = sqlx::query(
-        "select id, anonymous, username, email, last_signin, last_signoff \
-        from mm_axum_users order by LOWER(username) offset $1 limit $2",
+    let table_rows: Vec<DBUserList> = sqlx::query_as(
+        r#"select id, anonymous, username, email, last_signin, last_signoff from mm_axum_users order by LOWER(username) offset $1 limit $2"#,
     )
     .bind(offset)
-    .bind(limit);
-    let table_rows: Vec<DBUserList> = select_query
-        .map(|row: PgRow| DBUserList {
-            id: row.get("id"),
-            anonymous: row.get("anonymous"),
-            username: row.get("username"),
-            email: row.get("email"),
-            last_signin: row.get("last_signin"),
-            last_signoff: row.get("last_signoff"),
-        })
-        .fetch_all(sqlx_pool)
-        .await?;
+    .bind(limit)
+    .fetch_all(sqlx_pool)
+    .await?;
     Ok(table_rows)
 }
 
@@ -182,15 +172,16 @@ pub async fn mk_lib_database_user_count(
     user_name: String,
 ) -> Result<i64, sqlx::Error> {
     if user_name == "" {
-        let row: (i64,) = sqlx::query_as("select count(*) from mm_axum_users")
+        let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_axum_users"#)
             .fetch_one(sqlx_pool)
             .await?;
         Ok(row.0)
     } else {
-        let row: (i64,) = sqlx::query_as("select count(*) from mm_axum_users where username = $1")
-            .bind(user_name)
-            .fetch_one(sqlx_pool)
-            .await?;
+        let row: (i64,) =
+            sqlx::query_as(r#"select count(*) from mm_axum_users where username = $1"#)
+                .bind(user_name)
+                .fetch_one(sqlx_pool)
+                .await?;
         Ok(row.0)
     }
 }
@@ -200,7 +191,7 @@ pub async fn mk_lib_database_user_delete(
     user_id: i64,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query("delete from mm_axum_users where id = $1")
+    sqlx::query(r#"delete from mm_axum_users where id = $1"#)
         .bind(user_id)
         .execute(&mut *transaction)
         .await?;
@@ -213,17 +204,12 @@ pub async fn mk_lib_database_user_set_admin(
     user_id: i64,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query("insert into mm_axum_user_permissions (user_id, token) values ($1, $2)")
+    sqlx::query(r#"insert into mm_axum_user_permissions (user_id, token) values ($1, $2)"#)
         .bind(user_id)
         .bind("Admin::View")
         .execute(&mut *transaction)
         .await?;
-    // sqlx::query("insert into mm_axum_user_permissions (user_id, token) values ($1, $2)")
-    //     .bind(user_id)
-    //     .bind("Category::View")
-    //     .execute(&mut *transaction)
-    //     .await?;
-    sqlx::query("insert into mm_axum_user_permissions (user_id, token) values ($1, $2)")
+    sqlx::query(r#"insert into mm_axum_user_permissions (user_id, token) values ($1, $2)"#)
         .bind(user_id)
         .bind("User::View")
         .execute(&mut *transaction)
@@ -239,10 +225,7 @@ pub async fn mk_lib_database_user_insert(
 ) -> Result<i64, sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
     let row: (i64,) = sqlx::query_as(
-        "insert into mm_axum_users \
-        (username, password, anonymous) \
-        values ($1, crypt($2, gen_salt('bf', 10)), false) \
-        RETURNING id",
+        r#"insert into mm_axum_users (username, password, anonymous) values ($1, crypt($2, gen_salt('bf', 10)), false) RETURNING id"#,
     )
     .bind(username)
     .bind(password)
@@ -258,8 +241,7 @@ pub async fn mk_lib_database_user_login_verification(
     password: &String,
 ) -> Result<i64, sqlx::Error> {
     let row: (i64,) = sqlx::query_as(
-        "select coalesce((select id from mm_axum_users \
-        where username = $1 and password = crypt($2, password) limit 1), 0)",
+        r#"select coalesce((select id from mm_axum_users where username = $1 and password = crypt($2, password) limit 1), 0)"#,
     )
     .bind(username)
     .bind(password)
@@ -273,7 +255,7 @@ pub async fn mk_lib_database_user_login(
     user_id: i64,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query("update mm_axum_users set last_signin = now() where id = $1")
+    sqlx::query(r#"update mm_axum_users set last_signin = now() where id = $1"#)
         .bind(user_id)
         .execute(&mut *transaction)
         .await?;
@@ -286,7 +268,7 @@ pub async fn mk_lib_database_user_logout(
     user_id: i64,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query("update mm_axum_users set last_signoff = now() where id = $1")
+    sqlx::query(r#"update mm_axum_users set last_signoff = now() where id = $1"#)
         .bind(user_id)
         .execute(&mut *transaction)
         .await?;

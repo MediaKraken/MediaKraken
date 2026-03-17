@@ -1,20 +1,20 @@
 use mk_lib_database;
-use mk_lib_network;
 use mk_lib_rabbitmq;
-use serde_json::{json, Value};
+use serde_json::Value;
 use std::error::Error;
 use tokio::sync::Notify;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let sqlx_pool = mk_lib_database::mk_lib_database::mk_lib_database_open_pool_write(1, 120)
-        .await
-        .unwrap();
-    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool, false)
+    let (_sqlx_pool_rw, sqlx_pool_ro) =
+        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
+            .await
+            .unwrap();
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await;
-    let option_config_json =
-        &mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool)
+    let _option_config_json =
+        &mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool_ro)
             .await?;
 
     let (_rabbit_connection, rabbit_channel) =
@@ -31,8 +31,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {
-                let json_message: Value =
-                    serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
+                let _json_message: Value = match serde_json::from_slice(&payload) {
+                    Ok(message) => message,
+                    Err(_) => continue,
+                };
 
                 /*
                 Do I actually launch a docker swarm container that checks for cuda
@@ -164,11 +166,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             #     else if json_message["Command"] == "Stop":
                             #         os.killpg(self.proc_ffmpeg_stream.pid, signal.SIGTERM)
                              */
-                let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
-                    &rabbit_channel,
-                    msg.deliver.unwrap().delivery_tag(),
-                )
-                .await;
+                if let Some(delivery) = msg.deliver {
+                    let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
+                        &rabbit_channel,
+                        delivery.delivery_tag(),
+                    )
+                    .await;
+                }
             }
         }
     });

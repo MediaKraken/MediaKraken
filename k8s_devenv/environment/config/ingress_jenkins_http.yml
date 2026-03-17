@@ -10,10 +10,15 @@ metadata:
     "nginx.ingress.kubernetes.io/force-ssl-redirect": "true"
     "nginx.ingress.kubernetes.io/ssl-passthrough": "true"
     "nginx.ingress.kubernetes.io/backend-protocol": "HTTP"
+    cert-manager.io/cluster-issuer: "letsencrypt-cluster"
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+      - mkdevjenkins.mediakraken.media
+      secretName: letsencrypt-jenkins-priv
   rules:
-  - host: mkdevjenkins.beaverbay.local
+  - host: mkdevjenkins.mediakraken.media
     http:
       paths:
       - path: /

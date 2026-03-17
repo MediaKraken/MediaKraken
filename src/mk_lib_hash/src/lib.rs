@@ -5,3 +5,5 @@ pub mod mk_lib_hash_crc32;
 pub mod mk_lib_hash_ed2k;
 pub mod mk_lib_hash_md5;
 pub mod mk_lib_hash_sha1;
+
+mod hash_file_reader;

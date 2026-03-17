@@ -27,14 +27,24 @@ spec:
             - /wait && /mktmdbnetfetchbulk
           env:
             - name: WAIT_HOSTS
-              value: mkdbinstance.stackgres:5432, mkstack-rabbitmq-production.rabbitmq-system:5672
+              value: pgcluster-with-metrics-rw.cnpg-system:5432, mkstack-rabbitmq-production.rabbitmq-system:5672
             - name: WAIT_TIMEOUT
               value: "180"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-password
+                  key: username
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: db-password
-                  key: db-password
+                  key: password
+            - name: DEBUG
+              valueFrom:
+                secretKeyRef:
+                  name: run-env-type
+                  key: debug
           image: mediakraken/mktmdbnetfetchbulk:dev
           imagePullPolicy: Always
           name: mkstack-tmdbnetfetchbulk

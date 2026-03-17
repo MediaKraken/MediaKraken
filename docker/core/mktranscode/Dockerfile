@@ -22,31 +22,30 @@ ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig \
     DEBIAN_FRONTEND="noninteractive" \
     CARGO_INCREMENTAL=0
 
-# https://aomedia.googlesource.com/aom
-ARG AOM=v3.12.0
+# https://aomedia.googlesource.com/aom  <- this is av1
+# ARG AOM=v3.13.1
 # https://github.com/mstorsjo/fdk-aac
 ARG FDKAAC_VERSION=2.0.3
 # https://ffmpeg.org/download.html
-ARG FFMPEG_VERSION=7.1.1
+ARG FFMPEG_VERSION=8.0.1
 # FONTCONFIG=2.14.2 - 2.14.2-r3
 # FREETYPE=2.12.1 - 2.13.0-r5
-# TODO FRIBIDI=1.0.13  <- why is hebrew lang needed?
 # https://github.com/intel/gmmlib
 #ARG GMMLIB=22.3.16
 # https://github.com/intel/media-driver
 #ARG IHD=23.4.3
 # https://github.com/ultravideo/kvazaar
-ARG KVAZAAR=2.3.1
+ARG KVAZAAR=2.3.2
 # LAME=3.100 - 3.100-r5
 # LIBASS=0.17.1 - 0.17.1-r0
 # https://dri.freedesktop.org/libdrm
-ARG LIBDRM=2.4.121
+# ARG LIBDRM=2.4.131
 # https://github.com/Intel-Media-SDK/MediaSDK
 ARG LIBMFX=22.5.4
 # LIBVA=2.18.0 - 2.18.0-r1
 # LIBVDPAU=1.5 - 1.5-r1
 # https://github.com/georgmartius/vid.stab
-ARG LIBVIDSTAB=1.1.1
+# ARG LIBVIDSTAB=1.1.1 - eol basically
 # https://github.com/Netflix/vmaf
 ARG LIBVMAF=3.0.0
 # https://github.com/oneapi-src/oneVPL
@@ -67,10 +66,11 @@ ARG OPENMPT_VERSION=0.7.7+release.makefile
 # VORBIS=1.3.7 - 1.3.7-r1
 # VPX=1.13.0 -1.13.0-r1
 # https://bitbucket.org/multicoreware/x265_git
-ARG X265=4.1
+# ARG X265=4.1
 # XVID=1.3.7 - 1.3.7-r1
 
-RUN buildDeps="autoconf \
+RUN buildDeps="aom-dev \
+        autoconf \
         automake \
         bash \
         binutils \
@@ -96,6 +96,7 @@ RUN buildDeps="autoconf \
         libmodplug-dev \
         libogg-dev \
         rtmpdump-dev \
+        libdrm-dev \
         libtheora-dev \
         libtool \
         libva-dev \
@@ -116,6 +117,7 @@ RUN buildDeps="autoconf \
         speex-dev \
         soxr-dev \
         tar \
+        x265-dev \
         xvidcore-dev \
         xxd \
         xz \
@@ -138,15 +140,15 @@ RUN buildDeps="autoconf \
     #   make -j`getconf _NPROCESSORS_ONLN` && \
     #   make install
 
-    RUN echo "Begin: aom" && \
-      DIR=$(mktemp -d) && cd ${DIR} && \
-      git clone --branch ${AOM} --depth 1 https://aomedia.googlesource.com/aom && \
-      cd aom && \
-      mkdir -p aom_build && \
-      cd aom_build && \
-      cmake .. -DENABLE_EXAMPLES=0 -DENABLE_DOCS=0 -DENABLE_TESTS=0 && \
-      make -j`getconf _NPROCESSORS_ONLN` && \
-      make install      
+    # RUN echo "Begin: aom" && \
+    #   DIR=$(mktemp -d) && cd ${DIR} && \
+    #   git clone --branch ${AOM} --depth 1 https://aomedia.googlesource.com/aom && \
+    #   cd aom && \
+    #   mkdir -p aom_build && \
+    #   cd aom_build && \
+    #   cmake .. -DENABLE_EXAMPLES=0 -DENABLE_DOCS=0 -DENABLE_TESTS=0 && \
+    #   make -j`getconf _NPROCESSORS_ONLN` && \
+    #   make install
 
     # x264
     RUN echo "Begin: x264" && \
@@ -202,14 +204,14 @@ RUN buildDeps="autoconf \
       make -j`getconf _NPROCESSORS_ONLN` && \
       make install
 
-    # vistab
-    RUN echo "Begin: vistab" && \
-      DIR=$(mktemp -d) && cd ${DIR} && \
-      curl -L --insecure https://github.com/georgmartius/vid.stab/archive/refs/tags/v${LIBVIDSTAB}.tar.gz | \
-      tar -zx --strip-components=1 && \
-      cmake . && \
-      make -j`getconf _NPROCESSORS_ONLN` && \
-      make install
+    # # vistab
+    # RUN echo "Begin: vistab" && \
+    #   DIR=$(mktemp -d) && cd ${DIR} && \
+    #   curl -L --insecure https://github.com/georgmartius/vid.stab/archive/refs/tags/v${LIBVIDSTAB}.tar.gz | \
+    #   tar -zx --strip-components=1 && \
+    #   cmake . && \
+    #   make -j`getconf _NPROCESSORS_ONLN` && \
+    #   make install
 
     # # GMMLIB
     # RUN echo "Begin: gmmlib" && \
@@ -233,15 +235,15 @@ RUN buildDeps="autoconf \
     #   make install && \
     #   strip -d /usr/lib/x86_64-linux-gnu/dri/iHD_drv_video.so
 
-    # LIBDRM
-    RUN echo "Begin: libdrm" && \
-      DIR=$(mktemp -d) && cd ${DIR} && \
-      curl -Lf https://dri.freedesktop.org/libdrm/libdrm-${LIBDRM}.tar.xz | \
-      tar -xJ --strip-components=1 && \
-      meson setup --prefix=/usr --libdir=/usr/local/lib/x86_64-linux-gnu -Dvalgrind=disabled . build && \
-      ninja -C build && \
-      ninja -C build install && \
-      strip -d /usr/local/lib/x86_64-linux-gnu/libdrm*.so
+    # # LIBDRM
+    # RUN echo "Begin: libdrm" && \
+    #   DIR=$(mktemp -d) && cd ${DIR} && \
+    #   curl -Lf https://dri.freedesktop.org/libdrm/libdrm-${LIBDRM}.tar.xz | \
+    #   tar -xJ --strip-components=1 && \
+    #   meson setup --prefix=/usr --libdir=/usr/local/lib/x86_64-linux-gnu -Dvalgrind=disabled . build && \
+    #   ninja -C build && \
+    #   ninja -C build install && \
+    #   strip -d /usr/local/lib/x86_64-linux-gnu/libdrm*.so
 
     # LIBMFX
     RUN echo "Begin: libmfx" && \
@@ -298,14 +300,16 @@ RUN buildDeps="autoconf \
       make install && \
       strip -d /usr/local/lib/libmfx-gen.so
 
-    # x265
-    RUN echo "Begin: x265" && \
-      DIR=$(mktemp -d) && cd ${DIR} && \
-      curl -L --insecure https://bitbucket.org/multicoreware/x265_git/downloads/x265_${X265}.tar.gz | \
-      tar -zx --strip-components=1 && \
-      cd build/linux && \
-      ./multilib.sh && \
-      make -j`getconf _NPROCESSORS_ONLN` -C 8bit install
+    # # x265
+    # RUN echo "Begin: x265" && \
+    #   DIR=$(mktemp -d) && cd ${DIR} && \
+    #   # curl -L --insecure https://bitbucket.org/multicoreware/x265_git/downloads/x265_${X265}.tar.gz | \
+    #   # tar -zx --strip-components=1 && \
+    #   git clone --depth 1 https://bitbucket.org/multicoreware/x265_git.git  && \
+    #   cd x265_git/build/linux && \
+    #   # cd build/linux && \
+    #   ./multilib.sh && \
+    #   make -j`getconf _NPROCESSORS_ONLN` -C 8bit install
 
     # nvenc headers for ffmpeg
     RUN echo "Begin: nvenc" && \    
@@ -351,7 +355,6 @@ RUN buildDeps="autoconf \
           --enable-libtheora \
           --enable-libwebp \
           --enable-vaapi \
-          --enable-libvidstab \
           --enable-libvmaf \          
           --enable-libvorbis \
           --enable-libvpl \          
@@ -360,7 +363,7 @@ RUN buildDeps="autoconf \
           --enable-libx265 \
           --enable-libxvid \
           --enable-nonfree \
-          --enable-postproc \
+#          --enable-postproc \
           --enable-pthreads \
           --enable-shared \
           --enable-small \

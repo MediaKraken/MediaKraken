@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
 use sqlx::types::Uuid;
+use sqlx::FromRow;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaMusicVideoList {
@@ -17,40 +17,24 @@ pub async fn mk_lib_database_metadata_music_video_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMetaMusicVideoList>, sqlx::Error> {
-    let select_query;
-    if search_value != "" {
-        select_query = sqlx::query(
-            "select mm_metadata_music_video_guid, \
-            mm_metadata_music_video_band, \
-            mm_metadata_music_video_song, mm_metadata_music_video_localimage_json \
-            from mm_metadata_music_video where mm_metadata_music_video_song &@ $1 \
-            offset $2 limit $3",
+    if !search_value.is_empty() {
+        sqlx::query_as(
+            r#"select mm_metadata_music_video_guid, mm_metadata_music_video_band, mm_metadata_music_video_song, mm_metadata_music_video_localimage_json from mm_metadata_music_video where mm_metadata_music_video_song &@ $1 offset $2 limit $3"#,
         )
         .bind(search_value)
         .bind(offset)
-        .bind(limit);
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
     } else {
-        select_query = sqlx::query(
-            "select mm_metadata_music_video_guid, \
-            mm_metadata_music_video_band, \
-            mm_metadata_music_video_song, mm_metadata_music_video_localimage_json \
-            from mm_metadata_music_video order by LOWER(mm_metadata_music_video_band), \
-            LOWER(mm_metadata_music_video_song) offset $1 limit $2",
+        sqlx::query_as(
+            r#"select mm_metadata_music_video_guid, mm_metadata_music_video_band, mm_metadata_music_video_song, mm_metadata_music_video_localimage_json from mm_metadata_music_video order by LOWER(mm_metadata_music_video_band), LOWER(mm_metadata_music_video_song) offset $1 limit $2"#,
         )
         .bind(offset)
-        .bind(limit);
-    }
-    let table_rows: Vec<DBMetaMusicVideoList> = select_query
-        .map(|row: PgRow| DBMetaMusicVideoList {
-            mm_metadata_music_video_guid: row.get("mm_metadata_music_video_guid"),
-            mm_metadata_music_video_band: row.get("mm_metadata_music_video_band"),
-            mm_metadata_music_video_song: row.get("mm_metadata_music_video_song"),
-            mm_metadata_music_video_localimage_json: row
-                .get("mm_metadata_music_video_localimage_json"),
-        })
+        .bind(limit)
         .fetch_all(sqlx_pool)
-        .await?;
-    Ok(table_rows)
+        .await
+    }
 }
 
 pub async fn mk_lib_database_metadata_music_video_lookup(
@@ -59,10 +43,7 @@ pub async fn mk_lib_database_metadata_music_video_lookup(
     song_title: String,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let row: (Uuid,) = sqlx::query_as(
-        "select mm_metadata_music_video_guid \
-        from mm_metadata_music_video \
-        where lower(mm_media_music_video_band) = $1 \
-        and lower(mm_media_music_video_song) = $2",
+        r#"select mm_metadata_music_video_guid from mm_metadata_music_video where lower(mm_media_music_video_band) = $1 and lower(mm_media_music_video_song) = $2"#,
     )
     .bind(artist_name.to_lowercase())
     .bind(song_title.to_lowercase())
@@ -77,25 +58,23 @@ pub async fn mk_lib_database_metadata_music_video_count(
     imvdb_id: i32,
 ) -> Result<i64, sqlx::Error> {
     if imvdb_id == 0 {
-        if search_value != "" {
+        if !search_value.is_empty() {
             let row: (i64,) = sqlx::query_as(
-                "select count(*) from mm_metadata_music_video \
-                where mm_media_music_video_song &@ $1",
+                r#"select count(*) from mm_metadata_music_video where mm_media_music_video_song &@ $1"#,
             )
             .bind(search_value)
             .fetch_one(sqlx_pool)
             .await?;
             Ok(row.0)
         } else {
-            let row: (i64,) = sqlx::query_as("select count(*) from mm_metadata_music_video")
+            let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_metadata_music_video"#)
                 .fetch_one(sqlx_pool)
                 .await?;
             Ok(row.0)
         }
     } else {
         let row: (i64,) = sqlx::query_as(
-            "select count(*) from mm_metadata_music_video \
-            where mm_metadata_music_video_media_id->'imvdb' ? $1",
+            r#"select count(*) from mm_metadata_music_video where mm_metadata_music_video_media_id->'imvdb' ? $1"#,
         )
         .bind(imvdb_id)
         .fetch_one(sqlx_pool)
@@ -109,10 +88,7 @@ pub async fn mk_lib_database_metadata_music_video_detail(
     music_video_uuid: String,
 ) -> Result<PgRow, sqlx::Error> {
     let row: PgRow = sqlx::query(
-        "select mm_media_music_video_band, \
-        mm_media_music_video_song, mm_metadata_music_video_json, \
-        mm_metadata_music_video_localimage_json from mm_metadata_music_video \
-        where mm_metadata_music_video_guid = $1",
+        r#"select mm_media_music_video_band, mm_media_music_video_song, mm_metadata_music_video_json, mm_metadata_music_video_localimage_json from mm_metadata_music_video where mm_metadata_music_video_guid = $1"#,
     )
     .bind(music_video_uuid)
     .fetch_one(sqlx_pool)
@@ -131,13 +107,7 @@ pub async fn mk_lib_database_metadata_music_video_insert(
     let new_guid = uuid::Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
-        "insert into mm_metadata_music_video (mm_metadata_music_video_guid, \
-        mm_metadata_music_video_media_id, \
-        mm_media_music_video_band, \
-        mm_media_music_video_song, \
-        mm_metadata_music_video_json, \
-        mm_metadata_music_video_localimage_json) \
-        values ($1,$2,$3,$4,$5,$6)",
+        r#"insert into mm_metadata_music_video (mm_metadata_music_video_guid, mm_metadata_music_video_media_id, mm_media_music_video_band, mm_media_music_video_song, mm_metadata_music_video_json, mm_metadata_music_video_localimage_json) values ($1,$2,$3,$4,$5,$6)"#,
     )
     .bind(new_guid)
     .bind(id_json)
