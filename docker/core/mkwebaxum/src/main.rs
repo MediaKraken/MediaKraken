@@ -3,16 +3,16 @@ extern crate lazy_static;
 use axum::http::header;
 use axum::http::{Method, Uri};
 use axum::{
+    BoxError,
+    Extension,
+    Json,
+    Router,
     body::Body,
     extract::FromRef,
     extract::{Request, State},
     response::{IntoResponse, Response},
     //http::StatusCode,
     routing::{get, post},
-    BoxError,
-    Extension,
-    Json,
-    Router,
 };
 use axum_csrf::{CsrfConfig, CsrfToken};
 use axum_extra::routing::RouterExt;
@@ -39,9 +39,9 @@ use std::time::Duration;
 use std::{net::SocketAddr, path::PathBuf};
 use tokio::net::TcpListener;
 use tokio::signal;
-use tower::timeout::TimeoutLayer;
 use tower::ServiceExt;
-use tower::{timeout::error::Elapsed, ServiceBuilder};
+use tower::timeout::TimeoutLayer;
+use tower::{ServiceBuilder, timeout::error::Elapsed};
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::set_header::SetResponseHeaderLayer;
 
@@ -326,7 +326,8 @@ async fn main() {
         )
         .route_with_tsr(
             "/user/media/physical/{page}",
-            get(user_media::bp_media_physical::user_media_physical),
+            get(user_media::bp_media_physical::user_media_physical)
+                .post(user_media::bp_media_physical::user_media_physical_post),
         )
         .route_with_tsr(
             "/user/media/sports/{page}",
