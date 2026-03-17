@@ -2,7 +2,7 @@
   :class="$store.ui.sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'"
   x-cloak
   @click.outside="$store.ui.closeSidebar()"
-  class="fixed inset-y-0 left-0 z-40 w-64 transform
+  class="fixed inset-y-0 left-0 z-40 w-64 transform flex flex-col
          bg-white dark:bg-zinc-950 
          border-r border-zinc-200 dark:border-zinc-800
          shadow-lg md:shadow-none md:static md:inset-auto
@@ -18,7 +18,7 @@ dark:border-zinc-800 dark:text-zinc-400">
     </div>
 
     <!-- Nav -->
-    <nav class="flex-1 space-y-1 px-4 py-4">
+    <nav class="flex-1 space-y-1 px-4 py-4 overflow-y-auto">
 
         <!-- Primary -->
         <div class="pb-4">
