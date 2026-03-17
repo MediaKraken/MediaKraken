@@ -58,7 +58,7 @@ pub async fn user_media_upc_import(
 
 #[derive(Deserialize)]
 pub struct UPCInput {
-    upc_code: i32,
+    upc_code: String,
     media_type: String,
 }
 

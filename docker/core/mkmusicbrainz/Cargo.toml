@@ -16,9 +16,9 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { version = "0.0.197", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.166", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.169", registry = "kellnr" }
+mk_lib_database = { version = "0.0.199", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.168", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.171", registry = "kellnr" }
 
 reqwest = { version = "0.13.1", default-features = false, features = [
     "json",
