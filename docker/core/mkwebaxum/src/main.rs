@@ -115,9 +115,9 @@ pub mod user_media {
     pub mod bp_media_movie;
     pub mod bp_media_music;
     pub mod bp_media_music_video;
+    pub mod bp_media_physical;
     pub mod bp_media_sports;
     pub mod bp_media_tv;
-    pub mod bp_media_upc_import;
 }
 
 #[path = "user/metadata"]
@@ -325,6 +325,10 @@ async fn main() {
             get(user_media::bp_media_music_video::user_media_music_video_detail),
         )
         .route_with_tsr(
+            "/user/media/physical/{page}",
+            get(user_media::bp_media_physical::user_media_physical),
+        )
+        .route_with_tsr(
             "/user/media/sports/{page}",
             get(user_media::bp_media_sports::user_media_sports),
         )
@@ -340,11 +344,11 @@ async fn main() {
             "/user/media/tv_detail/{guid}",
             get(user_media::bp_media_tv::user_media_tv_detail),
         )
-        .route_with_tsr(
-            "/user/media/upc",
-            get(user_media::bp_media_upc_import::user_media_upc_import)
-                .post(user_media::bp_media_upc_import::user_media_upc_import_post),
-        )
+        // .route_with_tsr(
+        //     "/user/media/upc",
+        //     get(user_media::bp_media_upc_import::user_media_upc_import)
+        //         .post(user_media::bp_media_upc_import::user_media_upc_import_post),
+        // )
         .route_with_tsr(
             "/user/metadata/book/{page}",
             get(user_metadata::bp_meta_book::user_metadata_book),

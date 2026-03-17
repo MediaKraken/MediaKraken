@@ -30,7 +30,7 @@ struct TemplateMediaUPCContext {
     page_title: Option<String>,
 }
 
-pub async fn user_media_upc_import(
+pub async fn user_media_physical(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -62,7 +62,7 @@ pub struct UPCInput {
     media_type: String,
 }
 
-pub async fn user_media_upc_import_post(
+pub async fn user_media_physical_post(
      State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
@@ -128,5 +128,5 @@ pub async fn user_media_upc_import_post(
             // }
         }
     }
-    Redirect::to("/user/home")
+    Redirect::to("/user/physical/1")
 }
