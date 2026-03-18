@@ -7,6 +7,8 @@ use axum::{
 };
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
+use mk_lib_metadata::metadata_provider::amazon;
+use mk_lib_metadata::metadata_provider::ebay;
 use serde::Deserialize;
 use sqlx::postgres::PgPool;
 
@@ -145,37 +147,29 @@ fn optional_string(value: &str) -> Option<String> {
 }
 
 async fn lookup_media_by_upc(upc_code: &str) -> Result<Option<PhysicalMediaMatch>, String> {
-    let ebay_results: Result<Vec<mk_lib_metadata::provider::ebay::EbayMediaResult>, _> =
-        mk_lib_metadata::provider::ebay::provider_ebay_fetch_by_upc(upc_code).await;
-
-    match ebay_results {
+    match ebay::provider_ebay_fetch_by_upc(upc_code).await {
         Ok(results) => {
-            let first_result: Option<mk_lib_metadata::provider::ebay::EbayMediaResult> =
-                results.into_iter().next();
-            if let Some(result) = first_result {
+            if let Some(result) = results.into_iter().next() {
                 return Ok(Some(PhysicalMediaMatch {
                     upc_code: upc_code.to_string(),
                     title: result.title,
                     source: "eBay".to_string(),
-                    year: result.year.map(|year: i32| year.to_string()),
+                    year: result.year.map(|year| year.to_string()),
                     media_format: result.media_format,
                 }));
             }
         }
         Err(_) => {
-            // Fallback to Amazon below.
+            // Fall through to Amazon.
         }
     }
 
-    let amazon_result: Result<Option<mk_lib_metadata::provider::amazon::AmazonUpcResult>, _> =
-        mk_lib_metadata::provider::amazon::provider_amazon_search_by_upc(upc_code).await;
-
-    match amazon_result {
+    match amazon::provider_amazon_search_by_upc(upc_code).await {
         Ok(Some(result)) => Ok(Some(PhysicalMediaMatch {
             upc_code: upc_code.to_string(),
             title: result.title,
             source: "Amazon".to_string(),
-            year: result.year.map(|year: u16| year.to_string()),
+            year: result.year.map(|year| year.to_string()),
             media_format: result.media_format,
         })),
         Ok(None) => Ok(None),
@@ -188,10 +182,13 @@ async fn has_user_view_rights(
     auth: &AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> bool {
     let current_user = auth.current_user.clone().unwrap_or_default();
-    Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build([Method::GET], false)
-        .requires(Rights::any([Rights::permission("User::View")]))
-        .validate(&current_user, &method, None)
-        .await
+    Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET, Method::POST],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("User::View")]))
+    .validate(&current_user, &method, None)
+    .await
 }
 
 fn unauthorized_response() -> (StatusCode, axum::response::Response) {
