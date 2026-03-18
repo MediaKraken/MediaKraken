@@ -145,7 +145,10 @@ fn optional_string(value: &str) -> Option<String> {
 }
 
 async fn lookup_media_by_upc(upc_code: &str) -> Result<Option<PhysicalMediaMatch>, String> {
-    match mk_lib_metadata::provider::ebay::provider_ebay_fetch_by_upc(upc_code).await {
+    let ebay_results: Result<Vec<mk_lib_metadata::provider::ebay::EbayMediaResult>, _> =
+        mk_lib_metadata::provider::ebay::provider_ebay_fetch_by_upc(upc_code).await;
+
+    match ebay_results {
         Ok(results) => {
             if let Some(result) = results.into_iter().next() {
                 return Ok(Some(PhysicalMediaMatch {
@@ -162,7 +165,10 @@ async fn lookup_media_by_upc(upc_code: &str) -> Result<Option<PhysicalMediaMatch
         }
     }
 
-    match mk_lib_metadata::provider::amazon::provider_amazon_search_by_upc(upc_code).await {
+    let amazon_result: Result<Option<mk_lib_metadata::provider::amazon::AmazonUpcResult>, _> =
+        mk_lib_metadata::provider::amazon::provider_amazon_search_by_upc(upc_code).await;
+
+    match amazon_result {
         Ok(Some(result)) => Ok(Some(PhysicalMediaMatch {
             upc_code: upc_code.to_string(),
             title: result.title,
