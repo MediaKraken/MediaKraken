@@ -145,16 +145,25 @@ fn optional_string(value: &str) -> Option<String> {
 }
 
 async fn lookup_media_by_upc(upc_code: &str) -> Result<Option<PhysicalMediaMatch>, String> {
-    if let Ok(results) = mk_lib_metadata::provider::ebay::provider_ebay_fetch_by_upc(upc_code).await
-    {
-        if let Some(result) = results.into_iter().next() {
-            return Ok(Some(PhysicalMediaMatch {
-                upc_code: upc_code.to_string(),
-                title: result.title,
-                source: "eBay".to_string(),
-                year: result.year.map(|year: i32| year.to_string()),
-                media_format: result.media_format,
-            }));
+    let ebay_results: Result<Vec<mk_lib_metadata::provider::ebay::EbayMediaResult>, _> =
+        mk_lib_metadata::provider::ebay::provider_ebay_fetch_by_upc(upc_code).await;
+
+    match ebay_results {
+        Ok(results) => {
+            let first_result: Option<mk_lib_metadata::provider::ebay::EbayMediaResult> =
+                results.into_iter().next();
+            if let Some(result) = first_result {
+                return Ok(Some(PhysicalMediaMatch {
+                    upc_code: upc_code.to_string(),
+                    title: result.title,
+                    source: "eBay".to_string(),
+                    year: result.year.map(|year: i32| year.to_string()),
+                    media_format: result.media_format,
+                }));
+            }
+        }
+        Err(_) => {
+            // Fallback to Amazon below.
         }
     }
 
