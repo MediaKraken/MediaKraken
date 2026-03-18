@@ -150,12 +150,14 @@ async fn lookup_media_by_upc(upc_code: &str) -> Result<Option<PhysicalMediaMatch
 
     match ebay_results {
         Ok(results) => {
-            if let Some(result) = results.into_iter().next() {
+            let first_result: Option<mk_lib_metadata::provider::ebay::EbayMediaResult> =
+                results.into_iter().next();
+            if let Some(result) = first_result {
                 return Ok(Some(PhysicalMediaMatch {
                     upc_code: upc_code.to_string(),
                     title: result.title,
                     source: "eBay".to_string(),
-                    year: result.year.map(|year| year.to_string()),
+                    year: result.year.map(|year: i32| year.to_string()),
                     media_format: result.media_format,
                 }));
             }
@@ -173,7 +175,7 @@ async fn lookup_media_by_upc(upc_code: &str) -> Result<Option<PhysicalMediaMatch
             upc_code: upc_code.to_string(),
             title: result.title,
             source: "Amazon".to_string(),
-            year: result.year.map(|year| year.to_string()),
+            year: result.year.map(|year: u16| year.to_string()),
             media_format: result.media_format,
         })),
         Ok(None) => Ok(None),
