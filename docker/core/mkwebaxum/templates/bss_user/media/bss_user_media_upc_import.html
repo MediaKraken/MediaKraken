@@ -3,43 +3,127 @@
 
 {% include "bss_include_header.html" %}
 
-<body>
+<body class="min-h-screen flex flex-col bg-gray-100 text-gray-900">
+    {% include "bss_user/bss_user_include_menu.html" %}
 
-    <body class="min-h-screen flex flex-col bg-gray-100 text-gray-900">
-        <!-- Top navbar -->
-        {% include "bss_user/bss_user_include_menu.html" %}
-        <!-- Below top nav -->
-        <div class="flex flex-1">
-            <!-- Left sidebar -->
-            {% include "partials/sidebar_user.html" %}
-            <!-- Main content -->
-            <main class="flex-1 p-6 bg-gray-50 overflow-y-auto">
-                <div>
-                    <h2>Import Text File (Up to 500 Lines)</h2>
-                    <input type="file" id="fileInput" accept=".txt">
-                    <textarea id="output" placeholder="Imported lines will appear here..."></textarea>
-                    <br><br>
-                    <a href="/user/media/bss_user_media_upc_import_submit">
-                        <button type="button">Submit UPC(s)</button>
-                    </a>
-                </div>
-                {% include "bss_public/bss_public_footer.html" %}
-                <script>
-                    document.getElementById('fileInput').addEventListener('change', function () {
-                        const file = this.files[0];
-                        if (!file) return;
-                        const reader = new FileReader();
-                        reader.onload = function (e) {
-                            const lines = e.target.result.split(/\r?\n/);
-                            const first50Lines = lines.slice(0, 50).join('\n');
-                            document.getElementById('output').value = first50Lines;
-                        };
-                        reader.readAsText(file);
-                    });
-                </script>
-            </main>
-        </div>
-         
-    </body>
+    <div class="flex flex-1">
+        {% include "partials/sidebar_user.html" %}
+
+        <main class="flex-1 p-6 bg-gray-50 overflow-y-auto">
+            <div class="max-w-3xl rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
+                <h1 class="text-xl font-semibold text-zinc-900">Physical Media UPC Scan</h1>
+                <p class="mt-2 text-sm text-zinc-600">
+                    Scan or enter a UPC, then we will search eBay first and Amazon if eBay has no result.
+                </p>
+
+                <form method="post" action="/user/media/physical/1" class="mt-5 space-y-3">
+                    <label for="upc_code" class="block text-sm font-medium text-zinc-700">UPC Code</label>
+                    <input
+                        id="upc_code"
+                        name="upc_code"
+                        type="text"
+                        inputmode="numeric"
+                        autocomplete="off"
+                        value="{{ upc_code }}"
+                        placeholder="Scan UPC barcode"
+                        class="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    >
+                    <button
+                        type="submit"
+                        name="action"
+                        value="lookup"
+                        aria-label="Lookup scanned UPC"
+                        class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 active:bg-blue-800"
+                    >
+                        Lookup UPC
+                    </button>
+                </form>
+
+                {% if lookup_error.is_some() %}
+                    <div class="mt-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {{ lookup_error.as_ref().unwrap() }}
+                    </div>
+                {% endif %}
+
+                {% if confirmation_message.is_some() %}
+                    <div class="mt-4 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                        {{ confirmation_message.as_ref().unwrap() }}
+                    </div>
+                {% endif %}
+
+                {% if match_result.is_some() %}
+                    {% let matched_media = match_result.as_ref().unwrap() %}
+                    <div class="mt-6 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+                        <h2 class="text-lg font-semibold text-zinc-900">Detected Media</h2>
+                        <dl class="mt-3 space-y-2 text-sm text-zinc-700">
+                            <div>
+                                <dt class="font-medium text-zinc-900">Source</dt>
+                                <dd>{{ matched_media.source }}</dd>
+                            </div>
+                            <div>
+                                <dt class="font-medium text-zinc-900">Title</dt>
+                                <dd>{{ matched_media.title }}</dd>
+                            </div>
+                            <div>
+                                <dt class="font-medium text-zinc-900">UPC</dt>
+                                <dd>{{ matched_media.upc_code }}</dd>
+                            </div>
+                            {% if matched_media.year.is_some() %}
+                                <div>
+                                    <dt class="font-medium text-zinc-900">Year</dt>
+                                    <dd>{{ matched_media.year.as_ref().unwrap() }}</dd>
+                                </div>
+                            {% endif %}
+                            {% if matched_media.media_format.is_some() %}
+                                <div>
+                                    <dt class="font-medium text-zinc-900">Format</dt>
+                                    <dd>{{ matched_media.media_format.as_ref().unwrap() }}</dd>
+                                </div>
+                            {% endif %}
+                        </dl>
+
+                        <div class="mt-4 flex flex-wrap gap-3">
+                            <form method="post" action="/user/media/physical/1">
+                                <input type="hidden" name="upc_code" value="{{ matched_media.upc_code }}">
+                                <input type="hidden" name="match_title" value="{{ matched_media.title }}">
+                                <input type="hidden" name="match_source" value="{{ matched_media.source }}">
+                                <input type="hidden" name="match_year" value="{{ matched_media.year.as_deref().unwrap_or("") }}">
+                                <input type="hidden" name="match_media_format" value="{{ matched_media.media_format.as_deref().unwrap_or("") }}">
+                                <button
+                                    type="submit"
+                                    name="action"
+                                    value="confirm"
+                                    aria-label="Confirm detected media match"
+                                    class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 active:bg-emerald-800"
+                                >
+                                    OK Match
+                                </button>
+                            </form>
+
+                            <form method="post" action="/user/media/physical/1">
+                                <input type="hidden" name="upc_code" value="{{ matched_media.upc_code }}">
+                                <input type="hidden" name="match_title" value="{{ matched_media.title }}">
+                                <input type="hidden" name="match_source" value="{{ matched_media.source }}">
+                                <input type="hidden" name="match_year" value="{{ matched_media.year.as_deref().unwrap_or("") }}">
+                                <input type="hidden" name="match_media_format" value="{{ matched_media.media_format.as_deref().unwrap_or("") }}">
+                                <button
+                                    type="submit"
+                                    name="action"
+                                    value="flag"
+                                    aria-label="Flag detected media match as incorrect"
+                                    class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 active:bg-red-800"
+                                >
+                                    Flag Incorrect
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            {% include "bss_public/bss_public_footer.html" %}
+        </main>
+    </div>
+</body>
 
 </html>
