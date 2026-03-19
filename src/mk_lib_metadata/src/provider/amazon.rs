@@ -1,6 +1,7 @@
 use reqwest::Url;
 use select::document::Document;
 use select::predicate::{Attr, Name, Predicate};
+use std::collections::HashSet;
 
 const AMAZON_SEARCH_URL: &str = "https://www.amazon.com/s";
 const MEDIA_FORMAT_KEYWORDS: [&str; 12] = [
@@ -18,7 +19,7 @@ const MEDIA_FORMAT_KEYWORDS: [&str; 12] = [
     "digital",
 ];
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct AmazonUpcResult {
     pub title: String,
     pub year: Option<u16>,
@@ -35,27 +36,87 @@ pub async fn provider_amazon_search_by_upc(
 pub async fn provider_amazon_search_results_by_upc(
     upc_code: &str,
 ) -> Result<Vec<AmazonUpcResult>, Box<dyn std::error::Error>> {
-    let trimmed_upc = upc_code.trim();
-    if trimmed_upc.is_empty() {
+    let search_terms = build_amazon_upc_search_terms(upc_code);
+    if search_terms.is_empty() {
         return Ok(Vec::new());
     }
 
-    let mut url = Url::parse(AMAZON_SEARCH_URL)?;
-    url.query_pairs_mut().append_pair("k", trimmed_upc);
+    let client = reqwest::Client::new();
+    let mut all_results = Vec::new();
+    let mut seen_results = HashSet::new();
 
-    let html = reqwest::Client::new()
-        .get(url)
-        .header(
-            reqwest::header::USER_AGENT,
-            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-        )
-        .send()
-        .await?
-        .error_for_status()?
-        .text()
-        .await?;
+    for search_term in search_terms {
+        let mut url = Url::parse(AMAZON_SEARCH_URL)?;
+        url.query_pairs_mut().append_pair("k", &search_term);
 
-    Ok(parse_amazon_search_results(&html))
+        let html = client
+            .get(url)
+            .header(
+                reqwest::header::USER_AGENT,
+                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+            )
+            .send()
+            .await?
+            .error_for_status()?
+            .text()
+            .await?;
+
+        for result in parse_amazon_search_results(&html) {
+            if seen_results.insert(result.clone()) {
+                all_results.push(result);
+            }
+        }
+
+        if !all_results.is_empty() {
+            break;
+        }
+    }
+
+    Ok(all_results)
+}
+
+fn build_amazon_upc_search_terms(upc_code: &str) -> Vec<String> {
+    let trimmed_upc = upc_code.trim();
+    if trimmed_upc.is_empty() {
+        return Vec::new();
+    }
+
+    let digits_only: String = trimmed_upc
+        .chars()
+        .filter(|char| char.is_ascii_digit())
+        .collect();
+
+    let mut search_terms = Vec::new();
+    let mut seen_terms = HashSet::new();
+
+    for candidate in [
+        Some(trimmed_upc),
+        (!digits_only.is_empty()).then_some(digits_only.as_str()),
+    ]
+    .into_iter()
+    .flatten()
+    .flat_map(upc_search_variants)
+    {
+        if seen_terms.insert(candidate.clone()) {
+            search_terms.push(candidate);
+        }
+    }
+
+    search_terms
+}
+
+fn upc_search_variants(upc_code: &str) -> Vec<String> {
+    let mut variants = vec![upc_code.to_string()];
+
+    if upc_code.len() == 13 && upc_code.starts_with('0') {
+        variants.push(upc_code[1..].to_string());
+    }
+
+    if upc_code.len() == 14 && upc_code.starts_with("00") {
+        variants.push(upc_code[2..].to_string());
+    }
+
+    variants
 }
 
 fn parse_amazon_search_results(html: &str) -> Vec<AmazonUpcResult> {
@@ -124,6 +185,22 @@ fn format_keyword(keyword: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_build_amazon_upc_search_terms_trims_and_falls_back_to_upc_a() {
+        assert_eq!(
+            build_amazon_upc_search_terms(" 0191329268810 "),
+            vec!["0191329268810".to_string(), "191329268810".to_string()]
+        );
+    }
+
+    #[test]
+    fn test_build_amazon_upc_search_terms_deduplicates_digits_only_input() {
+        assert_eq!(
+            build_amazon_upc_search_terms("191329268810"),
+            vec!["191329268810".to_string()]
+        );
+    }
 
     #[test]
     fn test_parse_amazon_result_text() {
