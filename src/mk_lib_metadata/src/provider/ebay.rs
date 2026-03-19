@@ -1,6 +1,8 @@
 use reqwest::Url;
 use select::document::Document;
-use select::predicate::Class;
+use select::predicate::{Attr, Class, Name, Predicate};
+use serde_json::Value;
+use std::collections::BTreeSet;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EbayMediaResult {
@@ -16,37 +18,109 @@ pub async fn provider_ebay_fetch_by_upc(
     let mut search_url = Url::parse("https://www.ebay.com/sch/i.html")?;
     search_url
         .query_pairs_mut()
-        .append_pair("_nkw", upc_code.trim())
+        .append_pair("_nkw", &format!("\"{}\"", upc_code.trim()))
         .append_pair("_sop", "12");
 
     let html = reqwest::Client::new()
         .get(search_url)
-        .header(reqwest::header::USER_AGENT, 
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
+        .header(
+            reqwest::header::USER_AGENT,
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+        )
         .send()
         .await?
         .error_for_status()?
         .text()
         .await?;
 
-    let mut results = Vec::new();
-    let document = Document::from(html.as_str());
+    Ok(extract_results_from_html(&html))
+}
 
+fn extract_results_from_html(html: &str) -> Vec<EbayMediaResult> {
+    let document = Document::from(html);
+    let mut titles = BTreeSet::new();
+
+    collect_title_nodes(&document, &mut titles);
+    collect_json_ld_titles(&document, &mut titles);
+
+    titles
+        .into_iter()
+        .map(|title| {
+            let (year, media_format) = extract_year_and_media_format(&title);
+            EbayMediaResult {
+                title,
+                year,
+                media_format,
+            }
+        })
+        .collect()
+}
+
+fn collect_title_nodes(document: &Document, titles: &mut BTreeSet<String>) {
     for node in document.find(Class("s-item__title")) {
-        let title = node.text().trim().to_string();
-        if title.is_empty() || title == "Shop on eBay" {
-            continue;
-        }
-
-        let (year, media_format) = extract_year_and_media_format(&title);
-        results.push(EbayMediaResult {
-            title,
-            year,
-            media_format,
-        });
+        push_title(titles, node.text());
     }
 
-    Ok(results)
+    for node in document.find(Attr("role", "heading")) {
+        push_title(titles, node.text());
+    }
+}
+
+fn collect_json_ld_titles(document: &Document, titles: &mut BTreeSet<String>) {
+    for node in document.find(Name("script").and(Attr("type", "application/ld+json"))) {
+        let Ok(json) = serde_json::from_str::<Value>(&node.text()) else {
+            continue;
+        };
+
+        collect_titles_from_json(&json, titles);
+    }
+}
+
+fn collect_titles_from_json(value: &Value, titles: &mut BTreeSet<String>) {
+    match value {
+        Value::Array(items) => {
+            for item in items {
+                collect_titles_from_json(item, titles);
+            }
+        }
+        Value::Object(map) => {
+            if map.get("@type").and_then(Value::as_str) == Some("Product")
+                && let Some(title) = map.get("name").and_then(Value::as_str)
+            {
+                push_title(titles, title);
+            }
+
+            if let Some(item_list) = map.get("itemListElement").and_then(Value::as_array) {
+                for item in item_list {
+                    if let Some(title) = item
+                        .get("item")
+                        .and_then(|item| item.get("name"))
+                        .and_then(Value::as_str)
+                    {
+                        push_title(titles, title);
+                    }
+                }
+            }
+
+            for nested in map.values() {
+                collect_titles_from_json(nested, titles);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn push_title(titles: &mut BTreeSet<String>, title: impl AsRef<str>) {
+    let normalized = title
+        .as_ref()
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ");
+    if normalized.is_empty() || normalized == "Shop on eBay" {
+        return;
+    }
+
+    titles.insert(normalized);
 }
 
 fn extract_year_and_media_format(title: &str) -> (Option<i32>, Option<String>) {
@@ -85,7 +159,9 @@ fn detect_media_format(title: &str) -> Option<String> {
 
 #[cfg(test)]
 mod tests {
-    use super::{detect_media_format, extract_year, extract_year_and_media_format};
+    use super::{
+        detect_media_format, extract_results_from_html, extract_year, extract_year_and_media_format,
+    };
 
     #[test]
     fn extracts_year_from_title() {
@@ -112,5 +188,38 @@ mod tests {
             extract_year_and_media_format("Alien 1979 4K Ultra HD"),
             (Some(1979), Some("4K Ultra HD".to_string()))
         );
+    }
+
+    #[test]
+    fn extracts_titles_from_json_ld_when_dom_titles_are_missing() {
+        let html = r#"
+            <html>
+                <body>
+                    <script type="application/ld+json">
+                        {
+                            "@context": "https://schema.org",
+                            "@type": "ItemList",
+                            "itemListElement": [
+                                {
+                                    "@type": "ListItem",
+                                    "position": 1,
+                                    "item": {
+                                        "@type": "Product",
+                                        "name": "The Matrix 1999 Blu-ray"
+                                    }
+                                }
+                            ]
+                        }
+                    </script>
+                </body>
+            </html>
+        "#;
+
+        let results = extract_results_from_html(html);
+
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].title, "The Matrix 1999 Blu-ray");
+        assert_eq!(results[0].year, Some(1999));
+        assert_eq!(results[0].media_format.as_deref(), Some("Blu-ray"));
     }
 }
