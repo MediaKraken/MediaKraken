@@ -8,14 +8,11 @@
          shadow-lg md:shadow-none md:static md:inset-auto
          transition-transform duration-300 ease-in-out"
 >
-    <div class="flex h-16 flex-none items-center justify-center border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400">
-        <span class="text-xs font-bold uppercase tracking-widest">Media</span>
-    </div>
-
     <nav class="flex flex-1 flex-col overflow-hidden">
         
-        <div class="flex-none border-b border-zinc-200 px-4 py-4 dark:border-zinc-800">
+        <div class="flex-1 overflow-y-auto px-4 py-4 space-y-6 pb-20">
             <div class="space-y-1">
+                <h3 class="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Media</h3>
                 <a href="/user/media/new" class="flex items-center rounded-lg px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-200 dark:text-zinc-200 dark:hover:bg-zinc-800 transition-colors">
                     <span class="w-5 flex justify-center">{% include "icons/fire.svg" %}</span>
                     <span class="ml-3">New Releases</span>
@@ -29,9 +26,6 @@
                     <span class="ml-3">My Physical Media</span>
                 </a>
             </div>
-        </div>
-
-        <div class="flex-1 overflow-y-auto px-4 py-4 space-y-6 pb-20">
             
             <div class="space-y-1">
                 <h3 class="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Video</h3>
