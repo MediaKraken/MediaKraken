@@ -8,7 +8,7 @@ ENV CARGO_INCREMENTAL=0
 
 COPY Cargo.toml Cargo.toml
 COPY .cargo .cargo
-COPY mk_lib_filler .
+COPY mk_lib_filler mk_lib_filler
 
 RUN cargo chef prepare --recipe-path recipe.json
 
