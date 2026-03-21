@@ -29,7 +29,7 @@ pub async fn mk_lib_common_paginate(
 
     if total_pages > 1 {
         pagination_html.push_str(
-            r#"<nav class="mt-6 flex justify-center" aria-label="Pagination">
+            r#"<nav class="mt-6 mb-6 flex justify-center" aria-label="Pagination">
 <ul class="flex items-center gap-1 whitespace-nowrap text-sm">"#,
         );
 
