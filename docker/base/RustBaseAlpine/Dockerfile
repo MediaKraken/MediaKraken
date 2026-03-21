@@ -7,16 +7,19 @@ RUN apk update && \
   && chmod +x /wait
 
 # docker run -d --name redis-stack -p 6379:6379 -p 8001:8001 redis/redis-stack:latest
-RUN wget https://github.com/mozilla/sccache/releases/download/v0.9.1/sccache-v0.9.1-x86_64-unknown-linux-musl.tar.gz \
-    && tar xzf sccache-v0.9.1-x86_64-unknown-linux-musl.tar.gz \
-    && mv sccache-v0.9.1-x86_64-unknown-linux-musl/sccache /usr/local/bin/sccache \
-    && chmod +x /usr/local/bin/sccache
+ARG SCCACHE_VERSION=0.14.0
+RUN set -eux; \
+    wget -q "https://github.com/mozilla/sccache/releases/download/v${SCCACHE_VERSION}/sccache-v${SCCACHE_VERSION}-x86_64-unknown-linux-musl.tar.gz"; \
+    tar -xzf "sccache-v${SCCACHE_VERSION}-x86_64-unknown-linux-musl.tar.gz"; \
+    mv "sccache-v${SCCACHE_VERSION}-x86_64-unknown-linux-musl/sccache" /usr/local/bin/sccache; \
+    chmod +x /usr/local/bin/sccache; \
+    rm -rf "sccache-v${SCCACHE_VERSION}-x86_64-unknown-linux-musl.tar.gz" "sccache-v${SCCACHE_VERSION}-x86_64-unknown-linux-musl"
 
 # for layer cache later in build
 RUN cargo install cargo-chef
 
-# ENV RUSTC_WRAPPER=/usr/local/bin/sccache
-# ENV SCCACHE_REDIS="redis://mksccache:6379/mksccache"
+ENV RUSTC_WRAPPER=/usr/local/bin/sccache
+ENV SCCACHE_REDIS="redis://mksccache:6379/mksccache"
 ENV RUSTFLAGS="-C target-feature=-crt-static"
 
 # Create appuser
