@@ -41,7 +41,7 @@ ADD alpine-minirootfs-x86_64.tar.gz /
 COPY --from=cargo-build-mkopenlibrarynetfetchbulk /mediakraken/deps/* /
 
 RUN apk update && apk add --no-cache libssl3 libcrypto3 gzip \
- && rm -rf /var/cache/apt/*
+ && rm -rf /var/cache/apk/*
 
 # Import from builder.
 COPY --from=cargo-build-mkopenlibrarynetfetchbulk /etc/passwd /etc/passwd

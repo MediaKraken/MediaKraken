@@ -45,7 +45,7 @@ COPY --from=cargo-build-mksharescanner /mediakraken/deps/* /
 
 RUN apk update && apk add --no-cache nmap nmap-scripts \
   && apk add --no-cache rustscan --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing \
-  && rm -rf /var/cache/apt/*
+  && rm -rf /var/cache/apk/*
 
 # Import from builder.
 # COPY --from=cargo-build-mksharescanner /etc/passwd /etc/passwd

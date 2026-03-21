@@ -407,7 +407,7 @@ ADD alpine-minirootfs-x86_64.tar.gz /
 COPY --from=cargo-build-mktranscode /mediakraken/deps/* /
 
 RUN apk update && apk add --no-cache cifs-utils nfs-utils \
- && rm -rf /var/cache/apt/*
+ && rm -rf /var/cache/apk/*
 
 # Import from builder.
 COPY --from=cargo-build-mktranscode /etc/passwd /etc/passwd

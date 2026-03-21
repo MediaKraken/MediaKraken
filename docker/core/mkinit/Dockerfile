@@ -45,7 +45,7 @@ COPY meta.tar.gz /tmp/meta.tar.gz
 COPY --from=cargo-build-mkinit /mediakraken/deps/* /
 
 RUN apk update && apk add --no-cache gzip tar \
- && rm -rf /var/cache/apt/* \
+ && rm -rf /var/cache/apk/* \
  && chmod -R 777 /tmp
 
 # Import from builder.
