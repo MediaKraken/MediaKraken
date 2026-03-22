@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include "bss_include_header.html" %}
+
+<body class="bg-gray-100 text-gray-900">
+<div class="flex min-h-screen flex-col">
+  {% include "bss_user/bss_user_include_menu.html" %}
+
+  <div class="flex flex-1">
+    {% include "bss_admin/bss_admin_include_menu.html" %}
+
+    <main class="flex-1 p-6 space-y-6">
+      <section class="bg-white shadow rounded p-6 space-y-4">
+        <div>
+          <h2 class="text-lg font-semibold">Service Links</h2>
+          <p class="text-sm text-gray-600">Add MediaKraken servers that this instance can link to.</p>
+        </div>
+
+        <form action="/admin/server_links" method="post" class="grid gap-4 md:grid-cols-2">
+          <div class="md:col-span-2">
+            <label class="block font-medium mb-1" for="host-or-ip">Host / IP</label>
+            <input
+              id="host-or-ip"
+              name="host_or_ip"
+              type="text"
+              required
+              class="w-full border rounded px-3 py-2"
+              placeholder="192.168.1.10 or media.example.com"
+            >
+          </div>
+
+          <div>
+            <label class="block font-medium mb-1" for="server-username">Username</label>
+            <input
+              id="server-username"
+              name="username"
+              type="text"
+              required
+              class="w-full border rounded px-3 py-2"
+              autocomplete="username"
+            >
+          </div>
+
+          <div>
+            <label class="block font-medium mb-1" for="server-password">Password</label>
+            <input
+              id="server-password"
+              name="password"
+              type="password"
+              required
+              class="w-full border rounded px-3 py-2"
+              autocomplete="current-password"
+            >
+          </div>
+
+          <div class="md:col-span-2">
+            <button
+              type="submit"
+              class="inline-flex items-center rounded bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
+            >
+              Add server link
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section class="bg-white shadow rounded p-6 space-y-4">
+        <div>
+          <h3 class="text-lg font-semibold">Configured servers</h3>
+          <p class="text-sm text-gray-600">Current linked servers stored for this admin panel.</p>
+        </div>
+
+        {% if template_data.len() > 0 %}
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Host / IP</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Username</th>
+                <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Password</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 bg-white">
+              {% for link in template_data %}
+              <tr>
+                <td class="px-4 py-3 text-sm text-gray-900">{{ link.mm_link_name }}</td>
+                <td class="px-4 py-3 text-sm text-gray-900">{{ link.mm_link_username }}</td>
+                <td class="px-4 py-3 text-sm text-gray-500">Stored</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-sm text-gray-600">No linked servers have been configured yet.</p>
+        {% endif %}
+      </section>
+    </main>
+  </div>
+</div>
+
+{% include "bss_public/bss_public_footer.html" %}
+</body>
+</html>
