@@ -10,7 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_network = { version = "0.0.170", registry = "kellnr" }
+mk_lib_network = { version = "0.0.171", registry = "kellnr" }
 fltk = { version = "1.5.22", features = ["fltk-bundled"] }
 reqwest = { version = "0.12.28", default-features = false, features = [
     "json",

@@ -272,8 +272,8 @@ pub async fn provider_tmdb_meta_info_build(
             &image_file_path,
         )
         .await;
-        let _result = mk_lib_image::mk_image_file_thumb(&image_file_path);
-        poster_file_path = image_file_path;
+        let _result = mk_lib_image::mk_lib_image::mk_image_file_thumb(&image_file_path);
+        poster_file_path = image_file_path.clone();
     }
     else if result_json["images"]["profiles"][0].get("file_path").is_some() 
             && !result_json["images"]["profiles"][0]["file_path"].is_null() {
@@ -287,8 +287,8 @@ pub async fn provider_tmdb_meta_info_build(
             &image_file_path,
         )
         .await;
-        let _result = mk_lib_image::mk_image_file_thumb(&image_file_path);
-        poster_file_path = image_file_path;
+        let _result = mk_lib_image::mk_lib_image::mk_image_file_thumb(&image_file_path);
+        poster_file_path = image_file_path.clone();
     }
     // create file path for backdrop
     image_file_path = image_path::meta_image_file_path("backdrop".to_string())

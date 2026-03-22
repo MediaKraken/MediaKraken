@@ -1,3 +1,6 @@
+use std::error::Error;
+use std::path::Path;
+
 pub async fn mk_image_file_resize(
     base_image_path: &str,
     image_save_path: &str,
