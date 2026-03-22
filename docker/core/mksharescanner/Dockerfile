@@ -6,9 +6,7 @@ WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
 #ENV RUSTFLAGS="--Awarnings"
 
-COPY Cargo.toml Cargo.toml
-COPY .cargo .cargo
-COPY mk_lib_filler mk_lib_filler
+COPY . .
 
 RUN cargo chef prepare --recipe-path recipe.json
 

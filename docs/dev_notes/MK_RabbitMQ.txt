@@ -12,8 +12,8 @@ mktmdbnetfetchbulk
 content_type    application/json
 {
     "Type": "Bulk",
-    "Limit": 100000,
-    "Skip": 300000
+    "Limit": 200000,
+    "Skip": 400000
 }
 
 

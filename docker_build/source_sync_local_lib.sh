@@ -162,17 +162,17 @@
 \rsync -a alpine-minirootfs* ../docker/core/mkmediascanner/alpine-minirootfs-x86_64.tar.gz --exclude target
 
 # mkmetadata
-\rsync -a ../src/mk_lib_common/Cargo.toml ../docker/core/mkmetadata/Cargo.toml --exclude target
-\rsync -a ../src/mk_lib_compression/Cargo.toml ../docker/core/mkmetadata/Cargo.toml --exclude target
-\rsync -a ../src/mk_lib_database/Cargo.toml ../docker/core/mkmetadata/Cargo.toml --exclude target
-\rsync -a ../src/mk_lib_file/Cargo.toml ../docker/core/mkmetadata/Cargo.toml --exclude target
-\rsync -a ../src/mk_lib_hardware/Cargo.toml ../docker/core/mkmetadata/Cargo.toml --exclude target
-\rsync -a ../src/mk_lib_hash/Cargo.toml ../docker/core/mkmetadata/Cargo.toml --exclude target
-\rsync -a ../src/mk_lib_image/Cargo.toml ../docker/core/mkmetadata/Cargo.toml --exclude target
-\rsync -a ../src/mk_lib_logging/Cargo.toml ../docker/core/mkmetadata/Cargo.toml --exclude target
-\rsync -a ../src/mk_lib_metadata/Cargo.toml ../docker/core/mkmetadata/Cargo.toml --exclude target
-\rsync -a ../src/mk_lib_network/Cargo.toml ../docker/core/mkmetadata/Cargo.toml --exclude target
-\rsync -a ../src/mk_lib_rabbitmq/Cargo.toml ../docker/core/mkmetadata/Cargo.toml --exclude target
+\rsync -a ../src/mk_lib_common/Cargo.toml ../docker/core/mkmetadata/mk_lib_common/Cargo.toml --exclude target
+\rsync -a ../src/mk_lib_compression/Cargo.toml ../docker/core/mkmetadata/mk_lib_compression/Cargo.toml --exclude target
+\rsync -a ../src/mk_lib_database/Cargo.toml ../docker/core/mkmetadata/mk_lib_database/Cargo.toml --exclude target
+\rsync -a ../src/mk_lib_file/Cargo.toml ../docker/core/mkmetadata/mk_lib_file/Cargo.toml --exclude target
+\rsync -a ../src/mk_lib_hardware/Cargo.toml ../docker/core/mkmetadata/mk_lib_hardware/Cargo.toml --exclude target
+\rsync -a ../src/mk_lib_hash/Cargo.toml ../docker/core/mkmetadata/mk_lib_hash/Cargo.toml --exclude target
+\rsync -a ../src/mk_lib_image/Cargo.toml ../docker/core/mkmetadata/mk_lib_image/Cargo.toml --exclude target
+\rsync -a ../src/mk_lib_logging/Cargo.toml ../docker/core/mkmetadata/mk_lib_logging/Cargo.toml --exclude target
+\rsync -a ../src/mk_lib_metadata/Cargo.toml ../docker/core/mkmetadata/mk_lib_metadata/Cargo.toml --exclude target
+\rsync -a ../src/mk_lib_network/Cargo.toml ../docker/core/mkmetadata/mk_lib_network/Cargo.toml --exclude target
+\rsync -a ../src/mk_lib_rabbitmq/Cargo.toml ../docker/core/mkmetadata/mk_lib_rabbitmq/Cargo.toml --exclude target
 \rsync -a alpine-minirootfs* ../docker/core/mkmetadata/alpine-minirootfs-x86_64.tar.gz --exclude target
 
 # mkmetadatamame
