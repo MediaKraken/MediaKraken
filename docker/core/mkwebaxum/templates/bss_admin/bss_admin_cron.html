@@ -65,7 +65,7 @@
                   @click="confirmRun('{{ row_data.mm_cron_guid }}')"
                   class="text-indigo-600 hover:text-indigo-800"
                   title="Run Cron">
-                  <i class="fas fa-play"></i>
+                  {% include "icons/play.svg" %}
                 </button>
               </td>
               <td class="px-3 py-2 text-center">
@@ -75,7 +75,7 @@
                   @click="openEdit('{{ row_data.mm_cron_guid }}')"
                   class="text-indigo-600 hover:text-indigo-800"
                   title="Edit Cron">
-                  <i class="fas fa-pencil-alt"></i>
+                  {% include "icons/pencil.svg" %}
                 </button>
                 <script type="application/json" id="cron-json-{{ row_data.mm_cron_guid }}">{{ row_data.mm_cron_json }}</script>
                 <input type="hidden" id="cron-name-{{ row_data.mm_cron_guid }}" value="{{ row_data.mm_cron_name }}">
@@ -105,7 +105,9 @@
         </h3>
 
         <p class="text-red-600 mb-6">
-          <i class="fas fa-exclamation-triangle mr-1"></i>
+          <span class="mr-1 inline-flex align-middle">
+            {% include "icons/alert_triangle.svg" %}
+          </span>
           Are you sure you want to run this cron?
         </p>
 
