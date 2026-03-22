@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
 use sqlx::FromRow;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
@@ -37,7 +36,7 @@ pub async fn mk_lib_database_metadata_music_album_read(
     // TODO order by release year
     if search_value != String::new() {
         sqlx::query_as(
-            r#"select release.id as brainz_id, release.name as brainz_name, artist.name as brainz_artist from release, artist where artist.id = artist_credit and mm_metadata_album_name % $1 order by LOWER(name) offset $2 limit $3"#,
+            r#"select release.id as mm_metadata_album_id, release.name as mm_metadata_album_name, artist.name as mm_metadata_album_artist from release, artist where artist.id = artist_credit and release.name % $1 order by LOWER(release.name), LOWER(artist.name) offset $2 limit $3"#,
         )
         .bind(search_value)
         .bind(offset)
@@ -46,7 +45,7 @@ pub async fn mk_lib_database_metadata_music_album_read(
             .await
     } else {
         sqlx::query_as(
-            r#"select release.id as brainz_id, release.name as brainz_name, artist.name as brainz_artist from release, artist where artist.id = artist_credit order by LOWER(release.name), LOWER(artist.name) offset $1 limit $2"#,
+            r#"select release.id as mm_metadata_album_id, release.name as mm_metadata_album_name, artist.name as mm_metadata_album_artist from release, artist where artist.id = artist_credit order by LOWER(release.name), LOWER(artist.name) offset $1 limit $2"#,
         )
         .bind(offset)
         .bind(limit)
