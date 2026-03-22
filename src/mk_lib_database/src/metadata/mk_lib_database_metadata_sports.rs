@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
 use sqlx::FromRow;
+use sqlx::postgres::PgRow;
 
 pub async fn mk_lib_database_metadata_sports_count(
     sqlx_pool: &sqlx::PgPool,
@@ -34,10 +34,15 @@ pub async fn mk_lib_database_metadata_sports_read(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMetaSportsList>, sqlx::Error> {
-    // TODO order by year
     if !search_value.is_empty() {
         sqlx::query_as(
-            r#"select mm_metadata_sports_guid, mm_metadata_sports_name from mm_metadata_sports where mm_metadata_sports_guid where mm_metadata_sports_name &@ $1 offset $2 limit $3"#,
+            r#"select
+                mm_metadata_sports_guid,
+                coalesce(mm_metadata_sports_name, 'Unknown Event') as mm_metadata_sports_name
+            from mm_metadata_sports
+            where mm_metadata_sports_name &@ $1
+            order by lower(coalesce(mm_metadata_sports_name, 'Unknown Event'))
+            offset $2 limit $3"#,
         )
         .bind(search_value)
         .bind(offset)
@@ -46,8 +51,12 @@ pub async fn mk_lib_database_metadata_sports_read(
         .await
     } else {
         sqlx::query_as(
-            r#"select mm_metadata_sports_guid, mm_metadata_sports_name from mm_metadata_sports
-            order by LOWER(mm_metadata_sports_name) offset $1 limit $2"#,
+            r#"select
+                mm_metadata_sports_guid,
+                coalesce(mm_metadata_sports_name, 'Unknown Event') as mm_metadata_sports_name
+            from mm_metadata_sports
+            order by lower(coalesce(mm_metadata_sports_name, 'Unknown Event'))
+            offset $1 limit $2"#,
         )
         .bind(offset)
         .bind(limit)
