@@ -3,7 +3,6 @@ use crate::mk_lib_database;
 use askama::Template;
 use axum::{
     extract::{Form, State},
-    http::StatusCode,
     response::{Html, IntoResponse, Redirect},
 };
 use axum_flash::{Flash, IncomingFlashes};
@@ -23,7 +22,7 @@ pub async fn public_register(flashes: IncomingFlashes) -> impl IntoResponse {
             .collect(),
     };
     let reply_html = template.render().unwrap();
-    (flashes, StatusCode::OK, Html(reply_html).into_response())
+    (flashes, Html(reply_html))
 }
 
 #[derive(Deserialize)]
