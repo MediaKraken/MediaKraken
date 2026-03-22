@@ -13,6 +13,7 @@ codegen-units = 1
 mk_lib_common = { version = "0.0.169", registry = "kellnr" }
 mk_lib_database = { version = "0.0.201", registry = "kellnr" }
 mk_lib_hash = { version = "0.0.173", registry = "kellnr" }
+mk_lib_image = { version = "0.0.168", registry = "kellnr" }
 mk_lib_logging = { version = "0.0.170", registry = "kellnr" }
 mk_lib_network = { version = "0.0.170", registry = "kellnr" }
 

@@ -7,18 +7,12 @@ pub async fn meta_image_file_path(
     // This is the SAVE path.  Do NOT shorten the path to static.
     const CHARSET: &[u8] = b"abcdefghijklmnopqrstuvwxyz";
     const STRING_LEN: usize = 2;
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let file_path_random: String = (0..STRING_LEN)
-        .map(|_| {
-            let idx = rng.gen_range(0..CHARSET.len());
-            CHARSET[idx] as char
-        })
+        .map(|_| CHARSET[rng.random_range(0..CHARSET.len())] as char)
         .collect();
     let file_path_random_two: String = (0..STRING_LEN)
-        .map(|_| {
-            let idx = rng.gen_range(0..CHARSET.len());
-            CHARSET[idx] as char
-        })
+        .map(|_| CHARSET[rng.random_range(0..CHARSET.len())] as char)
         .collect();
     let file_path: String = format!(
         "/mediakraken/metadata/{}/{}/{}",

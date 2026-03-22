@@ -2,18 +2,11 @@ use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue:
 use std::error::Error;
 use torrent_name_parser::Metadata;
 
-#[path = "provider/imdb.rs"]
-mod provider_imdb;
-
-#[path = "provider/omdb.rs"]
-mod provider_omdb;
-
 #[path = "provider/tmdb.rs"]
 mod provider_tmdb;
 
 pub struct MetadataMovieLastLookup {
     metadata_last_id: uuid::Uuid,
-    metadata_last_imdb: String,
     metadata_last_tmdb: String,
 }
 

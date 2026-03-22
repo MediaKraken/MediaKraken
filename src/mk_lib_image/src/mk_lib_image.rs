@@ -17,7 +17,7 @@ pub async fn mk_image_file_resize(
     let resized_image = if image_data.width() == width && image_data.height() == height {
         image_data
     } else {
-        image_data.resize(width, height, image::imageops::FilterType::Nearest)
+        image_data.resize(width, height, image::imageops::FilterType::Lanczos3)
     };
 
     resized_image.save_with_format(image_save_path, image::ImageFormat::Png)?;

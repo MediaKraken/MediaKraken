@@ -6,7 +6,6 @@ mod provider_thesportsdb;
 
 pub struct MetadataSportsLastLookup {
     metadata_last_id: uuid::Uuid,
-    metadata_last_imdb: String,
     metadata_last_tmdb: String,
     metadata_last_thesportsdb: String,
 }
