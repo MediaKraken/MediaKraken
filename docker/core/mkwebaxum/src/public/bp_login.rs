@@ -1,29 +1,32 @@
+use crate::AppState;
 use crate::mk_lib_database;
 use askama::Template;
 use axum::{
-    extract::Form,
+    extract::{Form, State},
     http::StatusCode,
     response::{Html, IntoResponse, Redirect},
-    Extension,
 };
-use axum_flash::{Flash, IncomingFlashes, Key};
-use axum_session::{SessionConfig, SessionLayer};
+use axum_flash::{Flash, IncomingFlashes};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use serde::Deserialize;
-use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
-use validator::Validate;
-use axum::extract::State;
-use crate::AppState;
+use sqlx::postgres::PgPool;
 
 #[derive(Template)]
 #[template(path = "bss_public/bss_public_login.html")]
-struct LoginTemplate;
+struct LoginTemplate {
+    flash_messages: Vec<String>,
+}
 
-pub async fn public_login() -> impl IntoResponse {
-    let template = LoginTemplate {};
+pub async fn public_login(flashes: IncomingFlashes) -> impl IntoResponse {
+    let template = LoginTemplate {
+        flash_messages: flashes
+            .iter()
+            .map(|(_, message)| message.to_string())
+            .collect(),
+    };
     let reply_html = template.render().unwrap();
-    (StatusCode::OK, Html(reply_html).into_response())
+    (flashes, StatusCode::OK, Html(reply_html).into_response())
 }
 
 #[derive(Deserialize)]
@@ -33,11 +36,11 @@ pub struct LoginInput {
 }
 
 pub async fn public_login_post(
-     State(state): State<AppState>,
+    State(state): State<AppState>,
     mut auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
-    mut flash: Flash,
+    flash: Flash,
     Form(input_data): Form<LoginInput>,
-) -> Redirect {
+) -> (Flash, Redirect) {
     let user_id: i64 =
         mk_lib_database::mk_lib_database_user::mk_lib_database_user_login_verification(
             &state.sqlx_pool_rw,
@@ -55,8 +58,11 @@ pub async fn public_login_post(
         .await;
         auth.login_user(user_id);
         auth.remember_user(true);
+        (flash, Redirect::to("/user/home"))
     } else {
-        flash.error("Unknown user or password incorrect!");
+        (
+            flash.error("Unknown user or password incorrect!"),
+            Redirect::to("/public/login"),
+        )
     }
-    Redirect::to("/user/home")
 }
