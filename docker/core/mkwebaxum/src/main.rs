@@ -210,6 +210,10 @@ async fn main() {
             "/admin/cron_run/{guid}",
             get(admin::bp_cron::admin_cron_run),
         )
+        .route_with_tsr(
+            "/admin/cron_update",
+            post(admin::bp_cron::admin_cron_update),
+        )
         .route_with_tsr("/admin/database", get(admin::bp_database::admin_database))
         .route_with_tsr(
             "/admin/game_servers/{page}",

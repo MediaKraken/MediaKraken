@@ -60,6 +60,8 @@
               </td>
               <td class="px-3 py-2 text-center">
                 <button
+                  type="button"
+                  aria-label="Run cron {{ row_data.mm_cron_name }}"
                   @click="confirmRun('{{ row_data.mm_cron_guid }}')"
                   class="text-indigo-600 hover:text-indigo-800"
                   title="Run Cron">
@@ -68,14 +70,19 @@
               </td>
               <td class="px-3 py-2 text-center">
                 <button
-                  @click="openEdit(
-                    '{{ row_data.mm_cron_guid }}',
-                    '{{ row_data.mm_cron_name }}'
-                  )"
+                  type="button"
+                  aria-label="Edit cron {{ row_data.mm_cron_name }}"
+                  @click="openEdit('{{ row_data.mm_cron_guid }}')"
                   class="text-indigo-600 hover:text-indigo-800"
                   title="Edit Cron">
                   <i class="fas fa-pencil-alt"></i>
                 </button>
+                <script type="application/json" id="cron-json-{{ row_data.mm_cron_guid }}">{{ row_data.mm_cron_json }}</script>
+                <input type="hidden" id="cron-name-{{ row_data.mm_cron_guid }}" value="{{ row_data.mm_cron_name }}">
+                <input type="hidden" id="cron-description-{{ row_data.mm_cron_guid }}" value="{{ row_data.mm_cron_description }}">
+                <input type="hidden" id="cron-enabled-{{ row_data.mm_cron_guid }}" value="{{ row_data.mm_cron_enabled }}">
+                <input type="hidden" id="cron-schedule-type-{{ row_data.mm_cron_guid }}" value="{{ row_data.mm_cron_schedule_type }}">
+                <input type="hidden" id="cron-schedule-time-{{ row_data.mm_cron_guid }}" value="{{ row_data.mm_cron_schedule_time }}">
               </td>
             </tr>
             {% endfor %}
@@ -87,7 +94,6 @@
       {% endif %}
     </section>
 
-    <!-- Run Confirmation Modal -->
     <div
       x-show="showRunConfirm"
       x-cloak
@@ -105,11 +111,13 @@
 
         <div class="flex justify-end gap-3">
           <button
+            type="button"
             @click="runCron"
             class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
             Yes
           </button>
           <button
+            type="button"
             @click="showRunConfirm=false"
             class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
             No
@@ -118,50 +126,102 @@
       </div>
     </div>
 
-    <!-- Edit Cron Modal -->
     <div
       x-show="showEdit"
       x-cloak
-      class="fixed inset-0 bg-black/50 flex items-center justify-center">
+      class="fixed inset-0 bg-black/50 flex items-center justify-center px-4 py-8">
 
-      <div class="bg-white rounded shadow-lg w-full max-w-lg p-6">
+      <div class="bg-white rounded shadow-lg w-full max-w-2xl p-6 max-h-full overflow-y-auto">
         <h3 class="text-lg font-semibold mb-4">
           Update Cron
         </h3>
 
-        <form class="space-y-4">
+        <form class="space-y-4" @submit.prevent="updateCron">
+          <div x-show="editError" x-text="editError" class="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"></div>
+
           <div>
-            <label class="block text-sm font-medium mb-1">
-              Path
+            <label class="block text-sm font-medium mb-1" for="cron-name">
+              Name
             </label>
             <input
+              id="cron-name"
               type="text"
-              x-model="editPath"
+              x-model="editName"
               class="w-full border rounded px-3 py-2">
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-1">
-              Media Class
+            <label class="block text-sm font-medium mb-1" for="cron-description">
+              Description
             </label>
             <textarea
-              x-model="editClass"
+              id="cron-description"
+              x-model="editDescription"
               class="w-full border rounded px-3 py-2"></textarea>
           </div>
-        </form>
 
-        <div class="flex justify-end gap-3 mt-6">
-          <button
-            @click="showEdit=false"
-            class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
-            Close
-          </button>
-          <button
-            @click="updateCron"
-            class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
-            Update
-          </button>
-        </div>
+          <div class="grid gap-4 md:grid-cols-2">
+            <div>
+              <label class="block text-sm font-medium mb-1" for="cron-schedule-type">
+                Schedule Type
+              </label>
+              <select
+                id="cron-schedule-type"
+                x-model="editScheduleType"
+                class="w-full border rounded px-3 py-2">
+                <option value="Week(s)">Week(s)</option>
+                <option value="Day(s)">Day(s)</option>
+                <option value="Hour(s)">Hour(s)</option>
+                <option value="Minute(s)">Minute(s)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1" for="cron-schedule-time">
+                Schedule Time
+              </label>
+              <input
+                id="cron-schedule-time"
+                type="number"
+                min="1"
+                step="1"
+                x-model="editScheduleTime"
+                class="w-full border rounded px-3 py-2">
+            </div>
+          </div>
+
+          <label class="flex items-center gap-2 text-sm font-medium">
+            <input type="checkbox" x-model="editEnabled" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+            Enabled
+          </label>
+
+          <div>
+            <label class="block text-sm font-medium mb-1" for="cron-json">
+              JSON Payload
+            </label>
+            <textarea
+              id="cron-json"
+              x-model="editJson"
+              rows="10"
+              class="w-full border rounded px-3 py-2 font-mono text-xs"></textarea>
+          </div>
+
+          <div class="flex justify-end gap-3 mt-6">
+            <button
+              type="button"
+              @click="closeEdit"
+              class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
+              Close
+            </button>
+            <button
+              type="submit"
+              :disabled="isSaving"
+              class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300">
+              <span x-show="!isSaving">Update</span>
+              <span x-show="isSaving">Saving...</span>
+            </button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -175,9 +235,15 @@ function cronPage() {
   return {
     showRunConfirm: false,
     showEdit: false,
+    isSaving: false,
     selectedGuid: null,
-    editPath: '',
-    editClass: '',
+    editName: '',
+    editDescription: '',
+    editEnabled: false,
+    editScheduleType: 'Hour(s)',
+    editScheduleTime: '1',
+    editJson: '',
+    editError: '',
 
     confirmRun(guid) {
       this.selectedGuid = guid
@@ -188,16 +254,61 @@ function cronPage() {
       window.location.href = `/admin/cron_run/${this.selectedGuid}`
     },
 
-    openEdit(guid, name) {
+    openEdit(guid) {
       this.selectedGuid = guid
-      this.editPath = name
-      this.editClass = ''
+      this.editName = document.getElementById(`cron-name-${guid}`)?.value ?? ''
+      this.editDescription = document.getElementById(`cron-description-${guid}`)?.value ?? ''
+      this.editEnabled = (document.getElementById(`cron-enabled-${guid}`)?.value ?? '') === 'true'
+      this.editScheduleType = document.getElementById(`cron-schedule-type-${guid}`)?.value ?? 'Hour(s)'
+      this.editScheduleTime = document.getElementById(`cron-schedule-time-${guid}`)?.value ?? '1'
+      this.editJson = document.getElementById(`cron-json-${guid}`)?.textContent?.trim() ?? ''
+      this.editError = ''
       this.showEdit = true
     },
 
-    updateCron() {
-      console.log('Update cron:', this.selectedGuid, this.editPath, this.editClass)
+    closeEdit() {
       this.showEdit = false
+      this.editError = ''
+      this.isSaving = false
+    },
+
+    async updateCron() {
+      this.isSaving = true
+      this.editError = ''
+
+      const payload = new URLSearchParams({
+        guid: this.selectedGuid,
+        name: this.editName,
+        description: this.editDescription,
+        schedule_type: this.editScheduleType,
+        schedule_time: this.editScheduleTime,
+        cron_json: this.editJson,
+      })
+
+      if (this.editEnabled) {
+        payload.append('enabled', 'on')
+      }
+
+      try {
+        const response = await fetch('/admin/cron_update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+          },
+          body: payload.toString(),
+        })
+
+        if (!response.ok) {
+          this.editError = await response.text()
+          return
+        }
+
+        window.location.reload()
+      } catch (_error) {
+        this.editError = 'Unable to update cron entry.'
+      } finally {
+        this.isSaving = false
+      }
     }
   }
 }
