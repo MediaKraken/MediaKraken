@@ -1,13 +1,13 @@
 use serde::{Deserialize, Serialize};
-use sqlx::types::Uuid;
 use sqlx::FromRow;
+use sqlx::types::Uuid;
 
 pub async fn mk_lib_database_link_delete(
     sqlx_pool: &sqlx::PgPool,
     link_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query(r#"delete from mm_link where mm_link_guid = $1"#)
+    sqlx::query(r#"delete from mm_library_link where mm_link_guid = $1"#)
         .bind(link_uuid)
         .execute(&mut *transaction)
         .await?;
@@ -20,6 +20,8 @@ pub struct DBLinkList {
     pub mm_link_guid: uuid::Uuid,
     pub mm_link_name: String,
     pub mm_link_json: serde_json::Value,
+    pub mm_link_username: String,
+    pub mm_link_password: String,
 }
 
 pub async fn mk_lib_database_link_read(
@@ -28,7 +30,7 @@ pub async fn mk_lib_database_link_read(
     records: i64,
 ) -> Result<Vec<DBLinkList>, sqlx::Error> {
     let table_rows: Vec<DBLinkList> = sqlx::query_as(
-        r#"select mm_link_guid, mm_link_name, mm_link_json from mm_link order by mm_link_name offset $1 limit $2"#,
+        r#"select mm_link_guid, coalesce(mm_link_name, '') as mm_link_name, coalesce(mm_link_json, '{}'::jsonb) as mm_link_json, coalesce(mm_link_username, '') as mm_link_username, coalesce(mm_link_password, '') as mm_link_password from mm_library_link order by mm_link_name offset $1 limit $2"#,
     )
     .bind(offset)
     .bind(records)
@@ -39,15 +41,23 @@ pub async fn mk_lib_database_link_read(
 
 pub async fn mk_lib_database_link_insert(
     sqlx_pool: &sqlx::PgPool,
+    host_or_ip: String,
+    username: String,
+    password: String,
     link_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let new_guid = Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query(r#"insert into mm_link (mm_link_guid, mm_link_json) values ($1, $2)"#)
-        .bind(new_guid)
-        .bind(link_json)
-        .execute(&mut *transaction)
-        .await?;
+    sqlx::query(
+        r#"insert into mm_library_link (mm_link_guid, mm_link_name, mm_link_json, mm_link_username, mm_link_password) values ($1, $2, $3, $4, $5)"#,
+    )
+    .bind(new_guid)
+    .bind(host_or_ip)
+    .bind(link_json)
+    .bind(username)
+    .bind(password)
+    .execute(&mut *transaction)
+    .await?;
     transaction.commit().await?;
     Ok(new_guid)
 }

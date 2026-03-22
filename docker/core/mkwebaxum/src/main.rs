@@ -60,6 +60,7 @@ pub mod admin {
     pub mod bp_library;
     pub mod bp_logging;
     pub mod bp_reports;
+    pub mod bp_server_links;
     pub mod bp_settings;
     pub mod bp_torrent;
     pub mod bp_user;
@@ -228,6 +229,11 @@ async fn main() {
             get(admin::bp_library::admin_library_share_scan),
         )
         //.post(admin::bp_library::admin_library_post))
+        .route_with_tsr(
+            "/admin/server_links",
+            get(admin::bp_server_links::admin_server_links)
+                .post(admin::bp_server_links::admin_server_links_post),
+        )
         .route_with_tsr("/admin/settings", get(admin::bp_settings::admin_settings))
         .route_with_tsr(
             "/admin/report_known_media/{page}",
