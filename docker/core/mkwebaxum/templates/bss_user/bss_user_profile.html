@@ -1,81 +1,73 @@
 {% extends "layouts/base_user.html" %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <h3 class="text-dark mb-4">Profile</h3>
-    <div class="row mb-3">
-        <div class="col-lg-4">
-            <div class="card mb-3">
-                <div class="card-body text-center shadow"><img class="rounded-circle mb-3 mt-4"
-                        src="/static/image/K3.png" width="160" height="160">
-                    <div class="mb-3"><button class="btn btn-primary btn-sm" type="button">Change
-                            Photo</button></div>
-                </div>
+<div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">Profile</h1>
+        <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+            Update the profile photo shown for your MediaKraken account.
+        </p>
+    </div>
+
+    {% if let Some(message) = success_message %}
+    <div class="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-300">
+        {{ message }}
+    </div>
+    {% endif %}
+
+    {% if let Some(message) = error_message %}
+    <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300">
+        {{ message }}
+    </div>
+    {% endif %}
+
+    <div class="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+        <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <div x-data="{ previewUrl: '{{ profile_image_url }}' }" class="flex flex-col items-center text-center">
+                <img x-bind:src="previewUrl"
+                     src="{{ profile_image_url }}"
+                     alt="Current profile picture for {{ username }}"
+                     class="h-40 w-40 rounded-full border border-zinc-200 object-cover shadow-sm dark:border-zinc-700">
+                <p class="mt-4 text-lg font-medium text-zinc-900 dark:text-zinc-100">{{ username }}</p>
+                <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Recommended formats: PNG, JPEG, GIF, or WebP up to 5 MB.</p>
+
+                <form class="mt-6 flex w-full flex-col gap-4" action="/user/profile/photo" method="post" enctype="multipart/form-data">
+                    <label for="profile_image" class="text-left text-sm font-medium text-zinc-700 dark:text-zinc-200">
+                        Choose a new profile picture
+                    </label>
+                    <input id="profile_image"
+                           name="profile_image"
+                           type="file"
+                           accept="image/png,image/jpeg,image/gif,image/webp"
+                           aria-label="Choose a new profile picture"
+                           class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-indigo-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:file:bg-indigo-500 dark:hover:file:bg-indigo-400"
+                           x-on:change="const [file] = $event.target.files; if (file) { previewUrl = URL.createObjectURL(file); }">
+                    <button type="submit"
+                            aria-label="Upload new profile picture"
+                            class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-offset-zinc-900">
+                        Save profile picture
+                    </button>
+                </form>
             </div>
-            <div class="card shadow mb-4"></div>
-        </div>
-        <div class="col-lg-8">
-            <div class="row mb-3 d-none">
-                <div class="col">
-                    <div class="card text-white bg-primary shadow">
-                        <div class="card-body">
-                            <div class="row mb-2">
-                                <div class="col">
-                                    <p class="m-0">Peformance</p>
-                                    <p class="m-0"><strong>65.2%</strong></p>
-                                </div>
-                                <div class="col-auto"><i class="fas fa-rocket fa-2x"></i></div>
-                            </div>
-                            <p class="text-white-50 small m-0"><i class="fas fa-arrow-up"></i>&nbsp;5%
-                                since last month</p>
-                        </div>
-                    </div>
+        </section>
+
+        <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Photo settings</h2>
+            <dl class="mt-6 space-y-4 text-sm text-zinc-600 dark:text-zinc-300">
+                <div>
+                    <dt class="font-medium text-zinc-900 dark:text-zinc-100">Username</dt>
+                    <dd class="mt-1">{{ username }}</dd>
                 </div>
-                <div class="col">
-                    <div class="card text-white bg-success shadow">
-                        <div class="card-body">
-                            <div class="row mb-2">
-                                <div class="col">
-                                    <p class="m-0">Peformance</p>
-                                    <p class="m-0"><strong>65.2%</strong></p>
-                                </div>
-                                <div class="col-auto"><i class="fas fa-rocket fa-2x"></i></div>
-                            </div>
-                            <p class="text-white-50 small m-0"><i class="fas fa-arrow-up"></i>&nbsp;5%
-                                since last month</p>
-                        </div>
-                    </div>
+                <div>
+                    <dt class="font-medium text-zinc-900 dark:text-zinc-100">Current image path</dt>
+                    <dd class="mt-1 break-all">{{ profile_image_url }}</dd>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <div class="card shadow mb-3">
-                        <div class="card-header py-3">
-                            <p class="text-primary m-0 font-weight-bold">User Settings</p>
-                        </div>
-                        <div class="card-body">
-                            <form>
-                                <div class="form-row">
-                                    <div class="col">
-                                        <div class="form-group"><label
-                                                for="username"><strong>Username</strong></label><input
-                                                class="form-control" type="text" placeholder="Username"
-                                                name="username"></div>
-                                        <div class="form-group"><label for="email"><strong>Email
-                                                    Address</strong></label><input class="form-control"
-                                                type="email" placeholder="user@example.com"
-                                                name="email"></div>
-                                    </div>
-                                </div>
-                                <div class="form-group"><button class="btn btn-primary btn-sm"
-                                        type="submit">Save Settings</button></div>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="card shadow"></div>
+                <div>
+                    <dt class="font-medium text-zinc-900 dark:text-zinc-100">How this works</dt>
+                    <dd class="mt-1">Uploading a new image replaces your existing saved profile picture and updates the profile page immediately.</dd>
                 </div>
-            </div>
-        </div>
+            </dl>
+        </section>
     </div>
 </div>
 {% endblock %}

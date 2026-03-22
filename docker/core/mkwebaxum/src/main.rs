@@ -445,6 +445,10 @@ async fn main() {
         .route_with_tsr("/user/hardware", get(user::bp_hardware::user_hardware))
         .route_with_tsr("/user/home", get(user::bp_home::user_home))
         .route_with_tsr("/user/profile", get(user::bp_profile::user_profile))
+        .route(
+            "/user/profile/photo",
+            post(user::bp_profile::user_profile_photo_post),
+        )
         .route_with_tsr("/user/queue", get(user::bp_queue::user_queue))
         //.route_with_tsr("/user/search", get(user::bp_search::user_search))
         .route("/user/search", get(user::bp_search::search_handler))
