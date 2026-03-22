@@ -82,7 +82,7 @@ pub async fn admin_server_links_post(
     {
         let template = TemplateError403Context {};
         let reply_html = template.render().unwrap();
-        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response()).into_response()
     } else {
         let host_or_ip = input_data.host_or_ip.trim();
         let username = input_data.username.trim();
