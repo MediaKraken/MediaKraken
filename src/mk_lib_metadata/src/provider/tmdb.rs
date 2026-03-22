@@ -271,6 +271,7 @@ pub async fn provider_tmdb_meta_info_build(
             &image_file_path,
         )
         .await;
+       // TODO generate thumbnail here as well since these are usually huge and I don't want to generate them on the fly later
         poster_file_path = image_file_path;
     }
     else if result_json["images"]["profiles"][0].get("file_path").is_some() 
@@ -285,6 +286,7 @@ pub async fn provider_tmdb_meta_info_build(
             &image_file_path,
         )
         .await;
+        // TODO generate thumbnail here as well since these are usually huge and I don't want to generate them on the fly later
         poster_file_path = image_file_path;
     }
     // create file path for backdrop
