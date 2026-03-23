@@ -15,6 +15,7 @@
     </title>
     
     <link rel="stylesheet" href="/static/css/base_webapp_9.css">
+    {% block extra_head %}{% endblock %}
     
     <style>
         [x-cloak] { display: none !important; }
@@ -76,6 +77,7 @@
         </main>
     </div>
     
+    {% block extra_scripts %}{% endblock %}
 </body>
 
 <script defer>

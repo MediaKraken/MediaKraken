@@ -1,5 +1,100 @@
 {% extends "layouts/base_user.html" %}
 
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css">
+{% endblock %}
+
 {% block content %}
-<div></div>
+<section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="mb-8 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <p class="text-sm font-semibold uppercase tracking-[0.3em] text-sky-600 dark:text-sky-400">Image Gallery</p>
+        <h1 class="mt-2 text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">PhotoSwipe demo gallery</h1>
+        <p class="mt-3 max-w-3xl text-sm leading-6 text-zinc-600 dark:text-zinc-300">
+            Browse a small image gallery rendered by Askama and enhanced with PhotoSwipe for zoom, swipe gestures, and keyboard navigation.
+        </p>
+    </div>
+
+    <div id="media-gallery" class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        <a
+            href="/static/image/K3.png"
+            data-pswp-width="1484"
+            data-pswp-height="1484"
+            data-cropped="true"
+            target="_blank"
+            rel="noreferrer"
+            class="group overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
+        >
+            <img
+                src="/static/image/K3.png"
+                alt="K3 gallery artwork"
+                class="h-64 w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                loading="lazy"
+                decoding="async"
+            >
+            <div class="space-y-2 p-4">
+                <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">K3</h2>
+                <p class="text-sm text-zinc-600 dark:text-zinc-300">Large square artwork to show PhotoSwipe zoom and drag behavior.</p>
+            </div>
+        </a>
+
+        <a
+            href="/static/image/theater.png"
+            data-pswp-width="512"
+            data-pswp-height="512"
+            data-cropped="true"
+            target="_blank"
+            rel="noreferrer"
+            class="group overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
+        >
+            <img
+                src="/static/image/theater.png"
+                alt="Theater icon artwork"
+                class="h-64 w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                loading="lazy"
+                decoding="async"
+            >
+            <div class="space-y-2 p-4">
+                <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Theater</h2>
+                <p class="text-sm text-zinc-600 dark:text-zinc-300">Existing local artwork served from mkwebaxum static assets.</p>
+            </div>
+        </a>
+
+        <a
+            href="/static/image/photo.png"
+            data-pswp-width="512"
+            data-pswp-height="512"
+            data-cropped="true"
+            target="_blank"
+            rel="noreferrer"
+            class="group overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
+        >
+            <img
+                src="/static/image/photo.png"
+                alt="Photo icon artwork"
+                class="h-64 w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                loading="lazy"
+                decoding="async"
+            >
+            <div class="space-y-2 p-4">
+                <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Photo</h2>
+                <p class="text-sm text-zinc-600 dark:text-zinc-300">A simple local image tile that opens in the PhotoSwipe lightbox.</p>
+            </div>
+        </a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script type="module">
+    import PhotoSwipeLightbox from 'https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.min.js';
+
+    const lightbox = new PhotoSwipeLightbox({
+        gallery: '#media-gallery',
+        children: 'a',
+        pswpModule: () => import('https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.esm.min.js'),
+        showHideAnimationType: 'zoom'
+    });
+
+    lightbox.init();
+</script>
 {% endblock %}
