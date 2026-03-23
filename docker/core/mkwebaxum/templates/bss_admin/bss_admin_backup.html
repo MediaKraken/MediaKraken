@@ -95,15 +95,15 @@
                 </td>
                 <td class="px-3 py-2">
                   <a href={{ "/admin/bss_admin_backup_restore/{:?}" | format(row_data.mm_backup_guid) }}
-                     class="text-indigo-600 hover:text-indigo-800">
-                    <i class="fas fa-play"></i>
+                     class="text-indigo-600 hover:text-indigo-800" aria-label="Restore backup">
+                    {% include "icons/play.svg" %}
                   </a>
                 </td>
                 <td class="px-3 py-2">
                   <button
                     @click="openDelete('{{ row_data.mm_backup_guid }}')"
-                    class="text-red-600 hover:text-red-800">
-                    <i class="fas fa-trash-alt"></i>
+                    class="text-red-600 hover:text-red-800" aria-label="Delete backup">
+                    {% include "icons/trash.svg" %}
                   </button>
                 </td>
               </tr>
@@ -126,7 +126,7 @@
         <h3 class="text-lg font-semibold mb-3">Delete Backup</h3>
 
         <p class="text-red-600 mb-6">
-          <i class="fas fa-exclamation-triangle mr-1"></i>
+          <span class="mr-1 inline-flex align-middle">{% include "icons/alert_triangle.svg" %}</span>
           Are you sure you want to delete this backup?
         </p>
 

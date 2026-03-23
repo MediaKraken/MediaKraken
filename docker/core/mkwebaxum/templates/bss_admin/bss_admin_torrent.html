@@ -43,12 +43,12 @@
                                 <td class="px-4 py-2 text-sm" x-text="formatBytes(torrent.size)"></td>
                                 <td class="px-4 py-2 text-center">
                                     <button @click="editTorrent(torrent)" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">
-                                        <i class="fas fa-pencil-alt"></i> Edit
+                                        <span class="mr-1 inline-flex align-middle">{% include "icons/pencil.svg" %}</span> Edit
                                     </button>
                                 </td>
                                 <td class="px-4 py-2 text-center">
                                     <button @click="confirmDelete(torrent)" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
-                                        <i class="fas fa-trash-alt"></i> Delete
+                                        <span class="mr-1 inline-flex align-middle">{% include "icons/trash.svg" %}</span> Delete
                                     </button>
                                 </td>
                             </tr>
