@@ -1,0 +1,8 @@
+<svg
+  class="h-6 w-6"
+  viewBox="0 0 24 24"
+  fill="currentColor"
+  aria-hidden="true"
+>
+  <path d="M9 4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1h2.5A1.5 1.5 0 0 1 19 6.5V9h1a1 1 0 1 1 0 2h-1v2h1a1 1 0 1 1 0 2h-1v2.5a1.5 1.5 0 0 1-1.5 1.5H15v1a1 1 0 1 1-2 0v-1h-2v1a1 1 0 1 1-2 0v-1H6.5A1.5 1.5 0 0 1 5 17.5V15H4a1 1 0 1 1 0-2h1v-2H4a1 1 0 1 1 0-2h1V6.5A1.5 1.5 0 0 1 6.5 5H9V4Zm-2 3v10h10V7H7Zm2 2h6v6H9V9Z"/>
+</svg>
