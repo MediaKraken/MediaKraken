@@ -55,10 +55,18 @@ pub async fn api_title_search(
     } else {
         let title = title.replace("%20", " ");
         let movie_metadata = mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(
-        &state.sqlx_pool_ro, title.clone(), current_user.id, "a".to_string(), String::new(), 0, 100
-    )
-    .await
-    .unwrap();
+            &state.sqlx_pool_ro,
+            title.clone(),
+            current_user.id,
+            "a".to_string(),
+            String::new(),
+            String::new(),
+            String::new(),
+            0,
+            100,
+        )
+        .await
+        .unwrap();
         let tv_metadata = mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_read(
         &state.sqlx_pool_ro, title.clone(), 0, 100
     )
