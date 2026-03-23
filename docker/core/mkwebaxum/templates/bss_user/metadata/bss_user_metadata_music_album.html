@@ -1,32 +1,50 @@
 {% extends "layouts/base_user.html" %}
 
 {% block content %}
-<div>
-        <div>
-            {% if template_data_exists %}
-            {% if pagination_bar != "" %}
-            {{ pagination_bar|safe }}
-            {% endif %}
-            <div id="the-node">
-                {% for row_data in template_data %}
-                <div class="main_photo">
-                    <div class="media_context_right" data-id={{row_data.mm_metadata_album_id}}>
-                        <a href="/user/metadata/music_album_detail/{{row_data.mm_metadata_album_id}}">
-                            <img src="/static/image/headphone.png" loading="lazy" decoding="async" height="300" width="300">
-                        </a>
-                        <div class="description">
-                            <p class="description_content_left">{{row_data.mm_metadata_album_artist}} - {{row_data.mm_metadata_album_name}}</p>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% if pagination_bar != "" %}
-            {{ pagination_bar|safe }}
-            {% endif %}
-            {% else %}
-            <p id="general_text">No music album metadata found.</p>
-            {% endif %}
+<section class="w-full px-0 py-4 text-zinc-900 dark:text-zinc-100">
+  <h1 id="music-grid-heading" class="sr-only">Music album list</h1>
+
+  {% if template_data_exists %}
+  {% if pagination_bar != "" %}
+  {{ pagination_bar|safe }}
+  {% endif %}
+  <ul role="list" class="grid gap-4 sm:gap-5
+     grid-cols-2
+     sm:grid-cols-3
+     md:grid-cols-4
+     lg:grid-cols-5
+     xl:grid-cols-6">
+    {% for row_data in template_data %}
+    <li class="group relative overflow-hidden rounded-xl border border-transparent bg-white shadow-sm transition-all duration-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+      <a href="/user/metadata/music_album_detail/{{row_data.mm_metadata_album_id}}" class="block h-full">
+        <div class="relative aspect-square overflow-hidden rounded-t-xl bg-zinc-100 dark:bg-zinc-800">
+          <img
+            src="/static/image/headphone.png"
+            alt="Album artwork placeholder for {{ row_data.mm_metadata_album_artist }} - {{ row_data.mm_metadata_album_name }}"
+            loading="lazy"
+            decoding="async"
+            width="300"
+            height="300"
+            class="h-full w-full object-contain p-8 transition-transform duration-300 group-hover:scale-[1.02]" />
         </div>
-    </div>
+
+        <div class="space-y-1 p-3">
+          <h2 class="text-sm font-bold leading-tight text-zinc-900 line-clamp-2 dark:text-zinc-100">
+            {{ row_data.mm_metadata_album_name }}
+          </h2>
+          <p class="text-[11px] text-zinc-500 line-clamp-2 dark:text-zinc-400">
+            {{ row_data.mm_metadata_album_artist }}
+          </p>
+        </div>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% if pagination_bar != "" %}
+  {{ pagination_bar|safe }}
+  {% endif %}
+  {% else %}
+  <p class="text-sm text-zinc-500 dark:text-zinc-400">No music album metadata found.</p>
+  {% endif %}
+</section>
 {% endblock %}
