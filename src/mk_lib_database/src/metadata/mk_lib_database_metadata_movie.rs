@@ -41,6 +41,8 @@ pub async fn mk_lib_database_metadata_movie_read(
     user_id: i64,
     starts_with: String,
     genre_name: String,
+    primary_language: String,
+    status_filter: String,
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMetaMovieList>, sqlx::Error> {
@@ -74,12 +76,22 @@ pub async fn mk_lib_database_metadata_movie_read(
                     WHERE lower(genre->>'name') = lower($4)
                 )
              )
-             offset $5 limit $6"#,
+             AND (
+                $5 = ''
+                OR lower(mm_metadata_movie_json->>'original_language') = lower($5)
+             )
+             AND (
+                $6 = ''
+                OR COALESCE((mm_status_user_json->>$6)::boolean, false)
+             )
+             offset $7 limit $8"#,
         )
         .bind(&user_id)
          .bind(&search_value)
         .bind(&search_value)
         .bind(&genre_name)
+        .bind(&primary_language)
+        .bind(&status_filter)
         .bind(offset)
         .bind(limit)
             .fetch_all(sqlx_pool)
@@ -113,12 +125,22 @@ pub async fn mk_lib_database_metadata_movie_read(
                     WHERE lower(genre->>'name') = lower($3)
                 )
             )
+            AND (
+                $4 = ''
+                OR lower(mm_metadata_movie_json->>'original_language') = lower($4)
+            )
+            AND (
+                $5 = ''
+                OR COALESCE((mm_status_user_json->>$5)::boolean, false)
+            )
             order by LOWER(mm_metadata_movie_name), mm_date
-            offset $4 limit $5"#,
+            offset $6 limit $7"#,
         )
         .bind(&user_id)
          .bind(&starts_with)
         .bind(&genre_name)
+        .bind(&primary_language)
+        .bind(&status_filter)
         .bind(offset)
         .bind(limit)
             .fetch_all(sqlx_pool)
@@ -126,48 +148,97 @@ pub async fn mk_lib_database_metadata_movie_read(
     }
 }
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMetaMoviePrimaryLanguage {
+    pub primary_language: String,
+}
+
+pub async fn mk_lib_database_metadata_movie_languages(
+    sqlx_pool: &sqlx::PgPool,
+) -> Result<Vec<DBMetaMoviePrimaryLanguage>, sqlx::Error> {
+    sqlx::query_as(
+        r#"select distinct lower(mm_metadata_movie_json->>'original_language') as primary_language
+        from mm_metadata_movie
+        where coalesce(mm_metadata_movie_json->>'original_language', '') <> ''
+        order by lower(mm_metadata_movie_json->>'original_language')"#,
+    )
+    .fetch_all(sqlx_pool)
+    .await
+}
+
 pub async fn mk_lib_database_metadata_movie_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
+    user_id: i64,
     starts_with: String,
     genre_name: String,
+    primary_language: String,
+    status_filter: String,
 ) -> Result<i64, sqlx::Error> {
     if !search_value.is_empty() {
         let row: (i64,) = sqlx::query_as(
             r#"select count(*) from mm_metadata_movie
-            where mm_metadata_movie_name &@ $1
+            LEFT JOIN mm_metadata_user_status
+            ON mm_metadata_user_status.mm_status_type_movie = mm_metadata_movie.mm_metadata_movie_guid
+            and mm_metadata_user_status.mm_status_user_id = $1
+            where mm_metadata_movie_name &@ $2
             AND (
-                $2 = ''
+                $3 = ''
                 OR EXISTS (
                     SELECT 1
                     FROM jsonb_array_elements(mm_metadata_movie_json->'genres') AS genre
-                    WHERE lower(genre->>'name') = lower($2)
+                    WHERE lower(genre->>'name') = lower($3)
                 )
+            )
+            AND (
+                $4 = ''
+                OR lower(mm_metadata_movie_json->>'original_language') = lower($4)
+            )
+            AND (
+                $5 = ''
+                OR COALESCE((mm_status_user_json->>$5)::boolean, false)
             )"#,
         )
+        .bind(user_id)
         .bind(search_value)
         .bind(genre_name)
+        .bind(primary_language)
+        .bind(status_filter)
         .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
     } else {
         let row: (i64,) = sqlx::query_as(
             r#"select count(*) from mm_metadata_movie 
+            LEFT JOIN mm_metadata_user_status
+            ON mm_metadata_user_status.mm_status_type_movie = mm_metadata_movie.mm_metadata_movie_guid
+            and mm_metadata_user_status.mm_status_user_id = $1
             WHERE (
-                ($1 = '#' AND left(lower(mm_metadata_movie_name), 1) !~ '^[a-z0-9]$')
-                OR ($1 <> '#' AND lower(mm_metadata_movie_name) LIKE lower($1) || '%')
+                ($2 = '#' AND left(lower(mm_metadata_movie_name), 1) !~ '^[a-z0-9]$')
+                OR ($2 <> '#' AND lower(mm_metadata_movie_name) LIKE lower($2) || '%')
             )
             AND (
-                $2 = ''
+                $3 = ''
                 OR EXISTS (
                     SELECT 1
                     FROM jsonb_array_elements(mm_metadata_movie_json->'genres') AS genre
-                    WHERE lower(genre->>'name') = lower($2)
+                    WHERE lower(genre->>'name') = lower($3)
                 )
+            )
+            AND (
+                $4 = ''
+                OR lower(mm_metadata_movie_json->>'original_language') = lower($4)
+            )
+            AND (
+                $5 = ''
+                OR COALESCE((mm_status_user_json->>$5)::boolean, false)
             )"#,
         )
+        .bind(user_id)
         .bind(starts_with)
         .bind(genre_name)
+        .bind(primary_language)
+        .bind(status_filter)
         .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
