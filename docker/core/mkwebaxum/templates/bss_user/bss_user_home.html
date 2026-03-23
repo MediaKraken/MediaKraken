@@ -1,12 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "layouts/base_user.html" %}
 
-{% include "bss_include_header.html" %}
-
-<body class="bg-gray-900 text-gray-100 font-sans">
-        {% include "bss_user/bss_user_include_menu.html" %}
-        {% include "partials/sidebar_user.html" %}
-        <div>
+{% block content %}
+<div>
                 {% if template_data_new_media %}
                 <a href="/user/media/new"><img src="/static/image/new.png" width="200" height="200" loading="lazy" decoding="async"></a>
                 {% endif %}
@@ -130,8 +125,7 @@
                         </div>
                 </section>
         </div>
-        {% include "bss_public/bss_public_footer.html" %}
-               <!-- Alpine.js -->
+<!-- Alpine.js -->
         <script>
                 function mediaApp() {
                         return {
@@ -146,7 +140,4 @@
                         }
                 }
         </script>
-
-</body>
-
-</html>
+{% endblock %}

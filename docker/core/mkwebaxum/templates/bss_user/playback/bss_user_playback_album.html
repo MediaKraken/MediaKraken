@@ -1,13 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-{% include "bss_include_header.html" %}
+{% extends "layouts/base_user.html" %}
 
-<body>
-    {% include "bss_user/bss_user_include_menu.html" %}
-        {% include "partials/sidebar_user.html" %}
-
-
-    {% include "bss_public/bss_public_footer.html" %}
-    <script src="/static/videojs/video.min.js"></script>
-</body>
-</html>
+{% block content %}
+<script src="/static/videojs/video.min.js"></script>
+{% endblock %}
