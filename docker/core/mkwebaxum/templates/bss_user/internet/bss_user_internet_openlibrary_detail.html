@@ -1,12 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-{% include "bss_include_header.html" %}
+{% extends "layouts/base_user.html" %}
 
-<body class="bg-slate-950 text-slate-100">
-    {% include "bss_user/bss_user_include_menu.html" %}
-    {% include "partials/sidebar_user.html" %}
-
-    <main class="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+{% block content %}
+<main class="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
         <a href="/user/internet/openlibrary/1" class="mb-4 inline-flex rounded-lg border border-slate-600 px-3 py-2 text-sm hover:border-slate-400 hover:bg-slate-800" aria-label="Back to OpenLibrary browse">← Back to browse</a>
 
         <article class="rounded-xl border border-slate-800 bg-slate-900 p-5" x-data="{ showSubjects: true }">
@@ -57,8 +52,4 @@
             </section>
         </article>
     </main>
-
-    {% include "bss_public/bss_public_footer.html" %}
-</body>
-
-</html>
+{% endblock %}

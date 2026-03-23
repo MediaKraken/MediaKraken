@@ -1,11 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-{% include "bss_include_header.html" %}
+{% extends "layouts/base_user.html" %}
 
-<body>
-    {% include "bss_user/bss_user_include_menu.html" %}
-         {% include "partials/sidebar_user.html" %}
-   <div>
+{% block content %}
+<div>
         <div>
             {% if template_data_exists %}
             <div class="table-responsive">
@@ -36,7 +32,4 @@
             {% endif %}
         </div>
     </div>
-    {% include "bss_public/bss_public_footer.html" %}
- 
-</body>
-</html>
+{% endblock %}

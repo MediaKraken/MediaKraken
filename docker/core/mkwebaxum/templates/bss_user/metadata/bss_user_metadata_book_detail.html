@@ -1,21 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "layouts/base_user.html" %}
 
-{% include "bss_include_header.html" %}
-
-<body class="min-h-screen flex flex-col bg-gray-100 text-gray-900">
-    <!-- Top navbar -->
-    {% include "bss_user/bss_user_include_menu.html" %}
-    <!-- Below top nav -->
-    <div class="flex flex-1">
-        <!-- Left sidebar -->
-        {% include "partials/sidebar_user.html" %}
-        <!-- Main content -->
-        <main class="flex-1 p-6 bg-gray-50 overflow-y-auto">
-            <div></div>
-        </main>
-    </div>
-    {% include "bss_public/bss_public_footer.html" %}
- </body>
-
-</html>
+{% block content %}
+<div></div>
+{% endblock %}
