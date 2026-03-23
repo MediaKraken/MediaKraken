@@ -2,6 +2,7 @@
 
 members = [
     "brother_print_label",
+    "mediakraken",
     "pi_upc",
     "pi_voice",
     "theater_controller_pi",
