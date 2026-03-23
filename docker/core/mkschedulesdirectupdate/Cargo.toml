@@ -16,9 +16,9 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { version = "0.0.202", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.171", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.174", registry = "kellnr" }
+mk_lib_database = { version = "0.0.204", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.173", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.176", registry = "kellnr" }
 
 chrono = { version = "0.4.43", features = ["serde"] }
 reqwest = { version = "0.12.28", default-features = false, features = [
