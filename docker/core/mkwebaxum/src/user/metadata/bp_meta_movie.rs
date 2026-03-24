@@ -1,16 +1,16 @@
-use crate::AppState;
 use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
+use crate::AppState;
 use askama::Template;
 use axum::extract::Query;
 use axum::extract::State;
 use axum::response::Redirect;
 use axum::response::Response;
 use axum::{
-    Extension,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
+    Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
@@ -111,7 +111,7 @@ fn normalize_string_filter(raw: Option<&str>) -> Option<String> {
 fn normalize_status_filter(raw: Option<&str>) -> Option<String> {
     let value = raw.map(str::trim).filter(|value| !value.is_empty())?;
     match value {
-        "favorite" | "watched" | "good" | "bad" | "trash" => Some(value.to_string()),
+        "favorite" | "watched" | "unwatched" | "good" | "bad" | "trash" => Some(value.to_string()),
         _ => None,
     }
 }
@@ -313,6 +313,10 @@ pub async fn user_metadata_movie(
             FilterOption {
                 label: "Watched".to_string(),
                 query_value: "watched".to_string(),
+            },
+            FilterOption {
+                label: "Unwatched".to_string(),
+                query_value: "unwatched".to_string(),
             },
             FilterOption {
                 label: "Good".to_string(),
