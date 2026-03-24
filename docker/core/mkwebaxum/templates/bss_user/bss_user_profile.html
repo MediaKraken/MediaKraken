@@ -52,7 +52,7 @@
         </section>
 
         <section class="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Photo settings</h2>
+            <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Account settings</h2>
             <dl class="mt-6 space-y-4 text-sm text-zinc-600 dark:text-zinc-300">
                 <div>
                     <dt class="font-medium text-zinc-900 dark:text-zinc-100">Username</dt>
@@ -67,6 +67,25 @@
                     <dd class="mt-1">Uploading a new image replaces your existing saved profile picture and updates the profile page immediately.</dd>
                 </div>
             </dl>
+            <form class="mt-8 flex flex-col gap-3" action="/user/profile/pagination" method="post">
+                <label for="pagination_count" class="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                    Items per page (site-wide)
+                </label>
+                <input id="pagination_count"
+                       name="pagination_count"
+                       type="number"
+                       min="5"
+                       max="200"
+                       value="{{ pagination_count }}"
+                       aria-label="Items per page for paginated lists"
+                       class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100">
+                <p class="text-xs text-zinc-500 dark:text-zinc-400">This setting controls pagination across media, metadata, sync, and admin list pages.</p>
+                <button type="submit"
+                        aria-label="Save pagination preference"
+                        class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-offset-zinc-900">
+                    Save pagination preference
+                </button>
+            </form>
         </section>
     </div>
 </div>

@@ -1,4 +1,5 @@
 use crate::AppState;
+use crate::user_preferences;
 use askama::Template;
 use axum::{
     extract::{Path, State},
@@ -54,7 +55,11 @@ pub async fn user_metadata_person(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let db_offset: i64 = (page * 30) - 30;
+        let pagination_count =
+            user_preferences::load_user_pagination_count(&state.sqlx_pool_ro, current_user.id)
+                .await
+                .unwrap_or(user_preferences::DEFAULT_PAGINATION_COUNT);
+        let db_offset: i64 = (page * pagination_count) - pagination_count;
         let total_pages: i64 = mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_person_count(
             &state.sqlx_pool_ro,
             String::new(),
@@ -66,6 +71,7 @@ pub async fn user_metadata_person(
             page,
             "/user/metadata/person".to_string(),
             None,
+            pagination_count,
         )
         .await
         .unwrap();

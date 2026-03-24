@@ -1,8 +1,9 @@
 use crate::AppState;
 use crate::mk_lib_database;
+use crate::user_preferences;
 use askama::Template;
 use axum::{
-    extract::{Multipart, Query, State},
+    extract::{Form, Multipart, Query, State},
     http::{Method, StatusCode},
     response::{Html, IntoResponse, Redirect},
 };
@@ -26,6 +27,7 @@ struct UserProfileTemplate {
     page_title: Option<String>,
     username: String,
     profile_image_url: String,
+    pagination_count: i64,
     success_message: Option<String>,
     error_message: Option<String>,
 }
@@ -40,6 +42,11 @@ pub struct UserProfileQuery {
 struct UserProfileRow {
     mm_user_profile_guid: uuid::Uuid,
     mm_user_profile_json: Option<Value>,
+}
+
+#[derive(Deserialize)]
+pub struct PaginationPreferenceForm {
+    pagination_count: i64,
 }
 
 pub async fn user_profile(
@@ -67,8 +74,17 @@ pub async fn user_profile(
             profile_image_url: load_profile_image_url(&state.sqlx_pool_ro, current_user.id)
                 .await
                 .unwrap_or_else(|_| DEFAULT_PROFILE_IMAGE_URL.to_string()),
+            pagination_count: user_preferences::load_user_pagination_count(
+                &state.sqlx_pool_ro,
+                current_user.id,
+            )
+            .await
+            .unwrap_or(user_preferences::DEFAULT_PAGINATION_COUNT),
             success_message: match query.status.as_deref() {
                 Some("updated") => Some("Profile picture updated.".to_string()),
+                Some("pagination-updated") => {
+                    Some("Pagination preference updated for your account.".to_string())
+                }
                 _ => None,
             },
             error_message: match query.error.as_deref() {
@@ -82,6 +98,11 @@ pub async fn user_profile(
                 Some("save-failed") => {
                     Some("MediaKraken could not save that profile picture right now.".to_string())
                 }
+                Some("invalid-pagination") => Some(format!(
+                    "Pagination count must be between {} and {}.",
+                    user_preferences::MIN_PAGINATION_COUNT,
+                    user_preferences::MAX_PAGINATION_COUNT
+                )),
                 _ => None,
             },
         };
@@ -174,6 +195,44 @@ pub async fn user_profile_photo_post(
     }
 
     Redirect::to("/user/profile?status=updated")
+}
+
+pub async fn user_profile_pagination_post(
+    State(state): State<AppState>,
+    method: Method,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    Form(form): Form<PaginationPreferenceForm>,
+) -> Redirect {
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::POST],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("User::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        return Redirect::to("/error/401");
+    }
+
+    if form.pagination_count < user_preferences::MIN_PAGINATION_COUNT
+        || form.pagination_count > user_preferences::MAX_PAGINATION_COUNT
+    {
+        return Redirect::to("/user/profile?error=invalid-pagination");
+    }
+
+    if user_preferences::upsert_user_pagination_count(
+        &state.sqlx_pool_rw,
+        current_user.id,
+        form.pagination_count,
+    )
+    .await
+    .is_err()
+    {
+        return Redirect::to("/user/profile?error=save-failed");
+    }
+
+    Redirect::to("/user/profile?status=pagination-updated")
 }
 
 async fn load_profile_image_url(sqlx_pool: &PgPool, user_id: i64) -> Result<String, sqlx::Error> {

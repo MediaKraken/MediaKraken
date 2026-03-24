@@ -1,22 +1,23 @@
+use crate::AppState;
 use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
+use crate::user_preferences;
 use askama::Template;
+use axum::extract::State;
 use axum::response::Redirect;
 use axum::response::Response;
 use axum::{
+    Extension,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
-    Extension,
 };
-use axum::extract::State;
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
-use sqlx::postgres::PgPool;
-use crate::AppState;
 use serde_json::json;
+use sqlx::postgres::PgPool;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_401.html")]
@@ -52,7 +53,11 @@ pub async fn user_media_movie(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let db_offset: i64 = (page * 30) - 30;
+        let pagination_count =
+            user_preferences::load_user_pagination_count(&state.sqlx_pool_ro, current_user.id)
+                .await
+                .unwrap_or(user_preferences::DEFAULT_PAGINATION_COUNT);
+        let db_offset: i64 = (page * pagination_count) - pagination_count;
         let total_pages: i64 =
         mk_lib_database::database_media::mk_lib_database_media_movie::mk_lib_database_media_movie_count(
            &state.sqlx_pool_ro,
@@ -65,6 +70,7 @@ pub async fn user_media_movie(
             page,
             "/user/media/movie".to_string(),
             None,
+            pagination_count,
         )
         .await
         .unwrap();
@@ -73,7 +79,7 @@ pub async fn user_media_movie(
            &state.sqlx_pool_ro,
             String::new(),
             db_offset,
-            30,
+            pagination_count,
         )
         .await
         .unwrap();
@@ -130,11 +136,11 @@ pub async fn user_media_movie_detail(
 }
 
 pub async fn user_media_movie_status(
-     State(state): State<AppState>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     axum::Json(payload): axum::Json<mk_lib_database::mk_lib_database::MediaStatusUpdatePayload>,
-) -> impl IntoResponse  {
+) -> impl IntoResponse {
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
         [Method::GET],
@@ -144,14 +150,14 @@ pub async fn user_media_movie_status(
     .validate(&current_user, &method, None)
     .await
     {
-             return StatusCode::UNAUTHORIZED.into_response();
+        return StatusCode::UNAUTHORIZED.into_response();
     } else {
         let _row_data = mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_status(
             &state.sqlx_pool_rw, payload, current_user.id
         )
         .await
         .unwrap();
-           StatusCode::OK.into_response()
+        StatusCode::OK.into_response()
     }
 }
 
