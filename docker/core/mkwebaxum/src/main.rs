@@ -272,6 +272,10 @@ async fn main() {
             get(user_internet::bp_inter_twitchtv::user_inter_twitchtv),
         )
         .route_with_tsr(
+            "/user/internet/twitchtv/{stream_name}",
+            get(user_internet::bp_inter_twitchtv::user_inter_twitchtv_detail),
+        )
+        .route_with_tsr(
             "/user/internet/vimeo",
             get(user_internet::bp_inter_vimeo::user_inter_vimeo),
         )
