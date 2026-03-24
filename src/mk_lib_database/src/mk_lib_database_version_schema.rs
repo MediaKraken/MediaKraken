@@ -845,13 +845,28 @@ pub async fn mk_lib_database_update_schema(
 
     if version_no < 79 {
         let mut transaction = sqlx_pool.begin().await?;
-        sqlx::query(r#"ALTER TABLE ONLY mm_radio
+        sqlx::query(
+            r#"ALTER TABLE ONLY mm_radio
                 ADD CONSTRAINT mm_radio_address_uk UNIQUE (mm_radio_address);
-            "#)
-            .execute(&mut *transaction)
-            .await?;
+            "#,
+        )
+        .execute(&mut *transaction)
+        .await?;
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 79).await?;
+    }
+
+    if version_no < 80 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(
+            r#"CREATE INDEX IF NOT EXISTS mm_metadata_movie_original_language_lower_ndx
+            ON mm_metadata_movie USING btree (lower((mm_metadata_movie_json->>'original_language')))
+            WHERE coalesce(mm_metadata_movie_json->>'original_language', '') <> '';"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 80).await?;
     }
 
     // TODO, movie alt name, tv alt name and person alt name cleanup

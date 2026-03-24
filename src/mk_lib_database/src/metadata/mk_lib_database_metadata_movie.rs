@@ -1,10 +1,10 @@
 use crate::mk_lib_database::MediaStatusUpdatePayload;
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
 use sqlx::postgres::PgRow;
-use sqlx::types::Uuid;
 use sqlx::types::chrono::DateTime;
 use sqlx::types::chrono::Utc;
+use sqlx::types::Uuid;
+use sqlx::FromRow;
 
 pub async fn mk_lib_database_metadata_exists_movie(
     sqlx_pool: &sqlx::PgPool,
@@ -157,10 +157,11 @@ pub async fn mk_lib_database_metadata_movie_languages(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBMetaMoviePrimaryLanguage>, sqlx::Error> {
     sqlx::query_as(
-        r#"select distinct lower(mm_metadata_movie_json->>'original_language') as primary_language
+        r#"select lower(mm_metadata_movie_json->>'original_language') as primary_language
         from mm_metadata_movie
         where coalesce(mm_metadata_movie_json->>'original_language', '') <> ''
-        order by lower(mm_metadata_movie_json->>'original_language')"#,
+        group by 1
+        order by 1"#,
     )
     .fetch_all(sqlx_pool)
     .await
