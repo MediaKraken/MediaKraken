@@ -82,7 +82,14 @@ pub async fn mk_lib_database_metadata_movie_read(
              )
              AND (
                 $6 = ''
-                OR COALESCE((mm_status_user_json->>$6)::boolean, false)
+                OR (
+                    $6 = 'unwatched'
+                    AND NOT COALESCE((mm_status_user_json->>'watched')::boolean, false)
+                )
+                OR (
+                    $6 <> 'unwatched'
+                    AND COALESCE((mm_status_user_json->>$6)::boolean, false)
+                )
              )
              offset $7 limit $8"#,
         )
@@ -131,7 +138,14 @@ pub async fn mk_lib_database_metadata_movie_read(
             )
             AND (
                 $5 = ''
-                OR COALESCE((mm_status_user_json->>$5)::boolean, false)
+                OR (
+                    $5 = 'unwatched'
+                    AND NOT COALESCE((mm_status_user_json->>'watched')::boolean, false)
+                )
+                OR (
+                    $5 <> 'unwatched'
+                    AND COALESCE((mm_status_user_json->>$5)::boolean, false)
+                )
             )
             order by LOWER(mm_metadata_movie_name), mm_date
             offset $6 limit $7"#,
@@ -197,7 +211,14 @@ pub async fn mk_lib_database_metadata_movie_count(
             )
             AND (
                 $5 = ''
-                OR COALESCE((mm_status_user_json->>$5)::boolean, false)
+                OR (
+                    $5 = 'unwatched'
+                    AND NOT COALESCE((mm_status_user_json->>'watched')::boolean, false)
+                )
+                OR (
+                    $5 <> 'unwatched'
+                    AND COALESCE((mm_status_user_json->>$5)::boolean, false)
+                )
             )"#,
         )
         .bind(user_id)
@@ -232,7 +253,14 @@ pub async fn mk_lib_database_metadata_movie_count(
             )
             AND (
                 $5 = ''
-                OR COALESCE((mm_status_user_json->>$5)::boolean, false)
+                OR (
+                    $5 = 'unwatched'
+                    AND NOT COALESCE((mm_status_user_json->>'watched')::boolean, false)
+                )
+                OR (
+                    $5 <> 'unwatched'
+                    AND COALESCE((mm_status_user_json->>$5)::boolean, false)
+                )
             )"#,
         )
         .bind(user_id)
