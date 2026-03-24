@@ -279,6 +279,10 @@ async fn main() {
             get(user_internet::bp_inter_youtube::user_inter_youtube),
         )
         .route_with_tsr(
+            "/user/internet/youtube/{guid}",
+            get(user_internet::bp_inter_youtube::user_inter_youtube_detail),
+        )
+        .route_with_tsr(
             "/user/media/book/{page}",
             get(user_media::bp_media_book::user_media_book),
         )
