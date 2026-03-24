@@ -21,9 +21,14 @@ pub async fn mk_lib_common_paginate(
     page: i64,
     base_url: String,
     starts_with: Option<&str>,
+    pagination_count: i64,
 ) -> Result<String, Box<dyn Error>> {
-    // Convert total items → total pages (30 per page)
-    let total_pages = if total_items > 0 { (total_items + 29) / 30 } else { 0 };
+    let page_size = pagination_count.max(1);
+    let total_pages = if total_items > 0 {
+        (total_items + page_size - 1) / page_size
+    } else {
+        0
+    };
 
     let mut pagination_html = String::new();
 

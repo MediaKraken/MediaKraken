@@ -1,5 +1,6 @@
 use crate::AppState;
 use crate::mk_lib_database;
+use crate::user_preferences;
 use askama::Template;
 use axum::{
     extract::{Path, State},
@@ -51,7 +52,11 @@ pub async fn user_metadata_sports(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let db_offset: i64 = (page * 30) - 30;
+        let pagination_count =
+            user_preferences::load_user_pagination_count(&state.sqlx_pool_ro, current_user.id)
+                .await
+                .unwrap_or(user_preferences::DEFAULT_PAGINATION_COUNT);
+        let db_offset: i64 = (page * pagination_count) - pagination_count;
         let total_pages = match mk_lib_database::database_metadata::mk_lib_database_metadata_sports::mk_lib_database_metadata_sports_count(
             &state.sqlx_pool_ro,
             String::new(),
@@ -71,6 +76,7 @@ pub async fn user_metadata_sports(
             page,
             "/user/metadata/sports".to_string(),
             None,
+            pagination_count,
         )
         .await
         {
@@ -89,7 +95,7 @@ pub async fn user_metadata_sports(
             &state.sqlx_pool_ro,
             String::new(),
             db_offset,
-            30,
+            pagination_count,
         )
         .await
         {

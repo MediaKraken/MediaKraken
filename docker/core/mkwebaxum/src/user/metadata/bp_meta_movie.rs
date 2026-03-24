@@ -1,16 +1,17 @@
+use crate::AppState;
 use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
-use crate::AppState;
+use crate::user_preferences;
 use askama::Template;
 use axum::extract::Query;
 use axum::extract::State;
 use axum::response::Redirect;
 use axum::response::Response;
 use axum::{
+    Extension,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
-    Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
@@ -152,13 +153,14 @@ fn build_filter_query_suffix(
 fn build_movie_pagination(
     total_items: i64,
     page: i64,
+    pagination_count: i64,
     starts_with: Option<&str>,
     genre: Option<&str>,
     primary_language: Option<&str>,
     status_filter: Option<&str>,
 ) -> Result<String, std::fmt::Error> {
     let total_pages = if total_items > 0 {
-        (total_items + 29) / 30
+        (total_items + pagination_count - 1) / pagination_count
     } else {
         0
     };
@@ -271,7 +273,11 @@ pub async fn user_metadata_movie(
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let current_user = auth.current_user.clone().unwrap_or_default();
-        let db_offset: i64 = (page * 30) - 30;
+        let pagination_count =
+            user_preferences::load_user_pagination_count(&state.sqlx_pool_ro, current_user.id)
+                .await
+                .unwrap_or(user_preferences::DEFAULT_PAGINATION_COUNT);
+        let db_offset: i64 = (page * pagination_count) - pagination_count;
         let total_pages: i64 =
         mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(
            &state.sqlx_pool_ro,
@@ -287,6 +293,7 @@ pub async fn user_metadata_movie(
         let pagination_html = build_movie_pagination(
             total_pages,
             page,
+            pagination_count,
             starts_with.as_deref(),
             genre.as_deref(),
             primary_language.as_deref(),
@@ -347,7 +354,7 @@ pub async fn user_metadata_movie(
             primary_language.clone().unwrap_or_default(),
             status_filter.clone().unwrap_or_default(),
             db_offset,
-            30,
+            pagination_count,
         )
         .await
         .unwrap();

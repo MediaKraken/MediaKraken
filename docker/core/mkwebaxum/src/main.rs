@@ -48,6 +48,7 @@ use tower_http::set_header::SetResponseHeaderLayer;
 type Client = hyper_util::client::legacy::Client<HttpConnector, Body>;
 mod axum_custom_filters;
 mod error_handling;
+mod user_preferences;
 
 #[path = "admin"]
 pub mod admin {
@@ -458,6 +459,10 @@ async fn main() {
         .route(
             "/user/profile/photo",
             post(user::bp_profile::user_profile_photo_post),
+        )
+        .route(
+            "/user/profile/pagination",
+            post(user::bp_profile::user_profile_pagination_post),
         )
         .route_with_tsr("/user/queue", get(user::bp_queue::user_queue))
         //.route_with_tsr("/user/search", get(user::bp_search::user_search))
