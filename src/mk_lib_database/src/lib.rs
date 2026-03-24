@@ -3,6 +3,7 @@ pub mod mk_lib_database_backup;
 pub mod mk_lib_database_cron;
 pub mod mk_lib_database_game_servers;
 pub mod mk_lib_database_hardware_device;
+pub mod mk_lib_database_language;
 pub mod mk_lib_database_library;
 pub mod mk_lib_database_link_server;
 pub mod mk_lib_database_network_share;

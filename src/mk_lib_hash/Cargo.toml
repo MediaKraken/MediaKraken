@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_hash"
-version = "0.0.176"
+version = "0.0.177"
 edition = "2024"
 
 [profile.release]
@@ -10,8 +10,8 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_file = { version = "0.0.181", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.173", registry = "kellnr" }
+mk_lib_file = { version = "0.0.182", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.174", registry = "kellnr" }
 
 blake3 = "1.8.3"
 crc32fast = "1.5.0"

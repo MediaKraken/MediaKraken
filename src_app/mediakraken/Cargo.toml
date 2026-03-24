@@ -10,19 +10,19 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-dioxus = "0.4.3"
-reqwest = { version = "0.12.28", default-features = false, features = [
+dioxus = "0.7.3"
+reqwest = { version = "0.13.2", default-features = false, features = [
     "json",
     "rustls-tls",
 ] }
 serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.148"
+serde_json = "1.0.149"
 
 [target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
-dioxus-mobile = "0.4.3"
+dioxus-mobile = "0.6.2"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
-dioxus-desktop = { version = "0.4.3", features = ["tokio_runtime"], default-features = false }
+dioxus-desktop = { version = "0.7.3", features = ["tokio_runtime"], default-features = false }
 
 [dev-dependencies]
 tokio-test = "*"
