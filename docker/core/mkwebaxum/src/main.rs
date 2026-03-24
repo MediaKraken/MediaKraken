@@ -275,6 +275,10 @@ async fn main() {
             get(user_internet::bp_inter_vimeo::user_inter_vimeo),
         )
         .route_with_tsr(
+            "/user/internet/vimeo/{video_id}",
+            get(user_internet::bp_inter_vimeo::user_inter_vimeo_detail),
+        )
+        .route_with_tsr(
             "/user/internet/youtube",
             get(user_internet::bp_inter_youtube::user_inter_youtube),
         )
