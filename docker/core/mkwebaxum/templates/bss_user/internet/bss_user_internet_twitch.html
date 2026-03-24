@@ -1,22 +1,32 @@
 {% extends "layouts/base_user.html" %}
 
 {% block content %}
-<div>
-        {% if template_data_exists %}
-        <div>
-            {#{% for row_data in template_data %}
-            <div class="main_photo">
-                <a href="/user/internet/twichtv_detail/{{row_data[0]}}">
-                    <img src="{{ row_data[1] }}" height="180" width="320">
-                </a>
-                <div class="description">
-                    <p class="description_content_left">{{row_data[0]}}: {{row_data[2]}}</p>
+<div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    {% if let Some(message) = error_message %}
+    <p id="general_text" class="mb-4 text-red-500">{{ message }}</p>
+    {% endif %}
+
+    {% if has_streams %}
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {% for stream in streams %}
+        <a href="/user/internet/twitchtv/{{ stream.channel_login }}"
+            aria-label="Open Twitch stream {{ stream.channel_display_name }}"
+            class="group block overflow-hidden rounded-lg border border-zinc-700 bg-zinc-900 transition-colors hover:border-purple-400">
+            <img src="{{ stream.preview_image_url }}" alt="Preview image for {{ stream.channel_display_name }}"
+                class="h-44 w-full object-cover" loading="lazy">
+            <div class="space-y-2 p-4">
+                <p class="font-semibold text-white">{{ stream.channel_display_name }}</p>
+                <p class="line-clamp-2 text-sm text-zinc-200">{{ stream.stream_title }}</p>
+                <div class="flex items-center justify-between text-xs text-zinc-300">
+                    <span>{{ stream.game_name }}</span>
+                    <span>{{ stream.viewer_count }} viewers</span>
                 </div>
             </div>
-            {% endfor %} #}
-        </div>
-        {% else %}
-        <p id="general_text">No Twitch TV media found.</p>
-        {% endif %}
+        </a>
+        {% endfor %}
     </div>
+    {% else %}
+    <p id="general_text">No Twitch TV media found.</p>
+    {% endif %}
+</div>
 {% endblock %}
