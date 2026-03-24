@@ -10,7 +10,7 @@ use std::process::{Command, Stdio};
 use std::sync::{Arc, OnceLock, RwLock};
 use tokio::io::AsyncWriteExt;
 use tokio::sync::{Notify, Semaphore};
-use tokio::time::{sleep, Duration};
+use tokio::time::{Duration, sleep};
 
 type AppError = Box<dyn std::error::Error>;
 type TaskError = String;
@@ -150,19 +150,29 @@ async fn process_message(json_message: Value, _option_config_json: &Value) {
         }
         Some("Dosage") => {
             if let Some(data) = json_message["Data"].as_str() {
-                let output = Command::new("dosage")
-                    .args(["--adult", data])
-                    .stdout(Stdio::piped())
-                    .output();
+                if data == "--all" {
+                    let output_root = json_message["Local Save Path"]
+                        .as_str()
+                        .unwrap_or("/mediakraken/metadata/meta/comics");
 
-                match output {
-                    Ok(output) => {
-                        let stdout = String::from_utf8_lossy(&output.stdout);
-                        if data == "--list" {
-                            dosage_store_strips(dosage_parse_strip_list(&stdout));
-                        }
+                    if let Err(error) = dosage_download_all_strips(output_root) {
+                        eprintln!("dosage --all failed: {error}");
                     }
-                    Err(error) => eprintln!("dosage failed: {error}"),
+                } else {
+                    let output = Command::new("dosage")
+                        .args(["--adult", data])
+                        .stdout(Stdio::piped())
+                        .output();
+
+                    match output {
+                        Ok(output) => {
+                            let stdout = String::from_utf8_lossy(&output.stdout);
+                            if data == "--list" {
+                                dosage_store_strips(dosage_parse_strip_list(&stdout));
+                            }
+                        }
+                        Err(error) => eprintln!("dosage failed: {error}"),
+                    }
                 }
             } else {
                 eprintln!("Dosage message missing Data");
@@ -269,6 +279,90 @@ fn dosage_store_strips(strips: Vec<String>) {
     } else {
         eprintln!("dosage strip cache lock poisoned");
     }
+}
+
+fn dosage_get_cached_strips() -> Vec<String> {
+    let Some(strip_cache) = DOSAGE_STRIP_CACHE.get() else {
+        return Vec::new();
+    };
+
+    match strip_cache.read() {
+        Ok(cache) => cache.clone(),
+        Err(_) => {
+            eprintln!("dosage strip cache lock poisoned");
+            Vec::new()
+        }
+    }
+}
+
+fn dosage_fetch_strip_list() -> Result<Vec<String>, TaskError> {
+    let output = Command::new("dosage")
+        .args(["--adult", "--list"])
+        .stdout(Stdio::piped())
+        .output()
+        .map_err(|e| e.to_string())?;
+
+    if !output.status.success() {
+        return Err(format!(
+            "dosage --list failed with status {}",
+            output.status
+        ));
+    }
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let strips = dosage_parse_strip_list(&stdout);
+    dosage_store_strips(strips.clone());
+    Ok(strips)
+}
+
+fn dosage_strip_output_dir(root: &Path, strip: &str) -> PathBuf {
+    let mut output = root.to_path_buf();
+
+    for segment in strip.split('/') {
+        let cleaned = match segment {
+            "" | "." | ".." => "_",
+            _ => segment,
+        };
+        output.push(cleaned);
+    }
+
+    output
+}
+
+fn dosage_download_all_strips(output_root: &str) -> Result<(), TaskError> {
+    let output_root_path = Path::new(output_root);
+    std::fs::create_dir_all(output_root_path).map_err(|e| e.to_string())?;
+
+    let mut strips = dosage_get_cached_strips();
+    if strips.is_empty() {
+        strips = dosage_fetch_strip_list()?;
+    }
+
+    if strips.is_empty() {
+        return Err("no dosage strips found".to_string());
+    }
+
+    for strip in strips {
+        let strip_output_dir = dosage_strip_output_dir(output_root_path, &strip);
+        std::fs::create_dir_all(&strip_output_dir).map_err(|e| e.to_string())?;
+
+        let status = Command::new("dosage")
+            .args([
+                "--adult",
+                "--all",
+                "--basepath",
+                strip_output_dir.to_string_lossy().as_ref(),
+                strip.as_str(),
+            ])
+            .status()
+            .map_err(|e| e.to_string())?;
+
+        if !status.success() {
+            eprintln!("dosage download failed for strip {strip}: {status}");
+        }
+    }
+
+    Ok(())
 }
 
 async fn hdtrailers_collect_best_links() -> Result<Vec<String>, TaskError> {
