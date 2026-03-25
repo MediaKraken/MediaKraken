@@ -301,15 +301,15 @@ pub async fn user_metadata_movie(
         )
         .unwrap();
         let primary_language_options: Vec<FilterOption> =
-            mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_languages(
+            mk_lib_database::mk_lib_database_language::mk_lib_database_language_read(
                 &state.sqlx_pool_ro,
             )
             .await
             .unwrap_or_default()
             .into_iter()
             .map(|row| FilterOption {
-                label: row.primary_language.to_uppercase(),
-                query_value: row.primary_language,
+                label: row.language,
+                query_value: row.code.to_lowercase(),
             })
             .collect();
         let status_options = vec![
