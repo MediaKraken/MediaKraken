@@ -78,7 +78,7 @@ pub async fn mk_lib_database_metadata_movie_read(
              )
              AND (
                 $5 = ''
-                OR lower(mm_metadata_movie_json->>'original_language') = lower($5)
+                OR lower(mm_metadata_movie_primary_lang) = lower($5)
              )
              AND (
                 $6 = ''
@@ -134,7 +134,7 @@ pub async fn mk_lib_database_metadata_movie_read(
             )
             AND (
                 $4 = ''
-                OR lower(mm_metadata_movie_json->>'original_language') = lower($4)
+                OR lower(mm_metadata_movie_primary_lang) = lower($4)
             )
             AND (
                 $5 = ''
@@ -171,9 +171,9 @@ pub async fn mk_lib_database_metadata_movie_languages(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<DBMetaMoviePrimaryLanguage>, sqlx::Error> {
     sqlx::query_as(
-        r#"select lower(mm_metadata_movie_json->>'original_language') as primary_language
+        r#"select lower(mm_metadata_movie_primary_lang) as primary_language
         from mm_metadata_movie
-        where coalesce(mm_metadata_movie_json->>'original_language', '') <> ''
+        where coalesce(mm_metadata_movie_primary_lang, '') <> ''
         group by 1
         order by 1"#,
     )
@@ -207,7 +207,7 @@ pub async fn mk_lib_database_metadata_movie_count(
             )
             AND (
                 $4 = ''
-                OR lower(mm_metadata_movie_json->>'original_language') = lower($4)
+                OR lower(mm_metadata_movie_primary_lang) = lower($4)
             )
             AND (
                 $5 = ''
@@ -249,7 +249,7 @@ pub async fn mk_lib_database_metadata_movie_count(
             )
             AND (
                 $4 = ''
-                OR lower(mm_metadata_movie_json->>'original_language') = lower($4)
+                OR lower(mm_metadata_movie_primary_lang) = lower($4)
             )
             AND (
                 $5 = ''
