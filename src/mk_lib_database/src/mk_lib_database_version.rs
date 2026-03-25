@@ -1,8 +1,8 @@
 use crate::mk_lib_database_postgresql;
 use crate::mk_lib_database_version_schema;
-use tokio::time::{sleep, Duration};
+use tokio::time::{Duration, sleep};
 
-pub static DATABASE_VERSION: i32 = 80;
+pub static DATABASE_VERSION: i32 = 81;
 
 pub async fn mk_lib_database_postgresql_version(
     sqlx_pool: &sqlx::PgPool,
