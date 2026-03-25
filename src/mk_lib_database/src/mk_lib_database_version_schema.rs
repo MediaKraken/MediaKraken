@@ -1077,6 +1077,27 @@ pub async fn mk_lib_database_update_schema(
         mk_lib_database_version_update(&sqlx_pool, 80).await?;
     }
 
+    if version_no < 81 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(r#"ALTER TABLE mm_radio ADD COLUMN IF NOT EXISTS mm_radio_stationuuid text;"#)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(r#"ALTER TABLE mm_radio ADD COLUMN IF NOT EXISTS mm_radio_country text;"#)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(r#"ALTER TABLE mm_radio ADD COLUMN IF NOT EXISTS mm_radio_language text;"#)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(r#"ALTER TABLE mm_radio ADD COLUMN IF NOT EXISTS mm_radio_tags text;"#)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(r#"ALTER TABLE mm_radio ADD COLUMN IF NOT EXISTS mm_radio_url_resolved text;"#)
+            .execute(&mut *transaction)
+            .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 81).await?;
+    }
+
     // TODO, movie alt name, tv alt name and person alt name cleanup
 
     Ok(true)
