@@ -52,7 +52,7 @@ struct OpenLibraryDetailItem {
 }
 
 #[derive(Template)]
-#[template(path = "bss_user/internet/bss_user_internet_openlibrary.html")]
+#[template(path = "bss_user/internet/bss_user_metadata_openlibrary.html")]
 struct TemplateOpenLibraryBrowse {
     items: Vec<OpenLibraryBrowseItem>,
     has_items: bool,
@@ -63,7 +63,7 @@ struct TemplateOpenLibraryBrowse {
 }
 
 #[derive(Template)]
-#[template(path = "bss_user/internet/bss_user_internet_openlibrary_detail.html")]
+#[template(path = "bss_user/internet/bss_user_metadata_openlibrary_detail.html")]
 struct TemplateOpenLibraryDetail {
     item: OpenLibraryDetailItem,
     page_title: Option<String>,
