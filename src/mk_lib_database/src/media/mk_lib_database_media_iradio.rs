@@ -30,6 +30,52 @@ pub async fn mk_lib_database_media_iradio_insert(
     Ok(row.map(|(radio_guid,)| radio_guid))
 }
 
+pub async fn mk_lib_database_media_iradio_upsert(
+    sqlx_pool: &sqlx::PgPool,
+    station_uuid: &str,
+    station_name: &str,
+    station_address: &str,
+    station_country: Option<&str>,
+    station_language: Option<&str>,
+    station_tags: Option<&str>,
+    station_url_resolved: &str,
+) -> Result<uuid::Uuid, sqlx::Error> {
+    let row: (uuid::Uuid,) = sqlx::query_as(
+        r#"insert into mm_radio (
+            mm_radio_guid,
+            mm_radio_stationuuid,
+            mm_radio_name,
+            mm_radio_address,
+            mm_radio_country,
+            mm_radio_language,
+            mm_radio_tags,
+            mm_radio_url_resolved,
+            mm_radio_active
+        ) values ($1, $2, $3, $4, $5, $6, $7, $8, true)
+        on conflict (mm_radio_address) do update set
+            mm_radio_stationuuid = excluded.mm_radio_stationuuid,
+            mm_radio_name = excluded.mm_radio_name,
+            mm_radio_country = excluded.mm_radio_country,
+            mm_radio_language = excluded.mm_radio_language,
+            mm_radio_tags = excluded.mm_radio_tags,
+            mm_radio_url_resolved = excluded.mm_radio_url_resolved,
+            mm_radio_active = true
+        returning mm_radio_guid"#,
+    )
+    .bind(uuid::Uuid::new_v7())
+    .bind(station_uuid)
+    .bind(station_name)
+    .bind(station_address)
+    .bind(station_country)
+    .bind(station_language)
+    .bind(station_tags)
+    .bind(station_url_resolved)
+    .fetch_one(sqlx_pool)
+    .await?;
+
+    Ok(row.0)
+}
+
 pub async fn mk_lib_database_media_iradio_read(
     sqlx_pool: &sqlx::PgPool,
     offset: i64,
