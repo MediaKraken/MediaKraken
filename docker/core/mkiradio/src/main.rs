@@ -62,6 +62,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     return Ok(());
                 }
 
+                let mut upsert_count: usize = 0;
                 for (idx, station) in stations.iter().enumerate() {
                     println!("{}. {}", idx + 1, station.name);
                     println!("   Station UUID: {}", station.stationuuid);
@@ -80,7 +81,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                     println!("   Stream URL: {}", station.url_resolved);
                     println!();
+
+                    mk_lib_database::media::mk_lib_database_media_iradio::mk_lib_database_media_iradio_upsert(
+                        &sqlx_pool_rw,
+                        station.stationuuid.as_ref(),
+                        station.name.as_ref(),
+                        station.url.as_ref(),
+                        station.country.as_deref(),
+                        station.language.as_deref(),
+                        station.tags.as_deref(),
+                        station.url_resolved.as_ref(),
+                    )
+                    .await?;
+                    upsert_count += 1;
                 }
+                println!("Upserted {} stations into mm_radio.", upsert_count);
             }
             let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
                 &rabbit_channel,
