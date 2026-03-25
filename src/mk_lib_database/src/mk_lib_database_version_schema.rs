@@ -1079,6 +1079,21 @@ pub async fn mk_lib_database_update_schema(
 
     if version_no < 81 {
         let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(r#"ALTER TABLE mm_radio ADD COLUMN IF NOT EXISTS mm_radio_stationuuid text;"#)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(r#"ALTER TABLE mm_radio ADD COLUMN IF NOT EXISTS mm_radio_country text;"#)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(r#"ALTER TABLE mm_radio ADD COLUMN IF NOT EXISTS mm_radio_language text;"#)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(r#"ALTER TABLE mm_radio ADD COLUMN IF NOT EXISTS mm_radio_tags text;"#)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(r#"ALTER TABLE mm_radio ADD COLUMN IF NOT EXISTS mm_radio_url_resolved text;"#)
+            .execute(&mut *transaction)
+            .await?;
         sqlx::query(
             r#"ALTER TABLE mm_metadata_movie
             ADD COLUMN mm_metadata_movie_primary_lang text;"#,
