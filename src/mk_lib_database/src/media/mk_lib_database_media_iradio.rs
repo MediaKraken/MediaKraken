@@ -12,31 +12,22 @@ pub async fn mk_lib_database_media_iradio_insert(
     sqlx_pool: &sqlx::PgPool,
     radio_channel: &str,
 ) -> Result<Option<uuid::Uuid>, sqlx::Error> {
-    let row: (i64,) = sqlx::query_as(
-        r#"select count(*) from mm_radio
-        where mm_radio_address = $1"#,
+    let new_guid = uuid::Uuid::new_v4();
+    let row: Option<(uuid::Uuid,)> = sqlx::query_as(
+        r#"insert into mm_radio (
+            mm_radio_guid,
+            mm_radio_address,
+            mm_radio_active
+        ) values ($1, $2, true)
+        on conflict (mm_radio_address) do nothing
+        returning mm_radio_guid"#,
     )
+    .bind(new_guid)
     .bind(radio_channel)
-    .fetch_one(sqlx_pool)
+    .fetch_optional(sqlx_pool)
     .await?;
 
-    if row.0 == 0 {
-        let new_guid = uuid::Uuid::new_v4();
-        sqlx::query(
-            r#"insert into mm_radio (
-                mm_radio_guid,
-                mm_radio_address,
-                mm_radio_active
-            ) values ($1, $2, true)"#,
-        )
-        .bind(new_guid)
-        .bind(radio_channel)
-        .execute(sqlx_pool)
-        .await?;
-        Ok(Some(new_guid))
-    } else {
-        Ok(None)
-    }
+    Ok(row.map(|(radio_guid,)| radio_guid))
 }
 
 pub async fn mk_lib_database_media_iradio_read(
