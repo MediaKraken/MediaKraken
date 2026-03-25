@@ -99,7 +99,6 @@ pub mod user {
 pub mod user_internet {
     pub mod bp_inter_flickr;
     pub mod bp_inter_home;
-    pub mod bp_inter_openlibrary;
     pub mod bp_inter_twitchtv;
     pub mod bp_inter_vimeo;
     pub mod bp_inter_youtube;
@@ -127,6 +126,7 @@ pub mod user_metadata {
     pub mod bp_meta_book;
     pub mod bp_meta_game;
     pub mod bp_meta_game_system;
+    pub mod bp_meta_openlibrary;
     pub mod bp_meta_movie;
     pub mod bp_meta_music;
     pub mod bp_meta_music_video;
@@ -260,12 +260,12 @@ async fn main() {
             get(user_internet::bp_inter_home::user_inter_home),
         )
         .route_with_tsr(
-            "/user/internet/openlibrary/{page}",
-            get(user_internet::bp_inter_openlibrary::user_inter_openlibrary),
+            "/user/metadata/openlibrary/{page}",
+            get(user_metadata::bp_meta_openlibrary::user_inter_openlibrary),
         )
         .route_with_tsr(
-            "/user/internet/openlibrary_detail/{work_id}",
-            get(user_internet::bp_inter_openlibrary::user_inter_openlibrary_detail),
+            "/user/metadata/openlibrary_detail/{work_id}",
+            get(user_metadata::bp_meta_openlibrary::user_inter_openlibrary_detail),
         )
         .route_with_tsr(
             "/user/internet/twitchtv",
