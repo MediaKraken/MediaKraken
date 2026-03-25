@@ -12,7 +12,7 @@ pub async fn mk_lib_database_media_iradio_insert(
     sqlx_pool: &sqlx::PgPool,
     radio_channel: &str,
 ) -> Result<Option<uuid::Uuid>, sqlx::Error> {
-    let new_guid = uuid::Uuid::new_v4();
+    let new_guid = uuid::Uuid::new_v7();
     let row: Option<(uuid::Uuid,)> = sqlx::query_as(
         r#"insert into mm_radio (
             mm_radio_guid,
