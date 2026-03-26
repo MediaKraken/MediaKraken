@@ -1,12 +1,21 @@
 {% extends "layouts/base_user.html" %}
 
+{% block extra_head %}
+<style>
+    .youtube-player-shell {
+        height: calc(100vh - 10rem);
+        min-height: 420px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="space-y-4">
     <a href="/user/internet/youtube" class="inline-flex text-sm text-blue-700 hover:underline" aria-label="Back to YouTube browse page">
         ← Back to YouTube browse
     </a>
 
-    <div class="aspect-video w-full rounded-lg overflow-hidden border border-gray-200 bg-black">
+    <div class="youtube-player-shell w-full rounded-lg overflow-hidden border border-gray-200 bg-black">
         <iframe
             src="{{ template_embed_url }}"
             title="YouTube player for {{ template_youtube_video_guid }}"
