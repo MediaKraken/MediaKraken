@@ -6,7 +6,7 @@
   <h1 id="movie-grid-heading" class="sr-only">Movie list</h1>
   {% include "filters/pagination_letters.html" %}
 
-  <div class="mt-4 space-y-4 rounded-xl border border-zinc-200 bg-white/70 p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70">
+  <div class="mt-4 grid gap-4 rounded-xl border border-zinc-200 bg-white/70 p-4 shadow-sm md:grid-cols-2 dark:border-zinc-800 dark:bg-zinc-900/70">
     <div class="space-y-2">
       <h2 class="text-sm font-semibold tracking-wide text-zinc-700 dark:text-zinc-200">Primary language</h2>
       <form method="get" action="{{ base_path }}/1" class="max-w-xs">
