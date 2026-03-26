@@ -69,10 +69,10 @@
     
     {% include "partials/topnavbar.html" %}
     
-    <div class="flex flex-1 overflow-hidden">
+    <div class="flex flex-1">
         {% include "partials/sidebar_user.html" %}
         
-        <main id="main-content" class="flex-1 overflow-y-auto">
+        <main id="main-content" class="flex-1">
             {% block content %}{% endblock %}
         </main>
     </div>
