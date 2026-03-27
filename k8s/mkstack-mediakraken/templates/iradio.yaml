@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    io.kompose.service: mkstack-iradio
+  name: mkstack-iradio
+  namespace: mediakraken
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mkstack-iradio-service
+  template:
+    metadata:
+      labels:
+        io.kompose.service: mkstack-iradio-service
+    spec:
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - args:
+            - sh
+            - -c
+            - /wait && /mkiradio
+          env:
+            - name: WAIT_HOSTS
+              value: pgcluster-with-metrics-rw.cnpg-system:5432, mkstack-rabbitmq-production.rabbitmq-system:5672
+            - name: WAIT_TIMEOUT
+              value: "180"
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-password
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-password
+                  key: password
+            - name: DEBUG
+              valueFrom:
+                secretKeyRef:
+                  name: run-env-type
+                  key: debug
+          image: mediakraken/mkiradio:dev
+          imagePullPolicy: Always
+          name: mkstack-iradio
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30

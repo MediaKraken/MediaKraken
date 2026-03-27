@@ -41,6 +41,7 @@ pub async fn mk_lib_database_version_check(
     }
     if version_match == false {
         if update_schema == true {
+            println!("Database upgrade from {version_no} to version {DATABASE_VERSION}");
             // do db updates here
             mk_lib_database_version_schema::mk_lib_database_update_schema(&sqlx_pool, version_no)
                 .await?;
