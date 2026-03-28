@@ -10,9 +10,11 @@ use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use serde::Deserialize;
 use sqlx::postgres::PgPool;
+use std::collections::HashSet;
 use std::env;
 
 const TWITCH_TOP_STREAMS_URL: &str = "https://api.twitch.tv/helix/streams?first=24";
+const TWITCH_DIRECTORY_URL: &str = "https://www.twitch.tv/directory/all";
 const TWITCH_EMBED_PARENT_DEFAULT: &str = "localhost";
 
 #[derive(Template)]
@@ -58,13 +60,13 @@ pub async fn user_inter_twitchtv(
                 ),
             }
         }
-        _ => (
-            Vec::new(),
-            Some(
-                "Twitch integration is not configured. Set TWITCH_CLIENT_ID and TWITCH_APP_ACCESS_TOKEN."
-                    .to_string(),
+        _ => match fetch_twitch_directory_streams().await {
+            Ok(streams) => (streams, None),
+            Err(()) => (
+                Vec::new(),
+                Some("Unable to load Twitch streams right now.".to_string()),
             ),
-        ),
+        },
     };
 
     let template = UserInternetTwitchTVTemplate {
@@ -204,6 +206,89 @@ async fn fetch_twitch_streams(
                 .replace("{height}", "360"),
         })
         .collect())
+}
+
+async fn fetch_twitch_directory_streams() -> Result<Vec<TwitchStreamBrowseItem>, ()> {
+    let response = reqwest::Client::new()
+        .get(TWITCH_DIRECTORY_URL)
+        .header("User-Agent", "Mozilla/5.0 (MediaKraken)")
+        .send()
+        .await
+        .map_err(|_| ())?;
+
+    if !response.status().is_success() {
+        return Err(());
+    }
+
+    let response_body = response.text().await.map_err(|_| ())?;
+    let channels = extract_channels_from_directory_html(&response_body, 24);
+    if channels.is_empty() {
+        return Err(());
+    }
+
+    Ok(channels
+        .into_iter()
+        .map(|channel| TwitchStreamBrowseItem {
+            channel_login: channel.clone(),
+            channel_display_name: channel.clone(),
+            stream_title: "Open channel".to_string(),
+            game_name: "Browse".to_string(),
+            viewer_count: 0,
+            preview_image_url: format!(
+                "https://static-cdn.jtvnw.net/previews-ttv/live_user_{}-640x360.jpg",
+                channel
+            ),
+        })
+        .collect())
+}
+
+fn extract_channels_from_directory_html(html: &str, limit: usize) -> Vec<String> {
+    let mut channels = Vec::new();
+    let mut seen = HashSet::new();
+    let blocked_paths = [
+        "directory",
+        "downloads",
+        "jobs",
+        "login",
+        "messages",
+        "p",
+        "prime",
+        "search",
+        "settings",
+        "signup",
+        "store",
+        "subscriptions",
+        "turbo",
+        "videos",
+        "wallet",
+    ];
+
+    let mut cursor = 0usize;
+    while let Some(index) = html[cursor..].find("href=\"/") {
+        let start = cursor + index + "href=\"/".len();
+        let remainder = &html[start..];
+        let Some(end) = remainder.find('"') else {
+            break;
+        };
+
+        let candidate = &remainder[..end];
+        cursor = start + end;
+
+        if candidate.contains('/') || blocked_paths.contains(&candidate) {
+            continue;
+        }
+
+        if !is_valid_twitch_channel(candidate) || !seen.insert(candidate.to_string()) {
+            continue;
+        }
+
+        channels.push(candidate.to_string());
+        if channels.len() >= limit {
+            break;
+        }
+    }
+
+    channels
 }
 
 fn is_valid_twitch_channel(channel: &str) -> bool {
