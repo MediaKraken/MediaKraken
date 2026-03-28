@@ -1095,58 +1095,23 @@ pub async fn mk_lib_database_update_schema(
             .execute(&mut *transaction)
             .await?;
         sqlx::query(
-            r#"ALTER TABLE mm_metadata_movie
-            ADD COLUMN mm_metadata_movie_primary_lang text;"#,
-        )
-        .execute(&mut *transaction)
-        .await?;
-        sqlx::query(
-            r#"CREATE OR REPLACE FUNCTION mm_metadata_movie_primary_lang_sync()
-            RETURNS trigger AS $$
-            BEGIN
-                NEW.mm_metadata_movie_primary_lang =
-                    lower(
-                        coalesce(
-                            NEW.mm_metadata_movie_json->>'primary_language',
-                            NEW.mm_metadata_movie_json->>'original_language',
-                            ''
-                        )
-                    );
-                RETURN NEW;
-            END;
-            $$ LANGUAGE plpgsql;"#,
-        )
-        .execute(&mut *transaction)
-        .await?;
-        sqlx::query(r#"DROP TRIGGER IF EXISTS mm_metadata_movie_primary_lang_sync_trigger ON mm_metadata_movie;"#)
-            .execute(&mut *transaction)
-            .await?;
-        sqlx::query(
-            r#"CREATE TRIGGER mm_metadata_movie_primary_lang_sync_trigger
-            BEFORE INSERT OR UPDATE OF mm_metadata_movie_json
-            ON mm_metadata_movie
-            FOR EACH ROW
-            EXECUTE PROCEDURE mm_metadata_movie_primary_lang_sync();"#,
-        )
-        .execute(&mut *transaction)
-        .await?;
-        sqlx::query(
-            r#"UPDATE mm_metadata_movie
-            SET mm_metadata_movie_primary_lang =
+            r#"ALTER TABLE mm_metadata_movie 
+            ADD COLUMN mm_metadata_movie_primary_lang_gen TEXT 
+            GENERATED ALWAYS AS (
                 lower(
                     coalesce(
                         mm_metadata_movie_json->>'primary_language',
                         mm_metadata_movie_json->>'original_language',
                         ''
                     )
-                );"#,
+                )
+            ) STORED;"#,
         )
         .execute(&mut *transaction)
         .await?;
         sqlx::query(
-            r#"CREATE INDEX IF NOT EXISTS mm_metadata_movie_primary_lang_ndx
-            ON mm_metadata_movie USING btree (mm_metadata_movie_primary_lang)
-            WHERE mm_metadata_movie_primary_lang <> '';"#,
+            r#"CREATE INDEX IF NOT EXISTS mm_metadata_movie_primary_lang_gen_ndx ON mm_metadata_movie 
+            USING btree (mm_metadata_movie_primary_lang_gen);"#,
         )
         .execute(&mut *transaction)
         .await?;
