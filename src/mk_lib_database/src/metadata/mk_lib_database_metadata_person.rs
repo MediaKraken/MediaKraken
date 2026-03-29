@@ -84,7 +84,10 @@ pub async fn mk_lib_database_meta_person_detail(
     person_uuid: String,
 ) -> Result<PgRow, sqlx::Error> {
     let row: PgRow = sqlx::query(
-        r#"select mm_metadata_person_guid, mm_metadata_person_media_id, mm_metadata_person_meta_json, mm_metadata_person_image, mm_metadata_person_name, mm_metadata_person_meta_json->'profile_path' as mm_metadata_person_profile from mm_metadata_person where mm_metadata_person_guid = $1"#,
+        r#"select mm_metadata_person_guid, mm_metadata_person_media_id, mm_metadata_person_meta_json, 
+        mm_metadata_person_image, mm_metadata_person_name, 
+        mm_metadata_person_meta_json->'profile_path' as mm_metadata_person_profile 
+        from mm_metadata_person where mm_metadata_person_guid = $1"#,
     )
     .bind(person_uuid)
     .fetch_one(sqlx_pool)

@@ -78,7 +78,7 @@ pub async fn user_metadata_person(
         let person_list: Vec<TemplateMetaPersonList> = sqlx::query_as(
             r#"select mm_metadata_person_guid,
             mm_metadata_person_name,
-            COALESCE(mm_metadata_person_image->>'Poster', '') as mm_metadata_person_image
+            COALESCE(mm_metadata_person_image, '') as mm_metadata_person_image
             from mm_metadata_person
             order by LOWER(mm_metadata_person_name)
             offset $1 limit $2"#,
