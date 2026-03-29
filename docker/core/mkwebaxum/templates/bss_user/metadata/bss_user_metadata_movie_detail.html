@@ -75,6 +75,11 @@
                         {% include "icons/trash.svg" %}
                     </button>
                 </div>
+                {% if template_data_json["overiew"] != "" %}
+                <p class="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
+                    {{ template_data_json["overiew"] }}
+                </p>
+                {% endif %}
             </div>
         </div>
     </div>
