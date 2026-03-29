@@ -125,13 +125,16 @@
             </button>
 
             <div class="flex gap-4 overflow-x-auto scroll-smooth px-10" x-ref="crew">
-                <template x-for="person in crew" :key="person.name">
-                    <a href="#" class="min-w-[140px] text-center">
-                        <img :src="person.img" class="mx-auto h-28 w-28 rounded-full object-cover">
-                        <p class="mt-2 text-sm font-medium text-zinc-800 dark:text-zinc-200" x-text="person.name"></p>
-                        <p class="text-xs text-zinc-500 dark:text-zinc-400" x-text="person.role"></p>
-                    </a>
-                </template>
+                {% for person in template_metadata_crew %}
+                <a href="#" class="min-w-[140px] text-center">
+                    <div
+                        class="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-zinc-100 text-3xl font-semibold text-zinc-500 dark:bg-zinc-800 dark:text-zinc-300">
+                        {{ person.name.chars().next().unwrap_or('?') }}
+                    </div>
+                    <p class="mt-2 text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ person.name }}</p>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400">{{ person.job }}</p>
+                </a>
+                {% endfor %}
             </div>
 
             <button @click="scroll('crew', 1)" aria-label="Scroll crew right"
@@ -176,11 +179,6 @@
 
             genres: ['Action', 'Drama', 'Sci-Fi', 'Thriller'],
             activeGenres: [],
-
-            crew: [
-                { name: 'Director One', role: 'Director', img: 'https://via.placeholder.com/150' },
-                { name: 'Writer One', role: 'Writer', img: 'https://via.placeholder.com/150' }
-            ],
 
             reviews: [
                 { user: 'Alice', text: 'Amazing cinematography and story.' },

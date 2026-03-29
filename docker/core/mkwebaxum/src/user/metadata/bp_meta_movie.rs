@@ -43,6 +43,12 @@ struct MovieCastMember {
     pub character: String,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+struct MovieCrewMember {
+    pub name: String,
+    pub job: String,
+}
+
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_401.html")]
 struct TemplateError401Context {}
@@ -480,6 +486,7 @@ struct TemplateMetaMovieDetailContext<'a> {
     template_metadata_photo_updated: DateTime<Utc>,
     template_metadata_genre: Vec<Genre>,
     template_metadata_cast: Vec<MovieCastMember>,
+    template_metadata_crew: Vec<MovieCrewMember>,
     template_metadata_user_watched: serde_json::Value,
     template_metadata_user_rating: serde_json::Value,
     template_metadata_user_request: serde_json::Value,
@@ -565,6 +572,24 @@ pub async fn user_metadata_movie_detail(
                 })
                 .collect();
 
+        let crew_members: Vec<MovieCrewMember> =
+            movie_metadata.mm_metadata_movie_json["credits"]["crew"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .filter_map(|crew_member| {
+                    let name = crew_member.get("name").and_then(|value| value.as_str())?;
+                    let job = crew_member
+                        .get("job")
+                        .and_then(|value| value.as_str())
+                        .unwrap_or_default();
+                    Some(MovieCrewMember {
+                        name: name.to_string(),
+                        job: job.to_string(),
+                    })
+                })
+                .collect();
+
         let template = TemplateMetaMovieDetailContext {
             template_data_json: &movie_metadata.mm_metadata_movie_json,
             template_metadata_name_alt: movie_metadata.mm_metadata_movie_name_alt.clone(),
@@ -578,6 +603,7 @@ pub async fn user_metadata_movie_detail(
             template_metadata_photo_updated: movie_metadata.photo_updated.clone(),
             template_metadata_genre: genres,
             template_metadata_cast: cast_members,
+            template_metadata_crew: crew_members,
             template_metadata_user_watched: watched_status,
             template_metadata_user_rating: rating_status,
             template_metadata_user_request: request_status,
