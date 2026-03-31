@@ -126,10 +126,11 @@ pub mod user_metadata {
     pub mod bp_meta_book;
     pub mod bp_meta_game;
     pub mod bp_meta_game_system;
-    pub mod bp_meta_openlibrary;
     pub mod bp_meta_movie;
     pub mod bp_meta_music;
     pub mod bp_meta_music_video;
+    pub mod bp_meta_object;
+    pub mod bp_meta_openlibrary;
     pub mod bp_meta_person;
     pub mod bp_meta_sports;
     pub mod bp_meta_tv;
@@ -322,6 +323,10 @@ async fn main() {
         .route_with_tsr(
             "/user/media/image",
             get(user_media::bp_media_image::user_media_image),
+        )
+        .route(
+            "/user/metadata/object/{*object_key}",
+            get(user_metadata::bp_meta_object::metadata_object_proxy),
         )
         .route_with_tsr(
             "/user/media/movie/{page}",
