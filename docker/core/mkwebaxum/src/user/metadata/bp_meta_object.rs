@@ -1,9 +1,11 @@
 use crate::AppState;
 use axum::{
+    body::Body,
     extract::{Path, State},
-    http::{HeaderValue, StatusCode, header},
+    http::{HeaderValue, Request, StatusCode, Uri, header},
     response::IntoResponse,
 };
+use http_body_util::BodyExt;
 
 pub async fn metadata_object_proxy(
     State(state): State<AppState>,
@@ -32,15 +34,38 @@ pub async fn metadata_object_proxy(
         object_key.trim_start_matches('/')
     );
 
-    let mut request = state.client.get(upstream_url.as_str());
+    let upstream_uri = match upstream_url.parse::<Uri>() {
+        Ok(uri) => uri,
+        Err(_) => {
+            return (
+                StatusCode::SERVICE_UNAVAILABLE,
+                [(header::CONTENT_TYPE, "text/plain; charset=utf-8")],
+                "metadata storage URL is invalid".as_bytes().to_vec(),
+            );
+        }
+    };
+
+    let mut request_builder = Request::builder().method("GET").uri(upstream_uri);
     if let Ok(token) = std::env::var("MK_GARAGE_METADATA_TOKEN") {
         let trimmed = token.trim();
         if !trimmed.is_empty() {
-            request = request.header(header::AUTHORIZATION, format!("Bearer {trimmed}"));
+            request_builder =
+                request_builder.header(header::AUTHORIZATION, format!("Bearer {trimmed}"));
         }
     }
 
-    let upstream_response = match request.send().await {
+    let upstream_request = match request_builder.body(Body::empty()) {
+        Ok(request) => request,
+        Err(_) => {
+            return (
+                StatusCode::BAD_GATEWAY,
+                [(header::CONTENT_TYPE, "text/plain; charset=utf-8")],
+                "unable to build metadata request".as_bytes().to_vec(),
+            );
+        }
+    };
+
+    let upstream_response = match state.client.request(upstream_request).await {
         Ok(response) => response,
         Err(_) => {
             return (
@@ -74,8 +99,8 @@ pub async fn metadata_object_proxy(
         .unwrap_or("public, max-age=3600")
         .to_string();
 
-    let body = match upstream_response.bytes().await {
-        Ok(bytes) => bytes,
+    let body = match upstream_response.into_body().collect().await {
+        Ok(collected) => collected.to_bytes(),
         Err(_) => {
             return (
                 StatusCode::BAD_GATEWAY,
