@@ -2,29 +2,34 @@ use crate::AppState;
 use axum::{
     body::Body,
     extract::{Path, State},
-    http::{HeaderValue, Request, StatusCode, Uri, header},
+    http::{HeaderValue, Request, Response, StatusCode, Uri, header},
     response::IntoResponse,
 };
 use http_body_util::BodyExt;
+
+fn text_response(status: StatusCode, message: &str) -> Response<Body> {
+    let mut response = Response::new(Body::from(message.as_bytes().to_vec()));
+    *response.status_mut() = status;
+    response.headers_mut().insert(
+        header::CONTENT_TYPE,
+        HeaderValue::from_static("text/plain; charset=utf-8"),
+    );
+    response
+}
 
 pub async fn metadata_object_proxy(
     State(state): State<AppState>,
     Path(object_key): Path<String>,
 ) -> impl IntoResponse {
     if object_key.trim().is_empty() || object_key.contains("..") {
-        return (
-            StatusCode::BAD_REQUEST,
-            [(header::CONTENT_TYPE, "text/plain; charset=utf-8")],
-            "invalid object key".as_bytes().to_vec(),
-        );
+        return text_response(StatusCode::BAD_REQUEST, "invalid object key");
     }
 
     let garage_base_url = std::env::var("MK_GARAGE_METADATA_BASE_URL").unwrap_or_default();
     if garage_base_url.trim().is_empty() {
-        return (
+        return text_response(
             StatusCode::SERVICE_UNAVAILABLE,
-            [(header::CONTENT_TYPE, "text/plain; charset=utf-8")],
-            "metadata storage is not configured".as_bytes().to_vec(),
+            "metadata storage is not configured",
         );
     }
 
@@ -37,10 +42,9 @@ pub async fn metadata_object_proxy(
     let upstream_uri = match upstream_url.parse::<Uri>() {
         Ok(uri) => uri,
         Err(_) => {
-            return (
+            return text_response(
                 StatusCode::SERVICE_UNAVAILABLE,
-                [(header::CONTENT_TYPE, "text/plain; charset=utf-8")],
-                "metadata storage URL is invalid".as_bytes().to_vec(),
+                "metadata storage URL is invalid",
             );
         }
     };
@@ -57,31 +61,22 @@ pub async fn metadata_object_proxy(
     let upstream_request = match request_builder.body(Body::empty()) {
         Ok(request) => request,
         Err(_) => {
-            return (
-                StatusCode::BAD_GATEWAY,
-                [(header::CONTENT_TYPE, "text/plain; charset=utf-8")],
-                "unable to build metadata request".as_bytes().to_vec(),
-            );
+            return text_response(StatusCode::BAD_GATEWAY, "unable to build metadata request");
         }
     };
 
     let upstream_response = match state.client.request(upstream_request).await {
         Ok(response) => response,
         Err(_) => {
-            return (
-                StatusCode::BAD_GATEWAY,
-                [(header::CONTENT_TYPE, "text/plain; charset=utf-8")],
-                "unable to reach metadata storage".as_bytes().to_vec(),
-            );
+            return text_response(StatusCode::BAD_GATEWAY, "unable to reach metadata storage");
         }
     };
 
     let status = upstream_response.status();
     if !status.is_success() {
-        return (
+        return text_response(
             StatusCode::from_u16(status.as_u16()).unwrap_or(StatusCode::BAD_GATEWAY),
-            [(header::CONTENT_TYPE, "text/plain; charset=utf-8")],
-            "metadata storage returned an error".as_bytes().to_vec(),
+            "metadata storage returned an error",
         );
     }
 
@@ -102,11 +97,7 @@ pub async fn metadata_object_proxy(
     let body = match upstream_response.into_body().collect().await {
         Ok(collected) => collected.to_bytes(),
         Err(_) => {
-            return (
-                StatusCode::BAD_GATEWAY,
-                [(header::CONTENT_TYPE, "text/plain; charset=utf-8")],
-                "invalid metadata response".as_bytes().to_vec(),
-            );
+            return text_response(StatusCode::BAD_GATEWAY, "invalid metadata response");
         }
     };
 
@@ -119,12 +110,14 @@ pub async fn metadata_object_proxy(
         Err(_) => HeaderValue::from_static("public, max-age=3600"),
     };
 
-    (
-        StatusCode::OK,
-        [
-            (header::CONTENT_TYPE, content_type_header),
-            (header::CACHE_CONTROL, cache_control_header),
-        ],
-        body,
-    )
+    let mut response = Response::new(Body::from(body));
+    *response.status_mut() = StatusCode::OK;
+    response
+        .headers_mut()
+        .insert(header::CONTENT_TYPE, content_type_header);
+    response
+        .headers_mut()
+        .insert(header::CACHE_CONTROL, cache_control_header);
+
+    response
 }
