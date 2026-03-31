@@ -1,0 +1,22 @@
+---
+# Garage HA deployment on Kubernetes (3-node HA baseline).
+# 1) Create secret before running this playbook:
+# kubectl -n garage create secret generic garage-admin-secret \
+#   --from-literal=admin_token=REPLACE_ME \
+#   --from-literal=metrics_token=REPLACE_ME
+# 2) Bootstrap layout after pods are ready (assign one entry per running pod/node ID):
+# kubectl -n garage exec garage-0 -- /garage status
+# kubectl -n garage exec garage-0 -- /garage layout assign -z dc1 -c 1G <NODE_ID_1>
+# kubectl -n garage exec garage-0 -- /garage layout assign -z dc1 -c 1G <NODE_ID_2>
+# kubectl -n garage exec garage-0 -- /garage layout assign -z dc1 -c 1G <NODE_ID_3>
+# kubectl -n garage exec garage-0 -- /garage layout apply --version 1
+- name : Setup Garage HA on cluster
+  hosts: mkcontroldev1
+  tasks:
+    - name: copying file
+      copy:
+        src: ../config/garage_ha.yml
+        dest: ~/garage_ha.yml
+
+    - name: Apply Garage HA manifests
+      shell: kubectl apply -f ~/garage_ha.yml

@@ -1,0 +1,174 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: garage
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: garage-rpc-secret
+  namespace: garage
+type: Opaque
+stringData:
+  rpc_secret: "REPLACE_WITH_32_BYTE_RANDOM_HEX"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: garage-rpc
+  namespace: garage
+spec:
+  clusterIP: None
+  selector:
+    app: garage
+  ports:
+    - name: rpc
+      port: 3901
+      targetPort: 3901
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: garage-s3
+  namespace: garage
+spec:
+  selector:
+    app: garage
+  ports:
+    - name: s3
+      port: 3900
+      targetPort: 3900
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: garage-admin
+  namespace: garage
+spec:
+  selector:
+    app: garage
+  ports:
+    - name: admin
+      port: 3903
+      targetPort: 3903
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: garage-pdb
+  namespace: garage
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: garage
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: garage
+  namespace: garage
+spec:
+  serviceName: garage-rpc
+  replicas: 3
+  selector:
+    matchLabels:
+      app: garage
+  template:
+    metadata:
+      labels:
+        app: garage
+    spec:
+      terminationGracePeriodSeconds: 30
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - garage
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: garage
+          image: dxflrs/garage:v2.1.0
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "-ec"]
+          args:
+            - |
+              POD_ORDINAL="${HOSTNAME##*-}"
+              NODE_FQDN="garage-${POD_ORDINAL}.garage-rpc.garage.svc.cluster.local"
+              cat >/etc/garage.toml <<CFG
+              metadata_dir = "/var/lib/garage/meta"
+              data_dir = "/var/lib/garage/data"
+              db_engine = "sqlite"
+              replication_mode = "3"
+
+              rpc_bind_addr = "0.0.0.0:3901"
+              rpc_public_addr = "${NODE_FQDN}:3901"
+              rpc_secret = "${RPC_SECRET}"
+
+              [s3_api]
+              api_bind_addr = "0.0.0.0:3900"
+              s3_region = "garage"
+
+              [admin]
+              api_bind_addr = "0.0.0.0:3903"
+              admin_token = "${ADMIN_TOKEN}"
+              metrics_token = "${METRICS_TOKEN}"
+              CFG
+              exec /garage server
+          resources:
+            requests:
+              cpu: "1000m"
+              memory: "2Gi"
+            limits:
+              cpu: "2000m"
+              memory: "4Gi"
+          env:
+            - name: RPC_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: garage-rpc-secret
+                  key: rpc_secret
+            - name: ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: garage-admin-secret
+                  key: admin_token
+            - name: METRICS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: garage-admin-secret
+                  key: metrics_token
+          ports:
+            - name: s3
+              containerPort: 3900
+            - name: rpc
+              containerPort: 3901
+            - name: admin
+              containerPort: 3903
+          readinessProbe:
+            tcpSocket:
+              port: 3900
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 3901
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          volumeMounts:
+            - name: garage-data
+              mountPath: /var/lib/garage
+  volumeClaimTemplates:
+    - metadata:
+        name: garage-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: longhorn
+        resources:
+          requests:
+            storage: 500Gi
