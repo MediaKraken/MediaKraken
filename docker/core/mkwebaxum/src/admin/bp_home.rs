@@ -108,8 +108,9 @@ pub async fn admin_home(
             template_data_server_info_server_name: &option_json["MediaKrakenServer"]["Server Name"],
             // following boottime only compiles #[cfg(not(windows))] in this case is fine
             template_data_server_uptime: &format!(
-                "{:02}:{:02}:{:02}",
-                boot_duration.num_hours(),
+                "{}d {:02}:{:02}:{:02}",
+                boot_duration.num_days(),
+                boot_duration.num_hours() % 24,
                 boot_duration.num_minutes() % 60,
                 boot_duration.num_seconds() % 60,
             ),
