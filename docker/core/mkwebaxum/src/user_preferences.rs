@@ -1,6 +1,6 @@
 use num_format::Locale;
-use serde_json::{Value, json};
-use sqlx::{FromRow, postgres::PgPool};
+use serde_json::{json, Value};
+use sqlx::{postgres::PgPool, FromRow};
 
 pub const DEFAULT_PAGINATION_COUNT: i64 = 30;
 pub const MIN_PAGINATION_COUNT: i64 = 5;
@@ -25,9 +25,9 @@ pub fn normalize_number_format_language(value: &str) -> String {
     }
 }
 
-pub fn number_format_locale_for_language(language: &str) -> &'static Locale {
+pub fn number_format_locale_for_language(language: &str) -> Locale {
     let normalized = normalize_number_format_language(language);
-    Locale::from_name(&normalized).unwrap_or(&Locale::en)
+    Locale::from_name(&normalized).unwrap_or(Locale::en)
 }
 
 pub async fn load_user_pagination_count(

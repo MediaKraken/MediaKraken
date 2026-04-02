@@ -1,13 +1,13 @@
-use crate::AppState;
 use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
 use crate::user_preferences;
+use crate::AppState;
 use askama::Template;
 use axum::extract::State;
 use axum::{
-    Extension,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
+    Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
@@ -16,8 +16,8 @@ use mk_lib_common;
 use mk_lib_network;
 use num_format::ToFormattedString;
 use serde::{Deserialize, Serialize};
-use sqlx::Row;
 use sqlx::postgres::PgPool;
+use sqlx::Row;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -132,19 +132,19 @@ pub async fn admin_home(
                 &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_known_count(&state.sqlx_pool_ro)
                     .await
                     .unwrap()
-                    .to_formatted_string(locale),
+                    .to_formatted_string(&locale),
             template_data_count_matched_media:
                 &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_matched_count(&state.sqlx_pool_ro)
                     .await
                     .unwrap()
-                    .to_formatted_string(locale),
+                    .to_formatted_string(&locale),
             template_data_count_meta_fetch:
                 &mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(
                    &state.sqlx_pool_ro,
                 )
                 .await
                 .unwrap()
-                .to_formatted_string(locale),
+                .to_formatted_string(&locale),
             template_data_count_streamed_media: &"0".to_string(),
             template_server_notifications: &notification_list,
             template_server_streams: &server_streams,
