@@ -1,18 +1,17 @@
 use crate::mk_lib_database;
 use askama::Template;
 use axum::{
+    Extension, Router,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Extension, Router,
 };
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use serde_json::json;
 use sqlx::postgres::PgPool;
-use stdext::function_name;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_401.html")]

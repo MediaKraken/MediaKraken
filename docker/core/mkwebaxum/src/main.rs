@@ -481,6 +481,10 @@ async fn main() {
             "/user/profile/pagination",
             post(user::bp_profile::user_profile_pagination_post),
         )
+        .route(
+            "/user/profile/number-format-language",
+            post(user::bp_profile::user_profile_number_format_language_post),
+        )
         .route_with_tsr("/user/queue", get(user::bp_queue::user_queue))
         //.route_with_tsr("/user/search", get(user::bp_search::user_search))
         .route("/user/search", get(user::bp_search::search_handler))
