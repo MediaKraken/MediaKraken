@@ -132,19 +132,19 @@ pub async fn admin_home(
                 &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_known_count(&state.sqlx_pool_ro)
                     .await
                     .unwrap()
-                    .to_formatted_string(&locale),
+                    .to_formatted_string(locale),
             template_data_count_matched_media:
                 &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_matched_count(&state.sqlx_pool_ro)
                     .await
                     .unwrap()
-                    .to_formatted_string(&locale),
+                    .to_formatted_string(locale),
             template_data_count_meta_fetch:
                 &mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(
                    &state.sqlx_pool_ro,
                 )
                 .await
                 .unwrap()
-                .to_formatted_string(&locale),
+                .to_formatted_string(locale),
             template_data_count_streamed_media: &"0".to_string(),
             template_server_notifications: &notification_list,
             template_server_streams: &server_streams,
