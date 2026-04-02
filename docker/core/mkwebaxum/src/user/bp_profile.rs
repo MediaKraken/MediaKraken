@@ -309,7 +309,7 @@ pub async fn user_profile_number_format_language_post(
     if user_preferences::upsert_user_number_format_language(
         &state.sqlx_pool_rw,
         current_user.id,
-        normalized_language,
+        &normalized_language,
     )
     .await
     .is_err()
