@@ -86,6 +86,25 @@
                     Save pagination preference
                 </button>
             </form>
+            <form class="mt-8 flex flex-col gap-3" action="/user/profile/number-format-language" method="post">
+                <label for="default_number_format_language" class="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+                    Default number format language
+                </label>
+                <select id="default_number_format_language"
+                        name="default_number_format_language"
+                        aria-label="Default number format language"
+                        class="block w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100">
+                    {% for option in language_options %}
+                    <option value="{{ option.code }}"{% if default_number_format_language == option.code %} selected{% endif %}>{{ option.label }} ({{ option.code }})</option>
+                    {% endfor %}
+                </select>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400">This controls how large counts are formatted (for example on admin dashboards).</p>
+                <button type="submit"
+                        aria-label="Save default number format language"
+                        class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus:ring-offset-zinc-900">
+                    Save language preference
+                </button>
+            </form>
         </section>
     </div>
 </div>

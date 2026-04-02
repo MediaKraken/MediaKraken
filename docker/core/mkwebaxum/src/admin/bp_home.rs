@@ -1,22 +1,23 @@
+use crate::AppState;
 use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
+use crate::user_preferences;
 use askama::Template;
+use axum::extract::State;
 use axum::{
+    Extension,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
-    Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common;
 use mk_lib_network;
-use num_format::{SystemLocale, ToFormattedString};
+use num_format::ToFormattedString;
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgPool;
 use sqlx::Row;
-use axum::extract::State;
-use crate::AppState;
+use sqlx::postgres::PgPool;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -54,13 +55,12 @@ struct TemplateHomeContext<'a> {
     template_server_streams: &'a Vec<TemplateHomeStreamListContext>,
     template_server_users: &'a Vec<mk_lib_database::mk_lib_database_user::DBUserList>,
     template_data_scan_info: &'a Vec<TemplateHomeScanListContext>,
-        page_title: Option<String>,
-
+    page_title: Option<String>,
 }
 
 pub async fn admin_home(
-   State(state): State<AppState>,
-   method: Method,
+    State(state): State<AppState>,
+    method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let current_user = auth.current_user.clone().unwrap_or_default();
@@ -78,17 +78,22 @@ pub async fn admin_home(
     } else {
         let notification_list =
             mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_read(
-                &state.sqlx_pool_ro, 0, 9999,
+                &state.sqlx_pool_ro,
+                0,
+                9999,
             )
             .await
             .unwrap();
-        let user_list =
-            mk_lib_database::mk_lib_database_user::mk_lib_database_user_read(&state.sqlx_pool_ro, 0, 9999)
-                .await
-                .unwrap();
+        let user_list = mk_lib_database::mk_lib_database_user::mk_lib_database_user_read(
+            &state.sqlx_pool_ro,
+            0,
+            9999,
+        )
+        .await
+        .unwrap();
         let option_status_row =
             mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_status_read(
-               &state.sqlx_pool_ro,
+                &state.sqlx_pool_ro,
             )
             .await
             .unwrap();
@@ -103,7 +108,13 @@ pub async fn admin_home(
         .unwrap();
         let mut server_streams = Vec::new();
         let mut server_scans = Vec::new();
-        let locale = SystemLocale::default().unwrap();
+        let number_format_language = user_preferences::load_user_number_format_language(
+            &state.sqlx_pool_ro,
+            current_user.id,
+        )
+        .await
+        .unwrap_or_else(|_| user_preferences::DEFAULT_NUMBER_FORMAT_LANGUAGE.to_string());
+        let locale = user_preferences::number_format_locale_for_language(&number_format_language);
         let template = TemplateHomeContext {
             template_data_server_info_server_name: &option_json["MediaKrakenServer"]["Server Name"],
             // following boottime only compiles #[cfg(not(windows))] in this case is fine

@@ -12,6 +12,7 @@ use axum_session_sqlx::SessionPgPool;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::{FromRow, postgres::PgPool};
+use std::collections::HashSet;
 
 const DEFAULT_PROFILE_IMAGE_URL: &str = "/static/image/K3.png";
 const PROFILE_IMAGE_DIR: &str = "static/image/user_profile";
@@ -28,8 +29,15 @@ struct UserProfileTemplate {
     username: String,
     profile_image_url: String,
     pagination_count: i64,
+    default_number_format_language: String,
+    language_options: Vec<LanguageOption>,
     success_message: Option<String>,
     error_message: Option<String>,
+}
+
+struct LanguageOption {
+    code: String,
+    label: String,
 }
 
 #[derive(Deserialize, Default)]
@@ -47,6 +55,11 @@ struct UserProfileRow {
 #[derive(Deserialize)]
 pub struct PaginationPreferenceForm {
     pagination_count: i64,
+}
+
+#[derive(Deserialize)]
+pub struct NumberFormatLanguageForm {
+    default_number_format_language: String,
 }
 
 pub async fn user_profile(
@@ -68,6 +81,18 @@ pub async fn user_profile(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
+        let language_options: Vec<LanguageOption> =
+            mk_lib_database::mk_lib_database_language::mk_lib_database_language_read(
+                &state.sqlx_pool_ro,
+            )
+            .await
+            .unwrap_or_default()
+            .into_iter()
+            .map(|row| LanguageOption {
+                code: row.code.to_lowercase(),
+                label: row.language,
+            })
+            .collect();
         let template = UserProfileTemplate {
             page_title: Some("MediaKraken User Profile".to_string()),
             username: current_user.username,
@@ -80,10 +105,20 @@ pub async fn user_profile(
             )
             .await
             .unwrap_or(user_preferences::DEFAULT_PAGINATION_COUNT),
+            default_number_format_language: user_preferences::load_user_number_format_language(
+                &state.sqlx_pool_ro,
+                current_user.id,
+            )
+            .await
+            .unwrap_or_else(|_| user_preferences::DEFAULT_NUMBER_FORMAT_LANGUAGE.to_string()),
+            language_options,
             success_message: match query.status.as_deref() {
                 Some("updated") => Some("Profile picture updated.".to_string()),
                 Some("pagination-updated") => {
                     Some("Pagination preference updated for your account.".to_string())
+                }
+                Some("language-updated") => {
+                    Some("Default number format language updated for your account.".to_string())
                 }
                 _ => None,
             },
@@ -103,6 +138,9 @@ pub async fn user_profile(
                     user_preferences::MIN_PAGINATION_COUNT,
                     user_preferences::MAX_PAGINATION_COUNT
                 )),
+                Some("invalid-language") => Some(
+                    "Default language must be one of the configured language options.".to_string(),
+                ),
                 _ => None,
             },
         };
@@ -233,6 +271,53 @@ pub async fn user_profile_pagination_post(
     }
 
     Redirect::to("/user/profile?status=pagination-updated")
+}
+
+pub async fn user_profile_number_format_language_post(
+    State(state): State<AppState>,
+    method: Method,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    Form(form): Form<NumberFormatLanguageForm>,
+) -> Redirect {
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::POST],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("User::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        return Redirect::to("/error/401");
+    }
+
+    let normalized_language =
+        user_preferences::normalize_number_format_language(&form.default_number_format_language);
+    let valid_languages: HashSet<String> =
+        mk_lib_database::mk_lib_database_language::mk_lib_database_language_read(
+            &state.sqlx_pool_ro,
+        )
+        .await
+        .unwrap_or_default()
+        .into_iter()
+        .map(|row| row.code.to_lowercase())
+        .collect();
+    if !valid_languages.contains(&normalized_language) {
+        return Redirect::to("/user/profile?error=invalid-language");
+    }
+
+    if user_preferences::upsert_user_number_format_language(
+        &state.sqlx_pool_rw,
+        current_user.id,
+        normalized_language,
+    )
+    .await
+    .is_err()
+    {
+        return Redirect::to("/user/profile?error=save-failed");
+    }
+
+    Redirect::to("/user/profile?status=language-updated")
 }
 
 async fn load_profile_image_url(sqlx_pool: &PgPool, user_id: i64) -> Result<String, sqlx::Error> {
