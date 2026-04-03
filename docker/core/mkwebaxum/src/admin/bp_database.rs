@@ -1,17 +1,18 @@
+use crate::AppState;
 use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
+use crate::user_preferences;
 use askama::Template;
+use axum::extract::State;
 use axum::{
+    Extension,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
-    Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use sqlx::postgres::PgPool;
-use axum::extract::State;
-use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -26,6 +27,7 @@ struct AdminDBStatsTemplate<'a> {
     template_data_db_count: &'a Vec<mk_lib_database::mk_lib_database_postgresql::PGTableRows>,
     template_data_db_count_total: &'a f64,
     template_data_db_workers: &'a String,
+    template_data_number_format_language: &'a String,
     template_data_db_extension:
         &'a Vec<mk_lib_database::mk_lib_database_postgresql::PGExtensionActive>,
     template_data_db_extension_avail:
@@ -53,27 +55,31 @@ pub async fn admin_database(
     } else {
         let pg_version =
             mk_lib_database::mk_lib_database_version::mk_lib_database_postgresql_version(
-               &state.sqlx_pool_ro,
+                &state.sqlx_pool_ro,
             )
             .await
             .unwrap();
         let pg_table_size =
-            mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_size(&state.sqlx_pool_ro)
-                .await
-                .unwrap();
+            mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_size(
+                &state.sqlx_pool_ro,
+            )
+            .await
+            .unwrap();
         let pg_table_size_total =
             mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_size_total(
-               &state.sqlx_pool_ro,
+                &state.sqlx_pool_ro,
             )
             .await
             .unwrap();
         let pg_table_row_count =
-            mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_rows(&state.sqlx_pool_ro)
-                .await
-                .unwrap();
+            mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_rows(
+                &state.sqlx_pool_ro,
+            )
+            .await
+            .unwrap();
         let pg_table_row_count_total =
             mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_row_count(
-               &state.sqlx_pool_ro,
+                &state.sqlx_pool_ro,
             )
             .await
             .unwrap();
@@ -95,6 +101,12 @@ pub async fn admin_database(
             )
             .await
             .unwrap();
+        let number_format_language = user_preferences::load_user_number_format_language(
+            &state.sqlx_pool_ro,
+            current_user.id,
+        )
+        .await
+        .unwrap_or_else(|_| user_preferences::DEFAULT_NUMBER_FORMAT_LANGUAGE.to_string());
         let template = AdminDBStatsTemplate {
             template_data_db_version: &pg_version,
             template_data_db_size: &pg_table_size,
@@ -102,6 +114,7 @@ pub async fn admin_database(
             template_data_db_count: &pg_table_row_count,
             template_data_db_count_total: &pg_table_row_count_total,
             template_data_db_workers: &pg_worker_count,
+            template_data_number_format_language: &number_format_language,
             template_data_db_extension: &pg_extension,
             template_data_db_extension_avail: &pg_extension_avail,
             page_title: Some("MediaKraken Admin Database".to_string()),

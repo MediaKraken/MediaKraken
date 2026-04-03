@@ -76,10 +76,10 @@
                 <h5 class="font-semibold">Media Counts</h5>
               </div>
               <div class="p-4 space-y-1 text-sm">
-                <p><b>Media Files:</b> {{ template_data_count_media_files|number_format }}</p>
-                <p><b>Matched Media:</b> {{ template_data_count_matched_media|number_format }}</p>
-                <p><b>Metadata to Download:</b> {{ template_data_count_meta_fetch|number_format }}</p>
-                <p><b>Streamed:</b> {{ template_data_count_streamed_media|number_format }}</p>
+                <p><b>Media Files:</b> {{ template_data_count_media_files|number_format_locale(template_data_number_format_language) }}</p>
+                <p><b>Matched Media:</b> {{ template_data_count_matched_media|number_format_locale(template_data_number_format_language) }}</p>
+                <p><b>Metadata to Download:</b> {{ template_data_count_meta_fetch|number_format_locale(template_data_number_format_language) }}</p>
+                <p><b>Streamed:</b> {{ template_data_count_streamed_media|number_format_locale(template_data_number_format_language) }}</p>
               </div>
             </div>
           </div>

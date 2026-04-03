@@ -80,6 +80,17 @@ pub mod filters {
     }
 
     #[askama::filter_fn]
+    pub fn number_format_locale<T: std::fmt::Display>(
+        s: T,
+        _env: &dyn askama::Values,
+        locale_name: &str,
+    ) -> askama::Result<String> {
+        let result = mk_lib_common::mk_lib_common_internationalization::
+            mk_lib_common_internationalization_number_format_locale(t_as_i64(s), Some(locale_name));
+        Ok(result)
+    }
+
+    #[askama::filter_fn]
     pub fn byte_format<T: std::fmt::Display>(
         s: T,
         _env: &dyn askama::Values,

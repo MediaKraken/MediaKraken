@@ -1,13 +1,13 @@
+use crate::AppState;
 use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
 use crate::user_preferences;
-use crate::AppState;
 use askama::Template;
 use axum::extract::State;
 use axum::{
+    Extension,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
-    Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
@@ -16,8 +16,8 @@ use mk_lib_common;
 use mk_lib_network;
 use num_format::ToFormattedString;
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgPool;
 use sqlx::Row;
+use sqlx::postgres::PgPool;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -50,6 +50,7 @@ struct TemplateHomeContext<'a> {
     template_data_count_matched_media: &'a String,
     template_data_count_meta_fetch: &'a String,
     template_data_count_streamed_media: &'a String,
+    template_data_number_format_language: &'a String,
     template_server_notifications:
         &'a Vec<mk_lib_database::mk_lib_database_notification::DBNotificationList>,
     template_server_streams: &'a Vec<TemplateHomeStreamListContext>,
@@ -146,6 +147,7 @@ pub async fn admin_home(
                 .unwrap()
                 .to_formatted_string(&locale),
             template_data_count_streamed_media: &"0".to_string(),
+            template_data_number_format_language: &number_format_language,
             template_server_notifications: &notification_list,
             template_server_streams: &server_streams,
             template_server_users: &user_list,
