@@ -49,6 +49,7 @@ pub mod database_metadata {
     pub mod mk_lib_database_metadata_book;
     pub mod mk_lib_database_metadata_collection;
     pub mod mk_lib_database_metadata_download_queue;
+    pub mod mk_lib_database_metadata_download_url;
     pub mod mk_lib_database_metadata_game;
     pub mod mk_lib_database_metadata_game_system;
     pub mod mk_lib_database_metadata_image;

@@ -1131,12 +1131,30 @@ pub async fn mk_lib_database_update_schema(
             .execute(&mut *transaction)
             .await?;
         sqlx::query(
-            r#"CREATE INDEX IF NOT EXISTS mm_metadata_movie_fts_ndx ON mm_metadata_movie USING gin (( setweight(to_tsvector('simple', unaccent(coalesce(mm_metadata_movie_name, ''))), 'A') || ' ' || setweight(to_tsvector('simple', unaccent(coalesce(mm_metadata_movie_name_alt, ''))), 'B') :: tsvector ));"#,
+            r#"CREATE INDEX IF NOT EXISTS mm_metadata_movie_fts_ndx ON mm_metadata_movie 
+            USING gin (( setweight(to_tsvector('simple', unaccent(coalesce(mm_metadata_movie_name, ''))), 'A') || ' ' || setweight(to_tsvector('simple', unaccent(coalesce(mm_metadata_movie_name_alt, ''))), 'B') :: tsvector ));"#,
         )
         .execute(&mut *transaction)
         .await?;
         sqlx::query(
-            r#"CREATE INDEX IF NOT EXISTS mm_metadata_tvshow_fts_ndx ON mm_metadata_tvshow USING gin (( setweight(to_tsvector('simple', unaccent(coalesce(mm_metadata_tvshow_name, ''))), 'A') || ' ' || setweight(to_tsvector('simple', unaccent(coalesce(mm_metadata_tvshow_name_alt, ''))), 'B') :: tsvector ));"#,
+            r#"CREATE INDEX IF NOT EXISTS mm_metadata_tvshow_fts_ndx ON mm_metadata_tvshow 
+            USING gin (( setweight(to_tsvector('simple', unaccent(coalesce(mm_metadata_tvshow_name, ''))), 'A') || ' ' || setweight(to_tsvector('simple', unaccent(coalesce(mm_metadata_tvshow_name_alt, ''))), 'B') :: tsvector ));"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            r#"CREATE TABLE IF NOT EXISTS public.mm_downloaded
+            (
+                mm_download_guid uuid NOT NULL,
+                mm_downloaded_url text COLLATE pg_catalog."default" NOT NULL,
+                CONSTRAINT mm_downloaded_pkey PRIMARY KEY (mm_download_guid)
+            )"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            r#"CREATE INDEX IF NOT EXISTS mm_download_url_ndx ON mm_downloaded 
+            USING btree (mm_downloaded_url);"#,
         )
         .execute(&mut *transaction)
         .await?;
