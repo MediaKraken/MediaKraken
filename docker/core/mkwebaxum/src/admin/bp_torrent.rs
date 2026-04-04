@@ -1,24 +1,13 @@
-use crate::axum_custom_filters::filters;
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
-    extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
-    routing::{get, post},
-    Extension,
 };
-use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
 use axum_session_auth::*;
-use bytesize::ByteSize;
-use core::fmt::Write;
-use mk_lib_common;
-use crate::mk_lib_database;
+use axum_session_sqlx::SessionPgPool;
 use mk_lib_network;
-use serde_json::json;
 use sqlx::postgres::PgPool;
-use axum::extract::State;
-use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -27,13 +16,12 @@ struct TemplateError403Context {}
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_torrent.html")]
 struct AdminTorrentTemplate<'a> {
-    template_data: &'a Vec<mk_lib_network::mk_lib_network_transmission::TorrentList>,
-        page_title: Option<String>,
-
+    template_data_json: &'a str,
+    page_title: Option<String>,
 }
 
 pub async fn admin_torrent(
-     method: Method,
+    method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let current_user = auth.current_user.clone().unwrap_or_default();
@@ -59,10 +47,13 @@ pub async fn admin_torrent(
             )
             .await
             .unwrap();
+        let transmission_torrents_json = match serde_json::to_string(&transmission_torrents) {
+            Ok(value) => value,
+            Err(_) => "[]".to_string(),
+        };
         let template = AdminTorrentTemplate {
-            template_data: &transmission_torrents,
-                        page_title: Some("MediaKraken Admin Torrent".to_string()),
-
+            template_data_json: &transmission_torrents_json,
+            page_title: Some("MediaKraken Admin Torrent".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())

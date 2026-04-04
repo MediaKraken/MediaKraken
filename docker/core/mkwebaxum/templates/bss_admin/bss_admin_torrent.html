@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" x-data="torrentPage()" x-cloak>
+<html lang="en" x-data="torrentPage({{ template_data_json|safe }})" x-cloak>
 {% include "bss_include_header.html" %}
 <body class="bg-gray-100 text-gray-800">
 
@@ -78,13 +78,15 @@
   <script src="/static/js/base_webapp.js" defer></script>
     <!-- Alpine.js data -->
     <script>
-        function torrentPage() {
+        function torrentPage(initialTorrents) {
             return {
-                torrents: [
-                    // Example data; replace with server-side JSON
-                    { id: 1, name: "Ubuntu.iso", status: "Downloading", percent_done: 0.45, size: 2147483648 },
-                    { id: 2, name: "Fedora.iso", status: "Seeding", percent_done: 1, size: 3221225472 },
-                ],
+                torrents: initialTorrents.map((torrent) => ({
+                    id: torrent.mm_torrent_id,
+                    name: torrent.mm_torrent_name,
+                    status: torrent.mm_torrent_status,
+                    percent_done: torrent.mm_torrent_percent_done,
+                    size: torrent.mm_torrent_size,
+                })),
                 showDeleteModal: false,
                 torrentToDelete: null,
 
