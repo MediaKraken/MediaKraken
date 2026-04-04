@@ -134,8 +134,9 @@ fn build_game_pagination(
     );
 
     let suffix = build_filter_query_suffix(starts_with, genre, status_filter);
+    let current_page = page.max(1).min(total_pages) as usize;
     let paginator = Paginator::builder(total_pages as usize)
-        .current_page(page.max(1) as usize)
+        .current_page(current_page)
         .build_paginator()
         .map_err(|_| std::fmt::Error)?;
 
