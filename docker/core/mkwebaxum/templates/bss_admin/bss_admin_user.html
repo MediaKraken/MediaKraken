@@ -48,7 +48,7 @@
                                     <a href="/admin/bss_admin_user_detail/{{ row_data.id }}"
                                        class="text-blue-600 hover:underline">{{ row_data.username }}</a>
                                 </td>
-                                <td class="px-4 py-2 border-b">{{ row_data.email.as_ref().unwrap() }}</td>
+                                <td class="px-4 py-2 border-b">{% match row_data.email %}{% when Some with (email) %}{{ email }}{% when None %}-{% endmatch %}</td>
                                 <td class="px-4 py-2 border-b">FAKE</td>
                                 <td class="px-4 py-2 border-b">FAKE</td>
                                 <td class="px-4 py-2 border-b">FAKE</td>
