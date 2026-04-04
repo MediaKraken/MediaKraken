@@ -137,6 +137,7 @@ async fn run_bulk_cover_archive_upload(options: BulkImageCoverLoadOptions) -> an
     let archive_bytes = response.bytes().await?;
 
     let s3_prefix = options.s3_prefix.trim_matches('/').to_string();
+    let upload_s3_prefix = s3_prefix.clone();
     let add_json = options.add_json;
     let archive_url = options.archive_url.clone();
     let upload_bucket = bucket.clone();
@@ -171,7 +172,7 @@ async fn run_bulk_cover_archive_upload(options: BulkImageCoverLoadOptions) -> an
             let mut payload = Vec::new();
             entry.read_to_end(&mut payload)?;
             let payload_len = payload.len();
-            let object_key = format!("{}/{}", s3_prefix, file_name);
+            let object_key = format!("{}/{}", upload_s3_prefix, file_name);
 
             rt.block_on(upload_s3_object(
                 s3_client.clone(),
