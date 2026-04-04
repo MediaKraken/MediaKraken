@@ -11,7 +11,7 @@ fn prefers_fallback_locale() -> bool {
         .any(|value| value == "C" || value.starts_with("C.") || value == "POSIX")
 }
 
-fn locale_from_name(locale_name: &str) -> Option<&'static Locale> {
+fn locale_from_name(locale_name: &str) -> Option<Locale> {
     let trimmed = locale_name.trim();
     if trimmed.is_empty() {
         return None;
@@ -49,7 +49,7 @@ pub fn mk_lib_common_internationalization_number_format_locale(
     locale_name: Option<&str>,
 ) -> String {
     if let Some(locale) = locale_name.and_then(locale_from_name) {
-        return number_for_format.to_formatted_string(locale);
+        return number_for_format.to_formatted_string(&locale);
     }
 
     mk_lib_common_internationalization_number_format(number_for_format)
