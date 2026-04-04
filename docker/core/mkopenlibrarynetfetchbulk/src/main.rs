@@ -139,6 +139,7 @@ async fn run_bulk_cover_archive_upload(options: BulkImageCoverLoadOptions) -> an
     let s3_prefix = options.s3_prefix.trim_matches('/').to_string();
     let add_json = options.add_json;
     let archive_url = options.archive_url.clone();
+    let upload_bucket = bucket.clone();
 
     let uploaded = tokio::task::spawn_blocking(move || -> anyhow::Result<usize> {
         let mut uploaded_count: usize = 0;
@@ -174,7 +175,7 @@ async fn run_bulk_cover_archive_upload(options: BulkImageCoverLoadOptions) -> an
 
             rt.block_on(upload_s3_object(
                 s3_client.clone(),
-                &bucket,
+                &upload_bucket,
                 &object_key,
                 payload,
                 content_type,
@@ -192,7 +193,7 @@ async fn run_bulk_cover_archive_upload(options: BulkImageCoverLoadOptions) -> an
                 });
                 rt.block_on(upload_s3_object(
                     s3_client.clone(),
-                    &bucket,
+                    &upload_bucket,
                     &json_key,
                     serde_json::to_vec(&metadata)?,
                     "application/json",
