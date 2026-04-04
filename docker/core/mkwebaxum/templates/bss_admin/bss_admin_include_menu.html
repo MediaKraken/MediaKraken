@@ -1,4 +1,4 @@
-<nav>
+<nav x-data="{ activePath: window.location.pathname }">
   <div class="flex flex-col items-center w-40 h-full overflow-hidden text-gray-700 bg-gray-100 rounded">
     <a class="flex items-center w-full px-3 mt-3" href="/user/home">
           {% include "icons/mediakraken.svg" %}
@@ -6,53 +6,53 @@
     </a>
     <div class="w-full px-2">
       <div class="flex flex-col items-center w-full mt-3 border-t border-gray-300">
-        <a class="flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/home">
+        <a class="flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" :class="{ 'bg-gray-300': activePath === '/admin/home' }" :aria-current="activePath === '/admin/home' ? 'page' : null" href="/admin/home">
           {% include "icons/dashboard.svg" %}
           <span class="ml-2 text-sm font-medium">Dasboard</span>
         </a>
-        <a class="flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/backup/1">
+        <a class="flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" :class="{ 'bg-gray-300': activePath.startsWith('/admin/backup') }" :aria-current="activePath.startsWith('/admin/backup') ? 'page' : null" href="/admin/backup/1">
           {% include "icons/hdd.svg" %}
           <span class="ml-2 text-sm font-medium">Backups</span>
         </a>
-        <a class="flex items-center w-full h-12 px-3 mt-2 bg-gray-300 rounded" href="/admin/cron">
+        <a class="flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" :class="{ 'bg-gray-300': activePath === '/admin/cron' }" :aria-current="activePath === '/admin/cron' ? 'page' : null" href="/admin/cron">
           {% include "icons/toolbox.svg" %}
           <span class="ml-2 text-sm font-medium">Cron</span>
         </a>
-        <a class="flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/database">
+        <a class="flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" :class="{ 'bg-gray-300': activePath === '/admin/database' }" :aria-current="activePath === '/admin/database' ? 'page' : null" href="/admin/database">
           {% include "icons/database.svg" %}
           <span class="ml-2 text-sm font-medium">Database</span>
         </a>
-        <a class="flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/game_metadata">
+        <a class="flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" :class="{ 'bg-gray-300': activePath === '/admin/game_metadata' }" :aria-current="activePath === '/admin/game_metadata' ? 'page' : null" href="/admin/game_metadata">
           {% include "icons/gamepad_menu.svg" %}
           <span class="ml-2 text-sm font-medium">Game Metadata</span>
         </a>
-        <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/hardware">
+        <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" :class="{ 'bg-gray-300': activePath === '/admin/hardware' }" :aria-current="activePath === '/admin/hardware' ? 'page' : null" href="/admin/hardware">
           {% include "icons/microchip.svg" %}
           <span class="ml-2 text-sm font-medium">Hardware</span>
         </a>
-        <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/library">
+        <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" :class="{ 'bg-gray-300': activePath === '/admin/library' }" :aria-current="activePath === '/admin/library' ? 'page' : null" href="/admin/library">
           {% include "icons/ticket.svg" %}
           <span class="ml-2 text-sm font-medium">Library</span>
-        </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/logging">
+        </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" :class="{ 'bg-gray-300': activePath === '/admin/logging' }" :aria-current="activePath === '/admin/logging' ? 'page' : null" href="/admin/logging">
           {% include "icons/history.svg" %}
           <span class="ml-2 text-sm font-medium">Logging</span>
-        </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/report_known_media/1">
+        </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" :class="{ 'bg-gray-300': activePath.startsWith('/admin/report_known_media') }" :aria-current="activePath.startsWith('/admin/report_known_media') ? 'page' : null" href="/admin/report_known_media/1">
           {% include "icons/clipboard_list.svg" %}
           <span class="ml-2 text-sm font-medium">Reporting</span>
-        </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/settings">
+        </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" :class="{ 'bg-gray-300': activePath === '/admin/settings' }" :aria-current="activePath === '/admin/settings' ? 'page' : null" href="/admin/settings">
           {% include "icons/cogs.svg" %}
           <span class="ml-2 text-sm font-medium">Settings</span>
-        </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/server_links">
+        </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" :class="{ 'bg-gray-300': activePath === '/admin/server_links' }" :aria-current="activePath === '/admin/server_links' ? 'page' : null" href="/admin/server_links">
           {% include "icons/link.svg" %}
           <span class="ml-2 text-sm font-medium">Server Links</span>
-        </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/torrent">
+        </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" :class="{ 'bg-gray-300': activePath === '/admin/torrent' }" :aria-current="activePath === '/admin/torrent' ? 'page' : null" href="/admin/torrent">
           {% include "icons/bolt.svg" %}
           <span class="ml-2 text-sm font-medium">Torrent Management</span>
-        </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/upc">
+        </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" :class="{ 'bg-gray-300': activePath === '/admin/upc' }" :aria-current="activePath === '/admin/upc' ? 'page' : null" href="/admin/upc">
           {% include "icons/barcode.svg" %}
           <span class="ml-2 text-sm font-medium">UPC Import</span>
         </a>
-        <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" href="/admin/user/1">
+        <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300" :class="{ 'bg-gray-300': activePath.startsWith('/admin/user') }" :aria-current="activePath.startsWith('/admin/user') ? 'page' : null" href="/admin/user/1">
           {% include "icons/user.svg" %}
           <span class="ml-2 text-sm font-medium">Users</span>
         </a>

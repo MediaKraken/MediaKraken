@@ -18,7 +18,8 @@ fn locale_from_name(locale_name: &str) -> Option<&'static Locale> {
     }
 
     Locale::from_name(trimmed)
-        .or_else(|| Locale::from_name(&trimmed.replace('-', "_")))
+        .ok()
+        .or_else(|| Locale::from_name(&trimmed.replace('-', "_")).ok())
         .or_else(|| {
             let mut parts = trimmed.split(['-', '_']);
             let language = parts.next()?;
@@ -28,7 +29,7 @@ fn locale_from_name(locale_name: &str) -> Option<&'static Locale> {
                 language.to_ascii_lowercase(),
                 region.to_ascii_uppercase()
             );
-            Locale::from_name(&normalized)
+            Locale::from_name(&normalized).ok()
         })
 }
 

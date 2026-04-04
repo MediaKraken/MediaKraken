@@ -2,6 +2,7 @@ use crate::AppState;
 use crate::mk_lib_database;
 use crate::user_preferences;
 use askama::Template;
+use axum::extract::Query;
 use axum::extract::State;
 use axum::response::Redirect;
 use axum::{
@@ -14,6 +15,7 @@ use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
+use serde::Deserialize;
 use serde_json::json;
 use sqlx::postgres::PgPool;
 
@@ -31,6 +33,30 @@ struct TemplateMetaMusicContext<'a> {
     pagination_bar: &'a String,
     page: &'a usize,
     page_title: Option<String>,
+    pub current: Option<String>,
+    pub genre_filter: Option<String>,
+    pub genre_filter_query: Option<String>,
+    pub primary_language_filter: Option<String>,
+    pub status_filter: Option<String>,
+    pub base_path: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct FilterQuery {
+    pub starts_with: Option<String>,
+}
+
+fn normalize_starts_with(raw: Option<&str>) -> Option<String> {
+    let value = raw.map(str::trim).filter(|value| !value.is_empty())?;
+    let first_char = value.chars().next()?;
+
+    if first_char == '#' {
+        return Some("#".to_string());
+    }
+    if first_char.is_ascii_alphanumeric() {
+        return Some(first_char.to_ascii_uppercase().to_string());
+    }
+    Some("#".to_string())
 }
 
 pub async fn user_metadata_music(
@@ -38,7 +64,9 @@ pub async fn user_metadata_music(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
+    Query(params): Query<FilterQuery>,
 ) -> impl IntoResponse {
+    let starts_with = normalize_starts_with(params.starts_with.as_deref());
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
         [Method::GET],
@@ -60,7 +88,7 @@ pub async fn user_metadata_music(
         let total_pages: i64 =
         mk_lib_database::database_metadata::mk_lib_database_metadata_music_brainz::mk_lib_database_metadata_music_album_count(
            &state.sqlx_pool_ro,
-            String::new(),
+            starts_with.clone().unwrap_or_default(),
         )
         .await
         .unwrap();
@@ -68,7 +96,7 @@ pub async fn user_metadata_music(
             total_pages,
             page,
             "/user/metadata/music".to_string(),
-            None,
+            starts_with.as_deref(),
             pagination_count,
         )
         .await
@@ -76,7 +104,7 @@ pub async fn user_metadata_music(
         let music_list =
         mk_lib_database::database_metadata::mk_lib_database_metadata_music_brainz::mk_lib_database_metadata_music_album_read(
            &state.sqlx_pool_ro,
-            String::new(),
+            starts_with.clone().unwrap_or_default(),
             db_offset,
             pagination_count,
         )
@@ -93,6 +121,12 @@ pub async fn user_metadata_music(
             pagination_bar: &pagination_html,
             page: &page_usize,
             page_title: Some("MediaKraken Metadata Music".to_string()),
+            current: starts_with,
+            genre_filter: None,
+            genre_filter_query: None,
+            primary_language_filter: None,
+            status_filter: None,
+            base_path: "/user/metadata/music".to_string(),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
