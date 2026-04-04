@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" x-data="torrentPage({{ template_data_json|safe }})" x-cloak>
+<html lang="en" x-data="torrentPage()" x-cloak>
 {% include "bss_include_header.html" %}
 <body class="bg-gray-100 text-gray-800">
 
@@ -76,9 +76,20 @@
     </main>
   <script src="/static/js/alpinejs_3.15.3.min.js" defer></script>
   <script src="/static/js/base_webapp.js" defer></script>
+  <script id="torrent-data" type="application/json">{{ template_data_json|safe }}</script>
     <!-- Alpine.js data -->
     <script>
-        function torrentPage(initialTorrents) {
+        function torrentPage() {
+            const torrentDataElement = document.getElementById("torrent-data");
+            let initialTorrents = [];
+            if (torrentDataElement) {
+                try {
+                    initialTorrents = JSON.parse(torrentDataElement.textContent || "[]");
+                } catch (_error) {
+                    initialTorrents = [];
+                }
+            }
+
             return {
                 torrents: initialTorrents.map((torrent) => ({
                     id: torrent.mm_torrent_id,
