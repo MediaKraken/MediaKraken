@@ -3,7 +3,9 @@
 use id3::{Tag, TagLike};
 
 pub async fn mk_lib_metadata_id3_get_tag_info(file_name: String) {
-    let tag = Tag::read_from_path(file_name).unwrap();
+    let Ok(tag) = Tag::read_from_path(file_name) else {
+        return;
+    };
     if let Some(artist) = tag.artist() {
         #[cfg(debug_assertions)]
         {
