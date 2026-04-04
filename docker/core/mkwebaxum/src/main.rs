@@ -246,7 +246,6 @@ async fn main() {
             get(admin::bp_reports::admin_report_known_media),
         )
         .route_with_tsr("/admin/torrent", get(admin::bp_torrent::admin_torrent))
-        .route_with_tsr("/admin/torrent/web", get(proxy_transmission_handler))
         .route_with_tsr("/admin/user/{page}", get(admin::bp_user::admin_user))
         .route_with_tsr(
             "/user/internet/flickr",
@@ -589,24 +588,4 @@ async fn shutdown_signal() {
         _ = ctrl_c => {},
         _ = terminate => {},
     }
-}
-
-async fn proxy_transmission_handler(
-    State(state): State<AppState>,
-    mut req: Request,
-) -> Result<Response, StatusCode> {
-    let path = req.uri().path();
-    let path_query = req
-        .uri()
-        .path_and_query()
-        .map(|v| v.as_str())
-        .unwrap_or(path);
-    let uri = format!("https://mkstack-transmission:9091{}", path_query);
-    *req.uri_mut() = Uri::try_from(uri).unwrap();
-    Ok(state
-        .client
-        .request(req)
-        .await
-        .map_err(|_| StatusCode::BAD_REQUEST)?
-        .into_response())
 }

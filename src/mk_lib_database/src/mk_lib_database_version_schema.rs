@@ -1,6 +1,7 @@
 use crate::mk_lib_database_option_status;
+use crate::mk_lib_database_cron;
 use serde::{Deserialize, Serialize};
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 
 pub async fn mk_lib_database_update_schema(
     sqlx_pool: &sqlx::PgPool,
@@ -1157,6 +1158,16 @@ pub async fn mk_lib_database_update_schema(
             USING btree (mm_downloaded_url);"#,
         )
         .execute(&mut *transaction)
+        .await?;
+        mk_lib_database_cron::mk_lib_database_cron_insert(
+            &sqlx_pool,
+            "iRadio".into(),
+            "Populate iRadio".into(),
+            true,
+            "monthly".into(),
+            serde_json::json!({}),
+            1,
+        )
         .await?;
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 82).await?;
