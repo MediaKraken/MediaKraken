@@ -2,6 +2,7 @@
 
 {% block content %}
 <div>
+                {% include "filters/pagination_letters.html" %}
                 {% if template_data_exists %}
                 {% if pagination_bar != "" %}
                 {{ pagination_bar|safe }}
