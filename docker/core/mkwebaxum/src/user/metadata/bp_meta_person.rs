@@ -2,7 +2,7 @@ use crate::AppState;
 use crate::user_preferences;
 use askama::Template;
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
 };
@@ -34,6 +34,30 @@ struct TemplateMetaPersonContext<'a> {
     pagination_bar: &'a String,
     page: &'a usize,
     page_title: Option<String>,
+    pub current: Option<String>,
+    pub genre_filter: Option<String>,
+    pub genre_filter_query: Option<String>,
+    pub primary_language_filter: Option<String>,
+    pub status_filter: Option<String>,
+    pub base_path: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct FilterQuery {
+    pub starts_with: Option<String>,
+}
+
+fn normalize_starts_with(raw: Option<&str>) -> Option<String> {
+    let value = raw.map(str::trim).filter(|value| !value.is_empty())?;
+    let first_char = value.chars().next()?;
+
+    if first_char == '#' {
+        return Some("#".to_string());
+    }
+    if first_char.is_ascii_alphanumeric() {
+        return Some(first_char.to_ascii_uppercase().to_string());
+    }
+    Some("#".to_string())
 }
 
 pub async fn user_metadata_person(
@@ -41,7 +65,9 @@ pub async fn user_metadata_person(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(page): Path<i64>,
+    Query(params): Query<FilterQuery>,
 ) -> impl IntoResponse {
+    let starts_with = normalize_starts_with(params.starts_with.as_deref());
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
         [Method::GET],
@@ -62,7 +88,7 @@ pub async fn user_metadata_person(
         let db_offset: i64 = (page * pagination_count) - pagination_count;
         let total_pages: i64 = mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_person_count(
             &state.sqlx_pool_ro,
-            String::new(),
+            starts_with.clone().unwrap_or_default(),
         )
         .await
         .unwrap();
@@ -70,24 +96,27 @@ pub async fn user_metadata_person(
             total_pages,
             page,
             "/user/metadata/person".to_string(),
-            None,
+            starts_with.as_deref(),
             pagination_count,
         )
         .await
         .unwrap();
-        let person_list: Vec<TemplateMetaPersonList> = sqlx::query_as(
-            r#"select mm_metadata_person_guid,
-            mm_metadata_person_name,
-            COALESCE(mm_metadata_person_image, '') as mm_metadata_person_image
-            from mm_metadata_person
-            order by LOWER(mm_metadata_person_name)
-            offset $1 limit $2"#,
-        )
-        .bind(db_offset)
-        .bind(30_i64)
-        .fetch_all(&state.sqlx_pool_ro)
-        .await
-        .unwrap();
+        let person_list: Vec<TemplateMetaPersonList> =
+            mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_person_read(
+                &state.sqlx_pool_ro,
+                starts_with.clone().unwrap_or_default(),
+                db_offset,
+                pagination_count,
+            )
+            .await
+            .unwrap()
+            .into_iter()
+            .map(|row| TemplateMetaPersonList {
+                mm_metadata_person_guid: row.mm_metadata_person_guid,
+                mm_metadata_person_name: row.mm_metadata_person_name,
+                mm_metadata_person_image: row.mm_metadata_person_image,
+            })
+            .collect();
         let template_data_exists = !person_list.is_empty();
         let page_usize = page as usize;
         let template = TemplateMetaPersonContext {
@@ -96,6 +125,12 @@ pub async fn user_metadata_person(
             pagination_bar: &pagination_html,
             page: &page_usize,
             page_title: Some("MediaKraken Metadata Persons".to_string()),
+            current: starts_with,
+            genre_filter: None,
+            genre_filter_query: None,
+            primary_language_filter: None,
+            status_filter: None,
+            base_path: "/user/metadata/person".to_string(),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
