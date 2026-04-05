@@ -1,5 +1,64 @@
 {% extends "layouts/base_user.html" %}
 
 {% block content %}
-<div></div>
+<section class="w-full px-4 py-6 text-zinc-900 dark:text-zinc-100" x-data="{ currentUrl: '', currentName: '' }">
+    <div class="rounded-3xl border border-zinc-200/80 bg-gradient-to-br from-white via-white to-zinc-100 p-6 shadow-sm dark:border-zinc-800 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900">
+        <div class="space-y-2">
+            <p class="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500 dark:text-indigo-300">Media Library</p>
+            <h1 class="text-3xl font-bold tracking-tight">iRadio</h1>
+            <p class="max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+                Browse radio stations from your configured database and play any station directly in your browser.
+            </p>
+        </div>
+    </div>
+
+    <div class="mt-4 rounded-xl border border-zinc-200 bg-white/70 p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h2 class="text-sm font-semibold tracking-wide text-zinc-700 dark:text-zinc-200">Now playing</h2>
+                <p class="text-sm text-zinc-500 dark:text-zinc-400" x-text="currentName || 'No station selected'"></p>
+            </div>
+            <audio x-ref="player" controls preload="none" class="w-full sm:w-[28rem]" :src="currentUrl"></audio>
+        </div>
+    </div>
+
+    {% if template_data_exists %}
+    {% if pagination_bar != "" %}
+    {{ pagination_bar|safe }}
+    {% endif %}
+
+    <div class="mt-4 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <ul role="list" class="divide-y divide-zinc-200 dark:divide-zinc-800">
+            {% for station in template_data %}
+            <li class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="min-w-0">
+                    <p class="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                        {% if let Some(station_name) = station.mm_radio_name %}
+                        {{ station_name }}
+                        {% else %}
+                        Unnamed Station
+                        {% endif %}
+                    </p>
+                    <p class="truncate text-xs text-zinc-500 dark:text-zinc-400">{{ station.mm_radio_address }}</p>
+                </div>
+                <button
+                    type="button"
+                    class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                    aria-label="Play station"
+                    @click="currentUrl='{{ station.mm_radio_address }}'; currentName='{% if let Some(station_name) = station.mm_radio_name %}{{ station_name }}{% else %}Unnamed Station{% endif %}'; $refs.player.load(); $refs.player.play().catch(() => {})"
+                >
+                    Play
+                </button>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    {% if pagination_bar != "" %}
+    {{ pagination_bar|safe }}
+    {% endif %}
+    {% else %}
+    <p class="mt-4 text-sm text-zinc-500 dark:text-zinc-400">No iRadio stations found.</p>
+    {% endif %}
+</section>
 {% endblock %}

@@ -113,6 +113,7 @@ pub mod user_media {
     pub mod bp_media_genre;
     pub mod bp_media_home_media;
     pub mod bp_media_image;
+    pub mod bp_media_iradio;
     pub mod bp_media_movie;
     pub mod bp_media_music;
     pub mod bp_media_music_video;
@@ -322,6 +323,10 @@ async fn main() {
         .route_with_tsr(
             "/user/media/image",
             get(user_media::bp_media_image::user_media_image),
+        )
+        .route_with_tsr(
+            "/user/media/iradio/{page}",
+            get(user_media::bp_media_iradio::user_media_iradio),
         )
         .route(
             "/user/metadata/object/{*object_key}",
