@@ -38,6 +38,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let now = Utc::now();
 
         for row_data in cron_rows {
+            if !row_data.mm_cron_enabled {
+                continue;
+            }
+
             let time_delta = cron_schedule_to_duration(
                 row_data.mm_cron_schedule_type.as_str(),
                 row_data.mm_cron_schedule_time,
