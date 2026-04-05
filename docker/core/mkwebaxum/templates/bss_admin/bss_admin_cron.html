@@ -56,7 +56,12 @@
                 {{ format!("{} {}", row_data.mm_cron_schedule_time, row_data.mm_cron_schedule_type) }}
               </td>
               <td class="px-3 py-2">
-                {{ row_data.mm_cron_last_run }}
+                {% match row_data.mm_cron_last_run %}
+                  {% when Some with (last_run) %}
+                    {{ last_run }}
+                  {% when None %}
+                    Never
+                {% endmatch %}
               </td>
               <td class="px-3 py-2 text-center">
                 <button
