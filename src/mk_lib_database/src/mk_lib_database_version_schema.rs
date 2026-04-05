@@ -1131,15 +1131,22 @@ pub async fn mk_lib_database_update_schema(
         sqlx::query(r#"DROP INDEX IF EXISTS mm_metadata_tvshow_fts_ndx;"#)
             .execute(&mut *transaction)
             .await?;
+        sqlx::query(r#"CREATE TEXT SEARCH CONFIGURATION public.english_unaccent (COPY = english);"#)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(r#"ALTER TEXT SEARCH CONFIGURATION public.english_unaccent 
+            ALTER MAPPING FOR hword, hword_part, word WITH unaccent, english_stem;"#)
+            .execute(&mut *transaction)
+            .await?;
         sqlx::query(
             r#"CREATE INDEX IF NOT EXISTS mm_metadata_movie_fts_ndx ON mm_metadata_movie 
-            USING gin (( setweight(to_tsvector('simple', unaccent(coalesce(mm_metadata_movie_name, ''))), 'A') || ' ' || setweight(to_tsvector('simple', unaccent(coalesce(mm_metadata_movie_name_alt, ''))), 'B') :: tsvector ));"#,
+            USING gin (( setweight(to_tsvector('public.english_unaccent', coalesce(mm_metadata_movie_name, '')), 'A') || ' ' || setweight(to_tsvector('public.english_unaccent', coalesce(mm_metadata_movie_name_alt, '')), 'B') :: tsvector ));"#,
         )
         .execute(&mut *transaction)
         .await?;
         sqlx::query(
             r#"CREATE INDEX IF NOT EXISTS mm_metadata_tvshow_fts_ndx ON mm_metadata_tvshow 
-            USING gin (( setweight(to_tsvector('simple', unaccent(coalesce(mm_metadata_tvshow_name, ''))), 'A') || ' ' || setweight(to_tsvector('simple', unaccent(coalesce(mm_metadata_tvshow_name_alt, ''))), 'B') :: tsvector ));"#,
+            USING gin (( setweight(to_tsvector('public.english_unaccent', coalesce(mm_metadata_tvshow_name, '')), 'A') || ' ' || setweight(to_tsvector('public.english_unaccent', coalesce(mm_metadata_tvshow_name_alt, '')), 'B') :: tsvector ));"#,
         )
         .execute(&mut *transaction)
         .await?;
@@ -1173,6 +1180,19 @@ pub async fn mk_lib_database_update_schema(
         mk_lib_database_version_update(&sqlx_pool, 82).await?;
     }
 
+    if version_no < 83 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(
+            r#"UPDATE mm_cron_jobs
+            SET mm_cron_json = '{"Type": "radiobrowser", "route_key": "mkiradio"}'::jsonb
+            WHERE mm_cron_name = 'iRadio';
+            "#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 83).await?;
+    }
     // TODO, movie alt name, tv alt name and person alt name cleanup
 
     Ok(true)

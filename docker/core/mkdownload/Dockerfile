@@ -41,7 +41,6 @@ COPY --from=cargo-build-mkdownload /mediakraken/deps/* /
 ADD https://github.com/yt-dlp/yt-dlp/releases/download/2026.03.17/yt-dlp_linux /yt-dlp
 RUN chmod a+rx /yt-dlp \
  && apk update && apk add --no-cache py3-pip libssl3 libcrypto3 ca-certificates \
- && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing calibre \
  && rm -rf /var/cache/apk/* \
  && pip3 install --no-cache-dir dosage==3.2 cssselect==1.4.0 subliminal==2.6.0 --break-system-packages
  #&& pip3 install --no-cache-dir --trusted-host mksonatype -i http://mksonatype:8081/repository/pypi/simple dosage==3.0 cssselect==1.2.0 subliminal==2.2.1 --break-system-packages

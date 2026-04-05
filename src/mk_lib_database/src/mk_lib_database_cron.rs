@@ -73,7 +73,7 @@ pub async fn mk_lib_database_cron_insert(
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let new_guid = uuid::Uuid::now_v7();
     sqlx::query(
-        r#"insert into mm_cron (mm_cron_guid, mm_cron_name, mm_cron_description, 
+        r#"insert into mm_cron_jobs (mm_cron_guid, mm_cron_name, mm_cron_description, 
         mm_cron_enabled, mm_cron_schedule_type, mm_cron_last_run, mm_cron_json, 
         mm_cron_schedule_time) 
         values ($1,$2,$3,$4,$5,Null,$6,$7)"#,
