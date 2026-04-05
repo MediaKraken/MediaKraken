@@ -44,7 +44,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
             );
             let date_check: DateTime<Utc> = now - time_delta;
 
-            if row_data.mm_cron_last_run >= date_check {
+            if let Some(last_run) = row_data.mm_cron_last_run
+                && last_run >= date_check
+            {
                 continue;
             }
 
