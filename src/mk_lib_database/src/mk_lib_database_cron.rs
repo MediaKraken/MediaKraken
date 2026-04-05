@@ -1,7 +1,7 @@
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
-use sqlx::types::Uuid;
 use sqlx::FromRow;
+use sqlx::types::Uuid;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBCronList {
@@ -11,7 +11,7 @@ pub struct DBCronList {
     pub mm_cron_enabled: bool,
     pub mm_cron_schedule_type: String,
     pub mm_cron_schedule_time: i16,
-    pub mm_cron_last_run: DateTime<Utc>,
+    pub mm_cron_last_run: Option<DateTime<Utc>>,
     pub mm_cron_json: serde_json::Value,
 }
 
