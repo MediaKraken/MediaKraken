@@ -71,6 +71,32 @@ fn normalize_starts_with(raw: Option<&str>) -> Option<String> {
     Some("#".to_string())
 }
 
+fn extract_person_image_path(raw: Option<String>) -> String {
+    let Some(raw_image) = raw else {
+        return String::new();
+    };
+
+    let trimmed = raw_image.trim();
+    if trimmed.is_empty() {
+        return String::new();
+    }
+
+    let parsed_json = serde_json::from_str::<serde_json::Value>(trimmed);
+    if let Ok(serde_json::Value::Object(image_map)) = parsed_json {
+        if let Some(poster) = image_map.get("Poster").and_then(serde_json::Value::as_str) {
+            return poster.to_string();
+        }
+        if let Some(backdrop) = image_map
+            .get("Backdrop")
+            .and_then(serde_json::Value::as_str)
+        {
+            return backdrop.to_string();
+        }
+    }
+
+    raw_image
+}
+
 async fn metadata_person_count(pool: &PgPool, starts_with: &str) -> Result<i64, sqlx::Error> {
     sqlx::query_scalar(
         r#"
@@ -201,7 +227,7 @@ pub async fn user_metadata_person(
         .map(|row| TemplateMetaPersonList {
             mm_metadata_person_guid: row.mm_metadata_person_guid,
             mm_metadata_person_name: row.mm_metadata_person_name,
-            mm_metadata_person_image: row.mm_metadata_person_image.unwrap_or_default(),
+            mm_metadata_person_image: extract_person_image_path(row.mm_metadata_person_image),
         })
         .collect();
         let template_data_exists = !person_list.is_empty();
