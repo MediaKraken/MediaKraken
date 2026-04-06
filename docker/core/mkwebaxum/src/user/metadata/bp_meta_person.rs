@@ -19,11 +19,22 @@ use crate::mk_lib_database;
 #[template(path = "bss_error/bss_error_401.html")]
 struct TemplateError401Context {}
 
+#[derive(Template)]
+#[template(path = "bss_error/bss_error_500.html")]
+struct TemplateError500Context {}
+
 #[derive(Debug, Deserialize, Serialize, FromRow)]
 struct TemplateMetaPersonList {
     mm_metadata_person_guid: uuid::Uuid,
     mm_metadata_person_name: String,
     mm_metadata_person_image: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, FromRow)]
+struct MetadataPersonRow {
+    mm_metadata_person_guid: uuid::Uuid,
+    mm_metadata_person_name: String,
+    mm_metadata_person_image: Option<String>,
 }
 
 #[derive(Template)]
@@ -60,6 +71,89 @@ fn normalize_starts_with(raw: Option<&str>) -> Option<String> {
     Some("#".to_string())
 }
 
+fn extract_person_image_path(raw: Option<String>) -> String {
+    let Some(raw_image) = raw else {
+        return String::new();
+    };
+
+    let trimmed = raw_image.trim();
+    if trimmed.is_empty() {
+        return String::new();
+    }
+
+    let parsed_json = serde_json::from_str::<serde_json::Value>(trimmed);
+    if let Ok(serde_json::Value::Object(image_map)) = parsed_json {
+        if let Some(poster) = image_map.get("Poster").and_then(serde_json::Value::as_str) {
+            return poster.to_string();
+        }
+        if let Some(backdrop) = image_map
+            .get("Backdrop")
+            .and_then(serde_json::Value::as_str)
+        {
+            return backdrop.to_string();
+        }
+    }
+
+    raw_image
+}
+
+async fn metadata_person_count(pool: &PgPool, starts_with: &str) -> Result<i64, sqlx::Error> {
+    sqlx::query_scalar(
+        r#"
+        select count(*)::bigint
+          from mm_metadata_person
+         where (
+            $1 = ''
+            or (
+                $1 = '#'
+                and upper(left(coalesce(mm_metadata_person_name, ''), 1)) !~ '^[A-Z0-9]'
+            )
+            or (
+                $1 <> '#'
+                and upper(left(coalesce(mm_metadata_person_name, ''), 1)) = $1
+            )
+         )
+        "#,
+    )
+    .bind(starts_with)
+    .fetch_one(pool)
+    .await
+}
+
+async fn metadata_person_read(
+    pool: &PgPool,
+    starts_with: &str,
+    db_offset: i64,
+    pagination_count: i64,
+) -> Result<Vec<MetadataPersonRow>, sqlx::Error> {
+    sqlx::query_as(
+        r#"
+        select mm_metadata_person_guid,
+               coalesce(mm_metadata_person_name, '') as mm_metadata_person_name,
+               mm_metadata_person_image
+          from mm_metadata_person
+         where (
+            $1 = ''
+            or (
+                $1 = '#'
+                and upper(left(coalesce(mm_metadata_person_name, ''), 1)) !~ '^[A-Z0-9]'
+            )
+            or (
+                $1 <> '#'
+                and upper(left(coalesce(mm_metadata_person_name, ''), 1)) = $1
+            )
+         )
+         order by mm_metadata_person_name asc
+         limit $2 offset $3
+        "#,
+    )
+    .bind(starts_with)
+    .bind(pagination_count)
+    .bind(db_offset)
+    .fetch_all(pool)
+    .await
+}
+
 pub async fn user_metadata_person(
     State(state): State<AppState>,
     method: Method,
@@ -86,12 +180,22 @@ pub async fn user_metadata_person(
                 .await
                 .unwrap_or(user_preferences::DEFAULT_PAGINATION_COUNT);
         let db_offset: i64 = (page * pagination_count) - pagination_count;
-        let total_pages: i64 = mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_person_count(
+        let total_pages: i64 = match metadata_person_count(
             &state.sqlx_pool_ro,
-            starts_with.clone().unwrap_or_default(),
+            &starts_with.clone().unwrap_or_default(),
         )
         .await
-        .unwrap();
+        {
+            Ok(total) => total,
+            Err(_) => {
+                let template = TemplateError500Context {};
+                let reply_html = template.render().unwrap_or_default();
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(reply_html).into_response(),
+                );
+            }
+        };
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
             total_pages,
             page,
@@ -100,23 +204,32 @@ pub async fn user_metadata_person(
             pagination_count,
         )
         .await
-        .unwrap();
-        let person_list: Vec<TemplateMetaPersonList> =
-            mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_person_read(
-                &state.sqlx_pool_ro,
-                starts_with.clone().unwrap_or_default(),
-                db_offset,
-                pagination_count,
-            )
-            .await
-            .unwrap()
-            .into_iter()
-            .map(|row| TemplateMetaPersonList {
-                mm_metadata_person_guid: row.mm_metadata_person_guid,
-                mm_metadata_person_name: row.mm_metadata_person_name,
-                mm_metadata_person_image: row.mm_metadata_person_image,
-            })
-            .collect();
+        .unwrap_or_default();
+        let person_list: Vec<TemplateMetaPersonList> = match metadata_person_read(
+            &state.sqlx_pool_ro,
+            &starts_with.clone().unwrap_or_default(),
+            db_offset,
+            pagination_count,
+        )
+        .await
+        {
+            Ok(rows) => rows,
+            Err(_) => {
+                let template = TemplateError500Context {};
+                let reply_html = template.render().unwrap_or_default();
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(reply_html).into_response(),
+                );
+            }
+        }
+        .into_iter()
+        .map(|row| TemplateMetaPersonList {
+            mm_metadata_person_guid: row.mm_metadata_person_guid,
+            mm_metadata_person_name: row.mm_metadata_person_name,
+            mm_metadata_person_image: extract_person_image_path(row.mm_metadata_person_image),
+        })
+        .collect();
         let template_data_exists = !person_list.is_empty();
         let page_usize = page as usize;
         let template = TemplateMetaPersonContext {
