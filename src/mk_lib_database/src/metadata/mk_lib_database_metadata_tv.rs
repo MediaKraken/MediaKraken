@@ -26,18 +26,29 @@ pub struct DBMetaTVShowList {
 
 pub async fn mk_lib_database_metadata_tv_read(
     sqlx_pool: &sqlx::PgPool,
-    search_value: String,
+    starts_with: String,
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMetaTVShowList>, sqlx::Error> {
-    if !search_value.is_empty() {
-        // doing union so exact matches show on top
+    if !starts_with.is_empty() {
         sqlx::query_as(
-            r#"select mm_metadata_tvshow_guid, mm_metadata_tvshow_name, mm_metadata_tvshow_name_alt, mm_metadata_tvshow_json->'first_air_date' as air_date, mm_metadata_tvshow_localimage_json->'Poster' as image_json from mm_metadata_tvshow where mm_metadata_tvshow_name &@ $1 or mm_metadata_tvshow_name_alt &@ $2
-            offset $3 limit $4"#,
+            r#"select mm_metadata_tvshow_guid,
+            mm_metadata_tvshow_name,
+            mm_metadata_tvshow_name_alt,
+            mm_metadata_tvshow_json->'first_air_date' as air_date,
+            mm_metadata_tvshow_localimage_json->'Poster' as image_json
+            from mm_metadata_tvshow
+            where (
+                ($1 = '#' AND left(lower(mm_metadata_tvshow_name), 1) !~ '^[a-z0-9]$')
+                OR ($1 <> '#' AND (
+                    lower(mm_metadata_tvshow_name) LIKE lower($1) || '%'
+                    OR lower(coalesce(mm_metadata_tvshow_name_alt, '')) LIKE lower($1) || '%'
+                ))
+            )
+            order by lower(mm_metadata_tvshow_name), mm_metadata_tvshow_json->'first_air_date'
+            offset $2 limit $3"#,
         )
-        .bind(&search_value)
-        .bind(&search_value)
+        .bind(&starts_with)
         .bind(offset)
         .bind(limit)
         .fetch_all(sqlx_pool)
@@ -55,13 +66,21 @@ pub async fn mk_lib_database_metadata_tv_read(
 
 pub async fn mk_lib_database_metadata_tv_count(
     sqlx_pool: &sqlx::PgPool,
-    search_value: String,
+    starts_with: String,
 ) -> Result<i64, sqlx::Error> {
-    if !search_value.is_empty() {
+    if !starts_with.is_empty() {
         let row: (i64,) = sqlx::query_as(
-            r#"select count(*) from mm_metadata_tvshow where mm_metadata_tvshow_name &@ $1"#,
+            r#"select count(*)
+            from mm_metadata_tvshow
+            where (
+                ($1 = '#' AND left(lower(mm_metadata_tvshow_name), 1) !~ '^[a-z0-9]$')
+                OR ($1 <> '#' AND (
+                    lower(mm_metadata_tvshow_name) LIKE lower($1) || '%'
+                    OR lower(coalesce(mm_metadata_tvshow_name_alt, '')) LIKE lower($1) || '%'
+                ))
+            )"#,
         )
-        .bind(search_value)
+        .bind(starts_with)
         .fetch_one(sqlx_pool)
         .await?;
         Ok(row.0)
