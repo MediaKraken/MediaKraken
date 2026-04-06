@@ -14,7 +14,6 @@ use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common;
 use mk_lib_network;
-use num_format::ToFormattedString;
 use serde::{Deserialize, Serialize};
 use sqlx::Row;
 use sqlx::postgres::PgPool;
@@ -46,10 +45,10 @@ struct TemplateHomeContext<'a> {
     template_data_server_host_ip: &'a String,
     template_data_server_info_server_ip_external: &'a String,
     template_data_server_info_server_version: &'a String,
-    template_data_count_media_files: &'a String,
-    template_data_count_matched_media: &'a String,
-    template_data_count_meta_fetch: &'a String,
-    template_data_count_streamed_media: &'a String,
+    template_data_count_media_files: i64,
+    template_data_count_matched_media: i64,
+    template_data_count_meta_fetch: i64,
+    template_data_count_streamed_media: i64,
     template_data_number_format_language: &'a String,
     template_server_notifications:
         &'a Vec<mk_lib_database::mk_lib_database_notification::DBNotificationList>,
@@ -115,7 +114,23 @@ pub async fn admin_home(
         )
         .await
         .unwrap_or_else(|_| user_preferences::DEFAULT_NUMBER_FORMAT_LANGUAGE.to_string());
-        let locale = user_preferences::number_format_locale_for_language(&number_format_language);
+        let media_files_count =
+            mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_known_count(
+                &state.sqlx_pool_ro,
+            )
+            .await
+            .unwrap();
+        let matched_media_count =
+            mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_matched_count(
+                &state.sqlx_pool_ro,
+            )
+            .await
+            .unwrap();
+        let meta_fetch_count = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(
+            &state.sqlx_pool_ro,
+        )
+        .await
+        .unwrap();
         let template = TemplateHomeContext {
             template_data_server_info_server_name: &option_json["MediaKrakenServer"]["Server Name"],
             // following boottime only compiles #[cfg(not(windows))] in this case is fine
@@ -128,32 +143,18 @@ pub async fn admin_home(
             ),
             template_data_server_host_ip: &"255.255.255.255".to_string(),
             template_data_server_info_server_ip_external: &external_ip,
-            template_data_server_info_server_version: &mk_lib_common::mk_lib_common_version::WEB_VERSION.to_string(),
-            template_data_count_media_files:
-                &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_known_count(&state.sqlx_pool_ro)
-                    .await
-                    .unwrap()
-                    .to_formatted_string(&locale),
-            template_data_count_matched_media:
-                &mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_matched_count(&state.sqlx_pool_ro)
-                    .await
-                    .unwrap()
-                    .to_formatted_string(&locale),
-            template_data_count_meta_fetch:
-                &mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(
-                   &state.sqlx_pool_ro,
-                )
-                .await
-                .unwrap()
-                .to_formatted_string(&locale),
-            template_data_count_streamed_media: &"0".to_string(),
+            template_data_server_info_server_version:
+                &mk_lib_common::mk_lib_common_version::WEB_VERSION.to_string(),
+            template_data_count_media_files: media_files_count,
+            template_data_count_matched_media: matched_media_count,
+            template_data_count_meta_fetch: meta_fetch_count,
+            template_data_count_streamed_media: 0,
             template_data_number_format_language: &number_format_language,
             template_server_notifications: &notification_list,
             template_server_streams: &server_streams,
             template_server_users: &user_list,
             template_data_scan_info: &server_scans,
-                        page_title: Some("MediaKraken Admin".to_string()),
-
+            page_title: Some("MediaKraken Admin".to_string()),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
