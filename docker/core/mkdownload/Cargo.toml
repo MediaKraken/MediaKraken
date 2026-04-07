@@ -16,10 +16,10 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { version = "0.0.221", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.190", registry = "kellnr" }
-mk_lib_network = { version = "0.0.190", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.193", registry = "kellnr" }
+mk_lib_database = { version = "0.0.222", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.191", registry = "kellnr" }
+mk_lib_network = { version = "0.0.191", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.194", registry = "kellnr" }
 
 chrono = { version = "0.4.44", features = ["serde"] }
 csv = "1.4.0"

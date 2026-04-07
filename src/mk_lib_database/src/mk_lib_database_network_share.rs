@@ -7,12 +7,14 @@ pub async fn mk_lib_database_network_share_exists(
     network_share_ip: std::net::IpAddr,
     network_share_path: &str,
 ) -> Result<bool, sqlx::Error> {
+    let path_name = network_share_path.replace("\\\\", "/");
+    let path_vec: Vec<&str> = path_name.splitn(3, '/').collect();
     let row: (bool,) = sqlx::query_as(
         r#"select exists(select 1 from mm_network_shares where mm_network_share_ip = $1 
         and mm_network_share_path = $2 limit 1) as found_record limit 1"#,
     )
     .bind(network_share_ip)
-    .bind(network_share_path)
+    .bind(path_vec[1])
     .fetch_one(sqlx_pool)
     .await?;
     Ok(row.0)
