@@ -10,7 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_network = { version = "0.0.188", registry = "kellnr" }
+mk_lib_network = { version = "0.0.190", registry = "kellnr" }
 
 crossbeam = "0.8.4"
 crossbeam-channel = "0.5.15"

@@ -16,9 +16,9 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { version = "0.0.219", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.188", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.191", registry = "kellnr" }
+mk_lib_database = { version = "0.0.221", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.190", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.193", registry = "kellnr" }
 
 chrono = { version = "0.4.43", features = ["serde"] }
 fanotify-rs = "0.3.1"

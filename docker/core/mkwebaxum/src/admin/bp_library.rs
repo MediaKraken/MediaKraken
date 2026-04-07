@@ -137,7 +137,7 @@ pub async fn admin_library_share_scan(
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
             rabbit_channel.clone(),
             "mksharescanner",
-            json!({"Type": "Share Scan"}).to_string(),
+            json!({"Type": "Share Scan", "Data": "192.168.1"}).to_string(),
         )
         .await
         .unwrap();
