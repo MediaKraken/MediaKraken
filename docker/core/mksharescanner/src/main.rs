@@ -38,15 +38,15 @@ async fn process_message(
         if !mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_exists(
             sqlx_pool_ro,
             share_info.mm_share_ip,
-            share_info.mm_share_path.clone().as_str(),
+            share_path,
         )
         .await?
         {
             mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_insert(
                 sqlx_pool_rw,
                 share_info.mm_share_ip,
-                &normalized_share_path.as_str().unwrap(),
-                &share_info.mm_share_comment.clone().as_str(),
+                share_path,
+                share_info.mm_share_comment.clone(),
             )
             .await?;
         }
