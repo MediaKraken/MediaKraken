@@ -64,27 +64,13 @@ pub async fn mk_lib_database_network_share_detail(
     Ok(table_row)
 }
 
-pub async fn mk_lib_database_network_share_read(
-    sqlx_pool: &sqlx::PgPool,
-) -> Result<Vec<DBShareList>, sqlx::Error> {
-    let table_rows: Vec<DBShareList> = sqlx::query_as(
-        r#"select mm_network_share_guid, mm_network_share_ip, mm_network_share_path, 
-        mm_network_share_comment, mm_share_auth_user, mm_share_auth_password, 
-        mm_network_share_version, mm_network_share_workgroup 
-        from mm_network_shares"#,
-    )
-    .fetch_all(sqlx_pool)
-    .await?;
-    Ok(table_rows)
-}
-
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBShareList {
     pub mm_network_share_guid: uuid::Uuid,
     pub mm_network_share_ip: std::net::IpAddr,
     pub mm_network_share_path: String,
     pub mm_network_share_comment: String,
-    pub mm_share_auth_user: String,
+    pub mm_share_auth_user: Option<String>,
     pub mm_share_auth_password: Option<String>,
     pub mm_network_share_version: Option<i16>,
     pub mm_network_share_workgroup: Option<String>,
