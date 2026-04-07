@@ -62,9 +62,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120).await?;
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await?;
-    let _option_config_json: Value =
-        mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool_ro)
-            .await?;
 
     let (_rabbit_connection, rabbit_channel) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mksharescanner").await?;
