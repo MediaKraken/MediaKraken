@@ -28,6 +28,7 @@ async fn process_message(
         let Some(share_path) = share_info.mm_share_path.as_str() else {
             continue;
         };
+        let share_comment = share_info.mm_share_comment.as_str().unwrap_or("");
 
         let normalized_share_path = share_path.to_owned();
         if !seen_shares.insert((share_info.mm_share_ip, normalized_share_path.clone())) {
@@ -46,7 +47,7 @@ async fn process_message(
                 sqlx_pool_rw,
                 share_info.mm_share_ip,
                 share_path,
-                share_info.mm_share_comment.clone(),
+                share_comment,
             )
             .await?;
         }
