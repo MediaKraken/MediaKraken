@@ -60,7 +60,7 @@
                     {% for auth_row in template_data_share_user %}
                       <option
                         value="{{ auth_row.mm_share_auth_guid }}"
-                        {% if auth_row.mm_share_auth_user == row_data.mm_share_auth_user %}selected{% endif %}>
+                        {% if self.share_user_matches(row_data, auth_row) %}selected{% endif %}>
                         {{ auth_row.mm_share_auth_user }}
                       </option>
                     {% endfor %}

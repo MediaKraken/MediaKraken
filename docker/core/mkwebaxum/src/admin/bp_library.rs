@@ -1,19 +1,19 @@
+use crate::AppState;
 use crate::mk_lib_database;
 use askama::Template;
+use axum::extract::State;
 use axum::{
+    Extension,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse, Redirect},
-    Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_rabbitmq;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use sqlx::postgres::PgPool;
-use axum::extract::State;
-use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -28,6 +28,19 @@ struct TemplateAdminLibraryContext<'a> {
         &'a Vec<mk_lib_database::mk_lib_database_network_share::DBShareAuthUserList>,
     template_data_exists: &'a bool,
     page_title: Option<String>,
+}
+
+impl TemplateAdminLibraryContext<'_> {
+    fn share_user_matches(
+        &self,
+        share: &mk_lib_database::mk_lib_database_network_share::DBShareList,
+        auth_user: &mk_lib_database::mk_lib_database_network_share::DBShareAuthUserList,
+    ) -> bool {
+        matches!(
+            share.mm_share_auth_user.as_deref(),
+            Some(user) if user == auth_user.mm_share_auth_user
+        )
+    }
 }
 
 pub async fn admin_library(
@@ -50,13 +63,13 @@ pub async fn admin_library(
     } else {
         let share_list =
             mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_read(
-               &state.sqlx_pool_ro,
+                &state.sqlx_pool_ro,
             )
             .await
             .unwrap();
         let library_list =
             mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_audit_read(
-               &state.sqlx_pool_ro,
+                &state.sqlx_pool_ro,
             )
             .await
             .unwrap();
