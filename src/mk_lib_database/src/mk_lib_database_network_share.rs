@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
-use sqlx::types::Uuid;
 use sqlx::FromRow;
+use sqlx::types::Uuid;
 
 pub async fn mk_lib_database_network_share_exists(
     sqlx_pool: &sqlx::PgPool,
@@ -64,7 +64,7 @@ pub async fn mk_lib_database_network_share_detail(
     Ok(table_row)
 }
 
-#[derive(Debug, FromRow, Deserialize, Serialize)]
+#[derive(Clone, Debug, FromRow, Deserialize, Serialize)]
 pub struct DBShareList {
     pub mm_network_share_guid: uuid::Uuid,
     pub mm_network_share_ip: std::net::IpAddr,

@@ -6,7 +6,7 @@ use mk_lib_database;
 use mk_lib_file;
 use mk_lib_rabbitmq;
 use num_format::{Locale, ToFormattedString};
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::error::Error;
 use std::ffi::OsStr;
 use std::path::Path;
@@ -34,12 +34,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let stack_disc1 = Regex::new(r"(?i)-disc1(?!\d)").unwrap();
 
     // connect to db and do a version check
-    let (sqlx_pool_rw, sqlx_pool_ro) = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
-        .await
-        .unwrap();
-    let _result =
-        mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
-            .await;
+    let (sqlx_pool_rw, sqlx_pool_ro) =
+        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
+            .await
+            .unwrap();
+    let _result = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(
+        &sqlx_pool_ro,
+        false,
+    )
+    .await;
 
     let (_rabbit_connection, rabbit_channel) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkmediascanner")
@@ -70,7 +73,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 .unwrap();
                 // TODO handle NFS shares as well
                 // log into share via smbclient
-                let smb_client = mk_lib_file::mk_lib_smb::mk_file_smb_client_connect(share_info);
+                let smb_client =
+                    mk_lib_file::mk_lib_smb::mk_file_smb_client_connect(share_info.clone());
                 match smb_client {
                     Ok(smb_client) => {
                         // make sure the path still exists
@@ -102,9 +106,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         )
                                         .await;
                                     let mut file_data =
-                                        mk_lib_file::mk_lib_smb::mk_file_smb_client_tree(
-                                            &smb_client,
+                                        mk_lib_file::mk_lib_smb::mk_file_smb_client_tree_smbclient(
+                                            &share_info,
                                             format!("/{}", row_data.mm_media_dir_path).as_str(),
+                                        )
+                                        .unwrap_or_else(
+                                            |_| {
+                                                mk_lib_file::mk_lib_smb::mk_file_smb_client_tree(
+                                                    &smb_client,
+                                                    format!("/{}", row_data.mm_media_dir_path)
+                                                        .as_str(),
+                                                )
+                                            },
                                         );
                                     let mut total_scanned: u64 = 0;
                                     let mut total_files: u64 = 0;
@@ -112,12 +125,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         let file_metadata = file_data[0].clone();
                                         println!("meta: {:?}", file_metadata);
                                         if file_metadata.directory == true {
-                                            file_data.append(
-                                        &mut mk_lib_file::mk_lib_smb::mk_file_smb_client_tree(
-                                            &smb_client,
-                                            format!("/{}", file_metadata.name).as_str(),
-                                        ),
-                                    );
+                                            let mut child_files = mk_lib_file::mk_lib_smb::mk_file_smb_client_tree_smbclient(
+                                                &share_info,
+                                                format!("/{}", file_metadata.name).as_str(),
+                                            )
+                                            .unwrap_or_else(|_| {
+                                                mk_lib_file::mk_lib_smb::mk_file_smb_client_tree(
+                                                    &smb_client,
+                                                    format!("/{}", file_metadata.name).as_str(),
+                                                )
+                                            });
+                                            file_data.append(&mut child_files);
                                         } else {
                                             if mk_lib_database::mk_lib_database_library::mk_lib_database_library_file_exists(&sqlx_pool_ro, &file_metadata.name).await.unwrap() == false {
                                         // set lower here so I can remove a lot of .lower() in the code below
