@@ -186,7 +186,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 } else if json_message["Type"] == "HDHomeRun" {
                 } else if json_message["Type"] == "FFMPEG" {
                     if json_message["Subtype"] == "Probe" {
-                        // scan media file via ffprobeS
+                        // scan media file via ffprobe
                         let ffprobe_data: serde_json::Value =
                             mk_lib_common_ffmpeg::mk_common_ffmpeg_get_info(
                                 &json_message["Media Path"].to_string(),

@@ -379,15 +379,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                 // Send a message so ffprobe runs
                                                 mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
                                                     rabbit_channel.clone(),
-                                                    "mk_ffmpeg",
-                                                    json!({"Type": "FFProbe", "Media UUID": media_id, "Media Path": file_metadata.name}).to_string(),
+                                                    "mktranscode",
+                                                    json!({"Type": "FFMPEG", "Subtype": "Probe", "Media UUID": media_id, "Media Path": file_metadata.name}).to_string(),
                                                 )
                                                 .await.unwrap();
                                                 if ffprobe_bif_data == true && original_media_class != mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MUSIC {
                                                     // Send a message so roku thumbnail is generated
                                                     mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
                                                         rabbit_channel.clone(),
-                                                        "mk_ffmpeg",
+                                                        "mktranscode",
                                                         json!({"Type": "Roku", "Media UUID": media_id, "Media Path": file_metadata.name}).to_string(),
                                                     )
                                                     .await.unwrap();
