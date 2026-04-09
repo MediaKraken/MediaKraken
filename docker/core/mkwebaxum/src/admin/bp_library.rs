@@ -161,7 +161,7 @@ pub async fn admin_library_share_add(
             return Redirect::to("/admin/library");
         }
 
-        let share_info = match mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_detail(
+        let _share_info = match mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_detail(
             &state.sqlx_pool_ro,
             input_data.share_guid,
         )
@@ -174,10 +174,7 @@ pub async fn admin_library_share_add(
             }
         };
 
-        let library_path = format!(
-            "\\\\{}\\{}\\{}",
-            share_info.mm_network_share_ip, share_info.mm_network_share_path, subdirectory
-        );
+        let library_path = subdirectory.to_string();
 
         match mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_exists(
             &state.sqlx_pool_ro,

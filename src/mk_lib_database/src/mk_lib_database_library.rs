@@ -147,7 +147,7 @@ pub async fn mk_lib_database_library_path_insert(
         mm_media_dir_class_enum,
         mm_media_dir_last_scanned,
         mm_media_dir_share_guid
-        ) values ($1, $2, $3, NOW(), $4)"#,
+        ) values ($1, $2, $3, 'epoch'::timestamptz, $4)"#,
     )
     .bind(new_guid)
     .bind(library_path)
