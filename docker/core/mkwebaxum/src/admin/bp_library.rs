@@ -1,17 +1,19 @@
 use crate::AppState;
 use crate::mk_lib_database;
 use askama::Template;
-use axum::extract::State;
+use axum::extract::{Form, State};
 use axum::{
     Extension,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse, Redirect},
 };
+use axum_flash::Flash;
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_rabbitmq;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::postgres::PgPool;
 
@@ -41,6 +43,13 @@ impl TemplateAdminLibraryContext<'_> {
             Some(user) if user == auth_user.mm_share_auth_user
         )
     }
+}
+
+#[derive(Deserialize)]
+pub struct AddShareLibraryInput {
+    share_guid: uuid::Uuid,
+    subdirectory: String,
+    media_class: i16,
 }
 
 pub async fn admin_library(
@@ -125,6 +134,82 @@ pub async fn admin_library_media_scan(
             .await
             .unwrap();
         Redirect::to("/admin/library")
+    }
+}
+
+pub async fn admin_library_share_add(
+    State(state): State<AppState>,
+    method: Method,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    mut flash: Flash,
+    Form(input_data): Form<AddShareLibraryInput>,
+) -> impl IntoResponse {
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::POST],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("Admin::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        Redirect::to("/error/403")
+    } else {
+        let subdirectory = input_data.subdirectory.trim().trim_matches('/');
+        if subdirectory.is_empty() {
+            flash.error("Directory is required.");
+            return Redirect::to("/admin/library");
+        }
+
+        let share_info = match mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_detail(
+            &state.sqlx_pool_ro,
+            input_data.share_guid,
+        )
+        .await
+        {
+            Ok(data) => data,
+            Err(_) => {
+                flash.error("Unable to read share information.");
+                return Redirect::to("/admin/library");
+            }
+        };
+
+        let library_path = format!(
+            "\\\\{}\\{}\\{}",
+            share_info.mm_network_share_ip, share_info.mm_network_share_path, subdirectory
+        );
+
+        match mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_exists(
+            &state.sqlx_pool_ro,
+            &library_path,
+        )
+        .await
+        {
+            Ok(true) => {
+                flash.error("Path already exists in library.");
+                Redirect::to("/admin/library")
+            }
+            Ok(false) => {
+                match mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_insert(
+                    &state.sqlx_pool_rw,
+                    &library_path,
+                    input_data.media_class,
+                    input_data.share_guid,
+                )
+                .await
+                {
+                    Ok(_) => Redirect::to("/admin/library"),
+                    Err(_) => {
+                        flash.error("Unable to add library path.");
+                        Redirect::to("/admin/library")
+                    }
+                }
+            }
+            Err(_) => {
+                flash.error("Unable to validate library path.");
+                Redirect::to("/admin/library")
+            }
+        }
     }
 }
 

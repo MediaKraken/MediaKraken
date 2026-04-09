@@ -41,6 +41,7 @@
               <th class="px-3 py-2">Path</th>
               <th class="px-3 py-2">Comment</th>
               <th class="px-3 py-2">Auth User</th>
+              <th class="px-3 py-2">Add Directory as Library</th>
             </tr>
           </thead>
           <tbody class="divide-y">
@@ -62,6 +63,33 @@
                     {% endfor %}
                   </optgroup>
                 </select>
+              </td>
+              <td class="px-3 py-2">
+                <form action="/admin/library" method="post" class="flex flex-col gap-2 md:flex-row md:items-center">
+                  <input type="hidden" name="share_guid" value="{{ row_data.mm_network_share_guid }}">
+                  <input
+                    type="text"
+                    name="subdirectory"
+                    placeholder="Directory from share"
+                    class="border rounded px-2 py-1 w-full md:w-56">
+                  <select name="media_class" class="border rounded px-2 py-1 w-full md:w-44">
+                    <option value="1">Movie</option>
+                    <option value="2">TV</option>
+                    <option value="9">Music</option>
+                    <option value="4">Sports</option>
+                    <option value="5">Game</option>
+                    <option value="6">Publication</option>
+                    <option value="7">Picture</option>
+                    <option value="8">Anime</option>
+                    <option value="10">Adult</option>
+                  </select>
+                  <button
+                    type="submit"
+                    aria-label="Add share directory as library"
+                    class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700">
+                    Add
+                  </button>
+                </form>
               </td>
             </tr>
             {% endfor %}
