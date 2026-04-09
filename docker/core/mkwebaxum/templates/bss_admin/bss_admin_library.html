@@ -72,6 +72,13 @@
                     name="subdirectory"
                     placeholder="Directory from share"
                     class="border rounded px-2 py-1 w-full md:w-56">
+                  <input
+                    type="file"
+                    data-directory-picker
+                    class="hidden"
+                    webkitdirectory
+                    directory
+                    @change="setSelectedDirectory($event)">
                   <select name="media_class" class="border rounded px-2 py-1 w-full md:w-44">
                     <option value="1">Movie</option>
                     <option value="2">TV</option>
@@ -83,6 +90,13 @@
                     <option value="8">Anime</option>
                     <option value="10">Adult</option>
                   </select>
+                  <button
+                    type="button"
+                    @click="openDirectoryPicker($event)"
+                    aria-label="Browse share directory"
+                    class="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700">
+                    Browse
+                  </button>
                   <button
                     type="submit"
                     aria-label="Add share directory as library"
@@ -215,6 +229,32 @@ function libraryPage() {
     confirmDelete(guid) {
       this.selectedGuid = guid
       this.showDelete = true
+    },
+
+    openDirectoryPicker(event) {
+      const form = event.currentTarget.closest('form')
+      const directoryInput = form?.querySelector('input[data-directory-picker]')
+      if (directoryInput) {
+        directoryInput.click()
+      }
+    },
+
+    setSelectedDirectory(event) {
+      const directoryInput = event.currentTarget
+      const selectedFiles = directoryInput.files
+      if (!selectedFiles || selectedFiles.length === 0) {
+        return
+      }
+
+      const firstFile = selectedFiles[0]
+      const relativePath = firstFile.webkitRelativePath || firstFile.name
+      const selectedDirectory = relativePath.split('/')[0] || ''
+
+      const form = directoryInput.closest('form')
+      const subdirectoryInput = form?.querySelector('input[name="subdirectory"]')
+      if (subdirectoryInput) {
+        subdirectoryInput.value = selectedDirectory
+      }
     },
 
     updateLibrary() {
