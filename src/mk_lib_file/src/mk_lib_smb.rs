@@ -18,8 +18,18 @@ pub fn mk_file_smb_client_connect(
         SmbCredentials::default()
             .server(format!("smb://{}", share_to_mount.mm_network_share_ip))
             .share(format!("/{}", share_to_mount.mm_network_share_path))
-            .username(share_to_mount.mm_share_auth_user)
-            .password(share_to_mount.mm_share_auth_password.unwrap())
+            .username(
+                share_to_mount
+                    .mm_share_auth_user
+                    .as_deref()
+                    .unwrap_or_default(),
+            )
+            .password(
+                share_to_mount
+                    .mm_share_auth_password
+                    .as_deref()
+                    .unwrap_or_default(),
+            )
             .workgroup(smb_workgroup),
         SmbOptions::default().one_share_per_server(true),
     )
