@@ -55,8 +55,9 @@ pub async fn mk_lib_database_network_share_detail(
         r#"select mm_network_share_guid, mm_network_share_ip, mm_network_share_path, 
         mm_network_share_comment, mm_share_auth_user, mm_share_auth_password, 
         mm_network_share_version, mm_network_share_workgroup 
-        from mm_network_shares, mm_share_auth 
-        where mm_network_share_user_guid = mm_share_auth_guid and mm_network_share_guid = $1"#,
+        from mm_network_shares
+        LEFT JOIN mm_share_auth ON mm_network_shares.mm_network_share_user_guid = mm_share_auth.mm_share_auth_guid
+        where mm_network_share_guid = $1"#,
     )
     .bind(share_guid)
     .fetch_one(sqlx_pool)
