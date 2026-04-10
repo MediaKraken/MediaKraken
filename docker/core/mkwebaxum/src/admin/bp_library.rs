@@ -345,7 +345,8 @@ pub async fn admin_library_share_directories(
 
     let smb_output = match smb_command.output().await {
         Ok(data) => data,
-        Err(_) => {
+        Err(error) => {
+            println!("smbclient execution failed: {error:?}");
             return (
                 StatusCode::BAD_GATEWAY,
                 Json(json!({"error": "Unable to run smbclient"})),
@@ -355,6 +356,11 @@ pub async fn admin_library_share_directories(
 
     if smb_output.status.success() == false {
         let stderr_output = String::from_utf8_lossy(&smb_output.stderr).to_string();
+        println!(
+            "smbclient failed with status {:?}, stderr: {}",
+            smb_output.status.code(),
+            stderr_output
+        );
         return (
             StatusCode::BAD_GATEWAY,
             Json(json!({"error": "Failed to list share directories", "details": stderr_output})),
