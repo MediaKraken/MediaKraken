@@ -72,13 +72,6 @@
                     name="subdirectory"
                     placeholder="Directory from share"
                     class="border rounded px-2 py-1 w-full md:w-56">
-                  <input
-                    type="file"
-                    data-directory-picker
-                    class="hidden"
-                    webkitdirectory
-                    directory
-                    @change="setSelectedDirectory($event)">
                   <select name="media_class" class="border rounded px-2 py-1 w-full md:w-44">
                     <option value="1">Movie</option>
                     <option value="2">TV</option>
@@ -92,9 +85,9 @@
                   </select>
                   <button
                     type="button"
-                    @click="openDirectoryPicker($event)"
+                    @click="openDirectoryPicker($event, '{{ row_data.mm_network_share_guid }}')"
                     aria-label="Browse share directory"
-                    class="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700">
+                    class="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-800 whitespace-nowrap shrink-0 font-medium">
                     Browse
                   </button>
                   <button
@@ -205,6 +198,51 @@
       </div>
     </div>
 
+    <!-- Share Browser Modal -->
+    <div x-show="showShareBrowser" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
+      <div class="bg-white rounded shadow-lg w-full max-w-2xl p-6">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-lg font-semibold">Browse Share Directories</h3>
+          <button @click="showShareBrowser=false" class="bg-gray-200 hover:bg-gray-300 rounded px-3 py-1">Close</button>
+        </div>
+        <p class="text-sm text-gray-600 mb-3">Current path: <span class="font-mono" x-text="browserCurrentPath || '/'"></span></p>
+        <div class="mb-3">
+          <button
+            type="button"
+            @click="navigateToParent"
+            :disabled="browserParentPath === null || browserLoading"
+            class="bg-gray-100 border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+            Up One Level
+          </button>
+        </div>
+        <p x-show="browserLoading" class="text-sm text-gray-600">Loading directories...</p>
+        <p x-show="browserError" class="text-sm text-red-600" x-text="browserError"></p>
+        <div class="max-h-80 overflow-auto border border-gray-200 rounded">
+          <template x-if="!browserLoading && browserDirectories.length === 0">
+            <p class="p-3 text-sm text-gray-500">No directories found in this location.</p>
+          </template>
+          <template x-for="dirName in browserDirectories" :key="dirName">
+            <div class="flex items-center justify-between gap-2 border-b border-gray-100 px-3 py-2 last:border-b-0">
+              <button
+                type="button"
+                @click="browseInto(dirName)"
+                class="text-left flex-1 text-indigo-700 hover:text-indigo-900 hover:underline"
+                :aria-label="`Open directory ${dirName}`"
+                x-text="dirName">
+              </button>
+              <button
+                type="button"
+                @click="selectCurrentDirectory(dirName)"
+                class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 text-sm"
+                :aria-label="`Select directory ${dirName}`">
+                Select
+              </button>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
   </main>
   </div>
 </div>
@@ -215,7 +253,15 @@ function libraryPage() {
   return {
     showEdit: false,
     showDelete: false,
+    showShareBrowser: false,
     selectedGuid: null,
+    activeSubdirectoryInput: null,
+    browserShareGuid: '',
+    browserCurrentPath: '',
+    browserParentPath: null,
+    browserDirectories: [],
+    browserLoading: false,
+    browserError: '',
     editPath: '',
     editClass: '',
 
@@ -231,30 +277,58 @@ function libraryPage() {
       this.showDelete = true
     },
 
-    openDirectoryPicker(event) {
+    openDirectoryPicker(event, shareGuid) {
       const form = event.currentTarget.closest('form')
-      const directoryInput = form?.querySelector('input[data-directory-picker]')
-      if (directoryInput) {
-        directoryInput.click()
+      this.activeSubdirectoryInput = form?.querySelector('input[name=\"subdirectory\"]') ?? null
+      this.browserShareGuid = shareGuid
+      this.showShareBrowser = true
+      this.loadDirectories('')
+    },
+
+    async loadDirectories(path) {
+      this.browserLoading = true
+      this.browserError = ''
+      this.browserDirectories = []
+      try {
+        const params = new URLSearchParams({ share_guid: this.browserShareGuid, path })
+        const response = await fetch(`/admin/library/share_directories?${params.toString()}`)
+        const payload = await response.json()
+        if (!response.ok) {
+          this.browserError = payload.error || 'Unable to browse this share.'
+          return
+        }
+        this.browserCurrentPath = payload.current_path || ''
+        this.browserParentPath = payload.parent_path
+        this.browserDirectories = payload.directories || []
+      } catch (_error) {
+        this.browserError = 'Unable to browse this share.'
+      } finally {
+        this.browserLoading = false
       }
     },
 
-    setSelectedDirectory(event) {
-      const directoryInput = event.currentTarget
-      const selectedFiles = directoryInput.files
-      if (!selectedFiles || selectedFiles.length === 0) {
+    browseInto(dirName) {
+      const nextPath = this.browserCurrentPath
+        ? `${this.browserCurrentPath}/${dirName}`
+        : dirName
+      this.loadDirectories(nextPath)
+    },
+
+    navigateToParent() {
+      if (this.browserParentPath === null) {
         return
       }
+      this.loadDirectories(this.browserParentPath)
+    },
 
-      const firstFile = selectedFiles[0]
-      const relativePath = firstFile.webkitRelativePath || firstFile.name
-      const selectedDirectory = relativePath.split('/')[0] || ''
-
-      const form = directoryInput.closest('form')
-      const subdirectoryInput = form?.querySelector('input[name="subdirectory"]')
-      if (subdirectoryInput) {
-        subdirectoryInput.value = selectedDirectory
+    selectCurrentDirectory(dirName) {
+      const selectedPath = this.browserCurrentPath
+        ? `${this.browserCurrentPath}/${dirName}`
+        : dirName
+      if (this.activeSubdirectoryInput) {
+        this.activeSubdirectoryInput.value = selectedPath
       }
+      this.showShareBrowser = false
     },
 
     updateLibrary() {
