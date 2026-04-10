@@ -313,12 +313,11 @@ pub async fn admin_library_share_directories(
         share_info.mm_network_share_path.trim_matches('/')
     );
 
-    let mut smb_commands: Vec<String> =
-        vec![String::from("recurse OFF"), String::from("prompt OFF")];
-    if cleaned_path.is_empty() == false {
-        smb_commands.push(format!("cd \"{}\"", cleaned_path));
-    }
-    smb_commands.push(String::from("ls"));
+    let smb_commands: Vec<String> = vec![
+        String::from("recurse OFF"),
+        String::from("prompt OFF"),
+        String::from("ls"),
+    ];
 
     let mut smb_command = Command::new("smbclient");
     smb_command
@@ -326,6 +325,9 @@ pub async fn admin_library_share_directories(
         .arg("-g")
         .arg("-c")
         .arg(smb_commands.join(";"));
+    if cleaned_path.is_empty() == false {
+        smb_command.arg("-D").arg(&cleaned_path);
+    }
     if let Some(workgroup) = share_info.mm_network_share_workgroup.as_deref() {
         if workgroup.is_empty() == false {
             smb_command.arg("-W").arg(workgroup);
