@@ -40,7 +40,7 @@ COPY --from=cargo-build-mkwebapp /mediakraken/deps/* /
 
 WORKDIR /mediakraken
 
-RUN apk update && apk add --no-cache musl-locales lang libssl3 libcrypto3 cifs-utils nfs-utils libsmbclient \
+RUN apk update && apk add --no-cache musl-locales lang libssl3 libcrypto3 cifs-utils nfs-utils libsmbclient samba-client \
  && rm -rf /var/cache/apk/*
 
 # Import from builder.

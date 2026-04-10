@@ -38,7 +38,7 @@ ADD alpine-minirootfs-x86_64.tar.gz /
 # deps has full /usr/lib/x86_64-linux-gnu path.....hence copy to /
 COPY --from=cargo-build-mkmediascanner /mediakraken/deps/* /
 
-RUN apk update && apk add --no-cache cifs-utils nfs-utils libsmbclient \
+RUN apk update && apk add --no-cache cifs-utils nfs-utils libsmbclient samba-client \
  && rm -rf /var/cache/apk/*
 
 # Import from builder.
