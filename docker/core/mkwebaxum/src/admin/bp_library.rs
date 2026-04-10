@@ -3,8 +3,8 @@ use crate::mk_lib_database;
 use askama::Template;
 use axum::extract::{Form, State};
 use axum::{
-    Extension,
-    extract::Path,
+    Extension, Json,
+    extract::{Path, Query},
     http::{Method, StatusCode},
     response::{Html, IntoResponse, Redirect},
 };
@@ -13,9 +13,10 @@ use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_rabbitmq;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use sqlx::postgres::PgPool;
+use tokio::process::Command;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -50,6 +51,19 @@ pub struct AddShareLibraryInput {
     share_guid: uuid::Uuid,
     subdirectory: String,
     media_class: i16,
+}
+
+#[derive(Deserialize)]
+pub struct ShareDirectoryBrowseQuery {
+    share_guid: uuid::Uuid,
+    path: Option<String>,
+}
+
+#[derive(Serialize)]
+pub struct ShareDirectoryBrowseResponse {
+    current_path: String,
+    parent_path: Option<String>,
+    directories: Vec<String>,
 }
 
 pub async fn admin_library(
@@ -241,6 +255,145 @@ pub async fn admin_library_share_scan(
             .unwrap();
         Redirect::to("/admin/library")
     }
+}
+
+pub async fn admin_library_share_directories(
+    State(state): State<AppState>,
+    method: Method,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    Query(query): Query<ShareDirectoryBrowseQuery>,
+) -> impl IntoResponse {
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("Admin::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        return (
+            StatusCode::UNAUTHORIZED,
+            Json(json!({"error": "Not authorized"})),
+        );
+    }
+
+    let share_info =
+        match mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_detail(
+            &state.sqlx_pool_ro,
+            query.share_guid,
+        )
+        .await
+        {
+            Ok(data) => data,
+            Err(_) => {
+                return (
+                    StatusCode::NOT_FOUND,
+                    Json(json!({"error": "Share information not found"})),
+                );
+            }
+        };
+
+    let requested_path = query.path.unwrap_or_default();
+    let cleaned_path = requested_path
+        .trim()
+        .replace('\\', "/")
+        .trim_matches('/')
+        .to_string();
+    if cleaned_path.split('/').any(|segment| segment == "..") {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(json!({"error": "Invalid path"})),
+        );
+    }
+
+    let share_uri = format!(
+        "//{}/{}",
+        share_info.mm_network_share_ip,
+        share_info.mm_network_share_path.trim_matches('/')
+    );
+
+    let smb_commands: Vec<String> = vec![
+        String::from("recurse OFF"),
+        String::from("prompt OFF"),
+        String::from("ls"),
+    ];
+
+    let mut smb_command = Command::new("smbclient");
+    smb_command
+        .arg(share_uri)
+        .arg("-g")
+        .arg("-c")
+        .arg(smb_commands.join(";"));
+    if cleaned_path.is_empty() == false {
+        smb_command.arg("-D").arg(&cleaned_path);
+    }
+    if let Some(workgroup) = share_info.mm_network_share_workgroup.as_deref() {
+        if workgroup.is_empty() == false {
+            smb_command.arg("-W").arg(workgroup);
+        }
+    }
+    if let Some(user) = share_info.mm_share_auth_user.as_deref() {
+        let pass = share_info
+            .mm_share_auth_password
+            .as_deref()
+            .unwrap_or_default();
+        smb_command.arg("-U").arg(format!("{}%{}", user, pass));
+    } else {
+        smb_command.arg("-N");
+    }
+
+    let smb_output = match smb_command.output().await {
+        Ok(data) => data,
+        Err(_) => {
+            return (
+                StatusCode::BAD_GATEWAY,
+                Json(json!({"error": "Unable to run smbclient"})),
+            );
+        }
+    };
+
+    if smb_output.status.success() == false {
+        let stderr_output = String::from_utf8_lossy(&smb_output.stderr).to_string();
+        return (
+            StatusCode::BAD_GATEWAY,
+            Json(json!({"error": "Failed to list share directories", "details": stderr_output})),
+        );
+    }
+
+    let stdout_data = String::from_utf8_lossy(&smb_output.stdout);
+    let mut directories = Vec::new();
+    for line in stdout_data.lines() {
+        let parts: Vec<&str> = line.split('|').collect();
+        if parts.len() < 2 || parts[0] != "D" {
+            continue;
+        }
+        if parts[1] == "." || parts[1] == ".." {
+            continue;
+        }
+        directories.push(parts[1].to_string());
+    }
+    directories.sort_unstable();
+
+    let parent_path = cleaned_path
+        .rsplit_once('/')
+        .map(|(parent, _)| parent.to_string())
+        .or_else(|| {
+            if cleaned_path.is_empty() {
+                None
+            } else {
+                Some(String::new())
+            }
+        });
+
+    (
+        StatusCode::OK,
+        Json(json!(ShareDirectoryBrowseResponse {
+            current_path: cleaned_path,
+            parent_path,
+            directories,
+        })),
+    )
 }
 
 /*

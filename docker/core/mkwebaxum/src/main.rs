@@ -238,6 +238,10 @@ async fn main() {
             "/admin/library_share_scan",
             get(admin::bp_library::admin_library_share_scan),
         )
+        .route_with_tsr(
+            "/admin/library/share_directories",
+            get(admin::bp_library::admin_library_share_directories),
+        )
         //.post(admin::bp_library::admin_library_post))
         .route_with_tsr(
             "/admin/server_links",
