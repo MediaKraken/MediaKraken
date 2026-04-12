@@ -31,8 +31,9 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry \
   --mount=type=cache,target=/usr/local/cargo/git \
   --mount=type=cache,target=/mediakraken/target \
   cargo build --release --target x86_64-unknown-linux-musl \
-  && cp /mediakraken/target/x86_64-unknown-linux-musl/release/mk* /mediakraken/target/.;
-RUN ldd /mediakraken/target/mkwebapp | tr -s '[:blank:]' '\n' | grep '^/' | \
+  && mkdir -p /mediakraken/deps \
+  && cp /mediakraken/target/x86_64-unknown-linux-musl/release/mkwebapp /mediakraken/mkwebapp \
+  && ldd /mediakraken/mkwebapp | tr -s '[:blank:]' '\n' | grep '^/' | \
   xargs -I % sh -c 'mkdir -p $(dirname /mediakraken/deps%); cp % /mediakraken/deps%;'
 
 ####################################################################################################
@@ -42,7 +43,7 @@ FROM scratch
 # otherwise throws file not found error
 ADD alpine-minirootfs-x86_64.tar.gz /
 # deps has full /usr/lib/x86_64-linux-gnu path.....hence copy to /
-COPY --from=cargo-build-mkwebapp /mediakraken/deps/* /
+COPY --from=cargo-build-mkwebapp /mediakraken/deps/ /
 
 WORKDIR /mediakraken
 
@@ -58,7 +59,7 @@ COPY --from=cargo-build-mkwebapp /mediakraken/templates /mediakraken/templates
 COPY --from=cargo-build-mkwebapp /mediakraken/static /mediakraken/static
 
 # Copy our build
-COPY --from=cargo-build-mkwebapp /mediakraken/target/mkwebapp /mediakraken/mkwebapp
+COPY --from=cargo-build-mkwebapp /mediakraken/mkwebapp /mediakraken/mkwebapp
 
 # Use an unprivileged user.
 USER mediakraken:mediakraken
