@@ -232,7 +232,8 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut *transaction)
         .await?;
         let new_guid = uuid::Uuid::now_v7();
-        sqlx::query(r#"INSERT INTO mm_share_auth (mm_share_auth_guid, mm_share_auth_user, mm_share_auth_password) values ($1, 'guest', crypt('guest', gen_salt('bf', 10)));"#)
+        sqlx::query(r#"INSERT INTO mm_share_auth (mm_share_auth_guid, mm_share_auth_user, mm_share_auth_password) 
+        values ($1, 'guest', pgp_sym_encrypt('guest', 'fake-strong-key'));"#)
             .bind(new_guid)
             .execute(&mut *transaction)
             .await?;

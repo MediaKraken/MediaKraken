@@ -48,6 +48,7 @@ async fn process_message(
                 share_info.mm_share_ip,
                 share_path,
                 share_comment,
+                share_info.mm_share_type,
             )
             .await?;
         }

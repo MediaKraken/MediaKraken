@@ -53,7 +53,8 @@ pub async fn mk_lib_database_network_share_detail(
 ) -> Result<DBShareList, sqlx::Error> {
     let table_row: DBShareList = sqlx::query_as(
         r#"select mm_network_share_guid, mm_network_share_ip, mm_network_share_path, 
-        mm_network_share_comment, mm_share_auth_user, mm_share_auth_password, 
+        mm_network_share_comment, mm_share_auth_user, 
+        pgp_sym_decrypt(mm_share_auth_password::bytea, 'fake-strong-key') AS mm_share_auth_password, 
         mm_network_share_version, mm_network_share_workgroup 
         from mm_network_shares
         LEFT JOIN mm_share_auth ON mm_network_shares.mm_network_share_user_guid = mm_share_auth.mm_share_auth_guid
@@ -71,9 +72,9 @@ pub struct DBShareList {
     pub mm_network_share_ip: std::net::IpAddr,
     pub mm_network_share_path: String,
     pub mm_network_share_comment: String,
+    pub mm_network_share_version: i16,
     pub mm_share_auth_user: Option<String>,
     pub mm_share_auth_password: Option<String>,
-    pub mm_network_share_version: Option<i16>,
     pub mm_network_share_workgroup: Option<String>,
 }
 
@@ -82,9 +83,12 @@ pub async fn mk_lib_database_network_share_read(
 ) -> Result<Vec<DBShareList>, sqlx::Error> {
     let table_rows: Vec<DBShareList> = sqlx::query_as(
         r#"select mm_network_share_guid, mm_network_share_ip, mm_network_share_path, 
-        mm_network_share_comment, mm_share_auth_user, mm_share_auth_password, 
-        mm_network_share_version, mm_network_share_workgroup 
-        from mm_network_shares LEFT JOIN mm_share_auth ON mm_network_shares.mm_network_share_user_guid = mm_share_auth.mm_share_auth_guid
+        mm_network_share_comment, mm_network_share_version, 
+        mm_share_auth_user,
+        pgp_sym_decrypt(mm_share_auth_password::bytea, 'fake-strong-key') AS mm_share_auth_password, 
+        mm_network_share_workgroup 
+        from mm_network_shares LEFT JOIN mm_share_auth 
+        ON mm_network_shares.mm_network_share_user_guid = mm_share_auth.mm_share_auth_guid
         order by mm_network_share_path"#,
     )
     .fetch_all(sqlx_pool)
@@ -110,6 +114,7 @@ pub async fn mk_lib_database_network_share_insert(
     network_share_ip: std::net::IpAddr,
     network_share_path: &str,
     network_share_comment: &str,
+    network_share_version: i16
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let new_guid = uuid::Uuid::now_v7();
     let mut transaction = sqlx_pool.begin().await?;
@@ -117,12 +122,14 @@ pub async fn mk_lib_database_network_share_insert(
     let path_vec: Vec<&str> = path_name.splitn(3, '/').collect();
     sqlx::query(
         r#"insert into mm_network_shares (mm_network_share_guid, mm_network_share_ip, 
-        mm_network_share_path, mm_network_share_comment) values ($1, $2, $3, $4)"#,
+        mm_network_share_path, mm_network_share_comment, mm_network_share_version) 
+        values ($1, $2, $3, $4, $5)"#,
     )
     .bind(new_guid)
     .bind(network_share_ip)
     .bind(path_vec[1])
     .bind(network_share_comment)
+    .bind(network_share_version)
     .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
@@ -137,12 +144,10 @@ pub async fn mk_lib_database_network_share_update_user_info(
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
-        r#"update mm_network_shares set mm_network_share_user = $1, 
-        mm_network_share_password = $2 
-        where mm_network_share_guid = $3"#,
+        r#"update mm_network_shares set mm_network_share_user_guid = $1 
+        where mm_network_share_guid = $2"#,
     )
     .bind(network_share_user)
-    .bind(network_share_password)
     .bind(network_share_uuid)
     .execute(&mut *transaction)
     .await?;

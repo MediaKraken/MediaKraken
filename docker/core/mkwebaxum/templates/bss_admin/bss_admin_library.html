@@ -41,6 +41,7 @@
               <th class="px-3 py-2">Path</th>
               <th class="px-3 py-2">Comment</th>
               <th class="px-3 py-2">Auth User</th>
+              <th class="px-3 py-2">Type</th>
               <th class="px-3 py-2">Add Directory as Library</th>
             </tr>
           </thead>
@@ -64,6 +65,7 @@
                   </optgroup>
                 </select>
               </td>
+              <td class="px-3 py-2">{{ row_data.mm_network_share_version }}</td>
               <td class="px-3 py-2">
                 <form action="/admin/library" method="post" class="flex flex-col gap-2 md:flex-row md:items-center">
                   <input type="hidden" name="share_guid" value="{{ row_data.mm_network_share_guid }}">

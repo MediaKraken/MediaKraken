@@ -1,12 +1,12 @@
-use crate::AppState;
 use crate::mk_lib_database;
+use crate::AppState;
 use askama::Template;
 use axum::extract::{Form, State};
 use axum::{
-    Extension, Json,
     extract::{Path, Query},
     http::{Method, StatusCode},
     response::{Html, IntoResponse, Redirect},
+    Extension, Json,
 };
 use axum_flash::Flash;
 use axum_session::{SessionConfig, SessionLayer};
@@ -14,7 +14,7 @@ use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_rabbitmq;
 use serde::{Deserialize, Serialize};
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 use sqlx::postgres::PgPool;
 use tokio::process::Command;
 
@@ -64,6 +64,46 @@ pub struct ShareDirectoryBrowseResponse {
     current_path: String,
     parent_path: Option<String>,
     directories: Vec<String>,
+}
+
+fn classify_smbclient_browse_error(
+    stdout_output: &str,
+    stderr_output: &str,
+) -> (StatusCode, &'static str) {
+    let combined_output = format!("{stdout_output}\n{stderr_output}").to_ascii_lowercase();
+
+    if combined_output.contains("nt_status_access_denied")
+        || combined_output.contains("access denied")
+        || combined_output.contains("permission denied")
+    {
+        return (
+            StatusCode::FORBIDDEN,
+            "Share is reachable but access was denied",
+        );
+    }
+
+    if combined_output.contains("nt_status_object_path_not_found")
+        || combined_output.contains("nt_status_object_name_not_found")
+        || combined_output.contains("nt_status_bad_network_name")
+        || combined_output.contains("no such file")
+        || combined_output.contains("cannot chdir")
+    {
+        return (StatusCode::NOT_FOUND, "Share path was not found");
+    }
+
+    if combined_output.contains("nt_status_bad_network_path")
+        || combined_output.contains("nt_status_network_name_deleted")
+        || combined_output.contains("connection to")
+        || combined_output.contains("connection refused")
+        || combined_output.contains("could not resolve")
+        || combined_output.contains("host is down")
+        || combined_output.contains("name or service not known")
+        || combined_output.contains("timed out")
+    {
+        return (StatusCode::BAD_GATEWAY, "Unable to reach share");
+    }
+
+    (StatusCode::BAD_GATEWAY, "Failed to list share directories")
 }
 
 pub async fn admin_library(
@@ -293,7 +333,7 @@ pub async fn admin_library_share_directories(
                 );
             }
         };
-
+    println!("Share info: {:?}", share_info);
     let requested_path = query.path.unwrap_or_default();
     let cleaned_path = requested_path
         .trim()
@@ -310,7 +350,12 @@ pub async fn admin_library_share_directories(
     let share_uri = format!(
         "//{}/{}",
         share_info.mm_network_share_ip,
-        share_info.mm_network_share_path.trim_matches('/')
+        share_info
+            .mm_network_share_path
+            .trim_matches('/')
+            .rsplit_once('\\')
+            .unwrap()
+            .1,
     );
 
     let smb_commands: Vec<String> = vec![
@@ -333,7 +378,7 @@ pub async fn admin_library_share_directories(
             smb_command.arg("-W").arg(workgroup);
         }
     }
-    if let Some(user) = share_info.mm_share_auth_user.as_deref() {
+    if let Some(user) = share_info.mm_share_auth_user.as_deref() && user != "guest" {
         let pass = share_info
             .mm_share_auth_password
             .as_deref()
@@ -342,11 +387,11 @@ pub async fn admin_library_share_directories(
     } else {
         smb_command.arg("-N");
     }
-
+    println!("Running smbclient command: {:?}", smb_command);
     let smb_output = match smb_command.output().await {
         Ok(data) => data,
         Err(error) => {
-            println!("smbclient execution failed: {error:?}");
+            eprintln!("smbclient execution failed: {error:?}");
             return (
                 StatusCode::BAD_GATEWAY,
                 Json(json!({"error": "Unable to run smbclient"})),
@@ -355,15 +400,24 @@ pub async fn admin_library_share_directories(
     };
 
     if smb_output.status.success() == false {
+        let stdout_output = String::from_utf8_lossy(&smb_output.stdout).to_string();
         let stderr_output = String::from_utf8_lossy(&smb_output.stderr).to_string();
-        println!(
-            "smbclient failed with status {:?}, stderr: {}",
+        let details_output = if stderr_output.is_empty() {
+            stdout_output.clone()
+        } else {
+            stderr_output.clone()
+        };
+        let (status_code, error_message) =
+            classify_smbclient_browse_error(&stdout_output, &stderr_output);
+        eprintln!(
+            "smbclient failed with status {:?}, stdout: {}, stderr: {}",
             smb_output.status.code(),
+            stdout_output,
             stderr_output
         );
         return (
-            StatusCode::BAD_GATEWAY,
-            Json(json!({"error": "Failed to list share directories", "details": stderr_output})),
+            status_code,
+            Json(json!({"error": error_message, "details": details_output})),
         );
     }
 
