@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.6
+
 # outside of build step, hence have to re arg it below
 ARG BRANCHTAG
 
@@ -20,11 +22,15 @@ ENV CARGO_INCREMENTAL=0
 
 COPY --from=planner-mkwebapp /mediakraken/recipe.json recipe.json
 
-RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=/mediakraken/target \
+    cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
 
-COPY ./ .
-
-RUN cargo build --release --target x86_64-unknown-linux-musl \
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+  --mount=type=cache,target=/usr/local/cargo/git \
+  --mount=type=cache,target=/mediakraken/target \
+  cargo build --release --target x86_64-unknown-linux-musl \
   && cp /mediakraken/target/x86_64-unknown-linux-musl/release/mk* /mediakraken/target/.;
 RUN ldd /mediakraken/target/mkwebapp | tr -s '[:blank:]' '\n' | grep '^/' | \
   xargs -I % sh -c 'mkdir -p $(dirname /mediakraken/deps%); cp % /mediakraken/deps%;'
@@ -40,7 +46,7 @@ COPY --from=cargo-build-mkwebapp /mediakraken/deps/* /
 
 WORKDIR /mediakraken
 
-RUN apk update && apk add --no-cache musl-locales lang libssl3 libcrypto3 cifs-utils nfs-utils libsmbclient samba-client \
+RUN apk add --no-cache musl-locales lang libssl3 libcrypto3 cifs-utils nfs-utils libsmbclient samba-client \
  && rm -rf /var/cache/apk/*
 
 # Import from builder.
