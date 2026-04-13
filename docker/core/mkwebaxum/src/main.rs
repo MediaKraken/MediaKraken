@@ -44,6 +44,7 @@ use tower::timeout::TimeoutLayer;
 use tower::{ServiceBuilder, timeout::error::Elapsed};
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::set_header::SetResponseHeaderLayer;
+use tracing_subscriber::{EnvFilter, fmt};
 
 type Client = hyper_util::client::legacy::Client<HttpConnector, Body>;
 mod axum_custom_filters;
@@ -162,6 +163,12 @@ impl FromRef<AppState> for axum_flash::Config {
 
 #[tokio::main]
 async fn main() {
+    fmt()
+        .with_env_filter(
+            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
+        )
+        .init();
+
     // connect to db and do a version check
     let (sqlx_pool_rw, sqlx_pool_ro) =
         mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)

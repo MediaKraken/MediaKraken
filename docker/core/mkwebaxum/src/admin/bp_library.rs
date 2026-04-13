@@ -1,12 +1,12 @@
-use crate::mk_lib_database;
 use crate::AppState;
+use crate::mk_lib_database;
 use askama::Template;
 use axum::extract::{Form, State};
 use axum::{
+    Extension, Json,
     extract::{Path, Query},
     http::{Method, StatusCode},
     response::{Html, IntoResponse, Redirect},
-    Extension, Json,
 };
 use axum_flash::Flash;
 use axum_session::{SessionConfig, SessionLayer};
@@ -14,10 +14,10 @@ use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_rabbitmq;
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use sqlx::postgres::PgPool;
 use tokio::process::Command;
-use std::io::{self, Write};
+use tracing::{error, info};
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -304,8 +304,7 @@ pub async fn admin_library_share_directories(
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Query(query): Query<ShareDirectoryBrowseQuery>,
 ) -> impl IntoResponse {
-    println!("Share ir");
-    io::stdout().flush().unwrap();
+    info!("Browsing share directories request received");
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
         [Method::GET],
@@ -320,8 +319,7 @@ pub async fn admin_library_share_directories(
             Json(json!({"error": "Not authorized"})),
         );
     }
-    println!("Share ir3");
-    io::stdout().flush().unwrap();
+    info!("Share directory request authorized");
     let share_info =
         match mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_detail(
             &state.sqlx_pool_ro,
@@ -337,8 +335,7 @@ pub async fn admin_library_share_directories(
                 );
             }
         };
-    println!("Share info: {:?}", share_info);
-    io::stdout().flush().unwrap();
+    info!(share_guid = %query.share_guid, "Loaded share details for directory browse");
     let requested_path = query.path.unwrap_or_default();
     let cleaned_path = requested_path
         .trim()
@@ -383,7 +380,9 @@ pub async fn admin_library_share_directories(
             smb_command.arg("-W").arg(workgroup);
         }
     }
-    if let Some(user) = share_info.mm_share_auth_user.as_deref() && user != "guest" {
+    if let Some(user) = share_info.mm_share_auth_user.as_deref()
+        && user != "guest"
+    {
         let pass = share_info
             .mm_share_auth_password
             .as_deref()
@@ -392,12 +391,11 @@ pub async fn admin_library_share_directories(
     } else {
         smb_command.arg("-N");
     }
-    println!("Running smbclient command: {:?}", smb_command);
-    io::stdout().flush().unwrap();
+    info!(?smb_command, "Running smbclient directory listing command");
     let smb_output = match smb_command.output().await {
         Ok(data) => data,
         Err(error) => {
-            eprintln!("smbclient execution failed: {error:?}");
+            error!(?error, "smbclient execution failed");
             return (
                 StatusCode::BAD_GATEWAY,
                 Json(json!({"error": "Unable to run smbclient"})),
@@ -415,13 +413,12 @@ pub async fn admin_library_share_directories(
         };
         let (status_code, error_message) =
             classify_smbclient_browse_error(&stdout_output, &stderr_output);
-        eprintln!(
-            "smbclient failed with status {:?}, stdout: {}, stderr: {}",
-            smb_output.status.code(),
-            stdout_output,
-            stderr_output
+        error!(
+            status_code = ?smb_output.status.code(),
+            stdout = %stdout_output,
+            stderr = %stderr_output,
+            "smbclient failed"
         );
-        io::stdout().flush().unwrap();
         return (
             status_code,
             Json(json!({"error": error_message, "details": details_output})),
