@@ -1,3 +1,17 @@
-target
+# Ignore the massive rust build folder
+target/
+
+# Ignore local node dependencies if you have them
+node_modules/
+
+# Ignore git history (thousands of small files Docker has to "hash")
+.git
 .gitignore
-node_modules
+
+# Ignore local environment secrets and logs
+.env
+*.log
+
+# Ignore OS metadata
+.DS_Store
+Thumps.db
