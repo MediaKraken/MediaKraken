@@ -45,7 +45,7 @@ use tower::{ServiceBuilder, timeout::error::Elapsed};
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::set_header::SetResponseHeaderLayer;
 use tracing::Level;
-use tracing_subscriber::fmt;
+use tracing_subscriber::{fmt, filter::Targets};
 
 type Client = hyper_util::client::legacy::Client<HttpConnector, Body>;
 mod axum_custom_filters;
