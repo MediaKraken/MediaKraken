@@ -165,9 +165,12 @@ impl FromRef<AppState> for axum_flash::Config {
 #[tokio::main]
 async fn main() {
     fmt()
-        .with_max_level(Level::TRACE)
         .with_target(true)
         .with_ansi(false)
+        .with_env_filter(
+            Targets::new()
+                .with_target("mkwebapp", Level::TRACE)
+        )
         .init();
 
     // connect to db and do a version check
