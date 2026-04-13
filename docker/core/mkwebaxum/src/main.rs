@@ -44,7 +44,8 @@ use tower::timeout::TimeoutLayer;
 use tower::{ServiceBuilder, timeout::error::Elapsed};
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::set_header::SetResponseHeaderLayer;
-use tracing_subscriber::{EnvFilter, fmt};
+use tracing::Level;
+use tracing_subscriber::fmt;
 
 type Client = hyper_util::client::legacy::Client<HttpConnector, Body>;
 mod axum_custom_filters;
@@ -164,9 +165,9 @@ impl FromRef<AppState> for axum_flash::Config {
 #[tokio::main]
 async fn main() {
     fmt()
-        .with_env_filter(
-            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
-        )
+        .with_max_level(Level::TRACE)
+        .with_target(true)
+        .with_ansi(false)
         .init();
 
     // connect to db and do a version check

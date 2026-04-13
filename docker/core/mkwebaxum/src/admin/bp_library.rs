@@ -304,7 +304,7 @@ pub async fn admin_library_share_directories(
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Query(query): Query<ShareDirectoryBrowseQuery>,
 ) -> impl IntoResponse {
-    info!("Browsing share directories request received");
+    tracing::info!("Browsing share directories request received");
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
         [Method::GET],
@@ -319,7 +319,7 @@ pub async fn admin_library_share_directories(
             Json(json!({"error": "Not authorized"})),
         );
     }
-    info!("Share directory request authorized");
+    tracing::info!("Share directory request authorized");
     let share_info =
         match mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_detail(
             &state.sqlx_pool_ro,
@@ -335,7 +335,7 @@ pub async fn admin_library_share_directories(
                 );
             }
         };
-    info!(share_guid = %query.share_guid, "Loaded share details for directory browse");
+    tracing::info!(share_guid = %query.share_guid, "Loaded share details for directory browse");
     let requested_path = query.path.unwrap_or_default();
     let cleaned_path = requested_path
         .trim()
@@ -391,11 +391,11 @@ pub async fn admin_library_share_directories(
     } else {
         smb_command.arg("-N");
     }
-    info!(?smb_command, "Running smbclient directory listing command");
+    tracing::info!(?smb_command, "Running smbclient directory listing command");
     let smb_output = match smb_command.output().await {
         Ok(data) => data,
         Err(error) => {
-            error!(?error, "smbclient execution failed");
+            tracing::error!(?error, "smbclient execution failed");
             return (
                 StatusCode::BAD_GATEWAY,
                 Json(json!({"error": "Unable to run smbclient"})),
@@ -413,7 +413,7 @@ pub async fn admin_library_share_directories(
         };
         let (status_code, error_message) =
             classify_smbclient_browse_error(&stdout_output, &stderr_output);
-        error!(
+        tracing::error!(
             status_code = ?smb_output.status.code(),
             stdout = %stdout_output,
             stderr = %stderr_output,
