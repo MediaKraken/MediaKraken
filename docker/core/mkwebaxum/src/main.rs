@@ -44,7 +44,6 @@ use tower::timeout::TimeoutLayer;
 use tower::{ServiceBuilder, timeout::error::Elapsed};
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::set_header::SetResponseHeaderLayer;
-use tracing_subscriber::{EnvFilter, fmt, prelude::*, registry::Registry};
 
 type Client = hyper_util::client::legacy::Client<HttpConnector, Body>;
 mod axum_custom_filters;
@@ -163,15 +162,15 @@ impl FromRef<AppState> for axum_flash::Config {
 
 #[tokio::main]
 async fn main() {
-    Registry::default()
-        .with(
-            fmt::layer()
-                .with_target(true)
-                .with_ansi(false)
-                .with_filter(EnvFilter::builder().parse_lossy("mkwebapp=trace,tower_http=trace")),
-        )
-        .init();
-    tracing::info!("App start");
+    if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
+        "level": "info",
+        "message": "App start",
+        "module": module_path!(),
+    }))
+    .await
+    {
+        eprintln!("loki push error: {error}");
+    }
     // connect to db and do a version check
     let (sqlx_pool_rw, sqlx_pool_ro) =
         mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
