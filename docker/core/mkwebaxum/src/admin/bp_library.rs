@@ -17,7 +17,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use sqlx::postgres::PgPool;
 use tokio::process::Command;
-use tracing::{error, info};
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -67,6 +66,31 @@ pub struct ShareDirectoryBrowseResponse {
     directories: Vec<String>,
 }
 
+async fn log_loki(message: &str, payload: Value) {
+    if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
+        "level": "info",
+        "message": message,
+        "module": module_path!(),
+        "payload": payload,
+    }))
+    .await
+    {
+        eprintln!("loki push error: {error}");
+    }
+}
+
+async fn log_loki_error(message: &str, payload: Value) {
+    if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
+        "level": "error",
+        "message": message,
+        "module": module_path!(),
+        "payload": payload,
+    }))
+    .await
+    {
+        eprintln!("loki push error: {error}");
+    }
+}
 fn classify_smbclient_browse_error(
     stdout_output: &str,
     stderr_output: &str,
@@ -112,7 +136,7 @@ pub async fn admin_library(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
-    tracing::info!("Admin library request received");
+    log_loki("Admin library request received", json!({})).await;
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
         [Method::GET],
@@ -305,7 +329,7 @@ pub async fn admin_library_share_directories(
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Query(query): Query<ShareDirectoryBrowseQuery>,
 ) -> impl IntoResponse {
-    tracing::info!("Browsing share directories request received");
+    log_loki("Browsing share directories request received", json!({})).await;
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
         [Method::GET],
@@ -320,7 +344,7 @@ pub async fn admin_library_share_directories(
             Json(json!({"error": "Not authorized"})),
         );
     }
-    tracing::info!("Share directory request authorized");
+    log_loki("Share directory request authorized", json!({})).await;
     let share_info =
         match mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_detail(
             &state.sqlx_pool_ro,
@@ -336,7 +360,11 @@ pub async fn admin_library_share_directories(
                 );
             }
         };
-    tracing::info!(share_guid = %query.share_guid, "Loaded share details for directory browse");
+    log_loki(
+        "Loaded share details for directory browse",
+        json!({"share_guid": query.share_guid.to_string()}),
+    )
+    .await;
     let requested_path = query.path.unwrap_or_default();
     let cleaned_path = requested_path
         .trim()
@@ -392,11 +420,19 @@ pub async fn admin_library_share_directories(
     } else {
         smb_command.arg("-N");
     }
-    tracing::info!(?smb_command, "Running smbclient directory listing command");
+    log_loki(
+        "Running smbclient directory listing command",
+        json!({"command": format!("{:?}", smb_command)}),
+    )
+    .await;
     let smb_output = match smb_command.output().await {
         Ok(data) => data,
         Err(error) => {
-            tracing::error!(?error, "smbclient execution failed");
+            log_loki_error(
+                "smbclient execution failed",
+                json!({"error": error.to_string()}),
+            )
+            .await;
             return (
                 StatusCode::BAD_GATEWAY,
                 Json(json!({"error": "Unable to run smbclient"})),
@@ -414,12 +450,15 @@ pub async fn admin_library_share_directories(
         };
         let (status_code, error_message) =
             classify_smbclient_browse_error(&stdout_output, &stderr_output);
-        tracing::error!(
-            status_code = ?smb_output.status.code(),
-            stdout = %stdout_output,
-            stderr = %stderr_output,
-            "smbclient failed"
-        );
+        log_loki_error(
+            "smbclient failed",
+            json!({
+                "status_code": smb_output.status.code(),
+                "stdout": stdout_output,
+                "stderr": stderr_output,
+            }),
+        )
+        .await;
         return (
             status_code,
             Json(json!({"error": error_message, "details": details_output})),
