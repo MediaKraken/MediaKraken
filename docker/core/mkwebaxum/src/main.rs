@@ -45,7 +45,7 @@ use tower::{ServiceBuilder, timeout::error::Elapsed};
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::set_header::SetResponseHeaderLayer;
 use tracing::Level;
-use tracing_subscriber::{fmt, filter::Targets};
+use tracing_subscriber::{filter::Targets, fmt, prelude::*, registry::Registry};
 
 type Client = hyper_util::client::legacy::Client<HttpConnector, Body>;
 mod axum_custom_filters;
@@ -164,15 +164,18 @@ impl FromRef<AppState> for axum_flash::Config {
 
 #[tokio::main]
 async fn main() {
-    fmt()
-        .with_target(true)
-        .with_ansi(false)
-        .with_env_filter(
-            Targets::new()
-                .with_target("mkwebapp", Level::TRACE)
+    Registry::default()
+        .with(
+            fmt::layer()
+                .with_target(true)
+                .with_ansi(false)
+                .with_filter(
+                    Targets::new()
+                        .with_target("mkwebapp", Level::TRACE),
+                ),
         )
         .init();
-
+    tracing::info!("App start");
     // connect to db and do a version check
     let (sqlx_pool_rw, sqlx_pool_ro) =
         mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
