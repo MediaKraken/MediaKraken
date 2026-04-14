@@ -44,8 +44,7 @@ use tower::timeout::TimeoutLayer;
 use tower::{ServiceBuilder, timeout::error::Elapsed};
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::set_header::SetResponseHeaderLayer;
-use tracing::Level;
-use tracing_subscriber::{filter::Targets, fmt, prelude::*, registry::Registry};
+use tracing_subscriber::{EnvFilter, fmt, prelude::*, registry::Registry};
 
 type Client = hyper_util::client::legacy::Client<HttpConnector, Body>;
 mod axum_custom_filters;
@@ -169,10 +168,7 @@ async fn main() {
             fmt::layer()
                 .with_target(true)
                 .with_ansi(false)
-                .with_filter(
-                    Targets::new()
-                        .with_target("mkwebapp", Level::TRACE),
-                ),
+                .with_filter(EnvFilter::builder().parse_lossy("mkwebapp=trace")),
         )
         .init();
     tracing::info!("App start");
