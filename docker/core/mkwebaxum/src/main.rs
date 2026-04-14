@@ -168,7 +168,7 @@ async fn main() {
             fmt::layer()
                 .with_target(true)
                 .with_ansi(false)
-                .with_filter(EnvFilter::builder().parse_lossy("mkwebapp=debug,tower_http=debug")),
+                .with_filter(EnvFilter::builder().parse_lossy("mkwebapp=trace,tower_http=trace")),
         )
         .init();
     tracing::info!("App start");
