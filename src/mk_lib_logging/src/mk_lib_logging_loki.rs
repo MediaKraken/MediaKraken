@@ -11,7 +11,7 @@ use tokio::time::Duration;
 
 const LOKI_PUSH_URL: &str = "http://loki.monitoring.svc.mkcluster.local:3100/loki/api/v1/push";
 const LOKI_QUERY_URL: &str =
-    "http://loki.monitoring.svc.mkcluster.local:3100/loki/api/v1/query_range";
+    "http://loki-gateway.monitoring.svc.mkcluster.local/loki/api/v1/query_range";
 
 const LOKI_MAX_ENTRY_BYTES: usize = 262_144;
 const LOKI_SAFE_ENTRY_BYTES: usize = 240_000;
