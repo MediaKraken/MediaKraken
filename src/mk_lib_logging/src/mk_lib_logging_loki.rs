@@ -1,7 +1,7 @@
 use chrono::Utc;
 use reqwest::Client;
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
-use reqwest_retry::{policies::ExponentialBackoff, RetryTransientMiddleware};
+use reqwest_retry::{RetryTransientMiddleware, policies::ExponentialBackoff};
 use serde::Deserialize;
 use serde_json::json;
 use std::collections::HashMap;
@@ -9,8 +9,7 @@ use std::env;
 use std::sync::OnceLock;
 use tokio::time::Duration;
 
-const LOKI_PUSH_URL: &str =
-    "http://loki.monitoring.svc.mkcluster.local:3100/loki/api/v1/push";
+const LOKI_PUSH_URL: &str = "http://loki.monitoring.svc.mkcluster.local:3100/loki/api/v1/push";
 const LOKI_QUERY_URL: &str =
     "http://loki.monitoring.svc.mkcluster.local:3100/loki/api/v1/query_range";
 
@@ -145,13 +144,23 @@ fn stream_to_logql(labels: &HashMap<String, String>) -> String {
     format!("{{{}}}", stream_labels_to_string(labels))
 }
 
+fn escape_logql_string(value: &str) -> String {
+    value.replace('\\', r#"\\"#).replace('"', r#"\""#)
+}
+
 pub async fn mk_logging_loki_read(
     message_type: &str,
 ) -> Result<Vec<LokiLog>, Box<dyn std::error::Error>> {
+    let now_ns = Utc::now()
+        .timestamp_nanos_opt()
+        .ok_or("failed to generate nanosecond timestamp")?;
+    let start_ns = now_ns - (24 * 60 * 60 * 1_000_000_000_i64);
+
     let query = if message_type.is_empty() {
-        r#"{job="mediakraken"}"#.to_string()
+        r#"{job=~"mediakraken.*"}"#.to_string()
     } else {
-        format!(r#"{{job="mediakraken"}} |= "{}""#, message_type)
+        let escaped_message_type = escape_logql_string(message_type);
+        format!(r#"{{job=~"mediakraken.*"}} |= "{}""#, escaped_message_type)
     };
 
     let resp: LokiResponse = query_client()
@@ -160,6 +169,8 @@ pub async fn mk_logging_loki_read(
             ("query", query.as_str()),
             ("limit", "100"),
             ("direction", "backward"),
+            ("start", &start_ns.to_string()),
+            ("end", &now_ns.to_string()),
         ])
         .send()
         .await?
