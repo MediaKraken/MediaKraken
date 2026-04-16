@@ -52,6 +52,7 @@ hyper = { version = "1.8.1", features = ["full"] }
 hyper-util = { version = "0.1.19", features = ["client-legacy"] }
 ipnetwork = "0.21.1"
 lazy_static = "1.5.0"
+ldap3 = { version = "0.12.1", default-features = false, features = ["tls-native"] }
 libc = "0.2.180"
 num-format = { version = "0.4.4", features = ["with-system-locale"] }
 paginator = "0.2.6"
