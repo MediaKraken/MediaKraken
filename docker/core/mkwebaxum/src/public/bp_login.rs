@@ -10,7 +10,9 @@ use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use reqwest::StatusCode;
 use serde::Deserialize;
+use sqlx::Row;
 use sqlx::postgres::PgPool;
+use tokio::task;
 
 #[derive(Template)]
 #[template(path = "bss_public/bss_public_login.html")]
@@ -44,6 +46,64 @@ pub struct LoginInput {
     authy_token: Option<String>,
 }
 
+fn env_flag_enabled(var_name: &str) -> bool {
+    match std::env::var(var_name) {
+        Ok(value) => {
+            let normalized = value.trim().to_ascii_lowercase();
+            matches!(normalized.as_str(), "1" | "true" | "yes" | "on")
+        }
+        Err(_) => false,
+    }
+}
+
+async fn try_ad_login(sqlx_pool: &PgPool, username: &str, password: &str) -> Option<i64> {
+    if password.trim().is_empty() || !env_flag_enabled("MKWEBAPP_AD_LOGIN_ENABLED") {
+        return None;
+    }
+
+    let ldap_ip = match std::env::var("MKWEBAPP_AD_LDAP_IP") {
+        Ok(value) if !value.trim().is_empty() => value,
+        _ => return None,
+    };
+    let ldap_port = std::env::var("MKWEBAPP_AD_LDAP_PORT").unwrap_or_else(|_| "389".to_string());
+    let ldap_domain = match std::env::var("MKWEBAPP_AD_DOMAIN") {
+        Ok(value) if !value.trim().is_empty() => value,
+        _ => return None,
+    };
+
+    let bind_username = if username.contains('@') {
+        username.to_string()
+    } else {
+        format!("{}@{}", username, ldap_domain)
+    };
+
+    let bind_result = task::spawn_blocking(move || {
+        mk_lib_network::mk_lib_network_ldap::ldap_bind_blocking(
+            ldap_ip,
+            ldap_port,
+            &bind_username,
+            password,
+        )
+    })
+    .await;
+
+    if !matches!(bind_result, Ok(Ok(_))) {
+        return None;
+    }
+
+    let query_result = sqlx::query(r#"select id from mm_axum_users where username = $1 limit 1"#)
+        .bind(username)
+        .fetch_optional(sqlx_pool)
+        .await
+        .ok()
+        .flatten();
+
+    match query_result {
+        Some(row) => row.try_get::<i64, _>("id").ok(),
+        None => None,
+    }
+}
+
 async fn verify_authy_token(authy_id: &str, authy_token: &str, api_key: &str) -> bool {
     let verify_url = format!(
         "https://api.authy.com/protected/json/verify/{}/{}/?api_key={}",
@@ -71,7 +131,7 @@ pub async fn public_login_post(
     flash: Flash,
     Form(input_data): Form<LoginInput>,
 ) -> (Flash, Redirect) {
-    let user_id: i64 =
+    let mut user_id: i64 =
         match mk_lib_database::mk_lib_database_user::mk_lib_database_user_login_verification(
             &state.sqlx_pool_rw,
             &input_data.username,
@@ -87,6 +147,16 @@ pub async fn public_login_post(
                 );
             }
         };
+
+    if user_id <= 0 {
+        user_id = try_ad_login(
+            &state.sqlx_pool_rw,
+            &input_data.username,
+            &input_data.password,
+        )
+        .await
+        .unwrap_or(0);
+    }
 
     if user_id > 0 {
         let authy_id = mk_lib_database::mk_lib_database_user::mk_lib_database_user_authy_id(
