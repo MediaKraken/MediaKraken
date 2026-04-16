@@ -3,8 +3,8 @@ use axum_session_auth::Authentication;
 use axum_session_auth::*;
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgPool;
 use sqlx::FromRow;
+use sqlx::postgres::PgPool;
 use std::collections::HashSet;
 
 /*
@@ -261,6 +261,41 @@ pub async fn mk_lib_database_user_login(
         .await?;
     transaction.commit().await?;
     Ok(())
+}
+
+pub async fn mk_lib_database_user_authy_id(
+    sqlx_pool: &sqlx::PgPool,
+    user_id: i64,
+) -> Result<Option<String>, sqlx::Error> {
+    let has_authy_column: (bool,) = sqlx::query_as(
+        r#"select exists(
+            select 1
+            from information_schema.columns
+            where table_schema = 'public'
+                and table_name = 'mm_axum_users'
+                and column_name = 'authy_id'
+        )"#,
+    )
+    .fetch_one(sqlx_pool)
+    .await?;
+
+    if !has_authy_column.0 {
+        return Ok(None);
+    }
+
+    let authy_id: (Option<String>,) =
+        sqlx::query_as(r#"select authy_id::text from mm_axum_users where id = $1 limit 1"#)
+            .bind(user_id)
+            .fetch_one(sqlx_pool)
+            .await?;
+
+    Ok(authy_id.0.and_then(|value| {
+        if value.trim().is_empty() {
+            None
+        } else {
+            Some(value)
+        }
+    }))
 }
 
 pub async fn mk_lib_database_user_logout(
