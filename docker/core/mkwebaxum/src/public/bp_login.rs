@@ -12,6 +12,7 @@ use reqwest::StatusCode;
 use serde::Deserialize;
 use sqlx::Row;
 use sqlx::postgres::PgPool;
+use tokio::task;
 
 #[derive(Template)]
 #[template(path = "bss_public/bss_public_login.html")]
@@ -76,10 +77,17 @@ async fn try_ad_login(sqlx_pool: &PgPool, username: &str, password: &str) -> Opt
         format!("{}@{}", username, ldap_domain)
     };
 
-    if mk_lib_network::mk_lib_network_ldap::ldap_bind(ldap_ip, ldap_port, &bind_username, password)
-        .await
-        .is_err()
-    {
+    let bind_result = task::spawn_blocking(move || {
+        mk_lib_network::mk_lib_network_ldap::ldap_bind_blocking(
+            ldap_ip,
+            ldap_port,
+            &bind_username,
+            password,
+        )
+    })
+    .await;
+
+    if !matches!(bind_result, Ok(Ok(_))) {
         return None;
     }
 
