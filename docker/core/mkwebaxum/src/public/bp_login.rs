@@ -60,6 +60,7 @@ async fn try_ad_login(sqlx_pool: &PgPool, username: &str, password: &str) -> Opt
     if password.trim().is_empty() || !env_flag_enabled("MKWEBAPP_AD_LOGIN_ENABLED") {
         return None;
     }
+    let password_owned = password.to_string();
 
     let ldap_ip = match std::env::var("MKWEBAPP_AD_LDAP_IP") {
         Ok(value) if !value.trim().is_empty() => value,
@@ -82,7 +83,7 @@ async fn try_ad_login(sqlx_pool: &PgPool, username: &str, password: &str) -> Opt
             ldap_ip,
             ldap_port,
             &bind_username,
-            password,
+            &password_owned,
         )
     })
     .await;
