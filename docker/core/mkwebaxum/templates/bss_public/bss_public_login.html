@@ -60,6 +60,17 @@
                      focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
 
+            <input
+              type="text"
+              name="authy_token"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              autocomplete="one-time-code"
+              placeholder="2FA Code (if enabled)"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2
+                     focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+
             <button
               type="submit"
               class="w-full bg-indigo-600 hover:bg-indigo-700
