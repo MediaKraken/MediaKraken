@@ -99,28 +99,41 @@ async fn ms_ad_login_verification(username: &str, password: &str) -> bool {
     login_valid
 }
 
-async fn ensure_local_ms_ad_user(
+fn ms_ad_auto_provision_enabled() -> bool {
+    matches!(
+        std::env::var("MKWEBAPP_MS_AD_AUTO_PROVISION")
+            .unwrap_or_default()
+            .to_ascii_lowercase()
+            .as_str(),
+        "1" | "true" | "yes" | "on"
+    )
+}
+
+async fn fetch_local_user_id(
     sqlx_pool: &sqlx::PgPool,
     username: &str,
-) -> Result<i64, sqlx::Error> {
+) -> Result<Option<i64>, sqlx::Error> {
     let row: Option<(i64,)> =
         sqlx::query_as("select id from mm_axum_users where username = $1 limit 1")
             .bind(username)
             .fetch_optional(sqlx_pool)
             .await?;
 
-    let user_id = if let Some((id,)) = row {
-        id
-    } else {
-        let username_owned = username.to_string();
-        let generated_password = uuid::Uuid::new_v4().to_string();
-        mk_lib_database::mk_lib_database_user::mk_lib_database_user_insert(
-            sqlx_pool,
-            &username_owned,
-            &generated_password,
-        )
-        .await?
-    };
+    Ok(row.map(|(id,)| id))
+}
+
+async fn provision_local_ms_ad_user(
+    sqlx_pool: &sqlx::PgPool,
+    username: &str,
+) -> Result<i64, sqlx::Error> {
+    let username_owned = username.to_string();
+    let generated_password = uuid::Uuid::new_v4().to_string();
+    let user_id = mk_lib_database::mk_lib_database_user::mk_lib_database_user_insert(
+        sqlx_pool,
+        &username_owned,
+        &generated_password,
+    )
+    .await?;
 
     sqlx::query(
         r#"insert into mm_axum_user_permissions (user_id, token)
@@ -135,6 +148,22 @@ async fn ensure_local_ms_ad_user(
     .await?;
 
     Ok(user_id)
+}
+
+async fn resolve_local_ms_ad_user(
+    sqlx_pool: &sqlx::PgPool,
+    username: &str,
+) -> Result<Option<i64>, sqlx::Error> {
+    if let Some(user_id) = fetch_local_user_id(sqlx_pool, username).await? {
+        return Ok(Some(user_id));
+    }
+
+    if ms_ad_auto_provision_enabled() {
+        let user_id = provision_local_ms_ad_user(sqlx_pool, username).await?;
+        Ok(Some(user_id))
+    } else {
+        Ok(None)
+    }
 }
 
 pub async fn public_login_post(
@@ -159,8 +188,10 @@ pub async fn public_login_post(
             ms_ad_login_verification(&input_data.username, &input_data.password).await;
         if ad_login_valid {
             let local_username = local_username_for_ad(&input_data.username);
-            user_id = ensure_local_ms_ad_user(&state.sqlx_pool_rw, &local_username)
+            user_id = resolve_local_ms_ad_user(&state.sqlx_pool_rw, &local_username)
                 .await
+                .ok()
+                .flatten()
                 .unwrap_or(0);
         }
     }
