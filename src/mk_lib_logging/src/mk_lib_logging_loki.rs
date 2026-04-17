@@ -157,10 +157,10 @@ pub async fn mk_logging_loki_read(
     let start_ns = now_ns - (24 * 60 * 60 * 1_000_000_000_i64);
 
     let query = if message_type.is_empty() {
-        r#"{job=~"mediakraken.*"}"#.to_string()
+        r#"{job="mediakraken"}"#.to_string()
     } else {
         let escaped_message_type = escape_logql_string(message_type);
-        format!(r#"{{job=~"mediakraken.*"}} |= "{}""#, escaped_message_type)
+        format!(r#"{{job="mediakraken"}} |= "{}""#, escaped_message_type)
     };
 
     let resp: LokiResponse = query_client()
