@@ -22,7 +22,7 @@ lazy_static! {
         "0": "Amazon S3",
         "1": "Local",
         "2": "Network Share",
-        "3": "S3",
+        "3": "S3"
     }"#).unwrap();
 }
 

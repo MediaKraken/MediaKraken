@@ -5,6 +5,19 @@ use tokio::process::Command;
 pub async fn mk_common_ffmpeg_get_info(
     media_file: &str,
 ) -> Result<serde_json::Value, std::io::Error> {
+    if media_file.is_empty() {
+        return Err(Error::new(
+            ErrorKind::InvalidInput,
+            "media_file must not be empty",
+        ));
+    }
+    if media_file.starts_with('-') {
+        return Err(Error::new(
+            ErrorKind::InvalidInput,
+            "media_file must not start with '-' (potential option injection)",
+        ));
+    }
+
     let output = Command::new("ffprobe")
         .args([
             "-hide_banner",
@@ -13,7 +26,8 @@ pub async fn mk_common_ffmpeg_get_info(
             "-show_chapters",
             "-print_format",
             "json",
-            &media_file,
+            "-i",
+            media_file,
         ])
         .stdout(Stdio::piped())
         .output()
