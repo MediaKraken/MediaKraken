@@ -60,17 +60,19 @@ pub async fn mk_data_from_url_to_json_custom_headers(
 pub async fn mk_data_from_url_to_json(
     url: String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    let retry_policy = ExponentialBackoff::builder().build_with_max_retries(100);
+    // 100 retries with exponential backoff would stall callers for hours on a
+    // permanent upstream failure; 3 attempts is plenty for transient blips.
+    let retry_policy = ExponentialBackoff::builder().build_with_max_retries(3);
     let client = ClientBuilder::new(reqwest::Client::new())
         .with(RetryTransientMiddleware::new_with_policy(retry_policy))
         .build();
     let res: serde_json::Value = client
         .get(url)
         .timeout(Duration::from_secs(30))
-        .header(CONTENT_TYPE, "Content-Type: application/json")
+        .header(CONTENT_TYPE, "application/json")
         .header(
             USER_AGENT,
-            "User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0",
+            "Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0",
         )
         .send()
         .await?
@@ -166,24 +168,26 @@ pub async fn mk_download_file_from_url_tokio(
 }
 
 // wait_seconds - 120 typically
-pub async fn mk_network_service_available(host_dns: &str, host_port: &str, wait_seconds: &str) {
+pub async fn mk_network_service_available(
+    host_dns: &str,
+    host_port: &str,
+    wait_seconds: &str,
+) -> Result<(), std::io::Error> {
     let mut command_string = "/mediakraken/wait-for-it-bash.sh";
     if std::path::Path::new("/mediakraken/wait-for-it-ash-busybox130.sh").exists() {
         command_string = "/mediakraken/wait-for-it-ash-busybox130.sh";
     } else if std::path::Path::new("/mediakraken/wait-for-it-ash.sh").exists() {
         command_string = "/mediakraken/wait-for-it-ash.sh";
     }
-    if let Err(error) = std::process::Command::new(command_string)
+    tokio::process::Command::new(command_string)
         .arg("-h")
         .arg(host_dns)
         .arg("-p")
         .arg(host_port)
         .arg("-t")
         .arg(wait_seconds)
-        .spawn()
-    {
-        panic!("failed to launch wait script {command_string}: {error}");
-    }
+        .spawn()?;
+    Ok(())
 }
 
 // cargo test -- --show-output

@@ -1,11 +1,11 @@
 // https://github.com/j0rsa/transmission-rpc
 
 use serde::{Deserialize, Serialize};
+use transmission_rpc::TransClient;
 use transmission_rpc::types::{
     BasicAuth, Id, Nothing, Result, RpcResponse, SessionClose, Torrent, TorrentAction,
-    TorrentAddArgs, TorrentAddedOrDuplicate, TorrentGetField, TorrentStatus, Torrents,
+    TorrentAddArgs, TorrentAddedOrDuplicate, TorrentStatus, Torrents,
 };
-use transmission_rpc::TransClient;
 
 // https://docs.rs/transmission-rpc/0.4.2/transmission_rpc/types/struct.Torrent.html#structfield.added_date
 #[derive(Debug, Deserialize, Serialize)]
@@ -17,28 +17,32 @@ pub struct TorrentList {
     pub mm_torrent_percent_done: f32, // percent_done
 }
 
-pub async fn mk_network_transmission_login() -> Result<transmission_rpc::TransClient> {
-    let transmission_client = TransClient::with_auth(
-        //"http://mkprod:9091/transmission/rpc".parse().unwrap(),
-        "http://mkstack-transmission:9091/transmission/rpc"
-            .parse()
-            .unwrap(),
-        BasicAuth {
-            user: "admin".to_string(),
-            password: "metaman".to_string(),
-        },
-    );
-    Ok(transmission_client)
+const DEFAULT_TRANSMISSION_URL: &str = "http://mkstack-transmission:9091/transmission/rpc";
+
+/// Build a Transmission RPC client.
+///
+/// Reads `MK_TRANSMISSION_URL`, `MK_TRANSMISSION_USER`, and
+/// `MK_TRANSMISSION_PASSWORD` from the environment. The user and password are
+/// required; this returns an error if either is unset rather than baking
+/// credentials into the binary.
+pub async fn mk_network_transmission_login()
+-> std::result::Result<transmission_rpc::TransClient, Box<dyn std::error::Error + Send + Sync>> {
+    let url_str = std::env::var("MK_TRANSMISSION_URL")
+        .unwrap_or_else(|_| DEFAULT_TRANSMISSION_URL.to_string());
+    let url = url_str
+        .parse()
+        .map_err(|e| format!("invalid MK_TRANSMISSION_URL {url_str:?}: {e}"))?;
+    let user = std::env::var("MK_TRANSMISSION_USER")
+        .map_err(|_| "MK_TRANSMISSION_USER env var not set")?;
+    let password = std::env::var("MK_TRANSMISSION_PASSWORD")
+        .map_err(|_| "MK_TRANSMISSION_PASSWORD env var not set")?;
+    Ok(TransClient::with_auth(url, BasicAuth { user, password }))
 }
 
 pub async fn mk_network_transmission_close(
     mut transmission_client: transmission_rpc::TransClient,
 ) -> Result<()> {
-    let response: Result<RpcResponse<SessionClose>> = transmission_client.session_close().await;
-    match response {
-        Ok(_) => println!("Yay!"),
-        Err(_) => panic!("Oh no!"),
-    }
+    let _: RpcResponse<SessionClose> = transmission_client.session_close().await?;
     Ok(())
 }
 
@@ -77,12 +81,14 @@ pub async fn mk_network_transmission_list_torrents(
         .arguments
         .torrents
         .iter()
-        .map(|it| TorrentList {
-            mm_torrent_id: it.id.unwrap(),
-            mm_torrent_name: it.name.clone().unwrap(),
-            mm_torrent_status: format!("{:?}", TorrentStatus::from(it.status.unwrap())),
-            mm_torrent_size: it.total_size.unwrap(),
-            mm_torrent_percent_done: it.percent_done.unwrap(),
+        .filter_map(|it| {
+            Some(TorrentList {
+                mm_torrent_id: it.id?,
+                mm_torrent_name: it.name.clone()?,
+                mm_torrent_status: format!("{:?}", TorrentStatus::from(it.status?)),
+                mm_torrent_size: it.total_size?,
+                mm_torrent_percent_done: it.percent_done?,
+            })
         })
         .collect();
     Ok(torrent_rows)
