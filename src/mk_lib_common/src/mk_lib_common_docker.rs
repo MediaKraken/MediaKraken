@@ -55,15 +55,19 @@ pub async fn mk_common_docker_container_logs(id: String) -> Result<String> {
     Ok(String::from_utf8_lossy(&buffer).into_owned())
 }
 
-pub async fn mk_common_docker_container_stats(id: String) -> Result<Vec<String>> {
+/// Fetches a single stats snapshot from the container and returns it.
+///
+/// The underlying Docker API streams stats continuously for as long as the
+/// container runs; buffering that stream would be an unbounded memory sink,
+/// so we take the first sample and stop.
+pub async fn mk_common_docker_container_stats(id: String) -> Result<Option<String>> {
     let docker = Docker::unix("/var/run/docker.sock");
     let container = docker.containers().get(&id);
     let mut stats_stream = container.stats();
-    let mut stats_list = Vec::new();
-    while let Some(result) = stats_stream.next().await {
-        stats_list.push(format!("{:?}", result?));
+    match stats_stream.next().await {
+        Some(result) => Ok(Some(format!("{:?}", result?))),
+        None => Ok(None),
     }
-    Ok(stats_list)
 }
 
 pub async fn mk_common_docker_service_inspect(service: String) -> Result<String> {
@@ -104,6 +108,7 @@ pub async fn mk_common_docker_volume_list() -> Result<Vec<String>> {
     Ok(volumes
         .volumes
         .into_iter()
+        .flatten()
         .map(|v| format!("{:#?}", v))
         .collect())
 }
