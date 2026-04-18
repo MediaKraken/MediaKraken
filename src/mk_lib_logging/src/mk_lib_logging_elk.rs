@@ -1,4 +1,4 @@
-use chrono::prelude::*;
+use chrono::{SecondsFormat, Utc};
 use elasticsearch::cert::CertificateValidation;
 use elasticsearch::http::transport::{SingleNodeConnectionPool, TransportBuilder};
 use elasticsearch::{Elasticsearch, IndexParts};
@@ -8,18 +8,25 @@ use std::sync::OnceLock;
 use tokio::time::Duration;
 use url::Url;
 
-const ELK_POST_URL: &str =
+const ELK_HTTP_POST_URL: &str =
     "http://elasticsearch-es-http.elastic-stack.svc.mkcluster.local:9200/mklogs/_doc";
-const ELK_HTTPS_URL: &str = "https://elasticsearch-es-http.elastic-stack.svc.mkcluster.local:9200";
+const ELK_HTTPS_BASE_URL: &str =
+    "https://elasticsearch-es-http.elastic-stack.svc.mkcluster.local:9200";
+const ELK_HTTPS_POST_URL: &str =
+    "https://elasticsearch-es-http.elastic-stack.svc.mkcluster.local:9200/mklogs/_doc";
+
+const MAX_RETRIES: u32 = 5;
+const REQUEST_TIMEOUT: Duration = Duration::from_secs(30);
+
+type BoxError = Box<dyn std::error::Error + Send + Sync>;
 
 fn elk_payload(
     message_type: &str,
     message_module: &str,
     message_text: serde_json::Value,
 ) -> serde_json::Value {
-    let utc: DateTime<Utc> = Utc::now();
     serde_json::json!({
-        "@timestamp": utc.format("%Y-%m-%dT%H:%M:%S.%f").to_string(),
+        "@timestamp": Utc::now().to_rfc3339_opts(SecondsFormat::Millis, true),
         "type": message_type,
         "message": message_text,
         "module": message_module,
@@ -30,57 +37,47 @@ fn elk_payload(
 fn retrying_client() -> &'static ClientWithMiddleware {
     static CLIENT: OnceLock<ClientWithMiddleware> = OnceLock::new();
     CLIENT.get_or_init(|| {
-        let retry_policy = ExponentialBackoff::builder().build_with_max_retries(100);
+        let retry_policy = ExponentialBackoff::builder().build_with_max_retries(MAX_RETRIES);
         ClientBuilder::new(reqwest::Client::new())
             .with(RetryTransientMiddleware::new_with_policy(retry_policy))
             .build()
     })
 }
 
-fn insecure_reqwest_client() -> Result<&'static reqwest::Client, Box<dyn std::error::Error>> {
+fn insecure_reqwest_client() -> Result<&'static reqwest::Client, BoxError> {
     static CLIENT: OnceLock<reqwest::Client> = OnceLock::new();
     if let Some(client) = CLIENT.get() {
         return Ok(client);
     }
-
     let built = reqwest::Client::builder()
         .danger_accept_invalid_certs(true)
         .build()?;
-    let _ = CLIENT.set(built);
-
-    CLIENT
-        .get()
-        .ok_or_else(|| "failed to initialize insecure reqwest client".into())
+    Ok(CLIENT.get_or_init(|| built))
 }
 
-fn insecure_elasticsearch_client() -> Result<&'static Elasticsearch, Box<dyn std::error::Error>> {
+fn insecure_elasticsearch_client() -> Result<&'static Elasticsearch, BoxError> {
     static CLIENT: OnceLock<Elasticsearch> = OnceLock::new();
     if let Some(client) = CLIENT.get() {
         return Ok(client);
     }
-
-    let url = Url::parse(ELK_HTTPS_URL)?;
+    let url = Url::parse(ELK_HTTPS_BASE_URL)?;
     let conn_pool = SingleNodeConnectionPool::new(url);
     let transport = TransportBuilder::new(conn_pool)
         .cert_validation(CertificateValidation::None)
         .build()?;
-    let _ = CLIENT.set(Elasticsearch::new(transport));
-
-    CLIENT
-        .get()
-        .ok_or_else(|| "failed to initialize insecure elasticsearch client".into())
+    Ok(CLIENT.get_or_init(|| Elasticsearch::new(transport)))
 }
 
 pub async fn mk_logging_post_elk_retry(
     message_type: &str,
     message_module: &str,
     message_text: serde_json::Value,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), BoxError> {
     let data = elk_payload(message_type, message_module, message_text);
 
     retrying_client()
-        .post(ELK_POST_URL)
-        .timeout(Duration::from_secs(30))
+        .post(ELK_HTTP_POST_URL)
+        .timeout(REQUEST_TIMEOUT)
         .header("Content-Type", "application/json")
         .json(&data)
         .send()
@@ -94,12 +91,12 @@ pub async fn mk_logging_post_elk_ignore_ssl(
     message_type: &str,
     message_module: &str,
     message_text: serde_json::Value,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), BoxError> {
     let data = elk_payload(message_type, message_module, message_text);
 
     insecure_reqwest_client()?
-        .post(ELK_POST_URL)
-        .timeout(Duration::from_secs(30))
+        .post(ELK_HTTPS_POST_URL)
+        .timeout(REQUEST_TIMEOUT)
         .header("Content-Type", "application/json")
         .json(&data)
         .send()
@@ -113,7 +110,7 @@ pub async fn mk_logging_post_elk_lib(
     message_type: &str,
     message_module: &str,
     message_text: serde_json::Value,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), BoxError> {
     let data = elk_payload(message_type, message_module, message_text);
 
     insecure_elasticsearch_client()?
