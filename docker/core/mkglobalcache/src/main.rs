@@ -1,9 +1,11 @@
 use mk_lib_database;
 use mk_lib_network;
+use mk_lib_rabbitmq;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use std::error::Error;
-use tokio::sync::Notify;
+use tokio::signal;
+
+const IRDB_BASE_URL: &str = "https://irdb.globalcache.com:8081/api";
 
 fn sanitize(value: &str) -> String {
     value.replace('"', "")
@@ -66,154 +68,238 @@ struct ApiBrandsTypeModels {
     brand_link: serde_json::Value,
 }
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
-    // connect to db and do a version check
-    let (sqlx_pool_rw, sqlx_pool_ro) =
-        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
-            .await
-            .unwrap();
-    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
-        .await
-        .unwrap();
+async fn fetch_json<T: for<'de> Deserialize<'de>>(url: String) -> Result<T, Box<dyn Error>> {
+    let body = mk_lib_network::mk_lib_network::mk_data_from_url(url).await?;
+    Ok(serde_json::from_str(&body)?)
+}
 
-    let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkglobalcache")
-            .await
-            .unwrap();
+async fn refresh_catalog(
+    sqlx_pool_rw: &sqlx::PgPool,
+    sqlx_pool_ro: &sqlx::PgPool,
+) -> Result<(), Box<dyn Error>> {
+    let brands: Vec<ApiBrands> = fetch_json(format!("{IRDB_BASE_URL}/brands/")).await?;
 
-    let mut rabbit_consumer =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mkglobalcache", &rabbit_channel)
-            .await
-            .unwrap();
+    for brand_item in brands.iter() {
+        let brand_name = sanitize(&brand_item.brand_name);
+        let brand_id: i32 = match sanitize(&brand_item.brand_id).parse() {
+            Ok(id) => id,
+            Err(error) => {
+                eprintln!(
+                    "mkglobalcache: skipping brand '{brand_name}', non-numeric id '{}' ({error})",
+                    brand_item.brand_id
+                );
+                continue;
+            }
+        };
+        let brand_name_path = encode_brand_path(&brand_name);
 
-    tokio::spawn(async move {
-        while let Some(msg) = rabbit_consumer.recv().await {
-            if let Some(payload) = msg.content {
-                let json_message: Value =
-                    serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
-                // grab the manufacturer's from Global Cache
-                let fetch_brand_result: Vec<ApiBrands> = serde_json::from_str(
-                    &mk_lib_network::mk_lib_network::mk_data_from_url(
-                        "https://irdb.globalcache.com:8081/api/brands/".to_string(),
-                    )
-                    .await
-                    .unwrap(),
-                )
-                .unwrap();
-                // loop through all brands
-                for brand_item in fetch_brand_result.iter() {
-                    let brand_name = sanitize(&brand_item.brand_name);
-                    let brand_id = sanitize(&brand_item.brand_id).parse::<i32>().unwrap();
-                    let brand_name_path = encode_brand_path(&brand_name);
-
-                    #[cfg(debug_assertions)]
-                    {
-                        println!("{:?}\n", brand_item);
-                    }
-                    let _result =
-        mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_manufacturer_upsert(
-                &sqlx_pool_rw,
+        if let Err(error) =
+            mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_manufacturer_upsert(
+                sqlx_pool_rw,
                 brand_name.clone(),
                 brand_id,
             )
-            .await;
-                    // fetch types for the manufacturer (dvd, cd, etc)
-                    let fetch_result_type: Vec<ApiBrandsTypes> = serde_json::from_str(
-                        &mk_lib_network::mk_lib_network::mk_data_from_url(format!(
-                            "https://irdb.globalcache.com:8081/api/brands/{}/types",
-                            brand_name_path,
-                        ))
-                        .await
-                        .unwrap(),
-                    )
-                    .unwrap();
-                    for item_type in fetch_result_type.iter() {
-                        let type_name = sanitize(&item_type.brand_type);
-                        let type_name_path = encode_type_path(&type_name);
+            .await
+        {
+            eprintln!("mkglobalcache: manufacturer upsert failed for '{brand_name}' ({error})");
+            continue;
+        }
 
-                        #[cfg(debug_assertions)]
-                        {
-                            println!("item_type: {:?}\n", item_type);
-                        }
-                        let _result = mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_type_upsert(
-                &sqlx_pool_rw,
-                type_name.clone(),
-            )
-            .await;
-                        let fetch_model_type: Vec<ApiBrandsTypeModels> = serde_json::from_str(
-                            &mk_lib_network::mk_lib_network::mk_data_from_url(format!(
-                                "https://irdb.globalcache.com:8081/api/brands/{}/types/{}/models",
-                                brand_name_path,
-                                type_name_path,
-                                // .replace("Receiver/Preamp", "ReceiverxfslxPreamp")
-                                // .replace("TV/DVD/VCR", "TVxfslxDVDxfslxVCR")
-                                // .replace("TV/DVD", "TVxfslxDVD")
-                                // .replace("TV/VCR", "TVxfslxVCR")
-                                // .replace("DVD/VCR", "DVDxfslxVCR")
-                            ))
-                            .await
-                            .unwrap(),
-                        )
-                        .unwrap();
-                        // loop through all the models
-                        for item_model in fetch_model_type.iter() {
-                            let model_name = sanitize(&item_model.brand_model);
+        let types: Vec<ApiBrandsTypes> = match fetch_json(format!(
+            "{IRDB_BASE_URL}/brands/{brand_name_path}/types"
+        ))
+        .await
+        {
+            Ok(value) => value,
+            Err(error) => {
+                eprintln!("mkglobalcache: types fetch failed for '{brand_name}' ({error})");
+                continue;
+            }
+        };
 
-                            #[cfg(debug_assertions)]
-                            {
-                                println!("model_item: {:?}\n", item_model);
-                            }
-                            let device_count =
-                mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_model_device_count_by_type(
-                        &sqlx_pool_ro,
-                        brand_name.clone(),
-                        type_name.clone(),
-                        model_name.clone(),
-                    )
-                    .await
-                    .unwrap();
-                            if device_count == 0 {
-                                let _result =
-                    mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_model_insert(
-                            &sqlx_pool_rw,
+        for item_type in types.iter() {
+            let type_name = sanitize(&item_type.brand_type);
+            let type_name_path = encode_type_path(&type_name);
+
+            if let Err(error) =
+                mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_type_upsert(
+                    sqlx_pool_rw,
+                    type_name.clone(),
+                )
+                .await
+            {
+                eprintln!("mkglobalcache: type upsert failed for '{type_name}' ({error})");
+                continue;
+            }
+
+            let models: Vec<ApiBrandsTypeModels> = match fetch_json(format!(
+                "{IRDB_BASE_URL}/brands/{brand_name_path}/types/{type_name_path}/models"
+            ))
+            .await
+            {
+                Ok(value) => value,
+                Err(error) => {
+                    eprintln!(
+                        "mkglobalcache: models fetch failed for '{brand_name}'/'{type_name}' ({error})"
+                    );
+                    continue;
+                }
+            };
+
+            for item_model in models.iter() {
+                let model_name = sanitize(&item_model.brand_model);
+
+                let device_count = match mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_model_device_count_by_type(
+                    sqlx_pool_ro,
+                    brand_name.clone(),
+                    type_name.clone(),
+                    model_name.clone(),
+                )
+                .await
+                {
+                    Ok(count) => count,
+                    Err(error) => {
+                        eprintln!(
+                            "mkglobalcache: model count failed for '{brand_name}'/'{type_name}'/'{model_name}' ({error})"
+                        );
+                        continue;
+                    }
+                };
+
+                if device_count == 0 {
+                    if let Err(error) =
+                        mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_model_insert(
+                            sqlx_pool_rw,
                             brand_name.clone(),
                             type_name.clone(),
-                            model_name,
+                            model_name.clone(),
                         )
-                        .await;
-                                /*
-                                let fetch_codeset: Vec<ApiBrandsTypeCodeset> = serde_json::from_str(
-                                    &mk_lib_network::mk_data_from_url(
-                                        format!(
-                                            "https://irdb.globalcache.com:8081/api/codesets/{}",
-                                            item_model.brand_model_id.replace("\"", "").replace("&", "%26")
-                                                        )
-                                                        .to_string(),
-                                                    )
-                                                    .await
-                                                    .unwrap(),
-                                                )
-                                                .unwrap();
-                                                for item_codeset in fetch_codeset.iter() {
-                                                        #[cfg(debug_assertions)]
-                                {
-                                                    println!("item_codeset: {?}\n", item_codeset);}
-                                                }
-                                                */
-                            }
-                        }
+                        .await
+                    {
+                        eprintln!(
+                            "mkglobalcache: model insert failed for '{brand_name}'/'{type_name}'/'{model_name}' ({error})"
+                        );
                     }
                 }
-                let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
-                    &rabbit_channel,
-                    msg.deliver.unwrap().delivery_tag(),
-                )
-                .await;
             }
         }
-    });
-    let guard = Notify::new();
-    guard.notified().await;
+    }
     Ok(())
+}
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn Error>> {
+    let (sqlx_pool_rw, sqlx_pool_ro) =
+        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120).await?;
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
+        .await?;
+
+    let (_rabbit_connection, rabbit_channel) =
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkglobalcache").await?;
+
+    let mut rabbit_consumer =
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mkglobalcache", &rabbit_channel)
+            .await?;
+
+    loop {
+        tokio::select! {
+            _ = shutdown_signal() => {
+                eprintln!("mkglobalcache: shutdown signal received");
+                return Ok(());
+            }
+            msg = rabbit_consumer.recv() => {
+                let Some(msg) = msg else {
+                    eprintln!("mkglobalcache: rabbit consumer closed");
+                    return Ok(());
+                };
+
+                if msg.content.is_some() {
+                    if let Err(error) = refresh_catalog(&sqlx_pool_rw, &sqlx_pool_ro).await {
+                        eprintln!("mkglobalcache: catalog refresh failed ({error})");
+                    }
+                }
+
+                if let Some(deliver) = msg.deliver {
+                    if let Err(error) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
+                        &rabbit_channel,
+                        deliver.delivery_tag(),
+                    )
+                    .await
+                    {
+                        eprintln!("mkglobalcache: rabbit ack failed ({error})");
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sanitize_strips_double_quotes() {
+        assert_eq!(sanitize("\"Sony\""), "Sony");
+        assert_eq!(sanitize("Son\"y"), "Sony");
+        assert_eq!(sanitize("plain"), "plain");
+    }
+
+    #[test]
+    fn encode_brand_path_substitutes_special_characters() {
+        assert_eq!(encode_brand_path("A&B"), "AxampxB");
+        assert_eq!(encode_brand_path("A+B"), "AxaddxB");
+        assert_eq!(encode_brand_path("A B"), "A%20B");
+        assert_eq!(encode_brand_path("A/B"), "AxfslxB");
+        assert_eq!(encode_brand_path("A:B"), "AxcolxB");
+        assert_eq!(
+            encode_brand_path("Pioneer: A/V & More"),
+            "Pioneerxcolx%20AxfslxV%20xampx%20More"
+        );
+    }
+
+    #[test]
+    fn encode_type_path_substitutes_special_characters() {
+        assert_eq!(encode_type_path("A&B"), "A%26B");
+        assert_eq!(encode_type_path("A+B"), "AxaddxB");
+        assert_eq!(encode_type_path("A B"), "A%20B");
+        assert_eq!(encode_type_path("A/B"), "AxfslxB");
+        assert_eq!(encode_type_path("A:B"), "A:B");
+    }
+
+    #[test]
+    fn encode_type_path_preserves_plain_names() {
+        assert_eq!(encode_type_path("DVD"), "DVD");
+        assert_eq!(encode_type_path("TV/DVD"), "TVxfslxDVD");
+        assert_eq!(encode_type_path("Receiver/Preamp"), "ReceiverxfslxPreamp");
+    }
+
+    #[test]
+    fn api_brands_deserializes_expected_payload() {
+        let payload = r#"[{"$id":"1","Name":"Sony","Links":[]}]"#;
+        let parsed: Vec<ApiBrands> = serde_json::from_str(payload).unwrap();
+        assert_eq!(parsed.len(), 1);
+        assert_eq!(parsed[0].brand_id, "1");
+        assert_eq!(parsed[0].brand_name, "Sony");
+    }
 }
