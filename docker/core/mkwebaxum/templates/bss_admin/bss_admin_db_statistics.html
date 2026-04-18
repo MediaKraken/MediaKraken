@@ -76,7 +76,7 @@
                 <td class="px-3 py-2">{{ row_data.table_name }}</td>
                 <td class="px-3 py-2">
                   {% if row_data.table_rows != -1.0 %}
-                    {{ row_data.table_rows|number_format }}
+                    {{ row_data.table_rows|number_format_locale(template_data_number_format_language) }}
                   {% else %}
                     0
                   {% endif %}
@@ -86,7 +86,7 @@
               <tr class="font-semibold bg-gray-50">
                 <td class="px-3 py-2">Total Rows</td>
                 <td class="px-3 py-2">
-                  {{ template_data_db_count_total|number_format }}
+                  {{ template_data_db_count_total|number_format_locale(template_data_number_format_language) }}
                 </td>
               </tr>
             </tbody>

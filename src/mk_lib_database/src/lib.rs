@@ -3,6 +3,7 @@ pub mod mk_lib_database_backup;
 pub mod mk_lib_database_cron;
 pub mod mk_lib_database_game_servers;
 pub mod mk_lib_database_hardware_device;
+pub mod mk_lib_database_language;
 pub mod mk_lib_database_library;
 pub mod mk_lib_database_link_server;
 pub mod mk_lib_database_network_share;
@@ -48,6 +49,7 @@ pub mod database_metadata {
     pub mod mk_lib_database_metadata_book;
     pub mod mk_lib_database_metadata_collection;
     pub mod mk_lib_database_metadata_download_queue;
+    pub mod mk_lib_database_metadata_download_url;
     pub mod mk_lib_database_metadata_game;
     pub mod mk_lib_database_metadata_game_system;
     pub mod mk_lib_database_metadata_image;

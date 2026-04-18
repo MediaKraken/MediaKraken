@@ -14,9 +14,20 @@ use std::process::{Command, Stdio};
 // nmap -sS -sV -p 111,2049 --script nfs-showmount 192.168.1.122 -oX scan.xml 1>/dev/null 2>/dev/null
 // nmap -p 445 --script smb-enum-shares 192.168.1.122 -Pn -n -oX scan.xml
 
+/*]
+0 - smb1
+1 - smb2
+2 - smb3
+5 - nfs
+6 - nfs3
+7 - nfs4
+8 - nfs4.1
+9 - nfs4.2
+ */
+
 #[derive(Debug)]
 pub struct NMAPShareList {
-    pub mm_share_type: String,
+    pub mm_share_type: i16,
     pub mm_share_ip: std::net::IpAddr,
     pub mm_share_path: serde_json::Value,
     pub mm_share_comment: serde_json::Value,
@@ -132,7 +143,7 @@ pub async fn mk_network_share_smb_detail(
                     if v[share_ndx]["@key"].to_string().contains("$") {
                     } else {
                         let share_data = NMAPShareList {
-                            mm_share_type: "smb".to_string(),
+                            mm_share_type: 1, // smb2
                             mm_share_ip: format!("{:?}", ip_addr).parse().unwrap(),
                             mm_share_path: v[share_ndx]["@key"].clone(),
                             mm_share_comment: v[share_ndx]["elem"][1]["#text"].clone(),
@@ -175,7 +186,7 @@ pub async fn mk_network_share_nfs_detail(
                     // println!("elem: {}", v[share_ndx]["elem"]);
                     // println!("elem: {}", v[share_ndx]["elem"][1]["#text"]);
                     let share_data = NMAPShareList {
-                        mm_share_type: "nfs".to_string(),
+                        mm_share_type: 8, // nfs4.1
                         mm_share_ip: format!("{:?}", ip_addr).parse().unwrap(),
                         mm_share_path: v[share_ndx]["@key"].clone(),
                         mm_share_comment: v[share_ndx]["elem"][1]["#text"].clone(),

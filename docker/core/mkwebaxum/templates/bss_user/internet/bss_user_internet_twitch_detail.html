@@ -1,23 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-{% include "bss_include_header.html" %}
+{% extends "layouts/base_user.html" %}
 
-<body>
-  {% include "bss_user/bss_user_include_menu.html" %}
-        {% include "partials/sidebar_user.html" %}
-  <div>
-    <div id="twitch-embed"></div>
-    <!-- Load the Twitch embed script -->
+{% block content %}
+<div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <div id="twitch-embed" class="aspect-video w-full overflow-hidden rounded-lg"></div>
     <script src="https://embed.twitch.tv/embed/v1.js"></script>
-    <!-- Create a Twitch.Embed object that will render within the "twitch-embed" root element. -->
     <script type="text/javascript">
       new Twitch.Embed("twitch-embed", {
-        width: 1280,
-        height: 720,
-        channel: "{{twitchtv_channel}}"
+        width: "100%",
+        height: "100%",
+        channel: "{{ twitchtv_channel }}",
+        parent: ["{{ twitch_embed_parent }}"]
       });
     </script>
-  </div>
-  {% include "bss_public/bss_public_footer.html" %}
- </body>
-</html>
+</div>
+{% endblock %}

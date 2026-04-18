@@ -43,12 +43,12 @@
                                 <td class="px-4 py-2 text-sm" x-text="formatBytes(torrent.size)"></td>
                                 <td class="px-4 py-2 text-center">
                                     <button @click="editTorrent(torrent)" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">
-                                        <i class="fas fa-pencil-alt"></i> Edit
+                                        <span class="mr-1 inline-flex align-middle">{% include "icons/pencil.svg" %}</span> Edit
                                     </button>
                                 </td>
                                 <td class="px-4 py-2 text-center">
                                     <button @click="confirmDelete(torrent)" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
-                                        <i class="fas fa-trash-alt"></i> Delete
+                                        <span class="mr-1 inline-flex align-middle">{% include "icons/trash.svg" %}</span> Delete
                                     </button>
                                 </td>
                             </tr>
@@ -76,15 +76,28 @@
     </main>
   <script src="/static/js/alpinejs_3.15.3.min.js" defer></script>
   <script src="/static/js/base_webapp.js" defer></script>
+  <script id="torrent-data" type="application/json">{{ template_data_json|safe }}</script>
     <!-- Alpine.js data -->
     <script>
         function torrentPage() {
+            const torrentDataElement = document.getElementById("torrent-data");
+            let initialTorrents = [];
+            if (torrentDataElement) {
+                try {
+                    initialTorrents = JSON.parse(torrentDataElement.textContent || "[]");
+                } catch (_error) {
+                    initialTorrents = [];
+                }
+            }
+
             return {
-                torrents: [
-                    // Example data; replace with server-side JSON
-                    { id: 1, name: "Ubuntu.iso", status: "Downloading", percent_done: 0.45, size: 2147483648 },
-                    { id: 2, name: "Fedora.iso", status: "Seeding", percent_done: 1, size: 3221225472 },
-                ],
+                torrents: initialTorrents.map((torrent) => ({
+                    id: torrent.mm_torrent_id,
+                    name: torrent.mm_torrent_name,
+                    status: torrent.mm_torrent_status,
+                    percent_done: torrent.mm_torrent_percent_done,
+                    size: torrent.mm_torrent_size,
+                })),
                 showDeleteModal: false,
                 torrentToDelete: null,
 

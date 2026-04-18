@@ -1,12 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-{% include "bss_include_header.html" %}
+{% extends "layouts/base_user.html" %}
 
-<body class="bg-slate-950 text-slate-100">
-    {% include "bss_user/bss_user_include_menu.html" %}
-    {% include "partials/sidebar_user.html" %}
-
-    <main class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8" x-data="{ onlyWithCovers: false }">
+{% block content %}
+<main class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8" x-data="{ onlyWithCovers: false }">
         <section class="mb-6 flex flex-col gap-4 rounded-xl border border-slate-800 bg-slate-900/60 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h1 class="text-2xl font-semibold">OpenLibrary Browse</h1>
@@ -64,7 +59,7 @@
                 </div>
 
                 <a
-                    href="/user/internet/openlibrary_detail/{{ item.route_work_id }}"
+                    href="/user/metadata/openlibrary_detail/{{ item.route_work_id }}"
                     class="mt-1 inline-flex items-center justify-center rounded-lg bg-teal-700 px-3 py-2 text-sm font-medium hover:bg-teal-600"
                     aria-label="View OpenLibrary details for {{ item.title }}"
                 >
@@ -82,19 +77,15 @@
         <nav class="mt-6 flex items-center justify-between" aria-label="OpenLibrary pagination">
             <div>
                 {% if let Some(previous_page) = pagination_prev %}
-                <a href="/user/internet/openlibrary/{{ previous_page }}" class="rounded-lg border border-slate-600 px-4 py-2 text-sm hover:border-slate-400 hover:bg-slate-800" aria-label="Go to previous page">Previous</a>
+                <a href="/user/metadata/openlibrary/{{ previous_page }}" class="rounded-lg border border-slate-600 px-4 py-2 text-sm hover:border-slate-400 hover:bg-slate-800" aria-label="Go to previous page">Previous</a>
                 {% endif %}
             </div>
             <p class="text-sm text-slate-300">Page {{ page }}</p>
             <div>
                 {% if let Some(next_page) = pagination_next %}
-                <a href="/user/internet/openlibrary/{{ next_page }}" class="rounded-lg border border-slate-600 px-4 py-2 text-sm hover:border-slate-400 hover:bg-slate-800" aria-label="Go to next page">Next</a>
+                <a href="/user/metadata/openlibrary/{{ next_page }}" class="rounded-lg border border-slate-600 px-4 py-2 text-sm hover:border-slate-400 hover:bg-slate-800" aria-label="Go to next page">Next</a>
                 {% endif %}
             </div>
         </nav>
     </main>
-
-    {% include "bss_public/bss_public_footer.html" %}
-</body>
-
-</html>
+{% endblock %}

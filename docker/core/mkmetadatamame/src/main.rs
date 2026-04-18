@@ -395,6 +395,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     let mut sql_string = String::new();
 
                     loop {
+                        dat_line.clear();
                         match reader.read_line(&mut dat_line) {
                             Ok(0) => break,
                             Ok(_) => {
@@ -505,7 +506,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                 "Sound": sys_sound,
                                                 "Graphics": sys_graphics,
                                                 "Save State": sys_save_state})
-                                            );
+                                            ).await.unwrap();
                                         sys_wip = String::new();
                                         sys_romset = String::new();
                                     }

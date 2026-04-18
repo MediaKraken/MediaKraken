@@ -1,19 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-{% include "bss_include_header.html" %}
+{% extends "layouts/base_user.html" %}
 
-<body class="min-h-screen flex flex-col bg-gray-100 text-gray-900">
-    <!-- Top navbar -->
-    {% include "bss_user/bss_user_include_menu.html" %}
-    <!-- Below top nav -->
-    <div class="flex flex-1">
-        <!-- Left sidebar -->
-        {% include "partials/sidebar_user.html" %}
-        <!-- Main content -->
-        <main class="flex-1 p-6 bg-gray-50 overflow-y-auto">
-            <div></div>
-        </main>
+{% block content %}
+<div class="w-full px-4 py-6 sm:px-6 lg:px-8">
+        <a href="/user/internet/vimeo" class="mb-4 inline-flex rounded-lg border border-slate-600 px-3 py-2 text-sm hover:border-slate-400 hover:bg-slate-800" aria-label="Back to Vimeo browse">← Back to Vimeo</a>
+
+        <article class="rounded-xl border border-slate-800 bg-slate-900 p-4 sm:p-6">
+            <header class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-2xl font-semibold">Vimeo Playback</h1>
+                    <p class="text-sm text-slate-300">Video ID: {{ video_id }}</p>
+                </div>
+                <a href="{{ watch_url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-lg border border-slate-600 px-4 py-2 text-sm hover:border-slate-400 hover:bg-slate-800" aria-label="Open Vimeo video {{ video_id }} on vimeo.com">
+                    Open on Vimeo
+                </a>
+            </header>
+
+            <div class="aspect-video w-full overflow-hidden rounded-lg border border-slate-800 bg-black">
+                <iframe
+                    src="{{ embed_url }}"
+                    title="Vimeo player for {{ video_id }}"
+                    class="h-full w-full"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowfullscreen
+                    loading="lazy"
+                ></iframe>
+            </div>
+        </article>
     </div>
-    {% include "bss_public/bss_public_footer.html" %}
-  </body>
-</html>
+{% endblock %}

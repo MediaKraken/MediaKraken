@@ -3,11 +3,40 @@
 use crate::image_path;
 use mk_lib_common::mk_lib_common_enum_media_type;
 use mk_lib_database;
+use mk_lib_image;
 use mk_lib_network::mk_lib_network;
 use serde_json::json;
 use sqlx::types::Uuid;
-use torrent_name_parser::Metadata;
 use std::env;
+use tokio::time::{sleep, Duration};
+use torrent_name_parser::Metadata;
+
+const TMDB_RATE_LIMIT_STATUS_CODE: i64 = 25;
+const TMDB_RATE_LIMIT_RETRY_ATTEMPTS: u8 = 5;
+const TMDB_RATE_LIMIT_RETRY_DELAY_SECONDS: u64 = 2;
+
+async fn tmdb_fetch_json_with_retry(
+    url: String,
+) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+    for attempt in 0..TMDB_RATE_LIMIT_RETRY_ATTEMPTS {
+        let response = mk_lib_network::mk_data_from_url_to_json(url.clone()).await?;
+        let is_rate_limited = response
+            .get("status_code")
+            .and_then(serde_json::Value::as_i64)
+            .map(|code| code == TMDB_RATE_LIMIT_STATUS_CODE)
+            .unwrap_or(false);
+
+        if !is_rate_limited {
+            return Ok(response);
+        }
+
+        if attempt + 1 < TMDB_RATE_LIMIT_RETRY_ATTEMPTS {
+            sleep(Duration::from_secs(TMDB_RATE_LIMIT_RETRY_DELAY_SECONDS)).await;
+        }
+    }
+
+    Err("TMDB rate limit persisted after retries".into())
+}
 
 pub async fn provider_tmdb_movie_fetch(
     sqlx_pool: &sqlx::PgPool,
@@ -62,25 +91,23 @@ pub async fn provider_tmdb_person_fetch(
     let result_json = provider_tmdb_person_fetch_by_id(tmdb_id, tmdb_api_key)
         .await
         .unwrap();
-    if env::var("DEBUG").unwrap() == "true"
-    {
+    if env::var("DEBUG").unwrap() == "true" {
         mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
             json!({ "Type": "Person", "Module": std::module_path!(), "Result": result_json }),
-            )
-            .await
-            .unwrap();
+        )
+        .await
+        .unwrap();
     }
     if result_json.get("success").is_some() && result_json["success"] == false {
         println!("Skip Person: {}", tmdb_id);
         return;
     }
-    if env::var("DEBUG").unwrap() == "true"
-    {
+    if env::var("DEBUG").unwrap() == "true" {
         mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
             json!({ "Type": "Person After", "Module": std::module_path!() }),
-            )
-            .await
-            .unwrap();
+        )
+        .await
+        .unwrap();
     }
     let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert(
@@ -106,7 +133,7 @@ pub async fn provider_tmdb_tv_fetch(
     if result_json.get("success").is_some() && result_json["success"] == false {
         println!("Skip TV: {}", tmdb_id);
         return;
-    }    
+    }
     let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_insert(
         sqlx_pool,
@@ -139,7 +166,7 @@ pub async fn provider_tmdb_tv_fetch(
 pub async fn provider_tmdb_movie_id_max(
     api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
+    let url_result = tmdb_fetch_json_with_retry(format!(
         "https://api.themoviedb.org/3/movie/latest?api_key={}",
         api_key
     ))
@@ -151,7 +178,7 @@ pub async fn provider_tmdb_movie_id_max(
 pub async fn provider_tmdb_person_id_max(
     api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
+    let url_result = tmdb_fetch_json_with_retry(format!(
         "https://api.themoviedb.org/3/person/latest?api_key={}",
         api_key
     ))
@@ -163,7 +190,7 @@ pub async fn provider_tmdb_person_id_max(
 pub async fn provider_tmdb_tv_id_max(
     api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
+    let url_result = tmdb_fetch_json_with_retry(format!(
         "https://api.themoviedb.org/3/tv/latest?api_key={}",
         api_key
     ))
@@ -176,7 +203,7 @@ pub async fn provider_tmdb_collection_fetch_by_id(
     tmdb_id: i32,
     api_key: &String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
+    let url_result = tmdb_fetch_json_with_retry(format!(
         "https://api.themoviedb.org/3/collection/{}?api_key={}",
         tmdb_id, api_key
     ))
@@ -189,7 +216,7 @@ pub async fn provider_tmdb_movie_fetch_by_id(
     tmdb_id: i32,
     api_key: &str,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
+    let url_result = tmdb_fetch_json_with_retry(format!(
         "https://api.themoviedb.org/3/movie/{}?api_key={}\
         &append_to_response=credits,reviews,release_dates,videos",
         tmdb_id, api_key
@@ -202,7 +229,7 @@ pub async fn provider_tmdb_movie_fetch_by_id(
 pub async fn provider_tmdb_person_changes(
     api_key: &str,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
+    let url_result = tmdb_fetch_json_with_retry(format!(
         "https://api.themoviedb.org/3/person/changes?api_key={}",
         api_key
     ))
@@ -215,7 +242,7 @@ pub async fn provider_tmdb_person_fetch_by_id(
     tmdb_id: i32,
     api_key: &str,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
+    let url_result = tmdb_fetch_json_with_retry(format!(
         "https://api.themoviedb.org/3/person/{}?api_key={}\
         &append_to_response=combined_credits,external_ids,images",
         tmdb_id, api_key
@@ -229,7 +256,7 @@ pub async fn provider_tmdb_review_fetch_by_id(
     tmdb_id: i32,
     api_key: &str,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
+    let url_result = tmdb_fetch_json_with_retry(format!(
         "https://api.themoviedb.org/3/review/{}?api_key={}",
         tmdb_id, api_key
     ))
@@ -242,7 +269,7 @@ pub async fn provider_tmdb_tv_fetch_by_id(
     tmdb_id: i32,
     api_key: &str,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
+    let url_result = tmdb_fetch_json_with_retry(format!(
         "https://api.themoviedb.org/3/tv/{}?api_key={}\
         &append_to_response=credits,reviews,release_dates,videos",
         tmdb_id, api_key
@@ -271,21 +298,31 @@ pub async fn provider_tmdb_meta_info_build(
             &image_file_path,
         )
         .await;
-        poster_file_path = image_file_path;
-    }
-    else if result_json["images"]["profiles"][0].get("file_path").is_some() 
-            && !result_json["images"]["profiles"][0]["file_path"].is_null() {
-        image_file_path += &result_json["images"]["profiles"][0]["file_path"].as_str().unwrap().to_string();
+        let _result = mk_lib_image::mk_lib_image::mk_image_file_thumb(&image_file_path);
+        poster_file_path = image_file_path.clone();
+    } else if result_json["images"]["profiles"][0]
+        .get("file_path")
+        .is_some()
+        && !result_json["images"]["profiles"][0]["file_path"].is_null()
+    {
+        image_file_path += &result_json["images"]["profiles"][0]["file_path"]
+            .as_str()
+            .unwrap()
+            .to_string();
         //println!("ifilepath {}", image_file_path);
         let _result = mk_lib_network::mk_download_file_from_url(
             format!(
                 "https://image.tmdb.org/t/p/original{}",
-                &result_json["images"]["profiles"][0]["file_path"].as_str().unwrap().to_string()
+                &result_json["images"]["profiles"][0]["file_path"]
+                    .as_str()
+                    .unwrap()
+                    .to_string()
             ),
             &image_file_path,
         )
         .await;
-        poster_file_path = image_file_path;
+        let _result = mk_lib_image::mk_lib_image::mk_image_file_thumb(&image_file_path);
+        poster_file_path = image_file_path.clone();
     }
     // create file path for backdrop
     image_file_path = image_path::meta_image_file_path("backdrop".to_string())
@@ -334,7 +371,7 @@ pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_
         | mk_lib_common_enum_media_type::DLMediaType::MOVIE_SUBTITLE
         | mk_lib_common_enum_media_type::DLMediaType::MOVIE_THEME
         | mk_lib_common_enum_media_type::DLMediaType::MOVIE_TRAILER => {
-            let _url_result = mk_lib_network::mk_data_from_url_to_json(format!(
+            let _url_result = tmdb_fetch_json_with_retry(format!(
                 "https://api.themoviedb.org/3/search/movie\
                 ?api_key={}&include_adult=1&query={}",
                 search_text, tmdb_api_key
@@ -349,7 +386,7 @@ pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_
         | mk_lib_common_enum_media_type::DLMediaType::TV_SUBTITLE
         | mk_lib_common_enum_media_type::DLMediaType::TV_THEME
         | mk_lib_common_enum_media_type::DLMediaType::TV_TRAILER => {
-            let _url_result = mk_lib_network::mk_data_from_url_to_json(format!(
+            let _url_result = tmdb_fetch_json_with_retry(format!(
                 "https://api.themoviedb.org/3/search/tv\
                 ?api_key={}&include_adult=1&query={}",
                 search_text, tmdb_api_key
@@ -358,7 +395,7 @@ pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_
             .unwrap();
         }
         mk_lib_common_enum_media_type::DLMediaType::PERSON => {
-            let _url_result = mk_lib_network::mk_data_from_url_to_json(format!(
+            let _url_result = tmdb_fetch_json_with_retry(format!(
                 "https://api.themoviedb.org/3/search/person\
                 ?api_key={}&include_adult=1&query={}",
                 search_text, tmdb_api_key

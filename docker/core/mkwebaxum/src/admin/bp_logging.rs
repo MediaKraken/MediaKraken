@@ -1,17 +1,32 @@
 use crate::mk_lib_logging;
 use askama::Template;
 use axum::{
-    extract::Path,
     http::{Method, StatusCode},
-    response::{Html, IntoResponse, Redirect},
-    Extension,
+    response::{Html, IntoResponse},
 };
-use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
+use reqwest::Client;
+use serde::Deserialize;
 use sqlx::postgres::PgPool;
-use axum::extract::State;
-use crate::AppState;
+use std::collections::HashMap;
+use std::env;
+
+#[derive(Debug, Deserialize)]
+struct LokiResponse {
+    data: LokiData,
+}
+
+#[derive(Debug, Deserialize)]
+struct LokiData {
+    result: Vec<LokiStream>,
+}
+
+#[derive(Debug, Deserialize)]
+struct LokiStream {
+    stream: HashMap<String, String>,
+    values: Vec<[String; 2]>,
+}
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -23,6 +38,20 @@ struct TemplateLogContext<'a> {
     template_data: &'a Vec<mk_lib_logging::mk_lib_logging_loki::LokiLog>,
     template_data_exists: &'a bool,
     page_title: Option<String>,
+}
+
+fn stream_labels_to_string(labels: &HashMap<String, String>) -> String {
+    let mut pairs: Vec<_> = labels.iter().collect();
+    pairs.sort_by_key(|(k, _)| *k);
+    pairs
+        .into_iter()
+        .map(|(k, v)| format!(r#"{k}="{v}""#))
+        .collect::<Vec<_>>()
+        .join(",")
+}
+
+fn stream_to_logql(labels: &HashMap<String, String>) -> String {
+    format!("{{{}}}", stream_labels_to_string(labels))
 }
 
 pub async fn admin_logging(
@@ -39,22 +68,17 @@ pub async fn admin_logging(
     .await
     {
         let template = TemplateError403Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().unwrap_or_default();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let logging_list = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_read("fake_query")
-            .await
-            .unwrap();
-        let mut logging_data: bool = false;
-        if logging_list.len() > 0 {
-            logging_data = true;
-        }
+        let logging_list = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_read("").await.unwrap_or_default();
+        let logging_data = !logging_list.is_empty();
         let template = TemplateLogContext {
             template_data: &logging_list,
             template_data_exists: &logging_data,
             page_title: Some("MediaKraken Admin Logging".to_string()),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().unwrap_or_default();
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

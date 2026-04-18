@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MediaKraken – Login</title>
 
-<link rel="stylesheet" href="/static/css/base_webapp_8.css">
-  <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+<link rel="stylesheet" href="/static/css/base_webapp_9.css">
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-indigo-600 to-purple-700 flex flex-col">
@@ -31,6 +30,16 @@
             </h4>
           </div>
 
+          {% if !flash_messages.is_empty() %}
+          <div class="space-y-2" role="alert" aria-live="polite">
+            {% for message in flash_messages %}
+            <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {{ message }}
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
           <form action="/public/login" method="post" class="space-y-4">
 
             <input
@@ -47,6 +56,17 @@
               name="password"
               required
               placeholder="Password"
+              class="w-full rounded-lg border border-gray-300 px-4 py-2
+                     focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+
+            <input
+              type="text"
+              name="authy_token"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              autocomplete="one-time-code"
+              placeholder="2FA Code (if enabled)"
               class="w-full rounded-lg border border-gray-300 px-4 py-2
                      focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >

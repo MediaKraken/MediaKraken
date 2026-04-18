@@ -20,7 +20,7 @@ ENV CARGO_INCREMENTAL=0
 
 COPY --from=test-planner-mkwebapp /mediakraken/recipe.json recipe.json
 
-#RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
+RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
 
 COPY ./ .
 
@@ -41,10 +41,7 @@ COPY --from=test-cargo-build-mkwebapp /mediakraken/deps/* /
 WORKDIR /mediakraken
 
 RUN apk update && apk add --no-cache musl-locales lang libssl3 libcrypto3 cifs-utils nfs-utils libsmbclient \
- && rm -rf /var/cache/apt/*
-
-# RUN apt-get update && apt-get install -y locales locales-all \
-#   && rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/cache/apk/*
 
 # Import from builder.
 COPY --from=test-cargo-build-mkwebapp /wait /wait

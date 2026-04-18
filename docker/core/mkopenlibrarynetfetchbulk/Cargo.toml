@@ -16,14 +16,17 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_compression = { version = "0.0.166", registry = "kellnr" }
-mk_lib_database = { version = "0.0.199", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.168", registry = "kellnr" }
-mk_lib_network = { version = "0.0.168", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.171", registry = "kellnr" }
+mk_lib_compression = { version = "0.0.202", registry = "kellnr" }
+mk_lib_database = { version = "0.0.235", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.204", registry = "kellnr" }
+mk_lib_network = { version = "0.0.204", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.207", registry = "kellnr" }
 
 anyhow = "1.0.102"
 async-compression = { version = "0.4.40", features = ["tokio", "gzip"] }
+aws-config = "1.8.8"
+aws-sdk-s3 = "1.119.0"
+bytes = "1.10.1"
 chrono = { version = "0.4.43", features = ["serde"] }
 flate2 = "1.1.9"
 futures = "0.3.32"
@@ -37,7 +40,7 @@ serde_json = "1.0.149"
 sqlx = { version = "0.8.6", features = ["runtime-tokio-rustls", "postgres", "chrono"] }
 stdext = "0.3.3"
 sys-info = "0.9.1"
-tar = "0.4.44"
+tar = "0.4.45"
 tokio = { version = "1.49.0", features = ["full"] }
 tokio-util = { version = "0.7.18", features = ["io"] }
 uuid = { version = "1.21.0", features = ["serde", "v4", "v7"] }

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
-use sqlx::FromRow;
 
 pub async fn mk_lib_database_metadata_exists_person(
     sqlx_pool: &sqlx::PgPool,
@@ -53,7 +53,11 @@ pub async fn mk_lib_database_metadata_person_read(
     // TODO order by birth date
     if !search_value.is_empty() {
         sqlx::query_as(
-            r#"select mm_metadata_person_guid, mm_metadata_person_name, mm_metadata_person_image, mm_metadata_person_meta_json->>'profile_path' as mm_metadata_person_profile from mm_metadata_person where mm_metadata_person_name &@ $1 offset $2 limit $3"#,
+            r#"select mm_metadata_person_guid,
+            mm_metadata_person_name,
+            COALESCE(mm_metadata_person_image->>'Poster', '') as mm_metadata_person_image,
+            mm_metadata_person_meta_json->>'profile_path' as mm_metadata_person_profile
+            from mm_metadata_person where mm_metadata_person_name &@ $1 offset $2 limit $3"#,
         )
         .bind(search_value)
         .bind(offset)
@@ -62,7 +66,11 @@ pub async fn mk_lib_database_metadata_person_read(
         .await
     } else {
         sqlx::query_as(
-            r#"select mm_metadata_person_guid, mm_metadata_person_name, mm_metadata_person_image, mm_metadata_person_meta_json->>'profile_path' as mm_metadata_person_profile from mm_metadata_person order by LOWER(mm_metadata_person_name) offset $1 limit $2"#,
+            r#"select mm_metadata_person_guid,
+            mm_metadata_person_name,
+            COALESCE(mm_metadata_person_image->>'Poster', '') as mm_metadata_person_image,
+            mm_metadata_person_meta_json->>'profile_path' as mm_metadata_person_profile
+            from mm_metadata_person order by LOWER(mm_metadata_person_name) offset $1 limit $2"#,
         )
         .bind(offset)
         .bind(limit)
@@ -76,7 +84,10 @@ pub async fn mk_lib_database_meta_person_detail(
     person_uuid: String,
 ) -> Result<PgRow, sqlx::Error> {
     let row: PgRow = sqlx::query(
-        r#"select mm_metadata_person_guid, mm_metadata_person_media_id, mm_metadata_person_meta_json, mm_metadata_person_image, mm_metadata_person_name, mm_metadata_person_meta_json->'profile_path' as mm_metadata_person_profile from mm_metadata_person where mm_metadata_person_guid = $1"#,
+        r#"select mm_metadata_person_guid, mm_metadata_person_media_id, mm_metadata_person_meta_json, 
+        mm_metadata_person_image, mm_metadata_person_name, 
+        mm_metadata_person_meta_json->'profile_path' as mm_metadata_person_profile 
+        from mm_metadata_person where mm_metadata_person_guid = $1"#,
     )
     .bind(person_uuid)
     .fetch_one(sqlx_pool)

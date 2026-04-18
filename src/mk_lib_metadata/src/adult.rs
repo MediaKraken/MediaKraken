@@ -10,7 +10,6 @@ mod provider_tmdb;
 
 pub struct MetadataAdultLastLookup {
     metadata_last_id: uuid::Uuid,
-    metadata_last_imdb: String,
     metadata_last_tmdb: String,
 }
 

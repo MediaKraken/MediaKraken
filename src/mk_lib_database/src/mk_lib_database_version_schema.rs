@@ -1,4 +1,5 @@
 use crate::mk_lib_database_option_status;
+use crate::mk_lib_database_cron;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
@@ -231,7 +232,8 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut *transaction)
         .await?;
         let new_guid = uuid::Uuid::now_v7();
-        sqlx::query(r#"INSERT INTO mm_share_auth (mm_share_auth_guid, mm_share_auth_user, mm_share_auth_password) values ($1, 'guest', crypt('guest', gen_salt('bf', 10)));"#)
+        sqlx::query(r#"INSERT INTO mm_share_auth (mm_share_auth_guid, mm_share_auth_user, mm_share_auth_password) 
+        values ($1, 'guest', pgp_sym_encrypt('guest', 'fake-strong-key'));"#)
             .bind(new_guid)
             .execute(&mut *transaction)
             .await?;
@@ -845,15 +847,353 @@ pub async fn mk_lib_database_update_schema(
 
     if version_no < 79 {
         let mut transaction = sqlx_pool.begin().await?;
-        sqlx::query(r#"ALTER TABLE ONLY mm_radio
+        sqlx::query(
+            r#"ALTER TABLE ONLY mm_radio
                 ADD CONSTRAINT mm_radio_address_uk UNIQUE (mm_radio_address);
-            "#)
-            .execute(&mut *transaction)
-            .await?;
+            "#,
+        )
+        .execute(&mut *transaction)
+        .await?;
         transaction.commit().await?;
         mk_lib_database_version_update(&sqlx_pool, 79).await?;
     }
 
+    if version_no < 80 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(
+            r#"CREATE INDEX IF NOT EXISTS mm_metadata_movie_original_language_lower_ndx
+            ON mm_metadata_movie USING btree (lower((mm_metadata_movie_json->>'original_language')))
+            WHERE coalesce(mm_metadata_movie_json->>'original_language', '') <> '';"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            r#"CREATE INDEX IF NOT EXISTS mm_metadata_movie_genre_idxgin_json ON mm_metadata_movie 
+            USING gin (((mm_metadata_movie_json -> 'genres'::text)));"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            r#"CREATE TABLE mm_languages (
+            id          serial NOT NULL,
+            code        varchar(2) NOT NULL,
+            "language"  text,
+            CONSTRAINT languages_pkey
+                PRIMARY KEY (id)
+            ) WITH (
+                OIDS = FALSE
+            );"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            r#"INSERT INTO mm_languages (code, "language") VALUES
+            ('aa', 'Afar'),
+            ('ab', 'Abkhazian'),
+            ('af', 'Afrikaans'),
+            ('ak', 'Akan'),
+            ('am', 'Amharic'),
+            ('ar', 'Arabic'),
+            ('an', 'Aragonese'),
+            ('as', 'Assamese'),
+            ('av', 'Avaric'),
+            ('ae', 'Avestan'),
+            ('ay', 'Aymara'),
+            ('az', 'Azerbaijani'),
+            ('ba', 'Bashkir'),
+            ('bm', 'Bambara'),
+            ('be', 'Belarusian'),
+            ('bn', 'Bengali'),
+            ('bi', 'Bislama'),
+            ('bo', 'Tibetan'),
+            ('bs', 'Bosnian'),
+            ('br', 'Breton'),
+            ('bg', 'Bulgarian'),
+            ('ca', 'Catalan'),
+            ('cs', 'Czech'),
+            ('ch', 'Chamorro'),
+            ('ce', 'Chechen'),
+            ('cu', 'Church Slavic'),
+            ('cv', 'Chuvash'),
+            ('kw', 'Cornish'),
+            ('co', 'Corsican'),
+            ('cr', 'Cree'),
+            ('cy', 'Welsh'),
+            ('da', 'Danish'),
+            ('de', 'German'),
+            ('dv', 'Dhivehi'),
+            ('dz', 'Dzongkha'),
+            ('el', 'Modern Greek (1453-)'),
+            ('en', 'English'),
+            ('eo', 'Esperanto'),
+            ('et', 'Estonian'),
+            ('eu', 'Basque'),
+            ('ee', 'Ewe'),
+            ('fo', 'Faroese'),
+            ('fa', 'Persian'),
+            ('fj', 'Fijian'),
+            ('fi', 'Finnish'),
+            ('fr', 'French'),
+            ('fy', 'Western Frisian'),
+            ('ff', 'Fulah'),
+            ('gd', 'Scottish Gaelic'),
+            ('ga', 'Irish'),
+            ('gl', 'Galician'),
+            ('gv', 'Manx'),
+            ('gn', 'Guarani'),
+            ('gu', 'Gujarati'),
+            ('ht', 'Haitian'),
+            ('ha', 'Hausa'),
+            ('sh', 'Serbo-CroatianCode element for 639-1 has been deprecated'),
+            ('he', 'Hebrew'),
+            ('hz', 'Herero'),
+            ('hi', 'Hindi'),
+            ('ho', 'Hiri Motu'),
+            ('hr', 'Croatian'),
+            ('hu', 'Hungarian'),
+            ('hy', 'Armenian'),
+            ('ig', 'Igbo'),
+            ('io', 'Ido'),
+            ('ii', 'Sichuan Yi'),
+            ('iu', 'Inuktitut'),
+            ('ie', 'Interlingue'),
+            ('ia', 'Interlingua (International Auxiliary Language Association)'),
+            ('id', 'Indonesian'),
+            ('ik', 'Inupiaq'),
+            ('is', 'Icelandic'),
+            ('it', 'Italian'),
+            ('jv', 'Javanese'),
+            ('ja', 'Japanese'),
+            ('kl', 'Kalaallisut'),
+            ('kn', 'Kannada'),
+            ('ks', 'Kashmiri'),
+            ('ka', 'Georgian'),
+            ('kr', 'Kanuri'),
+            ('kk', 'Kazakh'),
+            ('km', 'Central Khmer'),
+            ('ki', 'Kikuyu'),
+            ('rw', 'Kinyarwanda'),
+            ('ky', 'Kirghiz'),
+            ('kv', 'Komi'),
+            ('kg', 'Kongo'),
+            ('ko', 'Korean'),
+            ('kj', 'Kuanyama'),
+            ('ku', 'Kurdish'),
+            ('lo', 'Lao'),
+            ('la', 'Latin'),
+            ('lv', 'Latvian'),
+            ('li', 'Limburgan'),
+            ('ln', 'Lingala'),
+            ('lt', 'Lithuanian'),
+            ('lb', 'Luxembourgish'),
+            ('lu', 'Luba-Katanga'),
+            ('lg', 'Ganda'),
+            ('mh', 'Marshallese'),
+            ('ml', 'Malayalam'),
+            ('mr', 'Marathi'),
+            ('mk', 'Macedonian'),
+            ('mg', 'Malagasy'),
+            ('mt', 'Maltese'),
+            ('mn', 'Mongolian'),
+            ('mi', 'Maori'),
+            ('ms', 'Malay (macrolanguage)'),
+            ('my', 'Burmese'),
+            ('na', 'Nauru'),
+            ('nv', 'Navajo'),
+            ('nr', 'South Ndebele'),
+            ('nd', 'North Ndebele'),
+            ('ng', 'Ndonga'),
+            ('ne', 'Nepali (macrolanguage)'),
+            ('nl', 'Dutch'),
+            ('nn', 'Norwegian Nynorsk'),
+            ('nb', 'Norwegian Bokmål'),
+            ('no', 'Norwegian'),
+            ('ny', 'Nyanja'),
+            ('oc', 'Occitan (post 1500)'),
+            ('oj', 'Ojibwa'),
+            ('or', 'Oriya (macrolanguage)'),
+            ('om', 'Oromo'),
+            ('os', 'Ossetian'),
+            ('pa', 'Panjabi'),
+            ('pi', 'Pali'),
+            ('pl', 'Polish'),
+            ('pt', 'Portuguese'),
+            ('ps', 'Pushto'),
+            ('qu', 'Quechua'),
+            ('rm', 'Romansh'),
+            ('ro', 'Romanian'),
+            ('rn', 'Rundi'),
+            ('ru', 'Russian'),
+            ('sg', 'Sango'),
+            ('sa', 'Sanskrit'),
+            ('si', 'Sinhala'),
+            ('sk', 'Slovak'),
+            ('sl', 'Slovenian'),
+            ('se', 'Northern Sami'),
+            ('sm', 'Samoan'),
+            ('sn', 'Shona'),
+            ('sd', 'Sindhi'),
+            ('so', 'Somali'),
+            ('st', 'Southern Sotho'),
+            ('es', 'Spanish'),
+            ('sq', 'Albanian'),
+            ('sc', 'Sardinian'),
+            ('sr', 'Serbian'),
+            ('ss', 'Swati'),
+            ('su', 'Sundanese'),
+            ('sw', 'Swahili (macrolanguage)'),
+            ('sv', 'Swedish'),
+            ('ty', 'Tahitian'),
+            ('ta', 'Tamil'),
+            ('tt', 'Tatar'),
+            ('te', 'Telugu'),
+            ('tg', 'Tajik'),
+            ('tl', 'Tagalog'),
+            ('th', 'Thai'),
+            ('ti', 'Tigrinya'),
+            ('to', 'Tonga (Tonga Islands)'),
+            ('tn', 'Tswana'),
+            ('ts', 'Tsonga'),
+            ('tk', 'Turkmen'),
+            ('tr', 'Turkish'),
+            ('tw', 'Twi'),
+            ('ug', 'Uighur'),
+            ('uk', 'Ukrainian'),
+            ('ur', 'Urdu'),
+            ('uz', 'Uzbek'),
+            ('ve', 'Venda'),
+            ('vi', 'Vietnamese'),
+            ('vo', 'Volapük'),
+            ('wa', 'Walloon'),
+            ('wo', 'Wolof'),
+            ('xh', 'Xhosa'),
+            ('yi', 'Yiddish'),
+            ('yo', 'Yoruba'),
+            ('za', 'Zhuang'),
+            ('zh', 'Chinese'),
+            ('zu', 'Zulu');"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 80).await?;
+    }
+
+    if version_no < 81 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(r#"ALTER TABLE mm_radio ADD COLUMN IF NOT EXISTS mm_radio_stationuuid text;"#)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(r#"ALTER TABLE mm_radio ADD COLUMN IF NOT EXISTS mm_radio_country text;"#)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(r#"ALTER TABLE mm_radio ADD COLUMN IF NOT EXISTS mm_radio_language text;"#)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(r#"ALTER TABLE mm_radio ADD COLUMN IF NOT EXISTS mm_radio_tags text;"#)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(r#"ALTER TABLE mm_radio ADD COLUMN IF NOT EXISTS mm_radio_url_resolved text;"#)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(
+            r#"ALTER TABLE mm_metadata_movie 
+            ADD COLUMN mm_metadata_movie_primary_lang_gen TEXT 
+            GENERATED ALWAYS AS (
+                lower(
+                    coalesce(
+                        mm_metadata_movie_json->>'primary_language',
+                        mm_metadata_movie_json->>'original_language',
+                        ''
+                    )
+                )
+            ) STORED;"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            r#"CREATE INDEX IF NOT EXISTS mm_metadata_movie_primary_lang_gen_ndx ON mm_metadata_movie 
+            USING btree (mm_metadata_movie_primary_lang_gen);"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 81).await?;
+    }
+
+    if version_no < 82 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(r#"CREATE EXTENSION IF NOT EXISTS unaccent;"#)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(r#"DROP INDEX IF EXISTS mm_metadata_movie_fts_ndx;"#)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(r#"DROP INDEX IF EXISTS mm_metadata_tvshow_fts_ndx;"#)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(r#"CREATE TEXT SEARCH CONFIGURATION public.english_unaccent (COPY = english);"#)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(r#"ALTER TEXT SEARCH CONFIGURATION public.english_unaccent 
+            ALTER MAPPING FOR hword, hword_part, word WITH unaccent, english_stem;"#)
+            .execute(&mut *transaction)
+            .await?;
+        sqlx::query(
+            r#"CREATE INDEX IF NOT EXISTS mm_metadata_movie_fts_ndx ON mm_metadata_movie 
+            USING gin (( setweight(to_tsvector('public.english_unaccent', coalesce(mm_metadata_movie_name, '')), 'A') || ' ' || setweight(to_tsvector('public.english_unaccent', coalesce(mm_metadata_movie_name_alt, '')), 'B') :: tsvector ));"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            r#"CREATE INDEX IF NOT EXISTS mm_metadata_tvshow_fts_ndx ON mm_metadata_tvshow 
+            USING gin (( setweight(to_tsvector('public.english_unaccent', coalesce(mm_metadata_tvshow_name, '')), 'A') || ' ' || setweight(to_tsvector('public.english_unaccent', coalesce(mm_metadata_tvshow_name_alt, '')), 'B') :: tsvector ));"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            r#"CREATE TABLE IF NOT EXISTS public.mm_downloaded
+            (
+                mm_download_guid uuid NOT NULL,
+                mm_downloaded_url text COLLATE pg_catalog."default" NOT NULL,
+                CONSTRAINT mm_downloaded_pkey PRIMARY KEY (mm_download_guid)
+            )"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            r#"CREATE INDEX IF NOT EXISTS mm_download_url_ndx ON mm_downloaded 
+            USING btree (mm_downloaded_url);"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        mk_lib_database_cron::mk_lib_database_cron_insert(
+            &sqlx_pool,
+            "iRadio".into(),
+            "Populate iRadio".into(),
+            true,
+            "monthly".into(),
+            serde_json::json!({}),
+            1,
+        )
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 82).await?;
+    }
+
+    if version_no < 83 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(
+            r#"UPDATE mm_cron_jobs
+            SET mm_cron_json = '{"Type": "radiobrowser", "route_key": "mkiradio"}'::jsonb
+            WHERE mm_cron_name = 'iRadio';
+            "#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(&sqlx_pool, 83).await?;
+    }
     // TODO, movie alt name, tv alt name and person alt name cleanup
 
     Ok(true)

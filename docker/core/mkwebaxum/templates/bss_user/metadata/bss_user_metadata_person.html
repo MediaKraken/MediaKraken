@@ -1,45 +1,62 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "layouts/base_user.html" %}
 
-{% include "bss_include_header.html" %}
+{% block content %}
+<section class="w-full px-0 py-4 text-zinc-900 dark:text-zinc-100">
+  <h1 id="person-grid-heading" class="sr-only">Person list</h1>
+  {% include "filters/pagination_letters.html" %}
 
-<body class="min-h-screen flex flex-col bg-gray-100 text-gray-900">
-    <!-- Top navbar -->
-    {% include "bss_user/bss_user_include_menu.html" %}
-    <!-- Below top nav -->
-    <div class="flex flex-1">
-        <!-- Left sidebar -->
-        {% include "partials/sidebar_user.html" %}
-        <!-- Main content -->
-        <main class="flex-1 p-6 bg-gray-50 overflow-y-auto">
-            {% if template_data_exists %}
-            {% if pagination_bar != "" %}
-            {{ pagination_bar|safe }}
-            {% endif %}
-            <div id="the-node">
-                {% for row_data in template_data %}
-                <div class="main_photo">
-                    <div class="media_context_right" data-id={{row_data.mm_metadata_person_guid}}>
-                        <a href="/user/metadata/person_detail/{{row_data.mm_metadata_person_guid}}">
-                            <img src="/metadata/{{row_data.mm_metadata_person_image}}" loading="lazy" decoding="async"
-                                height="300" width="200"></a>
-                        <div class="description">
-                            <p class="description_content_left">{{row_data.mm_metadata_person_name}}</p>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% if pagination_bar != "" %}
-            {{ pagination_bar|safe }}
-            {% endif %}
-            {% else %}
-            <p id="general_text">No people metadata found.</p>
-            {% endif %}
-        </main>
-    </div>
-    {% include "bss_public/bss_public_footer.html" %}
+  {% if template_data_exists %}
+  {% if pagination_bar != "" %}
+  {{ pagination_bar|safe }}
+  {% endif %}
+  <ul role="list" class="grid gap-4 sm:gap-5
+     grid-cols-2
+     sm:grid-cols-3
+     md:grid-cols-4
+     lg:grid-cols-5
+     xl:grid-cols-6">
+    {% for row_data in template_data %}
+    <li class="group relative overflow-hidden rounded-xl border border-transparent bg-white shadow-sm transition-all duration-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+      <a href="/user/metadata/person_detail/{{row_data.mm_metadata_person_guid}}" class="block h-full">
+        <div class="relative aspect-[2/3] overflow-hidden rounded-t-xl bg-zinc-200 dark:bg-zinc-800">
+          {% if row_data.mm_metadata_person_image != "" %}
+          <img
+            src="/metadata/{{row_data.mm_metadata_person_image}}"
+            alt="Portrait for {{ row_data.mm_metadata_person_name }}"
+            loading="lazy"
+            decoding="async"
+            width="200"
+            height="300"
+            class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
+          {% else %}
+          <img
+            src="/static/image/missing_icon.jpg"
+            alt="Missing portrait for {{ row_data.mm_metadata_person_name }}"
+            loading="lazy"
+            decoding="async"
+            width="200"
+            height="300"
+            class="h-full w-full object-cover" />
+          {% endif %}
+        </div>
 
-</body>
-
-</html>
+        <div class="p-3">
+          <h2 class="text-sm font-bold leading-tight text-zinc-900 line-clamp-2 dark:text-zinc-100">
+            {{ row_data.mm_metadata_person_name }}
+          </h2>
+          <p class="mt-1 text-[11px] font-medium uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
+            Person Metadata
+          </p>
+        </div>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% if pagination_bar != "" %}
+  {{ pagination_bar|safe }}
+  {% endif %}
+  {% else %}
+  <p class="text-sm text-zinc-500 dark:text-zinc-400">No people metadata found.</p>
+  {% endif %}
+</section>
+{% endblock %}

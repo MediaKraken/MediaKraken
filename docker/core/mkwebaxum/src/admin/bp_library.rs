@@ -1,19 +1,22 @@
+use crate::AppState;
 use crate::mk_lib_database;
 use askama::Template;
+use axum::extract::{Form, State};
 use axum::{
-    extract::Path,
+    Extension, Json,
+    extract::{Path, Query},
     http::{Method, StatusCode},
     response::{Html, IntoResponse, Redirect},
-    Extension,
 };
+use axum_flash::Flash;
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_rabbitmq;
-use serde_json::{json, Value};
+use serde::{Deserialize, Serialize};
+use serde_json::{Value, json};
 use sqlx::postgres::PgPool;
-use axum::extract::State;
-use crate::AppState;
+use tokio::process::Command;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -30,11 +33,110 @@ struct TemplateAdminLibraryContext<'a> {
     page_title: Option<String>,
 }
 
+impl TemplateAdminLibraryContext<'_> {
+    fn share_user_matches(
+        &self,
+        share: &mk_lib_database::mk_lib_database_network_share::DBShareList,
+        auth_user: &mk_lib_database::mk_lib_database_network_share::DBShareAuthUserList,
+    ) -> bool {
+        matches!(
+            share.mm_share_auth_user.as_deref(),
+            Some(user) if user == auth_user.mm_share_auth_user
+        )
+    }
+}
+
+#[derive(Deserialize)]
+pub struct AddShareLibraryInput {
+    share_guid: uuid::Uuid,
+    subdirectory: String,
+    media_class: i16,
+}
+
+#[derive(Deserialize)]
+pub struct ShareDirectoryBrowseQuery {
+    share_guid: uuid::Uuid,
+    path: Option<String>,
+}
+
+#[derive(Serialize)]
+pub struct ShareDirectoryBrowseResponse {
+    current_path: String,
+    parent_path: Option<String>,
+    directories: Vec<String>,
+}
+
+async fn log_loki(message: &str, payload: Value) {
+    if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
+        "level": "info",
+        "message": message,
+        "module": module_path!(),
+        "payload": payload,
+    }))
+    .await
+    {
+        eprintln!("loki push error: {error}");
+    }
+}
+
+async fn log_loki_error(message: &str, payload: Value) {
+    if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
+        "level": "error",
+        "message": message,
+        "module": module_path!(),
+        "payload": payload,
+    }))
+    .await
+    {
+        eprintln!("loki push error: {error}");
+    }
+}
+fn classify_smbclient_browse_error(
+    stdout_output: &str,
+    stderr_output: &str,
+) -> (StatusCode, &'static str) {
+    let combined_output = format!("{stdout_output}\n{stderr_output}").to_ascii_lowercase();
+
+    if combined_output.contains("nt_status_access_denied")
+        || combined_output.contains("access denied")
+        || combined_output.contains("permission denied")
+    {
+        return (
+            StatusCode::FORBIDDEN,
+            "Share is reachable but access was denied",
+        );
+    }
+
+    if combined_output.contains("nt_status_object_path_not_found")
+        || combined_output.contains("nt_status_object_name_not_found")
+        || combined_output.contains("nt_status_bad_network_name")
+        || combined_output.contains("no such file")
+        || combined_output.contains("cannot chdir")
+    {
+        return (StatusCode::NOT_FOUND, "Share path was not found");
+    }
+
+    if combined_output.contains("nt_status_bad_network_path")
+        || combined_output.contains("nt_status_network_name_deleted")
+        || combined_output.contains("connection to")
+        || combined_output.contains("connection refused")
+        || combined_output.contains("could not resolve")
+        || combined_output.contains("host is down")
+        || combined_output.contains("name or service not known")
+        || combined_output.contains("timed out")
+    {
+        return (StatusCode::BAD_GATEWAY, "Unable to reach share");
+    }
+
+    (StatusCode::BAD_GATEWAY, "Failed to list share directories")
+}
+
 pub async fn admin_library(
     State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
+    log_loki("Admin library request received", json!({})).await;
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
         [Method::GET],
@@ -50,13 +152,13 @@ pub async fn admin_library(
     } else {
         let share_list =
             mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_read(
-               &state.sqlx_pool_ro,
+                &state.sqlx_pool_ro,
             )
             .await
             .unwrap();
         let library_list =
             mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_audit_read(
-               &state.sqlx_pool_ro,
+                &state.sqlx_pool_ro,
             )
             .await
             .unwrap();
@@ -115,6 +217,79 @@ pub async fn admin_library_media_scan(
     }
 }
 
+pub async fn admin_library_share_add(
+    State(state): State<AppState>,
+    method: Method,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    mut flash: Flash,
+    Form(input_data): Form<AddShareLibraryInput>,
+) -> impl IntoResponse {
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::POST],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("Admin::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        Redirect::to("/error/403")
+    } else {
+        let subdirectory = input_data.subdirectory.trim().trim_matches('/');
+        if subdirectory.is_empty() {
+            flash.error("Directory is required.");
+            return Redirect::to("/admin/library");
+        }
+
+        let _share_info = match mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_detail(
+            &state.sqlx_pool_ro,
+            input_data.share_guid,
+        )
+        .await
+        {
+            Ok(data) => data,
+            Err(_) => {
+                flash.error("Unable to read share information.");
+                return Redirect::to("/admin/library");
+            }
+        };
+
+        let library_path = subdirectory.to_string();
+
+        match mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_exists(
+            &state.sqlx_pool_ro,
+            &library_path,
+        )
+        .await
+        {
+            Ok(true) => {
+                flash.error("Path already exists in library.");
+                Redirect::to("/admin/library")
+            }
+            Ok(false) => {
+                match mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_insert(
+                    &state.sqlx_pool_rw,
+                    &library_path,
+                    input_data.media_class,
+                    input_data.share_guid,
+                )
+                .await
+                {
+                    Ok(_) => Redirect::to("/admin/library"),
+                    Err(_) => {
+                        flash.error("Unable to add library path.");
+                        Redirect::to("/admin/library")
+                    }
+                }
+            }
+            Err(_) => {
+                flash.error("Unable to validate library path.");
+                Redirect::to("/admin/library")
+            }
+        }
+    }
+}
+
 pub async fn admin_library_share_scan(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
@@ -137,7 +312,7 @@ pub async fn admin_library_share_scan(
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
             rabbit_channel.clone(),
             "mksharescanner",
-            json!({"Type": "Share Scan"}).to_string(),
+            json!({"Type": "Share Scan", "Data": "192.168.1"}).to_string(),
         )
         .await
         .unwrap();
@@ -146,6 +321,183 @@ pub async fn admin_library_share_scan(
             .unwrap();
         Redirect::to("/admin/library")
     }
+}
+
+pub async fn admin_library_share_directories(
+    State(state): State<AppState>,
+    method: Method,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    Query(query): Query<ShareDirectoryBrowseQuery>,
+) -> impl IntoResponse {
+    log_loki("Browsing share directories request received", json!({})).await;
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("Admin::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        return (
+            StatusCode::UNAUTHORIZED,
+            Json(json!({"error": "Not authorized"})),
+        );
+    }
+    log_loki("Share directory request authorized", json!({})).await;
+    let share_info =
+        match mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_detail(
+            &state.sqlx_pool_ro,
+            query.share_guid,
+        )
+        .await
+        {
+            Ok(data) => data,
+            Err(_) => {
+                return (
+                    StatusCode::NOT_FOUND,
+                    Json(json!({"error": "Share information not found"})),
+                );
+            }
+        };
+    log_loki(
+        "Loaded share details for directory browse",
+        json!({"share_guid": query.share_guid.to_string()}),
+    )
+    .await;
+    let requested_path = query.path.unwrap_or_default();
+    let cleaned_path = requested_path
+        .trim()
+        .replace('\\', "/")
+        .trim_matches('/')
+        .to_string();
+    if cleaned_path.split('/').any(|segment| segment == "..") {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(json!({"error": "Invalid path"})),
+        );
+    }
+
+    let share_uri = format!(
+        "//{}/{}",
+        share_info.mm_network_share_ip,
+        share_info
+            .mm_network_share_path
+            .trim_matches('/')
+            .rsplit_once('\\')
+            .unwrap()
+            .1,
+    );
+
+    let smb_commands: Vec<String> = vec![
+        String::from("recurse OFF"),
+        String::from("prompt OFF"),
+        String::from("ls"),
+    ];
+
+    let mut smb_command = Command::new("smbclient");
+    smb_command
+        .arg(share_uri)
+        .arg("-g")
+        .arg("-c")
+        .arg(smb_commands.join(";"));
+    if cleaned_path.is_empty() == false {
+        smb_command.arg("-D").arg(&cleaned_path);
+    }
+    if let Some(workgroup) = share_info.mm_network_share_workgroup.as_deref() {
+        if workgroup.is_empty() == false {
+            smb_command.arg("-W").arg(workgroup);
+        }
+    }
+    if let Some(user) = share_info.mm_share_auth_user.as_deref()
+        && user != "guest"
+    {
+        let pass = share_info
+            .mm_share_auth_password
+            .as_deref()
+            .unwrap_or_default();
+        smb_command.arg("-U").arg(format!("{}%{}", user, pass));
+    } else {
+        smb_command.arg("-N");
+    }
+    log_loki(
+        "Running smbclient directory listing command",
+        json!({"command": format!("{:?}", smb_command)}),
+    )
+    .await;
+    let smb_output = match smb_command.output().await {
+        Ok(data) => data,
+        Err(error) => {
+            log_loki_error(
+                "smbclient execution failed",
+                json!({"error": error.to_string()}),
+            )
+            .await;
+            return (
+                StatusCode::BAD_GATEWAY,
+                Json(json!({"error": "Unable to run smbclient"})),
+            );
+        }
+    };
+
+    if smb_output.status.success() == false {
+        let stdout_output = String::from_utf8_lossy(&smb_output.stdout).to_string();
+        let stderr_output = String::from_utf8_lossy(&smb_output.stderr).to_string();
+        let details_output = if stderr_output.is_empty() {
+            stdout_output.clone()
+        } else {
+            stderr_output.clone()
+        };
+        let (status_code, error_message) =
+            classify_smbclient_browse_error(&stdout_output, &stderr_output);
+        log_loki_error(
+            "smbclient failed",
+            json!({
+                "status_code": smb_output.status.code(),
+                "stdout": stdout_output,
+                "stderr": stderr_output,
+            }),
+        )
+        .await;
+        return (
+            status_code,
+            Json(json!({"error": error_message, "details": details_output})),
+        );
+    }
+
+    let stdout_data = String::from_utf8_lossy(&smb_output.stdout);
+    let mut directories = Vec::new();
+    for line in stdout_data.lines() {
+        let parts: Vec<&str> = line.split('|').collect();
+        if parts.len() < 2 || parts[0] != "D" {
+            continue;
+        }
+        if parts[1] == "." || parts[1] == ".." {
+            continue;
+        }
+        directories.push(parts[1].to_string());
+    }
+    directories.sort_unstable();
+
+    let parent_path = cleaned_path
+        .rsplit_once('/')
+        .map(|(parent, _)| parent.to_string())
+        .or_else(|| {
+            if cleaned_path.is_empty() {
+                None
+            } else {
+                Some(String::new())
+            }
+        });
+
+    (
+        StatusCode::OK,
+        Json(json!(ShareDirectoryBrowseResponse {
+            current_path: cleaned_path,
+            parent_path,
+            directories,
+        })),
+    )
 }
 
 /*

@@ -45,21 +45,38 @@ pub async fn mk_lib_database_metadata_game_by_blake3(
 pub async fn mk_lib_database_metadata_game_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
+    starts_with: String,
+    genre: String,
+    status_filter: String,
 ) -> Result<i64, sqlx::Error> {
-    if !search_value.is_empty() {
-        let row: (i64,) = sqlx::query_as(
-            r#"select count(*) from mm_metadata_game_software_info where gi_game_info_name &@ $1"#,
-        )
-        .bind(search_value)
-        .fetch_one(sqlx_pool)
-        .await?;
-        Ok(row.0)
-    } else {
-        let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_metadata_game_software_info"#)
-            .fetch_one(sqlx_pool)
-            .await?;
-        Ok(row.0)
-    }
+    let row: (i64,) = sqlx::query_as(
+        r#"select count(*)
+           from mm_metadata_game_software_info
+           where
+             ($1 = '' or gi_game_info_name &@ $1)
+             and (
+               $2 = ''
+               or ($2 = '#' and left(lower(gi_game_info_name), 1) !~ '^[a-z0-9]$')
+               or ($2 <> '#' and lower(gi_game_info_name) like lower($2) || '%')
+             )
+             and ($3 = '' or lower(coalesce(gi_gc_category, '')) = lower($3))
+             and (
+               $4 = ''
+               or ($4 = 'favorite' and coalesce((gi_game_info_json->'user_status'->>'favorite')::boolean, false))
+               or ($4 = 'watched' and coalesce((gi_game_info_json->'user_status'->>'watched')::boolean, false))
+               or ($4 = 'unwatched' and not coalesce((gi_game_info_json->'user_status'->>'watched')::boolean, false))
+               or ($4 = 'good' and coalesce((gi_game_info_json->'user_status'->>'good')::boolean, false))
+               or ($4 = 'bad' and coalesce((gi_game_info_json->'user_status'->>'bad')::boolean, false))
+               or ($4 = 'trash' and coalesce((gi_game_info_json->'user_status'->>'trash')::boolean, false))
+             )"#,
+    )
+    .bind(search_value)
+    .bind(starts_with)
+    .bind(genre)
+    .bind(status_filter)
+    .fetch_one(sqlx_pool)
+    .await?;
+    Ok(row.0)
 }
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
@@ -70,32 +87,71 @@ pub struct DBMetaGameList {
     pub gi_year: Option<String>,
     pub gi_game_info_localimage: Option<serde_json::Value>,
     pub gs_game_system_name: String,
+    pub gi_gc_category: Option<String>,
 }
 
 pub async fn mk_lib_database_metadata_game_read(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
+    starts_with: String,
+    genre: String,
+    status_filter: String,
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMetaGameList>, sqlx::Error> {
-    if !search_value.is_empty() {
-        sqlx::query_as(
-            r#"select gi_game_info_id, gi_game_info_short_name, gi_game_info_name, gi_game_info_json->'machine'->>'year' as gi_year, gi_game_info_localimage, gs_game_system_name from mm_metadata_game_software_info, mm_metadata_game_systems_info where gi_game_info_system_id = gs_game_system_id and gi_game_info_name &@ $1 offset $2 limit $3"#,
-        )
-        .bind(search_value)
-        .bind(offset)
-        .bind(limit)
-        .fetch_all(sqlx_pool)
-        .await
-    } else {
-        sqlx::query_as(
-            r#"select gi_game_info_id, gi_game_info_short_name, gi_game_info_name, gi_game_info_json->'machine'->>'year' as gi_year, gi_game_info_localimage, gs_game_system_name from mm_metadata_game_software_info, mm_metadata_game_systems_info where gi_game_info_system_id = gs_game_system_id order by gi_game_info_name, gi_year offset $1 limit $2"#,
-        )
-        .bind(offset)
-        .bind(limit)
-        .fetch_all(sqlx_pool)
-        .await
-    }
+    sqlx::query_as(
+        r#"select gi_game_info_id,
+           gi_game_info_short_name,
+           gi_game_info_name,
+           gi_game_info_json->'machine'->>'year' as gi_year,
+           gi_game_info_localimage,
+           gs_game_system_name,
+           gi_gc_category
+           from mm_metadata_game_software_info, mm_metadata_game_systems_info
+           where gi_game_info_system_id = gs_game_system_id
+           and ($1 = '' or gi_game_info_name &@ $1)
+           and (
+               $2 = ''
+               or ($2 = '#' and left(lower(gi_game_info_name), 1) !~ '^[a-z0-9]$')
+               or ($2 <> '#' and lower(gi_game_info_name) like lower($2) || '%')
+           )
+           and ($3 = '' or lower(coalesce(gi_gc_category, '')) = lower($3))
+           and (
+               $4 = ''
+               or ($4 = 'favorite' and coalesce((gi_game_info_json->'user_status'->>'favorite')::boolean, false))
+               or ($4 = 'watched' and coalesce((gi_game_info_json->'user_status'->>'watched')::boolean, false))
+               or ($4 = 'unwatched' and not coalesce((gi_game_info_json->'user_status'->>'watched')::boolean, false))
+               or ($4 = 'good' and coalesce((gi_game_info_json->'user_status'->>'good')::boolean, false))
+               or ($4 = 'bad' and coalesce((gi_game_info_json->'user_status'->>'bad')::boolean, false))
+               or ($4 = 'trash' and coalesce((gi_game_info_json->'user_status'->>'trash')::boolean, false))
+           )
+           order by gi_game_info_name, gi_year
+           offset $5
+           limit $6"#,
+    )
+    .bind(search_value)
+    .bind(starts_with)
+    .bind(genre)
+    .bind(status_filter)
+    .bind(offset)
+    .bind(limit)
+    .fetch_all(sqlx_pool)
+    .await
+}
+
+pub async fn mk_lib_database_metadata_game_genres(
+    sqlx_pool: &sqlx::PgPool,
+) -> Result<Vec<String>, sqlx::Error> {
+    let rows: Vec<(String,)> = sqlx::query_as(
+        r#"select distinct gi_gc_category
+           from mm_metadata_game_software_info
+           where coalesce(gi_gc_category, '') <> ''
+           order by gi_gc_category"#,
+    )
+    .fetch_all(sqlx_pool)
+    .await?;
+
+    Ok(rows.into_iter().map(|row| row.0).collect())
 }
 
 pub async fn mk_lib_database_metadata_game_uuid_by_name_and_system(

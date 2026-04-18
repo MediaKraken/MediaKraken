@@ -1,56 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-{% include "bss_include_header.html" %}
+{% extends "layouts/base_user.html" %}
 
-<body class="min-h-screen flex flex-col bg-gray-100 text-gray-900">
-    <!-- Top navbar -->
-    {% include "bss_user/bss_user_include_menu.html" %}
-    <!-- Below top nav -->
-    <div class="flex flex-1">
-        <!-- Left sidebar -->
-        {% include "partials/sidebar_user.html" %}
-        <!-- Main content -->
-        <main class="flex-1 p-6 bg-gray-50 overflow-y-auto">
-            <div>
-                {% if template_data_exists %}
-                {% if pagination_bar != "" %}
-                {{ pagination_bar|safe }}
-                {% endif %}
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Sporting Event</th>
-                                <th>Event Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row_data in template_data %}
-                            <tr>
-                                <td>{{ loop.index + (page - 1) * 30 }}</td>
-                                <td><a href="/user/metadata/sports_detail/{{row_data.mm_metadata_sports_guid}}">{{
-                                        row_data.mm_metadata_sports_name }}</a></td>
-                                {#{% if row_data[2] != None %}
-                                <td>{{ row_data[2] }}</td>
-                                {% else %}
-                                <td>Unknown</td>
-                                {% endif %}#}
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% if pagination_bar != "" %}
-                {{ pagination_bar|safe }}
-                {% endif %}
-                {% else %}
-                <p id="general_text">No sporting event metadata found.</p>
-                {% endif %}
-            </div>
-        </main>
-    </div>
-    {% include "bss_public/bss_public_footer.html" %}
-</body>
+{% block content %}
+<section class="w-full px-0 py-4 text-zinc-900 dark:text-zinc-100">
+  <h1 id="sports-grid-heading" class="sr-only">Sports metadata list</h1>
+  {% include "filters/pagination_letters.html" %}
 
-</html>
+  {% if template_data_exists %}
+  {% if pagination_bar != "" %}
+  {{ pagination_bar|safe }}
+  {% endif %}
+  <ul role="list" class="grid gap-4 sm:gap-5
+     grid-cols-1
+     sm:grid-cols-2
+     lg:grid-cols-3
+     xl:grid-cols-4">
+    {% for row_data in template_data %}
+    <li class="group relative overflow-hidden rounded-xl border border-transparent bg-white shadow-sm transition-all duration-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+      <a href="/user/metadata/sports_detail/{{row_data.mm_metadata_sports_guid}}" class="block h-full">
+        <div class="flex aspect-[3/2] items-end bg-gradient-to-br from-indigo-500 via-sky-500 to-cyan-500 p-4 text-white">
+          <span class="rounded-full bg-white/20 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] backdrop-blur-sm">
+            Sports Event
+          </span>
+        </div>
+        <div class="p-4">
+          <h2 class="text-sm font-bold leading-tight text-zinc-900 line-clamp-3 dark:text-zinc-100">
+            {{ row_data.mm_metadata_sports_name }}
+          </h2>
+        </div>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% if pagination_bar != "" %}
+  {{ pagination_bar|safe }}
+  {% endif %}
+  {% else %}
+  <p class="text-sm text-zinc-500 dark:text-zinc-400">No sporting event metadata found.</p>
+  {% endif %}
+</section>
+{% endblock %}

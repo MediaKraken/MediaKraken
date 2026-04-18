@@ -1,11 +1,32 @@
 use async_compression::tokio::bufread::GzipDecoder;
+use aws_config::BehaviorVersion;
+use aws_sdk_s3::{Client as S3Client, config::Builder as S3ConfigBuilder, primitives::ByteStream};
+use bytes::Bytes;
 use futures::StreamExt;
-use serde_json::Value;
+use serde::Deserialize;
+use serde_json::{Value, json};
 use sqlx::{Pool, Postgres};
+use std::io::Read;
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::task::JoinSet;
 
 const BASE_URL: &str = "https://openlibrary.org/data/";
+
+#[derive(Debug, Deserialize)]
+struct BulkImageCoverLoadOptions {
+    #[serde(rename = "ArchiveUrl")]
+    archive_url: String,
+    #[serde(rename = "Bucket")]
+    bucket: Option<String>,
+    #[serde(rename = "S3Prefix", default = "default_cover_prefix")]
+    s3_prefix: String,
+    #[serde(rename = "AddJson", default)]
+    add_json: bool,
+}
+
+fn default_cover_prefix() -> String {
+    "openlibrary/covers".to_string()
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -56,6 +77,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
             });
         }
+        if json_message["Type"].as_str() == Some("START_BULK_IMAGE_COVER_LOAD")
+            || json_message["BulkImageCoverLoad"].is_object()
+        {
+            match serde_json::from_value::<BulkImageCoverLoadOptions>(
+                json_message["BulkImageCoverLoad"].clone(),
+            ) {
+                Ok(options) => {
+                    tokio::spawn(async move {
+                        if let Err(e) = run_bulk_cover_archive_upload(options).await {
+                            eprintln!("❌ Bulk cover archive upload failed: {}", e);
+                        }
+                    });
+                }
+                Err(err) => {
+                    eprintln!(
+                        "⚠️ Skipping cover archive upload due to invalid BulkImageCoverLoad payload: {}",
+                        err
+                    );
+                }
+            }
+        }
 
         // Always Ack to keep the queue moving
         if let Some(deliver) = msg.deliver {
@@ -67,6 +109,124 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
+    Ok(())
+}
+
+async fn run_bulk_cover_archive_upload(options: BulkImageCoverLoadOptions) -> anyhow::Result<()> {
+    let endpoint = std::env::var("MK_GARAGE_S3_ENDPOINT")
+        .or_else(|_| std::env::var("AWS_ENDPOINT_URL"))
+        .map_err(|_| anyhow::anyhow!("missing MK_GARAGE_S3_ENDPOINT (or AWS_ENDPOINT_URL)"))?;
+
+    let bucket = options
+        .bucket
+        .or_else(|| std::env::var("MK_GARAGE_S3_BUCKET").ok())
+        .ok_or_else(|| {
+            anyhow::anyhow!("missing BulkImageCoverLoad.Bucket and MK_GARAGE_S3_BUCKET")
+        })?;
+
+    let shared = aws_config::load_defaults(BehaviorVersion::latest()).await;
+    let s3_config = S3ConfigBuilder::from(&shared)
+        .endpoint_url(endpoint)
+        .force_path_style(true)
+        .build();
+    let s3_client = S3Client::from_conf(s3_config);
+
+    let response = reqwest::get(&options.archive_url)
+        .await?
+        .error_for_status()?;
+    let archive_bytes = response.bytes().await?;
+
+    let s3_prefix = options.s3_prefix.trim_matches('/').to_string();
+    let upload_s3_prefix = s3_prefix.clone();
+    let add_json = options.add_json;
+    let archive_url = options.archive_url.clone();
+    let upload_bucket = bucket.clone();
+
+    let uploaded = tokio::task::spawn_blocking(move || -> anyhow::Result<usize> {
+        let mut uploaded_count: usize = 0;
+        let rt = tokio::runtime::Handle::current();
+        let cursor = std::io::Cursor::new(archive_bytes);
+        let decoder = flate2::read::GzDecoder::new(cursor);
+        let mut archive = tar::Archive::new(decoder);
+
+        for item in archive.entries()? {
+            let mut entry = item?;
+            let entry_path = entry.path()?.display().to_string();
+            let Some(file_name) = std::path::Path::new(&entry_path).file_name() else {
+                continue;
+            };
+            let file_name = file_name.to_string_lossy().to_string();
+
+            let content_type = match std::path::Path::new(&file_name)
+                .extension()
+                .and_then(|v| v.to_str())
+                .map(|ext| ext.to_ascii_lowercase())
+                .as_deref()
+            {
+                Some("jpg" | "jpeg") => "image/jpeg",
+                Some("png") => "image/png",
+                Some("webp") => "image/webp",
+                _ => continue,
+            };
+
+            let mut payload = Vec::new();
+            entry.read_to_end(&mut payload)?;
+            let payload_len = payload.len();
+            let object_key = format!("{}/{}", upload_s3_prefix, file_name);
+
+            rt.block_on(upload_s3_object(
+                s3_client.clone(),
+                &upload_bucket,
+                &object_key,
+                payload,
+                content_type,
+            ))?;
+            uploaded_count += 1;
+
+            if add_json {
+                let json_key = format!("{object_key}.json");
+                let metadata = json!({
+                    "source_archive_url": archive_url,
+                    "source_archive_path": entry_path,
+                    "object_key": object_key,
+                    "size_bytes": payload_len,
+                    "content_type": content_type
+                });
+                rt.block_on(upload_s3_object(
+                    s3_client.clone(),
+                    &upload_bucket,
+                    &json_key,
+                    serde_json::to_vec(&metadata)?,
+                    "application/json",
+                ))?;
+            }
+        }
+        Ok(uploaded_count)
+    })
+    .await??;
+
+    println!(
+        "✅ Uploaded {} cover images to s3://{}/{}",
+        uploaded, bucket, s3_prefix
+    );
+    Ok(())
+}
+
+async fn upload_s3_object(
+    client: S3Client,
+    bucket: &str,
+    key: &str,
+    payload: Vec<u8>,
+    content_type: &str,
+) -> anyhow::Result<()> {
+    client
+        .put_object()
+        .bucket(bucket)
+        .key(key)
+        .content_type(content_type)
+        .body(ByteStream::from(Bytes::from(payload)))
+        .send()
+        .await?;
     Ok(())
 }
 

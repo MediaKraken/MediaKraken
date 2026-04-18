@@ -1,6 +1,7 @@
 use crate::AppState;
 use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
+use crate::user_preferences;
 use askama::Template;
 use axum::extract::Query;
 use axum::extract::State;
@@ -28,6 +29,24 @@ use sqlx::{FromRow, Row};
 pub struct Genre {
     pub name: String,
     pub query_value: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct FilterOption {
+    pub label: String,
+    pub query_value: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+struct MovieCastMember {
+    pub name: String,
+    pub character: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+struct MovieCrewMember {
+    pub name: String,
+    pub job: String,
 }
 
 #[derive(Template)]
@@ -65,6 +84,11 @@ struct TemplateMetaMovieContext<'a> {
     pub current: Option<String>,
     pub genre_filter: Option<String>,
     pub genre_filter_query: Option<String>,
+    pub primary_language_filter: Option<String>,
+    pub status_filter: Option<String>,
+    pub status_options: &'a Vec<FilterOption>,
+    pub primary_language_options: &'a Vec<FilterOption>,
+    pub filter_query_suffix: String,
     pub base_path: String,
 }
 
@@ -72,6 +96,8 @@ struct TemplateMetaMovieContext<'a> {
 pub struct FilterQuery {
     pub starts_with: Option<String>,
     pub genre: Option<String>,
+    pub primary_language: Option<String>,
+    pub status: Option<String>,
 }
 
 fn normalize_starts_with(raw: Option<&str>) -> Option<String> {
@@ -89,14 +115,64 @@ fn normalize_starts_with(raw: Option<&str>) -> Option<String> {
     Some("#".to_string())
 }
 
+fn normalize_string_filter(raw: Option<&str>) -> Option<String> {
+    raw.map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(ToOwned::to_owned)
+}
+
+fn normalize_status_filter(raw: Option<&str>) -> Option<String> {
+    let value = raw.map(str::trim).filter(|value| !value.is_empty())?;
+    match value {
+        "favorite" | "watched" | "unwatched" | "good" | "bad" | "trash" => Some(value.to_string()),
+        _ => None,
+    }
+}
+
+fn build_filter_query_suffix(
+    starts_with: Option<&str>,
+    genre: Option<&str>,
+    primary_language: Option<&str>,
+    status_filter: Option<&str>,
+) -> String {
+    let mut query_params: Vec<String> = Vec::new();
+    if let Some(sw) = starts_with.filter(|sw| !sw.is_empty()) {
+        if sw == "#" {
+            query_params.push("starts_with=%23".to_string());
+        } else {
+            query_params.push(format!("starts_with={sw}"));
+        }
+    }
+    if let Some(genre_name) = genre.filter(|genre_name| !genre_name.is_empty()) {
+        query_params.push(format!("genre={}", urlencoding::encode(genre_name)));
+    }
+    if let Some(language) = primary_language.filter(|language| !language.is_empty()) {
+        query_params.push(format!(
+            "primary_language={}",
+            urlencoding::encode(language)
+        ));
+    }
+    if let Some(status) = status_filter.filter(|status| !status.is_empty()) {
+        query_params.push(format!("status={}", urlencoding::encode(status)));
+    }
+    if query_params.is_empty() {
+        String::new()
+    } else {
+        format!("?{}", query_params.join("&"))
+    }
+}
+
 fn build_movie_pagination(
     total_items: i64,
     page: i64,
+    pagination_count: i64,
     starts_with: Option<&str>,
     genre: Option<&str>,
+    primary_language: Option<&str>,
+    status_filter: Option<&str>,
 ) -> Result<String, std::fmt::Error> {
     let total_pages = if total_items > 0 {
-        (total_items + 29) / 30
+        (total_items + pagination_count - 1) / pagination_count
     } else {
         0
     };
@@ -110,23 +186,7 @@ fn build_movie_pagination(
 <ul class="flex items-center gap-1 whitespace-nowrap text-sm">"#,
     );
 
-    let mut query_params: Vec<String> = Vec::new();
-    if let Some(sw) = starts_with.filter(|sw| !sw.is_empty()) {
-        if sw == "#" {
-            query_params.push("starts_with=%23".to_string());
-        } else {
-            query_params.push(format!("starts_with={sw}"));
-        }
-    }
-    if let Some(genre_name) = genre.filter(|genre_name| !genre_name.is_empty()) {
-        query_params.push(format!("genre={}", urlencoding::encode(genre_name)));
-    }
-
-    let suffix = if query_params.is_empty() {
-        String::new()
-    } else {
-        format!("?{}", query_params.join("&"))
-    };
+    let suffix = build_filter_query_suffix(starts_with, genre, primary_language, status_filter);
 
     if total_pages == 1 {
         write!(
@@ -207,12 +267,10 @@ pub async fn user_metadata_movie(
     Query(params): Query<FilterQuery>,
 ) -> impl IntoResponse {
     let starts_with = normalize_starts_with(params.starts_with.as_deref());
-    let genre = params
-        .genre
-        .as_deref()
-        .map(str::trim)
-        .filter(|genre| !genre.is_empty())
-        .map(ToOwned::to_owned);
+    let genre = normalize_string_filter(params.genre.as_deref());
+    let primary_language = normalize_string_filter(params.primary_language.as_deref())
+        .map(|value| value.to_lowercase());
+    let status_filter = normalize_status_filter(params.status.as_deref());
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
         [Method::GET],
@@ -227,19 +285,77 @@ pub async fn user_metadata_movie(
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let current_user = auth.current_user.clone().unwrap_or_default();
-        let db_offset: i64 = (page * 30) - 30;
+        let pagination_count =
+            user_preferences::load_user_pagination_count(&state.sqlx_pool_ro, current_user.id)
+                .await
+                .unwrap_or(user_preferences::DEFAULT_PAGINATION_COUNT);
+        let db_offset: i64 = (page * pagination_count) - pagination_count;
         let total_pages: i64 =
         mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_count(
            &state.sqlx_pool_ro,
             String::new(),
+            current_user.id,
             starts_with.clone().unwrap_or_default(),
             genre.clone().unwrap_or_default(),
+            primary_language.clone().unwrap_or_default(),
+            status_filter.clone().unwrap_or_default(),
         )
         .await
         .unwrap();
-        let pagination_html =
-            build_movie_pagination(total_pages, page, starts_with.as_deref(), genre.as_deref())
-                .unwrap();
+        let pagination_html = build_movie_pagination(
+            total_pages,
+            page,
+            pagination_count,
+            starts_with.as_deref(),
+            genre.as_deref(),
+            primary_language.as_deref(),
+            status_filter.as_deref(),
+        )
+        .unwrap();
+        let primary_language_options: Vec<FilterOption> =
+            mk_lib_database::mk_lib_database_language::mk_lib_database_language_read(
+                &state.sqlx_pool_ro,
+            )
+            .await
+            .unwrap_or_default()
+            .into_iter()
+            .map(|row| FilterOption {
+                label: row.language,
+                query_value: row.code.to_lowercase(),
+            })
+            .collect();
+        let status_options = vec![
+            FilterOption {
+                label: "Favorite".to_string(),
+                query_value: "favorite".to_string(),
+            },
+            FilterOption {
+                label: "Watched".to_string(),
+                query_value: "watched".to_string(),
+            },
+            FilterOption {
+                label: "Unwatched".to_string(),
+                query_value: "unwatched".to_string(),
+            },
+            FilterOption {
+                label: "Good".to_string(),
+                query_value: "good".to_string(),
+            },
+            FilterOption {
+                label: "Bad".to_string(),
+                query_value: "bad".to_string(),
+            },
+            FilterOption {
+                label: "Trash".to_string(),
+                query_value: "trash".to_string(),
+            },
+        ];
+        let filter_query_suffix = build_filter_query_suffix(
+            starts_with.as_deref(),
+            genre.as_deref(),
+            primary_language.as_deref(),
+            status_filter.as_deref(),
+        );
         let movie_list =
         mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_read(
             &state.sqlx_pool_ro,
@@ -247,8 +363,10 @@ pub async fn user_metadata_movie(
             current_user.id,
             starts_with.clone().unwrap_or_default(),
             genre.clone().unwrap_or_default(),
+            primary_language.clone().unwrap_or_default(),
+            status_filter.clone().unwrap_or_default(),
             db_offset,
-            30,
+            pagination_count,
         )
         .await
         .unwrap();
@@ -342,6 +460,11 @@ pub async fn user_metadata_movie(
             genre_filter_query: genre
                 .as_ref()
                 .map(|value| urlencoding::encode(value).into_owned()),
+            primary_language_filter: primary_language.clone(),
+            status_filter: status_filter.clone(),
+            status_options: &status_options,
+            primary_language_options: &primary_language_options,
+            filter_query_suffix,
             base_path: "/user/metadata/movie".to_string(),
         };
         let reply_html = template.render().unwrap();
@@ -362,6 +485,8 @@ struct TemplateMetaMovieDetailContext<'a> {
     template_metadata_tagline: Option<String>,
     template_metadata_photo_updated: DateTime<Utc>,
     template_metadata_genre: Vec<Genre>,
+    template_metadata_cast: Vec<MovieCastMember>,
+    template_metadata_crew: Vec<MovieCrewMember>,
     template_metadata_user_watched: serde_json::Value,
     template_metadata_user_rating: serde_json::Value,
     template_metadata_user_request: serde_json::Value,
@@ -429,6 +554,42 @@ pub async fn user_metadata_movie_detail(
             })
             .collect();
 
+        let cast_members: Vec<MovieCastMember> =
+            movie_metadata.mm_metadata_movie_json["credits"]["cast"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .filter_map(|cast_member| {
+                    let name = cast_member.get("name").and_then(|value| value.as_str())?;
+                    let character = cast_member
+                        .get("character")
+                        .and_then(|value| value.as_str())
+                        .unwrap_or_default();
+                    Some(MovieCastMember {
+                        name: name.to_string(),
+                        character: character.to_string(),
+                    })
+                })
+                .collect();
+
+        let crew_members: Vec<MovieCrewMember> =
+            movie_metadata.mm_metadata_movie_json["credits"]["crew"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .filter_map(|crew_member| {
+                    let name = crew_member.get("name").and_then(|value| value.as_str())?;
+                    let job = crew_member
+                        .get("job")
+                        .and_then(|value| value.as_str())
+                        .unwrap_or_default();
+                    Some(MovieCrewMember {
+                        name: name.to_string(),
+                        job: job.to_string(),
+                    })
+                })
+                .collect();
+
         let template = TemplateMetaMovieDetailContext {
             template_data_json: &movie_metadata.mm_metadata_movie_json,
             template_metadata_name_alt: movie_metadata.mm_metadata_movie_name_alt.clone(),
@@ -441,6 +602,8 @@ pub async fn user_metadata_movie_detail(
             template_metadata_tagline: movie_metadata.mm_metadata_tagline.clone(),
             template_metadata_photo_updated: movie_metadata.photo_updated.clone(),
             template_metadata_genre: genres,
+            template_metadata_cast: cast_members,
+            template_metadata_crew: crew_members,
             template_metadata_user_watched: watched_status,
             template_metadata_user_rating: rating_status,
             template_metadata_user_request: request_status,

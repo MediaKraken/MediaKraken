@@ -1,10 +1,12 @@
 pub mod mk_lib_network;
 pub mod mk_lib_network_dlna;
 pub mod mk_lib_network_email;
+pub mod mk_lib_network_email_aws;
 pub mod mk_lib_network_external_ip;
 pub mod mk_lib_network_ftp;
 #[cfg(feature = "infiniband")]
 pub mod mk_lib_network_ibverbs; // docker image, so, no infiniband
+pub mod mk_lib_network_kubernetes;
 pub mod mk_lib_network_ldap;
 pub mod mk_lib_network_limiter;
 pub mod mk_lib_network_mediakraken;

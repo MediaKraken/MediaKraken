@@ -21,15 +21,39 @@ pub async fn mk_lib_common_paginate(
     page: i64,
     base_url: String,
     starts_with: Option<&str>,
+    pagination_count: i64,
 ) -> Result<String, Box<dyn Error>> {
-    // Convert total items → total pages (30 per page)
-    let total_pages = if total_items > 0 { (total_items + 29) / 30 } else { 0 };
+    mk_lib_common_paginate_with_locale(
+        total_items,
+        page,
+        base_url,
+        starts_with,
+        pagination_count,
+        None,
+    )
+    .await
+}
+
+pub async fn mk_lib_common_paginate_with_locale(
+    total_items: i64,
+    page: i64,
+    base_url: String,
+    starts_with: Option<&str>,
+    pagination_count: i64,
+    locale_name: Option<&str>,
+) -> Result<String, Box<dyn Error>> {
+    let page_size = pagination_count.max(1);
+    let total_pages = if total_items > 0 {
+        (total_items + page_size - 1) / page_size
+    } else {
+        0
+    };
 
     let mut pagination_html = String::new();
 
     if total_pages > 1 {
         pagination_html.push_str(
-            r#"<nav class="mt-6 flex justify-center" aria-label="Pagination">
+            r#"<nav class="mt-6 mb-6 flex justify-center" aria-label="Pagination">
 <ul class="flex items-center gap-1 whitespace-nowrap text-sm">"#,
         );
 
@@ -64,7 +88,10 @@ class="px-3 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-2
                         p = p,
                         suffix = suffix,
                         label = mk_lib_common_internationalization::
-                            mk_lib_common_internationalization_number_format(p.get() as i64)
+                            mk_lib_common_internationalization_number_format_locale(
+                                p.get() as i64,
+                                locale_name
+                            )
                     );
                 }
 
@@ -79,7 +106,8 @@ class="px-3 py-2 rounded-md bg-indigo-600 text-white font-semibold border border
                 }
 
                 PageItem::Ignore => {
-                    pagination_html.push_str(r#"<li><span class="px-3 py-2 text-gray-400">…</span></li>"#);
+                    pagination_html
+                        .push_str(r#"<li><span class="px-3 py-2 text-gray-400">…</span></li>"#);
                 }
 
                 PageItem::Next(p) => {

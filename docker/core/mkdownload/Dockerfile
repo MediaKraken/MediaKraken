@@ -6,9 +6,7 @@ WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
 #ENV RUSTFLAGS="--Awarnings"
 
-COPY Cargo.toml Cargo.toml
-COPY .cargo .cargo
-COPY mk_lib_filler .
+COPY . .
 
 RUN cargo chef prepare --recipe-path recipe.json
 
@@ -22,7 +20,7 @@ ENV CARGO_INCREMENTAL=0
 
 COPY --from=planner-mkdownload /mediakraken/recipe.json recipe.json
 
-#RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
+RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
 
 COPY ./ .
 
@@ -40,11 +38,11 @@ ADD alpine-minirootfs-x86_64.tar.gz /
 # deps has full /usr/lib/x86_64-linux-gnu path.....hence copy to /
 COPY --from=cargo-build-mkdownload /mediakraken/deps/* /
 
-ADD https://github.com/yt-dlp/yt-dlp/releases/download/2025.02.19/yt-dlp_linux /yt-dlp
+ADD https://github.com/yt-dlp/yt-dlp/releases/download/2026.03.17/yt-dlp_linux /yt-dlp
 RUN chmod a+rx /yt-dlp \
- && apk update && apk add --no-cache py3-pip libssl3 libcrypto3 \
- && rm -rf /var/cache/apt/* \
- && pip3 install --no-cache-dir dosage==3.0 cssselect==1.2.0 subliminal==2.2.1 --break-system-packages
+ && apk update && apk add --no-cache py3-pip libssl3 libcrypto3 ca-certificates \
+ && rm -rf /var/cache/apk/* \
+ && pip3 install --no-cache-dir dosage==3.2 cssselect==1.4.0 subliminal==2.6.0 --break-system-packages
  #&& pip3 install --no-cache-dir --trusted-host mksonatype -i http://mksonatype:8081/repository/pypi/simple dosage==3.0 cssselect==1.2.0 subliminal==2.2.1 --break-system-packages
 
 # Import from builder.

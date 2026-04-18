@@ -1,27 +1,88 @@
-<!DOCTYPE html>
-<html lang="en">
-{% include "bss_include_header.html" %}
+{% extends "layouts/base_user.html" %}
 
-<body>
-    {% include "bss_user/bss_user_include_menu.html" %}
-        {% include "partials/sidebar_user.html" %}
-    <div>
-        {% if template_data_exists %}
-        <div>
-            {#{% for row_data in template_data %}
-            {% if row_data[2] == None %}
-            <a href="/user/internet/vimeo_detail/{{row_data[1]}}"> {{row_data[0]}}</a>
-            {% else %}
-            <a href="/user/internet/vimeo_detail/{{row_data[1]}}">
-                <img src="/static/meta/images/{{row_data[2]}}" height="300" width="200">
-            </a>
-            {% endif %}
-            {% endfor %}#}
-        </div>
+{% block content %}
+<main class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <section class="mb-6 rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <h1 class="text-2xl font-semibold">Vimeo Browse</h1>
+                    <p class="text-sm text-slate-300">Browse Vimeo staff picks and play videos directly in MediaKraken.</p>
+                </div>
+                <form method="get" action="/user/internet/vimeo" class="flex w-full max-w-xl gap-2" role="search" aria-label="Search Vimeo videos">
+                    <input
+                        type="search"
+                        name="q"
+                        value="{{ query }}"
+                        placeholder="Filter by title, description, or creator"
+                        class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+                        aria-label="Vimeo search query"
+                    />
+                    <input type="hidden" name="page" value="1" />
+                    <button type="submit" class="rounded-lg bg-sky-700 px-4 py-2 text-sm font-medium hover:bg-sky-600" aria-label="Apply Vimeo search filter">Search</button>
+                </form>
+            </div>
+        </section>
+
+        {% if has_videos %}
+        <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {% for video in videos %}
+            <article class="flex flex-col gap-3 rounded-xl border border-slate-800 bg-slate-900 p-4">
+                <a href="/user/internet/vimeo/{{ video.id }}" class="block" aria-label="Open Vimeo video {{ video.title }}">
+                    {% if let Some(thumbnail_url) = video.thumbnail_url %}
+                    <img src="{{ thumbnail_url }}" alt="Thumbnail for {{ video.title }}" class="h-44 w-full rounded-lg object-cover" loading="lazy" decoding="async" />
+                    {% else %}
+                    <div class="flex h-44 w-full items-center justify-center rounded-lg bg-slate-800 text-sm text-slate-400">No thumbnail</div>
+                    {% endif %}
+                </a>
+
+                <div class="min-w-0">
+                    <h2 class="line-clamp-2 text-base font-semibold">{{ video.title }}</h2>
+                    <p class="mt-1 text-xs text-slate-400">By {{ video.user_name }}</p>
+                    <p class="mt-2 text-sm text-slate-300">{{ video.description_preview }}</p>
+                </div>
+
+                <dl class="grid grid-cols-2 gap-2 text-xs text-slate-400">
+                    <div>
+                        <dt>Uploaded</dt>
+                        <dd class="text-slate-200">{{ video.upload_date }}</dd>
+                    </div>
+                    <div>
+                        <dt>Duration</dt>
+                        <dd class="text-slate-200">{{ video.duration }}</dd>
+                    </div>
+                </dl>
+
+                <div class="mt-1 flex gap-2">
+                    <a href="/user/internet/vimeo/{{ video.id }}" class="inline-flex flex-1 items-center justify-center rounded-lg bg-teal-700 px-3 py-2 text-sm font-medium hover:bg-teal-600" aria-label="Play {{ video.title }} in embedded Vimeo player">
+                        Play
+                    </a>
+                    {% if let Some(direct_url) = video.direct_url %}
+                    <a href="{{ direct_url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center rounded-lg border border-slate-600 px-3 py-2 text-sm hover:border-slate-400 hover:bg-slate-800" aria-label="Open {{ video.title }} on Vimeo website">
+                        Vimeo
+                    </a>
+                    {% endif %}
+                </div>
+            </article>
+            {% endfor %}
+        </section>
         {% else %}
-        <p id="general_text">No Vimeo media found.</p>
+        <section class="rounded-xl border border-slate-800 bg-slate-900 p-6 text-center text-slate-300">
+            No Vimeo videos found for this page/filter.
+        </section>
         {% endif %}
-    </div>
-    {% include "bss_public/bss_public_footer.html" %}
- </body>
-</html>
+
+        <nav class="mt-6 flex items-center justify-between" aria-label="Vimeo pagination">
+            <div>
+                {% if let Some(previous_page) = pagination_prev %}
+                <a href="/user/internet/vimeo?page={{ previous_page }}&q={{ query }}" class="rounded-lg border border-slate-600 px-4 py-2 text-sm hover:border-slate-400 hover:bg-slate-800" aria-label="Go to previous Vimeo page">Previous</a>
+                {% endif %}
+            </div>
+            <p class="text-sm text-slate-300">Page {{ page }}</p>
+            <div>
+                {% if let Some(next_page) = pagination_next %}
+                <a href="/user/internet/vimeo?page={{ next_page }}&q={{ query }}" class="rounded-lg border border-slate-600 px-4 py-2 text-sm hover:border-slate-400 hover:bg-slate-800" aria-label="Go to next Vimeo page">Next</a>
+                {% endif %}
+            </div>
+        </nav>
+    </main>
+{% endblock %}

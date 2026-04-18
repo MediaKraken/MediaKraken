@@ -28,6 +28,7 @@ async fn process_message(
         let Some(share_path) = share_info.mm_share_path.as_str() else {
             continue;
         };
+        let share_comment = share_info.mm_share_comment.as_str().unwrap_or("");
 
         let normalized_share_path = share_path.to_owned();
         if !seen_shares.insert((share_info.mm_share_ip, normalized_share_path.clone())) {
@@ -38,15 +39,16 @@ async fn process_message(
         if !mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_exists(
             sqlx_pool_ro,
             share_info.mm_share_ip,
-            share_info.mm_share_path.clone(),
+            share_path,
         )
         .await?
         {
             mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_insert(
                 sqlx_pool_rw,
                 share_info.mm_share_ip,
-                &normalized_share_path,
-                share_info.mm_share_comment.clone(),
+                share_path,
+                share_comment,
+                share_info.mm_share_type,
             )
             .await?;
         }
@@ -62,9 +64,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120).await?;
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await?;
-    let _option_config_json: Value =
-        mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool_ro)
-            .await?;
 
     let (_rabbit_connection, rabbit_channel) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mksharescanner").await?;

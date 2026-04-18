@@ -1,12 +1,15 @@
+use crate::AppState;
 use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
+use crate::user_preferences;
 use askama::Template;
+use axum::extract::State;
 use axum::response::Redirect;
 use axum::{
+    Extension,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
-    Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
@@ -14,8 +17,6 @@ use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
 use serde_json::json;
 use sqlx::postgres::PgPool;
-use axum::extract::State;
-use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_401.html")]
@@ -51,7 +52,11 @@ pub async fn user_media_tv(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let db_offset: i64 = (page * 30) - 30;
+        let pagination_count =
+            user_preferences::load_user_pagination_count(&state.sqlx_pool_ro, current_user.id)
+                .await
+                .unwrap_or(user_preferences::DEFAULT_PAGINATION_COUNT);
+        let db_offset: i64 = (page * pagination_count) - pagination_count;
         let total_pages: i64 =
         mk_lib_database::database_media::mk_lib_database_media_tv::mk_lib_database_media_tv_count(
             &state.sqlx_pool_ro,
@@ -64,6 +69,7 @@ pub async fn user_media_tv(
             page,
             "/user/media/tv".to_string(),
             None,
+            pagination_count,
         )
         .await
         .unwrap();
@@ -72,7 +78,7 @@ pub async fn user_media_tv(
             &state.sqlx_pool_ro,
             String::new(),
             db_offset,
-            30,
+            pagination_count,
         )
         .await
         .unwrap();
@@ -131,7 +137,7 @@ pub async fn user_media_tv_detail(
 }
 
 pub async fn user_media_tv_status(
-     State(state): State<AppState>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Path(guid): Path<uuid::Uuid>,

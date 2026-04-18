@@ -6,9 +6,7 @@ WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
 #ENV RUSTFLAGS="--Awarnings"
 
-COPY Cargo.toml Cargo.toml
-COPY .cargo .cargo
-COPY mk_lib_filler .
+COPY . .
 
 RUN cargo chef prepare --recipe-path recipe.json
 
@@ -22,7 +20,7 @@ ENV CARGO_INCREMENTAL=0
 
 COPY --from=planner-mksharescanner /mediakraken/recipe.json recipe.json
 
-#RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
+RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
 
 COPY ./ .
 
@@ -45,7 +43,7 @@ COPY --from=cargo-build-mksharescanner /mediakraken/deps/* /
 
 RUN apk update && apk add --no-cache nmap nmap-scripts \
   && apk add --no-cache rustscan --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing \
-  && rm -rf /var/cache/apt/*
+  && rm -rf /var/cache/apk/*
 
 # Import from builder.
 # COPY --from=cargo-build-mksharescanner /etc/passwd /etc/passwd

@@ -64,6 +64,9 @@ DOCKER_IMAGES = {
     # inotify of file system changes to amqp
     'mkinotify': ('mkinotify', 'core'),
 
+    # get list of iradio stations
+    'mkiradio': ('mkiradio', 'core'),
+
     # download libretro cores that are newer - run and exit
     'mklibretrocorefetchupdate': ('mklibretrocorefetchupdate', 'core'),
 

@@ -6,9 +6,7 @@ WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
 #ENV RUSTFLAGS="--Awarnings"
 
-COPY Cargo.toml Cargo.toml
-COPY .cargo .cargo
-COPY mk_lib_filler .
+COPY . .
 
 RUN cargo chef prepare --recipe-path recipe.json
 
@@ -22,7 +20,7 @@ ENV CARGO_INCREMENTAL=0
 
 COPY --from=planner-mkglobalcache /mediakraken/recipe.json recipe.json
 
-#RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
+RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
 
 COPY ./ .
 
@@ -41,7 +39,7 @@ ADD alpine-minirootfs-x86_64.tar.gz /
 COPY --from=cargo-build-mkglobalcache /mediakraken/deps/* /
 
 RUN apk update && apk add --no-cache libssl3 libcrypto3 \
- && rm -rf /var/cache/apt/*
+ && rm -rf /var/cache/apk/*
 
 # Import from builder.
 COPY --from=cargo-build-mkglobalcache /etc/passwd /etc/passwd

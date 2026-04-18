@@ -1,33 +1,28 @@
+use crate::AppState;
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
-    extract::Form,
-    http::{Method, StatusCode},
+    extract::{Form, State},
     response::{Html, IntoResponse, Redirect},
-    routing::{get, post},
-    Extension,
 };
-use axum_flash::{Flash, IncomingFlashes, Key};
-use axum_session::{SessionConfig, SessionLayer};
-use axum_session_sqlx::{SessionPgPool};
-use axum_session_auth::*;
-use crate::mk_lib_database;
-use serde::{Deserialize, Serialize};
-use sqlx::{
-    postgres::{PgConnectOptions, PgPoolOptions},
-    ConnectOptions, PgPool,
-};
-use validator::Validate;
-use axum::extract::State;
-use crate::AppState;
+use axum_flash::{Flash, IncomingFlashes};
+use serde::Deserialize;
 
 #[derive(Template)]
 #[template(path = "bss_public/bss_public_register.html")]
-struct RegisterTemplate;
+struct RegisterTemplate {
+    flash_messages: Vec<String>,
+}
 
-pub async fn public_register() -> impl IntoResponse {
-    let template = RegisterTemplate {};
+pub async fn public_register(flashes: IncomingFlashes) -> impl IntoResponse {
+    let template = RegisterTemplate {
+        flash_messages: flashes
+            .iter()
+            .map(|(_, message)| message.to_string())
+            .collect(),
+    };
     let reply_html = template.render().unwrap();
-    (StatusCode::OK, Html(reply_html).into_response())
+    (flashes, Html(reply_html))
 }
 
 #[derive(Deserialize)]
@@ -38,17 +33,20 @@ pub struct RegisterInput {
 
 pub async fn public_register_post(
     State(state): State<AppState>,
-    mut flash: Flash,
+    flash: Flash,
     Form(input_data): Form<RegisterInput>,
-) -> Redirect {
+) -> (Flash, Redirect) {
     let user_found = mk_lib_database::mk_lib_database_user::mk_lib_database_user_exists(
-       &state.sqlx_pool_ro,
+        &state.sqlx_pool_ro,
         &input_data.username,
     )
     .await
     .unwrap();
-    if user_found == true {
-        flash.error("User already exists!");
+    if user_found {
+        (
+            flash.error("User already exists!"),
+            Redirect::to("/public/register"),
+        )
     } else {
         let user_id: i64 = mk_lib_database::mk_lib_database_user::mk_lib_database_user_insert(
             &state.sqlx_pool_rw,
@@ -57,7 +55,7 @@ pub async fn public_register_post(
         )
         .await
         .unwrap();
-    // using rw here as I need to see the insert immediately
+        // using rw here as I need to see the insert immediately
         if mk_lib_database::mk_lib_database_user::mk_lib_database_user_count(
             &state.sqlx_pool_rw,
             String::new(),
@@ -68,10 +66,12 @@ pub async fn public_register_post(
         // Use 2 as 1 is guest
         {
             let _result = mk_lib_database::mk_lib_database_user::mk_lib_database_user_set_admin(
-                &state.sqlx_pool_rw, user_id,
+                &state.sqlx_pool_rw,
+                user_id,
             )
             .await;
         }
+
+        (flash, Redirect::to("/public/login"))
     }
-    Redirect::to("/public/login")
 }

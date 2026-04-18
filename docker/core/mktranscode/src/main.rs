@@ -3,6 +3,7 @@ use mk_lib_database;
 use mk_lib_rabbitmq;
 use serde_json::{Value, json};
 use std::error::Error;
+use std::path::Path;
 use tokio::process::Command;
 use tokio::sync::Notify;
 
@@ -57,6 +58,93 @@ fn cast_stream_argument(json_message: &Value) -> Option<(&'static str, String)> 
     })
 }
 
+fn json_string_from_keys<'a>(json_message: &'a Value, keys: &[&str]) -> Option<&'a str> {
+    keys.iter()
+        .find_map(|key| json_message.get(*key))
+        .and_then(Value::as_str)
+}
+
+fn ebook_conversion_targets(json_message: &Value) -> Option<(String, String)> {
+    let data = &json_message["Data"];
+    let source_path = json_string_from_keys(
+        data,
+        &[
+            "Input",
+            "Input Path",
+            "Source",
+            "Source Path",
+            "Path",
+            "Media Path",
+        ],
+    )
+    .or_else(|| json_string_from_keys(json_message, &["Input", "Input Path", "Media Path"]))?;
+
+    let output_path = json_string_from_keys(data, &["Output", "Output Path"]).map(String::from);
+    if let Some(explicit_path) = output_path {
+        return Some((source_path.to_string(), explicit_path));
+    }
+
+    let output_format = json_string_from_keys(data, &["Format", "Output Format", "To", "Target"])
+        .or_else(|| json_string_from_keys(json_message, &["Format", "Output Format", "To"]))?
+        .trim()
+        .trim_start_matches('.')
+        .to_lowercase();
+
+    if output_format.is_empty() {
+        return None;
+    }
+
+    let source = Path::new(source_path);
+    let source_parent = source.parent().unwrap_or_else(|| Path::new(""));
+    let source_stem = source.file_stem()?.to_str()?;
+    let output_file_name = format!("{source_stem}.{output_format}");
+    let output_target = source_parent.join(output_file_name);
+
+    Some((
+        source_path.to_string(),
+        output_target.to_string_lossy().to_string(),
+    ))
+}
+
+async fn convert_ebook(json_message: &Value) {
+    let Some((input_path, output_path)) = ebook_conversion_targets(json_message) else {
+        eprintln!("mktranscode: ebook conversion skipped, missing input/output parameters");
+        return;
+    };
+
+    let calibre_result = Command::new("ebook-convert")
+        .args([&input_path, &output_path])
+        .status()
+        .await;
+
+    match calibre_result {
+        Ok(status) if status.success() => return,
+        Ok(status) => {
+            eprintln!(
+                "mktranscode: ebook-convert failed with status {status}, falling back to pandoc"
+            );
+        }
+        Err(error) => {
+            eprintln!("mktranscode: ebook-convert unavailable ({error}), falling back to pandoc");
+        }
+    }
+
+    let pandoc_result = Command::new("pandoc")
+        .args([&input_path, "-o", &output_path])
+        .status()
+        .await;
+
+    match pandoc_result {
+        Ok(status) if status.success() => {}
+        Ok(status) => {
+            eprintln!("mktranscode: pandoc ebook conversion failed with status {status}");
+        }
+        Err(error) => {
+            eprintln!("mktranscode: pandoc unavailable for ebook conversion ({error})");
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // open the database
@@ -98,7 +186,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 } else if json_message["Type"] == "HDHomeRun" {
                 } else if json_message["Type"] == "FFMPEG" {
                     if json_message["Subtype"] == "Probe" {
-                        // scan media file via ffprobeS
+                        // scan media file via ffprobe
                         let ffprobe_data: serde_json::Value =
                             mk_lib_common_ffmpeg::mk_common_ffmpeg_get_info(
                                 &json_message["Media Path"].to_string(),
@@ -214,6 +302,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         // db_connection.db_update_media_json(json_message["Media UUID"], {
                         //     "ChapterImages": chapter_image_list
                         //});
+                    } else if json_message["Subtype"] == "EbookConvert" {
+                        convert_ebook(&json_message).await;
                     }
                     // } else if json_message["Subtype"] == "Sync" {
                     //     ffmpeg_params = [

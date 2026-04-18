@@ -1,16 +1,17 @@
-use crate::mk_lib_database;
 use crate::AppState;
+use crate::mk_lib_database;
 use askama::Template;
 use axum::extract::Query;
 use axum::extract::State;
 use axum::{
+    Extension,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
-    Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
+use serde::de::Deserializer;
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPool;
 
@@ -53,8 +54,26 @@ pub async fn user_search(
 #[derive(Deserialize)]
 pub struct SearchParams {
     pub q: String,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_filter")]
     pub filter: Vec<String>,
+}
+
+fn deserialize_filter<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum OneOrMany {
+        One(String),
+        Many(Vec<String>),
+    }
+
+    match Option::<OneOrMany>::deserialize(deserializer)? {
+        Some(OneOrMany::One(value)) => Ok(vec![value]),
+        Some(OneOrMany::Many(values)) => Ok(values),
+        None => Ok(Vec::new()),
+    }
 }
 
 pub struct MyMediaType {

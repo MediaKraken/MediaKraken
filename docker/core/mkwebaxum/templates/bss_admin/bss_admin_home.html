@@ -57,8 +57,8 @@
                       <td class="border px-2 py-1">{{ row_data.mm_notification_time }}</td>
                       <td class="border px-2 py-1 text-center">
                         <button class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded"
-                          data-id="{{ row_data.mm_notification_guid }}" onclick="ConfirmLibraryDelete(this)">
-                          <i class="fas fa-trash-alt"></i>
+                          data-id="{{ row_data.mm_notification_guid }}" onclick="ConfirmLibraryDelete(this)" aria-label="Delete notice">
+                          {% include "icons/trash.svg" %}
                         </button>
                       </td>
                     </tr>
@@ -76,10 +76,10 @@
                 <h5 class="font-semibold">Media Counts</h5>
               </div>
               <div class="p-4 space-y-1 text-sm">
-                <p><b>Media Files:</b> {{ template_data_count_media_files }}</p>
-                <p><b>Matched Media:</b> {{ template_data_count_matched_media }}</p>
-                <p><b>Metadata to Download:</b> {{ template_data_count_meta_fetch }}</p>
-                <p><b>Streamed:</b> {{ template_data_count_streamed_media }}</p>
+                <p><b>Media Files:</b> {{ template_data_count_media_files|number_format_locale(template_data_number_format_language) }}</p>
+                <p><b>Matched Media:</b> {{ template_data_count_matched_media|number_format_locale(template_data_number_format_language) }}</p>
+                <p><b>Metadata to Download:</b> {{ template_data_count_meta_fetch|number_format_locale(template_data_number_format_language) }}</p>
+                <p><b>Streamed:</b> {{ template_data_count_streamed_media|number_format_locale(template_data_number_format_language) }}</p>
               </div>
             </div>
           </div>

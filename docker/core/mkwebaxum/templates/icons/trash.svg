@@ -1,13 +1,5 @@
-<button
-  @click="toggle('trash')"
-  :class="trash 
-      ? 'text-red-600' 
-      : 'text-zinc-400 hover:text-red-600'"
-  aria-label="Trash"
->
   <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
     <path d="M9 3h6a1 1 0 011 1v1h5v2H3V5h5V4a1
              1 0 011-1zm1 7h2v8h-2v-8zm4 0h2v8h-2v-8zM7
              10h2v8H7v-8z"/>
   </svg>
-</button>

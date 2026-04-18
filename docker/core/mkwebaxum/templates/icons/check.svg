@@ -1,12 +1,6 @@
-<button
-  @click="toggle('watched')"
-  :class="watched ? 'text-green-500' : 'hover:text-green-500'"
-  aria-label="Watched"
->
   <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
     <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm4.293 7.293
              a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2
              a1 1 0 011.414-1.414L10 13.586l4.293-4.293
              a1 1 0 011.414 0z"/>
   </svg>
-</button>

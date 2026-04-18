@@ -1,24 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-{% include "bss_include_header.html" %}
+{% extends "layouts/base_user.html" %}
 
-<body>
-    {% include "bss_user/bss_user_include_menu.html" %}
-         {% include "partials/sidebar_user.html" %}
-   <div>
-        <form id="SearchForm" class="form form-youtube" method="POST" action="/user/internet/bss_user_internet_youtube"
-            role="form">
-            <div class="form-group">
-                < input label="Search string" , type="text" , name="search_string">
-            </div>
-        </form>
-        <video id="vid1" src="" class="video-js vjs-default-skin" controls preload="auto" width="100%" height="100%"
-            data-setup="{" fluid":"true","techOrder":["youtube"]}">
-            <source src="http://www.youtube.com/watch?v=" {{template_youtube_video_guid}} type="video/youtube">
-        </video>
+{% block extra_head %}
+<style>
+    .youtube-player-shell {
+        height: calc(100vh - 10rem);
+        min-height: 420px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+    <a href="/user/internet/youtube" class="inline-flex text-sm text-blue-700 hover:underline" aria-label="Back to YouTube browse page">
+        ← Back to YouTube browse
+    </a>
+
+    <div class="youtube-player-shell w-full rounded-lg overflow-hidden border border-gray-200 bg-black">
+        <iframe
+            src="{{ template_embed_url }}"
+            title="YouTube player for {{ template_youtube_video_guid }}"
+            class="h-full w-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen
+        ></iframe>
     </div>
-    {% include "bss_public/bss_public_footer.html" %}
-    <script src="/static/videojs/video.min.js"></script>
-    <script src="/static/videojs/Youtube.min.js"></script>
- </body>
-</html>
+</div>
+{% endblock %}

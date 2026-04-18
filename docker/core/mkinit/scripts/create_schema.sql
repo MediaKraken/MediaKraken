@@ -530,8 +530,13 @@ ALTER TABLE public.mm_options_and_status OWNER TO postgres;
 
 CREATE TABLE public.mm_radio (
     mm_radio_guid uuid NOT NULL,
+    mm_radio_stationuuid text,
     mm_radio_name text,
     mm_radio_description text,
+    mm_radio_country text,
+    mm_radio_language text,
+    mm_radio_tags text,
+    mm_radio_url_resolved text,
     mm_radio_address text,
     mm_radio_active boolean
 );
@@ -4192,4 +4197,3 @@ CREATE INDEX mm_tv_schedule_ndx_station_id ON public.mm_tv_schedule USING btree 
 --
 -- PostgreSQL database dump complete
 --
-

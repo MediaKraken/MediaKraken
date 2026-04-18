@@ -14,7 +14,8 @@
         {% endif %}
     </title>
     
-    <link rel="stylesheet" href="/static/css/base_webapp_8.css">
+    <link rel="stylesheet" href="/static/css/base_webapp_9.css">
+    {% block extra_head %}{% endblock %}
     
     <style>
         [x-cloak] { display: none !important; }
@@ -68,14 +69,15 @@
     
     {% include "partials/topnavbar.html" %}
     
-    <div class="flex flex-1 overflow-hidden">
+    <div class="flex flex-1">
         {% include "partials/sidebar_user.html" %}
         
-        <main id="main-content" class="flex-1 overflow-y-auto md:ml-64">
+        <main id="main-content" class="flex-1">
             {% block content %}{% endblock %}
         </main>
     </div>
     
+    {% block extra_scripts %}{% endblock %}
 </body>
 
 <script defer>

@@ -1,7 +1,7 @@
 {% extends "layouts/base_user.html" %}
 
 {% block content %}
-<section class="max-w-6xl mx-auto px-4 py-6 sm:px-6 md:ml-64" x-data="moviePage()">
+<section class="max-w-6xl mx-auto px-4 py-6 sm:px-6" x-data="moviePage()">
 
     <!-- HEADER -->
     <div class="grid gap-6 lg:grid-cols-[260px_1fr]">
@@ -75,6 +75,11 @@
                         {% include "icons/trash.svg" %}
                     </button>
                 </div>
+                {% if template_data_json["overview"] != "" %}
+                <p class="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
+                    {{ template_data_json["overview"] }}
+                </p>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -90,12 +95,16 @@
             </button>
 
             <div class="flex gap-4 overflow-x-auto scroll-smooth px-10" x-ref="cast">
-                <template x-for="person in cast" :key="person.name">
-                    <a href="#" class="min-w-[120px] text-center">
-                        <img :src="person.img" class="mx-auto h-28 w-28 rounded-full object-cover">
-                        <p class="mt-2 text-sm font-medium text-zinc-800 dark:text-zinc-200" x-text="person.name"></p>
-                    </a>
-                </template>
+                {% for person in template_metadata_cast %}
+                <a href="#" class="min-w-[140px] text-center">
+                    <div
+                        class="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-zinc-100 text-3xl font-semibold text-zinc-500 dark:bg-zinc-800 dark:text-zinc-300">
+                        {{ person.name.chars().next().unwrap_or('?') }}
+                    </div>
+                    <p class="mt-2 text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ person.name }}</p>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400">{{ person.character }}</p>
+                </a>
+                {% endfor %}
             </div>
 
             <button @click="scroll('cast', 1)" aria-label="Scroll cast right"
@@ -116,13 +125,16 @@
             </button>
 
             <div class="flex gap-4 overflow-x-auto scroll-smooth px-10" x-ref="crew">
-                <template x-for="person in crew" :key="person.name">
-                    <a href="#" class="min-w-[140px] text-center">
-                        <img :src="person.img" class="mx-auto h-28 w-28 rounded-full object-cover">
-                        <p class="mt-2 text-sm font-medium text-zinc-800 dark:text-zinc-200" x-text="person.name"></p>
-                        <p class="text-xs text-zinc-500 dark:text-zinc-400" x-text="person.role"></p>
-                    </a>
-                </template>
+                {% for person in template_metadata_crew %}
+                <a href="#" class="min-w-[140px] text-center">
+                    <div
+                        class="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-zinc-100 text-3xl font-semibold text-zinc-500 dark:bg-zinc-800 dark:text-zinc-300">
+                        {{ person.name.chars().next().unwrap_or('?') }}
+                    </div>
+                    <p class="mt-2 text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ person.name }}</p>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400">{{ person.job }}</p>
+                </a>
+                {% endfor %}
             </div>
 
             <button @click="scroll('crew', 1)" aria-label="Scroll crew right"
@@ -167,17 +179,6 @@
 
             genres: ['Action', 'Drama', 'Sci-Fi', 'Thriller'],
             activeGenres: [],
-
-            cast: [
-                { name: 'Actor One', img: 'https://via.placeholder.com/150' },
-                { name: 'Actor Two', img: 'https://via.placeholder.com/150' },
-                { name: 'Actor Three', img: 'https://via.placeholder.com/150' }
-            ],
-
-            crew: [
-                { name: 'Director One', role: 'Director', img: 'https://via.placeholder.com/150' },
-                { name: 'Writer One', role: 'Writer', img: 'https://via.placeholder.com/150' }
-            ],
 
             reviews: [
                 { user: 'Alice', text: 'Amazing cinematography and story.' },

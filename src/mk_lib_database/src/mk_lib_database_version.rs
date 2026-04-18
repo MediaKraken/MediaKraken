@@ -1,8 +1,8 @@
 use crate::mk_lib_database_postgresql;
 use crate::mk_lib_database_version_schema;
-use tokio::time::{sleep, Duration};
+use tokio::time::{Duration, sleep};
 
-pub static DATABASE_VERSION: i32 = 79;
+pub static DATABASE_VERSION: i32 = 83;
 
 pub async fn mk_lib_database_postgresql_version(
     sqlx_pool: &sqlx::PgPool,
@@ -41,6 +41,7 @@ pub async fn mk_lib_database_version_check(
     }
     if version_match == false {
         if update_schema == true {
+            println!("Database upgrade from {version_no} to version {DATABASE_VERSION}");
             // do db updates here
             mk_lib_database_version_schema::mk_lib_database_update_schema(&sqlx_pool, version_no)
                 .await?;

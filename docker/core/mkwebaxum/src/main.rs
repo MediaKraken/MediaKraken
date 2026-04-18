@@ -3,16 +3,16 @@ extern crate lazy_static;
 use axum::http::header;
 use axum::http::{Method, Uri};
 use axum::{
+    BoxError,
+    Extension,
+    Json,
+    Router,
     body::Body,
     extract::FromRef,
     extract::{Request, State},
     response::{IntoResponse, Response},
     //http::StatusCode,
     routing::{get, post},
-    BoxError,
-    Extension,
-    Json,
-    Router,
 };
 use axum_csrf::{CsrfConfig, CsrfToken};
 use axum_extra::routing::RouterExt;
@@ -39,15 +39,16 @@ use std::time::Duration;
 use std::{net::SocketAddr, path::PathBuf};
 use tokio::net::TcpListener;
 use tokio::signal;
-use tower::timeout::TimeoutLayer;
 use tower::ServiceExt;
-use tower::{timeout::error::Elapsed, ServiceBuilder};
+use tower::timeout::TimeoutLayer;
+use tower::{ServiceBuilder, timeout::error::Elapsed};
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::set_header::SetResponseHeaderLayer;
 
 type Client = hyper_util::client::legacy::Client<HttpConnector, Body>;
 mod axum_custom_filters;
 mod error_handling;
+mod user_preferences;
 
 #[path = "admin"]
 pub mod admin {
@@ -60,6 +61,7 @@ pub mod admin {
     pub mod bp_library;
     pub mod bp_logging;
     pub mod bp_reports;
+    pub mod bp_server_links;
     pub mod bp_settings;
     pub mod bp_torrent;
     pub mod bp_user;
@@ -97,7 +99,6 @@ pub mod user {
 pub mod user_internet {
     pub mod bp_inter_flickr;
     pub mod bp_inter_home;
-    pub mod bp_inter_openlibrary;
     pub mod bp_inter_twitchtv;
     pub mod bp_inter_vimeo;
     pub mod bp_inter_youtube;
@@ -112,6 +113,7 @@ pub mod user_media {
     pub mod bp_media_genre;
     pub mod bp_media_home_media;
     pub mod bp_media_image;
+    pub mod bp_media_iradio;
     pub mod bp_media_movie;
     pub mod bp_media_music;
     pub mod bp_media_music_video;
@@ -128,6 +130,8 @@ pub mod user_metadata {
     pub mod bp_meta_movie;
     pub mod bp_meta_music;
     pub mod bp_meta_music_video;
+    pub mod bp_meta_object;
+    pub mod bp_meta_openlibrary;
     pub mod bp_meta_person;
     pub mod bp_meta_sports;
     pub mod bp_meta_tv;
@@ -158,6 +162,15 @@ impl FromRef<AppState> for axum_flash::Config {
 
 #[tokio::main]
 async fn main() {
+    if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
+        "level": "info",
+        "message": "App start",
+        "module": module_path!(),
+    }))
+    .await
+    {
+        eprintln!("loki push error: {error}");
+    }
     // connect to db and do a version check
     let (sqlx_pool_rw, sqlx_pool_ro) =
         mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
@@ -210,6 +223,10 @@ async fn main() {
             "/admin/cron_run/{guid}",
             get(admin::bp_cron::admin_cron_run),
         )
+        .route_with_tsr(
+            "/admin/cron_update",
+            post(admin::bp_cron::admin_cron_update),
+        )
         .route_with_tsr("/admin/database", get(admin::bp_database::admin_database))
         .route_with_tsr(
             "/admin/game_servers/{page}",
@@ -218,7 +235,10 @@ async fn main() {
         .route_with_tsr("/admin/hardware", get(admin::bp_hardware::admin_hardware))
         .route_with_tsr("/admin/home", get(admin::bp_home::admin_home))
         .route_with_tsr("/admin/logging", get(admin::bp_logging::admin_logging))
-        .route_with_tsr("/admin/library", get(admin::bp_library::admin_library))
+        .route_with_tsr(
+            "/admin/library",
+            get(admin::bp_library::admin_library).post(admin::bp_library::admin_library_share_add),
+        )
         .route_with_tsr(
             "/admin/library_media_scan",
             get(admin::bp_library::admin_library_media_scan),
@@ -227,14 +247,22 @@ async fn main() {
             "/admin/library_share_scan",
             get(admin::bp_library::admin_library_share_scan),
         )
+        .route_with_tsr(
+            "/admin/library/share_directories",
+            get(admin::bp_library::admin_library_share_directories),
+        )
         //.post(admin::bp_library::admin_library_post))
+        .route_with_tsr(
+            "/admin/server_links",
+            get(admin::bp_server_links::admin_server_links)
+                .post(admin::bp_server_links::admin_server_links_post),
+        )
         .route_with_tsr("/admin/settings", get(admin::bp_settings::admin_settings))
         .route_with_tsr(
             "/admin/report_known_media/{page}",
             get(admin::bp_reports::admin_report_known_media),
         )
         .route_with_tsr("/admin/torrent", get(admin::bp_torrent::admin_torrent))
-        .route_with_tsr("/admin/torrent/web", get(proxy_transmission_handler))
         .route_with_tsr("/admin/user/{page}", get(admin::bp_user::admin_user))
         .route_with_tsr(
             "/user/internet/flickr",
@@ -249,24 +277,36 @@ async fn main() {
             get(user_internet::bp_inter_home::user_inter_home),
         )
         .route_with_tsr(
-            "/user/internet/openlibrary/{page}",
-            get(user_internet::bp_inter_openlibrary::user_inter_openlibrary),
+            "/user/metadata/openlibrary/{page}",
+            get(user_metadata::bp_meta_openlibrary::user_inter_openlibrary),
         )
         .route_with_tsr(
-            "/user/internet/openlibrary_detail/{work_id}",
-            get(user_internet::bp_inter_openlibrary::user_inter_openlibrary_detail),
+            "/user/metadata/openlibrary_detail/{work_id}",
+            get(user_metadata::bp_meta_openlibrary::user_inter_openlibrary_detail),
         )
         .route_with_tsr(
             "/user/internet/twitchtv",
             get(user_internet::bp_inter_twitchtv::user_inter_twitchtv),
         )
         .route_with_tsr(
+            "/user/internet/twitchtv/{stream_name}",
+            get(user_internet::bp_inter_twitchtv::user_inter_twitchtv_detail),
+        )
+        .route_with_tsr(
             "/user/internet/vimeo",
             get(user_internet::bp_inter_vimeo::user_inter_vimeo),
         )
         .route_with_tsr(
+            "/user/internet/vimeo/{video_id}",
+            get(user_internet::bp_inter_vimeo::user_inter_vimeo_detail),
+        )
+        .route_with_tsr(
             "/user/internet/youtube",
             get(user_internet::bp_inter_youtube::user_inter_youtube),
+        )
+        .route_with_tsr(
+            "/user/internet/youtube/{guid}",
+            get(user_internet::bp_inter_youtube::user_inter_youtube_detail),
         )
         .route_with_tsr(
             "/user/media/book/{page}",
@@ -301,6 +341,14 @@ async fn main() {
             get(user_media::bp_media_image::user_media_image),
         )
         .route_with_tsr(
+            "/user/media/iradio/{page}",
+            get(user_media::bp_media_iradio::user_media_iradio),
+        )
+        .route(
+            "/user/metadata/object/{*object_key}",
+            get(user_metadata::bp_meta_object::metadata_object_proxy),
+        )
+        .route_with_tsr(
             "/user/media/movie/{page}",
             get(user_media::bp_media_movie::user_media_movie),
         )
@@ -326,7 +374,8 @@ async fn main() {
         )
         .route_with_tsr(
             "/user/media/physical/{page}",
-            get(user_media::bp_media_physical::user_media_physical),
+            get(user_media::bp_media_physical::user_media_physical)
+                .post(user_media::bp_media_physical::user_media_physical_post),
         )
         .route_with_tsr(
             "/user/media/sports/{page}",
@@ -444,6 +493,18 @@ async fn main() {
         .route_with_tsr("/user/hardware", get(user::bp_hardware::user_hardware))
         .route_with_tsr("/user/home", get(user::bp_home::user_home))
         .route_with_tsr("/user/profile", get(user::bp_profile::user_profile))
+        .route(
+            "/user/profile/photo",
+            post(user::bp_profile::user_profile_photo_post),
+        )
+        .route(
+            "/user/profile/pagination",
+            post(user::bp_profile::user_profile_pagination_post),
+        )
+        .route(
+            "/user/profile/number-format-language",
+            post(user::bp_profile::user_profile_number_format_language_post),
+        )
         .route_with_tsr("/user/queue", get(user::bp_queue::user_queue))
         //.route_with_tsr("/user/search", get(user::bp_search::user_search))
         .route("/user/search", get(user::bp_search::search_handler))
@@ -548,24 +609,4 @@ async fn shutdown_signal() {
         _ = ctrl_c => {},
         _ = terminate => {},
     }
-}
-
-async fn proxy_transmission_handler(
-    State(state): State<AppState>,
-    mut req: Request,
-) -> Result<Response, StatusCode> {
-    let path = req.uri().path();
-    let path_query = req
-        .uri()
-        .path_and_query()
-        .map(|v| v.as_str())
-        .unwrap_or(path);
-    let uri = format!("https://mkstack-transmission:9091{}", path_query);
-    *req.uri_mut() = Uri::try_from(uri).unwrap();
-    Ok(state
-        .client
-        .request(req)
-        .await
-        .map_err(|_| StatusCode::BAD_REQUEST)?
-        .into_response())
 }

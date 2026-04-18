@@ -4,8 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MediaKraken – Register</title>
-  <link rel="stylesheet" href="/static/css/base_webapp_8.css">
-  <link rel="stylesheet" href="/static/fonts/fontawesome-all.min.css">
+  <link rel="stylesheet" href="/static/css/base_webapp_9.css">
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-indigo-600 to-purple-700 flex flex-col">
@@ -29,6 +28,16 @@
               Create an Account!
             </h4>
           </div>
+
+          {% if !flash_messages.is_empty() %}
+          <div class="space-y-2" role="alert" aria-live="polite">
+            {% for message in flash_messages %}
+            <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {{ message }}
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
 
           <form action="/public/register" method="post" class="space-y-4">
 
