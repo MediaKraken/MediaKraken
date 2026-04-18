@@ -11,7 +11,9 @@ pub async fn mk_lib_hardware_roku_discover() -> Result<Vec<Url>, Box<dyn std::er
     let mut request = SearchRequest::new();
     request.set(Man);
     request.set(MX(5));
-    request.set(ST::Target(ssdp::FieldMap::new("roku:ecp")?));
+    request.set(ST::Target(
+        ssdp::FieldMap::new("roku:ecp").ok_or("invalid SSDP field map for roku:ecp")?,
+    ));
     let mut urls = Vec::new();
     for (res, _) in request.multicast()? {
         let Some(loc) = res.get_raw("Location") else {
