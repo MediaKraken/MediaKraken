@@ -24,7 +24,7 @@ fn get_configs() -> Result<[UpnpConfig; 3], Box<dyn Error>> {
     };
 
     let config_address_range = UpnpConfig {
-        address: Some(Ipv4Cidr::from_str("192.168.0")?),
+        address: Some(Ipv4Cidr::from_str("192.168.0.0/24")?),
         port: 8081,
         protocol: PortMappingProtocol::TCP,
         duration: 3600,

@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_network"
-version = "0.0.204"
+version = "0.0.205"
 edition = "2024"
 
 [profile.release]
