@@ -1,91 +1,101 @@
 use pnet::datalink;
 use shiplift::Docker;
-use socket2::{Domain, Protocol, Socket, Type};
+use std::env;
 use std::io;
-use std::net::{IpAddr, Ipv4Addr, SocketAddr, UdpSocket};
-use std::time::Duration;
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use tokio::net::UdpSocket;
 
-fn new_socket(addr: &SocketAddr) -> io::Result<Socket> {
-    let domain = if addr.is_ipv4() {
-        Domain::IPV4
-    } else {
-        Domain::IPV6
-    };
-    let socket = Socket::new(domain, Type::DGRAM, Some(Protocol::UDP))?;
-    // we're going to use read timeouts so that we don't hang waiting for packets
-    socket.set_read_timeout(Some(Duration::from_millis(100)))?;
-    Ok(socket)
-}
+const DEFAULT_BIND: &str = "0.0.0.0:8888";
+const DEFAULT_MULTICAST: &str = "234.2.2.2";
+const DEFAULT_WEBAPP_PORT: u64 = 8903;
+const DEFAULT_WEBAPP_NAME: &str = "/mkstack-webapp";
 
-#[cfg(windows)]
-fn bind_multicast(socket: &Socket, addr: &SocketAddr) -> io::Result<()> {
-    let addr = match *addr {
-        SocketAddr::V4(addr) => SocketAddr::new(Ipv4Addr::new(0, 0, 0, 0).into(), addr.port()),
-        SocketAddr::V6(addr) => {
-            SocketAddr::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0).into(), addr.port())
+fn detect_local_ipv4() -> Option<Ipv4Addr> {
+    let iface_filter = env::var("MEDIAKRAKEN_IFACE").ok();
+    for iface in datalink::interfaces() {
+        if iface.is_loopback() || !iface.is_up() {
+            continue;
         }
-    };
-    socket.bind(&socket2::SockAddr::from(addr))
+        if let Some(ref name) = iface_filter {
+            if &iface.name != name {
+                continue;
+            }
+        }
+        for net in &iface.ips {
+            if let IpAddr::V4(ip) = net.ip() {
+                if !ip.is_loopback() && !ip.is_unspecified() {
+                    return Some(ip);
+                }
+            }
+        }
+    }
+    None
 }
 
-#[cfg(unix)]
-fn bind_multicast(socket: &Socket, addr: &SocketAddr) -> io::Result<()> {
-    socket.bind(&socket2::SockAddr::from(*addr))
+async fn lookup_webapp_port(docker: &Docker, name: &str) -> Option<u64> {
+    match docker.containers().list(&Default::default()).await {
+        Ok(list) => list
+            .into_iter()
+            .find(|c| c.names.iter().any(|n| n == name))
+            .and_then(|c| c.ports.first().map(|p| p.private_port)),
+        Err(e) => {
+            eprintln!("docker list error: {e}");
+            None
+        }
+    }
 }
 
 #[tokio::main]
-async fn main() {
-    let mut mediakraken_ip: String = "127.0.0.1".to_string();
-    // loop through interfaces
-    for iface in datalink::interfaces() {
-        // Debian 10/11, CentOS 6/7, CentOS 8
-        if iface.name == "ens18" || iface.name == "eth0" || iface.name == "ens192" {
-            for source_ip in iface.ips.iter() {
-                if source_ip.is_ipv4() {
-                    let source_ip = iface
-                        .ips
-                        .iter()
-                        .find(|ip| ip.is_ipv4())
-                        .map(|ip| match ip.ip() {
-                            IpAddr::V4(ip) => ip,
-                            _ => unreachable!(),
-                        })
-                        .unwrap();
-                    mediakraken_ip = source_ip.to_string();
-                    break;
-                }
-            }
-        }
+async fn main() -> io::Result<()> {
+    let bind_addr: SocketAddr = env::var("MEDIAKRAKEN_BIND")
+        .unwrap_or_else(|_| DEFAULT_BIND.to_string())
+        .parse()
+        .expect("invalid MEDIAKRAKEN_BIND");
+    let multi_addr: Ipv4Addr = env::var("MEDIAKRAKEN_MULTICAST")
+        .unwrap_or_else(|_| DEFAULT_MULTICAST.to_string())
+        .parse()
+        .expect("invalid MEDIAKRAKEN_MULTICAST");
+    let webapp_name = env::var("MEDIAKRAKEN_WEBAPP_NAME")
+        .unwrap_or_else(|_| DEFAULT_WEBAPP_NAME.to_string());
+
+    let local_ip = env::var("MEDIAKRAKEN_IP")
+        .ok()
+        .and_then(|s| s.parse::<Ipv4Addr>().ok())
+        .or_else(detect_local_ipv4)
+        .unwrap_or(Ipv4Addr::LOCALHOST);
+
+    let socket = UdpSocket::bind(bind_addr).await?;
+    if let Err(e) = socket.join_multicast_v4(multi_addr, Ipv4Addr::UNSPECIFIED) {
+        eprintln!("failed to join multicast group {multi_addr}: {e}");
+        return Err(e);
     }
-    let mut host_port: u64 = 8903;
-    // Grab public port that the web app is running on
+
     let docker = Docker::new();
-    let result = docker.containers().list(&Default::default()).await;
-    match result {
-        Ok(images) => {
-            for i in images {
-                if i.names[0] == "/mkstack-webapp" {
-                    host_port = i.ports[0].private_port;
-                    break;
-                }
-            }
-        }
-        Err(e) => eprintln!("Error: {}", e),
-    }
-    let response = format!("{}:{}", mediakraken_ip, host_port);
-    let socket = UdpSocket::bind("0.0.0.0:8888").unwrap();
+    let mut cached_port = lookup_webapp_port(&docker, &webapp_name)
+        .await
+        .unwrap_or(DEFAULT_WEBAPP_PORT);
+
+    println!(
+        "mkmulticast listening on {bind_addr}, group {multi_addr}, responding {local_ip}:{cached_port}"
+    );
+
     let mut buf = [0u8; 65535];
-    let multi_addr = Ipv4Addr::new(234, 2, 2, 2);
-    let inter = Ipv4Addr::new(0, 0, 0, 0);
-    let _result = socket.join_multicast_v4(&multi_addr, &inter);
     loop {
-        let (amt, remote_addr) = socket.recv_from(&mut buf).unwrap();
-        // create a socket to send the response
-        let responder =
-            UdpSocket::from(new_socket(&remote_addr).expect("failed to create responder"));
-        // we send the response that was set at the method beginning
-        responder
-            .send_to(response.as_bytes(), &remote_addr)
-            .expect("failed to respond");
+        let (_amt, remote_addr) = match socket.recv_from(&mut buf).await {
+            Ok(v) => v,
+            Err(e) => {
+                eprintln!("recv_from error: {e}");
+                continue;
+            }
+        };
+
+        if let Some(port) = lookup_webapp_port(&docker, &webapp_name).await {
+            cached_port = port;
+        }
+
+        let response = format!("{}:{}", local_ip, cached_port);
+        if let Err(e) = socket.send_to(response.as_bytes(), remote_addr).await {
+            eprintln!("send_to {remote_addr} error: {e}");
+        }
     }
 }
