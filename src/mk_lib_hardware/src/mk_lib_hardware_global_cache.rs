@@ -8,8 +8,7 @@ pub async fn mk_hardware_global_cache_api(
     let json_data = mk_lib_network::mk_lib_network::mk_data_from_url_to_json(
         format!("http://{}/api?expand=all", device_ip).to_string(),
     )
-    .await
-    .unwrap();
+    .await?;
     Ok(json_data)
 }
 
@@ -19,8 +18,7 @@ pub async fn mk_hardware_global_cache_api_host(
     let json_data = mk_lib_network::mk_lib_network::mk_data_from_url_to_json(
         format!("http://{}/api/host?expand=all", device_ip).to_string(),
     )
-    .await
-    .unwrap();
+    .await?;
     Ok(json_data)
 }
 
@@ -30,8 +28,7 @@ pub async fn mk_hardware_global_cache_api_host_id(
     let json_data = mk_lib_network::mk_lib_network::mk_data_from_url_to_json(
         format!("http://{}/api/host/id?expand=all", device_ip).to_string(),
     )
-    .await
-    .unwrap();
+    .await?;
     Ok(json_data)
 }
 
@@ -41,8 +38,7 @@ pub async fn mk_hardware_global_cache_api_host_id_unit(
     let json_data = mk_lib_network::mk_lib_network::mk_data_from_url_to_json(
         format!("http://{}/api/host/id/unit?expand=all", device_ip).to_string(),
     )
-    .await
-    .unwrap();
+    .await?;
     Ok(json_data)
 }
 
@@ -52,8 +48,7 @@ pub async fn mk_hardware_global_cache_api_leds(
     let json_data = mk_lib_network::mk_lib_network::mk_data_from_url_to_json(
         format!("http://{}/api/host/LEDs?expand=all", device_ip).to_string(),
     )
-    .await
-    .unwrap();
+    .await?;
     Ok(json_data)
 }
 
@@ -64,8 +59,7 @@ pub async fn mk_hardware_global_cache_api_leds_detail(
     let json_data = mk_lib_network::mk_lib_network::mk_data_from_url_to_json(
         format!("http://{}/api/host/LEDs/{}?expand=all", device_ip, led_number).to_string(),
     )
-    .await
-    .unwrap();
+    .await?;
     Ok(json_data)
 }
 
@@ -77,8 +71,7 @@ pub async fn mk_hardware_global_cache_api_host_config(
     let json_data = mk_lib_network::mk_lib_network::mk_data_from_url_to_json(
         format!("http://{}/api/host/config?expand=all", device_ip).to_string(),
     )
-    .await
-    .unwrap();
+    .await?;
     Ok(json_data)
 }
 
@@ -90,8 +83,7 @@ pub async fn mk_hardware_global_cache_api_host_config_network(
     let json_data = mk_lib_network::mk_lib_network::mk_data_from_url_to_json(
         format!("http://{}/api/host/config/network?expand=all", device_ip).to_string(),
     )
-    .await
-    .unwrap();
+    .await?;
     Ok(json_data)
 }
 
@@ -103,8 +95,7 @@ pub async fn mk_hardware_global_cache_api_host_storage(
     let json_data = mk_lib_network::mk_lib_network::mk_data_from_url_to_json(
         format!("http://{}/api/host/storage", device_ip).to_string(),
     )
-    .await
-    .unwrap();
+    .await?;
     Ok(json_data)
 }
 
@@ -118,8 +109,7 @@ pub async fn mk_hardware_global_cache_api_host_storage_files(
     let json_data = mk_lib_network::mk_lib_network::mk_data_from_url_to_json(
         format!("http://{}/api/host/storage/files", device_ip).to_string(),
     )
-    .await
-    .unwrap();
+    .await?;
     Ok(json_data)
 }
 
@@ -130,8 +120,7 @@ pub async fn mk_hardware_global_cache_api_host_storage_file_retrieve(
     let json_data = mk_lib_network::mk_lib_network::mk_data_from_url_to_json(
         format!("http://{}/api/host/storage/files/{}", device_ip, file_path).to_string(),
     )
-    .await
-    .unwrap();
+    .await?;
     Ok(json_data)
 }
 
@@ -145,8 +134,7 @@ pub async fn mk_hardware_global_cache_api_host_modules(
     let json_data = mk_lib_network::mk_lib_network::mk_data_from_url_to_json(
         format!("http://{}/api/host/modules?expand=all", device_ip).to_string(),
     )
-    .await
-    .unwrap();
+    .await?;
     Ok(json_data)
 }
 
@@ -157,8 +145,7 @@ pub async fn mk_hardware_global_cache_api_host_module_detail(
     let json_data = mk_lib_network::mk_lib_network::mk_data_from_url_to_json(
         format!("http://{}/api/host/modules/{}", device_ip, module_number).to_string(),
     )
-    .await
-    .unwrap();
+    .await?;
     Ok(json_data)
 }
 

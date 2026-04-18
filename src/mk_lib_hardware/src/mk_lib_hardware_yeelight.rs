@@ -5,33 +5,12 @@ use yeelib_rs::{Light, YeeClient};
 
 pub async fn mk_hardware_yeelight_brightness() {}
 
-pub async fn mk_hardware_yeelight_discover() -> Result<(), Box<dyn std::error::Error>> {
+pub async fn mk_hardware_yeelight_discover() -> Result<Vec<Light>, Box<dyn std::error::Error>> {
     let client = YeeClient::new()?;
-    let mut res: Vec<Light> = loop {
-        let lights = client.find_lights(Duration::from_secs(1));
-        // sometimes, it doesn't find anything, so rerun
-        if lights.len() == 0 {
-            #[cfg(debug_assertions)]
-            {
-                // mk_lib_logging::mk_logging_post_elk(
-                //     std::module_path!(),
-                //     json!({ "YeeClient": "zero" }),
-                // )
-                // .await
-                // .unwrap();
-            }
-        } else {
-            break lights;
-        }
-    };
-    let _light = res.get_mut(0).unwrap();
-    // #[cfg(debug_assertions)]
-    // {
-    //     mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "light": light }))
-    //         .await
-    //         .unwrap();
-    // }
-    Ok(())
+    // Yeelight discovery is advertised as best-effort; return an empty
+    // list rather than looping forever so callers can decide whether to
+    // retry or surface "no lights found" to the user.
+    Ok(client.find_lights(Duration::from_secs(1)))
 }
 
 pub async fn mk_hardware_yeelight_power() {}

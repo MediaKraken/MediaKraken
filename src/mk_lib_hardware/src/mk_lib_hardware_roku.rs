@@ -7,23 +7,24 @@ use ssdp::header::{HeaderMut, HeaderRef, Man, MX, ST};
 use ssdp::message::{Multicast, SearchRequest};
 use url::Url;
 
-pub async fn mk_lib_hardware_roku_discover() -> Vec<Url> {
+pub async fn mk_lib_hardware_roku_discover() -> Result<Vec<Url>, Box<dyn std::error::Error>> {
     let mut request = SearchRequest::new();
     request.set(Man);
     request.set(MX(5));
-    request.set(ST::Target(ssdp::FieldMap::new("roku:ecp").unwrap()));
-    request
-        .multicast()
-        .expect("could not send SSDP query")
-        .into_iter()
-        .map(|(res, _)| {
-            let loc = res
-                .get_raw("Location")
-                .expect("could not read Location header from SSDP");
-            Url::parse(&String::from_utf8_lossy(&loc[0]))
-                .expect("could not parse Location header URL")
-        })
-        .collect()
+    request.set(ST::Target(ssdp::FieldMap::new("roku:ecp")?));
+    let mut urls = Vec::new();
+    for (res, _) in request.multicast()? {
+        let Some(loc) = res.get_raw("Location") else {
+            continue;
+        };
+        if let Some(first) = loc.first() {
+            match Url::parse(&String::from_utf8_lossy(first)) {
+                Ok(u) => urls.push(u),
+                Err(e) => eprintln!("skipping unparseable SSDP Location {first:?}: {e}"),
+            }
+        }
+    }
+    Ok(urls)
 }
 
 pub async fn mk_lib_hardware_roku_command(
@@ -48,8 +49,7 @@ pub async fn mk_lib_hardware_roku_command(
             "{}keypress/{}",
             roku_url, roku_command
         ))
-        .await
-        .unwrap();
+        .await?;
     }
     Ok(request_json)
 }
@@ -60,8 +60,7 @@ pub async fn mk_lib_hardware_roku_app_list(
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let request_json: serde_json::Value =
         mk_lib_network::mk_data_from_url_to_json(format!("{}:{}/query/apps", roku_addr, roku_port))
-            .await
-            .unwrap();
+            .await?;
     Ok(request_json)
 }
 
@@ -74,8 +73,7 @@ pub async fn mk_lib_hardware_roku_app_launch(
         "{}:{}/launch/{}",
         roku_addr, roku_port, roku_app_id
     ))
-    .await
-    .unwrap();
+    .await?;
     Ok(request_json)
 }
 
@@ -85,12 +83,11 @@ pub async fn mk_lib_hardware_roku_icon_save(
     roku_app_id: String,
     file_path: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let _result = mk_lib_network::mk_download_file_from_url(
+    mk_lib_network::mk_download_file_from_url(
         format!("{}:{}/query/icon/{}", roku_addr, roku_port, roku_app_id),
         &file_path,
     )
-    .await
-    .unwrap();
+    .await?;
     Ok(())
 }
 
@@ -100,11 +97,10 @@ pub async fn mk_lib_hardware_roku_touch_sreen(
     x_pos: u16,
     y_pos: u16,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let _result = mk_lib_network::mk_data_from_url(format!(
+    mk_lib_network::mk_data_from_url(format!(
         "{}:{}/input?touch.0.x={}.0&touch.0.y={}.0&touch.0.op=down",
         roku_addr, roku_port, x_pos, y_pos
     ))
-    .await
-    .unwrap();
+    .await?;
     Ok(())
 }

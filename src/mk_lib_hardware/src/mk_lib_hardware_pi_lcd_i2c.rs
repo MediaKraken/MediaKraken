@@ -1,14 +1,8 @@
 // https://github.com/guanicoe/LiquidCrystal_I2C-rs
-
-use rppal::{gpio::Gpio, i2c::I2c};
-
-//static LCD_ADDRESS: u8 = 0x27;
-
-async fn mk_lib_hardware_i2c_lcd(lcd_address: u8, lcd_text: String) {
-    let mut i2c = I2c::new().unwrap();
-    let mut delay = rppal::hal::Delay;
-    let mut lcd = screen::Lcd::new(&mut i2c, lcd_address, &mut delay).unwrap();
-    lcd.set_display(screen::Display::On).unwrap();
-    lcd.set_backlight(screen::Backlight::On).unwrap();
-    lcd.print(lcd_text).unwrap();
-}
+//
+// Stub for future I2C LCD support on the Pi.
+//
+// The original body referenced a `screen` crate and `rppal::hal::Delay`
+// which are not declared in Cargo.toml, so enabling the `raspberry`
+// feature broke the build. Keep this empty until the real deps and
+// implementation land.
