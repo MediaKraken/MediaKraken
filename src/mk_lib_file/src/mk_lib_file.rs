@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::io;
 use tokio::fs;
+use tokio::task;
 use walkdir::{DirEntry, WalkDir};
 
 pub async fn mk_read_file_data(file_to_read: &str) -> io::Result<String> {
@@ -29,14 +30,22 @@ pub fn mk_file_is_hidden(entry: &DirEntry) -> bool {
 //  .filter_map(Result::ok)
 //  .filter(|d| d.path().extension() == Some(OsStr::from_bytes(b"zip")))
 //  .filter(|e| !e.file_type().is_dir())
-pub async fn mk_directory_walk(dir_path: String) -> Result<Vec<String>, Box<dyn Error>> {
-    let mut file_list: Vec<String> = Vec::new();
-    let walker = WalkDir::new(dir_path).into_iter();
-    for entry in walker.filter_entry(|e| !mk_file_is_hidden(e)) {
-        let entry = entry?;
-        file_list.push(entry.path().display().to_string());
-    }
-    Ok(file_list)
+pub async fn mk_directory_walk(dir_path: String) -> Result<Vec<String>, Box<dyn Error + Send + Sync>> {
+    // WalkDir performs blocking syscalls per entry, so run it off the async
+    // runtime to avoid stalling other tasks on the current worker thread.
+    task::spawn_blocking(move || -> Result<Vec<String>, walkdir::Error> {
+        let mut file_list: Vec<String> = Vec::new();
+        for entry in WalkDir::new(dir_path)
+            .into_iter()
+            .filter_entry(|e| !mk_file_is_hidden(e))
+        {
+            let entry = entry?;
+            file_list.push(entry.path().display().to_string());
+        }
+        Ok(file_list)
+    })
+    .await?
+    .map_err(Into::into)
 }
 
 #[cfg(test)]
