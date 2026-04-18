@@ -163,12 +163,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         &share_info,
                                         format!("/{}", row_data.mm_media_dir_path).as_str(),
                                     )
-                                    .unwrap_or_else(|_| {
+                                    .or_else(|_| {
                                         mk_lib_file::mk_lib_smb::mk_file_smb_client_tree(
                                             smb_client,
                                             format!("/{}", row_data.mm_media_dir_path).as_str(),
                                         )
                                     })
+                                    .unwrap_or_default()
                                 } else {
                                     mk_nfs_tree(
                                         &share_info,
@@ -189,12 +190,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                         &share_info,
                                                         format!("/{}", file_metadata.name).as_str(),
                                                     )
-                                                    .unwrap_or_else(|_| {
+                                                    .or_else(|_| {
                                                         mk_lib_file::mk_lib_smb::mk_file_smb_client_tree(
                                                             smb_client,
                                                             format!("/{}", file_metadata.name).as_str(),
                                                         )
                                                     })
+                                                    .unwrap_or_default()
                                         } else {
                                             mk_nfs_tree(
                                                 &share_info,

@@ -53,7 +53,8 @@ async fn main() {
                             let files_to_process = mk_lib_file::mk_lib_smb::mk_file_smb_client_tree(
                                 &smb_client,
                                 format!("/{}", row_data.mm_media_dir_path).as_str(),
-                            );
+                            )
+                            .unwrap_or_default();
                             println!("FTP: {:?}", files_to_process);
                             mediascan_file_process(
                                 &smb_client,
