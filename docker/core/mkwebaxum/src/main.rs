@@ -1,53 +1,35 @@
-#[macro_use]
-extern crate lazy_static;
 use axum::http::header;
-use axum::http::{Method, Uri};
+use axum::http::Method;
 use axum::{
-    BoxError,
-    Extension,
-    Json,
     Router,
     body::Body,
     extract::FromRef,
-    extract::{Request, State},
+    extract::Request,
+    middleware::{self, Next},
     response::{IntoResponse, Response},
-    //http::StatusCode,
     routing::{get, post},
 };
-use axum_csrf::{CsrfConfig, CsrfToken};
 use axum_extra::routing::RouterExt;
-use axum_flash::{Flash, IncomingFlashes};
-//use axum_handle_error_extract::HandleErrorLayer;
 use axum_prometheus::PrometheusMetricLayer;
-use axum_server::tls_rustls::RustlsConfig;
-use axum_session::{Key, Session, SessionConfig, SessionLayer, SessionStore};
+use axum_session::{Key, SessionConfig, SessionLayer, SessionStore};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use hyper::StatusCode;
 use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
 use mk_lib_database;
 use mk_lib_logging;
-use redis_pool::{RedisPool, SingleRedisPool};
 use ring::digest;
 use serde_json::json;
-use sqlx::postgres::{PgConnectOptions, PgPool, PgPoolOptions};
+use sqlx::postgres::PgPool;
 
-use std::fs::File;
-use std::io::Write;
-use std::path::Path;
-use std::time::Duration;
-use std::{net::SocketAddr, path::PathBuf};
 use tokio::net::TcpListener;
 use tokio::signal;
-use tower::ServiceExt;
-use tower::timeout::TimeoutLayer;
-use tower::{ServiceBuilder, timeout::error::Elapsed};
-use tower_http::services::{ServeDir, ServeFile};
+use tower::ServiceBuilder;
+use tower_http::services::ServeDir;
 use tower_http::set_header::SetResponseHeaderLayer;
 
 type Client = hyper_util::client::legacy::Client<HttpConnector, Body>;
 mod axum_custom_filters;
-mod error_handling;
 mod user_preferences;
 
 #[path = "admin"]
@@ -160,6 +142,80 @@ impl FromRef<AppState> for axum_flash::Config {
     }
 }
 
+// Signing key for flash/session cookies. Derives a stable 64-byte key from
+// MKWEBAPP_SIGNING_KEY so cookies survive restarts and are consistent across
+// replicas. Falls back to an ephemeral key with a loud warning for dev.
+fn load_signing_key() -> Key {
+    match std::env::var("MKWEBAPP_SIGNING_KEY") {
+        Ok(secret) if secret.len() >= 32 => {
+            let hash = digest::digest(&digest::SHA512, secret.as_bytes());
+            Key::from(hash.as_ref())
+        }
+        _ => {
+            tracing::warn!(
+                "MKWEBAPP_SIGNING_KEY not set or shorter than 32 bytes; \
+                 generating ephemeral key. Existing sessions will be invalidated on restart \
+                 and replicas will not share cookies."
+            );
+            Key::generate()
+        }
+    }
+}
+
+// CSRF defense via strict same-origin check on state-changing requests.
+// Rejects POST/PUT/PATCH/DELETE whose Origin (or Referer fallback) does not
+// match MKWEBAPP_ALLOWED_ORIGINS (comma-separated list of scheme://host[:port]).
+// If the env var is empty the check is skipped (dev convenience) but a warning
+// is emitted on startup.
+async fn require_same_origin(req: Request, next: Next) -> Response {
+    let method = req.method().clone();
+    let is_state_changing =
+        matches!(method, Method::POST | Method::PUT | Method::PATCH | Method::DELETE);
+    if !is_state_changing {
+        return next.run(req).await;
+    }
+
+    let allowed_raw = std::env::var("MKWEBAPP_ALLOWED_ORIGINS").unwrap_or_default();
+    let allowed: Vec<&str> = allowed_raw
+        .split(',')
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .collect();
+    if allowed.is_empty() {
+        return next.run(req).await;
+    }
+
+    let headers = req.headers();
+    let matches_allowed = |value: &str| -> bool {
+        allowed.iter().any(|a| {
+            value == *a
+                || value
+                    .strip_prefix(*a)
+                    .map(|rest| rest.starts_with('/') || rest.is_empty())
+                    .unwrap_or(false)
+        })
+    };
+
+    let origin_ok = headers
+        .get(header::ORIGIN)
+        .and_then(|v| v.to_str().ok())
+        .map(matches_allowed)
+        .or_else(|| {
+            headers
+                .get(header::REFERER)
+                .and_then(|v| v.to_str().ok())
+                .map(matches_allowed)
+        })
+        .unwrap_or(false);
+
+    if !origin_ok {
+        tracing::warn!(method = %method, uri = %req.uri(), "cross-origin state-changing request rejected");
+        return (StatusCode::FORBIDDEN, "cross-origin request rejected").into_response();
+    }
+
+    next.run(req).await
+}
+
 #[tokio::main]
 async fn main() {
     if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
@@ -182,16 +238,6 @@ async fn main() {
     )
     .await;
 
-    // let client =
-    //     redis::Client::open("redis://default:@mkstack-dragonfly.dragonfly-operator-system:6379/0").expect("Error while trying to open the redis connection");
-    // let redis_pool = RedisPool::from(client);
-    // let session_config = SessionConfig::default();
-    // let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
-    // let session_store =
-    //     SessionStore::<SessionRedisPool>::new(Some(redis_pool.clone().into()), session_config)
-    //         .await
-    //         .unwrap();
-
     let session_config = SessionConfig::default().with_table_name("mm_session");
     let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
     let session_store =
@@ -206,9 +252,19 @@ async fn main() {
         hyper_util::client::legacy::Client::<(), ()>::builder(TokioExecutor::new())
             .build(HttpConnector::new());
 
+    let signing_key = load_signing_key();
+    if std::env::var("MKWEBAPP_ALLOWED_ORIGINS")
+        .map(|v| v.trim().is_empty())
+        .unwrap_or(true)
+    {
+        tracing::warn!(
+            "MKWEBAPP_ALLOWED_ORIGINS is not set; same-origin CSRF check is disabled. \
+             Set this before deploying to production."
+        );
+    }
+
     let app_state = AppState {
-        // The key should probably come from configuration
-        flash_config: axum_flash::Config::new(Key::generate()),
+        flash_config: axum_flash::Config::new(signing_key),
         sqlx_pool_rw: sqlx_pool_rw.clone(),
         sqlx_pool_ro: sqlx_pool_ro.clone(),
         client: client.clone(),
@@ -251,7 +307,6 @@ async fn main() {
             "/admin/library/share_directories",
             get(admin::bp_library::admin_library_share_directories),
         )
-        //.post(admin::bp_library::admin_library_post))
         .route_with_tsr(
             "/admin/server_links",
             get(admin::bp_server_links::admin_server_links)
@@ -393,11 +448,6 @@ async fn main() {
             "/user/media/tv_detail/{guid}",
             get(user_media::bp_media_tv::user_media_tv_detail),
         )
-        // .route_with_tsr(
-        //     "/user/media/upc",
-        //     get(user_media::bp_media_upc_import::user_media_upc_import)
-        //         .post(user_media::bp_media_upc_import::user_media_upc_import_post),
-        // )
         .route_with_tsr(
             "/user/metadata/book/{page}",
             get(user_metadata::bp_meta_book::user_metadata_book),
@@ -506,7 +556,6 @@ async fn main() {
             post(user::bp_profile::user_profile_number_format_language_post),
         )
         .route_with_tsr("/user/queue", get(user::bp_queue::user_queue))
-        //.route_with_tsr("/user/search", get(user::bp_search::user_search))
         .route("/user/search", get(user::bp_search::search_handler))
         .route_with_tsr("/user/sync/{page}", get(user::bp_sync::user_sync))
         .route_with_tsr(
@@ -530,12 +579,24 @@ async fn main() {
             "/public/login",
             get(public::bp_login::public_login).post(public::bp_login::public_login_post),
         )
-        .nest_service("/static", ServeDir::new("static"))
-        .nest_service("/metadata", ServeDir::new("metadata"))
-        .layer(SetResponseHeaderLayer::overriding(
-            axum::http::header::CACHE_CONTROL,
-            axum::http::HeaderValue::from_static("public, max-age=31536000, immutable"),
-        ))
+        .nest_service(
+            "/static",
+            ServiceBuilder::new()
+                .layer(SetResponseHeaderLayer::overriding(
+                    header::CACHE_CONTROL,
+                    axum::http::HeaderValue::from_static("public, max-age=31536000, immutable"),
+                ))
+                .service(ServeDir::new("static").follow_symlinks(false)),
+        )
+        .nest_service(
+            "/metadata",
+            ServiceBuilder::new()
+                .layer(SetResponseHeaderLayer::overriding(
+                    header::CACHE_CONTROL,
+                    axum::http::HeaderValue::from_static("public, max-age=3600"),
+                ))
+                .service(ServeDir::new("metadata").follow_symlinks(false)),
+        )
         .layer(
             AuthSessionLayer::<
                 mk_lib_database::mk_lib_database_user::User,
@@ -570,25 +631,16 @@ async fn main() {
         )
         .route("/metrics", get(|| async move { metric_handle.render() }))
         .layer(prometheus_layer)
+        .layer(middleware::from_fn(require_same_origin))
         .with_state(app_state);
-    // TODO .layer(
-    //     ServiceBuilder::new()
-    //         .layer(HandleErrorLayer::new(|_: BoxError| async {
-    //             StatusCode::REQUEST_TIMEOUT
-    //         }))
-    //         .layer(TimeoutLayer::new(Duration::from_secs(10))),
-    // );
     // add a fallback service for handling routes to unknown paths
     let app = app.fallback(bp_error::general_not_found);
 
-    // run the app on http
     let listener = TcpListener::bind("0.0.0.0:8080").await.unwrap();
-    axum::serve(listener, app).await.unwrap();
-
-    //             bp_error::general_not_authorized,        401
-    //             bp_error::general_not_administrator,     403
-    //             bp_error::general_security,              401?
-    //             bp_error::default_catcher,               500
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal())
+        .await
+        .unwrap();
 }
 
 async fn shutdown_signal() {

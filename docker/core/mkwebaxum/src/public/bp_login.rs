@@ -106,12 +106,32 @@ async fn try_ad_login(sqlx_pool: &PgPool, username: &str, password: &str) -> Opt
 }
 
 async fn verify_authy_token(authy_id: &str, authy_token: &str, api_key: &str) -> bool {
+    // Authy tokens are 6-8 numeric digits; the user id is numeric as well.
+    // Reject obviously malformed values before making a network call so that
+    // log messages (and any error paths) don't echo user-supplied junk.
+    if authy_token.is_empty()
+        || authy_token.len() > 16
+        || !authy_token.chars().all(|c| c.is_ascii_digit())
+    {
+        return false;
+    }
+    if authy_id.is_empty() || !authy_id.chars().all(|c| c.is_ascii_digit()) {
+        return false;
+    }
+
     let verify_url = format!(
-        "https://api.authy.com/protected/json/verify/{}/{}/?api_key={}",
-        authy_token, authy_id, api_key
+        "https://api.authy.com/protected/json/verify/{}/{}",
+        authy_token, authy_id
     );
 
-    let response = match reqwest::Client::new().get(&verify_url).send().await {
+    let response = match reqwest::Client::new()
+        .get(&verify_url)
+        // Pass the API key via header instead of query string so it does not
+        // end up in reqwest/proxy/middlebox logs.
+        .header("X-Authy-API-Key", api_key)
+        .send()
+        .await
+    {
         Ok(value) => value,
         Err(_) => return false,
     };
@@ -169,24 +189,44 @@ pub async fn public_login_post(
         .flatten();
 
         if let Some(authy_user_id) = authy_id {
-            let authy_api_key = std::env::var("MKWEBAPP_AUTHY_API_KEY").ok();
-            if let Some(api_key) = authy_api_key {
-                let submitted_token = input_data.authy_token.unwrap_or_default();
-                if submitted_token.trim().is_empty() {
-                    return (
-                        flash.error("2FA code is required for this account."),
-                        Redirect::to("/public/login"),
-                    );
-                }
+            // Fail closed: if the user has 2FA configured, require a valid
+            // token. A missing API key is a misconfiguration, not a downgrade.
+            let Ok(api_key) = std::env::var("MKWEBAPP_AUTHY_API_KEY") else {
+                tracing::error!(
+                    user_id,
+                    "user has authy_id configured but MKWEBAPP_AUTHY_API_KEY is not set; refusing login"
+                );
+                return (
+                    flash.error("2FA is misconfigured on this server. Contact an administrator."),
+                    Redirect::to("/public/login"),
+                );
+            };
+            if api_key.trim().is_empty() {
+                tracing::error!(
+                    user_id,
+                    "MKWEBAPP_AUTHY_API_KEY is empty; refusing 2FA-enabled login"
+                );
+                return (
+                    flash.error("2FA is misconfigured on this server. Contact an administrator."),
+                    Redirect::to("/public/login"),
+                );
+            }
 
-                let token_valid =
-                    verify_authy_token(&authy_user_id, submitted_token.trim(), &api_key).await;
-                if !token_valid {
-                    return (
-                        flash.error("Invalid 2FA code."),
-                        Redirect::to("/public/login"),
-                    );
-                }
+            let submitted_token = input_data.authy_token.unwrap_or_default();
+            if submitted_token.trim().is_empty() {
+                return (
+                    flash.error("2FA code is required for this account."),
+                    Redirect::to("/public/login"),
+                );
+            }
+
+            let token_valid =
+                verify_authy_token(&authy_user_id, submitted_token.trim(), api_key.trim()).await;
+            if !token_valid {
+                return (
+                    flash.error("Invalid 2FA code."),
+                    Redirect::to("/public/login"),
+                );
             }
         }
 
@@ -196,7 +236,6 @@ pub async fn public_login_post(
         )
         .await;
         auth.login_user(user_id);
-        auth.remember_user(true);
         (flash, Redirect::to("/user/home"))
     } else {
         (
