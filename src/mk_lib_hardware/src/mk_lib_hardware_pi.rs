@@ -1,8 +1,8 @@
 use rascam::*;
 use rppal::gpio::Gpio;
-use serde_json::json;
 use std::error::Error;
-use stdext::function_name;
+use std::fs::File;
+use std::io::Write;
 use tokio::time::{sleep, Duration};
 
 // let gpio = Gpio::new()?;
@@ -25,20 +25,22 @@ pub async fn mk_lib_hardware_pi_led_flash(
     }
 }
 
-pub async fn mk_lib_hardware_pi_take_image(image_file_name: String) {
-    let info = info().unwrap();
-    if info.cameras.len() > 0 {
-        #[cfg(debug_assertions)]
-        {
-            mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "info": info })).await.unwrap();
-        }
-        simple_sync(&info.cameras[0], image_file_name);
+pub async fn mk_lib_hardware_pi_take_image(image_file_name: String) -> Result<(), Box<dyn Error>> {
+    let info = info()?;
+    if info.cameras.is_empty() {
+        return Err("no cameras detected".into());
     }
-}
-
-async fn simple_sync(info: &CameraInfo, image_file_name: String) {
-    let mut camera = SimpleCamera::new(info.clone()).unwrap();
-    camera.activate().unwrap();
-    let b = camera.take_one().unwrap();
-    File::create(image_file_name).unwrap().write_all(&b).unwrap();
+    let camera_info = info.cameras[0].clone();
+    // rascam performs synchronous MMAL/camera I/O; keep it off the async
+    // runtime so taking a photo doesn't stall other tasks on this worker.
+    tokio::task::spawn_blocking(move || -> Result<(), Box<dyn Error + Send + Sync>> {
+        let mut camera = SimpleCamera::new(camera_info)?;
+        camera.activate()?;
+        let b = camera.take_one()?;
+        let mut file = File::create(&image_file_name)?;
+        file.write_all(&b)?;
+        Ok(())
+    })
+    .await?
+    .map_err(Into::into)
 }
