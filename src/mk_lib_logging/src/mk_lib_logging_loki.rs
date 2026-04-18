@@ -1,5 +1,4 @@
 use chrono::Utc;
-use reqwest::Client;
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 use reqwest_retry::{RetryTransientMiddleware, policies::ExponentialBackoff};
 use serde::Deserialize;
@@ -15,21 +14,22 @@ const LOKI_QUERY_URL: &str =
 const LOKI_MAX_ENTRY_BYTES: usize = 262_144;
 const LOKI_SAFE_ENTRY_BYTES: usize = 240_000;
 
-// FIX 1: Add `status` and optional `error` + `data` fields.
-// Loki returns either:
+const MAX_RETRIES: u32 = 5;
+const REQUEST_TIMEOUT: Duration = Duration::from_secs(30);
+const READ_WINDOW_NS: i64 = 24 * 60 * 60 * 1_000_000_000;
+const READ_LIMIT: &str = "100";
+
+type BoxError = Box<dyn std::error::Error + Send + Sync>;
+
+// Loki responses come in two shapes:
 //   {"status":"success","data":{...}}
-// or:
-//   {"status":"error","error":"some message"}
-// Without `status` the code could not detect Loki-level errors, and the missing
-// `data` field would cause a cryptic serde deserialization error.
+//   {"status":"error","error":"..."}
+// `data` must stay optional so error responses deserialize.
 #[derive(Debug, Deserialize)]
 struct LokiResponse {
     status: String,
     #[serde(default)]
     error: Option<String>,
-    // FIX 5: `data` is now Option so that Loki error responses (which omit the
-    // field entirely) deserialize cleanly instead of failing with an opaque
-    // "missing field `data`" message.
     #[serde(default)]
     data: Option<LokiData>,
 }
@@ -55,19 +55,11 @@ pub struct LokiLog {
 fn retrying_client() -> &'static ClientWithMiddleware {
     static CLIENT: OnceLock<ClientWithMiddleware> = OnceLock::new();
     CLIENT.get_or_init(|| {
-        let retry_policy = ExponentialBackoff::builder().build_with_max_retries(100);
+        let retry_policy = ExponentialBackoff::builder().build_with_max_retries(MAX_RETRIES);
         ClientBuilder::new(reqwest::Client::new())
             .with(RetryTransientMiddleware::new_with_policy(retry_policy))
             .build()
     })
-}
-
-// FIX 3: `query_client()` is no longer used for reads; reads now use
-// `retrying_client()` for the same retry resilience as pushes.  Keep this
-// function in case callers outside this module still reference it.
-fn query_client() -> &'static Client {
-    static CLIENT: OnceLock<Client> = OnceLock::new();
-    CLIENT.get_or_init(Client::new)
 }
 
 fn truncate_to_bytes(input: &str, max_bytes: usize) -> String {
@@ -81,9 +73,7 @@ fn truncate_to_bytes(input: &str, max_bytes: usize) -> String {
     input[..end].to_string()
 }
 
-pub async fn mk_logging_loki_push(
-    message_text: serde_json::Value,
-) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn mk_logging_loki_push(message_text: serde_json::Value) -> Result<(), BoxError> {
     let exe_path = env::current_exe()?;
     let exe_name = exe_path
         .file_name()
@@ -128,7 +118,7 @@ pub async fn mk_logging_loki_push(
 
     let resp = retrying_client()
         .post(LOKI_PUSH_URL)
-        .timeout(Duration::from_secs(30))
+        .timeout(REQUEST_TIMEOUT)
         .header("Content-Type", "application/json")
         .json(&payload)
         .send()
@@ -159,39 +149,36 @@ fn stream_to_logql(labels: &HashMap<String, String>) -> String {
 }
 
 fn escape_logql_string(value: &str) -> String {
-    value.replace('\\', r#"\\"#).replace('"', r#"\""#)
+    value
+        .replace('\\', r#"\\"#)
+        .replace('"', r#"\""#)
+        .replace('\n', r#"\n"#)
+        .replace('\r', r#"\r"#)
 }
 
-pub async fn mk_logging_loki_read(
-    message_type: &str,
-) -> Result<Vec<LokiLog>, Box<dyn std::error::Error>> {
+pub async fn mk_logging_loki_read(message_type: &str) -> Result<Vec<LokiLog>, BoxError> {
     let now_ns = Utc::now()
         .timestamp_nanos_opt()
         .ok_or("failed to generate nanosecond timestamp")?;
+    let start_ns = now_ns - READ_WINDOW_NS;
 
-    let start_ns = now_ns - (24 * 60 * 60 * 1_000_000_000_i64);
-
-    // FIX 4: `message_type` is the name of an app/job — it should filter via
-    // a label selector (`app="<value>"`), not a log-line substring filter
-    // (`|= "<value>"`).  Using `|=` would search the raw JSON content of every
-    // log line for the string, which is both slower and semantically wrong when
-    // the intent is to scope reads to a specific MediaKraken service.
+    // `message_type` names an app/job — scope via the `app` label, not a line
+    // substring filter, so Loki can use its index.
     let query = if message_type.is_empty() {
         r#"{job="mediakraken"}"#.to_string()
     } else {
-        let escaped = escape_logql_string(message_type);
-        // Label-based filter: returns only streams whose `app` label matches.
-        format!(r#"{{job="mediakraken",app="{}"}}"#, escaped)
+        format!(
+            r#"{{job="mediakraken",app="{}"}}"#,
+            escape_logql_string(message_type)
+        )
     };
 
-    // FIX 2 & 3: Use `retrying_client()` (exponential back-off, same as push)
-    // and add a 30-second timeout so the caller is never blocked indefinitely.
     let resp: LokiResponse = retrying_client()
         .get(LOKI_QUERY_URL)
-        .timeout(Duration::from_secs(30))       // FIX 2: was missing
+        .timeout(REQUEST_TIMEOUT)
         .query(&[
             ("query", query.as_str()),
-            ("limit", "100"),
+            ("limit", READ_LIMIT),
             ("direction", "backward"),
             ("start", &start_ns.to_string()),
             ("end", &now_ns.to_string()),
@@ -202,8 +189,6 @@ pub async fn mk_logging_loki_read(
         .json()
         .await?;
 
-    // FIX 1 (cont.): Surface the Loki-level error instead of silently returning
-    // an empty result set or panicking on the missing `data` field.
     if resp.status != "success" {
         let loki_err = resp
             .error
@@ -211,8 +196,6 @@ pub async fn mk_logging_loki_read(
         return Err(format!("loki query failed: {}", loki_err).into());
     }
 
-    // FIX 5 (cont.): `data` is now `Option<LokiData>`; unwrap it after the
-    // status check — at this point `status == "success"` so `data` is present.
     let data = resp
         .data
         .ok_or("loki returned success but data field was missing")?;
@@ -228,8 +211,11 @@ pub async fn mk_logging_loki_read(
     for stream in data.result {
         let stream_str = stream_to_logql(&stream.stream);
         for [ts, line] in stream.values {
+            let Ok(timestamp_ns) = ts.parse() else {
+                continue;
+            };
             logs.push(LokiLog {
-                timestamp_ns: ts.parse()?,
+                timestamp_ns,
                 labels: stream_str.clone(),
                 line,
             });
