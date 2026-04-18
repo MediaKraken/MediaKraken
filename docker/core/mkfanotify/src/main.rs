@@ -96,8 +96,20 @@ async fn shutdown_signal() {
     }
 }
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
+    let runtime = tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()?;
+    let result = runtime.block_on(async_main());
+    // The watcher is a spawn_blocking task stuck in `fanotify.read_event()`;
+    // `abort()` is a no-op for blocking tasks. Cap the runtime shutdown so
+    // the process always exits promptly even if no filesystem event wakes
+    // the watcher. The OS reclaims the detached thread on process exit.
+    runtime.shutdown_timeout(std::time::Duration::from_secs(2));
+    result
+}
+
+async fn async_main() -> Result<(), Box<dyn Error>> {
     let (_, sqlx_pool_ro) =
         mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120).await?;
 
@@ -246,7 +258,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }))
         .await;
     }
-    watcher_handle.abort();
+    drop(watcher_handle);
     Ok(())
 }
 
