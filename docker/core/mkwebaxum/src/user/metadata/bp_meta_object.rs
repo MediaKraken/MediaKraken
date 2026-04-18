@@ -5,7 +5,12 @@ use axum::{
     http::{HeaderValue, Request, Response, StatusCode, Uri, header},
     response::IntoResponse,
 };
-use http_body_util::BodyExt;
+use std::time::Duration;
+
+const UPSTREAM_TIMEOUT: Duration = Duration::from_secs(15);
+// Upstream metadata objects (images, thumbnails, small JSON) should all fit
+// comfortably under this cap. Reject anything larger to limit memory pressure.
+const MAX_UPSTREAM_BYTES: u64 = 32 * 1024 * 1024;
 
 fn text_response(status: StatusCode, message: &str) -> Response<Body> {
     let mut response = Response::new(Body::from(message.as_bytes().to_vec()));
@@ -17,11 +22,27 @@ fn text_response(status: StatusCode, message: &str) -> Response<Body> {
     response
 }
 
+fn is_valid_object_key(key: &str) -> bool {
+    if key.is_empty() || key.len() > 1024 {
+        return false;
+    }
+    // Accept: ascii alnum plus -_./ (no leading slash handled by trim below).
+    // Forbid: backslash, control chars, null, ".." path components.
+    if key.split('/').any(|segment| segment == "..") {
+        return false;
+    }
+    key.chars().all(|c| {
+        c.is_ascii_alphanumeric()
+            || matches!(c, '-' | '_' | '.' | '/' | '=' | '+' | '%' | '~' | ':')
+    })
+}
+
 pub async fn metadata_object_proxy(
     State(state): State<AppState>,
     Path(object_key): Path<String>,
 ) -> impl IntoResponse {
-    if object_key.trim().is_empty() || object_key.contains("..") {
+    let trimmed_key = object_key.trim_start_matches('/');
+    if !is_valid_object_key(trimmed_key) {
         return text_response(StatusCode::BAD_REQUEST, "invalid object key");
     }
 
@@ -33,11 +54,7 @@ pub async fn metadata_object_proxy(
         );
     }
 
-    let upstream_url = format!(
-        "{}/{}",
-        garage_base_url.trim_end_matches('/'),
-        object_key.trim_start_matches('/')
-    );
+    let upstream_url = format!("{}/{}", garage_base_url.trim_end_matches('/'), trimmed_key);
 
     let upstream_uri = match upstream_url.parse::<Uri>() {
         Ok(uri) => uri,
@@ -65,12 +82,23 @@ pub async fn metadata_object_proxy(
         }
     };
 
-    let upstream_response = match state.client.request(upstream_request).await {
-        Ok(response) => response,
-        Err(_) => {
-            return text_response(StatusCode::BAD_GATEWAY, "unable to reach metadata storage");
-        }
-    };
+    let upstream_response =
+        match tokio::time::timeout(UPSTREAM_TIMEOUT, state.client.request(upstream_request)).await
+        {
+            Ok(Ok(response)) => response,
+            Ok(Err(_)) => {
+                return text_response(
+                    StatusCode::BAD_GATEWAY,
+                    "unable to reach metadata storage",
+                );
+            }
+            Err(_) => {
+                return text_response(
+                    StatusCode::GATEWAY_TIMEOUT,
+                    "metadata storage timed out",
+                );
+            }
+        };
 
     let status = upstream_response.status();
     if !status.is_success() {
@@ -78,6 +106,22 @@ pub async fn metadata_object_proxy(
             StatusCode::from_u16(status.as_u16()).unwrap_or(StatusCode::BAD_GATEWAY),
             "metadata storage returned an error",
         );
+    }
+
+    // Reject advertised oversize bodies up-front so we never even start
+    // streaming gigabyte-sized payloads into memory.
+    if let Some(len) = upstream_response
+        .headers()
+        .get(header::CONTENT_LENGTH)
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| v.parse::<u64>().ok())
+    {
+        if len > MAX_UPSTREAM_BYTES {
+            return text_response(
+                StatusCode::PAYLOAD_TOO_LARGE,
+                "metadata object exceeds maximum size",
+            );
+        }
     }
 
     let content_type = upstream_response
@@ -94,23 +138,18 @@ pub async fn metadata_object_proxy(
         .unwrap_or("public, max-age=3600")
         .to_string();
 
-    let body = match upstream_response.into_body().collect().await {
-        Ok(collected) => collected.to_bytes(),
-        Err(_) => {
-            return text_response(StatusCode::BAD_GATEWAY, "invalid metadata response");
-        }
-    };
+    let content_type_header = HeaderValue::from_str(&content_type)
+        .unwrap_or_else(|_| HeaderValue::from_static("application/octet-stream"));
+    let cache_control_header = HeaderValue::from_str(&cache_control)
+        .unwrap_or_else(|_| HeaderValue::from_static("public, max-age=3600"));
 
-    let content_type_header = match HeaderValue::from_str(&content_type) {
-        Ok(value) => value,
-        Err(_) => HeaderValue::from_static("application/octet-stream"),
-    };
-    let cache_control_header = match HeaderValue::from_str(&cache_control) {
-        Ok(value) => value,
-        Err(_) => HeaderValue::from_static("public, max-age=3600"),
-    };
+    // Stream the upstream body to the client and cap the total bytes so a
+    // lying Content-Length cannot sneak past the advertised-size check above.
+    let limited =
+        http_body_util::Limited::new(upstream_response.into_body(), MAX_UPSTREAM_BYTES as usize);
+    let streamed_body = Body::new(limited);
 
-    let mut response = Response::new(Body::from(body));
+    let mut response = Response::new(streamed_body);
     *response.status_mut() = StatusCode::OK;
     response
         .headers_mut()

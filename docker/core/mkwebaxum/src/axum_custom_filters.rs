@@ -1,18 +1,6 @@
 use mk_lib_common;
 
 pub mod filters {
-    // pub fn as_u64<T: Into<u64>>(x: T) -> u64 {
-    //     x.into()
-    // }
-
-    // pub fn t_as_i64<T: Into<i64>>(x: T) -> i64 {
-    //     x.into()
-    // }
-
-    // pub fn t_as_u64<T>(value: T) where u64: From<T> {
-    //    let b = u64::from(value);
-    // }
-
     pub fn t_as_i64<T: std::fmt::Display>(s: T) -> i64 {
         let s = s.to_string();
         if let Ok(value) = s.parse::<i64>() {
@@ -61,14 +49,6 @@ pub mod filters {
         let s = s.to_string();
         Ok(s.replace(a, b))
     }
-    // pub fn replace(s: &str, a: &str, b: &str) -> ::askama::Result<String> {
-    //     Ok(s.replace(a, b))
-    // }
-
-    // #[askama::filter_fn]
-    // pub fn uuid_to_str(s: &uuid::Uuid) -> ::askama::Result<String> {
-    //     Ok(format!("{}", s))
-    // }
 
     #[askama::filter_fn]
     pub fn number_format<T: std::fmt::Display>(
@@ -95,9 +75,15 @@ pub mod filters {
         s: T,
         _env: &dyn askama::Values,
     ) -> askama::Result<String> {
-        let result =
-            mk_lib_common::mk_lib_common_bytesize::mk_lib_common_bytesize(t_as_u64(s)).unwrap();
-        Ok(result)
+        let raw = s.to_string();
+        let value = raw.parse::<u64>().unwrap_or(0);
+        match mk_lib_common::mk_lib_common_bytesize::mk_lib_common_bytesize(value) {
+            Ok(result) => Ok(result),
+            Err(error) => {
+                tracing::warn!(?error, raw = %raw, "byte_format filter failed; returning raw value");
+                Ok(raw)
+            }
+        }
     }
 
     #[askama::filter_fn]
