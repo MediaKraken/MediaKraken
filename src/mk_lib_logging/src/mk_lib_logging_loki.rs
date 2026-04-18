@@ -1,5 +1,5 @@
 use chrono::Utc;
-use reqwest::Client;
+use reqwest::{Client, Url};
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 use reqwest_retry::{RetryTransientMiddleware, policies::ExponentialBackoff};
 use serde::Deserialize;
@@ -186,16 +186,24 @@ pub async fn mk_logging_loki_read(
 
     // FIX 2 & 3: Use `retrying_client()` (exponential back-off, same as push)
     // and add a 30-second timeout so the caller is never blocked indefinitely.
-    let resp: LokiResponse = retrying_client()
-        .get(LOKI_QUERY_URL)
-        .timeout(Duration::from_secs(30))       // FIX 2: was missing
-        .query(&[
+    // `reqwest_middleware::RequestBuilder` does not expose `.query()`, so build
+    // the URL with query parameters up front via `Url::parse_with_params`.
+    let start_str = start_ns.to_string();
+    let end_str = now_ns.to_string();
+    let url = Url::parse_with_params(
+        LOKI_QUERY_URL,
+        &[
             ("query", query.as_str()),
             ("limit", "100"),
             ("direction", "backward"),
-            ("start", &start_ns.to_string()),
-            ("end", &now_ns.to_string()),
-        ])
+            ("start", start_str.as_str()),
+            ("end", end_str.as_str()),
+        ],
+    )?;
+
+    let resp: LokiResponse = retrying_client()
+        .get(url)
+        .timeout(Duration::from_secs(30))
         .send()
         .await?
         .error_for_status()?
