@@ -2,41 +2,75 @@ use std::io;
 use std::io::BufWriter;
 use std::io::Read;
 use std::io::prelude::*;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
-pub async fn mk_decompress_tar_gz_file(archive_file: &str) -> Result<(), std::io::Error> {
-    let tar_gz = std::fs::File::open(archive_file)?;
-    let tar = flate2::read::GzDecoder::new(tar_gz);
-    let mut archive = tar::Archive::new(tar);
-    archive.unpack(".")?;
-    Ok(())
+fn join_error(err: tokio::task::JoinError) -> io::Error {
+    io::Error::other(format!("blocking task join error: {err}"))
 }
 
-pub async fn mk_decompress_tar_gz_file_gunzip(archive_file: &str) -> Result<(), std::io::Error> {
-    let status = Command::new("gunzip")
-        .args([&archive_file])
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()?;
-    if !status.success() {
-        return Err(io::Error::other(format!(
-            "gunzip exited with status: {status}"
-        )));
+pub async fn mk_decompress_tar_gz_file(archive_file: &str) -> io::Result<()> {
+    let path = archive_file.to_owned();
+    tokio::task::spawn_blocking(move || {
+        let tar_gz = std::fs::File::open(&path)?;
+        let tar = flate2::read::GzDecoder::new(tar_gz);
+        let mut archive = tar::Archive::new(tar);
+        archive.unpack(".")
+    })
+    .await
+    .map_err(join_error)?
+}
+
+pub async fn mk_decompress_tar_gz_file_gunzip(archive_file: &str) -> io::Result<()> {
+    if archive_file.is_empty() {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "archive_file must not be empty",
+        ));
     }
-    Ok(())
+    if archive_file.starts_with('-') {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "archive_file must not start with '-' (potential option injection)",
+        ));
+    }
+
+    let archive_file = archive_file.to_owned();
+    tokio::task::spawn_blocking(move || {
+        let status = Command::new("gunzip")
+            .arg("--")
+            .arg(&archive_file)
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status()?;
+        if !status.success() {
+            return Err(io::Error::other(format!(
+                "gunzip exited with status: {status}"
+            )));
+        }
+        Ok(())
+    })
+    .await
+    .map_err(join_error)?
 }
 
-pub async fn mk_decompress_gz_file(archive_file: &str) -> Result<String, std::io::Error> {
-    let file_handle = std::fs::File::open(archive_file)?;
-    let mut gz = flate2::read::GzDecoder::new(file_handle);
-    let mut gz_data = String::new();
-    gz.read_to_string(&mut gz_data)?;
-    Ok(gz_data)
+pub async fn mk_decompress_gz_file(archive_file: &str) -> io::Result<String> {
+    let path = archive_file.to_owned();
+    tokio::task::spawn_blocking(move || {
+        let file_handle = std::fs::File::open(&path)?;
+        let mut gz = flate2::read::GzDecoder::new(file_handle);
+        let mut gz_data = String::new();
+        gz.read_to_string(&mut gz_data)?;
+        Ok::<_, io::Error>(gz_data)
+    })
+    .await
+    .map_err(join_error)?
 }
 
 pub async fn mk_decompress_gz_bytes(bytes: Vec<u8>) -> io::Result<String> {
-    mk_decompress_gz_slice(&bytes)
+    tokio::task::spawn_blocking(move || mk_decompress_gz_slice(&bytes))
+        .await
+        .map_err(join_error)?
 }
 
 pub fn mk_decompress_gz_slice(bytes: &[u8]) -> io::Result<String> {
@@ -46,77 +80,67 @@ pub fn mk_decompress_gz_slice(bytes: &[u8]) -> io::Result<String> {
     Ok(s)
 }
 
-/*
-let tar_gz = File::create("archive.tar.gz")?;
-    let enc = GzEncoder::new(tar_gz, Compression::default());
-    let mut tar = tar::Builder::new(enc);
-    tar.append_dir_all("backup/logs", "/var/log")?;
-     */
-
 pub async fn mk_decompress_zip(
     archive_file: &str,
     remove_zip: bool,
     output_path: &str,
-) -> Result<(), std::io::Error> {
-    let fname = std::path::Path::new(archive_file);
-    let file = std::fs::File::open(fname)?;
+) -> io::Result<()> {
+    let archive_file = archive_file.to_owned();
+    let output_path = output_path.to_owned();
+    tokio::task::spawn_blocking(move || extract_zip(&archive_file, remove_zip, &output_path))
+        .await
+        .map_err(join_error)?
+}
+
+fn extract_zip(archive_file: &str, remove_zip: bool, output_path: &str) -> io::Result<()> {
+    let file = std::fs::File::open(Path::new(archive_file))?;
     let mut archive = zip::ZipArchive::new(file)?;
+
+    let out_dir = Path::new(output_path);
+    std::fs::create_dir_all(out_dir)?;
+    let out_dir_canon = std::fs::canonicalize(out_dir)?;
+    // Reject the trivial case where the extraction root is itself a symlink;
+    // every further check is relative to it.
+    if std::fs::symlink_metadata(&out_dir_canon)?
+        .file_type()
+        .is_symlink()
+    {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            format!(
+                "extraction root is a symlink: {}",
+                out_dir_canon.display()
+            ),
+        ));
+    }
+
     for i in 0..archive.len() {
-        let mut file = archive.by_index(i)?;
-        let mut outpath = match file.enclosed_name() {
+        let mut entry = archive.by_index(i)?;
+        let inside = match entry.enclosed_name() {
             Some(path) => path.to_owned(),
             None => continue,
         };
-        let mut override_path = PathBuf::from(output_path);
-        override_path.push(outpath);
-        outpath = override_path;
-        // let comment = file.comment();
-        // if !comment.is_empty() {
-        //     #[cfg(debug_assertions)]
-        //     {
-        //         mk_lib_logging::mk_logging_post_elk(
-        //             std::module_path!(),
-        //             json!({ "File": i, "comment": comment }),
-        //         )
-        //         .await
-        //         .unwrap();
-        //     }
-        // }
-        if (&*file.name()).ends_with('/') {
-            // #[cfg(debug_assertions)]
-            // {
-            //     mk_lib_logging::mk_logging_post_elk(
-            //         std::module_path!(),
-            //         json!({ "File": i, "extracted to": outpath.display().to_string() }),
-            //     )
-            //     .await
-            //     .unwrap();
-            // }
-            std::fs::create_dir_all(&outpath)?;
-        } else {
-            // #[cfg(debug_assertions)]
-            // {
-            //     mk_lib_logging::mk_logging_post_elk(
-            //         std::module_path!(),
-            //         json!({ "File": i, "extracted to": outpath.display().to_string(), "bytes": file.size() }),
-            //     )
-            //     .await.unwrap();
-            // }
-            if let Some(p) = outpath.parent() {
-                if !p.exists() {
-                    std::fs::create_dir_all(p)?;
-                }
-            }
-            let outfile = std::fs::File::create(&outpath)?;
+
+        let is_dir_entry = entry.name().ends_with('/');
+        // Walk each path component and create/validate it, rejecting any
+        // existing symlink along the way. `enclosed_name` guarantees the
+        // relative path has no `..` or absolute components, but any
+        // *existing* component under the output directory could still be a
+        // symlink to elsewhere on the filesystem — a lexical
+        // `starts_with(out_dir)` check would not catch that.
+        let outpath = secure_path_under(&out_dir_canon, &inside, is_dir_entry)?;
+
+        if !is_dir_entry {
+            let outfile = open_file_nofollow(&outpath)?;
             let mut writer = BufWriter::new(outfile);
-            std::io::copy(&mut file, &mut writer)?;
+            std::io::copy(&mut entry, &mut writer)?;
             writer.flush()?;
         }
-        // Get and Set permissions
+
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
-            if let Some(mode) = file.unix_mode() {
+            if let Some(mode) = entry.unix_mode() {
                 std::fs::set_permissions(&outpath, std::fs::Permissions::from_mode(mode))?;
             }
         }
@@ -125,4 +149,94 @@ pub async fn mk_decompress_zip(
         std::fs::remove_file(archive_file)?;
     }
     Ok(())
+}
+
+// Resolve `relative` under `root`, creating intermediate directories as needed
+// and failing the moment any existing component is a symlink or a non-directory.
+// If `is_dir_entry` is true, the leaf is also ensured to be a real directory.
+fn secure_path_under(root: &Path, relative: &Path, is_dir_entry: bool) -> io::Result<PathBuf> {
+    use std::path::Component;
+
+    let components: Vec<&std::ffi::OsStr> = relative
+        .components()
+        .map(|c| match c {
+            Component::Normal(name) => Ok(name),
+            _ => Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!(
+                    "zip entry has non-normal path component: {}",
+                    relative.display()
+                ),
+            )),
+        })
+        .collect::<io::Result<_>>()?;
+
+    let mut current = root.to_path_buf();
+    let last_idx = components.len().saturating_sub(1);
+    for (idx, name) in components.iter().enumerate() {
+        current.push(name);
+        let is_last = idx == last_idx;
+        let must_be_dir = !is_last || is_dir_entry;
+
+        match std::fs::symlink_metadata(&current) {
+            Ok(md) => {
+                if md.file_type().is_symlink() {
+                    return Err(io::Error::new(
+                        io::ErrorKind::InvalidData,
+                        format!(
+                            "refusing to traverse existing symlink: {}",
+                            current.display()
+                        ),
+                    ));
+                }
+                if must_be_dir && !md.is_dir() {
+                    return Err(io::Error::new(
+                        io::ErrorKind::InvalidData,
+                        format!(
+                            "existing path component is not a directory: {}",
+                            current.display()
+                        ),
+                    ));
+                }
+            }
+            Err(e) if e.kind() == io::ErrorKind::NotFound => {
+                if must_be_dir {
+                    std::fs::create_dir(&current)?;
+                }
+                // For file leaves the caller creates the file itself.
+            }
+            Err(e) => return Err(e),
+        }
+    }
+    Ok(current)
+}
+
+// Open a file for writing while refusing to follow a symlink at the leaf. We
+// check `symlink_metadata` first; on Unix we additionally pass `O_NOFOLLOW` so
+// the check-to-open race is closed by the kernel.
+fn open_file_nofollow(path: &Path) -> io::Result<std::fs::File> {
+    match std::fs::symlink_metadata(path) {
+        Ok(md) if md.file_type().is_symlink() => {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("refusing to overwrite symlink at leaf: {}", path.display()),
+            ));
+        }
+        Ok(_) | Err(_) => {}
+    }
+    let mut opts = std::fs::OpenOptions::new();
+    opts.write(true).create(true).truncate(true);
+    #[cfg(target_os = "linux")]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        // O_NOFOLLOW on Linux is 0o400000 (0x20000). Matches glibc and musl.
+        opts.custom_flags(0o400000);
+    }
+    #[cfg(any(target_os = "macos", target_os = "freebsd", target_os = "openbsd"))]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        // O_NOFOLLOW on the BSDs / macOS is 0x100.
+        opts.custom_flags(0x0100);
+    }
+    opts.open(path)
 }
