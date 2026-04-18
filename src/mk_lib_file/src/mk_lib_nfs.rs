@@ -1,15 +1,17 @@
 use libnfs::*;
-use nix::{fcntl::OFlag, sys::stat::Mode};
 use std::error::Error;
 
+/// Stub for future NFS share mounting.
+///
+/// The previous implementation ignored `share_to_mount` entirely and always
+/// mounted the hard-coded `0.0.0.0:/srv/nfs`, which was actively dangerous:
+/// it could attach to any NFS server reachable from the process. Until a
+/// real implementation lands we return an error so callers surface the gap
+/// instead of silently mounting the wrong target.
 pub fn mk_file_nfs_client_connect(
-    share_to_mount: mk_lib_database::mk_lib_database_network_share::DBShareList,
+    _share_to_mount: mk_lib_database::mk_lib_database_network_share::DBShareList,
 ) -> Result<NFSClient, Box<dyn Error>> {
-    let mut nfs = Nfs::new()?;
-    nfs.set_uid(1000)?;
-    nfs.set_gid(1000)?;
-    nfs.set_debug(9)?;
-    nfs.mount("0.0.0.0", "/srv/nfs")?;
+    Err("mk_file_nfs_client_connect is not implemented".into())
 }
 
 /*

@@ -1,5 +1,5 @@
 use mk_lib_database;
-use pavao::{SmbClient, SmbCredentials, SmbDirent, SmbDirentType, SmbOptions, SmbStat};
+use pavao::{SmbClient, SmbCredentials, SmbDirent, SmbDirentType, SmbOptions};
 use std::error::Error;
 use std::path::PathBuf;
 use std::process::Command;
@@ -7,13 +7,11 @@ use std::process::Command;
 pub fn mk_file_smb_client_connect(
     share_to_mount: mk_lib_database::mk_lib_database_network_share::DBShareList,
 ) -> Result<SmbClient, Box<dyn Error>> {
-    let mut smb_workgroup = "WORKGROUP";
-    if share_to_mount.mm_network_share_workgroup.is_some() {
-        smb_workgroup = share_to_mount
-            .mm_network_share_workgroup
-            .as_deref()
-            .unwrap_or("WORKGROUP");
-    }
+    let smb_workgroup = share_to_mount
+        .mm_network_share_workgroup
+        .as_deref()
+        .filter(|w| !w.is_empty())
+        .unwrap_or("WORKGROUP");
     let client = SmbClient::new(
         SmbCredentials::default()
             .server(format!("smb://{}", share_to_mount.mm_network_share_ip))
@@ -32,13 +30,7 @@ pub fn mk_file_smb_client_connect(
             )
             .workgroup(smb_workgroup),
         SmbOptions::default().one_share_per_server(true),
-    )
-    .unwrap();
-    println!("IP: {:?}", share_to_mount.mm_network_share_ip);
-    println!("Path: {:?}", share_to_mount.mm_network_share_path);
-    //println!("User: {:?}", share_to_mount.mm_share_auth_user);
-    //println!("Pass: {:?}", share_to_mount.mm_share_auth_password.unwrap());
-    println!("Workgroup: {:?}", smb_workgroup);
+    )?;
     Ok(client)
 }
 
@@ -56,27 +48,32 @@ pub struct File_Metadata {
 }
 
 // tree(&client, "/");
-pub fn mk_file_smb_client_tree(client: &SmbClient, uri: &str) -> Vec<File_Metadata> {
+pub fn mk_file_smb_client_tree(
+    client: &SmbClient,
+    uri: &str,
+) -> Result<Vec<File_Metadata>, Box<dyn Error>> {
     let mut file_list: Vec<File_Metadata> = vec![];
-    for entity in client.list_dir(uri).unwrap().into_iter() {
+    for entity in client.list_dir(uri)?.into_iter() {
         let entity_uri = mk_file_smb_client_entity_uri(&entity, uri);
-        let stat = client.stat(entity_uri.as_str()).unwrap();
-        let mut new_file = File_Metadata {
+        let is_dir = entity.get_type() == SmbDirentType::Dir;
+        file_list.push(File_Metadata {
             name: entity_uri,
-            directory: false,
-        };
-        if entity.get_type() == SmbDirentType::Dir {
-            new_file.directory = true;
-        }
-        file_list.push(new_file);
+            directory: is_dir,
+        });
     }
-    file_list
+    Ok(file_list)
 }
 
 pub fn mk_file_smb_client_tree_smbclient(
     share_to_mount: &mk_lib_database::mk_lib_database_network_share::DBShareList,
     uri: &str,
 ) -> Result<Vec<File_Metadata>, Box<dyn Error>> {
+    // smbclient's `-c` argument is a script: commands are separated by `;`
+    // and paths are quoted with `"`. A uri containing either character could
+    // inject additional smbclient commands, so reject it up front.
+    if uri.contains([';', '"', '\n', '\r', '\\']) {
+        return Err(format!("smbclient path contains disallowed characters: {uri:?}").into());
+    }
     let mut smb_command = Command::new("smbclient");
     let share_uri = format!(
         "//{}/{}",
@@ -100,10 +97,17 @@ pub fn mk_file_smb_client_tree_smbclient(
         }
     }
     if let Some(user) = share_to_mount.mm_share_auth_user.as_deref() {
+        // The `-U user%pass` form exposes the password to anything that can
+        // read this process's argv (ps, /proc). Reject `%` in the credentials
+        // so a malicious password can't escape the user field; a follow-up
+        // should move to an auth file via `-A` to keep the secret off argv.
         let pass = share_to_mount
             .mm_share_auth_password
             .as_deref()
             .unwrap_or_default();
+        if user.contains('%') || pass.contains('%') || user.contains('\n') || pass.contains('\n') {
+            return Err("smb credentials contain disallowed characters".into());
+        }
         smb_command.arg("-U").arg(format!("{}%{}", user, pass));
     } else {
         smb_command.arg("-N");
@@ -151,15 +155,4 @@ fn mk_file_smb_client_entity_uri(entity: &SmbDirent, path: &str) -> String {
     let mut p = PathBuf::from(path);
     p.push(PathBuf::from(entity.name()));
     p.as_path().to_string_lossy().to_string()
-}
-
-fn mk_file_smb_client_print_entry(entity: &SmbDirent, stat: &SmbStat) {
-    println!(
-        "{:32}\t{}\t{}\t{}\t{:?}",
-        entity.name(),
-        stat.uid,
-        stat.gid,
-        stat.size,
-        stat.modified,
-    );
 }
