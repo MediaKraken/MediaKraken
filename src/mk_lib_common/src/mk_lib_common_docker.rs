@@ -13,160 +13,99 @@ use futures::StreamExt;
 // use docker_api::models::SwarmInfo;
 // use docker_api::models::JoinTokens;
 
-pub async fn mk_common_docker_container_inspect(id: String) -> Result<Vec<String>> {
+pub async fn mk_common_docker_container_inspect(id: String) -> Result<String> {
     let docker = Docker::unix("/var/run/docker.sock");
-    let logs_list: Vec<String> = Vec::new();
-    match docker.containers().get(&id).inspect().await {
-        Ok(container) => println!("{:#?}", container),
-        Err(e) => eprintln!("Error: {}", e),
-    };
-    Ok(logs_list)
+    let container = docker.containers().get(&id).inspect().await?;
+    Ok(format!("{:#?}", container))
 }
 
 pub async fn mk_common_docker_container_list() -> Result<Vec<String>> {
     let docker = Docker::unix("/var/run/docker.sock");
-    let container_list: Vec<String> = Vec::new();
     let opts = ContainerListOpts::builder().all(true).build();
-    match docker.containers().list(&opts).await {
-        Ok(containers) => {
-            containers.into_iter().for_each(|container| {
-                println!(
-                    "{}\t{}\t{:?}\t{}\t{}",
-                    &container.id.unwrap_or_default()[..12],
-                    container.image.unwrap_or_default(),
-                    container.state,
-                    container.status.unwrap_or_default(),
-                    container.names.map(|n| n[0].to_owned()).unwrap_or_default()
-                );
-            });
-        }
-        Err(e) => eprintln!("Error: {}", e),
-    }
-    Ok(container_list)
+    let containers = docker.containers().list(&opts).await?;
+    let rows = containers
+        .into_iter()
+        .map(|container| {
+            let id = container.id.unwrap_or_default();
+            let id_short = id.get(..12).unwrap_or(id.as_str()).to_string();
+            format!(
+                "{}\t{}\t{:?}\t{}\t{}",
+                id_short,
+                container.image.unwrap_or_default(),
+                container.state,
+                container.status.unwrap_or_default(),
+                container
+                    .names
+                    .and_then(|n| n.into_iter().next())
+                    .unwrap_or_default()
+            )
+        })
+        .collect();
+    Ok(rows)
 }
 
-pub async fn mk_common_docker_container_logs(id: String) -> Result<Vec<String>> {
+pub async fn mk_common_docker_container_logs(id: String) -> Result<String> {
     let docker = Docker::unix("/var/run/docker.sock");
-    let logs_list: Vec<String> = Vec::new();
     let container = docker.containers().get(&id);
-    let logs_stream = container.logs(&LogsOpts::builder().stdout(true).stderr(true).build());
-    let logs: Vec<_> = logs_stream
-        .map(|chunk| match chunk {
-            Ok(chunk) => chunk.to_vec(),
-            Err(e) => {
-                eprintln!("Error: {e}");
-                vec![]
-            }
-        })
-        .collect::<Vec<_>>()
-        .await
-        .into_iter()
-        .flatten()
-        .collect::<Vec<_>>();
-    print!("{}", String::from_utf8_lossy(&logs));
-    Ok(logs_list)
+    let mut logs_stream = container.logs(&LogsOpts::builder().stdout(true).stderr(true).build());
+    let mut buffer: Vec<u8> = Vec::new();
+    while let Some(chunk) = logs_stream.next().await {
+        buffer.extend_from_slice(&chunk?);
+    }
+    Ok(String::from_utf8_lossy(&buffer).into_owned())
 }
 
 pub async fn mk_common_docker_container_stats(id: String) -> Result<Vec<String>> {
     let docker = Docker::unix("/var/run/docker.sock");
-    let stats_list: Vec<String> = Vec::new();
-    while let Some(result) = docker.containers().get(&id).stats().next().await {
-        match result {
-            Ok(stat) => println!("{:?}", stat),
-            Err(e) => eprintln!("Error: {}", e),
-        }
+    let container = docker.containers().get(&id);
+    let mut stats_stream = container.stats();
+    let mut stats_list = Vec::new();
+    while let Some(result) = stats_stream.next().await {
+        stats_list.push(format!("{:?}", result?));
     }
     Ok(stats_list)
 }
 
-pub async fn mk_common_docker_service_inspect(service: String) -> Result<Vec<String>> {
+pub async fn mk_common_docker_service_inspect(service: String) -> Result<String> {
     let docker = Docker::unix("/var/run/docker.sock");
-    let logs_list: Vec<String> = Vec::new();
-    match docker.services().get(&service).inspect().await {
-        Ok(service) => println!("{:#?}", service),
-        Err(e) => eprintln!("Error: {}", e),
-    };
-    Ok(logs_list)
+    let info = docker.services().get(&service).inspect().await?;
+    Ok(format!("{:#?}", info))
 }
 
 pub async fn mk_common_docker_service_list() -> Result<Vec<String>> {
     let docker = Docker::unix("/var/run/docker.sock");
-    let logs_list: Vec<String> = Vec::new();
-    match docker
+    let services = docker
         .services()
         .list(&ServiceListOpts::builder().status(true).build())
-        .await
-    {
-        Ok(services) => {
-            for s in services {
-                #[cfg(debug_assertions)]
-                {
-                    // mk_lib_logging::mk_logging_post_elk(
-                    //     std::module_path!(),
-                    //     json!({ "service": s }),
-                    // )
-                    // .await
-                    // .unwrap();
-                }
-            }
-        }
-        Err(e) => eprintln!("Error: {}", e),
-    }
-    Ok(logs_list)
+        .await?;
+    Ok(services.into_iter().map(|s| format!("{:#?}", s)).collect())
 }
 
-pub async fn mk_common_docker_service_logs(service: String) -> Result<Vec<String>> {
+pub async fn mk_common_docker_service_logs(service: String) -> Result<String> {
     let docker = Docker::unix("/var/run/docker.sock");
-    let logs_list: Vec<String> = Vec::new();
     let service = docker.services().get(&service);
-    let logs_stream = service.logs(&LogsOpts::builder().stdout(true).stderr(true).build());
-    let logs: Vec<_> = logs_stream
-        .map(|chunk| match chunk {
-            Ok(chunk) => chunk.to_vec(),
-            Err(e) => {
-                eprintln!("Error: {}", e);
-                vec![]
-            }
-        })
-        .collect::<Vec<_>>()
-        .await
-        .into_iter()
-        .flatten()
-        .collect::<Vec<_>>();
-    print!("{}", String::from_utf8_lossy(&logs));
-    Ok(logs_list)
+    let mut logs_stream = service.logs(&LogsOpts::builder().stdout(true).stderr(true).build());
+    let mut buffer: Vec<u8> = Vec::new();
+    while let Some(chunk) = logs_stream.next().await {
+        buffer.extend_from_slice(&chunk?);
+    }
+    Ok(String::from_utf8_lossy(&buffer).into_owned())
 }
 
-pub async fn mk_common_docker_volume_inspect(volume: String) -> Result<Vec<String>> {
+pub async fn mk_common_docker_volume_inspect(volume: String) -> Result<String> {
     let docker = Docker::unix("/var/run/docker.sock");
-    let logs_list: Vec<String> = Vec::new();
-    match docker.volumes().get(&volume).inspect().await {
-        Ok(info) => println!("{:#?}", info),
-        Err(e) => eprintln!("Error: {}", e),
-    };
-    Ok(logs_list)
+    let info = docker.volumes().get(&volume).inspect().await?;
+    Ok(format!("{:#?}", info))
 }
 
 pub async fn mk_common_docker_volume_list() -> Result<Vec<String>> {
     let docker = Docker::unix("/var/run/docker.sock");
-    let logs_list: Vec<String> = Vec::new();
-    match docker.volumes().list(&Default::default()).await {
-        Ok(volumes) => {
-            for v in volumes.volumes {
-                #[cfg(debug_assertions)]
-                {
-                    // mk_lib_logging::mk_logging_post_elk(
-                    //     std::module_path!(),
-                    //     json!({ "volume": v }),
-                    // )
-                    // .await
-                    // .unwrap();
-                }
-            }
-        }
-        Err(e) => eprintln!("Error: {}", e),
-    };
-    Ok(logs_list)
+    let volumes = docker.volumes().list(&Default::default()).await?;
+    Ok(volumes
+        .volumes
+        .into_iter()
+        .map(|v| format!("{:#?}", v))
+        .collect())
 }
 
 pub async fn mk_common_docker_info() -> Result<SystemInfo> {

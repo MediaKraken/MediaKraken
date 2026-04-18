@@ -3,9 +3,9 @@
 use bytesize::ByteSize;
 
 pub fn mk_lib_common_bits(bytes: u64, si: bool) -> String {
-    let mut s = ByteSize(bytes * 8).to_string_as(si);
-    s.pop();
-    format!("{}bits", s)
+    let s = ByteSize(bytes.saturating_mul(8)).to_string_as(si);
+    let without_byte_suffix = s.strip_suffix('B').unwrap_or(s.as_str());
+    format!("{without_byte_suffix}bits")
 }
 
 pub fn mk_lib_common_bytesize(

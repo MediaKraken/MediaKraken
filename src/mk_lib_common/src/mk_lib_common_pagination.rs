@@ -92,7 +92,7 @@ class="px-3 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-2
                                 p.get() as i64,
                                 locale_name
                             )
-                    );
+                    )?;
                 }
 
                 PageItem::CurrentPage(p) => {
