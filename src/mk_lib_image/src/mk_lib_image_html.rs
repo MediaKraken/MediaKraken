@@ -1,5 +1,5 @@
 use std::error::Error;
-use wkhtmlapp::{ImageBuilder, Source};
+use wkhtmlapp::{ImgApp, WkhtmlInput};
 
 /// Render the supplied HTML fragment to an image file at `output_path`.
 ///
@@ -11,10 +11,8 @@ pub async fn mk_lib_image_render_html(
     output_path: String,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     tokio::task::spawn_blocking(move || -> Result<(), Box<dyn Error + Send + Sync>> {
-        ImageBuilder::new(Source::Html(html_content))
-            .output_file(&output_path)
-            .build()?
-            .run()?;
+        let mut image_app = ImgApp::new()?;
+        image_app.run(WkhtmlInput::Html(&html_content), &output_path)?;
         Ok(())
     })
     .await?
