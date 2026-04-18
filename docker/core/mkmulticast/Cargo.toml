@@ -16,20 +16,12 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-chrono = { version = "0.4.43", features = ["serde"] }
 # 0.31.0 breaks datalink
 pnet = "0.30.0"
-reqwest = { version = "0.12.28", default-features = false, features = [
-    "json",
-    "rustls-tls",
-] }
-serde_json = "1.0.148"
 shiplift = { version = "0.7", default-features = false, features = [
     "unix-socket",
 ] }
-socket2 = { version = "0.5.9", features = ["all"] }
-stdext = "0.3.3"
-tokio = { version = "1.49.0", features = ["full"] }
+tokio = { version = "1.49.0", features = ["macros", "net", "rt-multi-thread"] }
 
 [dev-dependencies]
 tokio-test = "*"
