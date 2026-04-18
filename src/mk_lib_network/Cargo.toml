@@ -10,7 +10,6 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_file = { version = "0.0.212", registry = "kellnr" }
 mk_lib_logging = { version = "0.0.204", registry = "kellnr" }
 
 bytes = "1.11.0"
@@ -52,6 +51,7 @@ ssh-rs = { version = "0.5.0", features = ["scp"] }
 suppaftp = { version = "6.3.0", features = ["native-tls"] }
 surge-ping = "0.8.3"
 telnet = "0.2.4"
+tempfile = "3.12.0"
 tokio = { version = "1.49.0", features = ["full"] }
 transmission-rpc = "0.5.0"
 wakey = "0.3.0"

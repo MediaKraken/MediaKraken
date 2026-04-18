@@ -121,8 +121,8 @@ pub async fn mk_lib_database_network_share_insert(
     let path_name = network_share_path.replace("\\\\", "/");
     let path_vec: Vec<&str> = path_name.splitn(3, '/').collect();
     sqlx::query(
-        r#"insert into mm_network_shares (mm_network_share_guid, mm_network_share_ip, 
-        mm_network_share_path, mm_network_share_comment, mm_network_share_version) 
+        r#"insert into mm_network_shares (mm_network_share_guid, mm_network_share_ip,
+        mm_network_share_path, mm_network_share_comment, mm_network_share_version)
         values ($1, $2, $3, $4, $5)"#,
     )
     .bind(new_guid)
@@ -134,6 +134,41 @@ pub async fn mk_lib_database_network_share_insert(
     .await?;
     transaction.commit().await?;
     Ok(new_guid)
+}
+
+/// Insert-or-ignore upsert that collapses the existence check and insert into
+/// a single statement, eliminating the exists/insert race window. Requires a
+/// UNIQUE index on (mm_network_share_ip, mm_network_share_path).
+pub async fn mk_lib_database_network_share_upsert(
+    sqlx_pool: &sqlx::PgPool,
+    network_share_ip: std::net::IpAddr,
+    network_share_path: &str,
+    network_share_comment: &str,
+    network_share_version: i16,
+) -> Result<Option<uuid::Uuid>, sqlx::Error> {
+    let new_guid = uuid::Uuid::now_v7();
+    let path_name = network_share_path.replace("\\\\", "/");
+    let path_vec: Vec<&str> = path_name.splitn(3, '/').collect();
+    let Some(path_component) = path_vec.get(1).filter(|s| !s.is_empty()) else {
+        return Ok(None);
+    };
+    let mut transaction = sqlx_pool.begin().await?;
+    let row: Option<(uuid::Uuid,)> = sqlx::query_as(
+        r#"insert into mm_network_shares (mm_network_share_guid, mm_network_share_ip,
+        mm_network_share_path, mm_network_share_comment, mm_network_share_version)
+        values ($1, $2, $3, $4, $5)
+        on conflict (mm_network_share_ip, mm_network_share_path) do nothing
+        returning mm_network_share_guid"#,
+    )
+    .bind(new_guid)
+    .bind(network_share_ip)
+    .bind(*path_component)
+    .bind(network_share_comment)
+    .bind(network_share_version)
+    .fetch_optional(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(row.map(|(guid,)| guid))
 }
 
 pub async fn mk_lib_database_network_share_update_user_info(
