@@ -49,8 +49,8 @@ pub async fn mk_lib_database_library_path_audit_read(
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBLibraryPathStatus {
-    mm_media_dir_path: String,
-    mm_media_dir_status: String,
+    pub mm_media_dir_path: String,
+    pub mm_media_dir_status: String,
 }
 
 pub async fn mk_lib_database_library_path_status(

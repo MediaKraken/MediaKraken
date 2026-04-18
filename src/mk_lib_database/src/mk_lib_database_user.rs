@@ -51,7 +51,7 @@ impl Default for User {
 #[async_trait]
 impl Authentication<User, i64, PgPool> for User {
     async fn load_user(userid: i64, pool: Option<&PgPool>) -> Result<User, anyhow::Error> {
-        let pool = pool.unwrap();
+        let pool = pool.ok_or_else(|| anyhow::anyhow!("no PgPool provided to load_user"))?;
         User::get_user(userid, pool)
             .await
             .ok_or_else(|| anyhow::anyhow!("Could not load user"))

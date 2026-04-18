@@ -232,9 +232,12 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut *transaction)
         .await?;
         let new_guid = uuid::Uuid::now_v7();
-        sqlx::query(r#"INSERT INTO mm_share_auth (mm_share_auth_guid, mm_share_auth_user, mm_share_auth_password) 
-        values ($1, 'guest', pgp_sym_encrypt('guest', 'fake-strong-key'));"#)
+        let share_auth_key = std::env::var("MK_SHARE_AUTH_KEY")
+            .unwrap_or_else(|_| "fake-strong-key".to_string());
+        sqlx::query(r#"INSERT INTO mm_share_auth (mm_share_auth_guid, mm_share_auth_user, mm_share_auth_password)
+        values ($1, 'guest', pgp_sym_encrypt('guest', $2));"#)
             .bind(new_guid)
+            .bind(share_auth_key)
             .execute(&mut *transaction)
             .await?;
         sqlx::query(r#"ALTER TABLE mm_network_shares ADD COLUMN mm_network_share_workgroup text;"#)
