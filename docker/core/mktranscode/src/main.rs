@@ -1,15 +1,27 @@
 use mk_lib_common::mk_lib_common_ffmpeg;
-use mk_lib_database;
-use mk_lib_rabbitmq;
 use serde_json::{Value, json};
 use std::error::Error;
 use std::path::Path;
+use std::time::Duration;
 use tokio::process::Command;
-use tokio::sync::Notify;
+use tokio::signal;
+use tokio::time::timeout;
 
 const STREAM2CHROMECAST_PATH: &str = "/mediakraken/stream2chromecast/stream2chromecast.py";
+const COMMAND_TIMEOUT: Duration = Duration::from_secs(60 * 60);
 
 async fn run_cast_command(device_name: &str, command_flag: &str, extra: Option<&str>) {
+    if device_name.is_empty() || device_name.starts_with('-') {
+        eprintln!("mktranscode: cast skipped, invalid device_name '{device_name}'");
+        return;
+    }
+    if let Some(extra_arg) = extra
+        && extra_arg.starts_with('-')
+    {
+        eprintln!("mktranscode: cast skipped, argument '{extra_arg}' looks like a flag");
+        return;
+    }
+
     let mut process = Command::new("python3");
     process.args([
         STREAM2CHROMECAST_PATH,
@@ -20,7 +32,19 @@ async fn run_cast_command(device_name: &str, command_flag: &str, extra: Option<&
     if let Some(extra_arg) = extra {
         process.arg(extra_arg);
     }
-    let _result = process.status().await;
+
+    match timeout(COMMAND_TIMEOUT, process.status()).await {
+        Ok(Ok(status)) if status.success() => {}
+        Ok(Ok(status)) => {
+            eprintln!("mktranscode: stream2chromecast exited with status {status}");
+        }
+        Ok(Err(error)) => {
+            eprintln!("mktranscode: failed to spawn stream2chromecast ({error})");
+        }
+        Err(_) => {
+            eprintln!("mktranscode: stream2chromecast timed out after {COMMAND_TIMEOUT:?}");
+        }
+    }
 }
 
 fn json_value_to_string(value: &Value) -> Option<String> {
@@ -106,79 +130,118 @@ fn ebook_conversion_targets(json_message: &Value) -> Option<(String, String)> {
     ))
 }
 
+async fn run_conversion(binary: &str, args: &[&str]) -> Result<(), String> {
+    let output = match timeout(COMMAND_TIMEOUT, Command::new(binary).args(args).output()).await {
+        Ok(Ok(output)) => output,
+        Ok(Err(error)) => return Err(format!("{binary} unavailable ({error})")),
+        Err(_) => return Err(format!("{binary} timed out after {COMMAND_TIMEOUT:?}")),
+    };
+
+    if output.status.success() {
+        return Ok(());
+    }
+
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    Err(format!(
+        "{binary} failed with status {}: {}",
+        output.status,
+        stderr.trim()
+    ))
+}
+
 async fn convert_ebook(json_message: &Value) {
     let Some((input_path, output_path)) = ebook_conversion_targets(json_message) else {
         eprintln!("mktranscode: ebook conversion skipped, missing input/output parameters");
         return;
     };
 
-    let calibre_result = Command::new("ebook-convert")
-        .args([&input_path, &output_path])
-        .status()
-        .await;
-
-    match calibre_result {
-        Ok(status) if status.success() => return,
-        Ok(status) => {
-            eprintln!(
-                "mktranscode: ebook-convert failed with status {status}, falling back to pandoc"
-            );
-        }
-        Err(error) => {
-            eprintln!("mktranscode: ebook-convert unavailable ({error}), falling back to pandoc");
+    match run_conversion("ebook-convert", &[&input_path, &output_path]).await {
+        Ok(()) => return,
+        Err(reason) => {
+            eprintln!("mktranscode: {reason}, falling back to pandoc");
         }
     }
 
-    let pandoc_result = Command::new("pandoc")
-        .args([&input_path, "-o", &output_path])
-        .status()
-        .await;
+    if let Err(reason) = run_conversion("pandoc", &[&input_path, "-o", &output_path]).await {
+        eprintln!("mktranscode: pandoc ebook conversion failed: {reason}");
+    }
+}
 
-    match pandoc_result {
-        Ok(status) if status.success() => {}
-        Ok(status) => {
-            eprintln!("mktranscode: pandoc ebook conversion failed with status {status}");
-        }
-        Err(error) => {
-            eprintln!("mktranscode: pandoc unavailable for ebook conversion ({error})");
-        }
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
     }
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    // open the database
     let (sqlx_pool_rw, sqlx_pool_ro) =
-        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120)
-            .await
-            .unwrap();
-    let _results = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(
-        &sqlx_pool_ro,
-        false,
-    )
-    .await;
+        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(1, 120).await?;
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
+        .await?;
 
-    // pull options for metadata/chapters/images location
-    let option_json: serde_json::Value =
+    let _option_json =
         mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool_ro)
-            .await
-            .unwrap();
+            .await?;
 
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mktranscode")
-            .await
-            .unwrap();
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mktranscode").await?;
 
     let mut rabbit_consumer =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mktranscode", &rabbit_channel)
-            .await
-            .unwrap();
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mktranscode", &rabbit_channel).await?;
 
-    tokio::spawn(async move {
-        while let Some(msg) = rabbit_consumer.recv().await {
-            if let Some(payload) = msg.content {
-                let json_message: Value =
-                    serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
+    loop {
+        tokio::select! {
+            _ = shutdown_signal() => {
+                eprintln!("mktranscode: shutdown signal received");
+                return Ok(());
+            }
+            msg = rabbit_consumer.recv() => {
+                let Some(msg) = msg else {
+                    eprintln!("mktranscode: rabbit consumer closed");
+                    return Ok(());
+                };
+
+                let Some(payload) = msg.content else {
+                    if let Some(deliver) = msg.deliver {
+                        let _ = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
+                            &rabbit_channel,
+                            deliver.delivery_tag(),
+                        )
+                        .await;
+                    }
+                    continue;
+                };
+
+                let json_message: Value = match serde_json::from_slice(&payload) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        eprintln!("mktranscode: malformed payload ({error})");
+                        if let Some(deliver) = msg.deliver {
+                            let _ = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
+                                &rabbit_channel,
+                                deliver.delivery_tag(),
+                            )
+                            .await;
+                        }
+                        continue;
+                    }
+                };
+
                 if json_message["Type"] == "Roku" {
                     if json_message["Subtype"] == "Thumbnail" {
                         //common_hardware_roku_bif.com_roku_create_bif(&json_message["Media Path"].to_string());
@@ -186,21 +249,43 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 } else if json_message["Type"] == "HDHomeRun" {
                 } else if json_message["Type"] == "FFMPEG" {
                     if json_message["Subtype"] == "Probe" {
-                        // scan media file via ffprobe
-                        let ffprobe_data: serde_json::Value =
-                            mk_lib_common_ffmpeg::mk_common_ffmpeg_get_info(
-                                &json_message["Media Path"].to_string(),
-                            )
-                            .await
-                            .unwrap();
-                        let tmp_uuid =
-                            uuid::Uuid::parse_str(&json_message["Media UUID"].to_string()).unwrap();
-                        let _result = mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_ffmpeg_update_by_uuid(
-                        &sqlx_pool_rw,
-                        tmp_uuid,
-                        ffprobe_data,
-                    )
-                    .await;
+                        let media_path =
+                            json_message["Media Path"].as_str().unwrap_or_default();
+                        if media_path.is_empty() {
+                            eprintln!("mktranscode: ffprobe skipped, missing 'Media Path'");
+                        } else {
+                            let media_uuid_str =
+                                json_message["Media UUID"].as_str().unwrap_or_default();
+                            match uuid::Uuid::parse_str(media_uuid_str) {
+                                Ok(tmp_uuid) => {
+                                    match mk_lib_common_ffmpeg::mk_common_ffmpeg_get_info(media_path).await {
+                                        Ok(ffprobe_data) => {
+                                            if let Err(error) = mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_ffmpeg_update_by_uuid(
+                                                &sqlx_pool_rw,
+                                                tmp_uuid,
+                                                ffprobe_data,
+                                            )
+                                            .await
+                                            {
+                                                eprintln!(
+                                                    "mktranscode: ffprobe db update failed for {tmp_uuid} ({error})"
+                                                );
+                                            }
+                                        }
+                                        Err(error) => {
+                                            eprintln!(
+                                                "mktranscode: ffprobe failed for '{media_path}' ({error})"
+                                            );
+                                        }
+                                    }
+                                }
+                                Err(error) => {
+                                    eprintln!(
+                                        "mktranscode: ffprobe skipped, invalid Media UUID '{media_uuid_str}' ({error})"
+                                    );
+                                }
+                            }
+                        }
                     } else if json_message["Subtype"] == "Cast" {
                         let device_name = json_message["Device"].as_str().unwrap_or_default();
                         if json_message["Command"] == "Chapter Back" {
@@ -223,20 +308,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         } else if json_message["Command"] == "Volume Down" {
                             run_cast_command(device_name, "-voldown", None).await;
                         } else if json_message["Command"] == "Volume Set" {
-                            let volume = json_message["Data"]
-                                .as_str()
-                                .map(String::from)
-                                .unwrap_or_else(|| json_message["Data"].to_string());
-                            run_cast_command(device_name, "-setvol", Some(&volume)).await;
+                            if let Some(volume) = json_value_to_string(&json_message["Data"]) {
+                                run_cast_command(device_name, "-setvol", Some(&volume)).await;
+                            } else {
+                                eprintln!("mktranscode: Volume Set skipped, missing 'Data'");
+                            }
                         } else if json_message["Command"] == "Volume Up" {
                             run_cast_command(device_name, "-volup", None).await;
                         }
                     } else if json_message["Subtype"] == "ChapterImage" {
                         // begin image generation
-                        let mut chapter_image_list = json!({});
-                        let mut chapter_count: i16 = 0;
-                        let mut first_image: bool = true;
-                        let mut image_file_path: String = String::new();
+                        let chapter_image_list = json!({});
+                        let chapter_count: i16 = 0;
+                        let first_image: bool = true;
+                        let image_file_path: String = String::new();
                         // do this check as not all media has chapters....like LD rips
                         if json_message["Data"].get("chapters").is_some() {
                             // for chapter_data in json_message["Data"]["chapters"].iter() {
@@ -299,6 +384,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             //     first_image = false;
                             // }
                         }
+                        let _ = (&chapter_image_list, &chapter_count, &first_image, &image_file_path);
                         // db_connection.db_update_media_json(json_message["Media UUID"], {
                         //     "ChapterImages": chapter_image_list
                         //});
@@ -416,16 +502,104 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     //     db_connection.db_sync_delete(json_message[0]); // guid of sync record
                     // }
                 }
-                let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
-                    &rabbit_channel,
-                    msg.deliver.unwrap().delivery_tag(),
-                )
-                .await;
+
+                if let Some(deliver) = msg.deliver {
+                    if let Err(error) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
+                        &rabbit_channel,
+                        deliver.delivery_tag(),
+                    )
+                    .await
+                    {
+                        eprintln!("mktranscode: rabbit ack failed ({error})");
+                    }
+                }
             }
         }
-    });
+    }
+}
 
-    let guard = Notify::new();
-    guard.notified().await;
-    Ok(())
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn json_value_to_string_handles_scalars() {
+        assert_eq!(json_value_to_string(&json!("hi")).as_deref(), Some("hi"));
+        assert_eq!(json_value_to_string(&json!(42)).as_deref(), Some("42"));
+        assert_eq!(json_value_to_string(&json!(-7)).as_deref(), Some("-7"));
+        assert_eq!(json_value_to_string(&json!(1.5)).as_deref(), Some("1.5"));
+        assert_eq!(json_value_to_string(&json!(true)).as_deref(), Some("true"));
+        assert!(json_value_to_string(&json!(null)).is_none());
+        assert!(json_value_to_string(&json!({"a": 1})).is_none());
+    }
+
+    #[test]
+    fn cast_stream_argument_detects_url_vs_file() {
+        let message = json!({"Data": {"URL": "https://example.com/stream.m3u8"}});
+        assert_eq!(
+            cast_stream_argument(&message),
+            Some(("-playurl", "https://example.com/stream.m3u8".to_string()))
+        );
+
+        let message = json!({"Data": {"Path": "/media/movie.mkv"}});
+        assert_eq!(
+            cast_stream_argument(&message),
+            Some(("-playfile", "/media/movie.mkv".to_string()))
+        );
+    }
+
+    #[test]
+    fn cast_stream_argument_falls_back_to_scalar_data() {
+        let message = json!({"Data": "http://example.com/a.mp4"});
+        assert_eq!(
+            cast_stream_argument(&message),
+            Some(("-playurl", "http://example.com/a.mp4".to_string()))
+        );
+
+        let message = json!({"Data": null, "Media Path": "/tv/show.mkv"});
+        assert_eq!(
+            cast_stream_argument(&message),
+            Some(("-playfile", "/tv/show.mkv".to_string()))
+        );
+    }
+
+    #[test]
+    fn cast_stream_argument_missing_returns_none() {
+        let message = json!({"Data": {}});
+        assert!(cast_stream_argument(&message).is_none());
+    }
+
+    #[test]
+    fn ebook_conversion_targets_uses_explicit_output() {
+        let message = json!({
+            "Data": {"Input": "/books/a.epub", "Output": "/books/a.mobi"}
+        });
+        assert_eq!(
+            ebook_conversion_targets(&message),
+            Some(("/books/a.epub".to_string(), "/books/a.mobi".to_string()))
+        );
+    }
+
+    #[test]
+    fn ebook_conversion_targets_derives_output_from_format() {
+        let message = json!({
+            "Data": {"Source Path": "/books/a.epub", "Format": ".MOBI"}
+        });
+        let (input, output) = ebook_conversion_targets(&message).unwrap();
+        assert_eq!(input, "/books/a.epub");
+        assert_eq!(output, "/books/a.mobi");
+    }
+
+    #[test]
+    fn ebook_conversion_targets_requires_input() {
+        let message = json!({"Data": {"Format": "mobi"}});
+        assert!(ebook_conversion_targets(&message).is_none());
+    }
+
+    #[test]
+    fn ebook_conversion_targets_requires_output_info() {
+        let message = json!({"Data": {"Input": "/books/a.epub"}});
+        assert!(ebook_conversion_targets(&message).is_none());
+    }
 }
