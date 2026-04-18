@@ -99,6 +99,20 @@ fn extract_zip(archive_file: &str, remove_zip: bool, output_path: &str) -> io::R
     let out_dir = Path::new(output_path);
     std::fs::create_dir_all(out_dir)?;
     let out_dir_canon = std::fs::canonicalize(out_dir)?;
+    // Reject the trivial case where the extraction root is itself a symlink;
+    // every further check is relative to it.
+    if std::fs::symlink_metadata(&out_dir_canon)?
+        .file_type()
+        .is_symlink()
+    {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            format!(
+                "extraction root is a symlink: {}",
+                out_dir_canon.display()
+            ),
+        ));
+    }
 
     for i in 0..archive.len() {
         let mut entry = archive.by_index(i)?;
@@ -106,26 +120,18 @@ fn extract_zip(archive_file: &str, remove_zip: bool, output_path: &str) -> io::R
             Some(path) => path.to_owned(),
             None => continue,
         };
-        let outpath: PathBuf = out_dir_canon.join(&inside);
-        if !outpath.starts_with(&out_dir_canon) {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidData,
-                format!(
-                    "zip entry escapes output directory: {}",
-                    inside.display()
-                ),
-            ));
-        }
 
-        if entry.name().ends_with('/') {
-            std::fs::create_dir_all(&outpath)?;
-        } else {
-            if let Some(p) = outpath.parent() {
-                if !p.exists() {
-                    std::fs::create_dir_all(p)?;
-                }
-            }
-            let outfile = std::fs::File::create(&outpath)?;
+        let is_dir_entry = entry.name().ends_with('/');
+        // Walk each path component and create/validate it, rejecting any
+        // existing symlink along the way. `enclosed_name` guarantees the
+        // relative path has no `..` or absolute components, but any
+        // *existing* component under the output directory could still be a
+        // symlink to elsewhere on the filesystem — a lexical
+        // `starts_with(out_dir)` check would not catch that.
+        let outpath = secure_path_under(&out_dir_canon, &inside, is_dir_entry)?;
+
+        if !is_dir_entry {
+            let outfile = open_file_nofollow(&outpath)?;
             let mut writer = BufWriter::new(outfile);
             std::io::copy(&mut entry, &mut writer)?;
             writer.flush()?;
@@ -143,4 +149,94 @@ fn extract_zip(archive_file: &str, remove_zip: bool, output_path: &str) -> io::R
         std::fs::remove_file(archive_file)?;
     }
     Ok(())
+}
+
+// Resolve `relative` under `root`, creating intermediate directories as needed
+// and failing the moment any existing component is a symlink or a non-directory.
+// If `is_dir_entry` is true, the leaf is also ensured to be a real directory.
+fn secure_path_under(root: &Path, relative: &Path, is_dir_entry: bool) -> io::Result<PathBuf> {
+    use std::path::Component;
+
+    let components: Vec<&std::ffi::OsStr> = relative
+        .components()
+        .map(|c| match c {
+            Component::Normal(name) => Ok(name),
+            _ => Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!(
+                    "zip entry has non-normal path component: {}",
+                    relative.display()
+                ),
+            )),
+        })
+        .collect::<io::Result<_>>()?;
+
+    let mut current = root.to_path_buf();
+    let last_idx = components.len().saturating_sub(1);
+    for (idx, name) in components.iter().enumerate() {
+        current.push(name);
+        let is_last = idx == last_idx;
+        let must_be_dir = !is_last || is_dir_entry;
+
+        match std::fs::symlink_metadata(&current) {
+            Ok(md) => {
+                if md.file_type().is_symlink() {
+                    return Err(io::Error::new(
+                        io::ErrorKind::InvalidData,
+                        format!(
+                            "refusing to traverse existing symlink: {}",
+                            current.display()
+                        ),
+                    ));
+                }
+                if must_be_dir && !md.is_dir() {
+                    return Err(io::Error::new(
+                        io::ErrorKind::InvalidData,
+                        format!(
+                            "existing path component is not a directory: {}",
+                            current.display()
+                        ),
+                    ));
+                }
+            }
+            Err(e) if e.kind() == io::ErrorKind::NotFound => {
+                if must_be_dir {
+                    std::fs::create_dir(&current)?;
+                }
+                // For file leaves the caller creates the file itself.
+            }
+            Err(e) => return Err(e),
+        }
+    }
+    Ok(current)
+}
+
+// Open a file for writing while refusing to follow a symlink at the leaf. We
+// check `symlink_metadata` first; on Unix we additionally pass `O_NOFOLLOW` so
+// the check-to-open race is closed by the kernel.
+fn open_file_nofollow(path: &Path) -> io::Result<std::fs::File> {
+    match std::fs::symlink_metadata(path) {
+        Ok(md) if md.file_type().is_symlink() => {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("refusing to overwrite symlink at leaf: {}", path.display()),
+            ));
+        }
+        Ok(_) | Err(_) => {}
+    }
+    let mut opts = std::fs::OpenOptions::new();
+    opts.write(true).create(true).truncate(true);
+    #[cfg(target_os = "linux")]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        // O_NOFOLLOW on Linux is 0o400000 (0x20000). Matches glibc and musl.
+        opts.custom_flags(0o400000);
+    }
+    #[cfg(any(target_os = "macos", target_os = "freebsd", target_os = "openbsd"))]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        // O_NOFOLLOW on the BSDs / macOS is 0x100.
+        opts.custom_flags(0x0100);
+    }
+    opts.open(path)
 }
