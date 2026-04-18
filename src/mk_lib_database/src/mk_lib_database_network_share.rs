@@ -11,13 +11,22 @@ fn share_auth_key() -> String {
     std::env::var("MK_SHARE_AUTH_KEY").unwrap_or_else(|_| "fake-strong-key".to_string())
 }
 
-fn parse_share_subpath(network_share_path: &str) -> Option<String> {
-    let path_name = network_share_path.replace("\\\\", "/");
-    path_name
-        .splitn(3, '/')
-        .nth(1)
-        .filter(|s| !s.is_empty())
-        .map(str::to_owned)
+/// Extract the share name from a network share path.
+///
+/// Accepts either backslash UNC (`\\host\share\...`, the format nmap's
+/// `smb-enum-shares` emits) or forward-slash UNC (`//host/share/...`). The
+/// host segment is stripped — it is stored separately in
+/// `mm_network_share_ip` — and any deeper subpath is dropped, so only the
+/// share name itself is returned. A bare `share` with no UNC prefix is also
+/// accepted and returned unchanged.
+fn parse_share_name(network_share_path: &str) -> Option<String> {
+    let normalized = network_share_path.replace('\\', "/");
+    let had_unc_prefix = normalized.starts_with("//");
+    let mut segments = normalized.split('/').filter(|s| !s.is_empty());
+    if had_unc_prefix {
+        segments.next()?;
+    }
+    segments.next().map(str::to_owned)
 }
 
 pub async fn mk_lib_database_network_share_exists(
@@ -25,9 +34,9 @@ pub async fn mk_lib_database_network_share_exists(
     network_share_ip: std::net::IpAddr,
     network_share_path: &str,
 ) -> Result<bool, sqlx::Error> {
-    let share_path = parse_share_subpath(network_share_path).ok_or_else(|| {
+    let share_path = parse_share_name(network_share_path).ok_or_else(|| {
         sqlx::Error::Protocol(format!(
-            "invalid share path (expected '//host/share/...', got {network_share_path:?})"
+            "invalid share path (expected '//host/share' or '\\\\host\\share', got {network_share_path:?})"
         ))
     })?;
     let row: (bool,) = sqlx::query_as(
@@ -139,9 +148,9 @@ pub async fn mk_lib_database_network_share_insert(
     network_share_comment: &str,
     network_share_version: i16
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    let share_path = parse_share_subpath(network_share_path).ok_or_else(|| {
+    let share_path = parse_share_name(network_share_path).ok_or_else(|| {
         sqlx::Error::Protocol(format!(
-            "invalid share path (expected '//host/share/...', got {network_share_path:?})"
+            "invalid share path (expected '//host/share' or '\\\\host\\share', got {network_share_path:?})"
         ))
     })?;
     let new_guid = uuid::Uuid::now_v7();
@@ -183,4 +192,57 @@ pub async fn mk_lib_database_network_share_update_user_info(
     .await?;
     transaction.commit().await?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_share_name;
+
+    #[test]
+    fn backslash_unc_returns_share_name_without_host() {
+        assert_eq!(
+            parse_share_name(r"\\192.168.1.5\media").as_deref(),
+            Some("media"),
+        );
+    }
+
+    #[test]
+    fn backslash_unc_with_subpath_drops_subpath() {
+        assert_eq!(
+            parse_share_name(r"\\host\media\movies\2020").as_deref(),
+            Some("media"),
+        );
+    }
+
+    #[test]
+    fn forward_slash_unc_returns_share_name() {
+        assert_eq!(
+            parse_share_name("//192.168.1.5/media").as_deref(),
+            Some("media"),
+        );
+    }
+
+    #[test]
+    fn forward_slash_unc_with_subpath_drops_subpath() {
+        assert_eq!(
+            parse_share_name("//host/media/movies").as_deref(),
+            Some("media"),
+        );
+    }
+
+    #[test]
+    fn bare_share_name_is_returned_as_is() {
+        assert_eq!(parse_share_name("media").as_deref(), Some("media"));
+    }
+
+    #[test]
+    fn empty_string_returns_none() {
+        assert!(parse_share_name("").is_none());
+    }
+
+    #[test]
+    fn unc_without_share_segment_returns_none() {
+        assert!(parse_share_name(r"\\host").is_none());
+        assert!(parse_share_name("//host").is_none());
+    }
 }
