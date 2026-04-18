@@ -12,13 +12,18 @@ pub async fn metadata_guessit(
 ) -> Result<Metadata, Box<dyn Error>> {
     let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
     // check for dupes by name/year
-    let file_name = Path::new(&download_data.mm_download_path.as_ref().unwrap())
+    let download_path = download_data
+        .mm_download_path
+        .as_ref()
+        .ok_or("mm_download_path missing from download queue record")?;
+    let file_name = Path::new(download_path)
         .file_name()
-        .unwrap()
-        .to_os_string()
-        .into_string()
-        .unwrap();
-    let guessit_data: Metadata = Metadata::from(&file_name).unwrap();
+        .ok_or("download path has no file component")?
+        .to_str()
+        .ok_or("download path is not valid UTF-8")?
+        .to_string();
+    let guessit_data: Metadata = Metadata::from(&file_name)
+        .map_err(|e| format!("torrent_name_parser failed on {}: {:?}", file_name, e))?;
     if guessit_data.title().len() > 0 {
         if guessit_data.year().is_some() {
             if guessit_data.title().to_lowercase() == metadata_last_title
@@ -40,9 +45,12 @@ pub async fn metadata_guessit(
             metadata_last_year = 0;
         }
     } else {
-        mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_update_provider(&sqlx_pool,
-                                                                                                                 "ZZ".to_string(),
-                                                                                                                 download_data.mm_download_guid).await.unwrap();
+        mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_update_provider(
+            sqlx_pool,
+            "ZZ".to_string(),
+            download_data.mm_download_guid,
+        )
+        .await?;
     }
     //Ok((metadata_uuid, guessit_data))
     Ok(guessit_data)

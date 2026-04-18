@@ -15,6 +15,10 @@ const TMDB_RATE_LIMIT_STATUS_CODE: i64 = 25;
 const TMDB_RATE_LIMIT_RETRY_ATTEMPTS: u8 = 5;
 const TMDB_RATE_LIMIT_RETRY_DELAY_SECONDS: u64 = 2;
 
+fn debug_logging_enabled() -> bool {
+    env::var("DEBUG").ok().as_deref() == Some("true")
+}
+
 async fn tmdb_fetch_json_with_retry(
     url: String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
@@ -91,7 +95,7 @@ pub async fn provider_tmdb_person_fetch(
     let result_json = provider_tmdb_person_fetch_by_id(tmdb_id, tmdb_api_key)
         .await
         .unwrap();
-    if env::var("DEBUG").unwrap() == "true" {
+    if debug_logging_enabled() {
         mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
             json!({ "Type": "Person", "Module": std::module_path!(), "Result": result_json }),
         )
@@ -102,7 +106,7 @@ pub async fn provider_tmdb_person_fetch(
         println!("Skip Person: {}", tmdb_id);
         return;
     }
-    if env::var("DEBUG").unwrap() == "true" {
+    if debug_logging_enabled() {
         mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
             json!({ "Type": "Person After", "Module": std::module_path!() }),
         )
@@ -287,37 +291,22 @@ pub async fn provider_tmdb_meta_info_build(
         .await
         .unwrap();
     let mut poster_file_path = String::new();
-    if result_json.get("poster_path").is_some() && !result_json["poster_path"].is_null() {
-        image_file_path += &result_json["poster_path"].as_str().unwrap().to_string();
-        //println!("ifilepath {}", image_file_path);
+    let poster_path_value = result_json
+        .get("poster_path")
+        .and_then(|v| v.as_str())
+        .filter(|s| !s.is_empty())
+        .map(str::to_string)
+        .or_else(|| {
+            result_json
+                .pointer("/images/profiles/0/file_path")
+                .and_then(|v| v.as_str())
+                .filter(|s| !s.is_empty())
+                .map(str::to_string)
+        });
+    if let Some(poster_rel) = poster_path_value {
+        image_file_path.push_str(&poster_rel);
         let _result = mk_lib_network::mk_download_file_from_url(
-            format!(
-                "https://image.tmdb.org/t/p/original{}",
-                &result_json["poster_path"].as_str().unwrap().to_string()
-            ),
-            &image_file_path,
-        )
-        .await;
-        let _result = mk_lib_image::mk_lib_image::mk_image_file_thumb(&image_file_path);
-        poster_file_path = image_file_path.clone();
-    } else if result_json["images"]["profiles"][0]
-        .get("file_path")
-        .is_some()
-        && !result_json["images"]["profiles"][0]["file_path"].is_null()
-    {
-        image_file_path += &result_json["images"]["profiles"][0]["file_path"]
-            .as_str()
-            .unwrap()
-            .to_string();
-        //println!("ifilepath {}", image_file_path);
-        let _result = mk_lib_network::mk_download_file_from_url(
-            format!(
-                "https://image.tmdb.org/t/p/original{}",
-                &result_json["images"]["profiles"][0]["file_path"]
-                    .as_str()
-                    .unwrap()
-                    .to_string()
-            ),
+            format!("https://image.tmdb.org/t/p/original{}", poster_rel),
             &image_file_path,
         )
         .await;
@@ -329,14 +318,15 @@ pub async fn provider_tmdb_meta_info_build(
         .await
         .unwrap();
     let mut backdrop_file_path = String::new();
-    if result_json.get("backdrop_path").is_some() && !result_json["backdrop_path"].is_null() {
-        image_file_path += &result_json["backdrop_path"].as_str().unwrap().to_string();
-        //println!("iifilepath {}", image_file_path);
+    if let Some(backdrop_rel) = result_json
+        .get("backdrop_path")
+        .and_then(|v| v.as_str())
+        .filter(|s| !s.is_empty())
+        .map(str::to_string)
+    {
+        image_file_path.push_str(&backdrop_rel);
         let _result = mk_lib_network::mk_download_file_from_url(
-            format!(
-                "https://image.tmdb.org/t/p/original{}",
-                &result_json["backdrop_path"].as_str().unwrap().to_string()
-            ),
+            format!("https://image.tmdb.org/t/p/original{}", backdrop_rel),
             &image_file_path,
         )
         .await;
@@ -357,14 +347,13 @@ pub async fn provider_tmdb_meta_info_build(
 }
 
 pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_api_key: &String) {
-    let mut search_text: String = guessit_data.title().to_string().replace(" ", "%20");
-    if guessit_data.year().is_some() {
-        search_text = format!(
-            "{}%20{}",
-            search_text,
-            guessit_data.year().unwrap().to_string()
-        );
+    let mut raw_query = guessit_data.title().to_string();
+    if let Some(year) = guessit_data.year() {
+        raw_query.push(' ');
+        raw_query.push_str(&year.to_string());
     }
+    let search_text: String =
+        url::form_urlencoded::byte_serialize(raw_query.as_bytes()).collect();
     match media_type {
         mk_lib_common_enum_media_type::DLMediaType::MOVIE
         | mk_lib_common_enum_media_type::DLMediaType::MOVIE_EXTRAS
@@ -374,10 +363,9 @@ pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_
             let _url_result = tmdb_fetch_json_with_retry(format!(
                 "https://api.themoviedb.org/3/search/movie\
                 ?api_key={}&include_adult=1&query={}",
-                search_text, tmdb_api_key
+                tmdb_api_key, search_text
             ))
-            .await
-            .unwrap();
+            .await;
         }
         mk_lib_common_enum_media_type::DLMediaType::TV
         | mk_lib_common_enum_media_type::DLMediaType::TV_EPISODE
@@ -389,19 +377,17 @@ pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_
             let _url_result = tmdb_fetch_json_with_retry(format!(
                 "https://api.themoviedb.org/3/search/tv\
                 ?api_key={}&include_adult=1&query={}",
-                search_text, tmdb_api_key
+                tmdb_api_key, search_text
             ))
-            .await
-            .unwrap();
+            .await;
         }
         mk_lib_common_enum_media_type::DLMediaType::PERSON => {
             let _url_result = tmdb_fetch_json_with_retry(format!(
                 "https://api.themoviedb.org/3/search/person\
                 ?api_key={}&include_adult=1&query={}",
-                search_text, tmdb_api_key
+                tmdb_api_key, search_text
             ))
-            .await
-            .unwrap();
+            .await;
         }
         _ => eprintln!("provider_tmdb_search type does not equal any value"),
     }

@@ -341,12 +341,11 @@ pub async fn metadata_fetch(
     } else if provider_name == "themoviedb" {
         if download_data.mm_download_que_type == mk_lib_common_enum_media_type::DLMediaType::PERSON
         {
-            if env::var("DEBUG").unwrap() == "true" {
-                mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
+            if env::var("DEBUG").ok().as_deref() == Some("true") {
+                let _ = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
                     json!({ "Type": "Person", "Module": std::module_path!(), "DL Guid": download_data.mm_download_guid, "Status": download_data.mm_download_status, "Provider": "themoviedb", "ID": download_data.mm_download_provider_id }),
-                    )
-                    .await
-                    .unwrap();
+                )
+                .await;
             }
             provider_tmdb::provider_tmdb_person_fetch(
                 sqlx_pool,
