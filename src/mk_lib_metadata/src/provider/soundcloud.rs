@@ -8,22 +8,25 @@ use tokio_util::compat::TokioAsyncWriteCompatExt;
 pub async fn provider_soundcloud_client(
     soundcloud_client_id: String,
 ) -> Result<Client, std::io::Error> {
-    let client_id = std::env::var(soundcloud_client_id).unwrap();
-    let client = Client::new(&client_id);
-    Ok(client)
+    let client_id = std::env::var(&soundcloud_client_id).map_err(|e| {
+        std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            format!("soundcloud client id env var {} unset: {}", soundcloud_client_id, e),
+        )
+    })?;
+    Ok(Client::new(&client_id))
 }
 
 pub async fn provider_soundcloud_search(
     soundcloud_client: Client,
     band_name: String,
 ) -> Result<Vec<Track>, std::io::Error> {
-    let tracks = soundcloud_client
+    soundcloud_client
         .tracks()
         .query(Some(band_name))
         .get()
         .await
-        .unwrap();
-    Ok(tracks)
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))
 }
 
 pub async fn provider_soundcloud_track_download(

@@ -2,9 +2,14 @@
 
 use mk_lib_network;
 use std::collections::HashMap;
+use url::form_urlencoded;
 
-const BASE_API_URL: &str = "http://imvdb.com/api/v1";
+const BASE_API_URL: &str = "https://imvdb.com/api/v1";
 const BASE_USER_AGENT: &str = "MediaKraken_0.1.6";
+
+fn url_encode(raw: &str) -> String {
+    form_urlencoded::byte_serialize(raw.as_bytes()).collect()
+}
 
 pub async fn provider_imvdb_video_fetch_by_id(
     sqlx_pool: &sqlx::PgPool,
@@ -24,7 +29,7 @@ pub async fn provider_imvdb_video_fetch_by_id(
         ),
         headers,
     )
-    .await.unwrap();
+    .await?;
     let metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
     Ok(metadata_uuid)
 }
@@ -41,8 +46,10 @@ pub async fn provider_imvdb_search_video_by_names(
     let headers = mk_lib_network::mk_lib_network::custom_headers(&custom_headers).await;
     let _result = mk_lib_network::mk_lib_network::mk_data_from_url_to_json_custom_headers(
         format!(
-            "{}/search/videos?q=/{}+{}",
-            BASE_API_URL, band_name.replace(" ", "+"), song_name.replace(" ", "+")
+            "{}/search/videos?q={}+{}",
+            BASE_API_URL,
+            url_encode(&band_name),
+            url_encode(&song_name)
         ),
         headers,
     )
@@ -60,10 +67,7 @@ pub async fn provider_imvdb_search_videos_by_band(
     custom_headers.insert(String::from("Accept"), String::from("application/json"));
     let headers = mk_lib_network::mk_lib_network::custom_headers(&custom_headers).await;
     let _result = mk_lib_network::mk_lib_network::mk_data_from_url_to_json_custom_headers(
-        format!(
-            "{}/search/entities?q=/{}",
-            BASE_API_URL, band_name.replace(" ", "+")
-        ),
+        format!("{}/search/entities?q={}", BASE_API_URL, url_encode(&band_name)),
         headers,
     )
     .await;

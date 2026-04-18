@@ -9,8 +9,7 @@ const M3U_LINE_HEADER: &str = "EXTINF:";
 pub async fn mk_lib_metadata_m3u8_validate_playlist(
     playlist: &str,
 ) -> Result<MediaPlaylist, Box<dyn Error>> {
-    let valid_playlist: MediaPlaylist = playlist.parse::<MediaPlaylist>().unwrap();
-    Ok(valid_playlist)
+    Ok(playlist.parse::<MediaPlaylist>()?)
 }
 
 /*
