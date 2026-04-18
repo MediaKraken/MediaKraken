@@ -3,6 +3,8 @@
 use crate::hash_file_reader::read_file_chunks;
 use std::error::Error;
 
+/// Compute the BLAKE3 digest of `file_to_read` and return it as a lowercase
+/// hex string. Streams the file through a fixed-size buffer.
 pub async fn mk_file_hash_blake3(file_to_read: &str) -> Result<String, Box<dyn Error>> {
     let mut hasher = blake3::Hasher::new();
     read_file_chunks(file_to_read, |chunk| {
