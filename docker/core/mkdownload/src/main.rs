@@ -116,7 +116,7 @@ async fn process_message(json_message: Value) -> Result<(), TaskError> {
 
             mk_lib_network::mk_lib_network::mk_download_file_from_url(
                 url.to_string(),
-                &local_save_path.to_string_lossy(),
+                &local_save_path.to_string_lossy().into_owned(),
             )
             .await
             .map_err(|e| format!("file download failed: {e}"))?;
