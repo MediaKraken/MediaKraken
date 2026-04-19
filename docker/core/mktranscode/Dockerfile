@@ -405,7 +405,11 @@ ADD alpine-minirootfs-x86_64.tar.gz /
 COPY --from=cargo-build-mktranscode /mediakraken/deps/* /
 
 RUN apk update && apk add --no-cache cifs-utils nfs-utils \
- && apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing calibre \
+ && apk add --no-cache \
+      --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
+      --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
+      --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing \
+      python3 calibre \
  && rm -rf /var/cache/apk/*
 
 # Import from builder.
