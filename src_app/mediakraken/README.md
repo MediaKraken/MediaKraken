@@ -10,21 +10,44 @@ apt install libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev
 
 - A small `ApiClient` wrapper around `reqwest`
 - A simple login/config form for the MediaKraken API base URL and bearer token
-- A sample `GET /api/v1/library/summary` request path for initial integration work
+- Tab-based navigation between Home, Scan, Hardware, and Media pages
 - Conditional launch targets for Dioxus mobile (`ios` / `android`) and desktop fallback for local UI development
 
-## Expected API contract
+## Pages
 
-The boilerplate expects a JSON response shaped roughly like this:
+- **Home** — Calls `GET /api/v1/library/summary` to verify connectivity.
+- **Scan** — Opens the device camera (`<input capture="environment">`) and posts
+  the captured UPC to `GET /api/v1/library/ownership?upc=<code>` to check whether
+  the title is already in the user's library.
+- **Hardware** — Lists devices from `GET /api/v1/hardware/devices` and exposes
+  power/mute toggles plus a volume slider that POST to
+  `/api/v1/hardware/devices/{id}/{power|mute|volume}`.
+- **Media** — Browses movies, TV shows, and audio via
+  `GET /api/v1/media/{movies|shows|audio}` and renders a poster grid.
+
+## Expected API contracts
 
 ```json
-{
-  "server_name": "MediaKraken",
-  "version": "0.0.1",
-  "movie_count": 120,
-  "show_count": 45,
-  "music_album_count": 12
-}
+// /api/v1/library/summary
+{ "server_name": "MediaKraken", "version": "0.0.1",
+  "movie_count": 120, "show_count": 45, "music_album_count": 12 }
+
+// /api/v1/library/ownership?upc=786936224290
+{ "upc": "786936224290", "owned": true,
+  "title": "WALL·E", "media_type": "movie", "year": 2008 }
+
+// /api/v1/hardware/devices
+{ "devices": [
+    { "id": "living-room-avr", "name": "Living Room AVR",
+      "kind": "receiver", "powered": true, "volume": 42, "muted": false }
+] }
+
+// /api/v1/media/movies | /shows | /audio
+{ "items": [
+    { "id": "abc123", "title": "Example", "year": 2024,
+      "media_type": "movie", "poster_url": "https://...",
+      "overview": "..." }
+] }
 ```
 
 If your API endpoint differs, update `src/api.rs` and `src/models.rs`.
