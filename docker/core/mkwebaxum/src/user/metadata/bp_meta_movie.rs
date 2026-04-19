@@ -23,7 +23,7 @@ use serde_json::json;
 use sqlx::postgres::{PgPool, PgRow};
 use sqlx::types::chrono::DateTime;
 use sqlx::types::chrono::Utc;
-use sqlx::{FromRow, Row};
+use sqlx::FromRow;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Genre {

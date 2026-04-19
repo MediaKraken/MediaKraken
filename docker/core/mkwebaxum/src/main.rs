@@ -586,7 +586,7 @@ async fn main() {
                     header::CACHE_CONTROL,
                     axum::http::HeaderValue::from_static("public, max-age=31536000, immutable"),
                 ))
-                .service(ServeDir::new("static").follow_symlinks(false)),
+                .service(ServeDir::new("static")),
         )
         .nest_service(
             "/metadata",
@@ -595,7 +595,7 @@ async fn main() {
                     header::CACHE_CONTROL,
                     axum::http::HeaderValue::from_static("public, max-age=3600"),
                 ))
-                .service(ServeDir::new("metadata").follow_symlinks(false)),
+                .service(ServeDir::new("metadata")),
         )
         .layer(
             AuthSessionLayer::<
