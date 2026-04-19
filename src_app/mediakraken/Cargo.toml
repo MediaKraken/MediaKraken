@@ -13,7 +13,7 @@ codegen-units = 1
 dioxus = "0.7.5"
 reqwest = { version = "0.13.2", default-features = false, features = [
     "json",
-    "rustls-tls",
+    "native-tls",
 ] }
 serde = { version = "1.0.228", features = ["derive"] }
 

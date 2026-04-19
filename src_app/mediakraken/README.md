@@ -2,6 +2,10 @@
 
 This crate is a minimal Dioxus starter app intended for iOS and Android clients that call the MediaKraken HTTP API.
 
+# to build desktop
+sudo apt install -y libxdo-dev
+apt install libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev
+
 ## What is included
 
 - A small `ApiClient` wrapper around `reqwest`

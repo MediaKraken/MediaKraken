@@ -77,16 +77,16 @@ mod tests {
 
     #[test]
     fn trims_single_trailing_slash() {
-        assert_eq!(client("https://example.com/").base_url(), "https://example.com");
+        assert_eq!(client("https://www.mediakraken.media/").base_url(), "https://www.mediakraken.media");
     }
 
     #[test]
     fn trims_multiple_trailing_slashes() {
-        assert_eq!(client("https://example.com///").base_url(), "https://example.com");
+        assert_eq!(client("https://www.mediakraken.media///").base_url(), "https://www.mediakraken.media");
     }
 
     #[test]
     fn leaves_clean_url_unchanged() {
-        assert_eq!(client("https://example.com").base_url(), "https://example.com");
+        assert_eq!(client("https://www.mediakraken.media").base_url(), "https://www.mediakraken.media");
     }
 }

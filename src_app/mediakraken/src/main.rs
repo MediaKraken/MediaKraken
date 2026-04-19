@@ -20,7 +20,7 @@ fn main() {
 
 #[component]
 fn App() -> Element {
-    let mut base_url = use_signal(|| "https://mediakraken.example.com".to_string());
+    let mut base_url = use_signal(|| "https://www.mediakraken.media".to_string());
     let mut bearer_token = use_signal(String::new);
     let mut api_state = use_signal(|| ApiState::Idle);
     let http_client = use_signal(ApiClient::default_http_client);
@@ -39,16 +39,13 @@ fn App() -> Element {
 
     rsx! {
         main { class: "app-shell",
-            h1 { "MediaKraken mobile starter" }
-            p {
-                "Use this Dioxus screen as a starting point for Android/iOS clients that talk to the MediaKraken API."
-            }
+            h1 { "MediaKraken" }
             div { class: "form-grid",
                 label { "API base URL"
                     input {
                         value: "{base_url}",
                         oninput: move |event| base_url.set(event.value()),
-                        placeholder: "https://mediakraken.example.com",
+                        placeholder: "https://www.mediakraken.media",
                         autocomplete: "off",
                     }
                 }
