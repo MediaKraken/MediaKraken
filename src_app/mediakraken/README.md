@@ -33,6 +33,20 @@ From the `src_app/` workspace root:
 cargo run -p mediakraken
 ```
 
+### Linux prerequisites
+
+The desktop target embeds a WebKit2GTK WebView. If the app aborts at startup
+with an error such as `failed to load GTK` or a missing
+`libwebkit2gtk-4.1.so.0`, install the system libraries before running:
+
+```bash
+sudo apt install libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev
+```
+
+On Debian/Ubuntu releases that only ship the 4.0 packages, substitute
+`libwebkit2gtk-4.0-dev` for the 4.1 package. See
+`docs/dev_notes/MK_Dioxus.txt` for the full development environment notes.
+
 ## Android / iOS
 
 Use the Dioxus mobile tooling that matches the installed SDKs in your environment, then point the app at a reachable MediaKraken API base URL.
