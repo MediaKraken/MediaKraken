@@ -12,6 +12,3 @@ codegen-units = 1
 [dependencies]
 fltk = { version = "1.5.22", features = ["fltk-bundled"] }
 sqlite = "0.37.0"
-
-[dev-dependencies]
-tokio-test = "*"

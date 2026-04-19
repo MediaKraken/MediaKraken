@@ -154,12 +154,12 @@ impl MyChoice {
         self.frame.label()
     }
 
-    pub fn value(&self) -> i32 {
+    pub fn value(&self) -> Option<i32> {
         let choice = self.choice();
-        if let Some(val) = self.choices.borrow().iter().position(|x| x == &choice) {
-            val as _
-        } else {
-            -1
-        }
+        self.choices
+            .borrow()
+            .iter()
+            .position(|x| x == &choice)
+            .map(|v| v as i32)
     }
 }

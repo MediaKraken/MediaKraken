@@ -1,6 +1,5 @@
 use fltk::{
-    app, app::*, button::*, enums::*, frame::*, group::*, input::*, output::Output, prelude::*,
-    window::*,
+    app, app::*, enums::*, frame::*, group::*, input::*, output::Output, prelude::*, window::*,
 };
 mod choice;
 mod database;
@@ -8,7 +7,6 @@ use std::error::Error;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Message {
-    Increment,
     Scanned,
 }
 
@@ -17,8 +15,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut total_codes: i64 = database::database_upc_known_count(&db_instance)?;
     let app = app::App::default().with_scheme(app::Scheme::Gleam);
     let mut window_main = Window::default().with_size(800, 480); // pi 7" screen default
-
-    let mut button_sync = Button::new(666, 384, 133, 96, "Sync");
 
     let mut choice_media_type = choice::MyChoice::new(20, 20, 90, 30, None);
     choice_media_type.add_choices(&["Media", "CD", "Book", "Misc"]);
@@ -41,14 +37,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     container_upc_codes.set_color(Color::Black);
     container_upc_codes.set_type(PackType::Vertical);
 
-    // setup the event
     let (s, r) = app::channel::<Message>();
     let mut upc_input = IntInput::new(100, 100, 400, 120, "UPC");
     upc_input.set_trigger(CallbackTrigger::EnterKey);
-    upc_input.set_callback({
-        move |_| {
-            s.send(Message::Scanned);
-        }
+    upc_input.set_callback(move |_| {
+        s.send(Message::Scanned);
     });
 
     window_main.end();
@@ -59,64 +52,64 @@ fn main() -> Result<(), Box<dyn Error>> {
     upc_input.set_visible_focus();
 
     while app.wait() {
-        if let Some(msg) = r.recv() {
-            match msg {
-                Message::Increment => {
-                    println!("Increment");
-                }
-                Message::Scanned => {
-                    let scanned_input = upc_input.value();
-                    println!("{}:", scanned_input);
+        if let Some(Message::Scanned) = r.recv() {
+            let scanned_input = upc_input.value();
+            println!("{}:", scanned_input);
 
-                    match scanned_input.parse::<i64>() {
-                        Ok(inp1_val) => {
-                            let media_type = choice_media_type.value();
-                            let mut output_text: String = "No Data".to_string();
+            let output_text = match scanned_input.parse::<i64>() {
+                Ok(upc_value) => match choice_media_type.value() {
+                    Some(media_type) => handle_scan(
+                        &db_instance,
+                        upc_value,
+                        media_type,
+                        &mut total_codes,
+                        &mut frame_upc_known,
+                    ),
+                    None => "Select a media type".to_string(),
+                },
+                Err(_) => "Invalid UPC".to_string(),
+            };
 
-                            let log_text = format!("{} scanned", inp1_val);
-                            let _ = database::database_insert_logs(&db_instance, &log_text);
-
-                            match database::database_upc_owned(&db_instance, inp1_val, media_type) {
-                                Ok(0) => {
-                                    let _ = database::database_upc_insert(
-                                        &db_instance,
-                                        inp1_val,
-                                        media_type,
-                                    );
-                                    output_text = format!("{} - Added", inp1_val);
-                                    let added_log = format!("{} added", inp1_val);
-                                    let _ =
-                                        database::database_insert_logs(&db_instance, &added_log);
-                                    total_codes += 1;
-
-                                    frame_upc_known.set_label(&format!("Known: {}", total_codes));
-                                }
-                                Ok(_) => {
-                                    output_text = format!("{} - DUPLICATE!", inp1_val);
-                                    let duplicate_log = format!("{} duplicate", inp1_val);
-                                    let _ = database::database_insert_logs(
-                                        &db_instance,
-                                        &duplicate_log,
-                                    );
-                                }
-                                Err(_) => {
-                                    output_text = "Database error".to_string();
-                                }
-                            }
-
-                            out.set_value(&output_text);
-                        }
-                        Err(_) => {
-                            out.set_value("Invalid UPC");
-                        }
-                    }
-
-                    upc_input.set_value("");
-                    upc_input.take_focus();
-                    upc_input.set_visible_focus();
-                }
-            }
+            out.set_value(&output_text);
+            upc_input.set_value("");
+            upc_input.take_focus();
+            upc_input.set_visible_focus();
         }
     }
     Ok(())
+}
+
+fn handle_scan(
+    db: &sqlite::Connection,
+    upc_value: i64,
+    media_type: i32,
+    total_codes: &mut i64,
+    frame_upc_known: &mut Frame,
+) -> String {
+    if let Err(err) = database::database_insert_logs(db, &format!("{} scanned", upc_value)) {
+        eprintln!("log insert failed: {}", err);
+    }
+
+    match database::database_upc_insert(db, upc_value, media_type) {
+        Ok(true) => {
+            *total_codes += 1;
+            frame_upc_known.set_label(&format!("Known: {}", total_codes));
+            if let Err(err) = database::database_insert_logs(db, &format!("{} added", upc_value)) {
+                eprintln!("log insert failed: {}", err);
+            }
+            format!("{} - Added", upc_value)
+        }
+        Ok(false) => {
+            if let Err(err) =
+                database::database_insert_logs(db, &format!("{} duplicate", upc_value))
+            {
+                eprintln!("log insert failed: {}", err);
+            }
+            format!("{} - DUPLICATE!", upc_value)
+        }
+        Err(err) => {
+            eprintln!("upc insert failed: {}", err);
+            "Database error".to_string()
+        }
+    }
 }
