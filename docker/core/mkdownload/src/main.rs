@@ -5,12 +5,13 @@ use reqwest::{Client, StatusCode};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::env;
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::{Arc, OnceLock, RwLock};
 use tokio::io::AsyncWriteExt;
-use tokio::sync::{Notify, Semaphore};
+use tokio::sync::Semaphore;
 use tokio::time::{Duration, sleep};
+use validator::ValidateUrl;
 
 type AppError = Box<dyn std::error::Error>;
 type TaskError = String;
@@ -24,6 +25,8 @@ const IA_DEFAULT_OUTPUT_DIR: &str = "/mediakraken/metadata/meta/trailer/internet
 const IA_DEFAULT_STATE_FILE: &str =
     "/mediakraken/metadata/meta/trailer/internet_archive_state.json";
 const IA_DEFAULT_MAX_PAGES: usize = 1;
+// Restrict all user-supplied write paths to this prefix to prevent path traversal.
+const ALLOWED_WRITE_ROOT: &str = "/mediakraken/";
 static DOSAGE_STRIP_CACHE: OnceLock<RwLock<Vec<String>>> = OnceLock::new();
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Default)]
@@ -58,164 +61,194 @@ struct IAArchiveFile {
     format: Option<String>,
 }
 
-async fn process_message(json_message: Value, _option_config_json: &Value) {
-    match json_message["Type"].as_str() {
-        Some("File") => {
-            if let (Some(url), Some(local_save_path)) = (
-                json_message["URL"].as_str(),
-                json_message["Local Save Path"].as_str(),
-            ) {
-                let local_save_path = local_save_path.to_string();
+fn sanitize_local_save_path(raw: &str) -> Result<PathBuf, TaskError> {
+    if raw.is_empty() {
+        return Err("Local Save Path is empty".to_string());
+    }
 
-                if let Err(error) = mk_lib_network::mk_lib_network::mk_download_file_from_url(
-                    url.to_string(),
-                    &local_save_path,
-                )
-                .await
-                {
-                    eprintln!("file download failed: {error}");
-                }
-            } else {
-                eprintln!("File message missing URL or Local Save Path");
-            }
-        }
-        Some("Youtube") => {
-            if let Some(url) = json_message["URL"].as_str() {
-                if !validator::ValidateUrl::validate_url(url) {
-                    eprintln!("Youtube message contains an invalid URL");
-                    return;
-                }
-
-                let mut yt_dlp_command = Command::new("/yt-dlp");
-                yt_dlp_command.arg("--no-progress");
-
-                if let Some(local_save_path) = json_message["Local Save Path"].as_str() {
-                    yt_dlp_command.args(["-o", local_save_path]);
-                }
-
-                let result = yt_dlp_command
-                    .arg(url)
-                    .stdout(Stdio::piped())
-                    .stderr(Stdio::piped())
-                    .output();
-
-                match result {
-                    Ok(output) => {
-                        if !output.status.success() {
-                            let error = String::from_utf8_lossy(&output.stderr);
-                            eprintln!("youtube download failed: {error}");
-                        }
-                    }
-                    Err(error) => eprintln!("youtube download command failed: {error}"),
-                }
-            } else {
-                eprintln!("Youtube message missing URL");
-            }
-        }
-        Some("Subtitle") => {
-            if let Some(data) = json_message["Data"].as_str() {
-                let result = Command::new("subliminal")
-                    .args(["-l", "en", data])
-                    .stdout(Stdio::piped())
-                    .output();
-
-                if let Err(error) = result {
-                    eprintln!("subtitle download failed: {error}");
-                }
-            } else {
-                eprintln!("Subtitle message missing Data");
-            }
-        }
-        Some("Twitch") => {
-            if let (Some(url), Some(local_save_path)) = (
-                json_message["URL"].as_str(),
-                json_message["Local Save Path"].as_str(),
-            ) {
-                let local_save_path = local_save_path.to_string();
-
-                if validator::ValidateUrl::validate_url(url) {
-                    if let Err(error) =
-                        mk_lib_network::mk_lib_network::mk_download_file_from_url_tokio(
-                            url.to_string(),
-                            &local_save_path,
-                        )
-                        .await
-                    {
-                        eprintln!("twitch download failed: {error}");
-                    }
-                }
-            } else {
-                eprintln!("Twitch message missing URL or Local Save Path");
-            }
-        }
-        Some("Dosage") => {
-            if let Some(data) = json_message["Data"].as_str() {
-                if data == "--all" {
-                    let output_root = json_message["Local Save Path"]
-                        .as_str()
-                        .unwrap_or("/mediakraken/metadata/meta/comics");
-
-                    if let Err(error) = dosage_download_all_strips(output_root) {
-                        eprintln!("dosage --all failed: {error}");
-                    }
-                } else {
-                    let output = Command::new("dosage")
-                        .args(["--adult", data])
-                        .stdout(Stdio::piped())
-                        .output();
-
-                    match output {
-                        Ok(output) => {
-                            let stdout = String::from_utf8_lossy(&output.stdout);
-                            if data == "--list" {
-                                dosage_store_strips(dosage_parse_strip_list(&stdout));
-                            }
-                        }
-                        Err(error) => eprintln!("dosage failed: {error}"),
-                    }
-                }
-            } else {
-                eprintln!("Dosage message missing Data");
-            }
-        }
-        Some("HDTrailers") => match hdtrailers_collect_best_links().await {
-            Ok(download_links) => {
-                for download_link in download_links {
-                    if let Some(filename) = hdtrailers_extract_filename(&download_link) {
-                        let file_save_name =
-                            format!("/mediakraken/metadata/meta/trailer/{filename}");
-
-                        if !Path::new(&file_save_name).exists() {
-                            if let Err(error) =
-                                mk_lib_network::mk_lib_network::mk_download_file_from_url(
-                                    download_link,
-                                    &file_save_name,
-                                )
-                                .await
-                            {
-                                eprintln!("hdtrailers download failed: {error}");
-                            }
-                        }
-                    }
-                }
-            }
-            Err(error) => eprintln!("hdtrailers collect failed: {error}"),
-        },
-        Some("IATrailer") | Some("IAMovies") => {
-            if let Err(error) = process_ia_trailer_request(&json_message).await {
-                eprintln!(
-                    "{} request failed: {error}",
-                    json_message["Type"].as_str().unwrap_or("unknown")
-                );
-            }
-        }
-        Some(other) => {
-            eprintln!("unknown message type: {other}");
-        }
-        None => {
-            eprintln!("message missing Type");
+    let path = PathBuf::from(raw);
+    for component in path.components() {
+        if matches!(component, Component::ParentDir) {
+            return Err(format!("Local Save Path contains '..': {raw}"));
         }
     }
+
+    if !path.starts_with(ALLOWED_WRITE_ROOT) {
+        return Err(format!(
+            "Local Save Path must be within {ALLOWED_WRITE_ROOT}: {raw}"
+        ));
+    }
+
+    // Defense in depth: walk up to the deepest existing ancestor and
+    // canonicalize it so a symlink under the allowed root can't redirect
+    // writes outside it (e.g. /mediakraken/out -> /etc).
+    let mut existing = path.as_path();
+    while !existing.exists() {
+        match existing.parent() {
+            Some(parent) if !parent.as_os_str().is_empty() => existing = parent,
+            _ => break,
+        }
+    }
+    let canonical = std::fs::canonicalize(existing)
+        .map_err(|e| format!("failed to canonicalize {}: {e}", existing.display()))?;
+    if !canonical.starts_with(ALLOWED_WRITE_ROOT) {
+        return Err(format!(
+            "Local Save Path resolves outside {ALLOWED_WRITE_ROOT}: {raw} -> {}",
+            canonical.display()
+        ));
+    }
+
+    Ok(path)
+}
+
+async fn process_message(json_message: Value) -> Result<(), TaskError> {
+    let message_type = json_message["Type"].as_str().ok_or("message missing Type")?;
+
+    match message_type {
+        "File" => {
+            let url = json_message["URL"]
+                .as_str()
+                .ok_or("File message missing URL")?;
+            let local_save_path = json_message["Local Save Path"]
+                .as_str()
+                .ok_or("File message missing Local Save Path")?;
+            let local_save_path = sanitize_local_save_path(local_save_path)?;
+
+            mk_lib_network::mk_lib_network::mk_download_file_from_url(
+                url.to_string(),
+                &local_save_path.to_string_lossy(),
+            )
+            .await
+            .map_err(|e| format!("file download failed: {e}"))?;
+        }
+        "Youtube" => {
+            let url = json_message["URL"]
+                .as_str()
+                .ok_or("Youtube message missing URL")?;
+            if !url.validate_url() {
+                return Err("Youtube message contains an invalid URL".to_string());
+            }
+
+            let mut yt_dlp_command = Command::new("/yt-dlp");
+            yt_dlp_command.arg("--no-progress");
+
+            if let Some(raw) = json_message["Local Save Path"].as_str() {
+                let local_save_path = sanitize_local_save_path(raw)?;
+                yt_dlp_command.args(["-o", &local_save_path.to_string_lossy()]);
+            }
+
+            let output = yt_dlp_command
+                .arg(url)
+                .stdout(Stdio::piped())
+                .stderr(Stdio::piped())
+                .output()
+                .map_err(|e| format!("youtube download command failed: {e}"))?;
+
+            if !output.status.success() {
+                let stderr = String::from_utf8_lossy(&output.stderr);
+                return Err(format!("youtube download failed: {stderr}"));
+            }
+        }
+        "Subtitle" => {
+            let data = json_message["Data"]
+                .as_str()
+                .ok_or("Subtitle message missing Data")?;
+
+            let output = Command::new("subliminal")
+                .args(["-l", "en", data])
+                .stdout(Stdio::piped())
+                .stderr(Stdio::piped())
+                .output()
+                .map_err(|e| format!("subtitle download command failed: {e}"))?;
+
+            if !output.status.success() {
+                let stderr = String::from_utf8_lossy(&output.stderr);
+                return Err(format!("subtitle download failed: {stderr}"));
+            }
+        }
+        "Twitch" => {
+            let url = json_message["URL"]
+                .as_str()
+                .ok_or("Twitch message missing URL")?;
+            let local_save_path = json_message["Local Save Path"]
+                .as_str()
+                .ok_or("Twitch message missing Local Save Path")?;
+
+            if !url.validate_url() {
+                return Err("Twitch message contains an invalid URL".to_string());
+            }
+
+            let local_save_path = sanitize_local_save_path(local_save_path)?;
+            mk_lib_network::mk_lib_network::mk_download_file_from_url_tokio(
+                url.to_string(),
+                &local_save_path.to_string_lossy(),
+            )
+            .await
+            .map_err(|e| format!("twitch download failed: {e}"))?;
+        }
+        "Dosage" => {
+            let data = json_message["Data"]
+                .as_str()
+                .ok_or("Dosage message missing Data")?;
+
+            if data == "--all" {
+                let output_root = json_message["Local Save Path"]
+                    .as_str()
+                    .unwrap_or("/mediakraken/metadata/meta/comics");
+                let output_root = sanitize_local_save_path(output_root)?;
+                dosage_download_all_strips(&output_root.to_string_lossy())?;
+            } else if data == "--list" {
+                let output = Command::new("dosage")
+                    .args(["--adult", "--list"])
+                    .stdout(Stdio::piped())
+                    .output()
+                    .map_err(|e| format!("dosage --list failed: {e}"))?;
+                let stdout = String::from_utf8_lossy(&output.stdout);
+                dosage_store_strips(dosage_parse_strip_list(&stdout));
+            } else {
+                // Only accept strip names that appear in the cached list to
+                // block arbitrary flags being passed to dosage.
+                if !dosage_is_known_strip(data) {
+                    return Err(format!("Dosage message contains unknown strip: {data}"));
+                }
+                let status = Command::new("dosage")
+                    .args(["--adult", data])
+                    .stdout(Stdio::piped())
+                    .status()
+                    .map_err(|e| format!("dosage failed: {e}"))?;
+                if !status.success() {
+                    return Err(format!("dosage exited with status {status}"));
+                }
+            }
+        }
+        "HDTrailers" => {
+            let download_links = hdtrailers_collect_best_links().await?;
+            for download_link in download_links {
+                if let Some(filename) = hdtrailers_extract_filename(&download_link) {
+                    let file_save_name = format!("/mediakraken/metadata/meta/trailer/{filename}");
+
+                    if !Path::new(&file_save_name).exists() {
+                        if let Err(error) = mk_lib_network::mk_lib_network::mk_download_file_from_url(
+                            download_link,
+                            &file_save_name,
+                        )
+                        .await
+                        {
+                            eprintln!("hdtrailers download failed: {error}");
+                        }
+                    }
+                }
+            }
+        }
+        "IATrailer" | "IAMovies" => {
+            process_ia_trailer_request(&json_message).await?;
+        }
+        other => {
+            return Err(format!("unknown message type: {other}"));
+        }
+    }
+
+    Ok(())
 }
 
 fn dosage_parse_strip_list(list_output: &str) -> Vec<String> {
@@ -293,6 +326,14 @@ fn dosage_get_cached_strips() -> Vec<String> {
             Vec::new()
         }
     }
+}
+
+fn dosage_is_known_strip(name: &str) -> bool {
+    let mut strips = dosage_get_cached_strips();
+    if strips.is_empty() {
+        strips = dosage_fetch_strip_list().unwrap_or_default();
+    }
+    strips.iter().any(|s| s == name)
 }
 
 fn dosage_fetch_strip_list() -> Result<Vec<String>, TaskError> {
@@ -478,38 +519,16 @@ fn hdtrailers_link_score(link: &str) -> u64 {
 }
 
 fn hdtrailers_extract_filename(url: &str) -> Option<String> {
-    let file_name = url.rsplit('/').next()?;
+    let without_fragment = url.split_once('#').map(|(left, _)| left).unwrap_or(url);
+    let without_query = without_fragment
+        .split_once('?')
+        .map(|(left, _)| left)
+        .unwrap_or(without_fragment);
+    let file_name = without_query.rsplit('/').next()?;
     if file_name.is_empty() {
         return None;
     }
     Some(file_name.to_string())
-}
-
-fn sync_project_gutenberg(
-    destination: &str,
-    source: Option<&str>,
-    dry_run: bool,
-) -> Result<(), AppError> {
-    if !Path::new(destination).exists() {
-        return Err(format!("Destination does not exist: {destination}").into());
-    }
-
-    let rsync_source = source.unwrap_or("rsync://mirrors.xmission.com/gutenberg/");
-    let mut command = Command::new("rsync");
-    command.args(["-avz", "--delete"]);
-
-    if dry_run {
-        command.arg("--dry-run");
-    }
-
-    command.args([rsync_source, destination]);
-
-    let status = command.status()?;
-    if status.success() {
-        Ok(())
-    } else {
-        Err(format!("rsync failed with status: {status}").into())
-    }
 }
 
 #[tokio::main]
@@ -519,7 +538,7 @@ async fn main() -> Result<(), AppError> {
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await?;
 
-    let option_config_json: Value =
+    let _option_config_json: Value =
         mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool_ro)
             .await?;
 
@@ -536,64 +555,75 @@ async fn main() -> Result<(), AppError> {
         .unwrap_or(DEFAULT_MAX_CONCURRENT_DOWNLOADS);
 
     let worker_limit = Arc::new(Semaphore::new(max_concurrent_downloads));
-    let option_config_json = Arc::new(option_config_json);
     let rabbit_channel = Arc::new(rabbit_channel);
 
-    tokio::spawn({
+    let consumer_task = tokio::spawn({
         let worker_limit = Arc::clone(&worker_limit);
-        let option_config_json = Arc::clone(&option_config_json);
         let rabbit_channel = Arc::clone(&rabbit_channel);
 
         async move {
             while let Some(msg) = rabbit_consumer.recv().await {
-                if let Some(payload) = msg.content {
-                    let json_message: Value =
-                        match serde_json::from_str(&String::from_utf8_lossy(&payload)) {
-                            Ok(value) => value,
-                            Err(error) => {
-                                eprintln!("invalid JSON message: {error}");
-                                continue;
-                            }
-                        };
+                let Some(payload) = msg.content else {
+                    continue;
+                };
 
-                    let delivery_tag = match msg.deliver {
-                        Some(deliver) => deliver.delivery_tag(),
-                        None => {
-                            eprintln!("rabbit message missing delivery metadata");
+                let json_message: Value =
+                    match serde_json::from_str(&String::from_utf8_lossy(&payload)) {
+                        Ok(value) => value,
+                        Err(error) => {
+                            eprintln!("invalid JSON message: {error}");
                             continue;
                         }
                     };
 
-                    let worker_limit = Arc::clone(&worker_limit);
-                    let option_config_json = Arc::clone(&option_config_json);
-                    let rabbit_channel = Arc::clone(&rabbit_channel);
+                let delivery_tag = match msg.deliver {
+                    Some(deliver) => deliver.delivery_tag(),
+                    None => {
+                        eprintln!("rabbit message missing delivery metadata");
+                        continue;
+                    }
+                };
 
-                    tokio::spawn(async move {
-                        match worker_limit.acquire_owned().await {
-                            Ok(_permit) => {
-                                process_message(json_message, option_config_json.as_ref()).await;
+                let worker_limit = Arc::clone(&worker_limit);
+                let rabbit_channel = Arc::clone(&rabbit_channel);
 
-                                if let Err(error) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
-                                    &rabbit_channel,
-                                    delivery_tag,
-                                )
-                                .await
-                                {
-                                    eprintln!("rabbit ack failed: {error}");
-                                }
-                            }
-                            Err(error) => {
-                                eprintln!("failed to acquire worker permit: {error}");
-                            }
+                tokio::spawn(async move {
+                    let permit = match worker_limit.acquire_owned().await {
+                        Ok(permit) => permit,
+                        Err(error) => {
+                            eprintln!("failed to acquire worker permit: {error}");
+                            return;
                         }
-                    });
-                }
+                    };
+
+                    if let Err(error) = process_message(json_message).await {
+                        eprintln!("message processing failed: {error}");
+                    }
+
+                    if let Err(error) =
+                        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(&rabbit_channel, delivery_tag)
+                            .await
+                    {
+                        eprintln!("rabbit ack failed: {error}");
+                    }
+
+                    drop(permit);
+                });
             }
         }
     });
 
-    let guard = Notify::new();
-    guard.notified().await;
+    tokio::select! {
+        _ = tokio::signal::ctrl_c() => {
+            eprintln!("received ctrl-c, shutting down");
+        }
+        result = consumer_task => {
+            if let Err(error) = result {
+                eprintln!("consumer task ended unexpectedly: {error}");
+            }
+        }
+    }
+
     Ok(())
 }
 
@@ -630,6 +660,8 @@ async fn process_ia_trailer_request(json_message: &Value) -> Result<(), TaskErro
             break;
         }
 
+        let mut dirty = false;
+
         for doc in docs {
             if state.downloaded_ids.contains(&doc.identifier) {
                 continue;
@@ -643,9 +675,14 @@ async fn process_ia_trailer_request(json_message: &Value) -> Result<(), TaskErro
                     doc.identifier.clone(),
                     saved_path.to_string_lossy().to_string(),
                 );
-                ia_save_state(&state_file, &state).await?;
+                dirty = true;
                 sleep(IA_DOWNLOAD_DELAY).await;
             }
+        }
+
+        // Flush once per page instead of per-doc.
+        if dirty {
+            ia_save_state(&state_file, &state).await?;
         }
 
         sleep(IA_SEARCH_DELAY).await;
@@ -750,27 +787,28 @@ async fn ia_get_with_backoff(client: &Client, url: &str) -> Result<reqwest::Resp
     loop {
         attempt += 1;
         let response = client.get(url).send().await.map_err(|e| e.to_string())?;
+        let status = response.status();
 
-        if response.status() == StatusCode::TOO_MANY_REQUESTS {
+        if status == StatusCode::TOO_MANY_REQUESTS || status.is_server_error() {
+            if attempt > IA_MAX_RETRIES {
+                return Err(format!(
+                    "request failed ({status}) after {IA_MAX_RETRIES} retries for {url}"
+                ));
+            }
+
             let retry_after = response
                 .headers()
                 .get("retry-after")
                 .and_then(|value| value.to_str().ok())
                 .and_then(|value| value.parse::<u64>().ok())
-                .unwrap_or(5);
-
-            if attempt > IA_MAX_RETRIES {
-                return Err(format!(
-                    "rate limited after {IA_MAX_RETRIES} retries for {url}"
-                ));
-            }
+                .unwrap_or_else(|| 1 << (attempt - 1).min(5));
 
             sleep(Duration::from_secs(retry_after)).await;
             continue;
         }
 
-        if !response.status().is_success() {
-            return Err(format!("request failed ({}): {url}", response.status()));
+        if !status.is_success() {
+            return Err(format!("request failed ({status}): {url}"));
         }
 
         return Ok(response);
@@ -801,7 +839,20 @@ async fn ia_load_state(path: &Path) -> Result<IATrailerState, TaskError> {
 
 async fn ia_save_state(path: &Path, state: &IATrailerState) -> Result<(), TaskError> {
     let data = serde_json::to_vec_pretty(state).map_err(|e| e.to_string())?;
-    tokio::fs::write(path, data)
+    // Write to a sibling temp file then rename so a crash mid-write can't
+    // corrupt the existing state.
+    let tmp_path = match path.extension() {
+        Some(ext) => {
+            let mut new_ext = ext.to_os_string();
+            new_ext.push(".tmp");
+            path.with_extension(new_ext)
+        }
+        None => path.with_extension("tmp"),
+    };
+    tokio::fs::write(&tmp_path, data)
+        .await
+        .map_err(|e| e.to_string())?;
+    tokio::fs::rename(&tmp_path, path)
         .await
         .map_err(|e| e.to_string())?;
     Ok(())
