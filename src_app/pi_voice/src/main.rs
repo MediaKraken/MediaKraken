@@ -1,20 +1,39 @@
-use fltk::{
-    app, app::*, button::*, enums::*, frame::*, group::*, input::*, output::Output, prelude::*,
-    window::*,
-};
-use fltk_webview::*;
-mod choice;
 use clap::Parser;
-use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use cpal::{FromSample, Sample};
+use fltk::{
+    app, button::Button, enums::FrameType, output::Output, prelude::*, window::Window,
+};
+use fltk_webview::Webview;
 use std::error::Error;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
+use std::sync::Arc;
+use std::thread;
 
-#[derive(Debug, Clone, Copy)]
+mod choice;
+
+#[derive(Parser, Debug, Clone)]
+#[command(name = "pi_voice", version, about = "MediaKraken voice capture client")]
+struct Cli {
+    /// Base URL of the MediaKraken API (used by the embedded webview and title search).
+    #[arg(long, default_value = "https://mkprod:8900")]
+    api_base: String,
+
+    /// Vosk WebSocket URI used by the bundled Python client.
+    #[arg(long, default_value = "ws://mkprod:2700")]
+    vosk_uri: String,
+
+    /// Working directory for intermediate WAV files and the Python helper.
+    #[arg(long)]
+    workdir: Option<PathBuf>,
+}
+
+#[derive(Debug, Clone)]
 pub enum Message {
     Start,
     Stop,
     Recognise,
+    Status(String),
+    Navigate(String),
 }
 
 pub mod record {
@@ -23,17 +42,22 @@ pub mod record {
     use hound::WavWriter;
     use std::fs::File;
     use std::io::BufWriter;
-    use std::path::Path;
+    use std::path::PathBuf;
     use std::sync::{Arc, Mutex};
 
     pub struct Recorder {
+        output_path: PathBuf,
         utils: Option<(Arc<Mutex<Option<WavWriter<BufWriter<File>>>>>, cpal::Stream)>,
     }
 
     impl Recorder {
-        pub fn new() -> Self {
-            Recorder { utils: None }
+        pub fn new(output_path: PathBuf) -> Self {
+            Recorder {
+                output_path,
+                utils: None,
+            }
         }
+
         pub fn start_recording(&mut self) -> Result<(), anyhow::Error> {
             if self.utils.is_some() {
                 return Err(anyhow::Error::msg(
@@ -42,23 +66,18 @@ pub mod record {
             }
 
             let host = cpal::default_host();
-
-            // Set up the input device and stream with the default input config.
-            let device = host.default_input_device().unwrap();
+            let device = host
+                .default_input_device()
+                .ok_or_else(|| anyhow::Error::msg("no default input device available"))?;
 
             println!("Input device: {}", device.name()?);
 
-            let config = device
-                .default_input_config()
-                .expect("Failed to get default input config");
+            let config = device.default_input_config()?;
             println!("Default input config: {:?}", config);
 
-            // The WAV file we're recording to.
             let spec = wav_spec_from_config(&config);
-            let writer = hound::WavWriter::create(Path::new("voice_file.wav"), spec)?;
+            let writer = hound::WavWriter::create(&self.output_path, spec)?;
             let writer = Arc::new(Mutex::new(Some(writer)));
-
-            // Run the input stream on a separate thread.
             let writer_2 = writer.clone();
 
             let err_fn = move |err| {
@@ -93,29 +112,26 @@ pub mod record {
                 sample_format => {
                     return Err(anyhow::Error::msg(format!(
                         "Unsupported sample format '{sample_format}'"
-                    )))
+                    )));
                 }
             };
-            // ========================
             stream.play()?;
             self.utils = Some((writer, stream));
             Ok(())
         }
 
-        pub fn stop_recording(&mut self) -> Result<(), anyhow::Error> {
+        /// Stop recording. Returns Ok(true) if a recording was stopped,
+        /// Ok(false) if nothing was in progress.
+        pub fn stop_recording(&mut self) -> Result<bool, anyhow::Error> {
             match self.utils.take() {
                 Some((writer, stream)) => {
                     stream.pause()?;
                     if let Some(writer) = writer.lock().ok().and_then(|mut lock| lock.take()) {
                         writer.finalize()?;
                     }
-                    Ok(())
+                    Ok(true)
                 }
-                None => {
-                    return Err(anyhow::Error::msg(
-                        "Attempted to stop recording when not recording!",
-                    ));
-                }
+                None => Ok(false),
             }
         }
     }
@@ -144,20 +160,129 @@ pub mod record {
         T: Sample,
         U: Sample + hound::Sample + FromSample<T>,
     {
-        if let Ok(mut guard) = writer.try_lock() {
-            if let Some(writer) = guard.as_mut() {
-                for &sample in input.iter() {
-                    let sample: U = U::from_sample(sample);
-                    writer.write_sample(sample).ok();
-                }
+        let Ok(mut guard) = writer.lock() else {
+            eprintln!("recording writer lock poisoned; dropping samples");
+            return;
+        };
+        let Some(writer) = guard.as_mut() else {
+            return;
+        };
+        for &sample in input.iter() {
+            let sample: U = U::from_sample(sample);
+            if let Err(err) = writer.write_sample(sample) {
+                eprintln!("failed to write audio sample: {}", err);
+                return;
             }
         }
     }
 }
 
+/// Parse the stdout of the Python Vosk client into a single space-joined
+/// search string.
+fn extract_search_text(stdout: &str) -> String {
+    let mut search_str = String::new();
+    for line_item in stdout.lines() {
+        let line_item = line_item.trim();
+        let text = serde_json::from_str::<serde_json::Value>(line_item)
+            .ok()
+            .and_then(|value| {
+                value
+                    .get("text")
+                    .and_then(serde_json::Value::as_str)
+                    .map(str::to_owned)
+            })
+            .or_else(|| {
+                line_item
+                    .strip_prefix("\"text\" :")
+                    .map(|value| value.trim().trim_matches('"').to_owned())
+            });
+
+        if let Some(text) = text.filter(|text| !text.is_empty()) {
+            if !search_str.is_empty() {
+                search_str.push(' ');
+            }
+            search_str.push_str(text.as_str());
+        }
+    }
+    search_str.trim().to_owned()
+}
+
+struct ProcessingPaths {
+    raw_wav: PathBuf,
+    mono_wav: PathBuf,
+    script: PathBuf,
+}
+
+fn run_recognition(paths: &ProcessingPaths, vosk_uri: &str) -> Result<String, String> {
+    let ffmpeg = Command::new("ffmpeg")
+        .args([
+            "-y",
+            "-i",
+            paths.raw_wav.to_str().ok_or("raw wav path is not utf-8")?,
+            "-ar",
+            "16000",
+            "-ac",
+            "1",
+            paths.mono_wav.to_str().ok_or("mono wav path is not utf-8")?,
+        ])
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .output()
+        .map_err(|err| format!("failed to spawn ffmpeg: {err}"))?;
+
+    if !ffmpeg.status.success() {
+        return Err(format!(
+            "ffmpeg failed ({}): {}",
+            ffmpeg.status,
+            String::from_utf8_lossy(&ffmpeg.stderr).trim()
+        ));
+    }
+
+    let python = Command::new("python3")
+        .arg(&paths.script)
+        .arg(&paths.mono_wav)
+        .arg(vosk_uri)
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .output()
+        .map_err(|err| format!("failed to spawn python3: {err}"))?;
+
+    if !python.status.success() {
+        return Err(format!(
+            "vosk client failed ({}): {}",
+            python.status,
+            String::from_utf8_lossy(&python.stderr).trim()
+        ));
+    }
+
+    let stdout = String::from_utf8_lossy(&python.stdout);
+    let text = extract_search_text(&stdout);
+    if text.is_empty() {
+        Err("no speech recognised".to_owned())
+    } else {
+        Ok(text)
+    }
+}
+
 fn main() -> Result<(), Box<dyn Error>> {
-    use record::Recorder;
-    let mut recorder = Recorder::new();
+    let cli = Cli::parse();
+
+    let workdir = cli
+        .workdir
+        .clone()
+        .or_else(|| std::env::current_exe().ok().and_then(|p| p.parent().map(Path::to_path_buf)))
+        .unwrap_or_else(|| PathBuf::from("."));
+
+    let paths = Arc::new(ProcessingPaths {
+        raw_wav: workdir.join("voice_file.wav"),
+        mono_wav: workdir.join("voice_file_mono.wav"),
+        script: workdir.join("send_wav_to_websocket.py"),
+    });
+
+    let api_base = cli.api_base.trim_end_matches('/').to_owned();
+    let vosk_uri = cli.vosk_uri.clone();
+
+    let mut recorder = record::Recorder::new(paths.raw_wav.clone());
 
     let app = app::App::default().with_scheme(app::Scheme::Gleam);
     let mut window_main = Window::default().with_size(1800, 960);
@@ -187,7 +312,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut wv_win = Window::new(20, 250, 1700, 700, "");
 
-    // setup the event
     let (s, r) = app::channel::<Message>();
 
     window_main.end();
@@ -195,98 +319,119 @@ fn main() -> Result<(), Box<dyn Error>> {
     window_main.make_current();
 
     let mut wv = Webview::create(false, &mut wv_win);
-    wv.navigate("https://mkprod:8900/api");
+    wv.navigate(&format!("{api_base}/api"));
 
-    button_start_record_loop.set_callback(move |_| {
-        s.send(Message::Start);
+    button_start_record_loop.set_callback({
+        let s = s.clone();
+        move |_| s.send(Message::Start)
     });
 
-    button_stop_record_loop.set_callback(move |_| {
-        s.send(Message::Stop);
+    button_stop_record_loop.set_callback({
+        let s = s.clone();
+        move |_| s.send(Message::Stop)
     });
 
-    button_stop_and_recognise.set_callback(move |_| {
-        s.send(Message::Recognise);
+    button_stop_and_recognise.set_callback({
+        let s = s.clone();
+        move |_| s.send(Message::Recognise)
     });
 
     while app.wait() {
         if let Some(msg) = r.recv() {
             match msg {
                 Message::Start => {
-                    println!("Start");
                     if let Err(err) = recorder.start_recording() {
-                        eprintln!("failed to start recording: {err}");
+                        let text = format!("failed to start recording: {err}");
+                        eprintln!("{text}");
+                        out.set_value(&text);
+                    } else {
+                        out.set_value("Recording...");
                     }
                 }
                 Message::Stop => {
-                    println!("Stop");
-                    if let Err(err) = recorder.stop_recording() {
-                        eprintln!("failed to stop recording: {err}");
+                    match recorder.stop_recording() {
+                        Ok(true) => out.set_value("Stopped"),
+                        Ok(false) => out.set_value("Not recording"),
+                        Err(err) => {
+                            let text = format!("failed to stop recording: {err}");
+                            eprintln!("{text}");
+                            out.set_value(&text);
+                        }
                     }
                 }
                 Message::Recognise => {
-                    println!("Recognise");
                     if let Err(err) = recorder.stop_recording() {
                         eprintln!("failed to stop recording before recognition: {err}");
                     }
-                    // convert wav to proper format via ffmpeg
-                    let output = Command::new("ffmpeg")
-                        .args([
-                            "-y",
-                            "-i",
-                            "voice_file.wav",
-                            "-ar",
-                            "16000",
-                            "-ac",
-                            "1",
-                            "voice_file_mono.wav",
-                        ])
-                        .stdout(Stdio::piped())
-                        .output()?;
-                    let stdout: String = String::from_utf8(output.stdout)?;
-                    println!("{}", stdout);
-                    // speech rec via vosk
-                    let output = Command::new("python3")
-                        .args(["send_wav_to_websocket.py"])
-                        .stdout(Stdio::piped())
-                        .output()?;
-                    let stdout = String::from_utf8(output.stdout)?;
-                    let mut search_str = String::new();
-                    for line_item in stdout.lines() {
-                        let line_item = line_item.trim();
-                        let text = serde_json::from_str::<serde_json::Value>(line_item)
-                            .ok()
-                            .and_then(|value| {
-                                value
-                                    .get("text")
-                                    .and_then(serde_json::Value::as_str)
-                                    .map(str::to_owned)
-                            })
-                            .or_else(|| {
-                                line_item
-                                    .strip_prefix("\"text\" :")
-                                    .map(|value| value.trim().trim_matches('"').to_owned())
-                            });
+                    if !paths.raw_wav.exists() {
+                        out.set_value("No recording available");
+                        continue;
+                    }
+                    out.set_value("Recognising...");
 
-                        if let Some(text) = text.filter(|text| !text.is_empty()) {
-                            if !search_str.is_empty() {
-                                search_str.push(' ');
+                    let media_type = choice_media_type.choice();
+                    let paths = paths.clone();
+                    let vosk_uri = vosk_uri.clone();
+                    let api_base = api_base.clone();
+                    let s = s.clone();
+                    thread::spawn(move || {
+                        match run_recognition(&paths, &vosk_uri) {
+                            Ok(text) => {
+                                let query = urlencoding::encode(&text);
+                                let url = if media_type.is_empty() {
+                                    format!("{api_base}/api/titlesearch/{query}")
+                                } else {
+                                    let media = urlencoding::encode(&media_type);
+                                    format!(
+                                        "{api_base}/api/titlesearch/{query}?media_type={media}"
+                                    )
+                                };
+                                s.send(Message::Status(format!("Recognised: {text}")));
+                                s.send(Message::Navigate(url));
                             }
-                            search_str.push_str(text.as_str());
+                            Err(err) => {
+                                s.send(Message::Status(format!("Recognition failed: {err}")));
+                            }
                         }
-                    }
-                    // push output to page
-                    let search_query = search_str.trim().replace(' ', "%20");
-                    if !search_query.is_empty() {
-                        wv.navigate(
-                            format!("https://mkprod:8900/api/titlesearch/{search_query}").as_str(),
-                        );
-                    } else {
-                        eprintln!("no recognized text found in websocket output");
-                    }
+                    });
+                }
+                Message::Status(text) => {
+                    println!("{text}");
+                    out.set_value(&text);
+                }
+                Message::Navigate(url) => {
+                    wv.navigate(&url);
                 }
             }
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::extract_search_text;
+
+    #[test]
+    fn extracts_text_from_json_lines() {
+        let stdout = "{\"text\": \"hello world\"}\n{\"text\": \"second phrase\"}\n";
+        assert_eq!(extract_search_text(stdout), "hello world second phrase");
+    }
+
+    #[test]
+    fn skips_empty_text_entries() {
+        let stdout = "{\"text\": \"\"}\n{\"text\": \"only one\"}\n";
+        assert_eq!(extract_search_text(stdout), "only one");
+    }
+
+    #[test]
+    fn falls_back_to_legacy_prefix() {
+        let stdout = "\"text\" : \"legacy format\"\n";
+        assert_eq!(extract_search_text(stdout), "legacy format");
+    }
+
+    #[test]
+    fn returns_empty_on_no_matches() {
+        assert_eq!(extract_search_text("{\"partial\": \"x\"}\n"), "");
+    }
 }
