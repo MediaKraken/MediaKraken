@@ -79,6 +79,25 @@ fn sanitize_local_save_path(raw: &str) -> Result<PathBuf, TaskError> {
         ));
     }
 
+    // Defense in depth: walk up to the deepest existing ancestor and
+    // canonicalize it so a symlink under the allowed root can't redirect
+    // writes outside it (e.g. /mediakraken/out -> /etc).
+    let mut existing = path.as_path();
+    while !existing.exists() {
+        match existing.parent() {
+            Some(parent) if !parent.as_os_str().is_empty() => existing = parent,
+            _ => break,
+        }
+    }
+    let canonical = std::fs::canonicalize(existing)
+        .map_err(|e| format!("failed to canonicalize {}: {e}", existing.display()))?;
+    if !canonical.starts_with(ALLOWED_WRITE_ROOT) {
+        return Err(format!(
+            "Local Save Path resolves outside {ALLOWED_WRITE_ROOT}: {raw} -> {}",
+            canonical.display()
+        ));
+    }
+
     Ok(path)
 }
 
