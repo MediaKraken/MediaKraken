@@ -241,7 +241,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     json!({"error": error.to_string()}),
                 )
                 .await;
-                Vec::new()
+                // Don't ack: leave the trigger in-flight so the broker redelivers
+                // it after the DB recovers. Otherwise a transient outage silently
+                // drops the scan request.
+                continue;
             }
         };
 
@@ -403,12 +406,26 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .await;
                 }
 
-                let already_known = mk_lib_database::mk_lib_database_library::mk_lib_database_library_file_exists(
+                // On DB error we skip rather than defaulting to "not present";
+                // otherwise a transient read outage would fan every file into
+                // an insert attempt and flood the queue with duplicates.
+                let already_known = match mk_lib_database::mk_lib_database_library::mk_lib_database_library_file_exists(
                     &sqlx_pool_ro,
                     &file_metadata.name,
                 )
                 .await
-                .unwrap_or(false);
+                {
+                    Ok(known) => known,
+                    Err(error) => {
+                        log_loki(
+                            "error",
+                            "library_file_exists failed; skipping file",
+                            json!({"path": file_metadata.name, "error": error.to_string()}),
+                        )
+                        .await;
+                        continue;
+                    }
+                };
                 if already_known {
                     continue;
                 }
