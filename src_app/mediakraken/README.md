@@ -33,6 +33,20 @@ From the `src_app/` workspace root:
 cargo run -p mediakraken
 ```
 
+### Linux system dependencies
+
+The Dioxus `desktop` feature links against `libxdo` (pulled in transitively via
+`muda`/`tray-icon`). If the linker reports
+`rust-lld: error: unable to find library -lxdo`, install the matching system
+package before rebuilding:
+
+- Debian / Ubuntu: `sudo apt install libxdo-dev`
+- Fedora / RHEL: `sudo dnf install libxdo-devel`
+- Arch: `sudo pacman -S xdotool`
+
+GTK and WebKit2GTK development headers are also required by Dioxus desktop on
+Linux (`libgtk-3-dev`, `libwebkit2gtk-4.1-dev` on Debian/Ubuntu).
+
 ## Android / iOS
 
 Use the Dioxus mobile tooling that matches the installed SDKs in your environment, then point the app at a reachable MediaKraken API base URL.
