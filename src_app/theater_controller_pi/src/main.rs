@@ -309,15 +309,36 @@ fn handle_simple_api(api_addr: &str, endpoint: &str, success_title: &str, action
     }
 }
 
-fn send_theater_thin_post(api_addr: &str, endpoint: &str) -> Result<(u16, String), String> {
-    let socket_addr = api_addr
+fn connect_with_timeout(api_addr: &str) -> Result<TcpStream, String> {
+    let addrs = api_addr
         .to_socket_addrs()
-        .map_err(|error| format!("resolve {api_addr} failed: {error}"))?
-        .next()
-        .ok_or_else(|| format!("no addresses resolved for {api_addr}"))?;
+        .map_err(|error| format!("resolve {api_addr} failed: {error}"))?;
 
-    let mut stream = TcpStream::connect_timeout(&socket_addr, TCP_TIMEOUT)
-        .map_err(|error| format!("connect {api_addr} failed: {error}"))?;
+    let mut last_error: Option<String> = None;
+    let mut tried = 0;
+
+    for socket_addr in addrs {
+        tried += 1;
+        match TcpStream::connect_timeout(&socket_addr, TCP_TIMEOUT) {
+            Ok(stream) => return Ok(stream),
+            Err(error) => {
+                last_error = Some(format!("{socket_addr}: {error}"));
+            }
+        }
+    }
+
+    if tried == 0 {
+        Err(format!("no addresses resolved for {api_addr}"))
+    } else {
+        Err(format!(
+            "connect {api_addr} failed: {}",
+            last_error.unwrap_or_else(|| "unknown error".to_string())
+        ))
+    }
+}
+
+fn send_theater_thin_post(api_addr: &str, endpoint: &str) -> Result<(u16, String), String> {
+    let mut stream = connect_with_timeout(api_addr)?;
     stream
         .set_read_timeout(Some(TCP_TIMEOUT))
         .map_err(|error| format!("set read timeout failed: {error}"))?;
