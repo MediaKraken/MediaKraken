@@ -15,12 +15,16 @@ impl PopupButton {
         but.handle(|b, ev| match ev {
             Event::Enter => {
                 b.set_color(Color::Blue);
-                b.top_window().unwrap().redraw();
+                if let Some(mut w) = b.top_window() {
+                    w.redraw();
+                }
                 true
             }
             Event::Leave => {
                 b.set_color(Color::White);
-                b.top_window().unwrap().redraw();
+                if let Some(mut w) = b.top_window() {
+                    w.redraw();
+                }
                 true
             }
             _ => false,
@@ -115,10 +119,13 @@ impl MyChoice {
         btn.set_callback({
             let c = choices.clone();
             let mut f = frame.clone();
-            let btn_win = btn.window().unwrap();
             move |b| {
                 let mut menu = MyPopup::new(&c.borrow());
-                let s = menu.popup(b.x() + btn_win.x() - f.w(), b.y() + btn_win.y() + b.h());
+                let (wx, wy) = b
+                    .window()
+                    .map(|w| (w.x(), w.y()))
+                    .unwrap_or((0, 0));
+                let s = menu.popup(b.x() + wx - f.w(), b.y() + wy + b.h());
                 f.set_label(&s.0);
             }
         });
@@ -147,7 +154,13 @@ impl MyChoice {
     }
 
     pub fn set_current_choice(&mut self, idx: i32) {
-        self.frame.set_label(self.choices.borrow()[idx as usize])
+        if idx < 0 {
+            return;
+        }
+        let choices = self.choices.borrow();
+        if let Some(label) = choices.get(idx as usize) {
+            self.frame.set_label(label);
+        }
     }
 
     pub fn choice(&self) -> String {

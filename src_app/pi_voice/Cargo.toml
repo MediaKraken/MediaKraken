@@ -11,12 +11,10 @@ codegen-units = 1
 
 [dependencies]
 anyhow = "1.0.100"
-clap = "4.5.50"
+clap = { version = "4.5.50", features = ["derive"] }
 cpal = "0.16.0"  # libasound2-dev
 fltk = { version = "1.5.22", features = ["fltk-bundled"] }
 fltk-webview = "0.4.7"  # libwebkit2gtk-4.1-dev
 hound = "3.5.1"
 serde_json = "1.0.148"
-
-[dev-dependencies]
-tokio-test = "*"
+urlencoding = "2.1.3"
