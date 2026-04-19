@@ -27,9 +27,10 @@ If your API endpoint differs, update `src/api.rs` and `src/models.rs`.
 
 ## Local desktop preview
 
+From the `src_app/` workspace root:
+
 ```bash
-cd src_app/mediakraken
-cargo run
+cargo run -p mediakraken
 ```
 
 ## Android / iOS
