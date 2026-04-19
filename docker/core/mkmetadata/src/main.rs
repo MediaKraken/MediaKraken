@@ -1,320 +1,249 @@
-use mk_lib_database;
-use mk_lib_metadata;
-use mk_lib_network;
+use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider;
+use mk_lib_database::mk_lib_database::mk_lib_database_open_pool;
+use mk_lib_database::mk_lib_database_option_status::{
+    APIJson, mk_lib_database_option_api_read,
+};
+use mk_lib_database::mk_lib_database_version::mk_lib_database_version_check;
+use mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push;
+use mk_lib_metadata::base::metadata_process;
+use mk_lib_network::mk_lib_network_limiter::API_LIMIT;
 use ratelimit::Ratelimiter;
 use serde_json::json;
 use std::env;
 use std::error::Error;
-use tokio::time::{sleep, Duration};
+use tokio::signal;
+use tokio::sync::watch;
+use tokio::task::JoinHandle;
+use tokio::time::{Duration, sleep};
+
+const POLL_INTERVAL: Duration = Duration::from_secs(1);
+const DAILY_WINDOW_SECS: u64 = 86_400;
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+}
+
+fn build_limiter(tokens: u64, window: Duration) -> Ratelimiter {
+    Ratelimiter::builder(tokens, window)
+        .max_tokens(tokens)
+        .initial_available(tokens)
+        .build()
+        .expect("ratelimiter build failed")
+}
+
+// Waits until every limiter has a token available, or returns true if
+// shutdown was requested while waiting. Token consumption is atomic: if a
+// later limiter would block, the already-consumed earlier tokens would be
+// lost, so check tightest (shortest-window) limiter first.
+async fn await_limiters(
+    limiters: &[Ratelimiter],
+    shutdown_rx: &mut watch::Receiver<bool>,
+) -> bool {
+    for limiter in limiters {
+        while let Err(wait) = limiter.try_wait() {
+            tokio::select! {
+                _ = sleep(wait) => {}
+                _ = shutdown_rx.wait_for(|v| *v) => return true,
+            }
+        }
+    }
+    false
+}
+
+fn spawn_provider_loop(
+    pool: sqlx::PgPool,
+    provider: &'static str,
+    api_key: String,
+    limiters: Vec<Ratelimiter>,
+    debug: bool,
+    shutdown_rx: watch::Receiver<bool>,
+) -> JoinHandle<()> {
+    tokio::spawn(async move {
+        run_provider_loop(pool, provider, api_key, limiters, debug, shutdown_rx).await;
+    })
+}
+
+async fn run_provider_loop(
+    pool: sqlx::PgPool,
+    provider: &'static str,
+    api_key: String,
+    limiters: Vec<Ratelimiter>,
+    debug: bool,
+    mut shutdown_rx: watch::Receiver<bool>,
+) {
+    loop {
+        if *shutdown_rx.borrow() {
+            eprintln!("mkmetadata: {provider} shutdown");
+            return;
+        }
+
+        let queue = match mk_lib_database_download_queue_by_provider(&pool, provider).await {
+            Ok(items) => items,
+            Err(err) => {
+                eprintln!("mkmetadata: {provider} queue read failed ({err})");
+                Vec::new()
+            }
+        };
+
+        for download_data in queue {
+            if await_limiters(&limiters, &mut shutdown_rx).await {
+                eprintln!("mkmetadata: {provider} shutdown");
+                return;
+            }
+
+            if debug {
+                if let Err(err) = mk_logging_loki_push(json!({
+                    "Module": std::module_path!(),
+                    "DL Guid": download_data.mm_download_guid,
+                    "Status": download_data.mm_download_status,
+                    "Provider": provider,
+                    "ID": download_data.mm_download_provider_id,
+                }))
+                .await
+                {
+                    eprintln!("mkmetadata: {provider} loki push failed ({err})");
+                }
+            }
+
+            if let Err(err) = metadata_process(
+                &pool,
+                provider.to_string(),
+                download_data,
+                api_key.as_str(),
+            )
+            .await
+            {
+                eprintln!("mkmetadata: {provider} process failed ({err})");
+            }
+        }
+
+        tokio::select! {
+            _ = sleep(POLL_INTERVAL) => {}
+            _ = shutdown_rx.wait_for(|v| *v) => {
+                eprintln!("mkmetadata: {provider} shutdown");
+                return;
+            }
+        }
+    }
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    // open the database
-    let (sqlx_pool_rw, sqlx_pool_ro) =
-        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120).await?;
+    let (sqlx_pool_rw, sqlx_pool_ro) = mk_lib_database_open_pool(50, 120).await?;
 
-    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
-        .await?;
+    mk_lib_database_version_check(&sqlx_pool_ro, false).await?;
 
-    // pull options/api keys
-    let option_json: serde_json::Value =
-        mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_api_read(
-            &sqlx_pool_ro,
-        )
-        .await?;
-    let option_api: mk_lib_database::mk_lib_database_option_status::APIJson =
-        serde_json::from_value(option_json)?;
+    let option_json = mk_lib_database_option_api_read(&sqlx_pool_ro).await?;
+    let option_api: APIJson = serde_json::from_value(option_json)?;
 
     let debug_enabled = env::var("DEBUG")
         .map(|v| v.eq_ignore_ascii_case("true"))
         .unwrap_or(false);
 
-    // copy out keys before moving into tasks
-    let barcodespider_key = option_api.barcodespider.clone();
-    let musicbrainz_key = option_api.musicbrainz.clone();
-    let themoviedb_key = option_api.themoviedb.clone();
-    let thesportsdb_key = option_api.thesportsdb.clone();
-    let upcitemdb_key = option_api.upcitemdb.clone();
+    let (shutdown_tx, shutdown_rx) = watch::channel(false);
 
-    // barcodespider
-    if let Some(api_key) = barcodespider_key {
-        let sqlx_pool_rw_clone = sqlx_pool_rw.clone();
+    let mut handles: Vec<JoinHandle<()>> = Vec::new();
 
-        let _handle_barcodespider = tokio::spawn(async move {
-            let daily_api_call_limiter = Ratelimiter::builder(
-                mk_lib_network::mk_lib_network_limiter::API_LIMIT["barcodespider"].2,
-                Duration::from_secs(86400),
-            )
-            .max_tokens(mk_lib_network::mk_lib_network_limiter::API_LIMIT["barcodespider"].2)
-            .initial_available(
-                mk_lib_network::mk_lib_network_limiter::API_LIMIT["barcodespider"].2,
-            )
-            .build()
-            .unwrap();
-
-            loop {
-                let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(
-                    &sqlx_pool_rw_clone,
-                    "barcodespider",
-                )
-                .await
-                .unwrap();
-
-                for download_data in metadata_to_process {
-                    if let Err(wait_time) = daily_api_call_limiter.try_wait() {
-                        sleep(wait_time).await;
-                        continue;
-                    }
-
-                    mk_lib_metadata::base::metadata_process(
-                        &sqlx_pool_rw_clone,
-                        "barcodespider".to_string(),
-                        download_data,
-                        api_key.as_str(),
-                    )
-                    .await
-                    .unwrap();
-                }
-
-                sleep(Duration::from_secs(1)).await;
-            }
-        });
+    if let Some(key) = option_api.barcodespider {
+        let limit = API_LIMIT["barcodespider"];
+        handles.push(spawn_provider_loop(
+            sqlx_pool_rw.clone(),
+            "barcodespider",
+            key,
+            vec![build_limiter(limit.2, Duration::from_secs(DAILY_WINDOW_SECS))],
+            debug_enabled,
+            shutdown_rx.clone(),
+        ));
     }
 
-    // musicbrainz
-    if let Some(api_key) = musicbrainz_key {
-        let sqlx_pool_rw_clone = sqlx_pool_rw.clone();
-
-        let _handle_musicbrainz = tokio::spawn(async move {
-            let api_call_limiter = Ratelimiter::builder(
-                mk_lib_network::mk_lib_network_limiter::API_LIMIT["musicbrainz"].0,
-                Duration::from_secs(
-                    mk_lib_network::mk_lib_network_limiter::API_LIMIT["musicbrainz"].1,
-                ),
-            )
-            .max_tokens(mk_lib_network::mk_lib_network_limiter::API_LIMIT["musicbrainz"].0)
-            .initial_available(mk_lib_network::mk_lib_network_limiter::API_LIMIT["musicbrainz"].0)
-            .build()
-            .unwrap();
-
-            loop {
-                let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(
-                    &sqlx_pool_rw_clone,
-                    "musicbrainz",
-                )
-                .await
-                .unwrap();
-
-                for download_data in metadata_to_process {
-                    if let Err(wait_time) = api_call_limiter.try_wait() {
-                        sleep(wait_time).await;
-                        continue;
-                    }
-
-                    mk_lib_metadata::base::metadata_process(
-                        &sqlx_pool_rw_clone,
-                        "musicbrainz".to_string(),
-                        download_data,
-                        api_key.as_str(),
-                    )
-                    .await
-                    .unwrap();
-                }
-
-                sleep(Duration::from_secs(1)).await;
-            }
-        });
+    if let Some(key) = option_api.musicbrainz {
+        let limit = API_LIMIT["musicbrainz"];
+        handles.push(spawn_provider_loop(
+            sqlx_pool_rw.clone(),
+            "musicbrainz",
+            key,
+            vec![build_limiter(limit.0, Duration::from_secs(limit.1))],
+            debug_enabled,
+            shutdown_rx.clone(),
+        ));
     }
 
-    // themoviedb
-    {
-        let sqlx_pool_rw_clone = sqlx_pool_rw.clone();
-        let api_key = themoviedb_key.clone();
-        let debug_enabled = debug_enabled;
-
-        let _handle_tmdb = tokio::spawn(async move {
-            let api_call_limiter = Ratelimiter::builder(
-                mk_lib_network::mk_lib_network_limiter::API_LIMIT["themoviedb"].0,
-                Duration::from_secs(
-                    mk_lib_network::mk_lib_network_limiter::API_LIMIT["themoviedb"].1,
-                ),
-            )
-            .max_tokens(mk_lib_network::mk_lib_network_limiter::API_LIMIT["themoviedb"].0)
-            .initial_available(mk_lib_network::mk_lib_network_limiter::API_LIMIT["themoviedb"].0)
-            .build()
-            .unwrap();
-
-            loop {
-                let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(
-                    &sqlx_pool_rw_clone,
-                    "themoviedb",
-                )
-                .await
-                .unwrap();
-
-                for download_data in metadata_to_process {
-                    if let Err(wait_time) = api_call_limiter.try_wait() {
-                        sleep(wait_time).await;
-                        continue;
-                    }
-
-                    if debug_enabled {
-                        println!("TMDB here2");
-                        if let Err(err) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
-                            json!({
-                                "Module": std::module_path!(),
-                                "DL Guid": download_data.mm_download_guid,
-                                "Status": download_data.mm_download_status,
-                                "Provider": "themoviedb",
-                                "ID": download_data.mm_download_provider_id
-                            }),
-                        ).await {
-                            eprintln!("loki push error: {err}");
-                        }
-                    }
-
-                    mk_lib_metadata::base::metadata_process(
-                        &sqlx_pool_rw_clone,
-                        "themoviedb".to_string(),
-                        download_data,
-                        api_key.as_str(),
-                    )
-                    .await
-                    .unwrap();
-                }
-
-                sleep(Duration::from_secs(1)).await;
-            }
-        });
+    if !option_api.themoviedb.is_empty() {
+        let limit = API_LIMIT["themoviedb"];
+        handles.push(spawn_provider_loop(
+            sqlx_pool_rw.clone(),
+            "themoviedb",
+            option_api.themoviedb,
+            vec![build_limiter(limit.0, Duration::from_secs(limit.1))],
+            debug_enabled,
+            shutdown_rx.clone(),
+        ));
     }
 
-    // thesportsdb
-    {
-        let sqlx_pool_rw_clone = sqlx_pool_rw.clone();
-        let api_key = thesportsdb_key.clone();
-
-        let _handle_thesportsdb = tokio::spawn(async move {
-            let api_call_limiter = Ratelimiter::builder(
-                mk_lib_network::mk_lib_network_limiter::API_LIMIT["thesportsdb"].0,
-                Duration::from_secs(
-                    mk_lib_network::mk_lib_network_limiter::API_LIMIT["thesportsdb"].1,
-                ),
-            )
-            .max_tokens(mk_lib_network::mk_lib_network_limiter::API_LIMIT["thesportsdb"].0)
-            .initial_available(mk_lib_network::mk_lib_network_limiter::API_LIMIT["thesportsdb"].0)
-            .build()
-            .unwrap();
-
-            loop {
-                let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(
-                    &sqlx_pool_rw_clone,
-                    "thesportsdb",
-                )
-                .await
-                .unwrap();
-
-                for download_data in metadata_to_process {
-                    if let Err(wait_time) = api_call_limiter.try_wait() {
-                        sleep(wait_time).await;
-                        continue;
-                    }
-
-                    mk_lib_metadata::base::metadata_process(
-                        &sqlx_pool_rw_clone,
-                        "thesportsdb".to_string(),
-                        download_data,
-                        api_key.as_str(),
-                    )
-                    .await
-                    .unwrap();
-                }
-
-                sleep(Duration::from_secs(1)).await;
-            }
-        });
+    if !option_api.thesportsdb.is_empty() {
+        let limit = API_LIMIT["thesportsdb"];
+        handles.push(spawn_provider_loop(
+            sqlx_pool_rw.clone(),
+            "thesportsdb",
+            option_api.thesportsdb,
+            vec![build_limiter(limit.0, Duration::from_secs(limit.1))],
+            debug_enabled,
+            shutdown_rx.clone(),
+        ));
     }
 
-    // upcitemdb
-    if let Some(api_key) = upcitemdb_key {
-        let sqlx_pool_rw_clone = sqlx_pool_rw.clone();
-
-        let _handle_upcitemdb = tokio::spawn(async move {
-            let daily_api_call_limiter = Ratelimiter::builder(
-                mk_lib_network::mk_lib_network_limiter::API_LIMIT["upcitemdb"].2,
-                Duration::from_secs(86400),
-            )
-            .max_tokens(mk_lib_network::mk_lib_network_limiter::API_LIMIT["upcitemdb"].2)
-            .initial_available(mk_lib_network::mk_lib_network_limiter::API_LIMIT["upcitemdb"].2)
-            .build()
-            .unwrap();
-
-            let api_call_limiter = Ratelimiter::builder(
-                mk_lib_network::mk_lib_network_limiter::API_LIMIT["upcitemdb"].0,
-                Duration::from_secs(
-                    mk_lib_network::mk_lib_network_limiter::API_LIMIT["upcitemdb"].1,
-                ),
-            )
-            .max_tokens(mk_lib_network::mk_lib_network_limiter::API_LIMIT["upcitemdb"].0)
-            .initial_available(mk_lib_network::mk_lib_network_limiter::API_LIMIT["upcitemdb"].0)
-            .build()
-            .unwrap();
-
-            loop {
-                let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(
-                    &sqlx_pool_rw_clone,
-                    "upcitemdb",
-                )
-                .await
-                .unwrap();
-
-                for download_data in metadata_to_process {
-                    if let Err(wait_time) = daily_api_call_limiter.try_wait() {
-                        sleep(wait_time).await;
-                        continue;
-                    }
-
-                    if let Err(wait_time) = api_call_limiter.try_wait() {
-                        sleep(wait_time).await;
-                        continue;
-                    }
-
-                    mk_lib_metadata::base::metadata_process(
-                        &sqlx_pool_rw_clone,
-                        "upcitemdb".to_string(),
-                        download_data,
-                        api_key.as_str(),
-                    )
-                    .await
-                    .unwrap();
-                }
-
-                sleep(Duration::from_secs(1)).await;
-            }
-        });
+    if let Some(key) = option_api.upcitemdb {
+        let limit = API_LIMIT["upcitemdb"];
+        // Per-window limiter first so a blocked per-minute check never
+        // burns a daily token.
+        handles.push(spawn_provider_loop(
+            sqlx_pool_rw.clone(),
+            "upcitemdb",
+            key,
+            vec![
+                build_limiter(limit.0, Duration::from_secs(limit.1)),
+                build_limiter(limit.2, Duration::from_secs(DAILY_WINDOW_SECS)),
+            ],
+            debug_enabled,
+            shutdown_rx.clone(),
+        ));
     }
 
-    // process all the "Z" records
-    loop {
-        let metadata_to_process = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider(
-            &sqlx_pool_rw,
-            "Z",
-        )
-        .await?;
+    // "Z" catch-all: no external API, no rate limit.
+    handles.push(spawn_provider_loop(
+        sqlx_pool_rw.clone(),
+        "Z",
+        String::new(),
+        Vec::new(),
+        debug_enabled,
+        shutdown_rx.clone(),
+    ));
 
-        for download_data in metadata_to_process {
-            println!("DL Data: {:?}", download_data);
+    shutdown_signal().await;
+    eprintln!("mkmetadata: shutdown signal received");
+    let _ = shutdown_tx.send(true);
 
-            mk_lib_metadata::base::metadata_process(
-                &sqlx_pool_rw,
-                "Z".to_string(),
-                download_data,
-                "",
-            )
-            .await?;
-
-            println!("here2");
+    for handle in handles {
+        if let Err(err) = handle.await {
+            eprintln!("mkmetadata: task join error ({err})");
         }
-
-        sleep(Duration::from_secs(1)).await;
     }
+
+    Ok(())
 }
