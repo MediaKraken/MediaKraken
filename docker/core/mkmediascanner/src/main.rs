@@ -7,7 +7,7 @@ use std::collections::VecDeque;
 use std::error::Error;
 use std::ffi::OsStr;
 use std::path::Path;
-use std::time::SystemTime;
+use std::time::{Duration, SystemTime};
 use tokio::process::Command;
 use uuid::Uuid;
 
@@ -237,13 +237,31 @@ async fn main() -> Result<(), Box<dyn Error>> {
             Err(error) => {
                 log_loki(
                     "error",
-                    "library_path_audit_read failed",
+                    "library_path_audit_read failed; nacking with requeue",
                     json!({"error": error.to_string()}),
                 )
                 .await;
-                // Don't ack: leave the trigger in-flight so the broker redelivers
-                // it after the DB recovers. Otherwise a transient outage silently
-                // drops the scan request.
+                // Brief backoff so we don't spin on a downed DB, then nack with
+                // requeue so the broker redelivers the trigger (either to us
+                // after recovery or to another worker).
+                tokio::time::sleep(Duration::from_secs(5)).await;
+                if let Some(deliver) = msg.deliver {
+                    if let Err(nack_error) = rabbit_channel
+                        .basic_nack(amqprs::channel::BasicNackArguments::new(
+                            deliver.delivery_tag(),
+                            false,
+                            true,
+                        ))
+                        .await
+                    {
+                        log_loki(
+                            "error",
+                            "rabbitmq nack failed",
+                            json!({"error": nack_error.to_string()}),
+                        )
+                        .await;
+                    }
+                }
                 continue;
             }
         };
