@@ -2,7 +2,7 @@
 <html lang="en">
 {% include "bss_include_header.html" %}
 
-<body class="bg-gray-100 text-gray-900">
+<body class="bg-gray-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
 
 <div class="flex min-h-screen flex-col">
   {% include "bss_user/bss_user_include_menu.html" %}
@@ -12,16 +12,16 @@
 
   <main class="flex-1 p-6" x-data="cronPage()">
 
-    <section class="bg-white rounded shadow p-6">
-      <h2 class="text-xl font-semibold mb-6">
+    <section class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow p-6">
+      <h2 class="text-xl font-semibold mb-6 text-zinc-900 dark:text-zinc-100">
         Cron / Housekeeping Jobs
       </h2>
 
       {% if template_data_exists %}
       <div class="overflow-x-auto">
-        <table class="min-w-full border border-gray-200 text-sm">
-          <thead class="bg-gray-50">
-            <tr class="text-left font-semibold">
+        <table class="min-w-full border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-700 dark:text-zinc-300">
+          <thead class="bg-zinc-50 dark:bg-zinc-800">
+            <tr class="text-left font-semibold text-zinc-700 dark:text-zinc-200">
               <th class="px-3 py-2">#</th>
               <th class="px-3 py-2">Cron Name</th>
               <th class="px-3 py-2">Description</th>
@@ -33,9 +33,9 @@
             </tr>
           </thead>
 
-          <tbody class="divide-y">
+          <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
             {% for row_data in template_data %}
-            <tr class="hover:bg-gray-50">
+            <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
               <td class="px-3 py-2">{{ loop.index }}</td>
               <td class="px-3 py-2 font-medium">
                 {{ row_data.mm_cron_name }}
@@ -47,8 +47,8 @@
                 <span
                   class="px-2 py-1 rounded text-xs font-semibold"
                   :class="'{{ row_data.mm_cron_enabled }}' === 'True'
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-red-100 text-red-700'">
+                    ? 'bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-300'
+                    : 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-300'">
                   {{ row_data.mm_cron_enabled }}
                 </span>
               </td>
@@ -68,7 +68,7 @@
                   type="button"
                   aria-label="Run cron {{ row_data.mm_cron_name }}"
                   @click="confirmRun('{{ row_data.mm_cron_guid }}')"
-                  class="text-indigo-600 hover:text-indigo-800"
+                  class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
                   title="Run Cron">
                   {% include "icons/play.svg" %}
                 </button>
@@ -78,7 +78,7 @@
                   type="button"
                   aria-label="Edit cron {{ row_data.mm_cron_name }}"
                   @click="openEdit('{{ row_data.mm_cron_guid }}')"
-                  class="text-indigo-600 hover:text-indigo-800"
+                  class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
                   title="Edit Cron">
                   {% include "icons/pencil.svg" %}
                 </button>
@@ -95,7 +95,7 @@
         </table>
       </div>
       {% else %}
-        <p class="text-gray-500">No cron jobs found.</p>
+        <p class="text-zinc-500 dark:text-zinc-400">No cron jobs found.</p>
       {% endif %}
     </section>
 
@@ -104,12 +104,12 @@
       x-cloak
       class="fixed inset-0 bg-black/50 flex items-center justify-center">
 
-      <div class="bg-white rounded shadow-lg w-full max-w-md p-6">
-        <h3 class="text-lg font-semibold mb-4">
+      <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow-lg w-full max-w-md p-6">
+        <h3 class="text-lg font-semibold mb-4 text-zinc-900 dark:text-zinc-100">
           Run Cron Job
         </h3>
 
-        <p class="text-red-600 mb-6">
+        <p class="text-red-600 dark:text-red-400 mb-6">
           <span class="mr-1 inline-flex align-middle">
             {% include "icons/alert_triangle.svg" %}
           </span>
@@ -126,7 +126,7 @@
           <button
             type="button"
             @click="showRunConfirm=false"
-            class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
+            class="bg-zinc-300 text-zinc-900 px-4 py-2 rounded hover:bg-zinc-400 dark:bg-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-600">
             No
           </button>
         </div>
@@ -138,44 +138,44 @@
       x-cloak
       class="fixed inset-0 bg-black/50 flex items-center justify-center px-4 py-8">
 
-      <div class="bg-white rounded shadow-lg w-full max-w-2xl p-6 max-h-full overflow-y-auto">
-        <h3 class="text-lg font-semibold mb-4">
+      <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow-lg w-full max-w-2xl p-6 max-h-full overflow-y-auto">
+        <h3 class="text-lg font-semibold mb-4 text-zinc-900 dark:text-zinc-100">
           Update Cron
         </h3>
 
         <form class="space-y-4" @submit.prevent="updateCron">
-          <div x-show="editError" x-text="editError" class="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"></div>
+          <div x-show="editError" x-text="editError" class="rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"></div>
 
           <div>
-            <label class="block text-sm font-medium mb-1" for="cron-name">
+            <label class="block text-sm font-medium mb-1 text-zinc-700 dark:text-zinc-200" for="cron-name">
               Name
             </label>
             <input
               id="cron-name"
               type="text"
               x-model="editName"
-              class="w-full border rounded px-3 py-2">
+              class="w-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded px-3 py-2">
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-1" for="cron-description">
+            <label class="block text-sm font-medium mb-1 text-zinc-700 dark:text-zinc-200" for="cron-description">
               Description
             </label>
             <textarea
               id="cron-description"
               x-model="editDescription"
-              class="w-full border rounded px-3 py-2"></textarea>
+              class="w-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded px-3 py-2"></textarea>
           </div>
 
           <div class="grid gap-4 md:grid-cols-2">
             <div>
-              <label class="block text-sm font-medium mb-1" for="cron-schedule-type">
+              <label class="block text-sm font-medium mb-1 text-zinc-700 dark:text-zinc-200" for="cron-schedule-type">
                 Schedule Type
               </label>
               <select
                 id="cron-schedule-type"
                 x-model="editScheduleType"
-                class="w-full border rounded px-3 py-2">
+                class="w-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded px-3 py-2">
                 <option value="Week(s)">Week(s)</option>
                 <option value="Day(s)">Day(s)</option>
                 <option value="Hour(s)">Hour(s)</option>
@@ -184,7 +184,7 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium mb-1" for="cron-schedule-time">
+              <label class="block text-sm font-medium mb-1 text-zinc-700 dark:text-zinc-200" for="cron-schedule-time">
                 Schedule Time
               </label>
               <input
@@ -193,31 +193,31 @@
                 min="1"
                 step="1"
                 x-model="editScheduleTime"
-                class="w-full border rounded px-3 py-2">
+                class="w-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded px-3 py-2">
             </div>
           </div>
 
-          <label class="flex items-center gap-2 text-sm font-medium">
-            <input type="checkbox" x-model="editEnabled" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+          <label class="flex items-center gap-2 text-sm font-medium text-zinc-700 dark:text-zinc-200">
+            <input type="checkbox" x-model="editEnabled" class="h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500">
             Enabled
           </label>
 
           <div>
-            <label class="block text-sm font-medium mb-1" for="cron-json">
+            <label class="block text-sm font-medium mb-1 text-zinc-700 dark:text-zinc-200" for="cron-json">
               JSON Payload
             </label>
             <textarea
               id="cron-json"
               x-model="editJson"
               rows="10"
-              class="w-full border rounded px-3 py-2 font-mono text-xs"></textarea>
+              class="w-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded px-3 py-2 font-mono text-xs"></textarea>
           </div>
 
           <div class="flex justify-end gap-3 mt-6">
             <button
               type="button"
               @click="closeEdit"
-              class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
+              class="bg-zinc-300 text-zinc-900 px-4 py-2 rounded hover:bg-zinc-400 dark:bg-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-600">
               Close
             </button>
             <button

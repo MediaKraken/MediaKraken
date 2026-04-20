@@ -2,7 +2,7 @@
 <html lang="en">
 {% include "bss_include_header.html" %}
 
-<body class="bg-gray-100 text-gray-900">
+<body class="bg-gray-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
 
 <div class="flex min-h-screen flex-col">
   {% include "bss_user/bss_user_include_menu.html" %}
@@ -12,8 +12,8 @@
 
   <main class="flex-1 p-6">
 
-    <section class="bg-white rounded shadow p-6">
-      <h2 class="text-xl font-semibold mb-4">Media Report</h2>
+    <section class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow p-6">
+      <h2 class="text-xl font-semibold mb-4 text-zinc-900 dark:text-zinc-100">Media Report</h2>
 
       {% if pagination_bar != "" %}
         <div class="mb-2">
@@ -22,22 +22,22 @@
       {% endif %}
 
       <div class="overflow-x-auto">
-        <table class="min-w-full border border-gray-200 text-sm">
-          <thead class="bg-gray-50 font-semibold text-left">
-            <tr>
+        <table class="min-w-full border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-700 dark:text-zinc-300">
+          <thead class="bg-zinc-50 dark:bg-zinc-800 font-semibold text-left">
+            <tr class="text-zinc-700 dark:text-zinc-200">
               <th class="px-3 py-2 w-12">#</th>
               <th class="px-3 py-2">File Name</th>
               <th class="px-3 py-2">Media Type</th>
               <th class="px-3 py-2">Date Added</th>
             </tr>
           </thead>
-          <tbody class="divide-y">
+          <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
             {% for row_data in template_data %}
-            <tr class="hover:bg-gray-50">
-              <td class="px-3 py-2 text-gray-500">{{ loop.index + (page - 1) * 30 }}</td>
+            <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
+              <td class="px-3 py-2 text-zinc-500 dark:text-zinc-400">{{ loop.index + (page - 1) * 30 }}</td>
               <td class="px-3 py-2 break-all font-mono">{{ row_data.mm_media_path }}</td>
               <td class="px-3 py-2">{{ row_data.mm_media_class_enum }}</td>
-              <td class="px-3 py-2 font-mono text-xs text-gray-600">{{ row_data.mm_media_json_added }}</td>
+              <td class="px-3 py-2 font-mono text-xs text-zinc-600 dark:text-zinc-400">{{ row_data.mm_media_json_added }}</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -49,7 +49,7 @@
           {{ pagination_bar|safe }}
         </div>
       {% endif %}
-      
+
     </section>
 
   </main>
