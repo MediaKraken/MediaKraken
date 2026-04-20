@@ -1,111 +1,121 @@
+// Tizen back-button / exit handling.
 var backEventListener = null;
 
-var unregister = function() {
-    if ( backEventListener !== null ) {
-        document.removeEventListener( 'tizenhwkey', backEventListener );
+function unregister() {
+    if (backEventListener !== null) {
+        document.removeEventListener('tizenhwkey', backEventListener);
         backEventListener = null;
-        window.tizen.application.getCurrentApplication().exit();
-    }
-}
-
-//Initialize function
-var init = function () {
-    // register once
-    if ( backEventListener !== null ) {
-        return;
-    }
-    
-    // TODO:: Do your initialization job
-    console.log("init() called");
-    
-    var backEvent = function(e) {
-        if ( e.keyName == "back" ) {
-            try {
-                if ( $.mobile.urlHistory.activeIndex <= 0 ) {
-                    // if first page, terminate app
-                    unregister();
-                } else {
-                    // move previous page
-                    $.mobile.urlHistory.activeIndex -= 1;
-                    $.mobile.urlHistory.clearForward();
-                    window.history.back();
-                }
-            } catch( ex ) {
-                unregister();
-            }
+        if (window.tizen && window.tizen.application) {
+            window.tizen.application.getCurrentApplication().exit();
         }
     }
-    
-    // add eventListener for tizenhwkey (Back Button)
-    document.addEventListener( 'tizenhwkey', backEvent );
+}
+
+function init() {
+    if (backEventListener !== null) {
+        return;
+    }
+
+    var backEvent = function (e) {
+        if (e.keyName !== 'back') {
+            return;
+        }
+        try {
+            if (!$.mobile || !$.mobile.urlHistory
+                    || $.mobile.urlHistory.activeIndex <= 0) {
+                unregister();
+            } else {
+                window.history.back();
+            }
+        } catch (ex) {
+            unregister();
+        }
+    };
+
+    document.addEventListener('tizenhwkey', backEvent);
     backEventListener = backEvent;
-};
-
-$(document).bind( 'pageinit', init );
-$(document).unload( unregister );
-
-function setFocusVisible(index1,state){
-	var list = $.mobile.activePage.find("a[href]");
-	$item = list[index1];
-	if (state) {
-		$item.focus();
-	}
-	else {
-		$item.blur();
-	}
 }
 
-function changePage(index){
-	var list = $.mobile.activePage.find("a[href]");
-	$item = list[index];
-	var path = $item.getAttribute("href");
-	$.mobile.changePage(path);
-}
-var index = 0;
+$(document).on('pageinit', init);
+$(window).on('beforeunload', unregister);
 
-function handelPageOne(e) {
-	switch(e.keyCode){
-		case TvKeyCode.KEY_LEFT:
-		case TvKeyCode.KEY_UP:
-			if (index == 2){
-				index = index -2;
-				setFocusVisible(index+2,false);
-				setFocusVisible(index,true);
-			}else if(index != 0  && index >0){
-				index--;
-			}
-			setFocusVisible(index+1,false);
-			setFocusVisible(index,true);
-			break;
-		case TvKeyCode.KEY_RIGHT:
-		case TvKeyCode.KEY_DOWN:
-			if (index == 0){
-				index = index +2;
-				setFocusVisible(index-2,false);
-				setFocusVisible(index,true);
-			}
-			else if(index != 4 && index < 4){
-				index++;
-				setFocusVisible(index-1,false);
-				setFocusVisible(index,true);
-			}
-			break;
-		case TvKeyCode.KEY_ENTER:
-			changePage(index);
-			break;
-		default:
-			break;
-	}
+// Remote-key focus navigation for the tile grid.
+var focusIndex = 0;
+
+function focusableItems() {
+    return $.mobile.activePage.find('a[href], a[data-section]');
 }
 
-function bindKeyToPage1(){
-	console.log("pag1");
-	index = 0;
-	setFocusVisible(index,true);
-	document.body.removeEventListener("keydown",handelPageOne,false);
-	document.body.addEventListener("keydown",handelPageOne ,false);
+function setFocus(index) {
+    var list = focusableItems();
+    list.removeClass('mk-focused');
+    if (index < 0 || index >= list.length) {
+        return;
+    }
+    var item = list[index];
+    $(item).addClass('mk-focused');
+    if (typeof item.focus === 'function') {
+        item.focus();
+    }
 }
 
-$(document).on("pageshow", "#one", bindKeyToPage1);
-$(document).on("pageshow", "#two", bindKeyToPage1);
-$(document).on("pageshow", "#three", bindKeyToPage1);
+function activate(index) {
+    var list = focusableItems();
+    var item = list[index];
+    if (!item) {
+        return;
+    }
+    var section = item.getAttribute('data-section');
+    if (section) {
+        alert(section + ' section is not yet implemented');
+        return;
+    }
+    var path = item.getAttribute('href');
+    if (path && path !== '#') {
+        $.mobile.changePage(path);
+    }
+}
+
+function handlePageKey(e) {
+    var list = focusableItems();
+    if (list.length === 0) {
+        return;
+    }
+    switch (e.keyCode) {
+        case TvKeyCode.KEY_LEFT:
+        case TvKeyCode.KEY_UP:
+            if (focusIndex > 0) {
+                focusIndex -= 1;
+                setFocus(focusIndex);
+            }
+            break;
+        case TvKeyCode.KEY_RIGHT:
+        case TvKeyCode.KEY_DOWN:
+            if (focusIndex < list.length - 1) {
+                focusIndex += 1;
+                setFocus(focusIndex);
+            }
+            break;
+        case TvKeyCode.KEY_ENTER:
+            activate(focusIndex);
+            break;
+        default:
+            break;
+    }
+}
+
+function bindKeyNavigation() {
+    focusIndex = 0;
+    setFocus(focusIndex);
+    document.body.removeEventListener('keydown', handlePageKey, false);
+    document.body.addEventListener('keydown', handlePageKey, false);
+}
+
+$(document).on('pageshow', '[data-role="page"]', bindKeyNavigation);
+
+// Click fallback for tiles that have no destination yet.
+$(document).on('click', '.mk-tile[data-section]', function (e) {
+    e.preventDefault();
+    var section = $(this).data('section');
+    alert(section + ' section is not yet implemented');
+});

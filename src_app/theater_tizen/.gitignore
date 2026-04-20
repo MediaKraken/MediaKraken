@@ -3,3 +3,13 @@
 *.xml~
 *.config.xml.un~
 *.index.html.un~
+
+# Tizen build / signing output
+*.wgt
+.sign/
+.build/
+.buildResult/
+
+# Eclipse / Tizen Studio IDE metadata
+.settings/
+.metadata/

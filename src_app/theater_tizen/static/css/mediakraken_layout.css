@@ -105,8 +105,8 @@ img.center {
 }
 
 #movie_detail {
-    100%;
-    background:transparent;
+    width: 100%;
+    background: transparent;
 }
 
 #movie_image_div {
@@ -123,8 +123,8 @@ img.center {
 }
 
 #meta_detail {
-    100%;
-    background:transparent
+    width: 100%;
+    background: transparent;
 }
 
 #meta_image_div {
@@ -166,5 +166,27 @@ div.transbox {
 
 [class*='col-'] {
   float: left;
+}
+
+.mk-tile-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px;
+  justify-content: center;
+}
+
+.mk-tile {
+  display: inline-block;
+  border: 4px solid transparent;
+  border-radius: 8px;
+  transition: border-color 120ms ease-in-out, transform 120ms ease-in-out;
+  outline: none;
+}
+
+.mk-tile.mk-focused,
+.mk-tile:focus {
+  border-color: #228DFF;
+  transform: scale(1.04);
 }
 
