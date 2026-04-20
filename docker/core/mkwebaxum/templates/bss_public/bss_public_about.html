@@ -1,77 +1,282 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediaKraken - About</title>
-<link rel="stylesheet" href="/static/css/base_webapp_9.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediaKraken &ndash; About</title>
+  <link rel="stylesheet" href="/static/css/base_webapp_9.css">
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-200 transition-colors duration-300">
 
-    <main class="container mx-auto p-6 space-y-8">
+  <!-- Hero -->
+  <header class="bg-gradient-to-br from-indigo-600 to-purple-700 text-white">
+    <div class="max-w-5xl mx-auto px-6 py-12 text-center">
+      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight">About MediaKraken</h1>
+      <p class="mt-3 text-indigo-100 text-base sm:text-lg max-w-2xl mx-auto">
+        Credits, data providers, and the people who made this project possible.
+      </p>
+      <div class="mt-6">
+        <a href="/public/login"
+           class="inline-block rounded-lg bg-white/10 hover:bg-white/20 border border-white/20
+                  px-4 py-2 text-sm font-medium transition">
+          &larr; Back to Login
+        </a>
+      </div>
+    </div>
+  </header>
 
-        <!-- Contributors Section -->
-        <section class="bg-white shadow rounded-lg p-6">
-            <h2 class="text-2xl font-bold mb-4">Contributors and Blatant Code Rips</h2>
-            <ul class="list-disc list-inside space-y-1">
-                <li>Quinn <a href="https://github.com/SpootDev/" class="text-blue-600 hover:underline">"SpootDev"</a> Granfor - Main Nut</li>
-                <li>Breadman - Hardware donation for testing NP</li>
-                <li>Dravor - Hardware donation for testing RDMA</li>
-                <li>mrwebsmith - Alpha testing</li>
-            </ul>
-            <p class="mt-4">Feel like donating for inspiration and pizza? <a href="http://PayPal.Me/SpootDev" class="text-blue-600 hover:underline">Paypal</a></p>
-            <p class="mt-2">This product uses the TMDb API but is not endorsed or certified by TMDb.</p>
-        </section>
+  <main class="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-8">
 
-        <!-- Icons Credits -->
-        <section class="bg-white shadow rounded-lg p-6 space-y-2">
-            <h3 class="text-xl font-semibold mb-2">Icon Credits</h3>
-            <ul class="list-disc list-inside space-y-1 text-sm">
-                <li>Icons made by <a href="http://www.flaticon.com/authors/simpleicon" class="text-blue-600 hover:underline">SimpleIcon</a> from <a href="http://www.flaticon.com" class="text-blue-600 hover:underline">Flaticon</a> - CC 3.0 BY</li>
-                <li>Icons made by <a href="http://www.freepik.com" class="text-blue-600 hover:underline">Freepik</a> from Flaticon - CC 3.0 BY</li>
-                <li>Icons made by <a href="http://www.flaticon.com/authors/madebyoliver" class="text-blue-600 hover:underline">Madebyoliver</a> from Flaticon - CC 3.0 BY</li>
-                <li>Icons made by <a href="http://www.flaticon.com/authors/google" class="text-blue-600 hover:underline">Google</a> from Flaticon - CC 3.0 BY</li>
-                <li>Sync icon via <a href="http://www.VectorOpenStock.com" class="text-blue-600 hover:underline">VectorOpenStock</a> - CC 3.0 BY</li>
-                <li>Poo icon via <a href="http://www.fatcow.com/free-icons" class="text-blue-600 hover:underline">fatcow</a> - CC 4.0 BY</li>
-                <li>Some icons by <a href="http://p.yusukekamiyamane.com/" class="text-blue-600 hover:underline">Yusuke Kamiyamane</a> - CC 3.0 BY</li>
-                <li>Twitch Icon by <a href="http://www.flaticon.com/authors/darius-dan" class="text-blue-600 hover:underline">Darius Dan</a> - CC 3.0 BY</li>
-                <li>Icons by <a href="http://www.flaticon.com/authors/egor-rumyantsev" class="text-blue-600 hover:underline">Egor Rumyantsev</a> - CC 3.0 BY</li>
-                <li>Icons by <a href="http://www.flaticon.com/authors/icomoon" class="text-blue-600 hover:underline">Icomoon</a> - CC 3.0 BY</li>
-            </ul>
-        </section>
+    <!-- Contributors -->
+    <section class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800
+                    rounded-xl shadow-sm p-6 sm:p-8">
+      <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">Contributors</h2>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        People who built, tested, and supported MediaKraken.
+      </p>
 
-        <!-- Test Images Section -->
-        <section class="bg-white shadow rounded-lg p-6">
-            <h3 class="text-xl font-semibold mb-2">Test Images</h3>
-            <ul class="list-disc list-inside space-y-1 text-sm">
-                <li>ASUNI N, GIACHETTI A, "TESTIMAGES: A Large Data Archive For Display and Algorithm Testing", Journal of Graphics Tools, 2015, DOI:10.1080/2165347X.2015.1024298</li>
-                <li>ASUNI N, GIACHETTI A, "TESTIMAGES: a large-scale archive for testing visual devices and basic image processing algorithms", STAG 2014</li>
-            </ul>
-        </section>
+      <ul class="mt-6 divide-y divide-gray-100 dark:divide-gray-800">
+        <li class="py-3 flex items-baseline justify-between gap-4">
+          <div>
+            <span class="font-medium text-gray-900 dark:text-white">Quinn Granfor</span>
+            <span class="text-sm text-gray-500 dark:text-gray-400">&middot; Main developer</span>
+          </div>
+          <a href="https://github.com/SpootDev/"
+             class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline whitespace-nowrap">
+            @SpootDev
+          </a>
+        </li>
+        <li class="py-3">
+          <span class="font-medium text-gray-900 dark:text-white">Breadman</span>
+          <span class="text-sm text-gray-500 dark:text-gray-400">&middot; Hardware donation for NP testing</span>
+        </li>
+        <li class="py-3">
+          <span class="font-medium text-gray-900 dark:text-white">Dravor</span>
+          <span class="text-sm text-gray-500 dark:text-gray-400">&middot; Hardware donation for RDMA testing</span>
+        </li>
+        <li class="py-3">
+          <span class="font-medium text-gray-900 dark:text-white">mrwebsmith</span>
+          <span class="text-sm text-gray-500 dark:text-gray-400">&middot; Alpha testing</span>
+        </li>
+      </ul>
 
-        <!-- Data Providers Section -->
-        <section class="bg-white shadow rounded-lg p-6">
-            <h3 class="text-xl font-semibold mb-4">Data Providers</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                <a href="https://anidb.net" class="text-blue-600 hover:underline">AniDb</a>
-                <a href="http://www.chartlyrics.com/" class="text-blue-600 hover:underline">ChartLyrics</a>
-                <a href="http://www.freedb.org/" class="text-blue-600 hover:underline">FreeDB</a>
-                <a href="http://www.globalcache.com/" class="text-blue-600 hover:underline">Global Cache</a>
-                <a href="https://imvdb.com/" class="text-blue-600 hover:underline">IMVDb</a>
-                <a href="https://musicbrainz.org/" class="text-blue-600 hover:underline">MusicBrainz</a>
-                <a href="http://www.opensubtitles.org/" class="text-blue-600 hover:underline">OpenSubtitles.org</a>
-                <a href="http://pitchfork.com/" class="text-blue-600 hover:underline">Pitchfork</a>
-                <a href="http://www.schedulesdirect.org/" class="text-blue-600 hover:underline">Schedules Direct</a>
-                <a href="https://github.com/ScudLee/anime-lists" class="text-blue-600 hover:underline">Scudlee Anime Lists</a>
-                <a href="http://www.thelogodb.com/" class="text-blue-600 hover:underline">TheLogoDB</a>
-                <a href="http://www.thesportsdb.com/" class="text-blue-600 hover:underline">TheSportsDB</a>
-                <a href="https://www.themoviedb.org/" class="text-blue-600 hover:underline">The Movie Database</a>
-                <a href="https://trakt.tv/" class="text-blue-600 hover:underline">Trakt</a>
-            </div>
-        </section>
+      <div class="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4
+                  rounded-lg bg-indigo-50 dark:bg-indigo-500/10
+                  border border-indigo-100 dark:border-indigo-500/20 px-4 py-3">
+        <p class="text-sm text-gray-700 dark:text-gray-300">
+          Feel like donating for inspiration and pizza?
+        </p>
+        <a href="http://PayPal.Me/SpootDev"
+           class="inline-block text-sm font-semibold rounded-md
+                  bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 transition">
+          Donate via PayPal
+        </a>
+      </div>
 
-    </main>
+      <p class="mt-4 text-xs text-gray-500 dark:text-gray-400">
+        This product uses the TMDb API but is not endorsed or certified by TMDb.
+      </p>
+    </section>
 
-    {% include "bss_public/bss_public_footer.html" %}
+    <!-- Icon Credits -->
+    <section class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800
+                    rounded-xl shadow-sm p-6 sm:p-8">
+      <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">Icon Credits</h2>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Licensed under Creative Commons. Thanks to the artists who made their work available.
+      </p>
+
+      <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+        <div class="flex justify-between gap-3">
+          <a href="http://www.flaticon.com/authors/simpleicon"
+             class="text-indigo-600 dark:text-indigo-400 hover:underline">SimpleIcon</a>
+          <span class="text-gray-500 dark:text-gray-400">CC 3.0 BY &middot; Flaticon</span>
+        </div>
+        <div class="flex justify-between gap-3">
+          <a href="http://www.freepik.com"
+             class="text-indigo-600 dark:text-indigo-400 hover:underline">Freepik</a>
+          <span class="text-gray-500 dark:text-gray-400">CC 3.0 BY &middot; Flaticon</span>
+        </div>
+        <div class="flex justify-between gap-3">
+          <a href="http://www.flaticon.com/authors/madebyoliver"
+             class="text-indigo-600 dark:text-indigo-400 hover:underline">Madebyoliver</a>
+          <span class="text-gray-500 dark:text-gray-400">CC 3.0 BY &middot; Flaticon</span>
+        </div>
+        <div class="flex justify-between gap-3">
+          <a href="http://www.flaticon.com/authors/google"
+             class="text-indigo-600 dark:text-indigo-400 hover:underline">Google</a>
+          <span class="text-gray-500 dark:text-gray-400">CC 3.0 BY &middot; Flaticon</span>
+        </div>
+        <div class="flex justify-between gap-3">
+          <a href="http://www.flaticon.com/authors/darius-dan"
+             class="text-indigo-600 dark:text-indigo-400 hover:underline">Darius Dan</a>
+          <span class="text-gray-500 dark:text-gray-400">CC 3.0 BY &middot; Twitch icon</span>
+        </div>
+        <div class="flex justify-between gap-3">
+          <a href="http://www.flaticon.com/authors/egor-rumyantsev"
+             class="text-indigo-600 dark:text-indigo-400 hover:underline">Egor Rumyantsev</a>
+          <span class="text-gray-500 dark:text-gray-400">CC 3.0 BY</span>
+        </div>
+        <div class="flex justify-between gap-3">
+          <a href="http://www.flaticon.com/authors/icomoon"
+             class="text-indigo-600 dark:text-indigo-400 hover:underline">Icomoon</a>
+          <span class="text-gray-500 dark:text-gray-400">CC 3.0 BY</span>
+        </div>
+        <div class="flex justify-between gap-3">
+          <a href="http://www.VectorOpenStock.com"
+             class="text-indigo-600 dark:text-indigo-400 hover:underline">VectorOpenStock</a>
+          <span class="text-gray-500 dark:text-gray-400">CC 3.0 BY &middot; Sync icon</span>
+        </div>
+        <div class="flex justify-between gap-3">
+          <a href="http://p.yusukekamiyamane.com/"
+             class="text-indigo-600 dark:text-indigo-400 hover:underline">Yusuke Kamiyamane</a>
+          <span class="text-gray-500 dark:text-gray-400">CC 3.0 BY</span>
+        </div>
+        <div class="flex justify-between gap-3">
+          <a href="http://www.fatcow.com/free-icons"
+             class="text-indigo-600 dark:text-indigo-400 hover:underline">FatCow</a>
+          <span class="text-gray-500 dark:text-gray-400">CC 4.0 BY</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Test Images -->
+    <section class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800
+                    rounded-xl shadow-sm p-6 sm:p-8">
+      <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">Test Images</h2>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        Research citations used for display and algorithm testing.
+      </p>
+
+      <ul class="mt-6 space-y-3 text-sm text-gray-700 dark:text-gray-300">
+        <li class="pl-4 border-l-2 border-indigo-500/70">
+          Asuni N., Giachetti A. &mdash;
+          <em>TESTIMAGES: A Large Data Archive For Display and Algorithm Testing</em>,
+          Journal of Graphics Tools, 2015.
+          <span class="block text-xs text-gray-500 dark:text-gray-400 mt-1">
+            DOI: 10.1080/2165347X.2015.1024298
+          </span>
+        </li>
+        <li class="pl-4 border-l-2 border-indigo-500/70">
+          Asuni N., Giachetti A. &mdash;
+          <em>TESTIMAGES: a large-scale archive for testing visual devices and basic image processing algorithms</em>,
+          STAG 2014.
+        </li>
+      </ul>
+    </section>
+
+    <!-- Data Providers -->
+    <section class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800
+                    rounded-xl shadow-sm p-6 sm:p-8">
+      <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">Data Providers</h2>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        External services and databases that power MediaKraken's metadata.
+      </p>
+
+      <div class="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        <a href="https://anidb.net"
+           class="rounded-lg border border-gray-200 dark:border-gray-800
+                  hover:border-indigo-400 dark:hover:border-indigo-500
+                  hover:bg-indigo-50 dark:hover:bg-indigo-500/10
+                  px-3 py-2 text-sm text-center text-gray-800 dark:text-gray-200 transition">
+          AniDB
+        </a>
+        <a href="http://www.chartlyrics.com/"
+           class="rounded-lg border border-gray-200 dark:border-gray-800
+                  hover:border-indigo-400 dark:hover:border-indigo-500
+                  hover:bg-indigo-50 dark:hover:bg-indigo-500/10
+                  px-3 py-2 text-sm text-center text-gray-800 dark:text-gray-200 transition">
+          ChartLyrics
+        </a>
+        <a href="http://www.freedb.org/"
+           class="rounded-lg border border-gray-200 dark:border-gray-800
+                  hover:border-indigo-400 dark:hover:border-indigo-500
+                  hover:bg-indigo-50 dark:hover:bg-indigo-500/10
+                  px-3 py-2 text-sm text-center text-gray-800 dark:text-gray-200 transition">
+          FreeDB
+        </a>
+        <a href="http://www.globalcache.com/"
+           class="rounded-lg border border-gray-200 dark:border-gray-800
+                  hover:border-indigo-400 dark:hover:border-indigo-500
+                  hover:bg-indigo-50 dark:hover:bg-indigo-500/10
+                  px-3 py-2 text-sm text-center text-gray-800 dark:text-gray-200 transition">
+          Global Cache
+        </a>
+        <a href="https://imvdb.com/"
+           class="rounded-lg border border-gray-200 dark:border-gray-800
+                  hover:border-indigo-400 dark:hover:border-indigo-500
+                  hover:bg-indigo-50 dark:hover:bg-indigo-500/10
+                  px-3 py-2 text-sm text-center text-gray-800 dark:text-gray-200 transition">
+          IMVDb
+        </a>
+        <a href="https://musicbrainz.org/"
+           class="rounded-lg border border-gray-200 dark:border-gray-800
+                  hover:border-indigo-400 dark:hover:border-indigo-500
+                  hover:bg-indigo-50 dark:hover:bg-indigo-500/10
+                  px-3 py-2 text-sm text-center text-gray-800 dark:text-gray-200 transition">
+          MusicBrainz
+        </a>
+        <a href="http://www.opensubtitles.org/"
+           class="rounded-lg border border-gray-200 dark:border-gray-800
+                  hover:border-indigo-400 dark:hover:border-indigo-500
+                  hover:bg-indigo-50 dark:hover:bg-indigo-500/10
+                  px-3 py-2 text-sm text-center text-gray-800 dark:text-gray-200 transition">
+          OpenSubtitles
+        </a>
+        <a href="http://pitchfork.com/"
+           class="rounded-lg border border-gray-200 dark:border-gray-800
+                  hover:border-indigo-400 dark:hover:border-indigo-500
+                  hover:bg-indigo-50 dark:hover:bg-indigo-500/10
+                  px-3 py-2 text-sm text-center text-gray-800 dark:text-gray-200 transition">
+          Pitchfork
+        </a>
+        <a href="http://www.schedulesdirect.org/"
+           class="rounded-lg border border-gray-200 dark:border-gray-800
+                  hover:border-indigo-400 dark:hover:border-indigo-500
+                  hover:bg-indigo-50 dark:hover:bg-indigo-500/10
+                  px-3 py-2 text-sm text-center text-gray-800 dark:text-gray-200 transition">
+          Schedules Direct
+        </a>
+        <a href="https://github.com/ScudLee/anime-lists"
+           class="rounded-lg border border-gray-200 dark:border-gray-800
+                  hover:border-indigo-400 dark:hover:border-indigo-500
+                  hover:bg-indigo-50 dark:hover:bg-indigo-500/10
+                  px-3 py-2 text-sm text-center text-gray-800 dark:text-gray-200 transition">
+          Scudlee Anime Lists
+        </a>
+        <a href="http://www.thelogodb.com/"
+           class="rounded-lg border border-gray-200 dark:border-gray-800
+                  hover:border-indigo-400 dark:hover:border-indigo-500
+                  hover:bg-indigo-50 dark:hover:bg-indigo-500/10
+                  px-3 py-2 text-sm text-center text-gray-800 dark:text-gray-200 transition">
+          TheLogoDB
+        </a>
+        <a href="http://www.thesportsdb.com/"
+           class="rounded-lg border border-gray-200 dark:border-gray-800
+                  hover:border-indigo-400 dark:hover:border-indigo-500
+                  hover:bg-indigo-50 dark:hover:bg-indigo-500/10
+                  px-3 py-2 text-sm text-center text-gray-800 dark:text-gray-200 transition">
+          TheSportsDB
+        </a>
+        <a href="https://www.themoviedb.org/"
+           class="rounded-lg border border-gray-200 dark:border-gray-800
+                  hover:border-indigo-400 dark:hover:border-indigo-500
+                  hover:bg-indigo-50 dark:hover:bg-indigo-500/10
+                  px-3 py-2 text-sm text-center text-gray-800 dark:text-gray-200 transition">
+          The Movie Database
+        </a>
+        <a href="https://trakt.tv/"
+           class="rounded-lg border border-gray-200 dark:border-gray-800
+                  hover:border-indigo-400 dark:hover:border-indigo-500
+                  hover:bg-indigo-50 dark:hover:bg-indigo-500/10
+                  px-3 py-2 text-sm text-center text-gray-800 dark:text-gray-200 transition">
+          Trakt
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  {% include "bss_public/bss_public_footer.html" %}
 </body>
 </html>
