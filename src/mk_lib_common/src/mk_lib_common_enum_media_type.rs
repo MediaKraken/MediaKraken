@@ -21,6 +21,7 @@ impl DLMediaType {
     pub const ANIME: i16 = 8;
     pub const MUSIC: i16 = 9;
     pub const ADULT: i16 = 10;
+    pub const COLLECTION: i16 = 11;
 
     pub const ADULT_IMAGE: i16 = 1000;
     pub const ADULT_SCENE: i16 = 1001;
