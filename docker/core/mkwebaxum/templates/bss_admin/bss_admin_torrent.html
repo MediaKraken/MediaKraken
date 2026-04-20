@@ -12,6 +12,27 @@
     <!-- Main content -->
     <main class="p-4 max-w-7xl mx-auto">
 
+        <!-- Add torrent -->
+        <div class="bg-white shadow rounded-lg p-4 mb-4">
+            <h2 class="text-lg font-semibold mb-3">Add Torrent</h2>
+            <form @submit.prevent="addTorrent()" class="flex flex-col sm:flex-row sm:items-center gap-2">
+                <input
+                    type="text"
+                    x-model="newTorrentUrl"
+                    placeholder="Torrent URL, magnet link, or file path"
+                    class="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-400"
+                    required>
+                <button
+                    type="submit"
+                    :disabled="isAdding"
+                    class="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-4 py-2 rounded text-sm">
+                    <span x-show="!isAdding">Add</span>
+                    <span x-show="isAdding">Adding...</span>
+                </button>
+            </form>
+            <p x-show="actionError" class="text-red-600 text-sm mt-2" x-text="actionError"></p>
+        </div>
+
         <!-- Torrent Table -->
         <div class="bg-white shadow rounded-lg overflow-hidden">
             <div class="p-4 border-b border-gray-200">
@@ -27,7 +48,8 @@
                             <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Status</th>
                             <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Percentage</th>
                             <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Size</th>
-                            <th class="px-4 py-2 text-center text-sm font-medium text-gray-700">Start/Stop</th>
+                            <th class="px-4 py-2 text-center text-sm font-medium text-gray-700">Start</th>
+                            <th class="px-4 py-2 text-center text-sm font-medium text-gray-700">Pause</th>
                             <th class="px-4 py-2 text-center text-sm font-medium text-gray-700">Delete</th>
                         </tr>
                     </thead>
@@ -42,19 +64,35 @@
                                 <td class="px-4 py-2 text-sm" x-text="(torrent.percent_done*100).toFixed(1)+'%'"></td>
                                 <td class="px-4 py-2 text-sm" x-text="formatBytes(torrent.size)"></td>
                                 <td class="px-4 py-2 text-center">
-                                    <button @click="editTorrent(torrent)" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">
-                                        <span class="mr-1 inline-flex align-middle">{% include "icons/pencil.svg" %}</span> Edit
+                                    <button
+                                        @click="startTorrent(torrent)"
+                                        :disabled="pendingId === torrent.id"
+                                        class="bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white px-3 py-1 rounded text-sm inline-flex items-center">
+                                        <span class="mr-1 inline-flex align-middle">{% include "icons/play.svg" %}</span>
+                                        Start
                                     </button>
                                 </td>
                                 <td class="px-4 py-2 text-center">
-                                    <button @click="confirmDelete(torrent)" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
-                                        <span class="mr-1 inline-flex align-middle">{% include "icons/trash.svg" %}</span> Delete
+                                    <button
+                                        @click="stopTorrent(torrent)"
+                                        :disabled="pendingId === torrent.id"
+                                        class="bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 text-white px-3 py-1 rounded text-sm">
+                                        Pause
+                                    </button>
+                                </td>
+                                <td class="px-4 py-2 text-center">
+                                    <button
+                                        @click="confirmDelete(torrent)"
+                                        :disabled="pendingId === torrent.id"
+                                        class="bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white px-3 py-1 rounded text-sm inline-flex items-center">
+                                        <span class="mr-1 inline-flex align-middle">{% include "icons/trash.svg" %}</span>
+                                        Delete
                                     </button>
                                 </td>
                             </tr>
                         </template>
                         <tr x-show="torrents.length === 0">
-                            <td colspan="8" class="px-4 py-2 text-center text-gray-500">No torrents found.</td>
+                            <td colspan="9" class="px-4 py-2 text-center text-gray-500">No torrents found.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -100,20 +138,105 @@
                 })),
                 showDeleteModal: false,
                 torrentToDelete: null,
+                newTorrentUrl: '',
+                isAdding: false,
+                pendingId: null,
+                actionError: '',
+
+                async postForm(url, payload) {
+                    const body = payload ? new URLSearchParams(payload).toString() : '';
+                    return fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                        },
+                        body,
+                    });
+                },
+
+                async addTorrent() {
+                    this.actionError = '';
+                    const fileUrl = this.newTorrentUrl.trim();
+                    if (!fileUrl) {
+                        this.actionError = 'Torrent URL is required.';
+                        return;
+                    }
+                    this.isAdding = true;
+                    try {
+                        const response = await this.postForm('/admin/torrent_add', { file_url: fileUrl });
+                        if (!response.ok) {
+                            this.actionError = (await response.text()) || 'Unable to add torrent.';
+                            return;
+                        }
+                        this.newTorrentUrl = '';
+                        window.location.reload();
+                    } catch (_error) {
+                        this.actionError = 'Unable to add torrent.';
+                    } finally {
+                        this.isAdding = false;
+                    }
+                },
+
+                async startTorrent(torrent) {
+                    this.actionError = '';
+                    this.pendingId = torrent.id;
+                    try {
+                        const response = await this.postForm(`/admin/torrent_start/${torrent.id}`);
+                        if (!response.ok) {
+                            this.actionError = (await response.text()) || 'Unable to start torrent.';
+                            return;
+                        }
+                        window.location.reload();
+                    } catch (_error) {
+                        this.actionError = 'Unable to start torrent.';
+                    } finally {
+                        this.pendingId = null;
+                    }
+                },
+
+                async stopTorrent(torrent) {
+                    this.actionError = '';
+                    this.pendingId = torrent.id;
+                    try {
+                        const response = await this.postForm(`/admin/torrent_stop/${torrent.id}`);
+                        if (!response.ok) {
+                            this.actionError = (await response.text()) || 'Unable to pause torrent.';
+                            return;
+                        }
+                        window.location.reload();
+                    } catch (_error) {
+                        this.actionError = 'Unable to pause torrent.';
+                    } finally {
+                        this.pendingId = null;
+                    }
+                },
 
                 confirmDelete(torrent) {
                     this.torrentToDelete = torrent;
                     this.showDeleteModal = true;
                 },
 
-                deleteTorrent() {
-                    this.torrents = this.torrents.filter(t => t.id !== this.torrentToDelete.id);
-                    this.showDeleteModal = false;
-                    this.torrentToDelete = null;
-                },
-
-                editTorrent(torrent) {
-                    alert('Edit functionality for: ' + torrent.name);
+                async deleteTorrent() {
+                    if (!this.torrentToDelete) {
+                        return;
+                    }
+                    this.actionError = '';
+                    const id = this.torrentToDelete.id;
+                    this.pendingId = id;
+                    try {
+                        const response = await this.postForm(`/admin/torrent_delete/${id}`);
+                        if (!response.ok) {
+                            this.actionError = (await response.text()) || 'Unable to delete torrent.';
+                            return;
+                        }
+                        this.torrents = this.torrents.filter((t) => t.id !== id);
+                    } catch (_error) {
+                        this.actionError = 'Unable to delete torrent.';
+                    } finally {
+                        this.showDeleteModal = false;
+                        this.torrentToDelete = null;
+                        this.pendingId = null;
+                    }
                 },
 
                 formatBytes(bytes) {

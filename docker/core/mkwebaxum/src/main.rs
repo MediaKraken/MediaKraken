@@ -318,6 +318,22 @@ async fn main() {
             get(admin::bp_reports::admin_report_known_media),
         )
         .route_with_tsr("/admin/torrent", get(admin::bp_torrent::admin_torrent))
+        .route_with_tsr(
+            "/admin/torrent_add",
+            post(admin::bp_torrent::admin_torrent_add),
+        )
+        .route_with_tsr(
+            "/admin/torrent_start/{torrent_id}",
+            post(admin::bp_torrent::admin_torrent_start),
+        )
+        .route_with_tsr(
+            "/admin/torrent_stop/{torrent_id}",
+            post(admin::bp_torrent::admin_torrent_stop),
+        )
+        .route_with_tsr(
+            "/admin/torrent_delete/{torrent_id}",
+            post(admin::bp_torrent::admin_torrent_delete),
+        )
         .route_with_tsr("/admin/user/{page}", get(admin::bp_user::admin_user))
         .route_with_tsr(
             "/user/internet/flickr",
