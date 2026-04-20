@@ -34,6 +34,12 @@ struct MetadataPerson {
     popularity: f32,
 }
 
+#[derive(Serialize, Deserialize)]
+struct MetadataCollection {
+    id: Option<i32>,
+    name: String,
+}
+
 #[derive(Deserialize)]
 struct ResponseMetadata {
     results: Vec<MetadataGeneral>,
@@ -279,6 +285,69 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             }
                         }
                     }
+
+                    let date_to_use = find_date_to_use(
+                        "http://files.tmdb.org/p/exports/collection_ids_{}.json.gz",
+                    )
+                    .await
+                    .unwrap();
+                    // grab the Collection id's
+                    let fetch_result_collection =
+                        mk_lib_network::mk_lib_network::mk_network_download_file_to_vec(
+                            format!(
+                                "http://files.tmdb.org/p/exports/collection_ids_{}.json.gz",
+                                date_to_use
+                            )
+                            .replace("\"", ""),
+                        )
+                        .await
+                        .unwrap();
+                    let json_result =
+                        mk_lib_compression::mk_lib_compression::mk_decompress_gz_bytes(
+                            fetch_result_collection,
+                        )
+                        .await
+                        .unwrap();
+                    let mut record_count = 0;
+                    let mut skipped_rows = 0usize;
+                    for json_item in json_result.lines() {
+                        if !json_item.trim().is_empty() {
+                            if skipped_rows < skip_rows {
+                                skipped_rows += 1;
+                                continue;
+                            }
+                            let metadata_struct: MetadataCollection =
+                                serde_json::from_str(json_item.trim()).unwrap();
+                            let Some(metadata_id) = metadata_struct.id else {
+                                continue;
+                            };
+                            let result =
+                                mk_lib_database::database_metadata::mk_lib_database_metadata_collection::mk_lib_database_metadata_exists_collection(
+                                    &sqlx_pool_rw,
+                                    metadata_id,
+                                )
+                                .await
+                                .unwrap();
+                            if result == false {
+                                let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
+                                                                                                                              "themoviedb".to_string(),
+                                                                                                                              mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::COLLECTION,
+                                                                                                                              metadata_id).await.unwrap();
+                                if download_result == false {
+                                    record_count += 1;
+                                    if record_count > record_limit {
+                                        break;
+                                    }
+                                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
+                                                                                                            "themoviedb".to_string(),
+                                                                                                            mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::COLLECTION,
+                                                                                                            uuid::Uuid::now_v7(),
+                                                                                                            Some(metadata_id),
+                                                                                                            "Fetch".to_string(), None).await.unwrap();
+                                }
+                            }
+                        }
+                    }
                 } else {
                     let option_config_json: serde_json::Value =
                     mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool_ro)
@@ -413,6 +482,51 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
                                                                                                                         "themoviedb".to_string(),
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
+                                                                                                                        uuid::Uuid::now_v7(),
+                                                                                                                        Some(json_item.id),
+                                                                                                                        "Update".to_string(), None).await;
+                            }
+                        }
+                    }
+
+                    // process collection changes
+                    let url_result = mk_lib_network::mk_lib_network::mk_data_from_url(
+                        format!(
+                            "https://api.themoviedb.org/3/collection/changes?api_key={}",
+                            option_config_json["API"]["themoviedb"]
+                        )
+                        .replace("\"", ""),
+                    )
+                    .await
+                    .unwrap();
+                    let resp: ResponseMetadata = serde_json::from_str(&url_result.trim()).unwrap();
+                    for json_item in resp.results {
+                        println!("collection item {}", json_item.id);
+                        // verify it's not already in the database
+                        let result =
+                            mk_lib_database::database_metadata::mk_lib_database_metadata_collection::mk_lib_database_metadata_exists_collection(
+                                &sqlx_pool_rw,
+                                json_item.id,
+                            )
+                            .await
+                            .unwrap();
+                        if result == false {
+                            let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
+                                                                                                                                          "themoviedb".to_string(),
+                                                                                                                                          mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::COLLECTION,
+                                                                                                                                          json_item.id).await.unwrap();
+                            if download_result == false {
+                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
+                                                                                                                        "themoviedb".to_string(),
+                                                                                                                        mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::COLLECTION,
+                                                                                                                        uuid::Uuid::now_v7(),
+                                                                                                                        Some(json_item.id),
+                                                                                                                        "Fetch".to_string(), None).await;
+                            } else {
+                                // it's on the database, so must update the record with latest information
+                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
+                                                                                                                        "themoviedb".to_string(),
+                                                                                                                        mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::COLLECTION,
                                                                                                                         uuid::Uuid::now_v7(),
                                                                                                                         Some(json_item.id),
                                                                                                                         "Update".to_string(), None).await;

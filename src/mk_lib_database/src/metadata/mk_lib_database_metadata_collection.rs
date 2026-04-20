@@ -3,6 +3,23 @@ use sqlx::FromRow;
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
 
+pub async fn mk_lib_database_metadata_exists_collection(
+    sqlx_pool: &sqlx::PgPool,
+    metadata_id: i32,
+) -> Result<bool, sqlx::Error> {
+    let row: (bool,) = sqlx::query_as(
+        r#"select exists(
+            select 1 from mm_metadata_collection
+            where (mm_metadata_collection_json->>'id')::int = $1
+            limit 1
+        ) as found_record limit 1"#,
+    )
+    .bind(metadata_id)
+    .fetch_one(sqlx_pool)
+    .await?;
+    Ok(row.0)
+}
+
 pub async fn mk_lib_database_metadata_collection_count(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
