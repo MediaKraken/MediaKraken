@@ -122,101 +122,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     }
                 }
 
-                println!("Here I am 55");
-                // load games from hash files
-                let file_name = format!(
-                    "/mediakraken/emulation/mame0{}.zip",
-                    json_message["Version"]
-                );
-                // only do the parse/import if not processed before
-                if !Path::new(&file_name).exists() {
-                    // https://github.com/mamedev/mame/archive/refs/tags/mame0256.zip
-                    mk_lib_network::mk_lib_network::mk_download_file_from_url(
-                        format!(
-                            "https://github.com/mamedev/mame/archive/refs/tags/mame0{}.zip",
-                            json_message["Version"]
-                        ),
-                        &file_name,
-                    )
-                    .await
-                    .unwrap();
-                    mk_lib_compression::mk_lib_compression::mk_decompress_zip(
-                        &file_name,
-                        false,
-                        &"/mediakraken/emulation/",
-                    )
-                    .await
-                    .unwrap();
-
-                    let entries = fs::read_dir(format!(
-                        "/mediakraken/emulation/mame-mame0{}/hash",
-                        json_message["Version"]
-                    ))
-                    .unwrap()
-                    .map(|res| res.map(|e| e.path()))
-                    .collect::<Result<Vec<_>, io::Error>>()
-                    .unwrap();
-                    for hash_file_path in entries {
-                        let ext = Path::new(&hash_file_path)
-                            .extension()
-                            .unwrap_or(&std::ffi::OsStr::new("no_extension"));
-                        if ext == "xml" {
-                            let file = File::open(&hash_file_path).unwrap();
-                            let reader = BufReader::new(file);
-                            let mut xml_data: String = "".to_owned();
-                            let conf =
-                                Config::new_with_custom_values(true, "", "text", NullValue::Ignore)
-                                    .add_json_type_override(
-                                        "/software/name",
-                                        JsonArray::Infer(JsonType::AlwaysString),
-                                    )
-                                    .add_json_type_override(
-                                        "/software/year",
-                                        JsonArray::Infer(JsonType::AlwaysString),
-                                    )
-                                    .add_json_type_override(
-                                        "/software/publisher",
-                                        JsonArray::Infer(JsonType::AlwaysString),
-                                    );
-                            let mut game_system_uuid = uuid::Uuid::nil();
-                            for line in reader.lines() {
-                                let xml_line = &line.unwrap().trim().to_string();
-                                // fetch sytem id from /softwarelist/name
-                                if xml_line.starts_with("<softwarelist") == true {
-                                    println!("xml_line: {:?}", xml_line);
-                                    let system_string_split: Vec<&str> =
-                                        xml_line.split("\"").collect();
-                                    println!("split: {:?}", system_string_split);
-                                    let system_counter = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_game_count_by_short_name(&sqlx_pool_rw, &system_string_split[1].to_string()).await.unwrap();
-                                    if system_counter == 0 {
-                                        game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool_rw, system_string_split[1].to_string(), system_string_split[3].to_string(), json!({})).await.unwrap();
-                                    } else {
-                                        game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(&sqlx_pool_rw, &system_string_split[1].to_string()).await.unwrap();
-                                    }
-                                } else if xml_line.starts_with("<software") == true {
-                                    xml_data = xml_line.to_string();
-                                } else if xml_line.starts_with("</software") == true {
-                                    xml_data.push_str(xml_line);
-                                    let json_data =
-                                        xml_string_to_json(xml_data.to_string(), &conf).unwrap();
-                                    // name is short name
-                                    // description is long name
-                                    mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
-                                        &sqlx_pool_rw,
-                                        game_system_uuid,
-                                        json_data["software"]["name"].to_string(),
-                                        json_data["software"]["description"].to_string(),
-                                        json_data,
-                                    )
-                                    .await.unwrap();
-                                } else {
-                                    xml_data.push_str(xml_line);
-                                }
-                            }
-                        }
-                    }
-                }
-
                 println!("Here I am 33");
                 // update mame game descriptions from history dat
                 let file_name = format!(
@@ -516,6 +421,103 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         }
                     }
                 }
+
+                println!("Here I am 55");
+                // load games from hash files
+                // processed last so game systems exist for matching
+                let file_name = format!(
+                    "/mediakraken/emulation/mame0{}.zip",
+                    json_message["Version"]
+                );
+                // only do the parse/import if not processed before
+                if !Path::new(&file_name).exists() {
+                    // https://github.com/mamedev/mame/archive/refs/tags/mame0256.zip
+                    mk_lib_network::mk_lib_network::mk_download_file_from_url(
+                        format!(
+                            "https://github.com/mamedev/mame/archive/refs/tags/mame0{}.zip",
+                            json_message["Version"]
+                        ),
+                        &file_name,
+                    )
+                    .await
+                    .unwrap();
+                    mk_lib_compression::mk_lib_compression::mk_decompress_zip(
+                        &file_name,
+                        false,
+                        &"/mediakraken/emulation/",
+                    )
+                    .await
+                    .unwrap();
+
+                    let entries = fs::read_dir(format!(
+                        "/mediakraken/emulation/mame-mame0{}/hash",
+                        json_message["Version"]
+                    ))
+                    .unwrap()
+                    .map(|res| res.map(|e| e.path()))
+                    .collect::<Result<Vec<_>, io::Error>>()
+                    .unwrap();
+                    for hash_file_path in entries {
+                        let ext = Path::new(&hash_file_path)
+                            .extension()
+                            .unwrap_or(&std::ffi::OsStr::new("no_extension"));
+                        if ext == "xml" {
+                            let file = File::open(&hash_file_path).unwrap();
+                            let reader = BufReader::new(file);
+                            let mut xml_data: String = "".to_owned();
+                            let conf =
+                                Config::new_with_custom_values(true, "", "text", NullValue::Ignore)
+                                    .add_json_type_override(
+                                        "/software/name",
+                                        JsonArray::Infer(JsonType::AlwaysString),
+                                    )
+                                    .add_json_type_override(
+                                        "/software/year",
+                                        JsonArray::Infer(JsonType::AlwaysString),
+                                    )
+                                    .add_json_type_override(
+                                        "/software/publisher",
+                                        JsonArray::Infer(JsonType::AlwaysString),
+                                    );
+                            let mut game_system_uuid = uuid::Uuid::nil();
+                            for line in reader.lines() {
+                                let xml_line = &line.unwrap().trim().to_string();
+                                // fetch sytem id from /softwarelist/name
+                                if xml_line.starts_with("<softwarelist") == true {
+                                    println!("xml_line: {:?}", xml_line);
+                                    let system_string_split: Vec<&str> =
+                                        xml_line.split("\"").collect();
+                                    println!("split: {:?}", system_string_split);
+                                    let system_counter = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_game_count_by_short_name(&sqlx_pool_rw, &system_string_split[1].to_string()).await.unwrap();
+                                    if system_counter == 0 {
+                                        game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool_rw, system_string_split[1].to_string(), system_string_split[3].to_string(), json!({})).await.unwrap();
+                                    } else {
+                                        game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(&sqlx_pool_rw, &system_string_split[1].to_string()).await.unwrap();
+                                    }
+                                } else if xml_line.starts_with("<software") == true {
+                                    xml_data = xml_line.to_string();
+                                } else if xml_line.starts_with("</software") == true {
+                                    xml_data.push_str(xml_line);
+                                    let json_data =
+                                        xml_string_to_json(xml_data.to_string(), &conf).unwrap();
+                                    // name is short name
+                                    // description is long name
+                                    mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
+                                        &sqlx_pool_rw,
+                                        game_system_uuid,
+                                        json_data["software"]["name"].to_string(),
+                                        json_data["software"]["description"].to_string(),
+                                        json_data,
+                                    )
+                                    .await.unwrap();
+                                } else {
+                                    xml_data.push_str(xml_line);
+                                }
+                            }
+                        }
+                    }
+                }
+
                 println!("ACK!");
                 let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
                     &rabbit_channel,
