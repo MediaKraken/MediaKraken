@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="CategoryTile" extends="Group">
+    <interface>
+        <field id="itemContent" type="node" onChange="onContentChanged" />
+        <field id="width" type="float" />
+        <field id="height" type="float" />
+    </interface>
+    <script type="text/brightscript" uri="pkg:/components/CategoryTile.brs" />
+    <children>
+        <Rectangle
+            id="bg"
+            color="0x1f242bff"
+            width="260"
+            height="260" />
+        <Poster
+            id="icon"
+            translation="[40, 30]"
+            width="180"
+            height="160"
+            loadDisplayMode="scaleToFit" />
+        <Label
+            id="caption"
+            translation="[20, 210]"
+            width="220"
+            horizAlign="center"
+            font="font:MediumBoldSystemFont" />
+    </children>
+</component>

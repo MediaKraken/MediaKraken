@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="HomeScene" extends="Scene">
+    <interface>
+        <field id="deepLinkContentId" type="string" />
+    </interface>
+    <script type="text/brightscript" uri="pkg:/components/HomeScene.brs" />
+    <script type="text/brightscript" uri="pkg:/source/Registry.brs" />
+    <children>
+        <Rectangle
+            id="background"
+            color="0x101418FF"
+            width="1920"
+            height="1080" />
+
+        <Label
+            id="titleLabel"
+            text="MediaKraken"
+            translation="[80, 60]"
+            font="font:LargeBoldSystemFont" />
+
+        <Label
+            id="serverLabel"
+            translation="[80, 130]"
+            color="0x9aa3acff"
+            font="font:SmallSystemFont" />
+
+        <Label
+            id="statusLabel"
+            translation="[80, 970]"
+            color="0xc9d2dcff"
+            font="font:SmallSystemFont" />
+
+        <MarkupGrid
+            id="categoryGrid"
+            translation="[80, 200]"
+            itemSize="[260, 260]"
+            itemSpacing="[24, 24]"
+            numColumns="6"
+            numRows="2"
+            drawFocusFeedback="true">
+            <itemComponentName>CategoryTile</itemComponentName>
+        </MarkupGrid>
+    </children>
+</component>
