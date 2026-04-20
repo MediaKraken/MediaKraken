@@ -1,0 +1,12 @@
+{
+    "rootDir": ".",
+    "files": [
+        "manifest",
+        "source/**/*.brs",
+        "components/**/*.{brs,xml}",
+        "images/**/*.{png,jpg,jpeg}"
+    ],
+    "outFile": "build/theater_roku.zip",
+    "stagingDir": "build/staging",
+    "createPackage": false
+}

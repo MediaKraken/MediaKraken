@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="CatalogTask" extends="Task">
+    <interface>
+        <field id="serverUrl" type="string" />
+        <field id="category" type="string" />
+        <!-- result: { ok: boolean, category: string, items: [], detail: string } -->
+        <field id="result" type="assocarray" />
+    </interface>
+    <script type="text/brightscript" uri="pkg:/components/CatalogTask.brs" />
+</component>
