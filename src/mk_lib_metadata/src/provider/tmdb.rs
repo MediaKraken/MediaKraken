@@ -83,6 +83,9 @@ pub async fn provider_tmdb_movie_fetch(
             .await;
         }
     }
+    if result_json.get("belongs to collection").is_some() {
+        // TODO check for and insert collections fetch record
+    }
 }
 
 pub async fn provider_tmdb_person_fetch(
@@ -165,6 +168,31 @@ pub async fn provider_tmdb_tv_fetch(
             .await;
         }
     }
+}
+
+pub async fn provider_tmdb_collection_fetch(
+    sqlx_pool: &sqlx::PgPool,
+    tmdb_id: i32,
+    metadata_uuid: Uuid,
+    tmdb_api_key: &str,
+) {
+    // fetch and save json data via tmdb id
+    let result_json = provider_tmdb_collection_fetch_by_id(tmdb_id, tmdb_api_key)
+        .await
+        .unwrap();
+    if result_json.get("success").is_some() && result_json["success"] == false {
+        println!("Skip Collection: {}", tmdb_id);
+        return;
+    }
+    let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
+    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_collection::mk_lib_database_meta_collection_insert(
+        sqlx_pool,
+        metadata_uuid,
+        tmdb_id,
+        &result_json,
+        image_json,
+    )
+    .await;
 }
 
 pub async fn provider_tmdb_movie_id_max(

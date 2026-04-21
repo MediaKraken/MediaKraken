@@ -375,7 +375,18 @@ pub async fn metadata_fetch(
                 provider_api_key,
             )
             .await;
+        } else if download_data.mm_download_que_type
+            == mk_lib_common_enum_media_type::DLMediaType::COLLECTION
+        {
+            provider_tmdb::provider_tmdb_collection_fetch(
+                sqlx_pool,
+                download_data.mm_download_provider_id.unwrap(),
+                download_data.mm_download_new_uuid,
+                provider_api_key,
+            )
+            .await;
         }
+
     }
     //  else if provider_name == "upcitemdb" {
     //     let _upcitemdb_id = provider_upcitemdb::provider_upcitemdb_fetch_by_upc(
