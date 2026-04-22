@@ -233,7 +233,7 @@ pub async fn provider_tmdb_tv_id_max(
 
 pub async fn provider_tmdb_collection_fetch_by_id(
     tmdb_id: i32,
-    api_key: &String,
+    api_key: &str,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result = tmdb_fetch_json_with_retry(format!(
         "https://api.themoviedb.org/3/collection/{}?api_key={}",

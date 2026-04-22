@@ -488,51 +488,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             }
                         }
                     }
-
-                    // process collection changes
-                    let url_result = mk_lib_network::mk_lib_network::mk_data_from_url(
-                        format!(
-                            "https://api.themoviedb.org/3/collection/changes?api_key={}",
-                            option_config_json["API"]["themoviedb"]
-                        )
-                        .replace("\"", ""),
-                    )
-                    .await
-                    .unwrap();
-                    let resp: ResponseMetadata = serde_json::from_str(&url_result.trim()).unwrap();
-                    for json_item in resp.results {
-                        println!("collection item {}", json_item.id);
-                        // verify it's not already in the database
-                        let result =
-                            mk_lib_database::database_metadata::mk_lib_database_metadata_collection::mk_lib_database_metadata_exists_collection(
-                                &sqlx_pool_rw,
-                                json_item.id,
-                            )
-                            .await
-                            .unwrap();
-                        if result == false {
-                            let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
-                                                                                                                                          "themoviedb".to_string(),
-                                                                                                                                          mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::COLLECTION,
-                                                                                                                                          json_item.id).await.unwrap();
-                            if download_result == false {
-                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
-                                                                                                                        "themoviedb".to_string(),
-                                                                                                                        mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::COLLECTION,
-                                                                                                                        uuid::Uuid::now_v7(),
-                                                                                                                        Some(json_item.id),
-                                                                                                                        "Fetch".to_string(), None).await;
-                            } else {
-                                // it's on the database, so must update the record with latest information
-                                let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
-                                                                                                                        "themoviedb".to_string(),
-                                                                                                                        mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::COLLECTION,
-                                                                                                                        uuid::Uuid::now_v7(),
-                                                                                                                        Some(json_item.id),
-                                                                                                                        "Update".to_string(), None).await;
-                            }
-                        }
-                    }
                 }
                 let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
                     &rabbit_channel,
