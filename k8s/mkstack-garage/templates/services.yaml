@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mkstack-garage.rpcServiceName" . }}
+  labels:
+    {{- include "mkstack-garage.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector:
+    {{- include "mkstack-garage.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: rpc
+      port: 3901
+      targetPort: rpc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mkstack-garage.fullname" . }}-s3
+  labels:
+    {{- include "mkstack-garage.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.s3.type }}
+  selector:
+    {{- include "mkstack-garage.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: s3
+      port: {{ .Values.service.s3.port }}
+      targetPort: s3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mkstack-garage.fullname" . }}-web
+  labels:
+    {{- include "mkstack-garage.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.web.type }}
+  selector:
+    {{- include "mkstack-garage.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: web
+      port: {{ .Values.service.web.port }}
+      targetPort: web
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mkstack-garage.fullname" . }}-admin
+  labels:
+    {{- include "mkstack-garage.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.admin.type }}
+  selector:
+    {{- include "mkstack-garage.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: admin
+      port: {{ .Values.service.admin.port }}
+      targetPort: admin
+{{- if .Values.service.k2v.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "mkstack-garage.fullname" . }}-k2v
+  labels:
+    {{- include "mkstack-garage.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.k2v.type }}
+  selector:
+    {{- include "mkstack-garage.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: k2v
+      port: {{ .Values.service.k2v.port }}
+      targetPort: k2v
+{{- end }}

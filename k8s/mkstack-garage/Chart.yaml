@@ -1,0 +1,14 @@
+apiVersion: v2
+name: mkstack-garage
+description: Garage S3-compatible object storage cluster (3-node HA) for MediaKraken
+type: application
+version: 0.1.0
+appVersion: "2.1.0"
+keywords:
+  - s3
+  - garage
+  - object-storage
+  - storage
+home: https://garagehq.deuxfleurs.fr/
+sources:
+  - https://git.deuxfleurs.fr/Deuxfleurs/garage
