@@ -1,42 +1,45 @@
 <!DOCTYPE html>
 <html lang="en" x-data="upcImport()" x-cloak>
 {% include "bss_include_header.html" %}
-<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
+<body class="bg-gray-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 min-h-screen flex flex-col transition-colors duration-300">
 
-    <!-- Header/Menu -->
-    <header class="bg-white shadow p-4 flex justify-between items-center">
-        <h1 class="text-xl font-bold">MediaKraken - UPC Import</h1>
-        <!-- Include your menu templates here -->
-    </header>
+<div class="flex min-h-screen flex-col">
+    {% include "bss_user/bss_user_include_menu.html" %}
 
-    <!-- Main Content -->
-    <main class="flex-grow p-4 max-w-3xl mx-auto bg-white shadow rounded-lg mt-6">
-        <h2 class="text-lg font-semibold mb-4">Import Text File (Up to 500 Lines)</h2>
+    <div class="flex flex-1">
+        {% include "bss_admin/bss_admin_include_menu.html" %}
 
-        <!-- File Input -->
-        <input type="file" id="fileInput" accept=".txt"
-               @change="handleFileUpload($event)"
-               class="block w-full text-gray-700 border border-gray-300 rounded p-2 mb-4">
+        <!-- Main Content -->
+        <main class="flex-grow p-4 max-w-3xl mx-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow rounded-lg mt-6">
+            <h2 class="text-lg font-semibold mb-4 text-zinc-900 dark:text-zinc-100">Import Text File (Up to 500 Lines)</h2>
 
-        <!-- Textarea Preview -->
-        <textarea id="output"
-                  x-model="fileContent"
-                  placeholder="Imported lines will appear here..."
-                  rows="15"
-                  class="block w-full border border-gray-300 rounded p-2 mb-4 resize-none font-mono"></textarea>
+            <!-- File Input -->
+            <input type="file" id="fileInput" accept=".txt"
+                   @change="handleFileUpload($event)"
+                   class="block w-full text-zinc-700 dark:text-zinc-200 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded p-2 mb-4">
 
-        <!-- Submit Button -->
-        <div class="flex justify-end">
-            <a href="/admin/bss_admin_upc_import_submit">
-                <button type="button"
-                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                    Submit UPC(s)
-                </button>
-            </a>
-        </div>
-    </main>
+            <!-- Textarea Preview -->
+            <textarea id="output"
+                      x-model="fileContent"
+                      placeholder="Imported lines will appear here..."
+                      rows="15"
+                      class="block w-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 rounded p-2 mb-4 resize-none font-mono"></textarea>
 
-{% include "bss_public/bss_public_footer.html" %}
+            <!-- Submit Button -->
+            <div class="flex justify-end">
+                <a href="/admin/bss_admin_upc_import_submit">
+                    <button type="button"
+                            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        Submit UPC(s)
+                    </button>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    {% include "bss_public/bss_public_footer.html" %}
+</div>
+
      <!-- Alpine.js Logic -->
     <script>
         function upcImport() {

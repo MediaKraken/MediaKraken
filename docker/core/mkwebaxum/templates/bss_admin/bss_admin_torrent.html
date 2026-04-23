@@ -1,119 +1,122 @@
 <!DOCTYPE html>
 <html lang="en" x-data="torrentPage()" x-cloak>
 {% include "bss_include_header.html" %}
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-gray-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
 
-    <!-- Header/Menu -->
-    <header class="bg-white shadow p-4 flex justify-between items-center">
-        <h1 class="text-xl font-bold">MediaKraken - Torrents</h1>
-        <!-- Add your menu include here -->
-    </header>
+<div class="flex min-h-screen flex-col">
+    {% include "bss_user/bss_user_include_menu.html" %}
 
-    <!-- Main content -->
-    <main class="p-4 max-w-7xl mx-auto">
+    <div class="flex flex-1">
+        {% include "bss_admin/bss_admin_include_menu.html" %}
 
-        <!-- Add torrent -->
-        <div class="bg-white shadow rounded-lg p-4 mb-4">
-            <h2 class="text-lg font-semibold mb-3">Add Torrent</h2>
-            <form @submit.prevent="addTorrent()" class="flex flex-col sm:flex-row sm:items-center gap-2">
-                <input
-                    type="text"
-                    x-model="newTorrentUrl"
-                    placeholder="Torrent URL, magnet link, or file path"
-                    class="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-400"
-                    required>
-                <button
-                    type="submit"
-                    :disabled="isAdding"
-                    class="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-4 py-2 rounded text-sm">
-                    <span x-show="!isAdding">Add</span>
-                    <span x-show="isAdding">Adding...</span>
-                </button>
-            </form>
-            <p x-show="actionError" class="text-red-600 text-sm mt-2" x-text="actionError"></p>
-        </div>
+        <!-- Main content -->
+        <main class="flex-1 p-4">
 
-        <!-- Torrent Table -->
-        <div class="bg-white shadow rounded-lg overflow-hidden">
-            <div class="p-4 border-b border-gray-200">
-                <h2 class="text-lg font-semibold">Torrent Information</h2>
+            <!-- Add torrent -->
+            <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow rounded-lg p-4 mb-4">
+                <h2 class="text-lg font-semibold mb-3 text-zinc-900 dark:text-zinc-100">Add Torrent</h2>
+                <form @submit.prevent="addTorrent()" class="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <input
+                        type="text"
+                        x-model="newTorrentUrl"
+                        placeholder="Torrent URL, magnet link, or file path"
+                        class="flex-1 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 rounded px-3 py-2 text-sm focus:outline-none focus:ring focus:border-blue-400"
+                        required>
+                    <button
+                        type="submit"
+                        :disabled="isAdding"
+                        class="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-4 py-2 rounded text-sm">
+                        <span x-show="!isAdding">Add</span>
+                        <span x-show="isAdding">Adding...</span>
+                    </button>
+                </form>
+                <p x-show="actionError" class="text-red-600 dark:text-red-400 text-sm mt-2" x-text="actionError"></p>
             </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">#</th>
-                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">ID</th>
-                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Name</th>
-                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Status</th>
-                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Percentage</th>
-                            <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Size</th>
-                            <th class="px-4 py-2 text-center text-sm font-medium text-gray-700">Start</th>
-                            <th class="px-4 py-2 text-center text-sm font-medium text-gray-700">Pause</th>
-                            <th class="px-4 py-2 text-center text-sm font-medium text-gray-700">Delete</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <!-- Loop through torrents -->
-                        <template x-for="(torrent, index) in torrents" :key="torrent.id">
+
+            <!-- Torrent Table -->
+            <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow rounded-lg overflow-hidden">
+                <div class="p-4 border-b border-zinc-200 dark:border-zinc-800">
+                    <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Torrent Information</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+                        <thead class="bg-zinc-50 dark:bg-zinc-800">
                             <tr>
-                                <td class="px-4 py-2 text-sm" x-text="index + 1"></td>
-                                <td class="px-4 py-2 text-sm" x-text="torrent.id"></td>
-                                <td class="px-4 py-2 text-sm" x-text="torrent.name"></td>
-                                <td class="px-4 py-2 text-sm" x-text="torrent.status"></td>
-                                <td class="px-4 py-2 text-sm" x-text="(torrent.percent_done*100).toFixed(1)+'%'"></td>
-                                <td class="px-4 py-2 text-sm" x-text="formatBytes(torrent.size)"></td>
-                                <td class="px-4 py-2 text-center">
-                                    <button
-                                        @click="startTorrent(torrent)"
-                                        :disabled="pendingId === torrent.id"
-                                        class="bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white px-3 py-1 rounded text-sm inline-flex items-center">
-                                        <span class="mr-1 inline-flex align-middle">{% include "icons/play.svg" %}</span>
-                                        Start
-                                    </button>
-                                </td>
-                                <td class="px-4 py-2 text-center">
-                                    <button
-                                        @click="stopTorrent(torrent)"
-                                        :disabled="pendingId === torrent.id"
-                                        class="bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 text-white px-3 py-1 rounded text-sm">
-                                        Pause
-                                    </button>
-                                </td>
-                                <td class="px-4 py-2 text-center">
-                                    <button
-                                        @click="confirmDelete(torrent)"
-                                        :disabled="pendingId === torrent.id"
-                                        class="bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white px-3 py-1 rounded text-sm inline-flex items-center">
-                                        <span class="mr-1 inline-flex align-middle">{% include "icons/trash.svg" %}</span>
-                                        Delete
-                                    </button>
-                                </td>
+                                <th class="px-4 py-2 text-left text-sm font-medium text-zinc-700 dark:text-zinc-200">#</th>
+                                <th class="px-4 py-2 text-left text-sm font-medium text-zinc-700 dark:text-zinc-200">ID</th>
+                                <th class="px-4 py-2 text-left text-sm font-medium text-zinc-700 dark:text-zinc-200">Name</th>
+                                <th class="px-4 py-2 text-left text-sm font-medium text-zinc-700 dark:text-zinc-200">Status</th>
+                                <th class="px-4 py-2 text-left text-sm font-medium text-zinc-700 dark:text-zinc-200">Percentage</th>
+                                <th class="px-4 py-2 text-left text-sm font-medium text-zinc-700 dark:text-zinc-200">Size</th>
+                                <th class="px-4 py-2 text-center text-sm font-medium text-zinc-700 dark:text-zinc-200">Start</th>
+                                <th class="px-4 py-2 text-center text-sm font-medium text-zinc-700 dark:text-zinc-200">Pause</th>
+                                <th class="px-4 py-2 text-center text-sm font-medium text-zinc-700 dark:text-zinc-200">Delete</th>
                             </tr>
-                        </template>
-                        <tr x-show="torrents.length === 0">
-                            <td colspan="9" class="px-4 py-2 text-center text-gray-500">No torrents found.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Delete Modal -->
-        <div x-show="showDeleteModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-6">
-                <h3 class="text-lg font-semibold mb-4">Delete Torrent</h3>
-                <p class="mb-6">Are you sure you want to delete <span class="font-bold" x-text="torrentToDelete?.name"></span>?</p>
-                <div class="flex justify-end space-x-2">
-                    <button @click="showDeleteModal = false" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
-                    <button @click="deleteTorrent()" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
+                        </thead>
+                        <tbody class="bg-white dark:bg-zinc-900 divide-y divide-zinc-200 dark:divide-zinc-800 text-zinc-700 dark:text-zinc-300">
+                            <!-- Loop through torrents -->
+                            <template x-for="(torrent, index) in torrents" :key="torrent.id">
+                                <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
+                                    <td class="px-4 py-2 text-sm" x-text="index + 1"></td>
+                                    <td class="px-4 py-2 text-sm" x-text="torrent.id"></td>
+                                    <td class="px-4 py-2 text-sm" x-text="torrent.name"></td>
+                                    <td class="px-4 py-2 text-sm" x-text="torrent.status"></td>
+                                    <td class="px-4 py-2 text-sm" x-text="(torrent.percent_done*100).toFixed(1)+'%'"></td>
+                                    <td class="px-4 py-2 text-sm" x-text="formatBytes(torrent.size)"></td>
+                                    <td class="px-4 py-2 text-center">
+                                        <button
+                                            @click="startTorrent(torrent)"
+                                            :disabled="pendingId === torrent.id"
+                                            class="bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white px-3 py-1 rounded text-sm inline-flex items-center">
+                                            <span class="mr-1 inline-flex align-middle">{% include "icons/play.svg" %}</span>
+                                            Start
+                                        </button>
+                                    </td>
+                                    <td class="px-4 py-2 text-center">
+                                        <button
+                                            @click="stopTorrent(torrent)"
+                                            :disabled="pendingId === torrent.id"
+                                            class="bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 text-white px-3 py-1 rounded text-sm">
+                                            Pause
+                                        </button>
+                                    </td>
+                                    <td class="px-4 py-2 text-center">
+                                        <button
+                                            @click="confirmDelete(torrent)"
+                                            :disabled="pendingId === torrent.id"
+                                            class="bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white px-3 py-1 rounded text-sm inline-flex items-center">
+                                            <span class="mr-1 inline-flex align-middle">{% include "icons/trash.svg" %}</span>
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            </template>
+                            <tr x-show="torrents.length === 0">
+                                <td colspan="9" class="px-4 py-2 text-center text-zinc-500 dark:text-zinc-400">No torrents found.</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        </div>
 
-    </main>
-  <script src="/static/js/alpinejs_3.15.3.min.js" defer></script>
-  <script src="/static/js/base_webapp.js" defer></script>
+            <!-- Delete Modal -->
+            <div x-show="showDeleteModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-lg max-w-sm w-full p-6">
+                    <h3 class="text-lg font-semibold mb-4 text-zinc-900 dark:text-zinc-100">Delete Torrent</h3>
+                    <p class="mb-6 text-zinc-700 dark:text-zinc-300">Are you sure you want to delete <span class="font-bold text-zinc-900 dark:text-zinc-100" x-text="torrentToDelete?.name"></span>?</p>
+                    <div class="flex justify-end space-x-2">
+                        <button @click="showDeleteModal = false" class="px-4 py-2 bg-zinc-300 text-zinc-900 rounded hover:bg-zinc-400 dark:bg-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-600">Cancel</button>
+                        <button @click="deleteTorrent()" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Delete</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    {% include "bss_public/bss_public_footer.html" %}
+</div>
+
   <script id="torrent-data" type="application/json">{{ template_data_json|safe }}</script>
     <!-- Alpine.js data -->
     <script>

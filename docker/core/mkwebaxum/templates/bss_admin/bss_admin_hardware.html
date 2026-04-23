@@ -2,7 +2,7 @@
 <html lang="en">
 {% include "bss_include_header.html" %}
 
-<body class="bg-gray-100 text-gray-900">
+<body class="bg-gray-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
 
 <div class="flex min-h-screen flex-col">
   {% include "bss_user/bss_user_include_menu.html" %}
@@ -12,15 +12,15 @@
 
   <main class="flex-1 p-6" x-data="hardwarePage()">
 
-    <section class="bg-white rounded shadow p-6">
-      <h2 class="text-xl font-semibold mb-4">
+    <section class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow p-6">
+      <h2 class="text-xl font-semibold mb-4 text-zinc-900 dark:text-zinc-100">
         Hardware Devices
       </h2>
 
       <div class="overflow-x-auto">
-        <table class="min-w-full border border-gray-200 text-sm">
-          <thead class="bg-gray-50">
-            <tr class="text-left font-semibold">
+        <table class="min-w-full border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-700 dark:text-zinc-300">
+          <thead class="bg-zinc-50 dark:bg-zinc-800">
+            <tr class="text-left font-semibold text-zinc-700 dark:text-zinc-200">
               <th class="px-3 py-2">#</th>
               <th class="px-3 py-2">Manufacturer</th>
               <th class="px-3 py-2">Type</th>
@@ -32,9 +32,9 @@
             </tr>
           </thead>
 
-          <tbody class="divide-y">
+          <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
             {% for row_data in template_data %}
-            <tr class="hover:bg-gray-50">
+            <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
               <td class="px-3 py-2">{{ loop.index }}</td>
               <td class="px-3 py-2">
                 {{ row_data.mm_hardware_manufacturer }}
@@ -53,7 +53,7 @@
               </td>
               <td class="px-3 py-2 text-center">
                 <button
-                  class="text-indigo-600 hover:text-indigo-800"
+                  class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
                   title="View JSON" aria-label="View hardware JSON">
                   {% include "icons/code.svg" %}
                 </button>
@@ -61,7 +61,7 @@
               <td class="px-3 py-2 text-center">
                 <button
                   @click="confirmDelete('{{ row_data.mm_hardware_model_name }}')"
-                  class="text-red-600 hover:text-red-800"
+                  class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
                   title="Delete" aria-label="Delete hardware device">
                   {% include "icons/trash.svg" %}
                 </button>
@@ -80,12 +80,12 @@
       x-cloak
       class="fixed inset-0 bg-black/50 flex items-center justify-center">
 
-      <div class="bg-white rounded shadow-lg w-full max-w-md p-6">
-        <h3 class="text-lg font-semibold mb-4">
+      <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow-lg w-full max-w-md p-6">
+        <h3 class="text-lg font-semibold mb-4 text-zinc-900 dark:text-zinc-100">
           Delete Hardware Device
         </h3>
 
-        <p class="text-red-600 mb-6">
+        <p class="text-red-600 dark:text-red-400 mb-6">
           <span class="mr-1 inline-flex align-middle">{% include "icons/alert_triangle.svg" %}</span>
           Are you sure you want to delete
           <strong x-text="deleteTarget"></strong>?
@@ -99,7 +99,7 @@
           </button>
           <button
             @click="showDelete=false"
-            class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
+            class="bg-zinc-300 text-zinc-900 px-4 py-2 rounded hover:bg-zinc-400 dark:bg-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-600">
             No
           </button>
         </div>

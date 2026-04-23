@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 {% include "bss_include_header.html" %}
-<body class="bg-gray-100 text-gray-900">
+<body class="bg-gray-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
 
 <div class="flex min-h-screen flex-col">
   {% include "bss_user/bss_user_include_menu.html" %}
@@ -11,16 +11,16 @@
 
   <main class="flex-1 p-6" x-data>
 
-    <section class="bg-white rounded shadow p-6">
-      <h2 class="text-xl font-semibold mb-4">
+    <section class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow p-6">
+      <h2 class="text-xl font-semibold mb-4 text-zinc-900 dark:text-zinc-100">
         View MediaKraken Logs
       </h2>
 
       {% if template_data_exists %}
       <div class="overflow-x-auto">
-        <table class="min-w-full border border-gray-200 text-sm">
-          <thead class="bg-gray-50">
-            <tr class="text-left font-semibold">
+        <table class="min-w-full border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-700 dark:text-zinc-300">
+          <thead class="bg-zinc-50 dark:bg-zinc-800">
+            <tr class="text-left font-semibold text-zinc-700 dark:text-zinc-200">
               <th class="px-3 py-2 w-12">#</th>
               <th class="px-3 py-2 whitespace-nowrap">Log Time</th>
               <th class="px-3 py-2 whitespace-nowrap">Log Label</th>
@@ -28,16 +28,16 @@
             </tr>
           </thead>
 
-          <tbody class="divide-y">
+          <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
             {% for row_data in template_data %}
-            <tr class="hover:bg-gray-50 align-top">
-              <td class="px-3 py-2 text-gray-500">
+            <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800 align-top">
+              <td class="px-3 py-2 text-zinc-500 dark:text-zinc-400">
                 {{ loop.index }}
               </td>
               <td class="px-3 py-2 font-mono text-xs whitespace-nowrap">
                 {{ row_data.timestamp_ns }}
               </td>
-              <td class="px-3 py-2 font-mono text-xs text-indigo-700">
+              <td class="px-3 py-2 font-mono text-xs text-indigo-700 dark:text-indigo-400">
                 {{ row_data.labels }}
               </td>
               <td class="px-3 py-2 font-mono text-xs break-all">
@@ -49,7 +49,7 @@
         </table>
       </div>
       {% else %}
-        <p class="text-gray-500 italic">
+        <p class="text-zinc-500 dark:text-zinc-400 italic">
           No MediaKraken logs found.
         </p>
       {% endif %}

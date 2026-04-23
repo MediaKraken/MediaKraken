@@ -1,13 +1,13 @@
 {% import "form_input_macro.html" as m %}
 {% block content %}
-<div class="container-narrow">
-    <h1>Library Path Addition</h1>
+<div class="container-narrow text-zinc-900 dark:text-zinc-100">
+    <h1 class="text-zinc-900 dark:text-zinc-100">Library Path Addition</h1>
     <br>
     <form id="libraryaddeditForm" class="form form-libraryedit" method="POST" action="" role="form">
         <div class="form-group">
             {{ m::input(label="Library Path", type="text", name="account.name") }}
         </div>
-        <select name="Lib_Class", id="lib_class">
+        <select name="Lib_Class", id="lib_class" class="border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded px-3 py-2">
             {% for class_data in data_class %}
             <option value={{class_data[1]}}>{{class_data[0]}}</option>
             {% endfor %}
@@ -15,7 +15,7 @@
         <p><input class="btn btn-default btn-submit" type="submit" name="action_type" value="Add"></p>
         <p><input class="btn btn-default btn-submit" type="submit" name="action_type" value="Browse..."></p>
         <p><input type="image" src="/static/images/Synology_logo_Standard.png" class="btn btn-default btn-submit" type="submit" name="action_type" value="Synology"></p>
-        <p>The “Synology” logo are trademarks of Synology, Inc., registered in the Republic of China (Taiwan) and other countries.</p>
+        <p class="text-zinc-600 dark:text-zinc-400">The &ldquo;Synology&rdquo; logo are trademarks of Synology, Inc., registered in the Republic of China (Taiwan) and other countries.</p>
     </form>
 </div>
 {% endblock %}

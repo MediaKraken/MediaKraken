@@ -3,7 +3,7 @@
 
 {% include "bss_include_header.html" %}
 
-<body id="page-top" class="bg-gray-100">
+<body id="page-top" class="bg-gray-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
   <div class="flex min-h-screen flex-col">
     {% include "bss_user/bss_user_include_menu.html" %}
 
@@ -19,11 +19,11 @@
 
           <!-- Server Info -->
           <div class="col-span-12 md:col-span-6 xl:col-span-3">
-            <div class="bg-white rounded-lg shadow">
-              <div class="border-b px-4 py-3">
-                <h5 class="font-semibold">Server Info</h5>
+            <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow">
+              <div class="border-b border-zinc-200 dark:border-zinc-800 px-4 py-3">
+                <h5 class="font-semibold text-zinc-900 dark:text-zinc-100">Server Info</h5>
               </div>
-              <div class="p-4 space-y-1 text-sm">
+              <div class="p-4 space-y-1 text-sm text-zinc-700 dark:text-zinc-300">
                 <p><b>Server Name:</b> {{ template_data_server_info_server_name|unquote_json }}</p>
                 <p><b>Host Uptime:</b> {{ template_data_server_uptime }}</p>
                 <p><b>Host IP:</b> {{ template_data_server_host_ip }}</p>
@@ -35,27 +35,27 @@
 
           <!-- Notices -->
           <div class="col-span-12 md:col-span-6 xl:col-span-3">
-            <div class="bg-white rounded-lg shadow">
-              <div class="border-b px-4 py-3">
-                <h5 class="font-semibold">Notices</h5>
+            <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow">
+              <div class="border-b border-zinc-200 dark:border-zinc-800 px-4 py-3">
+                <h5 class="font-semibold text-zinc-900 dark:text-zinc-100">Notices</h5>
               </div>
               <div class="p-4 overflow-x-auto">
-                <table class="w-full text-sm border border-gray-300">
-                  <thead class="bg-gray-50">
+                <table class="w-full text-sm border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300">
+                  <thead class="bg-zinc-50 dark:bg-zinc-800">
                     <tr>
-                      <th class="border px-2 py-1">#</th>
-                      <th class="border px-2 py-1">Notice</th>
-                      <th class="border px-2 py-1">Time</th>
-                      <th class="border px-2 py-1">Delete</th>
+                      <th class="border border-zinc-200 dark:border-zinc-800 px-2 py-1">#</th>
+                      <th class="border border-zinc-200 dark:border-zinc-800 px-2 py-1">Notice</th>
+                      <th class="border border-zinc-200 dark:border-zinc-800 px-2 py-1">Time</th>
+                      <th class="border border-zinc-200 dark:border-zinc-800 px-2 py-1">Delete</th>
                     </tr>
                   </thead>
                   <tbody>
                     {% for row_data in template_server_notifications %}
-                    <tr class="hover:bg-gray-100">
-                      <td class="border px-2 py-1">{{ loop.index }}</td>
-                      <td class="border px-2 py-1">{{ row_data.mm_notification_text }}</td>
-                      <td class="border px-2 py-1">{{ row_data.mm_notification_time }}</td>
-                      <td class="border px-2 py-1 text-center">
+                    <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
+                      <td class="border border-zinc-200 dark:border-zinc-800 px-2 py-1">{{ loop.index }}</td>
+                      <td class="border border-zinc-200 dark:border-zinc-800 px-2 py-1">{{ row_data.mm_notification_text }}</td>
+                      <td class="border border-zinc-200 dark:border-zinc-800 px-2 py-1">{{ row_data.mm_notification_time }}</td>
+                      <td class="border border-zinc-200 dark:border-zinc-800 px-2 py-1 text-center">
                         <button class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded"
                           data-id="{{ row_data.mm_notification_guid }}" onclick="ConfirmLibraryDelete(this)" aria-label="Delete notice">
                           {% include "icons/trash.svg" %}
@@ -71,11 +71,11 @@
 
           <!-- Media Counts -->
           <div class="col-span-12 md:col-span-6 xl:col-span-2">
-            <div class="bg-white rounded-lg shadow">
-              <div class="border-b px-4 py-3">
-                <h5 class="font-semibold">Media Counts</h5>
+            <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow">
+              <div class="border-b border-zinc-200 dark:border-zinc-800 px-4 py-3">
+                <h5 class="font-semibold text-zinc-900 dark:text-zinc-100">Media Counts</h5>
               </div>
-              <div class="p-4 space-y-1 text-sm">
+              <div class="p-4 space-y-1 text-sm text-zinc-700 dark:text-zinc-300">
                 <p><b>Media Files:</b> {{ template_data_count_media_files|number_format_locale(template_data_number_format_language) }}</p>
                 <p><b>Matched Media:</b> {{ template_data_count_matched_media|number_format_locale(template_data_number_format_language) }}</p>
                 <p><b>Metadata to Download:</b> {{ template_data_count_meta_fetch|number_format_locale(template_data_number_format_language) }}</p>
@@ -89,7 +89,7 @@
         {% for section in ["Active Streams", "Active Users", "Media Scanning"] %}
         <section class="mt-8">
           <fieldset class="mb-2">
-            <legend class="font-semibold">{{ section }}</legend>
+            <legend class="font-semibold text-zinc-900 dark:text-zinc-100">{{ section }}</legend>
           </fieldset>
         </section>
         {% endfor %}

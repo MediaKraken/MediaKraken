@@ -2,7 +2,7 @@
 <html lang="en">
 {% include "bss_include_header.html" %}
 
-<body class="bg-gray-100 text-gray-900">
+<body class="bg-gray-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
 
 <div class="flex min-h-screen flex-col">
   {% include "bss_user/bss_user_include_menu.html" %}
@@ -12,19 +12,19 @@
 
   <main class="flex-1 p-6">
 
-    <section class="bg-white rounded shadow">
+    <section class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow">
 
       <!-- Header -->
-      <div class="border-b p-4 space-y-1">
-        <p class="text-indigo-600 font-semibold">
+      <div class="border-b border-zinc-200 dark:border-zinc-800 p-4 space-y-1">
+        <p class="text-indigo-600 dark:text-indigo-400 font-semibold">
           PostgreSQL Version:
-          <span class="text-gray-900">
+          <span class="text-zinc-900 dark:text-zinc-100">
             {{ template_data_db_version }}
           </span>
         </p>
-        <p class="text-indigo-600 font-semibold">
+        <p class="text-indigo-600 dark:text-indigo-400 font-semibold">
           Parallel Workers:
-          <span class="text-gray-900">
+          <span class="text-zinc-900 dark:text-zinc-100">
             {{ template_data_db_workers }}
           </span>
         </p>
@@ -32,21 +32,21 @@
 
       <!-- Active Extensions -->
       <div class="p-6">
-        <h2 class="text-lg font-semibold mb-3">
+        <h2 class="text-lg font-semibold mb-3 text-zinc-900 dark:text-zinc-100">
           Database Extensions (Active)
         </h2>
 
         <div class="overflow-x-auto">
-          <table class="min-w-full border border-gray-200 text-sm">
-            <thead class="bg-gray-50">
-              <tr class="text-left font-semibold">
+          <table class="min-w-full border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-700 dark:text-zinc-300">
+            <thead class="bg-zinc-50 dark:bg-zinc-800">
+              <tr class="text-left font-semibold text-zinc-700 dark:text-zinc-200">
                 <th class="px-3 py-2">Name</th>
                 <th class="px-3 py-2">Version</th>
               </tr>
             </thead>
-            <tbody class="divide-y">
+            <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
               {% for row_data in template_data_db_extension %}
-              <tr class="hover:bg-gray-50">
+              <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
                 <td class="px-3 py-2">{{ row_data.extname }}</td>
                 <td class="px-3 py-2">{{ row_data.extversion }}</td>
               </tr>
@@ -57,22 +57,22 @@
       </div>
 
       <!-- Record Count -->
-      <div class="border-t p-6">
-        <h2 class="text-lg font-semibold mb-3">
+      <div class="border-t border-zinc-200 dark:border-zinc-800 p-6">
+        <h2 class="text-lg font-semibold mb-3 text-zinc-900 dark:text-zinc-100">
           Database Record Count
         </h2>
 
         <div class="overflow-x-auto">
-          <table class="min-w-full border border-gray-200 text-sm">
-            <thead class="bg-gray-50">
-              <tr class="text-left font-semibold">
+          <table class="min-w-full border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-700 dark:text-zinc-300">
+            <thead class="bg-zinc-50 dark:bg-zinc-800">
+              <tr class="text-left font-semibold text-zinc-700 dark:text-zinc-200">
                 <th class="px-3 py-2">Table</th>
                 <th class="px-3 py-2">Record(s)</th>
               </tr>
             </thead>
-            <tbody class="divide-y">
+            <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
               {% for row_data in template_data_db_count %}
-              <tr class="hover:bg-gray-50">
+              <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
                 <td class="px-3 py-2">{{ row_data.table_name }}</td>
                 <td class="px-3 py-2">
                   {% if row_data.table_rows != -1.0 %}
@@ -83,7 +83,7 @@
                 </td>
               </tr>
               {% endfor %}
-              <tr class="font-semibold bg-gray-50">
+              <tr class="font-semibold bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100">
                 <td class="px-3 py-2">Total Rows</td>
                 <td class="px-3 py-2">
                   {{ template_data_db_count_total|number_format_locale(template_data_number_format_language) }}
@@ -95,29 +95,29 @@
       </div>
 
       <!-- Table Size -->
-      <div class="border-t p-6">
-        <h2 class="text-lg font-semibold mb-3">
+      <div class="border-t border-zinc-200 dark:border-zinc-800 p-6">
+        <h2 class="text-lg font-semibold mb-3 text-zinc-900 dark:text-zinc-100">
           Database Table Size
         </h2>
 
         <div class="overflow-x-auto">
-          <table class="min-w-full border border-gray-200 text-sm">
-            <thead class="bg-gray-50">
-              <tr class="text-left font-semibold">
+          <table class="min-w-full border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-700 dark:text-zinc-300">
+            <thead class="bg-zinc-50 dark:bg-zinc-800">
+              <tr class="text-left font-semibold text-zinc-700 dark:text-zinc-200">
                 <th class="px-3 py-2">Table</th>
                 <th class="px-3 py-2">Size</th>
               </tr>
             </thead>
-            <tbody class="divide-y">
+            <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
               {% for row_data in template_data_db_size %}
-              <tr class="hover:bg-gray-50">
+              <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
                 <td class="px-3 py-2">{{ row_data.table_name }}</td>
                 <td class="px-3 py-2">
                   {{ row_data.table_size|byte_format }}
                 </td>
               </tr>
               {% endfor %}
-              <tr class="font-semibold bg-gray-50">
+              <tr class="font-semibold bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100">
                 <td class="px-3 py-2">Total Size</td>
                 <td class="px-3 py-2">
                   {{ template_data_db_size_total|byte_format }}
@@ -129,22 +129,22 @@
       </div>
 
       <!-- Available Extensions -->
-      <div class="border-t p-6">
-        <h2 class="text-lg font-semibold mb-3">
+      <div class="border-t border-zinc-200 dark:border-zinc-800 p-6">
+        <h2 class="text-lg font-semibold mb-3 text-zinc-900 dark:text-zinc-100">
           Database Extensions (Available)
         </h2>
 
         <div class="overflow-x-auto">
-          <table class="min-w-full border border-gray-200 text-sm">
-            <thead class="bg-gray-50">
-              <tr class="text-left font-semibold">
+          <table class="min-w-full border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-700 dark:text-zinc-300">
+            <thead class="bg-zinc-50 dark:bg-zinc-800">
+              <tr class="text-left font-semibold text-zinc-700 dark:text-zinc-200">
                 <th class="px-3 py-2">Name</th>
                 <th class="px-3 py-2">Version</th>
               </tr>
             </thead>
-            <tbody class="divide-y">
+            <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
               {% for row_data in template_data_db_extension_avail %}
-              <tr class="hover:bg-gray-50">
+              <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
                 <td class="px-3 py-2">{{ row_data.name }}</td>
                 <td class="px-3 py-2">{{ row_data.default_version }}</td>
               </tr>

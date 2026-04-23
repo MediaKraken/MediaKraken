@@ -2,7 +2,7 @@
 <html lang="en">
 {% include "bss_include_header.html" %}
 
-<body class="bg-gray-100 text-gray-900">
+<body class="bg-gray-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
 
 <div class="flex min-h-screen flex-col">
   {% include "bss_user/bss_user_include_menu.html" %}
@@ -13,52 +13,52 @@
   <main class="flex-1 p-6 space-y-6">
 
     <!-- Server Settings -->
-    <section class="bg-white shadow rounded p-6 space-y-4">
-      <h2 class="text-lg font-semibold mb-2">Server Settings</h2>
+    <section class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow rounded p-6 space-y-4">
+      <h2 class="text-lg font-semibold mb-2 text-zinc-900 dark:text-zinc-100">Server Settings</h2>
 
       <div class="space-y-3">
         <div>
-          <label class="block font-medium mb-1" for="server-name">Server Name</label>
-          <input id="server-name" name="server.name" type="text" class="w-full border rounded px-3 py-2">
+          <label class="block font-medium mb-1 text-zinc-700 dark:text-zinc-200" for="server-name">Server Name</label>
+          <input id="server-name" name="server.name" type="text" class="w-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded px-3 py-2">
         </div>
 
         <div>
-          <label class="block font-medium mb-1" for="server-motd">Server MOTD</label>
-          <input id="server-motd" name="server.motd" type="text" class="w-full border rounded px-3 py-2">
+          <label class="block font-medium mb-1 text-zinc-700 dark:text-zinc-200" for="server-motd">Server MOTD</label>
+          <input id="server-motd" name="server.motd" type="text" class="w-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded px-3 py-2">
         </div>
 
         <div>
-          <label class="block font-medium mb-1" for="server-purge">Purge Activity Data Older Than</label>
-          <input id="server-purge" name="server.purge_activity" type="text" class="w-full border rounded px-3 py-2">
+          <label class="block font-medium mb-1 text-zinc-700 dark:text-zinc-200" for="server-purge">Purge Activity Data Older Than</label>
+          <input id="server-purge" name="server.purge_activity" type="text" class="w-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded px-3 py-2">
         </div>
 
         <div>
-          <label class="block font-medium mb-1" for="server-lock">Lock Account After Failed Attempts</label>
-          <input id="server-lock" name="server.lock_account" type="text" class="w-full border rounded px-3 py-2">
+          <label class="block font-medium mb-1 text-zinc-700 dark:text-zinc-200" for="server-lock">Lock Account After Failed Attempts</label>
+          <input id="server-lock" name="server.lock_account" type="text" class="w-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded px-3 py-2">
         </div>
       </div>
     </section>
 
     <!-- Metadata Settings -->
-    <section class="bg-white shadow rounded p-6 space-y-4">
-      <h2 class="text-lg font-semibold mb-2">Metadata</h2>
-      <div class="flex items-center space-x-2">
+    <section class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow rounded p-6 space-y-4">
+      <h2 class="text-lg font-semibold mb-2 text-zinc-900 dark:text-zinc-100">Metadata</h2>
+      <div class="flex items-center space-x-2 text-zinc-700 dark:text-zinc-300">
         <input type="checkbox" id="metadata-with-media" name="server.metadata_with_media" class="h-4 w-4">
         <label for="metadata-with-media">Save metadata with media</label>
       </div>
 
       <!-- Subtitles -->
-      <div class="bg-gray-50 p-4 rounded space-y-2 mt-2">
-        <h3 class="font-medium">Subtitles</h3>
-        <div class="flex items-center space-x-2">
+      <div class="bg-zinc-50 dark:bg-zinc-800 p-4 rounded space-y-2 mt-2">
+        <h3 class="font-medium text-zinc-900 dark:text-zinc-100">Subtitles</h3>
+        <div class="flex items-center space-x-2 text-zinc-700 dark:text-zinc-300">
           <input type="checkbox" id="subtitle-media" name="server.subtitle_for_media" class="h-4 w-4">
           <label for="subtitle-media">Subtitle</label>
         </div>
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center space-x-2 text-zinc-700 dark:text-zinc-300">
           <input type="checkbox" id="subtitle-opensubtitles" name="server.subtitle_opensubtitles" class="h-4 w-4">
           <label for="subtitle-opensubtitles">OpenSubtitles</label>
         </div>
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center space-x-2 text-zinc-700 dark:text-zinc-300">
           <input type="checkbox" id="subtitle-skip-audio" name="server.subtitle_skip_if_audio" class="h-4 w-4">
           <label for="subtitle-skip-audio">Skip if audio track in media</label>
         </div>
@@ -66,9 +66,9 @@
     </section>
 
     <!-- Subservers via Docker -->
-    <section class="bg-white shadow rounded p-6 space-y-4">
-      <h2 class="text-lg font-semibold mb-2">Subservers via Docker</h2>
-      <div class="flex flex-col space-y-2">
+    <section class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow rounded p-6 space-y-4">
+      <h2 class="text-lg font-semibold mb-2 text-zinc-900 dark:text-zinc-100">Subservers via Docker</h2>
+      <div class="flex flex-col space-y-2 text-zinc-700 dark:text-zinc-300">
         <div class="flex items-center space-x-2">
           <input type="checkbox" id="docker-mumble" name="server.docker_mumble" class="h-4 w-4">
           <label for="docker-mumble">Mumble</label>

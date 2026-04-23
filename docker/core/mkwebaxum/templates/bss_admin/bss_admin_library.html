@@ -2,7 +2,7 @@
 <html lang="en">
 {% include "bss_include_header.html" %}
 
-<body class="bg-gray-100 text-gray-900">
+<body class="bg-gray-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
 
 <div class="flex min-h-screen flex-col">
   {% include "bss_user/bss_user_include_menu.html" %}
@@ -13,8 +13,8 @@
   <main class="flex-1 p-6" x-data="libraryPage()">
 
     <!-- Actions -->
-    <section class="bg-white rounded shadow p-6 mb-6">
-      <h2 class="text-xl font-semibold mb-4">Media Library Setup</h2>
+    <section class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-4 text-zinc-900 dark:text-zinc-100">Media Library Setup</h2>
 
       <div class="flex flex-wrap gap-3">
         <a href="/admin/library_share_scan"
@@ -29,13 +29,13 @@
     </section>
 
     <!-- Share Info -->
-    <section class="bg-white rounded shadow p-6 mb-6">
-      <h2 class="text-lg font-semibold mb-4">Share Info</h2>
+    <section class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow p-6 mb-6">
+      <h2 class="text-lg font-semibold mb-4 text-zinc-900 dark:text-zinc-100">Share Info</h2>
 
       <div class="overflow-x-auto">
-        <table class="min-w-full border border-gray-200 text-sm">
-          <thead class="bg-gray-50">
-            <tr class="text-left font-semibold">
+        <table class="min-w-full border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-700 dark:text-zinc-300">
+          <thead class="bg-zinc-50 dark:bg-zinc-800">
+            <tr class="text-left font-semibold text-zinc-700 dark:text-zinc-200">
               <th class="px-3 py-2">#</th>
               <th class="px-3 py-2">Host / IP</th>
               <th class="px-3 py-2">Path</th>
@@ -45,15 +45,15 @@
               <th class="px-3 py-2">Add Directory as Library</th>
             </tr>
           </thead>
-          <tbody class="divide-y">
+          <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
             {% for row_data in template_data_share %}
-            <tr class="hover:bg-gray-50">
+            <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
               <td class="px-3 py-2">{{ loop.index }}</td>
               <td class="px-3 py-2">{{ row_data.mm_network_share_ip }}</td>
               <td class="px-3 py-2">{{ row_data.mm_network_share_path }}</td>
               <td class="px-3 py-2">{{ row_data.mm_network_share_comment }}</td>
               <td class="px-3 py-2">
-                <select class="border rounded px-2 py-1 w-full">
+                <select class="border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded px-2 py-1 w-full">
                   <optgroup label="Auth user group">
                     {% for auth_row in template_data_share_user %}
                       <option
@@ -73,8 +73,8 @@
                     type="text"
                     name="subdirectory"
                     placeholder="Directory from share"
-                    class="border rounded px-2 py-1 w-full md:w-56">
-                  <select name="media_class" class="border rounded px-2 py-1 w-full md:w-44">
+                    class="border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 rounded px-2 py-1 w-full md:w-56">
+                  <select name="media_class" class="border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded px-2 py-1 w-full md:w-44">
                     <option value="1">Movie</option>
                     <option value="2">TV</option>
                     <option value="9">Music</option>
@@ -89,7 +89,7 @@
                     type="button"
                     @click="openDirectoryPicker($event, '{{ row_data.mm_network_share_guid }}')"
                     aria-label="Browse share directory"
-                    class="bg-gray-700 text-white px-3 py-1 rounded hover:bg-gray-800 whitespace-nowrap shrink-0 font-medium">
+                    class="bg-zinc-700 text-white px-3 py-1 rounded hover:bg-zinc-800 dark:bg-zinc-700 dark:hover:bg-zinc-600 whitespace-nowrap shrink-0 font-medium">
                     Browse
                   </button>
                   <button
@@ -108,14 +108,14 @@
     </section>
 
     <!-- Library Info -->
-    <section class="bg-white rounded shadow p-6">
-      <h2 class="text-lg font-semibold mb-4">Library Info</h2>
+    <section class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow p-6">
+      <h2 class="text-lg font-semibold mb-4 text-zinc-900 dark:text-zinc-100">Library Info</h2>
 
       {% if template_data_exists %}
       <div class="overflow-x-auto">
-        <table class="min-w-full border border-gray-200 text-sm">
-          <thead class="bg-gray-50">
-            <tr class="text-left font-semibold">
+        <table class="min-w-full border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-700 dark:text-zinc-300">
+          <thead class="bg-zinc-50 dark:bg-zinc-800">
+            <tr class="text-left font-semibold text-zinc-700 dark:text-zinc-200">
               <th class="px-3 py-2">#</th>
               <th class="px-3 py-2">Directory</th>
               <th class="px-3 py-2">Media Class</th>
@@ -124,9 +124,9 @@
               <th class="px-3 py-2 text-center">Delete</th>
             </tr>
           </thead>
-          <tbody class="divide-y">
+          <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
             {% for row_data in template_data_libary %}
-            <tr class="hover:bg-gray-50">
+            <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
               <td class="px-3 py-2">{{ loop.index }}</td>
               <td class="px-3 py-2">{{ row_data.mm_media_dir_path }}</td>
               <td class="px-3 py-2">{{ row_data.mm_media_dir_class_enum }}</td>
@@ -140,14 +140,14 @@
               <td class="px-3 py-2 text-center">
                 <button
                   @click="openEdit('{{ row_data.mm_media_dir_guid }}', '{{ row_data.mm_media_dir_path }}', '{{ row_data.mm_media_dir_class_enum }}')"
-                  class="text-indigo-600 hover:text-indigo-800" aria-label="Edit library">
+                  class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300" aria-label="Edit library">
                   {% include "icons/pencil.svg" %}
                 </button>
               </td>
               <td class="px-3 py-2 text-center">
                 <button
                   @click="confirmDelete('{{ row_data.mm_media_dir_guid }}')"
-                  class="text-red-600 hover:text-red-800" aria-label="Delete library">
+                  class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300" aria-label="Delete library">
                   {% include "icons/trash.svg" %}
                 </button>
               </td>
@@ -157,78 +157,78 @@
         </table>
       </div>
       {% else %}
-        <p class="text-gray-500">No library data found.</p>
+        <p class="text-zinc-500 dark:text-zinc-400">No library data found.</p>
       {% endif %}
     </section>
 
     <!-- Edit Modal -->
     <div x-show="showEdit" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center">
-      <div class="bg-white rounded shadow-lg w-full max-w-lg p-6">
-        <h3 class="text-lg font-semibold mb-4">Update Library</h3>
+      <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow-lg w-full max-w-lg p-6">
+        <h3 class="text-lg font-semibold mb-4 text-zinc-900 dark:text-zinc-100">Update Library</h3>
 
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium mb-1">Path</label>
-            <input x-model="editPath" class="w-full border rounded px-3 py-2">
+            <label class="block text-sm font-medium mb-1 text-zinc-700 dark:text-zinc-200">Path</label>
+            <input x-model="editPath" class="w-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded px-3 py-2">
           </div>
           <div>
-            <label class="block text-sm font-medium mb-1">Media Class</label>
-            <input x-model="editClass" class="w-full border rounded px-3 py-2">
+            <label class="block text-sm font-medium mb-1 text-zinc-700 dark:text-zinc-200">Media Class</label>
+            <input x-model="editClass" class="w-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded px-3 py-2">
           </div>
         </div>
 
         <div class="flex justify-end gap-3 mt-6">
-          <button @click="showEdit=false" class="bg-gray-300 px-4 py-2 rounded">Close</button>
-          <button @click="updateLibrary" class="bg-indigo-600 text-white px-4 py-2 rounded">Update</button>
+          <button @click="showEdit=false" class="bg-zinc-300 text-zinc-900 px-4 py-2 rounded hover:bg-zinc-400 dark:bg-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-600">Close</button>
+          <button @click="updateLibrary" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Update</button>
         </div>
       </div>
     </div>
 
     <!-- Delete Modal -->
     <div x-show="showDelete" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center">
-      <div class="bg-white rounded shadow-lg w-full max-w-md p-6">
-        <h3 class="text-lg font-semibold mb-4">Delete Library</h3>
-        <p class="text-red-600 mb-6">
+      <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow-lg w-full max-w-md p-6">
+        <h3 class="text-lg font-semibold mb-4 text-zinc-900 dark:text-zinc-100">Delete Library</h3>
+        <p class="text-red-600 dark:text-red-400 mb-6">
           <span class="mr-1 inline-flex align-middle">{% include "icons/alert_triangle.svg" %}</span>
           Are you sure you want to delete this library?
         </p>
 
         <div class="flex justify-end gap-3">
-          <button @click="deleteLibrary" class="bg-red-600 text-white px-4 py-2 rounded">Yes</button>
-          <button @click="showDelete=false" class="bg-gray-300 px-4 py-2 rounded">No</button>
+          <button @click="deleteLibrary" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Yes</button>
+          <button @click="showDelete=false" class="bg-zinc-300 text-zinc-900 px-4 py-2 rounded hover:bg-zinc-400 dark:bg-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-600">No</button>
         </div>
       </div>
     </div>
 
     <!-- Share Browser Modal -->
     <div x-show="showShareBrowser" x-cloak class="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-      <div class="bg-white rounded shadow-lg w-full max-w-2xl p-6">
+      <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow-lg w-full max-w-2xl p-6">
         <div class="flex items-center justify-between mb-3">
-          <h3 class="text-lg font-semibold">Browse Share Directories</h3>
-          <button @click="showShareBrowser=false" class="bg-gray-200 hover:bg-gray-300 rounded px-3 py-1">Close</button>
+          <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Browse Share Directories</h3>
+          <button @click="showShareBrowser=false" class="bg-zinc-200 hover:bg-zinc-300 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-600 rounded px-3 py-1">Close</button>
         </div>
-        <p class="text-sm text-gray-600 mb-3">Current path: <span class="font-mono" x-text="browserCurrentPath || '/'"></span></p>
+        <p class="text-sm text-zinc-600 dark:text-zinc-400 mb-3">Current path: <span class="font-mono text-zinc-800 dark:text-zinc-200" x-text="browserCurrentPath || '/'"></span></p>
         <div class="mb-3">
           <button
             type="button"
             @click="navigateToParent"
             :disabled="browserParentPath === null || browserLoading"
-            class="bg-gray-100 border border-gray-300 rounded px-3 py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+            class="bg-zinc-100 text-zinc-800 border border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 rounded px-3 py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
             Up One Level
           </button>
         </div>
-        <p x-show="browserLoading" class="text-sm text-gray-600">Loading directories...</p>
-        <p x-show="browserError" class="text-sm text-red-600" x-text="browserError"></p>
-        <div class="max-h-80 overflow-auto border border-gray-200 rounded">
+        <p x-show="browserLoading" class="text-sm text-zinc-600 dark:text-zinc-400">Loading directories...</p>
+        <p x-show="browserError" class="text-sm text-red-600 dark:text-red-400" x-text="browserError"></p>
+        <div class="max-h-80 overflow-auto border border-zinc-200 dark:border-zinc-800 rounded">
           <template x-if="!browserLoading && browserDirectories.length === 0">
-            <p class="p-3 text-sm text-gray-500">No directories found in this location.</p>
+            <p class="p-3 text-sm text-zinc-500 dark:text-zinc-400">No directories found in this location.</p>
           </template>
           <template x-for="dirName in browserDirectories" :key="dirName">
-            <div class="flex items-center justify-between gap-2 border-b border-gray-100 px-3 py-2 last:border-b-0">
+            <div class="flex items-center justify-between gap-2 border-b border-zinc-100 dark:border-zinc-800 px-3 py-2 last:border-b-0">
               <button
                 type="button"
                 @click="browseInto(dirName)"
-                class="text-left flex-1 text-indigo-700 hover:text-indigo-900 hover:underline"
+                class="text-left flex-1 text-indigo-700 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 hover:underline"
                 :aria-label="`Open directory ${dirName}`"
                 x-text="dirName">
               </button>
