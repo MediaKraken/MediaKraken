@@ -196,7 +196,7 @@ pub async fn provider_tmdb_collection_fetch(
 }
 
 pub async fn provider_tmdb_movie_id_max(
-    api_key: &String,
+    api_key: &str,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result = tmdb_fetch_json_with_retry(format!(
         "https://api.themoviedb.org/3/movie/latest?api_key={}",
@@ -208,7 +208,7 @@ pub async fn provider_tmdb_movie_id_max(
 }
 
 pub async fn provider_tmdb_person_id_max(
-    api_key: &String,
+    api_key: &str,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result = tmdb_fetch_json_with_retry(format!(
         "https://api.themoviedb.org/3/person/latest?api_key={}",
@@ -220,7 +220,7 @@ pub async fn provider_tmdb_person_id_max(
 }
 
 pub async fn provider_tmdb_tv_id_max(
-    api_key: &String,
+    api_key: &str,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url_result = tmdb_fetch_json_with_retry(format!(
         "https://api.themoviedb.org/3/tv/latest?api_key={}",
@@ -374,7 +374,7 @@ pub async fn provider_tmdb_meta_info_build(
     Ok(image_json)
 }
 
-pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_api_key: &String) {
+pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_api_key: &str) {
     let mut raw_query = guessit_data.title().to_string();
     if let Some(year) = guessit_data.year() {
         raw_query.push(' ');

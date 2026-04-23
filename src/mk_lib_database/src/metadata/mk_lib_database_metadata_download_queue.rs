@@ -102,7 +102,7 @@ pub async fn mk_lib_database_metadata_download_queue_insert(
     metadata_new_uuid: Uuid,
     metadata_provider_id: Option<i32>,
     metadata_status: String,
-    metadata_path: Option<&String>,
+    metadata_path: Option<&str>,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(

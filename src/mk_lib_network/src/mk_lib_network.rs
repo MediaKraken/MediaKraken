@@ -103,7 +103,7 @@ pub async fn mk_network_download_file_to_vec(url: String) -> Result<Vec<u8>, req
 
 pub async fn mk_download_file_from_url(
     url: String,
-    file_name: &String,
+    file_name: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     println!("url: {}", url);
     let response = SHARED_HTTP_CLIENT.get(url).send().await?;

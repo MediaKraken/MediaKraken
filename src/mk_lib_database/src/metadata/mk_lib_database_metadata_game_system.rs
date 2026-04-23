@@ -97,7 +97,7 @@ pub async fn mk_lib_database_metadata_game_system_upsert(
 
 pub async fn mk_lib_database_metadata_game_system_guid_by_short_name(
     sqlx_pool: &sqlx::PgPool,
-    game_system_short_name: &String,
+    game_system_short_name: &str,
 ) -> Result<Uuid, sqlx::Error> {
     let row: (Uuid,) = sqlx::query_as(
         r#"select gs_game_system_id from mm_metadata_game_systems_info where gs_game_system_name = $1"#,
@@ -110,7 +110,7 @@ pub async fn mk_lib_database_metadata_game_system_guid_by_short_name(
 
 pub async fn mk_lib_database_metadata_game_system_game_count_by_short_name(
     sqlx_pool: &sqlx::PgPool,
-    game_system_short_name: &String,
+    game_system_short_name: &str,
 ) -> Result<i64, sqlx::Error> {
     // TODO this query doesn't return game count.......
     let row: (i64,) = sqlx::query_as(
