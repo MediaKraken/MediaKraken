@@ -1,34 +1,46 @@
+use aws_config::BehaviorVersion;
+use aws_sdk_s3::{Client as S3Client, config::Builder as S3ConfigBuilder};
 use std::env;
 use std::error::Error;
-use std::fs;
-use std::fs::File;
-use std::io::Write;
-use std::path::Path;
 use std::process::{Command, Stdio};
+
+const POSTER_BUCKETS: &[&str] = &[
+    "movie_poster",
+    "tv_poster",
+    "person_poster",
+    "crew_poster",
+    "cast_poster",
+    "book_cover",
+];
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    // create metadata paths, as before the db update will let it finish before
-    // other containers can use them
-    if Path::new(&"/tmp/meta.tar.gz").exists() {
-        println!("Meta file exists")
-    }
-    if Path::new(&"/mediakraken/metadata").exists() {
-        println!("Meta directory exists")
-    }
-    if !Path::new(&"/mediakraken/metadata/backdrop/aa").exists() {
-        println!("Creating directories");
-        // untar the tarball to /mediakraken/metadata
-        let output = Command::new("tar")
-            .args(["-xzf", "/tmp/meta.tar.gz", "-C", "/mediakraken/metadata"])
-            .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .output()
-            .unwrap();
-        let stdout: String = String::from_utf8(output.stdout).unwrap();
-        let stderr: String = String::from_utf8(output.stderr).unwrap();
-        println!("tar output: {}", stdout);
-        println!("tar erroutput: {}", stderr);
+    // Connect to local garage s3 and ensure required buckets exist before
+    // other containers try to use them.
+    let endpoint = env::var("MK_GARAGE_S3_ENDPOINT")
+        .or_else(|_| env::var("AWS_ENDPOINT_URL"))
+        .unwrap();
+    let shared = aws_config::load_defaults(BehaviorVersion::latest()).await;
+    let s3_config = S3ConfigBuilder::from(&shared)
+        .endpoint_url(endpoint)
+        .force_path_style(true)
+        .build();
+    let s3_client = S3Client::from_conf(s3_config);
+
+    for bucket in POSTER_BUCKETS {
+        match s3_client.create_bucket().bucket(*bucket).send().await {
+            Ok(_) => println!("Created bucket: {}", bucket),
+            Err(err) => {
+                let service_err = err.into_service_error();
+                if service_err.is_bucket_already_owned_by_you()
+                    || service_err.is_bucket_already_exists()
+                {
+                    println!("Bucket already exists: {}", bucket);
+                } else {
+                    return Err(Box::new(service_err));
+                }
+            }
+        }
     }
 
     // connect to db and do a version check and upgrade if needed

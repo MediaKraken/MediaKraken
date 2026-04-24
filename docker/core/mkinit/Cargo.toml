@@ -19,6 +19,8 @@ codegen-units = 1
 mk_lib_database = { version = "0.0.238", registry = "kellnr" }
 mk_lib_logging = { version = "0.0.207", registry = "kellnr" }
 
+aws-config = "1.8.12"
+aws-sdk-s3 = "1.119.0"
 tokio = { version = "1.49.0", features = ["full"] }
 
 [dev-dependencies]
