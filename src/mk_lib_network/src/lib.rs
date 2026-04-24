@@ -2,6 +2,7 @@ pub mod mk_lib_network;
 pub mod mk_lib_network_dlna;
 pub mod mk_lib_network_email;
 pub mod mk_lib_network_email_aws;
+pub mod mk_lib_network_email_aws_warmup;
 pub mod mk_lib_network_external_ip;
 pub mod mk_lib_network_ftp;
 #[cfg(feature = "infiniband")]
