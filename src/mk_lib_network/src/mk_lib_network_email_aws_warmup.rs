@@ -65,6 +65,12 @@ pub struct WarmupConfig {
     pub messages: Vec<WarmupMessage>,
 }
 
+/// Max number of per-message error strings retained on a report.
+/// Daily targets reach tens of millions, so a bulk failure (outage,
+/// auth error) could otherwise allocate a string per failed send.
+/// `failed` still counts every failure; `errors` is a bounded sample.
+pub const WARMUP_MAX_ERROR_SAMPLES: usize = 100;
+
 /// Result of a warm-up batch run.
 #[derive(Debug, Default, Clone)]
 pub struct WarmupReport {
@@ -72,7 +78,18 @@ pub struct WarmupReport {
     pub sent: u64,
     pub failed: u64,
     pub daily_target: u64,
+    /// Sample of per-message error messages, capped at
+    /// `WARMUP_MAX_ERROR_SAMPLES`. Use `failed` for the total count.
     pub errors: Vec<String>,
+}
+
+impl WarmupReport {
+    fn record_failure(&mut self, msg: String) {
+        self.failed += 1;
+        if self.errors.len() < WARMUP_MAX_ERROR_SAMPLES {
+            self.errors.push(msg);
+        }
+    }
 }
 
 /// Execute a warm-up batch: sends up to the day's daily target, paced to
@@ -119,8 +136,7 @@ pub async fn mk_lib_network_email_aws_warmup_run(
             .to(match msg.to.parse() {
                 Ok(t) => t,
                 Err(e) => {
-                    report.failed += 1;
-                    report.errors.push(format!("invalid To {:?}: {e}", msg.to));
+                    report.record_failure(format!("invalid To {:?}: {e}", msg.to));
                     sleep(interval).await;
                     continue;
                 }
@@ -131,8 +147,7 @@ pub async fn mk_lib_network_email_aws_warmup_run(
         let email = match built {
             Ok(m) => m,
             Err(e) => {
-                report.failed += 1;
-                report.errors.push(format!("message build failed: {e}"));
+                report.record_failure(format!("message build failed: {e}"));
                 sleep(interval).await;
                 continue;
             }
@@ -143,14 +158,8 @@ pub async fn mk_lib_network_email_aws_warmup_run(
 
         match send_res {
             Ok(Ok(_)) => report.sent += 1,
-            Ok(Err(e)) => {
-                report.failed += 1;
-                report.errors.push(format!("send failed: {e}"));
-            }
-            Err(e) => {
-                report.failed += 1;
-                report.errors.push(format!("send task join failed: {e}"));
-            }
+            Ok(Err(e)) => report.record_failure(format!("send failed: {e}")),
+            Err(e) => report.record_failure(format!("send task join failed: {e}")),
         }
 
         sleep(interval).await;
@@ -184,5 +193,15 @@ mod tests {
         for w in WARMUP_PLAN.windows(2) {
             assert!(w[1] >= w[0], "warm-up plan must be non-decreasing");
         }
+    }
+
+    #[test]
+    fn record_failure_caps_error_samples() {
+        let mut report = WarmupReport::default();
+        for i in 0..(WARMUP_MAX_ERROR_SAMPLES + 50) {
+            report.record_failure(format!("err {i}"));
+        }
+        assert_eq!(report.failed, (WARMUP_MAX_ERROR_SAMPLES + 50) as u64);
+        assert_eq!(report.errors.len(), WARMUP_MAX_ERROR_SAMPLES);
     }
 }
