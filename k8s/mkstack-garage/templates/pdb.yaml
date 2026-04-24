@@ -1,0 +1,13 @@
+{{- if .Values.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "mkstack-garage.fullname" . }}
+  labels:
+    {{- include "mkstack-garage.labels" . | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "mkstack-garage.selectorLabels" . | nindent 6 }}
+{{- end }}

@@ -1,0 +1,25 @@
+{{- if .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "mkstack-garage.fullname" . }}
+  {{- if .Values.serviceMonitor.namespace }}
+  namespace: {{ .Values.serviceMonitor.namespace }}
+  {{- end }}
+  labels:
+    {{- include "mkstack-garage.labels" . | nindent 4 }}
+    {{- with .Values.serviceMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "mkstack-garage.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: admin
+      path: /metrics
+      interval: {{ .Values.serviceMonitor.interval }}
+      bearerTokenSecret:
+        name: {{ include "mkstack-garage.adminSecretName" . }}
+        key: metrics_token
+{{- end }}

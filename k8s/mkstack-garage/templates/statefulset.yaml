@@ -1,0 +1,144 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "mkstack-garage.fullname" . }}
+  labels:
+    {{- include "mkstack-garage.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "mkstack-garage.rpcServiceName" . }}
+  replicas: {{ .Values.replicaCount }}
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      {{- include "mkstack-garage.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "mkstack-garage.selectorLabels" . | nindent 8 }}
+    spec:
+      terminationGracePeriodSeconds: 30
+      {{- if .Values.podAntiAffinity.enabled }}
+      affinity:
+        podAntiAffinity:
+          {{- if eq .Values.podAntiAffinity.mode "hard" }}
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  {{- include "mkstack-garage.selectorLabels" . | nindent 18 }}
+              topologyKey: {{ .Values.podAntiAffinity.topologyKey }}
+          {{- else }}
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    {{- include "mkstack-garage.selectorLabels" . | nindent 20 }}
+                topologyKey: {{ .Values.podAntiAffinity.topologyKey }}
+          {{- end }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: garage
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/sh", "-ec"]
+          args:
+            - |
+              POD_ORDINAL="${HOSTNAME##*-}"
+              NODE_FQDN="${HOSTNAME}.{{ include "mkstack-garage.rpcServiceName" . }}.{{ .Release.Namespace }}.svc.cluster.local"
+              cat >/etc/garage.toml <<CFG
+              metadata_dir = "/var/lib/garage/meta"
+              data_dir = "/var/lib/garage/data"
+              db_engine = "{{ .Values.garage.dbEngine }}"
+              replication_factor = {{ .Values.garage.replicationFactor }}
+
+              rpc_bind_addr = "[::]:3901"
+              rpc_public_addr = "${NODE_FQDN}:3901"
+              rpc_secret = "${RPC_SECRET}"
+
+              [s3_api]
+              s3_region = "{{ .Values.garage.s3Region }}"
+              api_bind_addr = "[::]:3900"
+              root_domain = ".{{ .Values.garage.rootDomain }}"
+
+              [s3_web]
+              bind_addr = "[::]:3902"
+              root_domain = ".{{ .Values.garage.rootDomain }}"
+              index = "index.html"
+
+              {{- if .Values.service.k2v.enabled }}
+              [k2v_api]
+              api_bind_addr = "[::]:3904"
+              {{- end }}
+
+              [admin]
+              api_bind_addr = "[::]:3903"
+              admin_token = "${ADMIN_TOKEN}"
+              metrics_token = "${METRICS_TOKEN}"
+              CFG
+              exec /garage -c /etc/garage.toml server
+          env:
+            - name: RPC_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mkstack-garage.rpcSecretName" . }}
+                  key: rpc_secret
+            - name: ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mkstack-garage.adminSecretName" . }}
+                  key: admin_token
+            - name: METRICS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mkstack-garage.adminSecretName" . }}
+                  key: metrics_token
+          ports:
+            - name: s3
+              containerPort: 3900
+            - name: rpc
+              containerPort: 3901
+            - name: web
+              containerPort: 3902
+            - name: admin
+              containerPort: 3903
+            {{- if .Values.service.k2v.enabled }}
+            - name: k2v
+              containerPort: 3904
+            {{- end }}
+          readinessProbe:
+            tcpSocket:
+              port: s3
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: rpc
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/garage
+  {{- if .Values.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          {{- toYaml .Values.persistence.accessModes | nindent 10 }}
+        {{- if .Values.persistence.storageClassName }}
+        storageClassName: {{ .Values.persistence.storageClassName }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size }}
+  {{- end }}

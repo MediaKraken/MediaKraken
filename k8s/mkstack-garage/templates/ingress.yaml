@@ -1,0 +1,41 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "mkstack-garage.fullname" . }}
+  labels:
+    {{- include "mkstack-garage.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- with .Values.ingress.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.s3.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "mkstack-garage.fullname" . }}-s3
+                port:
+                  number: {{ .Values.service.s3.port }}
+    - host: {{ .Values.ingress.web.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "mkstack-garage.fullname" . }}-web
+                port:
+                  number: {{ .Values.service.web.port }}
+{{- end }}

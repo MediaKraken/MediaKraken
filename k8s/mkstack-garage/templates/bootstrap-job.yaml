@@ -1,0 +1,137 @@
+{{- if .Values.bootstrap.enabled }}
+{{- /*
+One-shot job that waits for all Garage pods to be up, discovers their node IDs
+via the RPC headless service, assigns each to the configured zone/capacity,
+and commits a layout version. Idempotent as long as layoutVersion is bumped.
+*/ -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "mkstack-garage.fullname" . }}-bootstrap-v{{ .Values.bootstrap.layoutVersion }}
+  labels:
+    {{- include "mkstack-garage.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: 6
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        {{- include "mkstack-garage.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: bootstrap
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: bootstrap
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/sh", "-ec"]
+          args:
+            - |
+              set -eu
+              cat >/etc/garage.toml <<CFG
+              metadata_dir = "/tmp/garage/meta"
+              data_dir = "/tmp/garage/data"
+              db_engine = "sqlite"
+              replication_factor = {{ .Values.garage.replicationFactor }}
+              rpc_bind_addr = "[::]:13901"
+              rpc_public_addr = "127.0.0.1:13901"
+              rpc_secret = "${RPC_SECRET}"
+              [s3_api]
+              s3_region = "{{ .Values.garage.s3Region }}"
+              api_bind_addr = "[::]:13900"
+              [admin]
+              api_bind_addr = "[::]:13903"
+              admin_token = "${ADMIN_TOKEN}"
+              metrics_token = "${METRICS_TOKEN}"
+              CFG
+
+              SVC="{{ include "mkstack-garage.rpcServiceName" . }}.{{ .Release.Namespace }}.svc.cluster.local"
+              SS="{{ include "mkstack-garage.fullname" . }}"
+              REPLICAS={{ .Values.replicaCount }}
+
+              echo "Waiting for all ${REPLICAS} garage pods to resolve via ${SVC}..."
+              for i in $(seq 1 60); do
+                COUNT=$(getent hosts "${SVC}" | wc -l || true)
+                if [ "${COUNT}" -ge "${REPLICAS}" ]; then break; fi
+                sleep 5
+              done
+
+              PEERS=""
+              for i in $(seq 0 $((REPLICAS-1))); do
+                HOST="${SS}-${i}.${SVC}"
+                PEERS="${PEERS} -h ${HOST}:3901"
+              done
+
+              echo "Collecting node IDs..."
+              NODE_IDS=""
+              for i in $(seq 0 $((REPLICAS-1))); do
+                HOST="${SS}-${i}.${SVC}"
+                # Wait until this node responds to status.
+                for j in $(seq 1 60); do
+                  ID=$(/garage -c /etc/garage.toml -h "${HOST}:3901" node id -q 2>/dev/null || true)
+                  if [ -n "${ID}" ]; then break; fi
+                  sleep 5
+                done
+                if [ -z "${ID}" ]; then
+                  echo "ERROR: failed to get node id for ${HOST}" >&2
+                  exit 1
+                fi
+                SHORT_ID="${ID%@*}"
+                NODE_IDS="${NODE_IDS} ${SHORT_ID}"
+              done
+
+              echo "Node IDs:${NODE_IDS}"
+
+              echo "Connecting nodes into a cluster..."
+              for i in $(seq 0 $((REPLICAS-1))); do
+                HOST="${SS}-${i}.${SVC}"
+                for ID_FULL in $(
+                  for j in $(seq 0 $((REPLICAS-1))); do
+                    OTHER="${SS}-${j}.${SVC}"
+                    if [ "${OTHER}" != "${HOST}" ]; then
+                      /garage -c /etc/garage.toml -h "${OTHER}:3901" node id 2>/dev/null || true
+                    fi
+                  done
+                ); do
+                  /garage -c /etc/garage.toml -h "${HOST}:3901" node connect "${ID_FULL}" || true
+                done
+              done
+
+              echo "Assigning layout..."
+              FIRST="${SS}-0.${SVC}:3901"
+              IDX=0
+              for SHORT_ID in ${NODE_IDS}; do
+                /garage -c /etc/garage.toml -h "${FIRST}" layout assign \
+                  -z {{ .Values.garage.zone }} \
+                  -c {{ .Values.garage.capacity }} \
+                  -t "${SS}-${IDX}" \
+                  "${SHORT_ID}"
+                IDX=$((IDX+1))
+              done
+
+              echo "Applying layout version {{ .Values.bootstrap.layoutVersion }}..."
+              /garage -c /etc/garage.toml -h "${FIRST}" layout apply --version {{ .Values.bootstrap.layoutVersion }}
+
+              echo "Cluster status:"
+              /garage -c /etc/garage.toml -h "${FIRST}" status
+          env:
+            - name: RPC_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mkstack-garage.rpcSecretName" . }}
+                  key: rpc_secret
+            - name: ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mkstack-garage.adminSecretName" . }}
+                  key: admin_token
+            - name: METRICS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mkstack-garage.adminSecretName" . }}
+                  key: metrics_token
+{{- end }}

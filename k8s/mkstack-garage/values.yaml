@@ -1,0 +1,101 @@
+# Default values for mkstack-garage.
+# Deploys a 3-node Garage S3 cluster as a StatefulSet with one Garage pod per k8s node.
+
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: dxflrs/garage
+  tag: v2.1.0
+  pullPolicy: IfNotPresent
+
+# Number of Garage nodes. The cluster is designed for exactly 3.
+replicaCount: 3
+
+# Garage cluster configuration.
+garage:
+  # replication_factor must be <= replicaCount. Use 3 for HA (any node can fail).
+  replicationFactor: 3
+  # Metadata DB engine: sqlite | lmdb
+  dbEngine: sqlite
+  s3Region: garage
+  # Root domain for virtual-hosted-style S3 and web access (no leading dot).
+  rootDomain: garage.mediakraken.media
+  # Zone used when assigning the cluster layout. Per-node overrides below.
+  zone: dc1
+  # Capacity (bytes) advertised by each node to the layout planner. 1 TiB.
+  capacity: "1000000000000"
+
+# Secrets. Leave blank to let the chart generate random values on first install.
+# Rotating these after install requires manual coordination across all nodes.
+secrets:
+  rpcSecret: ""
+  adminToken: ""
+  metricsToken: ""
+
+service:
+  s3:
+    type: ClusterIP
+    port: 3900
+  web:
+    type: ClusterIP
+    port: 3902
+  admin:
+    type: ClusterIP
+    port: 3903
+  k2v:
+    enabled: false
+    type: ClusterIP
+    port: 3904
+
+persistence:
+  enabled: true
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteOnce
+  size: 500Gi
+
+resources:
+  requests:
+    cpu: "1000m"
+    memory: "2Gi"
+  limits:
+    cpu: "2000m"
+    memory: "4Gi"
+
+# Spread Garage pods across distinct nodes.
+podAntiAffinity:
+  enabled: true
+  # hard | soft
+  mode: hard
+  topologyKey: kubernetes.io/hostname
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+# Run a one-shot Job after install that assigns the cluster layout and commits it.
+# Disable if you prefer to run `garage layout` manually.
+bootstrap:
+  enabled: true
+  # Layout version to commit. Must be incremented on subsequent re-runs.
+  layoutVersion: 1
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  s3:
+    host: s3.garage.mediakraken.media
+  web:
+    host: web.garage.mediakraken.media
+  tls: []
+
+serviceMonitor:
+  enabled: false
+  namespace: ""
+  interval: 30s
+  labels: {}
+
+nodeSelector: {}
+tolerations: []
