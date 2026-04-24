@@ -50,7 +50,7 @@ service:
 
 persistence:
   enabled: true
-  storageClassName: longhorn
+  storageClassName: topolvm-provisioner
   accessModes:
     - ReadWriteOnce
   size: 500Gi
