@@ -131,7 +131,7 @@ impl SqlUser {
 
 pub async fn mk_lib_database_user_exists(
     sqlx_pool: &sqlx::PgPool,
-    user_name: &String,
+    user_name: &str,
 ) -> Result<bool, sqlx::Error> {
     let row: (bool,) = sqlx::query_as(
         r#"select exists(select 1 from mm_axum_users where username = $1 limit 1) limit 1"#,
@@ -220,8 +220,8 @@ pub async fn mk_lib_database_user_set_admin(
 
 pub async fn mk_lib_database_user_insert(
     sqlx_pool: &sqlx::PgPool,
-    username: &String,
-    password: &String,
+    username: &str,
+    password: &str,
 ) -> Result<i64, sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
     let row: (i64,) = sqlx::query_as(
@@ -237,8 +237,8 @@ pub async fn mk_lib_database_user_insert(
 
 pub async fn mk_lib_database_user_login_verification(
     sqlx_pool: &sqlx::PgPool,
-    username: &String,
-    password: &String,
+    username: &str,
+    password: &str,
 ) -> Result<i64, sqlx::Error> {
     let row: (i64,) = sqlx::query_as(
         r#"select coalesce((select id from mm_axum_users where username = $1 and password = crypt($2, password) limit 1), 0)"#,

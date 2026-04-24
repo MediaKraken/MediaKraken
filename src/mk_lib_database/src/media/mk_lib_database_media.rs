@@ -111,7 +111,7 @@ pub async fn mk_lib_database_media_insert(
     sqlx_pool: &sqlx::PgPool,
     mm_media_guid: Uuid,
     mm_media_class_enum: i16,
-    mm_media_path: &String,
+    mm_media_path: &str,
     mm_media_metadata_guid: Option<Uuid>,
     mm_media_ffprobe_json: serde_json::Value,
     mm_media_json: serde_json::Value,
