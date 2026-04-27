@@ -1,0 +1,16 @@
+---
+- name : Setup topolvm
+  hosts: mkcontrol1
+  tasks:
+    - name: Add repo
+      shell: helm repo add topolvm https://topolvm.github.io/topolvm
+
+    - name: Install topolvm
+      shell: helm upgrade --install --namespace=topolvm-system topolvm topolvm/topolvm --create-namespace \
+        --set lvmd.deviceClasses[0].name=vgk8sgarage \
+        --set lvmd.deviceClasses[0].volume-group=vgk8sgarage \
+        --set lvmd.deviceClasses[0].default=true \
+        --set defaultStorageClass.allowVolumeExpansion=true
+
+# sudo vgcreate vgk8sgarage /dev/sdf
+# worker 3 is /dev/sdk     um why?

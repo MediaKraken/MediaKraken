@@ -112,13 +112,22 @@ resource "terraform_data" "longhorningress" {
   ]
 }
 
+resource "terraform_data" "topolvm" {
+  provisioner "local-exec" {
+    command = "ansible-playbook -b -v -u ${var.vm_user} -e 'ansible_sudo_pass=${var.vm_user_password}' -i inventory.ini playbooks/topolvm.yml"
+  }
+  depends_on = [
+    terraform_data.longhorningress
+  ]
+}
+
 resource "terraform_data" "nfs" {
   # setup the NFS layer
   provisioner "local-exec" {
     command = "ansible-playbook -b -v -u ${var.vm_user} -e 'ansible_sudo_pass=${var.vm_user_password}' -i inventory.ini playbooks/nfs.yml"
   }
   depends_on = [
-    terraform_data.longhorningress
+    terraform_data.topolvm
   ]
 }
 
