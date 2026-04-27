@@ -87,6 +87,7 @@ metadata:
   namespace: garage-s3
 spec:
   clusterIP: None
+  publishNotReadyAddresses: true
   selector:
     app: garage
   ports:
@@ -134,7 +135,7 @@ spec:
               consistency_mode = "consistent"
 
               rpc_bind_addr = "[::]:3901"
-              rpc_public_addr = "${POD_NAME}.garage.garage-s3.svc.cluster.local:3901"
+              rpc_public_addr = "${POD_IP}:3901"
               rpc_secret_file = "/etc/garage/rpc-secret"
 
               [kubernetes_discovery]
@@ -160,6 +161,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                    fieldPath: status.podIP
           volumeMounts:
             - name: rendered-config
               mountPath: /work
@@ -309,35 +314,57 @@ spec:
 
 ***********************************
 
-kubectl exec -it garage-0 -n garage-s3 -- /garage status
+# this lists all 3 nodes and show the IDS
+kubectl exec -it garage-0 -n garage -- /garage status
 
-kubectl exec -it garage-0 -n garage-s3 -- /garage node connect $(kubectl get pod garage-1 -n garage-s3 -o jsonpath='{.status.podIP}'):3901
+<!-- kubectl exec -it garage-0 -n garage-s3 -- /garage node connect $(kubectl get pod garage-1 -n garage-s3 -o jsonpath='{.status.podIP}'):3901
 kubectl exec -it garage-0 -n garage-s3 -- /garage node connect $(kubectl get pod garage-2 -n garage-s3 -o jsonpath='{.status.podIP}'):3901
 
 
 kubectl get pod garage-0 -n garage-s3 -o jsonpath='{.status.podIP}'
 kubectl exec -it garage-0 -n garage-s3 -- /garage node connect 10.233.93.105:3901
-kubectl exec -it garage-0 -n garage-s3 -- /garage node connect 10.233.95.111:3901
+kubectl exec -it garage-0 -n garage-s3 -- /garage node connect 10.233.95.111:3901 -->
 
 
 
 kubectl port-forward -n garage-s3 garage-0 3903:3903
 
-curl -H "Authorization: Bearer your-super-garage-admin-token" \
+curl -H "Authorization: Bearer Q6BviePNmOL5ERWfC59nevT+4cweldllHypyWX04iwo=" \
      -s http://127.0.0.1:3903/v2/GetClusterStatus | python3 -m json.tool
 
-curl -H "Authorization: Bearer your-super-garage-admin-token" \
+<!-- kubectl -n garage-s3 logs garage-0 | grep 'Node ID'
+kubectl -n garage-s3 logs garage-1 | grep 'Node ID'
+kubectl -n garage-s3 logs garage-2 | grep 'Node ID' -->
+
+# run from a curl
+kubectl -n garage-s3 run curltest --rm -it \
+  --image=curlimages/curl:latest \
+  --restart=Never -- sh
+
+curl -H "Authorization: Bearer Q6BviePNmOL5ERWfC59nevT+4cweldllHypyWX04iwo=" \
+  -H "Content-Type: application/json" \
+  -X POST http://127.0.0.1:3903/v2/ConnectClusterNodes \
+  -d '[
+    "a2b735068c0c782c@10.233.95.123:3901",
+    "349f65588ab9a21a@10.233.93.124:3901"
+  ]'
+
+<!-- curl -H "Authorization: Bearer Q6BviePNmOL5ERWfC59nevT+4cweldllHypyWX04iwo=" \
      -H "Content-Type: application/json" \
      -X POST http://127.0.0.1:3903/v2/ConnectClusterNodes \
-     -d '["garage-1.garage.garage-s3.svc.cluster.local:3901", "garage-2.garage.garage-s3.svc.cluster.local:3901"]'
+     -d '["garage-1.garage.garage-s3:3901", "garage-2.garage.garage-s3:3901"]' -->
 
 *******************************************************
 
-# Assign capacity to each node (example: 50G each)
-# Get IDs first using: /garage status
-/garage layout assign <NODE_ID_0> -c 9000G -z zone1
-/garage layout assign <NODE_ID_1> -c 9000G -z zone1
-/garage layout assign <NODE_ID_2> -c 9000G -z zone1
 
-# Apply the layout (this finalizes the RF=1 configuration)
-/garage layout apply --version 1
+kubectl -n garage exec -it garage-0 -- /garage status
+kubectl -n garage exec -it garage-0 -- /garage layout assign -z dc1 -c 9000G 2241570881cc8da5
+kubectl -n garage exec -it garage-0 -- /garage layout assign -z dc1 -c 9000G e73016f1b4a1aab9
+kubectl -n garage exec -it garage-0 -- /garage layout assign -z dc1 -c 9000G f62b51319104adfc
+kubectl -n garage exec -it garage-0 -- /garage layout apply --version 1
+
+
+# Replace the placeholders before applying:
+#   rpc_secret    : openssl rand -hex 32
+#   admin_token   : openssl rand -base64 32
+#   metrics_token : openssl rand -base64 32
