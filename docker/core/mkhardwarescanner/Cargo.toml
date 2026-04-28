@@ -16,11 +16,11 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { version = "0.0.238", registry = "kellnr" }
-mk_lib_hardware = { version = "0.0.211", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.207", registry = "kellnr" }
-mk_lib_network = { version = "0.0.208", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.210", registry = "kellnr" }
+mk_lib_database = { version = "0.0.239", registry = "kellnr" }
+mk_lib_hardware = { version = "0.0.212", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.208", registry = "kellnr" }
+mk_lib_network = { version = "0.0.209", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.211", registry = "kellnr" }
 
 chrono = { version = "0.4.43", features = ["serde"] }
 crab-dlna = "0.2.1"

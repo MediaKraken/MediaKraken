@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_hash"
-version = "0.0.210"
+version = "0.0.211"
 edition = "2024"
 
 [profile.release]
