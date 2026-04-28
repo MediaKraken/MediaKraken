@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+{% include "bss_include_header.html" %}
+
+<body class="bg-gray-100 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
+
+<div class="flex min-h-screen flex-col">
+  {% include "bss_user/bss_user_include_menu.html" %}
+
+  <div class="flex flex-1">
+    {% include "bss_admin/bss_admin_include_menu.html" %}
+
+  <main class="flex-1 p-6">
+
+    <section class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow">
+
+      <!-- Header -->
+      <div class="border-b border-zinc-200 dark:border-zinc-800 p-4 space-y-1">
+        <h1 class="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+          S3 Object Storage
+        </h1>
+        <p class="text-sm text-zinc-600 dark:text-zinc-400">
+          Endpoint:
+          <span class="text-zinc-900 dark:text-zinc-100">
+            {% if template_endpoint.is_empty() %}<em>not configured</em>{% else %}{{ template_endpoint }}{% endif %}
+          </span>
+        </p>
+        <p class="text-sm text-zinc-600 dark:text-zinc-400">
+          Region:
+          <span class="text-zinc-900 dark:text-zinc-100">
+            {% if template_region.is_empty() %}<em>n/a</em>{% else %}{{ template_region }}{% endif %}
+          </span>
+        </p>
+        {% if let Some(error) = template_error %}
+        <p class="text-sm text-red-600 dark:text-red-400">
+          <span class="mr-1 inline-flex align-middle">{% include "icons/alert_triangle.svg" %}</span>
+          {{ error }}
+        </p>
+        {% endif %}
+      </div>
+
+      <!-- Stats grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-6">
+        <div class="border border-zinc-200 dark:border-zinc-800 rounded p-4 bg-zinc-50 dark:bg-zinc-800">
+          <p class="text-xs uppercase text-zinc-500 dark:text-zinc-400">Buckets</p>
+          <p class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+            {{ template_bucket_count }}
+          </p>
+        </div>
+        <div class="border border-zinc-200 dark:border-zinc-800 rounded p-4 bg-zinc-50 dark:bg-zinc-800">
+          <p class="text-xs uppercase text-zinc-500 dark:text-zinc-400">Total Files</p>
+          <p class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+            {{ template_object_count }}
+          </p>
+        </div>
+        <div class="border border-zinc-200 dark:border-zinc-800 rounded p-4 bg-zinc-50 dark:bg-zinc-800">
+          <p class="text-xs uppercase text-zinc-500 dark:text-zinc-400">Total Size</p>
+          <p class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+            {{ template_total_size|byte_format }}
+          </p>
+        </div>
+        <div class="border border-zinc-200 dark:border-zinc-800 rounded p-4 bg-zinc-50 dark:bg-zinc-800">
+          <p class="text-xs uppercase text-zinc-500 dark:text-zinc-400">Free Space</p>
+          {% if let Some(free) = template_disk_free %}
+          <p class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+            {{ free|byte_format }}
+          </p>
+          {% if let Some(total) = template_disk_total %}
+          <p class="text-xs text-zinc-500 dark:text-zinc-400">
+            of {{ total|byte_format }} total
+          </p>
+          {% endif %}
+          {% if let Some(path) = template_data_path %}
+          <p class="text-xs text-zinc-500 dark:text-zinc-400 truncate" title="{{ path }}">
+            {{ path }}
+          </p>
+          {% endif %}
+          {% else %}
+          <p class="text-2xl font-semibold text-zinc-500 dark:text-zinc-400">N/A</p>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400">
+            Set MK_GARAGE_DATA_PATH to enable
+          </p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Bucket summary -->
+      <div class="border-t border-zinc-200 dark:border-zinc-800 p-6">
+        <h2 class="text-lg font-semibold mb-3 text-zinc-900 dark:text-zinc-100">
+          Buckets
+        </h2>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-700 dark:text-zinc-300">
+            <thead class="bg-zinc-50 dark:bg-zinc-800">
+              <tr class="text-left font-semibold text-zinc-700 dark:text-zinc-200">
+                <th class="px-3 py-2">Name</th>
+                <th class="px-3 py-2 text-right">Objects</th>
+                <th class="px-3 py-2 text-right">Size</th>
+                <th class="px-3 py-2 text-center">Browse</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+              {% for bucket in template_buckets %}
+              <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800{% if template_browse_active && bucket.name.as_str() == template_selected_bucket.as_str() %} bg-indigo-50 dark:bg-indigo-900/30{% endif %}">
+                <td class="px-3 py-2 font-medium text-zinc-900 dark:text-zinc-100">{{ bucket.name }}</td>
+                <td class="px-3 py-2 text-right">{{ bucket.object_count }}</td>
+                <td class="px-3 py-2 text-right">{{ bucket.total_size|byte_format }}</td>
+                <td class="px-3 py-2 text-center">
+                  <a href="/admin/s3?bucket={{ bucket.name|space_to_html }}"
+                     class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+                     aria-label="Browse bucket {{ bucket.name }}">
+                    Browse
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+              {% if template_buckets.is_empty() %}
+              <tr>
+                <td colspan="4" class="px-3 py-4 text-center text-zinc-500 dark:text-zinc-400">
+                  No buckets found.
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Browser -->
+      {% if template_browse_active %}
+      <div class="border-t border-zinc-200 dark:border-zinc-800 p-6">
+        <h2 class="text-lg font-semibold mb-3 text-zinc-900 dark:text-zinc-100">
+          Browsing: {{ template_selected_bucket }}
+        </h2>
+
+        <!-- Breadcrumbs -->
+        <nav class="text-sm mb-3 flex flex-wrap items-center gap-1 text-zinc-600 dark:text-zinc-400">
+          <a href="/admin/s3?bucket={{ template_selected_bucket|space_to_html }}"
+             class="hover:text-indigo-600 dark:hover:text-indigo-400">
+            (root)
+          </a>
+          {% for crumb in template_breadcrumbs %}
+          <span class="text-zinc-400">/</span>
+          <a href="/admin/s3?bucket={{ template_selected_bucket|space_to_html }}&prefix={{ crumb.prefix|space_to_html }}"
+             class="hover:text-indigo-600 dark:hover:text-indigo-400">
+            {{ crumb.label }}
+          </a>
+          {% endfor %}
+        </nav>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-700 dark:text-zinc-300">
+            <thead class="bg-zinc-50 dark:bg-zinc-800">
+              <tr class="text-left font-semibold text-zinc-700 dark:text-zinc-200">
+                <th class="px-3 py-2">Name</th>
+                <th class="px-3 py-2 text-right">Size</th>
+                <th class="px-3 py-2">Last Modified</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+              {% for folder in template_folders %}
+              <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
+                <td class="px-3 py-2">
+                  <a href="/admin/s3?bucket={{ template_selected_bucket|space_to_html }}&prefix={{ folder.prefix|space_to_html }}"
+                     class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">
+                    <span class="mr-1">&#128193;</span>{{ folder.name }}/
+                  </a>
+                </td>
+                <td class="px-3 py-2 text-right text-zinc-400">&mdash;</td>
+                <td class="px-3 py-2 text-zinc-400">&mdash;</td>
+              </tr>
+              {% endfor %}
+              {% for object in template_objects %}
+              <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
+                <td class="px-3 py-2">
+                  <span class="mr-1">&#128196;</span>{{ object.name }}
+                </td>
+                <td class="px-3 py-2 text-right">{{ object.size|byte_format }}</td>
+                <td class="px-3 py-2">{{ object.last_modified }}</td>
+              </tr>
+              {% endfor %}
+              {% if template_folders.is_empty() && template_objects.is_empty() %}
+              <tr>
+                <td colspan="3" class="px-3 py-4 text-center text-zinc-500 dark:text-zinc-400">
+                  No objects under this prefix.
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+
+        {% if template_truncated %}
+        <p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+          Listing truncated at 1000 entries; refine the prefix to drill in further.
+        </p>
+        {% endif %}
+      </div>
+      {% endif %}
+
+    </section>
+
+  </main>
+  </div>
+</div>
+
+{% include "bss_public/bss_public_footer.html" %}
+</body>
+</html>
