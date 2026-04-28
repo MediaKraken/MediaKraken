@@ -31,6 +31,14 @@ pub mod filters {
     }
 
     #[askama::filter_fn]
+    pub fn url_encode<T: std::fmt::Display>(
+        s: T,
+        _env: &dyn askama::Values,
+    ) -> askama::Result<String> {
+        Ok(urlencoding::encode(&s.to_string()).into_owned())
+    }
+
+    #[askama::filter_fn]
     pub fn slash_to_asterik<T: std::fmt::Display>(
         s: T,
         _env: &dyn askama::Values,

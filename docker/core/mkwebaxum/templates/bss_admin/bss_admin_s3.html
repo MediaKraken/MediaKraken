@@ -107,7 +107,7 @@
                 <td class="px-3 py-2 text-right">{{ bucket.object_count }}</td>
                 <td class="px-3 py-2 text-right">{{ bucket.total_size|byte_format }}</td>
                 <td class="px-3 py-2 text-center">
-                  <a href="/admin/s3?bucket={{ bucket.name|space_to_html }}"
+                  <a href="/admin/s3?bucket={{ bucket.name|url_encode }}"
                      class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
                      aria-label="Browse bucket {{ bucket.name }}">
                     Browse
@@ -136,13 +136,13 @@
 
         <!-- Breadcrumbs -->
         <nav class="text-sm mb-3 flex flex-wrap items-center gap-1 text-zinc-600 dark:text-zinc-400">
-          <a href="/admin/s3?bucket={{ template_selected_bucket|space_to_html }}"
+          <a href="/admin/s3?bucket={{ template_selected_bucket|url_encode }}"
              class="hover:text-indigo-600 dark:hover:text-indigo-400">
             (root)
           </a>
           {% for crumb in template_breadcrumbs %}
           <span class="text-zinc-400">/</span>
-          <a href="/admin/s3?bucket={{ template_selected_bucket|space_to_html }}&prefix={{ crumb.prefix|space_to_html }}"
+          <a href="/admin/s3?bucket={{ template_selected_bucket|url_encode }}&prefix={{ crumb.prefix|url_encode }}"
              class="hover:text-indigo-600 dark:hover:text-indigo-400">
             {{ crumb.label }}
           </a>
@@ -162,7 +162,7 @@
               {% for folder in template_folders %}
               <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
                 <td class="px-3 py-2">
-                  <a href="/admin/s3?bucket={{ template_selected_bucket|space_to_html }}&prefix={{ folder.prefix|space_to_html }}"
+                  <a href="/admin/s3?bucket={{ template_selected_bucket|url_encode }}&prefix={{ folder.prefix|url_encode }}"
                      class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300">
                     <span class="mr-1">&#128193;</span>{{ folder.name }}/
                   </a>

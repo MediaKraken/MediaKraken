@@ -82,10 +82,11 @@ fn build_s3_client_config() -> Option<(String, String)> {
     Some((endpoint, region))
 }
 
-async fn build_s3_client(endpoint: &str) -> S3Client {
+async fn build_s3_client(endpoint: &str, region: &str) -> S3Client {
     let shared = aws_config::load_defaults(BehaviorVersion::latest()).await;
     let s3_config = S3ConfigBuilder::from(&shared)
         .endpoint_url(endpoint.to_string())
+        .region(aws_sdk_s3::config::Region::new(region.to_string()))
         .force_path_style(true)
         .build();
     S3Client::from_conf(s3_config)
@@ -305,7 +306,7 @@ pub async fn admin_s3(
     };
 
     if error_message.is_none() {
-        let client = build_s3_client(&endpoint).await;
+        let client = build_s3_client(&endpoint, &region).await;
         match gather_bucket_summaries(&client).await {
             Ok(summaries) => bucket_summaries = summaries,
             Err(err) => {
