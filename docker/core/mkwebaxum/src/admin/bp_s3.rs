@@ -12,15 +12,50 @@ use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use serde::Deserialize;
 use sqlx::postgres::PgPool;
+use std::sync::OnceLock;
+use std::time::{Duration, Instant};
+use tokio::sync::RwLock;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
 struct TemplateError403Context {}
 
+#[derive(Clone)]
 pub struct BucketSummary {
     pub name: String,
     pub object_count: u64,
     pub total_size: u64,
+}
+
+const SUMMARY_CACHE_TTL: Duration = Duration::from_secs(60);
+
+#[derive(Clone)]
+struct CachedSummaries {
+    captured_at: Instant,
+    summaries: Vec<BucketSummary>,
+}
+
+fn summary_cache() -> &'static RwLock<Option<CachedSummaries>> {
+    static CACHE: OnceLock<RwLock<Option<CachedSummaries>>> = OnceLock::new();
+    CACHE.get_or_init(|| RwLock::new(None))
+}
+
+async fn cached_bucket_summaries(client: &S3Client) -> Result<Vec<BucketSummary>, String> {
+    {
+        let guard = summary_cache().read().await;
+        if let Some(cached) = guard.as_ref() {
+            if cached.captured_at.elapsed() < SUMMARY_CACHE_TTL {
+                return Ok(cached.summaries.clone());
+            }
+        }
+    }
+    let fresh = gather_bucket_summaries(client).await?;
+    let mut guard = summary_cache().write().await;
+    *guard = Some(CachedSummaries {
+        captured_at: Instant::now(),
+        summaries: fresh.clone(),
+    });
+    Ok(fresh)
 }
 
 pub struct BrowserFolder {
@@ -257,9 +292,6 @@ fn sanitize_bucket_name(name: &str) -> Option<String> {
 
 fn sanitize_prefix(prefix: &str) -> String {
     let mut cleaned = prefix.trim_start_matches('/').to_string();
-    if cleaned.contains("..") {
-        cleaned.clear();
-    }
     if cleaned.len() > 1024 {
         cleaned.truncate(1024);
     }
@@ -307,7 +339,7 @@ pub async fn admin_s3(
 
     if error_message.is_none() {
         let client = build_s3_client(&endpoint, &region).await;
-        match gather_bucket_summaries(&client).await {
+        match cached_bucket_summaries(&client).await {
             Ok(summaries) => bucket_summaries = summaries,
             Err(err) => {
                 tracing::warn!(error = %err, "failed to gather S3 bucket summaries");
