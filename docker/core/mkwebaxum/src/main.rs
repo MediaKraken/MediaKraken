@@ -43,6 +43,7 @@ pub mod admin {
     pub mod bp_library;
     pub mod bp_logging;
     pub mod bp_reports;
+    pub mod bp_s3;
     pub mod bp_server_links;
     pub mod bp_settings;
     pub mod bp_torrent;
@@ -312,6 +313,7 @@ async fn main() {
             get(admin::bp_server_links::admin_server_links)
                 .post(admin::bp_server_links::admin_server_links_post),
         )
+        .route_with_tsr("/admin/s3", get(admin::bp_s3::admin_s3))
         .route_with_tsr("/admin/settings", get(admin::bp_settings::admin_settings))
         .route_with_tsr(
             "/admin/report_known_media/{page}",

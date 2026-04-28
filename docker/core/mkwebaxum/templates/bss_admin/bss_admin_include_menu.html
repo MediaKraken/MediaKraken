@@ -45,6 +45,9 @@
         </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300 dark:hover:bg-zinc-800" :class="{ 'bg-gray-300 dark:bg-zinc-800': activePath === '/admin/server_links' }" :aria-current="activePath === '/admin/server_links' ? 'page' : null" href="/admin/server_links">
           {% include "icons/link.svg" %}
           <span class="ml-2 text-sm font-medium">Server Links</span>
+        </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300 dark:hover:bg-zinc-800" :class="{ 'bg-gray-300 dark:bg-zinc-800': activePath.startsWith('/admin/s3') }" :aria-current="activePath.startsWith('/admin/s3') ? 'page' : null" href="/admin/s3">
+          {% include "icons/server.svg" %}
+          <span class="ml-2 text-sm font-medium">S3 Storage</span>
         </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300 dark:hover:bg-zinc-800" :class="{ 'bg-gray-300 dark:bg-zinc-800': activePath === '/admin/torrent' }" :aria-current="activePath === '/admin/torrent' ? 'page' : null" href="/admin/torrent">
           {% include "icons/bolt.svg" %}
           <span class="ml-2 text-sm font-medium">Torrent Management</span>
