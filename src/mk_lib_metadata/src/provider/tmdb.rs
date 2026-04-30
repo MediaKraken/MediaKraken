@@ -184,15 +184,15 @@ pub async fn provider_tmdb_collection_fetch(
         println!("Skip Collection: {}", tmdb_id);
         return;
     }
-    let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
-    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_collection::mk_lib_database_meta_collection_insert(
-        sqlx_pool,
-        metadata_uuid,
-        tmdb_id,
-        &result_json,
-        image_json,
-    )
-    .await;
+    // let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
+    // let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_collection::mk_lib_database_meta_collection_insert(
+    //     sqlx_pool,
+    //     metadata_uuid,
+    //     tmdb_id,
+    //     &result_json,
+    //     image_json,
+    // )
+    // .await;
 }
 
 pub async fn provider_tmdb_movie_id_max(

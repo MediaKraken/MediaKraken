@@ -213,7 +213,7 @@ fn classify_media(original_class: i16, file_extension: &str, file_path: &str) ->
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let (sqlx_pool_rw, sqlx_pool_ro) =
-        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120).await?;
+        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120).await?;
     let _ = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(
         &sqlx_pool_ro,
         false,
