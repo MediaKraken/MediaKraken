@@ -104,16 +104,8 @@ pub struct S3QueryParams {
 }
 
 fn build_s3_client_config() -> Option<(String, String)> {
-    let endpoint = std::env::var("MK_GARAGE_S3_ENDPOINT")
-        .or_else(|_| std::env::var("AWS_ENDPOINT_URL"))
-        .ok()
-        .map(|value| value.trim().to_string())
-        .filter(|value| !value.is_empty())?;
-    let region = std::env::var("AWS_REGION")
-        .ok()
-        .map(|value| value.trim().to_string())
-        .filter(|value| !value.is_empty())
-        .unwrap_or_else(|| "garage".to_string());
+    let endpoint = "garage-api.garage".to_string();
+    let region = "garage".to_string();
     Some((endpoint, region))
 }
 

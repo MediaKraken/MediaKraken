@@ -25,7 +25,7 @@ metadata:
   name: pgcluster-with-metrics
   namespace: cnpg-system
 spec:
-  instances: 2
+  instances: 3
   startDelay: 300
   stopDelay: 300
   imageName: ghcr.io/cloudnative-pg/postgis:18.1-3.6.1-202512151010-system-trixie
