@@ -104,7 +104,7 @@ pub struct S3QueryParams {
 }
 
 fn build_s3_client_config() -> Option<(String, String)> {
-    let endpoint = "garage-api.garage".to_string();
+    let endpoint = "http://garage-api.garage:3900".to_string();
     let region = "garage".to_string();
     Some((endpoint, region))
 }

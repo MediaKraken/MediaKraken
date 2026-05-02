@@ -368,3 +368,16 @@ kubectl -n garage exec -it garage-0 -- /garage layout apply --version 1
 #   rpc_secret    : openssl rand -hex 32
 #   admin_token   : openssl rand -base64 32
 #   metrics_token : openssl rand -base64 32
+
+
+kubectl -n garage exec -it garage-0 -- /garage key create mediakraken-key
+
+kubectl -n garage exec -it garage-0 -- /garage bucket create mediakraken
+
+kubectl -n garage exec -it garage-0 -- /garage bucket allow --read --write --owner mediakraken --key mediakraken-key
+
+kubectl create secret generic garage-s3-credentials \
+  --from-literal=ACCESS_KEY_ID=GK1c9e6a0782746b2aa6c0a68a \
+  --from-literal=ACCESS_SECRET_KEY=eceb5f36e68ca3ac55f57ed563f36cb3d6ceca8b5401a4aed650162b75aba099 \
+  --from-literal=AWS_REGION=garage \
+  -n mediakraken
