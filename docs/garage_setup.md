@@ -381,3 +381,15 @@ kubectl create secret generic garage-s3-credentials \
   --from-literal=ACCESS_SECRET_KEY=eceb5f36e68ca3ac55f57ed563f36cb3d6ceca8b5401a4aed650162b75aba099 \
   --from-literal=AWS_REGION=garage \
   -n mediakraken
+
+
+mediakraken
+  tmdb_person_photo
+  tmdb_person_crew_photo
+  tmdb_person_cast_photo
+  tmdb_movie_poster
+  tmdb_movie_backdrop
+  tmdb_tv_poster
+  tmdb_tv_backdrop
+  tmdb_collection_poster
+  openlibrary_book_cover

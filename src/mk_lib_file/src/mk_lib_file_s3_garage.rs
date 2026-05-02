@@ -12,22 +12,20 @@ use std::error::Error;
 /// `endpoint` is the Garage S3 API endpoint (e.g. `http://garage-api.garage:3900`).
 /// `region` is the Garage region name (e.g. `garage`).
 pub async fn mk_lib_file_s3_garage_client(
-    endpoint: &str,
-    region: &str,
     access_key_id: &str,
     secret_access_key: &str,
 ) -> Result<S3Client, Box<dyn Error>> {
     let credentials = Credentials::new(
-        access_key_id.to_string(),
-        secret_access_key.to_string(),
+        std::env::var("ACCESS_KEY_ID").to_string(),
+        std::env::var("ACCESS_SECRET_KEY").to_string(),
         None,
         None,
         "mk_lib_file_s3_garage",
     );
     let shared = aws_config::load_defaults(BehaviorVersion::latest()).await;
     let s3_config = S3ConfigBuilder::from(&shared)
-        .endpoint_url(endpoint.to_string())
-        .region(Region::new(region.to_string()))
+        .endpoint_url("http://garage-api.garage:3900".to_string())
+        .region(Region::new("garage".to_string()))
         .credentials_provider(credentials)
         .force_path_style(true)
         .build();
