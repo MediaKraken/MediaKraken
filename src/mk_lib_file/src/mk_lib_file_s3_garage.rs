@@ -11,7 +11,7 @@ use std::error::Error;
 ///
 /// `endpoint` is the Garage S3 API endpoint (e.g. `http://garage-api.garage:3900`).
 /// `region` is the Garage region name (e.g. `garage`).
-pub async fn mk_lib_network_s3_garage_client(
+pub async fn mk_lib_file_s3_garage_client(
     endpoint: &str,
     region: &str,
     access_key_id: &str,
@@ -22,7 +22,7 @@ pub async fn mk_lib_network_s3_garage_client(
         secret_access_key.to_string(),
         None,
         None,
-        "mk_lib_network_s3_garage",
+        "mk_lib_file_s3_garage",
     );
     let shared = aws_config::load_defaults(BehaviorVersion::latest()).await;
     let s3_config = S3ConfigBuilder::from(&shared)
@@ -35,7 +35,7 @@ pub async fn mk_lib_network_s3_garage_client(
 }
 
 /// Add a new object to the bucket.
-pub async fn mk_lib_network_s3_garage_add(
+pub async fn mk_lib_file_s3_garage_add(
     client: &S3Client,
     bucket: &str,
     key: &str,
@@ -52,7 +52,7 @@ pub async fn mk_lib_network_s3_garage_add(
 }
 
 /// Delete an object from the bucket.
-pub async fn mk_lib_network_s3_garage_delete(
+pub async fn mk_lib_file_s3_garage_delete(
     client: &S3Client,
     bucket: &str,
     key: &str,
@@ -68,7 +68,7 @@ pub async fn mk_lib_network_s3_garage_delete(
 
 /// Update an existing object by overwriting it.
 /// S3 has no in-place update; PUT replaces the object at `key`.
-pub async fn mk_lib_network_s3_garage_update(
+pub async fn mk_lib_file_s3_garage_update(
     client: &S3Client,
     bucket: &str,
     key: &str,
@@ -85,7 +85,7 @@ pub async fn mk_lib_network_s3_garage_update(
 }
 
 /// Load (GET) an object from the bucket and return the bytes.
-pub async fn mk_lib_network_s3_garage_load(
+pub async fn mk_lib_file_s3_garage_load(
     client: &S3Client,
     bucket: &str,
     key: &str,
@@ -100,7 +100,7 @@ pub async fn mk_lib_network_s3_garage_load(
     Ok(bytes.to_vec())
 }
 
-/// Object listing entry returned by [`mk_lib_network_s3_garage_list`].
+/// Object listing entry returned by [`mk_lib_file_s3_garage_list`].
 #[derive(Debug, Clone)]
 pub struct GarageObject {
     pub key: String,
@@ -110,7 +110,7 @@ pub struct GarageObject {
 
 /// List objects in the bucket, optionally filtered by prefix.
 /// Pages through results until all objects are collected.
-pub async fn mk_lib_network_s3_garage_list(
+pub async fn mk_lib_file_s3_garage_list(
     client: &S3Client,
     bucket: &str,
     prefix: Option<&str>,
