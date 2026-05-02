@@ -2,6 +2,8 @@
 pub mod mk_lib_file_s3;
 #[cfg(feature = "s3")]
 pub mod mk_lib_file_s3_garage;
+#[cfg(feature = "garage-admin")]
+pub mod mk_lib_file_garage_admin;
 #[cfg(feature = "share")]
 pub mod mk_lib_file_share;
 pub mod mk_lib_file;
