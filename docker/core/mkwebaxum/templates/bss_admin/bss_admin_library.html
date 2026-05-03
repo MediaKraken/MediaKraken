@@ -87,7 +87,7 @@
                   </select>
                   <button
                     type="button"
-                    @click.prevent.stop="openDirectoryPicker($el.form, '{{ row_data.mm_network_share_guid }}')"
+                    @click.prevent.stop="openDirectoryPicker('{{ row_data.mm_network_share_guid }}')"
                     aria-label="Browse share directory"
                     class="bg-zinc-700 text-white px-3 py-1 rounded hover:bg-zinc-800 dark:bg-zinc-700 dark:hover:bg-zinc-600 whitespace-nowrap shrink-0 font-medium">
                     Browse
@@ -257,7 +257,6 @@ function libraryPage() {
     showDelete: false,
     showShareBrowser: false,
     selectedGuid: null,
-    activeSubdirectoryInput: null,
     browserShareGuid: '',
     browserCurrentPath: '',
     browserParentPath: null,
@@ -279,8 +278,7 @@ function libraryPage() {
       this.showDelete = true
     },
 
-    openDirectoryPicker(form, shareGuid) {
-      this.activeSubdirectoryInput = form?.querySelector('input[name=\"subdirectory\"]') ?? null
+    openDirectoryPicker(shareGuid) {
       this.browserShareGuid = shareGuid
       this.showShareBrowser = true
       this.loadDirectories('')
@@ -326,8 +324,12 @@ function libraryPage() {
       const selectedPath = this.browserCurrentPath
         ? `${this.browserCurrentPath}/${dirName}`
         : dirName
-      if (this.activeSubdirectoryInput) {
-        this.activeSubdirectoryInput.value = selectedPath
+      const hiddenInput = document.querySelector(
+        `input[name="share_guid"][value="${this.browserShareGuid}"]`
+      )
+      const subdirInput = hiddenInput?.closest('form')?.querySelector('input[name="subdirectory"]')
+      if (subdirInput) {
+        subdirInput.value = selectedPath
       }
       this.showShareBrowser = false
     },
