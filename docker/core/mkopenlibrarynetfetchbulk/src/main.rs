@@ -1,8 +1,8 @@
 use async_compression::tokio::bufread::GzipDecoder;
 use aws_config::BehaviorVersion;
-use aws_sdk_s3::{Client as S3Client, config::Builder as S3ConfigBuilder, primitives::ByteStream};
-use bytes::Bytes;
+use aws_sdk_s3::{Client as S3Client, config::Builder as S3ConfigBuilder};
 use futures::StreamExt;
+use mk_lib_file::mk_lib_file_s3_garage::mk_lib_file_s3_garage_add;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::{Pool, Postgres};
@@ -174,13 +174,13 @@ async fn run_bulk_cover_archive_upload(options: BulkImageCoverLoadOptions) -> an
             let payload_len = payload.len();
             let object_key = format!("{}/{}", upload_s3_prefix, file_name);
 
-            rt.block_on(upload_s3_object(
-                s3_client.clone(),
+            rt.block_on(mk_lib_file_s3_garage_add(
+                &s3_client,
                 &upload_bucket,
                 &object_key,
                 payload,
-                content_type,
-            ))?;
+            ))
+            .map_err(|e| anyhow::anyhow!(e.to_string()))?;
             uploaded_count += 1;
 
             if add_json {
@@ -192,13 +192,13 @@ async fn run_bulk_cover_archive_upload(options: BulkImageCoverLoadOptions) -> an
                     "size_bytes": payload_len,
                     "content_type": content_type
                 });
-                rt.block_on(upload_s3_object(
-                    s3_client.clone(),
+                rt.block_on(mk_lib_file_s3_garage_add(
+                    &s3_client,
                     &upload_bucket,
                     &json_key,
                     serde_json::to_vec(&metadata)?,
-                    "application/json",
-                ))?;
+                ))
+                .map_err(|e| anyhow::anyhow!(e.to_string()))?;
             }
         }
         Ok(uploaded_count)
@@ -209,24 +209,6 @@ async fn run_bulk_cover_archive_upload(options: BulkImageCoverLoadOptions) -> an
         "✅ Uploaded {} cover images to s3://{}/{}",
         uploaded, bucket, s3_prefix
     );
-    Ok(())
-}
-
-async fn upload_s3_object(
-    client: S3Client,
-    bucket: &str,
-    key: &str,
-    payload: Vec<u8>,
-    content_type: &str,
-) -> anyhow::Result<()> {
-    client
-        .put_object()
-        .bucket(bucket)
-        .key(key)
-        .content_type(content_type)
-        .body(ByteStream::from(Bytes::from(payload)))
-        .send()
-        .await?;
     Ok(())
 }
 

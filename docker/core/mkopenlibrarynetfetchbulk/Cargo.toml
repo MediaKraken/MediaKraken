@@ -18,6 +18,7 @@ codegen-units = 1
 [dependencies]
 mk_lib_compression = { version = "0.0.207", registry = "kellnr" }
 mk_lib_database = { version = "0.0.240", registry = "kellnr" }
+mk_lib_file = { version = "0.0.217", registry = "kellnr", features = ["s3"] }
 mk_lib_logging = { version = "0.0.209", registry = "kellnr" }
 mk_lib_network = { version = "0.0.210", registry = "kellnr" }
 mk_lib_rabbitmq = { version = "0.0.212", registry = "kellnr" }
@@ -26,7 +27,6 @@ anyhow = "1.0.102"
 async-compression = { version = "0.4.40", features = ["tokio", "gzip"] }
 aws-config = "1.8.8"
 aws-sdk-s3 = "1.119.0"
-bytes = "1.10.1"
 chrono = { version = "0.4.43", features = ["serde"] }
 flate2 = "1.1.9"
 futures = "0.3.32"
