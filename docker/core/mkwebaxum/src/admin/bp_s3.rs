@@ -103,17 +103,11 @@ pub struct S3QueryParams {
     pub prefix: Option<String>,
 }
 
-fn build_s3_client_config() -> Option<(String, String)> {
-    let endpoint = "http://garage-api.garage:3900".to_string();
-    let region = "garage".to_string();
-    Some((endpoint, region))
-}
-
-async fn build_s3_client(endpoint: &str, region: &str) -> S3Client {
+async fn build_s3_client() -> S3Client {
     let shared = aws_config::load_defaults(BehaviorVersion::latest()).await;
     let s3_config = S3ConfigBuilder::from(&shared)
-        .endpoint_url(endpoint.to_string())
-        .region(aws_sdk_s3::config::Region::new(region.to_string()))
+        .endpoint_url("http://garage-api.garage:3900".to_string())
+        .region(aws_sdk_s3::config::Region::new("garage".to_string()))
         .force_path_style(true)
         .build();
     S3Client::from_conf(s3_config)
@@ -318,19 +312,8 @@ pub async fn admin_s3(
     let mut objects: Vec<BrowserObject> = Vec::new();
     let mut truncated = false;
 
-    let (endpoint, region) = match build_s3_client_config() {
-        Some(values) => values,
-        None => {
-            error_message = Some(
-                "S3 endpoint is not configured (set MK_GARAGE_S3_ENDPOINT or AWS_ENDPOINT_URL)."
-                    .to_string(),
-            );
-            (String::new(), String::new())
-        }
-    };
-
     if error_message.is_none() {
-        let client = build_s3_client(&endpoint, &region).await;
+        let client = build_s3_client().await;
         match cached_bucket_summaries(&client).await {
             Ok(summaries) => bucket_summaries = summaries,
             Err(err) => {
