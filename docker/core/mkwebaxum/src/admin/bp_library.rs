@@ -389,6 +389,12 @@ pub async fn admin_library_share_directories(
             .1,
     );
 
+    log_loki(
+        "Loaded share_uri",
+        json!({"share_uri": &share_uri}),
+    )
+    .await;
+    
     let smb_commands: Vec<String> = vec![
         String::from("recurse OFF"),
         String::from("prompt OFF"),
@@ -401,6 +407,7 @@ pub async fn admin_library_share_directories(
         .arg("-g")
         .arg("-c")
         .arg(smb_commands.join(";"));
+
     if cleaned_path.is_empty() == false {
         smb_command.arg("-D").arg(&cleaned_path);
     }

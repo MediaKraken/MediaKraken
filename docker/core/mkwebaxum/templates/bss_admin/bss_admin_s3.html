@@ -19,18 +19,6 @@
         <h1 class="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
           S3 Object Storage
         </h1>
-        <p class="text-sm text-zinc-600 dark:text-zinc-400">
-          Endpoint:
-          <span class="text-zinc-900 dark:text-zinc-100">
-            {% if template_endpoint.is_empty() %}<em>not configured</em>{% else %}{{ template_endpoint }}{% endif %}
-          </span>
-        </p>
-        <p class="text-sm text-zinc-600 dark:text-zinc-400">
-          Region:
-          <span class="text-zinc-900 dark:text-zinc-100">
-            {% if template_region.is_empty() %}<em>n/a</em>{% else %}{{ template_region }}{% endif %}
-          </span>
-        </p>
         {% if let Some(error) = template_error %}
         <p class="text-sm text-red-600 dark:text-red-400">
           <span class="mr-1 inline-flex align-middle">{% include "icons/alert_triangle.svg" %}</span>

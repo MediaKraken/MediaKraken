@@ -78,8 +78,6 @@ pub struct Breadcrumb {
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_s3.html")]
 struct AdminS3Template<'a> {
-    template_endpoint: &'a String,
-    template_region: &'a String,
     template_error: &'a Option<String>,
     template_bucket_count: &'a u64,
     template_object_count: &'a u64,
@@ -360,8 +358,6 @@ pub async fn admin_s3(
     let selected_bucket_string = selected_bucket.clone().unwrap_or_default();
 
     let template = AdminS3Template {
-        template_endpoint: &endpoint,
-        template_region: &region,
         template_error: &error_message,
         template_bucket_count: &bucket_count,
         template_object_count: &object_count,
