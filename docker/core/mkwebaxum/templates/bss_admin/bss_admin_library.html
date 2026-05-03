@@ -87,7 +87,7 @@
                   </select>
                   <button
                     type="button"
-                    @click="openDirectoryPicker($event, '{{ row_data.mm_network_share_guid }}')"
+                    @click.prevent.stop="openDirectoryPicker($el.form, '{{ row_data.mm_network_share_guid }}')"
                     aria-label="Browse share directory"
                     class="bg-zinc-700 text-white px-3 py-1 rounded hover:bg-zinc-800 dark:bg-zinc-700 dark:hover:bg-zinc-600 whitespace-nowrap shrink-0 font-medium">
                     Browse
@@ -279,8 +279,7 @@ function libraryPage() {
       this.showDelete = true
     },
 
-    openDirectoryPicker(event, shareGuid) {
-      const form = event.currentTarget.closest('form')
+    openDirectoryPicker(form, shareGuid) {
       this.activeSubdirectoryInput = form?.querySelector('input[name=\"subdirectory\"]') ?? null
       this.browserShareGuid = shareGuid
       this.showShareBrowser = true
