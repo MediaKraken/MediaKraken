@@ -14,7 +14,7 @@ use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_rabbitmq;
 use serde::{Deserialize, Serialize};
-use serde_json::{Value, json};
+use serde_json::json;
 use sqlx::postgres::PgPool;
 use tokio::process::Command;
 
@@ -66,33 +66,6 @@ pub struct ShareDirectoryBrowseResponse {
     directories: Vec<String>,
 }
 
-async fn log_loki(function: &str, message: &str, payload: Value) {
-    if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
-        "level": "info",
-        "message": message,
-        "module": module_path!(),
-        "function": function,
-        "payload": payload,
-    }))
-    .await
-    {
-        eprintln!("loki push error: {error}");
-    }
-}
-
-async fn log_loki_error(function: &str, message: &str, payload: Value) {
-    if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
-        "level": "error",
-        "message": message,
-        "module": module_path!(),
-        "function": function,
-        "payload": payload,
-    }))
-    .await
-    {
-        eprintln!("loki push error: {error}");
-    }
-}
 fn classify_smbclient_browse_error(
     stdout_output: &str,
     stderr_output: &str,
@@ -143,7 +116,17 @@ pub async fn admin_library(
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
-    log_loki("admin_library", "Admin library request received", json!({})).await;
+    if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
+        "level": "info",
+        "message": "Admin library request received",
+        "module": module_path!(),
+        "function": "admin_library",
+        "payload": {},
+    }))
+    .await
+    {
+        eprintln!("loki push error: {error}");
+    }
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
         [Method::GET],
@@ -336,12 +319,17 @@ pub async fn admin_library_share_directories(
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     Query(query): Query<ShareDirectoryBrowseQuery>,
 ) -> impl IntoResponse {
-    log_loki(
-        "admin_library_share_directories",
-        "Browsing share directories request received",
-        json!({}),
-    )
-    .await;
+    if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
+        "level": "info",
+        "message": "Browsing share directories request received",
+        "module": module_path!(),
+        "function": "admin_library_share_directories",
+        "payload": {},
+    }))
+    .await
+    {
+        eprintln!("loki push error: {error}");
+    }
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
         [Method::GET],
@@ -356,12 +344,17 @@ pub async fn admin_library_share_directories(
             Json(json!({"error": "Not authorized"})),
         );
     }
-    log_loki(
-        "admin_library_share_directories",
-        "Share directory request authorized",
-        json!({}),
-    )
-    .await;
+    if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
+        "level": "info",
+        "message": "Share directory request authorized",
+        "module": module_path!(),
+        "function": "admin_library_share_directories",
+        "payload": {},
+    }))
+    .await
+    {
+        eprintln!("loki push error: {error}");
+    }
     let share_info =
         match mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_detail(
             &state.sqlx_pool_ro,
@@ -377,12 +370,17 @@ pub async fn admin_library_share_directories(
                 );
             }
         };
-    log_loki(
-        "admin_library_share_directories",
-        "Loaded share details for directory browse",
-        json!({"share_guid": query.share_guid.to_string()}),
-    )
-    .await;
+    if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
+        "level": "info",
+        "message": "Loaded share details for directory browse",
+        "module": module_path!(),
+        "function": "admin_library_share_directories",
+        "payload": {"share_guid": query.share_guid.to_string()},
+    }))
+    .await
+    {
+        eprintln!("loki push error: {error}");
+    }
     let requested_path = query.path.unwrap_or_default();
     let cleaned_path = requested_path
         .trim()
@@ -403,12 +401,17 @@ pub async fn admin_library_share_directories(
         .unwrap_or(trimmed_share_path);
     let share_uri = format!("//{}/{}", share_info.mm_network_share_ip, share_name);
 
-    log_loki(
-        "admin_library_share_directories",
-        "Loaded share_uri",
-        json!({"share_uri": &share_uri}),
-    )
-    .await;
+    if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
+        "level": "info",
+        "message": "Loaded share_uri",
+        "module": module_path!(),
+        "function": "admin_library_share_directories",
+        "payload": {"share_uri": &share_uri},
+    }))
+    .await
+    {
+        eprintln!("loki push error: {error}");
+    }
 
     let smb_commands: Vec<String> = vec![
         String::from("recurse OFF"),
@@ -442,21 +445,32 @@ pub async fn admin_library_share_directories(
     } else {
         smb_command.arg("-N");
     }
-    log_loki(
-        "admin_library_share_directories",
-        "Running smbclient directory listing command",
-        json!({"command": format!("{:?}", smb_command)}),
-    )
-    .await;
+    if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
+        "level": "info",
+        "message": "Running smbclient directory listing command",
+        "module": module_path!(),
+        "function": "admin_library_share_directories",
+        "payload": {"command": format!("{:?}", smb_command)},
+    }))
+    .await
+    {
+        eprintln!("loki push error: {error}");
+    }
     let smb_output = match smb_command.output().await {
         Ok(data) => data,
         Err(error) => {
-            log_loki_error(
-                "admin_library_share_directories",
-                "smbclient execution failed",
-                json!({"error": error.to_string()}),
-            )
-            .await;
+            if let Err(loki_error) =
+                mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
+                    "level": "error",
+                    "message": "smbclient execution failed",
+                    "module": module_path!(),
+                    "function": "admin_library_share_directories",
+                    "payload": {"error": error.to_string()},
+                }))
+                .await
+            {
+                eprintln!("loki push error: {loki_error}");
+            }
             return (
                 StatusCode::BAD_GATEWAY,
                 Json(json!({"error": "Unable to run smbclient"})),
@@ -474,18 +488,24 @@ pub async fn admin_library_share_directories(
         };
         let (status_code, error_message) =
             classify_smbclient_browse_error(&stdout_output, &stderr_output);
-        log_loki_error(
-            "admin_library_share_directories",
-            "smbclient failed",
-            json!({
-                "status_code": smb_output.status.code(),
-                "classified_status": status_code.as_u16(),
-                "classified_message": error_message,
-                "stdout": stdout_output,
-                "stderr": stderr_output,
-            }),
-        )
-        .await;
+        if let Err(loki_error) =
+            mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
+                "level": "error",
+                "message": "smbclient failed",
+                "module": module_path!(),
+                "function": "admin_library_share_directories",
+                "payload": {
+                    "status_code": smb_output.status.code(),
+                    "classified_status": status_code.as_u16(),
+                    "classified_message": error_message,
+                    "stdout": stdout_output,
+                    "stderr": stderr_output,
+                },
+            }))
+            .await
+        {
+            eprintln!("loki push error: {loki_error}");
+        }
         return (
             status_code,
             Json(json!({"error": error_message, "details": details_output})),
