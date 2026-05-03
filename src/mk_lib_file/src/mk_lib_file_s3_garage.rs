@@ -33,19 +33,20 @@ pub async fn mk_lib_file_s3_garage_client(
 }
 
 /// Add a new object to the bucket.
+///
+/// `content_type` is forwarded as the object's MIME type when `Some`.
 pub async fn mk_lib_file_s3_garage_add(
     client: &S3Client,
     bucket: &str,
     key: &str,
     body: Vec<u8>,
+    content_type: Option<&str>,
 ) -> Result<(), Box<dyn Error>> {
-    client
-        .put_object()
-        .bucket(bucket)
-        .key(key)
-        .body(ByteStream::from(body))
-        .send()
-        .await?;
+    let mut request = client.put_object().bucket(bucket).key(key);
+    if let Some(ct) = content_type {
+        request = request.content_type(ct);
+    }
+    request.body(ByteStream::from(body)).send().await?;
     Ok(())
 }
 

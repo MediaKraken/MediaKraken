@@ -179,6 +179,7 @@ async fn run_bulk_cover_archive_upload(options: BulkImageCoverLoadOptions) -> an
                 &upload_bucket,
                 &object_key,
                 payload,
+                Some(content_type),
             ))
             .map_err(|e| anyhow::anyhow!(e.to_string()))?;
             uploaded_count += 1;
@@ -197,6 +198,7 @@ async fn run_bulk_cover_archive_upload(options: BulkImageCoverLoadOptions) -> an
                     &upload_bucket,
                     &json_key,
                     serde_json::to_vec(&metadata)?,
+                    Some("application/json"),
                 ))
                 .map_err(|e| anyhow::anyhow!(e.to_string()))?;
             }
