@@ -98,6 +98,10 @@ fn classify_smbclient_browse_error(
     let combined_output = format!("{stdout_output}\n{stderr_output}").to_ascii_lowercase();
 
     if combined_output.contains("nt_status_access_denied")
+        || combined_output.contains("nt_status_logon_failure")
+        || combined_output.contains("nt_status_account_disabled")
+        || combined_output.contains("nt_status_no_logon_servers")
+        || combined_output.contains("session setup failed")
         || combined_output.contains("access denied")
         || combined_output.contains("permission denied")
     {
@@ -118,6 +122,7 @@ fn classify_smbclient_browse_error(
 
     if combined_output.contains("nt_status_bad_network_path")
         || combined_output.contains("nt_status_network_name_deleted")
+        || combined_output.contains("nt_status_io_timeout")
         || combined_output.contains("connection to")
         || combined_output.contains("connection refused")
         || combined_output.contains("could not resolve")
@@ -389,12 +394,8 @@ pub async fn admin_library_share_directories(
             .1,
     );
 
-    log_loki(
-        "Loaded share_uri",
-        json!({"share_uri": &share_uri}),
-    )
-    .await;
-    
+    log_loki("Loaded share_uri", json!({"share_uri": &share_uri})).await;
+
     let smb_commands: Vec<String> = vec![
         String::from("recurse OFF"),
         String::from("prompt OFF"),
@@ -461,6 +462,8 @@ pub async fn admin_library_share_directories(
             "smbclient failed",
             json!({
                 "status_code": smb_output.status.code(),
+                "classified_status": status_code.as_u16(),
+                "classified_message": error_message,
                 "stdout": stdout_output,
                 "stderr": stderr_output,
             }),
