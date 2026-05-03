@@ -16,10 +16,10 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { version = "0.0.240", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.209", registry = "kellnr" }
-mk_lib_metadata = { version = "0.0.220", registry = "kellnr" }
-mk_lib_network = { version = "0.0.210", registry = "kellnr" }
+mk_lib_database = { version = "0.0.241", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.210", registry = "kellnr" }
+mk_lib_metadata = { version = "0.0.221", registry = "kellnr" }
+mk_lib_network = { version = "0.0.211", registry = "kellnr" }
 
 ratelimit = "0.10.0"
 serde_json = "1.0.148"

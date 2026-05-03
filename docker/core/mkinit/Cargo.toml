@@ -16,8 +16,8 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { version = "0.0.240", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.209", registry = "kellnr" }
+mk_lib_database = { version = "0.0.241", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.210", registry = "kellnr" }
 
 tokio = { version = "1.49.0", features = ["full"] }
 
