@@ -19,6 +19,10 @@ fn share_auth_key() -> String {
 /// `mm_network_share_ip` — and any deeper subpath is dropped, so only the
 /// share name itself is returned. A bare `share` with no UNC prefix is also
 /// accepted and returned unchanged.
+///
+/// IP-address-shaped values are rejected: when smb-enum-shares cannot
+/// enumerate anonymously it can surface a host-keyed entry, which would
+/// otherwise produce a `//host/host` URI when browsing.
 pub fn parse_share_name(network_share_path: &str) -> Option<String> {
     let normalized = network_share_path.replace('\\', "/");
     let had_unc_prefix = normalized.starts_with("//");
@@ -26,7 +30,11 @@ pub fn parse_share_name(network_share_path: &str) -> Option<String> {
     if had_unc_prefix {
         segments.next()?;
     }
-    segments.next().map(str::to_owned)
+    let candidate = segments.next()?.to_owned();
+    if candidate.parse::<std::net::IpAddr>().is_ok() {
+        return None;
+    }
+    Some(candidate)
 }
 
 pub async fn mk_lib_database_network_share_exists(
@@ -244,5 +252,12 @@ mod tests {
     fn unc_without_share_segment_returns_none() {
         assert!(parse_share_name(r"\\host").is_none());
         assert!(parse_share_name("//host").is_none());
+    }
+
+    #[test]
+    fn bare_ip_is_rejected() {
+        assert!(parse_share_name("192.168.1.122").is_none());
+        assert!(parse_share_name("10.0.0.1").is_none());
+        assert!(parse_share_name("::1").is_none());
     }
 }
