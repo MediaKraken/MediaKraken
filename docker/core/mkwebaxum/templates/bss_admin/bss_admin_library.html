@@ -87,7 +87,8 @@
                   </select>
                   <button
                     type="button"
-                    @click.prevent.stop="openDirectoryPicker('{{ row_data.mm_network_share_guid }}')"
+                    data-share-guid="{{ row_data.mm_network_share_guid }}"
+                    onclick="window.mkOpenShareBrowser(this); return false;"
                     aria-label="Browse share directory"
                     class="bg-zinc-700 text-white px-3 py-1 rounded hover:bg-zinc-800 dark:bg-zinc-700 dark:hover:bg-zinc-600 whitespace-nowrap shrink-0 font-medium">
                     Browse
@@ -251,6 +252,25 @@
 
 {% include "bss_public/bss_public_footer.html" %}
  <script>
+window.mkOpenShareBrowser = function(button) {
+  const shareGuid = button && button.dataset ? button.dataset.shareGuid : ''
+  if (!shareGuid) {
+    console.error('mkOpenShareBrowser: missing share guid on button', button)
+    return
+  }
+  const root = document.querySelector('main[x-data]')
+  if (!root || !window.Alpine || typeof window.Alpine.$data !== 'function') {
+    console.error('mkOpenShareBrowser: Alpine not ready')
+    return
+  }
+  const data = window.Alpine.$data(root)
+  if (!data || typeof data.openDirectoryPicker !== 'function') {
+    console.error('mkOpenShareBrowser: openDirectoryPicker not available on Alpine scope')
+    return
+  }
+  data.openDirectoryPicker(shareGuid)
+}
+
 function libraryPage() {
   return {
     showEdit: false,
