@@ -55,6 +55,11 @@
               <td class="px-3 py-2">
                 <select class="border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded px-2 py-1 w-full">
                   <optgroup label="Auth user group">
+                    <option
+                      value=""
+                      {% if row_data.mm_share_auth_user.is_none() %}selected{% endif %}>
+                      Anonymous
+                    </option>
                     {% for auth_row in template_data_share_user %}
                       <option
                         value="{{ auth_row.mm_share_auth_guid }}"
