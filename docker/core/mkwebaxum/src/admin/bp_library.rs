@@ -440,9 +440,7 @@ pub async fn admin_library_share_directories(
             smb_command.arg("-W").arg(workgroup);
         }
     }
-    if let Some(user) = share_info.mm_share_auth_user.as_deref()
-        && user != "guest"
-    {
+    if let Some(user) = share_info.mm_share_auth_user.as_deref() {
         let pass = share_info
             .mm_share_auth_password
             .as_deref()
