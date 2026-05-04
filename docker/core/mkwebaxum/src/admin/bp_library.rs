@@ -394,11 +394,17 @@ pub async fn admin_library_share_directories(
         );
     }
 
-    let trimmed_share_path = share_info.mm_network_share_path.trim_matches('/');
-    let share_name = trimmed_share_path
-        .rsplit_once('\\')
-        .map(|(_, name)| name)
-        .unwrap_or(trimmed_share_path);
+    let share_name = match mk_lib_database::mk_lib_database_network_share::parse_share_name(
+        &share_info.mm_network_share_path,
+    ) {
+        Some(name) => name,
+        None => {
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(json!({"error": "Share path is not a valid UNC path"})),
+            );
+        }
+    };
     let share_uri = format!("//{}/{}", share_info.mm_network_share_ip, share_name);
 
     if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({

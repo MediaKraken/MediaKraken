@@ -19,7 +19,7 @@ fn share_auth_key() -> String {
 /// `mm_network_share_ip` — and any deeper subpath is dropped, so only the
 /// share name itself is returned. A bare `share` with no UNC prefix is also
 /// accepted and returned unchanged.
-fn parse_share_name(network_share_path: &str) -> Option<String> {
+pub fn parse_share_name(network_share_path: &str) -> Option<String> {
     let normalized = network_share_path.replace('\\', "/");
     let had_unc_prefix = normalized.starts_with("//");
     let mut segments = normalized.split('/').filter(|s| !s.is_empty());
