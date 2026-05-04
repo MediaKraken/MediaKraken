@@ -49,7 +49,8 @@ RUN apk add --no-cache \
     libcrypto3 \
     cifs-utils \
     nfs-utils \
-    libsmbclient
+    libsmbclient \
+    samba-client
 
 # Copy system files and certs
 COPY --from=builder-mkwebapp /etc/passwd /etc/passwd
