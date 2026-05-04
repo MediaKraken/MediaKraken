@@ -20,15 +20,20 @@ fn share_auth_key() -> String {
 /// share name itself is returned. A bare `share` with no UNC prefix is also
 /// accepted and returned unchanged.
 ///
-/// IP-address-shaped values are rejected: when smb-enum-shares cannot
-/// enumerate anonymously it can surface a host-keyed entry, which would
-/// otherwise produce a `//host/host` URI when browsing.
+/// Paths missing the UNC prefix but starting with an IP (e.g.
+/// `192.168.1.122\testshare`) are also handled by stripping the leading
+/// IP segment; otherwise the browse handler ends up with a `//host/host`
+/// URI. Bare IP values with no share segment are rejected.
 pub fn parse_share_name(network_share_path: &str) -> Option<String> {
     let normalized = network_share_path.replace('\\', "/");
     let had_unc_prefix = normalized.starts_with("//");
-    let mut segments = normalized.split('/').filter(|s| !s.is_empty());
+    let mut segments = normalized.split('/').filter(|s| !s.is_empty()).peekable();
     if had_unc_prefix {
         segments.next()?;
+    } else if let Some(first) = segments.peek() {
+        if first.parse::<std::net::IpAddr>().is_ok() {
+            segments.next();
+        }
     }
     let candidate = segments.next()?.to_owned();
     if candidate.parse::<std::net::IpAddr>().is_ok() {
@@ -259,5 +264,21 @@ mod tests {
         assert!(parse_share_name("192.168.1.122").is_none());
         assert!(parse_share_name("10.0.0.1").is_none());
         assert!(parse_share_name("::1").is_none());
+    }
+
+    #[test]
+    fn ip_prefixed_path_without_unc_strips_host() {
+        assert_eq!(
+            parse_share_name(r"192.168.1.122\testshare").as_deref(),
+            Some("testshare"),
+        );
+        assert_eq!(
+            parse_share_name("192.168.1.122/testshare").as_deref(),
+            Some("testshare"),
+        );
+        assert_eq!(
+            parse_share_name(r"192.168.1.122\testshare\sub").as_deref(),
+            Some("testshare"),
+        );
     }
 }
