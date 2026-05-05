@@ -519,38 +519,20 @@ pub async fn admin_library_share_directories(
     let stdout_data = String::from_utf8_lossy(&smb_output.stdout);
     let mut directories = Vec::new();
     for line in stdout_data.lines() {
-        let trimmed = line.trim_end();
-        if trimmed.is_empty() {
+        // With `-g`, smbclient emits pipe-separated rows: `<type>|<name>|<size>|<date>`
+        // where <type> is `D` for directories and `F`/`H` for files.
+        let parts: Vec<&str> = line.split('|').collect();
+        if parts.len() < 2 {
             continue;
         }
-        // smbclient `ls` is column-formatted, not pipe-separated:
-        //   "  <name>  <attrs>  <size>  <Day Mon DD HH:MM:SS YYYY>"
-        // Date is exactly 5 whitespace tokens; size is 1 numeric token;
-        // attrs is 1 token of [DAHSRNV]; everything before that is the filename.
-        let tokens: Vec<&str> = trimmed.split_whitespace().collect();
-        if tokens.len() < 8 {
+        if parts[0] != "D" {
             continue;
         }
-        let n = tokens.len();
-        if tokens[n - 6].parse::<u64>().is_err() {
+        let filename = parts[1];
+        if filename.is_empty() || filename == "." || filename == ".." {
             continue;
         }
-        let attrs = tokens[n - 7];
-        if attrs.is_empty()
-            || !attrs
-                .chars()
-                .all(|c| matches!(c, 'D' | 'A' | 'H' | 'S' | 'R' | 'N' | 'V'))
-        {
-            continue;
-        }
-        if !attrs.contains('D') {
-            continue;
-        }
-        let filename = tokens[..n - 7].join(" ");
-        if filename == "." || filename == ".." {
-            continue;
-        }
-        directories.push(filename);
+        directories.push(filename.to_string());
     }
     directories.sort_unstable();
 
