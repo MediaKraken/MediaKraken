@@ -519,14 +519,38 @@ pub async fn admin_library_share_directories(
     let stdout_data = String::from_utf8_lossy(&smb_output.stdout);
     let mut directories = Vec::new();
     for line in stdout_data.lines() {
-        let parts: Vec<&str> = line.split('|').collect();
-        if parts.len() < 2 || parts[0] != "D" {
+        let trimmed = line.trim_end();
+        if trimmed.is_empty() {
             continue;
         }
-        if parts[1] == "." || parts[1] == ".." {
+        // smbclient `ls` is column-formatted, not pipe-separated:
+        //   "  <name>  <attrs>  <size>  <Day Mon DD HH:MM:SS YYYY>"
+        // Date is exactly 5 whitespace tokens; size is 1 numeric token;
+        // attrs is 1 token of [DAHSRNV]; everything before that is the filename.
+        let tokens: Vec<&str> = trimmed.split_whitespace().collect();
+        if tokens.len() < 8 {
             continue;
         }
-        directories.push(parts[1].to_string());
+        let n = tokens.len();
+        if tokens[n - 6].parse::<u64>().is_err() {
+            continue;
+        }
+        let attrs = tokens[n - 7];
+        if attrs.is_empty()
+            || !attrs
+                .chars()
+                .all(|c| matches!(c, 'D' | 'A' | 'H' | 'S' | 'R' | 'N' | 'V'))
+        {
+            continue;
+        }
+        if !attrs.contains('D') {
+            continue;
+        }
+        let filename = tokens[..n - 7].join(" ");
+        if filename == "." || filename == ".." {
+            continue;
+        }
+        directories.push(filename);
     }
     directories.sort_unstable();
 
