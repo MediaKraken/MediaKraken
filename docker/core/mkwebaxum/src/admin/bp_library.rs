@@ -456,8 +456,13 @@ pub async fn admin_library_share_directories(
     // directory at the share root and returning the same top-level listing
     // regardless of the requested subdirectory. `cd "path"` inside `-c`
     // matches the working pattern in mk_lib_smb::mk_file_smb_client_tree_smbclient.
-    let mut smb_commands: Vec<String> =
-        vec![String::from("recurse OFF"), String::from("prompt OFF")];
+    //
+    // Do NOT prepend `recurse OFF` / `prompt OFF`: in many smbclient builds
+    // `recurse` is a no-arg toggle that ignores trailing tokens, so
+    // `recurse OFF` actually flips recursion from OFF (the default) to ON.
+    // That makes `ls` enumerate every subdirectory in the share and surface
+    // them all in the picker regardless of the requested cwd.
+    let mut smb_commands: Vec<String> = Vec::new();
     if cleaned_path.is_empty() == false {
         smb_commands.push(format!("cd \"{}\"", cleaned_path));
     }
