@@ -111,6 +111,29 @@ fn classify_smbclient_browse_error(
     (StatusCode::BAD_GATEWAY, "Failed to list share directories")
 }
 
+// Matches the 24-byte ASCII output of samba's `time_to_asc()` /
+// `asctime`-style format: "Day Mon DD HH:MM:SS YYYY".
+fn is_smb_ls_date(s: &str) -> bool {
+    let bytes = s.as_bytes();
+    if bytes.len() != 24 {
+        return false;
+    }
+    bytes[3] == b' '
+        && bytes[7] == b' '
+        && bytes[10] == b' '
+        && bytes[13] == b':'
+        && bytes[16] == b':'
+        && bytes[19] == b' '
+        && bytes[0..3].iter().all(|c| c.is_ascii_alphabetic())
+        && bytes[4..7].iter().all(|c| c.is_ascii_alphabetic())
+        && (bytes[8] == b' ' || bytes[8].is_ascii_digit())
+        && bytes[9].is_ascii_digit()
+        && bytes[11..13].iter().all(|c| c.is_ascii_digit())
+        && bytes[14..16].iter().all(|c| c.is_ascii_digit())
+        && bytes[17..19].iter().all(|c| c.is_ascii_digit())
+        && bytes[20..24].iter().all(|c| c.is_ascii_digit())
+}
+
 pub async fn admin_library(
     State(state): State<AppState>,
     method: Method,
@@ -516,25 +539,95 @@ pub async fn admin_library_share_directories(
         );
     }
 
-    let stdout_data = String::from_utf8_lossy(&smb_output.stdout);
+    let stdout_data = String::from_utf8_lossy(&smb_output.stdout).to_string();
+    if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
+        "level": "info",
+        "message": "smbclient directory listing succeeded",
+        "module": module_path!(),
+        "function": "admin_library_share_directories",
+        "payload": {"stdout_len": stdout_data.len()},
+    }))
+    .await
+    {
+        eprintln!("loki push error: {error}");
+    }
     let mut directories = Vec::new();
     for line in stdout_data.lines() {
-        // With `-g`, smbclient emits pipe-separated rows: `<type>|<name>|<size>|<date>`
-        // where <type> is `D` for directories and `F`/`H` for files.
-        let parts: Vec<&str> = line.split('|').collect();
-        if parts.len() < 2 {
+        // smbclient's `ls` is column-formatted regardless of `-g` (the grepable
+        // flag only changes `-L` share-list output, not file listings). The
+        // emitting format string in samba's display_finfo() is:
+        //   "  %-30s%7.7s %8.0f  %s"
+        //  = 2 spaces, name padded to >=30 cols, 7-col attrs, " ",
+        //    8-col size, "  ", 24-col date "Day Mon DD HH:MM:SS YYYY".
+        // Some smbclient builds also emit pipe-separated rows
+        // (`<type>|<name>|<size>|<date>`); accept both shapes. Parse the
+        // column form by trimming fixed-width fields off the right so internal
+        // whitespace inside directory names is preserved verbatim.
+        if let Some((type_field, rest)) = line.split_once('|') {
+            if type_field == "D" {
+                let name = rest.split('|').next().unwrap_or_default();
+                if !name.is_empty() && name != "." && name != ".." {
+                    directories.push(name.to_string());
+                    continue;
+                }
+            }
+        }
+        let trimmed = line.trim_end_matches(['\r', '\n']);
+        // 2 + 30 + 7 + 1 + 8 + 2 + 24 = 74 minimum bytes.
+        if trimmed.len() < 74 {
             continue;
         }
-        if parts[0] != "D" {
+        let date_start = trimmed.len() - 24;
+        if !is_smb_ls_date(&trimmed[date_start..]) {
             continue;
         }
-        let filename = parts[1];
+        let head = &trimmed[..date_start];
+        let head = match head.strip_suffix("  ") {
+            Some(rest) => rest,
+            None => continue,
+        };
+        if head.len() < 8 {
+            continue;
+        }
+        let (head, size_field) = head.split_at(head.len() - 8);
+        if size_field.trim_start().parse::<u64>().is_err() {
+            continue;
+        }
+        let head = match head.strip_suffix(' ') {
+            Some(rest) => rest,
+            None => continue,
+        };
+        if head.len() < 7 {
+            continue;
+        }
+        let (head, attrs_field) = head.split_at(head.len() - 7);
+        let attrs = attrs_field.trim_start();
+        if attrs.is_empty()
+            || !attrs
+                .chars()
+                .all(|c| matches!(c, 'D' | 'A' | 'H' | 'S' | 'R' | 'N' | 'V'))
+        {
+            continue;
+        }
+        if !attrs.contains('D') {
+            continue;
+        }
+        let name_padded = match head.strip_prefix("  ") {
+            Some(rest) => rest,
+            None => continue,
+        };
+        // %-30s right-pads the name with spaces to fill its field; SMB names
+        // effectively cannot have trailing spaces (Windows strips them), so
+        // dropping trailing ASCII spaces recovers the real name without
+        // collapsing any internal whitespace.
+        let filename = name_padded.trim_end_matches(' ');
         if filename.is_empty() || filename == "." || filename == ".." {
             continue;
         }
         directories.push(filename.to_string());
     }
     directories.sort_unstable();
+    directories.dedup();
 
     let parent_path = cleaned_path
         .rsplit_once('/')
