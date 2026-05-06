@@ -516,25 +516,67 @@ pub async fn admin_library_share_directories(
         );
     }
 
-    let stdout_data = String::from_utf8_lossy(&smb_output.stdout);
+    let stdout_data = String::from_utf8_lossy(&smb_output.stdout).to_string();
+    if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
+        "level": "info",
+        "message": "smbclient directory listing succeeded",
+        "module": module_path!(),
+        "function": "admin_library_share_directories",
+        "payload": {"stdout_len": stdout_data.len(), "stdout": &stdout_data},
+    }))
+    .await
+    {
+        eprintln!("loki push error: {error}");
+    }
     let mut directories = Vec::new();
     for line in stdout_data.lines() {
-        // With `-g`, smbclient emits pipe-separated rows: `<type>|<name>|<size>|<date>`
-        // where <type> is `D` for directories and `F`/`H` for files.
-        let parts: Vec<&str> = line.split('|').collect();
-        if parts.len() < 2 {
+        // smbclient's `ls` is column-formatted regardless of `-g` (the grepable
+        // flag only changes `-L` share-list output, not file listings):
+        //   "  <name>  <attrs>  <size>  <Day Mon DD HH:MM:SS YYYY>"
+        // The trailing 5 whitespace tokens are the date, the next is size, the
+        // next is the attrs ([DAHSRNV]), and everything before that is the
+        // filename. Some smbclient builds also emit pipe-separated rows
+        // (`<type>|<name>|<size>|<date>`); accept both shapes.
+        if let Some((type_field, rest)) = line.split_once('|') {
+            if type_field == "D" {
+                let name = rest.split('|').next().unwrap_or_default();
+                if !name.is_empty() && name != "." && name != ".." {
+                    directories.push(name.to_string());
+                    continue;
+                }
+            }
+        }
+        let trimmed = line.trim_end();
+        if trimmed.is_empty() {
             continue;
         }
-        if parts[0] != "D" {
+        let tokens: Vec<&str> = trimmed.split_whitespace().collect();
+        if tokens.len() < 8 {
             continue;
         }
-        let filename = parts[1];
-        if filename.is_empty() || filename == "." || filename == ".." {
+        let n = tokens.len();
+        if tokens[n - 6].parse::<u64>().is_err() {
             continue;
         }
-        directories.push(filename.to_string());
+        let attrs = tokens[n - 7];
+        if attrs.is_empty()
+            || !attrs
+                .chars()
+                .all(|c| matches!(c, 'D' | 'A' | 'H' | 'S' | 'R' | 'N' | 'V'))
+        {
+            continue;
+        }
+        if !attrs.contains('D') {
+            continue;
+        }
+        let filename = tokens[..n - 7].join(" ");
+        if filename == "." || filename == ".." {
+            continue;
+        }
+        directories.push(filename);
     }
     directories.sort_unstable();
+    directories.dedup();
 
     let parent_path = cleaned_path
         .rsplit_once('/')
