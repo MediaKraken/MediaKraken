@@ -2,7 +2,7 @@ use chrono::Utc;
 use fancy_regex::Regex;
 use lazy_static::lazy_static;
 use num_format::{Locale, ToFormattedString};
-use serde_json::{Value, json};
+use serde_json::json;
 use std::collections::VecDeque;
 use std::error::Error;
 use std::ffi::OsStr;
@@ -21,6 +21,7 @@ use mk_lib_file::mk_lib_smb::{
     File_Metadata, mk_file_smb_client_connect, mk_file_smb_client_disconnect,
     mk_file_smb_client_tree, mk_file_smb_client_tree_smbclient,
 };
+use mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push;
 
 lazy_static! {
     static ref STACK_CD: Regex = Regex::new(r"(?i)-cd\d").unwrap();
@@ -35,19 +36,6 @@ lazy_static! {
     static ref STACK_DISK1: Regex = Regex::new(r"(?i)-disk1(?!\d)").unwrap();
     static ref STACK_DISC: Regex = Regex::new(r"(?i)-disc\d").unwrap();
     static ref STACK_DISC1: Regex = Regex::new(r"(?i)-disc1(?!\d)").unwrap();
-}
-
-async fn log_loki(level: &str, message: &str, payload: Value) {
-    if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
-        "level": level,
-        "message": message,
-        "module": module_path!(),
-        "payload": payload,
-    }))
-    .await
-    {
-        eprintln!("loki push error: {error}");
-    }
 }
 
 fn mk_nfs_uri(share_info: &DBShareList, uri: &str) -> String {
@@ -235,12 +223,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
         {
             Ok(rows) => rows,
             Err(error) => {
-                log_loki(
-                    "error",
-                    "library_path_audit_read failed; nacking with requeue",
-                    json!({"error": error.to_string()}),
-                )
-                .await;
+                if let Err(err) = mk_logging_loki_push(json!({
+                    "level": "error",
+                    "message": "library_path_audit_read failed; nacking with requeue",
+                    "module": module_path!(),
+                    "payload": {"error": error.to_string()},
+                }))
+                .await
+                {
+                    eprintln!("mkmediascanner loki push failed ({err})");
+                }
                 // Brief backoff so we don't spin on a downed DB, then nack with
                 // requeue so the broker redelivers the trigger (either to us
                 // after recovery or to another worker).
@@ -254,12 +246,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         ))
                         .await
                     {
-                        log_loki(
-                            "error",
-                            "rabbitmq nack failed",
-                            json!({"error": nack_error.to_string()}),
-                        )
-                        .await;
+                        if let Err(err) = mk_logging_loki_push(json!({
+                            "level": "error",
+                            "message": "rabbitmq nack failed",
+                            "module": module_path!(),
+                            "payload": {"error": nack_error.to_string()},
+                        }))
+                        .await
+                        {
+                            eprintln!("mkmediascanner loki push failed ({err})");
+                        }
                     }
                 }
                 continue;
@@ -275,15 +271,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
             {
                 Ok(s) => s,
                 Err(error) => {
-                    log_loki(
-                        "error",
-                        "network_share_detail failed",
-                        json!({
+                    if let Err(err) = mk_logging_loki_push(json!({
+                        "level": "error",
+                        "message": "network_share_detail failed",
+                        "module": module_path!(),
+                        "payload": {
                             "share_guid": row_data.mm_media_dir_share_guid,
                             "error": error.to_string(),
-                        }),
-                    )
-                    .await;
+                        },
+                    }))
+                    .await
+                    {
+                        eprintln!("mkmediascanner loki push failed ({err})");
+                    }
                     continue;
                 }
             };
@@ -357,12 +357,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 match mk_file_smb_client_tree_smbclient(&share_info, &path_on_share) {
                     Ok(entries) => entries,
                     Err(cli_error) => {
-                        log_loki(
-                            "info",
-                            "smbclient recursive listing failed; falling back to pavao BFS",
-                            json!({"path": path_on_share, "error": cli_error.to_string()}),
-                        )
-                        .await;
+                        if let Err(err) = mk_logging_loki_push(json!({
+                            "level": "info",
+                            "message": "smbclient recursive listing failed; falling back to pavao BFS",
+                            "module": module_path!(),
+                            "payload": {"path": path_on_share, "error": cli_error.to_string()},
+                        }))
+                        .await
+                        {
+                            eprintln!("mkmediascanner loki push failed ({err})");
+                        }
                         let mut collected: Vec<File_Metadata> = Vec::new();
                         let mut queue: VecDeque<String> = VecDeque::new();
                         queue.push_back(path_on_share.clone());
@@ -377,12 +381,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     }
                                 }
                                 Err(error) => {
-                                    log_loki(
-                                        "warn",
-                                        "pavao list_dir failed",
-                                        json!({"path": dir, "error": error.to_string()}),
-                                    )
-                                    .await;
+                                    if let Err(err) = mk_logging_loki_push(json!({
+                                        "level": "warn",
+                                        "message": "pavao list_dir failed",
+                                        "module": module_path!(),
+                                        "payload": {"path": dir, "error": error.to_string()},
+                                    }))
+                                    .await
+                                    {
+                                        eprintln!("mkmediascanner loki push failed ({err})");
+                                    }
                                 }
                             }
                         }
@@ -393,12 +401,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 match mk_nfs_tree(&share_info, &path_on_share).await {
                     Ok(entries) => entries,
                     Err(error) => {
-                        log_loki(
-                            "error",
-                            "nfs-ls recursive listing failed",
-                            json!({"path": path_on_share, "error": error.to_string()}),
-                        )
-                        .await;
+                        if let Err(err) = mk_logging_loki_push(json!({
+                            "level": "error",
+                            "message": "nfs-ls recursive listing failed",
+                            "module": module_path!(),
+                            "payload": {"path": path_on_share, "error": error.to_string()},
+                        }))
+                        .await
+                        {
+                            eprintln!("mkmediascanner loki push failed ({err})");
+                        }
                         Vec::new()
                     }
                 }
@@ -435,12 +447,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 {
                     Ok(known) => known,
                     Err(error) => {
-                        log_loki(
-                            "error",
-                            "library_file_exists failed; skipping file",
-                            json!({"path": file_metadata.name, "error": error.to_string()}),
-                        )
-                        .await;
+                        if let Err(err) = mk_logging_loki_push(json!({
+                            "level": "error",
+                            "message": "library_file_exists failed; skipping file",
+                            "module": module_path!(),
+                            "payload": {"path": file_metadata.name, "error": error.to_string()},
+                        }))
+                        .await
+                        {
+                            eprintln!("mkmediascanner loki push failed ({err})");
+                        }
                         continue;
                     }
                 };
@@ -488,12 +504,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 )
                 .await
                 {
-                    log_loki(
-                        "error",
-                        "media insert failed",
-                        json!({"path": file_metadata.name, "error": error.to_string()}),
-                    )
-                    .await;
+                    if let Err(err) = mk_logging_loki_push(json!({
+                        "level": "error",
+                        "message": "media insert failed",
+                        "module": module_path!(),
+                        "payload": {"path": file_metadata.name, "error": error.to_string()},
+                    }))
+                    .await
+                    {
+                        eprintln!("mkmediascanner loki push failed ({err})");
+                    }
                     continue;
                 }
 
@@ -514,12 +534,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     )
                     .await
                     {
-                        log_loki(
-                            "error",
-                            "ffprobe publish failed",
-                            json!({"media_id": media_id, "error": error.to_string()}),
-                        )
-                        .await;
+                        if let Err(err) = mk_logging_loki_push(json!({
+                            "level": "error",
+                            "message": "ffprobe publish failed",
+                            "module": module_path!(),
+                            "payload": {"media_id": media_id, "error": error.to_string()},
+                        }))
+                        .await
+                        {
+                            eprintln!("mkmediascanner loki push failed ({err})");
+                        }
                     }
                     if generate_roku_thumb && original_media_class != DLMediaType::MUSIC {
                         if let Err(error) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
@@ -534,12 +558,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         )
                         .await
                         {
-                            log_loki(
-                                "error",
-                                "roku publish failed",
-                                json!({"media_id": media_id, "error": error.to_string()}),
-                            )
-                            .await;
+                            if let Err(err) = mk_logging_loki_push(json!({
+                                "level": "error",
+                                "message": "roku publish failed",
+                                "module": module_path!(),
+                                "payload": {"media_id": media_id, "error": error.to_string()},
+                            }))
+                            .await
+                            {
+                                eprintln!("mkmediascanner loki push failed ({err})");
+                            }
                         }
                     }
                 }
@@ -556,12 +584,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     )
                     .await
                     {
-                        log_loki(
-                            "error",
-                            "download queue insert failed",
-                            json!({"media_id": media_id, "error": error.to_string()}),
-                        )
-                        .await;
+                        if let Err(err) = mk_logging_loki_push(json!({
+                            "level": "error",
+                            "message": "download queue insert failed",
+                            "module": module_path!(),
+                            "payload": {"media_id": media_id, "error": error.to_string()},
+                        }))
+                        .await
+                        {
+                            eprintln!("mkmediascanner loki push failed ({err})");
+                        }
                     }
                 }
             }
@@ -598,12 +630,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
             )
             .await
             {
-                log_loki(
-                    "error",
-                    "rabbitmq_ack failed",
-                    json!({"error": error.to_string()}),
-                )
-                .await;
+                if let Err(err) = mk_logging_loki_push(json!({
+                    "level": "error",
+                    "message": "rabbitmq_ack failed",
+                    "module": module_path!(),
+                    "payload": {"error": error.to_string()},
+                }))
+                .await
+                {
+                    eprintln!("mkmediascanner loki push failed ({err})");
+                }
             }
         }
     }
