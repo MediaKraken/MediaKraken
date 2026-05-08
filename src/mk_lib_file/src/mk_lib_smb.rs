@@ -1,4 +1,3 @@
-use mk_lib_database;
 use pavao::{SmbClient, SmbCredentials, SmbDirent, SmbDirentType, SmbOptions};
 use std::error::Error;
 use std::path::PathBuf;
@@ -42,7 +41,7 @@ pub fn mk_file_smb_client_disconnect(client: SmbClient) {
 // let mut file = client.open_with("/abc/test.txt", SmbOpenOptions::default().read(true)).unwrap();
 
 #[derive(Debug, Clone)]
-pub struct File_Metadata {
+pub struct FileMetadata {
     pub name: String,
     pub directory: bool,
 }
@@ -51,12 +50,12 @@ pub struct File_Metadata {
 pub fn mk_file_smb_client_tree(
     client: &SmbClient,
     uri: &str,
-) -> Result<Vec<File_Metadata>, Box<dyn Error>> {
-    let mut file_list: Vec<File_Metadata> = vec![];
+) -> Result<Vec<FileMetadata>, Box<dyn Error>> {
+    let mut file_list: Vec<FileMetadata> = vec![];
     for entity in client.list_dir(uri)?.into_iter() {
         let entity_uri = mk_file_smb_client_entity_uri(&entity, uri);
         let is_dir = entity.get_type() == SmbDirentType::Dir;
-        file_list.push(File_Metadata {
+        file_list.push(FileMetadata {
             name: entity_uri,
             directory: is_dir,
         });
@@ -67,12 +66,18 @@ pub fn mk_file_smb_client_tree(
 pub fn mk_file_smb_client_tree_smbclient(
     share_to_mount: &mk_lib_database::mk_lib_database_network_share::DBShareList,
     uri: &str,
-) -> Result<Vec<File_Metadata>, Box<dyn Error>> {
+) -> Result<Vec<FileMetadata>, Box<dyn Error>> {
     // smbclient's `-c` argument is a script: commands are separated by `;`
     // and paths are quoted with `"`. A uri containing either character could
     // inject additional smbclient commands, so reject it up front.
-    if uri.contains([';', '"', '\n', '\r', '\\']) {
+    let disallowed = [';', '"', '\n', '\r', '\\'];
+    if uri.contains(disallowed) {
         return Err(format!("smbclient path contains disallowed characters: {uri:?}").into());
+    }
+    if share_to_mount.mm_network_share_ip.contains(disallowed)
+        || share_to_mount.mm_network_share_path.contains(disallowed)
+    {
+        return Err("smbclient share host or path contains disallowed characters".into());
     }
     let mut smb_command = Command::new("smbclient");
     let share_uri = format!(
@@ -82,7 +87,7 @@ pub fn mk_file_smb_client_tree_smbclient(
     let mut smb_commands: Vec<String> =
         vec![String::from("recurse ON"), String::from("prompt OFF")];
     let cleaned_uri = uri.trim_start_matches('/');
-    if cleaned_uri.is_empty() == false {
+    if !cleaned_uri.is_empty() {
         smb_commands.push(format!("cd \"{}\"", cleaned_uri));
     }
     smb_commands.push(String::from("ls"));
@@ -92,11 +97,15 @@ pub fn mk_file_smb_client_tree_smbclient(
         .arg("-c")
         .arg(smb_commands.join(";"));
     if let Some(workgroup) = share_to_mount.mm_network_share_workgroup.as_deref() {
-        if workgroup.is_empty() == false {
+        if !workgroup.is_empty() {
             smb_command.arg("-W").arg(workgroup);
         }
     }
-    if let Some(user) = share_to_mount.mm_share_auth_user.as_deref() {
+    let user_opt = share_to_mount
+        .mm_share_auth_user
+        .as_deref()
+        .filter(|u| !u.is_empty());
+    if let Some(user) = user_opt {
         // The `-U user%pass` form exposes the password to anything that can
         // read this process's argv (ps, /proc). Reject `%` in the credentials
         // so a malicious password can't escape the user field; a follow-up
@@ -113,7 +122,7 @@ pub fn mk_file_smb_client_tree_smbclient(
         smb_command.arg("-N");
     }
     let smb_output = smb_command.output()?;
-    if smb_output.status.success() == false {
+    if !smb_output.status.success() {
         return Err(format!(
             "smbclient failed with status {:?}",
             smb_output.status.code()
@@ -121,7 +130,7 @@ pub fn mk_file_smb_client_tree_smbclient(
         .into());
     }
     let stdout_data = String::from_utf8(smb_output.stdout)?;
-    let mut file_list: Vec<File_Metadata> = vec![];
+    let mut file_list: Vec<FileMetadata> = vec![];
     for line in stdout_data.lines() {
         let parts: Vec<&str> = line.split('|').collect();
         if parts.len() < 2 {
@@ -140,13 +149,10 @@ pub fn mk_file_smb_client_tree_smbclient(
         } else {
             format!("{}/{}", uri, parts[1])
         };
-        file_list.push(File_Metadata {
+        file_list.push(FileMetadata {
             name: path_value,
             directory: parts[0] == "D",
         });
-    }
-    if file_list.is_empty() {
-        return Err("smbclient returned no parsable entries".into());
     }
     Ok(file_list)
 }
