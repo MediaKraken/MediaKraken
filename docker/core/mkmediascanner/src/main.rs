@@ -323,7 +323,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
             if let Err(err) = mk_logging_loki_push(json!({
                 "level": "info",
-                "message": format!("reachable after smbclient: {}", row_data.mm_media_dir_path),
+                "message": format!("reachable {} after smbclient: {}", reachable, row_data.mm_media_dir_path),
                 "module": module_path!(),
                 "payload": {"info": "reachable"},
             }))
@@ -347,7 +347,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
             if let Err(err) = mk_logging_loki_push(json!({
                 "level": "info",
-                "message": format!("reachable after smbclient: {}", row_data.mm_media_dir_path),
+                "message": format!("reachable: {}", row_data.mm_media_dir_path),
                 "module": module_path!(),
                 "payload": {"info": "reachable check complete"},
             }))
