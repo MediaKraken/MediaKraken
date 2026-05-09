@@ -321,6 +321,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 mk_nfs_tree(&share_info, &path_on_share).await.is_ok()
             };
 
+            if let Err(err) = mk_logging_loki_push(json!({
+                "level": "info",
+                "message": format!("reachable after smbclient: {}", row_data.mm_media_dir_path),
+                "module": module_path!(),
+                "payload": {"info": "reachable"},
+            }))
+            .await
+            {
+                eprintln!("mkmediascanner loki push failed ({err})");
+            }
+
             if !reachable {
                 let _ = mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_insert(
                     &sqlx_pool_rw,
