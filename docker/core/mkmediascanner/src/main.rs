@@ -262,6 +262,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
         };
 
         for row_data in audit_rows {
+            if let Err(err) = mk_logging_loki_push(json!({
+                "level": "info",
+                "message": format!("library_path_audit: {}", row_data.mm_media_dir_path),
+                "module": module_path!(),
+                "payload": {"info": "Processing library path audit"},
+            }))
+            .await
+            {
+                eprintln!("mkmediascanner loki push failed ({err})");
+            }
             let share_info = match mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_detail(
                 &sqlx_pool_ro,
                 row_data.mm_media_dir_share_guid,
@@ -290,6 +300,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let path_on_share = format!("/{}", row_data.mm_media_dir_path.trim_start_matches('/'));
             let smb_client = mk_file_smb_client_connect(share_info.clone()).ok();
 
+            if let Err(err) = mk_logging_loki_push(json!({
+                "level": "info",
+                "message": format!("library_path_audit after smbclient: {}", row_data.mm_media_dir_path),
+                "module": module_path!(),
+                "payload": {"info": "Completed SMB client connection attempt"},
+            }))
+            .await
+            {
+                eprintln!("mkmediascanner loki push failed ({err})");
+            }
+
             // Reachability probe only. The SMB directory mtime reflects only
             // changes at that exact level, so it can't be used to skip scans
             // for nested layouts; per-file dedup below handles already-known
@@ -311,6 +332,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     mk_file_smb_client_disconnect(c);
                 }
                 continue;
+            }
+
+            if let Err(err) = mk_logging_loki_push(json!({
+                "level": "info",
+                "message": format!("reachable after smbclient: {}", row_data.mm_media_dir_path),
+                "module": module_path!(),
+                "payload": {"info": "reachable check complete"},
+            }))
+            .await
+            {
+                eprintln!("mkmediascanner loki push failed ({err})");
             }
 
             let _ = mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_status_update(
@@ -397,6 +429,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     }
                 }
             };
+
+            if let Err(err) = mk_logging_loki_push(json!({
+                "level": "info",
+                "message": format!("b4 total: {}", row_data.mm_media_dir_path),
+                "module": module_path!(),
+                "payload": {"info": "reachable check complete"},
+            }))
+            .await
+            {
+                eprintln!("mkmediascanner loki push failed ({err})");
+            }
 
             let total_candidates = files.iter().filter(|f| !f.directory).count().max(1) as f64;
             let mut scanned: u64 = 0;
