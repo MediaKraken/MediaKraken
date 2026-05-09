@@ -7,7 +7,7 @@ use std::collections::VecDeque;
 use std::error::Error;
 use std::ffi::OsStr;
 use std::path::Path;
-use std::time::{Duration, SystemTime};
+use std::time::Duration;
 use tokio::process::Command;
 use uuid::Uuid;
 
@@ -15,7 +15,6 @@ use mk_lib_common::mk_lib_common_enum_media_type::DLMediaType;
 use mk_lib_common::mk_lib_common_media_extension::{
     GAME_EXTENSION, MEDIA_EXTENSION, MEDIA_EXTENSION_SKIP_FFMPEG, SUBTITLE_EXTENSION,
 };
-use mk_lib_database::mk_lib_database_library::DBLibraryAuditList;
 use mk_lib_database::mk_lib_database_network_share::DBShareList;
 use mk_lib_file::mk_lib_smb::{
     File_Metadata, mk_file_smb_client_connect, mk_file_smb_client_disconnect,
@@ -291,19 +290,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let path_on_share = format!("/{}", row_data.mm_media_dir_path.trim_start_matches('/'));
             let smb_client = mk_file_smb_client_connect(share_info.clone()).ok();
 
-            // Reachability + (SMB-only) mtime probe.
-            let (reachable, maybe_mtime): (bool, Option<SystemTime>) =
-                if let Some(c) = smb_client.as_ref() {
-                    match c.stat(path_on_share.clone()) {
-                        Ok(stat) => (true, Some(stat.modified)),
-                        Err(_) => (false, None),
-                    }
-                } else {
-                    match mk_nfs_tree(&share_info, &path_on_share).await {
-                        Ok(_) => (true, None),
-                        Err(_) => (false, None),
-                    }
-                };
+            // Reachability probe only. The SMB directory mtime reflects only
+            // changes at that exact level, so it can't be used to skip scans
+            // for nested layouts; per-file dedup below handles already-known
+            // files.
+            let reachable = if let Some(c) = smb_client.as_ref() {
+                c.stat(path_on_share.clone()).is_ok()
+            } else {
+                mk_nfs_tree(&share_info, &path_on_share).await.is_ok()
+            };
 
             if !reachable {
                 let _ = mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_insert(
@@ -316,19 +311,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     mk_file_smb_client_disconnect(c);
                 }
                 continue;
-            }
-
-            // Only short-circuit when we actually know the share mtime (SMB). NFS
-            // callers always fall through and rely on the per-file dedup below.
-            if let Some(mtime) = maybe_mtime {
-                let last_modified =
-                    mk_lib_common::mk_lib_common_date::system_time_to_date_time(mtime);
-                if last_modified <= row_data.mm_media_dir_last_scanned {
-                    if let Some(c) = smb_client {
-                        mk_file_smb_client_disconnect(c);
-                    }
-                    continue;
-                }
             }
 
             let _ = mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_status_update(
