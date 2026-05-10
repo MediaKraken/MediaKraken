@@ -74,8 +74,7 @@ pub fn mk_file_smb_client_tree_smbclient(
     if uri.contains(disallowed) {
         return Err(format!("smbclient path contains disallowed characters: {uri:?}").into());
     }
-    if share_to_mount.mm_network_share_ip.contains(disallowed)
-        || share_to_mount.mm_network_share_path.contains(disallowed)
+    if share_to_mount.mm_network_share_path.contains(disallowed)
     {
         return Err("smbclient share host or path contains disallowed characters".into());
     }

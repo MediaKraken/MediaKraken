@@ -159,6 +159,7 @@
 \rsync -a ../src/mk_lib_metadata/Cargo.toml ../docker/core/mkmediascanner/mk_lib_metadata/Cargo.toml --exclude target
 \rsync -a ../src/mk_lib_network/Cargo.toml ../docker/core/mkmediascanner/mk_lib_network/Cargo.toml --exclude target
 \rsync -a ../src/mk_lib_rabbitmq/Cargo.toml ../docker/core/mkmediascanner/mk_lib_rabbitmq/Cargo.toml --exclude target
+\rsync -a ../src/mk_lib_share/Cargo.toml ../docker/core/mkmediascanner/mk_lib_share/Cargo.toml --exclude target
 \rsync -a alpine-minirootfs* ../docker/core/mkmediascanner/alpine-minirootfs-x86_64.tar.gz --exclude target
 
 # mkmetadata
@@ -299,6 +300,7 @@
 \rsync -a ../src/mk_lib_metadata/Cargo.toml ../docker/core/mktranscode/mk_lib_metadata/Cargo.toml --exclude target
 \rsync -a ../src/mk_lib_network/Cargo.toml ../docker/core/mktranscode/mk_lib_network/Cargo.toml --exclude target
 \rsync -a ../src/mk_lib_rabbitmq/Cargo.toml ../docker/core/mktranscode/mk_lib_rabbitmq/Cargo.toml --exclude target
+\rsync -a ../src/mk_lib_share/Cargo.toml ../docker/core/mktranscode/mk_lib_share/Cargo.toml --exclude target
 \rsync -a alpine-minirootfs* ../docker/core/mktranscode/alpine-minirootfs-x86_64.tar.gz --exclude target
 
 # mkwebaxum
@@ -313,4 +315,5 @@
 \rsync -a ../src/mk_lib_metadata/Cargo.toml ../docker/core/mkwebaxum/mk_lib_metadata/Cargo.toml --exclude target
 \rsync -a ../src/mk_lib_network/Cargo.toml ../docker/core/mkwebaxum/mk_lib_network/Cargo.toml --exclude target
 \rsync -a ../src/mk_lib_rabbitmq/Cargo.toml ../docker/core/mkwebaxum/mk_lib_rabbitmq/Cargo.toml --exclude target
+\rsync -a ../src/mk_lib_share/Cargo.toml ../docker/core/mkwebaxum/mk_lib_share/Cargo.toml --exclude target
 \rsync -a alpine-minirootfs* ../docker/core/mkwebaxum/alpine-minirootfs-x86_64.tar.gz --exclude target
