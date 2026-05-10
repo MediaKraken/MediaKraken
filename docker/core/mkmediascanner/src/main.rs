@@ -184,14 +184,11 @@ async fn mk_smb_tree(
     commands.push(String::from("ls"));
     let mut cmd = build_smbclient_command(share_info, &share_uri, &commands)?;
     let output = cmd.output().await?;
-    if !output.status.success() {
-        return Err(format!(
-            "smbclient failed with status {:?}: {}",
-            output.status.code(),
-            String::from_utf8_lossy(&output.stderr).trim()
-        )
-        .into());
-    }
+    // smbclient with `recurse ON` exits non-zero when any subdirectory in the
+    // tree fails (e.g. one inaccessible folder), but still emits the entries
+    // it could read on stdout. Parse stdout regardless and only surface an
+    // error if we got nothing — otherwise a single permission glitch would
+    // discard every discovery for the share.
     let stdout_data = String::from_utf8(output.stdout)?;
     let mut file_list: Vec<File_Metadata> = vec![];
     for line in stdout_data.lines() {
@@ -216,6 +213,31 @@ async fn mk_smb_tree(
             name: path_value,
             directory: parts[0] == "D",
         });
+    }
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        let summary = format!(
+            "smbclient exited {:?}: {}",
+            output.status.code(),
+            stderr.trim()
+        );
+        if file_list.is_empty() {
+            return Err(summary.into());
+        }
+        if let Err(err) = mk_logging_loki_push(json!({
+            "level": "warn",
+            "message": "smbclient recursive listing exited non-zero; using partial results",
+            "module": module_path!(),
+            "payload": {
+                "path": path_on_share,
+                "entries": file_list.len(),
+                "error": summary,
+            },
+        }))
+        .await
+        {
+            eprintln!("mkmediascanner loki push failed ({err})");
+        }
     }
     Ok(file_list)
 }
