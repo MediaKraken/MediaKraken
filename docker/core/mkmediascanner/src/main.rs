@@ -3,7 +3,6 @@ use fancy_regex::Regex;
 use lazy_static::lazy_static;
 use num_format::{Locale, ToFormattedString};
 use serde_json::json;
-use std::collections::VecDeque;
 use std::error::Error;
 use std::ffi::OsStr;
 use std::path::Path;
@@ -15,11 +14,8 @@ use mk_lib_common::mk_lib_common_enum_media_type::DLMediaType;
 use mk_lib_common::mk_lib_common_media_extension::{
     GAME_EXTENSION, MEDIA_EXTENSION, MEDIA_EXTENSION_SKIP_FFMPEG, SUBTITLE_EXTENSION,
 };
-use mk_lib_database::mk_lib_database_network_share::DBShareList;
-use mk_lib_file::mk_lib_smb::{
-    File_Metadata, mk_file_smb_client_connect, mk_file_smb_client_disconnect,
-    mk_file_smb_client_tree, mk_file_smb_client_tree_smbclient,
-};
+use mk_lib_database::mk_lib_database_network_share::{DBShareList, parse_share_name};
+use mk_lib_file::mk_lib_smb::File_Metadata;
 use mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push;
 
 lazy_static! {
@@ -92,6 +88,156 @@ async fn mk_nfs_tree(
             name: format!("/{normalized}"),
             directory: is_dir,
         });
+    }
+    Ok(file_list)
+}
+
+// Build the `//{ip}/{share}` URI smbclient expects. `mm_network_share_path`
+// may be a UNC path (`\\host\share\sub`) or just a share name; either way only
+// the share segment belongs in the URI — host comes from `mm_network_share_ip`.
+// Mirrors the approach used by mkwebaxum's share-browse handler.
+fn mk_smb_share_uri(share_info: &DBShareList) -> Option<String> {
+    let share_name = parse_share_name(&share_info.mm_network_share_path)?;
+    Some(format!("//{}/{}", share_info.mm_network_share_ip, share_name))
+}
+
+// Construct an `smbclient` command running the supplied `-c` script, with
+// auth/workgroup args. Rejects metacharacters that could break out of the
+// quoted `cd` arg in the script.
+fn build_smbclient_command(
+    share_info: &DBShareList,
+    share_uri: &str,
+    smb_commands: &[String],
+) -> Result<Command, Box<dyn Error>> {
+    let mut cmd = Command::new("smbclient");
+    cmd.arg(share_uri)
+        .arg("-g")
+        .arg("-c")
+        .arg(smb_commands.join(";"));
+    if let Some(workgroup) = share_info.mm_network_share_workgroup.as_deref() {
+        if !workgroup.is_empty() {
+            cmd.arg("-W").arg(workgroup);
+        }
+    }
+    let user_opt = share_info
+        .mm_share_auth_user
+        .as_deref()
+        .filter(|u| !u.is_empty());
+    if let Some(user) = user_opt {
+        let pass = share_info
+            .mm_share_auth_password
+            .as_deref()
+            .unwrap_or_default();
+        if user.contains('%') || pass.contains('%') || user.contains('\n') || pass.contains('\n')
+        {
+            return Err("smb credentials contain disallowed characters".into());
+        }
+        cmd.arg("-U").arg(format!("{}%{}", user, pass));
+    } else {
+        cmd.arg("-N");
+    }
+    Ok(cmd)
+}
+
+fn smb_path_is_safe(cleaned: &str) -> bool {
+    !cleaned.contains([';', '"', '\n', '\r', '\\'])
+}
+
+// Reachability probe: `cd path; ls`. Success = share is reachable and the
+// requested directory exists / is accessible.
+async fn mk_smb_probe(share_info: &DBShareList, path_on_share: &str) -> bool {
+    let Some(share_uri) = mk_smb_share_uri(share_info) else {
+        return false;
+    };
+    let cleaned = path_on_share.trim_start_matches('/');
+    if !smb_path_is_safe(cleaned) {
+        return false;
+    }
+    let mut commands: Vec<String> = Vec::new();
+    if !cleaned.is_empty() {
+        commands.push(format!("cd \"{}\"", cleaned));
+    }
+    commands.push(String::from("ls"));
+    let mut cmd = match build_smbclient_command(share_info, &share_uri, &commands) {
+        Ok(c) => c,
+        Err(_) => return false,
+    };
+    matches!(cmd.output().await, Ok(out) if out.status.success())
+}
+
+// Recursive listing via `recurse ON; cd path; ls` parsed from `-g` pipe output.
+async fn mk_smb_tree(
+    share_info: &DBShareList,
+    path_on_share: &str,
+) -> Result<Vec<File_Metadata>, Box<dyn Error>> {
+    let share_uri = mk_smb_share_uri(share_info)
+        .ok_or_else(|| Box::<dyn Error>::from("invalid SMB share path"))?;
+    let cleaned = path_on_share.trim_start_matches('/');
+    if !smb_path_is_safe(cleaned) {
+        return Err("smb path contains disallowed characters".into());
+    }
+    let mut commands: Vec<String> =
+        vec![String::from("recurse ON"), String::from("prompt OFF")];
+    if !cleaned.is_empty() {
+        commands.push(format!("cd \"{}\"", cleaned));
+    }
+    commands.push(String::from("ls"));
+    let mut cmd = build_smbclient_command(share_info, &share_uri, &commands)?;
+    let output = cmd.output().await?;
+    // smbclient with `recurse ON` exits non-zero when any subdirectory in the
+    // tree fails (e.g. one inaccessible folder), but still emits the entries
+    // it could read on stdout. Parse stdout regardless and only surface an
+    // error if we got nothing — otherwise a single permission glitch would
+    // discard every discovery for the share.
+    let stdout_data = String::from_utf8(output.stdout)?;
+    let mut file_list: Vec<File_Metadata> = vec![];
+    for line in stdout_data.lines() {
+        let parts: Vec<&str> = line.split('|').collect();
+        if parts.len() < 2 {
+            continue;
+        }
+        if parts[0] != "D" && parts[0] != "F" {
+            continue;
+        }
+        if parts[1] == "." || parts[1] == ".." {
+            continue;
+        }
+        let path_value = if parts[1].starts_with('/') {
+            parts[1].to_string()
+        } else if path_on_share.ends_with('/') {
+            format!("{}{}", path_on_share, parts[1])
+        } else {
+            format!("{}/{}", path_on_share, parts[1])
+        };
+        file_list.push(File_Metadata {
+            name: path_value,
+            directory: parts[0] == "D",
+        });
+    }
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        let summary = format!(
+            "smbclient exited {:?}: {}",
+            output.status.code(),
+            stderr.trim()
+        );
+        if file_list.is_empty() {
+            return Err(summary.into());
+        }
+        if let Err(err) = mk_logging_loki_push(json!({
+            "level": "warn",
+            "message": "smbclient recursive listing exited non-zero; using partial results",
+            "module": module_path!(),
+            "payload": {
+                "path": path_on_share,
+                "entries": file_list.len(),
+                "error": summary,
+            },
+        }))
+        .await
+        {
+            eprintln!("mkmediascanner loki push failed ({err})");
+        }
     }
     Ok(file_list)
 }
@@ -298,28 +444,26 @@ async fn main() -> Result<(), Box<dyn Error>> {
             };
 
             let path_on_share = format!("/{}", row_data.mm_media_dir_path.trim_start_matches('/'));
-            let smb_client = mk_file_smb_client_connect(share_info.clone()).ok();
+
+            // Probe reachability via smbclient (matches the working pattern in
+            // mkwebaxum's share-browse handler). Only fall back to NFS if the
+            // SMB probe fails. Per-file dedup below handles already-known files,
+            // so we don't try to short-circuit scans by directory mtime.
+            let smb_reachable = mk_smb_probe(&share_info, &path_on_share).await;
 
             if let Err(err) = mk_logging_loki_push(json!({
                 "level": "info",
                 "message": format!("library_path_audit after smbclient: {}", row_data.mm_media_dir_path),
                 "module": module_path!(),
-                "payload": {"info": "Completed SMB client connection attempt"},
+                "payload": {"info": "Completed SMB reachability probe", "smb_reachable": smb_reachable},
             }))
             .await
             {
                 eprintln!("mkmediascanner loki push failed ({err})");
             }
 
-            // Reachability probe only. The SMB directory mtime reflects only
-            // changes at that exact level, so it can't be used to skip scans
-            // for nested layouts; per-file dedup below handles already-known
-            // files.
-            let reachable = if let Some(c) = smb_client.as_ref() {
-                c.stat(path_on_share.clone()).is_ok()
-            } else {
-                mk_nfs_tree(&share_info, &path_on_share).await.is_ok()
-            };
+            let reachable = smb_reachable
+                || mk_nfs_tree(&share_info, &path_on_share).await.is_ok();
 
             if let Err(err) = mk_logging_loki_push(json!({
                 "level": "info",
@@ -339,9 +483,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     true,
                 )
                 .await;
-                if let Some(c) = smb_client {
-                    mk_file_smb_client_disconnect(c);
-                }
                 continue;
             }
 
@@ -375,16 +516,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
             )
             .await;
 
-            // Collect every file under the library path. For SMB we prefer the
-            // recursive smbclient CLI (one subprocess total). If that fails,
-            // BFS via pavao one directory at a time. For NFS we use `nfs-ls -R`.
-            let files: Vec<File_Metadata> = if let Some(c) = smb_client.as_ref() {
-                match mk_file_smb_client_tree_smbclient(&share_info, &path_on_share) {
+            // Collect every file under the library path. We run a single
+            // recursive smbclient subprocess (matching mkwebaxum's working
+            // share-browse pattern). If the SMB probe failed we use
+            // `nfs-ls -R` instead.
+            let files: Vec<File_Metadata> = if smb_reachable {
+                match mk_smb_tree(&share_info, &path_on_share).await {
                     Ok(entries) => entries,
                     Err(cli_error) => {
                         if let Err(err) = mk_logging_loki_push(json!({
-                            "level": "info",
-                            "message": "smbclient recursive listing failed; falling back to pavao BFS",
+                            "level": "error",
+                            "message": "smbclient recursive listing failed",
                             "module": module_path!(),
                             "payload": {"path": path_on_share, "error": cli_error.to_string()},
                         }))
@@ -392,34 +534,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         {
                             eprintln!("mkmediascanner loki push failed ({err})");
                         }
-                        let mut collected: Vec<File_Metadata> = Vec::new();
-                        let mut queue: VecDeque<String> = VecDeque::new();
-                        queue.push_back(path_on_share.clone());
-                        while let Some(dir) = queue.pop_front() {
-                            match mk_file_smb_client_tree(c, &dir) {
-                                Ok(entries) => {
-                                    for entry in entries {
-                                        if entry.directory {
-                                            queue.push_back(entry.name.clone());
-                                        }
-                                        collected.push(entry);
-                                    }
-                                }
-                                Err(error) => {
-                                    if let Err(err) = mk_logging_loki_push(json!({
-                                        "level": "warn",
-                                        "message": "pavao list_dir failed",
-                                        "module": module_path!(),
-                                        "payload": {"path": dir, "error": error.to_string()},
-                                    }))
-                                    .await
-                                    {
-                                        eprintln!("mkmediascanner loki push failed ({err})");
-                                    }
-                                }
-                            }
-                        }
-                        collected
+                        Vec::new()
                     }
                 }
             } else {
@@ -654,9 +769,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 .await;
             }
 
-            if let Some(c) = smb_client {
-                mk_file_smb_client_disconnect(c);
-            }
         }
 
         if let Some(deliver) = msg.deliver {
