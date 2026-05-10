@@ -1,7 +1,8 @@
 use mk_lib_database;
 use std::error::Error;
-use std::fs;
-use std::process::{Command, Stdio};
+use std::process::Stdio;
+use tokio::fs;
+use tokio::process::Command;
 
 fn validate_mount_option_value(value: &str, field: &str) -> Result<(), Box<dyn Error>> {
     // `-o key=value,key=value,...` is comma-separated, so a value containing
@@ -26,7 +27,7 @@ pub async fn mk_file_share_mount(
     // Example target: mount -t cifs -o rw,guest,vers=1.0 //host/share /mnt
     let source = format!("//{}/{}", host_ip, host_path.replace('\\', "/"));
     let target = format!("/mediakraken/mnt/{share_guid}");
-    fs::create_dir_all(&target)?;
+    fs::create_dir_all(&target).await?;
 
     let mut options: Vec<String> = Vec::new();
     if share_version_old {
@@ -49,7 +50,11 @@ pub async fn mk_file_share_mount(
     }
     cmd.arg(&source).arg(&target);
 
-    let output = cmd.stdout(Stdio::piped()).stderr(Stdio::piped()).output()?;
+    let output = cmd
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .output()
+        .await?;
     if !output.status.success() {
         return Err(format!(
             "mount {source} -> {target} failed: status={:?} stderr={}",

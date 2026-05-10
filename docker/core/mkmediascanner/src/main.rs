@@ -15,7 +15,7 @@ use mk_lib_common::mk_lib_common_media_extension::{
     GAME_EXTENSION, MEDIA_EXTENSION, MEDIA_EXTENSION_SKIP_FFMPEG, SUBTITLE_EXTENSION,
 };
 use mk_lib_database::mk_lib_database_network_share::{DBShareList, parse_share_name};
-use mk_lib_file::mk_lib_smb::File_Metadata;
+use mk_lib_share::mk_lib_smb::FileMetadata;
 use mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push;
 
 lazy_static! {
@@ -51,7 +51,7 @@ fn mk_nfs_uri(share_info: &DBShareList, uri: &str) -> String {
 async fn mk_nfs_tree(
     share_info: &DBShareList,
     uri: &str,
-) -> Result<Vec<File_Metadata>, Box<dyn Error>> {
+) -> Result<Vec<FileMetadata>, Box<dyn Error>> {
     let output = Command::new("nfs-ls")
         .arg("-R")
         .arg(mk_nfs_uri(share_info, uri))
@@ -84,7 +84,7 @@ async fn mk_nfs_tree(
         }
         let is_dir = relative.ends_with('/');
         let normalized = relative.trim_end_matches('/');
-        file_list.push(File_Metadata {
+        file_list.push(FileMetadata {
             name: format!("/{normalized}"),
             directory: is_dir,
         });
@@ -169,7 +169,7 @@ async fn mk_smb_probe(share_info: &DBShareList, path_on_share: &str) -> bool {
 async fn mk_smb_tree(
     share_info: &DBShareList,
     path_on_share: &str,
-) -> Result<Vec<File_Metadata>, Box<dyn Error>> {
+) -> Result<Vec<FileMetadata>, Box<dyn Error>> {
     let share_uri = mk_smb_share_uri(share_info)
         .ok_or_else(|| Box::<dyn Error>::from("invalid SMB share path"))?;
     let cleaned = path_on_share.trim_start_matches('/');
@@ -190,7 +190,7 @@ async fn mk_smb_tree(
     // error if we got nothing — otherwise a single permission glitch would
     // discard every discovery for the share.
     let stdout_data = String::from_utf8(output.stdout)?;
-    let mut file_list: Vec<File_Metadata> = vec![];
+    let mut file_list: Vec<FileMetadata> = vec![];
     for line in stdout_data.lines() {
         let parts: Vec<&str> = line.split('|').collect();
         if parts.len() < 2 {
@@ -209,7 +209,7 @@ async fn mk_smb_tree(
         } else {
             format!("{}/{}", path_on_share, parts[1])
         };
-        file_list.push(File_Metadata {
+        file_list.push(FileMetadata {
             name: path_value,
             directory: parts[0] == "D",
         });
@@ -520,7 +520,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             // recursive smbclient subprocess (matching mkwebaxum's working
             // share-browse pattern). If the SMB probe failed we use
             // `nfs-ls -R` instead.
-            let files: Vec<File_Metadata> = if smb_reachable {
+            let files: Vec<FileMetadata> = if smb_reachable {
                 match mk_smb_tree(&share_info, &path_on_share).await {
                     Ok(entries) => entries,
                     Err(cli_error) => {
