@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_share"
-version = "0.0.222"
+version = "0.0.223"
 edition = "2024"
 [profile.release]
 panic = 'abort'
@@ -9,8 +9,8 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { version = "0.0.245", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.214", registry = "kellnr" }
+mk_lib_database = { version = "0.0.246", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.215", registry = "kellnr" }
 
 libnfs = { version = "0.1.1" }
 nix = {version = "0.31.2" }
