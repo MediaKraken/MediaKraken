@@ -1,6 +1,6 @@
 use crate::AppState;
 use crate::mk_lib_database;
-use mk_lib_file;
+use mk_lib_share::mk_lib_file_smb::{classify_smbclient_browse_error, is_smb_ls_date};
 use askama::Template;
 use axum::extract::{Form, State};
 use axum::{
@@ -462,8 +462,10 @@ pub async fn admin_library_share_directories(
         } else {
             stderr_output.clone()
         };
-        let (status_code, error_message) =
+        let (status_u16, error_message) =
             classify_smbclient_browse_error(&stdout_output, &stderr_output);
+        let status_code =
+            StatusCode::from_u16(status_u16).unwrap_or(StatusCode::BAD_GATEWAY);
         if let Err(loki_error) =
             mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
                 "level": "error",
@@ -472,7 +474,7 @@ pub async fn admin_library_share_directories(
                 "function": "admin_library_share_directories",
                 "payload": {
                     "status_code": smb_output.status.code(),
-                    "classified_status": status_code.as_u16(),
+                    "classified_status": status_u16,
                     "classified_message": error_message,
                     "stdout": stdout_output,
                     "stderr": stderr_output,

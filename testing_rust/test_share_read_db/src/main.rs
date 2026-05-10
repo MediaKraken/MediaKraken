@@ -2,7 +2,7 @@ use chrono::prelude::*;
 use chrono::DateTime;
 use mk_lib_common;
 use mk_lib_database;
-use mk_lib_file;
+use mk_lib_share;
 use pavao::{SmbClient, SmbCredentials, SmbDirent, SmbDirentType, SmbOptions, SmbStat};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -32,7 +32,7 @@ async fn main() {
             .await
             .unwrap();
         println!("share: {:?}", share_info);
-        let smb_client = mk_lib_file::mk_lib_smb::mk_file_smb_client_connect(share_info);
+        let smb_client = mk_lib_share::mk_lib_smb::mk_file_smb_client_connect(share_info);
         match smb_client {
             Ok(smb_client) => {
                 // make sure the path still exists
@@ -50,7 +50,7 @@ async fn main() {
                         );
                         if last_modified > row_data.mm_media_dir_last_scanned {
                             // grab initial file/dir list
-                            let files_to_process = mk_lib_file::mk_lib_smb::mk_file_smb_client_tree(
+                            let files_to_process = mk_lib_share::mk_lib_smb::mk_file_smb_client_tree(
                                 &smb_client,
                                 format!("/{}", row_data.mm_media_dir_path).as_str(),
                             )
@@ -73,7 +73,7 @@ async fn main() {
 
 fn mediascan_file_process(
     smb_client: &SmbClient,
-    files_to_process: Vec<mk_lib_file::mk_lib_smb::File_Metadata>,
+    files_to_process: Vec<mk_lib_share::mk_lib_smb::FileMetadata>,
     dir_last_scanned: DateTime<Utc>,
 ) {
     let epoch: DateTime<Utc> = DateTime::<Utc>::from(UNIX_EPOCH);

@@ -18,7 +18,6 @@ codegen-units = 1
 [dependencies]
 mk_lib_common = { version = "0.0.213", registry = "kellnr" }
 mk_lib_database = { version = "0.0.245", registry = "kellnr" }
-mk_lib_file = { version = "0.0.222", registry = "kellnr" }
 mk_lib_logging = { version = "0.0.214", registry = "kellnr" }
 mk_lib_metadata = { version = "0.0.225", registry = "kellnr" }
 mk_lib_network = { version = "0.0.215", registry = "kellnr" }
