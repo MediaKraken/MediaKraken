@@ -1,5 +1,5 @@
 
-fn classify_smbclient_browse_error(
+pub fn classify_smbclient_browse_error(
     stdout_output: &str,
     stderr_output: &str,
 ) -> (u16, &'static str) {
@@ -49,7 +49,7 @@ fn classify_smbclient_browse_error(
 
 // Matches the 24-byte ASCII output of samba's `time_to_asc()` /
 // `asctime`-style format: "Day Mon DD HH:MM:SS YYYY".
-fn is_smb_ls_date(s: &str) -> bool {
+pub fn is_smb_ls_date(s: &str) -> bool {
     let bytes = s.as_bytes();
     if bytes.len() != 24 {
         return false;
