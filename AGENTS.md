@@ -42,6 +42,44 @@ otherwise, prefer the safest minimal change.
 
 ---
 
+### 1a) Application Groups
+
+#### Backend (`docker/core/mk*`)
+- Shared libraries: `mk_lib_common`, `mk_lib_database`, `mk_lib_network`, etc.
+- All the existing Axum / SQLx / Askama / Tailwind rules apply here.
+- Libraries should have no side effects when imported; keep them framework-agnostic.
+- Cross-lib dependencies: prefer explicit function calls over re-exporting entire modules.
+
+#### Android/iOS/Web Client (`src_app/mediakraken`)
+- Dioxus 0.7 GUI app. Signals and component lifecycle rules apply.
+- Communicates with the web backend via reqwest; treat all API calls as fallible.
+- Target platforms: desktop + mobile (Android/iOS).
+
+#### Label Printer (`src_app/brother_print_label`)
+- Direct USB communication to Brother QL-800 via `brother_ql` crate.
+- All "Brother QL-800 Label / Imaging Rules" (Section 6) apply here.
+- No network or async runtime — blocking USB I/O is expected.
+
+#### Pi GUI Apps (`src_app/pi_audio`, `pi_upc`, `pi_voice`)
+- FLTK-based desktop GUI targeting Raspberry Pi.
+- `pi_voice` additionally uses `cpal` for audio capture and `fltk-webview` for web content.
+- SQLite for local storage (not Postgres/SQLx).
+- FLTK runs on its own event loop; do not block the main thread with heavy I/O.
+
+#### Theater System (`src_app/theater_*`)
+- `theater_controller_pi` / `theater_full`: FLTK GUI on Pi, uses `mk_lib_network` from kellnr.
+- `theater_thin`: thin client, FLTK + serde_json, connects to `theater_full`.
+- `theater_roku` / `theater_tizen`: non-Rust TV clients (no Cargo.toml).
+- Network communication between components must be versioned and backward-compatible.
+
+#### Shared Libraries (`src/mk_lib_*`)
+- These are consumed by multiple apps. Changes must not break consumers.
+- Prefer adding new functions over changing existing signatures.
+- Each lib should document its own external dependencies (system libs like libasound2-dev).
+- These are the libraries that are hosted locally on kellnr.
+
+---
+
 ## 2) Axum / HTTP Handlers
 
 - Handlers should return `impl IntoResponse` (or project standard).
@@ -180,5 +218,5 @@ When making changes, the agent should (at minimum) describe how to verify:
 - MediaKraken: Rust/Axum app + Askama templates + Tailwindv4/Alpine UI
 - DB: Postgres via SQLx
 - CNPG: CloudNativePG for Postgres ops
-- Garage S3: object storage backend for backups/WAL
+- Garage S3: object storage backend for images/backups/WAL
 

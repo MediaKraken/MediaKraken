@@ -14,7 +14,7 @@ apt install cuda
 reboot
 
 
-apt install nvidia-driver firmware-misc-nonfree xauth
+apt install nvidia-driver firmware-misc-nonfree xauth nvtop
 reboot
 
 
@@ -54,7 +54,7 @@ mkdir ~/.codex ~/.codex/model-catalogs
 nano ~/.codex/config.toml
 
 personality = "friendly"
-profile     = "unsloth_api"
+profile     = "unsloth_api9b"
 
 [model_providers.unsloth_api]
 name                  = "Unsloth Studio"
@@ -63,10 +63,25 @@ env_key               = "UNSLOTH_STUDIO_AUTH_TOKEN"
 wire_api              = "responses"
 requires_openai_auth  = false
 
-[profiles.unsloth_api]
+[profiles.unsloth_api27b]
 model_provider = "unsloth_api"
 model          = "unsloth/Qwen3.6-27B-GGUF"
 model_catalog_json = "~/.codex/model-catalogs/qwen36.json"
+
+[profiles.unsloth_api9b]
+model_provider = "unsloth_api"
+model          = "unsloth/Qwen3.5-9B-GGUF"
+model_catalog_json = "~/.codex/model-catalogs/qwen359b.json"
+
+[projects."/home/spoot/my-project"]
+trust_level = "trusted"
+
+[features]
+collaboration_modes = true
+steer = true
+unified_exec = true
+apps = false
+
 
 
 nano ~/.codex/model-catalogs/qwen36.json
@@ -130,6 +145,35 @@ nano ~/.codex/model-catalogs/qwen36.json
 
 
 
+
+{
+  "models": [
+    {
+      "id": "unsloth/Qwen3.5-9B-GGUF:UD-Q4_K_XL",
+      "slug": "qwen35-9b-unsloth",
+      "name": "Qwen 3.5 9B (Unsloth GGUF)",
+      "provider": "oss",
+      "max_context_window": 32768,
+      "max_output_tokens": 8192,
+      "capabilities": {
+        "chat": true,
+        "completion": true,
+        "tools": true,
+        "function_calling": false,
+        "structured_output": true,
+        "inline_thinking": true
+      },
+      "pricing": {
+        "input_cost_per_1k": 0.0,
+        "output_cost_per_1k": 0.0
+      },
+      "stop_sequences": [
+        "<|im_end|>",
+        "<|im_start|>"
+      ]
+    }
+  ]
+}
 
 
 
