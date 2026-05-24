@@ -1,0 +1,83 @@
+# =============================================================================
+# llama.cpp with CUDA 12.8 + RPC, built for RTX 5070 Ti (Blackwell, sm_120).
+# Multi-stage: builder has the toolchain, runtime is slim.
+# =============================================================================
+
+ARG CUDA_VERSION=12.8.1
+ARG UBUNTU_VERSION=24.04
+
+# -----------------------------------------------------------------------------
+# Stage 1: build llama.cpp from source
+# -----------------------------------------------------------------------------
+FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu${UBUNTU_VERSION} AS builder
+
+# 89 = Ada (4090 etc.), 120 = Blackwell (5070/5080/5090). Include 89 so the
+# same image is portable to older hosts. Add more if needed.
+ARG CMAKE_CUDA_ARCHITECTURES="89;120"
+ARG LLAMA_CPP_REF=master
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        cmake \
+        git \
+        curl \
+        ca-certificates \
+        pkg-config \
+        libcurl4-openssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt
+RUN git clone https://github.com/ggml-org/llama.cpp.git \
+ && cd llama.cpp \
+ && git checkout "${LLAMA_CPP_REF}"
+
+WORKDIR /opt/llama.cpp
+
+# Build flags:
+#   GGML_CUDA=ON              .. CUDA backend
+#   GGML_RPC=ON               .. RPC client (so --rpc works in llama-server)
+#   GGML_CUDA_FORCE_CUBLAS=ON .. workaround for sporadic "invalid resource
+#                                handle" on Blackwell with custom ggml kernels
+#   GGML_CUDA_F16=ON          .. enable FP16 paths (faster on 5070 Ti)
+#   LLAMA_CURL=ON             .. enable -hf / --hf-repo direct downloads
+RUN cmake -B build \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DGGML_CUDA=ON \
+        -DGGML_RPC=ON \
+        -DGGML_CUDA_FORCE_CUBLAS=ON \
+        -DGGML_CUDA_F16=ON \
+        -DLLAMA_CURL=ON \
+        -DCMAKE_CUDA_ARCHITECTURES="${CMAKE_CUDA_ARCHITECTURES}" \
+        -DBUILD_SHARED_LIBS=ON \
+ && cmake --build build --config Release -j"$(nproc)" \
+        --target llama-server llama-cli llama-bench rpc-server
+
+# -----------------------------------------------------------------------------
+# Stage 2: slim runtime
+# -----------------------------------------------------------------------------
+FROM nvidia/cuda:${CUDA_VERSION}-runtime-ubuntu${UBUNTU_VERSION}
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libcurl4 \
+        ca-certificates \
+        curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy binaries and shared libs from the builder.
+COPY --from=builder /opt/llama.cpp/build/bin/             /usr/local/bin/
+COPY --from=builder /opt/llama.cpp/build/src/libllama.so  /usr/local/lib/
+COPY --from=builder /opt/llama.cpp/build/ggml/src/        /usr/local/lib/ggml/
+
+# Flatten the ggml libs into /usr/local/lib for the linker.
+RUN find /usr/local/lib/ggml -name 'libggml*.so' -exec cp {} /usr/local/lib/ \; \
+ && ldconfig
+
+EXPOSE 8080
+WORKDIR /workspace
+
+# Default to llama-server; docker-compose's `command:` provides full args.
+ENTRYPOINT ["/usr/local/bin/llama-server"]

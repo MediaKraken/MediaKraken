@@ -1,13 +1,7 @@
 # Prompt
+Design and build docker-compose environment for:
 Node 1 (skynetgpu1): Run inference on Qwen3-Coder-Next-GGUF using GPU (RTX 5070 Ti).
 Node 2 (skynetmem1): Provide extra memory (RAM/HDD) — e.g., offload KV-cache or serve as a memory pool (128GB RAM, 2TB HDD).
-Since Qwen3-Coder-Next-GGUF is a quantized model, and you want to leverage distributed memory, the best approach is:
-
-Use vLLM’s --distributed-executor-backend ray with Ray + multi-node setup, where:
-
-skynetgpu1 runs the GPU worker (vLLM inference),
-skynetmem1 runs a Ray worker node that can store offloaded tensors (KV-cache, weights, etc.) in its large RAM.
-
 
 # Operating system build
 Debian 13
@@ -40,6 +34,9 @@ mkdir -p /data/gguf && cd /data/gguf
 # Use hf-transfer or direct download (e.g., via HuggingFace CLI)
 pip3 install huggingface-hub --break-system-packages
 hf download unsloth/Qwen3-Coder-Next-GGUF --include "Qwen3-Coder-Next-UD-TQ1_0.gguf" --local-dir ./qwen3-coder-next-ud-tq1_0
+hf download unsloth/Qwen3.5-9B-GGUF --include "Qwen3.5-9B-Q5_K_M.gguf" --local-dir ./Qwen3.5-9B-Q5_K_M
+hf download unsloth/Qwen3.5-9B-GGUF --include "Qwen3.5-9B-Q5_K_M.gguf" --local-dir ./Qwen3.5-9B-Q5_K_M
+
 then move the gguf file to /data/gguf/.
 
 
@@ -51,7 +48,21 @@ scp spoot@skynetmem1://data/gguf/Qwen3-Coder-Next-UD-TQ1_0.gguf .
 
 
 
+********************************************************************************************
 
+# Both nodes:
+./scripts/build-llama-cpp.sh          # skynetmem1 (CPU only)
+./scripts/build-llama-cpp.sh --cuda   # skynetgpu1
+
+# Order matters — memory node first:
+# skynetmem1 →
+./scripts/start-mem-node.sh
+
+# skynetgpu1 →
+./scripts/start-gpu-node.sh
+
+# Verify:
+python scripts/healthcheck.py --bench
 
 
 

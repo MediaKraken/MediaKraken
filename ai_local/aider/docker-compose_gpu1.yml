@@ -1,0 +1,38 @@
+services:
+  llamacpp:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    container_name: llamacpp
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - /data/gguf:/data/gguf
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command:
+      - "-m"
+      - "/data/gguf/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf"
+      - "--host"
+      - "0.0.0.0"
+      - "--port"
+      - "8000"
+      - "-c"
+      - "65536"
+      - "-ngl"
+      - "999"
+      - "--n-cpu-moe"
+      - "20"
+      - "-fa"
+      - "on"
+      - "--cache-type-k"
+      - "q8_0"
+      - "--cache-type-v"
+      - "q8_0"
+      - "--jinja"
+      - "--alias"
+      - "qwen3-coder"

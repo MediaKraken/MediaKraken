@@ -1,0 +1,97 @@
+# =============================================================================
+# skynetmem1 — memory pool node
+#   • rpc-server : exposes 100 GB of RAM as a ggml RPC backend on :50052
+#   • nfs-server : exports /srv/models so skynetgpu1 can read GGUF files
+#                  directly from the 2 TB HDD without a local copy
+# =============================================================================
+
+name: skynet-mem
+
+services:
+  rpc-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.llama-rpc
+    image: skynet/llama-rpc:latest
+    container_name: skynetmem1-rpc
+    hostname: skynetmem1
+
+    # Mount the GGUF dir (read-only — RPC server doesn't normally need the
+    # raw file, but llama-cli/bench inside the same image may want it) and
+    # a writable cache dir for RPC tensor caching.
+    volumes:
+      - ${MODELS_DIR:-/srv/models}:/models:ro
+      - ${RPC_CACHE_DIR:-/srv/rpc-cache}:/root/.cache/llama.cpp
+
+    ports:
+      - "50052:50052"
+
+    # ─── rpc-server arguments ────────────────────────────────────────────────
+    command:
+      - --host
+      - 0.0.0.0
+      - --port
+      - "50052"
+
+      # Maximum memory rpc-server is willing to use as a backend pool.
+      # Set well below total RAM (128 GB here) to leave room for OS + NFS.
+      - --mem
+      - ${RPC_MEM_MB:-100000}
+
+      # Use the disk cache. Lets the server hold large tensors locally so the
+      # main host doesn't have to re-stream them on every restart.
+      - --cache
+
+      # CPU threads — set to physical core count of skynetmem1.
+      - --threads
+      - ${RPC_THREADS:-16}
+
+    # Reserve memory so this container is the priority RAM consumer.
+    deploy:
+      resources:
+        limits:
+          memory: 110G
+        reservations:
+          memory: 100G
+
+    # Pin pages so the kernel doesn't swap a model tensor to the HDD mid-token.
+    ulimits:
+      memlock: -1
+
+    healthcheck:
+      # rpc-server doesn't expose HTTP; check the port is listening instead.
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/50052 && echo healthy"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # NFS export for /srv/models so skynetgpu1 can read GGUF files over the LAN
+  # without copying ~46 GB. Read-only by design.
+  # ---------------------------------------------------------------------------
+  nfs-server:
+    image: itsthenetwork/nfs-server-alpine:12
+    container_name: skynetmem1-nfs
+    hostname: skynetmem1-nfs
+
+    # NFS kernel module needs privileged for nfsd; this is normal for
+    # containerized NFS servers.
+    privileged: true
+
+    environment:
+      SHARED_DIRECTORY: /models
+      # Restrict to the GPU node only. Replace with your LAN CIDR for broader
+      # access (e.g. "192.168.1.0/24(ro,no_root_squash)").
+      PERMITTED: "${SKYNETGPU1_IP:-192.168.1.10}"
+      READ_ONLY: "true"
+
+    volumes:
+      - ${MODELS_DIR:-/srv/models}:/models:ro
+
+    ports:
+      - "2049:2049"
+
+    restart: unless-stopped

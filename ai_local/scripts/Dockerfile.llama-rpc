@@ -1,0 +1,74 @@
+# =============================================================================
+# llama.cpp rpc-server for the memory-pool node (CPU only, OpenBLAS-accelerated).
+# =============================================================================
+
+ARG UBUNTU_VERSION=24.04
+
+# -----------------------------------------------------------------------------
+# Stage 1: build
+# -----------------------------------------------------------------------------
+FROM ubuntu:${UBUNTU_VERSION} AS builder
+
+ARG LLAMA_CPP_REF=master
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        cmake \
+        git \
+        curl \
+        ca-certificates \
+        pkg-config \
+        libcurl4-openssl-dev \
+        libopenblas-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt
+RUN git clone https://github.com/ggml-org/llama.cpp.git \
+ && cd llama.cpp \
+ && git checkout "${LLAMA_CPP_REF}"
+
+WORKDIR /opt/llama.cpp
+
+# CPU build with:
+#   GGML_RPC=ON           .. build rpc-server
+#   GGML_BLAS=ON          .. use OpenBLAS for matmul
+#   GGML_NATIVE=ON        .. detect and use AVX2/AVX-512 of the build host CPU
+# llama-cli/llama-server are also included for local debugging.
+RUN cmake -B build \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DGGML_RPC=ON \
+        -DGGML_BLAS=ON \
+        -DGGML_BLAS_VENDOR=OpenBLAS \
+        -DGGML_NATIVE=ON \
+        -DLLAMA_CURL=ON \
+        -DBUILD_SHARED_LIBS=ON \
+ && cmake --build build --config Release -j"$(nproc)" \
+        --target rpc-server llama-cli llama-server llama-bench
+
+# -----------------------------------------------------------------------------
+# Stage 2: runtime
+# -----------------------------------------------------------------------------
+FROM ubuntu:${UBUNTU_VERSION}
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libcurl4 \
+        libopenblas0 \
+        ca-certificates \
+        curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /opt/llama.cpp/build/bin/             /usr/local/bin/
+COPY --from=builder /opt/llama.cpp/build/src/libllama.so  /usr/local/lib/
+COPY --from=builder /opt/llama.cpp/build/ggml/src/        /usr/local/lib/ggml/
+
+RUN find /usr/local/lib/ggml -name 'libggml*.so' -exec cp {} /usr/local/lib/ \; \
+ && ldconfig
+
+EXPOSE 50052
+WORKDIR /workspace
+
+ENTRYPOINT ["/usr/local/bin/rpc-server"]
