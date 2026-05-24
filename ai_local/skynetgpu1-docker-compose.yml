@@ -1,0 +1,24 @@
+# docker-compose.yml on skynetgpu1
+version: "3.8"
+services:
+  vllm:
+    image: vllm/vllm:latest
+    container_name: vllm-gpu
+    network_mode: host
+    volumes:
+      - /data/gguf:/data/gguf:ro
+    devices:
+      - /dev/nvidia0:/dev/nvidia0
+    environment:
+      - RANK=0
+      - WORLD_SIZE=2
+      - NODE_INDEX=0
+      - CUDA_VISIBLE_DEVICES=0
+    command: |
+      vllm serve Qwen/Qwen3-Coder-Next-UD-TQ1_0 --model /data/gguf/Qwen3-Coder-Next-UD-TQ1_0.gguf
+        --host 0.0.0.0 --port 8000
+        --tensor-parallel-size 1
+        --distributed-executor-backend ray
+        --ray-worker-subclasses 1
+        --max-num-requests 1024
+        --max-model-len 8192

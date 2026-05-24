@@ -14,7 +14,7 @@ apt install cuda
 reboot
 
 
-apt install nvidia-driver firmware-misc-nonfree xauth nvtop
+apt install nvidia-driver firmware-misc-nonfree xauth nvtop python3-pip
 reboot
 
 
@@ -42,13 +42,13 @@ curl -fsSL https://unsloth.ai/install.sh | sh
 
 http://localai.mediakraken.media:8888
 
-
+unsloth studio update
 
 *********************************************
 
 apt install nodejs npm git gh -y
 npm install -g @openai/codex
-
+###codex upgrade - rerun the command above
 
 mkdir ~/.codex ~/.codex/model-catalogs
 nano ~/.codex/config.toml
@@ -192,12 +192,54 @@ codexmonitor
 wget https://github.com/Dimillian/CodexMonitor/releases/download/v0.7.67/Codex.Monitor_0.7.67_amd64.AppImage
 
 
-
-
 vscode plugin
 Continue - open-source AI code agent
 
 
+**********************************
+docker/compose
+
+nano docker-compose.yml
+services:
+  openwebui:
+    image: ghcr.io/open-webui/open-webui:cuda
+    ports:
+      - "3000:8080"
+    volumes:
+      - open-webui:/app/backend/data
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+volumes:
+  open-webui:
+
+# 1. Configure the production repository
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+  && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+    tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+
+# 2. Update and install
+apt-get update
+apt-get install -y nvidia-container-toolkit
 
 
-apt install libfuse2
+# 1. Register the NVIDIA runtime with Docker's configuration
+nvidia-ctk runtime configure --runtime=docker
+
+# 2. Restart the Docker engine to apply the changes
+systemctl restart docker
+
+docker run --rm --gpus all nvidia/cuda:12.0.0-base-ubuntu22.04 nvidia-smi
+
+https://192.168.1.157:3000
+
+***************************
+open webui - lol no, wants 3.11
+apt install python3-pip
+pip3 install open-webui

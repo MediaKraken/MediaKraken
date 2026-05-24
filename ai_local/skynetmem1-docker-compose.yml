@@ -1,0 +1,26 @@
+# docker-compose.yml on skynetmem1
+version: "3.8"
+services:
+  ray-worker:
+    image: ray:latest
+    container_name: ray-worker
+    network_mode: host
+    volumes:
+      - /data:/data:rw
+    environment:
+      - RANK=1
+      - WORLD_SIZE=2
+      - NODE_INDEX=1
+      - RAY_ADDRESS=skynetgpu1:10000
+    command: |
+      ray start --address=skynetgpu1:10000
+        --num-gpus=0
+        --num-cpus=16
+        --resources=mem=128G
+        --redis-port=6379
+        --num-redis=1
+        --port=6379
+        --include-scheduler=True
+        --include-worker=True
+        --include-dashboard=True
+        --dashboard-port=8265
