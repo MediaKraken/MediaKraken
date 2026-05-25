@@ -16,32 +16,42 @@ wget https://huggingface.co/Qwen/Qwen3-Embedding-0.6B-GGUF/resolve/main/Qwen3-Em
 On skynetgpu1: docker compose up -d, then curl http://skynetgpu1:8000/v1/models — should show qwen3-coder.
 On skynetmem1: docker compose up -d, then curl http://skynetmem1:6333/collections and curl http://skynetmem1:8001/v1/models
 
+
+# let's setup codex on mkcode so I can look at stuff easier maybe
+npm install -g @openai/codex
+~/.codex/config.toml
+see codex_config.toml
+
+export LLAMACPP_API_KEY=dummy
+
+curl http://skynetgpu1:8000/v1/models
+
+
+
+
+
+
+after codex   /mcp
+
+
+
+## yeah, aider not fun
 Aider config on your dev box
 nano ~/.aider.conf.yml
-
-
 
 Save as index_repo.py on whichever machine has the source code:
 pip3 install qdrant-client httpx --break-system-packages
 pip3 install aider-install --break-system-packages && aider-install
 python3 ai_local/aider/index_repo.py ~/MediaKraken
     let the above command cook.....it'll be awhile
-
 Aider run from inside your repo:
 cd ~/MediaKraken
 aider
-
-
-
-
-
-
-
 On dev box: run index_repo.py against your repo.
 On dev box: cd repo && aider. Ask it something repo-wide like "summarize how authentication flows through this codebase" — if it answers coherently using files it found via the repo map, you're set.
 
 
-
+# testing
 To query Qdrant from the shell while you wait for an integration:
 curl http://skynetmem1:8001/v1/embeddings \
   -H "Content-Type: application/json" \
