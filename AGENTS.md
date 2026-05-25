@@ -5,6 +5,13 @@ If these rules conflict with a user request, ASK for confirmation only if the ch
 otherwise, prefer the safest minimal change.
 
 ---
+- This repo is under git. Do not create backup files when editing.
+  Specifically: never write `.bak`, `.orig`, `_old`, `_backup`, `_fixed`,
+  `_v2`, or similarly-suffixed copies of files you're modifying.
+- Edit files in place. If a change is risky, propose it first or create
+  a branch — don't leave duplicate files in the working tree.
+- If you want a "before" reference, use `git diff` or `git stash`,
+  not a copy of the file.
 
 ## 0) Prime Directives
 
