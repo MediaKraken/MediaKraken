@@ -22,7 +22,7 @@ services:
       - "--port"
       - "8000"
       - "-c"
-      - "65536"
+      - "98304"
       - "-ngl"
       - "999"
       - "--n-cpu-moe"
@@ -37,7 +37,7 @@ services:
       - "--alias"
       - "qwen3-coder"
       - "--parallel"
-      - "4"
+      - "1"
       - "-cb"
 
   embedder:

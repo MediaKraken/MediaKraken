@@ -15,5 +15,5 @@ pub fn system_time_to_date_time(t: SystemTime) -> DateTime<Utc> {
             }
         }
     };
-    Utc.timestamp(sec, nsec)
+    Utc.timestamp_opt(sec, nsec).unwrap()
 }

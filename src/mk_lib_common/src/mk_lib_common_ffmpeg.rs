@@ -34,8 +34,7 @@ pub async fn mk_common_ffmpeg_get_info(
         .await?;
 
     if !output.status.success() {
-        return Err(Error::new(
-            ErrorKind::Other,
+        return Err(Error::other(
             format!(
                 "ffprobe failed for '{media_file}' with status {}",
                 output.status

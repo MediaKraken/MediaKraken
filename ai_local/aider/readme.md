@@ -27,11 +27,34 @@ export LLAMACPP_API_KEY=dummy
 curl http://skynetgpu1:8000/v1/models
 
 
-
-
-
+# on mem1
+docker compose -f docker-compose_mem1.yml up -d --build code-search-mcp
+docker compose logs -f code-search-mcp
+## smoke test
+curl -i -N \
+  -H "Accept: application/json, text/event-stream" \
+  -H "Content-Type: application/json" \
+  -X POST http://skynetmem1:9876/mcp \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"curl","version":"0"}}}'
 
 after codex   /mcp
+
+# get remote codex monitor working
+nano /etc/ssh/sshd_config
+
+X11Forwarding yes
+X11UseLocalhost yes
+
+systemctl restart ssh
+
+in /home/metaman
+wget https://github.com/Dimillian/CodexMonitor/releases/download/v0.7.67/Codex.Monitor_0.7.67_amd64.AppImage
+
+
+
+
+
+
 
 
 
