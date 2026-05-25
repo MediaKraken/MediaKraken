@@ -8,11 +8,11 @@ from qdrant_client.models import Distance, VectorParams, PointStruct
 import time
 
 QDRANT_URL = "http://skynetmem1:6333"
-EMBED_URL = "http://skynetmem1:8001/v1/embeddings"
-EMBED_MODEL = "qwen3-embedding"
+EMBED_URL = "http://skynetgpu1:8001/v1/embeddings"
+EMBED_MODEL = "BAAI/bge-m3"
 COLLECTION = "code"
-VECTOR_SIZE = 1024   # Qwen3-Embedding-0.6B dims
-CHUNK_LINES = 60     # ~60-line code chunks
+VECTOR_SIZE = 1024
+CHUNK_LINES = 60
 CHUNK_OVERLAP = 10
 
 CODE_EXTS = {".py",".js",".ts",".tsx",".jsx",".go",".rs",".java",".c",".cc",

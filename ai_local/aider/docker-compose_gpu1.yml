@@ -26,7 +26,7 @@ services:
       - "-ngl"
       - "999"
       - "--n-cpu-moe"
-      - "20"
+      - "26"
       - "-fa"
       - "on"
       - "--cache-type-k"
@@ -36,3 +36,27 @@ services:
       - "--jinja"
       - "--alias"
       - "qwen3-coder"
+      - "--parallel"
+      - "4"
+      - "-cb"
+
+  embedder:
+    image: ghcr.io/huggingface/text-embeddings-inference:cuda-latest
+    container_name: embedder
+    restart: unless-stopped
+    ports:
+      - "8001:80"
+    volumes:
+      - /data/hf-cache:/data
+    environment:
+      - MODEL_ID=BAAI/bge-m3
+      - MAX_CONCURRENT_REQUESTS=8
+      - MAX_CLIENT_BATCH_SIZE=128
+      - MAX_BATCH_TOKENS=32768
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

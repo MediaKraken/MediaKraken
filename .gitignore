@@ -33,3 +33,4 @@ docker/core/mksharescanner/alpine-minirootfs-x86_64.tar.gz
 docker/core/mktmdbnetfetchbulk/alpine-minirootfs-x86_64.tar.gz
 docker/core/mktranscode/alpine-minirootfs-x86_64.tar.gz
 docker/core/mkwebaxum/alpine-minirootfs-x86_64.tar.gz
+.aider*

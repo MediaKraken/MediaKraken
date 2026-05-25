@@ -1,3 +1,5 @@
+apt install jq -y
+
 mkdir -p /data/gguf
 cd /data/gguf
 wget https://huggingface.co/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF/resolve/main/Qwen3-Coder-30B-A3B-Instruct-Q4_K_M.gguf
@@ -43,7 +45,7 @@ On dev box: cd repo && aider. Ask it something repo-wide like "summarize how aut
 To query Qdrant from the shell while you wait for an integration:
 curl http://skynetmem1:8001/v1/embeddings \
   -H "Content-Type: application/json" \
-  -d '{"model":"qwen3-embedding","input":"how does auth middleware work"}' \
+  -d '{"model":"BAAI/bge-m3","input":"how does auth middleware work"}' \
   | jq '.data[0].embedding' \
   | curl http://skynetmem1:6333/collections/code/points/search \
     -X POST -H "Content-Type: application/json" \
