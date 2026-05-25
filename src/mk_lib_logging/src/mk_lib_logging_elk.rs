@@ -39,36 +39,56 @@ fn retrying_client() -> &'static ClientWithMiddleware {
 
 fn insecure_reqwest_client() -> Result<&'static reqwest::Client, Box<dyn std::error::Error>> {
     static CLIENT: OnceLock<reqwest::Client> = OnceLock::new();
+
+    // Check if client is already initialized
     if let Some(client) = CLIENT.get() {
         return Ok(client);
     }
 
+    // Initialize the client
     let built = reqwest::Client::builder()
         .danger_accept_invalid_certs(true)
         .build()?;
-    let _ = CLIENT.set(built);
 
-    CLIENT
-        .get()
-        .ok_or_else(|| "failed to initialize insecure reqwest client".into())
+    // Try to set the client - if this fails, we'll return an error
+    CLIENT.set(built).map_err(|_| {
+        "Failed to initialize insecure reqwest client: client already initialized".to_string()
+    })?;
+
+    // Return the client
+    CLIENT.get().ok_or(
+        "failed to retrieve insecure reqwest client after initialization"
+            .to_string()
+            .into(),
+    )
 }
 
 fn insecure_elasticsearch_client() -> Result<&'static Elasticsearch, Box<dyn std::error::Error>> {
     static CLIENT: OnceLock<Elasticsearch> = OnceLock::new();
+
+    // Check if client is already initialized
     if let Some(client) = CLIENT.get() {
         return Ok(client);
     }
 
+    // Initialize the client
     let url = Url::parse(ELK_HTTPS_URL)?;
     let conn_pool = SingleNodeConnectionPool::new(url);
     let transport = TransportBuilder::new(conn_pool)
         .cert_validation(CertificateValidation::None)
         .build()?;
-    let _ = CLIENT.set(Elasticsearch::new(transport));
 
-    CLIENT
-        .get()
-        .ok_or_else(|| "failed to initialize insecure elasticsearch client".into())
+    // Try to set the client - if this fails, we'll return an error
+    CLIENT.set(Elasticsearch::new(transport)).map_err(|_| "Failed to initialize insecure elasticsearch client: client already initialized".to_string())?;
+        "Failed to initialize insecure elasticsearch client: client already initialized".to_string()
+    })?;
+
+    // Return the client
+    CLIENT.get().ok_or(
+        "failed to retrieve insecure elasticsearch client after initialization"
+            .to_string()
+            .into(),
+    )
 }
 
 pub async fn mk_logging_post_elk_retry(

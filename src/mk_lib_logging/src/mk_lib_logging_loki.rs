@@ -65,7 +65,6 @@ fn retrying_client() -> &'static ClientWithMiddleware {
 // FIX 3: `query_client()` is no longer used for reads; reads now use
 // `retrying_client()` for the same retry resilience as pushes.  Keep this
 // function in case callers outside this module still reference it.
-fn query_client() -> &'static Client {
     static CLIENT: OnceLock<Client> = OnceLock::new();
     CLIENT.get_or_init(Client::new)
 }
@@ -236,8 +235,12 @@ pub async fn mk_logging_loki_read(
     for stream in data.result {
         let stream_str = stream_to_logql(&stream.stream);
         for [ts, line] in stream.values {
+            // Improved timestamp parsing with better error handling
+            let timestamp_ns: i128 = ts
+                .parse()
+                .map_err(|e| format!("Failed to parse timestamp '{}': {}", ts, e))?;
             logs.push(LokiLog {
-                timestamp_ns: ts.parse()?,
+                timestamp_ns,
                 labels: stream_str.clone(),
                 line,
             });
