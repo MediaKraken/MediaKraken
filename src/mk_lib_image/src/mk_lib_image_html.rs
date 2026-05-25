@@ -11,7 +11,7 @@ pub async fn mk_lib_image_render_html(
     output_path: String,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     tokio::task::spawn_blocking(move || -> Result<(), Box<dyn Error + Send + Sync>> {
-        let mut image_app = ImgApp::new()?;
+        let image_app = ImgApp::new()?;
         image_app.run(WkhtmlInput::Html(&html_content), &output_path)?;
         Ok(())
     })
