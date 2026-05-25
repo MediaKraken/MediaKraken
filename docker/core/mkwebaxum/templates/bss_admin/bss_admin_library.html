@@ -93,7 +93,7 @@
                   <button
                     type="button"
                     data-share-guid="{{ row_data.mm_network_share_guid }}"
-                    onclick="window.mkOpenShareBrowser(this); return false;"
+                    @click.prevent.stop="openDirectoryPicker('{{ row_data.mm_network_share_guid }}')"
                     aria-label="Browse share directory"
                     class="bg-zinc-700 text-white px-3 py-1 rounded hover:bg-zinc-800 dark:bg-zinc-700 dark:hover:bg-zinc-600 whitespace-nowrap shrink-0 font-medium">
                     Browse
