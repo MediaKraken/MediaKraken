@@ -107,13 +107,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     };
 
                     let date_check: DateTime<Utc> = now - time_delta;
-
-                    if let Some(last_run) = row_data.mm_cron_last_run
-                        && last_run >= date_check
-                    {
+                    // Check if job needs to run
+                    if let Some(last_run) = row_data.mm_cron_last_run && last_run < date_check {
+                        // Job is due to run
+                    } else {
+                        // Job has run recently enough, skip it
                         continue;
                     }
-
                     let Some(route_key) = row_data.mm_cron_json["route_key"].as_str() else {
                         log_event(json!({
                             "Module": std::module_path!(),
