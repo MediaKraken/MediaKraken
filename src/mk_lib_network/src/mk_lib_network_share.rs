@@ -2,9 +2,9 @@
 
 //use ipnet::Ipv4Subnets;
 use mk_lib_file::mk_lib_file;
-use quickxml_to_serde::{xml_string_to_json, Config};
+use quickxml_to_serde::{Config, xml_string_to_json};
 use std::fs::File;
-use std::io::{prelude::*, BufReader};
+use std::io::{BufReader, prelude::*};
 use std::process::{Command, Stdio};
 
 // nmap -sU -sS -p U:137,T:139 --script smb-enum-shares 192.168.1.122 -oX scan.xml 1>/dev/null 2>/dev/null

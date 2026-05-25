@@ -22,7 +22,7 @@ let lim = RateLimiter::direct(Quota::per_second(nonzero!(10u32)));
     block_on(lim.until_ready());
  */
 
- // Requests, Time in Seconds, Per Day
+// Requests, Time in Seconds, Per Day
 pub static API_LIMIT: phf::Map<&'static str, (u64, u64, u64)> = phf_map! {
     "anidb" => (1, 4, u64::MAX),  // A Client MUST NOT send more than one packet
     // every four seconds over an extended amount of time. 4-16-2016)
@@ -53,8 +53,8 @@ pub static API_LIMIT: phf::Map<&'static str, (u64, u64, u64)> = phf_map! {
     "tv_intros" => (1, 1, u64::MAX),  // since I'm scraping
     //  "tvmaze" => (20, 10, u64::MAX),  // 20 every 10 6-11-2017
     "twitch" => (1, 1, u64::MAX),  // 12-10-2017
-    "upcitemdb" => (6, 60, 100), // 05-17-2024 - Ex. for plan FREE, your application is limited up to 6 requests per minute. 
-    // Requests sent faster than that will be declined with HTTP status 429. In order to regain the access, 
+    "upcitemdb" => (6, 60, 100), // 05-17-2024 - Ex. for plan FREE, your application is limited up to 6 requests per minute.
+    // Requests sent faster than that will be declined with HTTP status 429. In order to regain the access,
     // your application has to wait for the next window period. Think of it the same as the daily limits, but with a much smaller window.
     "Z" => (u64::MAX, u64::MAX, u64::MAX),  // catch all for limiter api program
 };

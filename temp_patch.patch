@@ -1,0 +1,96 @@
+--- a/src/mk_lib_network/src/mk_lib_network.rs
++++ b/src/mk_lib_network/src/mk_lib_network.rs
+@@ -1,5 +1,5 @@
+ use bytes::Bytes;
+-use futures_util::StreamExt;
++use futures_util::StreamExt;
+ use reqwest::Client;
+ use reqwest::header::CONTENT_TYPE;
+ use reqwest::header::USER_AGENT;
+@@ -17,18 +17,25 @@ static SHARED_HTTP_CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
+ pub async fn is_url_available(url: &str) -> bool {
+     // Try HEAD first (no body download)
+     match SHARED_HTTP_CLIENT.head(url).send().await {
+-        Ok(resp) => resp.status().is_success(),
+-        Err(_) => {
+-            // Fallback to GET (still async, body not read)
+-            SHARED_HTTP_CLIENT
+-                .get(url)
+-                .send()
+-                .await
+-                .map(|resp| resp.status().is_success())
+-                .unwrap_or(false)
++        Ok(resp) => {
++            return resp.status().is_success();
++        }
++        Err(_) => {
++            // If HEAD fails, fallback to GET
++            match SHARED_HTTP_CLIENT.get(url).send().await {
++                Ok(resp) => {
++                    return resp.status().is_success();
++                }
++                Err(_) => {
++                    return false;
++                }
++            }
+         }
+     }
+ }
+@@ -90,7 +90,7 @@ pub async fn mk_network_download_file_to_bytes(
+ pub async fn mk_network_download_file_to_vec(url: String) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+     let response = SHARED_HTTP_CLIENT.get(url).send().await?;
+     let bytes = response.bytes().await?.to_vec();
+-    Ok(bytes)
++    Ok(bytes)
+ }
+ 
+ pub async fn mk_download_file_from_url(
+@@ -101,7 +101,7 @@ pub async fn mk_download_file_from_url(
+     file.write_all(&response.bytes().await?).await?;
+     file.flush().await?;
+     Ok(())
+-}
++}
+ 
+ pub async fn mk_download_file_from_url_stream(
+     url: String,
+@@ -130,7 +130,7 @@ pub async fn mk_download_file_from_url_stream(
+     file.flush().await?;
+     println!("Download complete: {}", file_name);
+     Ok(())
+-}
++}
+ 
+ pub async fn mk_download_file_from_url_tokio(
+     url: String,
+@@ -170,12 +170,14 @@ pub async fn mk_download_file_from_url_tokio(
+     // Ensure all buffers are pushed to disk
+     writer.flush().await?;
+ 
+-    Ok(())
++    Ok(())
+ }
+ 
+ // wait_seconds - 120 typically
+ pub async fn mk_network_service_available(
+     host_dns: &str,
+     host_port: &str,
+     wait_seconds: &str,
+ ) -> Result<(), std::io::Error> {
+     let mut command_string = "/mediakraken/wait-for-it-bash.sh";
+     if std::path::Path::new("/mediakraken/wait-for-it-ash-busybox130.sh").exists() {
+         command_string = "/mediakraken/wait-for-it-ash-busybox130.sh";
+     } else if std::path::Path::new("/mediakraken/wait-for-it-ash.sh").exists() {
+         command_string = "/mediakraken/wait-for-it-ash.sh";
+     }
+-    tokio::process::Command::new(command_string)
++    let _child = tokio::process::Command::new(command_string)
+         .arg("-h")
+         .arg(host_dns)
+         .arg("-p")
+         .arg(host_port)
+         .arg("-t")
+         .arg(wait_seconds)
+         .spawn()?;
+     Ok(())
+ }

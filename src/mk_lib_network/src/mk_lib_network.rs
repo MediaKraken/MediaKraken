@@ -14,21 +14,26 @@ use tokio::time::Duration;
 
 static SHARED_HTTP_CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
 
-pub async fn is_url_available(url: &str) -> bool {
-    // Try HEAD first (no body download)
-    if let Ok(resp) = SHARED_HTTP_CLIENT.head(url).send().await {
-        return resp.status().is_success();
-    }
-    // Fallback to GET (still async, body not read)
-    SHARED_HTTP_CLIENT
-        .get(url)
-        .send()
-        .await
-        .map(|resp| resp.status().is_success())
-        .unwrap_or(false)
-}
-
 pub async fn custom_headers(map: &HashMap<String, String>) -> HeaderMap {
+    pub async fn is_url_available(url: &str) -> bool {
+        // Try HEAD first (no body download)
+        match SHARED_HTTP_CLIENT.head(url).send().await {
+            Ok(resp) => {
+                return resp.status().is_success();
+            }
+            Err(_) => {
+                // If HEAD fails, fallback to GET
+                match SHARED_HTTP_CLIENT.get(url).send().await {
+                    Ok(resp) => {
+                        return resp.status().is_success();
+                    }
+                    Err(_) => {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
     let mut headers = HeaderMap::new();
     for (key, value) in map.iter() {
         if let (Ok(header_name), Ok(header_value)) = (
@@ -95,7 +100,9 @@ pub async fn mk_network_download_file_to_bytes(
     Ok(body_bytes)
 }
 
-pub async fn mk_network_download_file_to_vec(url: String) -> Result<Vec<u8>, reqwest::Error> {
+pub async fn mk_network_download_file_to_vec(
+    url: String,
+) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
     let response = SHARED_HTTP_CLIENT.get(url).send().await?;
     let bytes = response.bytes().await?.to_vec();
     Ok(bytes)

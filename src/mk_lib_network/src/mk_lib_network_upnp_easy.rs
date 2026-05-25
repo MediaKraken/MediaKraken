@@ -1,7 +1,7 @@
 // https://github.com/FloGa/upnp-daemon/tree/develop/crates/easy-upnp
 
 use cidr_utils::cidr::Ipv4Cidr;
-use easy_upnp::{add_ports, delete_ports, PortMappingProtocol, UpnpConfig};
+use easy_upnp::{PortMappingProtocol, UpnpConfig, add_ports, delete_ports};
 use std::error::Error;
 
 // nmap -sU -p 1900 --script=upnp-info 192.168.1.1

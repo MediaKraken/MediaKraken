@@ -1,7 +1,8 @@
 // https://github.com/gabrielmagno/crab-dlna
 
 use crab_dlna::{
-    STREAMING_PORT_DEFAULT, get_local_ip, infer_subtitle_from_video, play, Error, MediaStreamingServer, Render, RenderSpec,
+    Error, MediaStreamingServer, Render, RenderSpec, STREAMING_PORT_DEFAULT, get_local_ip,
+    infer_subtitle_from_video, play,
 };
 use std::path::PathBuf;
 
@@ -26,7 +27,11 @@ pub async fn mk_lib_network_dlna_play(filename_to_play: String) -> Result<(), Er
     let host_ip = get_local_ip().await?;
     let video_path = PathBuf::from(filename_to_play);
     let inferred_subtitle_path = infer_subtitle_from_video(&video_path);
-    let media_streaming_server =
-        MediaStreamingServer::new(&video_path, &inferred_subtitle_path, &host_ip, &STREAMING_PORT_DEFAULT)?;
+    let media_streaming_server = MediaStreamingServer::new(
+        &video_path,
+        &inferred_subtitle_path,
+        &host_ip,
+        &STREAMING_PORT_DEFAULT,
+    )?;
     play(render, media_streaming_server).await
 }

@@ -19,13 +19,19 @@ pub async fn mk_lib_network_email_send(
     user_password: String,
 ) -> Result<(), Box<dyn Error + Send + Sync>> {
     let email = Message::builder()
-        .from(email_from.parse().map_err(|e| format!("invalid From {email_from:?}: {e}"))?)
+        .from(
+            email_from
+                .parse()
+                .map_err(|e| format!("invalid From {email_from:?}: {e}"))?,
+        )
         .reply_to(
             email_reply_to
                 .parse()
                 .map_err(|e| format!("invalid Reply-To {email_reply_to:?}: {e}"))?,
         )
-        .to(email_to.parse().map_err(|e| format!("invalid To {email_to:?}: {e}"))?)
+        .to(email_to
+            .parse()
+            .map_err(|e| format!("invalid To {email_to:?}: {e}"))?)
         .subject(email_subject)
         .body(email_body)?;
 
