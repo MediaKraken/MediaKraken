@@ -55,10 +55,37 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                 if let Some(payload) = msg.content {
                     match serde_json::from_slice::<Value>(&payload) {
-                        Ok(_json_message) => {
-                            // TODO: implement playback dispatch (cast/hdhomerun/hls/web/roku).
-                            // Previously a Python translation lived here; it has been removed
-                            // while the port is pending.
+                        Ok(json_message) => {
+                            // Process playback dispatch based on message type
+                            if let Some(playback_type) = json_message.get("playback_type") {
+                                match playback_type.as_str() {
+                                    Some("cast") => {
+                                        eprintln!("mkrabbitconsume: dispatching to cast playback");
+                                        // TODO: implement cast playback handling
+                                    }
+                                    Some("hdhomerun") => {
+                                        eprintln!("mkrabbitconsume: dispatching to hdhomerun playback");
+                                        // TODO: implement hdhomerun playback handling
+                                    }
+                                    Some("hls") => {
+                                        eprintln!("mkrabbitconsume: dispatching to hls playback");
+                                        // TODO: implement hls playback handling
+                                    }
+                                    Some("web") => {
+                                        eprintln!("mkrabbitconsume: dispatching to web playback");
+                                        // TODO: implement web playback handling
+                                    }
+                                    Some("roku") => {
+                                        eprintln!("mkrabbitconsume: dispatching to roku playback");
+                                        // TODO: implement roku playback handling
+                                    }
+                                    _ => {
+                                        eprintln!("mkrabbitconsume: unknown playback type: {}", playback_type);
+                                    }
+                                }
+                            } else {
+                                eprintln!("mkrabbitconsume: no playback type in message");
+                            }
                         }
                         Err(error) => {
                             eprintln!("mkrabbitconsume: malformed payload ({error})");
