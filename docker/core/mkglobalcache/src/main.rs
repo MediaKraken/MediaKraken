@@ -234,8 +234,28 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 };
 
                 if msg.content.is_some() {
-                    if let Err(error) = refresh_catalog(&sqlx_pool_rw, &sqlx_pool_ro).await {
-                        eprintln!("mkglobalcache: catalog refresh failed ({error})");
+                    let mut retry_count = 0;
+                    const MAX_RETRIES: u32 = 3;
+                    let mut success = false;
+
+                    while !success && retry_count < MAX_RETRIES {
+                        match refresh_catalog(&sqlx_pool_rw, &sqlx_pool_ro).await {
+                            Ok(_) => {
+                                success = true;
+                                eprintln!("mkglobalcache: catalog refresh succeeded");
+                            }
+                            Err(error) => {
+                                retry_count += 1;
+                                eprintln!("mkglobalcache: catalog refresh failed ({error}), retry {retry_count}/{MAX_RETRIES}");
+                                if retry_count < MAX_RETRIES {
+                                    tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+                                }
+                            }
+                        }
+                    }
+
+                    if !success {
+                        eprintln!("mkglobalcache: catalog refresh failed after {MAX_RETRIES} retries, continuing with next message");
                     }
                 }
 
