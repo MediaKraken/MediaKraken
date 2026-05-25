@@ -4,7 +4,28 @@ use mk_lib_rabbitmq;
 use serde_json::Value;
 use std::collections::HashSet;
 use std::error::Error;
+use tokio::signal;
 use tokio::sync::Notify;
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+}
 
 async fn process_message(
     payload: &[u8],
@@ -35,23 +56,15 @@ async fn process_message(
             continue;
         }
 
-        // TODO make an upsert.
-        if !mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_exists(
-            sqlx_pool_ro,
+        // Use upsert instead of separate exists + insert
+        mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_upsert(
+            sqlx_pool_rw,
             share_info.mm_share_ip,
             share_path,
+            share_comment,
+            share_info.mm_share_type,
         )
-        .await?
-        {
-            mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_insert(
-                sqlx_pool_rw,
-                share_info.mm_share_ip,
-                share_path,
-                share_comment,
-                share_info.mm_share_type,
-            )
-            .await?;
-        }
+        .await?;
     }
 
     Ok(())
@@ -72,30 +85,35 @@ async fn main() -> Result<(), Box<dyn Error>> {
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mksharescanner", &rabbit_channel)
             .await?;
 
-    tokio::spawn(async move {
+    // Spawn the message processing task
+    let handle = tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
-            let mut should_ack = true;
-
             if let Some(payload) = msg.content.as_deref() {
                 if let Err(err) = process_message(payload, &sqlx_pool_rw, &sqlx_pool_ro).await {
-                    should_ack = false;
                     eprintln!("failed to process mksharescanner message: {err}");
+                    // Do not ack the message on error to allow for retry
+                    continue;
                 }
             }
 
-            if should_ack {
-                if let Some(deliver) = msg.deliver {
-                    let _ = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
-                        &rabbit_channel,
-                        deliver.delivery_tag(),
-                    )
-                    .await;
+            // Acknowledge message on successful processing
+            if let Some(deliver) = msg.deliver {
+                if let Err(err) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
+                    &rabbit_channel,
+                    deliver.delivery_tag(),
+                ).await {
+                    eprintln!("failed to acknowledge message: {err}");
                 }
             }
         }
     });
 
-    let guard = Notify::new();
-    guard.notified().await;
+    // Wait for shutdown signal
+    shutdown_signal().await;
+    
+    // Cancel the processing task
+    handle.abort();
+    
+    eprintln!("mksharescanner: shutdown signal received");
     Ok(())
 }
