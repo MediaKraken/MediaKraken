@@ -3,12 +3,16 @@ use shiplift::Docker;
 use std::env;
 use std::io;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use std::time::Duration;
 use tokio::net::UdpSocket;
+use tokio::time::timeout;
 
 const DEFAULT_BIND: &str = "0.0.0.0:8888";
 const DEFAULT_MULTICAST: &str = "234.2.2.2";
 const DEFAULT_WEBAPP_PORT: u64 = 8903;
 const DEFAULT_WEBAPP_NAME: &str = "/mkstack-webapp";
+const MAX_DOCKER_RETRIES: u32 = 3;
+const DOCKER_RETRY_DELAY: Duration = Duration::from_secs(5);
 
 fn detect_local_ipv4() -> Option<Ipv4Addr> {
     let iface_filter = env::var("MEDIAKRAKEN_IFACE").ok();
@@ -32,15 +36,33 @@ fn detect_local_ipv4() -> Option<Ipv4Addr> {
     None
 }
 
-async fn lookup_webapp_port(docker: &Docker, name: &str) -> Option<u64> {
-    match docker.containers().list(&Default::default()).await {
-        Ok(list) => list
-            .into_iter()
-            .find(|c| c.names.iter().any(|n| n == name))
-            .and_then(|c| c.ports.first().map(|p| p.private_port)),
-        Err(e) => {
-            eprintln!("docker list error: {e}");
-            None
+async fn lookup_webapp_port_with_retry(docker: &Docker, name: &str) -> Option<u64> {
+    let mut retries = 0;
+    
+    loop {
+        match timeout(Duration::from_secs(10), docker.containers().list(&Default::default())).await {
+            Ok(Ok(list)) => {
+                return list
+                    .into_iter()
+                    .find(|c| c.names.iter().any(|n| n == name))
+                    .and_then(|c| c.ports.first().map(|p| p.private_port));
+            }
+            Ok(Err(e)) => {
+                retries += 1;
+                eprintln!("docker list error (attempt {retries}/{MAX_DOCKER_RETRIES}): {e}");
+                if retries >= MAX_DOCKER_RETRIES {
+                    return None;
+                }
+                tokio::time::sleep(DOCKER_RETRY_DELAY).await;
+            }
+            Err(_) => {
+                retries += 1;
+                eprintln!("docker list timeout (attempt {retries}/{MAX_DOCKER_RETRIES})");
+                if retries >= MAX_DOCKER_RETRIES {
+                    return None;
+                }
+                tokio::time::sleep(DOCKER_RETRY_DELAY).await;
+            }
         }
     }
 }
@@ -71,7 +93,7 @@ async fn main() -> io::Result<()> {
     }
 
     let docker = Docker::new();
-    let mut cached_port = lookup_webapp_port(&docker, &webapp_name)
+    let mut cached_port = lookup_webapp_port_with_retry(&docker, &webapp_name)
         .await
         .unwrap_or(DEFAULT_WEBAPP_PORT);
 
@@ -89,8 +111,11 @@ async fn main() -> io::Result<()> {
             }
         };
 
-        if let Some(port) = lookup_webapp_port(&docker, &webapp_name).await {
+        // Attempt to refresh port with retry logic
+        if let Some(port) = lookup_webapp_port_with_retry(&docker, &webapp_name).await {
             cached_port = port;
+        } else {
+            eprintln!("Failed to get webapp port, keeping cached port {cached_port}");
         }
 
         let response = format!("{}:{}", local_ip, cached_port);
