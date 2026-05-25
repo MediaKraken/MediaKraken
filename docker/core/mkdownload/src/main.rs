@@ -145,7 +145,7 @@ async fn process_message(json_message: Value) -> Result<(), TaskError> {
                 .map_err(|e| format!("youtube download command failed: {e}"))?;
 
             if !output.status.success() {
-                let stderr = String::from_utf8_lossy(&output.stderr);
+                let stderr = String::from_utf8_lossy(let stderr = String::from_utf8_lossy(let stderr = String::from_utf8_lossy(&output.stderr);output.stderr).into_owned();output.stderr).into_owned();
                 return Err(format!("youtube download failed: {stderr}"));
             }
         }
@@ -162,7 +162,7 @@ async fn process_message(json_message: Value) -> Result<(), TaskError> {
                 .map_err(|e| format!("subtitle download command failed: {e}"))?;
 
             if !output.status.success() {
-                let stderr = String::from_utf8_lossy(&output.stderr);
+                let stderr = String::from_utf8_lossy(let stderr = String::from_utf8_lossy(let stderr = String::from_utf8_lossy(&output.stderr);output.stderr).into_owned();output.stderr).into_owned();
                 return Err(format!("subtitle download failed: {stderr}"));
             }
         }
