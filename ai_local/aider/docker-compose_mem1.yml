@@ -8,9 +8,9 @@ services:
       - "6334:6334"
     volumes:
       - /data/qdrant:/qdrant/storage
-  code-search-mcp:
+  code-search-mcp-mediakraken:
     build: ./mcp_qdrant
-    container_name: code-search-mcp
+    container_name: code-search-mcp-mediakraken
     restart: unless-stopped
     ports:
       - "9876:8000"
@@ -18,7 +18,21 @@ services:
       QDRANT_URL: http://qdrant:6333
       EMBED_URL: http://skynetgpu1:8001/v1/embeddings
       EMBED_MODEL: qwen3-embedding
-      DEFAULT_COLLECTION: code
+      DEFAULT_COLLECTION: mediakraken
+      SEARCH_LIMIT: "8"
+    depends_on:
+      - qdrant
+  code-search-mcp-bmo:
+    build: ./mcp_qdrant
+    container_name: code-search-mcp-bmo
+    restart: unless-stopped
+    ports:
+      - "9877:8000"
+    environment:
+      QDRANT_URL: http://qdrant:6333
+      EMBED_URL: http://skynetgpu1:8001/v1/embeddings
+      EMBED_MODEL: qwen3-embedding
+      DEFAULT_COLLECTION: bmo_core
       SEARCH_LIMIT: "8"
     depends_on:
       - qdrant
