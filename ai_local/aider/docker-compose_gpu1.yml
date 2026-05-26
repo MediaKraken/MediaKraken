@@ -26,7 +26,7 @@ services:
       - "-ngl"
       - "999"
       - "--n-cpu-moe"
-      - "26"
+      - "30"
       - "-fa"
       - "on"
       - "--cache-type-k"

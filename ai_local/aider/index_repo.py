@@ -7,6 +7,16 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct, PointIdsList
 import time
 
+# python3 -m venv venv
+# source venv/bin/activate 
+# pip3 install httpx qdrant-client
+
+# test embedder connection:
+# curl -v --max-time 5 http://skynetgpu1:8001/v1/embeddings \
+#   -H 'Content-Type: application/json' \
+#   -d '{"model":"BAAI/bge-m3","input":["hello"]}'
+
+
 QDRANT_URL = "http://skynetmem1:6333"
 EMBED_URL = "http://skynetgpu1:8001/v1/embeddings"
 EMBED_MODEL = "BAAI/bge-m3"
@@ -108,7 +118,7 @@ def index_repo(repo_root, collection_name):
             points = []
 
     for root, dirs, files in os.walk(repo_root):
-        dirs[:] = [d for d in dirs if d not in (".git","node_modules","__pycache__",".venv","dist","build","target")]
+        dirs[:] = [d for d in dirs if d not in (".git","node_modules","__pycache__","venv",".venv","dist","build","target")]
         for fname in files:
             p = Path(root)/fname
             rel = str(p.relative_to(repo_root))
@@ -127,13 +137,13 @@ def index_repo(repo_root, collection_name):
                 batch_texts.append(text)
                 batch_meta.append({"path": rel, "start": start, "end": end})
                 batch_ids.append(cid)
-                if len(batch_texts) >= 8:
+                if len(batch_texts) >= 4:
                     vecs = embed(batch_texts)
                     for v, m, i in zip(vecs, batch_meta, batch_ids):
                         points.append(PointStruct(id=i, vector=v, payload=m))
                         new_count += 1
                     batch_texts, batch_meta, batch_ids = [], [], []
-                    if len(points) >= 256:
+                    if len(points) >= 128:
                         flush_upsert()
                         print(f"  embedded {new_count} new (reused {reused_count})...")
 
