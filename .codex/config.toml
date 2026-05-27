@@ -1,0 +1,37 @@
+# ---- which model to use by default ----
+model = "qwen3-coder"
+model_provider = "llamacpp"
+
+# ---- your llama.cpp coder server ----
+[model_providers.llamacpp]
+name = "Local llama.cpp on skynetgpu1"
+base_url = "http://skynetgpu1:8000/v1"
+env_key = "LLAMACPP_API_KEY"   # value doesn't matter, llama.cpp ignores it
+wire_api = "responses"              # CRITICAL — see below
+request_max_retries = 4
+
+# ---- Qdrant MCP server for semantic code search ----
+# [mcp_servers.code_search]
+# url = "http://skynetmem1:9876/mcp"
+# startup_timeout_sec = 10
+
+[mcp_servers.mediakraken_search]
+url = "http://skynetmem1:9876/mcp"   # instance with COLLECTION_NAME=mediakraken
+startup_timeout_sec = 10
+
+[mcp_servers.bmo_search]
+url = "http://skynetmem1:9877/mcp"   # instance with COLLECTION_NAME=bmo_core
+startup_timeout_sec = 10
+
+[models."qwen3-coder"]
+context_window = 65536
+max_output_tokens = 8192
+
+# [mcp_servers.code_search.env]
+# QDRANT_URL = "http://skynetmem1:6333"
+# COLLECTION_NAME = "code"
+# EMBEDDING_PROVIDER = "openai_compatible"
+# EMBEDDING_MODEL = "qwen3-embedding"
+# OPENAI_BASE_URL = "http://skynetmem1:8001/v1"
+# OPENAI_API_KEY = "dummy"
+# TOOL_FIND_DESCRIPTION = "Search the indexed code repository for relevant snippets. ALWAYS use this BEFORE writing or modifying code that touches existing files in this repo — it finds similar code, related implementations, and prior patterns."
