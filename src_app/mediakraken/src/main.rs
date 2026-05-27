@@ -32,6 +32,10 @@ fn App() -> Element {
     let client = ApiClient::from_parts(http_client(), base_url(), bearer_token());
 
     rsx! {
+        head {
+            title { "MediaKraken - Multimedia Player" }
+            style { include_str!("styles/main.css") }
+        }
         main { class: "app-shell",
             header { class: "app-header",
                 h1 { "MediaKraken" }
