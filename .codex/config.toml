@@ -19,9 +19,9 @@ request_max_retries = 4
 url = "http://skynetmem1:9876/mcp"   # instance with COLLECTION_NAME=mediakraken
 startup_timeout_sec = 10
 
-[mcp_servers.bmo_search]
-url = "http://skynetmem1:9877/mcp"   # instance with COLLECTION_NAME=bmo_core
-startup_timeout_sec = 10
+#[mcp_servers.bmo_search]
+#url = "http://skynetmem1:9877/mcp"   # instance with COLLECTION_NAME=bmo_core
+#startup_timeout_sec = 10
 
 [models."qwen3-coder"]
 context_window = 65536
