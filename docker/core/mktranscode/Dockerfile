@@ -25,7 +25,7 @@ ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig \
 # https://github.com/mstorsjo/fdk-aac
 ARG FDKAAC_VERSION=2.0.3
 # https://ffmpeg.org/download.html
-ARG FFMPEG_VERSION=8.0.1
+ARG FFMPEG_VERSION=8.1.1
 # FONTCONFIG=2.14.2 - 2.14.2-r3
 # FREETYPE=2.12.1 - 2.13.0-r5
 # https://github.com/intel/gmmlib
