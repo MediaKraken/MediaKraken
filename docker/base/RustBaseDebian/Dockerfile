@@ -1,11 +1,20 @@
 # don't use the slim version as it's just a stage one image
 # as too much stuff is missing causing stuff later to not compile
-FROM rust:1.92.0-bookworm
+FROM rust:1.95.0-bookworm
 RUN rustup target add x86_64-unknown-linux-musl
-RUN apt update && apt install libudev-dev wget ca-certificates libc-bin musl-tools clang -y \
-  && update-ca-certificates \
-  && wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.12.1/wait \
-  && chmod +x /wait
+RUN apt update && apt install -y \
+    libudev-dev \
+    wget \
+    ca-certificates \
+    libc-bin \
+    musl-tools \
+    clang \
+    git \
+    curl \
+    && update-ca-certificates \
+    && wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/download/2.12.1/wait \
+    && chmod +x /wait \
+    && rm -rf /var/lib/apt/lists/*
 
 # docker run -d --name redis-stack -p 6379:6379 -p 8001:8001 redis/redis-stack:latest
 ARG SCCACHE_VERSION=0.14.0
