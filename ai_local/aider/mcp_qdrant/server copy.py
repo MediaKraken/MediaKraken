@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """MCP server: semantic code search via llama.cpp embedder + Qdrant."""
 import os
-import re
 import httpx
 from mcp.server.fastmcp import FastMCP
 from qdrant_client import QdrantClient
@@ -12,16 +11,8 @@ EMBED_MODEL   = os.getenv("EMBED_MODEL", "qwen3-embedding")
 DEFAULT_COLL  = os.getenv("DEFAULT_COLLECTION", "code")
 LIMIT         = int(os.getenv("SEARCH_LIMIT", "8"))
 
-# Human-readable description of what's *in* this collection.
-# Set this per instance — it's the main signal Codex uses to route.
-# e.g. "the Mediakraken media-library service (movies, TV, metadata)"
-COLL_TOPIC    = os.getenv("COLLECTION_TOPIC", DEFAULT_COLL)
-
-# Tool names must match ^[a-zA-Z0-9_-]+$
-SAFE_COLL = re.sub(r"[^a-zA-Z0-9_-]", "_", DEFAULT_COLL)
-
 qdrant = QdrantClient(url=QDRANT_URL)
-mcp = FastMCP(f"qdrant-code-search-{SAFE_COLL}", host="0.0.0.0", port=8000)
+mcp = FastMCP("qdrant-code-search", host="0.0.0.0", port=8000)
 
 
 def embed(text: str) -> list[float]:
@@ -34,33 +25,37 @@ def embed(text: str) -> list[float]:
     return r.json()["data"][0]["embedding"]
 
 
-@mcp.tool(
-    name=f"qdrant_find_{SAFE_COLL}",
-    description=(
-        f'Search the "{DEFAULT_COLL}" code repository — {COLL_TOPIC}. '
-        f'Use this tool ONLY when the user is working on {COLL_TOPIC}. '
-        f'Call it BEFORE writing or modifying code in this repo so new code '
-        f'matches existing patterns. Returns up to {LIMIT} ranked snippets '
-        f'with file paths and line ranges. '
-        f'If the user is working on a different project, use a different '
-        f'qdrant_find_* tool instead — do not use this one.'
-    ),
-)
-def qdrant_find(query: str) -> str:
-    """Search this server's pinned collection."""
+@mcp.tool()
+def qdrant_find(query: str, collection: str | None = None) -> str:
+    """Search the indexed code repository for snippets relevant to the query.
+
+    Use this BEFORE writing or modifying code so new code matches existing
+    patterns in the codebase. Returns up to 8 ranked snippets with file paths
+    and line ranges.
+
+    Args:
+        query: Natural-language description of what you're looking for.
+               Example: "jwt token refresh middleware"
+        collection: Optional Qdrant collection name. Omit to use the repo's
+                    default collection configured for this MCP server.
+    """
+    coll = collection or DEFAULT_COLL
     try:
         vec = embed(query)
     except Exception as e:
         return f"Embedding failed: {e}"
+
     try:
         hits = qdrant.search(
-            collection_name=DEFAULT_COLL, query_vector=vec, limit=LIMIT
+            collection_name=coll, query_vector=vec, limit=LIMIT
         )
     except Exception as e:
-        return f"Qdrant search failed on collection '{DEFAULT_COLL}': {e}"
+        return f"Qdrant search failed on collection '{coll}': {e}"
+
     if not hits:
-        return f"No matches in collection '{DEFAULT_COLL}'."
-    out = [f"Found {len(hits)} matches in '{DEFAULT_COLL}':\n"]
+        return f"No matches in collection '{coll}'."
+
+    out = [f"Found {len(hits)} matches in '{coll}':\n"]
     for i, h in enumerate(hits, 1):
         p = h.payload or {}
         path  = p.get("path", "?")
@@ -73,14 +68,9 @@ def qdrant_find(query: str) -> str:
     return "\n\n".join(out)
 
 
-@mcp.tool(
-    name=f"qdrant_list_collections_{SAFE_COLL}",
-    description=(
-        f'List Qdrant collections on the {DEFAULT_COLL} server instance. '
-        f'Primary collection here is "{DEFAULT_COLL}" ({COLL_TOPIC}).'
-    ),
-)
+@mcp.tool()
 def qdrant_list_collections() -> str:
+    """List all Qdrant collections available for search."""
     cols = qdrant.get_collections().collections
     if not cols:
         return "No collections found."
@@ -88,4 +78,5 @@ def qdrant_list_collections() -> str:
 
 
 if __name__ == "__main__":
+    # streamable-http is the modern remote transport; Codex supports it.
     mcp.run(transport="streamable-http")
