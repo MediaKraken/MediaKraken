@@ -1,5 +1,5 @@
 # ---- which model to use by default ----
-model = "qwen3-coder"
+model = "qwen36-35b-a3b-ud-q6_k_xl"
 model_provider = "llamacpp"
 
 # ---- your llama.cpp coder server ----
@@ -9,6 +9,8 @@ base_url = "http://skynetgpu1:8000/v1"
 env_key = "LLAMACPP_API_KEY"   # value doesn't matter, llama.cpp ignores it
 wire_api = "responses"              # CRITICAL — see below
 request_max_retries = 4
+stream_idle_timeout_ms = 600000      # 10 min — thinking pauses won't kill the stream
+requires_openai_auth = false  
 
 # ---- Qdrant MCP server for semantic code search ----
 # [mcp_servers.code_search]
@@ -23,9 +25,9 @@ startup_timeout_sec = 10
 url = "http://skynetmem1:9877/mcp"   # instance with COLLECTION_NAME=bmo_core
 startup_timeout_sec = 10
 
-[models."qwen3-coder"]
-context_window = 65536
-max_output_tokens = 8192
+[models."qwen36-35b-a3b-ud-q6_k_xl"]
+context_window = 131072
+max_output_tokens = 32768
 
 # [mcp_servers.code_search.env]
 # QDRANT_URL = "http://skynetmem1:6333"
