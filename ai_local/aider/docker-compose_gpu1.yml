@@ -25,8 +25,8 @@ services:
       - "98304"
       - "-ngl"
       - "999"
-      - "--n-cpu-moe"
-      - "30"
+      # - "--n-cpu-moe"
+      # - "30"
       - "-fa"
       - "on"
       - "--cache-type-k"
@@ -39,6 +39,16 @@ services:
       - "--parallel"
       - "1"
       - "-cb"
+      - "--temp"
+      - "0.7"
+      - "--top-p"
+      - "0.8"
+      - "--top-k"
+      - "20"
+      - "--min-p"
+      - "0"
+      - "--repeat-penalty"
+      - "1.05"
 
   embedder:
     image: ghcr.io/huggingface/text-embeddings-inference:cuda-latest
