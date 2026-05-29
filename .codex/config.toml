@@ -1,5 +1,5 @@
 # ---- which model to use by default ----
-model = "qwen36-35b-a3b-ud-q6_k_xl"
+model = "qwen36-35b-a3b-ud-q4_k_xl"
 model_provider = "llamacpp"
 
 # ---- your llama.cpp coder server ----

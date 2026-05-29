@@ -12,11 +12,11 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: all
+              device_ids: ['0', '1']   # both GPUs
               capabilities: [gpu]
     command:
       - "-m"
-      - "/data/gguf/Qwen3.6-35B-A3B-UD-Q6_K_XL.gguf"
+      - "/data/gguf/Qwen3.6-35B-A3B-UD-Q4_K_XL.gguf"
       - "--host"
       - "0.0.0.0"
       - "--port"
@@ -25,6 +25,8 @@ services:
       - "131072"
       - "-ngl"
       - "999"
+      - "--tensor-split"
+      - "16,10"                 # weight toward the 5070 Ti; leaves ~2GB on the 5070 for the embedder
       # - "--n-cpu-moe"
       # - "30"
       - "-fa"
@@ -37,7 +39,7 @@ services:
       - "--reasoning-format"
       - "deepseek"
       - "--alias"
-      - "qwen36-35b-a3b-ud-q6_k_xl"
+      - "qwen36-35b-a3b-ud-q4_k_xl"
       - "--parallel"
       - "1"
       - "-cb"
@@ -72,5 +74,5 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: all
+              device_ids: ['1']    # pin embedder to the 5070
               capabilities: [gpu]

@@ -8,7 +8,7 @@ from qdrant_client.models import Distance, VectorParams, PointStruct, PointIdsLi
 import time
 
 # python3 -m venv venv
-# source venv/bin/activate 
+# source ai_local/aider/venv/bin/activate 
 # pip3 install httpx qdrant-client
 
 # test embedder connection:
