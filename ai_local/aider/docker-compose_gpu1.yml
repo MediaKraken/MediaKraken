@@ -26,7 +26,7 @@ services:
       - "-ngl"
       - "999"
       - "--tensor-split"
-      - "16,8"                 # weight toward the 5070 Ti; leaves ~2GB on the 5070 for the embedder
+      - "16,10"                 # weight toward the 5070 Ti; leaves ~2GB on the 5070 for the embedder
       # - "--n-cpu-moe"
       # - "30"
       - "-fa"
