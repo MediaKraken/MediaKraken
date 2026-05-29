@@ -58,17 +58,17 @@ def chunk_id(path: str, text: str) -> str:
     h = hashlib.sha256(f"{path}\0{text}".encode("utf-8", "ignore")).digest()
     return str(uuid.UUID(bytes=h[:16]))
 
-def embed(texts, retries=3):
+def embed(texts, retries=5):
     for attempt in range(retries):
         try:
             r = httpx.post(EMBED_URL, json={"model": EMBED_MODEL, "input": texts}, timeout=600)
             r.raise_for_status()
             return [d["embedding"] for d in r.json()["data"]]
-        except (httpx.ReadTimeout, httpx.HTTPStatusError) as e:
+        except (httpx.ReadTimeout, httpx.ConnectError, httpx.HTTPStatusError, httpx.RemoteProtocolError) as e:
             if attempt == retries - 1:
                 raise
-            wait = 5 * (attempt + 1)
-            print(f"  embed failed ({e}), retrying in {wait}s...")
+            wait = min(30, 2 ** attempt)   # 1, 2, 4, 8, 16s
+            print(f"  embed failed ({type(e).__name__}: {e}), retrying in {wait}s...")
             time.sleep(wait)
 
 def ensure_collection(qc, name):
@@ -137,13 +137,13 @@ def index_repo(repo_root, collection_name):
                 batch_texts.append(text)
                 batch_meta.append({"path": rel, "start": start, "end": end})
                 batch_ids.append(cid)
-                if len(batch_texts) >= 4:
+                if len(batch_texts) >= 2:
                     vecs = embed(batch_texts)
                     for v, m, i in zip(vecs, batch_meta, batch_ids):
                         points.append(PointStruct(id=i, vector=v, payload=m))
                         new_count += 1
                     batch_texts, batch_meta, batch_ids = [], [], []
-                    if len(points) >= 128:
+                    if len(points) >= 64:
                         flush_upsert()
                         print(f"  embedded {new_count} new (reused {reused_count})...")
 

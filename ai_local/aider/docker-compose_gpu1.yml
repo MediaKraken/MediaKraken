@@ -26,15 +26,15 @@ services:
       - "-ngl"
       - "999"
       - "--tensor-split"
-      - "16,10"                 # weight toward the 5070 Ti; leaves ~2GB on the 5070 for the embedder
+      - "16,8"                 # weight toward the 5070 Ti; leaves ~2GB on the 5070 for the embedder
       # - "--n-cpu-moe"
       # - "30"
       - "-fa"
       - "on"
       - "--cache-type-k"
-      - "f16"
+      - "q8_0"
       - "--cache-type-v"
-      - "f16"
+      - "q8_0"
       - "--jinja"
       - "--reasoning-format"
       - "deepseek"
@@ -64,6 +64,7 @@ services:
       - "8001:80"
     volumes:
       - /data/hf-cache:/data
+      - /tmp/empty:/usr/local/cuda/compat:ro   # <-- mask the compat libs
     environment:
       - MODEL_ID=BAAI/bge-m3
       - MAX_CONCURRENT_REQUESTS=8
@@ -74,5 +75,5 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              device_ids: ['1']    # pin embedder to the 5070
+              device_ids: ['1']
               capabilities: [gpu]
