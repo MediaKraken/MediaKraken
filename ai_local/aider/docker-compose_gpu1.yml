@@ -67,7 +67,7 @@ services:
       - /tmp/empty:/usr/local/cuda/compat:ro   # <-- mask the compat libs
     environment:
       - MODEL_ID=BAAI/bge-m3
-      - MAX_CONCURRENT_REQUESTS=8
+      - MAX_CONCURRENT_REQUESTS=64
       - MAX_CLIENT_BATCH_SIZE=128
       - MAX_BATCH_TOKENS=32768
     deploy:
