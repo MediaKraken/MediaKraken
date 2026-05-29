@@ -201,6 +201,11 @@ pub async fn user_profile_photo_post(
             return Redirect::to("/user/profile?error=too-large");
         }
 
+        // Validate magic bytes to prevent forged MIME type uploads.
+        if !validate_image_magic_bytes(&bytes, extension) {
+            return Redirect::to("/user/profile?error=invalid-type");
+        }
+
         image_bytes = Some(bytes);
         image_extension = Some(extension.to_string());
         break;
@@ -291,9 +296,7 @@ pub async fn user_profile_number_format_language_post(
         return Redirect::to("/error/401");
     }
 
-    let normalized_language =
-        user_preferences::normalize_number_format_language(&form.default_number_format_language);
-    let valid_languages: HashSet<String> =
+    let valid_languages: Vec<String> =
         mk_lib_database::mk_lib_database_language::mk_lib_database_language_read(
             &state.sqlx_pool_ro,
         )
@@ -302,6 +305,7 @@ pub async fn user_profile_number_format_language_post(
         .into_iter()
         .map(|row| row.code.to_lowercase())
         .collect();
+    let normalized_language = form.default_number_format_language.trim().to_lowercase();
     if !valid_languages.contains(&normalized_language) {
         return Redirect::to("/user/profile?error=invalid-language");
     }
@@ -440,6 +444,23 @@ fn content_type_to_extension(content_type: Option<&str>) -> Option<&'static str>
         Some("image/gif") => Some("gif"),
         Some("image/webp") => Some("webp"),
         _ => None,
+    }
+}
+
+/// Validate image magic bytes to prevent uploading files with forged MIME types.
+/// Checks the first 12 bytes against known image signatures.
+fn validate_image_magic_bytes(bytes: &[u8], expected_extension: &str) -> bool {
+    if bytes.len() < 4 {
+        return false;
+    }
+    match expected_extension {
+        "png" => bytes.starts_with(b"\x89PNG"),
+        "jpg" | "jpeg" => bytes.starts_with(b"\xff\xd8\xff"),
+        "gif" => bytes.starts_with(b"GIF8"),
+        "webp" => bytes.len() >= 12
+            && bytes[0..4] == *b"RIFF"
+            && bytes[8..12] == *b"WEBP",
+        _ => false,
     }
 }
 

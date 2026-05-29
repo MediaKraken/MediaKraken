@@ -5,22 +5,28 @@ use axum::{
     body::Body,
     extract::FromRef,
     extract::Request,
+    extract::ConnectInfo,
+    http::StatusCode,
     middleware::{self, Next},
     response::{IntoResponse, Response},
     routing::{get, post},
 };
 use axum_extra::routing::RouterExt;
 use axum_prometheus::PrometheusMetricLayer;
-use axum_session::{Key, SessionConfig, SessionLayer, SessionStore};
+use axum_session::{Key, SameSitePolicy, SessionConfig, SessionLayer, SessionStore};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
-use hyper::StatusCode;
 use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
 use mk_lib_database;
 use mk_lib_logging;
 use ring::digest;
 use serde_json::json;
 use sqlx::postgres::PgPool;
+use std::collections::HashMap;
+use std::net::SocketAddr;
+use std::sync::Arc;
+use std::time::{Duration, Instant};
+use tokio::sync::RwLock;
 
 use tokio::net::TcpListener;
 use tokio::signal;
@@ -133,6 +139,8 @@ struct AppState {
     pub sqlx_pool_rw: PgPool,
     pub sqlx_pool_ro: PgPool,
     client: Client,
+    login_limiter: Arc<RateLimiter>,
+    register_limiter: Arc<RateLimiter>,
 }
 
 // Our state type must implement this trait. That is how the config
@@ -163,11 +171,69 @@ fn load_signing_key() -> Key {
     }
 }
 
+/// Simple in-memory rate limiter keyed by IP address.
+struct RateLimiter {
+    inner: RwLock<HashMap<String, Vec<Instant>>>,
+    window: Duration,
+    max_requests: usize,
+}
+
+impl RateLimiter {
+    fn new(window: Duration, max_requests: usize) -> Self {
+        Self {
+            inner: RwLock::new(HashMap::new()),
+            window,
+            max_requests,
+        }
+    }
+
+    async fn is_allowed(&self, key: &str) -> bool {
+        let mut map = self.inner.write().await;
+        let now = Instant::now();
+        let entries = map.entry(key.to_string()).or_insert_with(Vec::new);
+        entries.retain(|t| now.duration_since(*t) < self.window);
+        if entries.len() >= self.max_requests {
+            false
+        } else {
+            entries.push(now);
+            true
+        }
+    }
+}
+
+/// Security headers middleware. Adds standard HTTP security headers to every response.
+async fn security_headers(req: Request, next: Next) -> Response {
+    let mut response = next.run(req).await;
+    let headers = response.headers_mut();
+    headers.insert(
+        header::X_CONTENT_TYPE_OPTIONS,
+        header::HeaderValue::from_static("nosniff"),
+    );
+    headers.insert(
+        header::X_FRAME_OPTIONS,
+        header::HeaderValue::from_static("DENY"),
+    );
+    headers.insert(
+        header::X_XSS_PROTECTION,
+        header::HeaderValue::from_static("1; mode=block"),
+    );
+    headers.insert(
+        header::REFERRER_POLICY,
+        header::HeaderValue::from_static("strict-origin-when-cross-origin"),
+    );
+    // Prevent client-side caching of pages that require auth.
+    headers.insert(
+        header::CACHE_CONTROL,
+        header::HeaderValue::from_static("no-store, no-cache, must-revalidate"),
+    );
+    headers.remove(header::SERVER);
+    response
+}
+
 // CSRF defense via strict same-origin check on state-changing requests.
 // Rejects POST/PUT/PATCH/DELETE whose Origin (or Referer fallback) does not
 // match MKWEBAPP_ALLOWED_ORIGINS (comma-separated list of scheme://host[:port]).
-// If the env var is empty the check is skipped (dev convenience) but a warning
-// is emitted on startup.
+// An empty allowed-origins list is a production hard-fail.
 async fn require_same_origin(req: Request, next: Next) -> Response {
     let method = req.method().clone();
     let is_state_changing =
@@ -183,7 +249,11 @@ async fn require_same_origin(req: Request, next: Next) -> Response {
         .filter(|s| !s.is_empty())
         .collect();
     if allowed.is_empty() {
-        return next.run(req).await;
+        tracing::error!(
+            "MKWEBAPP_ALLOWED_ORIGINS is empty; rejecting cross-origin requests \
+             with 403. This is a production safety measure."
+        );
+        return (StatusCode::FORBIDDEN, "cross-origin request rejected").into_response();
     }
 
     let headers = req.headers();
@@ -217,6 +287,38 @@ async fn require_same_origin(req: Request, next: Next) -> Response {
     next.run(req).await
 }
 
+/// Rate-limiting middleware for login and registration endpoints.
+/// Only applies to POST requests on /public/login, /public/register, and
+/// /public/forgot_password. All other requests pass through unmodified.
+async fn rate_limit_auth(
+    State(state): State<AppState>,
+    req: Request,
+    next: Next,
+) -> Response {
+    // Only apply rate limiting to auth POST endpoints.
+    if req.method() != Method::POST {
+        return next.run(req).await;
+    }
+    let path = req.uri().path();
+    let limiter = match path {
+        "/public/login" | "/public/forgot_password" => &state.login_limiter,
+        "/public/register" => &state.register_limiter,
+        _ => return next.run(req).await,
+    };
+
+    let addr = match req.extensions().get::<ConnectInfo<SocketAddr>>() {
+        Some(addr) => addr.0.ip().to_string(),
+        None => return next.run(req).await,
+    };
+
+    if !limiter.is_allowed(&addr).await {
+        tracing::warn!(ip = %addr, path, "rate limit exceeded on auth endpoint");
+        return (StatusCode::TOO_MANY_REQUESTS, "too many requests, please try again later").into_response();
+    }
+
+    next.run(req).await
+}
+
 #[tokio::main]
 async fn main() {
     if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
@@ -239,7 +341,17 @@ async fn main() {
     )
     .await;
 
-    let session_config = SessionConfig::default().with_table_name("mm_session");
+    // Session config with security flags.
+    // - secure_cookies: sent only over HTTPS (nginx ingress handles TLS).
+    // - http_only: not accessible via JavaScript (mitigates XSS cookie theft).
+    // - same_site: Lax allows same-site navigations but blocks cross-site POST.
+    // - max_age: 1 hour of inactivity or absolute expiration, whichever comes first.
+    let session_config = SessionConfig::default()
+        .with_table_name("mm_session")
+        .with_secure_cookies(true)
+        .with_http_only(true)
+        .with_same_site_policy(SameSitePolicy::Lax)
+        .with_max_age(Duration::from_secs(3600));
     let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
     let session_store =
         SessionStore::<SessionPgPool>::new(Some(sqlx_pool_rw.clone().into()), session_config)
@@ -254,21 +366,18 @@ async fn main() {
             .build(HttpConnector::new());
 
     let signing_key = load_signing_key();
-    if std::env::var("MKWEBAPP_ALLOWED_ORIGINS")
-        .map(|v| v.trim().is_empty())
-        .unwrap_or(true)
-    {
-        tracing::warn!(
-            "MKWEBAPP_ALLOWED_ORIGINS is not set; same-origin CSRF check is disabled. \
-             Set this before deploying to production."
-        );
-    }
+
+    // Rate limiters: 10 requests per minute for login, 5 per minute for registration.
+    let login_limiter = Arc::new(RateLimiter::new(Duration::from_secs(60), 10));
+    let register_limiter = Arc::new(RateLimiter::new(Duration::from_secs(60), 5));
 
     let app_state = AppState {
         flash_config: axum_flash::Config::new(signing_key),
         sqlx_pool_rw: sqlx_pool_rw.clone(),
         sqlx_pool_ro: sqlx_pool_ro.clone(),
         client: client.clone(),
+        login_limiter: login_limiter.clone(),
+        register_limiter: register_limiter.clone(),
     };
 
     // route_with_tsr creates two routes.....one with trailing slash
@@ -447,8 +556,7 @@ async fn main() {
         )
         .route_with_tsr(
             "/user/media/physical/{page}",
-            get(user_media::bp_media_physical::user_media_physical)
-                .post(user_media::bp_media_physical::user_media_physical_post),
+            get(user_media::bp_media_physical::user_media_physical_post),
         )
         .route_with_tsr(
             "/user/media/sports/{page}",
@@ -595,7 +703,8 @@ async fn main() {
         .route_with_tsr("/public/logout", get(public::bp_logout::public_logout))
         .route_with_tsr(
             "/public/login",
-            get(public::bp_login::public_login).post(public::bp_login::public_login_post),
+            get(public::bp_login::public_login)
+                .post(public::bp_login::public_login_post),
         )
         .nest_service(
             "/static",
@@ -636,7 +745,8 @@ async fn main() {
         .route_with_tsr("/error/500", get(bp_error::general_error))
         .route_with_tsr(
             "/public/forgot_password",
-            get(public::bp_forgot_password::public_forgot_password),
+            get(public::bp_forgot_password::public_forgot_password)
+                .post(public::bp_forgot_password::public_forgot_password_post),
         )
         .route_with_tsr(
             "/public/register",
@@ -649,6 +759,8 @@ async fn main() {
         )
         .route("/metrics", get(|| async move { metric_handle.render() }))
         .layer(prometheus_layer)
+        .layer(middleware::from_fn(security_headers))
+        .layer(middleware::from_fn(rate_limit_auth))
         .layer(middleware::from_fn(require_same_origin))
         .with_state(app_state);
     // add a fallback service for handling routes to unknown paths

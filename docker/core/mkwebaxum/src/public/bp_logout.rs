@@ -1,20 +1,12 @@
 use crate::mk_lib_database;
-use askama::Template;
 use axum::{
-    extract::Path,
-    http::{Method, StatusCode},
+    http::StatusCode,
     response::{Html, IntoResponse, Redirect},
     routing::{get, post},
-    Extension,
 };
-use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
-use serde_json::json;
-use sqlx::{
-    postgres::{PgConnectOptions, PgPoolOptions},
-    ConnectOptions, PgPool,
-};
+use sqlx::postgres::PgPool;
 use axum::extract::State;
 use crate::AppState;
 
@@ -28,6 +20,8 @@ pub async fn public_logout(
         current_user.id,
     )
     .await;
+    // Delete the server-side session row so a stolen cookie cannot be reused.
+    let _ = auth.delete_session().await;
     auth.logout_user();
     Redirect::to("/public/login")
 }
