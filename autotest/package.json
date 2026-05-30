@@ -1,0 +1,20 @@
+{
+  "name": "mediakraken-autotest",
+  "version": "1.0.0",
+  "description": "Playwright-based tests for MediaKraken",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:e2e": "playwright test e2e",
+    "test:integration": "playwright test integration",
+    "test:unit": "playwright test unit",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "playwright:install": "playwright install",
+    "playwright:install-deps": "playwright install-deps"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.0",
+    "@types/node": "^22.0.0"
+  }
+}

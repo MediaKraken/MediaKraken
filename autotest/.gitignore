@@ -1,0 +1,19 @@
+# Test artifacts
+test-results/
+playwright-report/
+test-results/
+blob-report/
+trace.zip
+*.png
+*.mp4
+
+# Dependencies
+node_modules/
+
+# Environment
+.env
+
+# OS
+.DS_Store
+*.swp
+*~
