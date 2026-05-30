@@ -1,6 +1,7 @@
 // http://www.chartlyrics.com/api.aspx
 
 use mk_lib_network;
+use std::error::Error;
 
 pub async fn provider_chart_lyrics_fetch(
     artist_name: String,
@@ -10,7 +11,6 @@ pub async fn provider_chart_lyrics_fetch(
         "http://api.chartlyrics.com/apiv1.asmx/SearchLyricDirect?artist={}&song={}",
         artist_name, song_name
     ))
-    .await
-    .unwrap();
+    .await?;
     Ok(json_data)
 }

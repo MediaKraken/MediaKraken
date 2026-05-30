@@ -5,6 +5,7 @@ use mk_lib_network::mk_lib_network;
 use serde_json::json;
 use sqlx::types::Uuid;
 use std::fmt::Write;
+use std::error::Error;
 
 pub async fn provider_upcitemdb_fetch_by_upc(
     sqlx_pool: &sqlx::PgPool,
@@ -17,13 +18,12 @@ pub async fn provider_upcitemdb_fetch_by_upc(
         if i > 0 {
             s.push_str("%20");
         }
-        write!(s, "{}", n).unwrap();
+        write!(s, "{}", n).map_err(|e| format!("write failed: {e}"))?;
     }
     let url_result = mk_lib_network::mk_data_from_url_to_json(format!(
         "https://api.upcitemdb.com/prod/trial/lookup?upc={}",
         s
     ))
-    .await
-    .unwrap();
+    .await?;
     Ok(url_result)
 }

@@ -47,13 +47,13 @@ pub async fn admin_settings(
     .await
     {
         let template = TemplateError403Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let template = AdminSettingsTemplate {
             page_title: Some("MediaKraken Admin Settings".to_string()),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

@@ -71,26 +71,26 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let (sqlx_pool_rw, sqlx_pool_ro) =
         mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120)
             .await
-            .unwrap();
+            ?;
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await
-        .unwrap();
+        ?;
 
     let (_rabbit_connection, rabbit_channel) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mktmdbnetfetchbulk")
             .await
-            .unwrap();
+            ?;
 
     let mut rabbit_consumer =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mktmdbnetfetchbulk", &rabbit_channel)
             .await
-            .unwrap();
+            ?;
 
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {
                 let json_message: Value =
-                    serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
+                    serde_json::from_str(&String::from_utf8_lossy(&payload))?;
                 println!(" [x] Received {:?}", json_message);
                 if json_message["Type"] == "Bulk" {
                     let mut record_limit = i64::MAX;
@@ -101,7 +101,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     let date_to_use =
                         find_date_to_use("http://files.tmdb.org/p/exports/movie_ids_{}.json.gz")
                             .await
-                            .unwrap();
+                            ?;
                     // grab the movie id's
                     let fetch_result_movie =
                         mk_lib_network::mk_lib_network::mk_network_download_file_to_vec(
@@ -112,13 +112,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             .replace("\"", ""),
                         )
                         .await
-                        .unwrap();
+                        ?;
                     let json_result =
                         mk_lib_compression::mk_lib_compression::mk_decompress_gz_bytes(
                             fetch_result_movie,
                         )
                         .await
-                        .unwrap();
+                        ?;
                     // Please note that the data is NOT in id order
                     let mut record_count = 0;
                     let mut skipped_rows = 0usize;
@@ -129,7 +129,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 continue;
                             }
                             let metadata_struct: MetadataMovie =
-                                serde_json::from_str(json_item.trim()).unwrap();
+                                serde_json::from_str(json_item.trim())?;
                             let Some(metadata_id) = metadata_struct.id else {
                                 continue;
                             };
@@ -139,12 +139,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     metadata_id,
                                 )
                                 .await
-                                .unwrap();
+                                ?;
                             if result == false {
                                 let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
                                                                                                                               "themoviedb".to_string(),
                                                                                                                               mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
-                                                                                                                              metadata_id).await.unwrap();
+                                                                                                                              metadata_id).await?;
                                 if download_result == false {
                                     record_count += 1;
                                     if record_count > record_limit {
@@ -155,7 +155,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                             uuid::Uuid::now_v7(),
                                                                                                             Some(metadata_id),
-                                                                                                            "Fetch".to_string(), None).await.unwrap();
+                                                                                                            "Fetch".to_string(), None).await?;
                                 }
                             }
                         }
@@ -165,7 +165,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         "http://files.tmdb.org/p/exports/tv_series_ids_{}.json.gz",
                     )
                     .await
-                    .unwrap();
+                    ?;
                     // grab the TV id's
                     let fetch_result_tv =
                         mk_lib_network::mk_lib_network::mk_network_download_file_to_vec(
@@ -176,13 +176,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             .replace("\"", ""),
                         )
                         .await
-                        .unwrap();
+                        ?;
                     let json_result =
                         mk_lib_compression::mk_lib_compression::mk_decompress_gz_bytes(
                             fetch_result_tv,
                         )
                         .await
-                        .unwrap();
+                        ?;
                     let mut record_count = 0;
                     let mut skipped_rows = 0usize;
                     for json_item in json_result.lines() {
@@ -192,7 +192,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 continue;
                             }
                             let metadata_struct: MetadataTV =
-                                serde_json::from_str(json_item.trim()).unwrap();
+                                serde_json::from_str(json_item.trim())?;
                             let Some(metadata_id) = metadata_struct.id else {
                                 continue;
                             };
@@ -202,12 +202,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     metadata_id,
                                 )
                                 .await
-                                .unwrap();
+                                ?;
                             if result == false {
                                 let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
                                                                                                                               "themoviedb".to_string(),
                                                                                                                               mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
-                                                                                                                              metadata_id).await.unwrap();
+                                                                                                                              metadata_id).await?;
                                 if download_result == false {
                                     record_count += 1;
                                     if record_count > record_limit {
@@ -218,7 +218,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                             uuid::Uuid::now_v7(),
                                                                                                             Some(metadata_id),
-                                                                                                            "Fetch".to_string(), None).await.unwrap();
+                                                                                                            "Fetch".to_string(), None).await?;
                                 }
                             }
                         }
@@ -227,7 +227,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     let date_to_use =
                         find_date_to_use("http://files.tmdb.org/p/exports/person_ids_{}.json.gz")
                             .await
-                            .unwrap();
+                            ?;
                     // grab the Person id's
                     let fetch_result_person =
                         mk_lib_network::mk_lib_network::mk_network_download_file_to_vec(
@@ -238,13 +238,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             .replace("\"", ""),
                         )
                         .await
-                        .unwrap();
+                        ?;
                     let json_result =
                         mk_lib_compression::mk_lib_compression::mk_decompress_gz_bytes(
                             fetch_result_person,
                         )
                         .await
-                        .unwrap();
+                        ?;
                     let mut record_count = 0;
                     let mut skipped_rows = 0usize;
                     for json_item in json_result.lines() {
@@ -254,7 +254,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 continue;
                             }
                             let metadata_struct: MetadataPerson =
-                                serde_json::from_str(json_item.trim()).unwrap();
+                                serde_json::from_str(json_item.trim())?;
                             let Some(metadata_id) = metadata_struct.id else {
                                 continue;
                             };
@@ -264,12 +264,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     metadata_id,
                                 )
                                 .await
-                                .unwrap();
+                                ?;
                             if result == false {
                                 let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
                                                                                                                               "themoviedb".to_string(),
                                                                                                                               mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
-                                                                                                                              metadata_id).await.unwrap();
+                                                                                                                              metadata_id).await?;
                                 if download_result == false {
                                     record_count += 1;
                                     if record_count > record_limit {
@@ -280,7 +280,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
                                                                                                             uuid::Uuid::now_v7(),
                                                                                                             Some(metadata_id),
-                                                                                                            "Fetch".to_string(), None).await.unwrap();
+                                                                                                            "Fetch".to_string(), None).await?;
                                 }
                             }
                         }
@@ -290,7 +290,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         "http://files.tmdb.org/p/exports/collection_ids_{}.json.gz",
                     )
                     .await
-                    .unwrap();
+                    ?;
                     // grab the Collection id's
                     let fetch_result_collection =
                         mk_lib_network::mk_lib_network::mk_network_download_file_to_vec(
@@ -301,13 +301,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             .replace("\"", ""),
                         )
                         .await
-                        .unwrap();
+                        ?;
                     let json_result =
                         mk_lib_compression::mk_lib_compression::mk_decompress_gz_bytes(
                             fetch_result_collection,
                         )
                         .await
-                        .unwrap();
+                        ?;
                     let mut record_count = 0;
                     let mut skipped_rows = 0usize;
                     for json_item in json_result.lines() {
@@ -317,7 +317,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 continue;
                             }
                             let metadata_struct: MetadataCollection =
-                                serde_json::from_str(json_item.trim()).unwrap();
+                                serde_json::from_str(json_item.trim())?;
                             let Some(metadata_id) = metadata_struct.id else {
                                 continue;
                             };
@@ -327,12 +327,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     metadata_id,
                                 )
                                 .await
-                                .unwrap();
+                                ?;
                             if result == false {
                                 let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
                                                                                                                               "themoviedb".to_string(),
                                                                                                                               mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::COLLECTION,
-                                                                                                                              metadata_id).await.unwrap();
+                                                                                                                              metadata_id).await?;
                                 if download_result == false {
                                     record_count += 1;
                                     if record_count > record_limit {
@@ -343,7 +343,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::COLLECTION,
                                                                                                             uuid::Uuid::now_v7(),
                                                                                                             Some(metadata_id),
-                                                                                                            "Fetch".to_string(), None).await.unwrap();
+                                                                                                            "Fetch".to_string(), None).await?;
                                 }
                             }
                         }
@@ -352,7 +352,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     let option_config_json: serde_json::Value =
                     mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool_ro)
                         .await
-                        .unwrap();
+                        ?;
                     // process movie changes
                     let url_result = mk_lib_network::mk_lib_network::mk_data_from_url(
                         format!(
@@ -362,9 +362,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .replace("\"", ""),
                     )
                     .await
-                    .unwrap();
+                    ?;
                     println!("one {:?}", url_result);
-                    let resp: ResponseMetadata = serde_json::from_str(&url_result.trim()).unwrap();
+                    let resp: ResponseMetadata = serde_json::from_str(&url_result.trim())?;
                     for json_item in resp.results {
                         println!("movie item {}", json_item.id);
                         // verify it's not already in the database
@@ -374,12 +374,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 json_item.id,
                             )
                             .await
-                            .unwrap();
+                            ?;
                         if result == false {
                             let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
                                                                                                                                       "themoviedb".to_string(),
                                                                                                                                       mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
-                                                                                                                                      json_item.id).await.unwrap();
+                                                                                                                                      json_item.id).await?;
                             if download_result == false {
                                 let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
                                                                                                                     "themoviedb".to_string(),
@@ -408,8 +408,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .replace("\"", ""),
                     )
                     .await
-                    .unwrap();
-                    let resp: ResponseMetadata = serde_json::from_str(&url_result.trim()).unwrap();
+                    ?;
+                    let resp: ResponseMetadata = serde_json::from_str(&url_result.trim())?;
                     for json_item in resp.results {
                         println!("tv item {}", json_item.id);
                         // verify it's not already in the database
@@ -419,12 +419,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 json_item.id,
                             )
                             .await
-                            .unwrap();
+                            ?;
                         if result == false {
                             let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
                                                                                                                                           "themoviedb".to_string(),
                                                                                                                                           mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
-                                                                                                                                          json_item.id).await.unwrap();
+                                                                                                                                          json_item.id).await?;
                             if download_result == false {
                                 let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
                                                                                                                         "themoviedb".to_string(),
@@ -453,8 +453,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .replace("\"", ""),
                     )
                     .await
-                    .unwrap();
-                    let resp: ResponseMetadata = serde_json::from_str(&url_result).unwrap();
+                    ?;
+                    let resp: ResponseMetadata = serde_json::from_str(&url_result)?;
                     for json_item in resp.results {
                         println!("person item {}", json_item.id);
                         // verify it's not already in the database
@@ -464,12 +464,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 json_item.id,
                             )
                             .await
-                            .unwrap();
+                            ?;
                         if result == false {
                             let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
                                                                                                                                           "themoviedb".to_string(),
                                                                                                                                           mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
-                                                                                                                                          json_item.id).await.unwrap();
+                                                                                                                                          json_item.id).await?;
                             if download_result == false {
                                 let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
                                                                                                                         "themoviedb".to_string(),

@@ -11,9 +11,9 @@ const HASH_BLK_SIZE: u64 = 65536;
 pub async fn provider_opensubtitles_create_hash(
     filename: String,
 ) -> Result<String, std::io::Error> {
-    let fsize = fs::metadata(filename.clone()).unwrap().len();
+    let fsize = fs::metadata(&filename)?.len();
     if fsize > HASH_BLK_SIZE {
-        let file = File::open(filename).unwrap();
+        let file = File::open(&filename)?;
         let mut buf = [0u8; 8];
         let mut word: u64;
         let mut hash_val: u64 = fsize; // seed hash with file size

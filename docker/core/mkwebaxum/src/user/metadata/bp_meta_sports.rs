@@ -76,7 +76,7 @@ pub async fn user_metadata_sports(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let pagination_count =
@@ -188,7 +188,7 @@ pub async fn user_metadata_sports_detail(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let template = TemplateMetaSportsDetailContext {
@@ -196,7 +196,7 @@ pub async fn user_metadata_sports_detail(
             template_data_exists: &false,
             page_title: Some("MediaKraken Metadata Sports Detail".to_string()),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

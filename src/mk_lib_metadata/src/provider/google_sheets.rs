@@ -5,6 +5,7 @@
 // https://docs.google.com/spreadsheets/d/1IgK7tIEKngP59PUOs_lsF4P1hbSRIG71tgxncpu1Mws/edit?gid=402351217#gid=402351217
 
 use mk_lib_network;
+use std::error::Error;
 
 pub async fn provider_google_sheets_fetch(
     sheet_id: String,
@@ -14,7 +15,6 @@ pub async fn provider_google_sheets_fetch(
         "https://docs.google.com/spreadsheets/d/{}/export?format={}&gid=0",
         sheet_id, export_type
     ))
-    .await
-    .unwrap();
+    .await?;
     Ok(sheet_data)
 }

@@ -1,14 +1,13 @@
 // https://github.com/jonhoo/rust-ibverbs
 
-use serde_json::json;
-use stdext::function_name;
-
-pub async fn mk_lib_network_ibverbs_discover() {
+pub async fn mk_lib_network_ibverbs_discover() -> Result<(), Box<dyn std::error::Error>> {
     let ctx = ibverbs::devices()
-        .unwrap()
+        .map_err(|e| format!("failed to list ibverbs devices: {e}"))?
         .iter()
         .next()
-        .expect("no rdma device available")
+        .ok_or("no rdma device available")?
         .open()
-        .unwrap();
+        .map_err(|e| format!("failed to open rdma device: {e}"))?;
+    let _ctx = ctx;
+    Ok(())
 }

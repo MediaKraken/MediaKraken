@@ -45,15 +45,15 @@ fn latest_stable_version(index_html: &str) -> Option<String> {
 async fn main() -> Result<(), Box<dyn Error>> {
     let (_rabbit_connection, rabbit_channel) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mklibretrocorefetchupdate")
-            .await
-            .unwrap();
+            .await?
+            ?;
 
     let mut rabbit_consumer = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer(
         "mklibretrocorefetchupdate",
         &rabbit_channel,
     )
-    .await
-    .unwrap();
+    .await?
+    ?;
 
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
@@ -73,7 +73,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         mk_lib_hash::mk_lib_hash_crc32::mk_file_hash_crc32(
                             &entry.path().display().to_string()
                         )
-                        .await
+                        .await?
                     );
                     let file_name = entry.path().display().to_string();
                     emulation_cores.insert(
@@ -81,7 +81,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         mk_lib_hash::mk_lib_hash_crc32::mk_file_hash_crc32(
                             &entry.path().display().to_string(),
                         )
-                        .await
+                        .await?
                         .unwrap(),
                     );
                 }
@@ -91,23 +91,23 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let stable_root = "http://buildbot.libretro.com/stable/";
                 let stable_index =
                     mk_lib_network::mk_lib_network::mk_data_from_url(stable_root.to_string())
-                        .await
-                        .unwrap();
-                let latest_version = latest_stable_version(&stable_index).unwrap();
+                        .await?
+                        ?;
+                let latest_version = latest_stable_version(&stable_index)?;
                 let libtro_url = format!("{}{}/linux/x86_64/", stable_root, latest_version);
                 let fetch_result = mk_lib_network::mk_lib_network::mk_data_from_url(format!(
                     "{}{}",
                     &libtro_url, ".index-extended"
                 ))
-                .await
-                .unwrap();
+                .await?
+                ?;
                 for libretro_core in fetch_result.split('\n') {
                     if libretro_core.len() > 0 {
                         let mut download_core = false;
                         let mut iter = libretro_core.splitn(3, " ");
-                        let core_date = iter.next().unwrap();
-                        let core_crc32 = iter.next().unwrap();
-                        let core_name = iter.next().unwrap();
+                        let core_date = iter.next()?;
+                        let core_crc32 = iter.next()?;
+                        let core_name = iter.next()?;
                         println!("line: {} {} {}", core_date, core_crc32, core_name);
                         let path_core_name = format!(
                             "/mediakraken/emulation/cores/{}",
@@ -130,14 +130,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 format!("{}{}", &libtro_url, core_name),
                                 &format!("/mediakraken/emulation/cores/{}", core_name),
                             )
-                            .await
-                            .unwrap();
+                            .await?
+                            ?;
                         }
                     }
                 }
                 let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
                     &rabbit_channel,
-                    msg.deliver.unwrap().delivery_tag(),
+                    msg.deliver.map(|d| d.delivery_tag()).unwrap_or(0),
                 )
                 .await;
             }

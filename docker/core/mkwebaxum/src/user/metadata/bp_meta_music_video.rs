@@ -76,7 +76,7 @@ pub async fn user_metadata_music_video(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let pagination_count =
@@ -91,7 +91,7 @@ pub async fn user_metadata_music_video(
             0,
         )
         .await
-        .unwrap();
+        ?;
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
             total_pages,
             page,
@@ -100,7 +100,7 @@ pub async fn user_metadata_music_video(
             pagination_count,
         )
         .await
-        .unwrap();
+        ?;
         let music_video_list =
         mk_lib_database::database_metadata::mk_lib_database_metadata_music_video::mk_lib_database_metadata_music_video_read(
            &state.sqlx_pool_ro,
@@ -109,7 +109,7 @@ pub async fn user_metadata_music_video(
             pagination_count,
         )
         .await
-        .unwrap();
+        ?;
         let mut template_data_exists = false;
         if music_video_list.len() > 0 {
             template_data_exists = true;
@@ -128,7 +128,7 @@ pub async fn user_metadata_music_video(
             status_filter: None,
             base_path: "/user/metadata/music_video".to_string(),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
@@ -156,14 +156,14 @@ pub async fn user_metadata_music_video_detail(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let template = TemplateMetaMusicVideoDetailContext {
             template_data: json!({}),
             page_title: Some("MediaKraken Metadata Music Video Detail".to_string()),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

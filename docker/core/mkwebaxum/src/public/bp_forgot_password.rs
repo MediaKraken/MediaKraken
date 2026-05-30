@@ -11,7 +11,7 @@ struct ForgotPasswordTemplate;
 
 pub async fn public_forgot_password() -> impl IntoResponse {
     let template = ForgotPasswordTemplate {};
-    let reply_html = template.render().unwrap();
+    let reply_html = template.render().map_err(|e| e.to_string())?;
     (StatusCode::OK, Html(reply_html).into_response())
 }
 

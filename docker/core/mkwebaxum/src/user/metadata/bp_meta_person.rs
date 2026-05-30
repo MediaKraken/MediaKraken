@@ -172,7 +172,7 @@ pub async fn user_metadata_person(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let pagination_count =
@@ -245,7 +245,7 @@ pub async fn user_metadata_person(
             status_filter: None,
             base_path: "/user/metadata/person".to_string(),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
@@ -273,14 +273,14 @@ pub async fn user_metadata_person_detail(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let template = TemplateMetaPersonDetailContext {
             template_data: json!({}),
             page_title: Some("MediaKraken Metadata Person Detail".to_string()),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

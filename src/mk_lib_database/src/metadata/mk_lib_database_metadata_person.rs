@@ -129,7 +129,7 @@ pub async fn mk_lib_database_metadata_person_insert(
         r#"insert into mm_metadata_person (mm_metadata_person_guid, mm_metadata_person_name, mm_metadata_person_media_id, mm_metadata_person_meta_json, mm_metadata_person_image) values ($1,$2,$3,$4,$5)"#,
     )
     .bind(uuid_id)
-    .bind(person_json["name"].as_str().unwrap().to_string())
+    .bind(person_json["name"].as_str().unwrap_or("").to_string())
     .bind(media_id)
     .bind(person_json)
     .bind(person_image_path)

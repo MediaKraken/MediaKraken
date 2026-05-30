@@ -114,7 +114,7 @@ pub async fn mk_lib_database_metadata_openlib_author_upsert(
     author_id: &str,
     json_data: &str,
 ) -> Result<(), sqlx::Error> {
-    let json_json: serde_json::Value = serde_json::from_str(json_data).unwrap();
+    let json_json: serde_json::Value = serde_json::from_str(json_data)?;
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         r#"insert into mm_openlib_author (mm_openlib_author_id, mm_openlib_author_json) values ($1,$2) ON CONFLICT(mm_openlib_author_id) DO UPDATE SET mm_openlib_author_json = $3"#,
@@ -133,7 +133,7 @@ pub async fn mk_lib_database_metadata_openlib_edition_upsert(
     edition_id: &str,
     json_data: &str,
 ) -> Result<(), sqlx::Error> {
-    let json_json: serde_json::Value = serde_json::from_str(json_data).unwrap();
+    let json_json: serde_json::Value = serde_json::from_str(json_data)?;
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         r#"insert into mm_openlib_edition (mm_openlib_edition_id, mm_openlib_edition_json) values ($1,$2) ON CONFLICT(mm_openlib_edition_id) DO UPDATE SET mm_openlib_edition_json = $3"#,
@@ -152,7 +152,7 @@ pub async fn mk_lib_database_metadata_openlib_rating_upsert(
     rating_id: &str,
     json_data: &str,
 ) -> Result<(), sqlx::Error> {
-    let json_json: serde_json::Value = serde_json::from_str(json_data).unwrap();
+    let json_json: serde_json::Value = serde_json::from_str(json_data)?;
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         r#"insert into mm_openlib_rating (mm_openlib_rating_id, mm_openlib_rating_json) values ($1,$2) ON CONFLICT(mm_openlib_rating_id) DO UPDATE SET mm_openlib_rating_json = $3"#,
@@ -171,7 +171,7 @@ pub async fn mk_lib_database_metadata_openlib_work_upsert(
     work_id: &str,
     json_data: &str,
 ) -> Result<(), sqlx::Error> {
-    let json_json: serde_json::Value = serde_json::from_str(json_data).unwrap();
+    let json_json: serde_json::Value = serde_json::from_str(json_data)?;
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         r#"insert into mm_openlib_work (mm_openlib_work_id, mm_openlib_work_json) values ($1,$2) ON CONFLICT(mm_openlib_work_id) DO UPDATE SET mm_openlib_work_json = $3"#,

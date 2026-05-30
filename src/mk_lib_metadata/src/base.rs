@@ -175,7 +175,7 @@ pub async fn metadata_search(
         // if download succeeds remove dl
         // TODO....handle list return for title?
         metadata_uuid = provider_televisiontunes::provider_televisiontunes_theme_fetch(
-            download_data.mm_download_path.unwrap(),
+            download_data.mm_download_path.ok_or("missing download_path")?,
             "TODO Fake Path".to_string(),
         )
         .await
@@ -332,7 +332,7 @@ pub async fn metadata_fetch(
     if provider_name == "imvdb" {
         let _imvdb_id = provider_imvdb::provider_imvdb_video_fetch_by_id(
             sqlx_pool,
-            download_data.mm_download_provider_id.unwrap(),
+            download_data.mm_download_provider_id.ok_or("missing provider_id")?,
             download_data.mm_download_new_uuid,
             provider_api_key,
         )
@@ -347,49 +347,63 @@ pub async fn metadata_fetch(
                 )
                 .await;
             }
-            provider_tmdb::provider_tmdb_person_fetch(
+            let provider_id = download_data.mm_download_provider_id.ok_or("missing provider_id")?;
+            if let Err(e) = provider_tmdb::provider_tmdb_person_fetch(
                 sqlx_pool,
-                download_data.mm_download_provider_id.unwrap(),
+                provider_id,
                 download_data.mm_download_new_uuid,
                 provider_api_key,
             )
-            .await;
+            .await
+            {
+                eprintln!("TMDB person fetch failed: {e}");
+            }
         } else if download_data.mm_download_que_type
             == mk_lib_common_enum_media_type::DLMediaType::MOVIE
         {
             // removing the imdb check.....as com_tmdb_metadata_by_id converts it
-            provider_tmdb::provider_tmdb_movie_fetch(
+            let provider_id = download_data.mm_download_provider_id.ok_or("missing provider_id")?;
+            if let Err(e) = provider_tmdb::provider_tmdb_movie_fetch(
                 sqlx_pool,
-                download_data.mm_download_provider_id.unwrap(),
+                provider_id,
                 download_data.mm_download_new_uuid,
                 provider_api_key,
             )
-            .await;
+            .await
+            {
+                eprintln!("TMDB movie fetch failed: {e}");
+            }
         } else if download_data.mm_download_que_type
             == mk_lib_common_enum_media_type::DLMediaType::TV
         {
-            provider_tmdb::provider_tmdb_tv_fetch(
+            let provider_id = download_data.mm_download_provider_id.ok_or("missing provider_id")?;
+            if let Err(e) = provider_tmdb::provider_tmdb_tv_fetch(
                 sqlx_pool,
-                download_data.mm_download_provider_id.unwrap(),
+                provider_id,
                 download_data.mm_download_new_uuid,
                 provider_api_key,
             )
-            .await;
+            .await
+            {
+                eprintln!("TMDB TV fetch failed: {e}");
+            }
         } else if download_data.mm_download_que_type
             == mk_lib_common_enum_media_type::DLMediaType::COLLECTION
         {
-            provider_tmdb::provider_tmdb_collection_fetch(
+            let provider_id = download_data.mm_download_provider_id.ok_or("missing provider_id")?;
+            if let Err(e) = provider_tmdb::provider_tmdb_collection_fetch(
                 sqlx_pool,
-                download_data.mm_download_provider_id.unwrap(),
+                provider_id,
                 download_data.mm_download_new_uuid,
                 provider_api_key,
             )
-            .await;
+            .await
+            {
+                eprintln!("TMDB collection fetch failed: {e}");
+            }
         }
 
     }
-    //  else if provider_name == "upcitemdb" {
-    //     let _upcitemdb_id = provider_upcitemdb::provider_upcitemdb_fetch_by_upc(
     //         sqlx_pool,
     //         vec![&download_data.mm_download_provider_id.unwrap()],
     //         &provider_api_key,

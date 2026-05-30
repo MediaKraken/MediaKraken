@@ -17,8 +17,7 @@ pub async fn telnet_connect_login(
         .await?;
     telnet_instance
         .login(&telnet_user, &telnet_password)
-        .await
-        .unwrap();
+        .await?;
     Ok(telnet_instance)
 }
 
@@ -34,13 +33,14 @@ pub async fn telnet_connect(
     Ok(telnet_instance)
 }
 
-pub async fn telnet_execute_normal(mut telnet_instance: Telnet, telnet_command: String) {
+pub async fn telnet_execute_normal(mut telnet_instance: Telnet, telnet_command: String) -> Result<(), Box<dyn std::error::Error>> {
     telnet_instance
         .normal_execute(&telnet_command)
-        .await
-        .unwrap();
+        .await?;
+    Ok(())
 }
 
-pub async fn telnet_execute(mut telnet_instance: Telnet, telnet_command: String) {
-    telnet_instance.execute(&telnet_command).await.unwrap();
+pub async fn telnet_execute(mut telnet_instance: Telnet, telnet_command: String) -> Result<(), Box<dyn std::error::Error>> {
+    telnet_instance.execute(&telnet_command).await?;
+    Ok(())
 }

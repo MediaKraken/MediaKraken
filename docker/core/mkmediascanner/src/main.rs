@@ -19,18 +19,18 @@ use mk_lib_share::mk_lib_smb::FileMetadata;
 use mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push;
 
 lazy_static! {
-    static ref STACK_CD: Regex = Regex::new(r"(?i)-cd\d").unwrap();
-    static ref STACK_CD1: Regex = Regex::new(r"(?i)-cd1(?!\d)").unwrap();
-    static ref STACK_PART: Regex = Regex::new(r"(?i)-part\d").unwrap();
-    static ref STACK_PART1: Regex = Regex::new(r"(?i)-part1(?!\d)").unwrap();
-    static ref STACK_DVD: Regex = Regex::new(r"(?i)-dvd\d").unwrap();
-    static ref STACK_DVD1: Regex = Regex::new(r"(?i)-dvd1(?!\d)").unwrap();
-    static ref STACK_PT: Regex = Regex::new(r"(?i)-pt\d").unwrap();
-    static ref STACK_PT1: Regex = Regex::new(r"(?i)-pt1(?!\d)").unwrap();
-    static ref STACK_DISK: Regex = Regex::new(r"(?i)-disk\d").unwrap();
-    static ref STACK_DISK1: Regex = Regex::new(r"(?i)-disk1(?!\d)").unwrap();
-    static ref STACK_DISC: Regex = Regex::new(r"(?i)-disc\d").unwrap();
-    static ref STACK_DISC1: Regex = Regex::new(r"(?i)-disc1(?!\d)").unwrap();
+    static ref STACK_CD: Regex = Regex::new(r"(?i)-cd\d")?;
+    static ref STACK_CD1: Regex = Regex::new(r"(?i)-cd1(?!\d)")?;
+    static ref STACK_PART: Regex = Regex::new(r"(?i)-part\d")?;
+    static ref STACK_PART1: Regex = Regex::new(r"(?i)-part1(?!\d)")?;
+    static ref STACK_DVD: Regex = Regex::new(r"(?i)-dvd\d")?;
+    static ref STACK_DVD1: Regex = Regex::new(r"(?i)-dvd1(?!\d)")?;
+    static ref STACK_PT: Regex = Regex::new(r"(?i)-pt\d")?;
+    static ref STACK_PT1: Regex = Regex::new(r"(?i)-pt1(?!\d)")?;
+    static ref STACK_DISK: Regex = Regex::new(r"(?i)-disk\d")?;
+    static ref STACK_DISK1: Regex = Regex::new(r"(?i)-disk1(?!\d)")?;
+    static ref STACK_DISC: Regex = Regex::new(r"(?i)-disc\d")?;
+    static ref STACK_DISC1: Regex = Regex::new(r"(?i)-disc1(?!\d)")?;
 }
 
 fn mk_nfs_uri(share_info: &DBShareList, uri: &str) -> String {

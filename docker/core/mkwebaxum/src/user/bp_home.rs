@@ -39,7 +39,7 @@ pub async fn user_home(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let mut new_media = false;
@@ -48,7 +48,7 @@ pub async fn user_home(
             7,
         )
         .await
-        .unwrap()
+        .unwrap_or(0)
             > 0
         {
             new_media = true;
@@ -58,7 +58,7 @@ pub async fn user_home(
             template_data_user_media_queue: &true,
             page_title: Some("MediaKraken".to_string()),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

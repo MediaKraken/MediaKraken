@@ -21,7 +21,6 @@ pub async fn provider_openlibrary_cover_fetch(
         format!("http://covers.openlibrary.org/b/isbn/{}-L.jpg", isbn).to_string(),
         &file_path,
     )
-    .await
-    .unwrap();
+    .await?;
     Ok(())
 }

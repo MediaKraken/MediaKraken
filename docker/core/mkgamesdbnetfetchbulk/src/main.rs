@@ -10,26 +10,26 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
     let (sqlx_pool_rw, sqlx_pool_ro) = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120)
         .await
-        .unwrap();
+        ?;
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await;
 
     let _option_config_json: Value =
         mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool_ro)
             .await
-            .unwrap();
+            ?;
 
     let (_rabbit_connection, rabbit_channel) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkgamesdbnetfetchbulk")
             .await
-            .unwrap();
+            ?;
 
     let mut rabbit_consumer = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer(
         "mkgamesdbnetfetchbulk",
         &rabbit_channel,
     )
     .await
-    .unwrap();
+    ?;
 
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
@@ -55,7 +55,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 */
                 let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
                     &rabbit_channel,
-                    msg.deliver.unwrap().delivery_tag(),
+                    msg.deliver.map(|d| d.delivery_tag()).unwrap_or(0),
                 )
                 .await;
             }

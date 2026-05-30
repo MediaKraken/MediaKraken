@@ -47,7 +47,7 @@ pub async fn admin_user(
     .await
     {
         let template = TemplateError403Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let pagination_count =
@@ -60,7 +60,7 @@ pub async fn admin_user(
             String::new(),
         )
         .await
-        .unwrap();
+        ?;
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
             total_pages,
             page,
@@ -69,14 +69,14 @@ pub async fn admin_user(
             pagination_count,
         )
         .await
-        .unwrap();
+        ?;
         let user_list = mk_lib_database::mk_lib_database_user::mk_lib_database_user_read(
             &state.sqlx_pool_ro,
             db_offset,
             pagination_count,
         )
         .await
-        .unwrap();
+        ?;
         let page_usize = page as usize;
         let template = TemplateAdminUserContext {
             template_data: &user_list,
@@ -84,7 +84,7 @@ pub async fn admin_user(
             page: &page_usize,
             page_title: Some("MediaKraken Admin User".to_string()),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
@@ -111,13 +111,13 @@ pub async fn admin_user_detail(
     .await
     {
         let template = TemplateError403Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let template = TemplateAdminUserDetailContext {
             page_title: Some("MediaKraken Admin User".to_string()),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
@@ -142,11 +142,11 @@ pub async fn admin_user_detail(
 //     .await
 //     {
 //         let template = TemplateError403Context {};
-//         let reply_html = template.render().unwrap();
+//         let reply_html = template.render().map_err(|e| e.to_string())?;
 //         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
 //     } else {
 //         let template = TemplateAdminUserDeleteContext {};
-//         let reply_html = template.render().unwrap();
+//         let reply_html = template.render().map_err(|e| e.to_string())?;
 //         (StatusCode::OK, Html(reply_html).into_response())
 //     }
 // }

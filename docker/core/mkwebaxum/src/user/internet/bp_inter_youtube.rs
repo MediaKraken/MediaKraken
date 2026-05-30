@@ -57,7 +57,7 @@ pub async fn user_inter_youtube(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         return (StatusCode::UNAUTHORIZED, Html(reply_html).into_response());
     }
 
@@ -74,7 +74,7 @@ pub async fn user_inter_youtube(
         page_title: Some("MediaKraken Youtube".to_string()),
     };
 
-    let reply_html = template.render().unwrap();
+    let reply_html = template.render().map_err(|e| e.to_string())?;
     (StatusCode::OK, Html(reply_html).into_response())
 }
 
@@ -101,7 +101,7 @@ pub async fn user_inter_youtube_detail(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         return (StatusCode::UNAUTHORIZED, Html(reply_html).into_response());
     }
 
@@ -118,7 +118,7 @@ pub async fn user_inter_youtube_detail(
         template_embed_url: embed_url.as_str(),
         page_title: Some("MediaKraken Youtube Playback".to_string()),
     };
-    let reply_html = template.render().unwrap();
+    let reply_html = template.render().map_err(|e| e.to_string())?;
     (StatusCode::OK, Html(reply_html).into_response())
 }
 

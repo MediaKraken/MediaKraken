@@ -205,7 +205,7 @@ pub async fn user_metadata_game(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let pagination_count =
@@ -222,7 +222,7 @@ pub async fn user_metadata_game(
             status_filter.clone().unwrap_or_default(),
         )
         .await
-        .unwrap();
+        ?;
         let pagination_html = build_game_pagination(
             total_pages,
             page,
@@ -231,7 +231,7 @@ pub async fn user_metadata_game(
             genre.as_deref(),
             status_filter.as_deref(),
         )
-        .unwrap();
+        ?;
         let game_list =
         mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_read(
            &state.sqlx_pool_ro,
@@ -243,7 +243,7 @@ pub async fn user_metadata_game(
             pagination_count,
         )
         .await
-        .unwrap();
+        ?;
         let status_options = vec![
             FilterOption {
                 label: "Favorite".to_string(),
@@ -303,7 +303,7 @@ pub async fn user_metadata_game(
             genre_options: &genre_options,
             base_path: "/user/metadata/game".to_string(),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
@@ -331,14 +331,14 @@ pub async fn user_metadata_game_detail(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let template = TemplateMetaGameDetailContext {
             template_data: json!({}),
             page_title: Some("MediaKraken Metadata Game Detail".to_string()),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

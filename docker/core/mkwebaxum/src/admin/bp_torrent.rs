@@ -47,19 +47,19 @@ pub async fn admin_torrent(
 ) -> impl IntoResponse {
     if !user_can_admin_torrent(&method, &auth).await {
         let template = TemplateError403Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let transmission_client =
             mk_lib_network::mk_lib_network_transmission::mk_network_transmission_login()
                 .await
-                .unwrap();
+                ?;
         let transmission_torrents =
             mk_lib_network::mk_lib_network_transmission::mk_network_transmission_list_torrents(
                 transmission_client,
             )
             .await
-            .unwrap();
+            ?;
         let transmission_torrents_json = match serde_json::to_string(&transmission_torrents) {
             Ok(value) => value,
             Err(_) => "[]".to_string(),
@@ -68,7 +68,7 @@ pub async fn admin_torrent(
             template_data_json: &transmission_torrents_json,
             page_title: Some("MediaKraken Admin Torrent".to_string()),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

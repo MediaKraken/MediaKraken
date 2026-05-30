@@ -6,18 +6,18 @@ pub async fn mk_network_ssh_command(
     host_ip: &str,
     host_port: u16,
     command_string: &str,
-) {
+) -> Result<(), Box<dyn std::error::Error>> {
     let mut session = ssh::create_session()
         .username(username)
         .password(password)
-        //.private_key_path("./id_rsa")
         .connect(format!("{}:{}", host_ip, host_port))
-        .unwrap()
+        .map_err(|e| format!("ssh connect failed: {e}"))?
         .run_local();
-    let exec = session.open_exec().unwrap();
-    let vec: Vec<u8> = exec.send_command(command_string).unwrap();
-    println!("{}", String::from_utf8(vec).unwrap());
+    let exec = session.open_exec().map_err(|e| format!("open exec failed: {e}"))?;
+    let vec: Vec<u8> = exec.send_command(command_string).map_err(|e| format!("send command failed: {e}"))?;
+    println!("{}", String::from_utf8(vec).map_err(|e| format!("invalid utf8: {e}"))?);
     session.close();
+    Ok(())
 }
 
 pub async fn mk_network_ssh_upload(
@@ -27,16 +27,16 @@ pub async fn mk_network_ssh_upload(
     host_port: u16,
     local_file: &str,
     remote_file: &str,
-) {
+) -> Result<(), Box<dyn std::error::Error>> {
     let mut session = ssh::create_session()
         .username(username)
         .password(password)
-        //.private_key_path("./id_rsa")
         .connect(format!("{}:{}", host_ip, host_port))
-        .unwrap()
+        .map_err(|e| format!("ssh connect failed: {e}"))?
         .run_local();
-    let scp = session.open_scp().unwrap();
-    scp.upload(local_file, remote_file).unwrap();
+    let scp = session.open_scp().map_err(|e| format!("open scp failed: {e}"))?;
+    scp.upload(local_file, remote_file).map_err(|e| format!("scp upload failed: {e}"))?;
+    Ok(())
 }
 
 pub async fn mk_network_ssh_download(
@@ -46,14 +46,14 @@ pub async fn mk_network_ssh_download(
     host_port: u16,
     local_file: &str,
     remote_file: &str,
-) {
+) -> Result<(), Box<dyn std::error::Error>> {
     let mut session = ssh::create_session()
         .username(username)
         .password(password)
-        //.private_key_path("./id_rsa")
         .connect(format!("{}:{}", host_ip, host_port))
-        .unwrap()
+        .map_err(|e| format!("ssh connect failed: {e}"))?
         .run_local();
-    let scp = session.open_scp().unwrap();
-    scp.download(local_file, remote_file).unwrap();
+    let scp = session.open_scp().map_err(|e| format!("open scp failed: {e}"))?;
+    scp.download(local_file, remote_file).map_err(|e| format!("scp download failed: {e}"))?;
+    Ok(())
 }

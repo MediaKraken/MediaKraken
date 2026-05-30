@@ -27,7 +27,7 @@ pub async fn metadata_guessit(
     if guessit_data.title().len() > 0 {
         if guessit_data.year().is_some() {
             if guessit_data.title().to_lowercase() == metadata_last_title
-                && guessit_data.year().unwrap() == metadata_last_year
+                && guessit_data.year().ok_or("year is_some but not a value")? == metadata_last_year
             {
                 // matches last media scanned, so set with that metadata id
                 metadata_uuid = metadata_last_uuid;
@@ -40,7 +40,7 @@ pub async fn metadata_guessit(
         metadata_last_uuid = metadata_uuid;
         metadata_last_title = guessit_data.title().to_lowercase();
         if guessit_data.year().is_some() {
-            metadata_last_year = guessit_data.year().unwrap();
+            metadata_last_year = guessit_data.year().ok_or("year is_some but not a value")?;
         } else {
             metadata_last_year = 0;
         }

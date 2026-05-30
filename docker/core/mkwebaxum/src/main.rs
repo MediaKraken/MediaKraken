@@ -332,14 +332,21 @@ async fn main() {
     }
     // connect to db and do a version check
     let (sqlx_pool_rw, sqlx_pool_ro) =
-        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120)
-            .await
-            .unwrap();
-    let _result = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(
+        match mk_lib_database::mk_lib_database::mk_lib_database_open_pool(50, 120).await {
+            Ok(pools) => pools,
+            Err(e) => {
+                eprintln!("Failed to open database pool: {e}");
+                return;
+            }
+        };
+    if let Err(e) = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(
         &sqlx_pool_ro,
         false,
     )
-    .await;
+    .await
+    {
+        eprintln!("Database version check failed: {e}");
+    }
 
     // Session config with security flags.
     // - secure_cookies: sent only over HTTPS (nginx ingress handles TLS).
@@ -354,10 +361,13 @@ async fn main() {
         .with_max_age(Duration::from_secs(3600));
     let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
     let session_store =
-        SessionStore::<SessionPgPool>::new(Some(sqlx_pool_rw.clone().into()), session_config)
-            .await
-            .unwrap();
-
+        match SessionStore::<SessionPgPool>::new(Some(sqlx_pool_rw.clone().into()), session_config).await {
+            Ok(store) => store,
+            Err(e) => {
+                eprintln!("Failed to create session store: {e}");
+                return;
+            }
+        };
     let (prometheus_layer, metric_handle) = PrometheusMetricLayer::pair();
 
     // build our application with routes
@@ -766,11 +776,19 @@ async fn main() {
     // add a fallback service for handling routes to unknown paths
     let app = app.fallback(bp_error::general_not_found);
 
-    let listener = TcpListener::bind("0.0.0.0:8080").await.unwrap();
-    axum::serve(listener, app)
+    let listener = match TcpListener::bind("0.0.0.0:8080").await {
+        Ok(l) => l,
+        Err(e) => {
+            eprintln!("Failed to bind to port 8080: {e}");
+            return;
+        }
+    };
+    if let Err(e) = axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
         .await
-        .unwrap();
+    {
+        eprintln!("Server error: {e}");
+    }
 }
 
 async fn shutdown_signal() {

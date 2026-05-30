@@ -3,6 +3,7 @@
 use flickr::FlickrAPI;
 use flickr::methods::favorites::GetListResult;
 use flickr::methods::favorites::Photos;
+use std::error::Error;
 
 pub async fn provider_flickr_login(
     api_key: &str,
@@ -16,6 +17,6 @@ pub async fn provider_flickr_favorites_photo_list(
     mut flickr_api: FlickrAPI,
 ) -> Result<Photos, Box<dyn std::error::Error>> {
     let res = flickr_api.favorites().get_list().perform()?;
-    let results = res.photos.unwrap();
+    let results = res.photos.ok_or("no photos in flickr response")?;
     Ok(results)
 }

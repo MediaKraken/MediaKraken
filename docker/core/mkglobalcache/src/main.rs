@@ -317,7 +317,7 @@ mod tests {
     #[test]
     fn api_brands_deserializes_expected_payload() {
         let payload = r#"[{"$id":"1","Name":"Sony","Links":[]}]"#;
-        let parsed: Vec<ApiBrands> = serde_json::from_str(payload).unwrap();
+        let parsed: Vec<ApiBrands> = serde_json::from_str(payload)?;
         assert_eq!(parsed.len(), 1);
         assert_eq!(parsed[0].brand_id, "1");
         assert_eq!(parsed[0].brand_name, "Sony");

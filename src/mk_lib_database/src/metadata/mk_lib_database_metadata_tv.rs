@@ -101,7 +101,7 @@ pub async fn mk_lib_database_metadata_tv_insert(
 ) -> Result<(), sqlx::Error> {
     let mut original_name = None;
     if !data_json["original_name"].is_null() && data_json["name"] != data_json["original_name"] {
-        original_name = Some(data_json["original_name"].as_str().unwrap());
+        original_name = Some(data_json["original_name"].as_str().unwrap_or(""));
     }
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(

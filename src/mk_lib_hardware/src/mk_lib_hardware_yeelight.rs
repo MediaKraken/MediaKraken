@@ -28,7 +28,7 @@ let client = YeeClient::new()?;
 
       light.set_ct_abx(3500,
                        Transition::smooth(Duration::from_millis(400))
-                           .unwrap())?;
+                           // .unwrap())?;
 
       light.toggle()?;
   } */

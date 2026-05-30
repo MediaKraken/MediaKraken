@@ -10,24 +10,24 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let (_rabbit_connection, rabbit_channel) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkhardwarescanner")
             .await
-            .unwrap();
+            ?;
 
     let mut rabbit_consumer =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mkhardwarescanner", &rabbit_channel)
             .await
-            .unwrap();
+            ?;
 
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {
                 let json_message: Value =
-                    serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
+                    serde_json::from_str(&String::from_utf8_lossy(&payload))?;
                 // media_devices = []
 
                 // chromecast discover
                 mk_lib_hardware::mk_lib_hardware_chromecast::mk_hardware_chromecast_discover()
                     .await
-                    .unwrap();
+                    ?;
 
                 // crestron device discover
                 // # crestron_devices = common_hardware_crestron.com_hardware_crestron_discover()
@@ -42,7 +42,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // {
                 //     mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"HWScan": "After DLNA"}))
                 //         .await
-                //         .unwrap();
+                //         ?;
                 // }
 
                 // hdhomerun tuner discovery
@@ -79,12 +79,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // phillips hue hub discover
                 // mk_lib_hardware_phue::mk_hardware_phue_discover()
                 //     .await
-                //     .unwrap();
+                //     ?;
                 // #[cfg(debug_assertions)]
                 // {
                 //     mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"HWScan": "After PHue"}))
                 //         .await
-                //         .unwrap();
+                //         ?;
                 // }
                 // roku discover
                 // for roku in common_hardware_roku_network.com_roku_network_discovery():
@@ -118,7 +118,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 //                                file_ext=None)
                 let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
                     &rabbit_channel,
-                    msg.deliver.unwrap().delivery_tag(),
+                    msg.deliver.map(|d| d.delivery_tag()).unwrap_or(0),
                 )
                 .await;
             }

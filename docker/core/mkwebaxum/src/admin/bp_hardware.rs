@@ -40,7 +40,7 @@ pub async fn admin_hardware(
     .await
     {
         let template = TemplateError403Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let hardware_list =
@@ -48,7 +48,7 @@ pub async fn admin_hardware(
                &state.sqlx_pool_ro,
             )
             .await
-            .unwrap();
+            ?;
         let mut hardware_data: bool = false;
         if hardware_list.len() > 0 {
             hardware_data = true;
@@ -58,7 +58,7 @@ pub async fn admin_hardware(
             template_data_exists: &hardware_data,
             page_title: Some("MediaKraken Admin Hardware".to_string()),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

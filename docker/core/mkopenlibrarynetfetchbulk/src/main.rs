@@ -34,24 +34,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (sqlx_pool_rw, sqlx_pool_ro) =
         mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120)
             .await
-            .unwrap();
+            ?;
 
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await
-        .unwrap();
+        ?;
 
     // 2. Initialize RabbitMQ using your library
     let (_rabbit_connection, rabbit_channel) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkopenlibrarynetfetchbulk")
             .await
-            .unwrap();
+            ?;
 
     let mut rabbit_consumer = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer(
         "mkopenlibrarynetfetchbulk",
         &rabbit_channel,
     )
     .await
-    .unwrap();
+    ?;
 
     println!("📥 Worker online. Waiting for 'START_BULK_LOAD' signal...");
 

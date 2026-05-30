@@ -46,7 +46,7 @@ pub async fn admin_upc_import(
     .await
     {
         let template = TemplateError403Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let template = TemplateMediaUPCContext {
@@ -54,7 +54,7 @@ pub async fn admin_upc_import(
                         page_title: Some("MediaKraken Admin UPC Import".to_string()),
 
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
@@ -82,7 +82,7 @@ pub async fn admin_upc_import_post(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         //(StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         // See if the barcode is on the DB
@@ -91,7 +91,7 @@ pub async fn admin_upc_import_post(
               &state.sqlx_pool_ro,
                 &input_data.upc_code,
             ) .await
-            .unwrap();
+            ?;
         }
     }
     Redirect::to("/admin/home")

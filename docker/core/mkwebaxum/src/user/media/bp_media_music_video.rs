@@ -49,7 +49,7 @@ pub async fn user_media_music_video(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let pagination_count =
@@ -63,7 +63,7 @@ pub async fn user_media_music_video(
             String::new(),
         )
         .await
-        .unwrap();
+        ?;
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
             total_pages,
             page,
@@ -72,7 +72,7 @@ pub async fn user_media_music_video(
             pagination_count,
         )
         .await
-        .unwrap();
+        ?;
         let music_video_list =
         mk_lib_database::database_media::mk_lib_database_media_music_video::mk_lib_database_media_music_video_read(
             &state.sqlx_pool_ro,
@@ -81,7 +81,7 @@ pub async fn user_media_music_video(
             pagination_count,
         )
         .await
-        .unwrap();
+        ?;
         let mut template_data_exists: bool = false;
         if music_video_list.len() > 0 {
             template_data_exists = true;
@@ -94,7 +94,7 @@ pub async fn user_media_music_video(
             page: &page_usize,
             page_title: Some("MediaKraken Music Videos".to_string()),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
@@ -122,14 +122,14 @@ pub async fn user_media_music_video_detail(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let template = TemplateMediaMusicVideoDetailContext {
             template_data: json!({}),
             page_title: Some("MediaKraken Music Video Detail".to_string()),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

@@ -24,33 +24,47 @@ pub async fn mk_lib_database_version_check(
     sqlx_pool: &sqlx::PgPool,
     update_schema: bool,
 ) -> Result<bool, sqlx::Error> {
-    // see if db exists
+    // see if db exists, with timeout to prevent infinite looping
     println!("Checking database version...");
-    while mk_lib_database_postgresql::mk_lib_database_table_exists(&sqlx_pool, "mm_version")
-        .await
-        .unwrap()
-        == false
-    {
+    let table_check_timeout = Duration::from_secs(60);
+    let start = tokio::time::Instant::now();
+    let mut table_exists = false;
+    while start.elapsed() < table_check_timeout {
+        match mk_lib_database_postgresql::mk_lib_database_table_exists(&sqlx_pool, "mm_version").await {
+            Ok(exists) => {
+                if exists {
+                    table_exists = true;
+                    break;
+                }
+            }
+            Err(e) => {
+                eprintln!("Error checking table existence: {e}");
+                return Err(e);
+            }
+        }
         sleep(Duration::from_secs(5)).await;
     }
-    // start version check
-    let mut version_match: bool = false;
-    let version_no: i32 = mk_lib_database_version(&sqlx_pool).await.unwrap();
-    if DATABASE_VERSION == version_no {
-        version_match = true;
+    if !table_exists {
+        return Err(sqlx::Error::PoolTimedOut);
     }
-    if version_match == false {
-        if update_schema == true {
+
+    // start version check
+    let version_no: i32 = mk_lib_database_version(&sqlx_pool).await?;
+    let mut version_match: bool = DATABASE_VERSION == version_no;
+
+    if !version_match {
+        if update_schema {
             println!("Database upgrade from {version_no} to version {DATABASE_VERSION}");
-            // do db updates here
             mk_lib_database_version_schema::mk_lib_database_update_schema(&sqlx_pool, version_no)
                 .await?;
             version_match = true;
         } else {
-            loop {
+            let version_wait_timeout = Duration::from_secs(300);
+            let start_wait = tokio::time::Instant::now();
+            while start_wait.elapsed() < version_wait_timeout {
                 sleep(Duration::from_secs(5)).await;
-                let version_no: i32 = mk_lib_database_version(&sqlx_pool).await.unwrap();
-                if DATABASE_VERSION == version_no {
+                let current_version: i32 = mk_lib_database_version(&sqlx_pool).await?;
+                if DATABASE_VERSION == current_version {
                     version_match = true;
                     break;
                 }

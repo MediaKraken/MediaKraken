@@ -9,22 +9,22 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
     let (sqlx_pool_rw, sqlx_pool_ro) = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120)
         .await
-        .unwrap();
+        ?;
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await
-        .unwrap();
+        ?;
 
     let (_rabbit_connection, rabbit_channel) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkinotify")
             .await
-            .unwrap();
+            ?;
 
     let mut inotify = Inotify::init().expect("Failed to initialize inotify");
 
     for row_data in
         mk_lib_database::mk_lib_database_library::mk_lib_database_library_read(&sqlx_pool_ro)
             .await
-            .unwrap()
+            ?
     {
         let lib_path: String = row_data.mm_media_dir_path;
         match inotify.add_watch(
@@ -51,7 +51,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         format!("{{'Type': 'Dir Create', 'JSON': {:?}}}", event.name),
                     )
                     .await
-                    .unwrap();
+                    ?;
                 } else {
                     mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
                         rabbit_channel.clone(),
@@ -59,7 +59,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         format!("{{'Type': 'File Create', 'JSON': {:?}}}", event.name),
                     )
                     .await
-                    .unwrap();
+                    ?;
                 }
             } else if event.mask.contains(EventMask::DELETE) {
                 if event.mask.contains(EventMask::ISDIR) {
@@ -69,7 +69,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         format!("{{'Type': 'Dir Delete', 'JSON': {:?}}}", event.name),
                     )
                     .await
-                    .unwrap();
+                    ?;
                 } else {
                     mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
                         rabbit_channel.clone(),
@@ -77,7 +77,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         format!("{{'Type': 'File Delete', 'JSON': {:?}}}", event.name),
                     )
                     .await
-                    .unwrap();
+                    ?;
                 }
             } else if event.mask.contains(EventMask::MODIFY) {
                 if event.mask.contains(EventMask::ISDIR) {
@@ -87,7 +87,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         format!("{{'Type': 'Dir Modify', 'JSON': {:?}}}", event.name),
                     )
                     .await
-                    .unwrap();
+                    ?;
                 } else {
                     mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
                         rabbit_channel.clone(),
@@ -95,7 +95,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         format!("{{'Type': 'File Modify', 'JSON': {:?}}}", event.name),
                     )
                     .await
-                    .unwrap();
+                    ?;
                 }
             }
         }

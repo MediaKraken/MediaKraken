@@ -50,7 +50,7 @@ pub async fn admin_database(
     .await
     {
         let template = TemplateError403Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let pg_version =
@@ -58,49 +58,49 @@ pub async fn admin_database(
                 &state.sqlx_pool_ro,
             )
             .await
-            .unwrap();
+            ?;
         let pg_table_size =
             mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_size(
                 &state.sqlx_pool_ro,
             )
             .await
-            .unwrap();
+            ?;
         let pg_table_size_total =
             mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_size_total(
                 &state.sqlx_pool_ro,
             )
             .await
-            .unwrap();
+            ?;
         let pg_table_row_count =
             mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_rows(
                 &state.sqlx_pool_ro,
             )
             .await
-            .unwrap();
+            ?;
         let pg_table_row_count_total =
             mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_row_count(
                 &state.sqlx_pool_ro,
             )
             .await
-            .unwrap();
+            ?;
         let pg_worker_count =
             mk_lib_database::mk_lib_database_postgresql::mk_lib_database_parallel_workers(
                 &state.sqlx_pool_ro,
             )
             .await
-            .unwrap();
+            ?;
         let pg_extension =
             mk_lib_database::mk_lib_database_postgresql::mk_lib_database_extension_active(
                 &state.sqlx_pool_ro,
             )
             .await
-            .unwrap();
+            ?;
         let pg_extension_avail =
             mk_lib_database::mk_lib_database_postgresql::mk_lib_database_extension_available(
                 &state.sqlx_pool_ro,
             )
             .await
-            .unwrap();
+            ?;
         let number_format_language = user_preferences::load_user_number_format_language(
             &state.sqlx_pool_ro,
             current_user.id,
@@ -119,7 +119,7 @@ pub async fn admin_database(
             template_data_db_extension_avail: &pg_extension_avail,
             page_title: Some("MediaKraken Admin Database".to_string()),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

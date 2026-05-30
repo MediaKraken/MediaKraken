@@ -75,7 +75,7 @@ pub async fn user_metadata_game_system(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let pagination_count =
@@ -89,7 +89,7 @@ pub async fn user_metadata_game_system(
             starts_with.clone().unwrap_or_default(),
         )
         .await
-        .unwrap();
+        ?;
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
             total_pages,
             page,
@@ -98,7 +98,7 @@ pub async fn user_metadata_game_system(
             pagination_count,
         )
         .await
-        .unwrap();
+        ?;
         let game_system_list =
         mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_read(
             &state.sqlx_pool_ro,
@@ -107,7 +107,7 @@ pub async fn user_metadata_game_system(
             pagination_count,
         )
         .await
-        .unwrap();
+        ?;
         let mut template_data_exists = false;
         if game_system_list.len() > 0 {
             template_data_exists = true;
@@ -126,7 +126,7 @@ pub async fn user_metadata_game_system(
             status_filter: None,
             base_path: "/user/metadata/game_system".to_string(),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
@@ -154,21 +154,21 @@ pub async fn user_metadata_game_system_detail(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
+        let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string())?;
         let detail_data =
         mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_detail(
             &state.sqlx_pool_ro, tmp_uuid,
         )
         .await
-        .unwrap();
+        ?;
         let template = TemplateMetaGameSystemDetailContext {
             template_data: detail_data,
             page_title: Some("MediaKraken Metadata Game System Detail".to_string()),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

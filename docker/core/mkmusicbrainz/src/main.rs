@@ -14,21 +14,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
     let (sqlx_pool_rw, sqlx_pool_ro) = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120)
         .await
-        .unwrap();
+        ?;
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await;
 
     let (_rabbit_connection, rabbit_channel) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkmusicbrainz")
             .await
-            .unwrap();
+            ?;
 
     let mut rabbit_consumer =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mkmusicbrainz", &rabbit_channel)
             .await
-            .unwrap();
+            ?;
 
-    let db_pass = env::var("POSTGRES_PASSWORD").unwrap();
+    let db_pass = env::var("POSTGRES_PASSWORD")?;
     unsafe {
         env::set_var("PGPASSWORD", &db_pass);
     }
@@ -47,7 +47,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     ])
                     .stdout(Stdio::piped())
                     .output()
-                    .unwrap();
+                    ?;
                 let _output = Command::new("psql")
                     .args([
                         "-h",
@@ -59,7 +59,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     ])
                     .stdout(Stdio::piped())
                     .output()
-                    .unwrap();
+                    ?;
 
                 let _output = Command::new("psql")
                     .args([
@@ -72,7 +72,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     ])
                     .stdout(Stdio::piped())
                     .output()
-                    .unwrap();
+                    ?;
 
                 // create tables
                 let _output = Command::new("psql")
@@ -86,7 +86,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     ])
                     .stdout(Stdio::piped())
                     .output()
-                    .unwrap();
+                    ?;
 
                 // no db dumps for caa
                 // let _output = Command::new("psql")
@@ -100,13 +100,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 //     ])
                 //     .stdout(Stdio::piped())
                 //     .output()
-                //     .unwrap();
+                //     ?;
 
                 // import dump tables
                 let pg_tables =
                     mk_lib_database::mk_lib_database_postgresql::mk_lib_database_tables(&sqlx_pool_rw)
                         .await
-                        .unwrap();
+                        ?;
                 for row_data in pg_tables.iter() {
                     // loop through tables and see if dump files exist
                     let table_name = row_data.table_name.replace("public.", "");
@@ -174,7 +174,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     ])
                     .stdout(Stdio::piped())
                     .output()
-                    .unwrap();
+                    ?;
                 // no db dumps for caa
                 // let _output = Command::new("psql")
                 //     .args([
@@ -187,7 +187,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 //     ])
                 //     .stdout(Stdio::piped())
                 //     .output()
-                //     .unwrap();
+                //     ?;
                 let _output = Command::new("psql")
                     .args([
                         "-h",
@@ -199,7 +199,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     ])
                     .stdout(Stdio::piped())
                     .output()
-                    .unwrap();
+                    ?;
                 // no db dumps for caa
                 // let _output = Command::new("psql")
                 //     .args([
@@ -212,7 +212,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 //     ])
                 //     .stdout(Stdio::piped())
                 //     .output()
-                //     .unwrap();
+                //     ?;
 
                 // # ??  why  RunSQLScript($DB, 'CreateSearchIndexes.sql', 'Creating search indexes ...');
                 let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(

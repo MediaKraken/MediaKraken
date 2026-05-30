@@ -30,7 +30,7 @@ pub async fn upnp_add_port(
     match igd::search_gateway(Default::default()) {
         Err(ref err) => println!("Error: {err}"),
         Ok(gateway) => {
-            let local_addr = local_addr.parse::<IpAddr>().unwrap();
+            let local_addr = local_addr.parse::<IpAddr>().map_err(|e| format!("invalid ip address: {e}"))?;
             let local_addr = SocketAddr::new(local_addr, internal_port);
             match gateway.add_port(
                 igd::PortMappingProtocol::TCP,

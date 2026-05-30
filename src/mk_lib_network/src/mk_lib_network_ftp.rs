@@ -21,13 +21,14 @@ pub async fn mk_lib_network_ftp_get_pwd(
     mut ftp_stream: suppaftp::FtpStream,
 ) -> Result<String, Box<dyn std::error::Error>> {
     // Get the current directory that the client will be reading from and writing to.
-    let ftp_directory = ftp_stream.pwd().unwrap();
+    let ftp_directory = ftp_stream.pwd().map_err(|e| format!("ftp pwd failed: {e}"))?;
     Ok(ftp_directory)
 }
 
-pub async fn mk_lib_network_ftp_set_cwd(mut ftp_stream: suppaftp::FtpStream, new_directory: &str) {
+pub async fn mk_lib_network_ftp_set_cwd(mut ftp_stream: suppaftp::FtpStream, new_directory: &str) -> Result<(), Box<dyn std::error::Error>> {
     // Change into a new directory, relative to the one we are currently in.
-    let _ = ftp_stream.cwd(new_directory).unwrap();
+    ftp_stream.cwd(new_directory).map_err(|e| format!("ftp cwd failed: {e}"))?;
+    Ok(())
 }
 
 pub async fn mk_lib_network_ftp_get(
@@ -35,20 +36,22 @@ pub async fn mk_lib_network_ftp_get(
     get_file_name: &str,
 ) -> Result<String, Box<dyn std::error::Error>> {
     // Retrieve (GET) a file from the FTP server in the current working directory.
-    let remote_file = ftp_stream.retr_as_buffer(get_file_name).unwrap();
+    let remote_file = ftp_stream.retr_as_buffer(get_file_name).map_err(|e| format!("ftp get failed: {e}"))?;
     let ftp_data = str::from_utf8(&remote_file.into_inner())
-        .unwrap()
+        .map_err(|e| format!("invalid utf8 in ftp response: {e}"))?
         .to_owned();
     Ok(ftp_data)
 }
 
-pub async fn mk_lib_network_ftp_put(mut ftp_stream: suppaftp::FtpStream, put_file_name: &str) {
+pub async fn mk_lib_network_ftp_put(mut ftp_stream: suppaftp::FtpStream, put_file_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     // Store (PUT) a file from the client to the current working directory of the server.
     let mut reader = Cursor::new("Hello from the Rust \"ftp\" crate!".as_bytes());
-    let _ = ftp_stream.put_file(put_file_name, &mut reader);
+    ftp_stream.put_file(put_file_name, &mut reader).map_err(|e| format!("ftp put failed: {e}"))?;
+    Ok(())
 }
 
-pub async fn mk_lib_network_ftp_close(mut ftp_stream: suppaftp::FtpStream) {
+pub async fn mk_lib_network_ftp_close(mut ftp_stream: suppaftp::FtpStream) -> Result<(), Box<dyn std::error::Error>> {
     // Terminate the connection to the server.
-    let _ = ftp_stream.quit();
+    ftp_stream.quit().map_err(|e| format!("ftp quit failed: {e}"))?;
+    Ok(())
 }

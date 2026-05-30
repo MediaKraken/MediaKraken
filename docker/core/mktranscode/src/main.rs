@@ -376,8 +376,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             //         ])
                             //         .stdout(Stdio::piped())
                             //         .output()
-                            //         .unwrap();
-                            //     let stdout = String::from_utf8(output.stdout).unwrap();
+                            //         ?;
+                            //     let stdout = String::from_utf8(output.stdout)?;
                             // as the worker might see it as finished if allowed to continue
                             //     chapter_image_list[chapter_data["tags"]["title"]] =
                             //         image_file_path;
@@ -586,7 +586,7 @@ mod tests {
         let message = json!({
             "Data": {"Source Path": "/books/a.epub", "Format": ".MOBI"}
         });
-        let (input, output) = ebook_conversion_targets(&message).unwrap();
+        let (input, output) = ebook_conversion_targets(&message)?;
         assert_eq!(input, "/books/a.epub");
         assert_eq!(output, "/books/a.mobi");
     }

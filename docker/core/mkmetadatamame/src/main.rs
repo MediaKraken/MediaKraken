@@ -26,27 +26,27 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
     let (sqlx_pool_rw, sqlx_pool_ro) = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120)
         .await
-        .unwrap();
+        ?;
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await
-        .unwrap();
+        ?;
 
     let (_rabbit_connection, rabbit_channel) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkmetadatamame")
             .await
-            .unwrap();
+            ?;
 
     let mut rabbit_consumer =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mkmetadatamame", &rabbit_channel)
             .await
-            .unwrap();
+            ?;
 
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {
                 println!("Here I am 3");
                 let json_message: Value =
-                    serde_json::from_str(&String::from_utf8_lossy(&payload)).unwrap();
+                    serde_json::from_str(&String::from_utf8_lossy(&payload))?;
                 // create mame game list
                 let file_name = format!(
                     "/mediakraken/emulation/mame0{}lx.zip",
@@ -65,7 +65,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             &file_name,
                         )
                         .await
-                        .unwrap();
+                        ?;
                     println!("File dl 2");
                     let unzip_file_name = format!(
                         "/mediakraken/emulation/mame0{}.xml",
@@ -78,8 +78,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             "/mediakraken/emulation/",
                         )
                         .await
-                        .unwrap();
-                        let file = File::open(&unzip_file_name).unwrap();
+                        ?;
+                        let file = File::open(&unzip_file_name)?;
                         let reader = BufReader::new(file);
                         let mut xml_data: String = "".to_owned();
                         let conf =
@@ -103,7 +103,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             } else if xml_line.starts_with("</machine") == true {
                                 xml_data.push_str(xml_line);
                                 let json_data =
-                                    xml_string_to_json(xml_data.to_string(), &conf).unwrap();
+                                    xml_string_to_json(xml_data.to_string(), &conf)?;
                                 // name is short name
                                 // description is long name
                                 mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
@@ -114,7 +114,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         json_data,
                                     )
                                     .await
-                                    .unwrap();
+                                    ?;
                             } else {
                                 xml_data.push_str(xml_line);
                             }
@@ -139,16 +139,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         &file_name,
                     )
                     .await
-                    .unwrap();
+                    ?;
                     mk_lib_compression::mk_lib_compression::mk_decompress_zip(
                         &file_name,
                         false,
                         &"/mediakraken/emulation/",
                     )
                     .await
-                    .unwrap();
+                    ?;
 
-                    let file = File::open(&"/mediakraken/emulation/history.xml").unwrap();
+                    let file = File::open(&"/mediakraken/emulation/history.xml")?;
                     let reader = BufReader::new(file);
                     let mut xml_data: String = "".to_owned();
                     let conf = Config::new_with_custom_values(true, "", "text", NullValue::Ignore)
@@ -163,10 +163,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         } else if xml_line.starts_with("</entry") == true {
                             xml_data.push_str(xml_line);
                             let json_data =
-                                xml_string_to_json(xml_data.to_string(), &conf).unwrap();
-                            let mut game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(&sqlx_pool_rw, &json_data["entry"]["software"]["item"]["list"].to_string()).await.unwrap();
+                                xml_string_to_json(xml_data.to_string(), &conf)?;
+                            let mut game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(&sqlx_pool_rw, &json_data["entry"]["software"]["item"]["list"].to_string()).await?;
                             if game_system_uuid == uuid::Uuid::nil() {
-                                game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool_rw, json_data["entry"]["software"]["item"]["list"].to_string(), String::new(), json!({})).await.unwrap();
+                                game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool_rw, json_data["entry"]["software"]["item"]["list"].to_string(), String::new(), json!({})).await?;
                             }
                             mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
                                     &sqlx_pool_rw,
@@ -176,7 +176,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     json_data,
                                 )
                                 .await
-                                .unwrap();
+                                ?;
                         } else {
                             xml_data.push_str(xml_line);
                         }
@@ -211,15 +211,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             &file_name,
                         )
                         .await
-                        .unwrap();
+                        ?;
                     mk_lib_compression::mk_lib_compression::mk_decompress_zip(
                         &file_name,
                         false,
                         &"/mediakraken/emulation/",
                     )
                     .await
-                    .unwrap();
-                    let file = File::open(&"/mediakraken/emulation/catver.ini").unwrap();
+                    ?;
+                    let file = File::open(&"/mediakraken/emulation/catver.ini")?;
                     let reader = BufReader::new(file);
                     let mut category_found = false;
                     for line in reader.lines() {
@@ -266,15 +266,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     mk_lib_network::mk_lib_network::mk_download_file_from_url(
                             format!("https://www.progettosnaps.net/download/?tipo=messinfo&file=pS_messinfo_{}.zip", json_message["Version"]), &file_name)
                         .await
-                        .unwrap();
+                        ?;
                     mk_lib_compression::mk_lib_compression::mk_decompress_zip(
                         &file_name,
                         false,
                         &"/mediakraken/emulation/",
                     )
                     .await
-                    .unwrap();
-                    let file = File::open(&"/mediakraken/emulation/messinfo.dat").unwrap();
+                    ?;
+                    let file = File::open(&"/mediakraken/emulation/messinfo.dat")?;
                     let mut reader = BufReader::new(file);
                     let mut dat_line = String::new();
                     let mut start_system_read = false;
@@ -411,7 +411,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                                 "Sound": sys_sound,
                                                 "Graphics": sys_graphics,
                                                 "Save State": sys_save_state})
-                                            ).await.unwrap();
+                                            ).await?;
                                         sys_wip = String::new();
                                         sys_romset = String::new();
                                     }
@@ -440,14 +440,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         &file_name,
                     )
                     .await
-                    .unwrap();
+                    ?;
                     mk_lib_compression::mk_lib_compression::mk_decompress_zip(
                         &file_name,
                         false,
                         &"/mediakraken/emulation/",
                     )
                     .await
-                    .unwrap();
+                    ?;
 
                     let entries = fs::read_dir(format!(
                         "/mediakraken/emulation/mame-mame0{}/hash",
@@ -456,13 +456,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .unwrap()
                     .map(|res| res.map(|e| e.path()))
                     .collect::<Result<Vec<_>, io::Error>>()
-                    .unwrap();
+                    ?;
                     for hash_file_path in entries {
                         let ext = Path::new(&hash_file_path)
                             .extension()
                             .unwrap_or(&std::ffi::OsStr::new("no_extension"));
                         if ext == "xml" {
-                            let file = File::open(&hash_file_path).unwrap();
+                            let file = File::open(&hash_file_path)?;
                             let reader = BufReader::new(file);
                             let mut xml_data: String = "".to_owned();
                             let conf =
@@ -488,18 +488,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                     let system_string_split: Vec<&str> =
                                         xml_line.split("\"").collect();
                                     println!("split: {:?}", system_string_split);
-                                    let system_counter = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_game_count_by_short_name(&sqlx_pool_rw, &system_string_split[1].to_string()).await.unwrap();
+                                    let system_counter = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_game_count_by_short_name(&sqlx_pool_rw, &system_string_split[1].to_string()).await?;
                                     if system_counter == 0 {
-                                        game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool_rw, system_string_split[1].to_string(), system_string_split[3].to_string(), json!({})).await.unwrap();
+                                        game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool_rw, system_string_split[1].to_string(), system_string_split[3].to_string(), json!({})).await?;
                                     } else {
-                                        game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(&sqlx_pool_rw, &system_string_split[1].to_string()).await.unwrap();
+                                        game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(&sqlx_pool_rw, &system_string_split[1].to_string()).await?;
                                     }
                                 } else if xml_line.starts_with("<software") == true {
                                     xml_data = xml_line.to_string();
                                 } else if xml_line.starts_with("</software") == true {
                                     xml_data.push_str(xml_line);
                                     let json_data =
-                                        xml_string_to_json(xml_data.to_string(), &conf).unwrap();
+                                        xml_string_to_json(xml_data.to_string(), &conf)?;
                                     // name is short name
                                     // description is long name
                                     mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
@@ -509,7 +509,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         json_data["software"]["description"].to_string(),
                                         json_data,
                                     )
-                                    .await.unwrap();
+                                    .await?;
                                 } else {
                                     xml_data.push_str(xml_line);
                                 }

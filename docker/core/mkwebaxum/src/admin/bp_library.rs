@@ -93,7 +93,7 @@ pub async fn admin_library(
     .await
     {
         let template = TemplateError403Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let share_list =
@@ -101,19 +101,19 @@ pub async fn admin_library(
                 &state.sqlx_pool_ro,
             )
             .await
-            .unwrap();
+            ?;
         let library_list =
             mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_audit_read(
                 &state.sqlx_pool_ro,
             )
             .await
-            .unwrap();
+            ?;
         let share_user_list =
         mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_user_read(
            &state.sqlx_pool_ro,
         )
         .await
-        .unwrap();
+        ?;
         let mut template_data_exists: bool = false;
         if library_list.len() > 0 {
             template_data_exists = true;
@@ -125,7 +125,7 @@ pub async fn admin_library(
             template_data_exists: &template_data_exists,
             page_title: Some("MediaKraken Admin Library".to_string()),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
@@ -148,17 +148,17 @@ pub async fn admin_library_media_scan(
         let (rabbit_connection, rabbit_channel) =
             mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp")
                 .await
-                .unwrap();
+                ?;
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
             rabbit_channel.clone(),
             "mkmediascanner",
             json!({"Type": "Library Scan"}).to_string(),
         )
         .await
-        .unwrap();
+        ?;
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
             .await
-            .unwrap();
+            ?;
         Redirect::to("/admin/library")
     }
 }
@@ -254,17 +254,17 @@ pub async fn admin_library_share_scan(
         let (rabbit_connection, rabbit_channel) =
             mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp")
                 .await
-                .unwrap();
+                ?;
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
             rabbit_channel.clone(),
             "mksharescanner",
             json!({"Type": "Share Scan", "Data": "192.168.1"}).to_string(),
         )
         .await
-        .unwrap();
+        ?;
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
             .await
-            .unwrap();
+            ?;
         Redirect::to("/admin/library")
     }
 }

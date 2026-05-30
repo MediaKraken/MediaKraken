@@ -48,7 +48,7 @@ pub async fn user_media_game(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let pagination_count =
@@ -62,7 +62,7 @@ pub async fn user_media_game(
             String::new(),
         )
         .await
-        .unwrap();
+        ?;
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
             total_pages,
             page,
@@ -71,7 +71,7 @@ pub async fn user_media_game(
             pagination_count,
         )
         .await
-        .unwrap();
+        ?;
         let game_list = mk_lib_database::database_media::mk_lib_database_media_game::mk_lib_database_media_game_read(
        &state.sqlx_pool_ro,
         String::new(),
@@ -79,7 +79,7 @@ pub async fn user_media_game(
         pagination_count,
     )
     .await
-    .unwrap();
+    ?;
         let mut template_data_exists = false;
         if game_list.len() > 0 {
             template_data_exists = true;
@@ -92,7 +92,7 @@ pub async fn user_media_game(
             page: &page_usize,
             page_title: Some("MediaKraken Games".to_string()),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
@@ -120,14 +120,14 @@ pub async fn user_media_game_detail(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let template = TemplateMediaGameDetailContext {
             template_data: json!({}),
             page_title: Some("MediaKraken Game Detail".to_string()),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

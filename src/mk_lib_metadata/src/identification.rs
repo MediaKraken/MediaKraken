@@ -30,11 +30,11 @@ pub async fn metadata_identification(
                 metadata_uuid,
             )
             .await
-            .unwrap();
+            ?;
             if metadata_uuid == uuid::Uuid::nil() {
                 metadata_uuid = adult::metadata_adult_lookup(&sqlx_pool, &dl_row, guessit_data)
                     .await
-                    .unwrap();
+                    ?;
             }
         }
 
@@ -47,11 +47,11 @@ pub async fn metadata_identification(
                 metadata_uuid,
             )
             .await
-            .unwrap();
+            ?;
             if metadata_uuid == uuid::Uuid::nil() {
                 metadata_uuid = anime::metadata_anime_lookup(&sqlx_pool, &dl_row, guessit_data)
                     .await
-                    .unwrap();
+                    ?;
             }
         }
 
@@ -64,7 +64,7 @@ pub async fn metadata_identification(
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::GAME_ROM => {
             metadata_uuid = game::metadata_game_lookup(&sqlx_pool, &dl_row)
                 .await
-                .unwrap();
+                ?;
         }
 
         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PUBLICATION
@@ -75,7 +75,7 @@ pub async fn metadata_identification(
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PUBLICATION_GRAPHIC_NOVEL => {
             metadata_uuid = book::metadata_book_lookup(&sqlx_pool, &dl_row)
                 .await
-                .unwrap();
+                ?;
         }
 
         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE
@@ -92,11 +92,11 @@ pub async fn metadata_identification(
                 metadata_uuid,
             )
             .await
-            .unwrap();
+            ?;
             if metadata_uuid == uuid::Uuid::nil() {
                 metadata_uuid = movie::metadata_movie_lookup(&sqlx_pool, &dl_row, guessit_data)
                     .await
-                    .unwrap();
+                    ?;
             }
         }
 
@@ -111,19 +111,19 @@ pub async fn metadata_identification(
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MUSIC_SONG => {
             metadata_uuid = music::metadata_music_lookup(&sqlx_pool, &dl_row)
                 .await
-                .unwrap();
+                ?;
         }
 
         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MUSIC_VIDEO => {
             metadata_uuid = music_video::metadata_music_video_lookup(&sqlx_pool, &dl_row)
                 .await
-                .unwrap();
+                ?;
         }
 
         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::SPORTS => {
             metadata_uuid = sports::metadata_sports_lookup(&sqlx_pool, &dl_row)
                 .await
-                .unwrap();
+                ?;
         }
 
         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV
@@ -141,11 +141,11 @@ pub async fn metadata_identification(
                 metadata_uuid,
             )
             .await
-            .unwrap();
+            ?;
             if metadata_uuid == uuid::Uuid::nil() {
                 metadata_uuid = tv::metadata_tv_lookup(&sqlx_pool, &dl_row, guessit_data)
                     .await
-                    .unwrap();
+                    ?;
             }
         }
 

@@ -45,7 +45,7 @@ pub async fn admin_server_links(
     .await
     {
         let template = TemplateError403Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let server_links = mk_lib_database::mk_lib_database_link_server::mk_lib_database_link_read(
@@ -59,7 +59,7 @@ pub async fn admin_server_links(
             template_data: &server_links,
             page_title: Some("MediaKraken Admin Server Links".to_string()),
         };
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
@@ -81,7 +81,7 @@ pub async fn admin_server_links_post(
     .await
     {
         let template = TemplateError403Context {};
-        let reply_html = template.render().unwrap();
+        let reply_html = template.render().map_err(|e| e.to_string())?;
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response()).into_response()
     } else {
         let host_or_ip = input_data.host_or_ip.trim();
