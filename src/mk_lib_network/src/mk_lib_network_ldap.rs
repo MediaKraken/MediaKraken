@@ -1,7 +1,7 @@
 // https://github.com/inejge/ldap3
 
 use ldap3::result::Result;
-use ldap3::{LdapConn, LdapConnAsync, LdapConnSettings, LdapResult, Scope, SearchEntry};
+use ldap3::{LdapConn, LdapResult};
 
 pub async fn ldap_bind(
     ldap_ip: String,
@@ -26,5 +26,5 @@ pub fn ldap_bind_blocking(
 }
 
 pub async fn ldap_unbind(mut ldap: LdapConn) -> Result<()> {
-    Ok(ldap.unbind()?)
+    ldap.unbind()
 }

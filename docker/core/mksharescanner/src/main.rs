@@ -101,7 +101,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 if let Err(err) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
                     &rabbit_channel,
                     deliver.delivery_tag(),
-                ).await {
+                )
+                .await
+                {
                     eprintln!("failed to acknowledge message: {err}");
                 }
             }
@@ -110,10 +112,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // Wait for shutdown signal
     shutdown_signal().await;
-    
+
     // Cancel the processing task
     handle.abort();
-    
+
     eprintln!("mksharescanner: shutdown signal received");
     Ok(())
 }

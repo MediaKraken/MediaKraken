@@ -43,7 +43,7 @@ impl Default for User {
             // email: "guest@fake.com".into(),
             // last_signin: Utc::now(),
             // last_signoff: Utc::now(),
-            permissions: permissions,
+            permissions,
         }
     }
 }
@@ -171,7 +171,7 @@ pub async fn mk_lib_database_user_count(
     sqlx_pool: &sqlx::PgPool,
     user_name: String,
 ) -> Result<i64, sqlx::Error> {
-    if user_name == "" {
+    if user_name.is_empty() {
         let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_axum_users"#)
             .fetch_one(sqlx_pool)
             .await?;

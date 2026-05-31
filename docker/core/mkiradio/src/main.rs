@@ -38,7 +38,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
             Err(err) => {
                 eprintln!("Invalid JSON payload: {err}");
                 if let Some(tag) = delivery_tag {
-                    let _ = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(&rabbit_channel, tag).await;
+                    let _ =
+                        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(&rabbit_channel, tag).await;
                 }
                 continue;
             }
@@ -51,7 +52,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let mut retries = 0;
             const MAX_RETRIES: u32 = 3;
             let mut api_call_success = false;
-            
+
             while !api_call_success && retries < MAX_RETRIES {
                 match RadioBrowserAPI::new().await {
                     Ok(mut api) => {
@@ -119,7 +120,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             }
                             Err(err) => {
                                 retries += 1;
-                                eprintln!("RadioBrowser API call failed (attempt {retries}/{MAX_RETRIES}): {err}");
+                                eprintln!(
+                                    "RadioBrowser API call failed (attempt {retries}/{MAX_RETRIES}): {err}"
+                                );
                                 if retries < MAX_RETRIES {
                                     tokio::time::sleep(Duration::from_secs(5)).await;
                                 }
@@ -128,7 +131,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     }
                     Err(err) => {
                         retries += 1;
-                        eprintln!("Failed to initialize RadioBrowser API (attempt {retries}/{MAX_RETRIES}): {err}");
+                        eprintln!(
+                            "Failed to initialize RadioBrowser API (attempt {retries}/{MAX_RETRIES}): {err}"
+                        );
                         if retries < MAX_RETRIES {
                             tokio::time::sleep(Duration::from_secs(5)).await;
                         }
@@ -137,13 +142,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
 
             if !api_call_success {
-                eprintln!("RadioBrowser API calls failed after {MAX_RETRIES} attempts, skipping this message");
+                eprintln!(
+                    "RadioBrowser API calls failed after {MAX_RETRIES} attempts, skipping this message"
+                );
             }
         }
 
         // Always acknowledge the message
         if let Some(tag) = delivery_tag {
-            if let Err(err) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(&rabbit_channel, tag).await {
+            if let Err(err) =
+                mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(&rabbit_channel, tag).await
+            {
                 eprintln!("Failed to acknowledge message: {err}");
             }
         }

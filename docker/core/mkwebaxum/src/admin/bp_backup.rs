@@ -62,8 +62,7 @@ pub async fn admin_backup(
             mk_lib_database::mk_lib_database_backup::mk_lib_database_backup_count(
                 &state.sqlx_pool_ro,
             )
-            .await
-            ?;
+            .await?;
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
             total_pages,
             page,
@@ -71,15 +70,13 @@ pub async fn admin_backup(
             None,
             pagination_count,
         )
-        .await
-        ?;
+        .await?;
         let backup_list = mk_lib_database::mk_lib_database_backup::mk_lib_database_backup_read(
             &state.sqlx_pool_ro,
             db_offset,
             pagination_count,
         )
-        .await
-        ?;
+        .await?;
         let mut template_data_exists = false;
         if backup_list.len() > 0 {
             template_data_exists = true;

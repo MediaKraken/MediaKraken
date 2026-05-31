@@ -82,21 +82,18 @@ pub async fn admin_home(
                 0,
                 9999,
             )
-            .await
-            ?;
+            .await?;
         let user_list = mk_lib_database::mk_lib_database_user::mk_lib_database_user_read(
             &state.sqlx_pool_ro,
             0,
             9999,
         )
-        .await
-        ?;
+        .await?;
         let option_status_row =
             mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_status_read(
                 &state.sqlx_pool_ro,
             )
-            .await
-            ?;
+            .await?;
         let option_json: serde_json::Value = option_status_row.get("mm_options_json");
         let status_json: serde_json::Value = option_status_row.get("mm_status_json");
         let boot_seconds: libc::timeval = sys_info::boottime()?;
@@ -104,8 +101,7 @@ pub async fn admin_home(
         let external_ip = mk_lib_network::mk_lib_network::mk_data_from_url(
             "https://myexternalip.com/raw".to_string(),
         )
-        .await
-        ?;
+        .await?;
         let mut server_streams = Vec::new();
         let mut server_scans = Vec::new();
         let number_format_language = user_preferences::load_user_number_format_language(

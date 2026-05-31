@@ -6,45 +6,26 @@ use std::env;
 use std::error::Error;
 use torrent_name_parser::Metadata;
 
-#[path = "adult.rs"]
-mod metadata_adult;
-#[path = "anime.rs"]
-mod metadata_anime;
-#[path = "book.rs"]
-mod metadata_book;
-#[path = "game.rs"]
-mod metadata_game;
-#[path = "movie.rs"]
-mod metadata_movie;
-#[path = "music.rs"]
-mod metadata_music;
-#[path = "music_video.rs"]
-mod metadata_music_video;
-#[path = "person.rs"]
-mod metadata_person;
-#[path = "sports.rs"]
-mod metadata_sports;
-#[path = "tv.rs"]
-mod metadata_tv;
+use super::adult as metadata_adult;
+use super::anime as metadata_anime;
+use super::book as metadata_book;
+use super::game as metadata_game;
+use super::movie as metadata_movie;
+use super::music as metadata_music;
+use super::music_video as metadata_music_video;
+use super::person as metadata_person;
+use super::sports as metadata_sports;
+use super::tv as metadata_tv;
 
-#[path = "provider/anidb.rs"]
-mod provider_anidb;
-#[path = "provider/barcodespider.rs"]
-mod provider_barcodespider;
-#[path = "provider/chart_lyrics.rs"]
-mod provider_chart_lyrics;
-#[path = "provider/imvdb.rs"]
-mod provider_imvdb;
-#[path = "provider/isbndb.rs"]
-mod provider_isbndb;
-#[path = "provider/musicbrainz.rs"]
-mod provider_musicbrainz;
-#[path = "provider/televisiontunes.rs"]
-mod provider_televisiontunes;
-#[path = "provider/tmdb.rs"]
-mod provider_tmdb;
-#[path = "provider/upcitemdb.rs"]
-mod provider_upcitemdb;
+use super::metadata_provider::anidb as provider_anidb;
+use super::metadata_provider::barcodespider as provider_barcodespider;
+use super::metadata_provider::chart_lyrics as provider_chart_lyrics;
+use super::metadata_provider::imvdb as provider_imvdb;
+use super::metadata_provider::isbndb as provider_isbndb;
+use super::metadata_provider::musicbrainz as provider_musicbrainz;
+use super::metadata_provider::televisiontunes as provider_televisiontunes;
+use super::metadata_provider::tmdb as provider_tmdb;
+use super::metadata_provider::upcitemdb as provider_upcitemdb;
 
 pub async fn metadata_process(
     sqlx_pool: &sqlx::PgPool,
@@ -100,23 +81,21 @@ pub async fn metadata_search(
     let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
     let mut set_fetch: bool = false;
     let mut lookup_halt: bool = false;
-    let update_provider = String::new();
+    let _update_provider = String::new();
     let guessit_data: Metadata;
     if provider_name == "anidb" {
         guessit_data = guessit::metadata_guessit(
-            &sqlx_pool,
+            sqlx_pool,
             &download_data,
             "fake".to_string(),
             0,
             metadata_uuid,
         )
-        .await
-        .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+        .await?;
         if metadata_uuid == uuid::Uuid::nil() {
             metadata_uuid =
-                metadata_anime::metadata_anime_lookup(&sqlx_pool, &download_data, guessit_data)
-                    .await
-                    .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+                metadata_anime::metadata_anime_lookup(sqlx_pool, &download_data, guessit_data)
+                    .await?;
             // if metadata_uuid == uuid::Uuid::nil() {
             //     if match_result == None {
             //         // do lookup halt as we'll start all movies in tmdb
@@ -137,9 +116,8 @@ pub async fn metadata_search(
         lookup_halt = true;
     } else if provider_name == "imvdb" {
         metadata_uuid =
-            metadata_music_video::metadata_music_video_lookup(&sqlx_pool, &download_data)
-                .await
-                .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+            metadata_music_video::metadata_music_video_lookup(sqlx_pool, &download_data)
+                .await?;
         // if metadata_uuid == uuid::Uuid::nil() {
         //     if match_result == None {
         //         update_provider = "theaudiodb".to_string();
@@ -150,16 +128,15 @@ pub async fn metadata_search(
     } else if provider_name == "isbndb" {
         // metadata_uuid = provider_isbndb::metadata_book_search_isbndb(&sqlx_pool, download_data)
         //     .await
-        //     .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+        //     .map_err(|e| e)?;
         if metadata_uuid == uuid::Uuid::nil() {
             lookup_halt = true;
         }
     } else if provider_name == "lastfm" {
         lookup_halt = true;
     } else if provider_name == "musicbrainz" {
-        metadata_uuid = metadata_music::metadata_music_lookup(&sqlx_pool, &download_data)
-            .await
-            .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+        metadata_uuid = metadata_music::metadata_music_lookup(sqlx_pool, &download_data)
+            .await?;
         if metadata_uuid == uuid::Uuid::nil() {
             lookup_halt = true;
         }
@@ -178,16 +155,14 @@ pub async fn metadata_search(
             download_data.mm_download_path.ok_or("missing download_path")?,
             "TODO Fake Path".to_string(),
         )
-        .await
-        .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+        .await?;
         if metadata_uuid != uuid::Uuid::nil() {
             // TODO add theme.mp3 dl'd above to media table
             mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
-                &sqlx_pool,
+                sqlx_pool,
                 download_data.mm_download_guid,
             )
-            .await
-            .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+            .await?;
         } else {
             lookup_halt = true;
         }
@@ -197,20 +172,18 @@ pub async fn metadata_search(
         lookup_halt = true;
     } else if provider_name == "themoviedb" {
         guessit_data = guessit::metadata_guessit(
-            &sqlx_pool,
+            sqlx_pool,
             &download_data,
             "fake".to_string(),
             0,
             metadata_uuid,
         )
-        .await
-        .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+        .await?;
         if download_data.mm_download_que_type == mk_lib_common_enum_media_type::DLMediaType::MOVIE {
             if metadata_uuid == uuid::Uuid::nil() {
                 metadata_uuid =
-                    metadata_movie::metadata_movie_lookup(&sqlx_pool, &download_data, guessit_data)
-                        .await
-                        .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+                    metadata_movie::metadata_movie_lookup(sqlx_pool, &download_data, guessit_data)
+                        .await?;
                 // (metadata_uuid, match_result) = metadata_provider_themoviedb.movie_search_tmdb(
                 //     &sqlx_pool,
                 //     download_data);
@@ -227,9 +200,8 @@ pub async fn metadata_search(
         {
             if metadata_uuid == uuid::Uuid::nil() {
                 metadata_uuid =
-                    metadata_tv::metadata_tv_lookup(&sqlx_pool, &download_data, guessit_data)
-                        .await
-                        .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+                    metadata_tv::metadata_tv_lookup(sqlx_pool, &download_data, guessit_data)
+                        .await?;
                 // (metadata_uuid, match_result) = metadata_tv.metadata_tv_lookup(&sqlx_pool, download_data);
                 // // if match_result is an int, that means the lookup found a match but isn"t in db
                 // if metadata_uuid == uuid::Uuid::nil() && type(match_result) != int {
@@ -244,12 +216,11 @@ pub async fn metadata_search(
         {
             if metadata_uuid == uuid::Uuid::nil() {
                 metadata_uuid = metadata_person::metadata_person_lookup(
-                    &sqlx_pool,
+                    sqlx_pool,
                     &download_data,
                     guessit_data,
                 )
-                .await
-                .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+                .await?;
                 // (metadata_uuid, match_result) = metadata_person.metadata_person_lookup(&sqlx_pool, download_data);
                 // // if match_result is an int, that means the lookup found a match but isn"t in db
                 // if metadata_uuid == uuid::Uuid::nil() && type(match_result) != int {
@@ -268,9 +239,8 @@ pub async fn metadata_search(
             }
         }
     } else if provider_name == "thesportsdb" {
-        metadata_uuid = metadata_sports::metadata_sports_lookup(&sqlx_pool, &download_data)
-            .await
-            .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+        metadata_uuid = metadata_sports::metadata_sports_lookup(sqlx_pool, &download_data)
+            .await?;
         // if metadata_uuid == uuid::Uuid::nil() {
         //     if match_result == None {
         //         update_provider = "themoviedb".to_string();
@@ -327,7 +297,7 @@ pub async fn metadata_fetch(
     //         &provider_api_key,
     //     )
     //     .await
-    //     .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+    //     .map_err(|e| e)?;
     // } else 
     if provider_name == "imvdb" {
         let _imvdb_id = provider_imvdb::provider_imvdb_video_fetch_by_id(
@@ -336,8 +306,7 @@ pub async fn metadata_fetch(
             download_data.mm_download_new_uuid,
             provider_api_key,
         )
-        .await
-        .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+        .await?;
     } else if provider_name == "themoviedb" {
         if download_data.mm_download_que_type == mk_lib_common_enum_media_type::DLMediaType::PERSON
         {
@@ -409,7 +378,7 @@ pub async fn metadata_fetch(
     //         &provider_api_key,
     //     )
     //     .await
-    //     .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+    //     .map_err(|e| e)?;
     // }
     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
         sqlx_pool,

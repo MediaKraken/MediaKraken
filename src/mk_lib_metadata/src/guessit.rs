@@ -24,7 +24,7 @@ pub async fn metadata_guessit(
         .to_string();
     let guessit_data: Metadata = Metadata::from(&file_name)
         .map_err(|e| format!("torrent_name_parser failed on {}: {:?}", file_name, e))?;
-    if guessit_data.title().len() > 0 {
+    if !guessit_data.title().is_empty() {
         if guessit_data.year().is_some() {
             if guessit_data.title().to_lowercase() == metadata_last_title
                 && guessit_data.year().ok_or("year is_some but not a value")? == metadata_last_year

@@ -4,7 +4,6 @@
 use std::fs;
 use std::fs::File;
 use std::io::{BufReader, Read, Seek, SeekFrom};
-use std::mem;
 
 const HASH_BLK_SIZE: u64 = 65536;
 
@@ -22,7 +21,7 @@ pub async fn provider_opensubtitles_create_hash(
         for _ in 0..iterations {
             reader.read(&mut buf)?;
             unsafe {
-                word = mem::transmute(buf);
+                word = u64::from_ne_bytes(buf);
             };
             hash_val = hash_val.wrapping_add(word);
         }
@@ -30,7 +29,7 @@ pub async fn provider_opensubtitles_create_hash(
         for _ in 0..iterations {
             reader.read(&mut buf)?;
             unsafe {
-                word = mem::transmute(buf);
+                word = u64::from_ne_bytes(buf);
             };
             hash_val = hash_val.wrapping_add(word);
         }

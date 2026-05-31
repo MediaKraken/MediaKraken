@@ -1,5 +1,4 @@
 //use governor::{Quota, RateLimiter};
-use nonzero_ext::*;
 use phf::phf_map;
 
 // https://docs.rs/governor/0.6.3/governor/struct.Quota.html

@@ -38,9 +38,14 @@ fn detect_local_ipv4() -> Option<Ipv4Addr> {
 
 async fn lookup_webapp_port_with_retry(docker: &Docker, name: &str) -> Option<u64> {
     let mut retries = 0;
-    
+
     loop {
-        match timeout(Duration::from_secs(10), docker.containers().list(&Default::default())).await {
+        match timeout(
+            Duration::from_secs(10),
+            docker.containers().list(&Default::default()),
+        )
+        .await
+        {
             Ok(Ok(list)) => {
                 return list
                     .into_iter()
@@ -77,8 +82,8 @@ async fn main() -> io::Result<()> {
         .unwrap_or_else(|_| DEFAULT_MULTICAST.to_string())
         .parse()
         .expect("invalid MEDIAKRAKEN_MULTICAST");
-    let webapp_name = env::var("MEDIAKRAKEN_WEBAPP_NAME")
-        .unwrap_or_else(|_| DEFAULT_WEBAPP_NAME.to_string());
+    let webapp_name =
+        env::var("MEDIAKRAKEN_WEBAPP_NAME").unwrap_or_else(|_| DEFAULT_WEBAPP_NAME.to_string());
 
     let local_ip = env::var("MEDIAKRAKEN_IP")
         .ok()

@@ -1,9 +1,7 @@
 // https://gitlab.com/timosaarinen/flickr-rust
 
 use flickr::FlickrAPI;
-use flickr::methods::favorites::GetListResult;
 use flickr::methods::favorites::Photos;
-use std::error::Error;
 
 pub async fn provider_flickr_login(
     api_key: &str,

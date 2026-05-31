@@ -1,17 +1,17 @@
+use crate::AppState;
 use crate::mk_lib_database;
 use askama::Template;
+use axum::extract::State;
 use axum::{
+    Extension,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
-    Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use serde_json::json;
 use sqlx::postgres::PgPool;
-use axum::extract::State;
-use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -45,10 +45,9 @@ pub async fn admin_hardware(
     } else {
         let hardware_list =
             mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_device_read(
-               &state.sqlx_pool_ro,
+                &state.sqlx_pool_ro,
             )
-            .await
-            ?;
+            .await?;
         let mut hardware_data: bool = false;
         if hardware_list.len() > 0 {
             hardware_data = true;

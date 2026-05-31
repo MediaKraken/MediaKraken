@@ -16,5 +16,5 @@ pub fn system_time_to_date_time(t: SystemTime) -> DateTime<Utc> {
         }
     };
     // timestamp_opt can return None for out-of-range values; fall back to Unix epoch
-    Utc.timestamp_opt(sec, nsec).unwrap_or(DateTime::<Utc>::UNIX_EPOCH)
+    Utc.timestamp_opt(sec, nsec).single().unwrap_or(DateTime::<Utc>::UNIX_EPOCH)
 }

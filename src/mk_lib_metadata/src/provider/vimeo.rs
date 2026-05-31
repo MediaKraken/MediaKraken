@@ -1,7 +1,6 @@
 // https://github.com/335g/vimeo-rs
 
-pub const USER_AGENT: &'static str = "...";
-use vimeo_rs as vimeo;
+pub const USER_AGENT: &str = "...";
 
 pub async fn provider_vimeo_video_fetch(
 ) {

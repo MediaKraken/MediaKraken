@@ -5,7 +5,7 @@ use mk_lib_file::mk_lib_file;
 use quickxml_to_serde::{Config, xml_string_to_json};
 use std::fs::File;
 use std::io::{BufReader, prelude::*};
-use std::process::{Command, Stdio};
+use std::process::Stdio;
 
 // nmap -sU -sS -p U:137,T:139 --script smb-enum-shares 192.168.1.122 -oX scan.xml 1>/dev/null 2>/dev/null
 // By default, the script uses guest permissions to list only publicly available shares
@@ -86,7 +86,7 @@ pub async fn mk_network_share_scan_port(
         .output()
         .map_err(|e| format!("nmap failed: {e}"))?;
     let mut vec_share = Vec::new();
-    let file = File::open(&"port.txt")
+    let file = File::open("port.txt")
         .map_err(|e| format!("failed to open port.txt: {e}"))?;
     let reader = BufReader::new(file);
     let mut ip_addr = String::new();

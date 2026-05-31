@@ -62,9 +62,9 @@ fn retrying_client() -> &'static ClientWithMiddleware {
     })
 }
 
-// FIX 3: `query_client()` is no longer used for reads; reads now use
-// `retrying_client()` for the same retry resilience as pushes.  Keep this
-// function in case callers outside this module still reference it.
+#[expect(dead_code)]
+fn query_client() -> &'static Client {
+    // Keep this function in case callers outside this module still reference it.
     static CLIENT: OnceLock<Client> = OnceLock::new();
     CLIENT.get_or_init(Client::new)
 }

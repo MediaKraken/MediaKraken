@@ -30,6 +30,7 @@ pub async fn mk_lib_database_media_iradio_insert(
     Ok(row.map(|(radio_guid,)| radio_guid))
 }
 
+#[allow(clippy::too_many_arguments)]
 pub async fn mk_lib_database_media_iradio_upsert(
     sqlx_pool: &sqlx::PgPool,
     station_uuid: &str,

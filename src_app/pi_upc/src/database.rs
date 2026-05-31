@@ -44,7 +44,7 @@ pub fn database_upc_insert(
             VALUES (?, ?, CURRENT_TIMESTAMP);",
     )?;
     statement.bind((1, upc_code))?;
-    statement.bind((2, upc_type))?;
+    statement.bind((2, upc_type as i64))?;
     statement.next()?;
     Ok(db.change_count() > 0)
 }

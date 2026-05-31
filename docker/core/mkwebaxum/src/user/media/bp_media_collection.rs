@@ -72,8 +72,7 @@ pub async fn user_media_collection(
             None,
             pagination_count,
         )
-        .await
-        ?;
+        .await?;
         let collection_list =
         mk_lib_database::database_metadata::mk_lib_database_metadata_collection::mk_lib_database_metadata_collection_read(
            &state.sqlx_pool_ro,

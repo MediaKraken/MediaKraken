@@ -1,8 +1,6 @@
 use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_by_provider;
 use mk_lib_database::mk_lib_database::mk_lib_database_open_pool;
-use mk_lib_database::mk_lib_database_option_status::{
-    APIJson, mk_lib_database_option_api_read,
-};
+use mk_lib_database::mk_lib_database_option_status::{APIJson, mk_lib_database_option_api_read};
 use mk_lib_database::mk_lib_database_version::mk_lib_database_version_check;
 use mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push;
 use mk_lib_metadata::base::metadata_process;
@@ -51,10 +49,7 @@ fn build_limiter(tokens: u64, window: Duration) -> Ratelimiter {
 // shutdown was requested while waiting. Token consumption is atomic: if a
 // later limiter would block, the already-consumed earlier tokens would be
 // lost, so check tightest (shortest-window) limiter first.
-async fn await_limiters(
-    limiters: &[Ratelimiter],
-    shutdown_rx: &mut watch::Receiver<bool>,
-) -> bool {
+async fn await_limiters(limiters: &[Ratelimiter], shutdown_rx: &mut watch::Receiver<bool>) -> bool {
     for limiter in limiters {
         while let Err(wait) = limiter.try_wait() {
             tokio::select! {
@@ -121,13 +116,8 @@ async fn run_provider_loop(
                 }
             }
 
-            if let Err(err) = metadata_process(
-                &pool,
-                provider.to_string(),
-                download_data,
-                api_key.as_str(),
-            )
-            .await
+            if let Err(err) =
+                metadata_process(&pool, provider.to_string(), download_data, api_key.as_str()).await
             {
                 eprintln!("mkmetadata: {provider} process failed ({err})");
             }
@@ -166,7 +156,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             sqlx_pool_rw.clone(),
             "barcodespider",
             key,
-            vec![build_limiter(limit.2, Duration::from_secs(DAILY_WINDOW_SECS))],
+            vec![build_limiter(
+                limit.2,
+                Duration::from_secs(DAILY_WINDOW_SECS),
+            )],
             debug_enabled,
             shutdown_rx.clone(),
         ));

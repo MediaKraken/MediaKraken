@@ -99,8 +99,7 @@ pub async fn user_metadata_music(
             starts_with.as_deref(),
             pagination_count,
         )
-        .await
-        ?;
+        .await?;
         let music_list =
         mk_lib_database::database_metadata::mk_lib_database_metadata_music_brainz::mk_lib_database_metadata_music_album_read(
            &state.sqlx_pool_ro,

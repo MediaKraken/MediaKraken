@@ -1,7 +1,7 @@
 use mk_lib_hardware;
 use mk_lib_network;
 use mk_lib_rabbitmq;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::error::Error;
 use std::net::IpAddr;
 use std::str::FromStr;
@@ -11,20 +11,16 @@ use tokio::sync::Notify;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkhardwarecontrol")
-            .await
-            ?;
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkhardwarecontrol").await?;
 
     let mut rabbit_consumer =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mkhardwarecontrol", &rabbit_channel)
-            .await
-            ?;
+            .await?;
 
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {
-                let json_message: Value =
-                    serde_json::from_str(&String::from_utf8_lossy(&payload))?;
+                let json_message: Value = serde_json::from_str(&String::from_utf8_lossy(&payload))?;
                 if json_message["Type"] == "Hardware" {
                     if json_message["Subtype"] == "Lights" {
                         if json_message["Hardware"] == "Hue" {

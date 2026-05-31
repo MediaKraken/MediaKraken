@@ -30,7 +30,7 @@ pub async fn mk_lib_database_version_check(
     let start = tokio::time::Instant::now();
     let mut table_exists = false;
     while start.elapsed() < table_check_timeout {
-        match mk_lib_database_postgresql::mk_lib_database_table_exists(&sqlx_pool, "mm_version").await {
+        match mk_lib_database_postgresql::mk_lib_database_table_exists(sqlx_pool, "mm_version").await {
             Ok(exists) => {
                 if exists {
                     table_exists = true;
@@ -49,13 +49,13 @@ pub async fn mk_lib_database_version_check(
     }
 
     // start version check
-    let version_no: i32 = mk_lib_database_version(&sqlx_pool).await?;
+    let version_no: i32 = mk_lib_database_version(sqlx_pool).await?;
     let mut version_match: bool = DATABASE_VERSION == version_no;
 
     if !version_match {
         if update_schema {
             println!("Database upgrade from {version_no} to version {DATABASE_VERSION}");
-            mk_lib_database_version_schema::mk_lib_database_update_schema(&sqlx_pool, version_no)
+            mk_lib_database_version_schema::mk_lib_database_update_schema(sqlx_pool, version_no)
                 .await?;
             version_match = true;
         } else {
@@ -63,7 +63,7 @@ pub async fn mk_lib_database_version_check(
             let start_wait = tokio::time::Instant::now();
             while start_wait.elapsed() < version_wait_timeout {
                 sleep(Duration::from_secs(5)).await;
-                let current_version: i32 = mk_lib_database_version(&sqlx_pool).await?;
+                let current_version: i32 = mk_lib_database_version(sqlx_pool).await?;
                 if DATABASE_VERSION == current_version {
                     version_match = true;
                     break;

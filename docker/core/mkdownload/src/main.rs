@@ -102,7 +102,9 @@ fn sanitize_local_save_path(raw: &str) -> Result<PathBuf, TaskError> {
 }
 
 async fn process_message(json_message: Value) -> Result<(), TaskError> {
-    let message_type = json_message["Type"].as_str().ok_or("message missing Type")?;
+    let message_type = json_message["Type"]
+        .as_str()
+        .ok_or("message missing Type")?;
 
     match message_type {
         "File" => {
@@ -145,7 +147,7 @@ async fn process_message(json_message: Value) -> Result<(), TaskError> {
                 .map_err(|e| format!("youtube download command failed: {e}"))?;
 
             if !output.status.success() {
-                let stderr = String::from_utf8_lossy(let stderr = String::from_utf8_lossy(let stderr = String::from_utf8_lossy(&output.stderr);output.stderr).into_owned();output.stderr).into_owned();
+                let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
                 return Err(format!("youtube download failed: {stderr}"));
             }
         }
@@ -162,7 +164,7 @@ async fn process_message(json_message: Value) -> Result<(), TaskError> {
                 .map_err(|e| format!("subtitle download command failed: {e}"))?;
 
             if !output.status.success() {
-                let stderr = String::from_utf8_lossy(let stderr = String::from_utf8_lossy(let stderr = String::from_utf8_lossy(&output.stderr);output.stderr).into_owned();output.stderr).into_owned();
+                let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
                 return Err(format!("subtitle download failed: {stderr}"));
             }
         }
@@ -228,11 +230,12 @@ async fn process_message(json_message: Value) -> Result<(), TaskError> {
                     let file_save_name = format!("/mediakraken/metadata/meta/trailer/{filename}");
 
                     if !Path::new(&file_save_name).exists() {
-                        if let Err(error) = mk_lib_network::mk_lib_network::mk_download_file_from_url(
-                            download_link,
-                            &file_save_name,
-                        )
-                        .await
+                        if let Err(error) =
+                            mk_lib_network::mk_lib_network::mk_download_file_from_url(
+                                download_link,
+                                &file_save_name,
+                            )
+                            .await
                         {
                             eprintln!("hdtrailers download failed: {error}");
                         }
@@ -600,9 +603,11 @@ async fn main() -> Result<(), AppError> {
                         eprintln!("message processing failed: {error}");
                     }
 
-                    if let Err(error) =
-                        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(&rabbit_channel, delivery_tag)
-                            .await
+                    if let Err(error) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
+                        &rabbit_channel,
+                        delivery_tag,
+                    )
+                    .await
                     {
                         eprintln!("rabbit ack failed: {error}");
                     }

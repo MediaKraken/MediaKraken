@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use transmission_rpc::TransClient;
 use transmission_rpc::types::{
     BasicAuth, Id, Nothing, Result, RpcResponse, SessionClose, Torrent, TorrentAction,
-    TorrentAddArgs, TorrentAddedOrDuplicate, TorrentStatus, Torrents,
+    TorrentAddArgs, TorrentAddedOrDuplicate, Torrents,
 };
 
 // https://docs.rs/transmission-rpc/0.4.2/transmission_rpc/types/struct.Torrent.html#structfield.added_date
@@ -85,7 +85,7 @@ pub async fn mk_network_transmission_list_torrents(
             Some(TorrentList {
                 mm_torrent_id: it.id?,
                 mm_torrent_name: it.name.clone()?,
-                mm_torrent_status: format!("{:?}", TorrentStatus::from(it.status?)),
+                mm_torrent_status: format!("{:?}", it.status?),
                 mm_torrent_size: it.total_size?,
                 mm_torrent_percent_done: it.percent_done?,
             })

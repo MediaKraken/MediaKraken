@@ -1,11 +1,11 @@
-use axum::http::header;
 use axum::http::Method;
+use axum::http::header;
 use axum::{
     Router,
     body::Body,
+    extract::ConnectInfo,
     extract::FromRef,
     extract::Request,
-    extract::ConnectInfo,
     http::StatusCode,
     middleware::{self, Next},
     response::{IntoResponse, Response},
@@ -236,8 +236,10 @@ async fn security_headers(req: Request, next: Next) -> Response {
 // An empty allowed-origins list is a production hard-fail.
 async fn require_same_origin(req: Request, next: Next) -> Response {
     let method = req.method().clone();
-    let is_state_changing =
-        matches!(method, Method::POST | Method::PUT | Method::PATCH | Method::DELETE);
+    let is_state_changing = matches!(
+        method,
+        Method::POST | Method::PUT | Method::PATCH | Method::DELETE
+    );
     if !is_state_changing {
         return next.run(req).await;
     }
@@ -290,11 +292,7 @@ async fn require_same_origin(req: Request, next: Next) -> Response {
 /// Rate-limiting middleware for login and registration endpoints.
 /// Only applies to POST requests on /public/login, /public/register, and
 /// /public/forgot_password. All other requests pass through unmodified.
-async fn rate_limit_auth(
-    State(state): State<AppState>,
-    req: Request,
-    next: Next,
-) -> Response {
+async fn rate_limit_auth(State(state): State<AppState>, req: Request, next: Next) -> Response {
     // Only apply rate limiting to auth POST endpoints.
     if req.method() != Method::POST {
         return next.run(req).await;
@@ -313,7 +311,11 @@ async fn rate_limit_auth(
 
     if !limiter.is_allowed(&addr).await {
         tracing::warn!(ip = %addr, path, "rate limit exceeded on auth endpoint");
-        return (StatusCode::TOO_MANY_REQUESTS, "too many requests, please try again later").into_response();
+        return (
+            StatusCode::TOO_MANY_REQUESTS,
+            "too many requests, please try again later",
+        )
+            .into_response();
     }
 
     next.run(req).await
@@ -361,7 +363,9 @@ async fn main() {
         .with_max_age(Duration::from_secs(3600));
     let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
     let session_store =
-        match SessionStore::<SessionPgPool>::new(Some(sqlx_pool_rw.clone().into()), session_config).await {
+        match SessionStore::<SessionPgPool>::new(Some(sqlx_pool_rw.clone().into()), session_config)
+            .await
+        {
             Ok(store) => store,
             Err(e) => {
                 eprintln!("Failed to create session store: {e}");
@@ -713,8 +717,7 @@ async fn main() {
         .route_with_tsr("/public/logout", get(public::bp_logout::public_logout))
         .route_with_tsr(
             "/public/login",
-            get(public::bp_login::public_login)
-                .post(public::bp_login::public_login_post),
+            get(public::bp_login::public_login).post(public::bp_login::public_login_post),
         )
         .nest_service(
             "/static",

@@ -30,11 +30,10 @@ pub fn parse_share_name(network_share_path: &str) -> Option<String> {
     let mut segments = normalized.split('/').filter(|s| !s.is_empty()).peekable();
     if had_unc_prefix {
         segments.next()?;
-    } else if let Some(first) = segments.peek() {
-        if first.parse::<std::net::IpAddr>().is_ok() {
+    } else if let Some(first) = segments.peek()
+        && first.parse::<std::net::IpAddr>().is_ok() {
             segments.next();
         }
-    }
     let candidate = segments.next()?.to_owned();
     if candidate.parse::<std::net::IpAddr>().is_ok() {
         return None;

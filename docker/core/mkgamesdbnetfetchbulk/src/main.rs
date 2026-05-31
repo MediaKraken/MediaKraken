@@ -1,35 +1,30 @@
 use mk_lib_database;
 use mk_lib_rabbitmq;
-use serde_json::json;
 use serde_json::Value;
+use serde_json::json;
 use std::error::Error;
 use tokio::sync::Notify;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let (sqlx_pool_rw, sqlx_pool_ro) = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120)
-        .await
-        ?;
+    let (sqlx_pool_rw, sqlx_pool_ro) =
+        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120).await?;
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await;
 
     let _option_config_json: Value =
         mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool_ro)
-            .await
-            ?;
+            .await?;
 
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkgamesdbnetfetchbulk")
-            .await
-            ?;
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkgamesdbnetfetchbulk").await?;
 
     let mut rabbit_consumer = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer(
         "mkgamesdbnetfetchbulk",
         &rabbit_channel,
     )
-    .await
-    ?;
+    .await?;
 
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {

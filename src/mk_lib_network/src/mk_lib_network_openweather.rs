@@ -13,7 +13,7 @@ pub async fn network_openweather_current(
     let options = ClientOptions {
         units: temp_type,
         language: "en".to_string(),
-        api_key: api_key,
+        api_key,
     };
     let client = Client::new(options)?;
     let reading = client.fetch_weather(&City::new(city, country)).await?;

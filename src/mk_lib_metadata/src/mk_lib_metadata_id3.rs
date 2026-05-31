@@ -6,7 +6,7 @@ pub async fn mk_lib_metadata_id3_get_tag_info(file_name: String) {
     let Ok(tag) = Tag::read_from_path(file_name) else {
         return;
     };
-    if let Some(artist) = tag.artist() {
+    if let Some(_artist) = tag.artist() {
         #[cfg(debug_assertions)]
         {
             // mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "artist": artist }))
@@ -14,7 +14,7 @@ pub async fn mk_lib_metadata_id3_get_tag_info(file_name: String) {
             //     .unwrap();
         }
     }
-    if let Some(title) = tag.title() {
+    if let Some(_title) = tag.title() {
         #[cfg(debug_assertions)]
         {
             // mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "title": title }))
@@ -22,7 +22,7 @@ pub async fn mk_lib_metadata_id3_get_tag_info(file_name: String) {
             //     .unwrap();
         }
     }
-    if let Some(album) = tag.album() {
+    if let Some(_album) = tag.album() {
         #[cfg(debug_assertions)]
         {
             // mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "album": album }))

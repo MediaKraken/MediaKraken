@@ -17,7 +17,7 @@ pub async fn provider_openlibrary_cover_fetch(
     isbn: String,
     file_path: String,
 ) -> Result<(), Box<dyn Error>> {
-    let _fetch_result = mk_lib_network::mk_lib_network::mk_download_file_from_url(
+    mk_lib_network::mk_lib_network::mk_download_file_from_url(
         format!("http://covers.openlibrary.org/b/isbn/{}-L.jpg", isbn).to_string(),
         &file_path,
     )

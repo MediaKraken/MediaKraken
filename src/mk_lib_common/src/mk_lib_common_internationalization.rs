@@ -19,7 +19,7 @@ fn locale_from_name(locale_name: &str) -> Option<Locale> {
 
     Locale::from_name(trimmed)
         .ok()
-        .or_else(|| Locale::from_name(&trimmed.replace('-', "_")).ok())
+        .or_else(|| Locale::from_name(trimmed.replace('-', "_")).ok())
         .or_else(|| {
             let mut parts = trimmed.split(['-', '_']);
             let language = parts.next()?;

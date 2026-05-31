@@ -72,8 +72,7 @@ pub async fn user_media_movie(
             None,
             pagination_count,
         )
-        .await
-        ?;
+        .await?;
         let movie_list =
         mk_lib_database::database_media::mk_lib_database_media_movie::mk_lib_database_media_movie_read(
            &state.sqlx_pool_ro,

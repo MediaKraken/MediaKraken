@@ -1,6 +1,7 @@
 use chrono::prelude::*;
 use sqlx::types::Uuid;
 
+#[allow(clippy::too_many_arguments)]
 pub async fn mk_lib_database_activity_insert(
     sqlx_pool: &sqlx::PgPool,
     activity_name: String,

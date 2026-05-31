@@ -82,23 +82,20 @@ pub async fn metadata_object_proxy(
         }
     };
 
-    let upstream_response =
-        match tokio::time::timeout(UPSTREAM_TIMEOUT, state.client.request(upstream_request)).await
-        {
-            Ok(Ok(response)) => response,
-            Ok(Err(_)) => {
-                return text_response(
-                    StatusCode::BAD_GATEWAY,
-                    "unable to reach metadata storage",
-                );
-            }
-            Err(_) => {
-                return text_response(
-                    StatusCode::GATEWAY_TIMEOUT,
-                    "metadata storage timed out",
-                );
-            }
-        };
+    let upstream_response = match tokio::time::timeout(
+        UPSTREAM_TIMEOUT,
+        state.client.request(upstream_request),
+    )
+    .await
+    {
+        Ok(Ok(response)) => response,
+        Ok(Err(_)) => {
+            return text_response(StatusCode::BAD_GATEWAY, "unable to reach metadata storage");
+        }
+        Err(_) => {
+            return text_response(StatusCode::GATEWAY_TIMEOUT, "metadata storage timed out");
+        }
+    };
 
     let status = upstream_response.status();
     if !status.is_success() {

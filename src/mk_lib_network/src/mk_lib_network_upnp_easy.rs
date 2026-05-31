@@ -39,11 +39,11 @@ fn get_configs() -> Result<[UpnpConfig; 3], Box<dyn Error>> {
 }
 
 pub async fn upnp_open_ports() -> Result<(), Box<dyn Error>> {
-    add_ports(get_configs()?);
+    add_ports(get_configs()?).count();
     Ok(())
 }
 
 pub async fn upnp_delete_ports() -> Result<(), Box<dyn Error>> {
-    delete_ports(get_configs()?);
+    delete_ports(get_configs()?).count();
     Ok(())
 }

@@ -20,9 +20,7 @@ fn cron_schedule_to_duration(schedule_type: &str, schedule_time: i16) -> Option<
 }
 
 async fn log_event(payload: serde_json::Value) {
-    if let Err(err) =
-        mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(payload).await
-    {
+    if let Err(err) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(payload).await {
         eprintln!("mkcron: loki push failed: {err}");
     }
 }

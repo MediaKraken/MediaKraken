@@ -25,7 +25,7 @@ pub async fn telnet_connect(
     telnet_ip: String,
     telnet_port: String,
 ) -> Result<Telnet, Box<dyn std::error::Error>> {
-    let mut telnet_instance = Telnet::builder()
+    let telnet_instance = Telnet::builder()
         .connect_timeout(Duration::from_secs(10))
         .timeout(Duration::from_secs(5))
         .connect(&format!("{}:{}", telnet_ip, telnet_port))

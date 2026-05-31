@@ -2,10 +2,8 @@
 
 //use rusty_ytdl::Video;
 use select::document::Document;
-use select::predicate::{Attr, Name};
+use select::predicate::Name;
 use std::error::Error;
-use std::io::Read;
-use std::io::Write;
 use std::str;
 
 // pub async fn provider_youtube_video_fetch(video_url: &str, download_path: &str) {
@@ -19,10 +17,10 @@ use std::str;
 // }
 
 pub async fn provider_youtube_trending(country_code: &str) -> Result<(), Box<dyn Error>> {
-    let mut link_list: Vec<String> = Vec::new();
+    let _link_list: Vec<String> = Vec::new();
     let url = format!("https://www.youtube.com/feed/trending?gl={}", country_code);
     let response = reqwest::get(&url).await?.text().await?;
-    let document = Document::from(response.as_str())
+    Document::from(response.as_str())
         .find(Name("a"))
         .filter_map(|n| n.attr("href"))
         .for_each(|x| println!("{}", x));

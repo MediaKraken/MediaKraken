@@ -17,14 +17,14 @@ pub async fn metadata_identification(
     dl_row: &DBDownloadQueueByProviderList,
 ) -> Result<uuid::Uuid, Box<dyn Error>> {
     let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
-    let mut guessit_data: Metadata;
+    let guessit_data: Metadata;
     println!("typeL {}", dl_row.mm_download_que_type);
     match dl_row.mm_download_que_type {
         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::ADULT
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::ADULT_SCENE => {
             guessit_data = guessit::metadata_guessit(
-                &sqlx_pool,
-                &dl_row,
+                sqlx_pool,
+                dl_row,
                 "fake".to_string(),
                 0,
                 metadata_uuid,
@@ -32,7 +32,7 @@ pub async fn metadata_identification(
             .await
             ?;
             if metadata_uuid == uuid::Uuid::nil() {
-                metadata_uuid = adult::metadata_adult_lookup(&sqlx_pool, &dl_row, guessit_data)
+                metadata_uuid = adult::metadata_adult_lookup(sqlx_pool, dl_row, guessit_data)
                     .await
                     ?;
             }
@@ -40,8 +40,8 @@ pub async fn metadata_identification(
 
         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::ANIME => {
             guessit_data = guessit::metadata_guessit(
-                &sqlx_pool,
-                &dl_row,
+                sqlx_pool,
+                dl_row,
                 "fake".to_string(),
                 0,
                 metadata_uuid,
@@ -49,7 +49,7 @@ pub async fn metadata_identification(
             .await
             ?;
             if metadata_uuid == uuid::Uuid::nil() {
-                metadata_uuid = anime::metadata_anime_lookup(&sqlx_pool, &dl_row, guessit_data)
+                metadata_uuid = anime::metadata_anime_lookup(sqlx_pool, dl_row, guessit_data)
                     .await
                     ?;
             }
@@ -62,7 +62,7 @@ pub async fn metadata_identification(
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::GAME_TRAILER
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::GAME_ISO
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::GAME_ROM => {
-            metadata_uuid = game::metadata_game_lookup(&sqlx_pool, &dl_row)
+            metadata_uuid = game::metadata_game_lookup(sqlx_pool, dl_row)
                 .await
                 ?;
         }
@@ -73,7 +73,7 @@ pub async fn metadata_identification(
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PUBLICATION_COMIC_STRIP
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PUBLICATION_MAGAZINE
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PUBLICATION_GRAPHIC_NOVEL => {
-            metadata_uuid = book::metadata_book_lookup(&sqlx_pool, &dl_row)
+            metadata_uuid = book::metadata_book_lookup(sqlx_pool, dl_row)
                 .await
                 ?;
         }
@@ -85,8 +85,8 @@ pub async fn metadata_identification(
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE_TRAILER => {
             println!("movie lookup");
             guessit_data = guessit::metadata_guessit(
-                &sqlx_pool,
-                &dl_row,
+                sqlx_pool,
+                dl_row,
                 "fake".to_string(),
                 0,
                 metadata_uuid,
@@ -94,7 +94,7 @@ pub async fn metadata_identification(
             .await
             ?;
             if metadata_uuid == uuid::Uuid::nil() {
-                metadata_uuid = movie::metadata_movie_lookup(&sqlx_pool, &dl_row, guessit_data)
+                metadata_uuid = movie::metadata_movie_lookup(sqlx_pool, dl_row, guessit_data)
                     .await
                     ?;
             }
@@ -109,19 +109,19 @@ pub async fn metadata_identification(
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MUSIC_ALBUM
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MUSIC_LYRICS
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MUSIC_SONG => {
-            metadata_uuid = music::metadata_music_lookup(&sqlx_pool, &dl_row)
+            metadata_uuid = music::metadata_music_lookup(sqlx_pool, dl_row)
                 .await
                 ?;
         }
 
         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MUSIC_VIDEO => {
-            metadata_uuid = music_video::metadata_music_video_lookup(&sqlx_pool, &dl_row)
+            metadata_uuid = music_video::metadata_music_video_lookup(sqlx_pool, dl_row)
                 .await
                 ?;
         }
 
         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::SPORTS => {
-            metadata_uuid = sports::metadata_sports_lookup(&sqlx_pool, &dl_row)
+            metadata_uuid = sports::metadata_sports_lookup(sqlx_pool, dl_row)
                 .await
                 ?;
         }
@@ -134,8 +134,8 @@ pub async fn metadata_identification(
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_THEME
         | mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV_TRAILER => {
             guessit_data = guessit::metadata_guessit(
-                &sqlx_pool,
-                &dl_row,
+                sqlx_pool,
+                dl_row,
                 "fake".to_string(),
                 0,
                 metadata_uuid,
@@ -143,7 +143,7 @@ pub async fn metadata_identification(
             .await
             ?;
             if metadata_uuid == uuid::Uuid::nil() {
-                metadata_uuid = tv::metadata_tv_lookup(&sqlx_pool, &dl_row, guessit_data)
+                metadata_uuid = tv::metadata_tv_lookup(sqlx_pool, dl_row, guessit_data)
                     .await
                     ?;
             }

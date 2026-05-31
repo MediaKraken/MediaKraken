@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
 use sqlx::FromRow;
 

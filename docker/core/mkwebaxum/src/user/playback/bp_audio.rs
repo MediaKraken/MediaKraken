@@ -1,11 +1,11 @@
 use crate::mk_lib_database;
 use askama::Template;
 use axum::{
+    Extension, Router,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
-    Extension, Router,
 };
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;

@@ -71,7 +71,9 @@ pub async fn admin_logging(
         let reply_html = template.render().unwrap_or_default();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let logging_list = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_read("").await.unwrap_or_default();
+        let logging_list = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_read("")
+            .await
+            .unwrap_or_default();
         let logging_data = !logging_list.is_empty();
         let template = TemplateLogContext {
             template_data: &logging_list,

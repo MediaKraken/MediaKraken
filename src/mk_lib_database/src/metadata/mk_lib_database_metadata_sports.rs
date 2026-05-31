@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
-use sqlx::postgres::PgRow;
 
 pub async fn mk_lib_database_metadata_sports_count(
     sqlx_pool: &sqlx::PgPool,

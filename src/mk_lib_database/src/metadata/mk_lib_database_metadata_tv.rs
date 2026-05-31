@@ -122,7 +122,7 @@ pub async fn mk_lib_database_metadata_tv_insert(
 pub async fn mk_lib_database_metadata_tv_status(
     sqlx_pool: &sqlx::PgPool,
     uuid_id: Uuid,
-    key: String,
+    _key: String,
     user_id: i64,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;

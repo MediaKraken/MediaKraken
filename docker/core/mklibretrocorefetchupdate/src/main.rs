@@ -44,16 +44,13 @@ fn latest_stable_version(index_html: &str) -> Option<String> {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mklibretrocorefetchupdate")
-            .await?
-            ?;
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mklibretrocorefetchupdate").await??;
 
     let mut rabbit_consumer = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer(
         "mklibretrocorefetchupdate",
         &rabbit_channel,
     )
-    .await?
-    ?;
+    .await??;
 
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
@@ -91,16 +88,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let stable_root = "http://buildbot.libretro.com/stable/";
                 let stable_index =
                     mk_lib_network::mk_lib_network::mk_data_from_url(stable_root.to_string())
-                        .await?
-                        ?;
+                        .await??;
                 let latest_version = latest_stable_version(&stable_index)?;
                 let libtro_url = format!("{}{}/linux/x86_64/", stable_root, latest_version);
                 let fetch_result = mk_lib_network::mk_lib_network::mk_data_from_url(format!(
                     "{}{}",
                     &libtro_url, ".index-extended"
                 ))
-                .await?
-                ?;
+                .await??;
                 for libretro_core in fetch_result.split('\n') {
                     if libretro_core.len() > 0 {
                         let mut download_core = false;
@@ -130,8 +125,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 format!("{}{}", &libtro_url, core_name),
                                 &format!("/mediakraken/emulation/cores/{}", core_name),
                             )
-                            .await?
-                            ?;
+                            .await??;
                         }
                     }
                 }

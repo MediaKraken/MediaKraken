@@ -97,8 +97,7 @@ pub async fn user_metadata_game_system(
             starts_with.as_deref(),
             pagination_count,
         )
-        .await
-        ?;
+        .await?;
         let game_system_list =
         mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_read(
             &state.sqlx_pool_ro,

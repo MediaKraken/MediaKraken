@@ -1,8 +1,6 @@
 // https://github.com/kallekankaanpaa/rsteam
 
-use rsteam::steam_id::{SteamID2, SteamID3};
-use rsteam::steam_user::{BanData, Status};
-use rsteam::{SteamClient, SteamID};
+use rsteam::SteamClient;
 
 /*
 ISteamUser
@@ -32,8 +30,8 @@ pub async fn steam_login(
     api_key: &str,
     vanity_url: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let client = SteamClient::with_api_key(&api_key);
-    let id = client.resolve_vanity_url(&vanity_url, None).await?;
-    let id_vec = vec![id.clone()];
+    let client = SteamClient::with_api_key(api_key);
+    let id = client.resolve_vanity_url(vanity_url, None).await?;
+    let _id_vec = [id];
     Ok(())
 }

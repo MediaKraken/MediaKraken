@@ -15,20 +15,21 @@ use tokio::time::Duration;
 static SHARED_HTTP_CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
 
 pub async fn custom_headers(map: &HashMap<String, String>) -> HeaderMap {
+    #[allow(dead_code)]
     pub async fn is_url_available(url: &str) -> bool {
         // Try HEAD first (no body download)
         match SHARED_HTTP_CLIENT.head(url).send().await {
             Ok(resp) => {
-                return resp.status().is_success();
+                resp.status().is_success()
             }
             Err(_) => {
                 // If HEAD fails, fallback to GET
                 match SHARED_HTTP_CLIENT.get(url).send().await {
                     Ok(resp) => {
-                        return resp.status().is_success();
+                        resp.status().is_success()
                     }
                     Err(_) => {
-                        return false;
+                        false
                     }
                 }
             }
@@ -150,16 +151,10 @@ pub async fn mk_download_file_from_url_tokio(
     let client = Client::builder().user_agent("MediaKraken/0.0.1").build()?;
 
     // 1. Handle Request Errors
-    let mut res = client.get(&url).send().await.map_err(|e| {
-        // Log here if needed: format!("Network error: {}", e)
-        e
-    })?;
+    let mut res = client.get(&url).send().await?;
 
     // 2. Handle File Creation Errors
-    let file = tokio::fs::File::create(file_name).await.map_err(|e| {
-        // Log here: format!("File system error: {}", e)
-        e
-    })?;
+    let file = tokio::fs::File::create(file_name).await?;
 
     let mut writer = tokio::io::BufWriter::new(file);
 

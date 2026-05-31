@@ -26,7 +26,7 @@ pub async fn provider_soundcloud_search(
         .query(Some(band_name))
         .get()
         .await
-        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))
+        .map_err(|e| std::io::Error::other(e.to_string()))
 }
 
 pub async fn provider_soundcloud_track_download(
@@ -44,11 +44,10 @@ pub async fn provider_soundcloud_track_download(
             .replace(&['\"', '.', '\'', '\\', '/', '?', '*'][..], "");
         let path = format!("{} - {}", band_name, track_title);
         let mut outfile = File::create(&path).await?.compat_write();
-        if let Ok(num_bytes) = soundcloud_client.download(track, &mut outfile).await {
-            if num_bytes > 0 {
+        if let Ok(num_bytes) = soundcloud_client.download(track, &mut outfile).await
+            && num_bytes > 0 {
                 break;
             }
-        }
     }
     Ok(())
 }

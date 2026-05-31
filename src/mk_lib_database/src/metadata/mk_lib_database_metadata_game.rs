@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
 use sqlx::FromRow;
 
@@ -159,7 +158,7 @@ pub async fn mk_lib_database_metadata_game_uuid_by_name_and_system(
     game_name: String,
     game_system_short_name: String,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    if game_system_short_name != "" {
+    if !game_system_short_name.is_empty() {
         let row: (uuid::Uuid,) = sqlx::query_as(
             r#"select gi_id from mm_metadata_game_software_info where gi_game_info_name = $1 and game_system_short_name = $2 limit 1"#,
         )
@@ -192,7 +191,7 @@ pub async fn mk_lib_database_metadata_game_by_name_and_system(
     offset: i64,
     limit: i64,
 ) -> Result<Vec<DBMetaGameNameMatchList>, sqlx::Error> {
-    if game_system_short_name != "" {
+    if !game_system_short_name.is_empty() {
         // TODO fix game_system_short_name in query below
         sqlx::query_as(
             r#"select gi_id, gi_game_info_json from mm_metadata_game_software_info where gi_game_info_name = $1 and game_system_short_name = $2"#,

@@ -5,8 +5,8 @@ use mk_lib_database;
 use mk_lib_network;
 use mk_lib_rabbitmq;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use serde_json::Value;
+use serde_json::json;
 use std::error::Error;
 use tokio::sync::Notify;
 
@@ -69,28 +69,21 @@ pub async fn find_date_to_use(url_template: &str) -> Result<String, Box<dyn Erro
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
     let (sqlx_pool_rw, sqlx_pool_ro) =
-        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120)
-            .await
-            ?;
+        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120).await?;
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
-        .await
-        ?;
+        .await?;
 
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mktmdbnetfetchbulk")
-            .await
-            ?;
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mktmdbnetfetchbulk").await?;
 
     let mut rabbit_consumer =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mktmdbnetfetchbulk", &rabbit_channel)
-            .await
-            ?;
+            .await?;
 
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {
-                let json_message: Value =
-                    serde_json::from_str(&String::from_utf8_lossy(&payload))?;
+                let json_message: Value = serde_json::from_str(&String::from_utf8_lossy(&payload))?;
                 println!(" [x] Received {:?}", json_message);
                 if json_message["Type"] == "Bulk" {
                     let mut record_limit = i64::MAX;
@@ -100,8 +93,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     }
                     let date_to_use =
                         find_date_to_use("http://files.tmdb.org/p/exports/movie_ids_{}.json.gz")
-                            .await
-                            ?;
+                            .await?;
                     // grab the movie id's
                     let fetch_result_movie =
                         mk_lib_network::mk_lib_network::mk_network_download_file_to_vec(
@@ -111,14 +103,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             )
                             .replace("\"", ""),
                         )
-                        .await
-                        ?;
+                        .await?;
                     let json_result =
                         mk_lib_compression::mk_lib_compression::mk_decompress_gz_bytes(
                             fetch_result_movie,
                         )
-                        .await
-                        ?;
+                        .await?;
                     // Please note that the data is NOT in id order
                     let mut record_count = 0;
                     let mut skipped_rows = 0usize;
@@ -164,8 +154,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     let date_to_use = find_date_to_use(
                         "http://files.tmdb.org/p/exports/tv_series_ids_{}.json.gz",
                     )
-                    .await
-                    ?;
+                    .await?;
                     // grab the TV id's
                     let fetch_result_tv =
                         mk_lib_network::mk_lib_network::mk_network_download_file_to_vec(
@@ -175,14 +164,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             )
                             .replace("\"", ""),
                         )
-                        .await
-                        ?;
+                        .await?;
                     let json_result =
                         mk_lib_compression::mk_lib_compression::mk_decompress_gz_bytes(
                             fetch_result_tv,
                         )
-                        .await
-                        ?;
+                        .await?;
                     let mut record_count = 0;
                     let mut skipped_rows = 0usize;
                     for json_item in json_result.lines() {
@@ -226,8 +213,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                     let date_to_use =
                         find_date_to_use("http://files.tmdb.org/p/exports/person_ids_{}.json.gz")
-                            .await
-                            ?;
+                            .await?;
                     // grab the Person id's
                     let fetch_result_person =
                         mk_lib_network::mk_lib_network::mk_network_download_file_to_vec(
@@ -237,14 +223,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             )
                             .replace("\"", ""),
                         )
-                        .await
-                        ?;
+                        .await?;
                     let json_result =
                         mk_lib_compression::mk_lib_compression::mk_decompress_gz_bytes(
                             fetch_result_person,
                         )
-                        .await
-                        ?;
+                        .await?;
                     let mut record_count = 0;
                     let mut skipped_rows = 0usize;
                     for json_item in json_result.lines() {
@@ -289,8 +273,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     let date_to_use = find_date_to_use(
                         "http://files.tmdb.org/p/exports/collection_ids_{}.json.gz",
                     )
-                    .await
-                    ?;
+                    .await?;
                     // grab the Collection id's
                     let fetch_result_collection =
                         mk_lib_network::mk_lib_network::mk_network_download_file_to_vec(
@@ -300,14 +283,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             )
                             .replace("\"", ""),
                         )
-                        .await
-                        ?;
+                        .await?;
                     let json_result =
                         mk_lib_compression::mk_lib_compression::mk_decompress_gz_bytes(
                             fetch_result_collection,
                         )
-                        .await
-                        ?;
+                        .await?;
                     let mut record_count = 0;
                     let mut skipped_rows = 0usize;
                     for json_item in json_result.lines() {
@@ -361,8 +342,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         )
                         .replace("\"", ""),
                     )
-                    .await
-                    ?;
+                    .await?;
                     println!("one {:?}", url_result);
                     let resp: ResponseMetadata = serde_json::from_str(&url_result.trim())?;
                     for json_item in resp.results {
@@ -407,8 +387,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         )
                         .replace("\"", ""),
                     )
-                    .await
-                    ?;
+                    .await?;
                     let resp: ResponseMetadata = serde_json::from_str(&url_result.trim())?;
                     for json_item in resp.results {
                         println!("tv item {}", json_item.id);
@@ -452,8 +431,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         )
                         .replace("\"", ""),
                     )
-                    .await
-                    ?;
+                    .await?;
                     let resp: ResponseMetadata = serde_json::from_str(&url_result)?;
                     for json_item in resp.results {
                         println!("person item {}", json_item.id);

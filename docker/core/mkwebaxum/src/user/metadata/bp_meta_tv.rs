@@ -99,8 +99,7 @@ pub async fn user_metadata_tv(
             starts_with.as_deref(),
             pagination_count,
         )
-        .await
-        ?;
+        .await?;
         let tv_list = mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_read(
            &state.sqlx_pool_ro,
             starts_with.clone().unwrap_or_default(),

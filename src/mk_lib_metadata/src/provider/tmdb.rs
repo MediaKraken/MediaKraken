@@ -174,9 +174,9 @@ pub async fn provider_tmdb_tv_fetch(
 }
 
 pub async fn provider_tmdb_collection_fetch(
-    sqlx_pool: &sqlx::PgPool,
+    _sqlx_pool: &sqlx::PgPool,
     tmdb_id: i32,
-    metadata_uuid: Uuid,
+    _metadata_uuid: Uuid,
     tmdb_api_key: &str,
 )-> Result<(), Box<dyn std::error::Error>> {
     // fetch and save json data via tmdb id

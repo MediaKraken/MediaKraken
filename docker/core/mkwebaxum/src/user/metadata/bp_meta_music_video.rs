@@ -99,8 +99,7 @@ pub async fn user_metadata_music_video(
             starts_with.as_deref(),
             pagination_count,
         )
-        .await
-        ?;
+        .await?;
         let music_video_list =
         mk_lib_database::database_metadata::mk_lib_database_metadata_music_video::mk_lib_database_metadata_music_video_read(
            &state.sqlx_pool_ro,

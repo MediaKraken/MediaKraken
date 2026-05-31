@@ -1,16 +1,12 @@
 // https://www.upcitemdb.com/wp/docs/main/development/getting-started/
 
-use mk_lib_database;
 use mk_lib_network::mk_lib_network;
-use serde_json::json;
-use sqlx::types::Uuid;
 use std::fmt::Write;
-use std::error::Error;
 
 pub async fn provider_upcitemdb_fetch_by_upc(
-    sqlx_pool: &sqlx::PgPool,
+    _sqlx_pool: &sqlx::PgPool,
     upc_code: Vec<&str>,
-    api_token: &str,
+    _api_token: &str,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     // join up upc code for query below
     let mut s = String::new();

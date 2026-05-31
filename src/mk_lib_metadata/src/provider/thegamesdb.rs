@@ -20,7 +20,7 @@ pub async fn thegamesdb_platforms_read(
         "https://api.thegamesdb.net/v1/Platforms?apikey={}&fields=icon,console,controller,developer,manufacturer,media,cpu,memory,graphics,sound,maxcontrollers,display,overview,youtube",
         api_key
     );
-    Ok(mk_lib_network::mk_data_from_url_to_json(url).await?)
+    mk_lib_network::mk_data_from_url_to_json(url).await
 }
 
 pub async fn thegamesdb_games_updated(
@@ -31,24 +31,24 @@ pub async fn thegamesdb_games_updated(
         "https://api.thegamesdb.net/v1/Games/Updates?apikey={}&last_edit_id={}",
         api_key, edit_id
     );
-    Ok(mk_lib_network::mk_data_from_url_to_json(url).await?)
+    mk_lib_network::mk_data_from_url_to_json(url).await
 }
 
 pub async fn thegamesdb_genre_read(api_key: String) -> Result<serde_json::Value, Box<dyn Error>> {
     let url = format!("https://api.thegamesdb.net/v1/Genres?apikey={}", api_key);
-    Ok(mk_lib_network::mk_data_from_url_to_json(url).await?)
+    mk_lib_network::mk_data_from_url_to_json(url).await
 }
 
 pub async fn thegamesdb_developers_read(
     api_key: String,
 ) -> Result<serde_json::Value, Box<dyn Error>> {
     let url = format!("https://api.thegamesdb.net/v1/Developers?apikey={}", api_key);
-    Ok(mk_lib_network::mk_data_from_url_to_json(url).await?)
+    mk_lib_network::mk_data_from_url_to_json(url).await
 }
 
 pub async fn thegamesdb_publishers_read(
     api_key: String,
 ) -> Result<serde_json::Value, Box<dyn Error>> {
     let url = format!("https://api.thegamesdb.net/v1/Publishers?apikey={}", api_key);
-    Ok(mk_lib_network::mk_data_from_url_to_json(url).await?)
+    mk_lib_network::mk_data_from_url_to_json(url).await
 }

@@ -1,32 +1,29 @@
 use chrono::prelude::*;
 use mk_lib_database;
 use mk_lib_rabbitmq;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::error::Error;
 use tokio::sync::Notify;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // open the database
-    let (sqlx_pool_rw, sqlx_pool_ro) = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120)
-        .await
-        ?;
-    let _db_check =
-        mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
-            .await
-            ?;
+    let (sqlx_pool_rw, sqlx_pool_ro) =
+        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120).await?;
+    let _db_check = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(
+        &sqlx_pool_ro,
+        false,
+    )
+    .await?;
 
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkschedulesdirectupdate")
-            .await
-            ?;
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkschedulesdirectupdate").await?;
 
     let mut rabbit_consumer = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer(
         "mkschedulesdirectupdate",
         &rabbit_channel,
     )
-    .await
-    ?;
+    .await?;
 
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {

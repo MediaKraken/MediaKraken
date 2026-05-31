@@ -34,7 +34,7 @@ pub fn MediaPage(client: ApiClient) -> Element {
     let on_audio = make_loader(client.clone(), MediaKind::Audio, kind, state);
 
     // Handle the case when we want to play an item
-    let play_item = move |item: MediaItem, kind: MediaKind| {
+    let play_item = move |(item, kind): (MediaItem, MediaKind)| {
         playback_item.set(Some((item, kind)));
     };
 
@@ -58,7 +58,7 @@ pub fn MediaPage(client: ApiClient) -> Element {
                     MediaListView { 
                         state: state(), 
                         kind: active,
-                        on_play: play_item
+                        on_play: Callback::new(play_item)
                     }
                 }
             }
@@ -91,7 +91,7 @@ fn tab_class(active: bool) -> &'static str {
 }
 
 #[component]
-fn MediaListView(state: LibraryState, kind: MediaKind, on_play: EventHandler<(MediaItem, MediaKind)>) -> Element {
+fn MediaListView(state: LibraryState, kind: MediaKind, on_play: Callback<(MediaItem, MediaKind)>) -> Element {
     match state {
         LibraryState::Idle => rsx! {
             p { class: "muted", "Pick a category above to load {kind.label()}." }
@@ -124,7 +124,7 @@ fn MediaListView(state: LibraryState, kind: MediaKind, on_play: EventHandler<(Me
 }
 
 #[component]
-fn MediaCard(item: MediaItem, kind: MediaKind, on_play: EventHandler<(MediaItem, MediaKind)>) -> Element {
+fn MediaCard(item: MediaItem, kind: MediaKind, on_play: Callback<(MediaItem, MediaKind)>) -> Element {
     let year = item
         .year
         .map(|y| y.to_string())
@@ -146,7 +146,7 @@ fn MediaCard(item: MediaItem, kind: MediaKind, on_play: EventHandler<(MediaItem,
             }
             button {
                 class: "play-button",
-                onclick: move |_| on_play.invoke((item.clone(), kind)),
+                onclick: move |_| on_play((item.clone(), kind)),
                 "▶ Play"
             }
         }
@@ -154,12 +154,12 @@ fn MediaCard(item: MediaItem, kind: MediaKind, on_play: EventHandler<(MediaItem,
 }
 
 #[component]
-fn PlaybackView(item: MediaItem, kind: MediaKind, on_back: EventHandler<()>) -> Element {
+fn PlaybackView(item: MediaItem, kind: MediaKind, on_back: Callback<()>) -> Element {
     rsx! {
         section { class: "page",
             button { 
                 class: "back-button",
-                onclick: on_back,
+                onclick: move |_| on_back(()),
                 "← Back to Library"
             }
             h2 { "Playing: {item.title}" }

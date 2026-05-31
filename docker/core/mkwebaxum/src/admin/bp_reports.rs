@@ -57,8 +57,7 @@ pub async fn admin_report_known_media(
             mk_lib_database::mk_lib_database_report::mk_lib_database_report_known_media_count(
                 &state.sqlx_pool_ro,
             )
-            .await
-            ?;
+            .await?;
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
             total_pages,
             page,
@@ -66,16 +65,14 @@ pub async fn admin_report_known_media(
             None,
             pagination_count,
         )
-        .await
-        ?;
+        .await?;
         let report_list =
             mk_lib_database::mk_lib_database_report::mk_lib_database_report_known_media_read(
                 &state.sqlx_pool_ro,
                 db_offset,
                 pagination_count,
             )
-            .await
-            ?;
+            .await?;
         let mut report_data: bool = false;
         if report_list.len() > 0 {
             report_data = true;

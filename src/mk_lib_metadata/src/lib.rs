@@ -1,3 +1,7 @@
+#![allow(dead_code)]
+#![allow(unused_assignments)]
+#![allow(path_dependence)]
+#![expect(unused)]
 pub mod adult;
 pub mod anime;
 pub mod base;
@@ -9,6 +13,7 @@ pub mod image_path;
 pub mod mk_lib_metadata_id3;
 pub mod mk_lib_metadata_m3u8;
 pub mod movie;
+pub mod person;
 pub mod music;
 pub mod music_video;
 pub mod nfo_xml;

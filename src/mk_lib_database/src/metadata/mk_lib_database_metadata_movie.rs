@@ -1,6 +1,5 @@
 use crate::mk_lib_database::MediaStatusUpdatePayload;
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
 use sqlx::types::chrono::DateTime;
 use sqlx::types::chrono::Utc;
 use sqlx::types::Uuid;
@@ -35,6 +34,7 @@ pub struct DBMetaMovieList {
     pub photo_updated: DateTime<Utc>, // Maps to TIMESTAMPTZ
 }
 
+#[allow(clippy::too_many_arguments)]
 pub async fn mk_lib_database_metadata_movie_read(
     sqlx_pool: &sqlx::PgPool,
     search_value: String,
@@ -93,7 +93,7 @@ pub async fn mk_lib_database_metadata_movie_read(
              )
              offset $7 limit $8"#,
         )
-        .bind(&user_id)
+        .bind(user_id)
          .bind(&search_value)
         .bind(&search_value)
         .bind(&genre_name)
@@ -150,7 +150,7 @@ pub async fn mk_lib_database_metadata_movie_read(
             order by LOWER(mm_metadata_movie_name), mm_date
             offset $6 limit $7"#,
         )
-        .bind(&user_id)
+        .bind(user_id)
          .bind(&starts_with)
         .bind(&genre_name)
         .bind(&primary_language)
@@ -356,7 +356,7 @@ pub async fn mk_lib_database_metadata_movie_detail_by_guid(
              and mm_metadata_user_status.mm_status_user_id = $1
              WHERE mm_metadata_movie_guid = $2"#,
     )
-    .bind(&user_id)
+    .bind(user_id)
     .bind(uuid_id)
     .fetch_one(sqlx_pool)
     .await

@@ -2,8 +2,8 @@
 // apt install pkg-config libudev-dev
 // serialport = "4.2.2"
 
-use serialport::{DataBits, SerialPort, SerialPortType, StopBits, available_ports};
-use std::io::{self, Write};
+use serialport::{DataBits, SerialPort, StopBits};
+use std::io::Write;
 use std::time::Duration;
 
 pub async fn serial_port_discover() -> Result<(), Box<dyn std::error::Error>> {
@@ -34,7 +34,7 @@ pub async fn serial_port_write(
     mut port: Box<dyn SerialPort>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let output = "This is a test. This is only a test.".as_bytes();
-    port.write(output).expect("Write failed!");
+    let _ = port.write(output).expect("Write failed!");
     Ok(())
 }
 
@@ -42,7 +42,7 @@ pub async fn serial_port_read(
     mut port: Box<dyn SerialPort>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut serial_buf: Vec<u8> = vec![0; 32];
-    port.read(serial_buf.as_mut_slice())
+    let _ = port.read(serial_buf.as_mut_slice())
         .expect("Found no data!");
     Ok(())
 }

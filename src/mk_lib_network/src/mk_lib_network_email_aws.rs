@@ -20,6 +20,7 @@ pub fn mk_lib_network_email_aws_transport(
     Ok(mailer)
 }
 
+#[allow(clippy::too_many_arguments)]
 pub async fn mk_lib_network_email_send_aws(
     email_from: String,
     email_reply_to: String,

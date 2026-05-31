@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
-use sqlx::postgres::PgRow;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaGameSystemList {

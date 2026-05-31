@@ -3,17 +3,6 @@ name = "mkinit"
 version = "0.0.1"
 edition = "2024"
 
-[profile.dev]
-panic = 'unwind'
-strip = "none"
-lto = false
-codegen-units = 16
-
-[profile.release]
-panic = 'abort'
-strip = "symbols"
-lto = true
-codegen-units = 1
 
 [dependencies]
 mk_lib_database = { version = "0.0.248", registry = "kellnr" }

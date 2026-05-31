@@ -55,8 +55,7 @@ pub async fn user_sync(
         let db_offset: i64 = (page * pagination_count) - pagination_count;
         let total_pages: i64 =
             mk_lib_database::mk_lib_database_sync::mk_lib_database_sync_count(&state.sqlx_pool_ro)
-                .await
-                ?;
+                .await?;
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
             total_pages,
             page,
@@ -64,16 +63,14 @@ pub async fn user_sync(
             None,
             pagination_count,
         )
-        .await
-        ?;
+        .await?;
         let sync_list = mk_lib_database::mk_lib_database_sync::mk_lib_database_sync_list(
             &state.sqlx_pool_ro,
             uuid::Uuid::nil(),
             db_offset,
             pagination_count,
         )
-        .await
-        ?;
+        .await?;
         let mut template_data_exists = false;
         if sync_list.len() > 0 {
             template_data_exists = true;

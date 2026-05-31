@@ -71,8 +71,7 @@ pub async fn user_media_music_video(
             None,
             pagination_count,
         )
-        .await
-        ?;
+        .await?;
         let music_video_list =
         mk_lib_database::database_media::mk_lib_database_media_music_video::mk_lib_database_media_music_video_read(
             &state.sqlx_pool_ro,

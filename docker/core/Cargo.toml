@@ -1,4 +1,5 @@
 [workspace]
+resolver = "3"
 
 members = [
     "mkcron",
@@ -25,3 +26,16 @@ members = [
     "mktranscode",
     "mkwebaxum",
 ]
+
+[profile.dev]
+panic = 'unwind'
+strip = "none"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+
+
+[patch.crates-io]
+hyper = { git = "https://github.com/hyperium/hyper", tag = "v0.10.16" }

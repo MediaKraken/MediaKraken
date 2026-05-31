@@ -34,7 +34,7 @@ fn App() -> Element {
     rsx! {
         head {
             title { "MediaKraken - Multimedia Player" }
-            style { include_str!("styles/main.css") }
+            style { {include_str!("styles/main.css")} }
         }
         main { class: "app-shell",
             header { class: "app-header",

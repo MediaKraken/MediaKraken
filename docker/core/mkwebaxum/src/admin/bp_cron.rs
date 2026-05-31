@@ -103,8 +103,7 @@ pub async fn admin_cron(
         let cron_list = mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_service_read(
             &state.sqlx_pool_ro,
         )
-        .await
-        ?;
+        .await?;
         let cron_data = !cron_list.is_empty();
         let template = TemplateCronContext {
             template_data: &cron_list,
@@ -129,28 +128,21 @@ pub async fn admin_cron_run(
             &state.sqlx_pool_rw,
             guid,
         )
-        .await
-        ?;
+        .await?;
         let (rabbit_connection, rabbit_channel) =
-            mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp")
-                .await
-                ?;
+            mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp").await?;
         let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
             rabbit_channel.clone(),
             row_data["route_key"].as_str().unwrap_or(""),
             row_data.to_string(),
         )
-        .await
-        ?;
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
-            .await
-            ?;
+        .await?;
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection).await?;
         let _result = mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_time_update(
             &state.sqlx_pool_rw,
             guid,
         )
-        .await
-        ?;
+        .await?;
         Redirect::to("/admin/cron")
     }
 }

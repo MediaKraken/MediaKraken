@@ -1,6 +1,6 @@
 use fanotify::high_level::{
-    FanEvent, Fanotify, FanotifyMode, FAN_CLOSE_WRITE, FAN_CREATE, FAN_DELETE,
-    FAN_EVENT_ON_CHILD, FAN_MODIFY, FAN_MOVED_FROM, FAN_MOVED_TO, FAN_ONDIR,
+    FAN_CLOSE_WRITE, FAN_CREATE, FAN_DELETE, FAN_EVENT_ON_CHILD, FAN_MODIFY, FAN_MOVED_FROM,
+    FAN_MOVED_TO, FAN_ONDIR, FanEvent, Fanotify, FanotifyMode,
 };
 use mk_lib_database;
 use mk_lib_rabbitmq;
@@ -67,7 +67,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let events = fanotify.read_event();
 
             for event in events {
-                let action = if event.events.iter().any(|e| matches!(e, FanEvent::CloseWrite)) {
+                let action = if event
+                    .events
+                    .iter()
+                    .any(|e| matches!(e, FanEvent::CloseWrite))
+                {
                     Some(ACTION_CREATE_WRITE)
                 } else if event.events.iter().any(|e| matches!(e, FanEvent::Create)) {
                     Some(ACTION_CREATE)
@@ -126,9 +130,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 processed_events += 1;
                 if processed_events % CLEANUP_EVERY_EVENTS == 0 {
                     let now = Instant::now();
-                    recently_sent.retain(|_, last_seen| {
-                        now.duration_since(*last_seen) < dedupe_window
-                    });
+                    recently_sent
+                        .retain(|_, last_seen| now.duration_since(*last_seen) < dedupe_window);
                 }
             }
         }

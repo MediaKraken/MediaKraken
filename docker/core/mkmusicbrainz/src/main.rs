@@ -1,6 +1,6 @@
 use mk_lib_database;
 use mk_lib_rabbitmq;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::env;
 use std::error::Error;
 use std::fs;
@@ -12,21 +12,17 @@ use tokio::sync::Notify;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
-    let (sqlx_pool_rw, sqlx_pool_ro) = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120)
-        .await
-        ?;
+    let (sqlx_pool_rw, sqlx_pool_ro) =
+        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120).await?;
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await;
 
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkmusicbrainz")
-            .await
-            ?;
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkmusicbrainz").await?;
 
     let mut rabbit_consumer =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mkmusicbrainz", &rabbit_channel)
-            .await
-            ?;
+            .await?;
 
     let db_pass = env::var("POSTGRES_PASSWORD")?;
     unsafe {
@@ -46,8 +42,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         "/scripts/Extensions.sql",
                     ])
                     .stdout(Stdio::piped())
-                    .output()
-                    ?;
+                    .output()?;
                 let _output = Command::new("psql")
                     .args([
                         "-h",
@@ -58,8 +53,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         "/scripts/CreateCollations.sql",
                     ])
                     .stdout(Stdio::piped())
-                    .output()
-                    ?;
+                    .output()?;
 
                 let _output = Command::new("psql")
                     .args([
@@ -71,8 +65,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         "/scripts/CreateTypes.sql",
                     ])
                     .stdout(Stdio::piped())
-                    .output()
-                    ?;
+                    .output()?;
 
                 // create tables
                 let _output = Command::new("psql")
@@ -85,8 +78,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         "/scripts/CreateTables.sql",
                     ])
                     .stdout(Stdio::piped())
-                    .output()
-                    ?;
+                    .output()?;
 
                 // no db dumps for caa
                 // let _output = Command::new("psql")
@@ -104,9 +96,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                 // import dump tables
                 let pg_tables =
-                    mk_lib_database::mk_lib_database_postgresql::mk_lib_database_tables(&sqlx_pool_rw)
-                        .await
-                        ?;
+                    mk_lib_database::mk_lib_database_postgresql::mk_lib_database_tables(
+                        &sqlx_pool_rw,
+                    )
+                    .await?;
                 for row_data in pg_tables.iter() {
                     // loop through tables and see if dump files exist
                     let table_name = row_data.table_name.replace("public.", "");
@@ -173,8 +166,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         "/scripts/CreatePrimaryKeys.sql",
                     ])
                     .stdout(Stdio::piped())
-                    .output()
-                    ?;
+                    .output()?;
                 // no db dumps for caa
                 // let _output = Command::new("psql")
                 //     .args([
@@ -198,8 +190,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         "/scripts/CreateIndexes.sql",
                     ])
                     .stdout(Stdio::piped())
-                    .output()
-                    ?;
+                    .output()?;
                 // no db dumps for caa
                 // let _output = Command::new("psql")
                 //     .args([

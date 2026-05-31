@@ -1,12 +1,12 @@
 use mk_lib_compression;
 use mk_lib_database;
 use mk_lib_network;
-use quickxml_to_serde::{xml_string_to_json, Config, JsonArray, JsonType, NullValue};
-use serde_json::json;
+use quickxml_to_serde::{Config, JsonArray, JsonType, NullValue, xml_string_to_json};
 use serde_json::Value;
+use serde_json::json;
 use std::error::Error;
 use std::fs::File;
-use std::io::{prelude::*, BufReader};
+use std::io::{BufReader, prelude::*};
 use std::path::Path;
 use std::str::RSplit;
 use std::{fs, io};
@@ -24,29 +24,23 @@ use tokio::sync::Notify;
 async fn main() -> Result<(), Box<dyn Error>> {
     // open the database
     // connect to db and do a version check
-    let (sqlx_pool_rw, sqlx_pool_ro) = mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120)
-        .await
-        ?;
+    let (sqlx_pool_rw, sqlx_pool_ro) =
+        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120).await?;
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
-        .await
-        ?;
+        .await?;
 
     let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkmetadatamame")
-            .await
-            ?;
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkmetadatamame").await?;
 
     let mut rabbit_consumer =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mkmetadatamame", &rabbit_channel)
-            .await
-            ?;
+            .await?;
 
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {
                 println!("Here I am 3");
-                let json_message: Value =
-                    serde_json::from_str(&String::from_utf8_lossy(&payload))?;
+                let json_message: Value = serde_json::from_str(&String::from_utf8_lossy(&payload))?;
                 // create mame game list
                 let file_name = format!(
                     "/mediakraken/emulation/mame0{}lx.zip",
@@ -77,8 +71,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             false,
                             "/mediakraken/emulation/",
                         )
-                        .await
-                        ?;
+                        .await?;
                         let file = File::open(&unzip_file_name)?;
                         let reader = BufReader::new(file);
                         let mut xml_data: String = "".to_owned();
@@ -102,8 +95,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 xml_data = xml_line.to_string();
                             } else if xml_line.starts_with("</machine") == true {
                                 xml_data.push_str(xml_line);
-                                let json_data =
-                                    xml_string_to_json(xml_data.to_string(), &conf)?;
+                                let json_data = xml_string_to_json(xml_data.to_string(), &conf)?;
                                 // name is short name
                                 // description is long name
                                 mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
@@ -138,15 +130,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         ),
                         &file_name,
                     )
-                    .await
-                    ?;
+                    .await?;
                     mk_lib_compression::mk_lib_compression::mk_decompress_zip(
                         &file_name,
                         false,
                         &"/mediakraken/emulation/",
                     )
-                    .await
-                    ?;
+                    .await?;
 
                     let file = File::open(&"/mediakraken/emulation/history.xml")?;
                     let reader = BufReader::new(file);
@@ -162,8 +152,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                             xml_data = xml_line.to_string();
                         } else if xml_line.starts_with("</entry") == true {
                             xml_data.push_str(xml_line);
-                            let json_data =
-                                xml_string_to_json(xml_data.to_string(), &conf)?;
+                            let json_data = xml_string_to_json(xml_data.to_string(), &conf)?;
                             let mut game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(&sqlx_pool_rw, &json_data["entry"]["software"]["item"]["list"].to_string()).await?;
                             if game_system_uuid == uuid::Uuid::nil() {
                                 game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool_rw, json_data["entry"]["software"]["item"]["list"].to_string(), String::new(), json!({})).await?;
@@ -217,8 +206,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         false,
                         &"/mediakraken/emulation/",
                     )
-                    .await
-                    ?;
+                    .await?;
                     let file = File::open(&"/mediakraken/emulation/catver.ini")?;
                     let reader = BufReader::new(file);
                     let mut category_found = false;
@@ -272,8 +260,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         false,
                         &"/mediakraken/emulation/",
                     )
-                    .await
-                    ?;
+                    .await?;
                     let file = File::open(&"/mediakraken/emulation/messinfo.dat")?;
                     let mut reader = BufReader::new(file);
                     let mut dat_line = String::new();
@@ -439,15 +426,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         ),
                         &file_name,
                     )
-                    .await
-                    ?;
+                    .await?;
                     mk_lib_compression::mk_lib_compression::mk_decompress_zip(
                         &file_name,
                         false,
                         &"/mediakraken/emulation/",
                     )
-                    .await
-                    ?;
+                    .await?;
 
                     let entries = fs::read_dir(format!(
                         "/mediakraken/emulation/mame-mame0{}/hash",
@@ -455,8 +440,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     ))
                     .unwrap()
                     .map(|res| res.map(|e| e.path()))
-                    .collect::<Result<Vec<_>, io::Error>>()
-                    ?;
+                    .collect::<Result<Vec<_>, io::Error>>()?;
                     for hash_file_path in entries {
                         let ext = Path::new(&hash_file_path)
                             .extension()

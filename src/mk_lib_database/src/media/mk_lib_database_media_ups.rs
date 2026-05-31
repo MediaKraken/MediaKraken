@@ -1,6 +1,3 @@
-use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
-use sqlx::types::Uuid;
 
 pub async fn mk_lib_database_media_upc_count(sqlx_pool: &sqlx::PgPool) -> Result<i64, sqlx::Error> {
     let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_bar_codes"#)

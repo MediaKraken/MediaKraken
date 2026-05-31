@@ -12,9 +12,9 @@ fn url_encode(raw: &str) -> String {
 }
 
 pub async fn provider_imvdb_video_fetch_by_id(
-    sqlx_pool: &sqlx::PgPool,
+    _sqlx_pool: &sqlx::PgPool,
     video_id: i32,
-    metadata_uuid: uuid::Uuid,
+    _metadata_uuid: uuid::Uuid,
     api_key: &str,
 ) -> Result<uuid::Uuid, Box<dyn std::error::Error>> {
     let mut custom_headers: HashMap<String, String> = HashMap::new();

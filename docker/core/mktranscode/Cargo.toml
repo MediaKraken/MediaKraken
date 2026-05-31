@@ -3,23 +3,12 @@ name = "mktranscode"
 version = "0.0.1"
 edition = "2024"
 
-[profile.dev]
-panic = 'unwind'
-strip = "none"
-lto = false
-codegen-units = 16
-
-[profile.release]
-panic = 'abort'
-strip = "symbols"
-lto = true
-codegen-units = 1
 
 [dependencies]
 mk_lib_common = { version = "0.0.216", registry = "kellnr" }
 mk_lib_compression = { version = "0.0.215", registry = "kellnr" }
 mk_lib_database = { version = "0.0.248", registry = "kellnr" }
-mk_lib_file = { version = "0.0.225", registry = "kellnr", features = ["smb"] }
+mk_lib_file = { version = "0.0.225", registry = "kellnr",  }
 mk_lib_logging = { version = "0.0.217", registry = "kellnr" }
 mk_lib_rabbitmq = { version = "0.0.220", registry = "kellnr" }
 

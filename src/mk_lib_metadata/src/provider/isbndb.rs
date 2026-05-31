@@ -1,7 +1,6 @@
 // https://isbndb.com/apidocs/v2
 
 use mk_lib_network;
-use std::error::Error;
 
 const ISBN_API_URL: &str = "http://isbndb.com/api/v2/json/";
 

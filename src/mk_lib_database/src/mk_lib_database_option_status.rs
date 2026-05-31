@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use sqlx::postgres::PgRow;
 
 #[derive(Deserialize, Debug)]

@@ -20,10 +20,10 @@ use core::fmt::Write;
 use paginator::{PageItem, Paginator};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use sqlx::FromRow;
 use sqlx::postgres::{PgPool, PgRow};
 use sqlx::types::chrono::DateTime;
 use sqlx::types::chrono::Utc;
-use sqlx::FromRow;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Genre {
@@ -310,8 +310,7 @@ pub async fn user_metadata_movie(
             genre.as_deref(),
             primary_language.as_deref(),
             status_filter.as_deref(),
-        )
-        ?;
+        )?;
         let primary_language_options: Vec<FilterOption> =
             mk_lib_database::mk_lib_database_language::mk_lib_database_language_read(
                 &state.sqlx_pool_ro,

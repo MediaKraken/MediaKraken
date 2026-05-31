@@ -3,7 +3,7 @@
 use mk_lib_network::mk_lib_network;
 
 pub async fn provider_barcodelookup_fetch(
-    sqlx_pool: &sqlx::PgPool,
+    _sqlx_pool: &sqlx::PgPool,
     upc_code: &str,
     api_token: &str,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {

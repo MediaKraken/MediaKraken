@@ -1,5 +1,5 @@
-use crate::mk_lib_database;
 use crate::AppState;
+use crate::mk_lib_database;
 use askama::Template;
 use axum::{
     extract::{Path, State},
@@ -9,7 +9,7 @@ use axum::{
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use serde_json::Value;
-use sqlx::{postgres::PgPool, FromRow};
+use sqlx::{FromRow, postgres::PgPool};
 
 const PAGE_SIZE: i64 = 24;
 
@@ -175,7 +175,7 @@ pub async fn user_inter_openlibrary_detail(
             return (
                 StatusCode::NOT_FOUND,
                 Html(String::from("Not found")).into_response(),
-            )
+            );
         }
         Err(_) => return render_500(),
     };

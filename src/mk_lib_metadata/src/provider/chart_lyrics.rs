@@ -1,7 +1,6 @@
 // http://www.chartlyrics.com/api.aspx
 
 use mk_lib_network;
-use std::error::Error;
 
 pub async fn provider_chart_lyrics_fetch(
     artist_name: String,

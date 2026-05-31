@@ -1,4 +1,6 @@
+use crate::AppState;
 use crate::mk_lib_database;
+use axum::extract::State;
 use axum::{
     http::StatusCode,
     response::{Html, IntoResponse, Redirect},
@@ -7,11 +9,9 @@ use axum::{
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use sqlx::postgres::PgPool;
-use axum::extract::State;
-use crate::AppState;
 
 pub async fn public_logout(
-     State(state): State<AppState>,
+    State(state): State<AppState>,
     mut auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     let current_user = auth.current_user.clone().unwrap_or_default();

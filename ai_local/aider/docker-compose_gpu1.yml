@@ -22,13 +22,12 @@ services:
       - "--port"
       - "8000"
       - "-c"
-      - "131072"
       - "-ngl"
       - "999"
       - "--tensor-split"
-      - "16,10"                 # weight toward the 5070 Ti; leaves ~2GB on the 5070 for the embedder
-      # - "--n-cpu-moe"
-      # - "30"
+      - "25,11"                 # weight toward the 5070 Ti; leaves ~2GB on the 5070 for the embedder
+      - "--n-cpu-moe"
+      - "4"
       - "-fa"
       - "on"
       - "--cache-type-k"

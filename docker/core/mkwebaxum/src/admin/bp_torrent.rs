@@ -51,15 +51,12 @@ pub async fn admin_torrent(
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let transmission_client =
-            mk_lib_network::mk_lib_network_transmission::mk_network_transmission_login()
-                .await
-                ?;
+            mk_lib_network::mk_lib_network_transmission::mk_network_transmission_login().await?;
         let transmission_torrents =
             mk_lib_network::mk_lib_network_transmission::mk_network_transmission_list_torrents(
                 transmission_client,
             )
-            .await
-            ?;
+            .await?;
         let transmission_torrents_json = match serde_json::to_string(&transmission_torrents) {
             Ok(value) => value,
             Err(_) => "[]".to_string(),

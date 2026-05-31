@@ -3,6 +3,7 @@ use fltk::{
     app, button::Button, enums::FrameType, output::Output, prelude::*, window::Window,
 };
 use fltk_webview::Webview;
+use fltk_webview::FromFltkWindow;
 use std::error::Error;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};

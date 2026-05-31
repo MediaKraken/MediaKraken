@@ -8,14 +8,14 @@ pub async fn mk_provider_shoutcast_top500(
     api_key: String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url = format!("{}Top500?k={}", SHOUTCAST_API_URL, api_key);
-    Ok(mk_lib_network::mk_lib_network::mk_data_from_url_to_json(url).await?)
+    mk_lib_network::mk_lib_network::mk_data_from_url_to_json(url).await
 }
 
 pub async fn mk_provider_shoutcast_genre_list(
     api_key: String,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let url = format!("{}genrelist?k={}", SHOUTCAST_API_URL, api_key);
-    Ok(mk_lib_network::mk_lib_network::mk_data_from_url_to_json(url).await?)
+    mk_lib_network::mk_lib_network::mk_data_from_url_to_json(url).await
 }
 
 /*

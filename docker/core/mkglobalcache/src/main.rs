@@ -105,17 +105,14 @@ async fn refresh_catalog(
             continue;
         }
 
-        let types: Vec<ApiBrandsTypes> = match fetch_json(format!(
-            "{IRDB_BASE_URL}/brands/{brand_name_path}/types"
-        ))
-        .await
-        {
-            Ok(value) => value,
-            Err(error) => {
-                eprintln!("mkglobalcache: types fetch failed for '{brand_name}' ({error})");
-                continue;
-            }
-        };
+        let types: Vec<ApiBrandsTypes> =
+            match fetch_json(format!("{IRDB_BASE_URL}/brands/{brand_name_path}/types")).await {
+                Ok(value) => value,
+                Err(error) => {
+                    eprintln!("mkglobalcache: types fetch failed for '{brand_name}' ({error})");
+                    continue;
+                }
+            };
 
         for item_type in types.iter() {
             let type_name = sanitize(&item_type.brand_type);

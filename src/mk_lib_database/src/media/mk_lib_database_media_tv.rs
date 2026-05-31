@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
-use sqlx::postgres::PgRow;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMediaTVShowList {
@@ -58,7 +57,7 @@ pub async fn mk_lib_database_media_tv_count(
     sqlx_pool: &sqlx::PgPool,
     search_string: String,
 ) -> Result<i64, sqlx::Error> {
-    if search_string != "" {
+    if !search_string.is_empty() {
         let row: (i64,) = sqlx::query_as(
         r#"select count(*) from mm_metadata_tvshow,
         mm_media where mm_media_metadata_guid = mm_metadata_tvshow_guid

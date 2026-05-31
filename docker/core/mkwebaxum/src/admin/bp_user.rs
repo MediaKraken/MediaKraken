@@ -59,8 +59,7 @@ pub async fn admin_user(
             &state.sqlx_pool_ro,
             String::new(),
         )
-        .await
-        ?;
+        .await?;
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
             total_pages,
             page,
@@ -68,15 +67,13 @@ pub async fn admin_user(
             None,
             pagination_count,
         )
-        .await
-        ?;
+        .await?;
         let user_list = mk_lib_database::mk_lib_database_user::mk_lib_database_user_read(
             &state.sqlx_pool_ro,
             db_offset,
             pagination_count,
         )
-        .await
-        ?;
+        .await?;
         let page_usize = page as usize;
         let template = TemplateAdminUserContext {
             template_data: &user_list,

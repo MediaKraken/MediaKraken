@@ -1,6 +1,5 @@
 use mk_lib_common::mk_lib_common_enum_media_type;
 use serde::{Deserialize, Serialize};
-use sqlx::postgres::PgRow;
 use sqlx::FromRow;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]

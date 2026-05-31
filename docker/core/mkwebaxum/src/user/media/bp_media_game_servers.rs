@@ -62,8 +62,7 @@ pub async fn user_media_game_servers(
                 &state.sqlx_pool_ro,
                 String::new(),
             )
-            .await
-            ?;
+            .await?;
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
             total_pages,
             page,
@@ -71,8 +70,7 @@ pub async fn user_media_game_servers(
             None,
             pagination_count,
         )
-        .await
-        ?;
+        .await?;
         let game_server_list =
             mk_lib_database::mk_lib_database_game_servers::mk_lib_database_game_server_read(
                 &state.sqlx_pool_ro,
@@ -80,8 +78,7 @@ pub async fn user_media_game_servers(
                 db_offset,
                 pagination_count,
             )
-            .await
-            ?;
+            .await?;
         let mut template_data_exists = false;
         if game_server_list.len() > 0 {
             template_data_exists = true;

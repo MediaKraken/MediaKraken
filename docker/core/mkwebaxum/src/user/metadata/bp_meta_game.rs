@@ -1,15 +1,15 @@
+use crate::AppState;
 use crate::mk_lib_database;
 use crate::user_preferences;
-use crate::AppState;
 use askama::Template;
 use axum::extract::Query;
 use axum::extract::State;
 use axum::response::Redirect;
 use axum::{
+    Extension,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
-    Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
@@ -230,8 +230,7 @@ pub async fn user_metadata_game(
             starts_with.as_deref(),
             genre.as_deref(),
             status_filter.as_deref(),
-        )
-        ?;
+        )?;
         let game_list =
         mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_read(
            &state.sqlx_pool_ro,

@@ -15,8 +15,8 @@ use mk_lib_common::mk_lib_common_media_extension::{
     GAME_EXTENSION, MEDIA_EXTENSION, MEDIA_EXTENSION_SKIP_FFMPEG, SUBTITLE_EXTENSION,
 };
 use mk_lib_database::mk_lib_database_network_share::{DBShareList, parse_share_name};
-use mk_lib_share::mk_lib_smb::FileMetadata;
 use mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push;
+use mk_lib_share::mk_lib_smb::FileMetadata;
 
 lazy_static! {
     static ref STACK_CD: Regex = Regex::new(r"(?i)-cd\d")?;
@@ -98,7 +98,10 @@ async fn mk_nfs_tree(
 // Mirrors the approach used by mkwebaxum's share-browse handler.
 fn mk_smb_share_uri(share_info: &DBShareList) -> Option<String> {
     let share_name = parse_share_name(&share_info.mm_network_share_path)?;
-    Some(format!("//{}/{}", share_info.mm_network_share_ip, share_name))
+    Some(format!(
+        "//{}/{}",
+        share_info.mm_network_share_ip, share_name
+    ))
 }
 
 // Construct an `smbclient` command running the supplied `-c` script, with
@@ -128,8 +131,7 @@ fn build_smbclient_command(
             .mm_share_auth_password
             .as_deref()
             .unwrap_or_default();
-        if user.contains('%') || pass.contains('%') || user.contains('\n') || pass.contains('\n')
-        {
+        if user.contains('%') || pass.contains('%') || user.contains('\n') || pass.contains('\n') {
             return Err("smb credentials contain disallowed characters".into());
         }
         cmd.arg("-U").arg(format!("{}%{}", user, pass));
@@ -176,8 +178,7 @@ async fn mk_smb_tree(
     if !smb_path_is_safe(cleaned) {
         return Err("smb path contains disallowed characters".into());
     }
-    let mut commands: Vec<String> =
-        vec![String::from("recurse ON"), String::from("prompt OFF")];
+    let mut commands: Vec<String> = vec![String::from("recurse ON"), String::from("prompt OFF")];
     if !cleaned.is_empty() {
         commands.push(format!("cd \"{}\"", cleaned));
     }
@@ -361,51 +362,52 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     while let Some(msg) = rabbit_consumer.recv().await {
         // Message content is a wake-up signal; the actual list of paths comes from the DB.
-        let audit_rows = match mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_audit_read(
-            &sqlx_pool_ro,
-        )
-        .await
-        {
-            Ok(rows) => rows,
-            Err(error) => {
-                if let Err(err) = mk_logging_loki_push(json!({
-                    "level": "error",
-                    "message": "library_path_audit_read failed; nacking with requeue",
-                    "module": module_path!(),
-                    "payload": {"error": error.to_string()},
-                }))
-                .await
-                {
-                    eprintln!("mkmediascanner loki push failed ({err})");
-                }
-                // Brief backoff so we don't spin on a downed DB, then nack with
-                // requeue so the broker redelivers the trigger (either to us
-                // after recovery or to another worker).
-                tokio::time::sleep(Duration::from_secs(5)).await;
-                if let Some(deliver) = msg.deliver {
-                    if let Err(nack_error) = rabbit_channel
-                        .basic_nack(amqprs::channel::BasicNackArguments::new(
-                            deliver.delivery_tag(),
-                            false,
-                            true,
-                        ))
-                        .await
+        let audit_rows =
+            match mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_audit_read(
+                &sqlx_pool_ro,
+            )
+            .await
+            {
+                Ok(rows) => rows,
+                Err(error) => {
+                    if let Err(err) = mk_logging_loki_push(json!({
+                        "level": "error",
+                        "message": "library_path_audit_read failed; nacking with requeue",
+                        "module": module_path!(),
+                        "payload": {"error": error.to_string()},
+                    }))
+                    .await
                     {
-                        if let Err(err) = mk_logging_loki_push(json!({
-                            "level": "error",
-                            "message": "rabbitmq nack failed",
-                            "module": module_path!(),
-                            "payload": {"error": nack_error.to_string()},
-                        }))
-                        .await
+                        eprintln!("mkmediascanner loki push failed ({err})");
+                    }
+                    // Brief backoff so we don't spin on a downed DB, then nack with
+                    // requeue so the broker redelivers the trigger (either to us
+                    // after recovery or to another worker).
+                    tokio::time::sleep(Duration::from_secs(5)).await;
+                    if let Some(deliver) = msg.deliver {
+                        if let Err(nack_error) = rabbit_channel
+                            .basic_nack(amqprs::channel::BasicNackArguments::new(
+                                deliver.delivery_tag(),
+                                false,
+                                true,
+                            ))
+                            .await
                         {
-                            eprintln!("mkmediascanner loki push failed ({err})");
+                            if let Err(err) = mk_logging_loki_push(json!({
+                                "level": "error",
+                                "message": "rabbitmq nack failed",
+                                "module": module_path!(),
+                                "payload": {"error": nack_error.to_string()},
+                            }))
+                            .await
+                            {
+                                eprintln!("mkmediascanner loki push failed ({err})");
+                            }
                         }
                     }
+                    continue;
                 }
-                continue;
-            }
-        };
+            };
 
         for row_data in audit_rows {
             if let Err(err) = mk_logging_loki_push(json!({
@@ -462,8 +464,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 eprintln!("mkmediascanner loki push failed ({err})");
             }
 
-            let reachable = smb_reachable
-                || mk_nfs_tree(&share_info, &path_on_share).await.is_ok();
+            let reachable = smb_reachable || mk_nfs_tree(&share_info, &path_on_share).await.is_ok();
 
             if let Err(err) = mk_logging_loki_push(json!({
                 "level": "info",
@@ -668,9 +669,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     continue;
                 }
 
-                let needs_ffprobe = !MEDIA_EXTENSION_SKIP_FFMPEG
-                    .contains(&file_extension.as_str())
-                    && is_media;
+                let needs_ffprobe =
+                    !MEDIA_EXTENSION_SKIP_FFMPEG.contains(&file_extension.as_str()) && is_media;
                 if needs_ffprobe {
                     if let Err(error) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
                         rabbit_channel.clone(),
@@ -768,7 +768,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 )
                 .await;
             }
-
         }
 
         if let Some(deliver) = msg.deliver {

@@ -71,8 +71,7 @@ pub async fn user_media_tv(
             None,
             pagination_count,
         )
-        .await
-        ?;
+        .await?;
         let tv_list =
         mk_lib_database::database_media::mk_lib_database_media_tv::mk_lib_database_media_tv_read(
             &state.sqlx_pool_ro,

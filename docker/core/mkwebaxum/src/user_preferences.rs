@@ -1,6 +1,6 @@
 use num_format::Locale;
-use serde_json::{json, Value};
-use sqlx::{postgres::PgPool, FromRow};
+use serde_json::{Value, json};
+use sqlx::{FromRow, postgres::PgPool};
 
 pub const DEFAULT_PAGINATION_COUNT: i64 = 30;
 pub const MIN_PAGINATION_COUNT: i64 = 5;
