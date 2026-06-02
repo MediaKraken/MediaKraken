@@ -243,3 +243,41 @@ https://192.168.1.157:3000
 open webui - lol no, wants 3.11
 apt install python3-pip
 pip3 install open-webui
+
+
+********************************
+
+curl -fsSL https://opencode.ai/install | bash
+
+opencode
+/connect
+
+
+nano ~/.config/opencode/opencode.json
+
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "llama-cpp/qwen36-35b-a3b-ud-q4_k_xl",
+  "provider": {
+    "llama-cpp": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "llama.cpp (skynetgpu1)",
+      "options": {
+        "baseURL": "http://skynetgpu1.mediakraken.media:8000/v1",
+        "apiKey": "sk-no-key-required"
+      },
+      "models": {
+        "qwen36-35b-a3b-ud-q4_k_xl": {
+          "name": "qwen36-35b-a3b-ud-q4_k_xl",
+          "tool_call": true,
+          "limit": {
+            "context": 131072,
+            "output": 32768
+          }
+        }
+      }
+    }
+  }
+}
+
+/model then select skynet

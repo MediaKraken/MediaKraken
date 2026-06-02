@@ -8,15 +8,19 @@ class CommonNetworkSSH:
     Class for interfacing via SSH
     """
 
-    def __init__(self, host, user_name, user_password):
+    def __init__(self, host, user_name, user_password, host_key_policy=None):
         # Create an SSH session to be used for all our requests
         self.ssh_connection = paramiko.SSHClient()
-        self.ssh_connection.set_missing_host_key_policy(
-            paramiko.AutoAddPolicy())
+        if host_key_policy is None:
+            policy = paramiko.MissingHostKeyPolicy()
+            host_keys = host_key_policy if host_key_policy else paramiko.AutoAddPolicy()
+            self.ssh_connection.set_missing_host_key_policy(host_keys)
+        else:
+            self.ssh_connection.set_missing_host_key_policy(host_key_policy)
         self.ssh_connection.connect(
             host, username=user_name, password=user_password)
 
-    def com_net_ssh_run_sudo_command(self, command_text, sudo_password='metaman'):
+    def com_net_ssh_run_sudo_command(self, command_text, sudo_password=None):
         """
         Run specified command as sudo so it will send the password
         """
@@ -43,9 +47,11 @@ class CommonNetworkSSH:
 
 async def main(loop):
     # connection to proxmox instance
-    prox_inst = CommonNetworkSSH(host='192.168.1.n',
-                                user_name='root',
-                                user_password='fakepassword!')
+   import os
+    prox_inst = CommonNetworkSSH(
+        host=os.environ.get('SSH_HOST', 'localhost'),
+        user_name=os.environ.get('SSH_USER', 'root'),
+        user_password=os.environ.get('SSH_PASSWORD', ''))
     # grab the disk list
     disk_out = prox_inst.com_net_ssh_run_command("lsblk -o NAME,MODEL,SERIAL,SIZE,STATE -d")
     for disk in disk_out.split(b'\r\n'):

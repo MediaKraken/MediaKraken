@@ -119,7 +119,7 @@ pub async fn search_handler(Query(params): Query<SearchParams>) -> Html<String> 
         results,
         page_title: Some("MediaKraken Search Results".to_string()),
     };
-    Html(template.render().expect("Render failed"))
+    Html(template.render().unwrap_or_else(|e| format!("<!DOCTYPE html><html><head><title>Error</title></head><body><h1>Search Error</h1><p>Template rendering failed.</p></body></html>")))
 }
 
 /*

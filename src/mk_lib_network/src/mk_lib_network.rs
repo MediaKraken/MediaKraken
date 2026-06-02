@@ -12,6 +12,21 @@ use std::sync::LazyLock;
 use tokio::io::AsyncWriteExt;
 use tokio::time::Duration;
 
+fn sanitize_url_for_logging(url: &str) -> String {
+    // Remove query parameters that may contain tokens/credentials
+    let truncated = if let Some(pos) = url.find('?') {
+        &url[..pos]
+    } else {
+        url
+    };
+    // Truncate very long URLs to prevent log flooding
+    if truncated.len() > 200 {
+        format!("{}... (truncated)", &truncated[..200])
+    } else {
+        truncated.to_string()
+    }
+}
+
 static SHARED_HTTP_CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
 
 pub async fn custom_headers(map: &HashMap<String, String>) -> HeaderMap {
@@ -113,7 +128,8 @@ pub async fn mk_download_file_from_url(
     url: String,
     file_name: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    println!("url: {}", url);
+    let safe_url = sanitize_url_for_logging(&url);
+    eprintln!("[DEBUG] Downloading file from: {}", safe_url);
     let response = SHARED_HTTP_CLIENT.get(url).send().await?;
     let mut file = tokio::fs::File::create(file_name).await?;
     file.write_all(&response.bytes().await?).await?;
@@ -125,7 +141,8 @@ pub async fn mk_download_file_from_url_stream(
     url: String,
     file_name: &str, // Changed to &str for better ergonomics
 ) -> Result<(), Box<dyn std::error::Error>> {
-    println!("Downloading from: {}", url);
+    let safe_url = sanitize_url_for_logging(&url);
+    eprintln!("[DEBUG] Downloading file from: {}", safe_url);
 
     let response = SHARED_HTTP_CLIENT.get(url).send().await?;
     let mut file = tokio::fs::File::create(file_name).await?;
@@ -140,7 +157,7 @@ pub async fn mk_download_file_from_url_stream(
 
     file.flush().await?;
 
-    println!("Download complete: {}", file_name);
+    eprintln!("[DEBUG] Download complete: {}", file_name);
     Ok(())
 }
 

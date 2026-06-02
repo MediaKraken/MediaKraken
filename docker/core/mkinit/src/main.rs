@@ -1,4 +1,4 @@
-use std::env;
+  use std::env;
 use std::error::Error;
 use std::process::{Command, Stdio};
 
@@ -15,17 +15,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
     .await?;
     if db_exists == false {
         let db_pass = env::var("POSTGRES_PASSWORD")?;
-        unsafe {
-            env::set_var("PGPASSWORD", &db_pass);
-        }
+        let postgres_user = env::var("POSTGRES_USER")
+            .map_err(|e| format!("POSTGRES_USER not set: {e}"))?;
         let output = Command::new("psql")
+            .env("PGPASSWORD", &db_pass)
             .args([
                 "-h",
                 "pgcluster-with-metrics-rw.cnpg-system",
                 "-U",
-                env::var("POSTGRES_USER")
-                    .map_err(|e| format!("POSTGRES_USER not set: {e}"))?
-                    .as_str(),
+                postgres_user.as_str(),
                 "-d",
                 "mkdatabase",
                 "-f",
@@ -35,9 +33,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .stderr(Stdio::piped())
             .output()?;
         let stdout: String = String::from_utf8(output.stdout)?;
-        println!("stdout: {}", stdout);
+        if !stdout.is_empty() {
+            println!("stdout: {}", stdout);
+        }
         let stderr: String = String::from_utf8(output.stderr)?;
-        println!("stderr: {}", stderr);
+        if !stderr.is_empty() {
+            eprintln!("stderr: {}", stderr);
+        }
     }
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_rw, true)
         .await?;
