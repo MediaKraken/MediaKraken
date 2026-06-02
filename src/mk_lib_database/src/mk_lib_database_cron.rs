@@ -55,7 +55,7 @@ pub async fn mk_lib_database_cron_delete(
     sqlx_pool: &sqlx::PgPool,
     cron_uuid: Uuid,
 ) -> Result<(), sqlx::Error> {
-    sqlx::query(r#"delete from mm_cron where mm_cron_guid = $1"#)
+    sqlx::query(r#"delete from mm_cron_jobs where mm_cron_guid = $1"#)
         .bind(cron_uuid)
         .execute(sqlx_pool)
         .await?;
@@ -94,7 +94,7 @@ pub async fn mk_lib_database_cron_count(
     sqlx_pool: &sqlx::PgPool,
     cron_enabled: bool,
 ) -> Result<i64, sqlx::Error> {
-    let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_cron where mm_cron_enabled = $1"#)
+    let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_cron_jobs where mm_cron_enabled = $1"#)
         .bind(cron_enabled)
         .fetch_one(sqlx_pool)
         .await?;

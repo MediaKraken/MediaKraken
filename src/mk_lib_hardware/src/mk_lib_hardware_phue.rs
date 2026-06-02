@@ -60,7 +60,7 @@ pub async fn mk_hardware_phue_bridge_set_light(
         modifier = modifier.with_saturation(Adjust::Override(sat.min(u8::MAX as u64) as u8));
     }
     if let Some(bri) = light_brightness {
-        modifier = modifier.with_brightness(Adjust::Decrement(bri.min(u8::MAX as u64) as u8));
+        modifier = modifier.with_brightness(Adjust::Override(bri.min(u8::MAX as u64) as u8));
     }
     bridge.set_light_state(light_id, &modifier)?;
     Ok(())

@@ -13,8 +13,8 @@ pub enum Message {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let db_instance = database::database_open().unwrap();
-    let mut total_codes: i64 = database::database_upc_known_count(&db_instance).unwrap();
+    let db_instance = database::database_open()?;
+    let mut total_codes: i64 = database::database_upc_known_count(&db_instance)?;
     let app = app::App::default().with_scheme(app::Scheme::Gleam);
     let mut window_main = Window::default().with_size(800, 480); // pi 7" screen default
 
@@ -65,23 +65,36 @@ fn main() -> Result<(), Box<dyn Error>> {
                 Message::Scanned => {
                     println!("{}:", upc_input.value());
 
-                    let inp1_val: i64 = upc_input.value().parse().unwrap();
+                    let inp1_val: i64 = match upc_input.value().parse() {
+                        Ok(v) => v,
+                        Err(e) => {
+                            out.set_value(&format!("Parse error: {}", e));
+                            upc_input.set_value("");
+                            continue;
+                        }
+                    };
                     let mut output_text: String = "No Data".to_string();
-                    database::database_insert_logs(&db_instance, format!("{} scanned", inp1_val));
-                    let upc_count = database::database_upc_owned(
+                    let _ = database::database_insert_logs(&db_instance, format!("{} scanned", inp1_val));
+                    let upc_count = match database::database_upc_owned(
                         &db_instance,
                         inp1_val,
                         choice_media_type.value(),
-                    )
-                    .unwrap();
+                    ) {
+                        Ok(c) => c,
+                        Err(e) => {
+                            out.set_value(&format!("DB error: {}", e));
+                            upc_input.set_value("");
+                            continue;
+                        }
+                    };
                     if upc_count == 0 {
-                        let _result = database::database_upc_insert(
+                        let _ = database::database_upc_insert(
                             &db_instance,
                             inp1_val,
                             choice_media_type.value(),
                         );
                         output_text = format!("{} - Added", inp1_val);
-                        database::database_insert_logs(&db_instance, format!("{} added", inp1_val));
+                        let _ = database::database_insert_logs(&db_instance, format!("{} added", inp1_val));
                         total_codes += 1;
 
                         frame_upc_known.set_label(&format!(
@@ -90,7 +103,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                         ));
                     } else {
                         output_text = format!("{} - DUPLICATE!", inp1_val);
-                        database::database_insert_logs(
+                        let _ = database::database_insert_logs(
                             &db_instance,
                             format!("{} duplicate", inp1_val),
                         );

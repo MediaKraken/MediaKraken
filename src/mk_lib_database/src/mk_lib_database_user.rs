@@ -52,9 +52,8 @@ impl Default for User {
 impl Authentication<User, i64, PgPool> for User {
     async fn load_user(userid: i64, pool: Option<&PgPool>) -> Result<User, anyhow::Error> {
         let pool = pool.ok_or_else(|| anyhow::anyhow!("no PgPool provided to load_user"))?;
-        User::get_user(userid, pool)
-            .await
-            .ok_or_else(|| anyhow::anyhow!("Could not load user"))
+        let user_opt = User::get_user(userid, pool).await?;
+        user_opt.ok_or_else(|| anyhow::anyhow!("Could not load user"))
     }
 
     fn is_authenticated(&self) -> bool {
@@ -78,23 +77,23 @@ impl HasPermission<PgPool> for User {
 }
 
 impl User {
-    pub async fn get_user(id: i64, pool: &PgPool) -> Option<Self> {
+    pub async fn get_user(id: i64, pool: &PgPool) -> Result<Option<Self>, sqlx::Error> {
         let sqluser = sqlx::query_as::<_, SqlUser>(
             r#"SELECT id, anonymous, username FROM mm_axum_users WHERE id = $1"#,
         )
         .bind(id)
         .fetch_one(pool)
-        .await
-        .ok()?;
+        .await?;
         // lets just get all the tokens the user can use, we will only use the full permissions if modifing them.
-        let sql_user_perms = sqlx::query_as::<_, SqlPermissionTokens>(
+        let sql_user_perms: Vec<SqlPermissionTokens> = sqlx::query_as::<_, SqlPermissionTokens>(
             r#"SELECT token FROM mm_axum_user_permissions WHERE user_id = $1"#,
         )
         .bind(id)
         .fetch_all(pool)
         .await
-        .ok()?;
-        Some(sqluser.into_user(Some(sql_user_perms)))
+        .ok()
+        .unwrap_or_default();
+        Ok(Some(sqluser.into_user(Some(sql_user_perms))))
     }
 }
 
