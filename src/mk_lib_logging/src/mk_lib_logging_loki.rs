@@ -161,6 +161,128 @@ fn escape_logql_string(value: &str) -> String {
     value.replace('\\', r#"\\"#).replace('"', r#"\""#)
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_truncate_to_bytes_short_string() {
+        let s = "hello";
+        assert_eq!(truncate_to_bytes(s, 100), "hello");
+    }
+
+    #[test]
+    fn test_truncate_to_bytes_exact_length() {
+        let s = "hello";
+        assert_eq!(truncate_to_bytes(s, 5), "hello");
+    }
+
+    #[test]
+    fn test_truncate_to_bytes_longer_than_max() {
+        let s = "hello world";
+        let result = truncate_to_bytes(s, 5);
+        assert_eq!(result, "hello");
+    }
+
+    #[test]
+    fn test_truncate_to_bytes_multibyte_char_boundary() {
+        let s = "hello \u{00e9}world";
+        let result = truncate_to_bytes(s, 6);
+        assert!(result.is_char_boundary(6));
+    }
+
+    #[test]
+    fn test_truncate_to_bytes_empty() {
+        assert_eq!(truncate_to_bytes("", 10), "");
+    }
+
+    #[test]
+    fn test_stream_labels_to_string_empty() {
+        let labels = HashMap::new();
+        assert_eq!(stream_labels_to_string(&labels), "");
+    }
+
+    #[test]
+    fn test_stream_labels_to_string_single() {
+        let mut labels = HashMap::new();
+        labels.insert("job".to_string(), "mediakraken".to_string());
+        let result = stream_labels_to_string(&labels);
+        assert_eq!(result, r#"job="mediakraken""#);
+    }
+
+    #[test]
+    fn test_stream_labels_to_string_multiple_sorted() {
+        let mut labels = HashMap::new();
+        labels.insert("zebra".to_string(), "z".to_string());
+        labels.insert("alpha".to_string(), "a".to_string());
+        let result = stream_labels_to_string(&labels);
+        assert!(result.starts_with(r#"alpha="a""#));
+        assert!(result.contains(r#"zebra="z""#));
+    }
+
+    #[test]
+    fn test_stream_to_logql_empty() {
+        let labels = HashMap::new();
+        assert_eq!(stream_to_logql(&labels), "{}");
+    }
+
+    #[test]
+    fn test_stream_to_logql_single() {
+        let mut labels = HashMap::new();
+        labels.insert("job".to_string(), "mediakraken".to_string());
+        assert_eq!(stream_to_logql(&labels), r#"{job="mediakraken"}"#);
+    }
+
+    #[test]
+    fn test_escape_logql_string_no_escapes() {
+        assert_eq!(escape_logql_string("hello world"), "hello world");
+    }
+
+    #[test]
+    fn test_escape_logql_string_backslash() {
+        assert_eq!(escape_logql_string(r"hello\world"), r"hello\\world");
+    }
+
+    #[test]
+    fn test_escape_logql_string_quotes() {
+        assert_eq!(escape_logql_string(r#"hello"world"#), r#"hello\"world"#);
+    }
+
+    #[test]
+    fn test_escape_logql_string_both() {
+        let input = r#"hello\"world"#;
+        let result = escape_logql_string(input);
+        assert_eq!(result, r#"hello\\"world"#);
+    }
+
+    #[test]
+    fn test_loki_log_struct() {
+        let log = LokiLog {
+            timestamp_ns: 1234567890123456789,
+            labels: "job=\"mediakraken\"".to_string(),
+            line: "test log line".to_string(),
+        };
+        assert_eq!(log.timestamp_ns, 1234567890123456789);
+        assert_eq!(log.labels, "job=\"mediakraken\"");
+        assert_eq!(log.line, "test log line");
+    }
+
+    #[test]
+    fn test_loki_max_entry_bytes_constant() {
+        assert_eq!(LOKI_MAX_ENTRY_BYTES, 262_144);
+    }
+
+    #[test]
+    fn test_loki_safe_entry_bytes_constant() {
+        assert_eq!(LOKI_SAFE_ENTRY_BYTES, 240_000);
+    }
+
+    #[test]
+    fn test_loki_safe_entry_bytes_less_than_max() {
+        assert!(LOKI_SAFE_ENTRY_BYTES < LOKI_MAX_ENTRY_BYTES);
+    }
+}
+
 pub async fn mk_logging_loki_read(
     message_type: &str,
 ) -> Result<Vec<LokiLog>, Box<dyn std::error::Error>> {

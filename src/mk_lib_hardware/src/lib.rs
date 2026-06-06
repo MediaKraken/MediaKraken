@@ -4,9 +4,9 @@ pub mod mk_lib_hardware_appletv;
 #[cfg(feature = "arduino")]
 pub mod mk_lib_hardware_arduino;
 #[cfg(feature = "arduino")]
-pub mod mk_lib_hardware_arduino_lm1602;
-#[cfg(feature = "arduino")]
 pub mod mk_lib_hardware_arduino_SPL06_007;
+#[cfg(feature = "arduino")]
+pub mod mk_lib_hardware_arduino_lm1602;
 pub mod mk_lib_hardware_chromecast;
 pub mod mk_lib_hardware_crestron;
 pub mod mk_lib_hardware_firetv;
@@ -14,8 +14,8 @@ pub mod mk_lib_hardware_global_cache;
 pub mod mk_lib_hardware_hdhomerun;
 pub mod mk_lib_hardware_lenbrook;
 pub mod mk_lib_hardware_lg;
-pub mod mk_lib_hardware_marantz;
 pub mod mk_lib_hardware_main_controller;
+pub mod mk_lib_hardware_marantz;
 pub mod mk_lib_hardware_nut;
 pub mod mk_lib_hardware_onkyo;
 //pub mod mk_lib_hardware_onvif;

@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_hash"
-version = "0.0.220"
+version = "0.0.227"
 edition = "2024"
 
 [profile.release]
@@ -10,13 +10,14 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-blake3 = "1.8.3"
+blake3 = "1.8.5"
 crc32fast = "1.5.0"
 #ed2k = { git = "https://github.com/runfalk/ed2k-rs" }
 ed2k = { version = "0.3.0", registry = "kellnr" }
-md-5 = "0.10.6"
-sha1 = "0.10.6"
-tokio = { version = "1.49.0", features = ["fs", "io-util"] }
+md-5 = "0.11.0"
+sha1 = "0.11.0"
+hex = "0.4"
+tokio = { version = "1.52.3", features = ["fs", "io-util", "macros", "rt"] }
 
 [dev-dependencies]
 tokio-test = "*"

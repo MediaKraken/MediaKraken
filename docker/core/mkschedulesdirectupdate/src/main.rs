@@ -1,14 +1,10 @@
-use chrono::prelude::*;
-use mk_lib_database;
-use mk_lib_rabbitmq;
-use serde_json::{Value, json};
 use std::error::Error;
 use tokio::sync::Notify;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // open the database
-    let (sqlx_pool_rw, sqlx_pool_ro) =
+    let (_sqlx_pool_rw, sqlx_pool_ro) =
         mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120).await?;
     let _db_check = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(
         &sqlx_pool_ro,
@@ -27,7 +23,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
-            if let Some(payload) = msg.content {
+            if let Some(_payload) = msg.content {
                 //
                 // def mk_schedules_direct_program_info_fetch(meta_program_fetch):
                 //     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',

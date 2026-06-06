@@ -44,3 +44,32 @@ pub async fn mk_common_ffmpeg_get_info(
 
     serde_json::from_slice(&output.stdout).map_err(|err| Error::new(ErrorKind::InvalidData, err))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_ffmpeg_empty_media_file_rejected() {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let result = rt.block_on(mk_common_ffmpeg_get_info(""));
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err().kind(), ErrorKind::InvalidInput);
+    }
+
+    #[test]
+    fn test_ffmpeg_dangerous_media_file_rejected() {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let result = rt.block_on(mk_common_ffmpeg_get_info("-i malicious"));
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err().kind(), ErrorKind::InvalidInput);
+    }
+
+    #[test]
+    fn test_ffmpeg_dash_starting_file_rejected() {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let result = rt.block_on(mk_common_ffmpeg_get_info("--help"));
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err().kind(), ErrorKind::InvalidInput);
+    }
+}

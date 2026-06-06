@@ -319,21 +319,21 @@ fn main() -> Result<(), Box<dyn Error>> {
     window_main.show();
     window_main.make_current();
 
-    let mut wv = Webview::create(false, &mut wv_win);
+    let wv = Webview::create(false, &mut wv_win);
     wv.navigate(&format!("{api_base}/api"));
 
     button_start_record_loop.set_callback({
-        let s = s.clone();
+        let s = s;
         move |_| s.send(Message::Start)
     });
 
     button_stop_record_loop.set_callback({
-        let s = s.clone();
+        let s = s;
         move |_| s.send(Message::Stop)
     });
 
     button_stop_and_recognise.set_callback({
-        let s = s.clone();
+        let s = s;
         move |_| s.send(Message::Recognise)
     });
 
@@ -374,7 +374,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     let paths = paths.clone();
                     let vosk_uri = vosk_uri.clone();
                     let api_base = api_base.clone();
-                    let s = s.clone();
+                    let s = s;
                     thread::spawn(move || {
                         match run_recognition(&paths, &vosk_uri) {
                             Ok(text) => {

@@ -1,5 +1,5 @@
 use fltk::{
-    app, app::*, enums::*, frame::*, group::*, input::*, output::Output, prelude::*, window::*,
+    app, enums::*, frame::*, group::*, input::*, output::Output, prelude::*, window::*,
 };
 mod choice;
 mod database;

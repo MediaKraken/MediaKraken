@@ -1,5 +1,3 @@
-
-
 /*
     def com_hardware_marantz_command(self, command_string, resp_cnt):
         command_string = command_string.encode("ascii")
@@ -619,4 +617,3 @@
 # testing against AV7703
 
 */
-

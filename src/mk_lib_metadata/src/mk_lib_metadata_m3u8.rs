@@ -12,6 +12,55 @@ pub async fn mk_lib_metadata_m3u8_validate_playlist(
     Ok(playlist.parse::<MediaPlaylist>()?)
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_m3u8_valid_simple_playlist() {
+        let playlist = "#EXTM3U\n#EXTINF:111,Track One\ntrack1.mp3\n#EXTINF:222,Track Two\ntrack2.mp3\n";
+        let result = mk_lib_metadata_m3u8_validate_playlist(playlist).await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_m3u8_empty_string_rejected() {
+        let result = mk_lib_metadata_m3u8_validate_playlist("").await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_m3u8_missing_header_rejected() {
+        let playlist = "track1.mp3\ntrack2.mp3\n";
+        let result = mk_lib_metadata_m3u8_validate_playlist(playlist).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn test_m3u8_single_track() {
+        let playlist = "#EXTM3U\n#EXTINF:60,Single Track\nsingle.mp3\n";
+        let result = mk_lib_metadata_m3u8_validate_playlist(playlist).await;
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_m3u8_zero_duration() {
+        let playlist = "#EXTM3U\n#EXTINF:0,Zero Duration\nzero.mp3\n";
+        let result = mk_lib_metadata_m3u8_validate_playlist(playlist).await;
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_m3u_header_constant() {
+        assert_eq!(M3U_HEADER, "EXTM3U\n");
+    }
+
+    #[test]
+    fn test_m3u_line_header_constant() {
+        assert_eq!(M3U_LINE_HEADER, "EXTINF:");
+    }
+}
+
 /*
 
 '''

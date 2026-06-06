@@ -5,17 +5,17 @@ edition = "2024"
 
 
 [dependencies]
-mk_lib_database = { version = "0.0.248", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.217", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.220", registry = "kellnr" }
+mk_lib_database = { version = "0.0.255", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.224", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.227", registry = "kellnr" }
 
-reqwest = { version = "0.13.1", default-features = false, features = [
+reqwest = { version = "0.13.4", default-features = false, features = [
     "json",
     "native-tls",
 ] }
 rustls = "0.23.27"
 serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.148"
+serde_json = "1.0.150"
 sqlx = { version = "0.8.6", features = [
     "chrono",
     "ipnetwork",
@@ -26,7 +26,7 @@ sqlx = { version = "0.8.6", features = [
 ] }
 stdext = "0.3.3"
 sys-info = "0.9.1"
-tokio = { version = "1.49.0", features = ["full"] }
+tokio = { version = "1.52.3", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"

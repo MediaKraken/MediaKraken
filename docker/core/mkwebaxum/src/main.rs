@@ -813,3 +813,99 @@ async fn shutdown_signal() {
         _ = terminate => {},
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::env;
+
+    fn setup_signing_key(key: &str) {
+        env::set_var("MKWEBAPP_SIGNING_KEY", key);
+    }
+
+    fn teardown_signing_key() {
+        env::remove_var("MKWEBAPP_SIGNING_KEY");
+    }
+
+    #[test]
+    fn test_load_signing_key_long_enough() {
+        setup_signing_key(&"a".repeat(32));
+        let key = load_signing_key();
+        assert_eq!(key.as_ref().len(), 64);
+        teardown_signing_key();
+    }
+
+    #[test]
+    fn test_load_signing_key_too_short() {
+        setup_signing_key("short");
+        let key = load_signing_key();
+        assert_eq!(key.as_ref().len(), 64);
+        teardown_signing_key();
+    }
+
+    #[test]
+    fn test_load_signing_key_empty() {
+        setup_signing_key("");
+        let key = load_signing_key();
+        assert_eq!(key.as_ref().len(), 64);
+        teardown_signing_key();
+    }
+
+    #[test]
+    fn test_load_signing_key_deterministic() {
+        setup_signing_key("test_secret_key_32_bytes_long!");
+        let key1 = load_signing_key();
+        setup_signing_key("test_secret_key_32_bytes_long!");
+        let key2 = load_signing_key();
+        assert_eq!(key1.as_ref(), key2.as_ref());
+        teardown_signing_key();
+    }
+
+    #[test]
+    fn test_load_signing_key_different_inputs_different_keys() {
+        setup_signing_key("first_secret_key_32_bytes!");
+        let key1 = load_signing_key();
+        setup_signing_key("second_secret_key_32_bytes!");
+        let key2 = load_signing_key();
+        assert_ne!(key1.as_ref(), key2.as_ref());
+        teardown_signing_key();
+    }
+
+    #[tokio::test]
+    async fn test_rate_limiter_allows_within_limit() {
+        let limiter = RateLimiter::new(Duration::from_secs(60), 5);
+        for _ in 0..5 {
+            assert!(limiter.is_allowed("192.168.1.1").await);
+        }
+    }
+
+    #[tokio::test]
+    async fn test_rate_limiter_blocks_over_limit() {
+        let limiter = RateLimiter::new(Duration::from_secs(60), 3);
+        for _ in 0..3 {
+            assert!(limiter.is_allowed("10.0.0.1").await);
+        }
+        assert!(!limiter.is_allowed("10.0.0.1").await);
+    }
+
+    #[tokio::test]
+    async fn test_rate_limiter_different_keys_independent() {
+        let limiter = RateLimiter::new(Duration::from_secs(60), 2);
+        assert!(limiter.is_allowed("ip1").await);
+        assert!(limiter.is_allowed("ip1").await);
+        assert!(!limiter.is_allowed("ip1").await);
+        assert!(limiter.is_allowed("ip2").await);
+        assert!(limiter.is_allowed("ip2").await);
+        assert!(!limiter.is_allowed("ip2").await);
+    }
+
+    #[tokio::test]
+    async fn test_rate_limiter_window_expiry() {
+        let limiter = RateLimiter::new(Duration::from_millis(100), 2);
+        assert!(limiter.is_allowed("temp").await);
+        assert!(limiter.is_allowed("temp").await);
+        assert!(!limiter.is_allowed("temp").await);
+        tokio::time::sleep(Duration::from_millis(150)).await;
+        assert!(limiter.is_allowed("temp").await);
+    }
+}

@@ -1,9 +1,9 @@
 // https://github.com/nn1ks/huelib-rs
 
-use huelib::resource::Light;
-use huelib::resource::{light, Adjust, Alert};
 use huelib::Color;
-use huelib::{bridge, Bridge};
+use huelib::resource::Light;
+use huelib::resource::{Adjust, Alert, light};
+use huelib::{Bridge, bridge};
 use std::net::IpAddr;
 
 /// Register a device name on the Philips Hue bridge and return the

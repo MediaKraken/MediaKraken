@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_file"
-version = "0.0.225"
+version = "0.0.233"
 edition = "2024"
 [profile.release]
 panic = 'abort'
@@ -9,16 +9,16 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { version = "0.0.248", registry = "kellnr", optional = true }
-mk_lib_logging = { version = "0.0.217", registry = "kellnr" }
+mk_lib_database = { version = "0.0.255", registry = "kellnr", optional = true }
+mk_lib_logging = { version = "0.0.224", registry = "kellnr" }
 
-aws-config = { version = "1.8.16", optional = true }
-aws-sdk-s3 = { version = "1.132.0", optional = true }
-reqwest = { version = "0.13.3", default-features = false, features = ["json", "native-tls"], optional = true }
+aws-config = { version = "1.8.18", optional = true }
+aws-sdk-s3 = { version = "1.135.0", optional = true }
+reqwest = { version = "0.13.4", default-features = false, features = ["json", "native-tls"], optional = true }
 serde = { version = "1.0.228", features = ["derive"], optional = true }
-serde_json = "1.0.149"
+serde_json = "1.0.150"
 tokio = { version = "1.52.3", features = ["full"] }
-uuid = { version = "1.23.1", features = ["serde", "v4"] }
+uuid = { version = "1.23.2", features = ["serde", "v4"] }
 walkdir = "2.5.0"
 
 [features]

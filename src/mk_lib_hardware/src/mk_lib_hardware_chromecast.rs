@@ -11,10 +11,47 @@ pub struct ChromecastDevice {
     pub address: String,
 }
 
-pub async fn mk_hardware_chromecast_discover(
-) -> Result<Vec<ChromecastDevice>, Box<dyn std::error::Error>> {
-    let stream =
-        mdns::discover::all(CHROMECAST_SERVICE_NAME, Duration::from_secs(15))?.listen();
+#[cfg(test)]
+mod tests {
+    use super::ChromecastDevice;
+    use serde_json;
+
+    #[test]
+    fn chromecast_device_serialize() {
+        let device = ChromecastDevice {
+            hostname: "living-room.local".to_string(),
+            address: "192.168.1.50:8008".to_string(),
+        };
+        let json_value = serde_json::to_value(&device).unwrap();
+        assert_eq!(json_value["hostname"], "living-room.local");
+        assert_eq!(json_value["address"], "192.168.1.50:8008");
+    }
+
+    #[test]
+    fn chromecast_device_clone() {
+        let device = ChromecastDevice {
+            hostname: "bedroom.local".to_string(),
+            address: "192.168.1.51:8008".to_string(),
+        };
+        let cloned = device.clone();
+        assert_eq!(device.hostname, cloned.hostname);
+        assert_eq!(device.address, cloned.address);
+    }
+
+    #[test]
+    fn chromecast_device_debug_format() {
+        let device = ChromecastDevice {
+            hostname: "kitchen.local".to_string(),
+            address: "192.168.1.52:8008".to_string(),
+        };
+        let debug_str = format!("{:?}", device);
+        assert!(debug_str.contains("ChromecastDevice"));
+    }
+}
+
+pub async fn mk_hardware_chromecast_discover()
+-> Result<Vec<ChromecastDevice>, Box<dyn std::error::Error>> {
+    let stream = mdns::discover::all(CHROMECAST_SERVICE_NAME, Duration::from_secs(15))?.listen();
 
     pin_mut!(stream);
 

@@ -227,3 +227,10 @@ When making changes, the agent should (at minimum) describe how to verify:
 - CNPG: CloudNativePG for Postgres ops
 - Garage S3: object storage backend for images/backups/WAL
 
+---
+
+## 13) Local crates repository - Kellnr
+
+ - If a bump and push is required, run the following two programs:
+    - verify_kellnr_versions.py
+    - build_and_deploy_to_kellnr.py

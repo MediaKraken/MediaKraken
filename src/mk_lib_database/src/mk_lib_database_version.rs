@@ -4,6 +4,21 @@ use tokio::time::{Duration, sleep};
 
 pub static DATABASE_VERSION: i32 = 83;
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_database_version_value() {
+        assert_eq!(DATABASE_VERSION, 83);
+    }
+
+    #[test]
+    fn test_database_version_is_positive() {
+        assert!(DATABASE_VERSION > 0);
+    }
+}
+
 pub async fn mk_lib_database_postgresql_version(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<String, sqlx::Error> {

@@ -343,3 +343,88 @@ async fn download_and_import(pool: Pool<Postgres>, table: &str, url: &str) -> an
     println!("⭐ Finished {}: {} total rows.", table, count);
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_bulk_image_cover_load_options_all_fields() {
+        let json = r#"{"ArchiveUrl":"http://example.com/archive.tar.gz","Bucket":"my-bucket","S3Prefix":"custom/prefix","AddJson":true}"#;
+        let options: BulkImageCoverLoadOptions = serde_json::from_str(json).unwrap();
+        assert_eq!(options.archive_url, "http://example.com/archive.tar.gz");
+        assert_eq!(options.bucket, Some("my-bucket".to_string()));
+        assert_eq!(options.s3_prefix, "custom/prefix");
+        assert!(options.add_json);
+    }
+
+    #[test]
+    fn test_bulk_image_cover_load_options_minimal() {
+        let json = r#"{"ArchiveUrl":"http://example.com/archive.tar.gz"}"#;
+        let options: BulkImageCoverLoadOptions = serde_json::from_str(json).unwrap();
+        assert_eq!(options.archive_url, "http://example.com/archive.tar.gz");
+        assert!(options.bucket.is_none());
+        assert_eq!(options.s3_prefix, "default_cover_prefix");
+        assert!(!options.add_json);
+    }
+
+    #[test]
+    fn test_bulk_image_cover_load_options_null_bucket() {
+        let json = r#"{"ArchiveUrl":"http://example.com/archive.tar.gz","Bucket":null}"#;
+        let options: BulkImageCoverLoadOptions = serde_json::from_str(json).unwrap();
+        assert!(options.bucket.is_none());
+    }
+
+    #[test]
+    fn test_bulk_image_cover_load_options_default_s3_prefix() {
+        let json = r#"{"ArchiveUrl":"http://example.com/archive.tar.gz","S3Prefix":""}"#;
+        let options: BulkImageCoverLoadOptions = serde_json::from_str(json).unwrap();
+        assert_eq!(options.s3_prefix, "");
+    }
+
+    #[test]
+    fn test_bulk_image_cover_load_options_add_json_false() {
+        let json = r#"{"ArchiveUrl":"http://example.com/archive.tar.gz","AddJson":false}"#;
+        let options: BulkImageCoverLoadOptions = serde_json::from_str(json).unwrap();
+        assert!(!options.add_json);
+    }
+
+    #[test]
+    fn test_bulk_image_cover_load_options_serialization_roundtrip() {
+        let options = BulkImageCoverLoadOptions {
+            archive_url: "http://test.com/archive.tar.gz".to_string(),
+            bucket: Some("test-bucket".to_string()),
+            s3_prefix: "test/prefix".to_string(),
+            add_json: true,
+        };
+        let serialized = serde_json::to_string(&options).unwrap();
+        let deserialized: BulkImageCoverLoadOptions = serde_json::from_str(&serialized).unwrap();
+        assert_eq!(deserialized.archive_url, options.archive_url);
+        assert_eq!(deserialized.bucket, options.bucket);
+        assert_eq!(deserialized.s3_prefix, options.s3_prefix);
+        assert_eq!(deserialized.add_json, options.add_json);
+    }
+
+    #[test]
+    fn test_default_cover_prefix_function() {
+        assert_eq!(default_cover_prefix(), "openlibrary/covers");
+    }
+
+    #[test]
+    fn test_base_url_constant() {
+        assert_eq!(BASE_URL, "https://openlibrary.org/data/");
+    }
+
+    #[test]
+    fn test_bulk_image_cover_load_options_debug() {
+        let options = BulkImageCoverLoadOptions {
+            archive_url: "http://example.com/archive.tar.gz".to_string(),
+            bucket: None,
+            s3_prefix: "prefix".to_string(),
+            add_json: false,
+        };
+        let debug_str = format!("{:?}", options);
+        assert!(debug_str.contains("BulkImageCoverLoadOptions"));
+        assert!(debug_str.contains("archive_url"));
+    }
+}

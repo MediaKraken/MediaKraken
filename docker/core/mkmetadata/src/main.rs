@@ -102,8 +102,8 @@ async fn run_provider_loop(
                 return;
             }
 
-            if debug {
-                if let Err(err) = mk_logging_loki_push(json!({
+            if debug
+                && let Err(err) = mk_logging_loki_push(json!({
                     "Module": std::module_path!(),
                     "DL Guid": download_data.mm_download_guid,
                     "Status": download_data.mm_download_status,
@@ -111,9 +111,8 @@ async fn run_provider_loop(
                     "ID": download_data.mm_download_provider_id,
                 }))
                 .await
-                {
-                    eprintln!("mkmetadata: {provider} loki push failed ({err})");
-                }
+            {
+                eprintln!("mkmetadata: {provider} loki push failed ({err})");
             }
 
             if let Err(err) =
@@ -239,4 +238,59 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_build_limiter_basic() {
+        let limiter = build_limiter(10, Duration::from_secs(60));
+        let result = limiter.try_wait();
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_build_limiter_max_tokens() {
+        let limiter = build_limiter(5, Duration::from_secs(60));
+        for _ in 0..5 {
+            assert!(limiter.try_wait().is_ok());
+        }
+        assert!(limiter.try_wait().is_err());
+    }
+
+    #[tokio::test]
+    async fn test_build_limiter_single_token() {
+        let limiter = build_limiter(1, Duration::from_secs(60));
+        assert!(limiter.try_wait().is_ok());
+        assert!(limiter.try_wait().is_err());
+    }
+
+    #[tokio::test]
+    async fn test_build_limiter_large_tokens() {
+        let limiter = build_limiter(1000, Duration::from_secs(60));
+        for _ in 0..1000 {
+            assert!(limiter.try_wait().is_ok());
+        }
+        assert!(limiter.try_wait().is_err());
+    }
+
+    #[tokio::test]
+    async fn test_build_limiter_short_window() {
+        let limiter = build_limiter(2, Duration::from_millis(100));
+        assert!(limiter.try_wait().is_ok());
+        assert!(limiter.try_wait().is_ok());
+        assert!(limiter.try_wait().is_err());
+        tokio::time::sleep(Duration::from_millis(150)).await;
+        assert!(limiter.try_wait().is_ok());
+    }
+
+    #[tokio::test]
+    async fn test_build_limiter_different_windows() {
+        let limiter1 = build_limiter(5, Duration::from_secs(10));
+        let limiter2 = build_limiter(5, Duration::from_secs(60));
+        assert!(limiter1.try_wait().is_ok());
+        assert!(limiter2.try_wait().is_ok());
+    }
 }

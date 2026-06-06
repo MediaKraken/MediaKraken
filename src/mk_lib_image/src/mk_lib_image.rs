@@ -50,3 +50,43 @@ pub async fn mk_image_file_thumb(image_save_path: &str) -> Result<(), Box<dyn Er
     resized.save(&thumb_path)?;
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_mk_image_file_resize_zero_width_rejected() {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let result = rt.block_on(mk_image_file_resize("test.png", "out.png", 0, 100));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_mk_image_file_resize_zero_height_rejected() {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let result = rt.block_on(mk_image_file_resize("test.png", "out.png", 100, 0));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_mk_image_file_resize_nonexistent_file_rejected() {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let result = rt.block_on(mk_image_file_resize("nonexistent.png", "out.png", 100, 100));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_mk_image_file_thumb_nonexistent_file_rejected() {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let result = rt.block_on(mk_image_file_thumb("nonexistent.png"));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_mk_image_file_thumb_no_parent() {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let result = rt.block_on(mk_image_file_thumb("just_a_filename.png"));
+        assert!(result.is_err());
+    }
+}

@@ -20,12 +20,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {
-                let json_message: Value = serde_json::from_str(&String::from_utf8_lossy(&payload))?;
+                let json_message: Value = match serde_json::from_str(&String::from_utf8_lossy(&payload)) {
+                    Ok(v) => v,
+                    Err(e) => {
+                        eprintln!("Failed to parse JSON: {}", e);
+                        continue;
+                    }
+                };
                 if json_message["Type"] == "Hardware" {
                     if json_message["Subtype"] == "Lights" {
                         if json_message["Hardware"] == "Hue" {
                             if json_message["Action"] == "OnOff" {
-                                let _hardware_hue =
+                                if let Err(e) =
                                     mk_lib_hardware::mk_lib_hardware_phue::mk_hardware_phue_bridge_set_light_onoff(
                                         json_message["Target"].to_string().parse::<IpAddr>().unwrap_or_else(|_| "0.0.0.0".parse().unwrap()),
                                         json_message["ClientKey"].to_string(),
@@ -33,14 +39,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         bool::from_str(json_message["Setting"].as_str().unwrap_or("")).unwrap_or(false),
                                     )
                                     .await
-                                    ?;
+                                {
+                                    eprintln!("Phue OnOff failed: {}", e);
+                                }
                             } else if json_message["Action"] == "Color" {
-                                let _hardware_hue = mk_lib_hardware::mk_lib_hardware_phue::mk_hardware_phue_bridge_set_color(
+                                if let Err(e) = mk_lib_hardware::mk_lib_hardware_phue::mk_hardware_phue_bridge_set_color(
                                         json_message["Target"].to_string().parse::<IpAddr>().unwrap_or_else(|_| "0.0.0.0".parse().unwrap()),
                                         json_message["ClientKey"].to_string(),
                                         json_message["LightList"].to_string(),
                                         json_message["Color"].to_string(),
-                                    ).await?;
+                                    ).await
+                                {
+                                    eprintln!("Phue Color failed: {}", e);
+                                }
                             } else if json_message["Action"] == "Bright" {
                                 let _hardware_hue = mk_lib_hardware::mk_lib_hardware_phue::mk_hardware_phue_bridge_set_light(
                                     json_message["Target"].to_string().parse::<IpAddr>().unwrap_or_else(|_| "0.0.0.0".parse().unwrap()),

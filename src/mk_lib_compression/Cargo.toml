@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_compression"
-version = "0.0.215"
+version = "0.0.222"
 edition = "2024"
 
 [profile.release]
@@ -10,12 +10,12 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_logging = { version = "0.0.217", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.224", registry = "kellnr" }
 
 flate2 = "1.1.8"
-serde_json = "1.0.149"
+serde_json = "1.0.150"
 tar = "0.4.44"
-tokio = { version = "1.50.0", features = ["rt"] }
+tokio = { version = "1.52.3", features = ["rt"] }
 zip = "4.5.0"
 
 [dev-dependencies]

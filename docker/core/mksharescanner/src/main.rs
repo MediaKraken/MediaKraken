@@ -5,7 +5,6 @@ use serde_json::Value;
 use std::collections::HashSet;
 use std::error::Error;
 use tokio::signal;
-use tokio::sync::Notify;
 
 async fn shutdown_signal() {
     let ctrl_c = async {

@@ -1,5 +1,3 @@
-use mk_lib_database;
-use mk_lib_rabbitmq;
 use std::env;
 use std::error::Error;
 use std::path::Path;
@@ -11,7 +9,10 @@ fn validate_table_name(name: &str) -> Result<(), String> {
         return Err("Table name cannot be empty".to_string());
     }
     // Allow alphanumeric, underscore, dot (for schema.table)
-    if !name.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '.') {
+    if !name
+        .chars()
+        .all(|c| c.is_alphanumeric() || c == '_' || c == '.')
+    {
         return Err(format!("Table name contains invalid characters: {}", name));
     }
     Ok(())
@@ -93,10 +94,7 @@ async fn import_dump_tables(
     db_pass: &str,
 ) -> Result<(), Box<dyn Error>> {
     let pg_tables =
-        mk_lib_database::mk_lib_database_postgresql::mk_lib_database_tables(
-            sqlx_pool_rw,
-        )
-        .await?;
+        mk_lib_database::mk_lib_database_postgresql::mk_lib_database_tables(sqlx_pool_rw).await?;
     for row_data in pg_tables.iter() {
         // loop through tables and see if dump files exist
         let table_name = row_data.table_name.replace("public.", "");
@@ -114,7 +112,10 @@ async fn import_dump_tables(
                 "\\copy {} from '/mediakraken/mbdump/{}';",
                 table_name, table_name
             );
-            if let Some(invalid) = copy_sql.chars().find(|c| !c.is_alphanumeric() && !c.is_ascii_punctuation() && !c.is_whitespace()) {
+            if let Some(invalid) = copy_sql
+                .chars()
+                .find(|c| !c.is_alphanumeric() && !c.is_ascii_punctuation() && !c.is_whitespace())
+            {
                 eprintln!("Invalid character in SQL command: {}", invalid);
                 continue;
             }
@@ -233,8 +234,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check
     let (sqlx_pool_rw, sqlx_pool_ro) =
         mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120).await?;
-    let _ = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
-        .await;
+    let _ = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(
+        &sqlx_pool_ro,
+        false,
+    )
+    .await;
 
     let (_rabbit_connection, rabbit_channel) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkmusicbrainz").await?;
@@ -282,4 +286,81 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let guard = Notify::new();
     guard.notified().await;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_validate_table_name_valid_simple() {
+        assert!(validate_table_name("artists").is_ok());
+    }
+
+    #[test]
+    fn test_validate_table_name_valid_underscore() {
+        assert!(validate_table_name("my_table").is_ok());
+    }
+
+    #[test]
+    fn test_validate_table_name_valid_schema_table() {
+        assert!(validate_table_name("public.artists").is_ok());
+    }
+
+    #[test]
+    fn test_validate_table_name_valid_numbers() {
+        assert!(validate_table_name("table123").is_ok());
+    }
+
+    #[test]
+    fn test_validate_table_name_empty() {
+        let result = validate_table_name("");
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("cannot be empty"));
+    }
+
+    #[test]
+    fn test_validate_table_name_special_chars() {
+        assert!(validate_table_name("table-name").is_err());
+    }
+
+    #[test]
+    fn test_validate_table_name_space() {
+        assert!(validate_table_name("table name").is_err());
+    }
+
+    #[test]
+    fn test_validate_table_name_sql_injection() {
+        assert!(validate_table_name("table; DROP TABLE artists").is_err());
+    }
+
+    #[test]
+    fn test_validate_table_name_slash() {
+        assert!(validate_table_name("table/name").is_err());
+    }
+
+    #[test]
+    fn test_validate_table_name_backslash() {
+        assert!(validate_table_name("table\\name").is_err());
+    }
+
+    #[test]
+    fn test_validate_table_name_quotes() {
+        assert!(validate_table_name("table'name").is_err());
+    }
+
+    #[test]
+    fn test_validate_table_name_double_dot() {
+        assert!(validate_table_name("schema..table").is_ok());
+    }
+
+    #[test]
+    fn test_validate_table_name_leading_dot() {
+        assert!(validate_table_name(".table").is_ok());
+    }
+
+    #[test]
+    fn test_validate_table_name_trailing_dot() {
+        assert!(validate_table_name("table.").is_ok());
+    }
 }

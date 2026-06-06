@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_metadata"
-version = "0.0.228"
+version = "0.0.235"
 edition = "2024"
 
 [profile.release]
@@ -10,28 +10,28 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_common = { version = "0.0.216", registry = "kellnr" }
-mk_lib_database = { version = "0.0.248", registry = "kellnr" }
-mk_lib_hash = { version = "0.0.220", registry = "kellnr" }
-mk_lib_image = { version = "0.0.216", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.217", registry = "kellnr" }
-mk_lib_network = { version = "0.0.218", registry = "kellnr" }
+mk_lib_common = { version = "0.0.223", registry = "kellnr" }
+mk_lib_database = { version = "0.0.255", registry = "kellnr" }
+mk_lib_hash = { version = "0.0.227", registry = "kellnr" }
+mk_lib_image = { version = "0.0.223", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.224", registry = "kellnr" }
+mk_lib_network = { version = "0.0.223", registry = "kellnr" }
 
 discid = { version = "0.7.0", optional = true }
 flickr = "0.1.1"
-hls_m3u8 = "0.5.1"
-id3 = "1.16.3"
+hls_m3u8 = "0.7.0"
+id3 = "1.17.0"
 #lib-mal = "0.5.1"  # myanimelist
 mangadex = "0.1.2"
 # musicbrainz_rs = { version = "0.5.0", features = ["async"] }
 nonzero_ext = "0.3.0"
 omdb = "0.3.2"
 open-library = "0.7.1"
-rand = "0.9.2"
-reqwest = "0.13.1"
+rand = "0.10.1"
+reqwest = "0.13.4"
 # rusty_ytdl = "0.6.2"  # breaks sscache
 select = "0.6.1"
-serde_json = "1.0.149"
+serde_json = "1.0.150"
 sqlx = { version = "0.8.6", features = [
     "chrono",
     "ipnetwork",
@@ -42,7 +42,7 @@ sqlx = { version = "0.8.6", features = [
 ] }
 soundcloud = "0.4.0"
 substring = "1.4.5"
-tokio = "1.49.0"
+tokio = "1.52.3"
 tokio-util = { version = "0.7.18", features = ["compat"] }
 url = "2.5"
 torrent-name-parser = "0.12.1"
@@ -52,8 +52,8 @@ twitch_api = { version = "0.7.2", features = [
     "reqwest",
     "twitch_oauth2",
 ] }
-twitch_oauth2 = "0.16.0"
-uuid = { version = "1.19.0", features = ["serde", "v4"] }
+twitch_oauth2 = "0.17.1"
+uuid = { version = "1.23.2", features = ["serde", "v4"] }
 vimeo-rs = { version = "0.2.1" }
 
 [features]

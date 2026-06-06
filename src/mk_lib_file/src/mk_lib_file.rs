@@ -61,4 +61,42 @@ mod tests {
                 .unwrap()
         );
     }
+
+    #[tokio::test]
+    async fn test_mk_read_file_data_nonexistent() {
+        let result = mk_read_file_data("nonexistent_file_xyz.txt").await;
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err().kind(), io::ErrorKind::NotFound);
+    }
+
+    #[tokio::test]
+    async fn test_mk_read_file_data_u8() {
+        let result = mk_read_file_data_u8("testing_data/HashCalc.txt").await.unwrap();
+        assert_eq!(result, b"thisisafileforhashcalctests");
+    }
+
+    #[tokio::test]
+    async fn test_mk_save_file_data() {
+        let test_dir = "/tmp/mk_lib_file_test";
+        let test_file = format!("{}/test_save.txt", test_dir);
+        fs::create_dir_all(test_dir).await.unwrap();
+        mk_save_file_data("hello world", &test_file).await.unwrap();
+        let read_back = mk_read_file_data(&test_file).await.unwrap();
+        assert_eq!(read_back, "hello world");
+        fs::remove_dir_all(test_dir).await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn test_mk_directory_walk_existing_dir() {
+        let result = mk_directory_walk("testing_data".to_string()).await;
+        assert!(result.is_ok());
+        let files = result.unwrap();
+        assert!(!files.is_empty());
+    }
+
+    #[tokio::test]
+    async fn test_mk_directory_walk_nonexistent_dir() {
+        let result = mk_directory_walk("/nonexistent_dir_xyz".to_string()).await;
+        assert!(result.is_err());
+    }
 }

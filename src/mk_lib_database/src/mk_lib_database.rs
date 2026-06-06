@@ -14,6 +14,86 @@ pub struct MediaStatusUpdatePayload {
     pub trash: bool,
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use uuid::Uuid;
+
+    #[test]
+    fn test_media_status_update_payload_serialization() {
+        let payload = MediaStatusUpdatePayload {
+            guid: Uuid::nil(),
+            favorite: true,
+            watched: false,
+            good: true,
+            bad: false,
+            trash: false,
+        };
+        let json = serde_json::to_string(&payload).unwrap();
+        assert!(json.contains("\"guid\""));
+        assert!(json.contains("\"favorite\":true"));
+        assert!(json.contains("\"watched\":false"));
+    }
+
+    #[test]
+    fn test_media_status_update_payload_deserialization() {
+        let json = r#"{"guid":"00000000-0000-0000-0000-000000000000","favorite":true,"watched":false,"good":true,"bad":false,"trash":false}"#;
+        let payload: MediaStatusUpdatePayload = serde_json::from_str(json).unwrap();
+        assert!(payload.favorite);
+        assert!(!payload.watched);
+        assert!(payload.good);
+    }
+
+    #[test]
+    fn test_media_status_update_payload_all_false() {
+        let payload = MediaStatusUpdatePayload {
+            guid: Uuid::new_v4(),
+            favorite: false,
+            watched: false,
+            good: false,
+            bad: false,
+            trash: false,
+        };
+        assert!(!payload.favorite);
+        assert!(!payload.watched);
+        assert!(!payload.good);
+        assert!(!payload.bad);
+        assert!(!payload.trash);
+    }
+
+    #[test]
+    fn test_media_status_update_payload_all_true() {
+        let payload = MediaStatusUpdatePayload {
+            guid: Uuid::new_v4(),
+            favorite: true,
+            watched: true,
+            good: true,
+            bad: true,
+            trash: true,
+        };
+        assert!(payload.favorite);
+        assert!(payload.watched);
+        assert!(payload.good);
+        assert!(payload.bad);
+        assert!(payload.trash);
+    }
+
+    #[test]
+    fn test_media_status_update_payload_clone() {
+        let payload = MediaStatusUpdatePayload {
+            guid: Uuid::new_v4(),
+            favorite: true,
+            watched: false,
+            good: false,
+            bad: false,
+            trash: false,
+        };
+        let cloned = payload.clone();
+        assert_eq!(payload.guid, cloned.guid);
+        assert_eq!(payload.favorite, cloned.favorite);
+    }
+}
+
 pub async fn mk_lib_database_open_pool(
     pool_connections: u32,
     connection_timeout: u64,

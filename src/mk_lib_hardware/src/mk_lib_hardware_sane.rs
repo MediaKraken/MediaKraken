@@ -102,7 +102,7 @@ fn parse_scanimage_list(stdout: &str) -> Vec<SaneScannerDevice> {
             }
 
             let id_start = "device `".len();
-            let id_end = line[id_start..].find('`')? + id_start;
+            let id_end = line[id_start..].find('\'')? + id_start;
             let id = line[id_start..id_end].trim();
             if id.is_empty() {
                 return None;
@@ -112,6 +112,7 @@ fn parse_scanimage_list(stdout: &str) -> Vec<SaneScannerDevice> {
                 line[id_end + 1..].find(" is a ")? + id_end + 1 + " is a ".len();
             let description = line[description_start..]
                 .trim()
+                .trim_matches('\'')
                 .trim_matches('`')
                 .to_string();
 
@@ -125,7 +126,7 @@ fn parse_scanimage_list(stdout: &str) -> Vec<SaneScannerDevice> {
 
 #[cfg(test)]
 mod tests {
-    use super::{SaneScannerDevice, parse_scanimage_list};
+    use super::{parse_scanimage_list, SaneScanOutput, SaneScannerDevice};
 
     #[test]
     fn parses_scanimage_output_lines() {
@@ -154,5 +155,81 @@ mod tests {
         let input = "No scanners were identified.\nTry scanimage -L";
         let scanners = parse_scanimage_list(input);
         assert!(scanners.is_empty());
+    }
+
+    #[test]
+    fn parses_empty_input() {
+        let scanners = parse_scanimage_list("");
+        assert!(scanners.is_empty());
+    }
+
+    #[test]
+    fn parses_single_device() {
+        let input = "device `usb:001:002' is a Test Scanner Inc. Model X100\n";
+        let scanners = parse_scanimage_list(input);
+        assert_eq!(scanners.len(), 1);
+        assert_eq!(scanners[0].id, "usb:001:002");
+    }
+
+    #[test]
+    fn parses_device_with_malformed_description() {
+        let input = "device `usb:001:002'\n";
+        let scanners = parse_scanimage_list(input);
+        assert!(scanners.is_empty());
+    }
+
+    #[test]
+    fn parses_device_with_empty_id() {
+        let input = "device `` is a Test Scanner\n";
+        let scanners = parse_scanimage_list(input);
+        assert!(scanners.is_empty());
+    }
+
+    #[test]
+    fn parses_multiple_devices_mixed() {
+        let input = "Some random line\n\
+                     device `net:192.168.1.100' is a Network Scanner Pro\n\
+                     More random text\n\
+                     device `usb:002:005' is a USB Scanner Basic\n";
+        let scanners = parse_scanimage_list(input);
+        assert_eq!(scanners.len(), 2);
+    }
+
+    #[test]
+    fn sane_scanner_device_clone() {
+        let device = SaneScannerDevice {
+            id: "usb:001:002".to_string(),
+            description: "Test Scanner".to_string(),
+        };
+        let cloned = device.clone();
+        assert_eq!(device.id, cloned.id);
+        assert_eq!(device.description, cloned.description);
+    }
+
+    #[test]
+    fn sane_scanner_device_partial_eq() {
+        let a = SaneScannerDevice {
+            id: "usb:001:002".to_string(),
+            description: "Test Scanner".to_string(),
+        };
+        let b = SaneScannerDevice {
+            id: "usb:001:002".to_string(),
+            description: "Test Scanner".to_string(),
+        };
+        let c = SaneScannerDevice {
+            id: "usb:001:003".to_string(),
+            description: "Test Scanner".to_string(),
+        };
+        assert_eq!(a, b);
+        assert_ne!(a, c);
+    }
+
+    #[test]
+    fn sane_scan_output_debug() {
+        let output = SaneScanOutput {
+            bytes_written: 1024,
+        };
+        let debug_str = format!("{:?}", output);
+        assert!(debug_str.contains("SaneScanOutput"));
     }
 }

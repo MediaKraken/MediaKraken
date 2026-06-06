@@ -10,7 +10,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     if !Path::new(&"/mediakraken/metadata").exists() {
         println!("Creating folders");
         fs::create_dir("/mediakraken/metadata")?;
-        let vec_of_metadata = vec!["poster", "backdrop", "trailer"];
+        let vec_of_metadata = ["poster", "backdrop", "trailer"];
         for metadata_type in vec_of_metadata.iter() {
             let file_name = format!("/mediakraken/metadata/{}", metadata_type);
             fs::create_dir(&file_name)?;

@@ -16,8 +16,8 @@ pub async fn mk_lib_file_s3_garage_client(
     secret_access_key: &str,
 ) -> Result<S3Client, Box<dyn Error>> {
     let credentials = Credentials::new(
-        std::env::var("ACCESS_KEY_ID").to_string(),
-        std::env::var("ACCESS_SECRET_KEY").to_string(),
+        access_key_id.to_string(),
+        secret_access_key.to_string(),
         None,
         None,
         "mk_lib_file_s3_garage",

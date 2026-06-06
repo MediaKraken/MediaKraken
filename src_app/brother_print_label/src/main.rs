@@ -1,6 +1,5 @@
 use std::error::Error;
 use brother_ql::{connection::{PrinterConnection, UsbConnection, UsbConnectionInfo}, media::Media, printjob::PrintJob};
-use image::open;
 
 // DK1209
 // 62mm x 29mm

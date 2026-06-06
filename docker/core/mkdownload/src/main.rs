@@ -1,6 +1,3 @@
-use mk_lib_database;
-use mk_lib_network;
-use mk_lib_rabbitmq;
 use reqwest::{Client, StatusCode};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
@@ -118,7 +115,7 @@ async fn process_message(json_message: Value) -> Result<(), TaskError> {
 
             mk_lib_network::mk_lib_network::mk_download_file_from_url(
                 url.to_string(),
-                &local_save_path.to_string_lossy().into_owned(),
+                &local_save_path.to_string_lossy(),
             )
             .await
             .map_err(|e| format!("file download failed: {e}"))?;
@@ -229,16 +226,15 @@ async fn process_message(json_message: Value) -> Result<(), TaskError> {
                 if let Some(filename) = hdtrailers_extract_filename(&download_link) {
                     let file_save_name = format!("/mediakraken/metadata/meta/trailer/{filename}");
 
-                    if !Path::new(&file_save_name).exists() {
-                        if let Err(error) =
+                    if !Path::new(&file_save_name).exists()
+                        && let Err(error) =
                             mk_lib_network::mk_lib_network::mk_download_file_from_url(
                                 download_link,
                                 &file_save_name,
                             )
                             .await
-                        {
-                            eprintln!("hdtrailers download failed: {error}");
-                        }
+                    {
+                        eprintln!("hdtrailers download failed: {error}");
                     }
                 }
             }
@@ -861,4 +857,126 @@ async fn ia_save_state(path: &Path, state: &IATrailerState) -> Result<(), TaskEr
         .await
         .map_err(|e| e.to_string())?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn dosage_parse_strip_list_parses_valid_output() {
+        let input = "Available comic scrapers:\n\
+                     \n\
+                     xkcd\n\
+                     Dilbert\n\
+                     \n\
+                     Some comics are disabled";
+        let strips = dosage_parse_strip_list(input);
+        assert_eq!(strips, vec!["xkcd", "Dilbert"]);
+    }
+
+    #[test]
+    fn dosage_parse_strip_list_handles_empty_input() {
+        let strips = dosage_parse_strip_list("");
+        assert!(strips.is_empty());
+    }
+
+    #[test]
+    fn dosage_parse_strip_list_filters_asterisk_lines() {
+        let input = "RegularItem\n* Item with asterisk\nValidItem\n  IndentedItem";
+        let strips = dosage_parse_strip_list(input);
+        assert_eq!(strips, vec!["RegularItem", "ValidItem"]);
+    }
+
+    #[test]
+    fn hdtrailers_extract_hrefs_finds_quotes() {
+        let html = r#"<a href="video.mp4">Link</a><a href='trailer.mov'>Other</a>"#;
+        let hrefs = hdtrailers_extract_hrefs(html);
+        assert_eq!(hrefs, vec!["video.mp4", "trailer.mov"]);
+    }
+
+    #[test]
+    fn hdtrailers_extract_hrefs_handles_no_hrefs() {
+        let html = "<p>No links here</p>";
+        let hrefs = hdtrailers_extract_hrefs(html);
+        assert!(hrefs.is_empty());
+    }
+
+    #[test]
+    fn hdtrailers_find_best_video_link_selects_highest_quality() {
+        let html = r#"<a href="movie.480p.mp4">Low</a><a href="movie.1080p.mp4">High</a>"#;
+        let best = hdtrailers_find_best_video_link(html);
+        assert_eq!(best, Some("movie.1080p.mp4".to_string()));
+    }
+
+    #[test]
+    fn hdtrailers_find_best_video_link_returns_none_for_non_video() {
+        let html = r#"<a href="page.html">Not Video</a>"#;
+        let best = hdtrailers_find_best_video_link(html);
+        assert!(best.is_none());
+    }
+
+    #[test]
+    fn hdtrailers_link_score_prefers_4k() {
+        assert_eq!(hdtrailers_link_score("movie.4320p.mp4"), 4320);
+    }
+
+    #[test]
+    fn hdtrailers_link_score_prefers_1080p_over_720p() {
+        assert_eq!(hdtrailers_link_score("movie.720p.mp4"), 720);
+        assert_eq!(hdtrailers_link_score("movie.1080p.mp4"), 1080);
+    }
+
+    #[test]
+    fn hdtrailers_link_score_resolves_dimensions() {
+        let score = hdtrailers_link_score("video.1920x1080.mp4");
+        assert_eq!(score, 1920 * 1080);
+    }
+
+    #[test]
+    fn hdtrailers_extract_filename_gets_basename() {
+        assert_eq!(
+            hdtrailers_extract_filename("http://example.com/path/to/video.mp4"),
+            Some("video.mp4".to_string())
+        );
+    }
+
+    #[test]
+    fn hdtrailers_extract_filename_handles_query_string() {
+        assert_eq!(
+            hdtrailers_extract_filename("http://example.com/video.mp4?quality=high"),
+            Some("video.mp4".to_string())
+        );
+    }
+
+    #[test]
+    fn hdtrailers_extract_filename_handles_fragment() {
+        assert_eq!(
+            hdtrailers_extract_filename("http://example.com/video.mp4#section"),
+            Some("video.mp4".to_string())
+        );
+    }
+
+    #[test]
+    fn hdtrailers_extract_filename_returns_none_for_empty() {
+        assert!(hdtrailers_extract_filename("http://example.com/").is_none());
+    }
+
+    #[test]
+    fn ia_sanitize_filename_replaces_invalid_chars() {
+        let result = ia_sanitize_filename("test", "file name!.txt");
+        assert_eq!(result, "test_file_name_.txt");
+    }
+
+    #[test]
+    fn ia_sanitize_filename_preserves_valid_chars() {
+        let result = ia_sanitize_filename("test", "file-name_123.txt");
+        assert_eq!(result, "test_file-name_123.txt");
+    }
+
+    #[test]
+    fn ia_sanitize_filename_handles_unicode() {
+        let result = ia_sanitize_filename("test", "file_with_uni\u{00e9}code.txt");
+        assert_eq!(result, "test_file_with_uni_code.txt");
+    }
 }

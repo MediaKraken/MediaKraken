@@ -13,7 +13,7 @@ pub async fn mk_file_hash_md5(file_to_read: &str) -> Result<String, Box<dyn Erro
     let mut hasher = Md5::new();
     read_file_chunks(file_to_read, |chunk| hasher.update(chunk)).await?;
     let result = hasher.finalize();
-    Ok(format!("{:x}", result))
+    Ok(hex::encode(result.as_slice()))
 }
 
 #[cfg(test)]

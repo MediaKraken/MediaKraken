@@ -17,12 +17,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {
-                let json_message: Value = serde_json::from_str(&String::from_utf8_lossy(&payload))?;
+                let json_message: Value = match serde_json::from_str(&String::from_utf8_lossy(&payload)) {
+                    Ok(v) => v,
+                    Err(e) => {
+                        eprintln!("Failed to parse JSON: {}", e);
+                        continue;
+                    }
+                };
                 // media_devices = []
 
                 // chromecast discover
-                mk_lib_hardware::mk_lib_hardware_chromecast::mk_hardware_chromecast_discover()
-                    .await?;
+                if let Err(e) = mk_lib_hardware::mk_lib_hardware_chromecast::mk_hardware_chromecast_discover().await {
+                    eprintln!("Chromecast discover failed: {}", e);
+                }
 
                 // crestron device discover
                 // # crestron_devices = common_hardware_crestron.com_hardware_crestron_discover()

@@ -3,7 +3,7 @@ use rppal::gpio::Gpio;
 use std::error::Error;
 use std::fs::File;
 use std::io::Write;
-use tokio::time::{sleep, Duration};
+use tokio::time::{Duration, sleep};
 
 // let gpio = Gpio::new()?;
 // let i2c = I2c::new()?;

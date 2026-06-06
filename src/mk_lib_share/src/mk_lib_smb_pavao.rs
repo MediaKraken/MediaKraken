@@ -1,7 +1,6 @@
 use pavao::{SmbClient, SmbCredentials, SmbDirent, SmbDirentType, SmbOptions};
 use std::error::Error;
 use std::path::PathBuf;
-use std::process::Command;
 
 pub fn mk_file_smb_client_connect(
     share_to_mount: mk_lib_database::mk_lib_database_network_share::DBShareList,

@@ -503,8 +503,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     // }
                 }
 
-                if let Some(deliver) = msg.deliver {
-                    if let Err(error) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
+                if let Some(deliver) = msg.deliver
+                    && let Err(error) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
                         &rabbit_channel,
                         deliver.delivery_tag(),
                     )
@@ -512,7 +512,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     {
                         eprintln!("mktranscode: rabbit ack failed ({error})");
                     }
-                }
             }
         }
     }

@@ -16,6 +16,45 @@ pub struct HDHomeRunChannel {
     pub stream_url: String,
 }
 
+#[cfg(test)]
+mod tests {
+    use super::HDHomeRunChannel;
+    use serde_json;
+
+    #[test]
+    fn hdhomerun_channel_deserialize_from_json() {
+        let json_str = r#"{"GuideNumber":"3.1","GuideName":"ABC","URL":"http://192.168.1.100:5004/auto/v3.1"}"#;
+        let channel: HDHomeRunChannel = serde_json::from_str(json_str).unwrap();
+        assert_eq!(channel.guide_number, "3.1");
+        assert_eq!(channel.guide_name, "ABC");
+        assert_eq!(channel.stream_url, "http://192.168.1.100:5004/auto/v3.1");
+    }
+
+    #[test]
+    fn hdhomerun_channel_clone() {
+        let channel = HDHomeRunChannel {
+            guide_number: "5.2".to_string(),
+            guide_name: "NBC".to_string(),
+            stream_url: "http://192.168.1.100:5004/auto/v5.2".to_string(),
+        };
+        let cloned = channel.clone();
+        assert_eq!(channel.guide_number, cloned.guide_number);
+        assert_eq!(channel.guide_name, cloned.guide_name);
+        assert_eq!(channel.stream_url, cloned.stream_url);
+    }
+
+    #[test]
+    fn hdhomerun_channel_debug_format() {
+        let channel = HDHomeRunChannel {
+            guide_number: "1.1".to_string(),
+            guide_name: "CBS".to_string(),
+            stream_url: "http://192.168.1.100:5004/auto/v1.1".to_string(),
+        };
+        let debug_str = format!("{:?}", channel);
+        assert!(debug_str.contains("HDHomeRunChannel"));
+    }
+}
+
 pub async fn mk_lib_hardware_hdhomerun_discover() -> Vec<Url> {
     let mut request = SearchRequest::new();
     request.set(Man);

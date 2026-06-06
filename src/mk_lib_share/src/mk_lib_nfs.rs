@@ -12,22 +12,22 @@
 // }
 
 /*
- let dir = nfs.opendir(&Path::new("/"))?;
-    for f in dir {
-        println!("dir: {:?}", f);
-    }
+let dir = nfs.opendir(&Path::new("/"))?;
+   for f in dir {
+       println!("dir: {:?}", f);
+   }
 
-    println!("creating file");
-    let file = nfs.create(
-        &Path::new("/rust"),
-        OFlag::O_SYNC,
-        Mode::S_IROTH | Mode::S_IWOTH,
-    )?;
-    let mut contents = String::from("Hello from rust").into_bytes();
-    file.write(&mut contents)?;
+   println!("creating file");
+   let file = nfs.create(
+       &Path::new("/rust"),
+       OFlag::O_SYNC,
+       Mode::S_IROTH | Mode::S_IWOTH,
+   )?;
+   let mut contents = String::from("Hello from rust").into_bytes();
+   file.write(&mut contents)?;
 
-    println!("reading file");
-    let file = nfs.open(&Path::new("/rust"), OFlag::O_RDONLY)?;
-    let buff = file.read(1024)?;
-    println!("read file: {}", String::from_utf8_lossy(&buff));
-     */
+   println!("reading file");
+   let file = nfs.open(&Path::new("/rust"), OFlag::O_RDONLY)?;
+   let buff = file.read(1024)?;
+   println!("read file: {}", String::from_utf8_lossy(&buff));
+    */

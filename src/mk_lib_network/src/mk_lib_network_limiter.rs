@@ -57,3 +57,159 @@ pub static API_LIMIT: phf::Map<&'static str, (u64, u64, u64)> = phf_map! {
     // your application has to wait for the next window period. Think of it the same as the daily limits, but with a much smaller window.
     "Z" => (u64::MAX, u64::MAX, u64::MAX),  // catch all for limiter api program
 };
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_api_limit_contains_anidb() {
+        let limit = API_LIMIT.get("anidb").copied().unwrap();
+        assert_eq!(limit, (1, 4, u64::MAX));
+    }
+
+    #[test]
+    fn test_api_limit_contains_barcodespider() {
+        let limit = API_LIMIT.get("barcodespider").copied().unwrap();
+        assert_eq!(limit.2, 100); // daily cap of 100
+    }
+
+    #[test]
+    fn test_api_limit_contains_comicvine() {
+        let limit = API_LIMIT.get("comicvine").copied().unwrap();
+        assert_eq!(limit, (1, 1, u64::MAX));
+    }
+
+    #[test]
+    fn test_api_limit_contains_flickr() {
+        let limit = API_LIMIT.get("flickr").copied().unwrap();
+        assert_eq!(limit, (3000, 60, u64::MAX));
+    }
+
+    #[test]
+    fn test_api_limit_contains_giantbomb() {
+        let limit = API_LIMIT.get("giantbomb").copied().unwrap();
+        assert_eq!(limit, (1, 1, u64::MAX));
+    }
+
+    #[test]
+    fn test_api_limit_contains_lastfm() {
+        let limit = API_LIMIT.get("lastfm").copied().unwrap();
+        assert_eq!(limit, (5, 1, u64::MAX));
+    }
+
+    #[test]
+    fn test_api_limit_contains_musicbrainz() {
+        let limit = API_LIMIT.get("musicbrainz").copied().unwrap();
+        assert_eq!(limit, (1, 1, u64::MAX));
+    }
+
+    #[test]
+    fn test_api_limit_contains_themoviedb() {
+        let limit = API_LIMIT.get("themoviedb").copied().unwrap();
+        assert_eq!(limit, (45, 1, u64::MAX));
+    }
+
+    #[test]
+    fn test_api_limit_contains_upcitemdb() {
+        let limit = API_LIMIT.get("upcitemdb").copied().unwrap();
+        assert_eq!(limit, (6, 60, 100));
+    }
+
+    #[test]
+    fn test_api_limit_contains_catch_all() {
+        let limit = API_LIMIT.get("Z").copied().unwrap();
+        assert_eq!(limit, (u64::MAX, u64::MAX, u64::MAX));
+    }
+
+    #[test]
+    fn test_api_limit_contains_imdb() {
+        let limit = API_LIMIT.get("imdb").copied().unwrap();
+        assert_eq!(limit.0, u64::MAX);
+    }
+
+    #[test]
+    fn test_api_limit_contains_themoviedb_limits() {
+        let limit = API_LIMIT.get("themoviedb").copied().unwrap();
+        assert!(limit.0 > 0);
+        assert!(limit.0 <= 45);
+        assert_eq!(limit.1, 1);
+    }
+
+    #[test]
+    fn test_api_limit_contains_discogs() {
+        let limit = API_LIMIT.get("discogs").copied().unwrap();
+        assert_eq!(limit, (240, 60, u64::MAX));
+    }
+
+    #[test]
+    fn test_api_limit_contains_imvdb() {
+        let limit = API_LIMIT.get("imvdb").copied().unwrap();
+        assert_eq!(limit, (1000, 60, u64::MAX));
+    }
+
+    #[test]
+    fn test_api_limit_contains_openlibrary() {
+        let limit = API_LIMIT.get("openlibrary").copied().unwrap();
+        assert_eq!(limit, (100, 300, u64::MAX));
+    }
+
+    #[test]
+    fn test_api_limit_contains_omdb() {
+        let limit = API_LIMIT.get("omdb").copied().unwrap();
+        assert_eq!(limit, (20, 1, u64::MAX));
+    }
+
+    #[test]
+    fn test_api_limit_contains_twitch() {
+        let limit = API_LIMIT.get("twitch").copied().unwrap();
+        assert_eq!(limit, (1, 1, u64::MAX));
+    }
+
+    #[test]
+    fn test_api_limit_contains_tv_intros() {
+        let limit = API_LIMIT.get("tv_intros").copied().unwrap();
+        assert_eq!(limit, (1, 1, u64::MAX));
+    }
+
+    #[test]
+    fn test_api_limit_catch_all_has_max_values() {
+        let catch_all = API_LIMIT.get("Z").copied().unwrap();
+        assert_eq!(catch_all.0, u64::MAX);
+        assert_eq!(catch_all.1, u64::MAX);
+        assert_eq!(catch_all.2, u64::MAX);
+    }
+
+    #[test]
+    fn test_api_limit_all_have_positive_requests() {
+        for (key, &(req, _, _)) in API_LIMIT.iter() {
+            if key != &"Z" {
+                assert!(req > 0, "API limit for {} has zero requests", key);
+            }
+        }
+    }
+
+    #[test]
+    fn test_api_limit_all_have_positive_time() {
+        for (key, &(_, time, _)) in API_LIMIT.iter() {
+            if key != &"Z" {
+                assert!(time > 0, "API limit for {} has zero time window", key);
+            }
+        }
+    }
+
+    #[test]
+    fn test_api_limit_contains_theaudiodb() {
+        assert!(API_LIMIT.contains_key("theaudiodb"));
+    }
+
+    #[test]
+    fn test_api_limit_contains_thegamesdb() {
+        assert!(API_LIMIT.contains_key("thegamesdb"));
+    }
+
+    #[test]
+    fn test_api_limit_contains_thesportsdb() {
+        assert!(API_LIMIT.contains_key("thesportsdb"));
+    }
+}

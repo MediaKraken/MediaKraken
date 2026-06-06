@@ -13,7 +13,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         "mm_version",
     )
     .await?;
-    if db_exists == false {
+    if !db_exists {
         let db_pass = env::var("POSTGRES_PASSWORD")?;
         let postgres_user = env::var("POSTGRES_USER")
             .map_err(|e| format!("POSTGRES_USER not set: {e}"))?;

@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_share"
-version = "0.0.225"
+version = "0.0.232"
 edition = "2024"
 [profile.release]
 panic = 'abort'
@@ -9,12 +9,11 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_database = { version = "0.0.248", registry = "kellnr" }
+mk_lib_database = { version = "0.0.255", registry = "kellnr" }
 
-libnfs = { version = "0.1.1" }
 pavao = { version = "0.2.16" }
-tokio = { version = "1.52.3", features = ["fs", "process"] }
-uuid = { version = "1.23.1", features = ["serde", "v4"] }
+tokio = { version = "1.23.2", features = ["fs", "process"] }
+uuid = { version = "1.23.2", features = ["serde", "v4"] }
 
 [dev-dependencies]
 tokio-test = "*"

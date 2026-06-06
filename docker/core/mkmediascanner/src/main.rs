@@ -792,3 +792,338 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn test_share() -> DBShareList {
+        DBShareList {
+            mm_network_share_guid: Uuid::nil(),
+            mm_network_share_ip: "192.168.1.100".parse().unwrap(),
+            mm_network_share_path: "/shared/media".to_string(),
+            mm_network_share_comment: "Test share".to_string(),
+            mm_network_share_version: 1,
+            mm_share_auth_user: Some("user".to_string()),
+            mm_share_auth_password: Some("pass".to_string()),
+            mm_network_share_workgroup: Some("WORKGROUP".to_string()),
+        }
+    }
+
+    #[test]
+    fn test_mk_nfs_uri_no_path() {
+        let share = test_share();
+        assert_eq!(mk_nfs_uri(&share, ""), "nfs://192.168.1.100/shared/media");
+    }
+
+    #[test]
+    fn test_mk_nfs_uri_with_path() {
+        let share = test_share();
+        assert_eq!(
+            mk_nfs_uri(&share, "/movies"),
+            "nfs://192.168.1.100/shared/media/movies"
+        );
+    }
+
+    #[test]
+    fn test_mk_nfs_uri_leading_slash_stripped() {
+        let share = test_share();
+        assert_eq!(
+            mk_nfs_uri(&share, "//movies"),
+            "nfs://192.168.1.100/shared/media/movies"
+        );
+    }
+
+    #[test]
+    fn test_mk_nfs_uri_path_with_trailing_slash() {
+        let share = test_share();
+        assert_eq!(
+            mk_nfs_uri(&share, "/movies/"),
+            "nfs://192.168.1.100/shared/media/movies/"
+        );
+    }
+
+    #[test]
+    fn test_mk_smb_share_uri_simple() {
+        let share = test_share();
+        assert_eq!(mk_smb_share_uri(&share), Some("//192.168.1.100/shared"));
+    }
+
+    #[test]
+    fn test_mk_smb_share_uri_unc_path() {
+        let mut share = test_share();
+        share.mm_network_share_path = "\\\\server\\share\\sub".to_string();
+        assert_eq!(mk_smb_share_uri(&share), Some("//192.168.1.100/share"));
+    }
+
+    #[test]
+    fn test_mk_smb_share_uri_ip_path() {
+        let mut share = test_share();
+        share.mm_network_share_path = "//192.168.1.10/media".to_string();
+        assert_eq!(mk_smb_share_uri(&share), Some("//192.168.1.100/media"));
+    }
+
+    #[test]
+    fn test_smb_path_is_safe_valid() {
+        assert!(smb_path_is_safe("movies"));
+        assert!(smb_path_is_safe("movies/action"));
+        assert!(smb_path_is_safe("movies/action"));
+        assert!(smb_path_is_safe("movie.mp4"));
+    }
+
+    #[test]
+    fn test_smb_path_is_safe_semicolon() {
+        assert!(!smb_path_is_safe("movies; rm -rf"));
+    }
+
+    #[test]
+    fn test_smb_path_is_safe_quotes() {
+        assert!(!smb_path_is_safe("movies\"test"));
+    }
+
+    #[test]
+    fn test_smb_path_is_safe_newline() {
+        assert!(!smb_path_is_safe("movies\ntest"));
+    }
+
+    #[test]
+    fn test_smb_path_is_safe_carriage_return() {
+        assert!(!smb_path_is_safe("movies\rtest"));
+    }
+
+    #[test]
+    fn test_smb_path_is_safe_backslash() {
+        assert!(!smb_path_is_safe("movies\\test"));
+    }
+
+    #[test]
+    fn test_is_stacked_non_first_cd() {
+        assert!(!is_stacked_non_first("Movie -cd1"));
+        assert!(is_stacked_non_first("Movie -cd2"));
+        assert!(is_stacked_non_first("Movie -cd10"));
+    }
+
+    #[test]
+    fn test_is_stacked_non_first_part() {
+        assert!(!is_stacked_non_first("Movie -part1"));
+        assert!(is_stacked_non_first("Movie -part2"));
+        assert!(is_stacked_non_first("Movie -part10"));
+    }
+
+    #[test]
+    fn test_is_stacked_non_first_dvd() {
+        assert!(!is_stacked_non_first("Movie -dvd1"));
+        assert!(is_stacked_non_first("Movie -dvd2"));
+    }
+
+    #[test]
+    fn test_is_stacked_non_first_pt() {
+        assert!(!is_stacked_non_first("Movie -pt1"));
+        assert!(is_stacked_non_first("Movie -pt2"));
+    }
+
+    #[test]
+    fn test_is_stacked_non_first_disk() {
+        assert!(!is_stacked_non_first("Movie -disk1"));
+        assert!(is_stacked_non_first("Movie -disk2"));
+    }
+
+    #[test]
+    fn test_is_stacked_non_first_disc() {
+        assert!(!is_stacked_non_first("Movie -disc1"));
+        assert!(is_stacked_non_first("Movie -disc2"));
+    }
+
+    #[test]
+    fn test_is_stacked_non_first_not_stacked() {
+        assert!(!is_stacked_non_first("Movie.mkv"));
+        assert!(!is_stacked_non_first("Movie Part 1.mkv"));
+    }
+
+    #[test]
+    fn test_path_contains_segment_forward() {
+        assert!(path_contains_segment("/movies/action/file.mkv", "movies"));
+        assert!(path_contains_segment("/movies/action/file.mkv", "action"));
+    }
+
+    #[test]
+    fn test_path_contains_segment_backslash() {
+        assert!(path_contains_segment(
+            "\\movies\\action\\file.mkv",
+            "movies"
+        ));
+        assert!(path_contains_segment(
+            "\\movies\\action\\file.mkv",
+            "action"
+        ));
+    }
+
+    #[test]
+    fn test_path_contains_segment_not_found() {
+        assert!(!path_contains_segment("/movies/action/file.mkv", "comedy"));
+        assert!(!path_contains_segment("/movies/file.mkv", "action"));
+    }
+
+    #[test]
+    fn test_path_contains_segment_partial_no_match() {
+        assert!(!path_contains_segment("/movies/action/file.mkv", "movie"));
+    }
+
+    #[test]
+    fn test_path_contains_prefix_forward() {
+        assert!(path_contains_prefix("/movies/action/file.mkv", "movies"));
+        assert!(path_contains_prefix("/movies/file.mkv", "movies"));
+    }
+
+    #[test]
+    fn test_path_contains_prefix_backslash() {
+        assert!(path_contains_prefix("\\movies\\action\\file.mkv", "movies"));
+    }
+
+    #[test]
+    fn test_path_contains_prefix_not_found() {
+        assert!(!path_contains_prefix("/movies/action/file.mkv", "comedy"));
+    }
+
+    #[test]
+    fn test_path_contains_prefix_partial_no_match() {
+        assert!(!path_contains_prefix("/movies/action/file.mkv", "movie"));
+    }
+
+    #[test]
+    fn test_is_tv_class_true() {
+        assert!(is_tv_class(DLMediaType::TV));
+        assert!(is_tv_class(DLMediaType::TV_EPISODE));
+        assert!(is_tv_class(DLMediaType::TV_SEASON));
+    }
+
+    #[test]
+    fn test_is_tv_class_false() {
+        assert!(!is_tv_class(DLMediaType::MOVIE));
+        assert!(!is_tv_class(DLMediaType::GAME));
+        assert!(!is_tv_class(DLMediaType::TV_SUBTITLE));
+    }
+
+    #[test]
+    fn test_classify_media_game_iso() {
+        let (class, _) = classify_media(DLMediaType::GAME, "iso", "/games/game.iso");
+        assert_eq!(class, DLMediaType::GAME_ISO);
+    }
+
+    #[test]
+    fn test_classify_media_game_chd() {
+        let (class, _) = classify_media(DLMediaType::GAME, "chd", "/games/game.chd");
+        assert_eq!(class, DLMediaType::GAME_CHD);
+    }
+
+    #[test]
+    fn test_classify_media_game_rom() {
+        let (class, _) = classify_media(DLMediaType::GAME, "nfs", "/games/game.nfs");
+        assert_eq!(class, DLMediaType::GAME_ROM);
+    }
+
+    #[test]
+    fn test_classify_media_game_no_roku_thumb() {
+        let (_, roku) = classify_media(DLMediaType::GAME, "chd", "/games/game.chd");
+        assert!(!roku);
+    }
+
+    #[test]
+    fn test_classify_media_movie_subtitle() {
+        let (class, _) = classify_media(DLMediaType::MOVIE, "srt", "/movies/movie.srt");
+        assert_eq!(class, DLMediaType::MOVIE_SUBTITLE);
+    }
+
+    #[test]
+    fn test_classify_media_tv_subtitle() {
+        let (class, _) = classify_media(DLMediaType::TV_EPISODE, "srt", "/tv/episode.srt");
+        assert_eq!(class, DLMediaType::TV_SUBTITLE);
+    }
+
+    #[test]
+    fn test_classify_media_subtitle_unknown_class() {
+        let (class, _) = classify_media(999, "srt", "/other/file.srt");
+        assert_eq!(class, 999);
+    }
+
+    #[test]
+    fn test_classify_media_subtitle_no_roku() {
+        let (_, roku) = classify_media(DLMediaType::MOVIE, "srt", "/movies/movie.srt");
+        assert!(!roku);
+    }
+
+    #[test]
+    fn test_classify_media_trailer_movie() {
+        let (class, _) = classify_media(DLMediaType::MOVIE, "mp4", "/movies/trailers/trailer.mp4");
+        assert_eq!(class, DLMediaType::MOVIE_TRAILER);
+    }
+
+    #[test]
+    fn test_classify_media_trailer_tv() {
+        let (class, _) = classify_media(DLMediaType::TV_EPISODE, "mp4", "/tv/trailers/trailer.mp4");
+        assert_eq!(class, DLMediaType::TV_TRAILER);
+    }
+
+    #[test]
+    fn test_classify_media_trailer_generate_roku() {
+        let (_, roku) = classify_media(DLMediaType::MOVIE, "mp4", "/movies/trailers/trailer.mp4");
+        assert!(roku);
+    }
+
+    #[test]
+    fn test_classify_media_theme_movie() {
+        let (class, _) = classify_media(DLMediaType::MOVIE, "jpg", "/movies/theme.jpg");
+        assert_eq!(class, DLMediaType::MOVIE_THEME);
+    }
+
+    #[test]
+    fn test_classify_media_theme_tv() {
+        let (class, _) = classify_media(DLMediaType::TV_SEASON, "jpg", "/tv/season/theme.jpg");
+        assert_eq!(class, DLMediaType::TV_THEME);
+    }
+
+    #[test]
+    fn test_classify_media_theme_backdrops() {
+        let (class, _) = classify_media(DLMediaType::MOVIE, "jpg", "/movies/backdrops/theme.jpg");
+        assert_eq!(class, DLMediaType::MOVIE_THEME);
+    }
+
+    #[test]
+    fn test_classify_media_theme_generate_roku() {
+        let (_, roku) = classify_media(DLMediaType::MOVIE, "jpg", "/movies/theme.jpg");
+        assert!(roku);
+    }
+
+    #[test]
+    fn test_classify_media_extras_movie() {
+        let (class, _) = classify_media(DLMediaType::MOVIE, "mp4", "/movies/extras/featurette.mp4");
+        assert_eq!(class, DLMediaType::MOVIE_EXTRAS);
+    }
+
+    #[test]
+    fn test_classify_media_extras_tv() {
+        let (class, _) =
+            classify_media(DLMediaType::TV_EPISODE, "mp4", "/tv/season/extras/bts.mp4");
+        assert_eq!(class, DLMediaType::TV_EXTRAS);
+    }
+
+    #[test]
+    fn test_classify_media_extras_generate_roku() {
+        let (_, roku) = classify_media(DLMediaType::MOVIE, "mp4", "/movies/extras/featurette.mp4");
+        assert!(roku);
+    }
+
+    #[test]
+    fn test_classify_media_passthrough() {
+        let (class, roku) = classify_media(DLMediaType::MOVIE, "mp4", "/movies/movie.mp4");
+        assert_eq!(class, DLMediaType::MOVIE);
+        assert!(roku);
+    }
+
+    #[test]
+    fn test_classify_media_unknown_class_passthrough() {
+        let (class, roku) = classify_media(999, "mp4", "/other/file.mp4");
+        assert_eq!(class, 999);
+        assert!(roku);
+    }
+}

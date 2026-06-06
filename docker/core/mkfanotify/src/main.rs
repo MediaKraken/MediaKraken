@@ -2,8 +2,6 @@ use fanotify::high_level::{
     FAN_CLOSE_WRITE, FAN_CREATE, FAN_DELETE, FAN_EVENT_ON_CHILD, FAN_MODIFY, FAN_MOVED_FROM,
     FAN_MOVED_TO, FAN_ONDIR, FanEvent, Fanotify, FanotifyMode,
 };
-use mk_lib_database;
-use mk_lib_rabbitmq;
 use serde_json::json;
 use std::collections::HashMap;
 use std::error::Error;
@@ -128,7 +126,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
 
                 processed_events += 1;
-                if processed_events % CLEANUP_EVERY_EVENTS == 0 {
+                if processed_events.is_multiple_of(CLEANUP_EVERY_EVENTS) {
                     let now = Instant::now();
                     recently_sent
                         .retain(|_, last_seen| now.duration_since(*last_seen) < dedupe_window);

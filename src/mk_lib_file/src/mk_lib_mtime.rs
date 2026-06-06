@@ -13,3 +13,26 @@ pub async fn file_version(path: String) -> u64 {
     .await
     .unwrap_or(0)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_file_version_existing_file() {
+        let version = file_version("testing_data/HashCalc.txt".to_string()).await;
+        assert!(version > 0);
+    }
+
+    #[tokio::test]
+    async fn test_file_version_nonexistent_file() {
+        let version = file_version("/nonexistent_file_xyz.txt".to_string()).await;
+        assert_eq!(version, 0);
+    }
+
+    #[tokio::test]
+    async fn test_file_version_directory() {
+        let version = file_version("testing_data".to_string()).await;
+        assert!(version > 0);
+    }
+}

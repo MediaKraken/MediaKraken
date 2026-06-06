@@ -27,29 +27,135 @@ fn sanitize_url_for_logging(url: &str) -> String {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_sanitize_url_for_logging_no_query() {
+        let url = "https://example.com/path/to/resource";
+        assert_eq!(
+            sanitize_url_for_logging(url),
+            "https://example.com/path/to/resource"
+        );
+    }
+
+    #[test]
+    fn test_sanitize_url_for_logging_with_query() {
+        let url = "https://example.com/path?token=secret&foo=bar";
+        assert_eq!(
+            sanitize_url_for_logging(url),
+            "https://example.com/path"
+        );
+    }
+
+    #[test]
+    fn test_sanitize_url_for_logging_query_at_start() {
+        let url = "https://example.com?token=secret";
+        assert_eq!(
+            sanitize_url_for_logging(url),
+            "https://example.com"
+        );
+    }
+
+    #[test]
+    fn test_sanitize_url_for_logging_empty() {
+        assert_eq!(sanitize_url_for_logging(""), "");
+    }
+
+    #[test]
+    fn test_sanitize_url_for_logging_truncation() {
+        let long_path = "a".repeat(300);
+        let url = format!("https://example.com/{}", long_path);
+        let result = sanitize_url_for_logging(&url);
+        assert!(result.len() < url.len());
+        assert!(result.contains("... (truncated)"));
+        assert!(result.starts_with("https://example.com/"));
+    }
+
+    #[test]
+    fn test_sanitize_url_for_logging_exactly_200() {
+        let path = "a".repeat(182); // https://example.com/ = 18 chars, total = 200
+        let url = format!("https://example.com/{}", path);
+        let result = sanitize_url_for_logging(&url);
+        assert_eq!(result.len(), 200);
+        assert!(!result.contains("truncated"));
+    }
+
+    #[test]
+    fn test_sanitize_url_for_logging_201_chars() {
+        let path = "a".repeat(183); // https://example.com/ = 18 chars, total = 201
+        let url = format!("https://example.com/{}", path);
+        let result = sanitize_url_for_logging(&url);
+        assert!(result.len() < 201);
+        assert!(result.contains("truncated"));
+    }
+
+    #[test]
+    fn test_sanitize_url_for_logging_multiple_queries() {
+        let url = "https://example.com/path?a=1&b=2&c=3";
+        assert_eq!(
+            sanitize_url_for_logging(url),
+            "https://example.com/path"
+        );
+    }
+
+    #[test]
+    fn test_sanitize_url_for_logging_special_chars_in_path() {
+        let url = "https://example.com/path with spaces/file%20name";
+        assert_eq!(
+            sanitize_url_for_logging(url),
+            "https://example.com/path with spaces/file%20name"
+        );
+    }
+
+    #[test]
+    fn test_custom_headers_empty_map() {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let headers = rt.block_on(custom_headers(&HashMap::new()));
+        assert!(headers.is_empty());
+    }
+
+    #[test]
+    fn test_custom_headers_single_header() {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let mut map = HashMap::new();
+        map.insert("X-Custom-Header".to_string(), "test-value".to_string());
+        let headers = rt.block_on(custom_headers(&map));
+        assert_eq!(headers.get("X-Custom-Header").unwrap(), "test-value");
+    }
+
+    #[test]
+    fn test_custom_headers_invalid_header_rejected() {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let mut map = HashMap::new();
+        map.insert("invalid\x00header".to_string(), "value".to_string());
+        let headers = rt.block_on(custom_headers(&map));
+        assert!(headers.is_empty());
+    }
+
+    #[test]
+    fn test_custom_headers_multiple_valid() {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let mut map = HashMap::new();
+        map.insert("Header-One".to_string(), "value1".to_string());
+        map.insert("Header-Two".to_string(), "value2".to_string());
+        let headers = rt.block_on(custom_headers(&map));
+        assert_eq!(headers.get("Header-One").unwrap(), "value1");
+        assert_eq!(headers.get("Header-Two").unwrap(), "value2");
+    }
+}
+
 static SHARED_HTTP_CLIENT: LazyLock<Client> = LazyLock::new(Client::new);
 
-pub async fn custom_headers(map: &HashMap<String, String>) -> HeaderMap {
-    #[allow(dead_code)]
-    pub async fn is_url_available(url: &str) -> bool {
-        // Try HEAD first (no body download)
-        match SHARED_HTTP_CLIENT.head(url).send().await {
-            Ok(resp) => {
-                resp.status().is_success()
-            }
-            Err(_) => {
-                // If HEAD fails, fallback to GET
-                match SHARED_HTTP_CLIENT.get(url).send().await {
-                    Ok(resp) => {
-                        resp.status().is_success()
-                    }
-                    Err(_) => {
-                        false
-                    }
-                }
-            }
-        }
+pub async fn is_url_available(url: &str) -> bool {
+    match SHARED_HTTP_CLIENT.head(url).send().await {
+        Ok(resp) => resp.status().is_success(),
+        Err(_) => false,
     }
+}
+
+pub async fn custom_headers(map: &HashMap<String, String>) -> HeaderMap {
     let mut headers = HeaderMap::new();
     for (key, value) in map.iter() {
         if let (Ok(header_name), Ok(header_value)) = (

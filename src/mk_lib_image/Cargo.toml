@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_image"
-version = "0.0.216"
+version = "0.0.223"
 edition = "2024"
 
 [profile.release]
@@ -10,10 +10,10 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_logging = { version = "0.0.217", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.224", registry = "kellnr" }
 
 image = "0.25.10"
-tokio = { version = "1.49.0", features = ["rt"] }
+tokio = { version = "1.52.3", features = ["rt"] }
 wkhtmlapp = "1.1.0"
 
 [dev-dependencies]

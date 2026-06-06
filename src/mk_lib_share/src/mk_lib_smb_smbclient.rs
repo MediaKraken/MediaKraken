@@ -1,3 +1,7 @@
+use std::error::Error;
+use std::process::Command;
+
+use crate::mk_lib_smb_pavao::FileMetadata;
 
 pub fn classify_smbclient_browse_error(
     stdout_output: &str,
@@ -26,8 +30,9 @@ pub fn classify_smbclient_browse_error(
         || combined_output.contains("cannot chdir")
     {
         return (
-            404, // StatusCode::NOT_FOUND, 
-            "Share path was not found");
+            404, // StatusCode::NOT_FOUND,
+            "Share path was not found",
+        );
     }
 
     if combined_output.contains("nt_status_bad_network_path")
@@ -40,8 +45,10 @@ pub fn classify_smbclient_browse_error(
         || combined_output.contains("name or service not known")
         || combined_output.contains("timed out")
     {
-        return (502, // StatusCode::BAD_GATEWAY, 
-            "Unable to reach share");
+        return (
+            502, // StatusCode::BAD_GATEWAY,
+            "Unable to reach share",
+        );
     }
 
     (502, "Failed to list share directories")
@@ -81,8 +88,7 @@ pub fn mk_file_smb_client_tree_smbclient(
     if uri.contains(disallowed) {
         return Err(format!("smbclient path contains disallowed characters: {uri:?}").into());
     }
-    if share_to_mount.mm_network_share_path.contains(disallowed)
-    {
+    if share_to_mount.mm_network_share_path.contains(disallowed) {
         return Err("smbclient share host or path contains disallowed characters".into());
     }
     let mut smb_command = Command::new("smbclient");
@@ -102,10 +108,10 @@ pub fn mk_file_smb_client_tree_smbclient(
         .arg("-g")
         .arg("-c")
         .arg(smb_commands.join(";"));
-    if let Some(workgroup) = share_to_mount.mm_network_share_workgroup.as_deref() {
-        if !workgroup.is_empty() {
-            smb_command.arg("-W").arg(workgroup);
-        }
+    if let Some(workgroup) = share_to_mount.mm_network_share_workgroup.as_deref()
+        && !workgroup.is_empty()
+    {
+        smb_command.arg("-W").arg(workgroup);
     }
     let user_opt = share_to_mount
         .mm_share_auth_user
@@ -162,4 +168,3 @@ pub fn mk_file_smb_client_tree_smbclient(
     }
     Ok(file_list)
 }
-

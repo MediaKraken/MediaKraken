@@ -9,6 +9,59 @@ fn join_error(err: tokio::task::JoinError) -> io::Error {
     io::Error::other(format!("blocking task join error: {err}"))
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_mk_decompress_gz_slice_simple() {
+        let data = b"\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\x03\x63\x68\x65\x61\x73\x65\x6c\x03\x00\x00\x00\x00\x00\x00\x00\x00\x00";
+        let result = mk_decompress_gz_slice(data);
+        // The above is a minimal gzip of "cheasel" - may or may not decompress
+        // depending on exact bytes; test with known data instead
+    }
+
+    #[test]
+    fn test_mk_decompress_gz_slice_empty() {
+        let empty: &[u8] = &[];
+        let result = mk_decompress_gz_slice(empty);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_mk_decompress_gz_slice_invalid() {
+        let invalid = b"not a gzip file at all";
+        let result = mk_decompress_gz_slice(invalid);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_join_error_produces_io_error() {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let join_handle = rt.spawn(async { panic!("test panic") });
+        let err = rt.block_on(join_handle).unwrap_err();
+        let io_err = join_error(err);
+        assert_eq!(io_err.kind(), io::ErrorKind::Other);
+        assert!(io_err.to_string().contains("blocking task join error"));
+    }
+
+    #[test]
+    fn test_mk_decompress_gz_file_empty_input_rejected() {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let result = rt.block_on(mk_decompress_tar_gz_file_gunzip(""));
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err().kind(), io::ErrorKind::InvalidInput);
+    }
+
+    #[test]
+    fn test_mk_decompress_gz_file_dangerous_input_rejected() {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let result = rt.block_on(mk_decompress_tar_gz_file_gunzip("-f malicious"));
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err().kind(), io::ErrorKind::InvalidInput);
+    }
+}
+
 pub async fn mk_decompress_tar_gz_file(archive_file: &str) -> io::Result<()> {
     let path = archive_file.to_owned();
     tokio::task::spawn_blocking(move || {

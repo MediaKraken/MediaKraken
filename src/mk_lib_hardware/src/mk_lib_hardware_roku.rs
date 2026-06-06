@@ -3,7 +3,7 @@
 
 use mk_lib_network::mk_lib_network;
 use serde_json::json;
-use ssdp::header::{HeaderMut, HeaderRef, Man, MX, ST};
+use ssdp::header::{HeaderMut, HeaderRef, MX, Man, ST};
 use ssdp::message::{Multicast, SearchRequest};
 use url::Url;
 

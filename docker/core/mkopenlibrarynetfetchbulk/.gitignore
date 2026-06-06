@@ -1,6 +1,3 @@
-/license.md
-/ol_dump_latest.txt.gz
-/ol_dump_latest.txt
 /target/
 mk_lib_common
 mk_lib_compression
@@ -14,3 +11,5 @@ mk_lib_logging
 mk_lib_metadata
 mk_lib_network
 mk_lib_rabbitmq
+mk_lib_share
+node_modules

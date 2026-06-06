@@ -13,6 +13,8 @@ RUN apk update && \
         libsmbclient \
         samba-dev \
         libnfs-dev \
+        clang21-dev \
+        clang21-libclang \
         zlib-dev \
         git \
         curl \

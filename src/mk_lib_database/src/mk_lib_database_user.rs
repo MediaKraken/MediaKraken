@@ -128,6 +128,158 @@ impl SqlUser {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_user_default() {
+        let user = User::default();
+        assert_eq!(user.id, 1);
+        assert!(user.anonymous);
+        assert_eq!(user.username, "Guest");
+        assert!(user.permissions.contains("Category::View"));
+    }
+
+    #[test]
+    fn test_user_is_authenticated_default() {
+        let user = User::default();
+        assert!(!user.is_authenticated());
+    }
+
+    #[test]
+    fn test_user_is_active_default() {
+        let user = User::default();
+        assert!(!user.is_active());
+    }
+
+    #[test]
+    fn test_user_is_anonymous_default() {
+        let user = User::default();
+        assert!(user.is_anonymous());
+    }
+
+    #[test]
+    fn test_user_non_anonymous() {
+        let user = User {
+            id: 2,
+            anonymous: false,
+            username: "testuser".to_string(),
+            permissions: HashSet::from(["Admin::View".to_string(), "Category::View".to_string()]),
+        };
+        assert!(user.is_authenticated());
+        assert!(user.is_active());
+        assert!(!user.is_anonymous());
+    }
+
+    #[test]
+    fn test_user_has_permission() {
+        let user = User {
+            id: 2,
+            anonymous: false,
+            username: "testuser".to_string(),
+            permissions: HashSet::from(["Admin::View".to_string()]),
+        };
+        assert!(user.has("Admin::View", &None));
+        assert!(!user.has("User::View", &None));
+    }
+
+    #[test]
+    fn test_user_has_no_permissions() {
+        let user = User {
+            id: 3,
+            anonymous: false,
+            username: "noperms".to_string(),
+            permissions: HashSet::new(),
+        };
+        assert!(!user.has("Admin::View", &None));
+        assert!(!user.has("Category::View", &None));
+    }
+
+    #[test]
+    fn test_sql_user_into_user_no_perms() {
+        let sql_user = SqlUser {
+            id: 10,
+            anonymous: false,
+            username: "sqluser".to_string(),
+        };
+        let user = sql_user.into_user(None);
+        assert_eq!(user.id, 10);
+        assert!(!user.anonymous);
+        assert_eq!(user.username, "sqluser");
+        assert!(user.permissions.is_empty());
+    }
+
+    #[test]
+    fn test_sql_user_into_user_with_perms() {
+        let sql_user = SqlUser {
+            id: 10,
+            anonymous: false,
+            username: "sqluser".to_string(),
+        };
+        let perms = vec![
+            SqlPermissionTokens {
+                token: "Admin::View".to_string(),
+            },
+            SqlPermissionTokens {
+                token: "User::View".to_string(),
+            },
+        ];
+        let user = sql_user.into_user(Some(perms));
+        assert!(user.permissions.contains("Admin::View"));
+        assert!(user.permissions.contains("User::View"));
+    }
+
+    #[test]
+    fn test_sql_user_into_user_duplicate_perms() {
+        let sql_user = SqlUser {
+            id: 10,
+            anonymous: false,
+            username: "sqluser".to_string(),
+        };
+        let perms = vec![
+            SqlPermissionTokens {
+                token: "Admin::View".to_string(),
+            },
+            SqlPermissionTokens {
+                token: "Admin::View".to_string(),
+            },
+        ];
+        let user = sql_user.into_user(Some(perms));
+        assert_eq!(user.permissions.len(), 1);
+        assert!(user.permissions.contains("Admin::View"));
+    }
+
+    #[test]
+    fn test_user_clone() {
+        let user = User {
+            id: 1,
+            anonymous: true,
+            username: "Guest".to_string(),
+            permissions: HashSet::from(["Category::View".to_string()]),
+        };
+        let cloned = user.clone();
+        assert_eq!(user.id, cloned.id);
+        assert_eq!(user.anonymous, cloned.anonymous);
+        assert_eq!(user.username, cloned.username);
+    }
+
+    #[test]
+    fn test_db_user_list_serialization() {
+        let list = DBUserList {
+            id: 1,
+            anonymous: false,
+            username: "test".to_string(),
+            email: Some("test@example.com".to_string()),
+            last_signin: None,
+            last_signoff: None,
+        };
+        let json = serde_json::to_string(&list).unwrap();
+        assert!(json.contains("\"id\":1"));
+        assert!(json.contains("\"username\":\"test\""));
+    }
+}
+
 pub async fn mk_lib_database_user_exists(
     sqlx_pool: &sqlx::PgPool,
     user_name: &str,

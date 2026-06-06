@@ -1,5 +1,3 @@
-use mk_lib_database;
-use mk_lib_rabbitmq;
 use serde_json::Value;
 use std::error::Error;
 use tokio::signal;
@@ -93,8 +91,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     }
                 }
 
-                if let Some(deliver) = msg.deliver {
-                    if let Err(error) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
+                if let Some(deliver) = msg.deliver
+                    && let Err(error) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
                         &rabbit_channel,
                         deliver.delivery_tag(),
                     )
@@ -102,7 +100,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     {
                         eprintln!("mkrabbitconsume: rabbit ack failed ({error})");
                     }
-                }
             }
         }
     }

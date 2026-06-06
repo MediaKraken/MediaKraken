@@ -20,16 +20,17 @@ fn detect_local_ipv4() -> Option<Ipv4Addr> {
         if iface.is_loopback() || !iface.is_up() {
             continue;
         }
-        if let Some(ref name) = iface_filter {
-            if &iface.name != name {
-                continue;
-            }
+        if let Some(ref name) = iface_filter
+            && &iface.name != name
+        {
+            continue;
         }
         for net in &iface.ips {
-            if let IpAddr::V4(ip) = net.ip() {
-                if !ip.is_loopback() && !ip.is_unspecified() {
-                    return Some(ip);
-                }
+            if let IpAddr::V4(ip) = net.ip()
+                && !ip.is_loopback()
+                && !ip.is_unspecified()
+            {
+                return Some(ip);
             }
         }
     }
@@ -127,5 +128,63 @@ async fn main() -> io::Result<()> {
         if let Err(e) = socket.send_to(response.as_bytes(), remote_addr).await {
             eprintln!("send_to {remote_addr} error: {e}");
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_default_bind_constant() {
+        assert_eq!(DEFAULT_BIND, "0.0.0.0:8888");
+    }
+
+    #[test]
+    fn test_default_multicast_constant() {
+        assert_eq!(DEFAULT_MULTICAST, "234.2.2.2");
+    }
+
+    #[test]
+    fn test_default_webapp_port_constant() {
+        assert_eq!(DEFAULT_WEBAPP_PORT, 8903);
+    }
+
+    #[test]
+    fn test_default_webapp_name_constant() {
+        assert_eq!(DEFAULT_WEBAPP_NAME, "/mkstack-webapp");
+    }
+
+    #[test]
+    fn test_max_docker_retries_constant() {
+        assert_eq!(MAX_DOCKER_RETRIES, 3);
+    }
+
+    #[test]
+    fn test_docker_retry_delay_constant() {
+        assert_eq!(DOCKER_RETRY_DELAY, Duration::from_secs(5));
+    }
+
+    #[test]
+    fn test_detect_local_ipv4_returns_some_or_none() {
+        let result = detect_local_ipv4();
+        if let Some(ip) = result {
+            assert!(!ip.is_loopback());
+            assert!(!ip.is_unspecified());
+            assert!(ip.is_ipv4());
+        }
+    }
+
+    #[test]
+    fn test_detect_local_ipv4_consistent() {
+        let result1 = detect_local_ipv4();
+        let result2 = detect_local_ipv4();
+        assert_eq!(result1, result2);
+    }
+
+    #[test]
+    fn test_constants_no_overlap() {
+        assert_ne!(DEFAULT_BIND, DEFAULT_MULTICAST);
+        assert_ne!(DEFAULT_WEBAPP_NAME, DEFAULT_BIND);
     }
 }

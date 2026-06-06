@@ -10,6 +10,52 @@ pub struct APIJson {
     pub barcodespider: Option<String>,
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_api_json_deserialization_with_all_fields() {
+        let json = r#"{"themoviedb":"key1","musicbrainz":"key2","thesportsdb":"key3","upcitemdb":"key4","barcodespider":"key5"}"#;
+        let api: APIJson = serde_json::from_str(json).unwrap();
+        assert_eq!(api.themoviedb, "key1");
+        assert_eq!(api.musicbrainz, Some("key2".to_string()));
+        assert_eq!(api.thesportsdb, "key3");
+        assert_eq!(api.upcitemdb, Some("key4".to_string()));
+        assert_eq!(api.barcodespider, Some("key5".to_string()));
+    }
+
+    #[test]
+    fn test_api_json_deserialization_with_optional_nils() {
+        let json = r#"{"themoviedb":"key1","musicbrainz":null,"thesportsdb":"key3","upcitemdb":null,"barcodespider":null}"#;
+        let api: APIJson = serde_json::from_str(json).unwrap();
+        assert_eq!(api.themoviedb, "key1");
+        assert_eq!(api.musicbrainz, None);
+        assert_eq!(api.thesportsdb, "key3");
+        assert_eq!(api.upcitemdb, None);
+        assert_eq!(api.barcodespider, None);
+    }
+
+    #[test]
+    fn test_api_json_deserialization_missing_optional_fields() {
+        let json = r#"{"themoviedb":"key1","thesportsdb":"key3"}"#;
+        let api: APIJson = serde_json::from_str(json).unwrap();
+        assert_eq!(api.themoviedb, "key1");
+        assert_eq!(api.musicbrainz, None);
+        assert_eq!(api.thesportsdb, "key3");
+        assert_eq!(api.upcitemdb, None);
+        assert_eq!(api.barcodespider, None);
+    }
+
+    #[test]
+    fn test_api_json_debug() {
+        let json = r#"{"themoviedb":"key1","thesportsdb":"key3"}"#;
+        let api: APIJson = serde_json::from_str(json).unwrap();
+        let debug_str = format!("{:?}", api);
+        assert!(debug_str.contains("APIJson"));
+    }
+}
+
 pub async fn mk_lib_database_option_api_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<serde_json::Value, sqlx::Error> {

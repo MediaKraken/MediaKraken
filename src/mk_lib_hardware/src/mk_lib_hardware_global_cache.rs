@@ -54,10 +54,14 @@ pub async fn mk_hardware_global_cache_api_leds(
 
 pub async fn mk_hardware_global_cache_api_leds_detail(
     device_ip: String,
-    led_number: u8
+    led_number: u8,
 ) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
     let json_data = mk_lib_network::mk_lib_network::mk_data_from_url_to_json(
-        format!("http://{}/api/host/LEDs/{}?expand=all", device_ip, led_number).to_string(),
+        format!(
+            "http://{}/api/host/LEDs/{}?expand=all",
+            device_ip, led_number
+        )
+        .to_string(),
     )
     .await?;
     Ok(json_data)

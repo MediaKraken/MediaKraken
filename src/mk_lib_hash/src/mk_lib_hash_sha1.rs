@@ -9,7 +9,7 @@ pub async fn mk_file_hash_sha1(file_to_read: &str) -> Result<String, Box<dyn Err
     let mut hasher = Sha1::new();
     read_file_chunks(file_to_read, |chunk| hasher.update(chunk)).await?;
     let hash = hasher.finalize();
-    Ok(format!("{:x}", hash))
+    Ok(hex::encode(hash.as_slice()))
 }
 
 #[cfg(test)]

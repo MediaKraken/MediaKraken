@@ -5,7 +5,7 @@ fn main() {
             .expect("Couldn't connect to the server...");
     println!("after connect");
     let telnet_buffer = "MVDOWN".as_bytes();
-    telnet.write(&telnet_buffer).expect("Read error");
+    telnet.write(telnet_buffer).expect("Read error");
     println!("after write");
     loop {
         let event = telnet.read_nonblocking().expect("Read error");

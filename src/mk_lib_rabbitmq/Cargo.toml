@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_rabbitmq"
-version = "0.0.220"
+version = "0.0.227"
 edition = "2024"
 
 [profile.release]
@@ -10,11 +10,11 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_logging = { version = "0.0.217", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.224", registry = "kellnr" }
 
-amqprs = "2.1.3"
+amqprs = "2.1.5"
 sys-info = "0.9.1"
-tokio = "1.49.0"
+tokio = "1.52.3"
 
 [dev-dependencies]
 tokio-test = "*"

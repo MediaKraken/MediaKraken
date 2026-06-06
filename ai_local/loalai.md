@@ -277,6 +277,26 @@ nano ~/.config/opencode/opencode.json
         }
       }
     }
+  },
+  "mcp": {
+    "mcp_mediakraken": {
+      "type": "remote",
+      "url": "http://skynetmem1:9876/mcp",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer YOUR_SECRET_API_KEY"
+      },
+      "timeout": 5000
+    },
+    "mcp_bmo_core": {
+      "type": "remote",
+      "url": "http://skynetmem1:9877/mcp",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer YOUR_SECRET_API_KEY"
+      },
+      "timeout": 5000
+    }
   }
 }
 

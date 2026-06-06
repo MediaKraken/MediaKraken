@@ -74,12 +74,11 @@ impl MpvController {
     }
 
     fn shutdown(&self) {
-        if let Ok(mut guard) = self.child.lock() {
-            if let Some(mut child) = guard.take() {
+        if let Ok(mut guard) = self.child.lock()
+            && let Some(mut child) = guard.take() {
                 let _ = child.kill();
                 let _ = child.wait();
             }
-        }
         let _ = fs::remove_file(&self.socket_path);
     }
 }
@@ -126,7 +125,7 @@ fn main() {
 
     let socket_path = runtime_socket_path();
     let handle = mpv_win.raw_handle();
-    let controller = match MpvController::spawn(handle as u64, socket_path) {
+    let controller = match MpvController::spawn(handle, socket_path) {
         Ok(c) => Arc::new(c),
         Err(e) => {
             eprintln!("Failed to launch mpv: {e}");
@@ -227,11 +226,10 @@ fn handle_client(
         };
         let value = value.trim();
         match name.trim().to_ascii_lowercase().as_str() {
-            "host" => {
-                if ALLOWED_HOSTS.iter().any(|h| h.eq_ignore_ascii_case(value)) {
+            "host"
+                if ALLOWED_HOSTS.iter().any(|h| h.eq_ignore_ascii_case(value)) => {
                     host_ok = true;
                 }
-            }
             "authorization" => auth_header = Some(value.to_string()),
             _ => {}
         }

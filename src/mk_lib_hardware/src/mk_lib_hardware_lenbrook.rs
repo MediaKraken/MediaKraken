@@ -1,6 +1,6 @@
 // https://crates.io/crates/lsdp
 
-use lsdp::{net::Discover, ClassID};
+use lsdp::{ClassID, net::Discover};
 
 pub async fn mk_hardware_lenbrook_discovery() -> Result<(), Box<dyn std::error::Error>> {
     let d = Discover::start().await?;

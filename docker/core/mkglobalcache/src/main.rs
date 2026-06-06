@@ -1,6 +1,3 @@
-use mk_lib_database;
-use mk_lib_network;
-use mk_lib_rabbitmq;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
 use tokio::signal;
@@ -163,8 +160,8 @@ async fn refresh_catalog(
                     }
                 };
 
-                if device_count == 0 {
-                    if let Err(error) =
+                if device_count == 0
+                    && let Err(error) =
                         mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_model_insert(
                             sqlx_pool_rw,
                             brand_name.clone(),
@@ -177,7 +174,6 @@ async fn refresh_catalog(
                             "mkglobalcache: model insert failed for '{brand_name}'/'{type_name}'/'{model_name}' ({error})"
                         );
                     }
-                }
             }
         }
     }
@@ -256,8 +252,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     }
                 }
 
-                if let Some(deliver) = msg.deliver {
-                    if let Err(error) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
+                if let Some(deliver) = msg.deliver
+                    && let Err(error) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
                         &rabbit_channel,
                         deliver.delivery_tag(),
                     )
@@ -265,7 +261,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     {
                         eprintln!("mkglobalcache: rabbit ack failed ({error})");
                     }
-                }
             }
         }
     }

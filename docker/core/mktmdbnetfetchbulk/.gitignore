@@ -16,3 +16,4 @@ mk_lib_logging
 mk_lib_metadata
 mk_lib_network
 mk_lib_rabbitmq
+mk_lib_share

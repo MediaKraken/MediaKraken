@@ -143,3 +143,52 @@ pub async fn mk_logging_post_elk_lib(
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_elk_payload_contains_required_fields() {
+        let payload = elk_payload("info", "test_module", serde_json::json!({"key": "value"}));
+        assert!(payload.contains_key("@timestamp"));
+        assert!(payload.contains_key("type"));
+        assert!(payload.contains_key("message"));
+        assert!(payload.contains_key("module"));
+        assert!(payload.contains_key("user"));
+    }
+
+    #[test]
+    fn test_elk_payload_type_field() {
+        let payload = elk_payload("error", "test", serde_json::json!({}));
+        assert_eq!(payload["type"], "error");
+    }
+
+    #[test]
+    fn test_elk_payload_module_field() {
+        let payload = elk_payload("info", "my_module", serde_json::json!({}));
+        assert_eq!(payload["module"], "my_module");
+    }
+
+    #[test]
+    fn test_elk_payload_message_field() {
+        let msg = serde_json::json!({"data": 42});
+        let payload = elk_payload("info", "test", msg);
+        assert_eq!(payload["message"]["data"], 42);
+    }
+
+    #[test]
+    fn test_elk_payload_user_field() {
+        let payload = elk_payload("info", "test", serde_json::json!({}));
+        assert_eq!(payload["user"]["id"], "mediakraken");
+    }
+
+    #[test]
+    fn test_elk_payload_timestamp_format() {
+        let payload = elk_payload("info", "test", serde_json::json!({}));
+        let ts = payload["@timestamp"].as_str().unwrap();
+        assert!(ts.contains('-'));
+        assert!(ts.contains(':'));
+        assert!(ts.len() > 20);
+    }
+}

@@ -55,7 +55,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
             while !api_call_success && retries < MAX_RETRIES {
                 match RadioBrowserAPI::new().await {
-                    Ok(mut api) => {
+                    Ok(api) => {
                         match api
                             .get_stations()
                             .order(StationOrder::Clickcount)
@@ -149,13 +149,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
 
         // Always acknowledge the message
-        if let Some(tag) = delivery_tag {
-            if let Err(err) =
+        if let Some(tag) = delivery_tag
+            && let Err(err) =
                 mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(&rabbit_channel, tag).await
             {
                 eprintln!("Failed to acknowledge message: {err}");
             }
-        }
     }
 
     Ok(())

@@ -1,4 +1,5 @@
 use rand::Rng;
+use rand::RngExt;
 
 pub async fn meta_image_file_path(
     media_type: String,
