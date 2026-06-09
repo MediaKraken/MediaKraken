@@ -1,0 +1,34 @@
+{
+	"folders": [
+		{
+			"path": "../bmo_core"
+		},
+		{
+			"path": "../bmoenv"
+		},
+		{
+			"path": "../cure_station"
+		},
+		{
+			"path": "../MediaKraken"
+		},
+		{
+			"path": "../MKAutoRipper"
+		},
+		{
+			"path": "../Aethena"
+		},
+		{
+			"path": "../wxDMHelper_Cpp"
+		},
+		{
+			"path": "../wxDMHelper_Python"
+		},
+		{
+			"path": "../DMHelper_Data"
+		}
+	],
+	"settings": {
+		"git.ignoreLimitWarning": true
+	}
+}

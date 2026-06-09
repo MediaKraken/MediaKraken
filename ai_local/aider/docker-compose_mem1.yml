@@ -36,3 +36,17 @@ services:
       SEARCH_LIMIT: "8"
     depends_on:
       - qdrant
+  code-search-mcp-dmhelper:
+    build: ./mcp_qdrant
+    container_name: code-search-mcp-dmhelper
+    restart: unless-stopped
+    ports:
+      - "9878:8000"
+    environment:
+      QDRANT_URL: http://qdrant:6333
+      EMBED_URL: http://skynetgpu1:8001/v1/embeddings
+      EMBED_MODEL: qwen3-embedding
+      DEFAULT_COLLECTION: wxDMHelper_Cpp
+      SEARCH_LIMIT: "8"
+    depends_on:
+      - qdrant

@@ -236,6 +236,7 @@ async def main():
     repos = [
         {"path": "/home/metaman/repositories/MediaKraken", "collection": "mediakraken"},
         {"path": "/home/metaman/repositories/bmo_core", "collection": "bmo_core"},
+        {"path": "/home/metaman/repositories/wxDMHelper_Cpp", "collection": "wxDMHelper_Cpp"},
     ]
     for repo in repos:
         print(f"Indexing {repo['path']} -> {repo['collection']}")
