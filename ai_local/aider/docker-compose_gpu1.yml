@@ -25,7 +25,7 @@ services:
       - "-ngl"
       - "999"
       - "--tensor-split"
-      - "25,11"                 # weight toward the 5070 Ti; leaves ~2GB on the 5070 for the embedder
+      - "25,11"                  # weight toward the 5070 Ti; leaves ~2GB on the 5070 for the embedder
       - "--n-cpu-moe"
       - "4"
       - "-fa"
@@ -54,6 +54,11 @@ services:
       - "0.0"
       - "--repeat-penalty"
       - "1.0"
+      # --- Added for MTP Support ---
+      - "--spec-type"
+      - "draft-mtp"
+      - "--spec-draft-n-max"
+      - "3"
 
   embedder:
     image: ghcr.io/huggingface/text-embeddings-inference:cuda-latest

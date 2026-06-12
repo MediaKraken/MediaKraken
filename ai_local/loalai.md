@@ -278,6 +278,7 @@ nano ~/.config/opencode/opencode.json
       }
     }
   },
+  "lsp": true,
   "mcp": {
     "mcp_mediakraken": {
       "type": "remote",
@@ -296,8 +297,38 @@ nano ~/.config/opencode/opencode.json
         "Authorization": "Bearer YOUR_SECRET_API_KEY"
       },
       "timeout": 5000
+    },
+    "mcp_wxdmhelper": {
+      "type": "remote",
+      "url": "http://skynetmem1:9878/mcp",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer YOUR_SECRET_API_KEY"
+      },
+      "timeout": 5000
     }
   }
 }
 
 /model then select skynet
+
+
+setup lsp
+had ai install the clang-fmt
+
+apt install python3-pylsp
+
+rust-analyzer
+
+
+
+
+/*   MTP
+llama-server \
+  --model ./Qwen3.6-27B-Q4_K_M.gguf \
+  --model-draft ./Qwen3.6-27B-MTP.gguf \
+  --spec-draft-n-max 2 \
+  --ctx-size 32768 \
+  --n-gpu-layers 99 \
+  --port 8080
+  */
