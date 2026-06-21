@@ -1,7 +1,0 @@
-openai-api-base: http://skynetgpu1:8000/v1
-openai-api-key: dummy
-model: openai/qwen3-coder
-edit-format: diff
-map-tokens: 8192
-auto-commits: false
-stream: true
