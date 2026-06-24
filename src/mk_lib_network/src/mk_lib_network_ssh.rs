@@ -7,7 +7,7 @@ pub async fn mk_network_ssh_command(
     host_port: u16,
     command_string: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let mut session = ssh::create_session()
+    let session = ssh::create_session()
         .username(username)
         .password(password)
         .connect(format!("{}:{}", host_ip, host_port))
@@ -28,7 +28,7 @@ pub async fn mk_network_ssh_upload(
     local_file: &str,
     remote_file: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let mut session = ssh::create_session()
+    let session = ssh::create_session()
         .username(username)
         .password(password)
         .connect(format!("{}:{}", host_ip, host_port))
@@ -36,6 +36,8 @@ pub async fn mk_network_ssh_upload(
         .run_local();
     let scp = session.open_scp().map_err(|e| format!("open scp failed: {e}"))?;
     scp.upload(local_file, remote_file).map_err(|e| format!("scp upload failed: {e}"))?;
+    drop(scp);
+    session.close();
     Ok(())
 }
 
@@ -47,7 +49,7 @@ pub async fn mk_network_ssh_download(
     local_file: &str,
     remote_file: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let mut session = ssh::create_session()
+    let session = ssh::create_session()
         .username(username)
         .password(password)
         .connect(format!("{}:{}", host_ip, host_port))
@@ -55,5 +57,7 @@ pub async fn mk_network_ssh_download(
         .run_local();
     let scp = session.open_scp().map_err(|e| format!("open scp failed: {e}"))?;
     scp.download(local_file, remote_file).map_err(|e| format!("scp download failed: {e}"))?;
+    drop(scp);
+    session.close();
     Ok(())
 }

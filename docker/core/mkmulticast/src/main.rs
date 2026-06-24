@@ -78,11 +78,11 @@ async fn main() -> io::Result<()> {
     let bind_addr: SocketAddr = env::var("MEDIAKRAKEN_BIND")
         .unwrap_or_else(|_| DEFAULT_BIND.to_string())
         .parse()
-        .expect("invalid MEDIAKRAKEN_BIND");
+        .map_err(|_| format!("invalid MEDIAKRAKEN_BIND: {}", env::var("MEDIAKRAKEN_BIND").unwrap_or_default()))?;
     let multi_addr: Ipv4Addr = env::var("MEDIAKRAKEN_MULTICAST")
         .unwrap_or_else(|_| DEFAULT_MULTICAST.to_string())
         .parse()
-        .expect("invalid MEDIAKRAKEN_MULTICAST");
+        .map_err(|_| format!("invalid MEDIAKRAKEN_MULTICAST: {}", env::var("MEDIAKRAKEN_MULTICAST").unwrap_or_default()))?;
     let webapp_name =
         env::var("MEDIAKRAKEN_WEBAPP_NAME").unwrap_or_else(|_| DEFAULT_WEBAPP_NAME.to_string());
 

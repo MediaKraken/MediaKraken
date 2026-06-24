@@ -235,7 +235,6 @@ pub async fn mk_download_file_from_url(
     file_name: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let safe_url = sanitize_url_for_logging(&url);
-    eprintln!("[DEBUG] Downloading file from: {}", safe_url);
     let response = SHARED_HTTP_CLIENT.get(url).send().await?;
     let mut file = tokio::fs::File::create(file_name).await?;
     file.write_all(&response.bytes().await?).await?;
@@ -248,8 +247,6 @@ pub async fn mk_download_file_from_url_stream(
     file_name: &str, // Changed to &str for better ergonomics
 ) -> Result<(), Box<dyn std::error::Error>> {
     let safe_url = sanitize_url_for_logging(&url);
-    eprintln!("[DEBUG] Downloading file from: {}", safe_url);
-
     let response = SHARED_HTTP_CLIENT.get(url).send().await?;
     let mut file = tokio::fs::File::create(file_name).await?;
 
@@ -263,7 +260,6 @@ pub async fn mk_download_file_from_url_stream(
 
     file.flush().await?;
 
-    eprintln!("[DEBUG] Download complete: {}", file_name);
     Ok(())
 }
 

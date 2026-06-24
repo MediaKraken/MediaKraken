@@ -20,17 +20,13 @@ pub async fn provider_opensubtitles_create_hash(
         let mut reader = BufReader::with_capacity(HASH_BLK_SIZE as usize, file);
         for _ in 0..iterations {
             reader.read(&mut buf)?;
-            unsafe {
-                word = u64::from_ne_bytes(buf);
-            };
+            word = u64::from_ne_bytes(buf);
             hash_val = hash_val.wrapping_add(word);
         }
         reader.seek(SeekFrom::Start(fsize - HASH_BLK_SIZE))?;
         for _ in 0..iterations {
             reader.read(&mut buf)?;
-            unsafe {
-                word = u64::from_ne_bytes(buf);
-            };
+            word = u64::from_ne_bytes(buf);
             hash_val = hash_val.wrapping_add(word);
         }
         let hash_string = format!("{:01$x}", hash_val, 16);

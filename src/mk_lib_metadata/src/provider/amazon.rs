@@ -62,7 +62,7 @@ pub async fn provider_amazon_search_results_by_upc(
             .await?;
 
         for result in parse_amazon_search_results(&html) {
-            if seen_results.insert(result.clone()) {
+            if seen_results.insert(result) {
                 all_results.push(result);
             }
         }

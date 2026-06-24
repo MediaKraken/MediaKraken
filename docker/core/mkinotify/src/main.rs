@@ -12,7 +12,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let (_rabbit_connection, rabbit_channel) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkinotify").await?;
 
-    let mut inotify = Inotify::init().expect("Failed to initialize inotify");
+    let mut inotify = Inotify::init().map_err(|e| format!("Failed to initialize inotify: {e}"))?;
 
     for row_data in
         mk_lib_database::mk_lib_database_library::mk_lib_database_library_read(&sqlx_pool_ro)
@@ -24,7 +24,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             WatchMask::MODIFY | WatchMask::CREATE | WatchMask::DELETE,
         ) {
             Ok(lib_path) => println!("Loaded add inotify watch: {:?}", lib_path),
-            Err(lib_path) => println!("Failed to add inotify watch: {:?}", lib_path),
+            Err(e) => println!("Failed to add inotify watch: {e}"),
         }
     }
 
@@ -32,7 +32,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     loop {
         let events = inotify
             .read_events_blocking(&mut buffer)
-            .expect("Failed to read inotify events");
+            .map_err(|e| format!("Failed to read inotify events: {e}"))?;
         // process all the events
         for event in events {
             if event.mask.contains(EventMask::CREATE) {

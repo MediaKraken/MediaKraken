@@ -30,6 +30,16 @@ impl ApiClient {
             .expect("failed to build reqwest client")
     }
 
+    pub fn default_http_client_or_exit() -> Client {
+        match Client::builder().timeout(REQUEST_TIMEOUT).build() {
+            Ok(client) => client,
+            Err(e) => {
+                eprintln!("failed to build reqwest client: {e}");
+                std::process::exit(1);
+            }
+        }
+    }
+
     pub fn from_parts(
         http_client: Client,
         base_url: impl Into<String>,

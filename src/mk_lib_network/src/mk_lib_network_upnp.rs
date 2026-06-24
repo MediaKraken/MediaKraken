@@ -4,22 +4,16 @@ use igd_next as igd;
 use std::error::Error;
 use std::net::{IpAddr, SocketAddr};
 
-pub async fn upnp_discover_gateway() -> Result<(), Box<dyn Error>> {
-    match igd::search_gateway(Default::default()) {
-        Err(ref err) => println!("Error: {err}"),
-        Ok(gateway) => match gateway.get_external_ip() {
-            Err(ref err) => {
-                println!("There was an error! {err}");
-            }
-            Ok(ext_addr) => {
-                println!(
-                    "Local gateway: {}, External ip address: {}",
-                    gateway.addr, ext_addr
-                );
-            }
-        },
-    }
-    Ok(())
+pub async fn upnp_discover_gateway() -> Result<(String, String), Box<dyn Error>> {
+    let gateway = igd::search_gateway(Default::default())
+        .map_err(|err| format!("Error: {err}"))?;
+    let ext_addr = gateway.get_external_ip()
+        .map_err(|err| format!("There was an error! {err}"))?;
+    println!(
+        "Local gateway: {}, External ip address: {}",
+        gateway.addr, ext_addr
+    );
+    Ok((gateway.addr.to_string(), ext_addr.to_string()))
 }
 
 pub async fn upnp_add_port(
@@ -27,31 +21,24 @@ pub async fn upnp_add_port(
     internal_port: u16,
     external_port: u16,
 ) -> Result<(), Box<dyn Error>> {
-    match igd::search_gateway(Default::default()) {
-        Err(ref err) => println!("Error: {err}"),
-        Ok(gateway) => {
-            let local_addr = local_addr.parse::<IpAddr>().map_err(|e| format!("invalid ip address: {e}"))?;
-            let local_addr = SocketAddr::new(local_addr, internal_port);
-            if let Err(ref err) = gateway.add_port(
-                igd::PortMappingProtocol::TCP,
-                external_port,
-                local_addr,
-                60,
-                "MediaKraken",
-            ) {
-                println!("There was an error! {err}");
-            }
-        }
-    }
+    let gateway = igd::search_gateway(Default::default())
+        .map_err(|err| format!("Error: {err}"))?;
+    let local_addr = local_addr.parse::<IpAddr>().map_err(|e| format!("invalid ip address: {e}"))?;
+    let local_addr = SocketAddr::new(local_addr, internal_port);
+    gateway.add_port(
+        igd::PortMappingProtocol::TCP,
+        external_port,
+        local_addr,
+        60,
+        "MediaKraken",
+    ).map_err(|err| format!("There was an error! {err}"))?;
     Ok(())
 }
 
 pub async fn upnp_delete_port(external_port: u16) -> Result<(), Box<dyn Error>> {
-    match igd::search_gateway(Default::default()) {
-        Err(ref err) => println!("Error: {err}"),
-        Ok(gateway) => if let Err(ref err) = gateway.remove_port(igd::PortMappingProtocol::TCP, external_port) {
-            println!("There was an error! {err}");
-        },
-    }
+    let gateway = igd::search_gateway(Default::default())
+        .map_err(|err| format!("Error: {err}"))?;
+    gateway.remove_port(igd::PortMappingProtocol::TCP, external_port)
+        .map_err(|err| format!("There was an error! {err}"))?;
     Ok(())
 }

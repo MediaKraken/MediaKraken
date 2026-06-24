@@ -68,7 +68,16 @@ pub async fn mk_decompress_tar_gz_file(archive_file: &str) -> io::Result<()> {
         let tar_gz = std::fs::File::open(&path)?;
         let tar = flate2::read::GzDecoder::new(tar_gz);
         let mut archive = tar::Archive::new(tar);
-        archive.unpack(".")
+        for entry in archive.entries()? {
+            let mut entry = entry?;
+            let path = entry.path()?;
+            let canonical = path.canonicalize().unwrap_or(path);
+            if canonical.components().any(|c| matches!(c, std::path::Component::ParentDir | std::path::Component::RootDir)) {
+                return Err(io::Error::new(io::ErrorKind::InvalidInput, "path traversal detected in tar entry"));
+            }
+            entry.unpack_in(".")?;
+        }
+        Ok(())
     })
     .await
     .map_err(join_error)?
