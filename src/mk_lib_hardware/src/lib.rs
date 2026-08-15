@@ -31,6 +31,7 @@ pub mod mk_lib_hardware_roku;
 pub mod mk_lib_hardware_samsung;
 pub mod mk_lib_hardware_sane;
 pub mod mk_lib_hardware_sonos;
+pub mod mk_lib_hardware_ssdp;
 pub mod mk_lib_hardware_synology;
 pub mod mk_lib_hardware_tivo;
 pub mod mk_lib_hardware_tripplite;

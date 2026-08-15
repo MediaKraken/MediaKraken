@@ -152,10 +152,8 @@ pub async fn mk_lib_database_metadata_download_status_update(
 pub async fn mk_lib_database_metadata_download_count(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<i64, sqlx::Error> {
-    let row: (i64,) = sqlx::query_as(
-        r#"select count(*) from mm_metadata_download_que"#,
-    )
-    .fetch_one(sqlx_pool)
-    .await?;
+    let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_metadata_download_que"#)
+        .fetch_one(sqlx_pool)
+        .await?;
     Ok(row.0)
 }

@@ -1,9 +1,7 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
-pub async fn mk_lib_database_table_row_count(
-    sqlx_pool: &sqlx::PgPool,
-) -> Result<f64, sqlx::Error> {
+pub async fn mk_lib_database_table_row_count(sqlx_pool: &sqlx::PgPool) -> Result<f64, sqlx::Error> {
     let row: (f64,) = sqlx::query_as(
         r#"
         SELECT COALESCE(sum(reltuples), 0)::float8
@@ -53,9 +51,7 @@ pub struct PGTable {
     pub table_name: String,
 }
 
-pub async fn mk_lib_database_tables(
-    sqlx_pool: &sqlx::PgPool,
-) -> Result<Vec<PGTable>, sqlx::Error> {
+pub async fn mk_lib_database_tables(sqlx_pool: &sqlx::PgPool) -> Result<Vec<PGTable>, sqlx::Error> {
     let table_rows: Vec<PGTable> = sqlx::query_as(
         r#"
         SELECT tablename AS table_name

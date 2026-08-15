@@ -1,4 +1,3 @@
-
 pub async fn mk_lib_database_metadata_download_url_exists(
     sqlx_pool: &sqlx::PgPool,
     download_url: String,

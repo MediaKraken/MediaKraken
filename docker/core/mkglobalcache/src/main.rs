@@ -182,16 +182,19 @@ async fn refresh_catalog(
 
 async fn shutdown_signal() {
     let ctrl_c = async {
-        signal::ctrl_c()
-            .await
-            .expect("failed to install Ctrl+C handler");
+        if signal::ctrl_c().await.is_err() {
+            eprintln!("Failed to install Ctrl+C handler");
+        }
     };
 
     let terminate = async {
-        signal::unix::signal(signal::unix::SignalKind::terminate())
-            .expect("failed to install signal handler")
-            .recv()
-            .await;
+        match signal::unix::signal(signal::unix::SignalKind::terminate()) {
+            Ok(mut s) => s.recv().await,
+            Err(e) => {
+                eprintln!("Failed to install SIGTERM handler: {}", e);
+                None
+            }
+        };
     };
 
     tokio::select! {

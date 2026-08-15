@@ -45,7 +45,9 @@ pub async fn mk_lib_database_version_check(
     let start = tokio::time::Instant::now();
     let mut table_exists = false;
     while start.elapsed() < table_check_timeout {
-        match mk_lib_database_postgresql::mk_lib_database_table_exists(sqlx_pool, "mm_version").await {
+        match mk_lib_database_postgresql::mk_lib_database_table_exists(sqlx_pool, "mm_version")
+            .await
+        {
             Ok(exists) => {
                 if exists {
                     table_exists = true;

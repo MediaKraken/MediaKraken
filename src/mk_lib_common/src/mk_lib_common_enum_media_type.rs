@@ -144,9 +144,17 @@ mod tests {
     #[test]
     fn test_no_overlapping_values() {
         let core_values = [
-            DLMediaType::MOVIE, DLMediaType::TV, DLMediaType::PERSON, DLMediaType::SPORTS,
-            DLMediaType::GAME, DLMediaType::PUBLICATION, DLMediaType::PICTURE, DLMediaType::ANIME,
-            DLMediaType::MUSIC, DLMediaType::ADULT, DLMediaType::COLLECTION,
+            DLMediaType::MOVIE,
+            DLMediaType::TV,
+            DLMediaType::PERSON,
+            DLMediaType::SPORTS,
+            DLMediaType::GAME,
+            DLMediaType::PUBLICATION,
+            DLMediaType::PICTURE,
+            DLMediaType::ANIME,
+            DLMediaType::MUSIC,
+            DLMediaType::ADULT,
+            DLMediaType::COLLECTION,
         ];
         for i in 0..core_values.len() {
             for j in (i + 1)..core_values.len() {

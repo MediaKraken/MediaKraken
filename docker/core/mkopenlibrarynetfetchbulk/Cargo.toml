@@ -5,12 +5,12 @@ edition = "2024"
 
 
 [dependencies]
-mk_lib_compression = { version = "0.0.222", registry = "kellnr" }
-mk_lib_database = { version = "0.0.255", registry = "kellnr" }
-mk_lib_file = { version = "0.0.233", registry = "kellnr", features = ["s3"] }
-mk_lib_logging = { version = "0.0.224", registry = "kellnr" }
-mk_lib_network = { version = "0.0.223", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.227", registry = "kellnr" }
+mk_lib_compression = { version = "0.0.223", registry = "kellnr" }
+mk_lib_database = { version = "0.0.256", registry = "kellnr" }
+mk_lib_file = { version = "0.0.234", registry = "kellnr", features = ["s3"] }
+mk_lib_logging = { version = "0.0.225", registry = "kellnr" }
+mk_lib_network = { version = "0.0.224", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.228", registry = "kellnr" }
 
 anyhow = "1.0.102"
 async-compression = { version = "0.4.42", features = ["tokio", "gzip"] }

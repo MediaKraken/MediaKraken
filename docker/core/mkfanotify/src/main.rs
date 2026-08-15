@@ -31,7 +31,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let (_rabbit_connection, rabbit_channel) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkfanotify").await?;
 
-    let fanotify = Fanotify::new_blocking(FanotifyMode::CONTENT)?;
+    let fanotify = Fanotify::new_blocking(FanotifyMode::NOTIF)?;
 
     for row_data in
         mk_lib_database::mk_lib_database_library::mk_lib_database_library_read(&sqlx_pool_ro)
@@ -56,7 +56,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let (tx, mut rx) = mpsc::channel::<String>(CHANNEL_BUFFER);
 
-    let watcher_handle = tokio::task::spawn_blocking(move || {
+    let mut watcher_handle = tokio::task::spawn_blocking(move || {
         let dedupe_window = Duration::from_millis(DEDUPE_WINDOW_MS);
         let mut recently_sent: HashMap<(u8, u8, String), Instant> = HashMap::new();
         let mut processed_events: u64 = 0;
@@ -122,6 +122,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 .to_string();
 
                 if tx.blocking_send(payload).is_err() {
+                    eprintln!("fanotify event channel closed, stopping watcher");
                     return;
                 }
 
@@ -135,15 +136,42 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
     });
 
-    while let Some(payload) = rx.recv().await {
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
-            rabbit_channel.clone(),
-            "mk_inotify",
-            payload,
-        )
-        .await?;
+    // fanotify is a Linux-only kernel interface, so unix signal handling is always available here.
+    let mut terminate = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())?;
+
+    loop {
+        tokio::select! {
+            maybe_payload = rx.recv() => {
+                // Channel closed (watcher task exited) → nothing left to publish.
+                let Some(payload) = maybe_payload else { break };
+
+                if let Err(error) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
+                    rabbit_channel.clone(),
+                    "mk_inotify",
+                    payload,
+                )
+                .await
+                {
+                    // Log-and-continue: a transient broker hiccup must not take down the whole event pipeline.
+                    eprintln!("failed to publish fanotify event: {error}");
+                }
+            }
+            _ = tokio::signal::ctrl_c() => {
+                eprintln!("received ctrl-c, shutting down");
+                break;
+            }
+            _ = terminate.recv() => {
+                eprintln!("received SIGTERM, shutting down");
+                break;
+            }
+        }
     }
 
-    watcher_handle.await?;
+    // The blocking reader can be parked inside fanotify.read_event(), so the join is bounded to stay within Docker's grace window.
+    match tokio::time::timeout(Duration::from_secs(5), &mut watcher_handle).await {
+        Ok(result) => result?,
+        Err(_) => eprintln!("timed out waiting for fanotify reader; proceeding with shutdown"),
+    }
+
     Ok(())
 }

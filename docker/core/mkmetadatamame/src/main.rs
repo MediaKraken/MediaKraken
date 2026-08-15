@@ -63,7 +63,8 @@ async fn process_rabbit_message(
                         JsonArray::Infer(JsonType::AlwaysString),
                     );
             for line in reader.lines() {
-                let xml_line = &line.unwrap().trim().to_string();
+                let xml_line = &line.unwrap_or_default().trim().to_string();
+                if xml_line.is_empty() { continue; }
                 if xml_line.starts_with("<machine") == true {
                     xml_data = xml_line.to_string();
                 } else if xml_line.starts_with("</machine") == true {
@@ -114,7 +115,8 @@ async fn process_rabbit_message(
                 JsonArray::Infer(JsonType::AlwaysString),
             );
         for line in reader.lines() {
-            let xml_line = &line.unwrap().trim().to_string();
+            let xml_line = &line.unwrap_or_default().trim().to_string();
+            if xml_line.is_empty() { continue; }
             if xml_line.starts_with("<entry") == true {
                 xml_data = xml_line.to_string();
             } else if xml_line.starts_with("</entry") == true {
@@ -162,7 +164,8 @@ async fn process_rabbit_message(
         let reader = BufReader::new(file);
         let mut category_found = false;
         for line in reader.lines() {
-            let xml_line = &line.unwrap().trim().to_string();
+            let xml_line = &line.unwrap_or_default().trim().to_string();
+            if xml_line.is_empty() { continue; }
             if xml_line.len() > 1 {
                 if category_found == true {
                     // TODO
@@ -234,25 +237,29 @@ async fn process_rabbit_message(
                         } else if dat_line.starts_with("$info") {
                             start_system_read = true;
                             sys_short_name =
-                                dat_line.split("=").nth(1).unwrap().to_string();
+                                dat_line.split('=').nth(1)
+                                    .map(|s| s.trim().to_string())
+                                    .unwrap_or_default();
                         } else if dat_line.starts_with("Emulation:") {
                             sys_emulation =
-                                dat_line.split(" ").nth(1).unwrap().to_string();
+                                dat_line.split_whitespace().nth(1)
+                                    .map(|s| s.trim().to_string())
+                                    .unwrap_or_default();
                         } else if dat_line.starts_with("Color:") {
-                            sys_color = dat_line.split(" ").nth(1).unwrap().to_string();
+                            sys_color = dat_line.split_whitespace().nth(1)
+                                .map(|s| s.trim().to_string())
+                                .unwrap_or_default();
                         } else if dat_line.starts_with("Sound:") {
-                            sys_sound = dat_line.split(" ").nth(1).unwrap().to_string();
+                            sys_sound = dat_line.split_whitespace().nth(1)
+                                .map(|s| s.trim().to_string())
+                                .unwrap_or_default();
                         } else if dat_line.starts_with("Graphics:") {
                             sys_graphics =
-                                dat_line.split(" ").nth(1).unwrap().to_string();
+                                dat_line.split_whitespace().nth(1)
+                                    .map(|s| s.trim().to_string())
+                                    .unwrap_or_default();
                         } else if dat_line.starts_with("Save State:") {
-                            if dat_line
-                                .rsplit(" ")
-                                .last()
-                                .unwrap()
-                                .trim_end_matches('\n')
-                                == "Supported"
-                            {
+                            if dat_line.split_whitespace().rev().next() == Some("Supported") {
                                 sys_save_state = true;
                             } else {
                                 sys_save_state = false;
@@ -350,13 +357,17 @@ async fn process_rabbit_message(
         )
         .await?;
 
-        let entries = fs::read_dir(format!(
+        let mame_hash_path = format!(
             "/mediakraken/emulation/mame-mame0{}/hash",
             json_message["Version"]
-        ))
-        .unwrap()
-        .map(|res| res.map(|e| e.path()))
-        .collect::<Result<Vec<_>, io::Error>>()?;
+        );
+        let entries = match fs::read_dir(&mame_hash_path) {
+            Ok(rd) => rd.map(|res| res.map(|e| e.path())).collect::<Result<Vec<_>, io::Error>>()?,
+            Err(e) => {
+                println!("Could not read MAME hash directory {}: {}", mame_hash_path, e);
+                return Ok(());
+            }
+        };
         for hash_file_path in entries {
             let ext = Path::new(&hash_file_path)
                 .extension()
@@ -381,7 +392,8 @@ async fn process_rabbit_message(
                         );
                 let mut game_system_uuid = uuid::Uuid::nil();
                 for line in reader.lines() {
-                    let xml_line = &line.unwrap().trim().to_string();
+                    let xml_line = &line.unwrap_or_default().trim().to_string();
+                    if xml_line.is_empty() { continue; }
                     if xml_line.starts_with("<softwarelist") == true {
                         println!("xml_line: {:?}", xml_line);
                         let system_string_split: Vec<&str> =

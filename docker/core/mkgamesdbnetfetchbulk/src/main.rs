@@ -1,6 +1,29 @@
 use serde_json::Value;
 use std::error::Error;
-use tokio::sync::Notify;
+use tokio::signal;
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        if signal::ctrl_c().await.is_err() {
+            eprintln!("Failed to install Ctrl+C handler");
+        }
+    };
+
+    let terminate = async {
+        match signal::unix::signal(signal::unix::SignalKind::terminate()) {
+            Ok(mut s) => s.recv().await,
+            Err(e) => {
+                eprintln!("Failed to install SIGTERM handler: {}", e);
+                None
+            }
+        };
+    };
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -8,7 +31,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let (_sqlx_pool_rw, sqlx_pool_ro) =
         mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120).await?;
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
-        .await;
+        .await?;
 
     let _option_config_json: Value =
         mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(&sqlx_pool_ro)
@@ -23,7 +46,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     )
     .await?;
 
-    tokio::spawn(async move {
+    // Keep the consumer task handle so we can stop it on shutdown.
+    let handle = tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(_payload) = msg.content {
                 /*
@@ -54,7 +78,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
     });
 
-    let guard = Notify::new();
-    guard.notified().await;
+    // Wait for a shutdown signal, then stop the consumer task.
+    shutdown_signal().await;
+    handle.abort();
+    eprintln!("mkgamesdbnetfetchbulk: shutting down");
     Ok(())
 }

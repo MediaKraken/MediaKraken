@@ -13,10 +13,10 @@ pub mod image_path;
 pub mod mk_lib_metadata_id3;
 pub mod mk_lib_metadata_m3u8;
 pub mod movie;
-pub mod person;
 pub mod music;
 pub mod music_video;
 pub mod nfo_xml;
+pub mod person;
 pub mod sports;
 pub mod tv;
 

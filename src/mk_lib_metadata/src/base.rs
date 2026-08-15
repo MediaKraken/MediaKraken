@@ -116,8 +116,7 @@ pub async fn metadata_search(
         lookup_halt = true;
     } else if provider_name == "imvdb" {
         metadata_uuid =
-            metadata_music_video::metadata_music_video_lookup(sqlx_pool, &download_data)
-                .await?;
+            metadata_music_video::metadata_music_video_lookup(sqlx_pool, &download_data).await?;
         // if metadata_uuid == uuid::Uuid::nil() {
         //     if match_result == None {
         //         update_provider = "theaudiodb".to_string();
@@ -135,8 +134,7 @@ pub async fn metadata_search(
     } else if provider_name == "lastfm" {
         lookup_halt = true;
     } else if provider_name == "musicbrainz" {
-        metadata_uuid = metadata_music::metadata_music_lookup(sqlx_pool, &download_data)
-            .await?;
+        metadata_uuid = metadata_music::metadata_music_lookup(sqlx_pool, &download_data).await?;
         if metadata_uuid == uuid::Uuid::nil() {
             lookup_halt = true;
         }
@@ -152,7 +150,9 @@ pub async fn metadata_search(
         // if download succeeds remove dl
         // TODO....handle list return for title?
         metadata_uuid = provider_televisiontunes::provider_televisiontunes_theme_fetch(
-            download_data.mm_download_path.ok_or("missing download_path")?,
+            download_data
+                .mm_download_path
+                .ok_or("missing download_path")?,
             "TODO Fake Path".to_string(),
         )
         .await?;
@@ -239,8 +239,7 @@ pub async fn metadata_search(
             }
         }
     } else if provider_name == "thesportsdb" {
-        metadata_uuid = metadata_sports::metadata_sports_lookup(sqlx_pool, &download_data)
-            .await?;
+        metadata_uuid = metadata_sports::metadata_sports_lookup(sqlx_pool, &download_data).await?;
         // if metadata_uuid == uuid::Uuid::nil() {
         //     if match_result == None {
         //         update_provider = "themoviedb".to_string();
@@ -298,11 +297,13 @@ pub async fn metadata_fetch(
     //     )
     //     .await
     //     .map_err(|e| e)?;
-    // } else 
+    // } else
     if provider_name == "imvdb" {
         let _imvdb_id = provider_imvdb::provider_imvdb_video_fetch_by_id(
             sqlx_pool,
-            download_data.mm_download_provider_id.ok_or("missing provider_id")?,
+            download_data
+                .mm_download_provider_id
+                .ok_or("missing provider_id")?,
             download_data.mm_download_new_uuid,
             provider_api_key,
         )
@@ -316,7 +317,9 @@ pub async fn metadata_fetch(
                 )
                 .await;
             }
-            let provider_id = download_data.mm_download_provider_id.ok_or("missing provider_id")?;
+            let provider_id = download_data
+                .mm_download_provider_id
+                .ok_or("missing provider_id")?;
             if let Err(e) = provider_tmdb::provider_tmdb_person_fetch(
                 sqlx_pool,
                 provider_id,
@@ -331,7 +334,9 @@ pub async fn metadata_fetch(
             == mk_lib_common_enum_media_type::DLMediaType::MOVIE
         {
             // removing the imdb check.....as com_tmdb_metadata_by_id converts it
-            let provider_id = download_data.mm_download_provider_id.ok_or("missing provider_id")?;
+            let provider_id = download_data
+                .mm_download_provider_id
+                .ok_or("missing provider_id")?;
             if let Err(e) = provider_tmdb::provider_tmdb_movie_fetch(
                 sqlx_pool,
                 provider_id,
@@ -345,7 +350,9 @@ pub async fn metadata_fetch(
         } else if download_data.mm_download_que_type
             == mk_lib_common_enum_media_type::DLMediaType::TV
         {
-            let provider_id = download_data.mm_download_provider_id.ok_or("missing provider_id")?;
+            let provider_id = download_data
+                .mm_download_provider_id
+                .ok_or("missing provider_id")?;
             if let Err(e) = provider_tmdb::provider_tmdb_tv_fetch(
                 sqlx_pool,
                 provider_id,
@@ -359,7 +366,9 @@ pub async fn metadata_fetch(
         } else if download_data.mm_download_que_type
             == mk_lib_common_enum_media_type::DLMediaType::COLLECTION
         {
-            let provider_id = download_data.mm_download_provider_id.ok_or("missing provider_id")?;
+            let provider_id = download_data
+                .mm_download_provider_id
+                .ok_or("missing provider_id")?;
             if let Err(e) = provider_tmdb::provider_tmdb_collection_fetch(
                 sqlx_pool,
                 provider_id,
@@ -371,7 +380,6 @@ pub async fn metadata_fetch(
                 eprintln!("TMDB collection fetch failed: {e}");
             }
         }
-
     }
     //         sqlx_pool,
     //         vec![&download_data.mm_download_provider_id.unwrap()],

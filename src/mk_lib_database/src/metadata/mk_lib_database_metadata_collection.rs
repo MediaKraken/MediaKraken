@@ -34,11 +34,9 @@ pub async fn mk_lib_database_metadata_collection_count(
         .await?;
         Ok(row.0)
     } else {
-        let row: (i64,) = sqlx::query_as(
-            r#"select count(*) from mm_metadata_collection"#,
-        )
-        .fetch_one(sqlx_pool)
-        .await?;
+        let row: (i64,) = sqlx::query_as(r#"select count(*) from mm_metadata_collection"#)
+            .fetch_one(sqlx_pool)
+            .await?;
         Ok(row.0)
     }
 }

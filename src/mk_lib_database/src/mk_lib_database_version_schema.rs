@@ -1,6 +1,6 @@
-use crate::mk_lib_database_option_status;
 use crate::mk_lib_database_cron;
-use serde_json::{json, Value};
+use crate::mk_lib_database_option_status;
+use serde_json::{Value, json};
 
 pub async fn mk_lib_database_update_schema(
     sqlx_pool: &sqlx::PgPool,
@@ -9,9 +9,7 @@ pub async fn mk_lib_database_update_schema(
     if version_no < 44 {
         // set mame version to 240
         let _option_json: Value =
-            mk_lib_database_option_status::mk_lib_database_option_read(sqlx_pool)
-                .await
-                ?;
+            mk_lib_database_option_status::mk_lib_database_option_read(sqlx_pool).await?;
         // option_json["MAME"]["Version"] = 240;
         // mk_lib_database_option_status::mk_lib_database_option_update(&sqlx_pool, option_json).await?;
         mk_lib_database_version_update(sqlx_pool, 44).await?;
@@ -231,8 +229,8 @@ pub async fn mk_lib_database_update_schema(
         .execute(&mut *transaction)
         .await?;
         let new_guid = uuid::Uuid::now_v7();
-        let share_auth_key = std::env::var("MK_SHARE_AUTH_KEY")
-            .unwrap_or_else(|_| "fake-strong-key".to_string());
+        let share_auth_key =
+            std::env::var("MK_SHARE_AUTH_KEY").unwrap_or_else(|_| "fake-strong-key".to_string());
         sqlx::query(r#"INSERT INTO mm_share_auth (mm_share_auth_guid, mm_share_auth_user, mm_share_auth_password)
         values ($1, 'guest', pgp_sym_encrypt('guest', $2));"#)
             .bind(new_guid)
@@ -1134,13 +1132,17 @@ pub async fn mk_lib_database_update_schema(
         sqlx::query(r#"DROP INDEX IF EXISTS mm_metadata_tvshow_fts_ndx;"#)
             .execute(&mut *transaction)
             .await?;
-        sqlx::query(r#"CREATE TEXT SEARCH CONFIGURATION public.english_unaccent (COPY = english);"#)
-            .execute(&mut *transaction)
-            .await?;
-        sqlx::query(r#"ALTER TEXT SEARCH CONFIGURATION public.english_unaccent 
-            ALTER MAPPING FOR hword, hword_part, word WITH unaccent, english_stem;"#)
-            .execute(&mut *transaction)
-            .await?;
+        sqlx::query(
+            r#"CREATE TEXT SEARCH CONFIGURATION public.english_unaccent (COPY = english);"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(
+            r#"ALTER TEXT SEARCH CONFIGURATION public.english_unaccent 
+            ALTER MAPPING FOR hword, hword_part, word WITH unaccent, english_stem;"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
         sqlx::query(
             r#"CREATE INDEX IF NOT EXISTS mm_metadata_movie_fts_ndx ON mm_metadata_movie 
             USING gin (( setweight(to_tsvector('public.english_unaccent', coalesce(mm_metadata_movie_name, '')), 'A') || ' ' || setweight(to_tsvector('public.english_unaccent', coalesce(mm_metadata_movie_name_alt, '')), 'B') :: tsvector ));"#,

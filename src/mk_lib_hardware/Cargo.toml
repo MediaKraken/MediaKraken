@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_hardware"
-version = "0.0.228"
+version = "0.0.230"
 edition = "2024"
 
 [profile.release]
@@ -10,8 +10,8 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_network = { version = "0.0.223", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.224", registry = "kellnr" }
+mk_lib_network = { version = "0.0.224", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.225", registry = "kellnr" }
 
 futures = "0.3.31"
 futures-util = "0.3.31"
@@ -32,7 +32,7 @@ smartcast = "0.1.1"
 sonos_discovery = "0.0.2"
 spl06-007 = { version = "0.3.3", optional = true }
 #ssdp = { git = "https://github.com/ssnover/ssdp-rs", branch = "feature/local-impl-of-ip-feature" }
-ssdp = { version = "0.7.0", registry = "kellnr" }
+ssdp-client = "2.1.0"
 tokio = "1.52.3"
 url = "2.5.8"
 #weectrl = { git = "https://github.com/Hyperchaotic/weectrl" }

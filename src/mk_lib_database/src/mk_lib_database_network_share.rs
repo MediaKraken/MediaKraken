@@ -31,9 +31,10 @@ pub fn parse_share_name(network_share_path: &str) -> Option<String> {
     if had_unc_prefix {
         segments.next()?;
     } else if let Some(first) = segments.peek()
-        && first.parse::<std::net::IpAddr>().is_ok() {
-            segments.next();
-        }
+        && first.parse::<std::net::IpAddr>().is_ok()
+    {
+        segments.next();
+    }
     let candidate = segments.next()?.to_owned();
     if candidate.parse::<std::net::IpAddr>().is_ok() {
         return None;
@@ -158,7 +159,7 @@ pub async fn mk_lib_database_network_share_insert(
     network_share_ip: std::net::IpAddr,
     network_share_path: &str,
     network_share_comment: &str,
-    network_share_version: i16
+    network_share_version: i16,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let share_path = parse_share_name(network_share_path).ok_or_else(|| {
         sqlx::Error::Protocol(format!(

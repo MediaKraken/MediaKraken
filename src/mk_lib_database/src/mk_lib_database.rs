@@ -99,7 +99,8 @@ pub async fn mk_lib_database_open_pool(
     connection_timeout: u64,
 ) -> Result<(sqlx::PgPool, sqlx::PgPool), Box<dyn std::error::Error + Send + Sync>> {
     let db_user = env::var("POSTGRES_USER").map_err(|e| format!("POSTGRES_USER not set: {e}"))?;
-    let db_pass = env::var("POSTGRES_PASSWORD").map_err(|e| format!("POSTGRES_PASSWORD not set: {e}"))?;
+    let db_pass =
+        env::var("POSTGRES_PASSWORD").map_err(|e| format!("POSTGRES_PASSWORD not set: {e}"))?;
     let create_pool = |host: &str| {
         let connection_string = format!(
             "postgresql://{}:{}@{}:5432/mkdatabase?sslmode=prefer",

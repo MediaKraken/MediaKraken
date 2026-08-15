@@ -9,11 +9,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let (sqlx_pool_rw, sqlx_pool_ro) =
         mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120).await?;
 
-    let _ = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(
-        &sqlx_pool_ro,
-        false,
-    )
-    .await;
+    mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
+        .await?;
 
     // Connect to RabbitMQ.
     let (_rabbit_connection, rabbit_channel) =
@@ -22,13 +19,22 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let mut rabbit_consumer =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mkiradio", &rabbit_channel).await?;
 
-    while let Some(msg) = rabbit_consumer.recv().await {
-        let delivery_tag = msg.deliver.as_ref().map(|d| d.delivery_tag());
+    // Reusable SIGTERM receiver; Ctrl+C is re-registered each loop iteration via the select! below.
+    let mut terminate = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())?;
+
+    loop {
+        tokio::select! {
+        msg_opt = rabbit_consumer.recv() => {
+            // Channel closed (no more messages) → stop consuming.
+            let Some(msg) = msg_opt else { break };
+
+            let delivery_tag = msg.deliver.as_ref().map(|d| d.delivery_tag());
 
         let Some(payload) = msg.content.as_ref() else {
             eprintln!("Received message with no payload.");
             if let Some(tag) = delivery_tag {
-                let _ = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(&rabbit_channel, tag).await;
+                let _ =
+                    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(&rabbit_channel, tag).await;
             }
             continue;
         };
@@ -39,13 +45,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 eprintln!("Invalid JSON payload: {err}");
                 if let Some(tag) = delivery_tag {
                     let _ =
-                        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(&rabbit_channel, tag).await;
+                        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(&rabbit_channel, tag)
+                            .await;
                 }
                 continue;
             }
         };
-
-        println!(" [x] Received {:?}", json_message);
 
         if json_message.get("Type").and_then(Value::as_str) == Some("radiobrowser") {
             // Add retry logic for RadioBrowser API calls
@@ -90,32 +95,35 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                         println!();
 
                                         match mk_lib_database::database_media::mk_lib_database_media_iradio::mk_lib_database_media_iradio_upsert(
-                                            &sqlx_pool_rw,
-                                            station.stationuuid.as_ref(),
-                                            station.name.as_ref(),
-                                            station.url.as_ref(),
-                                            Some(station.country.as_str()),
-                                            Some(station.language.as_str()),
-                                            Some(station.tags.as_str()),
-                                            station.url_resolved.as_ref(),
-                                        )
-                                        .await
-                                        {
-                                            Ok(_) => {
-                                                upsert_count += 1;
-                                            }
-                                            Err(err) => {
-                                                eprintln!(
-                                                    "Failed to upsert station '{}' ({}): {}",
-                                                    station.name,
-                                                    station.stationuuid,
-                                                    err
-                                                );
-                                            }
+                                        &sqlx_pool_rw,
+                                        station.stationuuid.as_ref(),
+                                        station.name.as_ref(),
+                                        station.url.as_ref(),
+                                        Some(station.country.as_str()),
+                                        Some(station.language.as_str()),
+                                        Some(station.tags.as_str()),
+                                        station.url_resolved.as_ref(),
+                                    )
+                                    .await
+                                    {
+                                        Ok(_) => {
+                                            upsert_count += 1;
+                                        }
+                                        Err(err) => {
+                                            eprintln!(
+                                                "Failed to upsert station '{}' ({}): {}",
+                                                station.name,
+                                                station.stationuuid,
+                                                err
+                                            );
                                         }
                                     }
+                                    }
 
-                                    println!("Upserted {} stations into mm_radio.", upsert_count);
+                                    println!(
+                                        "Upserted {} stations into mm_radio.",
+                                        upsert_count
+                                    );
                                 }
                             }
                             Err(err) => {
@@ -152,9 +160,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
         if let Some(tag) = delivery_tag
             && let Err(err) =
                 mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(&rabbit_channel, tag).await
-            {
-                eprintln!("Failed to acknowledge message: {err}");
+        {
+            eprintln!("Failed to acknowledge message: {err}");
+        }
+        }
+            _ = tokio::signal::ctrl_c() => {
+                eprintln!("received ctrl-c, shutting down");
+                break;
             }
+            _ = terminate.recv() => {
+                eprintln!("received SIGTERM, shutting down");
+                break;
+            }
+        }
     }
 
     Ok(())

@@ -29,8 +29,7 @@ pub async fn metadata_game_lookup(
         .await?;
 
     if metadata_uuid == uuid::Uuid::nil() {
-        let sha1_hash =
-            mk_lib_hash::mk_lib_hash_sha1::mk_file_hash_sha1(download_path).await?;
+        let sha1_hash = mk_lib_hash::mk_lib_hash_sha1::mk_file_hash_sha1(download_path).await?;
         metadata_uuid =
             mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_by_sha1(
                 sqlx_pool, sha1_hash,

@@ -19,16 +19,19 @@ const DAILY_WINDOW_SECS: u64 = 86_400;
 
 async fn shutdown_signal() {
     let ctrl_c = async {
-        signal::ctrl_c()
-            .await
-            .expect("failed to install Ctrl+C handler");
+        if signal::ctrl_c().await.is_err() {
+            eprintln!("Failed to install Ctrl+C handler");
+        }
     };
 
     let terminate = async {
-        signal::unix::signal(signal::unix::SignalKind::terminate())
-            .expect("failed to install signal handler")
-            .recv()
-            .await;
+        match signal::unix::signal(signal::unix::SignalKind::terminate()) {
+            Ok(mut s) => s.recv().await,
+            Err(e) => {
+                eprintln!("Failed to install SIGTERM handler: {}", e);
+                None
+            }
+        };
     };
 
     tokio::select! {
@@ -37,12 +40,12 @@ async fn shutdown_signal() {
     }
 }
 
-fn build_limiter(tokens: u64, window: Duration) -> Ratelimiter {
+fn build_limiter(tokens: u64, window: Duration) -> Result<Ratelimiter, String> {
     Ratelimiter::builder(tokens, window)
         .max_tokens(tokens)
         .initial_available(tokens)
         .build()
-        .expect("ratelimiter build failed")
+        .map_err(|e| format!("ratelimiter build failed for {} tokens/{}ms: {}", tokens, window.as_millis(), e))
 }
 
 // Waits until every limiter has a token available, or returns true if
@@ -158,7 +161,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             vec![build_limiter(
                 limit.2,
                 Duration::from_secs(DAILY_WINDOW_SECS),
-            )],
+            )?],
             debug_enabled,
             shutdown_rx.clone(),
         ));
@@ -170,7 +173,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             sqlx_pool_rw.clone(),
             "musicbrainz",
             key,
-            vec![build_limiter(limit.0, Duration::from_secs(limit.1))],
+            vec![build_limiter(limit.0, Duration::from_secs(limit.1))?],
             debug_enabled,
             shutdown_rx.clone(),
         ));
@@ -182,7 +185,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             sqlx_pool_rw.clone(),
             "themoviedb",
             option_api.themoviedb,
-            vec![build_limiter(limit.0, Duration::from_secs(limit.1))],
+            vec![build_limiter(limit.0, Duration::from_secs(limit.1))?],
             debug_enabled,
             shutdown_rx.clone(),
         ));
@@ -194,7 +197,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             sqlx_pool_rw.clone(),
             "thesportsdb",
             option_api.thesportsdb,
-            vec![build_limiter(limit.0, Duration::from_secs(limit.1))],
+            vec![build_limiter(limit.0, Duration::from_secs(limit.1))?],
             debug_enabled,
             shutdown_rx.clone(),
         ));
@@ -209,8 +212,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
             "upcitemdb",
             key,
             vec![
-                build_limiter(limit.0, Duration::from_secs(limit.1)),
-                build_limiter(limit.2, Duration::from_secs(DAILY_WINDOW_SECS)),
+                build_limiter(limit.0, Duration::from_secs(limit.1))?,
+                build_limiter(limit.2, Duration::from_secs(DAILY_WINDOW_SECS))?,
             ],
             debug_enabled,
             shutdown_rx.clone(),
@@ -246,14 +249,14 @@ mod tests {
 
     #[tokio::test]
     async fn test_build_limiter_basic() {
-        let limiter = build_limiter(10, Duration::from_secs(60));
+        let limiter = build_limiter(10, Duration::from_secs(60)).expect("build_limiter failed in test");
         let result = limiter.try_wait();
         assert!(result.is_ok());
     }
 
     #[tokio::test]
     async fn test_build_limiter_max_tokens() {
-        let limiter = build_limiter(5, Duration::from_secs(60));
+        let limiter = build_limiter(5, Duration::from_secs(60)).expect("build_limiter failed in test");
         for _ in 0..5 {
             assert!(limiter.try_wait().is_ok());
         }
@@ -262,14 +265,14 @@ mod tests {
 
     #[tokio::test]
     async fn test_build_limiter_single_token() {
-        let limiter = build_limiter(1, Duration::from_secs(60));
+        let limiter = build_limiter(1, Duration::from_secs(60)).expect("build_limiter failed in test");
         assert!(limiter.try_wait().is_ok());
         assert!(limiter.try_wait().is_err());
     }
 
     #[tokio::test]
     async fn test_build_limiter_large_tokens() {
-        let limiter = build_limiter(1000, Duration::from_secs(60));
+        let limiter = build_limiter(1000, Duration::from_secs(60)).expect("build_limiter failed in test");
         for _ in 0..1000 {
             assert!(limiter.try_wait().is_ok());
         }
@@ -278,7 +281,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_build_limiter_short_window() {
-        let limiter = build_limiter(2, Duration::from_millis(100));
+        let limiter = build_limiter(2, Duration::from_millis(100)).expect("build_limiter failed in test");
         assert!(limiter.try_wait().is_ok());
         assert!(limiter.try_wait().is_ok());
         assert!(limiter.try_wait().is_err());
@@ -288,8 +291,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_build_limiter_different_windows() {
-        let limiter1 = build_limiter(5, Duration::from_secs(10));
-        let limiter2 = build_limiter(5, Duration::from_secs(60));
+        let limiter1 = build_limiter(5, Duration::from_secs(10)).expect("build_limiter failed in test");
+        let limiter2 = build_limiter(5, Duration::from_secs(60)).expect("build_limiter failed in test");
         assert!(limiter1.try_wait().is_ok());
         assert!(limiter2.try_wait().is_ok());
     }

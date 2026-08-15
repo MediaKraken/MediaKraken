@@ -108,6 +108,9 @@ async fn process_message(json_message: Value) -> Result<(), TaskError> {
             let url = json_message["URL"]
                 .as_str()
                 .ok_or("File message missing URL")?;
+            if !url.validate_url() {
+                return Err("File message contains an invalid URL".to_string());
+            }
             let local_save_path = json_message["Local Save Path"]
                 .as_str()
                 .ok_or("File message missing Local Save Path")?;
@@ -152,6 +155,13 @@ async fn process_message(json_message: Value) -> Result<(), TaskError> {
             let data = json_message["Data"]
                 .as_str()
                 .ok_or("Subtitle message missing Data")?;
+
+            // Reject empty values and anything that would be interpreted as a CLI flag.
+            if data.is_empty() || data.starts_with('-') {
+                return Err(format!(
+                    "Subtitle message contains invalid Data (empty or starts with '-'): {data}"
+                ));
+            }
 
             let output = Command::new("subliminal")
                 .args(["-l", "en", data])
@@ -202,6 +212,12 @@ async fn process_message(json_message: Value) -> Result<(), TaskError> {
                     .stdout(Stdio::piped())
                     .output()
                     .map_err(|e| format!("dosage --list failed: {e}"))?;
+                if !output.status.success() {
+                    return Err(format!(
+                        "dosage --list exited with status {}",
+                        output.status
+                    ));
+                }
                 let stdout = String::from_utf8_lossy(&output.stdout);
                 dosage_store_strips(dosage_parse_strip_list(&stdout));
             } else {
@@ -614,16 +630,27 @@ async fn main() -> Result<(), AppError> {
         }
     });
 
+    // Watch both Ctrl+C and SIGTERM so Docker's `docker stop` / pod eviction gets a graceful shutdown.
+    let mut terminate =
+        match tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate()) {
+            Ok(term) => term,
+            Err(e) => {
+                eprintln!("failed to install SIGTERM handler: {e}");
+                // Fall back to ctrl-c-only if we can't register the signal.
+                let _ = tokio::signal::ctrl_c().await;
+                return Ok(());
+            }
+        };
+
     tokio::select! {
-        _ = tokio::signal::ctrl_c() => {
-            eprintln!("received ctrl-c, shutting down");
-        }
+        _ = tokio::signal::ctrl_c() => eprintln!("received ctrl-c, shutting down"),
+        _ = terminate.recv() => eprintln!("received SIGTERM, shutting down"),
         result = consumer_task => {
             if let Err(error) = result {
                 eprintln!("consumer task ended unexpectedly: {error}");
             }
-        }
-    }
+        },
+    };
 
     Ok(())
 }
@@ -639,6 +666,10 @@ async fn process_ia_trailer_request(json_message: &Value) -> Result<(), TaskErro
         .and_then(Value::as_str)
         .map(PathBuf::from)
         .unwrap_or_else(|| PathBuf::from(IA_DEFAULT_STATE_FILE));
+
+    // Sanitize user-supplied paths so a malicious message can't write outside the allowed root.
+    let output_dir = sanitize_local_save_path(&output_dir.to_string_lossy())?;
+    let state_file = sanitize_local_save_path(&state_file.to_string_lossy())?;
     let max_pages = json_message
         .get("MaxPages")
         .and_then(Value::as_u64)
@@ -787,7 +818,20 @@ async fn ia_get_with_backoff(client: &Client, url: &str) -> Result<reqwest::Resp
     let mut attempt = 0;
     loop {
         attempt += 1;
-        let response = client.get(url).send().await.map_err(|e| e.to_string())?;
+
+        // Retry transient network-level failures (DNS, connection refused/reset) too.
+        let response = match client.get(url).send().await {
+            Ok(response) => response,
+            Err(error) if attempt > IA_MAX_RETRIES => {
+                return Err(format!(
+                    "request failed ({error}) after {IA_MAX_RETRIES} retries for {url}"
+                ));
+            }
+            Err(_) => {
+                sleep(Duration::from_secs(1 << (attempt - 1).min(5))).await;
+                continue;
+            }
+        };
         let status = response.status();
 
         if status == StatusCode::TOO_MANY_REQUESTS || status.is_server_error() {

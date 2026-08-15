@@ -34,12 +34,10 @@ pub async fn mk_common_ffmpeg_get_info(
         .await?;
 
     if !output.status.success() {
-        return Err(Error::other(
-            format!(
-                "ffprobe failed for '{media_file}' with status {}",
-                output.status
-            ),
-        ));
+        return Err(Error::other(format!(
+            "ffprobe failed for '{media_file}' with status {}",
+            output.status
+        )));
     }
 
     serde_json::from_slice(&output.stdout).map_err(|err| Error::new(ErrorKind::InvalidData, err))

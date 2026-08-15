@@ -27,16 +27,19 @@ async fn log_event(payload: serde_json::Value) {
 
 async fn shutdown_signal() {
     let ctrl_c = async {
-        signal::ctrl_c()
-            .await
-            .expect("failed to install Ctrl+C handler");
+        if signal::ctrl_c().await.is_err() {
+            eprintln!("Failed to install Ctrl+C handler");
+        }
     };
 
     let terminate = async {
-        signal::unix::signal(signal::unix::SignalKind::terminate())
-            .expect("failed to install signal handler")
-            .recv()
-            .await;
+        match signal::unix::signal(signal::unix::SignalKind::terminate()) {
+            Ok(mut s) => s.recv().await,
+            Err(e) => {
+                eprintln!("Failed to install SIGTERM handler: {}", e);
+                None
+            }
+        };
     };
 
     tokio::select! {
@@ -104,14 +107,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         continue;
                     };
 
-                    let date_check: DateTime<Utc> = now - time_delta;
-                    // Check if job needs to run
-                    if let Some(last_run) = row_data.mm_cron_last_run && last_run < date_check {
-                        // Job is due to run
-                    } else {
-                        // Job has run recently enough, skip it
+                    let due = match row_data.mm_cron_last_run {
+                        None => true,
+                        Some(last) if last < (now - time_delta) => true,
+                        _ => false,
+                    };
+
+                    if !due {
                         continue;
                     }
+
                     let Some(route_key) = row_data.mm_cron_json["route_key"].as_str() else {
                         log_event(json!({
                             "Module": std::module_path!(),

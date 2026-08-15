@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
-use sqlx::FromRow;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaMusicVideoList {

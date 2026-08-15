@@ -126,7 +126,7 @@ fn parse_scanimage_list(stdout: &str) -> Vec<SaneScannerDevice> {
 
 #[cfg(test)]
 mod tests {
-    use super::{parse_scanimage_list, SaneScanOutput, SaneScannerDevice};
+    use super::{SaneScanOutput, SaneScannerDevice, parse_scanimage_list};
 
     #[test]
     fn parses_scanimage_output_lines() {

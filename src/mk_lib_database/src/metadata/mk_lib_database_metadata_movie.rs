@@ -1,9 +1,9 @@
 use crate::mk_lib_database::MediaStatusUpdatePayload;
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
+use sqlx::types::Uuid;
 use sqlx::types::chrono::DateTime;
 use sqlx::types::chrono::Utc;
-use sqlx::types::Uuid;
-use sqlx::FromRow;
 
 pub async fn mk_lib_database_metadata_exists_movie(
     sqlx_pool: &sqlx::PgPool,

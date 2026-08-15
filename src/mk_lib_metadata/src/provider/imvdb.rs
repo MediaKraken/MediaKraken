@@ -67,7 +67,11 @@ pub async fn provider_imvdb_search_videos_by_band(
     custom_headers.insert(String::from("Accept"), String::from("application/json"));
     let headers = mk_lib_network::mk_lib_network::custom_headers(&custom_headers).await;
     let _result = mk_lib_network::mk_lib_network::mk_data_from_url_to_json_custom_headers(
-        format!("{}/search/entities?q={}", BASE_API_URL, url_encode(&band_name)),
+        format!(
+            "{}/search/entities?q={}",
+            BASE_API_URL,
+            url_encode(&band_name)
+        ),
         headers,
     )
     .await;

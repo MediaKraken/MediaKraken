@@ -61,8 +61,7 @@ pub async fn mk_lib_common_paginate_with_locale(
 
         let paginator = Paginator::builder(total_pages as usize)
             .current_page(page.max(1) as usize)
-            .build_paginator()
-            ?;
+            .build_paginator()?;
 
         for item in paginator.paginate() {
             match item {

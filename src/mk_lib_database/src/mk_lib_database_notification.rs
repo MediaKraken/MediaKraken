@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
-use sqlx::types::Uuid;
 use sqlx::FromRow;
+use sqlx::types::Uuid;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBNotificationList {

@@ -11,7 +11,10 @@ pub async fn provider_soundcloud_client(
     let client_id = std::env::var(&soundcloud_client_id).map_err(|e| {
         std::io::Error::new(
             std::io::ErrorKind::NotFound,
-            format!("soundcloud client id env var {} unset: {}", soundcloud_client_id, e),
+            format!(
+                "soundcloud client id env var {} unset: {}",
+                soundcloud_client_id, e
+            ),
         )
     })?;
     Ok(Client::new(&client_id))
@@ -45,9 +48,10 @@ pub async fn provider_soundcloud_track_download(
         let path = format!("{} - {}", band_name, track_title);
         let mut outfile = File::create(&path).await?.compat_write();
         if let Ok(num_bytes) = soundcloud_client.download(track, &mut outfile).await
-            && num_bytes > 0 {
-                break;
-            }
+            && num_bytes > 0
+        {
+            break;
+        }
     }
     Ok(())
 }

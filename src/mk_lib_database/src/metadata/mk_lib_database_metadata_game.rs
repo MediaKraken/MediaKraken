@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
-use sqlx::types::Uuid;
 use sqlx::FromRow;
+use sqlx::types::Uuid;
 
 pub async fn mk_lib_database_metadata_game_detail(
     sqlx_pool: &sqlx::PgPool,

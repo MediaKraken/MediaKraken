@@ -1,8 +1,8 @@
 use mk_lib_common::mk_lib_common_enum_media_type;
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
-use sqlx::FromRow;
 
 pub async fn mk_lib_database_media_movie_genre_count(
     sqlx_pool: &sqlx::PgPool,

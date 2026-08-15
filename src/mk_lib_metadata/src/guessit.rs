@@ -121,37 +121,72 @@ mod tests {
 
     #[test]
     fn test_compare_titles_match_same_case() {
-        assert!(compare_titles_and_years("The Matrix", None, "The Matrix", None));
+        assert!(compare_titles_and_years(
+            "The Matrix",
+            None,
+            "The Matrix",
+            None
+        ));
     }
 
     #[test]
     fn test_compare_titles_match_different_case() {
-        assert!(compare_titles_and_years("the matrix", None, "THE MATRIX", None));
+        assert!(compare_titles_and_years(
+            "the matrix",
+            None,
+            "THE MATRIX",
+            None
+        ));
     }
 
     #[test]
     fn test_compare_titles_match_with_year() {
-        assert!(compare_titles_and_years("The Matrix", Some(1999), "the matrix", Some(1999)));
+        assert!(compare_titles_and_years(
+            "The Matrix",
+            Some(1999),
+            "the matrix",
+            Some(1999)
+        ));
     }
 
     #[test]
     fn test_compare_titles_mismatch_year() {
-        assert!(!compare_titles_and_years("The Matrix", Some(1999), "the matrix", Some(1998)));
+        assert!(!compare_titles_and_years(
+            "The Matrix",
+            Some(1999),
+            "the matrix",
+            Some(1998)
+        ));
     }
 
     #[test]
     fn test_compare_titles_mismatch_title() {
-        assert!(!compare_titles_and_years("The Matrix", None, "Star Wars", None));
+        assert!(!compare_titles_and_years(
+            "The Matrix",
+            None,
+            "Star Wars",
+            None
+        ));
     }
 
     #[test]
     fn test_compare_titles_one_year_some_other_none() {
-        assert!(compare_titles_and_years("The Matrix", Some(1999), "the matrix", None));
+        assert!(compare_titles_and_years(
+            "The Matrix",
+            Some(1999),
+            "the matrix",
+            None
+        ));
     }
 
     #[test]
     fn test_compare_titles_both_year_none() {
-        assert!(compare_titles_and_years("The Matrix", None, "the matrix", None));
+        assert!(compare_titles_and_years(
+            "The Matrix",
+            None,
+            "the matrix",
+            None
+        ));
     }
 
     #[test]

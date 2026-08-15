@@ -1,5 +1,28 @@
 use std::error::Error;
-use tokio::sync::Notify;
+use tokio::signal;
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        if signal::ctrl_c().await.is_err() {
+            eprintln!("Failed to install Ctrl+C handler");
+        }
+    };
+
+    let terminate = async {
+        match signal::unix::signal(signal::unix::SignalKind::terminate()) {
+            Ok(mut s) => s.recv().await,
+            Err(e) => {
+                eprintln!("Failed to install SIGTERM handler: {}", e);
+                None
+            }
+        };
+    };
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -21,7 +44,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     )
     .await?;
 
-    tokio::spawn(async move {
+    // Keep the consumer task handle so we can stop it on shutdown.
+    let handle = tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(_payload) = msg.content {
                 //
@@ -128,15 +152,22 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 //     mk_schedules_direct_program_info_fetch(meta_program_fetch)
                 //
                 // // TODO, go grab images for blank logos
-                let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
-                    &rabbit_channel,
-                    msg.deliver.unwrap().delivery_tag(),
-                )
-                .await;
+                let _result = if let Some(deliver) = msg.deliver {
+                    mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
+                        &rabbit_channel,
+                        deliver.delivery_tag(),
+                    )
+                    .await
+                } else {
+                    Ok(())
+                };
             }
         }
     });
-    let guard = Notify::new();
-    guard.notified().await;
+
+    // Wait for a shutdown signal, then stop the consumer task.
+    shutdown_signal().await;
+    handle.abort();
+    eprintln!("mkschedulesdirectupdate: shutting down");
     Ok(())
 }

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
-use sqlx::FromRow;
 
 pub async fn mk_lib_database_game_server_delete(
     sqlx_pool: &sqlx::PgPool,

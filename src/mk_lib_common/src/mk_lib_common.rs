@@ -1,4 +1,3 @@
-
 pub async fn print_type_of_variable<T>(_: &T) {
     #[cfg(debug_assertions)]
     {

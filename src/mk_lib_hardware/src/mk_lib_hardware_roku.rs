@@ -1,31 +1,17 @@
 // https://github.com/RoseSecurity/Abusing-Roku-APIs
 // http://sdkdocs.roku.com/display/sdkdoc/External+Control+Guide
 
+use crate::mk_lib_hardware_ssdp;
 use mk_lib_network::mk_lib_network;
 use serde_json::json;
-use ssdp::header::{HeaderMut, HeaderRef, MX, Man, ST};
-use ssdp::message::{Multicast, SearchRequest};
 use url::Url;
 
 pub async fn mk_lib_hardware_roku_discover() -> Result<Vec<Url>, Box<dyn std::error::Error>> {
-    let mut request = SearchRequest::new();
-    request.set(Man);
-    request.set(MX(5));
-    request.set(ST::Target(
-        ssdp::FieldMap::new("roku:ecp").ok_or("invalid SSDP field map for roku:ecp")?,
-    ));
-    let mut urls = Vec::new();
-    for (res, _) in request.multicast()? {
-        let Some(loc) = res.get_raw("Location") else {
-            continue;
-        };
-        if let Some(first) = loc.first() {
-            match Url::parse(&String::from_utf8_lossy(first)) {
-                Ok(u) => urls.push(u),
-                Err(e) => eprintln!("skipping unparseable SSDP Location {first:?}: {e}"),
-            }
-        }
-    }
+    let responses = mk_lib_hardware_ssdp::mk_lib_hardware_ssdp_search("roku:ecp").await?;
+    let urls = responses
+        .iter()
+        .filter_map(|resp| Url::parse(resp.location()).ok())
+        .collect();
     Ok(urls)
 }
 
@@ -40,11 +26,11 @@ pub async fn mk_lib_hardware_roku_command(
     let mut request_json: serde_json::Value = json!({});
     if roku_command_seconds > 0 {
         /*
-                       urllib.request.urlopen(
-                   roku_addr + ':' + roku_port + '/keydown/' + roku_command)
-               time.sleep(roku_command_seconds)
-               response = urllib.request.urlopen(
-                   roku_addr + ':' + roku_port + '/keyup/' + roku_command)
+                        urllib.request.urlopen(
+                    roku_addr + ':' + roku_port + '/keydown/' + roku_command)
+                time.sleep(roku_command_seconds)
+                response = urllib.request.urlopen(
+                    roku_addr + ':' + roku_port + '/keyup/' + roku_command)
         */
     } else {
         request_json = mk_lib_network::mk_data_from_url_to_json(format!(

@@ -1,6 +1,5 @@
 // https://www.thesportsdb.com/api.php
 
-
 /*
 
 # http://www.thesportsdb.com/forum/viewtopic.php?f=6&t=5

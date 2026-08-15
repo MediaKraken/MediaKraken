@@ -18,7 +18,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_m3u8_valid_simple_playlist() {
-        let playlist = "#EXTM3U\n#EXTINF:111,Track One\ntrack1.mp3\n#EXTINF:222,Track Two\ntrack2.mp3\n";
+        let playlist =
+            "#EXTM3U\n#EXTINF:111,Track One\ntrack1.mp3\n#EXTINF:222,Track Two\ntrack2.mp3\n";
         let result = mk_lib_metadata_m3u8_validate_playlist(playlist).await;
         assert!(result.is_ok());
     }

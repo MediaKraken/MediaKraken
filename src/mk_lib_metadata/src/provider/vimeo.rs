@@ -2,8 +2,7 @@
 
 pub const USER_AGENT: &str = "...";
 
-pub async fn provider_vimeo_video_fetch(
-) {
+pub async fn provider_vimeo_video_fetch() {
     // let mut handles = vec![];
     // let bars = MultiProgress::new();
     // let style = ProgressStyle::default_bar()
@@ -22,7 +21,7 @@ pub async fn provider_vimeo_video_fetch(
     //     vimeo::get_movie(at, from, "a1.mp4", USER_AGENT, pb1, Some(downloading_msg), Some(finished_msg)).await
     // });
     // handles.push(handle);
-    
+
     // // 2nd content
     // let pb2 = bars.add(ProgressBar::new(1));
     // pb2.set_style(style.clone());

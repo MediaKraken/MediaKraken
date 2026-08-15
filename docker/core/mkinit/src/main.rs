@@ -1,4 +1,4 @@
-  use std::env;
+use std::env;
 use std::error::Error;
 use std::process::{Command, Stdio};
 
@@ -15,8 +15,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     .await?;
     if !db_exists {
         let db_pass = env::var("POSTGRES_PASSWORD")?;
-        let postgres_user = env::var("POSTGRES_USER")
-            .map_err(|e| format!("POSTGRES_USER not set: {e}"))?;
+        let postgres_user =
+            env::var("POSTGRES_USER").map_err(|e| format!("POSTGRES_USER not set: {e}"))?;
         let output = Command::new("psql")
             .env("PGPASSWORD", &db_pass)
             .args([
@@ -34,11 +34,23 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .output()?;
         let stdout: String = String::from_utf8(output.stdout)?;
         if !stdout.is_empty() {
-            println!("stdout: {}", stdout);
+            println!("create_schema.sql stdout:\n{stdout}");
         }
         let stderr: String = String::from_utf8(output.stderr)?;
+
+        // Surface a failed schema creation directly instead of relying on the version check below to catch it.
+        if !output.status.success() {
+            let message = format!(
+                "create_schema.sql exited with status {}:\n{}",
+                output.status,
+                stderr.trim()
+            );
+            eprintln!("{message}");
+            return Err(std::io::Error::other("database initialization script failed").into());
+        }
+
         if !stderr.is_empty() {
-            eprintln!("stderr: {}", stderr);
+            println!("create_schema.sql stderr:\n{stderr}");
         }
     }
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_rw, true)

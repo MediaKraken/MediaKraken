@@ -1,7 +1,4 @@
-use futures_util::{pin_mut, stream::StreamExt};
-use mk_lib_hardware;
 use serde_json::Value;
-use serde_json::json;
 use std::error::Error;
 use tokio::sync::Notify;
 
@@ -17,17 +14,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {
-                let json_message: Value = match serde_json::from_str(&String::from_utf8_lossy(&payload)) {
-                    Ok(v) => v,
-                    Err(e) => {
-                        eprintln!("Failed to parse JSON: {}", e);
-                        continue;
-                    }
-                };
+                let _json_message: Value =
+                    match serde_json::from_str(&String::from_utf8_lossy(&payload)) {
+                        Ok(v) => v,
+                        Err(e) => {
+                            eprintln!("Failed to parse JSON: {}", e);
+                            continue;
+                        }
+                    };
                 // media_devices = []
 
                 // chromecast discover
-                if let Err(e) = mk_lib_hardware::mk_lib_hardware_chromecast::mk_hardware_chromecast_discover().await {
+                if let Err(e) =
+                    mk_lib_hardware::mk_lib_hardware_chromecast::mk_hardware_chromecast_discover()
+                        .await
+                {
                     eprintln!("Chromecast discover failed: {}", e);
                 }
 
@@ -69,7 +70,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                 // onvif cameras discover
                 //use futures_util::stream::StreamExt;
-                const MAX_CONCURRENT_JUMPERS: usize = 100;
                 // discovery::discover(std::time::Duration::from_secs(1))
                 //     .await
                 //     .unwrap()

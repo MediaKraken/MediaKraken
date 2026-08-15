@@ -10,7 +10,7 @@ pnet = "0.30.0"
 shiplift = { version = "0.7", default-features = false, features = [
     "unix-socket",
 ] }
-tokio = { version = "1.52.3", features = ["macros", "net", "rt-multi-thread"] }
+tokio = { version = "1.52.3", features = ["macros", "net", "rt-multi-thread", "signal"] }
 
 [dev-dependencies]
 tokio-test = "*"

@@ -1,7 +1,7 @@
-pub static MEDIA_EXTENSION: [&str; 32] = [
+pub static MEDIA_EXTENSION: [&str; 31] = [
     "webm", "mkv", "flv", "vob", "ogv", "ogg", "drc", "mng", "avi", "mov", "qt", "wmv", "wma",
     "yuv", "rm", "rmvb", "asf", "mp4", "m4p", "m4v", "mpg", "mp2", "mpeg", "mpe", "mp3", "flac",
-    "mpv", "m2v", "m4v", "nsv", "pdf", "lrc",
+    "mpv", "m2v", "nsv", "pdf", "lrc",
 ];
 
 pub static SUBTITLE_EXTENSION: [&str; 7] = ["srt", "smi", "ssa", "ass", "vtt", "sub", "idx"];
@@ -18,7 +18,7 @@ mod tests {
 
     #[test]
     fn test_media_extension_count() {
-        assert_eq!(MEDIA_EXTENSION.len(), 32);
+        assert_eq!(MEDIA_EXTENSION.len(), 31);
     }
 
     #[test]

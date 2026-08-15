@@ -75,14 +75,21 @@ async fn lookup_webapp_port_with_retry(docker: &Docker, name: &str) -> Option<u6
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
-    let bind_addr: SocketAddr = env::var("MEDIAKRAKEN_BIND")
-        .unwrap_or_else(|_| DEFAULT_BIND.to_string())
-        .parse()
-        .map_err(|_| format!("invalid MEDIAKRAKEN_BIND: {}", env::var("MEDIAKRAKEN_BIND").unwrap_or_default()))?;
-    let multi_addr: Ipv4Addr = env::var("MEDIAKRAKEN_MULTICAST")
-        .unwrap_or_else(|_| DEFAULT_MULTICAST.to_string())
-        .parse()
-        .map_err(|_| format!("invalid MEDIAKRAKEN_MULTICAST: {}", env::var("MEDIAKRAKEN_MULTICAST").unwrap_or_default()))?;
+    let bind_env = env::var("MEDIAKRAKEN_BIND").unwrap_or_else(|_| DEFAULT_BIND.to_string());
+    let bind_addr: SocketAddr = bind_env.parse().map_err(|e| {
+        std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            format!("invalid MEDIAKRAKEN_BIND '{bind_env}': {e}"),
+        )
+    })?;
+    let multicast_env =
+        env::var("MEDIAKRAKEN_MULTICAST").unwrap_or_else(|_| DEFAULT_MULTICAST.to_string());
+    let multi_addr: Ipv4Addr = multicast_env.parse().map_err(|e| {
+        std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            format!("invalid MEDIAKRAKEN_MULTICAST '{multicast_env}': {e}"),
+        )
+    })?;
     let webapp_name =
         env::var("MEDIAKRAKEN_WEBAPP_NAME").unwrap_or_else(|_| DEFAULT_WEBAPP_NAME.to_string());
 
@@ -108,14 +115,19 @@ async fn main() -> io::Result<()> {
     );
 
     let mut buf = [0u8; 65535];
+    // Reusable SIGTERM receiver; Ctrl+C is re-registered each loop iteration via the select! below.
+    let mut terminate = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())?;
+
     loop {
-        let (_amt, remote_addr) = match socket.recv_from(&mut buf).await {
-            Ok(v) => v,
-            Err(e) => {
-                eprintln!("recv_from error: {e}");
-                continue;
-            }
-        };
+        tokio::select! {
+            recv_result = socket.recv_from(&mut buf) => {
+                let (_amt, remote_addr) = match recv_result {
+                    Ok(v) => v,
+                    Err(e) => {
+                        eprintln!("recv_from error: {e}");
+                        continue;
+                    }
+                };
 
         // Attempt to refresh port with retry logic
         if let Some(port) = lookup_webapp_port_with_retry(&docker, &webapp_name).await {
@@ -128,7 +140,20 @@ async fn main() -> io::Result<()> {
         if let Err(e) = socket.send_to(response.as_bytes(), remote_addr).await {
             eprintln!("send_to {remote_addr} error: {e}");
         }
+            }
+            _ = tokio::signal::ctrl_c() => {
+                eprintln!("received ctrl-c, shutting down");
+                break;
+            }
+            _ = terminate.recv() => {
+                eprintln!("received SIGTERM, shutting down");
+                break;
+            }
+        }
     }
+
+    eprintln!("mkmulticast: shutting down");
+    Ok(())
 }
 
 #[cfg(test)]
