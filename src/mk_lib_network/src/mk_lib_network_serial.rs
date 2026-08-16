@@ -33,7 +33,7 @@ pub async fn serial_port_write(
     mut port: Box<dyn SerialPort>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let output = "This is a test. This is only a test.".as_bytes();
-    port.write(output)?;
+    port.write_all(output)?;
     Ok(())
 }
 

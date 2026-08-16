@@ -138,14 +138,14 @@ pub async fn mk_network_share_smb_detail(
             let (key, v) = val;
             if key == "table" {
                 let shares = v.as_array().ok_or("no array in script table")?;
-                for share_ndx in 0..shares.len() {
-                    if shares[share_ndx]["@key"].to_string().contains("$") {
-                    } else if shares[share_ndx]["elem"].as_array().map(|a| a.len()).unwrap_or(0) >= 2 {
+                for share_entry in shares.iter() {
+                    if share_entry["@key"].to_string().contains("$") {
+                    } else if share_entry["elem"].as_array().map(|a| a.len()).unwrap_or(0) >= 2 {
                         let share_data = NMAPShareList {
                             mm_share_type: 1, // smb2
                             mm_share_ip: format!("{:?}", ip_addr).parse()?,
-                            mm_share_path: shares[share_ndx]["@key"].clone(),
-                            mm_share_comment: shares[share_ndx]["elem"][1]["#text"].clone(),
+                            mm_share_path: share_entry["@key"].clone(),
+                            mm_share_comment: share_entry["elem"][1]["#text"].clone(),
                         };
                         vec_share.push(share_data);
                     }
@@ -180,13 +180,13 @@ pub async fn mk_network_share_nfs_detail(
             let (key, v) = val;
             if key == "table" {
                 let shares = v.as_array().ok_or("no array in nfs table")?;
-                for share_ndx in 0..shares.len() {
-                    if shares[share_ndx]["elem"].as_array().map(|a| a.len()).unwrap_or(0) >= 2 {
+                for share_entry in shares.iter() {
+                    if share_entry["elem"].as_array().map(|a| a.len()).unwrap_or(0) >= 2 {
                         let share_data = NMAPShareList {
                             mm_share_type: 8, // nfs4.1
                             mm_share_ip: format!("{:?}", ip_addr).parse()?,
-                            mm_share_path: shares[share_ndx]["@key"].clone(),
-                            mm_share_comment: shares[share_ndx]["elem"][1]["#text"].clone(),
+                            mm_share_path: share_entry["@key"].clone(),
+                            mm_share_comment: share_entry["elem"][1]["#text"].clone(),
                         };
                         vec_share.push(share_data);
                     }

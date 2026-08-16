@@ -17,7 +17,11 @@ pub async fn network_openweather_current(
     };
     let client = Client::new(options)?;
     let reading = client.fetch_weather(&City::new(city, country)).await?;
-    let weather = reading.weather.first()
-        .ok_or(ClientError::Other("no weather data available".to_string()))?;
+    let weather = match reading.weather.first() {
+        Some(w) => w,
+        None => return Err(ClientError::InvalidOptionsError(
+            openweathermap_client::error::InvalidOptionsError { message: "no weather data available".to_string() },
+        )),
+    };
     Ok((reading.main.temp, weather.description.clone()))
 }

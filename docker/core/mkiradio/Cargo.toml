@@ -5,11 +5,11 @@ edition = "2024"
 
 
 [dependencies]
-mk_lib_common = { version = "0.0.224", registry = "kellnr" }
-mk_lib_database = { version = "0.0.256", registry = "kellnr" }
-mk_lib_file = { version = "0.0.234", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.225", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.228", registry = "kellnr" }
+mk_lib_common = { version = "0.0.225", registry = "kellnr" }
+mk_lib_database = { version = "0.0.257", registry = "kellnr" }
+mk_lib_file = { version = "0.0.235", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.226", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.229", registry = "kellnr" }
 
 async-std = { version = "1.13.1", features = ["attributes"] }
 chrono = { version = "0.4.45", features = ["serde"] }
