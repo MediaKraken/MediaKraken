@@ -6,7 +6,9 @@ use std::process::{Command, Stdio};
 async fn main() -> Result<(), Box<dyn Error>> {
     // connect to db and do a version check and upgrade if needed
     let (sqlx_pool_rw, sqlx_pool_ro) =
-        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120).await?;
+        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120)
+            .await
+            .map_err(|e| format!("failed to open database pool: {e}"))?;
     // see if db exists
     let db_exists = mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_exists(
         &sqlx_pool_ro,

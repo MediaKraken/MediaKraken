@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 #![allow(unused_assignments)]
-#![allow(path_dependence)]
 #![expect(unused)]
 pub mod adult;
 pub mod anime;

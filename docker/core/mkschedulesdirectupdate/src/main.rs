@@ -28,7 +28,9 @@ async fn shutdown_signal() {
 async fn main() -> Result<(), Box<dyn Error>> {
     // open the database
     let (_sqlx_pool_rw, sqlx_pool_ro) =
-        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120).await?;
+        mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120)
+            .await
+            .map_err(|e| format!("failed to open database pool: {e}"))?;
     let _db_check = mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(
         &sqlx_pool_ro,
         false,
