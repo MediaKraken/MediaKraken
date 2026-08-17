@@ -799,11 +799,11 @@ pub async fn mk_lib_database_update_schema(
             "mm_metadata_tvshow",
         ];
         for table in tables {
-            let query = format!(
-                "ALTER TABLE {} ADD COLUMN IF NOT EXISTS photo_updated timestamptz DEFAULT now();",
-                table
-            );
-            sqlx::query(&query).execute(&mut *transaction).await?;
+            let mut query_builder = sqlx::QueryBuilder::<sqlx::Postgres>::new("ALTER TABLE ");
+            query_builder.push(table);
+            query_builder
+                .push(" ADD COLUMN IF NOT EXISTS photo_updated timestamptz DEFAULT now();");
+            query_builder.build().execute(&mut *transaction).await?;
         }
         transaction.commit().await?;
         mk_lib_database_version_update(sqlx_pool, 77).await?;
