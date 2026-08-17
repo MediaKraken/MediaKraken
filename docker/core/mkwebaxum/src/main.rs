@@ -6,6 +6,7 @@ use axum::{
     extract::ConnectInfo,
     extract::FromRef,
     extract::Request,
+    extract::State,
     http::StatusCode,
     middleware::{self, Next},
     response::{IntoResponse, Response},
@@ -13,7 +14,7 @@ use axum::{
 };
 use axum_extra::routing::RouterExt;
 use axum_prometheus::PrometheusMetricLayer;
-use axum_session::{Key, SameSitePolicy, SessionConfig, SessionLayer, SessionStore};
+use axum_session::{Key, SameSite, SessionConfig, SessionLayer, SessionStore};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
@@ -151,15 +152,19 @@ impl FromRef<AppState> for axum_flash::Config {
     }
 }
 
+/// Derives the stable 64-byte signing key from a secret. Pure and testable:
+/// same input always yields the same key across processes and replicas.
+fn derive_signing_key(secret: &str) -> Key {
+    let hash = digest::digest(&digest::SHA512, secret.as_bytes());
+    Key::from(hash.as_ref())
+}
+
 // Signing key for flash/session cookies. Derives a stable 64-byte key from
 // MKWEBAPP_SIGNING_KEY so cookies survive restarts and are consistent across
 // replicas. Falls back to an ephemeral key with a loud warning for dev.
 fn load_signing_key() -> Key {
     match std::env::var("MKWEBAPP_SIGNING_KEY") {
-        Ok(secret) if secret.len() >= 32 => {
-            let hash = digest::digest(&digest::SHA512, secret.as_bytes());
-            Key::from(hash.as_ref())
-        }
+        Ok(secret) if secret.len() >= 32 => derive_signing_key(&secret),
         _ => {
             tracing::warn!(
                 "MKWEBAPP_SIGNING_KEY not set or shorter than 32 bytes; \
@@ -354,13 +359,16 @@ async fn main() {
     // - secure_cookies: sent only over HTTPS (nginx ingress handles TLS).
     // - http_only: not accessible via JavaScript (mitigates XSS cookie theft).
     // - same_site: Lax allows same-site navigations but blocks cross-site POST.
-    // - max_age: 1 hour of inactivity or absolute expiration, whichever comes first.
+    // - lifetime/max_age: session and cookie expire after 1 hour without activity.
     let session_config = SessionConfig::default()
         .with_table_name("mm_session")
         .with_secure(true)
         .with_http_only(true)
-        .with_same_site_policy(SameSitePolicy::Lax)
-        .with_max_age(Duration::from_secs(3600));
+        .with_cookie_same_site(SameSite::Lax)
+        // Inactivity timeout for stored sessions (sliding on activity).
+        .with_lifetime(chrono::TimeDelta::seconds(3600))
+        // Cookie Max-Age matches the session window; None would make it a browser-close cookie.
+        .with_max_age(Some(chrono::TimeDelta::seconds(3600)));
     let auth_config = AuthConfig::<i64>::default().with_anonymous_user_id(Some(1));
     let session_store =
         match SessionStore::<SessionPgPool>::new(Some(sqlx_pool_rw.clone().into()), session_config)
@@ -773,7 +781,10 @@ async fn main() {
         .route("/metrics", get(|| async move { metric_handle.render() }))
         .layer(prometheus_layer)
         .layer(middleware::from_fn(security_headers))
-        .layer(middleware::from_fn(rate_limit_auth))
+        .layer(middleware::from_fn_with_state(
+            app_state.clone(),
+            rate_limit_auth,
+        ))
         .layer(middleware::from_fn(require_same_origin))
         .with_state(app_state);
     // add a fallback service for handling routes to unknown paths
@@ -822,56 +833,46 @@ mod tests {
     use super::*;
     use std::env;
 
-    fn setup_signing_key(key: &str) {
-        env::set_var("MKWEBAPP_SIGNING_KEY", key);
+    #[test]
+    fn test_derive_signing_key_length() {
+        let key = derive_signing_key(&"a".repeat(32));
+        assert_eq!(key.master().len(), 64);
     }
 
-    fn teardown_signing_key() {
-        env::remove_var("MKWEBAPP_SIGNING_KEY");
+    // The only test that mutates MKWEBAPP_SIGNING_KEY; its checks run sequentially on one thread.
+    #[test]
+    fn test_load_signing_key_fallback() {
+        let secret = "test-signing-key-secret-0123456789"; // >= 32 chars so the derived path is taken
+        let expected = derive_signing_key(secret);
+        // SAFETY: this is the only test touching MKWEBAPP_SIGNING_KEY and it
+        // performs its mutations sequentially on a single thread.
+        unsafe { env::set_var("MKWEBAPP_SIGNING_KEY", secret) };
+        assert_eq!(load_signing_key().master(), expected.master());
+
+        for secret in ["short", ""] {
+            // SAFETY: this is the only test touching MKWEBAPP_SIGNING_KEY and it
+            // performs its mutations sequentially on a single thread.
+            unsafe { env::set_var("MKWEBAPP_SIGNING_KEY", secret) };
+            let key = load_signing_key();
+            assert_eq!(key.master().len(), 64);
+        }
+
+        // SAFETY: same as above; restores the unset state for anything else in the process.
+        unsafe { env::remove_var("MKWEBAPP_SIGNING_KEY") };
     }
 
     #[test]
-    fn test_load_signing_key_long_enough() {
-        setup_signing_key(&"a".repeat(32));
-        let key = load_signing_key();
-        assert_eq!(key.as_ref().len(), 64);
-        teardown_signing_key();
+    fn test_derive_signing_key_deterministic() {
+        let key1 = derive_signing_key("test_secret_key_32_bytes_long!");
+        let key2 = derive_signing_key("test_secret_key_32_bytes_long!");
+        assert_eq!(key1.master(), key2.master());
     }
 
     #[test]
-    fn test_load_signing_key_too_short() {
-        setup_signing_key("short");
-        let key = load_signing_key();
-        assert_eq!(key.as_ref().len(), 64);
-        teardown_signing_key();
-    }
-
-    #[test]
-    fn test_load_signing_key_empty() {
-        setup_signing_key("");
-        let key = load_signing_key();
-        assert_eq!(key.as_ref().len(), 64);
-        teardown_signing_key();
-    }
-
-    #[test]
-    fn test_load_signing_key_deterministic() {
-        setup_signing_key("test_secret_key_32_bytes_long!");
-        let key1 = load_signing_key();
-        setup_signing_key("test_secret_key_32_bytes_long!");
-        let key2 = load_signing_key();
-        assert_eq!(key1.as_ref(), key2.as_ref());
-        teardown_signing_key();
-    }
-
-    #[test]
-    fn test_load_signing_key_different_inputs_different_keys() {
-        setup_signing_key("first_secret_key_32_bytes!");
-        let key1 = load_signing_key();
-        setup_signing_key("second_secret_key_32_bytes!");
-        let key2 = load_signing_key();
-        assert_ne!(key1.as_ref(), key2.as_ref());
-        teardown_signing_key();
+    fn test_derive_signing_key_different_inputs_different_keys() {
+        let key1 = derive_signing_key("first_secret_key_32_bytes!");
+        let key2 = derive_signing_key("second_secret_key_32_bytes!");
+        assert_ne!(key1.master(), key2.master());
     }
 
     #[tokio::test]

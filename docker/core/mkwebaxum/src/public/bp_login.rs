@@ -236,7 +236,7 @@ pub async fn public_login_post(
         )
         .await;
         // Regenerate session ID to prevent session fixation attacks.
-        let _ = auth.regenerate();
+        auth.session.renew();
         auth.login_user(user_id);
         (flash, Redirect::to("/user/home"))
     } else {

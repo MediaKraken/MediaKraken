@@ -20,8 +20,9 @@ pub async fn public_logout(
         current_user.id,
     )
     .await;
-    // Delete the server-side session row so a stolen cookie cannot be reused.
-    let _ = auth.delete_session().await;
+    // Destroy the server-side session and clear its cookie on response so a
+    // stolen cookie cannot be reused.
+    auth.session.destroy();
     auth.logout_user();
     Redirect::to("/public/login")
 }
