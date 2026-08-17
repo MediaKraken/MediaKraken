@@ -50,7 +50,7 @@ pub async fn user_media_collection(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let pagination_count =
@@ -64,7 +64,7 @@ pub async fn user_media_collection(
             String::new(),
         )
         .await
-        ?;
+        .unwrap();
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
             total_pages,
             page,
@@ -72,7 +72,8 @@ pub async fn user_media_collection(
             None,
             pagination_count,
         )
-        .await?;
+        .await
+        .unwrap();
         let collection_list =
         mk_lib_database::database_metadata::mk_lib_database_metadata_collection::mk_lib_database_metadata_collection_read(
            &state.sqlx_pool_ro,
@@ -81,7 +82,7 @@ pub async fn user_media_collection(
             pagination_count,
         )
         .await
-        ?;
+        .unwrap();
         let mut template_data_exists = false;
         if collection_list.len() > 0 {
             template_data_exists = true;
@@ -94,7 +95,7 @@ pub async fn user_media_collection(
             page: &page_usize,
             page_title: Some("MediaKraken Collections".to_string()),
         };
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
@@ -123,7 +124,7 @@ pub async fn user_media_collection_detail(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let template = TemplateMediaCollectionDetailContext {
@@ -131,7 +132,7 @@ pub async fn user_media_collection_detail(
             template_data_exists: false,
             page_title: Some("MediaKraken Collection Detail".to_string()),
         };
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

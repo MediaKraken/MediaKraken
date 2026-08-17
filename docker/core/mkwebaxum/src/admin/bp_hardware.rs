@@ -1,17 +1,17 @@
-use crate::AppState;
 use crate::mk_lib_database;
 use askama::Template;
-use axum::extract::State;
 use axum::{
-    Extension,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
+    Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use serde_json::json;
 use sqlx::postgres::PgPool;
+use axum::extract::State;
+use crate::AppState;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
@@ -40,14 +40,15 @@ pub async fn admin_hardware(
     .await
     {
         let template = TemplateError403Context {};
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let hardware_list =
             mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_device_read(
-                &state.sqlx_pool_ro,
+               &state.sqlx_pool_ro,
             )
-            .await?;
+            .await
+            .unwrap();
         let mut hardware_data: bool = false;
         if hardware_list.len() > 0 {
             hardware_data = true;
@@ -57,7 +58,7 @@ pub async fn admin_hardware(
             template_data_exists: &hardware_data,
             page_title: Some("MediaKraken Admin Hardware".to_string()),
         };
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

@@ -36,13 +36,13 @@ pub async fn user_playback_video(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let template = UserPlaybackVideoTemplate {
             page_title: Some("MediaKraken Video Playback".to_string()),
         };
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

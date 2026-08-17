@@ -1,11 +1,11 @@
 use crate::mk_lib_database;
 use askama::Template;
 use axum::{
-    Extension, Router,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
     routing::{get, post},
+    Extension, Router,
 };
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
@@ -38,13 +38,13 @@ pub async fn user_playback_audio(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let template = UserPlaybackAlbumTemplate {
             page_title: Some("MediaKraken Audio Playback".to_string()),
         };
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

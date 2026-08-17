@@ -49,7 +49,7 @@ pub async fn admin_backup(
     .await
     {
         let template = TemplateError403Context {};
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         // TODO show local backups here as well
@@ -62,7 +62,8 @@ pub async fn admin_backup(
             mk_lib_database::mk_lib_database_backup::mk_lib_database_backup_count(
                 &state.sqlx_pool_ro,
             )
-            .await?;
+            .await
+            .unwrap();
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
             total_pages,
             page,
@@ -70,13 +71,15 @@ pub async fn admin_backup(
             None,
             pagination_count,
         )
-        .await?;
+        .await
+        .unwrap();
         let backup_list = mk_lib_database::mk_lib_database_backup::mk_lib_database_backup_read(
             &state.sqlx_pool_ro,
             db_offset,
             pagination_count,
         )
-        .await?;
+        .await
+        .unwrap();
         let mut template_data_exists = false;
         if backup_list.len() > 0 {
             template_data_exists = true;
@@ -90,7 +93,7 @@ pub async fn admin_backup(
             page: &page_usize,
             page_title: Some("MediaKraken Admin Backup".to_string()),
         };
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

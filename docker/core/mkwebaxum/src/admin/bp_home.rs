@@ -73,7 +73,7 @@ pub async fn admin_home(
     .await
     {
         let template = TemplateError403Context {};
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let notification_list =
@@ -82,26 +82,30 @@ pub async fn admin_home(
                 0,
                 9999,
             )
-            .await?;
+            .await
+            .unwrap();
         let user_list = mk_lib_database::mk_lib_database_user::mk_lib_database_user_read(
             &state.sqlx_pool_ro,
             0,
             9999,
         )
-        .await?;
+        .await
+        .unwrap();
         let option_status_row =
             mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_status_read(
                 &state.sqlx_pool_ro,
             )
-            .await?;
+            .await
+            .unwrap();
         let option_json: serde_json::Value = option_status_row.get("mm_options_json");
         let status_json: serde_json::Value = option_status_row.get("mm_status_json");
-        let boot_seconds: libc::timeval = sys_info::boottime()?;
+        let boot_seconds: libc::timeval = sys_info::boottime().unwrap();
         let boot_duration = chrono::Duration::seconds(i64::from(boot_seconds.tv_sec));
         let external_ip = mk_lib_network::mk_lib_network::mk_data_from_url(
             "https://myexternalip.com/raw".to_string(),
         )
-        .await?;
+        .await
+        .unwrap();
         let mut server_streams = Vec::new();
         let mut server_scans = Vec::new();
         let number_format_language = user_preferences::load_user_number_format_language(
@@ -115,18 +119,18 @@ pub async fn admin_home(
                 &state.sqlx_pool_ro,
             )
             .await
-            ?;
+            .unwrap();
         let matched_media_count =
             mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_matched_count(
                 &state.sqlx_pool_ro,
             )
             .await
-            ?;
+            .unwrap();
         let meta_fetch_count = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_count(
             &state.sqlx_pool_ro,
         )
         .await
-        ?;
+        .unwrap();
         let template = TemplateHomeContext {
             template_data_server_info_server_name: &option_json["MediaKrakenServer"]["Server Name"],
             // following boottime only compiles #[cfg(not(windows))] in this case is fine
@@ -152,7 +156,7 @@ pub async fn admin_home(
             template_data_scan_info: &server_scans,
             page_title: Some("MediaKraken Admin".to_string()),
         };
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

@@ -50,7 +50,7 @@ pub async fn api_title_search(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let title = title.replace("%20", " ");
@@ -66,23 +66,23 @@ pub async fn api_title_search(
             100,
         )
         .await
-        ?;
+        .unwrap();
         let tv_metadata = mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_read(
         &state.sqlx_pool_ro, title.clone(), 0, 100
     )
     .await
-    ?;
+    .unwrap();
         let music_metadata = mk_lib_database::database_metadata::mk_lib_database_metadata_music::mk_lib_database_metadata_music_read(
             &state.sqlx_pool_ro, title.clone(), 0, 100
     )
     .await
-    ?;
+    .unwrap();
         let template = TemplateAPITitleSearchContext {
             template_data_movie_match: &movie_metadata,
             template_data_tv_match: &tv_metadata,
             template_data_music_match: &music_metadata,
         };
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

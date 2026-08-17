@@ -48,7 +48,7 @@ pub async fn user_media_sports(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let pagination_count =
@@ -62,7 +62,7 @@ pub async fn user_media_sports(
             String::new(),
         )
         .await
-        ?;
+        .unwrap();
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
             total_pages,
             page,
@@ -70,7 +70,8 @@ pub async fn user_media_sports(
             None,
             pagination_count,
         )
-        .await?;
+        .await
+        .unwrap();
         let sports_list =
         mk_lib_database::database_media::mk_lib_database_media_sports::mk_lib_database_media_sports_read(
             &state.sqlx_pool_ro,
@@ -79,7 +80,7 @@ pub async fn user_media_sports(
             pagination_count,
         )
         .await
-        ?;
+        .unwrap();
         let mut template_data_exists = false;
         if sports_list.len() > 0 {
             template_data_exists = true;
@@ -92,7 +93,7 @@ pub async fn user_media_sports(
             page: &page_usize,
             page_title: Some("MediaKraken Sports".to_string()),
         };
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
@@ -120,14 +121,14 @@ pub async fn user_media_sports_detail(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let template = TemplateMediaSportsDetailContext {
             template_data: json!({}),
             page_title: Some("MediaKraken Sports Detail".to_string()),
         };
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

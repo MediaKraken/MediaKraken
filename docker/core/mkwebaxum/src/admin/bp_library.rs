@@ -1,5 +1,6 @@
 use crate::AppState;
 use crate::mk_lib_database;
+use mk_lib_share::mk_lib_file_smb::{classify_smbclient_browse_error, is_smb_ls_date};
 use askama::Template;
 use axum::extract::{Form, State};
 use axum::{
@@ -13,7 +14,6 @@ use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_rabbitmq;
-use mk_lib_share::mk_lib_file_smb::{classify_smbclient_browse_error, is_smb_ls_date};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::postgres::PgPool;
@@ -93,25 +93,27 @@ pub async fn admin_library(
     .await
     {
         let template = TemplateError403Context {};
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let share_list =
             mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_read(
                 &state.sqlx_pool_ro,
             )
-            .await?;
+            .await
+            .unwrap();
         let library_list =
             mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_audit_read(
                 &state.sqlx_pool_ro,
             )
-            .await?;
+            .await
+            .unwrap();
         let share_user_list =
         mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_user_read(
            &state.sqlx_pool_ro,
         )
         .await
-        ?;
+        .unwrap();
         let mut template_data_exists: bool = false;
         if library_list.len() > 0 {
             template_data_exists = true;
@@ -123,7 +125,7 @@ pub async fn admin_library(
             template_data_exists: &template_data_exists,
             page_title: Some("MediaKraken Admin Library".to_string()),
         };
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
@@ -144,14 +146,19 @@ pub async fn admin_library_media_scan(
         Redirect::to("/error/403")
     } else {
         let (rabbit_connection, rabbit_channel) =
-            mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp").await?;
+            mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp")
+                .await
+                .unwrap();
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
             rabbit_channel.clone(),
             "mkmediascanner",
             json!({"Type": "Library Scan"}).to_string(),
         )
-        .await?;
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection).await?;
+        .await
+        .unwrap();
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
+            .await
+            .unwrap();
         Redirect::to("/admin/library")
     }
 }
@@ -245,14 +252,19 @@ pub async fn admin_library_share_scan(
         Redirect::to("/error/403")
     } else {
         let (rabbit_connection, rabbit_channel) =
-            mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp").await?;
+            mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp")
+                .await
+                .unwrap();
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
             rabbit_channel.clone(),
             "mksharescanner",
             json!({"Type": "Share Scan", "Data": "192.168.1"}).to_string(),
         )
-        .await?;
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection).await?;
+        .await
+        .unwrap();
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
+            .await
+            .unwrap();
         Redirect::to("/admin/library")
     }
 }
@@ -452,21 +464,23 @@ pub async fn admin_library_share_directories(
         };
         let (status_u16, error_message) =
             classify_smbclient_browse_error(&stdout_output, &stderr_output);
-        let status_code = StatusCode::from_u16(status_u16).unwrap_or(StatusCode::BAD_GATEWAY);
-        if let Err(loki_error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
-            "level": "error",
-            "message": "smbclient failed",
-            "module": module_path!(),
-            "function": "admin_library_share_directories",
-            "payload": {
-                "status_code": smb_output.status.code(),
-                "classified_status": status_u16,
-                "classified_message": error_message,
-                "stdout": stdout_output,
-                "stderr": stderr_output,
-            },
-        }))
-        .await
+        let status_code =
+            StatusCode::from_u16(status_u16).unwrap_or(StatusCode::BAD_GATEWAY);
+        if let Err(loki_error) =
+            mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
+                "level": "error",
+                "message": "smbclient failed",
+                "module": module_path!(),
+                "function": "admin_library_share_directories",
+                "payload": {
+                    "status_code": smb_output.status.code(),
+                    "classified_status": status_u16,
+                    "classified_message": error_message,
+                    "stdout": stdout_output,
+                    "stderr": stderr_output,
+                },
+            }))
+            .await
         {
             eprintln!("loki push error: {loki_error}");
         }

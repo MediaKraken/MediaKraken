@@ -97,20 +97,21 @@ pub async fn admin_cron(
 ) -> impl IntoResponse {
     if !user_can_view_admin_cron(&method, &auth).await {
         let template = TemplateError403Context {};
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let cron_list = mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_service_read(
             &state.sqlx_pool_ro,
         )
-        .await?;
+        .await
+        .unwrap();
         let cron_data = !cron_list.is_empty();
         let template = TemplateCronContext {
             template_data: &cron_list,
             template_data_exists: &cron_data,
             page_title: Some("MediaKraken Admin Cron".to_string()),
         };
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
@@ -128,21 +129,28 @@ pub async fn admin_cron_run(
             &state.sqlx_pool_rw,
             guid,
         )
-        .await?;
+        .await
+        .unwrap();
         let (rabbit_connection, rabbit_channel) =
-            mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp").await?;
+            mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp")
+                .await
+                .unwrap();
         let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
             rabbit_channel.clone(),
-            row_data["route_key"].as_str().unwrap_or(""),
+            row_data["route_key"].as_str().unwrap(),
             row_data.to_string(),
         )
-        .await?;
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection).await?;
+        .await
+        .unwrap();
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
+            .await
+            .unwrap();
         let _result = mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_time_update(
             &state.sqlx_pool_rw,
             guid,
         )
-        .await?;
+        .await
+        .unwrap();
         Redirect::to("/admin/cron")
     }
 }

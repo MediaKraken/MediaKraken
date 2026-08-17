@@ -78,7 +78,7 @@ pub async fn user_profile(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let language_options: Vec<LanguageOption> =
@@ -144,7 +144,7 @@ pub async fn user_profile(
                 _ => None,
             },
         };
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
@@ -457,7 +457,9 @@ fn validate_image_magic_bytes(bytes: &[u8], expected_extension: &str) -> bool {
         "png" => bytes.starts_with(b"\x89PNG"),
         "jpg" | "jpeg" => bytes.starts_with(b"\xff\xd8\xff"),
         "gif" => bytes.starts_with(b"GIF8"),
-        "webp" => bytes.len() >= 12 && bytes[0..4] == *b"RIFF" && bytes[8..12] == *b"WEBP",
+        "webp" => bytes.len() >= 12
+            && bytes[0..4] == *b"RIFF"
+            && bytes[8..12] == *b"WEBP",
         _ => false,
     }
 }

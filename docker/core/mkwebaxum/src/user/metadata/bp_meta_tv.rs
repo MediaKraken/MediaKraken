@@ -77,7 +77,7 @@ pub async fn user_metadata_tv(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let pagination_count =
@@ -91,7 +91,7 @@ pub async fn user_metadata_tv(
             starts_with.clone().unwrap_or_default(),
         )
         .await
-        ?;
+        .unwrap();
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
             total_pages,
             page,
@@ -99,7 +99,8 @@ pub async fn user_metadata_tv(
             starts_with.as_deref(),
             pagination_count,
         )
-        .await?;
+        .await
+        .unwrap();
         let tv_list = mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_read(
            &state.sqlx_pool_ro,
             starts_with.clone().unwrap_or_default(),
@@ -107,7 +108,7 @@ pub async fn user_metadata_tv(
             pagination_count,
         )
         .await
-        ?;
+        .unwrap();
         let mut template_data_exists = false;
         if tv_list.len() > 0 {
             template_data_exists = true;
@@ -126,7 +127,7 @@ pub async fn user_metadata_tv(
             status_filter: None,
             base_path: "/user/metadata/tv".to_string(),
         };
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
@@ -155,7 +156,7 @@ pub async fn user_metadata_tv_detail(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let template = TemplateMetaTVDetailContext {
@@ -163,7 +164,7 @@ pub async fn user_metadata_tv_detail(
             template_data_media_seasons_exists: &false,
             page_title: Some("MediaKraken Metadata TV Show Detail".to_string()),
         };
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
@@ -190,7 +191,7 @@ pub async fn user_metadata_tv_status(
             &state.sqlx_pool_rw, guid, event_type, current_user.id
         )
         .await
-        ?;
+        .unwrap();
         Redirect::to("/admin/cron")
     }
 }

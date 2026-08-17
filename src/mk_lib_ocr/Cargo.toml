@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_ocr"
-version = "0.0.4"
+version = "0.0.8"
 edition = "2024"
 
 [profile.release]
@@ -10,7 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_logging = { version = "0.0.227", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.231", registry = "kellnr" }
 
 tesseract = "0.15.2"
 image = "0.25.10"

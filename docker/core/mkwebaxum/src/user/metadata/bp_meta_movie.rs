@@ -20,10 +20,10 @@ use core::fmt::Write;
 use paginator::{PageItem, Paginator};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sqlx::FromRow;
 use sqlx::postgres::{PgPool, PgRow};
 use sqlx::types::chrono::DateTime;
 use sqlx::types::chrono::Utc;
+use sqlx::FromRow;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Genre {
@@ -281,7 +281,7 @@ pub async fn user_metadata_movie(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let current_user = auth.current_user.clone().unwrap_or_default();
@@ -301,7 +301,7 @@ pub async fn user_metadata_movie(
             status_filter.clone().unwrap_or_default(),
         )
         .await
-        ?;
+        .unwrap();
         let pagination_html = build_movie_pagination(
             total_pages,
             page,
@@ -310,7 +310,8 @@ pub async fn user_metadata_movie(
             genre.as_deref(),
             primary_language.as_deref(),
             status_filter.as_deref(),
-        )?;
+        )
+        .unwrap();
         let primary_language_options: Vec<FilterOption> =
             mk_lib_database::mk_lib_database_language::mk_lib_database_language_read(
                 &state.sqlx_pool_ro,
@@ -368,7 +369,7 @@ pub async fn user_metadata_movie(
             pagination_count,
         )
         .await
-        ?;
+        .unwrap();
         let mut template_data_vec: Vec<TemplateMetaMovieList> = Vec::new();
         for row_data in movie_list.iter() {
             let watched_status = row_data.mm_status_user_json.clone().unwrap_or_else(|| {
@@ -466,7 +467,7 @@ pub async fn user_metadata_movie(
             filter_query_suffix,
             base_path: "/user/metadata/movie".to_string(),
         };
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
@@ -509,7 +510,7 @@ pub async fn user_metadata_movie_detail(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let movie_metadata =
@@ -517,7 +518,7 @@ pub async fn user_metadata_movie_detail(
             &state.sqlx_pool_ro, guid, current_user.id
         )
         .await
-        ?;
+        .unwrap();
 
         let watched_status = movie_metadata
             .mm_status_user_json
@@ -609,7 +610,7 @@ pub async fn user_metadata_movie_detail(
             template_metadata_user_queue: queue_status,
             page_title: Some("MediaKraken Metadata Movie Detail".to_string()),
         };
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
@@ -631,7 +632,7 @@ pub async fn user_metadata_movie_status(
     {
         println!("here is the user: {:?}", current_user.id);
         // let template = TemplateError401Context {};
-        // let reply_html = template.render().map_err(|e| e.to_string())?;
+        // let reply_html = template.render().unwrap();
         return StatusCode::UNAUTHORIZED.into_response();
     } else {
         println!("here is the payload4: {:?}", payload);
@@ -639,7 +640,7 @@ pub async fn user_metadata_movie_status(
             &state.sqlx_pool_rw, payload, current_user.id
         )
         .await
-        ?;
+        .unwrap();
         StatusCode::OK.into_response()
     }
 }

@@ -16,21 +16,28 @@ use mk_lib_common::mk_lib_common_media_extension::{
 };
 use mk_lib_database::mk_lib_database_network_share::{DBShareList, parse_share_name};
 use mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push;
-use mk_lib_share::mk_lib_smb::FileMetadata;
+use mk_lib_share::mk_lib_smb_pavao::FileMetadata;
+
+fn compile_stack(pattern: &str) -> Regex {
+    match Regex::new(pattern) {
+        Ok(regex) => regex,
+        Err(e) => panic!("invalid stack pattern {pattern}: {e}"),
+    }
+}
 
 lazy_static! {
-    static ref STACK_CD: Regex = Regex::new(r"(?i)-cd\d")?;
-    static ref STACK_CD1: Regex = Regex::new(r"(?i)-cd1(?!\d)")?;
-    static ref STACK_PART: Regex = Regex::new(r"(?i)-part\d")?;
-    static ref STACK_PART1: Regex = Regex::new(r"(?i)-part1(?!\d)")?;
-    static ref STACK_DVD: Regex = Regex::new(r"(?i)-dvd\d")?;
-    static ref STACK_DVD1: Regex = Regex::new(r"(?i)-dvd1(?!\d)")?;
-    static ref STACK_PT: Regex = Regex::new(r"(?i)-pt\d")?;
-    static ref STACK_PT1: Regex = Regex::new(r"(?i)-pt1(?!\d)")?;
-    static ref STACK_DISK: Regex = Regex::new(r"(?i)-disk\d")?;
-    static ref STACK_DISK1: Regex = Regex::new(r"(?i)-disk1(?!\d)")?;
-    static ref STACK_DISC: Regex = Regex::new(r"(?i)-disc\d")?;
-    static ref STACK_DISC1: Regex = Regex::new(r"(?i)-disc1(?!\d)")?;
+    static ref STACK_CD: Regex = compile_stack(r"(?i)-cd\d");
+    static ref STACK_CD1: Regex = compile_stack(r"(?i)-cd1(?!\d)");
+    static ref STACK_PART: Regex = compile_stack(r"(?i)-part\d");
+    static ref STACK_PART1: Regex = compile_stack(r"(?i)-part1(?!\d)");
+    static ref STACK_DVD: Regex = compile_stack(r"(?i)-dvd\d");
+    static ref STACK_DVD1: Regex = compile_stack(r"(?i)-dvd1(?!\d)");
+    static ref STACK_PT: Regex = compile_stack(r"(?i)-pt\d");
+    static ref STACK_PT1: Regex = compile_stack(r"(?i)-pt1(?!\d)");
+    static ref STACK_DISK: Regex = compile_stack(r"(?i)-disk\d");
+    static ref STACK_DISK1: Regex = compile_stack(r"(?i)-disk1(?!\d)");
+    static ref STACK_DISC: Regex = compile_stack(r"(?i)-disc\d");
+    static ref STACK_DISC1: Regex = compile_stack(r"(?i)-disc1(?!\d)");
 }
 
 fn mk_nfs_uri(share_info: &DBShareList, uri: &str) -> String {

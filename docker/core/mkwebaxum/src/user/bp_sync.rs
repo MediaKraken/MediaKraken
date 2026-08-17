@@ -45,7 +45,7 @@ pub async fn user_sync(
     .await
     {
         let template = TemplateError401Context {};
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let pagination_count =
@@ -55,7 +55,8 @@ pub async fn user_sync(
         let db_offset: i64 = (page * pagination_count) - pagination_count;
         let total_pages: i64 =
             mk_lib_database::mk_lib_database_sync::mk_lib_database_sync_count(&state.sqlx_pool_ro)
-                .await?;
+                .await
+                .unwrap();
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
             total_pages,
             page,
@@ -63,14 +64,16 @@ pub async fn user_sync(
             None,
             pagination_count,
         )
-        .await?;
+        .await
+        .unwrap();
         let sync_list = mk_lib_database::mk_lib_database_sync::mk_lib_database_sync_list(
             &state.sqlx_pool_ro,
             uuid::Uuid::nil(),
             db_offset,
             pagination_count,
         )
-        .await?;
+        .await
+        .unwrap();
         let mut template_data_exists = false;
         if sync_list.len() > 0 {
             template_data_exists = true;
@@ -83,7 +86,7 @@ pub async fn user_sync(
             page: &page_usize,
             page_title: Some("MediaKraken Sync".to_string()),
         };
-        let reply_html = template.render().map_err(|e| e.to_string())?;
+        let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }

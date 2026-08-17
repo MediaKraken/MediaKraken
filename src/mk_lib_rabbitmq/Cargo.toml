@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_rabbitmq"
-version = "0.0.230"
+version = "0.0.234"
 edition = "2024"
 
 [profile.release]
@@ -10,7 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_logging = { version = "0.0.227", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.231", registry = "kellnr" }
 
 amqprs = "2.1.5"
 sys-info = "0.9.1"
