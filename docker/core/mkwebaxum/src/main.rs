@@ -357,7 +357,7 @@ async fn main() {
     // - max_age: 1 hour of inactivity or absolute expiration, whichever comes first.
     let session_config = SessionConfig::default()
         .with_table_name("mm_session")
-        .with_secure_cookies(true)
+        .with_secure(true)
         .with_http_only(true)
         .with_same_site_policy(SameSitePolicy::Lax)
         .with_max_age(Duration::from_secs(3600));
@@ -803,7 +803,7 @@ async fn shutdown_signal() {
 
     let terminate = async {
         match signal::unix::signal(signal::unix::SignalKind::terminate()) {
-            Ok(s) => s.recv().await,
+            Ok(mut s) => s.recv().await,
             Err(e) => {
                 eprintln!("Failed to install SIGTERM handler: {}", e);
                 None
