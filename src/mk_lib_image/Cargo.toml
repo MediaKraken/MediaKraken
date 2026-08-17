@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_image"
-version = "0.0.230"
+version = "0.0.233"
 edition = "2024"
 
 [profile.release]
@@ -10,7 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_logging = { version = "0.0.231", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.234", registry = "kellnr" }
 
 image = "0.25.10"
 tokio = { version = "1.52.3", features = ["rt"] }

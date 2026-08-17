@@ -5,9 +5,9 @@ edition = "2024"
 
 
 [dependencies]
-mk_lib_database = { version = "0.0.262", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.231", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.234", registry = "kellnr" }
+mk_lib_database = { version = "0.0.265", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.234", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.237", registry = "kellnr" }
 
 chrono = { version = "0.4.45", features = ["serde"] }
 inotify = "0.11.0"
