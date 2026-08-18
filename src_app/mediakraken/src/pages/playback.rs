@@ -35,17 +35,15 @@ pub fn PlaybackPage(client: ApiClient, media_item: MediaItem, kind: MediaKind) -
     let mut is_muted = use_signal(|| false);
     let mut is_paused = use_signal(|| false);
     let mut progress = use_signal(|| 0f64);
-    
+
     // Fetch stream URL when page loads
     use_effect(move || {
-        let client = client.clone();
         let media_item = media_item.clone();
-        let kind = kind.clone();
         spawn(async move {
             let stream_url = match kind {
-                MediaKind::Movie => format!("'/api/v1/media/movies/{}/stream", media_item.id),
-                MediaKind::Show => format!("'/api/v1/media/shows/{}/stream", media_item.id),
-                MediaKind::Audio => format!("'/api/v1/media/audio/{}/stream", media_item.id),
+                MediaKind::Movie => format!("/api/v1/media/movies/{}/stream", media_item.id),
+                MediaKind::Show => format!("/api/v1/media/shows/{}/stream", media_item.id),
+                MediaKind::Audio => format!("/api/v1/media/audio/{}/stream", media_item.id),
             };
             let media_type = match kind {
                 MediaKind::Movie => "video/mp4".to_string(),
@@ -77,7 +75,7 @@ pub fn PlaybackPage(client: ApiClient, media_item: MediaItem, kind: MediaKind) -
                             volume: volume(),
                             is_muted: is_muted(),
                             is_paused: is_paused(),
-                            on_progress: move |new_progress| progress.set(new_progress),
+                            progress: move |new_progress| progress.set(new_progress),
                         },
                         MediaInfo { item: item.clone() },
                         PlaybackControls {
@@ -95,8 +93,10 @@ pub fn PlaybackPage(client: ApiClient, media_item: MediaItem, kind: MediaKind) -
                             on_stop: Callback::new(move |_| {
                                 playback_state.set(PlaybackState::Idle);
                             }),
-                        }
-                PlaybackState::Paused { item, media_type, stream_url, position } => rsx! {
+                        },
+                    }
+                },
+                PlaybackState::Paused { item, media_type, stream_url, .. } => rsx! {
                     div { class: "playback-container",
                         VideoPlayer {
                             stream_url: stream_url.clone(),
@@ -104,7 +104,7 @@ pub fn PlaybackPage(client: ApiClient, media_item: MediaItem, kind: MediaKind) -
                             volume: volume(),
                             is_muted: is_muted(),
                             is_paused: is_paused(),
-                            on_progress: move |new_progress| progress.set(new_progress),
+                            progress: move |new_progress| progress.set(new_progress),
                         },
                         MediaInfo { item: item.clone() },
                         PlaybackControls {
@@ -141,8 +141,9 @@ fn VideoPlayer(props: VideoPlayerProps) -> Element {
         volume,
         is_muted,
         is_paused,
+        ..
     } = props;
-    
+
     // We'll simulate the video player with a placeholder
     rsx! {
         div { class: "video-player",
@@ -167,6 +168,7 @@ struct VideoPlayerProps {
     volume: u8,
     is_muted: bool,
     is_paused: bool,
+    progress: Callback<f64>,
 }
 
 #[component]
@@ -199,10 +201,10 @@ fn PlaybackControls(props: PlaybackControlsProps) -> Element {
         on_mute_toggle,
         on_stop,
     } = props;
-    
+
     rsx! {
         div { class: "playback-controls",
-            button { 
+            button {
                 class: "control-btn",
                 onclick: move |_| on_play_pause(()),
                 if is_paused {
@@ -211,12 +213,12 @@ fn PlaybackControls(props: PlaybackControlsProps) -> Element {
                     "⏸ Pause"
                 }
             }
-            button { 
+            button {
                 class: "control-btn",
                 onclick: move |_| on_stop(()),
                 "⏹ Stop"
             }
-            button { 
+            button {
                 class: "control-btn",
                 onclick: move |_| on_mute_toggle(()),
                 if is_muted {
@@ -225,7 +227,7 @@ fn PlaybackControls(props: PlaybackControlsProps) -> Element {
                     "🔇 Mute"
                 }
             }
-            input { 
+            input {
                 class: "volume-slider",
                 r#type: "range",
                 min: "0",
