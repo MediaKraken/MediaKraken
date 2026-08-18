@@ -27,7 +27,6 @@ load_dotenv()
 
 # publish to kellnr
 libs_to_publish = ["ed2k",
-                   "ssdp",
                    "weectrl",
                    "mk_lib_logging",
                    "mk_lib_common",

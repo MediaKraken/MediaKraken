@@ -31,7 +31,6 @@ serialport = "4.7.3"
 smartcast = "0.1.1"
 sonos_discovery = "0.0.2"
 spl06-007 = { version = "0.3.3", optional = true }
-#ssdp = { git = "https://github.com/ssnover/ssdp-rs", branch = "feature/local-impl-of-ip-feature" }
 ssdp-client = "2.1.0"
 tokio = "1.52.3"
 url = "2.5.8"
