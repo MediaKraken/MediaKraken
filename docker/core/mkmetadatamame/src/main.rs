@@ -71,7 +71,7 @@ async fn process_rabbit_message(
                     xml_data.push_str(xml_line);
                     let json_data = xml_string_to_json(xml_data.to_string(), &conf)?;
                     mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
-                            &sqlx_pool_rw,
+                            sqlx_pool_rw,
                             uuid::Uuid::nil(),
                             json_data["machine"]["name"].to_string(),
                             json_data["machine"]["description"].to_string(),
@@ -122,12 +122,12 @@ async fn process_rabbit_message(
             } else if xml_line.starts_with("</entry") == true {
                 xml_data.push_str(xml_line);
                 let json_data = xml_string_to_json(xml_data.to_string(), &conf)?;
-                let mut game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(&sqlx_pool_rw, &json_data["entry"]["software"]["item"]["list"].to_string()).await?;
+                let mut game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(sqlx_pool_rw, &json_data["entry"]["software"]["item"]["list"].to_string()).await?;
                 if game_system_uuid == uuid::Uuid::nil() {
-                    game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool_rw, json_data["entry"]["software"]["item"]["list"].to_string(), String::new(), json!({})).await?;
+                    game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(sqlx_pool_rw, json_data["entry"]["software"]["item"]["list"].to_string(), String::new(), json!({})).await?;
                 }
                 mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
-                        &sqlx_pool_rw,
+                        sqlx_pool_rw,
                         game_system_uuid,
                         json_data["entry"]["software"]["item"]["name"].to_string(),
                         json_data["entry"]["text"].to_string(),
@@ -313,7 +313,7 @@ async fn process_rabbit_message(
                                 sys_graphics =
                                     sys_graphics.trim_end_matches('\n').to_string();
                             }
-                            let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool_rw,
+                            let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(sqlx_pool_rw,
                                     sys_short_name.trim_end_matches('\n').to_string(),
                                     sys_longname.clone(),
                                     json!({
@@ -399,11 +399,11 @@ async fn process_rabbit_message(
                         let system_string_split: Vec<&str> =
                             xml_line.split("\"").collect();
                         println!("split: {:?}", system_string_split);
-                        let system_counter = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_game_count_by_short_name(&sqlx_pool_rw, &system_string_split[1].to_string()).await?;
+                        let system_counter = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_game_count_by_short_name(sqlx_pool_rw, &system_string_split[1].to_string()).await?;
                         if system_counter == 0 {
-                            game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(&sqlx_pool_rw, system_string_split[1].to_string(), system_string_split[3].to_string(), json!({})).await?;
+                            game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(sqlx_pool_rw, system_string_split[1].to_string(), system_string_split[3].to_string(), json!({})).await?;
                         } else {
-                            game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(&sqlx_pool_rw, &system_string_split[1].to_string()).await?;
+                            game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(sqlx_pool_rw, &system_string_split[1].to_string()).await?;
                         }
                     } else if xml_line.starts_with("<software") == true {
                         xml_data = xml_line.to_string();
@@ -412,7 +412,7 @@ async fn process_rabbit_message(
                         let json_data =
                             xml_string_to_json(xml_data.to_string(), &conf)?;
                         mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
-                            &sqlx_pool_rw,
+                            sqlx_pool_rw,
                             game_system_uuid,
                             json_data["software"]["name"].to_string(),
                             json_data["software"]["description"].to_string(),

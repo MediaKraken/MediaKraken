@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_ocr"
-version = "0.0.11"
+version = "0.0.13"
 edition = "2024"
 
 [profile.release]
@@ -10,15 +10,15 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_logging = { version = "0.0.234", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.236", registry = "kellnr" }
 
 tesseract = "0.15.2"
 image = "0.25.10"
-tokio = { version = "1.52.3", features = ["fs", "process", "rt"] }
-serde_json = "1.0"
+tokio = { version = "1.53.1", features = ["fs", "process", "rt"] }
+serde_json = "1.0.151"
 
 [build-dependencies]
-pkg-config = "0.3"
+pkg-config = "0.3.34"
 
 [dev-dependencies]
 tokio-test = "*"

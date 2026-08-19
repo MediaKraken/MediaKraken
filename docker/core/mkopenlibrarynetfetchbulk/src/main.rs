@@ -5,7 +5,7 @@ use futures::StreamExt;
 use mk_lib_file::mk_lib_file_s3_garage::mk_lib_file_s3_garage_add;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::{Pool, Postgres};
+use sqlx::{AssertSqlSafe, Pool, Postgres, QueryBuilder, raw_sql};
 use std::io::Read;
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::task::JoinSet;
@@ -246,8 +246,13 @@ async fn run_bulk_import(pool: Pool<Postgres>) -> anyhow::Result<()> {
                 .execute(&mut *conn)
                 .await?;
 
-            let sql = format!("CREATE INDEX IF NOT EXISTS {}_key_idx ON {} (key);", t, t);
-            sqlx::query(&sql).execute(&mut *conn).await?;
+            let mut qb = QueryBuilder::<Postgres>::new("CREATE INDEX IF NOT EXISTS ");
+            qb.push(format!("{t}_key_idx"));
+            qb.push(" ON ");
+            qb.push(t.as_str());
+            qb.push(" (key)");
+
+            qb.build().execute(&mut *conn).await?;
             Ok::<(), anyhow::Error>(())
         });
     }
@@ -267,8 +272,11 @@ async fn run_bulk_import(pool: Pool<Postgres>) -> anyhow::Result<()> {
             .execute(&mut *conn)
             .await?;
 
-        let sql = format!("ALTER TABLE {} SET LOGGED;", table);
-        sqlx::query(&sql).execute(&mut *conn).await?;
+        let mut qb = QueryBuilder::<Postgres>::new("ALTER TABLE ");
+        qb.push(*table);
+        qb.push(" SET LOGGED");
+
+        qb.build().execute(&mut *conn).await?;
     }
 
     println!("🔄 Performing final table swap...");
@@ -277,23 +285,30 @@ async fn run_bulk_import(pool: Pool<Postgres>) -> anyhow::Result<()> {
         let final_name = tmp_table.replace("tmp_", "");
         let mut conn = pool.acquire().await?;
 
-        let swap_sql = format!(
-            "DROP TABLE IF EXISTS {final_name} CASCADE; 
-             ALTER TABLE {tmp_table} RENAME TO {final_name};"
-        );
+        let mut qb = QueryBuilder::<Postgres>::new("DROP TABLE IF EXISTS ");
+        qb.push(final_name.as_str());
+        qb.push(" CASCADE; ALTER TABLE ");
+        qb.push(*tmp_table);
+        qb.push(" RENAME TO ");
+        qb.push(final_name.as_str());
 
-        match sqlx::query(&swap_sql).execute(&mut *conn).await {
+        match raw_sql(AssertSqlSafe(qb.into_string()))
+            .execute(&mut *conn)
+            .await
+        {
             Ok(_) => println!("✅ Swapped {tmp_table} -> {final_name}"),
             Err(e) => eprintln!("❌ Failed to swap {tmp_table}: {e}"),
         }
 
         let old_idx = format!("{tmp_table}_key_idx");
         let new_idx = format!("{final_name}_key_idx");
-        let _ = sqlx::query(&format!(
-            "ALTER INDEX IF EXISTS {old_idx} RENAME TO {new_idx};"
-        ))
-        .execute(&mut *conn)
-        .await;
+
+        let mut qb = QueryBuilder::<Postgres>::new("ALTER INDEX IF EXISTS ");
+        qb.push(old_idx.as_str());
+        qb.push(" RENAME TO ");
+        qb.push(new_idx.as_str());
+
+        let _ = qb.build().execute(&mut *conn).await;
     }
 
     println!("🏆 Migration successful! The new data is now live.");
@@ -304,35 +319,35 @@ async fn download_and_import(pool: Pool<Postgres>, table: &str, url: &str) -> an
     let mut conn = pool.acquire().await?;
 
     // Use UNLOGGED for raw speed during initial load
-    sqlx::query(&format!(
-        "CREATE UNLOGGED TABLE IF NOT EXISTS {} (type text, key text, revision int, last_modified timestamp, data jsonb);",
-        table
-    )).execute(&mut *conn).await?;
+    let mut qb = QueryBuilder::<Postgres>::new("CREATE UNLOGGED TABLE IF NOT EXISTS ");
+    qb.push(table);
+    qb.push(" (type text, key text, revision int, last_modified timestamp, data jsonb)");
+
+    qb.build().execute(&mut *conn).await?;
 
     let response = reqwest::get(url).await?.error_for_status()?;
 
     // Map reqwest error to std::io::Error for the StreamReader
     let stream = response
         .bytes_stream()
-        .map(|result| result.map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e)));
+        .map(|result| result.map_err(std::io::Error::other));
 
     let reader = tokio_util::io::StreamReader::new(stream);
     let decoder = GzipDecoder::new(BufReader::new(reader));
     let mut lines = BufReader::new(decoder).lines();
 
-    let mut writer = conn
-        .copy_in_raw(&format!(
-            "COPY {} FROM STDIN WITH (FORMAT csv, DELIMITER E'\\t', QUOTE E'\\b')",
-            table
-        ))
-        .await?;
+    let mut qb = QueryBuilder::<Postgres>::new("COPY ");
+    qb.push(table);
+    qb.push(" FROM STDIN WITH (FORMAT csv, DELIMITER E'\\t', QUOTE E'\\b')");
+
+    let copy_sql = qb.into_string();
+    let mut writer = conn.copy_in_raw(&copy_sql).await?;
 
     let mut count = 0;
     while let Some(mut line) = lines.next_line().await? {
         // next_line() strips the newline, so we add it back for the CSV parser
         line.push('\n');
 
-        // Use .send() for sqlx 0.8 compatibility
         writer.send(line.as_bytes()).await?;
 
         count += 1;

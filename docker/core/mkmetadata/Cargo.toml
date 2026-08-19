@@ -5,10 +5,10 @@ edition = "2024"
 
 
 [dependencies]
-mk_lib_database = { version = "0.0.265", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.234", registry = "kellnr" }
-mk_lib_metadata = { version = "0.0.245", registry = "kellnr" }
-mk_lib_network = { version = "0.0.233", registry = "kellnr" }
+mk_lib_database = { version = "0.0.267", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.236", registry = "kellnr" }
+mk_lib_metadata = { version = "0.0.247", registry = "kellnr" }
+mk_lib_network = { version = "0.0.235", registry = "kellnr" }
 
 ratelimit = "0.10.0"
 serde_json = "1.0.150"
