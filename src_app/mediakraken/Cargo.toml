@@ -10,15 +10,15 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-dioxus = "0.7.5"
-reqwest = { version = "0.13.2", default-features = false, features = [
+dioxus = "0.7.10"
+reqwest = { version = "0.13.4", default-features = false, features = [
     "json",
     "native-tls",
 ] }
-serde = { version = "1.0.228", features = ["derive"] }
+serde = { version = "1.0.229", features = ["derive"] }
 
 [target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
-dioxus = { version = "0.7.5", features = ["mobile"] }
+dioxus = { version = "0.7.10", features = ["mobile"] }
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
-dioxus = { version = "0.7.5", features = ["desktop"] }
+dioxus = { version = "0.7.10", features = ["desktop"] }

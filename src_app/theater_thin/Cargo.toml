@@ -11,5 +11,6 @@ codegen-units = 1
 
 [dependencies]
 mk_lib_network = { version = "0.0.235", registry = "kellnr" }
-fltk = { version = "1.5.22", features = ["fltk-bundled"] }
-serde_json = "1.0.149"
+
+fltk = { version = "1.5.23", features = ["fltk-bundled"] }
+serde_json = "1.0.151"

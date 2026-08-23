@@ -12,13 +12,13 @@ codegen-units = 1
 mk_lib_database = { version = "0.0.267", registry = "kellnr", optional = true }
 mk_lib_logging = { version = "0.0.236", registry = "kellnr" }
 
-aws-config = { version = "1.8.18", optional = true }
-aws-sdk-s3 = { version = "1.135.0", optional = true }
+aws-config = { version = "1.11.0", optional = true }
+aws-sdk-s3 = { version = "1.143.0", optional = true }
 reqwest = { version = "0.13.4", default-features = false, features = ["json", "native-tls"], optional = true }
 serde = { version = "1.0.228", features = ["derive"], optional = true }
 serde_json = "1.0.150"
-tokio = { version = "1.52.3", features = ["full"] }
-uuid = { version = "1.23.2", features = ["serde", "v4"] }
+tokio = { version = "1.53.1", features = ["full"] }
+uuid = { version = "1.25.0", features = ["serde", "v4"] }
 walkdir = "2.5.0"
 
 [features]

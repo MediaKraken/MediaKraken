@@ -10,6 +10,6 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-crossbeam-channel = "0.5.15"
-fltk = { version = "1.5.22", features = ["fltk-bundled"] }
+crossbeam-channel = "0.5.16"
+fltk = { version = "1.5.23", features = ["fltk-bundled"] }
 fltk-theme = "0.7.9"

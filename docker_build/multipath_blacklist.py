@@ -47,7 +47,7 @@ class CommonNetworkSSH:
 
 async def main(loop):
     # connection to proxmox instance
-   import os
+    import os
     prox_inst = CommonNetworkSSH(
         host=os.environ.get('SSH_HOST', 'localhost'),
         user_name=os.environ.get('SSH_USER', 'root'),

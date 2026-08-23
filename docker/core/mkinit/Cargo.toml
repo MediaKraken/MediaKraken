@@ -8,7 +8,7 @@ edition = "2024"
 mk_lib_database = { version = "0.0.267", registry = "kellnr" }
 mk_lib_logging = { version = "0.0.236", registry = "kellnr" }
 
-tokio = { version = "1.52.3", features = ["full"] }
+tokio = { version = "1.53.1", features = ["full"] }
 
 [dev-dependencies]
 tokio-test = "*"

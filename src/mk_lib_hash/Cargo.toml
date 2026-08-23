@@ -10,14 +10,14 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-blake3 = "1.8.5"
-crc32fast = "1.5.0"
+blake3 = "1.8.7"
+crc32fast = "1.5.1"
 #ed2k = { git = "https://github.com/runfalk/ed2k-rs" }
 ed2k = { version = "0.3.0", registry = "kellnr" }
 md-5 = "0.11.0"
 sha1 = "0.11.0"
 hex = "0.4"
-tokio = { version = "1.52.3", features = ["fs", "io-util", "macros", "rt"] }
+tokio = { version = "1.53.1", features = ["fs", "io-util", "macros", "rt"] }
 
 [dev-dependencies]
 tokio-test = "*"

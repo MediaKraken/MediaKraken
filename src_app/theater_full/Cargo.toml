@@ -12,6 +12,6 @@ codegen-units = 1
 [dependencies]
 mk_lib_network = { version = "0.0.235", registry = "kellnr" }
 
-fltk = { version = "1.5.22", features = ["fltk-bundled"] }
+fltk = { version = "1.5.23", features = ["fltk-bundled"] }
 fltk-theme = "0.7.9"
-tokio = { version = "1.52.3", features = ["rt"] }
+tokio = { version = "1.53.1", features = ["rt"] }

@@ -52,7 +52,7 @@ ssh-rs = { version = "0.5.0", features = ["scp"] }
 suppaftp = { version = "6.3.0", features = ["native-tls"] }
 surge-ping = "0.8.3"
 telnet = "0.2.4"
-tokio = { version = "1.52.3", features = ["full"] }
+tokio = { version = "1.53.1", features = ["full"] }
 transmission-rpc = "0.5.0"
 wakey = "0.3.0"
 
