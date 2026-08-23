@@ -100,7 +100,6 @@ impl MyPopup {
 }
 
 pub struct MyChoice {
-    grp: group::Group,
     frame: frame::Frame,
     btn: button::Button,
     choices: Rc<RefCell<Vec<&'static str>>>,
@@ -121,16 +120,12 @@ impl MyChoice {
             let mut f = frame.clone();
             move |b| {
                 let mut menu = MyPopup::new(&c.borrow());
-                let (wx, wy) = b
-                    .window()
-                    .map(|w| (w.x(), w.y()))
-                    .unwrap_or((0, 0));
+                let (wx, wy) = b.window().map(|w| (w.x(), w.y())).unwrap_or((0, 0));
                 let s = menu.popup(b.x() + wx - f.w(), b.y() + wy + b.h());
                 f.set_label(&s.0);
             }
         });
         Self {
-            grp,
             frame,
             btn,
             choices,
@@ -149,10 +144,6 @@ impl MyChoice {
         &mut self.frame
     }
 
-    pub fn group(&mut self) -> &mut group::Group {
-        &mut self.grp
-    }
-
     pub fn set_current_choice(&mut self, idx: i32) {
         if idx < 0 {
             return;
@@ -165,14 +156,5 @@ impl MyChoice {
 
     pub fn choice(&self) -> String {
         self.frame.label()
-    }
-
-    pub fn value(&self) -> i32 {
-        let choice = self.choice();
-        if let Some(val) = self.choices.borrow().iter().position(|x| x == &choice) {
-            val as _
-        } else {
-            -1
-        }
     }
 }

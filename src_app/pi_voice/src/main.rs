@@ -1,9 +1,7 @@
 use clap::Parser;
-use fltk::{
-    app, button::Button, enums::FrameType, output::Output, prelude::*, window::Window,
-};
-use fltk_webview::Webview;
+use fltk::{app, button::Button, enums::FrameType, output::Output, prelude::*, window::Window};
 use fltk_webview::FromFltkWindow;
+use fltk_webview::Webview;
 use std::error::Error;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -46,9 +44,12 @@ pub mod record {
     use std::path::PathBuf;
     use std::sync::{Arc, Mutex};
 
+    type WavWriterHandle = Arc<Mutex<Option<WavWriter<BufWriter<File>>>>>;
+    type RecordingSession = (WavWriterHandle, cpal::Stream);
+
     pub struct Recorder {
         output_path: PathBuf,
-        utils: Option<(Arc<Mutex<Option<WavWriter<BufWriter<File>>>>>, cpal::Stream)>,
+        utils: Option<RecordingSession>,
     }
 
     impl Recorder {
@@ -71,7 +72,7 @@ pub mod record {
                 .default_input_device()
                 .ok_or_else(|| anyhow::Error::msg("no default input device available"))?;
 
-            println!("Input device: {}", device.name()?);
+            println!("Input device: {}", device.description()?.name());
 
             let config = device.default_input_config()?;
             println!("Default input config: {:?}", config);
@@ -87,25 +88,25 @@ pub mod record {
 
             let stream = match config.sample_format() {
                 cpal::SampleFormat::I8 => device.build_input_stream(
-                    &config.into(),
+                    config.into(),
                     move |data, _: &_| write_input_data::<i8, i8>(data, &writer_2),
                     err_fn,
                     None,
                 )?,
                 cpal::SampleFormat::I16 => device.build_input_stream(
-                    &config.into(),
+                    config.into(),
                     move |data, _: &_| write_input_data::<i16, i16>(data, &writer_2),
                     err_fn,
                     None,
                 )?,
                 cpal::SampleFormat::I32 => device.build_input_stream(
-                    &config.into(),
+                    config.into(),
                     move |data, _: &_| write_input_data::<i32, i32>(data, &writer_2),
                     err_fn,
                     None,
                 )?,
                 cpal::SampleFormat::F32 => device.build_input_stream(
-                    &config.into(),
+                    config.into(),
                     move |data, _: &_| write_input_data::<f32, f32>(data, &writer_2),
                     err_fn,
                     None,
@@ -148,13 +149,11 @@ pub mod record {
     fn wav_spec_from_config(config: &cpal::SupportedStreamConfig) -> hound::WavSpec {
         hound::WavSpec {
             channels: config.channels() as _,
-            sample_rate: config.sample_rate().0 as _,
+            sample_rate: config.sample_rate() as _,
             bits_per_sample: (config.sample_format().sample_size() * 8) as _,
             sample_format: sample_format(config.sample_format()),
         }
     }
-
-    type WavWriterHandle = Arc<Mutex<Option<hound::WavWriter<BufWriter<File>>>>>;
 
     fn write_input_data<T, U>(input: &[T], writer: &WavWriterHandle)
     where
@@ -224,7 +223,10 @@ fn run_recognition(paths: &ProcessingPaths, vosk_uri: &str) -> Result<String, St
             "16000",
             "-ac",
             "1",
-            paths.mono_wav.to_str().ok_or("mono wav path is not utf-8")?,
+            paths
+                .mono_wav
+                .to_str()
+                .ok_or("mono wav path is not utf-8")?,
         ])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -271,7 +273,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     let workdir = cli
         .workdir
         .clone()
-        .or_else(|| std::env::current_exe().ok().and_then(|p| p.parent().map(Path::to_path_buf)))
+        .or_else(|| {
+            std::env::current_exe()
+                .ok()
+                .and_then(|p| p.parent().map(Path::to_path_buf))
+        })
         .unwrap_or_else(|| PathBuf::from("."));
 
     let paths = Arc::new(ProcessingPaths {
@@ -320,22 +326,13 @@ fn main() -> Result<(), Box<dyn Error>> {
     window_main.make_current();
 
     let wv = Webview::create(false, &mut wv_win);
-    wv.navigate(&format!("{api_base}/api"));
+    let _ = wv.navigate(&format!("{api_base}/api"));
 
-    button_start_record_loop.set_callback({
-        let s = s;
-        move |_| s.send(Message::Start)
-    });
+    button_start_record_loop.set_callback(move |_| s.send(Message::Start));
 
-    button_stop_record_loop.set_callback({
-        let s = s;
-        move |_| s.send(Message::Stop)
-    });
+    button_stop_record_loop.set_callback(move |_| s.send(Message::Stop));
 
-    button_stop_and_recognise.set_callback({
-        let s = s;
-        move |_| s.send(Message::Recognise)
-    });
+    button_stop_and_recognise.set_callback(move |_| s.send(Message::Recognise));
 
     while app.wait() {
         if let Some(msg) = r.recv() {
@@ -349,17 +346,15 @@ fn main() -> Result<(), Box<dyn Error>> {
                         out.set_value("Recording...");
                     }
                 }
-                Message::Stop => {
-                    match recorder.stop_recording() {
-                        Ok(true) => out.set_value("Stopped"),
-                        Ok(false) => out.set_value("Not recording"),
-                        Err(err) => {
-                            let text = format!("failed to stop recording: {err}");
-                            eprintln!("{text}");
-                            out.set_value(&text);
-                        }
+                Message::Stop => match recorder.stop_recording() {
+                    Ok(true) => out.set_value("Stopped"),
+                    Ok(false) => out.set_value("Not recording"),
+                    Err(err) => {
+                        let text = format!("failed to stop recording: {err}");
+                        eprintln!("{text}");
+                        out.set_value(&text);
                     }
-                }
+                },
                 Message::Recognise => {
                     if let Err(err) = recorder.stop_recording() {
                         eprintln!("failed to stop recording before recognition: {err}");
@@ -374,25 +369,20 @@ fn main() -> Result<(), Box<dyn Error>> {
                     let paths = paths.clone();
                     let vosk_uri = vosk_uri.clone();
                     let api_base = api_base.clone();
-                    let s = s;
-                    thread::spawn(move || {
-                        match run_recognition(&paths, &vosk_uri) {
-                            Ok(text) => {
-                                let query = urlencoding::encode(&text);
-                                let url = if media_type.is_empty() {
-                                    format!("{api_base}/api/titlesearch/{query}")
-                                } else {
-                                    let media = urlencoding::encode(&media_type);
-                                    format!(
-                                        "{api_base}/api/titlesearch/{query}?media_type={media}"
-                                    )
-                                };
-                                s.send(Message::Status(format!("Recognised: {text}")));
-                                s.send(Message::Navigate(url));
-                            }
-                            Err(err) => {
-                                s.send(Message::Status(format!("Recognition failed: {err}")));
-                            }
+                    thread::spawn(move || match run_recognition(&paths, &vosk_uri) {
+                        Ok(text) => {
+                            let query = urlencoding::encode(&text);
+                            let url = if media_type.is_empty() {
+                                format!("{api_base}/api/titlesearch/{query}")
+                            } else {
+                                let media = urlencoding::encode(&media_type);
+                                format!("{api_base}/api/titlesearch/{query}?media_type={media}")
+                            };
+                            s.send(Message::Status(format!("Recognised: {text}")));
+                            s.send(Message::Navigate(url));
+                        }
+                        Err(err) => {
+                            s.send(Message::Status(format!("Recognition failed: {err}")));
                         }
                     });
                 }
@@ -401,7 +391,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     out.set_value(&text);
                 }
                 Message::Navigate(url) => {
-                    wv.navigate(&url);
+                    let _ = wv.navigate(&url);
                 }
             }
         }
