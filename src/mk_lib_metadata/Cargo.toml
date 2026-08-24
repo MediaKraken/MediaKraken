@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_metadata"
-version = "0.0.247"
+version = "0.0.249"
 edition = "2024"
 
 [profile.release]
@@ -10,14 +10,14 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_common = { version = "0.0.235", registry = "kellnr" }
-mk_lib_database = { version = "0.0.267", registry = "kellnr" }
-mk_lib_hash = { version = "0.0.239", registry = "kellnr" }
-mk_lib_image = { version = "0.0.235", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.236", registry = "kellnr" }
-mk_lib_network = { version = "0.0.235", registry = "kellnr" }
+mk_lib_common = { version = "0.0.237", registry = "kellnr" }
+mk_lib_database = { version = "0.0.269", registry = "kellnr" }
+mk_lib_hash = { version = "0.0.240", registry = "kellnr" }
+mk_lib_image = { version = "0.0.237", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.238", registry = "kellnr" }
+mk_lib_network = { version = "0.0.237", registry = "kellnr" }
 
-discid = { version = "0.7.0", optional = true }
+discid = { version = "0.7.1", optional = true }
 flickr = "0.1.1"
 hls_m3u8 = "0.7.0"
 id3 = "1.17.1"
@@ -46,14 +46,14 @@ tokio = "1.53.1"
 tokio-util = { version = "0.7.19", features = ["compat"] }
 url = "2.5"
 torrent-name-parser = "0.12.1"
-twitch_api = { version = "0.7.2", features = [
+twitch_api = { version = "0.8.0", features = [
     "client",
     "helix",
     "reqwest",
     "twitch_oauth2",
 ] }
 twitch_oauth2 = "0.17.1"
-uuid = { version = "1.24.1", features = ["serde", "v4"] }
+uuid = { version = "1.25.0", features = ["serde", "v4"] }
 vimeo-rs = { version = "0.2.1" }
 
 [features]

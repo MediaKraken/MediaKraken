@@ -3,6 +3,7 @@
 use cidr_utils::cidr::Ipv4Cidr;
 use easy_upnp::{PortMappingProtocol, UpnpConfig, add_ports, delete_ports};
 use std::error::Error;
+use std::str::FromStr;
 
 // nmap -sU -p 1900 --script=upnp-info 192.168.1.1
 

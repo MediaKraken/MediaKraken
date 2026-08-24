@@ -151,11 +151,11 @@ mod tests {
     #[test]
     fn test_elk_payload_contains_required_fields() {
         let payload = elk_payload("info", "test_module", serde_json::json!({"key": "value"}));
-        assert!(payload.contains_key("@timestamp"));
-        assert!(payload.contains_key("type"));
-        assert!(payload.contains_key("message"));
-        assert!(payload.contains_key("module"));
-        assert!(payload.contains_key("user"));
+        assert!(payload.get("@timestamp").is_some());
+        assert!(payload.get("type").is_some());
+        assert!(payload.get("message").is_some());
+        assert!(payload.get("module").is_some());
+        assert!(payload.get("user").is_some());
     }
 
     #[test]

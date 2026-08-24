@@ -161,6 +161,95 @@ fn escape_logql_string(value: &str) -> String {
     value.replace('\\', r#"\\"#).replace('"', r#"\""#)
 }
 
+pub async fn mk_logging_loki_read(
+    message_type: &str,
+) -> Result<Vec<LokiLog>, Box<dyn std::error::Error>> {
+    let now_ns = Utc::now()
+        .timestamp_nanos_opt()
+        .ok_or("failed to generate nanosecond timestamp")?;
+
+    let start_ns = now_ns - (24 * 60 * 60 * 1_000_000_000_i64);
+
+    // FIX 4: `message_type` is the name of an app/job — it should filter via
+    // a label selector (`app="<value>"`), not a log-line substring filter
+    // (`|= "<value>"`).  Using `|=` would search the raw JSON content of every
+    // log line for the string, which is both slower and semantically wrong when
+    // the intent is to scope reads to a specific MediaKraken service.
+    let query = if message_type.is_empty() {
+        r#"{job="mediakraken"}"#.to_string()
+    } else {
+        let escaped = escape_logql_string(message_type);
+        // Label-based filter: returns only streams whose `app` label matches.
+        format!(r#"{{job="mediakraken",app="{}"}}"#, escaped)
+    };
+
+    // FIX 2 & 3: Use `retrying_client()` (exponential back-off, same as push)
+    // and add a 30-second timeout so the caller is never blocked indefinitely.
+    // `reqwest_middleware::RequestBuilder` does not expose `.query()`, so build
+    // the URL with query parameters up front via `Url::parse_with_params`.
+    let start_str = start_ns.to_string();
+    let end_str = now_ns.to_string();
+    let url = Url::parse_with_params(
+        LOKI_QUERY_URL,
+        &[
+            ("query", query.as_str()),
+            ("limit", "100"),
+            ("direction", "backward"),
+            ("start", start_str.as_str()),
+            ("end", end_str.as_str()),
+        ],
+    )?;
+
+    let resp: LokiResponse = retrying_client()
+        .get(url)
+        .timeout(Duration::from_secs(30))
+        .send()
+        .await?
+        .error_for_status()?
+        .json()
+        .await?;
+
+    // FIX 1 (cont.): Surface the Loki-level error instead of silently returning
+    // an empty result set or panicking on the missing `data` field.
+    if resp.status != "success" {
+        let loki_err = resp
+            .error
+            .unwrap_or_else(|| "unknown loki error".to_string());
+        return Err(format!("loki query failed: {}", loki_err).into());
+    }
+
+    // FIX 5 (cont.): `data` is now `Option<LokiData>`; unwrap it after the
+    // status check — at this point `status == "success"` so `data` is present.
+    let data = resp
+        .data
+        .ok_or("loki returned success but data field was missing")?;
+
+    let capacity = data
+        .result
+        .iter()
+        .map(|stream| stream.values.len())
+        .sum::<usize>();
+
+    let mut logs = Vec::with_capacity(capacity);
+
+    for stream in data.result {
+        let stream_str = stream_to_logql(&stream.stream);
+        for [ts, line] in stream.values {
+            // Improved timestamp parsing with better error handling
+            let timestamp_ns: i128 = ts
+                .parse()
+                .map_err(|e| format!("Failed to parse timestamp '{}': {}", ts, e))?;
+            logs.push(LokiLog {
+                timestamp_ns,
+                labels: stream_str.clone(),
+                line,
+            });
+        }
+    }
+
+    Ok(logs)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -252,7 +341,7 @@ mod tests {
     fn test_escape_logql_string_both() {
         let input = r#"hello\"world"#;
         let result = escape_logql_string(input);
-        assert_eq!(result, r#"hello\\"world"#);
+        assert_eq!(result, r#"hello\\\"world"#);
     }
 
     #[test]
@@ -279,95 +368,6 @@ mod tests {
 
     #[test]
     fn test_loki_safe_entry_bytes_less_than_max() {
-        assert!(LOKI_SAFE_ENTRY_BYTES < LOKI_MAX_ENTRY_BYTES);
+        const _: () = assert!(LOKI_SAFE_ENTRY_BYTES < LOKI_MAX_ENTRY_BYTES);
     }
-}
-
-pub async fn mk_logging_loki_read(
-    message_type: &str,
-) -> Result<Vec<LokiLog>, Box<dyn std::error::Error>> {
-    let now_ns = Utc::now()
-        .timestamp_nanos_opt()
-        .ok_or("failed to generate nanosecond timestamp")?;
-
-    let start_ns = now_ns - (24 * 60 * 60 * 1_000_000_000_i64);
-
-    // FIX 4: `message_type` is the name of an app/job — it should filter via
-    // a label selector (`app="<value>"`), not a log-line substring filter
-    // (`|= "<value>"`).  Using `|=` would search the raw JSON content of every
-    // log line for the string, which is both slower and semantically wrong when
-    // the intent is to scope reads to a specific MediaKraken service.
-    let query = if message_type.is_empty() {
-        r#"{job="mediakraken"}"#.to_string()
-    } else {
-        let escaped = escape_logql_string(message_type);
-        // Label-based filter: returns only streams whose `app` label matches.
-        format!(r#"{{job="mediakraken",app="{}"}}"#, escaped)
-    };
-
-    // FIX 2 & 3: Use `retrying_client()` (exponential back-off, same as push)
-    // and add a 30-second timeout so the caller is never blocked indefinitely.
-    // `reqwest_middleware::RequestBuilder` does not expose `.query()`, so build
-    // the URL with query parameters up front via `Url::parse_with_params`.
-    let start_str = start_ns.to_string();
-    let end_str = now_ns.to_string();
-    let url = Url::parse_with_params(
-        LOKI_QUERY_URL,
-        &[
-            ("query", query.as_str()),
-            ("limit", "100"),
-            ("direction", "backward"),
-            ("start", start_str.as_str()),
-            ("end", end_str.as_str()),
-        ],
-    )?;
-
-    let resp: LokiResponse = retrying_client()
-        .get(url)
-        .timeout(Duration::from_secs(30))
-        .send()
-        .await?
-        .error_for_status()?
-        .json()
-        .await?;
-
-    // FIX 1 (cont.): Surface the Loki-level error instead of silently returning
-    // an empty result set or panicking on the missing `data` field.
-    if resp.status != "success" {
-        let loki_err = resp
-            .error
-            .unwrap_or_else(|| "unknown loki error".to_string());
-        return Err(format!("loki query failed: {}", loki_err).into());
-    }
-
-    // FIX 5 (cont.): `data` is now `Option<LokiData>`; unwrap it after the
-    // status check — at this point `status == "success"` so `data` is present.
-    let data = resp
-        .data
-        .ok_or("loki returned success but data field was missing")?;
-
-    let capacity = data
-        .result
-        .iter()
-        .map(|stream| stream.values.len())
-        .sum::<usize>();
-
-    let mut logs = Vec::with_capacity(capacity);
-
-    for stream in data.result {
-        let stream_str = stream_to_logql(&stream.stream);
-        for [ts, line] in stream.values {
-            // Improved timestamp parsing with better error handling
-            let timestamp_ns: i128 = ts
-                .parse()
-                .map_err(|e| format!("Failed to parse timestamp '{}': {}", ts, e))?;
-            logs.push(LokiLog {
-                timestamp_ns,
-                labels: stream_str.clone(),
-                line,
-            });
-        }
-    }
-
-    Ok(logs)
 }

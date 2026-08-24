@@ -15,44 +15,6 @@ fn validate_mount_option_value(value: &str, field: &str) -> Result<(), Box<dyn E
     Ok(())
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_validate_mount_option_value_valid() {
-        assert!(validate_mount_option_value("myuser", "username").is_ok());
-    }
-
-    #[test]
-    fn test_validate_mount_option_value_comma_rejected() {
-        let result = validate_mount_option_value("user,name", "username");
-        assert!(result.is_err());
-    }
-
-    #[test]
-    fn test_validate_mount_option_value_nul_rejected() {
-        let result = validate_mount_option_value("user\0name", "username");
-        assert!(result.is_err());
-    }
-
-    #[test]
-    fn test_validate_mount_option_value_newline_rejected() {
-        let result = validate_mount_option_value("user\nname", "username");
-        assert!(result.is_err());
-    }
-
-    #[test]
-    fn test_validate_mount_option_value_empty_valid() {
-        assert!(validate_mount_option_value("", "username").is_ok());
-    }
-
-    #[test]
-    fn test_validate_mount_option_value_special_chars_valid() {
-        assert!(validate_mount_option_value("user-name_123.test", "username").is_ok());
-    }
-}
-
 pub async fn mk_file_share_mount(
     host_ip: &str,
     host_path: &str,
@@ -127,4 +89,42 @@ pub async fn mk_file_share_mount_all(
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_validate_mount_option_value_valid() {
+        assert!(validate_mount_option_value("myuser", "username").is_ok());
+    }
+
+    #[test]
+    fn test_validate_mount_option_value_comma_rejected() {
+        let result = validate_mount_option_value("user,name", "username");
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_validate_mount_option_value_nul_rejected() {
+        let result = validate_mount_option_value("user\0name", "username");
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_validate_mount_option_value_newline_rejected() {
+        let result = validate_mount_option_value("user\nname", "username");
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_validate_mount_option_value_empty_valid() {
+        assert!(validate_mount_option_value("", "username").is_ok());
+    }
+
+    #[test]
+    fn test_validate_mount_option_value_special_chars_valid() {
+        assert!(validate_mount_option_value("user-name_123.test", "username").is_ok());
+    }
 }

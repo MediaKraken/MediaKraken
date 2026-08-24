@@ -24,7 +24,7 @@ def sed_file(filename):
             f.writelines(lines)
 
 
-TABLE_RE = re.compile(r'^(\s*)(mk_lib_\w+)\s*=\s*\{[^}]*?\bversion\s*="([^"]+)"')
+TABLE_RE = re.compile(r'^(\s*)(mk_lib_\w+)\s*=\s*\{[^}]*?\bversion\s*=\s*"([^"]+)"')
 BARE_RE = re.compile(r'^(\s*)(mk_lib_\w+)\s*=\s*"([^"\n]+)"\s*$')
 
 # find all current kellnr versions and bump level
@@ -37,18 +37,20 @@ for filename in sorted(glob(str(root / 'src/mk_lib_*/Cargo.toml'))):
     if pkg_match:
         block = pkg_match.group(1)
         name_m = re.search(r'(?m)^name\s*=\s*"([^"]+)"', block)
-        ver_m = re.search(r'(?m)^version\s*="\K[^"]+', block)
+        ver_m = re.search(r'(?m)^version\s*=\s*"([^"]+)"', block)
     if not (pkg_match and name_m and ver_m):
         print("WARNING: could not parse [package] name/version in", filename, "- skipped")
         continue
     crate_name = name_m.group(1)
-    old_version = ver_m.group()
+    old_version = ver_m.group(1)
     major_minor, patch = old_version.rsplit(".", 1)
     new_version = major_minor + "." + str(int(patch) + 1)
     list_of_crates[crate_name] = new_version
     print("Bump:", filename, crate_name, old_version, "->", new_version)
     with open(filename, "w") as f:
-        f.write(re.sub(r'(?m)^version\s*="\K[^"]+', new_version, text, count=1))
+        f.write(
+            re.sub(r'(?m)^(version\s*=\s*")[^"]+"', r"\g<1>" + new_version + '"', text, count=1)
+        )
 
 print("My Kellnr Cargos: ", list_of_crates)
 

@@ -182,7 +182,7 @@ mod tests {
 
     #[test]
     fn test_api_limit_all_have_positive_requests() {
-        for (key, &(req, _, _)) in API_LIMIT.iter() {
+        for (key, &(req, _, _)) in API_LIMIT.entries() {
             if key != &"Z" {
                 assert!(req > 0, "API limit for {} has zero requests", key);
             }
@@ -191,7 +191,7 @@ mod tests {
 
     #[test]
     fn test_api_limit_all_have_positive_time() {
-        for (key, &(_, time, _)) in API_LIMIT.iter() {
+        for (key, &(_, time, _)) in API_LIMIT.entries() {
             if key != &"Z" {
                 assert!(time > 0, "API limit for {} has zero time window", key);
             }

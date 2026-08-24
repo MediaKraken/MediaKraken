@@ -75,7 +75,7 @@ mod tests {
 
     #[test]
     fn test_sanitize_url_for_logging_exactly_200() {
-        let path = "a".repeat(182); // https://example.com/ = 18 chars, total = 200
+        let path = "a".repeat(180); // https://example.com/ = 20 chars, total = 200
         let url = format!("https://example.com/{}", path);
         let result = sanitize_url_for_logging(&url);
         assert_eq!(result.len(), 200);
@@ -84,10 +84,10 @@ mod tests {
 
     #[test]
     fn test_sanitize_url_for_logging_201_chars() {
-        let path = "a".repeat(183); // https://example.com/ = 18 chars, total = 201
+        let path = "a".repeat(181); // https://example.com/ = 20 chars, total = 201
         let url = format!("https://example.com/{}", path);
         let result = sanitize_url_for_logging(&url);
-        assert!(result.len() < 201);
+        assert_eq!(result.len(), 200 + "... (truncated)".len());
         assert!(result.contains("truncated"));
     }
 
@@ -334,7 +334,7 @@ mod test_mk_lib_network {
     fn test_mk_download_file_from_url() {
         let res = aw!(mk_download_file_from_url(
             "https://github.com/MediaKraken/MediaKraken_Deployment/raw/master/LICENSE".to_string(),
-            &"license.md".to_string()
+            "license.md"
         ));
         assert!(res.is_ok());
     }
