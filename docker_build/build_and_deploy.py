@@ -154,7 +154,7 @@ async def main():
     print("To Build:", images_to_build)
 
     if images_to_build:
-        semaphore = asyncio.Semaphore(4)
+        semaphore = asyncio.Semaphore(2)
         tasks = [
             run_build(build_image, git_branch, cwd_home_directory, semaphore)
             for build_image in images_to_build
