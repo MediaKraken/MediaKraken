@@ -1,0 +1,9 @@
+/home/metaman/repositories/MediaKraken/src/mk_lib_xbox/target/debug/deps/zeroize-1df11719de17c292.d: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/zeroize-1.9.0/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/zeroize-1.9.0/src/x86.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/zeroize-1.9.0/src/barrier.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/zeroize-1.9.0/src/stack.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/zeroize-1.9.0/src/../README.md
+
+/home/metaman/repositories/MediaKraken/src/mk_lib_xbox/target/debug/deps/libzeroize-1df11719de17c292.rmeta: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/zeroize-1.9.0/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/zeroize-1.9.0/src/x86.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/zeroize-1.9.0/src/barrier.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/zeroize-1.9.0/src/stack.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/zeroize-1.9.0/src/../README.md
+
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/zeroize-1.9.0/src/lib.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/zeroize-1.9.0/src/x86.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/zeroize-1.9.0/src/barrier.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/zeroize-1.9.0/src/stack.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/zeroize-1.9.0/src/../README.md:

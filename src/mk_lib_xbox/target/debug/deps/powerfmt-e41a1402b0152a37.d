@@ -1,0 +1,9 @@
+/home/metaman/repositories/MediaKraken/src/mk_lib_xbox/target/debug/deps/powerfmt-e41a1402b0152a37.d: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/powerfmt-0.2.0/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/powerfmt-0.2.0/src/buf.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/powerfmt-0.2.0/src/ext.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/powerfmt-0.2.0/src/smart_display.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/powerfmt-0.2.0/src/smart_display_impls.rs
+
+/home/metaman/repositories/MediaKraken/src/mk_lib_xbox/target/debug/deps/libpowerfmt-e41a1402b0152a37.rmeta: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/powerfmt-0.2.0/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/powerfmt-0.2.0/src/buf.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/powerfmt-0.2.0/src/ext.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/powerfmt-0.2.0/src/smart_display.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/powerfmt-0.2.0/src/smart_display_impls.rs
+
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/powerfmt-0.2.0/src/lib.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/powerfmt-0.2.0/src/buf.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/powerfmt-0.2.0/src/ext.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/powerfmt-0.2.0/src/smart_display.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/powerfmt-0.2.0/src/smart_display_impls.rs:

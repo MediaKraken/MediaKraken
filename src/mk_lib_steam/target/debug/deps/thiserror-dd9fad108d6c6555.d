@@ -1,0 +1,12 @@
+/home/metaman/repositories/MediaKraken/src/mk_lib_steam/target/debug/deps/thiserror-dd9fad108d6c6555.d: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/thiserror-2.0.21/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/thiserror-2.0.21/src/aserror.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/thiserror-2.0.21/src/display.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/thiserror-2.0.21/src/var.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/thiserror-2.0.21/src/private.rs /home/metaman/repositories/MediaKraken/src/mk_lib_steam/target/debug/build/thiserror-ac432b28b42a5a3c/out/private.rs
+
+/home/metaman/repositories/MediaKraken/src/mk_lib_steam/target/debug/deps/libthiserror-dd9fad108d6c6555.rmeta: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/thiserror-2.0.21/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/thiserror-2.0.21/src/aserror.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/thiserror-2.0.21/src/display.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/thiserror-2.0.21/src/var.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/thiserror-2.0.21/src/private.rs /home/metaman/repositories/MediaKraken/src/mk_lib_steam/target/debug/build/thiserror-ac432b28b42a5a3c/out/private.rs
+
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/thiserror-2.0.21/src/lib.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/thiserror-2.0.21/src/aserror.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/thiserror-2.0.21/src/display.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/thiserror-2.0.21/src/var.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/thiserror-2.0.21/src/private.rs:
+/home/metaman/repositories/MediaKraken/src/mk_lib_steam/target/debug/build/thiserror-ac432b28b42a5a3c/out/private.rs:
+
+# env-dep:OUT_DIR=/home/metaman/repositories/MediaKraken/src/mk_lib_steam/target/debug/build/thiserror-ac432b28b42a5a3c/out

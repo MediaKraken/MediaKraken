@@ -1,0 +1,8 @@
+/home/metaman/repositories/MediaKraken/src/mk_lib_steam/target/debug/deps/icu_normalizer-f87c5f01c023f448.d: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/properties.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/provider.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/uts46.rs
+
+/home/metaman/repositories/MediaKraken/src/mk_lib_steam/target/debug/deps/libicu_normalizer-f87c5f01c023f448.rmeta: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/properties.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/provider.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/uts46.rs
+
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/lib.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/properties.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/provider.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/uts46.rs:

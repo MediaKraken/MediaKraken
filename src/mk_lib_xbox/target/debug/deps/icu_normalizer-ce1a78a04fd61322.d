@@ -1,0 +1,8 @@
+/home/metaman/repositories/MediaKraken/src/mk_lib_xbox/target/debug/deps/icu_normalizer-ce1a78a04fd61322.d: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/properties.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/provider.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/uts46.rs
+
+/home/metaman/repositories/MediaKraken/src/mk_lib_xbox/target/debug/deps/libicu_normalizer-ce1a78a04fd61322.rmeta: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/properties.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/provider.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/uts46.rs
+
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/lib.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/properties.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/provider.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/icu_normalizer-2.3.0/src/uts46.rs:

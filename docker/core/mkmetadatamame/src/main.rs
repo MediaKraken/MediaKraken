@@ -12,6 +12,19 @@ use std::path::Path;
 use std::{fs, io};
 use tokio::sync::Notify;
 
+// extracts the single messinfo.dat from the 7z archive shipped in messinfo zips >= 0.281
+fn extract_7z_dat(src: &Path, dest_dir: &str) -> Result<(), Box<dyn Error>> {
+    sevenz_rust::decompress_file_with_extract_fn(src, dest_dir, |entry, reader, dest| {
+        if entry.name() != "messinfo.dat" || entry.is_directory() {
+            return Ok(false);
+        }
+        let mut out = File::create(dest)?;
+        std::io::copy(reader, &mut out)?;
+        Ok(true)
+    })?;
+    Ok(())
+}
+
 async fn process_rabbit_message(
     msg: serde_json::Value,
     rabbit_channel: &amqprs::channel::Channel,
@@ -26,13 +39,13 @@ async fn process_rabbit_message(
     if !Path::new(&file_name).exists() {
         println!("File dl");
         mk_lib_network::mk_lib_network::mk_download_file_from_url(
-                format!(
-                    "https://github.com/mamedev/mame/releases/download/mame0{}/mame0{}lx.zip",
-                    json_message["Version"], json_message["Version"]
-                ),
-                &file_name,
-            )
-            .await?;
+            format!(
+                "https://github.com/mamedev/mame/releases/download/mame0{}/mame0{}lx.zip",
+                json_message["Version"], json_message["Version"]
+            ),
+            &file_name,
+        )
+        .await?;
         println!("File dl 2");
         let unzip_file_name = format!(
             "/mediakraken/emulation/mame0{}.xml",
@@ -48,23 +61,15 @@ async fn process_rabbit_message(
             let file = File::open(&unzip_file_name)?;
             let reader = BufReader::new(file);
             let mut xml_data: String = "".to_owned();
-            let conf =
-                Config::new_with_custom_values(true, "", "text", NullValue::Ignore)
-                    .add_json_type_override(
-                        "/machine/name",
-                        JsonArray::Infer(JsonType::AlwaysString),
-                    )
-                    .add_json_type_override(
-                        "/year",
-                        JsonArray::Infer(JsonType::AlwaysString),
-                    )
-                    .add_json_type_override(
-                        "/manufacturer",
-                        JsonArray::Infer(JsonType::AlwaysString),
-                    );
+            let conf = Config::new_with_custom_values(true, "", "text", NullValue::Ignore)
+                .add_json_type_override("/machine/name", JsonArray::Infer(JsonType::AlwaysString))
+                .add_json_type_override("/year", JsonArray::Infer(JsonType::AlwaysString))
+                .add_json_type_override("/manufacturer", JsonArray::Infer(JsonType::AlwaysString));
             for line in reader.lines() {
                 let xml_line = &line.unwrap_or_default().trim().to_string();
-                if xml_line.is_empty() { continue; }
+                if xml_line.is_empty() {
+                    continue;
+                }
                 if xml_line.starts_with("<machine") == true {
                     xml_data = xml_line.to_string();
                 } else if xml_line.starts_with("</machine") == true {
@@ -93,7 +98,7 @@ async fn process_rabbit_message(
     if !Path::new(&file_name).exists() {
         mk_lib_network::mk_lib_network::mk_download_file_from_url(
             format!(
-                "https://www.arcade-history.com/dats/history{}b.zip",
+                "https://www.arcade-history.com/dats/history{}.zip",
                 json_message["Version"]
             ),
             &file_name,
@@ -106,7 +111,11 @@ async fn process_rabbit_message(
         )
         .await?;
 
-        let file = File::open(&"/mediakraken/emulation/history.xml")?;
+        // zips >= 0.280 contain history/history.xml, older ones have history.xml at the root
+        let file = match File::open("/mediakraken/emulation/history.xml") {
+            Ok(f) => f,
+            Err(_) => File::open("/mediakraken/emulation/history/history.xml")?,
+        };
         let reader = BufReader::new(file);
         let mut xml_data: String = "".to_owned();
         let conf = Config::new_with_custom_values(true, "", "text", NullValue::Ignore)
@@ -116,20 +125,62 @@ async fn process_rabbit_message(
             );
         for line in reader.lines() {
             let xml_line = &line.unwrap_or_default().trim().to_string();
-            if xml_line.is_empty() { continue; }
+            if xml_line.is_empty() {
+                continue;
+            }
             if xml_line.starts_with("<entry") == true {
                 xml_data = xml_line.to_string();
             } else if xml_line.starts_with("</entry") == true {
                 xml_data.push_str(xml_line);
-                let json_data = xml_string_to_json(xml_data.to_string(), &conf)?;
-                let mut game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(sqlx_pool_rw, &json_data["entry"]["software"]["item"]["list"].to_string()).await?;
-                if game_system_uuid == uuid::Uuid::nil() {
-                    game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(sqlx_pool_rw, json_data["entry"]["software"]["item"]["list"].to_string(), String::new(), json!({})).await?;
-                }
+                let json_data = match xml_string_to_json(xml_data.to_string(), &conf) {
+                    Ok(j) => j,
+                    Err(e) => {
+                        println!("Skipping unparseable history entry: {}", e);
+                        continue;
+                    }
+                };
+                let entry = &json_data["entry"];
+                // a single <item>/<system> parses to an object, multiple to an array
+                let first_item: Option<&Value> = if !entry["software"].is_null() {
+                    match &entry["software"]["item"] {
+                        Value::Array(items) => items.first(),
+                        Value::Object(_) => Some(&entry["software"]["item"]),
+                        _ => None,
+                    }
+                } else {
+                    None
+                };
+                let (system_name, game_name) = if let Some(item) = first_item {
+                    // system names in the DB are stored unquoted
+                    (
+                        item["list"].as_str().unwrap_or_default().to_string(),
+                        item["name"].to_string(),
+                    )
+                } else {
+                    // <systems> entries are machine names, stored as games under a nil system
+                    let first_sys: Option<&Value> = match &entry["systems"]["system"] {
+                        Value::Array(systems) => systems.first(),
+                        Value::Object(_) => Some(&entry["systems"]["system"]),
+                        _ => None,
+                    };
+                    match first_sys {
+                        Some(sys) => (String::new(), sys["name"].to_string()),
+                        None => continue,
+                    }
+                };
+                let game_system_uuid = if system_name.is_empty() {
+                    uuid::Uuid::nil()
+                } else {
+                    match mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(sqlx_pool_rw, &system_name).await {
+                        Ok(u) => u,
+                        Err(sqlx::Error::RowNotFound) => mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(sqlx_pool_rw, system_name, String::new(), json!({})).await?,
+                        Err(e) => return Err(e.into()),
+                    }
+                };
                 mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
                         sqlx_pool_rw,
                         game_system_uuid,
-                        json_data["entry"]["software"]["item"]["name"].to_string(),
+                        game_name,
                         json_data["entry"]["text"].to_string(),
                         json_data,
                     )
@@ -147,13 +198,13 @@ async fn process_rabbit_message(
     );
     if !Path::new(&file_name).exists() {
         mk_lib_network::mk_lib_network::mk_download_file_from_url(
-                format!(
-                    "https://www.progettosnaps.net/download/?tipo=catver&file=pS_CatVer_{}.zip",
-                    json_message["Version"]
-                ),
-                &file_name,
-            )
-            .await?;
+            format!(
+                "https://www.progettosnaps.net/download/?tipo=catver&file=pS_CatVer_{}.zip",
+                json_message["Version"]
+            ),
+            &file_name,
+        )
+        .await?;
         mk_lib_compression::mk_lib_compression::mk_decompress_zip(
             &file_name,
             false,
@@ -165,7 +216,9 @@ async fn process_rabbit_message(
         let mut category_found = false;
         for line in reader.lines() {
             let xml_line = &line.unwrap_or_default().trim().to_string();
-            if xml_line.is_empty() { continue; }
+            if xml_line.is_empty() {
+                continue;
+            }
             if xml_line.len() > 1 {
                 if category_found == true {
                     // TODO
@@ -184,18 +237,32 @@ async fn process_rabbit_message(
     );
     if !Path::new(&file_name).exists() {
         mk_lib_network::mk_lib_network::mk_download_file_from_url(
-                format!("https://www.progettosnaps.net/download/?tipo=messinfo&file=pS_messinfo_{}.zip", json_message["Version"]), &file_name)
-            .await?;
+            format!(
+                "https://www.progettosnaps.net/download/?tipo=messinfo&file=pS_messinfo_{}.zip",
+                json_message["Version"]
+            ),
+            &file_name,
+        )
+        .await?;
         mk_lib_compression::mk_lib_compression::mk_decompress_zip(
             &file_name,
             false,
             &"/mediakraken/emulation/",
         )
         .await?;
+        // messinfo zips >= 0.281 ship the dat as messinfo.7z instead of messinfo.dat
+        if !Path::new("/mediakraken/emulation/messinfo.dat").exists()
+            && Path::new("/mediakraken/emulation/messinfo.7z").exists()
+        {
+            extract_7z_dat(
+                Path::new("/mediakraken/emulation/messinfo.7z"),
+                "/mediakraken/emulation/",
+            )?;
+        }
         let file = File::open(&"/mediakraken/emulation/messinfo.dat")?;
         let mut reader = BufReader::new(file);
         let mut dat_line = String::new();
-        let mut start_system_read = false;
+        let mut in_drv_block = false;
         let mut skip_next_line = false;
         let mut long_name_next = false;
         let mut desc_next = false;
@@ -219,6 +286,11 @@ async fn process_rabbit_message(
             match reader.read_line(&mut dat_line) {
                 Ok(0) => break,
                 Ok(_) => {
+                    // normalize CRLF -> LF
+                    dat_line = dat_line
+                        .trim_end_matches('\n')
+                        .trim_end_matches('\r')
+                        .to_string();
                     if skip_next_line {
                         skip_next_line = false;
                     } else {
@@ -235,29 +307,36 @@ async fn process_rabbit_message(
                                 long_name_next = true;
                             }
                         } else if dat_line.starts_with("$info") {
-                            start_system_read = true;
-                            sys_short_name =
-                                dat_line.split('=').nth(1)
-                                    .map(|s| s.trim().to_string())
-                                    .unwrap_or_default();
+                            in_drv_block = false;
+                            sys_short_name = dat_line
+                                .split('=')
+                                .nth(1)
+                                .map(|s| s.trim().to_string())
+                                .unwrap_or_default();
                         } else if dat_line.starts_with("Emulation:") {
-                            sys_emulation =
-                                dat_line.split_whitespace().nth(1)
-                                    .map(|s| s.trim().to_string())
-                                    .unwrap_or_default();
+                            sys_emulation = dat_line
+                                .split_whitespace()
+                                .nth(1)
+                                .map(|s| s.trim().to_string())
+                                .unwrap_or_default();
                         } else if dat_line.starts_with("Color:") {
-                            sys_color = dat_line.split_whitespace().nth(1)
+                            sys_color = dat_line
+                                .split_whitespace()
+                                .nth(1)
                                 .map(|s| s.trim().to_string())
                                 .unwrap_or_default();
                         } else if dat_line.starts_with("Sound:") {
-                            sys_sound = dat_line.split_whitespace().nth(1)
+                            sys_sound = dat_line
+                                .split_whitespace()
+                                .nth(1)
                                 .map(|s| s.trim().to_string())
                                 .unwrap_or_default();
                         } else if dat_line.starts_with("Graphics:") {
-                            sys_graphics =
-                                dat_line.split_whitespace().nth(1)
-                                    .map(|s| s.trim().to_string())
-                                    .unwrap_or_default();
+                            sys_graphics = dat_line
+                                .split_whitespace()
+                                .nth(1)
+                                .map(|s| s.trim().to_string())
+                                .unwrap_or_default();
                         } else if dat_line.starts_with("Save State:") {
                             if dat_line.split_whitespace().rev().next() == Some("Supported") {
                                 sys_save_state = true;
@@ -270,6 +349,9 @@ async fn process_rabbit_message(
                             wip_in_progress = false;
                             romset_in_progress = true;
                         } else {
+                            if dat_line.starts_with("$drv") {
+                                in_drv_block = true;
+                            }
                             if wip_in_progress && dat_line.find("Romset:") != Some(0) {
                                 sys_wip.push_str(dat_line.trim_end_matches('\n'));
                                 sys_wip.push_str("<BR>");
@@ -301,31 +383,30 @@ async fn process_rabbit_message(
                                 if sys_desc.trim_end_matches('\n') == "..." {
                                     sys_desc = String::new();
                                 } else {
-                                    sys_desc =
-                                        sys_desc.trim_end_matches('\n').to_string();
+                                    sys_desc = sys_desc.trim_end_matches('\n').to_string();
                                 }
-                                sys_emulation =
-                                    sys_emulation.trim_end_matches('\n').to_string();
-                                sys_color =
-                                    sys_color.trim_end_matches('\n').to_string();
-                                sys_sound =
-                                    sys_sound.trim_end_matches('\n').to_string();
-                                sys_graphics =
-                                    sys_graphics.trim_end_matches('\n').to_string();
+                                sys_emulation = sys_emulation.trim_end_matches('\n').to_string();
+                                sys_color = sys_color.trim_end_matches('\n').to_string();
+                                sys_sound = sys_sound.trim_end_matches('\n').to_string();
+                                sys_graphics = sys_graphics.trim_end_matches('\n').to_string();
+                                // driver ($drv) blocks describe the cpp driver, not an emulated system
+                                if !in_drv_block {
+                                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(sqlx_pool_rw,
+                                            sys_short_name.trim_end_matches('\n').to_string(),
+                                            sys_longname.clone(),
+                                            json!({
+                                            "Desc": sys_desc,
+                                            "Year": sys_year.trim_end_matches('\n'),
+                                            "Manufacturer": sys_manufacturer,
+                                            "Emulation": sys_emulation,
+                                            "Color": sys_color,
+                                            "Sound": sys_sound,
+                                            "Graphics": sys_graphics,
+                                            "Save State": sys_save_state})
+                                        ).await?;
+                                }
+                                in_drv_block = false;
                             }
-                            let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(sqlx_pool_rw,
-                                    sys_short_name.trim_end_matches('\n').to_string(),
-                                    sys_longname.clone(),
-                                    json!({
-                                    "Desc": sys_desc,
-                                    "Year": sys_year.trim_end_matches('\n'),
-                                    "Manufacturer": sys_manufacturer,
-                                    "Emulation": sys_emulation,
-                                    "Color": sys_color,
-                                    "Sound": sys_sound,
-                                    "Graphics": sys_graphics,
-                                    "Save State": sys_save_state})
-                                ).await?;
                             sys_wip = String::new();
                             sys_romset = String::new();
                         }
@@ -362,9 +443,14 @@ async fn process_rabbit_message(
             json_message["Version"]
         );
         let entries = match fs::read_dir(&mame_hash_path) {
-            Ok(rd) => rd.map(|res| res.map(|e| e.path())).collect::<Result<Vec<_>, io::Error>>()?,
+            Ok(rd) => rd
+                .map(|res| res.map(|e| e.path()))
+                .collect::<Result<Vec<_>, io::Error>>()?,
             Err(e) => {
-                println!("Could not read MAME hash directory {}: {}", mame_hash_path, e);
+                println!(
+                    "Could not read MAME hash directory {}: {}",
+                    mame_hash_path, e
+                );
                 return Ok(());
             }
         };
@@ -376,28 +462,28 @@ async fn process_rabbit_message(
                 let file = File::open(&hash_file_path)?;
                 let reader = BufReader::new(file);
                 let mut xml_data: String = "".to_owned();
-                let conf =
-                    Config::new_with_custom_values(true, "", "text", NullValue::Ignore)
-                        .add_json_type_override(
-                            "/software/name",
-                            JsonArray::Infer(JsonType::AlwaysString),
-                        )
-                        .add_json_type_override(
-                            "/software/year",
-                            JsonArray::Infer(JsonType::AlwaysString),
-                        )
-                        .add_json_type_override(
-                            "/software/publisher",
-                            JsonArray::Infer(JsonType::AlwaysString),
-                        );
+                let conf = Config::new_with_custom_values(true, "", "text", NullValue::Ignore)
+                    .add_json_type_override(
+                        "/software/name",
+                        JsonArray::Infer(JsonType::AlwaysString),
+                    )
+                    .add_json_type_override(
+                        "/software/year",
+                        JsonArray::Infer(JsonType::AlwaysString),
+                    )
+                    .add_json_type_override(
+                        "/software/publisher",
+                        JsonArray::Infer(JsonType::AlwaysString),
+                    );
                 let mut game_system_uuid = uuid::Uuid::nil();
                 for line in reader.lines() {
                     let xml_line = &line.unwrap_or_default().trim().to_string();
-                    if xml_line.is_empty() { continue; }
+                    if xml_line.is_empty() {
+                        continue;
+                    }
                     if xml_line.starts_with("<softwarelist") == true {
                         println!("xml_line: {:?}", xml_line);
-                        let system_string_split: Vec<&str> =
-                            xml_line.split("\"").collect();
+                        let system_string_split: Vec<&str> = xml_line.split("\"").collect();
                         println!("split: {:?}", system_string_split);
                         let system_counter = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_game_count_by_short_name(sqlx_pool_rw, &system_string_split[1].to_string()).await?;
                         if system_counter == 0 {
@@ -409,16 +495,25 @@ async fn process_rabbit_message(
                         xml_data = xml_line.to_string();
                     } else if xml_line.starts_with("</software") == true {
                         xml_data.push_str(xml_line);
-                        let json_data =
-                            xml_string_to_json(xml_data.to_string(), &conf)?;
-                        mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
-                            sqlx_pool_rw,
-                            game_system_uuid,
-                            json_data["software"]["name"].to_string(),
-                            json_data["software"]["description"].to_string(),
-                            json_data,
-                        )
-                        .await?;
+                        match xml_string_to_json(xml_data.to_string(), &conf) {
+                            Ok(json_data) => {
+                                mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
+                                    sqlx_pool_rw,
+                                    game_system_uuid,
+                                    json_data["software"]["name"].to_string(),
+                                    json_data["software"]["description"].to_string(),
+                                    json_data,
+                                )
+                                .await?;
+                            }
+                            Err(e) => {
+                                println!(
+                                    "Skipping unparseable software entry in {}: {}",
+                                    hash_file_path.display(),
+                                    e
+                                );
+                            }
+                        }
                     } else {
                         xml_data.push_str(xml_line);
                     }
@@ -462,7 +557,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {
                 let parsed: Value = serde_json::from_slice(&payload).unwrap_or_default();
-                if let Err(e) = process_rabbit_message(parsed, &rabbit_channel, &spawn_pool_rw).await {
+                if let Err(e) =
+                    process_rabbit_message(parsed, &rabbit_channel, &spawn_pool_rw).await
+                {
                     eprintln!("Processing failed: {}", e);
                 }
                 let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(

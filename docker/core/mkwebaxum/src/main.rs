@@ -97,6 +97,7 @@ pub mod user_internet {
 #[path = "user/media"]
 pub mod user_media {
     pub mod bp_media_book;
+    pub mod bp_media_cctv;
     pub mod bp_media_collection;
     pub mod bp_media_game;
     pub mod bp_media_game_servers;
@@ -519,6 +520,10 @@ async fn main() {
         .route_with_tsr(
             "/user/media/book_detail/{guid}",
             get(user_media::bp_media_book::user_media_book_detail),
+        )
+        .route_with_tsr(
+            "/user/media/cctv",
+            get(user_media::bp_media_cctv::user_media_cctv),
         )
         .route_with_tsr(
             "/user/media/game/{page}",

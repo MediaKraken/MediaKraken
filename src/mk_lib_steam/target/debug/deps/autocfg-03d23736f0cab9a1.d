@@ -1,0 +1,10 @@
+/home/metaman/repositories/MediaKraken/src/mk_lib_steam/target/debug/deps/autocfg-03d23736f0cab9a1.d: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/autocfg-1.5.1/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/autocfg-1.5.1/src/error.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/autocfg-1.5.1/src/rustc.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/autocfg-1.5.1/src/version.rs
+
+/home/metaman/repositories/MediaKraken/src/mk_lib_steam/target/debug/deps/libautocfg-03d23736f0cab9a1.rlib: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/autocfg-1.5.1/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/autocfg-1.5.1/src/error.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/autocfg-1.5.1/src/rustc.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/autocfg-1.5.1/src/version.rs
+
+/home/metaman/repositories/MediaKraken/src/mk_lib_steam/target/debug/deps/libautocfg-03d23736f0cab9a1.rmeta: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/autocfg-1.5.1/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/autocfg-1.5.1/src/error.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/autocfg-1.5.1/src/rustc.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/autocfg-1.5.1/src/version.rs
+
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/autocfg-1.5.1/src/lib.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/autocfg-1.5.1/src/error.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/autocfg-1.5.1/src/rustc.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/autocfg-1.5.1/src/version.rs:

@@ -1,0 +1,10 @@
+/home/metaman/repositories/MediaKraken/src/mk_lib_xbox/target/debug/deps/litemap-8a7aa09187553a36.d: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/litemap-0.8.3/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/litemap-0.8.3/src/map.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/litemap-0.8.3/src/store/mod.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/litemap-0.8.3/src/store/slice_impl.rs
+
+/home/metaman/repositories/MediaKraken/src/mk_lib_xbox/target/debug/deps/liblitemap-8a7aa09187553a36.rlib: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/litemap-0.8.3/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/litemap-0.8.3/src/map.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/litemap-0.8.3/src/store/mod.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/litemap-0.8.3/src/store/slice_impl.rs
+
+/home/metaman/repositories/MediaKraken/src/mk_lib_xbox/target/debug/deps/liblitemap-8a7aa09187553a36.rmeta: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/litemap-0.8.3/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/litemap-0.8.3/src/map.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/litemap-0.8.3/src/store/mod.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/litemap-0.8.3/src/store/slice_impl.rs
+
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/litemap-0.8.3/src/lib.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/litemap-0.8.3/src/map.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/litemap-0.8.3/src/store/mod.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/litemap-0.8.3/src/store/slice_impl.rs:

@@ -40,7 +40,9 @@ libs_to_publish = ["ed2k",
                    "mk_lib_hash",
                    "mk_lib_network",
                    "mk_lib_hardware",
-                   "mk_lib_metadata"]
+                   "mk_lib_metadata",
+                   "mk_lib_steam",
+                   "mk_lib_xbox"]
 
 if args.library:
     libs_to_publish = [args.library]

@@ -3,9 +3,8 @@
   "mcp": {
     "mcp-qdrant-server": {
       "enabled": true,
-      "transport": "sse",
       "type": "remote",
-      "url": "http://skynetmem1:8000/sse?collection=mediakraken"
+      "url": "http://skynetmem1:8000/mcp?collection=mediakraken"
     }
   }
 }

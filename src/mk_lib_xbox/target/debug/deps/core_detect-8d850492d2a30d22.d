@@ -1,0 +1,9 @@
+/home/metaman/repositories/MediaKraken/src/mk_lib_xbox/target/debug/deps/core_detect-8d850492d2a30d22.d: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/core_detect-1.0.0/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/core_detect-1.0.0/src/macros.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/core_detect-1.0.0/src/arch/x86.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/core_detect-1.0.0/src/os/x86.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/core_detect-1.0.0/src/cache.rs
+
+/home/metaman/repositories/MediaKraken/src/mk_lib_xbox/target/debug/deps/libcore_detect-8d850492d2a30d22.rmeta: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/core_detect-1.0.0/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/core_detect-1.0.0/src/macros.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/core_detect-1.0.0/src/arch/x86.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/core_detect-1.0.0/src/os/x86.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/core_detect-1.0.0/src/cache.rs
+
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/core_detect-1.0.0/src/lib.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/core_detect-1.0.0/src/macros.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/core_detect-1.0.0/src/arch/x86.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/core_detect-1.0.0/src/os/x86.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/core_detect-1.0.0/src/cache.rs:

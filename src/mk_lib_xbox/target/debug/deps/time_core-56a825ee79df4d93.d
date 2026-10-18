@@ -1,0 +1,10 @@
+/home/metaman/repositories/MediaKraken/src/mk_lib_xbox/target/debug/deps/time_core-56a825ee79df4d93.d: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/time-core-0.1.9/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/time-core-0.1.9/src/hint.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/time-core-0.1.9/src/unit.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/time-core-0.1.9/src/util.rs
+
+/home/metaman/repositories/MediaKraken/src/mk_lib_xbox/target/debug/deps/libtime_core-56a825ee79df4d93.rlib: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/time-core-0.1.9/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/time-core-0.1.9/src/hint.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/time-core-0.1.9/src/unit.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/time-core-0.1.9/src/util.rs
+
+/home/metaman/repositories/MediaKraken/src/mk_lib_xbox/target/debug/deps/libtime_core-56a825ee79df4d93.rmeta: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/time-core-0.1.9/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/time-core-0.1.9/src/hint.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/time-core-0.1.9/src/unit.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/time-core-0.1.9/src/util.rs
+
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/time-core-0.1.9/src/lib.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/time-core-0.1.9/src/hint.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/time-core-0.1.9/src/unit.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/time-core-0.1.9/src/util.rs:

@@ -1,0 +1,8 @@
+/home/metaman/repositories/MediaKraken/src/mk_lib_steam/target/debug/deps/serde_aux-df31724ad4c5b082.d: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/serde-aux-4.7.0/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/serde-aux-4.7.0/src/container_attributes.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/serde-aux-4.7.0/src/field_attributes.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/serde-aux-4.7.0/src/serde_introspection.rs
+
+/home/metaman/repositories/MediaKraken/src/mk_lib_steam/target/debug/deps/libserde_aux-df31724ad4c5b082.rmeta: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/serde-aux-4.7.0/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/serde-aux-4.7.0/src/container_attributes.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/serde-aux-4.7.0/src/field_attributes.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/serde-aux-4.7.0/src/serde_introspection.rs
+
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/serde-aux-4.7.0/src/lib.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/serde-aux-4.7.0/src/container_attributes.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/serde-aux-4.7.0/src/field_attributes.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/serde-aux-4.7.0/src/serde_introspection.rs:

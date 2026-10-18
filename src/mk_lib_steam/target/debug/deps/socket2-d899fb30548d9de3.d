@@ -1,0 +1,9 @@
+/home/metaman/repositories/MediaKraken/src/mk_lib_steam/target/debug/deps/socket2-d899fb30548d9de3.d: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/socket2-0.5.10/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/socket2-0.5.10/src/sockaddr.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/socket2-0.5.10/src/socket.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/socket2-0.5.10/src/sockref.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/socket2-0.5.10/src/sys/unix.rs
+
+/home/metaman/repositories/MediaKraken/src/mk_lib_steam/target/debug/deps/libsocket2-d899fb30548d9de3.rmeta: /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/socket2-0.5.10/src/lib.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/socket2-0.5.10/src/sockaddr.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/socket2-0.5.10/src/socket.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/socket2-0.5.10/src/sockref.rs /home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/socket2-0.5.10/src/sys/unix.rs
+
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/socket2-0.5.10/src/lib.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/socket2-0.5.10/src/sockaddr.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/socket2-0.5.10/src/socket.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/socket2-0.5.10/src/sockref.rs:
+/home/metaman/.cargo/registry/src/mkdevkellnrapi.mediakraken.media-744ca4c38c13d37c/socket2-0.5.10/src/sys/unix.rs:

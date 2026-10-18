@@ -1,5 +1,39 @@
 {% extends "layouts/base_user.html" %}
 
 {% block content %}
-<div></div>
+
+<section class="w-full px-0 py-4 text-zinc-900 dark:text-zinc-100">
+  <h1 id="cctv-grid-heading" class="sr-only">CCTV cameras</h1>
+
+  {% if template_data_exists %}
+  <ul role="list" class="grid gap-4 sm:gap-5
+     grid-cols-1
+     sm:grid-cols-2
+     lg:grid-cols-3
+     xl:grid-cols-4">
+    {% for camera in template_data %}
+    <li class="group relative overflow-hidden rounded-xl bg-white dark:bg-zinc-900
+           border border-transparent dark:border-zinc-800
+           shadow-sm hover:shadow-md transition-all duration-300">
+      <div class="relative aspect-video w-full bg-zinc-200 dark:bg-zinc-800">
+        <video class="h-full w-full object-cover"
+               src="{{ camera.template_camera_feed }}"
+               muted autoplay playsinline preload="metadata"
+               aria-label="Live feed from {{ camera.template_camera_name }}"></video>
+      </div>
+
+      <div class="p-3">
+        <h2 class="text-sm font-bold leading-tight line-clamp-2 text-zinc-900 dark:text-zinc-100">
+          {{ camera.template_camera_name }}
+        </h2>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="text-sm text-zinc-500 dark:text-zinc-400">
+    No CCTV cameras found.
+  </p>
+  {% endif %}
+</section>
 {% endblock %}
