@@ -1,35 +1,221 @@
 {% extends "layouts/base_user.html" %}
 
+{#
+  Context (TemplateMetaSportsDetailContext):
+    template_data: &serde_json::Value
+      "mm_metadata_json": {
+        "title": "Event name",
+        "sport": "Sport",
+        "league": "League",
+        "season": "2026",
+        "release_date": "2026-01-01",
+        "venue": "Venue",
+        "team_home": "Home team",
+        "team_away": "Away team",
+        "home_score": "1",
+        "away_score": "0",
+        "poster": "/path/or/url/to/poster",
+        "overview": "Description"
+      }
+    template_data_exists: &bool
+    page_title: Option<String>
+#}
+
 {% block content %}
-<div>
-        <div>
-            {% if template_data_exists %}
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <tbody>
-                        <tr>
-                            {#<p><b>Title:</b> {{ data_title }}</p>
-                            <p><b>Runtime:</b> {{data_runtime}}</p>
-                            <p><b>Rating:</b> </p>
-                            <p><b>User Rating Avg:</b> {{data_user_rating}}</p>
-                            <p><b>Release Date:</b> {{data_first_aired}}</p>
-                            <p><b>Overview:</b> {{data_overview}}</p>
-                            {% if data_genres_list %}
-                            <p><b>Genres:</b> {{data_genres_list}}</p>
-                            {% endif %}
-                            {% if data_production %}
-                            <p><b>Production Companies:</b> {{data_production}}</p>
-                            {% endif %}
-                            {% if data_review %}
-                            <p><b>Reviews:</b></p>
-                            {% endif %}#}
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+<section class="max-w-6xl mx-auto px-4 py-6 sm:px-6" x-data="sportsDetailPage()">
+
+    {% if template_data_exists %}
+
+    <!-- HEADER -->
+    <div class="grid gap-6 lg:grid-cols-[260px_1fr]">
+
+        <!-- Poster -->
+        <div class="aspect-[2/3] overflow-hidden rounded-2xl bg-zinc-200 shadow-sm dark:bg-zinc-800">
+            {% if let Some(poster) = template_data["mm_metadata_json"]["poster"].as_str() %}
+            <img src="{{ poster }}"
+                alt="Event poster" loading="lazy" decoding="async"
+                @load="loaded = true" @error="loaded = true"
+                x-init="$nextTick(() => { loaded = $el.complete })"
+                class="h-full w-full object-cover transition-opacity duration-500"
+                :class="loaded ? 'opacity-100' : 'opacity-0'" />
             {% else %}
-            <p id="general_text">No info found. ERROR! You should never see this message.</p>
+            <img src="/static/image/stadium.png?v=1"
+                alt="Event artwork placeholder" loading="lazy" decoding="async"
+                @load="loaded = true" @error="loaded = true"
+                x-init="$nextTick(() => { loaded = $el.complete })"
+                class="h-full w-full object-contain p-10 transition-opacity duration-500"
+                :class="loaded ? 'opacity-100' : 'opacity-0'" />
             {% endif %}
         </div>
+
+        <!-- Info -->
+        <div class="space-y-5">
+
+            <div>
+                {% if let Some(title) = template_data["mm_metadata_json"]["title"].as_str() %}
+                <h1 class="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                    {{ title }}
+                </h1>
+                {% else %}
+                <h1 class="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                    Unknown Event
+                </h1>
+                {% endif %}
+                {% if let Some(sport) = template_data["mm_metadata_json"]["sport"].as_str() %}
+                <p class="mt-1 text-lg font-medium text-zinc-600 dark:text-zinc-400">
+                    {{ sport }}
+                </p>
+                {% endif %}
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                {% if let Some(league) = template_data["mm_metadata_json"]["league"].as_str() %}
+                <span
+                    class="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                    {{ league }}
+                </span>
+                {% endif %}
+                {% if let Some(season) = template_data["mm_metadata_json"]["season"].as_str() %}
+                <span
+                    class="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                    Season {{ season }}
+                </span>
+                {% endif %}
+                {% if let Some(release_date) = template_data["mm_metadata_json"]["release_date"].as_str() %}
+                <span
+                    class="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                    {{ release_date }}
+                </span>
+                {% endif %}
+            </div>
+
+            <div class="rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-900">
+                <div class="flex items-center gap-2">
+                    <button @click="toggle('favorite')" aria-label="Toggle favorite"
+                        class="rounded-md p-1 transition-transform active:scale-110"
+                        :class="favorite ? 'text-red-500' : 'text-zinc-400 hover:text-red-400'">
+                        {% include "icons/heart.svg" %}
+                    </button>
+                    <button @click="toggle('trash')" aria-label="Toggle trash"
+                        class="rounded-md p-1 transition-transform active:scale-110"
+                        :class="trash ? 'text-red-600' : 'text-zinc-400 hover:text-red-500'">
+                        {% include "icons/trash.svg" %}
+                    </button>
+                </div>
+                {% if let Some(overview) = template_data["mm_metadata_json"]["overview"].as_str() %}
+                <p class="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
+                    {{ overview }}
+                </p>
+                {% endif %}
+            </div>
+        </div>
     </div>
+
+    <!-- FACTS -->
+    <div class="mt-10 grid gap-4 sm:grid-cols-3">
+        {% if let Some(release_date) = template_data["mm_metadata_json"]["release_date"].as_str() %}
+        <div
+            class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+            <p class="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                Date
+            </p>
+            <p class="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                {{ release_date }}
+            </p>
+        </div>
+        {% endif %}
+        {% if let Some(league) = template_data["mm_metadata_json"]["league"].as_str() %}
+        <div
+            class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+            <p class="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                League
+            </p>
+            <p class="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                {{ league }}
+            </p>
+        </div>
+        {% endif %}
+        {% if let Some(venue) = template_data["mm_metadata_json"]["venue"].as_str() %}
+        <div
+            class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+            <p class="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                Venue
+            </p>
+            <p class="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                {{ venue }}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- MATCHUP -->
+    {% if !template_data["mm_metadata_json"]["team_home"].is_null() || !template_data["mm_metadata_json"]["team_away"].is_null() %}
+    <div class="mt-10">
+        <h2 class="mb-3 text-xl font-semibold text-zinc-900 dark:text-zinc-100">Matchup</h2>
+        <div
+            class="grid grid-cols-[1fr_auto_1fr] items-center gap-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+            <div class="text-center">
+                <p class="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                    Home
+                </p>
+                {% if let Some(team_home) = template_data["mm_metadata_json"]["team_home"].as_str() %}
+                <p class="mt-1 truncate text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                    {{ team_home }}
+                </p>
+                {% else %}
+                <p class="mt-1 text-lg font-semibold text-zinc-500 dark:text-zinc-400">TBD</p>
+                {% endif %}
+            </div>
+            <div
+                class="text-2xl font-bold tabular-nums text-zinc-900 dark:text-zinc-100">
+                {% if let Some(home_score) = template_data["mm_metadata_json"]["home_score"].as_str() %}
+                {% if let Some(away_score) = template_data["mm_metadata_json"]["away_score"].as_str() %}
+                {{ home_score }} – {{ away_score }}
+                {% else %}
+                vs
+                {% endif %}
+                {% else %}
+                vs
+                {% endif %}
+            </div>
+            <div class="text-center">
+                <p class="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                    Away
+                </p>
+                {% if let Some(team_away) = template_data["mm_metadata_json"]["team_away"].as_str() %}
+                <p class="mt-1 truncate text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                    {{ team_away }}
+                </p>
+                {% else %}
+                <p class="mt-1 text-lg font-semibold text-zinc-500 dark:text-zinc-400">TBD</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div
+        class="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-6 text-sm text-zinc-500 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400">
+        {% include "icons/search.svg" %}
+        No info found for this event.
+    </div>
+    {% endif %}
+
+</section>
+
+<script>
+    function sportsDetailPage() {
+        return {
+            loaded: false,
+            favorite: false,
+            trash: false,
+
+            toggle(stateName) {
+                this[stateName] = !this[stateName]
+            }
+        }
+    }
+</script>
+
 {% endblock %}
