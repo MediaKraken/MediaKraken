@@ -1,5 +1,132 @@
 {% extends "layouts/base_user.html" %}
 
+{#
+  Context (TemplateMediaGameServerDetailContext):
+    template_data: serde_json::Value
+      "mm_metadata_json": {
+        "name": "Server name",
+        "overview": "Description",
+        "game": "Game the server hosts",
+        "address": "host:port or hostname",
+        "version": "Game version",
+        "max_players": "32"
+      }
+    page_title: Option<String>
+
+  The handler currently passes json!({}) — every field is guarded and the
+  page renders a clean empty state until real data is wired up.
+#}
+
 {% block content %}
-<div></div>
+<section class="max-w-6xl mx-auto px-4 py-6 sm:px-6" x-data="mediaGameServerDetailPage()">
+
+    <a href="/user/media/game_servers/1"
+        class="mb-4 inline-flex items-center gap-2 text-sm font-medium text-indigo-600 transition-colors hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
+        <span aria-hidden="true">&larr;</span> Back to Game Servers
+    </a>
+
+    <div class="grid gap-6 lg:grid-cols-[260px_1fr]">
+
+        <!-- Icon tile -->
+        <div
+            class="mx-auto aspect-square w-full max-w-[260px] overflow-hidden rounded-2xl bg-zinc-200 shadow-sm lg:mx-0 dark:bg-zinc-800">
+            {% if let Some(cover) = template_data["mm_metadata_json"]["cover"].as_str() %}
+            <img src="{{ cover }}" alt="Game server artwork"
+                class="h-full w-full object-cover" loading="lazy" decoding="async">
+            {% else %}
+            <img src="/static/image/circuit-board.png?v=1" alt="Game server placeholder"
+                class="h-full w-full object-contain p-10" loading="lazy" decoding="async">
+            {% endif %}
+        </div>
+
+        <!-- Info -->
+        <div class="space-y-5">
+
+            <div>
+                {% if let Some(title) = template_data["mm_metadata_json"]["name"].as_str() %}
+                <h1 class="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                    {{ title }}
+                </h1>
+                {% else %}
+                <h1 class="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                    Unknown Game Server
+                </h1>
+                {% endif %}
+                {% if let Some(game) = template_data["mm_metadata_json"]["game"].as_str() %}
+                <p class="mt-1 text-lg font-medium text-zinc-600 dark:text-zinc-400">
+                    {{ game }}
+                </p>
+                {% endif %}
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                {% if let Some(version) = template_data["mm_metadata_json"]["version"].as_str() %}
+                <span
+                    class="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                    Version {{ version }}
+                </span>
+                {% endif %}
+                {% if let Some(max_players) = template_data["mm_metadata_json"]["max_players"].as_str() %}
+                <span
+                    class="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                    {{ max_players }} players
+                </span>
+                {% endif %}
+            </div>
+
+            <div class="rounded-xl border border-zinc-200 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                {% if let Some(overview) = template_data["mm_metadata_json"]["overview"].as_str() %}
+                <p class="text-sm text-zinc-600 dark:text-zinc-400">
+                    {{ overview }}
+                </p>
+                {% else %}
+                <p class="text-sm italic text-zinc-400 dark:text-zinc-500">
+                    No description available yet.
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- FACTS -->
+    <div class="mt-10 grid gap-4 sm:grid-cols-2">
+        {% if let Some(address) = template_data["mm_metadata_json"]["address"].as_str() %}
+        <div
+            class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <p class="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                Address
+            </p>
+            <p class="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                {{ address }}
+            </p>
+        </div>
+        {% endif %}
+        {% if let Some(version) = template_data["mm_metadata_json"]["version"].as_str() %}
+        <div
+            class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <p class="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                Version
+            </p>
+            <p class="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                {{ version }}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+</section>
+
+<script>
+    function mediaGameServerDetailPage() {
+        return {
+            favorite: false,
+            trash: false,
+
+            toggle(stateName) {
+                this[stateName] = !this[stateName]
+            }
+        }
+    }
+</script>
+
 {% endblock %}

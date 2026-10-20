@@ -1,5 +1,87 @@
 {% extends "layouts/base_user.html" %}
 
+{#
+  Context (UserSearchTemplate):
+    page_title: Option<String>
+
+  The form below targets the registered GET /user/search route.
+  The handler expects SearchParams { q: String, filter: Vec<String> },
+  so the input uses name="q" and each checkbox uses name="filter".
+  The handler currently returns an empty result set.
+#}
+
 {% block content %}
-<div></div>
+<section class="w-full px-0 py-4 text-zinc-900 dark:text-zinc-100">
+    <div class="rounded-3xl border border-zinc-200/80 bg-gradient-to-br from-white via-white to-zinc-100 p-6 shadow-sm dark:border-zinc-800 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900">
+        <div class="space-y-2">
+            <p class="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500 dark:text-indigo-300">Search</p>
+            <h1 class="text-3xl font-bold tracking-tight">Title Search</h1>
+            <p class="max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+                Search across your library by title. Pick one or more media types to narrow the results.
+            </p>
+        </div>
+    </div>
+
+    <div class="mt-4 rounded-xl border border-zinc-200 bg-white/70 p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70">
+        <form action="/user/search" method="get" class="space-y-4" role="search" aria-label="Title search">
+            <div>
+                <label for="title-search" class="block text-sm font-semibold tracking-wide text-zinc-700 dark:text-zinc-200">Title</label>
+                <input
+                    id="title-search"
+                    name="q"
+                    type="text"
+                    placeholder="Start typing a title…"
+                    class="mt-2 block w-full max-w-xl rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm placeholder:text-zinc-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                >
+            </div>
+            <div>
+                <p class="text-sm font-semibold tracking-wide text-zinc-700 dark:text-zinc-200">Media types</p>
+                <div class="mt-2 flex flex-wrap gap-3 text-sm text-zinc-600 dark:text-zinc-300">
+                    <label class="flex cursor-pointer items-center gap-2">
+                        <input type="checkbox" name="filter" value="movie"
+                            class="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950">
+                        Movies
+                    </label>
+                    <label class="flex cursor-pointer items-center gap-2">
+                        <input type="checkbox" name="filter" value="book"
+                            class="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950">
+                        Books
+                    </label>
+                    <label class="flex cursor-pointer items-center gap-2">
+                        <input type="checkbox" name="filter" value="game"
+                            class="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950">
+                        Games
+                    </label>
+                    <label class="flex cursor-pointer items-center gap-2">
+                        <input type="checkbox" name="filter" value="music"
+                            class="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950">
+                        Music
+                    </label>
+                    <label class="flex cursor-pointer items-center gap-2">
+                        <input type="checkbox" name="filter" value="tv"
+                            class="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950">
+                        TV
+                    </label>
+                    <label class="flex cursor-pointer items-center gap-2">
+                        <input type="checkbox" name="filter" value="sports"
+                            class="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950">
+                        Sports
+                    </label>
+                    <label class="flex cursor-pointer items-center gap-2">
+                        <input type="checkbox" name="filter" value="all"
+                            class="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950">
+                        All
+                    </label>
+                </div>
+            </div>
+            <div>
+                <button type="submit"
+                    class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-500"
+                    aria-label="Run title search">
+                    Search
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
 {% endblock %}

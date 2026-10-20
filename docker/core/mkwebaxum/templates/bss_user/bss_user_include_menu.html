@@ -1,4 +1,20 @@
-<header class="sticky top-0 z-[100] w-full bg-white dark:bg-zinc-900 shadow" x-data="themeToggle()" x-init="init()">
+<header class="sticky top-0 z-[100] w-full bg-white dark:bg-zinc-900 shadow" x-init="init()"
+    x-data="{
+        // Self-contained (same component the admin head's themeToggle() provides):
+        // error pages include this menu without defining themeToggle().
+        dark: false,
+        init() {
+            this.dark = localStorage.theme === 'dark' ||
+                (!('theme' in localStorage) &&
+                    window.matchMedia('(prefers-color-scheme: dark)').matches)
+            document.documentElement.classList.toggle('dark', this.dark)
+        },
+        toggle() {
+            this.dark = !this.dark
+            document.documentElement.classList.toggle('dark', this.dark)
+            localStorage.theme = this.dark ? 'dark' : 'light'
+        }
+    }">
     <nav class="bg-white dark:bg-zinc-900">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="relative flex items-center justify-between h-16">
@@ -51,7 +67,7 @@
                                             <li><a href="/user/metadata/movie/1"
                                                     class="text-sm text-gray-600 dark:text-zinc-300 hover:text-indigo-600 block">Movie</a>
                                             </li>
-                                            <li><a href="/user/metadata/movie_collection/1"
+                                            <li><a href="/user/metadata/collection/1"
                                                     class="text-sm text-gray-600 dark:text-zinc-300 hover:text-indigo-600 block">Movie
                                                     Collection</a></li>
                                             <li><a href="/user/metadata/tv/1"

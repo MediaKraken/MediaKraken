@@ -14,7 +14,6 @@ use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
-use serde_json::json;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -98,6 +97,12 @@ pub async fn user_media_sports(
     }
 }
 
+#[derive(sqlx::FromRow)]
+struct MediaSportsDetailRow {
+    mm_metadata_sports_json: serde_json::Value,
+    cover_path: String,
+}
+
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_sports_detail.html")]
 struct TemplateMediaSportsDetailContext {
@@ -124,8 +129,35 @@ pub async fn user_media_sports_detail(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
+        let row = sqlx::query_as::<_, MediaSportsDetailRow>(
+            r#"select mm_metadata_sports_json,
+                      COALESCE(mm_metadata_sports_image_json->'Images'->'thesportsdb'->>'Poster',
+                               mm_metadata_sports_image_json->>'Poster', '') as cover_path
+               from mm_metadata_sports
+               where mm_metadata_sports_guid = $1"#,
+        )
+        .bind(guid)
+        .fetch_optional(&state.sqlx_pool_ro)
+        .await;
+        let template_data = match row {
+            Ok(Some(row)) => {
+                crate::user::detail_map::sports(&row.mm_metadata_sports_json, &row.cover_path)
+            }
+            Ok(None) => {
+                return (
+                    StatusCode::NOT_FOUND,
+                    Html(String::from("Not found")).into_response(),
+                );
+            }
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
         let template = TemplateMediaSportsDetailContext {
-            template_data: json!({}),
+            template_data,
             page_title: Some("MediaKraken Sports Detail".to_string()),
         };
         let reply_html = template.render().unwrap();

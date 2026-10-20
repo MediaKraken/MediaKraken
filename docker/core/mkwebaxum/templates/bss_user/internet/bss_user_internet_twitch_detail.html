@@ -1,16 +1,27 @@
 {% extends "layouts/base_user.html" %}
 
 {% block content %}
-<div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-    <div id="twitch-embed" class="aspect-video w-full overflow-hidden rounded-lg"></div>
-    <script src="https://embed.twitch.tv/embed/v1.js"></script>
-    <script type="text/javascript">
-      new Twitch.Embed("twitch-embed", {
-        width: "100%",
-        height: "100%",
-        channel: "{{ twitchtv_channel }}",
-        parent: ["{{ twitch_embed_parent }}"]
-      });
-    </script>
-</div>
+<main class="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+    <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <a href="/user/internet/twitchtv" class="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 transition-colors hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300" aria-label="Back to Twitch browse">
+            <span aria-hidden="true">&larr;</span> Back to Twitch
+        </a>
+        <h1 class="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+            Channel: {{ twitchtv_channel }}
+        </h1>
+    </div>
+
+    <div class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div id="twitch-embed" class="aspect-video w-full overflow-hidden rounded-lg bg-zinc-950"></div>
+        <script src="https://embed.twitch.tv/embed/v1.js"></script>
+        <script type="text/javascript">
+          new Twitch.Embed("twitch-embed", {
+            width: "100%",
+            height: "100%",
+            channel: "{{ twitchtv_channel }}",
+            parent: ["{{ twitch_embed_parent }}"]
+          });
+        </script>
+    </div>
+</main>
 {% endblock %}

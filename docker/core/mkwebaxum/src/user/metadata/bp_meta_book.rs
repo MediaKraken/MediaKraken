@@ -133,6 +133,12 @@ pub async fn user_metadata_book(
     }
 }
 
+#[derive(sqlx::FromRow)]
+struct MetaBookDetailRow {
+    mm_metadata_book_json: serde_json::Value,
+    cover_path: String,
+}
+
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_book_detail.html")]
 struct TemplateMetaBookDetailContext {
@@ -159,14 +165,35 @@ pub async fn user_metadata_book_detail(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let detail_data =
-        mk_lib_database::database_metadata::mk_lib_database_metadata_book::mk_lib_database_metadata_book_detail(
-            &state.sqlx_pool_ro, guid,
+        let row = sqlx::query_as::<_, MetaBookDetailRow>(
+            r#"select mm_metadata_book_json,
+                      COALESCE(mm_metadata_book_localimage->>'Poster',
+                               mm_metadata_book_localimage->'Images'->>'Poster', '') as cover_path
+               from mm_metadata_book
+               where mm_metadata_book_guid = $1"#,
         )
-        .await
-        .unwrap();
+        .bind(guid)
+        .fetch_optional(&state.sqlx_pool_ro)
+        .await;
+        let template_data = match row {
+            Ok(Some(row)) => {
+                crate::user::detail_map::book(&row.mm_metadata_book_json, &row.cover_path)
+            }
+            Ok(None) => {
+                return (
+                    StatusCode::NOT_FOUND,
+                    Html(String::from("Not found")).into_response(),
+                );
+            }
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
         let template = TemplateMetaBookDetailContext {
-            template_data: detail_data,
+            template_data,
             page_title: Some("MediaKraken Metadata Book Detail".to_string()),
         };
         let reply_html = template.render().unwrap();

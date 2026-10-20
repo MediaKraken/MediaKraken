@@ -16,9 +16,11 @@
         {% endfor %}
         <div id="the-tv-node">
             {% for row_data in template_data_tv_match %}
-            <img src="/static{{row_data.image_json|safe}}" loading="lazy" decoding="async" height="300" width="200">
+            {% if let Some(image) = row_data.image_json.as_str() %}
+            <img src="/static{{image|safe}}" loading="lazy" decoding="async" height="300" width="200">
+            {% endif %}
             <a href="/user/api/tv_add/{{row_data.mm_metadata_tvshow_guid}}">
-                    {{row_data.mm_metadata_tvshow_name}} - {{row_data.air_date}}
+                    {{row_data.mm_metadata_tvshow_name}}{% if let Some(air_date) = row_data.air_date.as_str() %} - {{air_date}}{% endif %}
                 </a><BR>
             {% endfor %}
         </div>

@@ -1,26 +1,38 @@
 {% extends "layouts/base_user.html" %}
 
+{#
+  Context (TemplateUserInternetFlickr):
+    items: Vec<FlickrBrowseItem>
+      { id, title, author, image_url, published, link_url, tags, description: all String }
+    has_items: bool
+    tags: String
+    page_title: Option<String>
+
+  The tag form is a GET on the registered /user/internet/flickr route
+  with the "tags" query parameter.
+#}
+
 {% block content %}
 <main class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-    <section class="mb-6 rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-        <h1 class="text-2xl font-semibold">Flickr Browse</h1>
-        <p class="mt-1 text-sm text-slate-300">Browse Flickr public photos, optionally filtered by tags.</p>
+    <section class="mb-6 rounded-xl border border-zinc-200 bg-white/70 p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70">
+        <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Flickr Browse</h1>
+        <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Browse Flickr public photos, optionally filtered by tags.</p>
 
         <form action="/user/internet/flickr" method="get" class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
             <div class="w-full sm:max-w-md">
-                <label for="flickr-tags" class="block text-sm font-medium text-slate-200">Tags (comma separated)</label>
+                <label for="flickr-tags" class="block text-sm font-medium text-zinc-700 dark:text-zinc-200">Tags (comma separated)</label>
                 <input
                     id="flickr-tags"
                     name="tags"
                     type="text"
                     value="{{ tags }}"
                     placeholder="nature,sunset"
-                    class="mt-1 w-full rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-teal-400 focus:outline-none"
+                    class="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-teal-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
                 >
             </div>
             <div class="flex gap-2">
-                <button type="submit" class="rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-600" aria-label="Search Flickr tags">Search</button>
-                <a href="/user/internet/flickr" class="rounded-lg border border-slate-600 px-4 py-2 text-sm text-slate-200 hover:border-slate-400 hover:bg-slate-800" aria-label="Clear Flickr tag filter">Clear</a>
+                <button type="submit" class="rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-500" aria-label="Search Flickr tags">Search</button>
+                <a href="/user/internet/flickr" class="rounded-lg border border-zinc-300 px-4 py-2 text-sm text-zinc-700 transition-colors hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-zinc-500 dark:hover:bg-zinc-800" aria-label="Clear Flickr tag filter">Clear</a>
             </div>
         </form>
     </section>
@@ -28,15 +40,15 @@
     {% if has_items %}
     <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {% for item in items %}
-        <article class="overflow-hidden rounded-xl border border-slate-800 bg-slate-900">
+        <article class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
             <img src="{{ item.image_url }}" alt="{{ item.title }}" class="h-56 w-full object-cover" loading="lazy" decoding="async">
             <div class="space-y-2 p-4">
-                <h2 class="truncate text-base font-semibold text-slate-100">{{ item.title }}</h2>
-                <p class="truncate text-sm text-slate-300">{{ item.author }}</p>
-                <p class="text-xs text-slate-400">Published: {{ item.published }}</p>
+                <h2 class="truncate text-base font-semibold text-zinc-900 dark:text-zinc-100">{{ item.title }}</h2>
+                <p class="truncate text-sm text-zinc-600 dark:text-zinc-300">{{ item.author }}</p>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400">Published: {{ item.published }}</p>
                 <a
                     href="/user/internet/flickr/{{ item.id }}?title={{ item.title|urlencode }}&author={{ item.author|urlencode }}&image={{ item.image_url|urlencode }}&published={{ item.published|urlencode }}&link={{ item.link_url|urlencode }}&tags={{ item.tags|urlencode }}&description={{ item.description|urlencode }}"
-                    class="mt-2 inline-flex w-full items-center justify-center rounded-lg bg-slate-800 px-3 py-2 text-sm font-medium text-slate-100 hover:bg-slate-700"
+                    class="mt-2 inline-flex w-full items-center justify-center rounded-lg bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700"
                     aria-label="View Flickr details for {{ item.title }}"
                 >
                     View details
@@ -46,7 +58,7 @@
         {% endfor %}
     </section>
     {% else %}
-    <section class="rounded-xl border border-slate-800 bg-slate-900 p-6 text-center text-slate-300">
+    <section class="rounded-xl border border-zinc-200 bg-white p-6 text-center text-zinc-600 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
         No Flickr media found for this filter.
     </section>
     {% endif %}

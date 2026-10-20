@@ -10,7 +10,6 @@ use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use sqlx::{FromRow, postgres::PgPool};
 
 use crate::mk_lib_database;
@@ -250,6 +249,13 @@ pub async fn user_metadata_person(
     }
 }
 
+#[derive(sqlx::FromRow)]
+struct MetaPersonDetailRow {
+    mm_metadata_person_meta_json: serde_json::Value,
+    person_name: String,
+    photo_path: String,
+}
+
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_person_detail.html")]
 struct TemplateMetaPersonDetailContext {
@@ -258,10 +264,10 @@ struct TemplateMetaPersonDetailContext {
 }
 
 pub async fn user_metadata_person_detail(
-    State(_state): State<AppState>,
+    State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
-    Path(_guid): Path<uuid::Uuid>,
+    Path(guid): Path<uuid::Uuid>,
 ) -> impl IntoResponse {
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
@@ -276,8 +282,37 @@ pub async fn user_metadata_person_detail(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
+        let row = sqlx::query_as::<_, MetaPersonDetailRow>(
+            r#"select mm_metadata_person_meta_json,
+                      COALESCE(mm_metadata_person_name, '') as person_name,
+                      COALESCE(mm_metadata_person_image->>'Poster', '') as photo_path
+               from mm_metadata_person
+               where mm_metadata_person_guid = $1"#,
+        )
+        .bind(guid)
+        .fetch_optional(&state.sqlx_pool_ro)
+        .await;
+        let template_data = match row {
+            Ok(Some(row)) => crate::user::detail_map::person(
+                &row.mm_metadata_person_meta_json,
+                &row.person_name,
+                &row.photo_path,
+            ),
+            Ok(None) => {
+                return (
+                    StatusCode::NOT_FOUND,
+                    Html(String::from("Not found")).into_response(),
+                );
+            }
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
         let template = TemplateMetaPersonDetailContext {
-            template_data: json!({}),
+            template_data,
             page_title: Some("MediaKraken Metadata Person Detail".to_string()),
         };
         let reply_html = template.render().unwrap();

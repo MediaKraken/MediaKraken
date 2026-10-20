@@ -16,7 +16,6 @@ use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
 use serde::Deserialize;
-use serde_json::json;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -133,6 +132,13 @@ pub async fn user_metadata_music(
     }
 }
 
+#[derive(sqlx::FromRow)]
+struct MetaMusicDetailRow {
+    mm_metadata_album_json: serde_json::Value,
+    album_name: String,
+    localimage: serde_json::Value,
+}
+
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_music_album_detail.html")]
 struct TemplateMetaMusicDetailContext {
@@ -159,8 +165,40 @@ pub async fn user_metadata_music_detail(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
+        let row = sqlx::query_as::<_, MetaMusicDetailRow>(
+            r#"select mm_metadata_album_json,
+                      COALESCE(mm_metadata_album_name, '') as album_name,
+                      COALESCE(mm_metadata_album_localimage, 'null'::jsonb) as localimage
+               from mm_metadata_album
+               where mm_metadata_album_guid = $1"#,
+        )
+        .bind(guid)
+        .fetch_optional(&state.sqlx_pool_ro)
+        .await;
+        let template_data = match row {
+            Ok(Some(row)) => {
+                let cover_path = crate::user::detail_map::album_cover_path(&row.localimage);
+                crate::user::detail_map::album(
+                    &row.mm_metadata_album_json,
+                    &row.album_name,
+                    cover_path,
+                )
+            }
+            Ok(None) => {
+                return (
+                    StatusCode::NOT_FOUND,
+                    Html(String::from("Not found")).into_response(),
+                );
+            }
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
         let template = TemplateMetaMusicDetailContext {
-            template_data: json!({}),
+            template_data,
             page_title: Some("MediaKraken Metadata Music Detail".to_string()),
         };
         let reply_html = template.render().unwrap();

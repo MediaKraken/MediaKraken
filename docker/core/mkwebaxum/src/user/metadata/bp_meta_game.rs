@@ -1,15 +1,15 @@
+use crate::AppState;
 use crate::mk_lib_database;
 use crate::user_preferences;
-use crate::AppState;
 use askama::Template;
 use axum::extract::Query;
 use axum::extract::State;
 use axum::response::Redirect;
 use axum::{
+    Extension,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
-    Extension,
 };
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
@@ -17,7 +17,6 @@ use axum_session_sqlx::SessionPgPool;
 use core::fmt::Write;
 use paginator::{PageItem, Paginator};
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -308,6 +307,14 @@ pub async fn user_metadata_game(
     }
 }
 
+#[derive(sqlx::FromRow)]
+struct MetaGameDetailRow {
+    gi_game_info_json: serde_json::Value,
+    game_name: String,
+    platform: String,
+    cover_path: String,
+}
+
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_game_detail.html")]
 struct TemplateMetaGameDetailContext {
@@ -334,8 +341,41 @@ pub async fn user_metadata_game_detail(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
+        let row = sqlx::query_as::<_, MetaGameDetailRow>(
+            r#"select gi.gi_game_info_json,
+                      COALESCE(gi.gi_game_info_name, '') as game_name,
+                      COALESCE(gs.gs_game_system_name, '') as platform,
+                      COALESCE(gi.gi_game_info_localimage->>'Poster',
+                               gi.gi_game_info_localimage->'Images'->>'Poster', '') as cover_path
+               from mm_metadata_game_software_info gi
+               left join mm_metadata_game_systems_info gs on gs.gs_id = gi.gi_system_id
+               where gi.gi_id = $1"#,
+        )
+        .bind(guid)
+        .fetch_optional(&state.sqlx_pool_ro)
+        .await;
+        let template_data = match row {
+            Ok(Some(row)) => crate::user::detail_map::game(
+                &row.gi_game_info_json,
+                &row.game_name,
+                &row.platform,
+                &row.cover_path,
+            ),
+            Ok(None) => {
+                return (
+                    StatusCode::NOT_FOUND,
+                    Html(String::from("Not found")).into_response(),
+                );
+            }
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
         let template = TemplateMetaGameDetailContext {
-            template_data: json!({}),
+            template_data,
             page_title: Some("MediaKraken Metadata Game Detail".to_string()),
         };
         let reply_html = template.render().unwrap();

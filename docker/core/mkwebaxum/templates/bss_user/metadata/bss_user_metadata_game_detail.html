@@ -1,5 +1,172 @@
 {% extends "layouts/base_user.html" %}
 
+{#
+  Context (TemplateMetaGameDetailContext):
+    template_data: serde_json::Value
+      "mm_metadata_json": {
+        "name": "Game title",
+        "overview": "Description",
+        "year": "2021",
+        "genre": ["Action", "Adventure"],
+        "developer": "Developer",
+        "publisher": "Publisher",
+        "platform": "PC",
+        "cover": "/path/or/url/to/art"
+      }
+    page_title: Option<String>
+
+  The handler currently passes json!({}) — every field is guarded and the
+  page renders a clean empty state until real data is wired up.
+#}
+
 {% block content %}
-<div></div>
+<section class="max-w-6xl mx-auto px-4 py-6 sm:px-6" x-data="metaGameDetailPage()">
+
+    <a href="/user/metadata/game/1"
+        class="mb-4 inline-flex items-center gap-2 text-sm font-medium text-indigo-600 transition-colors hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
+        <span aria-hidden="true">&larr;</span> Back to Games
+    </a>
+
+    <div class="grid gap-6 lg:grid-cols-[260px_1fr]">
+
+        <!-- Poster -->
+        <div
+            class="mx-auto aspect-[2/3] w-full max-w-[260px] overflow-hidden rounded-2xl bg-zinc-200 shadow-sm lg:mx-0 dark:bg-zinc-800">
+            {% if let Some(cover) = template_data["mm_metadata_json"]["cover"].as_str() %}
+            <img src="{{ cover }}" alt="Game cover"
+                class="h-full w-full object-cover" loading="lazy" decoding="async">
+            {% else %}
+            <img src="/static/image/vid_game.png?v=1" alt="Game artwork placeholder"
+                class="h-full w-full object-contain p-8" loading="lazy" decoding="async">
+            {% endif %}
+        </div>
+
+        <!-- Info -->
+        <div class="space-y-5">
+
+            <div>
+                {% if let Some(title) = template_data["mm_metadata_json"]["name"].as_str() %}
+                <h1 class="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                    {{ title }}
+                </h1>
+                {% else %}
+                <h1 class="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+                    Unknown Game
+                </h1>
+                {% endif %}
+                {% if let Some(developer) = template_data["mm_metadata_json"]["developer"].as_str() %}
+                <p class="mt-1 text-lg font-medium text-zinc-600 dark:text-zinc-400">
+                    {{ developer }}
+                </p>
+                {% endif %}
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                {% if let Some(year) = template_data["mm_metadata_json"]["year"].as_str() %}
+                <span
+                    class="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                    {{ year }}
+                </span>
+                {% endif %}
+                {% if let Some(genres) = template_data["mm_metadata_json"]["genre"].as_array() %}
+                {% for genre in genres %}
+                {% if let Some(g) = genre.as_str() %}
+                <span
+                    class="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                    {{ g }}
+                </span>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="rounded-xl border border-zinc-200 bg-white p-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+                <div class="flex items-center gap-2">
+                    <button @click="toggle('favorite')" aria-label="Toggle favorite"
+                        class="rounded-md p-1 transition-transform active:scale-110"
+                        :class="favorite ? 'text-red-500' : 'text-zinc-400 hover:text-red-400'">
+                        {% include "icons/heart.svg" %}
+                    </button>
+                    <button @click="toggle('trash')" aria-label="Toggle trash"
+                        class="rounded-md p-1 transition-transform active:scale-110"
+                        :class="trash ? 'text-red-600' : 'text-zinc-400 hover:text-red-500'">
+                        {% include "icons/trash.svg" %}
+                    </button>
+                </div>
+                {% if let Some(overview) = template_data["mm_metadata_json"]["overview"].as_str() %}
+                <p class="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
+                    {{ overview }}
+                </p>
+                {% else %}
+                <p class="mt-3 text-sm italic text-zinc-400 dark:text-zinc-500">
+                    No description available yet.
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- FACTS -->
+    <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {% if let Some(year) = template_data["mm_metadata_json"]["year"].as_str() %}
+        <div
+            class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <p class="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                Release Year
+            </p>
+            <p class="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                {{ year }}
+            </p>
+        </div>
+        {% endif %}
+        {% if let Some(developer) = template_data["mm_metadata_json"]["developer"].as_str() %}
+        <div
+            class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <p class="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                Developer
+            </p>
+            <p class="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                {{ developer }}
+            </p>
+        </div>
+        {% endif %}
+        {% if let Some(publisher) = template_data["mm_metadata_json"]["publisher"].as_str() %}
+        <div
+            class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <p class="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                Publisher
+            </p>
+            <p class="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                {{ publisher }}
+            </p>
+        </div>
+        {% endif %}
+        {% if let Some(platform) = template_data["mm_metadata_json"]["platform"].as_str() %}
+        <div
+            class="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <p class="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                Platform
+            </p>
+            <p class="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                {{ platform }}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+</section>
+
+<script>
+    function metaGameDetailPage() {
+        return {
+            favorite: false,
+            trash: false,
+
+            toggle(stateName) {
+                this[stateName] = !this[stateName]
+            }
+        }
+    }
+</script>
+
 {% endblock %}

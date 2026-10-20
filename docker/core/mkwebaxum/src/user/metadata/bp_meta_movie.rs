@@ -20,10 +20,10 @@ use core::fmt::Write;
 use paginator::{PageItem, Paginator};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use sqlx::FromRow;
 use sqlx::postgres::{PgPool, PgRow};
 use sqlx::types::chrono::DateTime;
 use sqlx::types::chrono::Utc;
-use sqlx::FromRow;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Genre {

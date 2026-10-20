@@ -1,11 +1,47 @@
 {% extends "layouts/base_user.html" %}
 
+{#
+  Context (TemplateUserHardwareContext<'a>):
+    template_data_phue_exists: &bool
+    page_title: Option<String>
+
+  The /user/hardware/phue route is not registered in main.rs yet;
+  the card below links to it for when it is wired up.
+#}
+
 {% block content %}
-<div>
-        {% if template_data_phue_exists %}
-        <a href="/user/hardware/phue" id="user_hardware_page">
-            <img src="/static/image/light-bulb.png" width="200" height="200">
-        </a>
-        {% endif %}
+<section class="w-full px-0 py-4 text-zinc-900 dark:text-zinc-100">
+    <div class="rounded-3xl border border-zinc-200/80 bg-gradient-to-br from-white via-white to-zinc-100 p-6 shadow-sm dark:border-zinc-800 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900">
+        <div class="space-y-2">
+            <p class="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500 dark:text-indigo-300">Hardware</p>
+            <h1 class="text-3xl font-bold tracking-tight">Hardware</h1>
+            <p class="max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+                Hardware connected to MediaKraken.
+            </p>
+        </div>
     </div>
+
+    {% if template_data_phue_exists %}
+    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+        <a id="user_hardware_page" href="/user/hardware/phue"
+            class="group flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+            aria-label="Open Philips Hue lighting controls">
+            <img src="/static/image/light-bulb.png?v=1" alt="Light bulb icon" width="96" height="96"
+                loading="lazy" decoding="async"
+                class="h-24 w-24 rounded-lg object-contain bg-zinc-100 p-2 transition-transform duration-300 group-hover:scale-105 dark:bg-zinc-800">
+            <span class="min-w-0">
+                <span class="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">Philips Hue</span>
+                <span class="block text-xs text-zinc-500 dark:text-zinc-400">Manage your Hue lighting.</span>
+            </span>
+        </a>
+    </div>
+    {% else %}
+    <div class="mt-4 rounded-xl border border-dashed border-zinc-300 bg-white/50 p-10 text-center shadow-sm dark:border-zinc-700 dark:bg-zinc-900/50">
+        <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">No hardware is configured yet.</p>
+        <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            Connected hardware, such as Philips Hue lighting, will appear here.
+        </p>
+    </div>
+    {% endif %}
+</section>
 {% endblock %}

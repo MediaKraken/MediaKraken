@@ -1,25 +1,344 @@
 {% extends "layouts/base_user.html" %}
 
+{#
+  Context (TemplateUserGenreContext):
+    page_title: Option<String>
+
+  Static genre hub: one card per bundled genre artwork in
+  /static/image/genre/. Cards link into the metadata movie list's
+  registered genre query parameter.
+#}
+
 {% block content %}
-<div>
-        <div>
-            {#{% if template_data_exists %}
-            <div>
-                {% for row_data in template_data %}
-                <div class="main_photo">
-                    <a href="/user/media/genre/{{row_data[0]|space_to_html}}">
-                        <img src="/static/image/genre/{{row_data[2]|space_to_html}}" loading="lazy" decoding="async" height="300"
-                            width="200">
-                    </a>
-                    <div class="description">
-                        <p class="description_content_left">{{row_data[0]}} - {{row_data[1]}}</p>
-                    </div>
-                </div>
-                {% endfor %}
+<section class="w-full px-0 py-4 text-zinc-900 dark:text-zinc-100">
+    <div class="rounded-3xl border border-zinc-200/80 bg-gradient-to-br from-white via-white to-zinc-100 p-6 shadow-sm dark:border-zinc-800 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div class="space-y-2">
+                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500 dark:text-indigo-300">Browse</p>
+                <h1 class="text-3xl font-bold tracking-tight">Genres</h1>
+                <p class="max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+                    Jump straight into a genre. Cards open the movie metadata list filtered to that genre.
+                </p>
             </div>
-            {% else %}
-            <p id="general_text">No media by genre found.</p>
-            {% endif %}#}
+            <div class="flex flex-wrap gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                <span class="rounded-full border border-zinc-300 px-3 py-1 dark:border-zinc-700">26 genres</span>
+            </div>
         </div>
     </div>
+
+    <ul role="list" class="mt-4 grid gap-4 sm:gap-5 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Action" class="block" aria-label="Browse movies in the Action genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Action.png" alt="Action genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Action</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Adult" class="block" aria-label="Browse movies in the Adult genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Adult.png" alt="Adult genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Adult</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Adventure" class="block" aria-label="Browse movies in the Adventure genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Adventure.png" alt="Adventure genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Adventure</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Animation" class="block" aria-label="Browse movies in the Animation genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Animation.png" alt="Animation genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Animation</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Biography" class="block" aria-label="Browse movies in the Biography genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Biography.png" alt="Biography genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Biography</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Comedy" class="block" aria-label="Browse movies in the Comedy genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Comedy.png" alt="Comedy genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Comedy</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Crime" class="block" aria-label="Browse movies in the Crime genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Crime.png" alt="Crime genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Crime</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Documentary" class="block" aria-label="Browse movies in the Documentary genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Documentary.png" alt="Documentary genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Documentary</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Drama" class="block" aria-label="Browse movies in the Drama genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Drama.png" alt="Drama genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Drama</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Family" class="block" aria-label="Browse movies in the Family genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Family.png" alt="Family genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Family</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Fantasy" class="block" aria-label="Browse movies in the Fantasy genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Fantasy.png" alt="Fantasy genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Fantasy</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Film-Noir" class="block" aria-label="Browse movies in the Film-Noir genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Film-Noir.png" alt="Film-Noir genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Film-Noir</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Foreign" class="block" aria-label="Browse movies in the Foreign genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Foreign.png" alt="Foreign genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Foreign</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=History" class="block" aria-label="Browse movies in the History genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/History.png" alt="History genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">History</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Horror" class="block" aria-label="Browse movies in the Horror genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Horror.png" alt="Horror genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Horror</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Kids" class="block" aria-label="Browse movies in the Kids genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Kids.png" alt="Kids genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Kids</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Musical" class="block" aria-label="Browse movies in the Musical genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Musical.png" alt="Musical genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Musical</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Music" class="block" aria-label="Browse movies in the Music genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Music.png" alt="Music genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Music</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Mystery" class="block" aria-label="Browse movies in the Mystery genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Mystery.png" alt="Mystery genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Mystery</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Romance" class="block" aria-label="Browse movies in the Romance genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Romance.png" alt="Romance genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Romance</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Science%20Fiction" class="block" aria-label="Browse movies in the Science Fiction genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Science Fiction.png" alt="Science Fiction genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Science Fiction</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Sports" class="block" aria-label="Browse movies in the Sports genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Sports.png" alt="Sports genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Sports</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Thriller" class="block" aria-label="Browse movies in the Thriller genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Thriller.png" alt="Thriller genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Thriller</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=TV%20Movie" class="block" aria-label="Browse movies in the TV Movie genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/TV Movie.png" alt="TV Movie genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">TV Movie</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=War" class="block" aria-label="Browse movies in the War genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/War.png" alt="War genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">War</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1?genre=Western" class="block" aria-label="Browse movies in the Western genre">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/genre/Western.png" alt="Western genre artwork"
+                        loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Western</h2>
+                </div>
+            </a>
+        </li>
+    </ul>
+</section>
 {% endblock %}

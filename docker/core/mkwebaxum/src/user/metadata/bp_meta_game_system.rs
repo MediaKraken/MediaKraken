@@ -158,14 +158,27 @@ pub async fn user_metadata_game_system_detail(
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
         let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
-        let detail_data =
-        mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_detail(
+        let detail_data = match mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_detail(
             &state.sqlx_pool_ro, tmp_uuid,
         )
         .await
-        .unwrap();
+        {
+            Ok(data) => data,
+            Err(sqlx::Error::RowNotFound) => {
+                return (
+                    StatusCode::NOT_FOUND,
+                    Html(String::from("Not found")).into_response(),
+                );
+            }
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
         let template = TemplateMetaGameSystemDetailContext {
-            template_data: detail_data,
+            template_data: crate::user::detail_map::game_system(&detail_data),
             page_title: Some("MediaKraken Metadata Game System Detail".to_string()),
         };
         let reply_html = template.render().unwrap();

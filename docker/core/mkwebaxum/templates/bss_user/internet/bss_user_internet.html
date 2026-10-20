@@ -1,14 +1,70 @@
 {% extends "layouts/base_user.html" %}
 
+{#
+  Context (UserInternetTemplate):
+    page_title: Option<String>
+
+  Internet media hub: one card per provider. All routes below are
+  registered in main.rs.
+#}
+
 {% block content %}
-<div>
-        <a href="/user/internet/youtube"><img src="/static/image/internet/youtube-logo.png" width="200" height="200"
-                loading="lazy" decoding="async"></a>
-        <a href="/user/internet/vimeo"><img src="/static/image/internet/vimeo_icon_white_on_blue_rounded.png"
-                width="200" height="200" loading="lazy" decoding="async"></a>
-        <a href="/user/internet/flickr"><img src="/static/image/internet/flickr.png" width="200" height="200"
-                loading="lazy" decoding="async"></a>
-        <a href="/user/internet/twitchtv"><img src="/static/image/internet/twitch.png" width="200" height="200"
-                loading="lazy" decoding="async"></a>
+<section class="w-full px-0 py-4 text-zinc-900 dark:text-zinc-100">
+    <div class="rounded-3xl border border-zinc-200/80 bg-gradient-to-br from-white via-white to-zinc-100 p-6 shadow-sm dark:border-zinc-800 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900">
+        <div class="space-y-2">
+            <p class="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500 dark:text-indigo-300">Internet</p>
+            <h1 class="text-3xl font-bold tracking-tight">Internet Media</h1>
+            <p class="max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+                Browse video, photos, and live streams from the internet.
+            </p>
+        </div>
     </div>
+
+    <ul role="list" class="mt-4 grid gap-4 sm:gap-5 grid-cols-2 lg:grid-cols-4">
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/internet/youtube" class="block" aria-label="Browse YouTube videos">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-950">
+                    <img src="/static/image/internet/youtube-logo.png?v=1" alt="YouTube logo" loading="lazy" decoding="async"
+                        class="h-full w-full object-contain p-10 transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">YouTube</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/internet/vimeo" class="block" aria-label="Browse Vimeo videos">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-950">
+                    <img src="/static/image/internet/vimeo_icon_white_on_blue_rounded.png?v=1" alt="Vimeo logo" loading="lazy" decoding="async"
+                        class="h-full w-full object-contain p-10 transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Vimeo</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/internet/flickr" class="block" aria-label="Browse Flickr photos">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-950">
+                    <img src="/static/image/internet/flickr.png?v=1" alt="Flickr logo" loading="lazy" decoding="async"
+                        class="h-full w-full object-contain p-10 transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Flickr</h2>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/internet/twitchtv" class="block" aria-label="Browse Twitch streams">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-950">
+                    <img src="/static/image/internet/twitch.png?v=1" alt="Twitch logo" loading="lazy" decoding="async"
+                        class="h-full w-full object-contain p-10 transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Twitch</h2>
+                </div>
+            </a>
+        </li>
+    </ul>
+</section>
 {% endblock %}

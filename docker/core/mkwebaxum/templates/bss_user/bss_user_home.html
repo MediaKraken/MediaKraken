@@ -1,136 +1,195 @@
 {% extends "layouts/base_user.html" %}
 
+{#
+  Context (TemplateUserHomeContext<'a>):
+    template_data_new_media: &bool
+    template_data_user_media_queue: &bool
+    page_title: Option<String>
+
+  Static dashboard: notification cards driven by the two flags plus a
+  library link grid. All routes below are registered in main.rs.
+#}
+
 {% block content %}
-<div>
-                <!-- Movies Section -->
-                <section id="movies" class="container mx-auto px-6 py-12">
-                        <h2 class="text-3xl font-bold mb-8">Movies</h2>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-                                <template x-for="item in media.filter(m => m.type === 'movies')" :key="item.id">
-                                        <div
-                                                class="bg-gray-800 rounded-lg overflow-hidden group relative cursor-pointer">
-                                                <img :src="item.image" alt=""
-                                                        class="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-300">
-                                                <div
-                                                        class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
-                                                        <h3 class="text-lg font-bold mb-1" x-text="item.title"></h3>
-                                                        <p class="text-sm text-gray-300 mb-2" x-text="item.description">
-                                                        </p>
-                                                        <div class="flex space-x-3">
-                                                                <!-- Play SVG -->
-                                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        class="h-6 w-6 text-white hover:text-blue-400"
-                                                                        fill="none" viewBox="0 0 24 24"
-                                                                        stroke="currentColor">
-                                                                        <path stroke-linecap="round"
-                                                                                stroke-linejoin="round" stroke-width="2"
-                                                                                d="M14.752 11.168l-5.197-3.022A1 1 0 008 9.03v5.938a1 1 0 001.555.832l5.197-3.022a1 1 0 000-1.664z" />
-                                                                </svg>
-                                                                <!-- Info SVG -->
-                                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        class="h-6 w-6 text-white hover:text-blue-400"
-                                                                        fill="none" viewBox="0 0 24 24"
-                                                                        stroke="currentColor">
-                                                                        <path stroke-linecap="round"
-                                                                                stroke-linejoin="round" stroke-width="2"
-                                                                                d="M13 16h-1v-4h-1m1-4h.01M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
-                                                                </svg>
-                                                        </div>
-                                                </div>
-                                        </div>
-                                </template>
-                        </div>
-                </section>
-
-                <!-- TV Shows Section -->
-                <section id="tvshows" class="container mx-auto px-6 py-12">
-                        <h2 class="text-3xl font-bold mb-8">TV Shows</h2>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-                                <template x-for="item in media.filter(m => m.type === 'tv')" :key="item.id">
-                                        <div
-                                                class="bg-gray-800 rounded-lg overflow-hidden group relative cursor-pointer">
-                                                <img :src="item.image" alt=""
-                                                        class="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-300">
-                                                <div
-                                                        class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
-                                                        <h3 class="text-lg font-bold mb-1" x-text="item.title"></h3>
-                                                        <p class="text-sm text-gray-300 mb-2" x-text="item.description">
-                                                        </p>
-                                                        <div class="flex space-x-3">
-                                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        class="h-6 w-6 text-white hover:text-blue-400"
-                                                                        fill="none" viewBox="0 0 24 24"
-                                                                        stroke="currentColor">
-                                                                        <path stroke-linecap="round"
-                                                                                stroke-linejoin="round" stroke-width="2"
-                                                                                d="M14.752 11.168l-5.197-3.022A1 1 0 008 9.03v5.938a1 1 0 001.555.832l5.197-3.022a1 1 0 000-1.664z" />
-                                                                </svg>
-                                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        class="h-6 w-6 text-white hover:text-blue-400"
-                                                                        fill="none" viewBox="0 0 24 24"
-                                                                        stroke="currentColor">
-                                                                        <path stroke-linecap="round"
-                                                                                stroke-linejoin="round" stroke-width="2"
-                                                                                d="M13 16h-1v-4h-1m1-4h.01M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
-                                                                </svg>
-                                                        </div>
-                                                </div>
-                                        </div>
-                                </template>
-                        </div>
-                </section>
-
-                <!-- Music Section -->
-                <section id="music" class="container mx-auto px-6 py-12">
-                        <h2 class="text-3xl font-bold mb-8">Music</h2>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-                                <template x-for="item in media.filter(m => m.type === 'music')" :key="item.id">
-                                        <div
-                                                class="bg-gray-800 rounded-lg overflow-hidden group relative cursor-pointer">
-                                                <img :src="item.image" alt=""
-                                                        class="w-full h-60 object-cover group-hover:scale-105 transition-transform duration-300">
-                                                <div
-                                                        class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
-                                                        <h3 class="text-lg font-bold mb-1" x-text="item.title"></h3>
-                                                        <p class="text-sm text-gray-300 mb-2" x-text="item.description">
-                                                        </p>
-                                                        <div class="flex space-x-3">
-                                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        class="h-6 w-6 text-white hover:text-blue-400"
-                                                                        fill="none" viewBox="0 0 24 24"
-                                                                        stroke="currentColor">
-                                                                        <path stroke-linecap="round"
-                                                                                stroke-linejoin="round" stroke-width="2"
-                                                                                d="M14.752 11.168l-5.197-3.022A1 1 0 008 9.03v5.938a1 1 0 001.555.832l5.197-3.022a1 1 0 000-1.664z" />
-                                                                </svg>
-                                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        class="h-6 w-6 text-white hover:text-blue-400"
-                                                                        fill="none" viewBox="0 0 24 24"
-                                                                        stroke="currentColor">
-                                                                        <path stroke-linecap="round"
-                                                                                stroke-linejoin="round" stroke-width="2"
-                                                                                d="M13 16h-1v-4h-1m1-4h.01M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" />
-                                                                </svg>
-                                                        </div>
-                                                </div>
-                                        </div>
-                                </template>
-                        </div>
-                </section>
+<section class="w-full px-0 py-4 text-zinc-900 dark:text-zinc-100">
+    <div class="rounded-3xl border border-zinc-200/80 bg-gradient-to-br from-white via-white to-zinc-100 p-6 shadow-sm dark:border-zinc-800 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900">
+        <div class="space-y-2">
+            <p class="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500 dark:text-indigo-300">Dashboard</p>
+            <h1 class="text-3xl font-bold tracking-tight">Home</h1>
+            <p class="max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+                Welcome back. Catch up on what's new or jump straight into your library.
+            </p>
         </div>
-<!-- Alpine.js -->
-        <script>
-                function mediaApp() {
-                        return {
-                                media: [
-                                        { id: 1, type: 'movies', title: 'The Great Adventure', description: 'Action-packed thriller.', image: 'https://via.placeholder.com/400x300?text=Movie+1' },
-                                        { id: 2, type: 'movies', title: 'Romantic Escape', description: 'Heartwarming romance.', image: 'https://via.placeholder.com/400x300?text=Movie+2' },
-                                        { id: 3, type: 'tv', title: 'Mystery Manor', description: 'Suspenseful TV drama.', image: 'https://via.placeholder.com/400x300?text=TV+1' },
-                                        { id: 4, type: 'tv', title: 'Comedy Nights', description: 'Laugh out loud.', image: 'https://via.placeholder.com/400x300?text=TV+2' },
-                                        { id: 5, type: 'music', title: 'Top Hits 2026', description: 'Latest chartbusters.', image: 'https://via.placeholder.com/400x300?text=Music+1' },
-                                        { id: 6, type: 'music', title: 'Classical Moods', description: 'Relaxing symphonies.', image: 'https://via.placeholder.com/400x300?text=Music+2' }
-                                ]
-                        }
-                }
-        </script>
+    </div>
+
+    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+        {% if template_data_new_media %}
+        <a href="/user/search"
+            class="flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+            aria-label="Open title search for new media">
+            <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-teal-500" aria-hidden="true"></span>
+            <span class="min-w-0">
+                <span class="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">New media available</span>
+                <span class="block text-xs text-zinc-500 dark:text-zinc-400">New items have been added to your media sources.</span>
+            </span>
+        </a>
+        {% endif %}
+        {% if template_data_user_media_queue %}
+        <a href="/user/queue"
+            class="flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+            aria-label="Open your media queue">
+            <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-indigo-500" aria-hidden="true"></span>
+            <span class="min-w-0">
+                <span class="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">Items in your queue</span>
+                <span class="block text-xs text-zinc-500 dark:text-zinc-400">You have media waiting to be played.</span>
+            </span>
+        </a>
+        {% endif %}
+        {% if !template_data_new_media && !template_data_user_media_queue %}
+        <div class="flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:col-span-2">
+            <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-zinc-300 dark:bg-zinc-600" aria-hidden="true"></span>
+            <span class="min-w-0">
+                <span class="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">All caught up</span>
+                <span class="block text-xs text-zinc-500 dark:text-zinc-400">No new media and an empty queue. Enjoy your library.</span>
+            </span>
+        </div>
+        {% endif %}
+    </div>
+
+    <h2 class="mt-6 text-lg font-semibold text-zinc-900 dark:text-zinc-100">Browse your library</h2>
+    <ul role="list" class="mt-3 grid gap-4 sm:gap-5 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/movie/1" class="block" aria-label="Browse movies">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/Movie-icon.png?v=1" alt="Movies artwork" loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h3 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Movies</h3>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/tv/1" class="block" aria-label="Browse TV shows">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/television.png?v=1" alt="TV shows artwork" loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h3 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">TV Shows</h3>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/music/1" class="block" aria-label="Browse music">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/headphone.png?v=1" alt="Music artwork" loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h3 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Music</h3>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/sports/1" class="block" aria-label="Browse sports">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/stadium.png?v=1" alt="Sports artwork" loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h3 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Sports</h3>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/book/1" class="block" aria-label="Browse books">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/books.png?v=1" alt="Books artwork" loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h3 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Books</h3>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/game/1" class="block" aria-label="Browse games">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/vid_game.png?v=1" alt="Games artwork" loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h3 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Games</h3>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/game_system/1" class="block" aria-label="Browse game systems">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/circuit-board.png?v=1" alt="Game systems artwork" loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h3 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Game Systems</h3>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/music_video/1" class="block" aria-label="Browse music videos">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/listening-music-video-clip-with-auricular.png?v=1" alt="Music videos artwork" loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h3 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Music Videos</h3>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/collection/1" class="block" aria-label="Browse collections">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/rectangles_black.png?v=1" alt="Collections artwork" loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h3 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Collections</h3>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/metadata/openlibrary/1" class="block" aria-label="Browse OpenLibrary">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/earth.png?v=1" alt="OpenLibrary artwork" loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h3 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">OpenLibrary</h3>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/media/genre" class="block" aria-label="Browse genres">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/movie_ticket.png?v=1" alt="Genres artwork" loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h3 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Genres</h3>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/internet" class="block" aria-label="Browse internet media">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/browser.png?v=1" alt="Internet media artwork" loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h3 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Internet</h3>
+                </div>
+            </a>
+        </li>
+    </ul>
+</section>
 {% endblock %}

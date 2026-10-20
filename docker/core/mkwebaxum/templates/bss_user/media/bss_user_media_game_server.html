@@ -1,5 +1,80 @@
 {% extends "layouts/base_user.html" %}
 
+{#
+  Context (TemplateMediaGameServersContext<'a>):
+    template_data: &Vec<DBGameServerList>
+      { mm_game_server_guid: Uuid, mm_game_server_name: String,
+        mm_game_server_json: serde_json::Value }
+    template_data_exists: &bool
+    pagination_bar: &String
+    page: &usize
+    page_title: Option<String>
+
+  Cards link to /user/media/game_server_detail/{guid}.
+#}
+
 {% block content %}
-<div></div>
+<section class="w-full px-0 py-4 text-zinc-900 dark:text-zinc-100">
+    <div class="rounded-3xl border border-zinc-200/80 bg-gradient-to-br from-white via-white to-zinc-100 p-6 shadow-sm dark:border-zinc-800 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div class="space-y-2">
+                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500 dark:text-indigo-300">Media Library</p>
+                <h1 class="text-3xl font-bold tracking-tight">Game Servers</h1>
+                <p class="max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+                    Track the game servers you run or play on.
+                </p>
+            </div>
+            <div class="flex flex-wrap gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                <span class="rounded-full border border-zinc-300 px-3 py-1 dark:border-zinc-700">Personal media</span>
+            </div>
+        </div>
+    </div>
+
+    {% if template_data_exists %}
+    {% if pagination_bar != "" %}
+    {{ pagination_bar|safe }}
+    {% endif %}
+    <ul role="list" class="mt-4 grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        {% for row_data in template_data %}
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <div class="relative aspect-[3/2] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                <a href="/user/media/game_server_detail/{{ row_data.mm_game_server_guid }}" class="block h-full"
+                    aria-label="Open details for {{ row_data.mm_game_server_name }}">
+                    <img src="/static/image/circuit-board.png?v=1"
+                        alt="Game server artwork placeholder"
+                        loading="lazy"
+                        decoding="async"
+                        width="300"
+                        height="200"
+                        class="h-full w-full object-contain p-8 transition-transform duration-300 group-hover:scale-105" />
+                </a>
+                <div class="absolute right-2 top-2">
+                    <span class="rounded-md bg-indigo-600/85 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm backdrop-blur-md">
+                        Server
+                    </span>
+                </div>
+            </div>
+            <div class="space-y-3 p-3">
+                <div class="space-y-1">
+                    <h2 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">{{ row_data.mm_game_server_name }}</h2>
+                    <p class="text-[11px] text-zinc-500 dark:text-zinc-400 break-all">{{ row_data.mm_game_server_guid }}</p>
+                </div>
+                <div class="flex items-center justify-between border-t border-zinc-100 pt-3 text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+                    <span>Media item</span>
+                    <a href="/user/media/game_server_detail/{{ row_data.mm_game_server_guid }}"
+                        class="font-semibold text-indigo-600 transition-colors hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
+                        Open details
+                    </a>
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% if pagination_bar != "" %}
+    {{ pagination_bar|safe }}
+    {% endif %}
+    {% else %}
+    <p class="mt-4 text-sm text-zinc-500 dark:text-zinc-400">No game servers found.</p>
+    {% endif %}
+</section>
 {% endblock %}

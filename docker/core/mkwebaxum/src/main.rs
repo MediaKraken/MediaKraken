@@ -83,6 +83,7 @@ pub mod user {
     pub mod bp_queue;
     pub mod bp_search;
     pub mod bp_sync;
+    pub mod detail_map;
 }
 
 #[path = "user/internet"]
@@ -538,6 +539,10 @@ async fn main() {
             get(user_media::bp_media_game_servers::user_media_game_servers),
         )
         .route_with_tsr(
+            "/user/media/game_server_detail/{guid}",
+            get(user_media::bp_media_game_servers::user_media_game_servers_detail),
+        )
+        .route_with_tsr(
             "/user/media/genre",
             get(user_media::bp_media_genre::user_media_genre),
         )
@@ -694,6 +699,10 @@ async fn main() {
             get(user_playback::bp_video::user_playback_video),
         )
         .route_with_tsr("/user/hardware", get(user::bp_hardware::user_hardware))
+        .route_with_tsr(
+            "/user/hardware/phue",
+            get(user::bp_hardware::user_hardware_phue),
+        )
         .route_with_tsr("/user/home", get(user::bp_home::user_home))
         .route_with_tsr("/user/profile", get(user::bp_profile::user_profile))
         .route(

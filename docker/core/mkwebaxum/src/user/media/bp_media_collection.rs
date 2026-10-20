@@ -14,7 +14,6 @@ use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
-use serde_json::json;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -100,6 +99,12 @@ pub async fn user_media_collection(
     }
 }
 
+#[derive(sqlx::FromRow)]
+struct MediaCollectionDetailRow {
+    mm_metadata_collection_json: serde_json::Value,
+    cover_path: String,
+}
+
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_movie_collection_detail.html")]
 struct TemplateMediaCollectionDetailContext {
@@ -127,9 +132,37 @@ pub async fn user_media_collection_detail(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
+        let row = sqlx::query_as::<_, MediaCollectionDetailRow>(
+            r#"select mm_metadata_collection_json,
+                      COALESCE(mm_metadata_collection_imagelocal->>'Poster',
+                               mm_metadata_collection_imagelocal->'Images'->>'Poster', '') as cover_path
+               from mm_metadata_collection
+               where mm_metadata_collection_guid = $1"#,
+        )
+        .bind(guid)
+        .fetch_optional(&state.sqlx_pool_ro)
+        .await;
+        let template_data = match row {
+            Ok(Some(row)) => crate::user::detail_map::collection(
+                &row.mm_metadata_collection_json,
+                &row.cover_path,
+            ),
+            Ok(None) => {
+                return (
+                    StatusCode::NOT_FOUND,
+                    Html(String::from("Not found")).into_response(),
+                );
+            }
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
         let template = TemplateMediaCollectionDetailContext {
-            template_data: json!({}),
-            template_data_exists: false,
+            template_data,
+            template_data_exists: true,
             page_title: Some("MediaKraken Collection Detail".to_string()),
         };
         let reply_html = template.render().unwrap();

@@ -15,7 +15,6 @@ use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
-use serde_json::json;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -99,6 +98,13 @@ pub async fn user_media_tv(
     }
 }
 
+#[derive(sqlx::FromRow)]
+struct MediaTVDetailRow {
+    mm_metadata_tvshow_json: serde_json::Value,
+    show_name: String,
+    cover_path: String,
+}
+
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_tv_detail.html")]
 struct TemplateMediaTVDetailContext {
@@ -126,9 +132,39 @@ pub async fn user_media_tv_detail(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
+        let row = sqlx::query_as::<_, MediaTVDetailRow>(
+            r#"select mm_metadata_tvshow_json,
+                      COALESCE(mm_metadata_tvshow_name, '') as show_name,
+                      COALESCE(mm_metadata_tvshow_localimage_json->>'Poster',
+                               mm_metadata_tvshow_localimage_json->'Images'->>'Poster', '') as cover_path
+               from mm_metadata_tvshow
+               where mm_metadata_tvshow_guid = $1"#,
+        )
+        .bind(guid)
+        .fetch_optional(&state.sqlx_pool_ro)
+        .await;
+        let template_data = match row {
+            Ok(Some(row)) => crate::user::detail_map::tv(
+                &row.mm_metadata_tvshow_json,
+                &row.show_name,
+                &row.cover_path,
+            ),
+            Ok(None) => {
+                return (
+                    StatusCode::NOT_FOUND,
+                    Html(String::from("Not found")).into_response(),
+                );
+            }
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
         let template = TemplateMediaTVDetailContext {
-            template_data: json!({}),
-            template_data_exists: false,
+            template_data,
+            template_data_exists: true,
             page_title: Some("MediaKraken TV Show Detail".to_string()),
         };
         let reply_html = template.render().unwrap();

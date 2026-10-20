@@ -457,9 +457,7 @@ fn validate_image_magic_bytes(bytes: &[u8], expected_extension: &str) -> bool {
         "png" => bytes.starts_with(b"\x89PNG"),
         "jpg" | "jpeg" => bytes.starts_with(b"\xff\xd8\xff"),
         "gif" => bytes.starts_with(b"GIF8"),
-        "webp" => bytes.len() >= 12
-            && bytes[0..4] == *b"RIFF"
-            && bytes[8..12] == *b"WEBP",
+        "webp" => bytes.len() >= 12 && bytes[0..4] == *b"RIFF" && bytes[8..12] == *b"WEBP",
         _ => false,
     }
 }

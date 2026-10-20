@@ -1,26 +1,77 @@
 {% extends "layouts/base_user.html" %}
 
+{#
+  Context (TemplateUserHardwarePhueContext):
+    template_data_phue: i32
+    page_title: Option<String>
+
+  template_data_phue is the number of configured Hue devices (the
+  handler currently stubs it to 0). The on/off and color controls
+  below are the legacy device controls; per-device data is not
+  passed to the template yet.
+  The legacy lightbulb_on.png / lightbulb_off.png assets do not
+  exist in static/image/ (the legacy page already 404'd them), so
+  both buttons use the bundled light-bulb.png and the off state is
+  greyed out instead.
+  Note: the /user/hardware/phue route is not registered in main.rs.
+#}
+
 {% block content %}
-<div>
-        <div class="container">
-            <div class="row">
-                <div class="col">
-                    <ul class="list-group">
-                        <li class="list-group-item"><span>List Group Item 1</span></li>
-                        <li class="list-group-item"><span>List Group Item 2</span></li>
-                        <li class="list-group-item"><span>List Group Item 3</span></li>
-                    </ul>
-                </div>
-                <div class="col">
-                    <div class="row">
-                        <div class="col"><a href="#"><img src="/static/image/lightbulb_on.png" width="200"
-                                    height="200"></a><a href="#">
-                                <img src="/static/image/lightbulb_off.png" width="200" height="200"></a><input
-                                type="color">
-                        </div>
-                    </div>
-                </div>
+<section class="w-full px-0 py-4 text-zinc-900 dark:text-zinc-100">
+    <div class="rounded-3xl border border-zinc-200/80 bg-gradient-to-br from-white via-white to-zinc-100 p-6 shadow-sm dark:border-zinc-800 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div class="space-y-2">
+                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500 dark:text-indigo-300">Hardware</p>
+                <h1 class="text-3xl font-bold tracking-tight">Philips Hue</h1>
+                <p class="max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+                    Control the Hue lighting connected to MediaKraken.
+                </p>
+            </div>
+            <div class="flex flex-wrap gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                <span class="rounded-full border border-zinc-300 px-3 py-1 dark:border-zinc-700">{{ template_data_phue }} device(s)</span>
             </div>
         </div>
     </div>
+
+    {% if template_data_phue == 0 %}
+    <div class="mt-4 rounded-xl border border-dashed border-zinc-300 bg-white/50 p-10 text-center shadow-sm dark:border-zinc-700 dark:bg-zinc-900/50">
+        <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">No Hue devices are configured yet.</p>
+        <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            Once your bridge and lights are discovered, they will be listed here.
+        </p>
+    </div>
+    {% endif %}
+
+    <div class="mt-4 grid gap-4 lg:grid-cols-2">
+        <div class="rounded-xl border border-zinc-200 bg-white/70 p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70">
+            <h2 class="text-sm font-semibold tracking-wide text-zinc-700 dark:text-zinc-200">Lights</h2>
+            <ul class="mt-3 space-y-2 text-sm text-zinc-600 dark:text-zinc-300">
+                <li class="rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">List Group Item 1</li>
+                <li class="rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">List Group Item 2</li>
+                <li class="rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">List Group Item 3</li>
+            </ul>
+        </div>
+
+        <div class="rounded-xl border border-zinc-200 bg-white/70 p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70">
+            <h2 class="text-sm font-semibold tracking-wide text-zinc-700 dark:text-zinc-200">Controls</h2>
+            <div class="mt-3 flex flex-wrap items-center gap-6">
+                <button type="button" class="group" aria-label="Turn the light on">
+                    <img src="/static/image/light-bulb.png?v=1" alt="Light bulb on" width="96" height="96"
+                        loading="lazy" decoding="async"
+                        class="h-24 w-24 object-contain transition-transform duration-300 group-hover:scale-105">
+                </button>
+                <button type="button" class="group" aria-label="Turn the light off">
+                    <img src="/static/image/light-bulb.png?v=1" alt="Light bulb off" width="96" height="96"
+                        loading="lazy" decoding="async"
+                        class="h-24 w-24 object-contain opacity-40 grayscale transition-transform duration-300 group-hover:scale-105">
+                </button>
+                <label class="flex items-center gap-3 text-sm text-zinc-600 dark:text-zinc-300">
+                    <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Color</span>
+                    <input type="color" aria-label="Pick a light color"
+                        class="h-10 w-14 cursor-pointer rounded border border-zinc-300 bg-transparent dark:border-zinc-700">
+                </label>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}

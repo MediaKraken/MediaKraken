@@ -16,7 +16,6 @@ use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
 use serde::Deserialize;
-use serde_json::json;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -133,6 +132,14 @@ pub async fn user_metadata_music_video(
     }
 }
 
+#[derive(sqlx::FromRow)]
+struct MetaMusicVideoDetailRow {
+    mm_metadata_music_video_json: serde_json::Value,
+    band: String,
+    song: String,
+    cover_path: String,
+}
+
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_music_video_detail.html")]
 struct TemplateMetaMusicVideoDetailContext {
@@ -159,8 +166,40 @@ pub async fn user_metadata_music_video_detail(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
+        let row = sqlx::query_as::<_, MetaMusicVideoDetailRow>(
+            r#"select mm_metadata_music_video_json,
+                      COALESCE(mm_metadata_music_video_band, '') as band,
+                      COALESCE(mm_metadata_music_video_song, '') as song,
+                      COALESCE(mm_metadata_music_video_localimage_json->>'Poster',
+                               mm_metadata_music_video_localimage_json->'Images'->>'Poster', '') as cover_path
+               from mm_metadata_music_video
+               where mm_metadata_music_video_guid = $1"#,
+        )
+        .bind(guid)
+        .fetch_optional(&state.sqlx_pool_ro)
+        .await;
+        let template_data = match row {
+            Ok(Some(row)) => crate::user::detail_map::music_video(
+                &row.mm_metadata_music_video_json,
+                &row.band,
+                &row.song,
+                &row.cover_path,
+            ),
+            Ok(None) => {
+                return (
+                    StatusCode::NOT_FOUND,
+                    Html(String::from("Not found")).into_response(),
+                );
+            }
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
         let template = TemplateMetaMusicVideoDetailContext {
-            template_data: json!({}),
+            template_data,
             page_title: Some("MediaKraken Metadata Music Video Detail".to_string()),
         };
         let reply_html = template.render().unwrap();

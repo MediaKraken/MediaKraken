@@ -48,7 +48,7 @@
         {% for row_data in template_data %}
         <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
             <div class="relative aspect-[2/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
-                <a href="/user/media/bss_user_music_detail/{{ row_data.mm_metadata_album_guid }}" class="block h-full">
+                <a href="/user/media/music_detail/{{ row_data.mm_metadata_album_guid }}" class="block h-full">
                     <img src="/static/image/headphone.png?v=1"
                         alt="Album artwork placeholder for {{ row_data.mm_metadata_album_name }}"
                         loading="lazy"
@@ -70,7 +70,7 @@
                 </div>
                 <div class="flex items-center justify-between border-t border-zinc-100 pt-3 text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
                     <span>Album</span>
-                    <a href="/user/media/bss_user_music_detail/{{ row_data.mm_metadata_album_guid }}"
+                    <a href="/user/media/music_detail/{{ row_data.mm_metadata_album_guid }}"
                         class="font-semibold text-indigo-600 transition-colors hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
                         Open details
                     </a>

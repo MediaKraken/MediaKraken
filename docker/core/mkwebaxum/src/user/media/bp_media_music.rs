@@ -15,7 +15,6 @@ use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
-use serde_json::json;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -99,6 +98,13 @@ pub async fn user_media_music(
     }
 }
 
+#[derive(sqlx::FromRow)]
+struct MediaMusicDetailRow {
+    mm_metadata_album_json: serde_json::Value,
+    album_name: String,
+    localimage: serde_json::Value,
+}
+
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_music_album_detail.html")]
 struct TemplateMediaMusicDetailContext {
@@ -126,9 +132,41 @@ pub async fn user_media_music_detail(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
+        let row = sqlx::query_as::<_, MediaMusicDetailRow>(
+            r#"select mm_metadata_album_json,
+                      COALESCE(mm_metadata_album_name, '') as album_name,
+                      COALESCE(mm_metadata_album_localimage, 'null'::jsonb) as localimage
+               from mm_metadata_album
+               where mm_metadata_album_guid = $1"#,
+        )
+        .bind(guid)
+        .fetch_optional(&state.sqlx_pool_ro)
+        .await;
+        let template_data = match row {
+            Ok(Some(row)) => {
+                let cover_path = crate::user::detail_map::album_cover_path(&row.localimage);
+                crate::user::detail_map::album(
+                    &row.mm_metadata_album_json,
+                    &row.album_name,
+                    cover_path,
+                )
+            }
+            Ok(None) => {
+                return (
+                    StatusCode::NOT_FOUND,
+                    Html(String::from("Not found")).into_response(),
+                );
+            }
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
         let template = TemplateMediaMusicDetailContext {
-            template_data: json!({}),
-            template_data_exists: false,
+            template_data,
+            template_data_exists: true,
             page_title: Some("MediaKraken Music Detail".to_string()),
         };
         let reply_html = template.render().unwrap();

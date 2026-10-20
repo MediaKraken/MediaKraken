@@ -1,9 +1,24 @@
 {% extends "layouts/base_user.html" %}
 
+{#
+  Context (UserInternetTwitchTVTemplate):
+    streams: Vec<TwitchStreamBrowseItem>
+      { channel_login, channel_display_name, stream_title, game_name: String,
+        viewer_count: i64, preview_image_url: String }
+    has_streams: bool
+    error_message: Option<String>
+    page_title: Option<String>
+#}
+
 {% block content %}
 <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <section class="mb-6 rounded-xl border border-zinc-200 bg-white/70 p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70">
+        <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Twitch Browse</h1>
+        <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">Currently live channels from your Twitch follow list.</p>
+    </section>
+
     {% if let Some(message) = error_message %}
-    <p id="general_text" class="mb-4 text-red-500">{{ message }}</p>
+    <p id="general_text" class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">{{ message }}</p>
     {% endif %}
 
     {% if has_streams %}
@@ -11,13 +26,13 @@
         {% for stream in streams %}
         <a href="/user/internet/twitchtv/{{ stream.channel_login }}"
             aria-label="Open Twitch stream {{ stream.channel_display_name }}"
-            class="group block overflow-hidden rounded-lg border border-zinc-700 bg-zinc-900 transition-colors hover:border-purple-400">
+            class="group block overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-purple-400 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-purple-400">
             <img src="{{ stream.preview_image_url }}" alt="Preview image for {{ stream.channel_display_name }}"
                 class="h-44 w-full object-cover" loading="lazy">
             <div class="space-y-2 p-4">
-                <p class="font-semibold text-white">{{ stream.channel_display_name }}</p>
-                <p class="line-clamp-2 text-sm text-zinc-200">{{ stream.stream_title }}</p>
-                <div class="flex items-center justify-between text-xs text-zinc-300">
+                <p class="font-semibold text-zinc-900 dark:text-white">{{ stream.channel_display_name }}</p>
+                <p class="line-clamp-2 text-sm text-zinc-600 dark:text-zinc-200">{{ stream.stream_title }}</p>
+                <div class="flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-300">
                     <span>{{ stream.game_name }}</span>
                     <span>{{ stream.viewer_count }} viewers</span>
                 </div>
@@ -26,7 +41,7 @@
         {% endfor %}
     </div>
     {% else %}
-    <p id="general_text">No Twitch TV media found.</p>
+    <p id="general_text" class="rounded-xl border border-dashed border-zinc-300 bg-white/50 p-8 text-center text-sm text-zinc-500 shadow-sm dark:border-zinc-700 dark:bg-zinc-900/50 dark:text-zinc-400">No Twitch TV media found.</p>
     {% endif %}
 </div>
 {% endblock %}

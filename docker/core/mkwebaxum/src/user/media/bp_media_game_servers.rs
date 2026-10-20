@@ -15,7 +15,6 @@ use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
-use serde_json::json;
 use sqlx::postgres::PgPool;
 use stdext::function_name;
 
@@ -99,6 +98,12 @@ pub async fn user_media_game_servers(
     }
 }
 
+#[derive(sqlx::FromRow)]
+struct MediaGameServerDetailRow {
+    mm_game_server_json: serde_json::Value,
+    server_name: String,
+}
+
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_game_server_detail.html")]
 struct TemplateMediaGameServerDetailContext {
@@ -125,8 +130,34 @@ pub async fn user_media_game_servers_detail(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
+        let row = sqlx::query_as::<_, MediaGameServerDetailRow>(
+            r#"select mm_game_server_json,
+                      COALESCE(mm_game_server_name, '') as server_name
+               from mm_game_dedicated_servers
+               where mm_game_server_guid = $1"#,
+        )
+        .bind(guid)
+        .fetch_optional(&state.sqlx_pool_ro)
+        .await;
+        let template_data = match row {
+            Ok(Some(row)) => {
+                crate::user::detail_map::game_server(&row.mm_game_server_json, &row.server_name)
+            }
+            Ok(None) => {
+                return (
+                    StatusCode::NOT_FOUND,
+                    Html(String::from("Not found")).into_response(),
+                );
+            }
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
         let template = TemplateMediaGameServerDetailContext {
-            template_data: json!({}),
+            template_data,
             page_title: Some("MediaKraken Game Server Detail".to_string()),
         };
         let reply_html = template.render().unwrap();
