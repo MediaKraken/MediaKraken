@@ -95,19 +95,86 @@ Verify the environment with:
 dx doctor
 ```
 
-### 2. Android prerequisites (Linux, macOS or Windows)
+### 2. Android SDK setup
 
-- Install [Android Studio](https://developer.android.com/studio).
-- In *SDK Manager → SDK Tools* install: Android SDK, SDK Command-line tools,
-  NDK (Side by side), and CMake.
-- Create at least one emulator (AVD) in the *Device Manager*.
-- Export the environment (adjust paths to your installation):
+Two toolchains are involved:
+
+- `dx` compiles the Rust code with the **NDK** clang toolchain
+  (needs `ANDROID_HOME` and `NDK_HOME`).
+- The generated gradle project (AGP 8.7.0, Kotlin 2.0.20, `compileSdk 34`,
+  `minSdk 24`, `targetSdk 34`) assembles the APK and requires **JDK 17**.
+
+#### Option A — Android Studio (GUI)
+
+1. Install [Android Studio](https://developer.android.com/studio); it creates
+   the SDK at `~/Android/Sdk` (Linux) or `~/Library/Android/sdk` (macOS).
+2. *SDK Manager → SDK Platforms*: install **Android API 34 (Android 14)**.
+   *SDK Manager → SDK Tools*: enable **Android SDK Platform-Tools**,
+   **Android SDK Build-Tools**, **NDK (Side by side)**, **CMake**, and
+   **Android SDK Command-line Tools (latest)**; accept all licenses.
+3. *Device Manager*: create at least one emulator (AVD) with an API 34
+   system image.
+
+#### Option B — command line only (Linux / macOS, no Studio)
 
 ```bash
-export JAVA_HOME="/path/to/android-studio/jbr"
-export ANDROID_HOME="$HOME/Library/Android/sdk"
-export NDK_HOME="$ANDROID_HOME/ndk/<installed-ndk-version>"
-export PATH="$PATH:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools"
+# 1. SDK command-line tools
+sudo apt install -y unzip                      # Debian / Ubuntu
+mkdir -p "$HOME/android-sdk/cmdline-tools"
+curl -O https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+unzip commandlinetools-linux-11076708_latest.zip -d "$HOME/android-sdk/cmdline-tools"
+mv "$HOME/android-sdk/cmdline-tools/cmdline-tools" "$HOME/android-sdk/cmdline-tools/latest"
+
+# 2. Packages dx needs (API 34 matches compileSdk 34 of the generated project)
+SDKMGR="$HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager"
+"$SDKMGR" --install \
+  "platform-tools" \
+  "platforms;android-34" \
+  "build-tools;34.0.0" \
+  "ndk;27.2.12479018" \
+  "emulator" \
+  "system-images;android-34;google_apis;x86_64"
+yes | "$SDKMGR" --licenses
+
+# 3. JDK 17 — required by AGP 8.7.0
+sudo apt install -y openjdk-17-jdk             # Debian / Ubuntu
+```
+
+- Any recent NDK works — `dx` automatically uses the newest directory under
+  `$ANDROID_HOME/ndk/`; list alternatives with `sdkmanager --list`.
+- On an arm64 Linux host (e.g. Raspberry Pi 5) install
+  `system-images;android-34;google_apis;arm64-v8a` instead of `x86_64`.
+- On macOS use the `commandlinetools-mac-…` archive from the
+  [Command-line tools](https://developer.android.com/studio#command-line-tools-only)
+  section of the official docs.
+
+#### Environment
+
+```bash
+export ANDROID_HOME="$HOME/Android/Sdk"                  # or $HOME/android-sdk, or $HOME/Library/Android/sdk
+export JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64"    # AGP 8.7.0 needs JDK 17; Android Studio's JBR also works
+export NDK_HOME="$ANDROID_HOME/ndk/27.2.12479018"        # optional — dx auto-detects the newest NDK
+export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools"
+```
+
+Add these to your `~/.bashrc` / `~/.zshrc` to make them permanent. `dx`
+resolves the SDK from `ANDROID_SDK_ROOT`, `ANDROID_SDK`, or `ANDROID_HOME`,
+and the NDK from `NDK_HOME` / `ANDROID_NDK_HOME` (falling back to the newest
+`$ANDROID_HOME/ndk/<version>` directory).
+
+#### Create an emulator (if you don't have one yet)
+
+```bash
+avdmanager create avd -n pixel_6 -d pixel_6 \
+  -k "system-images;android-34;google_apis;x86_64"
+emulator -avd pixel_6 &          # start it; dx serve picks it up automatically
+```
+
+#### Verify
+
+```bash
+adb devices      # the running emulator (or a USB-connected phone) is listed
+dx doctor        # under "Android": sdk, ndk, adb, emulator, java_home are all found
 ```
 
 ### 3. iOS prerequisites (macOS only)
