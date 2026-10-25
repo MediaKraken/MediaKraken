@@ -1,0 +1,25 @@
+# Dioxus CLI configuration for the mediakraken mobile app (dx 0.7.x).
+# See README.md ("Android / iOS") for build and signing instructions.
+
+[application]
+name = "mediakraken"
+
+[bundle]
+identifier = "media.mediakraken" # Android applicationId / iOS bundle id
+publisher = "MediaKraken"
+
+# The Scan page uses the device camera for UPC scanning
+[permissions.camera]
+description = "Scan media barcodes"
+
+# Android release signing --------------------------------------------------
+# `dx bundle --android --release` produces a signed release only when this
+# block is present and the keystore file exists. Generate a keystore first:
+#   keytool -genkey -v -keystore keystore/release.jks -keyalg RSA -keysize 2048 -validity 10000
+# Never commit the keystore file or real passwords.
+#
+# [bundle.android]
+# jks_file = "keystore/release.jks"
+# jks_password = "REDACTED"
+# key_alias = "release"
+# key_password = "REDACTED"
