@@ -698,6 +698,10 @@ async fn main() {
             "/user/playback/video",
             get(user_playback::bp_video::user_playback_video),
         )
+        .route_with_tsr(
+            "/user/playback/stream/{media_guid}",
+            get(user_playback::bp_video::user_playback_stream),
+        )
         .route_with_tsr("/user/hardware", get(user::bp_hardware::user_hardware))
         .route_with_tsr(
             "/user/hardware/phue",

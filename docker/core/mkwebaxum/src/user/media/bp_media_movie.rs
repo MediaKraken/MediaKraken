@@ -100,11 +100,73 @@ pub async fn user_media_movie(
     }
 }
 
+#[derive(Debug, sqlx::FromRow)]
+struct MediaMovieMetadataRow {
+    mm_metadata_movie_json: serde_json::Value,
+    mm_metadata_movie_name: String,
+    mm_poster: String,
+}
+
+#[derive(Debug, sqlx::FromRow)]
+struct MediaMovieFileRow {
+    mm_media_guid: uuid::Uuid,
+    mm_media_path: String,
+    mm_media_ffprobe_json: Option<serde_json::Value>,
+}
+
+/// One media file (version) of a movie with ffprobe-derived display values.
+#[derive(Debug)]
+struct TemplateMediaFileList {
+    mm_media_guid: uuid::Uuid,
+    file_name: String,
+    resolution: String,
+    runtime: String,
+}
+
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_movie_detail.html")]
 struct TemplateMediaMovieDetailContext {
     template_data: serde_json::Value,
+    template_poster: String,
+    template_media_files: Vec<TemplateMediaFileList>,
     page_title: Option<String>,
+}
+
+/// Width x height of the first video stream in an ffprobe document, or "NA".
+fn parse_ffprobe_resolution(ffprobe: &serde_json::Value) -> String {
+    let Some(streams) = ffprobe.get("streams").and_then(serde_json::Value::as_array) else {
+        return "NA".to_string();
+    };
+    for stream in streams {
+        if stream.get("codec_type").and_then(serde_json::Value::as_str) == Some("video") {
+            if let (Some(width), Some(height)) = (
+                stream.get("width").and_then(serde_json::Value::as_u64),
+                stream.get("height").and_then(serde_json::Value::as_u64),
+            ) {
+                return format!("{width}x{height}");
+            }
+        }
+    }
+    "NA".to_string()
+}
+
+/// format.duration (seconds) formatted as HH:MM:SS, or "NA".
+fn parse_ffprobe_runtime(ffprobe: &serde_json::Value) -> String {
+    let duration = ffprobe
+        .get("format")
+        .and_then(|format_info| format_info.get("duration"))
+        .and_then(serde_json::Value::as_str)
+        .and_then(|raw| raw.parse::<f64>().ok());
+    match duration {
+        Some(duration) if duration.is_finite() && duration >= 0.0 => {
+            let total_seconds = duration as i64;
+            let hours = total_seconds / 3600;
+            let minutes = (total_seconds % 3600) / 60;
+            let seconds = total_seconds % 60;
+            format!("{hours:02}H:{minutes:02}M:{seconds:02}S")
+        }
+        _ => "NA".to_string(),
+    }
 }
 
 pub async fn user_media_movie_detail(
@@ -126,8 +188,104 @@ pub async fn user_media_movie_detail(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
+        // the detail guid is a media guid (mm_media_guid); resolve the movie
+        // metadata it belongs to
+        let metadata_row = sqlx::query_as::<_, MediaMovieMetadataRow>(
+            r#"select mm_metadata_movie_json,
+                      mm_metadata_movie_name,
+                      COALESCE(mm_metadata_movie_localimage_json->>'Poster', '') as mm_poster
+               from mm_metadata_movie
+               where mm_metadata_movie_guid = (
+                   select mm_media_metadata_guid
+                   from mm_media
+                   where mm_media_guid = $1
+               )
+               limit 1"#,
+        )
+        .bind(guid)
+        .fetch_optional(&state.sqlx_pool_ro)
+        .await;
+        let metadata_row = match metadata_row {
+            Ok(Some(row)) => row,
+            Ok(None) => {
+                return (
+                    StatusCode::NOT_FOUND,
+                    Html(String::from("Not found")).into_response(),
+                );
+            }
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
+        let template_data = crate::user::detail_map::movie(
+            &metadata_row.mm_metadata_movie_json,
+            &metadata_row.mm_metadata_movie_name,
+            &metadata_row.mm_poster,
+        );
+        let template_poster = template_data
+            .get("mm_metadata_json")
+            .and_then(|meta| meta.get("poster"))
+            .and_then(serde_json::Value::as_str)
+            .filter(|poster| !poster.is_empty())
+            .map(str::to_string)
+            .unwrap_or_else(|| "/static/image/Movie-icon.png".to_string());
+
+        // every media file (version) of this movie
+        let file_rows = sqlx::query_as::<_, MediaMovieFileRow>(
+            r#"select mm_media_guid,
+                      mm_media_path,
+                      mm_media_ffprobe_json
+               from mm_media
+               where mm_media_metadata_guid = (
+                   select mm_media_metadata_guid
+                   from mm_media
+                   where mm_media_guid = $1
+               )
+               order by mm_media_path"#,
+        )
+        .bind(guid)
+        .fetch_all(&state.sqlx_pool_ro)
+        .await;
+        let file_rows = match file_rows {
+            Ok(rows) => rows,
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
+        let mut template_media_files: Vec<TemplateMediaFileList> = Vec::new();
+        for file_row in file_rows {
+            let file_name = file_row
+                .mm_media_path
+                .rsplit('/')
+                .next()
+                .unwrap_or(&file_row.mm_media_path)
+                .to_string();
+            let (resolution, runtime) = match &file_row.mm_media_ffprobe_json {
+                Some(ffprobe) => (
+                    parse_ffprobe_resolution(ffprobe),
+                    parse_ffprobe_runtime(ffprobe),
+                ),
+                // not all files have ffprobe data
+                None => ("NA".to_string(), "NA".to_string()),
+            };
+            template_media_files.push(TemplateMediaFileList {
+                mm_media_guid: file_row.mm_media_guid,
+                file_name,
+                resolution,
+                runtime,
+            });
+        }
+
         let template = TemplateMediaMovieDetailContext {
-            template_data: json!({}),
+            template_data,
+            template_poster,
+            template_media_files,
             page_title: Some("MediaKraken Movie Detail".to_string()),
         };
         let reply_html = template.render().unwrap();

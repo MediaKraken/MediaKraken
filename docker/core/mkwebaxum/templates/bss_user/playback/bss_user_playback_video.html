@@ -3,11 +3,14 @@
 {#
   Context (UserPlaybackVideoTemplate):
     page_title: Option<String>
+    media_name: Option<String>
+    media_source: Option<String>
+    media_mime: Option<String>
 
-  Player shell: the Video.js player is expected to mount into #video_player.
-  The videojs assets are expected at /static/videojs/ (video.min.js and,
-  for the YouTube provider, Youtube.min.js). Until the assets and the
-  mounting script are in place, the shell shows a placeholder.
+  When media_source is present, #video_player is an HTML5 <video> element
+  playing the file served by /user/playback/stream/{media_guid}; that
+  endpoint supports HTTP Range requests, so seeking works. Until a source
+  is selected, the shell shows a placeholder.
 #}
 
 {% block content %}
@@ -17,11 +20,26 @@
         class="rounded-3xl border border-zinc-200/80 bg-gradient-to-br from-white via-white to-zinc-100 p-6 shadow-sm dark:border-zinc-800 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900">
         <p class="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500 dark:text-indigo-300">Playback</p>
         <h1 class="mt-2 text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Video</h1>
+        {% if let Some(name) = media_name %}
+        <p class="mt-1 truncate text-sm text-zinc-600 dark:text-zinc-400" title="{{ name }}">{{ name }}</p>
+        {% else %}
         <p class="mt-2 max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
             Videos and YouTube sources play in the built-in player.
         </p>
+        {% endif %}
     </div>
 
+    {% if let Some(source) = media_source %}
+    <div class="mt-6 aspect-video w-full overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-950 shadow-sm dark:border-zinc-800">
+        <video id="video_player" class="h-full w-full" controls preload="auto" aria-label="Video player">
+            {% if let Some(mime) = media_mime %}
+            <source src="{{ source }}" type="{{ mime }}">
+            {% else %}
+            <source src="{{ source }}">
+            {% endif %}
+        </video>
+    </div>
+    {% else %}
     <div id="video_player"
         class="mt-6 aspect-video w-full overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-950 shadow-sm dark:border-zinc-800">
         <div class="flex h-full flex-col items-center justify-center gap-2 text-zinc-400 dark:text-zinc-500">
@@ -29,6 +47,7 @@
             <p class="text-xs">Waiting for /static/videojs/video.min.js</p>
         </div>
     </div>
+    {% endif %}
 
     <script src="/static/videojs/video.min.js"></script>
     <script src="/static/videojs/Youtube.min.js"></script>

@@ -20,7 +20,7 @@ Please see the WIKI for documentation.<BR>
 <li>Remote control software to run on a touch tablet/phone/pi
 <LI>Dedicated OS builds for the following clients:
     <UL>
-    <li>img file for Raspberry Pi 3/4/5 (Linux based)
+    <li>img file for Raspberry Pi 4/5 (Linux based)
     <li>ISO/img for install on dedicated client hardware (Linux based)
     </UL>
 <li>Offsite Storage Support

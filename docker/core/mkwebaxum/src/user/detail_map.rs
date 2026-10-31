@@ -7,6 +7,7 @@
 //!
 //! Stored blob shapes (as produced by the fetcher writers in `mk_lib_metadata`):
 //! - book: OpenLibrary work JSON (`title`, `author_name`, `first_publish_date`, ...)
+//! - movie: TMDB movie JSON (`title`, `original_title`, `overview`, `tagline`, `release_date`)
 //! - game / game_system: MAME XML -> JSON (`machine` object: `name`, `description`,
 //!   `year`, `manufacturer`)
 //! - album: MusicBrainz release JSON (`title`, `artist-credit-phrase`, `date-year`,
@@ -167,6 +168,25 @@ pub fn book(blob: &Value, cover_path: &str) -> Value {
             "publisher": Value::from(publisher),
             "isbn": Value::from(isbn),
             "cover": cover_url(cover_path),
+        }
+    })
+}
+
+/// Movie (TMDB movie JSON) blob -> contract. `title` prefers the indexed
+/// column; the blob supplies the rest.
+pub fn movie(blob: &Value, name: &str, cover_path: &str) -> Value {
+    json!({
+        "mm_metadata_json": {
+            "title": if name.is_empty() {
+                str_at(blob, "title")
+            } else {
+                Value::from(name)
+            },
+            "original_title": str_at(blob, "original_title"),
+            "overview": str_at(blob, "overview"),
+            "tagline": str_at(blob, "tagline"),
+            "release_date": str_at(blob, "release_date"),
+            "poster": cover_url(cover_path),
         }
     })
 }
