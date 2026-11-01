@@ -68,7 +68,7 @@ spec:
                   name: garage-s3-credentials
                   key: region
           image: mediakraken/mkinit:dev
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: mkstack-init
           volumeMounts:
             - mountPath: /mediakraken/metadata

@@ -76,7 +76,7 @@ spec:
                   name: garage-s3-credentials
                   key: AWS_REGION
           image: mediakraken/mkopenlibrarynetfetchbulk:dev
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: mkstack-openlibrarynetfetchbulk
           volumeMounts:
             - mountPath: /mediakraken

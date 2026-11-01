@@ -63,7 +63,7 @@ spec:
                   name: garage-s3-credentials
                   key: AWS_REGION
           image: mediakraken/mkdownload:dev
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: mkstack-download
           volumeMounts:
             - mountPath: /Comics

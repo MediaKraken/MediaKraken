@@ -22,7 +22,7 @@ spec:
             - name: SUPERUSER_PASSWORD
               value: metaman
           image: mediakraken/mkchatmumble:dev
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: mkstack-mumble
           ports:
             - containerPort: 64738

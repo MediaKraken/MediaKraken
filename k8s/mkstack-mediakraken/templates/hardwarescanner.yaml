@@ -43,7 +43,7 @@ spec:
                   name: run-env-type
                   key: debug
           image: mediakraken/mkhardwarescanner:dev
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: mkstack-hardwarescanner
       restartPolicy: Always
       terminationGracePeriodSeconds: 30

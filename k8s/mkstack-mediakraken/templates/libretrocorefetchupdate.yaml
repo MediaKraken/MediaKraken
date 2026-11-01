@@ -38,7 +38,7 @@ spec:
                   name: run-env-type
                   key: debug
           image: mediakraken/mklibretrocorefetchupdate:dev
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: mkstack-libretrocorefetchupdate
           volumeMounts:
             - mountPath: /mediakraken/emulation

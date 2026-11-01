@@ -46,7 +46,7 @@ spec:
                   name: run-env-type
                   key: debug
           image: mediakraken/mkschedulesdirectupdate:dev
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: mkstack-schedulesdirectupdate
       restartPolicy: Always
       terminationGracePeriodSeconds: 30

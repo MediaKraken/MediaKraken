@@ -48,7 +48,7 @@ spec:
                   name: run-env-type
                   key: debug
           image: mediakraken/mkgamesdbnetfetchbulk:dev
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: mkstack-gamesdbnetfetchbulk
           volumeMounts:
             - mountPath: /metadata

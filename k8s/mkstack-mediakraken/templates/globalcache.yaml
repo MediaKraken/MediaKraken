@@ -46,7 +46,7 @@ spec:
                   name: run-env-type
                   key: debug
           image: mediakraken/mkglobalcache:dev
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: mkstack-globalcache
       restartPolicy: Always
       terminationGracePeriodSeconds: 30

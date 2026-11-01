@@ -48,7 +48,7 @@ spec:
                   name: run-env-type
                   key: debug
           image: mediakraken/mkrabbitconsume:dev
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: mkstack-rabbitconsume
       restartPolicy: Always
       terminationGracePeriodSeconds: 30

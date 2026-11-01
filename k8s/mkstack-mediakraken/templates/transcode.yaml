@@ -51,7 +51,7 @@ spec:
                   name: run-env-type
                   key: debug
           image: mediakraken/mktranscode:dev
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: mkstack-transcode
           volumeMounts:
             - mountPath: /mediakraken/mnt

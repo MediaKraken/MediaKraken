@@ -46,7 +46,7 @@ spec:
                   name: run-env-type
                   key: debug
           image: mediakraken/mktmdbnetfetchbulk:dev
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: mkstack-tmdbnetfetchbulk
       restartPolicy: Always
       terminationGracePeriodSeconds: 30

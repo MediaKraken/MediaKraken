@@ -78,7 +78,7 @@ spec:
                   name: garage-s3-credentials
                   key: AWS_REGION
           image: mediakraken/mkwebaxum:dev
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: mkstack-webapp
           ports:
             - containerPort: 8080

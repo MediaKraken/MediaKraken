@@ -33,7 +33,7 @@ spec:
                   name: run-env-type
                   key: debug
           image: mediakraken/mkhardwarecontrol:dev
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: mkstack-hardwarecontrol
       restartPolicy: Always
       terminationGracePeriodSeconds: 30

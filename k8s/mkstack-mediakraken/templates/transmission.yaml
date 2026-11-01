@@ -85,7 +85,7 @@ spec:
         runAsUser: 100
       containers:
         - image: mediakraken/mktransmission:dev
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: mkstack-transmission
           ports:
             - containerPort: 9091
