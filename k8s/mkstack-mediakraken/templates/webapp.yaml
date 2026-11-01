@@ -82,7 +82,7 @@ spec:
           imagePullPolicy: IfNotPresent
           name: mkstack-webapp
           ports:
-            - containerPort: 8080
+            - containerPort: 80
               protocol: TCP
           volumeMounts:
             - mountPath: /mediakraken/metadata
