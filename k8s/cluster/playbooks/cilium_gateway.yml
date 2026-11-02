@@ -1,0 +1,56 @@
+# https://docs.cilium.io/en/stable/install/helm/
+# Replaces calico (deployed by kubespray) with cilium.
+# Gateway API is enabled by default in the cilium chart and creates the "cilium" GatewayClass.
+#
+# Order matters on a live cluster: the cilium agent writes /etc/cni/net.d/05-cilium.conflist
+# only once it is running, so cilium must be installed AND ready before the calico CNI config
+# is removed. If the agent never becomes ready, the playbook fails at the rollout gate and
+# the nodes keep running on calico (no CNI-less window).
+#
+# Kubespray creates /opt/cni/bin and /etc/cni/net.d owned by kube:root (mode 755). Cilium's
+# init containers run unprivileged with CAP_DAC_OVERRIDE dropped, so as uid 0 they cannot
+# write into kube-owned directories (EACCES): mount-cgroup, apply-sysctl-overwrites,
+# mount-bpf-fs and install-cni-binaries all die staging their binaries, and the agent can
+# never publish its CNI config. The chown in the first play fixes that.
+- name: Prepare nodes for cilium
+  hosts: k8s_cluster
+  become: yes
+  tasks:
+    - name: Make CNI directories root-owned so cilium's unprivileged inits can write
+      file:
+        path: "{{ item }}"
+        owner: root
+        group: root
+        state: directory
+      loop:
+        - /opt/cni/bin
+        - /etc/cni/net.d
+
+- name: Setup cilium gateway on cluster
+  hosts: mkcontrol1
+  tasks:
+    - name: Install cilium
+      shell: helm upgrade --install cilium cilium \
+        --repo https://helm.cilium.io \
+        --namespace kube-system \
+        --version 1.20.4
+
+    - name: Wait for cilium agents to be ready
+      shell: kubectl -n kube-system rollout status daemonset/cilium --timeout=600s
+
+- name: Remove calico CNI config from nodes
+  hosts: k8s_cluster
+  become: yes
+  tasks:
+    - name: Remove calico CNI config
+      file:
+        path: /etc/cni/net.d/10-calico.conflist
+        state: absent
+
+- name: Remove calico from cluster
+  hosts: mkcontrol1
+  tasks:
+    - name: Remove calico namespaces and CRDs
+      shell: |
+        kubectl delete ns calico calico-system --ignore-not-found
+        kubectl get crd -o name | grep 'projectcalico.org' | xargs -r kubectl delete
