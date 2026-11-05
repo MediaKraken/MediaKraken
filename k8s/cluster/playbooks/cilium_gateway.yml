@@ -1,6 +1,12 @@
 # https://docs.cilium.io/en/stable/install/helm/
 # Replaces calico (deployed by kubespray) with cilium.
-# Gateway API is enabled by default in the cilium chart and creates the "cilium" GatewayClass.
+# Gateway API is DISABLED by default in the cilium chart — we pass --set gatewayAPI.enabled=true
+# to start the gateway controller and create the "cilium" GatewayClass.
+# The chart also does NOT ship the Gateway API CRDs — they are installed from
+# ../config/gateway_api_crds.yml (gateway-api v1.6.3, matching cilium 1.20.4) before the helm install.
+# resources.limits.memory is REQUIRED: the 1.20.4 agent template sets GOMEMLIMIT via
+# resourceFieldRef limits.memory unconditionally, so without it the kubelet rejects every agent pod
+# ("Resource limits.memory not found for container cilium-agent").
 #
 # Order matters on a live cluster: the cilium agent writes /etc/cni/net.d/05-cilium.conflist
 # only once it is running, so cilium must be installed AND ready before the calico CNI config
@@ -29,11 +35,21 @@
 - name: Setup cilium gateway on cluster
   hosts: mkcontrol1
   tasks:
+    - name: Copy Gateway API CRDs
+      copy:
+        src: ../config/gateway_api_crds.yml
+        dest: ~/gateway_api_crds.yml
+
+    - name: Install Gateway API CRDs
+      shell: kubectl apply -f ~/gateway_api_crds.yml
+
     - name: Install cilium
       shell: helm upgrade --install cilium cilium \
         --repo https://helm.cilium.io \
         --namespace kube-system \
-        --version 1.20.4
+        --version 1.20.4 \
+        --set gatewayAPI.enabled=true \
+        --set resources.limits.memory=512Mi
 
     - name: Wait for cilium agents to be ready
       shell: kubectl -n kube-system rollout status daemonset/cilium --timeout=600s
@@ -54,3 +70,72 @@
       shell: |
         kubectl delete ns calico calico-system --ignore-not-found
         kubectl get crd -o name | grep 'projectcalico.org' | xargs -r kubectl delete
+
+- name: Maintain gateway VIP IPVS entries (Route mode)
+  # The gateway LoadBalancer service (192.168.50.202:443/80 + nodePorts 31528/32289)
+  # has selector <none>, so it never had endpoints in the deleted IPVS-mode
+  # kube-proxy, leaving stale IPVS service entries with zero real servers on
+  # every node. Without a real server per VIP, external VIP traffic dies
+  # (immediate ICMP port-unreachable). kube-proxy is gone, so this play owns
+  # the real servers.
+  #
+  # CRITICAL RULES (learned the hard way, verified 2026-11-05):
+  #  - Add the local real server PLAIN:  ipvsadm -a -t <VIP> -r 127.0.0.1:<port>
+  #    WITHOUT -m (Masq). Masq to a loopback real server is BROKEN in this
+  #    stack: IPVS schedules the SYN (visible in ipvsadm --stats) but it never
+  #    reaches conntrack or the socket — silent timeout. Plain mode is
+  #    normalized by the kernel to "127.0.0.1:<VIPport> Route"; the packet is
+  #    delivered locally untouched and Cilium's bpf_sock sk_lookup rewrites
+  #    127.0.0.1:<nodeport> to the per-node envoy L7 proxy port.
+  #  - IPVS state is kernel memory ONLY — entries are LOST ON NODE REBOOT.
+  #    This play must run on every node after (re)boot.
+  #  - The per-node envoy listener port is NOT stable (changes when the
+  #    envoy pod restarts), so it is read from the envoy admin socket each
+  #    run — never hardcode it.
+  hosts: k8s_cluster
+  become: yes
+  tasks:
+    - name: Detect the cilium-envoy gateway listener port on this node
+      shell: |
+        curl -s --max-time 5 --unix-socket /var/run/cilium/envoy/sockets/admin.sock \
+          http://localhost/listeners \
+          | grep 'cilium-gateway-mkstack-webapp/listener::127\.0\.0\.1:' \
+          | grep -oE '[0-9]+$' | head -1
+      register: gw_listener
+      changed_when: false
+      failed_when:
+        gw_listener.stdout | trim | length == 0
+      # fail message covers both "no socket" and "gateway not deployed yet"
+
+    - name: Gather current gateway VIP IPVS state (one "vip mode" line per VIP)
+      shell: |
+        for vp in 192.168.50.202:443 192.168.50.202:80 {{ ansible_host }}:31528 {{ ansible_host }}:32289; do
+          mode=$(ipvsadm -Ln 2>/dev/null \
+            | awk -v a="$vp" '$1=="TCP" {show=($2==a); next} show && /^  -> / {print $3; exit}')
+          echo "$vp ${mode:-missing}"
+        done
+      register: ipvs_state
+      changed_when: false
+
+    - name: Reset gateway VIP real servers to Route mode
+      when: ipvs_state.stdout_lines | select('search', '\sRoute$') | list | length < 4
+      shell: |
+        set -e
+        for vp in 192.168.50.202:443 192.168.50.202:80 {{ ansible_host }}:31528 {{ ansible_host }}:32289; do
+          rs=$(ipvsadm -Ln 2>/dev/null \
+            | awk -v a="$vp" '$1=="TCP" {show=($2==a); next} show && /^  -> / {print $2; exit}')
+          if [ -n "$rs" ]; then ipvsadm -d -t "$vp" -r "$rs" || true; fi
+          # plain add, NO -m: kernel stores it as "127.0.0.1:<VIPport> Route"
+          ipvsadm -a -t "$vp" -r "127.0.0.1:${vp##*:}"
+        done
+      changed_when: true
+
+    - name: Verify all four gateway VIPs are in Route mode
+      shell: |
+        for vp in 192.168.50.202:443 192.168.50.202:80 {{ ansible_host }}:31528 {{ ansible_host }}:32289; do
+          ipvsadm -Ln 2>/dev/null \
+            | awk -v a="$vp" '$1=="TCP" {show=($2==a); next} show && /^  -> / {print $2, $3}' \
+            | grep -Eq '127\.0\.0\.1:[0-9]+ +Route' \
+            || { echo "gateway VIP $vp has no Route-mode 127.0.0.1 real server"; exit 1; }
+        done
+      changed_when: false

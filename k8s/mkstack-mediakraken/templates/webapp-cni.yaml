@@ -4,7 +4,9 @@ metadata:
   name: mkstack-webapp-tls
   namespace: mediakraken
 spec:
-  clusterIssuer: letsencrypt-cluster
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-cluster
   dnsNames:
     - mk.mediakraken.media
   secretName: letsencrypt-webapp-tls

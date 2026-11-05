@@ -4,7 +4,7 @@ metadata:
   name: mkstack-webapp-service
   namespace: mediakraken
 spec:
-  externalTrafficPolicy: Local
+  externalTrafficPolicy: Cluster
   type: LoadBalancer
   ports:
     - port: 80
