@@ -78,6 +78,8 @@ spec:
                 secretKeyRef:
                   name: garage-s3-credentials
                   key: AWS_REGION
+            - name: MKWEBAPP_ALLOWED_ORIGINS
+              value: "https://mk.mediakraken.media,http://192.168.50.201:80,http://192.168.50.50:31874,http://192.168.50.51:31874,http://192.168.50.52:31874,http://192.168.50.60:31874,http://192.168.50.61:31874,http://192.168.50.62:31874"
           image: mediakraken/mkwebaxum:dev
           imagePullPolicy: IfNotPresent
           name: mkstack-webapp
