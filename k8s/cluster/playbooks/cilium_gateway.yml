@@ -88,7 +88,10 @@
   #    delivered locally untouched and Cilium's bpf_sock sk_lookup rewrites
   #    127.0.0.1:<nodeport> to the per-node envoy L7 proxy port.
   #  - IPVS state is kernel memory ONLY — entries are LOST ON NODE REBOOT.
-  #    This play must run on every node after (re)boot.
+  #    mk-gateway-ipvs.service (installed by the persist play below) restores
+  #    them at boot; this play handles drift while the node is up and is
+  #    boot-safe too (creates missing VSes, so a fresh node can be joined
+  #    by running this playbook even before the service exists).
   #  - The per-node envoy listener port is NOT stable (changes when the
   #    envoy pod restarts), so it is read from the envoy admin socket each
   #    run — never hardcode it.
@@ -122,6 +125,9 @@
       shell: |
         set -e
         for vp in 192.168.50.202:443 192.168.50.202:80 {{ ansible_host }}:31528 {{ ansible_host }}:32289; do
+          # create the VS if missing (fresh boot / new node); on an existing
+          # VS this fails with "already defined", which is fine
+          ipvsadm -A -t "$vp" -s rr 2>/dev/null || true
           rs=$(ipvsadm -Ln 2>/dev/null \
             | awk -v a="$vp" '$1=="TCP" {show=($2==a); next} show && /^  -> / {print $2; exit}')
           if [ -n "$rs" ]; then ipvsadm -d -t "$vp" -r "$rs" || true; fi
@@ -132,6 +138,59 @@
 
     - name: Verify all four gateway VIPs are in Route mode
       shell: |
+        for vp in 192.168.50.202:443 192.168.50.202:80 {{ ansible_host }}:31528 {{ ansible_host }}:32289; do
+          ipvsadm -Ln 2>/dev/null \
+            | awk -v a="$vp" '$1=="TCP" {show=($2==a); next} show && /^  -> / {print $2, $3}' \
+            | grep -Eq '127\.0\.0\.1:[0-9]+ +Route' \
+            || { echo "gateway VIP $vp has no Route-mode 127.0.0.1 real server"; exit 1; }
+        done
+      changed_when: false
+
+- name: Persist gateway VIP IPVS entries across node reboots (boot service)
+  # The kernel IPVS table is wiped on every node reboot and nothing rebuilds
+  # it (kube-proxy-replacement=true, no kube-proxy; verified 2026-11-05).
+  # Verified 2026-11-05 on 192.168.50.50 with all four gateway entries
+  # removed: Cilium's eBPF (bpf_sock sk_lookup -> per-node envoy) carries
+  # the NodePort gateway traffic on its own when the VSes are simply ABSENT.
+  # The broken state is a VS that EXISTS with zero real servers (IPVS
+  # intercepts the packet and answers ICMP port-unreachable — the
+  # 2026-11-05 cutover failure mode). This play therefore installs a
+  # per-node oneshot service that restores the exact production
+  # configuration (the four Route-mode entries from the play above) at
+  # boot, so the table can never drift into the empty-VS state:
+  #   /usr/local/bin/mk-gw-ipvs-boot.sh        (idempotent, fail-loud)
+  #   /etc/systemd/system/mk-gateway-ipvs.service
+  # Re-running is idempotent (re-copies the same files, re-arms the unit).
+  # Run on its own with:
+  #   ansible-playbook -i inventory.ini playbooks/cilium_gateway.yml --tags gateway_ipvs_persist
+  hosts: k8s_cluster
+  become: yes
+  tags: [gateway_ipvs_persist]
+  tasks:
+    - name: Install the boot-time IPVS restore script
+      copy:
+        src: ../config/mk-gw-ipvs-boot.sh
+        dest: /usr/local/bin/mk-gw-ipvs-boot.sh
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Install the mk-gateway-ipvs systemd unit
+      copy:
+        src: ../config/mk-gw-ipvs.service
+        dest: /etc/systemd/system/mk-gateway-ipvs.service
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Reload systemd and enable/start the service now
+      shell: |
+        systemctl daemon-reload
+        systemctl enable --now mk-gateway-ipvs.service
+
+    - name: Verify the service is active and all four VIPs are in Route mode
+      shell: |
+        test "$(systemctl is-active mk-gateway-ipvs.service)" = "active"
         for vp in 192.168.50.202:443 192.168.50.202:80 {{ ansible_host }}:31528 {{ ansible_host }}:32289; do
           ipvsadm -Ln 2>/dev/null \
             | awk -v a="$vp" '$1=="TCP" {show=($2==a); next} show && /^  -> / {print $2, $3}' \

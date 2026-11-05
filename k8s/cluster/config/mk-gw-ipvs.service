@@ -1,0 +1,16 @@
+[Unit]
+# Restores the MediaKraken gateway VIP IPVS Route-mode entries at boot.
+# The IPVS table is kernel memory only and wiped on every reboot; this
+# cluster has no kube-proxy (Cilium kube-proxy-replacement=true), so
+# nothing else recreates the gateway entries. See mk-gw-ipvs-boot.sh.
+Description=MediaKraken gateway VIP IPVS Route-mode entries (boot restore)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/mk-gw-ipvs-boot.sh
+
+[Install]
+WantedBy=multi-user.target
