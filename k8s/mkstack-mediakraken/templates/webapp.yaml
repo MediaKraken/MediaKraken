@@ -8,7 +8,7 @@ spec:
   type: LoadBalancer
   ports:
     - port: 80
-      targetPort: 80
+      targetPort: 8080
   selector:
     io.kompose.service: mkstack-webapp-service
 ---
@@ -82,7 +82,7 @@ spec:
           imagePullPolicy: IfNotPresent
           name: mkstack-webapp
           ports:
-            - containerPort: 80
+            - containerPort: 8080
               protocol: TCP
           volumeMounts:
             - mountPath: /mediakraken/metadata

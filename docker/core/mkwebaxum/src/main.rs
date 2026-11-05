@@ -808,10 +808,10 @@ async fn main() {
     // add a fallback service for handling routes to unknown paths
     let app = app.fallback(bp_error::general_not_found);
 
-    let listener = match TcpListener::bind("0.0.0.0:80").await {
+    let listener = match TcpListener::bind("0.0.0.0:8080").await {
         Ok(l) => l,
         Err(e) => {
-            eprintln!("Failed to bind to port 80: {e}");
+            eprintln!("Failed to bind to port 8080: {e}");
             return;
         }
     };

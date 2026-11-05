@@ -50,8 +50,7 @@ RUN apk add --no-cache \
     cifs-utils \
     nfs-utils \
     libsmbclient \
-    samba-client \
-    libcap
+    samba-client
 
 # Copy system files and certs
 COPY --from=builder-mkwebapp /etc/passwd /etc/passwd
@@ -61,10 +60,6 @@ COPY --from=builder-mkwebapp /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/c
 
 # Copy the binary and assets
 COPY --from=builder-mkwebapp /mediakraken/mkwebapp /mediakraken/mkwebapp
-
-# Let the unprivileged app user (uid 1000) bind :80.
-# File capabilities survive the `sh -c` exec chain; runtime capabilities.add does not.
-RUN setcap cap_net_bind_service=+ep /mediakraken/mkwebapp
 COPY --from=builder-mkwebapp /mediakraken/templates ./templates
 COPY --from=builder-mkwebapp /mediakraken/static ./static
 
