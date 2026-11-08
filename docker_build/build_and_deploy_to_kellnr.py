@@ -26,8 +26,7 @@ args = parser.parse_args()
 load_dotenv()
 
 # publish to kellnr
-libs_to_publish = ["ed2k",
-                   "weectrl",
+libs_to_publish = ["weectrl",
                    "mk_lib_logging",
                    "mk_lib_common",
                    "mk_lib_compression",

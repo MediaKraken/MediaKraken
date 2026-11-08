@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_xbox"
-version = "0.0.1"
+version = "0.0.5"
 edition = "2024"
 
 [profile.release]

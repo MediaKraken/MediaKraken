@@ -1,7 +1,6 @@
 [workspace]
 
 members = [
-    "ed2k",
     "meta_directory_builder",
     "mk_lib_common",
     "mk_lib_compression",

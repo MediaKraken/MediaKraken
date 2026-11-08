@@ -53,6 +53,7 @@ pub async fn user_search(
 
 #[derive(Deserialize)]
 pub struct SearchParams {
+    #[serde(default)]
     pub q: String,
     #[serde(default, deserialize_with = "deserialize_filter")]
     pub filter: Vec<String>,

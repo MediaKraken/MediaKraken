@@ -59,9 +59,9 @@
     <h2 class="mt-6 text-lg font-semibold text-zinc-900 dark:text-zinc-100">Browse your library</h2>
     <ul role="list" class="mt-3 grid gap-4 sm:gap-5 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">
         <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
-            <a href="/user/metadata/movie/1" class="block" aria-label="Browse movies">
+            <a href="/user/media/movie/1" class="block" aria-label="Browse movies">
                 <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
-                    <img src="/static/image/Movie-icon.png?v=1" alt="Movies artwork" loading="lazy" decoding="async"
+                    <img src="/static/image/movie_ticket.png?v=1" alt="Movies artwork" loading="lazy" decoding="async"
                         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                 </div>
                 <div class="p-3">
@@ -70,7 +70,7 @@
             </a>
         </li>
         <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
-            <a href="/user/metadata/tv/1" class="block" aria-label="Browse TV shows">
+            <a href="/user/media/tv/1" class="block" aria-label="Browse TV shows">
                 <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
                     <img src="/static/image/television.png?v=1" alt="TV shows artwork" loading="lazy" decoding="async"
                         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
@@ -81,7 +81,7 @@
             </a>
         </li>
         <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
-            <a href="/user/metadata/music/1" class="block" aria-label="Browse music">
+            <a href="/user/media/music/1" class="block" aria-label="Browse music">
                 <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
                     <img src="/static/image/headphone.png?v=1" alt="Music artwork" loading="lazy" decoding="async"
                         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
@@ -92,7 +92,7 @@
             </a>
         </li>
         <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
-            <a href="/user/metadata/sports/1" class="block" aria-label="Browse sports">
+            <a href="/user/media/sports/1" class="block" aria-label="Browse sports">
                 <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
                     <img src="/static/image/stadium.png?v=1" alt="Sports artwork" loading="lazy" decoding="async"
                         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
@@ -103,7 +103,7 @@
             </a>
         </li>
         <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
-            <a href="/user/metadata/book/1" class="block" aria-label="Browse books">
+            <a href="/user/media/book/1" class="block" aria-label="Browse books">
                 <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
                     <img src="/static/image/books.png?v=1" alt="Books artwork" loading="lazy" decoding="async"
                         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
@@ -114,7 +114,7 @@
             </a>
         </li>
         <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
-            <a href="/user/metadata/game/1" class="block" aria-label="Browse games">
+            <a href="/user/media/game/1" class="block" aria-label="Browse games">
                 <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
                     <img src="/static/image/vid_game.png?v=1" alt="Games artwork" loading="lazy" decoding="async"
                         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
@@ -125,7 +125,7 @@
             </a>
         </li>
         <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
-            <a href="/user/metadata/game_system/1" class="block" aria-label="Browse game systems">
+            <a href="/user/media/game_system/1" class="block" aria-label="Browse game systems">
                 <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
                     <img src="/static/image/circuit-board.png?v=1" alt="Game systems artwork" loading="lazy" decoding="async"
                         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
@@ -147,24 +147,13 @@
             </a>
         </li>
         <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
-            <a href="/user/metadata/collection/1" class="block" aria-label="Browse collections">
+            <a href="/user/media/collection/1" class="block" aria-label="Browse collections">
                 <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
                     <img src="/static/image/rectangles_black.png?v=1" alt="Collections artwork" loading="lazy" decoding="async"
                         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                 </div>
                 <div class="p-3">
                     <h3 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Collections</h3>
-                </div>
-            </a>
-        </li>
-        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
-            <a href="/user/metadata/openlibrary/1" class="block" aria-label="Browse OpenLibrary">
-                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
-                    <img src="/static/image/earth.png?v=1" alt="OpenLibrary artwork" loading="lazy" decoding="async"
-                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                </div>
-                <div class="p-3">
-                    <h3 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">OpenLibrary</h3>
                 </div>
             </a>
         </li>
@@ -182,7 +171,7 @@
         <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
             <a href="/user/internet" class="block" aria-label="Browse internet media">
                 <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
-                    <img src="/static/image/browser.png?v=1" alt="Internet media artwork" loading="lazy" decoding="async"
+                    <img src="/static/image/earth.png?v=1" alt="Internet media artwork" loading="lazy" decoding="async"
                         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                 </div>
                 <div class="p-3">

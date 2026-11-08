@@ -59,12 +59,17 @@ pub async fn user_media_movie(
                 .unwrap_or(user_preferences::DEFAULT_PAGINATION_COUNT);
         let db_offset: i64 = (page * pagination_count) - pagination_count;
         let total_pages: i64 =
-        mk_lib_database::database_media::mk_lib_database_media_movie::mk_lib_database_media_movie_count(
-           &state.sqlx_pool_ro,
-            String::new(),
-        )
-        .await
-        .unwrap();
+            match mk_lib_database::database_media::mk_lib_database_media_movie::
+                mk_lib_database_media_movie_count(&state.sqlx_pool_ro, String::new()).await
+            {
+                Ok(total) => total,
+                Err(_) => {
+                    return (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        Html(String::from("Internal server error")).into_response(),
+                    );
+                }
+            };
         let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
             total_pages,
             page,
@@ -75,14 +80,23 @@ pub async fn user_media_movie(
         .await
         .unwrap();
         let movie_list =
-        mk_lib_database::database_media::mk_lib_database_media_movie::mk_lib_database_media_movie_read(
-           &state.sqlx_pool_ro,
-            String::new(),
-            db_offset,
-            pagination_count,
-        )
-        .await
-        .unwrap();
+            match mk_lib_database::database_media::mk_lib_database_media_movie::
+                mk_lib_database_media_movie_read(
+                    &state.sqlx_pool_ro,
+                    String::new(),
+                    db_offset,
+                    pagination_count,
+                )
+                .await
+            {
+                Ok(list) => list,
+                Err(_) => {
+                    return (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        Html(String::from("Internal server error")).into_response(),
+                    );
+                }
+            };
         let mut template_data_exists = false;
         if movie_list.len() > 0 {
             template_data_exists = true;

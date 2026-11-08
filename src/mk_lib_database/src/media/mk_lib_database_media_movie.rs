@@ -52,18 +52,45 @@ pub async fn mk_lib_database_media_movie_read(
     limit: i64,
 ) -> Result<Vec<DBMediaMovieList>, sqlx::Error> {
     if !search_value.is_empty() {
-        sqlx::query_as(r#""#)
-            .bind(search_value)
-            .bind(offset)
-            .bind(limit)
-            .fetch_all(sqlx_pool)
-            .await
+        sqlx::query_as(
+            r#"select mm_media_guid as mm_media_movie_video_guid
+            from (select distinct on (mm_metadata_movie_guid) mm_media_guid,
+            mm_metadata_movie_guid,
+            mm_metadata_movie_name
+            from mm_media,
+            mm_metadata_movie where mm_media_class_enum = $1
+            and mm_media_metadata_guid = mm_metadata_movie_guid
+            and mm_metadata_movie_name % $2
+            order by mm_metadata_movie_guid, mm_media_path) as temp
+            order by LOWER(temp.mm_metadata_movie_name),
+            temp.mm_metadata_movie_guid
+            offset $3 limit $4"#,
+        )
+        .bind(mk_lib_common_enum_media_type::DLMediaType::MOVIE)
+        .bind(search_value)
+        .bind(offset)
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
     } else {
-        sqlx::query_as(r#""#)
-            .bind(offset)
-            .bind(limit)
-            .fetch_all(sqlx_pool)
-            .await
+        sqlx::query_as(
+            r#"select mm_media_guid as mm_media_movie_video_guid
+            from (select distinct on (mm_metadata_movie_guid) mm_media_guid,
+            mm_metadata_movie_guid,
+            mm_metadata_movie_name
+            from mm_media,
+            mm_metadata_movie where mm_media_class_enum = $1
+            and mm_media_metadata_guid = mm_metadata_movie_guid
+            order by mm_metadata_movie_guid, mm_media_path) as temp
+            order by LOWER(temp.mm_metadata_movie_name),
+            temp.mm_metadata_movie_guid
+            offset $2 limit $3"#,
+        )
+        .bind(mk_lib_common_enum_media_type::DLMediaType::MOVIE)
+        .bind(offset)
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
     }
 }
 
@@ -72,13 +99,28 @@ pub async fn mk_lib_database_media_movie_count(
     search_value: String,
 ) -> Result<i64, sqlx::Error> {
     if !search_value.is_empty() {
-        let row: (i64,) = sqlx::query_as(r#""#)
-            .bind(search_value)
-            .fetch_one(sqlx_pool)
-            .await?;
+        let row: (i64,) = sqlx::query_as(
+            r#"select count(*) from (select distinct mm_metadata_movie_guid
+            from mm_media,
+            mm_metadata_movie where mm_media_class_enum = $1
+            and mm_media_metadata_guid = mm_metadata_movie_guid
+            and mm_metadata_movie_name % $2) as temp"#,
+        )
+        .bind(mk_lib_common_enum_media_type::DLMediaType::MOVIE)
+        .bind(search_value)
+        .fetch_one(sqlx_pool)
+        .await?;
         Ok(row.0)
     } else {
-        let row: (i64,) = sqlx::query_as(r#""#).fetch_one(sqlx_pool).await?;
+        let row: (i64,) = sqlx::query_as(
+            r#"select count(*) from (select distinct mm_metadata_movie_guid
+            from mm_media,
+            mm_metadata_movie where mm_media_class_enum = $1
+            and mm_media_metadata_guid = mm_metadata_movie_guid) as temp"#,
+        )
+        .bind(mk_lib_common_enum_media_type::DLMediaType::MOVIE)
+        .fetch_one(sqlx_pool)
+        .await?;
         Ok(row.0)
     }
 }
