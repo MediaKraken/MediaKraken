@@ -7,6 +7,13 @@ import 'dotenv/config';
 
 import { baseOrigin } from './utils/env';
 
+/**
+ * e2e/auth-rate-limit.spec.ts hammers the shared client-IP auth budget
+ * (login 10/60s, register 5/60s), so it is excluded from the browser
+ * projects and only runs in the dedicated `rate-limit` project below.
+ */
+const RATE_LIMIT_SPEC = 'e2e/auth-rate-limit.spec.ts';
+
 export default defineConfig({
   // All specs live in e2e/, integration/ and unit/ (see testMatch).
   testDir: '.',
@@ -46,24 +53,48 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
 
-  /** Configure projects for major browsers */
+  /**
+   * Configure projects for major browsers. The browser projects must NOT
+   * run in parallel with the rate-limit project (Playwright runs projects
+   * concurrently): the burst would eat the shared-IP login/register budget
+   * and flip the 303 expectations of auth-login/csrf/session-cookies into
+   * 429s. Run them as separate commands (see README, CI section).
+   */
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      testIgnore: RATE_LIMIT_SPEC,
     },
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
+      testIgnore: RATE_LIMIT_SPEC,
     },
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
+      testIgnore: RATE_LIMIT_SPEC,
     },
     /** Optional: mobile emulation */
     {
       name: 'Mobile Chrome',
       use: { ...devices['Pixel 5'] },
+      testIgnore: RATE_LIMIT_SPEC,
+    },
+    /**
+     * Rate-limit project: runs only e2e/auth-rate-limit.spec.ts, with a
+     * single worker so its two bursts stay sequential against the shared
+     * client-IP budget. Invoke explicitly:
+     *
+     *   npx playwright test --project=rate-limit
+     */
+    {
+      name: 'rate-limit',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: RATE_LIMIT_SPEC,
+      workers: 1,
+      fullyParallel: false,
     },
   ],
 

@@ -6,10 +6,13 @@
  * the target deployment, so they only run when MK_TEST_ALLOW_REGISTER is
  * truthy.
  *
- * Note on the (currently inert) register rate limiter: this file performs at
- * most 3 register POSTs per run, and the rate-limit spec performs 4; both
- * stay under the configured 5/60s limit per file even if the limiter were
- * ever activated.
+ * Note on the (active) register rate limiter — 5 requests / 60s per
+ * client IP, in-memory per replica: this file performs at most 3
+ * register POSTs per run (the validation tests; the success tests add up
+ * to 3 more only when MK_TEST_ALLOW_REGISTER is set). All four browser
+ * projects share the client IP, so keep these counts low, and never run
+ * this project in parallel with the `rate-limit` project (which exhausts
+ * the budget on purpose).
  */
 import type { Page, TestInfo } from '@playwright/test';
 import { test, expect } from '../fixtures/auth';

@@ -1,14 +1,12 @@
 /**
  * Security headers (security_headers middleware in main.rs).
  *
- * The middleware inserts a fixed header set into every response that passes
- * through it and strips the app's Server header. Two responses bypass it
- * entirely and are asserted as documented gaps:
- *
- * - the app-level fallback 404 (attached via app.fallback() AFTER the
- *   middleware stack), and
- * - the CSRF 403 (require_same_origin is the OUTERMOST middleware, so it
- *   rejects before security_headers runs).
+ * The middleware inserts a fixed header set into every response and strips
+ * the app's Server header. It is the OUTERMOST middleware, so even
+ * middleware rejections (the CSRF 403) carry the headers, and the 404
+ * fallback — merged as a sub-router with its own security_headers layer —
+ * carries them too. (Both of those were documented gaps before the
+ * middleware was moved outside require_same_origin.)
  */
 import type { APIResponse } from '@playwright/test';
 import { test, expect } from '../fixtures/auth';
@@ -26,13 +24,6 @@ function expectSecurityHeaders(response: APIResponse): void {
   const headers = response.headers();
   for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
     expect(headers[name], `header ${name}`).toBe(value);
-  }
-}
-
-function expectNoSecurityHeaders(response: APIResponse): void {
-  const headers = response.headers();
-  for (const name of Object.keys(SECURITY_HEADERS)) {
-    expect(headers[name], `header ${name} should be absent`).toBeUndefined();
   }
 }
 
@@ -67,25 +58,25 @@ test.describe('security headers on middleware-covered responses', () => {
     expect(response.status()).toBe(405);
     expectSecurityHeaders(response);
   });
-});
 
-test.describe('responses that bypass the middleware (documented gaps)', () => {
-  test('the fallback 404 carries NO security headers', async ({ request }) => {
-    // main.rs attaches app.fallback() after .layer(...), so fallback
-    // responses never reach security_headers.
+  // Former documented gaps, now covered.
+  test('the fallback 404 carries the full security header set', async ({ request }) => {
+    // main.rs merges the 404 fallback as a sub-router with its own
+    // security_headers layer (kept OUTSIDE the session layer, so a 404
+    // must not create a session — see http-behavior.spec.ts).
     const response = await request.get('/definitely/not/a/real/route');
     expect(response.status()).toBe(404);
-    expectNoSecurityHeaders(response);
+    expectSecurityHeaders(response);
   });
 
-  test('the CSRF 403 carries NO security headers', async ({ request }) => {
-    // require_same_origin is the outermost middleware: a rejected
-    // state-changing request never reaches security_headers.
+  test('the CSRF 403 carries the full security header set', async ({ request }) => {
+    // security_headers is the outermost middleware, so a rejected
+    // state-changing request still gets the headers.
     const response = await request.post('/public/login', {
       form: { username: 'x', password: 'y' },
       maxRedirects: 0,
     });
     expect(response.status()).toBe(403);
-    expectNoSecurityHeaders(response);
+    expectSecurityHeaders(response);
   });
 });

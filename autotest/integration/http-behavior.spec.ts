@@ -1,9 +1,11 @@
 /**
  * Generic HTTP behavior of the app router:
  *
- * - unregistered paths fall through to the app-level 404 fallback
- * - the fallback 404 is registered AFTER (inside of) the middleware stack, so
- *   its responses carry NO security headers — a documented gap asserted here
+ * - unregistered paths fall through to the app-level 404 fallback, which is
+ *   merged as a sub-router with its own security-headers layer: the 404
+ *   carries the full security header set AND no Set-Cookie at all (it is
+ *   deliberately outside the session layer, so an unknown path must not
+ *   create or refresh a session)
  * - wrong methods on existing routes yield 405 (once CSRF is satisfied)
  * - the root path "/" is not registered and 404s
  */
@@ -26,16 +28,22 @@ test.describe('fallback 404', () => {
     expect(await response.text()).toContain('<title>MediaKraken – 404</title>');
   });
 
-  test('DOCUMENTED GAP: fallback 404 lacks the security headers', async ({ request }) => {
-    // The fallback handler is attached after the security-headers middleware
-    // (app.fallback() in main.rs), so its responses skip the middleware stack
-    // entirely. Asserting absence so the suite goes red if the gap is ever
-    // fixed (and the assertion can be flipped to presence then).
+  test('the fallback 404 carries the security headers and no session cookie', async ({
+    request,
+  }) => {
+    // main.rs merges the fallback as a sub-router with its own
+    // security_headers layer, so 404s carry the same header set as
+    // everything else. The merge happens OUTSIDE the session layer
+    // on purpose: an unknown path must not create or refresh a session.
     const response = await request.get('/definitely/not/a/real/route');
     expect(response.status()).toBe(404);
-    expect(response.headers()['x-frame-options']).toBeUndefined();
-    expect(response.headers()['x-content-type-options']).toBeUndefined();
-    expect(response.headers()['cache-control']).toBeUndefined();
+    expect(response.headers()['x-frame-options']).toBe('DENY');
+    expect(response.headers()['x-content-type-options']).toBe('nosniff');
+    expect(response.headers()['cache-control']).toBe('no-store, no-cache, must-revalidate');
+    expect(
+      response.headersArray().some((header) => header.name.toLowerCase() === 'set-cookie'),
+      'a 404 must not set any cookie (the fallback sits outside the session layer)',
+    ).toBe(false);
   });
 });
 

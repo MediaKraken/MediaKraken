@@ -42,8 +42,9 @@ npx playwright install          # browsers (chromium, firefox, webkit)
 ## Running tests
 
 ```bash
-npx playwright test                      # all projects (4 browsers)
+npx playwright test                      # the 4 browser projects
 npx playwright test --project=chromium   # one browser
+npx playwright test --project=rate-limit # the auth rate-limit spec (separately!)
 npx playwright test e2e/                 # one directory
 npx playwright test unit/                # offline unit tests only
 npx playwright test --headed             # visible browser
@@ -54,6 +55,12 @@ npx playwright show-report               # HTML report after a run
 - Locally: 4 parallel workers, no retries, HTML reporter.
 - On CI (`CI=1`): 1 worker, 2 retries, `forbidOnly` enforced.
 - Global timeout: 60s per test (live network round trips).
+- The `rate-limit` project runs `e2e/auth-rate-limit.spec.ts` on its own
+  (1 worker). It deliberately exhausts the shared client-IP login/register
+  budget for 60s, so it must **not** run in parallel with the browser
+  projects — Playwright runs projects concurrently, so invoke it as a
+  separate command, AFTER the browser projects (their login tests have no
+  429 back-off and would see the depleted budget).
 
 ## Configuration (`.env`)
 
@@ -89,30 +96,48 @@ Point `BASE_URL` at the local app. Two server-side constraints matter:
   server's `MKWEBAPP_ALLOWED_ORIGINS`. Make sure the local origin is included
   in that server environment variable, or every form POST 403s.
 
-## Documented bugs the suite codifies
+## Previously documented bugs (all fixed — specs now assert the fixed behavior)
 
-These tests assert **current, known-wrong** behavior on purpose so the suite
-goes red (and needs updating) if the bug is ever fixed:
+This suite originally asserted six known-wrong behaviors on purpose. All
+six are now fixed in `docker/core/mkwebaxum`, and the specs assert the
+**fixed** behavior:
 
-| Test file | Documented issue |
+| Test file | Fixed behavior asserted |
 | --- | --- |
-| `integration/api-titlesearch.spec.ts` | `/api/titlesearch/*` 500s for everyone — route registered after `AuthSessionLayer`, handler still extracts `AuthSession` |
-| `e2e/error-pages.spec.ts`, `e2e/admin-access.spec.ts` | `/admin/*` rejections render the 403 template but return a **401 status** |
-| `e2e/security-headers.spec.ts`, `integration/http-behavior.spec.ts` | the fallback 404 (and the CSRF 403) bypass the security-headers middleware |
-| `e2e/auth-rate-limit.spec.ts` | the auth rate limiter is **inert**: `axum::serve` without `into_make_service_with_connect_info` never sets `ConnectInfo`, so `rate_limit_auth` always passes through |
-| `e2e/user-search.spec.ts` | `/user/search` is wired to the public stub handler (always empty results); the permission-gated handler is not registered |
-| `fixtures/auth.ts` (comment) | `/admin/home` additionally calls myexternalip.com with `.unwrap()` — the fixture verifies `/admin/user/1` instead |
+| `integration/api-titlesearch.spec.ts` | the route is registered in front of the auth/session layers: anonymous → 401 error page, authenticated → 200 results page (no more 500 "Can't extract AuthSession") |
+| `e2e/error-pages.spec.ts`, `e2e/admin-access.spec.ts` | `/admin/*` rejections return a **403 status** matching the 403 template |
+| `e2e/security-headers.spec.ts`, `integration/http-behavior.spec.ts` | the fallback 404 and the CSRF 403 both carry the full security header set (`security_headers` is the outermost middleware; the 404 fallback is merged with its own copy of it) |
+| `e2e/auth-rate-limit.spec.ts` | the limiter is **active** (`into_make_service_with_connect_info` + X-Forwarded-For keying): a burst past the per-IP budget ends in a 429 "too many requests, please try again later" carrying the security headers |
+| `e2e/user-search.spec.ts` | `/user/search` is wired to the permission-gated handler: anonymous → 401 error page, `User::View` → 200 search form (query params are accepted but ignored — no Query extractor) |
+| `fixtures/auth.ts` (comment) | `/admin/home` no longer `.unwrap()`s the myexternalip.com fetch (falls back to "unavailable"), so the suite no longer needs to work around it |
 
-Also noted in `e2e/session-cookies.spec.ts`: the session cookie is named
+Until the fixed build is deployed, the specs in the table above are
+**expected to be red** against the live deployment; everything else is
+unchanged and must stay green.
+
+Notes:
+
+- The rate limits are 10 login-equivalent POSTs (login + forgot_password)
+  and 5 register POSTs per 60s per client IP, in-memory **per replica**
+  (the deployment runs 3 replicas, so the effective site-wide limit is
+  looser). The rate-limit spec's bursts are sized to exceed the worst
+  case, and concurrent consumers from the same IP can only make the 429
+  arrive earlier.
+- Also noted in `e2e/session-cookies.spec.ts`: the session cookie is named
 `session`, carries its 1h lifetime as `Expires` (no `Max-Age`), and the
 `axum-flash` cookie is `SameSite=Strict` with `Max-Age=600`.
 
 ## CI
 
+Run the browser projects first, then the rate-limit project — the rate
+limit spec exhausts the shared client-IP login/register budget for 60s,
+and Playwright runs projects concurrently:
+
 ```bash
 npm ci
 npx playwright install --with-deps chromium
 CI=1 npx playwright test --project=chromium --reporter=github
+CI=1 npx playwright test --project=rate-limit --reporter=github
 ```
 
 Keep `MK_TEST_ALLOW_REGISTER` unset in CI against production: the success

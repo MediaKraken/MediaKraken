@@ -94,7 +94,7 @@ pub async fn admin_library(
     {
         let template = TemplateError403Context {};
         let reply_html = template.render().unwrap();
-        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+        (StatusCode::FORBIDDEN, Html(reply_html).into_response())
     } else {
         let share_list =
             mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_read(
@@ -296,7 +296,7 @@ pub async fn admin_library_share_directories(
     .await
     {
         return (
-            StatusCode::UNAUTHORIZED,
+            StatusCode::FORBIDDEN,
             Json(json!({"error": "Not authorized"})),
         );
     }

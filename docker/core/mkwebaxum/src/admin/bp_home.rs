@@ -74,7 +74,7 @@ pub async fn admin_home(
     {
         let template = TemplateError403Context {};
         let reply_html = template.render().unwrap();
-        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+        (StatusCode::FORBIDDEN, Html(reply_html).into_response())
     } else {
         let notification_list =
             mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_read(
@@ -101,11 +101,20 @@ pub async fn admin_home(
         let status_json: serde_json::Value = option_status_row.get("mm_status_json");
         let boot_seconds: libc::timeval = sys_info::boottime().unwrap();
         let boot_duration = chrono::Duration::seconds(i64::from(boot_seconds.tv_sec));
-        let external_ip = mk_lib_network::mk_lib_network::mk_data_from_url(
+        let external_ip = match mk_lib_network::mk_lib_network::mk_data_from_url(
             "https://myexternalip.com/raw".to_string(),
         )
         .await
-        .unwrap();
+        {
+            Ok(ip) => ip,
+            Err(error) => {
+                tracing::warn!(
+                    %error,
+                    "failed to fetch external IP from myexternalip.com; using fallback"
+                );
+                "unavailable".to_string()
+            }
+        };
         let mut server_streams = Vec::new();
         let mut server_scans = Vec::new();
         let number_format_language = user_preferences::load_user_number_format_language(

@@ -47,7 +47,7 @@ pub async fn admin_upc_import(
     {
         let template = TemplateError403Context {};
         let reply_html = template.render().unwrap();
-        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+        (StatusCode::FORBIDDEN, Html(reply_html).into_response())
     } else {
         let template = TemplateMediaUPCContext {
             template_data: json!({}),

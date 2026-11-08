@@ -46,7 +46,7 @@ pub async fn admin_report_known_media(
     {
         let template = TemplateError403Context {};
         let reply_html = template.render().unwrap();
-        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+        (StatusCode::FORBIDDEN, Html(reply_html).into_response())
     } else {
         let pagination_count =
             user_preferences::load_user_pagination_count(&state.sqlx_pool_ro, current_user.id)

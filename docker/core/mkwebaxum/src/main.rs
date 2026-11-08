@@ -311,12 +311,24 @@ async fn rate_limit_auth(State(state): State<AppState>, req: Request, next: Next
         _ => return next.run(req).await,
     };
 
-    let addr = match req.extensions().get::<ConnectInfo<SocketAddr>>() {
+    let peer = match req.extensions().get::<ConnectInfo<SocketAddr>>() {
         Some(addr) => addr.0.ip().to_string(),
         None => return next.run(req).await,
     };
+    // Behind the ingress (envoy) the peer address is shared by all clients,
+    // so prefer the first X-Forwarded-For hop when the proxy provides one.
+    // A forged XFF value can only weaken this soft limit; it cannot bypass
+    // authentication or the CSRF check.
+    let addr = req
+        .headers()
+        .get(header::HeaderName::from_static("x-forwarded-for"))
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| v.split(',').next())
+        .map(str::trim)
+        .filter(|v| !v.is_empty())
+        .unwrap_or(&peer);
 
-    if !limiter.is_allowed(&addr).await {
+    if !limiter.is_allowed(addr).await {
         tracing::warn!(ip = %addr, path, "rate limit exceeded on auth endpoint");
         return (
             StatusCode::TOO_MANY_REQUESTS,
@@ -406,6 +418,13 @@ async fn main() {
 
     // route_with_tsr creates two routes.....one with trailing slash
     let app = Router::new()
+        // Title search is registered before the auth/session layers so its
+        // AuthSession extractor works; the handler itself answers 401 for
+        // anonymous users and 200 for any authenticated user.
+        .route_with_tsr(
+            "/api/titlesearch/{title}",
+            get(api::bp_api_title_search::api_title_search),
+        )
         .route_with_tsr("/admin", get(admin::bp_home::admin_home))
         .route_with_tsr("/admin/backup", get(admin::bp_backup::admin_backup))
         .route_with_tsr("/admin/cron", get(admin::bp_cron::admin_cron))
@@ -722,7 +741,7 @@ async fn main() {
             post(user::bp_profile::user_profile_number_format_language_post),
         )
         .route_with_tsr("/user/queue", get(user::bp_queue::user_queue))
-        .route("/user/search", get(user::bp_search::search_handler))
+        .route("/user/search", get(user::bp_search::user_search))
         .route_with_tsr("/user/sync/{page}", get(user::bp_sync::user_sync))
         .route_with_tsr(
             "/user/user_media_movie_status",
@@ -773,11 +792,6 @@ async fn main() {
             .with_config(auth_config),
         )
         .layer(SessionLayer::new(session_store))
-        // after authsessionlayer so anyone can access
-        .route_with_tsr(
-            "/api/titlesearch/{title}",
-            get(api::bp_api_title_search::api_title_search),
-        )
         .route_with_tsr("/public/about", get(public::bp_about::public_about))
         .route_with_tsr("/error/401", get(bp_error::general_not_authorized))
         .route_with_tsr("/error/403", get(bp_error::general_not_administrator))
@@ -798,15 +812,23 @@ async fn main() {
         )
         .route("/metrics", get(|| async move { metric_handle.render() }))
         .layer(prometheus_layer)
-        .layer(middleware::from_fn(security_headers))
         .layer(middleware::from_fn_with_state(
             app_state.clone(),
             rate_limit_auth,
         ))
         .layer(middleware::from_fn(require_same_origin))
+        // Outermost so its headers are added to every response, including
+        // CSRF 403s and rate-limit 429s.
+        .layer(middleware::from_fn(security_headers))
         .with_state(app_state);
-    // add a fallback service for handling routes to unknown paths
-    let app = app.fallback(bp_error::general_not_found);
+    // add a fallback service for handling routes to unknown paths.
+    // Merged in separately so it stays outside the session layer (a 404 must
+    // not create or refresh a session) while still carrying security headers.
+    let app = app.merge(
+        Router::new()
+            .fallback(bp_error::general_not_found)
+            .layer(middleware::from_fn(security_headers)),
+    );
 
     let listener = match TcpListener::bind("0.0.0.0:8080").await {
         Ok(l) => l,
@@ -815,9 +837,12 @@ async fn main() {
             return;
         }
     };
-    if let Err(e) = axum::serve(listener, app)
-        .with_graceful_shutdown(shutdown_signal())
-        .await
+    if let Err(e) = axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .with_graceful_shutdown(shutdown_signal())
+    .await
     {
         eprintln!("Server error: {e}");
     }

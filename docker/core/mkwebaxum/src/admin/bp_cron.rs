@@ -98,7 +98,7 @@ pub async fn admin_cron(
     if !user_can_view_admin_cron(&method, &auth).await {
         let template = TemplateError403Context {};
         let reply_html = template.render().unwrap();
-        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+        (StatusCode::FORBIDDEN, Html(reply_html).into_response())
     } else {
         let cron_list = mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_service_read(
             &state.sqlx_pool_ro,
@@ -162,7 +162,7 @@ pub async fn admin_cron_update(
     Form(input_data): Form<CronUpdateInput>,
 ) -> impl IntoResponse {
     if !user_can_view_admin_cron(&method, &auth).await {
-        return (StatusCode::UNAUTHORIZED, "Unauthorized").into_response();
+        return (StatusCode::FORBIDDEN, "Forbidden").into_response();
     }
 
     let (cron_name, cron_description, cron_enabled, schedule_type, schedule_time, cron_json) =

@@ -50,7 +50,7 @@ pub async fn admin_backup(
     {
         let template = TemplateError403Context {};
         let reply_html = template.render().unwrap();
-        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+        (StatusCode::FORBIDDEN, Html(reply_html).into_response())
     } else {
         // TODO show local backups here as well
         let pagination_count =

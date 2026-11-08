@@ -48,7 +48,7 @@ pub async fn admin_settings(
     {
         let template = TemplateError403Context {};
         let reply_html = template.render().unwrap();
-        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+        (StatusCode::FORBIDDEN, Html(reply_html).into_response())
     } else {
         let template = AdminSettingsTemplate {
             page_title: Some("MediaKraken Admin Settings".to_string()),

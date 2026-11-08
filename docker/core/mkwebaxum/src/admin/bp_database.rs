@@ -51,7 +51,7 @@ pub async fn admin_database(
     {
         let template = TemplateError403Context {};
         let reply_html = template.render().unwrap();
-        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+        (StatusCode::FORBIDDEN, Html(reply_html).into_response())
     } else {
         let pg_version =
             mk_lib_database::mk_lib_database_version::mk_lib_database_postgresql_version(

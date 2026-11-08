@@ -1,45 +1,49 @@
 /**
  * /api/titlesearch/{title}
  *
- * DOCUMENTED BUG (asserting current behavior on purpose):
- * the route is registered AFTER AuthSessionLayer in main.rs
- * (`.layer(AuthSessionLayer::...())` is applied to routes registered before
- * it; this one is added afterwards "so anyone can access" it). The handler
- * still extracts `AuthSession<...>`, which fails because the layer never ran
- * for this route, so every request — anonymous or authenticated — gets a
- * plain-text 500 with the extractor's panic message.
- *
- * If/when the route is moved in front of the layer (or the extraction
- * removed), these tests should be updated to assert the working API.
+ * The route is registered at the TOP of the route chain in main.rs, in
+ * front of the AuthSession/Session layers, so the handler's `AuthSession`
+ * extractor works: anonymous visitors get the 401 error page, and any
+ * authenticated user with User::View gets the search results page
+ * (bss_api/bss_api_title_search.html — one node per media type).
  */
 import { test, expect } from '../fixtures/auth';
 
-const EXPECTED_ERROR_BODY = "Can't extract AuthSession. Is `AuthSessionLayer` enabled?";
-
 test.describe('/api/titlesearch', () => {
-  test('anonymous request returns 500 with the extractor error', async ({ request }) => {
+  test('anonymous request gets the 401 error page', async ({ request }) => {
     const response = await request.get('/api/titlesearch/test');
-    expect(response.status()).toBe(500);
-    expect(response.headers()['content-type']).toContain('text/plain');
-    expect((await response.text()).trim()).toBe(EXPECTED_ERROR_BODY);
+    expect(response.status()).toBe(401);
+    expect(response.headers()['content-type']).toContain('text/html');
+    const body = await response.text();
+    expect(body).toContain('<title>MediaKraken – 401</title>');
+    expect(body).toContain('401 – Must be a verified user');
   });
 
-  test('authenticated request returns the same 500 (bug affects everyone)', async ({
+  test('authenticated request renders the title search results page', async ({
     authRequest,
   }) => {
-    const response = await authRequest.get('/api/titlesearch/test');
-    expect(response.status()).toBe(500);
-    expect((await response.text()).trim()).toBe(EXPECTED_ERROR_BODY);
+    // A made-up title matches no metadata rows, so all three result nodes
+    // render empty — the point is that the handler runs end to end.
+    const response = await authRequest.get('/api/titlesearch/autotest-no-such-title-xyz');
+    expect(response.status()).toBe(200);
+    expect(response.headers()['content-type']).toContain('text/html');
+    const body = await response.text();
+    expect(body).toContain('<title>MediaKraken API</title>');
+    expect(body).toContain('id="the-movie-node"');
+    expect(body).toContain('id="the-tv-node"');
+    expect(body).toContain('id="the-music-node"');
   });
 
-  test('trailing slash redirects to the canonical (broken) route', async ({ request }) => {
-    // /api/titlesearch/{title}/ is not a separately registered route; Axum
-    // 308-redirects it to the canonical path, which then 500s as well.
+  test('trailing slash redirects to the canonical route (401 for anonymous)', async ({
+    request,
+  }) => {
+    // route_with_tsr registers the trailing-slash variant as a 308
+    // redirect to the canonical path, which then 401s for anonymous.
     const redirected = await request.get('/api/titlesearch/test/', { maxRedirects: 0 });
     expect(redirected.status()).toBe(308);
     expect(redirected.headers()['location']).toBe('/api/titlesearch/test');
 
     const canonical = await request.get('/api/titlesearch/test', { maxRedirects: 0 });
-    expect(canonical.status()).toBe(500);
+    expect(canonical.status()).toBe(401);
   });
 });

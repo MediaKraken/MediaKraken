@@ -298,7 +298,7 @@ pub async fn admin_s3(
     {
         let template = TemplateError403Context {};
         let reply_html = template.render().unwrap_or_default();
-        return (StatusCode::UNAUTHORIZED, Html(reply_html).into_response());
+        return (StatusCode::FORBIDDEN, Html(reply_html).into_response());
     }
 
     let selected_bucket = params.bucket.as_deref().and_then(sanitize_bucket_name);

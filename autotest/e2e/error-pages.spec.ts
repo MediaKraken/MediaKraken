@@ -40,14 +40,13 @@ test.describe('real error surfaces', () => {
     expect(body).toContain('401 – Must be a verified user');
   });
 
-  test('DOCUMENTED BUG: /admin/* answers a 401 status with the 403 template', async ({
-    request,
-  }) => {
+  test('/admin/* answers a 403 status with the 403 template', async ({ request }) => {
     // Every admin handler (src/admin/bp_*.rs) renders
-    // bss_error/bss_error_403.html but returns StatusCode::UNAUTHORIZED.
-    // Asserting both sides of the mismatch so it stays visible in the suite.
+    // bss_error/bss_error_403.html with StatusCode::FORBIDDEN.
+    // (This was a documented bug — 403 template with a 401 status — that
+    // the fix resolved.)
     const response = await request.get('/admin/home');
-    expect(response.status()).toBe(401);
+    expect(response.status()).toBe(403);
     const body = await response.text();
     expect(body).toContain('<title>MediaKraken – 403</title>');
     expect(body).toContain('403 – Invalid security profile');

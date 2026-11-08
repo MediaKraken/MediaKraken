@@ -48,7 +48,7 @@ pub async fn admin_torrent(
     if !user_can_admin_torrent(&method, &auth).await {
         let template = TemplateError403Context {};
         let reply_html = template.render().unwrap();
-        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+        (StatusCode::FORBIDDEN, Html(reply_html).into_response())
     } else {
         let transmission_client =
             mk_lib_network::mk_lib_network_transmission::mk_network_transmission_login()
@@ -79,7 +79,7 @@ pub async fn admin_torrent_add(
     Form(input_data): Form<TorrentAddInput>,
 ) -> impl IntoResponse {
     if !user_can_admin_torrent(&method, &auth).await {
-        return (StatusCode::UNAUTHORIZED, "Unauthorized").into_response();
+        return (StatusCode::FORBIDDEN, "Forbidden").into_response();
     }
     let file_url = input_data.file_url.trim().to_string();
     if file_url.is_empty() {
@@ -114,7 +114,7 @@ pub async fn admin_torrent_start(
     Path(torrent_id): Path<i64>,
 ) -> impl IntoResponse {
     if !user_can_admin_torrent(&method, &auth).await {
-        return (StatusCode::UNAUTHORIZED, "Unauthorized").into_response();
+        return (StatusCode::FORBIDDEN, "Forbidden").into_response();
     }
     let transmission_client =
         match mk_lib_network::mk_lib_network_transmission::mk_network_transmission_login().await {
@@ -149,7 +149,7 @@ pub async fn admin_torrent_stop(
     Path(torrent_id): Path<i64>,
 ) -> impl IntoResponse {
     if !user_can_admin_torrent(&method, &auth).await {
-        return (StatusCode::UNAUTHORIZED, "Unauthorized").into_response();
+        return (StatusCode::FORBIDDEN, "Forbidden").into_response();
     }
     let transmission_client =
         match mk_lib_network::mk_lib_network_transmission::mk_network_transmission_login().await {
@@ -180,7 +180,7 @@ pub async fn admin_torrent_delete(
     Path(torrent_id): Path<i64>,
 ) -> impl IntoResponse {
     if !user_can_admin_torrent(&method, &auth).await {
-        return (StatusCode::UNAUTHORIZED, "Unauthorized").into_response();
+        return (StatusCode::FORBIDDEN, "Forbidden").into_response();
     }
     let transmission_client =
         match mk_lib_network::mk_lib_network_transmission::mk_network_transmission_login().await {

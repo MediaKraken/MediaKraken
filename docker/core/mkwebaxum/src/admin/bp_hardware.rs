@@ -41,7 +41,7 @@ pub async fn admin_hardware(
     {
         let template = TemplateError403Context {};
         let reply_html = template.render().unwrap();
-        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+        (StatusCode::FORBIDDEN, Html(reply_html).into_response())
     } else {
         let hardware_list =
             mk_lib_database::mk_lib_database_hardware_device::mk_lib_database_hardware_device_read(

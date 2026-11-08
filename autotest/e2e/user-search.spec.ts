@@ -1,39 +1,39 @@
 /**
  * /user/search.
  *
- * DOCUMENTED QUIRK: the registered handler (main.rs) is the PUBLIC
- * `search_handler` from src/user/bp_search.rs — no auth, no permission
- * check, and the per-media-type fetchers are commented out, so the page
- * always renders "No results found" for everyone. The permission-gated
- * `user_search` handler exists in the same file but is NOT registered.
- *
- * These tests assert that current behavior so the suite goes red if the
- * wiring changes (in which case the authenticated expectations below need
- * revisiting).
+ * The registered handler (main.rs) is the permission-gated `user_search`
+ * from src/user/bp_search.rs: anonymous visitors get the 401 error page,
+ * and any user with User::View gets the title-search form
+ * (bss_user/bss_user_media_search.html). The handler takes no Query
+ * extractor, so ?q= and filter parameters are accepted but ignored — the
+ * rendered page is byte-identical regardless.
  */
 import { test, expect } from '../fixtures/auth';
 
 test.describe('/user/search', () => {
-  test('anonymous GET renders the results page (no auth required)', async ({ page }) => {
-    // No login session exists in the default context, yet the page renders.
+  test('anonymous GET gets the 401 error page', async ({ page }) => {
+    // No login session exists in the default context; the handler's
+    // permission check must reject with the 401 template.
     await page.goto('/user/search');
-    await expect(page).toHaveTitle('MediaKraken Search Results');
-    await expect(page.getByRole('heading', { name: 'Search Results' })).toBeVisible();
-    await expect(page.getByText('No results found')).toBeVisible();
+    await expect(page).toHaveTitle('MediaKraken – 401');
+    await expect(
+      page.getByRole('heading', { name: '401 – Must be a verified user' }),
+    ).toBeVisible();
   });
 
-  test('a query parameter does not change the always-empty result', async ({ page }) => {
-    await page.goto('/user/search?q=test');
-    await expect(page).toHaveTitle('MediaKraken Search Results');
-    await expect(page.getByText('No results found')).toBeVisible();
+  test('authenticated GET renders the title search form', async ({ authPage: page }) => {
+    await page.goto('/user/search');
+    await expect(page).toHaveTitle('MediaKraken Search');
+    await expect(page.getByRole('heading', { name: 'Title Search' })).toBeVisible();
   });
 
-  test('filter parameters are accepted and the result stays empty', async ({ request }) => {
-    // The handler accepts a repeatable `filter` param; the "movie" branch is
-    // commented out, so the result is still the empty state.
-    const response = await request.get('/user/search?q=autotest&filter=movie');
-    expect(response.status()).toBe(200);
-    const body = await response.text();
-    expect(body).toContain('No results found');
+  test('query and filter parameters are accepted but ignored', async ({ authRequest }) => {
+    // No Query extractor in the handler: both requests render the exact
+    // same page (the layout and template carry no per-request data).
+    const plain = await authRequest.get('/user/search');
+    expect(plain.status()).toBe(200);
+    const withParams = await authRequest.get('/user/search?q=autotest&filter=movie');
+    expect(withParams.status()).toBe(200);
+    expect(await withParams.text()).toBe(await plain.text());
   });
 });
