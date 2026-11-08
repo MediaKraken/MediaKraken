@@ -5,8 +5,16 @@ import { defineConfig, devices } from '@playwright/test';
  */
 import 'dotenv/config';
 
+import { baseOrigin } from './utils/env';
+
 export default defineConfig({
-  testDir: './tests',
+  // All specs live in e2e/, integration/ and unit/ (see testMatch).
+  testDir: '.',
+
+  testMatch: ['**/*.spec.ts'],
+
+  /** Global timeout per test (live-deployment network round trips). */
+  timeout: 60_000,
 
   /** Run tests in files in parallel */
   fullyParallel: true,
@@ -18,7 +26,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
 
   /** Opt out of parallel tests on CI */
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 1 : 4,
 
   /** Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
@@ -26,7 +34,7 @@ export default defineConfig({
   /** Shared settings for all projects */
   use: {
     /** Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: process.env.BASE_URL ?? 'https://mk.mediakraken.media',
+    baseURL: baseOrigin(),
 
     /** Collect trace when retrying the failed test */
     trace: 'on-first-retry',
