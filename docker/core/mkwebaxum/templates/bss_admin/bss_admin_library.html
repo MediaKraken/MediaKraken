@@ -72,7 +72,15 @@
                   </optgroup>
                 </select>
               </td>
-              <td class="px-3 py-2">{{ row_data.mm_network_share_version }}</td>
+              <td class="px-3 py-2">
+                {% if row_data.mm_network_share_version == 1 %}
+                  smb
+                {% elif row_data.mm_network_share_version == 2 %}
+                  nfs
+                {% else %}
+                  {{ row_data.mm_network_share_version }}
+                {% endif %}
+              </td>
               <td class="px-3 py-2">
                 <form action="/admin/library" method="post" class="flex flex-col gap-2 md:flex-row md:items-center">
                   <input type="hidden" name="share_guid" value="{{ row_data.mm_network_share_guid }}">
@@ -125,6 +133,7 @@
           <thead class="bg-zinc-50 dark:bg-zinc-800">
             <tr class="text-left font-semibold text-zinc-700 dark:text-zinc-200">
               <th class="px-3 py-2">#</th>
+              <th class="px-3 py-2">Share Path</th>
               <th class="px-3 py-2">Directory</th>
               <th class="px-3 py-2">Media Class</th>
               <th class="px-3 py-2">Last Scanned</th>
@@ -136,6 +145,13 @@
             {% for row_data in template_data_libary %}
             <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
               <td class="px-3 py-2">{{ loop.index }}</td>
+              <td class="px-3 py-2">
+                {% if let Some(share_path) = &row_data.mm_network_share_path %}
+                  {{ share_path }}
+                {% else %}
+                  <i>Unknown</i>
+                {% endif %}
+              </td>
               <td class="px-3 py-2">{{ row_data.mm_media_dir_path }}</td>
               <td class="px-3 py-2">{{ row_data.mm_media_dir_class_enum }}</td>
               <td class="px-3 py-2">

@@ -25,11 +25,23 @@ struct TemplateError403Context {
     is_admin: bool,
 }
 
+/// Display row for the Library Info table: a library row joined with the
+/// network share path it points at, so the template can show the share path
+/// without any lookup of its own.
+#[derive(Debug)]
+struct LibraryRowDisplay {
+    mm_media_dir_guid: uuid::Uuid,
+    mm_media_dir_path: String,
+    mm_media_dir_class_enum: i16,
+    mm_media_dir_last_scanned: chrono::DateTime<chrono::Utc>,
+    mm_network_share_path: Option<String>,
+}
+
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_library.html")]
 struct TemplateAdminLibraryContext<'a> {
     template_data_share: &'a Vec<mk_lib_database::mk_lib_database_network_share::DBShareList>,
-    template_data_libary: &'a Vec<mk_lib_database::mk_lib_database_library::DBLibraryAuditList>,
+    template_data_libary: &'a Vec<LibraryRowDisplay>,
     template_data_share_user:
         &'a Vec<mk_lib_database::mk_lib_database_network_share::DBShareAuthUserList>,
     template_data_exists: &'a bool,
@@ -110,6 +122,27 @@ pub async fn admin_library(
             )
             .await
             .unwrap();
+        let share_path_by_guid: std::collections::HashMap<uuid::Uuid, &str> = share_list
+            .iter()
+            .map(|share| {
+                (
+                    share.mm_network_share_guid,
+                    share.mm_network_share_path.as_str(),
+                )
+            })
+            .collect();
+        let library_rows: Vec<LibraryRowDisplay> = library_list
+            .iter()
+            .map(|library| LibraryRowDisplay {
+                mm_media_dir_guid: library.mm_media_dir_guid,
+                mm_media_dir_path: library.mm_media_dir_path.clone(),
+                mm_media_dir_class_enum: library.mm_media_dir_class_enum,
+                mm_media_dir_last_scanned: library.mm_media_dir_last_scanned,
+                mm_network_share_path: share_path_by_guid
+                    .get(&library.mm_media_dir_share_guid)
+                    .map(|path| (*path).to_string()),
+            })
+            .collect();
         let share_user_list =
         mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_user_read(
            &state.sqlx_pool_ro,
@@ -122,7 +155,7 @@ pub async fn admin_library(
         }
         let template = TemplateAdminLibraryContext {
             template_data_share: &share_list,
-            template_data_libary: &library_list,
+            template_data_libary: &library_rows,
             template_data_share_user: &share_user_list,
             template_data_exists: &template_data_exists,
             page_title: Some("MediaKraken Admin Library".to_string()),
