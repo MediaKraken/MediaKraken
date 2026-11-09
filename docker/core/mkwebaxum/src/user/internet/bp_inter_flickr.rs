@@ -21,6 +21,7 @@ struct TemplateError401Context {}
 #[template(path = "bss_error/bss_error_500.html")]
 struct TemplateError500Context {
     page_title: Option<String>,
+    is_admin: bool,
 }
 
 #[derive(Clone)]
@@ -321,6 +322,7 @@ fn render_401() -> (StatusCode, axum::response::Response) {
 fn render_500() -> (StatusCode, axum::response::Response) {
     let template = TemplateError500Context {
         page_title: Some("MediaKraken Error".to_string()),
+        is_admin: false,
     };
 
     match template.render() {

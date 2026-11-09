@@ -30,7 +30,9 @@ struct LokiStream {
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
-struct TemplateError403Context {}
+struct TemplateError403Context {
+    is_admin: bool,
+}
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_logging.html")]
@@ -67,7 +69,7 @@ pub async fn admin_logging(
     .validate(&current_user, &method, None)
     .await
     {
-        let template = TemplateError403Context {};
+        let template = TemplateError403Context { is_admin: true };
         let reply_html = template.render().unwrap_or_default();
         (StatusCode::FORBIDDEN, Html(reply_html).into_response())
     } else {

@@ -20,7 +20,9 @@ struct TemplateError401Context {}
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_500.html")]
-struct TemplateError500Context {}
+struct TemplateError500Context {
+    is_admin: bool,
+}
 
 #[derive(Debug, Deserialize, Serialize, FromRow)]
 struct TemplateMetaPersonList {
@@ -187,7 +189,7 @@ pub async fn user_metadata_person(
         {
             Ok(total) => total,
             Err(_) => {
-                let template = TemplateError500Context {};
+                let template = TemplateError500Context { is_admin: false };
                 let reply_html = template.render().unwrap_or_default();
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
@@ -214,7 +216,7 @@ pub async fn user_metadata_person(
         {
             Ok(rows) => rows,
             Err(_) => {
-                let template = TemplateError500Context {};
+                let template = TemplateError500Context { is_admin: false };
                 let reply_html = template.render().unwrap_or_default();
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,

@@ -13,7 +13,11 @@
   {% include "bss_user/bss_user_include_menu.html" %}
 
   <div class="flex flex-1">
+    {% if is_admin %}
+    {% include "bss_admin/bss_admin_include_menu.html" %}
+    {% else %}
     {% include "partials/sidebar_user.html" %}
+    {% endif %}
 
     <!-- Main content -->
     <main class="flex-1 flex items-center justify-center px-4">

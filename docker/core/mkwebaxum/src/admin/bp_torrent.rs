@@ -13,7 +13,9 @@ use sqlx::postgres::PgPool;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
-struct TemplateError403Context {}
+struct TemplateError403Context {
+    is_admin: bool,
+}
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_torrent.html")]
@@ -46,7 +48,7 @@ pub async fn admin_torrent(
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     if !user_can_admin_torrent(&method, &auth).await {
-        let template = TemplateError403Context {};
+        let template = TemplateError403Context { is_admin: true };
         let reply_html = template.render().unwrap();
         (StatusCode::FORBIDDEN, Html(reply_html).into_response())
     } else {

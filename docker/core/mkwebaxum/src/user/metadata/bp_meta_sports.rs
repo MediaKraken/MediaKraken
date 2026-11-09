@@ -19,7 +19,9 @@ struct TemplateError401Context {}
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_500.html")]
-struct TemplateError500Context {}
+struct TemplateError500Context {
+    is_admin: bool,
+}
 
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_sports.html")]
@@ -92,7 +94,7 @@ pub async fn user_metadata_sports(
             Ok(total_pages) => total_pages,
             Err(err) => {
                 eprintln!("sports metadata count failed: {err}");
-                let template = TemplateError500Context {};
+                let template = TemplateError500Context { is_admin: false };
                 let reply_html = template.render().unwrap_or_default();
                 return (StatusCode::INTERNAL_SERVER_ERROR, Html(reply_html).into_response());
             }
@@ -109,7 +111,7 @@ pub async fn user_metadata_sports(
             Ok(pagination_html) => pagination_html,
             Err(err) => {
                 eprintln!("sports metadata pagination failed: {err}");
-                let template = TemplateError500Context {};
+                let template = TemplateError500Context { is_admin: false };
                 let reply_html = template.render().unwrap_or_default();
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
@@ -128,7 +130,7 @@ pub async fn user_metadata_sports(
             Ok(sports_list) => sports_list,
             Err(err) => {
                 eprintln!("sports metadata read failed: {err}");
-                let template = TemplateError500Context {};
+                let template = TemplateError500Context { is_admin: false };
                 let reply_html = template.render().unwrap_or_default();
                 return (StatusCode::INTERNAL_SERVER_ERROR, Html(reply_html).into_response());
             }
@@ -152,7 +154,7 @@ pub async fn user_metadata_sports(
             Ok(reply_html) => (StatusCode::OK, Html(reply_html).into_response()),
             Err(err) => {
                 eprintln!("sports metadata template render failed: {err}");
-                let template = TemplateError500Context {};
+                let template = TemplateError500Context { is_admin: false };
                 let reply_html = template.render().unwrap_or_default();
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,

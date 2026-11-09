@@ -15,7 +15,9 @@ const ALLOWED_CRON_SCHEDULE_TYPES: [&str; 4] = ["Week(s)", "Day(s)", "Hour(s)", 
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
-struct TemplateError403Context {}
+struct TemplateError403Context {
+    is_admin: bool,
+}
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_cron.html")]
@@ -96,7 +98,7 @@ pub async fn admin_cron(
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
     if !user_can_view_admin_cron(&method, &auth).await {
-        let template = TemplateError403Context {};
+        let template = TemplateError403Context { is_admin: true };
         let reply_html = template.render().unwrap();
         (StatusCode::FORBIDDEN, Html(reply_html).into_response())
     } else {
@@ -123,7 +125,7 @@ pub async fn admin_cron_run(
     Path(guid): Path<uuid::Uuid>,
 ) -> impl IntoResponse {
     if !user_can_view_admin_cron(&method, &auth).await {
-        Redirect::to("/error/403")
+        Redirect::to("/error/403?admin=true")
     } else {
         let row_data = mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_service_json(
             &state.sqlx_pool_rw,

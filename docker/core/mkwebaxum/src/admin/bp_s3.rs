@@ -18,7 +18,9 @@ use tokio::sync::RwLock;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
-struct TemplateError403Context {}
+struct TemplateError403Context {
+    is_admin: bool,
+}
 
 #[derive(Clone)]
 pub struct BucketSummary {
@@ -296,7 +298,7 @@ pub async fn admin_s3(
     .validate(&current_user, &method, None)
     .await
     {
-        let template = TemplateError403Context {};
+        let template = TemplateError403Context { is_admin: true };
         let reply_html = template.render().unwrap_or_default();
         return (StatusCode::FORBIDDEN, Html(reply_html).into_response());
     }

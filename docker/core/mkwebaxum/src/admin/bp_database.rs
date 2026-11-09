@@ -16,7 +16,9 @@ use sqlx::postgres::PgPool;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
-struct TemplateError403Context {}
+struct TemplateError403Context {
+    is_admin: bool,
+}
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_db_statistics.html")]
@@ -49,7 +51,7 @@ pub async fn admin_database(
     .validate(&current_user, &method, None)
     .await
     {
-        let template = TemplateError403Context {};
+        let template = TemplateError403Context { is_admin: true };
         let reply_html = template.render().unwrap();
         (StatusCode::FORBIDDEN, Html(reply_html).into_response())
     } else {

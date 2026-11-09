@@ -21,7 +21,9 @@ use tokio::process::Command;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
-struct TemplateError403Context {}
+struct TemplateError403Context {
+    is_admin: bool,
+}
 
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_library.html")]
@@ -92,7 +94,7 @@ pub async fn admin_library(
     .validate(&current_user, &method, None)
     .await
     {
-        let template = TemplateError403Context {};
+        let template = TemplateError403Context { is_admin: true };
         let reply_html = template.render().unwrap();
         (StatusCode::FORBIDDEN, Html(reply_html).into_response())
     } else {
@@ -143,7 +145,7 @@ pub async fn admin_library_media_scan(
     .validate(&current_user, &method, None)
     .await
     {
-        Redirect::to("/error/403")
+        Redirect::to("/error/403?admin=true")
     } else {
         let (rabbit_connection, rabbit_channel) =
             mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp")
@@ -179,7 +181,7 @@ pub async fn admin_library_share_add(
     .validate(&current_user, &method, None)
     .await
     {
-        Redirect::to("/error/403")
+        Redirect::to("/error/403?admin=true")
     } else {
         let subdirectory = input_data.subdirectory.trim().trim_matches('/');
         if subdirectory.is_empty() {
@@ -249,7 +251,7 @@ pub async fn admin_library_share_scan(
     .validate(&current_user, &method, None)
     .await
     {
-        Redirect::to("/error/403")
+        Redirect::to("/error/403?admin=true")
     } else {
         let (rabbit_connection, rabbit_channel) =
             mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp")
