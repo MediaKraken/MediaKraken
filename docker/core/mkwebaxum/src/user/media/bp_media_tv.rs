@@ -195,8 +195,8 @@ pub async fn user_media_tv_status(
         )
         .await
         .unwrap();
-        // TODO wrong link
-        Redirect::to("/admin/cron")
+        let target = format!("/user/media/tv_detail/{}", guid);
+        Redirect::to(target.as_str())
     }
 }
 

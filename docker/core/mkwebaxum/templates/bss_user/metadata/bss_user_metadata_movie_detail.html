@@ -106,7 +106,8 @@
 
             <div class="flex gap-4 overflow-x-auto scroll-smooth px-10" x-ref="cast">
                 {% for person in template_metadata_cast %}
-                <a href="#" class="min-w-[140px] text-center">
+                <a href="{% if let Some(person_guid) = person.guid %}/user/metadata/person_detail/{{ person_guid }}{% else %}#{% endif %}"
+                    class="min-w-[140px] text-center">
                     <div
                         class="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-zinc-100 text-3xl font-semibold text-zinc-500 dark:bg-zinc-800 dark:text-zinc-300">
                         {{ person.name.chars().next().unwrap_or('?') }}
@@ -136,7 +137,8 @@
 
             <div class="flex gap-4 overflow-x-auto scroll-smooth px-10" x-ref="crew">
                 {% for person in template_metadata_crew %}
-                <a href="#" class="min-w-[140px] text-center">
+                <a href="{% if let Some(person_guid) = person.guid %}/user/metadata/person_detail/{{ person_guid }}{% else %}#{% endif %}"
+                    class="min-w-[140px] text-center">
                     <div
                         class="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-zinc-100 text-3xl font-semibold text-zinc-500 dark:bg-zinc-800 dark:text-zinc-300">
                         {{ person.name.chars().next().unwrap_or('?') }}

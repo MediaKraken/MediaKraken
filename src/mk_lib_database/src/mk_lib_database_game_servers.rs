@@ -85,16 +85,17 @@ pub async fn mk_lib_database_game_server_upsert(
     server_name: String,
     server_json: serde_json::Value,
 ) -> Result<uuid::Uuid, sqlx::Error> {
-    // TODO um, would return "invalid" uuid on update
     let new_guid = uuid::Uuid::now_v7();
-    sqlx::query(
-        r#"INSERT INTO mm_game_dedicated_servers(mm_game_server_guid, mm_game_server_name, mm_game_server_json) VALUES($1, $2, $3) ON CONFLICT(mm_game_server_name) DO UPDATE SET mm_game_server_json = $4"#,
+    // RETURNING covers both the insert and the on-conflict update path, so the
+    // returned guid is always the guid of the row that was actually written
+    let row: (uuid::Uuid,) = sqlx::query_as(
+        r#"INSERT INTO mm_game_dedicated_servers(mm_game_server_guid, mm_game_server_name, mm_game_server_json) VALUES($1, $2, $3) ON CONFLICT(mm_game_server_name) DO UPDATE SET mm_game_server_json = $4 RETURNING mm_game_server_guid"#,
     )
     .bind(new_guid)
     .bind(server_name)
     .bind(&server_json)
     .bind(&server_json)
-    .execute(sqlx_pool)
+    .fetch_one(sqlx_pool)
     .await?;
-    Ok(new_guid)
+    Ok(row.0)
 }

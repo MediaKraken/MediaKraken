@@ -1,3 +1,5 @@
+use sqlx::postgres::PgRow;
+
 pub async fn mk_lib_database_remote_media_count(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<i64, sqlx::Error> {
@@ -7,40 +9,68 @@ pub async fn mk_lib_database_remote_media_count(
     Ok(row.0)
 }
 
+/// Insert a remote media record; returns the new guid.
+///
+/// NOTE: the Python original used `mmr_media_link_id` for the link column;
+/// ported as `mmr_media_link_guid`. `mmr_media_class_guid` follows the live
+/// idiom (`mk_lib_database_media_movie_genre_count`,
+/// `mk_lib_database_media_home_media_count`), which bind the `DLMediaType`
+/// i16 to it; the schema dump lists `mmr_media_class_enum` instead (confirm
+/// against the live database).
+pub async fn mk_lib_database_media_remote_insert(
+    sqlx_pool: &sqlx::PgPool,
+    media_link_guid: uuid::Uuid,
+    media_guid: uuid::Uuid,
+    media_class: i16,
+    media_metadata_guid: uuid::Uuid,
+    media_ffprobe_json: &serde_json::Value,
+) -> Result<uuid::Uuid, sqlx::Error> {
+    let new_guid = uuid::Uuid::now_v7();
+    let mut transaction = sqlx_pool.begin().await?;
+    sqlx::query(
+        r#"insert into mm_media_remote (mmr_media_guid, mmr_media_link_guid,
+        mmr_media_uuid, mmr_media_class_guid, mmr_media_metadata_guid,
+        mmr_media_ffprobe_json)
+        values ($1,$2,$3,$4,$5,$6)"#,
+    )
+    .bind(new_guid)
+    .bind(media_link_guid)
+    .bind(media_guid)
+    .bind(media_class)
+    .bind(media_metadata_guid)
+    .bind(media_ffprobe_json)
+    .execute(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(new_guid)
+}
+
+/// Remote media records, all columns.
+///
+/// With a guid, returns at most one row; without, returns all rows.
+pub async fn mk_lib_database_media_remote_read(
+    sqlx_pool: &sqlx::PgPool,
+    media_guid: Option<uuid::Uuid>,
+) -> Result<Vec<PgRow>, sqlx::Error> {
+    let rows: Vec<PgRow> = match media_guid {
+        Some(guid) => {
+            sqlx::query(r#"select * from mm_media_remote where mmr_media_guid = $1"#)
+                .bind(guid)
+                .fetch_all(sqlx_pool)
+                .await?
+        }
+        None => {
+            sqlx::query(r#"select * from mm_media_remote"#)
+                .fetch_all(sqlx_pool)
+                .await?
+        }
+    };
+    Ok(rows)
+}
+
 /*
-// TODO port query
-def db_insert_remote_media(self, media_link_uuid, media_uuid, media_class_uuid,
-                           media_metadata_uuid, media_ffprobe_json):
-    new_guid = uuid.uuid4()
-    self.db_cursor.execute('insert into mm_media_remote (mmr_media_guid,'
-                           ' mmr_media_link_id,'
-                           ' mmr_media_uuid,'
-                           ' mmr_media_class_guid,'
-                           ' mmr_media_metadata_guid,'
-                           ' mmr_media_ffprobe_json)'
-                           ' values ($1,$2,$3,$4,$5,$6)', (new_guid, media_link_uuid, media_uuid,
-                                                           media_class_uuid, media_metadata_uuid,
-                                                           media_ffprobe_json))
-    self.db_commit()
-    return new_guid
-
-
-// TODO port query
-def db_read_remote_media(self, media_guid=None):
-    if media_guid != None:
-        self.db_cursor.execute('select * from mm_media_remote where mmr_media_guid = $1',
-                               (media_guid,))
-        try:
-            return self.db_cursor.fetchone()
-        except:
-            return None
-    else:
-        self.db_cursor.execute('select * from mm_media_remote')
-        return self.db_cursor.fetchall()
-
-
-
-
+// Not ported: fully commented out in the Python original (dead in the dead);
+// processed via main_link and depends on per-class metadata guid lookups.
 
 # processed via main_link........
 # process new records from network sync event from linked server
@@ -76,85 +106,111 @@ def db_read_remote_media(self, media_guid=None):
 #        if metadata_guid != None:
 #            self.db_insert_remote_media(link_uuid, row_data[0], \
 # self.db_media_uuid_by_class(row_data[1]), metadata_guid[0], json.dumps(row_data[2]))
+*/
 
-
-// TODO port query
-def db_media_remote_read_new(self, date_last_sync, sync_movie=None, sync_tv=None,
-                             sync_sports=None, sync_music=None, sync_music_video=None,
-                             sync_book=None):
-    """
-    # new media for link
-    """
-    // TODO add games to this
-    let mut first_query = true;
-    let mut sync_query = String::new();
-    if sync_movie != None:
-        sync_query += ('select mm_media_guid, 'Movie','
-                       ' mm_media_ffprobe_json,'
-                       ' mm_metadata_media_id'
-                       ' from mm_media, mm_metadata_movie'
-                       ' where mm_media_metadata_guid = mm_metadata_guid'
-                       ' and mm_media_json->>'DateAdded' >= $1', (date_last_sync,))
-        first_query = false
-
-    if sync_tv != None:
-        if not first_query:
-            sync_query += ' union all '
-        sync_query += ('select mm_media_guid, 'TV Show','
-                       ' mm_media_ffprobe_json,'
-                       ' mm_metadata_media_tvshow_id'
-                       ' from mm_media, mm_metadata_tvshow'
-                       ' where mm_metadata_tvshow_guid = mm_metadata_tvshow_guid'
-                       ' and mm_media_json->>'DateAdded' >= $1', (date_last_sync,))
-        first_query = false
-
-    if sync_sports != None:
-        if not first_query:
-            sync_query += ' union all '
-        sync_query += ('select mm_media_guid, 'Sports','
-                       ' mm_media_ffprobe_json,'
-                       ' mm_metadata_media_sports_id'
-                       ' from mm_media, mm_metadata_sports'
-                       ' where mm_metadata_sports_guid = mm_metadata_sports_guid'
-                       ' and mm_media_json->>'DateAdded' >= $1', (date_last_sync,))
-        first_query = false
-
-    if sync_music != None:
-        if not first_query:
-            sync_query += ' union all '
-        sync_query += ('select mm_media_guid, 'Music','
-                       ' mm_media_ffprobe_json,'
-                       ' mm_metadata_media_music_id'
-                       ' from mm_media, mm_metadata_music'
-                       ' where mm_metadata_music_guid = mm_metadata_music_guid'
-                       ' and mm_media_json->>'DateAdded' >= $1', (date_last_sync,))
-        first_query = false
-
-    if sync_music_video != None:
-        if not first_query:
-            sync_query += ' union all '
-        sync_query += ('select mm_media_guid, 'Music Video','
-                       ' mm_media_ffprobe_json,'
-                       ' mm_metadata_music_video_media_id'
-                       ' from mm_media, mm_metadata_music_video'
-                       ' where mm_metadata_music_video_guid = mm_metadata_music_video_guid'
-                       ' and mm_media_json->>'DateAdded' >= $1', (date_last_sync,))
-        first_query = false
-
-    if sync_book != None:
-        if not first_query:
-            sync_query += ' union all '
-        sync_query += ('select mm_media_guid, 'Book','
-                       ' mm_media_ffprobe_json,'
-                       ' mm_metadata_book_isbn'
-                       ' from mm_media, mm_metadata_book'
-                       ' where mm_metadata_book_guid = mm_metadata_book_guid'
-                       ' and mm_media_json->>'DateAdded' >= $1', (date_last_sync,))
-        first_query = false
-    if sync_query != '':
-        self.db_cursor.execute(sync_query)
-        return self.db_cursor.fetchall()
-    else:
-        return None
-
- */
+/// New media for a link since the last sync, across the enabled media classes.
+///
+/// NOTE: the Python self-joins were tautologies
+/// (`mm_metadata_tvshow_guid = mm_metadata_tvshow_guid` etc.); all branches
+/// join on `mm_media_metadata_guid = mm_metadata_<class>_guid`. The fourth
+/// union column (int/jsonb/text mix) is cast to text in every branch.
+/// TODO add games to this
+#[allow(clippy::too_many_arguments)]
+pub async fn mk_lib_database_media_remote_read_new(
+    sqlx_pool: &sqlx::PgPool,
+    date_last_sync: &str,
+    sync_movie: bool,
+    sync_tv: bool,
+    sync_sports: bool,
+    sync_music: bool,
+    sync_music_video: bool,
+    sync_book: bool,
+) -> Result<Vec<PgRow>, sqlx::Error> {
+    let mut query = sqlx::QueryBuilder::<sqlx::Postgres>::new(String::new());
+    let mut first = true;
+    let push_branch = |query: &mut sqlx::QueryBuilder<sqlx::Postgres>,
+                       first: &mut bool,
+                       class_name: &str,
+                       table: &str,
+                       metadata_guid_col: &str,
+                       media_id_col: &str| {
+        if !*first {
+            query.push(" union all ");
+        }
+        query.push("select mm_media_guid, ");
+        query.push_bind(class_name);
+        query.push(", mm_media_ffprobe_json, ");
+        query.push(media_id_col);
+        query.push("::text from mm_media, ");
+        query.push(table);
+        query.push(" where mm_media_metadata_guid = ");
+        query.push(metadata_guid_col);
+        query.push(" and mm_media_json->>'DateAdded' >= ");
+        query.push_bind(date_last_sync);
+        *first = false;
+    };
+    if sync_movie {
+        push_branch(
+            &mut query,
+            &mut first,
+            "Movie",
+            "mm_metadata_movie",
+            "mm_metadata_movie_guid",
+            "mm_metadata_movie_media_id",
+        );
+    }
+    if sync_tv {
+        push_branch(
+            &mut query,
+            &mut first,
+            "TV Show",
+            "mm_metadata_tvshow",
+            "mm_metadata_tvshow_guid",
+            "mm_metadata_media_tvshow_id",
+        );
+    }
+    if sync_sports {
+        push_branch(
+            &mut query,
+            &mut first,
+            "Sports",
+            "mm_metadata_sports",
+            "mm_metadata_sports_guid",
+            "mm_metadata_media_sports_id",
+        );
+    }
+    if sync_music {
+        push_branch(
+            &mut query,
+            &mut first,
+            "Music",
+            "mm_metadata_music",
+            "mm_metadata_music_guid",
+            "mm_metadata_media_music_id",
+        );
+    }
+    if sync_music_video {
+        push_branch(
+            &mut query,
+            &mut first,
+            "Music Video",
+            "mm_metadata_music_video",
+            "mm_metadata_music_video_guid",
+            "mm_metadata_music_video_media_id",
+        );
+    }
+    if sync_book {
+        push_branch(
+            &mut query,
+            &mut first,
+            "Book",
+            "mm_metadata_book",
+            "mm_metadata_book_guid",
+            "mm_metadata_book_isbn",
+        );
+    }
+    if first {
+        return Ok(Vec::new());
+    }
+    query.build().fetch_all(sqlx_pool).await
+}

@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use sqlx::postgres::PgRow;
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct DBMetaMusicList {
@@ -58,33 +59,23 @@ pub async fn mk_lib_database_metadata_music_read(
     }
 }
 
+// Not ported: identical query to `db_meta_album_by_guid` (see
+// `mk_lib_database_metadata_album_by_guid`).
+
+// Not ported: identical query to `db_meta_songs_by_album_guid` (see
+// `mk_lib_database_metadata_songs_by_album_guid`).
+
 /*
-// TODO port query
-pub async fn db_meta_music_album_by_guid(self, guid):
-    """
-    # return album data by guid
-    """
-    return await db_conn.fetchrow('select * from mm_metadata_album'
-                                  ' where mm_metadata_album_guid = $1',
-                                  guid)
-
-
-// TODO port query
-pub async fn db_meta_music_songs_by_album_guid(self, guid):
-    """
-    # return song list from album guid
-    """
-    return await db_conn.fetch('select * from mm_metadata_music'
-                               ' where blah = $1'
-                               ' order by lower(mm_metadata_music_name)',
-                               guid)
-
+// Not ported: the three tables have no join predicates in the Python
+// original (cartesian product), and there is no musician link column on
+// `mm_metadata_music` to join on. The Python original already noted that
+// album/musician fields "don't exist on the database".
 
 // TODO port query
 def db_music_lookup(self, artist_name, album_name, song_title):
     """
-    # query to see if song is in local DB
-    """
+     # query to see if song is in local DB
+     """
     // TODO the following fields don't exist on the database (album and musician)
     // TODO order by release year
     self.db_cursor.execute('select mm_metadata_music_guid,'
@@ -100,151 +91,181 @@ def db_music_lookup(self, artist_name, album_name, song_title):
         return self.db_cursor.fetchone()
     except:
         return None
+*/
 
+/// Musician data by guid, all columns.
+pub async fn mk_lib_database_metadata_musician_by_guid(
+    sqlx_pool: &sqlx::PgPool,
+    guid: uuid::Uuid,
+) -> Result<Option<PgRow>, sqlx::Error> {
+    sqlx::query(
+        r#"select * from mm_metadata_musician
+        where mm_metadata_musician_guid = $1"#,
+    )
+    .bind(guid)
+    .fetch_optional(sqlx_pool)
+    .await
+}
 
-// TODO port query
-def db_meta_musician_by_guid(self, guid):
-    """
-    # return musician data by guid
-    """
-    self.db_cursor.execute('select * from mm_metadata_musician'
-                           ' where mm_metadata_musician_guid = $1', (guid,))
-    try:
-        return self.db_cursor.fetchone()
-    except:
-        return None
+/// Insert a musician; returns the new guid.
+pub async fn mk_lib_database_metadata_musician_add(
+    sqlx_pool: &sqlx::PgPool,
+    data_name: &str,
+    data_id: &serde_json::Value,
+    data_json: &serde_json::Value,
+) -> Result<uuid::Uuid, sqlx::Error> {
+    let new_guid = uuid::Uuid::now_v7();
+    let mut transaction = sqlx_pool.begin().await?;
+    sqlx::query(
+        r#"insert into mm_metadata_musician (mm_metadata_musician_guid,
+        mm_metadata_musician_name, mm_metadata_musician_id, mm_metadata_musician_json)
+        values ($1,$2,$3,$4)"#,
+    )
+    .bind(new_guid)
+    .bind(data_name)
+    .bind(data_id)
+    .bind(data_json)
+    .execute(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(new_guid)
+}
 
+/// Album data by guid, all columns.
+pub async fn mk_lib_database_metadata_album_by_guid(
+    sqlx_pool: &sqlx::PgPool,
+    guid: uuid::Uuid,
+) -> Result<Option<PgRow>, sqlx::Error> {
+    sqlx::query(r#"select * from mm_metadata_album where mm_metadata_album_guid = $1"#)
+        .bind(guid)
+        .fetch_optional(sqlx_pool)
+        .await
+}
 
-// TODO port query
-def db_meta_musician_add(self, data_name, data_id, data_json):
-    """
-    # insert musician
-    """
-    new_guid = uuid.uuid4()
-    self.db_cursor.execute('insert into mm_metadata_musician (mm_metadata_musician_guid,'
-                           ' mm_metadata_musician_name,'
-                           ' mm_metadata_musician_id,'
-                           ' mm_metadata_musician_json)'
-                           ' values ($1,$2,$3,$4)',
-                           (new_guid, data_name, data_id, data_json))
-    self.db_commit()
-    return new_guid
+/// Insert an album; returns the new guid.
+pub async fn mk_lib_database_metadata_album_add(
+    sqlx_pool: &sqlx::PgPool,
+    data_name: &str,
+    data_id: &serde_json::Value,
+    data_json: &serde_json::Value,
+) -> Result<uuid::Uuid, sqlx::Error> {
+    let new_guid = uuid::Uuid::now_v7();
+    let mut transaction = sqlx_pool.begin().await?;
+    sqlx::query(
+        r#"insert into mm_metadata_album (mm_metadata_album_guid,
+        mm_metadata_album_name, mm_metadata_album_id, mm_metadata_album_json)
+        values ($1,$2,$3,$4)"#,
+    )
+    .bind(new_guid)
+    .bind(data_name)
+    .bind(data_id)
+    .bind(data_json)
+    .execute(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(new_guid)
+}
 
+/// Song data by guid, all columns.
+pub async fn mk_lib_database_metadata_song_by_guid(
+    sqlx_pool: &sqlx::PgPool,
+    guid: uuid::Uuid,
+) -> Result<Option<PgRow>, sqlx::Error> {
+    sqlx::query(r#"select * from mm_metadata_music where mm_metadata_music_guid = $1"#)
+        .bind(guid)
+        .fetch_optional(sqlx_pool)
+        .await
+}
 
-// TODO port query
-def db_meta_album_by_guid(self, guid):
-    """
-    # return album data by guid
-    """
-    self.db_cursor.execute('select * from mm_metadata_album where mm_metadata_album_guid = $1',
-                           (guid,))
-    try:
-        return self.db_cursor.fetchone()
-    except:
-        return None
+/// Insert a song; returns the new guid.
+pub async fn mk_lib_database_metadata_song_add(
+    sqlx_pool: &sqlx::PgPool,
+    data_name: &str,
+    data_id: &serde_json::Value,
+    data_json: &serde_json::Value,
+) -> Result<uuid::Uuid, sqlx::Error> {
+    let new_guid = uuid::Uuid::now_v7();
+    let mut transaction = sqlx_pool.begin().await?;
+    sqlx::query(
+        r#"insert into mm_metadata_music (mm_metadata_music_guid, mm_metadata_music_name,
+        mm_metadata_media_music_id, mm_metadata_music_json)
+        values ($1,$2,$3,$4)"#,
+    )
+    .bind(new_guid)
+    .bind(data_name)
+    .bind(data_id)
+    .bind(data_json)
+    .execute(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(new_guid)
+}
 
+/// Song list from an album guid, all columns.
+///
+/// NOTE: the Python original filtered on a placeholder column named `blah`;
+/// ported as `mm_metadata_music_album_guid` (the album link on
+/// `mm_metadata_music`).
+pub async fn mk_lib_database_metadata_songs_by_album_guid(
+    sqlx_pool: &sqlx::PgPool,
+    album_guid: uuid::Uuid,
+) -> Result<Vec<PgRow>, sqlx::Error> {
+    sqlx::query(
+        r#"select * from mm_metadata_music
+        where mm_metadata_music_album_guid = $1
+        order by lower(mm_metadata_music_name)"#,
+    )
+    .bind(album_guid)
+    .fetch_all(sqlx_pool)
+    .await
+}
 
-// TODO port query
-def db_meta_album_add(self, data_name, data_id, data_json):
-    """
-    # insert album
-    """
-    new_guid = uuid.uuid4()
-    self.db_cursor.execute('insert into mm_metadata_album (mm_metadata_album_guid,'
-                           ' mm_metadata_album_name,'
-                           ' mm_metadata_album_id,'
-                           ' mm_metadata_album_json)'
-                           ' values ($1,$2,$3,$4)',
-                           (new_guid, data_name, data_id, data_json))
-    self.db_commit()
-    return new_guid
+// db_meta_album_list: already ported as `mk_lib_database_metadata_music_read`.
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMetaMusicianList {
+    pub mm_metadata_musician_guid: uuid::Uuid,
+    pub mm_metadata_musician_name: String,
+    pub mm_metadata_musician_json: serde_json::Value,
+}
 
-// TODO port query
-def db_meta_song_by_guid(self, guid):
-    """
-    # return song data by guid
-    """
-    self.db_cursor.execute('select * from mm_metadata_music where mm_metadata_music_guid = $1',
-                           (guid,))
-    try:
-        return self.db_cursor.fetchone()
-    except:
-        return None
-
-
-// TODO port query
-def db_meta_song_add(self, data_name, data_id, data_json):
-    """
-    # insert song
-    """
-    new_guid = uuid.uuid4()
-    self.db_cursor.execute('insert into mm_metadata_music (mm_metadata_music_guid,'
-                           ' mm_metadata_music_name, mm_metadata_media_music_id,'
-                           ' mm_metadata_music_json) values ($1,$2,$3,$4)',
-                           (new_guid, data_name, data_id, data_json))
-    self.db_commit()
-    return new_guid
-
-
-// TODO port query
-def db_meta_songs_by_album_guid(self, guid):
-    """
-    # return song list from ablum guid
-    """
-    self.db_cursor.execute('select * from mm_metadata_music where blah = $1'
-                           ' order by lower(mm_metadata_music_name)', (guid,))
-    return self.db_cursor.fetchall()
-
-
-// TODO port query
-def db_meta_album_list(self, offset=0, records=None, search_value=None):
-    """
-    # return albums metadatalist
-    """
+/// Musician metadata list.
+pub async fn mk_lib_database_metadata_musician_list(
+    sqlx_pool: &sqlx::PgPool,
+    search_value: String,
+    offset: i64,
+    limit: i64,
+) -> Result<Vec<DBMetaMusicianList>, sqlx::Error> {
     // TODO, only grab the poster locale from json
-    // TODO order by release year
-    if search_value != None:
-        self.db_cursor.execute('select mm_metadata_album_guid, mm_metadata_album_name,'
-                               ' mm_metadata_album_json, mm_metadata_album_localimage'
-                               ' from mm_metadata_album'
-                               ' where mm_metadata_album_name %% $1'
-                               ' order by LOWER(mm_metadata_album_name)'
-                               ' offset $2 limit $3', (search_value, offset, records))
-    else:
-        self.db_cursor.execute('select mm_metadata_album_guid, mm_metadata_album_name,'
-                               ' mm_metadata_album_json, mm_metadata_album_localimage'
-                               ' from mm_metadata_album'
-                               ' order by LOWER(mm_metadata_album_name)'
-                               ' offset $1 limit $2', (offset, records))
-    return self.db_cursor.fetchall()
+    if !search_value.is_empty() {
+        sqlx::query_as(
+            r#"select mm_metadata_musician_guid, mm_metadata_musician_name, mm_metadata_musician_json from mm_metadata_musician where mm_metadata_musician_name % $1 order by LOWER(mm_metadata_musician_name) offset $2 limit $3"#,
+        )
+        .bind(search_value)
+        .bind(offset)
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
+    } else {
+        sqlx::query_as(
+            r#"select mm_metadata_musician_guid, mm_metadata_musician_name, mm_metadata_musician_json from mm_metadata_musician order by LOWER(mm_metadata_musician_name) offset $1 limit $2"#,
+        )
+        .bind(offset)
+        .bind(limit)
+        .fetch_all(sqlx_pool)
+        .await
+    }
+}
 
-
-// TODO port query
-def db_meta_musician_list(self, offset=0, records=None, search_value=None):
-    """
-    # return musician metadatalist
-    """
-    // TODO, only grab the poster locale from json
-    if search_value != None:
-        self.db_cursor.execute('select mm_metadata_musician_guid, mm_metadata_musician_name,'
-                               ' mm_metadata_musician_json from mm_metadata_musician'
-                               ' where mm_metadata_musician_name %% $1'
-                               ' order by LOWER(mm_metadata_musician_name) offset $2 limit $3',
-                               (search_value, offset, records))
-    else:
-        self.db_cursor.execute('select mm_metadata_musician_guid, mm_metadata_musician_name,'
-                               ' mm_metadata_musician_json from mm_metadata_musician'
-                               ' order by LOWER(mm_metadata_musician_name) offset $1 limit $2',
-                               (offset, records))
-    return self.db_cursor.fetchall()
-
+/*
+// Not ported: the SQL is fully commented out in the Python original; only
+// the try/except around a never-run fetchone remains.
 
 // TODO port query
 def db_meta_album_image_random(self):
     """
-    Find random album cover image
-    """
+     Find random album cover image
+     """
     # self.db_cursor.execute('select mm_metadata_localimage_json->'Images'->'themoviedb'->>''
     #     + return_image_type + '' as image_json,mm_metadata_guid from mm_media,mm_metadata_movie'\
     #     ' where mm_media_metadata_guid = mm_metadata_guid'\
@@ -256,16 +277,37 @@ def db_meta_album_image_random(self):
         return image_json, metadata_id
     except:
         return None, None
+*/
 
+/// Music guid by provider uuid (e.g. "Mbrainz").
+///
+/// The provider is embedded in a JSON path in the SQL, so it is restricted to
+/// `[A-Za-z0-9_-]`; the Python original was injectable.
+pub async fn mk_lib_database_metadata_music_by_provider_uuid(
+    sqlx_pool: &sqlx::PgPool,
+    provider: &str,
+    provider_uuid: &str,
+) -> Result<Option<uuid::Uuid>, sqlx::Error> {
+    if !is_valid_json_path_key(provider) {
+        return Err(sqlx::Error::Configuration(
+            format!("invalid provider: {provider}").into(),
+        ));
+    }
+    let sql = format!(
+        r#"select mm_metadata_music_guid from mm_metadata_music
+        where mm_metadata_media_music_id->'{provider}' ? $1"#,
+    );
+    let row: Option<(uuid::Uuid,)> = sqlx::query_as(sqlx::AssertSqlSafe(sql))
+        .bind(provider_uuid)
+        .fetch_optional(sqlx_pool)
+        .await?;
+    Ok(row.map(|row| row.0))
+}
 
-// TODO port query
-def db_meta_music_by_provider_uuid(self, provider, uuid_id):
-    try:
-        self.db_cursor.execute('select mm_metadata_music_guid from mm_metadata_music'
-                               ' where mm_metadata_media_music_id->'' + provider
-                               + '' ? $1', (uuid_id,))
-        return self.db_cursor.fetchone()['mm_metadata_music_guid']
-    except:
-        return None
-
- */
+/// True when the key is safe to embed in a SQL JSON path.
+fn is_valid_json_path_key(key: &str) -> bool {
+    !key.is_empty()
+        && key
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+}

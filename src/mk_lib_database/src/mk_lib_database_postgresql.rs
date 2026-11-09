@@ -184,43 +184,74 @@ pub async fn mk_lib_database_table_exists(
     Ok(row.0)
 }
 
-/*
-// TODO port query
-pub async fn db_pgsql_vacuum_stat_by_day(self, days=1):
-    """
-    # vacuum stats by day list
-    """
-    if days == 0:
-        return await db_conn.fetch('SELECT relname FROM pg_stat_all_tables'
-                               ' WHERE schemaname = 'public'')
-    else:
-        return await db_conn.fetch('SELECT relname FROM pg_stat_all_tables'
-                               ' WHERE schemaname = 'public' AND ((last_analyze is NULL'
-                               ' AND last_autoanalyze is NULL)'
-                               ' OR ((last_analyze < last_autoanalyze'
-                               ' OR last_analyze is null)'
-                               ' AND last_autoanalyze < now() - interval $1)'
-                               ' OR ((last_autoanalyze < last_analyze'
-                               ' OR last_autoanalyze is null)'
-                               ' AND last_analyze < now() - interval $2));',
-                               str(days) + ' day', str(days) + ' day')
+// TODO - see last analyze, etc
+// SELECT schemaname, relname, last_analyze FROM pg_stat_all_tables WHERE relname = 'city';
 
+/// Tables in the public schema that are due for vacuuming.
+///
+/// With `days == 0` every public-schema table is returned.
+pub async fn mk_lib_database_pgsql_vacuum_stat_by_day(
+    sqlx_pool: &sqlx::PgPool,
+    days: i64,
+) -> Result<Vec<String>, sqlx::Error> {
+    let rows: Vec<(String,)> = if days == 0 {
+        sqlx::query_as(
+            r#"SELECT relname FROM pg_stat_all_tables
+            WHERE schemaname = 'public'"#,
+        )
+        .fetch_all(sqlx_pool)
+        .await?
+    } else {
+        let interval = format!("{days} day");
+        sqlx::query_as(
+            r#"SELECT relname FROM pg_stat_all_tables
+            WHERE schemaname = 'public' AND ((last_analyze is NULL
+            AND last_autoanalyze is NULL)
+            OR ((last_analyze < last_autoanalyze
+            OR last_analyze is null)
+            AND last_autoanalyze < now() - interval $1)
+            OR ((last_autoanalyze < last_analyze
+            OR last_autoanalyze is null)
+            AND last_analyze < now() - interval $2))"#,
+        )
+        .bind(&interval)
+        .bind(&interval)
+        .fetch_all(sqlx_pool)
+        .await?
+    };
+    Ok(rows.into_iter().map(|row| row.0).collect())
+}
 
+/// VACUUM ANALYZE a table. The table name must be a plain lowercase identifier
+/// because VACUUM cannot take bind parameters.
+pub async fn mk_lib_database_pgsql_vacuum_table(
+    sqlx_pool: &sqlx::PgPool,
+    table_name: &str,
+) -> Result<(), sqlx::Error> {
+    if !is_plain_sql_identifier(table_name) {
+        return Err(sqlx::Error::Configuration(
+            format!("invalid table name for VACUUM: {table_name}").into(),
+        ));
+    }
+    if !mk_lib_database_table_exists(sqlx_pool, table_name).await? {
+        // The Python original logged missing tables to Elasticsearch; this crate
+        // has no ES client.
+        return Ok(());
+    }
+    // table_name was validated as a plain identifier above.
+    let vacuum_sql = format!("VACUUM ANALYZE {table_name}");
+    sqlx::query(sqlx::AssertSqlSafe(vacuum_sql))
+        .execute(sqlx_pool)
+        .await?;
+    Ok(())
+}
 
-
-// TODO port query
-def db_pgsql_vacuum_table(self, table_name):
-    """
-    # vacuum table
-    """
-    if self.db_pgsql_table_exits(table_name) != None:
-        # self.db_pgsql_set_iso_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        self.db_cursor.execute('VACUUM ANALYZE ' + table_name)
-        # self.db_pgsql_set_iso_level(ISOLATION_LEVEL_READ_COMMITTED)
-    else:
-        common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text={
-            'Vacuum table missing': table_name})
-
-// TODO - see last analynze, etc
-# SELECT schemaname, relname, last_analyze FROM pg_stat_all_tables WHERE relname = 'city';
- */
+/// True when the name is a plain lowercase SQL identifier (no quoting needed).
+fn is_plain_sql_identifier(name: &str) -> bool {
+    let mut chars = name.chars();
+    match chars.next() {
+        Some(c) if c.is_ascii_lowercase() || c == '_' => {}
+        _ => return false,
+    }
+    chars.all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_')
+}

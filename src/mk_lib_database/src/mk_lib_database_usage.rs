@@ -48,20 +48,23 @@ pub struct DBUsageTVEpisodeList {
 }
 
 /*
+// Not ported: both Python originals are `select 1 limit 10` stubs whose result
+// does not match DBUsageAllTimeList / DBUsageTVEpisodeList (mm_review_* columns).
+// Port once the Python stubs contain real SQL.
 
 // TODO port query
 pub async fn db_usage_top10_alltime(self):
     """
-    Top 10 of all time
-    """
+     Top 10 of all time
+     """
     return await db_conn.fetch('select 1 limit 10')
 
 
 // TODO port query
 pub async fn db_usage_top10_tv_episode(self):
     """
-    Top 10 TV episode
-    """
+     Top 10 TV episode
+     """
     return await db_conn.fetch('select 1 limit 10')
 
- */
+*/

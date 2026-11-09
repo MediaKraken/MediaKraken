@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
+use sqlx::postgres::PgRow;
 use sqlx::types::Uuid;
 
 pub async fn mk_lib_database_metadata_game_detail(
@@ -192,9 +193,8 @@ pub async fn mk_lib_database_metadata_game_by_name_and_system(
     limit: i64,
 ) -> Result<Vec<DBMetaGameNameMatchList>, sqlx::Error> {
     if !game_system_short_name.is_empty() {
-        // TODO fix game_system_short_name in query below
         sqlx::query_as(
-            r#"select gi_id, gi_game_info_json from mm_metadata_game_software_info where gi_game_info_name = $1 and game_system_short_name = $2"#,
+            r#"select gi_id, gi_game_info_json from mm_metadata_game_software_info, mm_metadata_game_systems_info where gi_game_info_name = $1 and gs_game_system_name = $2 and gi_game_info_system_id = gs_game_system_id offset $3 limit $4"#,
         )
         .bind(game_name)
         .bind(game_system_short_name)
@@ -204,7 +204,7 @@ pub async fn mk_lib_database_metadata_game_by_name_and_system(
         .await
     } else {
         sqlx::query_as(
-            r#"select gi_id, gi_game_info_json from mm_metadata_game_software_info where gi_game_info_name = $1 and gi_game_info_system_id IS NULL"#,
+            r#"select gi_id, gi_game_info_json from mm_metadata_game_software_info where gi_game_info_name = $1 and gi_game_info_system_id IS NULL offset $2 limit $3"#,
         )
         .bind(game_name)
         .bind(offset)
@@ -237,118 +237,180 @@ pub async fn mk_lib_database_metadata_game_insert(
     Ok(new_guid)
 }
 
-/*
-// TODO port query
-pub async fn db_meta_game_update(self, game_system_id, game_short_name, game_name, game_json,
-                              db_connection=None):
-    """
-    Update game
-    """
-    await db_conn.execute("update mm_metadata_game_software_info"
-                          " set gi_game_info_json = $1"
-                          " where gi_system_id = $2"
-                          " and gi_game_info_short_name = $3"
-                          " and gi_game_info_name = $4",
-                          game_json, game_system_id, game_short_name, game_name)
-
-
-// TODO port query
-pub async fn db_meta_game_by_name(self, game_short_name, game_name):
-    """
-    # return game info by name
-    """
-    return await db_conn.fetch("select gi_id, gi_system_id,"
-                               " gi_game_info_json"
-                               " from mm_metadata_game_software_info"
-                               " where gi_game_info_name = $1"
-                               " or game_short_name = $2", game_name, game_short_name)
-
-
-// TODO port query
-pub async fn db_meta_game_update_by_guid(self, game_id, game_json):
-    """
-    Update game by uuid
-    """
-    await db_conn.execute("update mm_metadata_game_software_info"
-                          " set gi_game_info_json = $1"
-                          " where gi_system_id = $2",
-                          game_json, game_id)
-
-
-// TODO port query
-def db_meta_game_by_system_count(self, guid):
-    """
-    # game list by system count
-    """
-    self.db_cursor.execute("select count(*) from mm_metadata_game_software_info,"
-                           " mm_metadata_game_systems_info"
-                           " where gi_system_id = gs_id"
-                           " and gs_id = $1", (guid,))
-    return self.db_cursor.fetchone()[0]
-
-
-// TODO port query
-def db_meta_game_by_system(self, guid, offset=0, records=None):
-    """
-    # game list by system count
-    """
-    self.db_cursor.execute("select * from mm_metadata_game_software_info,"
-                           " mm_metadata_game_systems_info"
-                           " where gi_system_id = gs_id"
-                           " and gs_id = $1"
-                           " offset $2, limit $3", (guid, offset, records))
-    try:
-        return self.db_cursor.fetchone()
-    except:
-        return None
-
-# poster, backdrop, etc
-// TODO port query
-def db_meta_game_image_random(self, return_image_type="Poster"):
-    """
-    Find random game image
-    """
-    // TODO little bobby tables
-    self.db_cursor.execute("select gi_game_info_json->\"Images\"->\"thegamesdb\"->>\""
-                           + return_image_type + "\" as image_json, gi_id"
-                                                 " from mm_media, mm_metadata_game_software_info"
-                                                 " where mm_media_metadata_guid = gi_id"
-                                                 " and ("
-                                                 "gi_game_info_json->\"Images\"->\"thegamesdb\"->>\""
-                           + return_image_type + "\"" + ")::text != \"null\""
-                                                        " order by random() limit 1")
-    try:
-        # then if no results.....a None will except which will then pass None, None
-        image_json, metadata_id = self.db_cursor.fetchone()
-        return image_json, metadata_id
-    except:
-        return None, None
-
-
-// TODO port query
-def db_meta_game_category_by_name(self, category_name):
-    self.db_cursor.execute(
-        "select gc_id from mm_game_category where gc_category = $1", (category_name,))
-    try:
-        return self.db_cursor.fetchone()
-    except:
-        return None
- */
-
-pub async fn mk_lib_database_metadata_game_category_insert(
+/// Update a game's json found by system guid, short name and name.
+pub async fn mk_lib_database_metadata_game_update(
     sqlx_pool: &sqlx::PgPool,
-    category_name: String,
-) -> Result<uuid::Uuid, sqlx::Error> {
-    let new_guid = uuid::Uuid::now_v7();
+    game_json: &serde_json::Value,
+    game_system_id: uuid::Uuid,
+    game_short_name: &str,
+    game_name: &str,
+) -> Result<(), sqlx::Error> {
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
-        r#"insert into mm_game_category (gc_id, gc_category)
-        values ($1, $2)"#,
+        r#"update mm_metadata_game_software_info
+        set gi_game_info_json = $1
+        where gi_game_info_system_id = $2
+        and gi_game_info_short_name = $3
+        and gi_game_info_name = $4"#,
     )
-    .bind(new_guid)
-    .bind(category_name)
+    .bind(game_json)
+    .bind(game_system_id)
+    .bind(game_short_name)
+    .bind(game_name)
     .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
-    Ok(new_guid)
+    Ok(())
+}
+
+/// Game info (id, system id, json) by name or short name.
+pub async fn mk_lib_database_metadata_game_by_name(
+    sqlx_pool: &sqlx::PgPool,
+    game_name: &str,
+    game_short_name: &str,
+) -> Result<Vec<(uuid::Uuid, uuid::Uuid, serde_json::Value)>, sqlx::Error> {
+    let rows: Vec<(uuid::Uuid, uuid::Uuid, serde_json::Value)> = sqlx::query_as(
+        r#"select gi_game_info_id, gi_game_info_system_id, gi_game_info_json
+        from mm_metadata_game_software_info
+        where gi_game_info_name = $1
+        or gi_game_info_short_name = $2"#,
+    )
+    .bind(game_name)
+    .bind(game_short_name)
+    .fetch_all(sqlx_pool)
+    .await?;
+    Ok(rows)
+}
+
+/// Update a game's json by its guid.
+pub async fn mk_lib_database_metadata_game_update_by_guid(
+    sqlx_pool: &sqlx::PgPool,
+    game_json: &serde_json::Value,
+    game_guid: uuid::Uuid,
+) -> Result<(), sqlx::Error> {
+    let mut transaction = sqlx_pool.begin().await?;
+    sqlx::query(
+        r#"update mm_metadata_game_software_info
+        set gi_game_info_json = $1
+        where gi_game_info_id = $2"#,
+    )
+    .bind(game_json)
+    .bind(game_guid)
+    .execute(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(())
+}
+
+/// Count of games for a game system guid.
+pub async fn mk_lib_database_metadata_game_by_system_count(
+    sqlx_pool: &sqlx::PgPool,
+    system_guid: uuid::Uuid,
+) -> Result<i64, sqlx::Error> {
+    let row: (i64,) = sqlx::query_as(
+        r#"select count(*) from mm_metadata_game_software_info, mm_metadata_game_systems_info
+        where gi_game_info_system_id = gs_game_system_id
+        and gs_game_system_id = $1"#,
+    )
+    .bind(system_guid)
+    .fetch_one(sqlx_pool)
+    .await?;
+    Ok(row.0)
+}
+
+/// Games for a game system guid, all columns, with pagination.
+///
+/// NOTE: the Python original had `offset $2, limit $3` (comma typo); ported
+/// as `offset $2 limit $3`, and used fetchone-with-try/except (returns at most
+/// one row); ported as fetch_all.
+pub async fn mk_lib_database_metadata_game_by_system(
+    sqlx_pool: &sqlx::PgPool,
+    system_guid: uuid::Uuid,
+    offset: i64,
+    records: Option<i64>,
+) -> Result<Vec<PgRow>, sqlx::Error> {
+    let rows: Vec<PgRow> = match records {
+        Some(records) => {
+            sqlx::query(
+                r#"select * from mm_metadata_game_software_info, mm_metadata_game_systems_info
+                where gi_game_info_system_id = gs_game_system_id
+                and gs_game_system_id = $1
+                offset $2 limit $3"#,
+            )
+            .bind(system_guid)
+            .bind(offset)
+            .bind(records)
+            .fetch_all(sqlx_pool)
+            .await?
+        }
+        None => {
+            sqlx::query(
+                r#"select * from mm_metadata_game_software_info, mm_metadata_game_systems_info
+                where gi_game_info_system_id = gs_game_system_id
+                and gs_game_system_id = $1
+                offset $2"#,
+            )
+            .bind(system_guid)
+            .bind(offset)
+            .fetch_all(sqlx_pool)
+            .await?
+        }
+    };
+    Ok(rows)
+}
+
+/// Find a random game image of the requested type (e.g. "Poster").
+///
+/// NOTE: the Python original used double-quoted jsonb keys
+/// (`gi_game_info_json->"Images"->"thegamesdb"->>"X"`), which is not valid
+/// Postgres jsonb syntax; ported as single-quoted keys.
+/// The image type is embedded in a JSON path in the SQL, so it is restricted
+/// to `[A-Za-z0-9_-]`; the Python original was injectable ("little bobby
+/// tables").
+pub async fn mk_lib_database_metadata_game_image_random(
+    sqlx_pool: &sqlx::PgPool,
+    return_image_type: &str,
+) -> Result<Option<(serde_json::Value, uuid::Uuid)>, sqlx::Error> {
+    if !is_valid_image_type(return_image_type) {
+        return Err(sqlx::Error::Configuration(
+            format!("invalid image type: {return_image_type}").into(),
+        ));
+    }
+    let sql = format!(
+        r#"select gi_game_info_json->'Images'->'thegamesdb'->{return_image_type} as image_json,
+        gi_game_info_id
+        from mm_media, mm_metadata_game_software_info
+        where mm_media_metadata_guid = gi_game_info_id
+        and (gi_game_info_json->'Images'->'thegamesdb'->>'{return_image_type}')::text != 'null'
+        order by random() limit 1"#,
+    );
+    let row: Option<(serde_json::Value, uuid::Uuid)> = sqlx::query_as(sqlx::AssertSqlSafe(sql))
+        .fetch_optional(sqlx_pool)
+        .await?;
+    Ok(row)
+}
+
+/// Game category guid by category name.
+///
+/// NOTE: `mm_game_category` is not in the schema dump but is used by
+/// `mk_lib_database_metadata_game_category_insert`; confirm against the
+/// live database.
+pub async fn mk_lib_database_metadata_game_category_by_name(
+    sqlx_pool: &sqlx::PgPool,
+    category_name: &str,
+) -> Result<Option<uuid::Uuid>, sqlx::Error> {
+    let row: Option<(uuid::Uuid,)> =
+        sqlx::query_as(r#"select gc_id from mm_game_category where gc_category = $1"#)
+            .bind(category_name)
+            .fetch_optional(sqlx_pool)
+            .await?;
+    Ok(row.map(|row| row.0))
+}
+
+/// True when the image type is safe to embed in a SQL JSON path.
+fn is_valid_image_type(image_type: &str) -> bool {
+    !image_type.is_empty()
+        && image_type
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
 }

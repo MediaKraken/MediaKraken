@@ -57,99 +57,154 @@ pub async fn mk_lib_database_meta_tv_station_exists(
     Ok(row.0)
 }
 
-/*
-// TODO port query
-def db_tv_station_insert(self, station_id, channel_id):
-    """
-    # insert station/channel unless it exists
-    """
-    if self.db_tv_station_exist(station_id, channel_id) == 0:
-        new_guid = uuid.uuid4()
-        self.db_cursor.execute('insert into mm_tv_stations (mm_tv_stations_id,'
-                               ' mm_tv_station_id,'
-                               ' mm_tv_station_channel)'
-                               ' values ($1, $2, $3)',
-                               (new_guid, station_id, channel_id))
-        self.db_commit()
-        return new_guid
+/// Insert a station/channel record unless it already exists; returns the new
+/// guid when a row was inserted.
+pub async fn mk_lib_database_meta_tv_station_insert(
+    sqlx_pool: &sqlx::PgPool,
+    station_id: &str,
+    channel_id: &str,
+) -> Result<Option<uuid::Uuid>, sqlx::Error> {
+    let row: (i64,) = sqlx::query_as(
+        r#"select count(*) from mm_tv_stations
+        where mm_tv_station_id = $1 and mm_tv_station_channel = $2"#,
+    )
+    .bind(station_id)
+    .bind(channel_id)
+    .fetch_one(sqlx_pool)
+    .await?;
+    if row.0 > 0 {
+        return Ok(None);
+    }
+    let new_guid = uuid::Uuid::now_v7();
+    let mut transaction = sqlx_pool.begin().await?;
+    sqlx::query(
+        r#"insert into mm_tv_stations (mm_tv_stations_id, mm_tv_station_id,
+        mm_tv_station_channel) values ($1, $2, $3)"#,
+    )
+    .bind(new_guid)
+    .bind(station_id)
+    .bind(channel_id)
+    .execute(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(Some(new_guid))
+}
 
-// TODO port query
-def db_tv_station_update(self, station_name, station_id, station_json):
-    """
-    # update station/channel info
-    """
-    self.db_cursor.execute('update mm_tv_stations set mm_tv_station_name = $1,'
-                           ' mm_tv_station_json = $2'
-                           ' where mm_tv_station_id = $3',
-                           (station_name, station_json, station_id))
-    self.db_commit()
+/// Update station/channel info.
+pub async fn mk_lib_database_meta_tv_station_update(
+    sqlx_pool: &sqlx::PgPool,
+    station_name: &str,
+    station_id: &str,
+    station_json: &serde_json::Value,
+) -> Result<(), sqlx::Error> {
+    let mut transaction = sqlx_pool.begin().await?;
+    sqlx::query(
+        r#"update mm_tv_stations
+        set mm_tv_station_name = $1, mm_tv_station_json = $2
+        where mm_tv_station_id = $3"#,
+    )
+    .bind(station_name)
+    .bind(station_json)
+    .bind(station_id)
+    .execute(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(())
+}
 
+/// Insert or update a day's schedule for a station; returns the new guid when
+/// a row was inserted.
+///
+/// TODO change to upsert (the Python original did the same; there is no unique
+/// constraint on station+date to conflict on).
+pub async fn mk_lib_database_meta_tv_schedule_insert(
+    sqlx_pool: &sqlx::PgPool,
+    station_id: &str,
+    schedule_date: chrono::NaiveDate,
+    schedule_json: &serde_json::Value,
+) -> Result<Option<uuid::Uuid>, sqlx::Error> {
+    let mut transaction = sqlx_pool.begin().await?;
+    let row: (i64,) = sqlx::query_as(
+        r#"select count(*) from mm_tv_schedule
+        where mm_tv_schedule_station_id = $1 and mm_tv_schedule_date = $2"#,
+    )
+    .bind(station_id)
+    .bind(schedule_date)
+    .fetch_one(&mut *transaction)
+    .await?;
+    if row.0 > 0 {
+        sqlx::query(
+            r#"update mm_tv_schedule set mm_tv_schedule_json = $1
+            where mm_tv_schedule_station_id = $2
+            and mm_tv_schedule_date = $3"#,
+        )
+        .bind(schedule_json)
+        .bind(station_id)
+        .bind(schedule_date)
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        Ok(None)
+    } else {
+        let new_guid = uuid::Uuid::now_v7();
+        sqlx::query(
+            r#"insert into mm_tv_schedule (mm_tv_schedule_id,
+            mm_tv_schedule_station_id, mm_tv_schedule_date, mm_tv_schedule_json)
+            values ($1, $2, $3, $4)"#,
+        )
+        .bind(new_guid)
+        .bind(station_id)
+        .bind(schedule_date)
+        .bind(schedule_json)
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        Ok(Some(new_guid))
+    }
+}
 
-// TODO port query
-def db_tv_schedule_insert(self, station_id, schedule_date, schedule_json):
-    """
-    # insert schedule info
-    """
-    self.db_cursor.execute('select count(*) from mm_tv_schedule'
-                           ' where mm_tv_schedule_station_id = $1 and mm_tv_schedule_date = $2',
-                           (station_id, schedule_date))
-    // TODO change to upsert
-    if self.db_cursor.fetchone()[0] > 0:
-        self.db_cursor.execute('update mm_tv_schedule set mm_tv_schedule_json = $1'
-                               ' where mm_tv_schedule_station_id = $2'
-                               ' and mm_tv_schedule_date = $3',
-                               (schedule_json, station_id, schedule_date))
-        self.db_commit()
-    else:
-        new_guid = uuid.uuid4()
-        self.db_cursor.execute('insert into mm_tv_schedule (mm_tv_schedule_id,'
-                               ' mm_tv_schedule_station_id,'
-                               ' mm_tv_schedule_date,'
-                               ' mm_tv_schedule_json)'
-                               ' values ($1, $2, $3, $4)',
-                               (new_guid, station_id, schedule_date, schedule_json))
-        self.db_commit()
-        return new_guid
-
-
-// TODO port query
-def db_tv_program_insert(self, program_id, program_json):
-    """
-    # insert program info
-    """
-    self.db_cursor.execute('select count(*) from mm_tv_schedule_program'
-                           ' where mm_tv_schedule_program_id = $1', (program_id,))
-    // TODO change to upsert
-    if self.db_cursor.fetchone()[0] > 0:
-        self.db_cursor.execute('update mm_tv_schedule_program'
-                               ' set mm_tv_schedule_program_json = $1'
-                               ' where mm_tv_schedule_program_id = $2',
-                               (program_json, program_id))
-        self.db_commit()
-    else:
-        new_guid = uuid.uuid4()
-        self.db_cursor.execute('insert into mm_tv_schedule_program'
-                               ' (mm_tv_schedule_program_guid,'
-                               ' mm_tv_schedule_program_id,'
-                               ' mm_tv_schedule_program_json) values ($1, $2, $3)',
-                               (new_guid, program_id, program_json))
-        self.db_commit()
-        return new_guid
-
-
-// TODO port query
-def db_tv_schedule_by_date(self, display_date):
-    """
-    # tv shows for schedule display
-    """
-    self.db_cursor.execute('select mm_tv_station_name,'
-                           ' mm_tv_station_channel,'
-                           ' mm_tv_schedule_json'
-                           ' from mm_tv_stations, mm_tv_schedule'
-                           ' where mm_tv_schedule_station_id = mm_tv_station_id'
-                           ' and mm_tv_schedule_date = $1'
-                           ' order by LOWER(mm_tv_station_name),'
-                           ' mm_tv_schedule_json->'airDateTime'',
-                           (display_date,))
-    return self.db_cursor.fetchall()
- */
+/// Insert or update a program record; returns the new guid when a row was
+/// inserted.
+///
+/// TODO change to upsert (the Python original did the same).
+pub async fn mk_lib_database_meta_tv_program_insert(
+    sqlx_pool: &sqlx::PgPool,
+    program_id: &str,
+    program_json: &serde_json::Value,
+) -> Result<Option<uuid::Uuid>, sqlx::Error> {
+    let mut transaction = sqlx_pool.begin().await?;
+    let row: (i64,) = sqlx::query_as(
+        r#"select count(*) from mm_tv_schedule_program
+        where mm_tv_schedule_program_id = $1"#,
+    )
+    .bind(program_id)
+    .fetch_one(&mut *transaction)
+    .await?;
+    if row.0 > 0 {
+        sqlx::query(
+            r#"update mm_tv_schedule_program
+            set mm_tv_schedule_program_json = $1
+            where mm_tv_schedule_program_id = $2"#,
+        )
+        .bind(program_json)
+        .bind(program_id)
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        Ok(None)
+    } else {
+        let new_guid = uuid::Uuid::now_v7();
+        sqlx::query(
+            r#"insert into mm_tv_schedule_program (mm_tv_schedule_program_guid,
+            mm_tv_schedule_program_id, mm_tv_schedule_program_json)
+            values ($1, $2, $3)"#,
+        )
+        .bind(new_guid)
+        .bind(program_id)
+        .bind(program_json)
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        Ok(Some(new_guid))
+    }
+}

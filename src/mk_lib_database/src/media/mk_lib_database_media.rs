@@ -313,135 +313,256 @@ pub async fn mk_lib_database_media_new(
     Ok(table_rows)
 }
 
-/*
+/// Set the per-user rating/watch status for media.
+///
+/// A status of "watched" or "mismatch" stores boolean `true` under that
+/// status name; any other status is stored as its string value under the
+/// `Rating` key.
+pub async fn mk_lib_database_media_rating_update(
+    sqlx_pool: &sqlx::PgPool,
+    media_guid: Uuid,
+    user_id: i64,
+    status_text: &str,
+) -> Result<(), sqlx::Error> {
+    let mut transaction = sqlx_pool.begin().await?;
+    let row: Option<(serde_json::Value,)> = sqlx::query_as(
+        r#"select mm_media_json
+        from mm_media
+        where mm_media_guid = $1 for update"#,
+    )
+    .bind(media_guid)
+    .fetch_optional(&mut *transaction)
+    .await?;
+    let Some((mut media_json,)) = row else {
+        transaction.rollback().await?;
+        return Err(sqlx::Error::RowNotFound);
+    };
+    let (status_key, status_value) = if status_text == "watched" || status_text == "mismatch" {
+        (status_text, serde_json::Value::Bool(true))
+    } else {
+        ("Rating", serde_json::Value::String(status_text.to_string()))
+    };
+    upsert_media_user_stat(&mut media_json, user_id, status_key, status_value);
+    sqlx::query(
+        r#"update mm_media set mm_media_json = $1
+        where mm_media_guid = $2"#,
+    )
+    .bind(&media_json)
+    .bind(media_guid)
+    .execute(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(())
+}
 
-// TODO port query
-def db_media_rating_update(self, media_guid, user_id, status_text):
-    """
-    # set favorite status for media
-    """
-    self.db_cursor.execute('SELECT mm_media_json from mm_media'
-                           ' where mm_media_guid = $1 FOR UPDATE', (media_guid,))
-    if status_text == 'watched' or status_text == 'mismatch':
-        status_setting = true
-    else:
-        status_setting = status_text
-        status_text = 'Rating'
-    try:
-        json_data = self.db_cursor.fetchone()['mm_media_json']
-        if 'UserStats' not in json_data:
-            json_data['UserStats'] = {}
-        if user_id in json_data['UserStats']:
-            json_data['UserStats'][user_id][status_text] = status_setting
-        else:
-            json_data['UserStats'][user_id] = {status_text: status_setting}
-        self.db_update_media_json(media_guid, json.dumps(json_data))
-        self.db_commit()
-    except:
-        self.db_rollback()
-        return None
+/// Set the per-user ffmpeg playback checkpoint for media
+/// (so a user can pick up where they left off).
+///
+/// The Python original took an untyped `ffmpeg_time`; ported as `f64`
+/// (seconds, fractional).
+pub async fn mk_lib_database_media_watched_checkpoint_update(
+    sqlx_pool: &sqlx::PgPool,
+    media_guid: Uuid,
+    user_id: i64,
+    ffmpeg_time: f64,
+) -> Result<(), sqlx::Error> {
+    let mut transaction = sqlx_pool.begin().await?;
+    let row: Option<(serde_json::Value,)> = sqlx::query_as(
+        r#"select mm_media_json
+        from mm_media
+        where mm_media_guid = $1 for update"#,
+    )
+    .bind(media_guid)
+    .fetch_optional(&mut *transaction)
+    .await?;
+    let Some((mut media_json,)) = row else {
+        transaction.rollback().await?;
+        return Err(sqlx::Error::RowNotFound);
+    };
+    upsert_media_user_stat(
+        &mut media_json,
+        user_id,
+        "ffmpeg_checkpoint",
+        serde_json::Value::from(ffmpeg_time),
+    );
+    sqlx::query(
+        r#"update mm_media set mm_media_json = $1
+        where mm_media_guid = $2"#,
+    )
+    .bind(&media_json)
+    .bind(media_guid)
+    .execute(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(())
+}
 
+/// Update the media json for the media guid.
+pub async fn mk_lib_database_media_update_json(
+    sqlx_pool: &sqlx::PgPool,
+    media_guid: Uuid,
+    media_json: &serde_json::Value,
+) -> Result<(), sqlx::Error> {
+    let mut transaction = sqlx_pool.begin().await?;
+    sqlx::query(
+        r#"update mm_media set mm_media_json = $1
+        where mm_media_guid = $2"#,
+    )
+    .bind(media_json)
+    .bind(media_guid)
+    .execute(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(())
+}
 
-// TODO port query
-def db_media_watched_checkpoint_update(self, media_guid, user_id, ffmpeg_time):
-    """
-    # set checkpoint for media (so can pick up where left off per user)
-    """
-    self.db_cursor.execute('SELECT mm_media_json from mm_media'
-                           ' where mm_media_guid = $1 FOR UPDATE', (media_guid,))
-    json_data = self.db_cursor.fetchone()['mm_media_json']
-    if 'UserStats' not in json_data:
-        json_data['UserStats'] = {}
-    if user_id in json_data['UserStats']:
-        json_data['UserStats'][user_id]['ffmpeg_checkpoint'] = ffmpeg_time
-    else:
-        json_data['UserStats'][user_id] = {'ffmpeg_checkpoint': ffmpeg_time}
-    self.db_update_media_json(media_guid, json.dumps(json_data))
-    self.db_commit()
+/// All media matching a metadata guid and media class.
+///
+/// NOTE: the Python self-join `mm_media_metadata_guid = mm_metadata_guid` was
+/// a tautology against a non-existent column; ported as
+/// `= mm_metadata_movie_guid`. `mm_media_name` / `mm_media_class_guid`
+/// follow the live `mk_lib_database_media_new` idiom; the schema dump only
+/// lists `mm_media_class_enum` (confirm against the live database). The
+/// Python `media_class_uuid` param is bound as the `DLMediaType` i16,
+/// matching the live `mk_lib_database_media_movie_genre_count` bind.
+pub async fn mk_lib_database_media_by_metadata_guid(
+    sqlx_pool: &sqlx::PgPool,
+    metadata_guid: Uuid,
+    media_class: i16,
+) -> Result<Vec<(String, Uuid)>, sqlx::Error> {
+    let rows: Vec<(String, Uuid)> = sqlx::query_as(
+        r#"select mm_media_name,
+        mm_media_guid
+        from mm_media, mm_metadata_movie
+        where mm_media_metadata_guid = mm_metadata_movie_guid
+        and mm_media_metadata_guid = $1
+        and mm_media_class_guid = $2"#,
+    )
+    .bind(metadata_guid)
+    .bind(media_class)
+    .fetch_all(sqlx_pool)
+    .await?;
+    Ok(rows)
+}
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMediaMetadataBothList {
+    pub mm_media_name: String,
+    pub mm_media_metadata_guid: Option<Uuid>,
+    pub mm_media_ffprobe_json: serde_json::Value,
+    pub mm_media_json: serde_json::Value,
+    pub mm_metadata_movie_json: serde_json::Value,
+    pub mm_metadata_movie_localimage_json: serde_json::Value,
+    pub mm_metadata_movie_media_id: i32,
+}
 
+/// Read media and its movie metadata together by media guid.
+///
+/// NOTE: the Python original used the short names `mm_metadata_json` /
+/// `mm_metadata_localimage_json` / `mm_metadata_media_id` (no such movie
+/// columns); ported to `mm_metadata_movie_*`. The Python self-join
+/// `mm_media_metadata_guid = mm_metadata_guid` was a tautology against a
+/// non-existent column; ported as `= mm_metadata_movie_guid`.
+pub async fn mk_lib_database_media_read_media_metadata_both(
+    sqlx_pool: &sqlx::PgPool,
+    media_guid: Uuid,
+) -> Result<Option<DBMediaMetadataBothList>, sqlx::Error> {
+    let row: Option<DBMediaMetadataBothList> = sqlx::query_as(
+        r#"select mm_media_name,
+        mm_media_metadata_guid,
+        mm_media_ffprobe_json,
+        mm_media_json,
+        mm_metadata_movie_json,
+        mm_metadata_movie_localimage_json,
+        mm_metadata_movie_media_id
+        from mm_media, mm_metadata_movie
+        where mm_media_metadata_guid = mm_metadata_movie_guid
+        and mm_media_guid = $1"#,
+    )
+    .bind(media_guid)
+    .fetch_optional(sqlx_pool)
+    .await?;
+    Ok(row)
+}
 
+/// The first media metadata guid whose path starts with the given path
+/// (used for trailer and extras matching, since the media live within the
+/// root directory, not at it).
+pub async fn mk_lib_database_media_read_path_like(
+    sqlx_pool: &sqlx::PgPool,
+    media_path: &str,
+) -> Result<Option<Uuid>, sqlx::Error> {
+    let row: Option<(Option<Uuid>,)> = sqlx::query_as(
+        r#"select mm_media_metadata_guid
+        from mm_media
+        where mm_media_path like $1
+        and mm_media_metadata_guid is not NULL limit 1"#,
+    )
+    .bind(format!("{media_path}%"))
+    .fetch_optional(sqlx_pool)
+    .await?;
+    Ok(row.and_then(|row| row.0))
+}
 
+/// All media guids and ffprobe json sharing the metadata of the given media
+/// and media class.
+///
+/// NOTE: the Python original comma-joined `mm_metadata_movie` with no
+/// predicate (relies on `distinct`); ported with the proper join
+/// `mm_media_metadata_guid = mm_metadata_movie_guid`. `mm_media_class_guid`
+/// follows the live `mk_lib_database_media_new` idiom; the schema dump only
+/// lists `mm_media_class_enum` (confirm against the live database). The
+/// Python `media_class_uuid` param is bound as the `DLMediaType` i16,
+/// matching the live `mk_lib_database_media_movie_genre_count` bind.
+pub async fn mk_lib_database_media_ffprobe_all_media_guid(
+    sqlx_pool: &sqlx::PgPool,
+    media_guid: Uuid,
+    media_class: i16,
+) -> Result<Vec<(Uuid, serde_json::Value)>, sqlx::Error> {
+    let rows: Vec<(Uuid, serde_json::Value)> = sqlx::query_as(
+        r#"select distinct mm_media_guid,
+        mm_media_ffprobe_json
+        from mm_media, mm_metadata_movie
+        where mm_media_metadata_guid = mm_metadata_movie_guid
+        and mm_media_metadata_guid =
+        (select mm_media_metadata_guid
+        from mm_media where mm_media_guid = $1)
+        and mm_media_class_guid = $2"#,
+    )
+    .bind(media_guid)
+    .bind(media_class)
+    .fetch_all(sqlx_pool)
+    .await?;
+    Ok(rows)
+}
 
-// TODO port query
-def db_update_media_json(self, media_guid, mediajson):
-    """
-    # update the media json
-    """
-    self.db_cursor.execute('update mm_media set mm_media_json = $1'
-                           ' where mm_media_guid = $2',
-                           (mediajson, media_guid))
-
-
-// TODO port query
-def db_media_by_metadata_guid(self, metadata_guid, media_class_uuid):
-    """
-    # fetch all media with METADATA match
-    """
-    self.db_cursor.execute('select mm_media_name,'
-                           'mm_media_guid'
-                           ' from mm_media, mm_metadata_movie'
-                           ' where mm_media_metadata_guid = mm_metadata_guid'
-                           ' and mm_media_metadata_guid = $1'
-                           ' and mm_media_class_guid = $2',
-                           (metadata_guid, media_class_uuid))
-    return self.db_cursor.fetchall()
-
-
-
-// TODO port query
-def db_read_media_metadata_both(self, media_guid):
-    """
-    # read in metadata by id
-    """
-    self.db_cursor.execute('select mm_media_name,'
-                           'mm_media_metadata_guid,'
-                           'mm_media_ffprobe_json,'
-                           'mm_media_json,'
-                           'mm_metadata_json,'
-                           'mm_metadata_localimage_json,'
-                           'mm_metadata_media_id'
-                           ' from mm_media, mm_metadata_movie'
-                           ' where mm_media_metadata_guid = mm_metadata_guid'
-                           ' and mm_media_guid = $1', (media_guid,))
-    try:
-        return self.db_cursor.fetchone()
-    except:
-        return None
-
-
-// TODO port query
-def db_read_media_path_like(self, media_path):
-    """
-    # do a like class path match for trailers and extras
-    """
-    # use like since I won't be using the "root" directory but media within it
-    common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
-                                                         message_text={'path like': media_path})
-    self.db_cursor.execute('select mm_media_metadata_guid'
-                           ' from mm_media'
-                           ' where mm_media_path LIKE $1'
-                           ' and mm_media_metadata_guid IS NOT NULL limit 1',
-                           ((media_path + '%'),))
-    try:
-        return self.db_cursor.fetchone()['mm_media_metadata_guid']
-    except:
-        return None
-
-// TODO port query
-def db_ffprobe_all_media_guid(self, media_uuid, media_class_uuid):
-    """
-    # fetch all media with METADATA match
-    """
-    self.db_cursor.execute(
-        'select distinct mm_media_guid,'
-        'mm_media_ffprobe_json'
-        ' from mm_media, mm_metadata_movie'
-        ' where mm_media_metadata_guid = '
-        '(select mm_media_metadata_guid'
-        ' from mm_media where mm_media_guid = $1)'
-        ' and mm_media_class_guid = $2',
-        (media_uuid, media_class_uuid))
-    return self.db_cursor.fetchall()
-
- */
+/// Set `UserStats[user_id][stat_key]` in the media json, creating the
+/// `UserStats` and per-user objects when missing.
+fn upsert_media_user_stat(
+    media_json: &mut serde_json::Value,
+    user_id: i64,
+    stat_key: &str,
+    stat_value: serde_json::Value,
+) {
+    let user_key = user_id.to_string();
+    if !media_json
+        .get("UserStats")
+        .is_some_and(serde_json::Value::is_object)
+    {
+        media_json["UserStats"] = serde_json::json!({});
+    }
+    if !media_json
+        .get("UserStats")
+        .and_then(|stats| stats.get(user_key.as_str()))
+        .is_some_and(serde_json::Value::is_object)
+    {
+        media_json["UserStats"][user_key.as_str()] = serde_json::json!({});
+    }
+    if let Some(user_stats) = media_json
+        .get_mut("UserStats")
+        .and_then(|stats| stats.get_mut(user_key.as_str()))
+        .and_then(serde_json::Value::as_object_mut)
+    {
+        user_stats.insert(stat_key.to_string(), stat_value);
+    }
+}

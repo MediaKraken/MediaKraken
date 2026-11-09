@@ -171,39 +171,33 @@ pub async fn mk_lib_database_metadata_person_insert_cast_crew(
     //     }
     // }
 }
-/*
-
-// TODO port query
-pub async fn db_meta_person_as_seen_in(self, person_guid):
-    row_data = await self.db_meta_person_by_guid(guid=person_guid)
-    if row_data == None:  // exit on not found person
-        return None
-    // TODO jin index the credits
-    return await db_conn.fetch('select mm_metadata_guid, mm_metadata_name,'
-                               ' mm_metadata_localimage_json->'Poster''
-                               ' from mm_metadata_movie'
-                               ' where mm_metadata_json->'credits'->'cast''
-                               ' @> '[{"id": '
-                               + str(row_data['mm_metadata_person_person_media_id'])
-                               + '}]' order by LOWER(mm_metadata_name)')
-
- */
-
-pub async fn mk_lib_database_metadata_person_update(
+/// List movies whose cast credits include the given person, ordered by name.
+/// Returns `Ok(None)` when the person record does not exist.
+pub async fn mk_lib_database_metadata_person_as_seen_in(
     sqlx_pool: &sqlx::PgPool,
-    person_media_id: Uuid,
-    person_bio: serde_json::Value,
-    person_image: serde_json::Value,
-) -> Result<(), sqlx::Error> {
-    let mut transaction = sqlx_pool.begin().await?;
-    sqlx::query(
-        r#"update mm_metadata_person set mm_metadata_person_meta_json = $1, mm_metadata_person_image = $2 where mm_metadata_person_media_id = $3"#,
+    person_guid: uuid::Uuid,
+) -> Result<Option<Vec<PgRow>>, sqlx::Error> {
+    let row: Option<(i32,)> = sqlx::query_as(
+        r#"select mm_metadata_person_media_id from mm_metadata_person
+        where mm_metadata_person_guid = $1"#,
     )
-    .bind(person_bio)
-    .bind(person_image)
-    .bind(person_media_id)
-    .execute(&mut *transaction)
+    .bind(person_guid)
+    .fetch_optional(sqlx_pool)
     .await?;
-    transaction.commit().await?;
-    Ok(())
+    let Some((media_id,)) = row else {
+        return Ok(None);
+    };
+    // TODO index the credits
+    let cast_check = serde_json::json!([{"id": media_id}]);
+    let rows: Vec<PgRow> = sqlx::query(
+        r#"select mm_metadata_movie_guid, mm_metadata_movie_name,
+        mm_metadata_movie_localimage_json->'Poster'
+        from mm_metadata_movie
+        where mm_metadata_movie_json->'credits'->'cast' @> $1
+        order by LOWER(mm_metadata_movie_name)"#,
+    )
+    .bind(cast_check)
+    .fetch_all(sqlx_pool)
+    .await?;
+    Ok(Some(rows))
 }

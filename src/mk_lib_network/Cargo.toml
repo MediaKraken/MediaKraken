@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_network"
-version = "0.0.241"
+version = "0.0.242"
 edition = "2024"
 
 [profile.release]
@@ -10,8 +10,8 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_file = { version = "0.0.251", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.242", registry = "kellnr" }
+mk_lib_file = { version = "0.0.252", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.243", registry = "kellnr" }
 
 bytes = "1.12.1"
 cidr-utils = "0.7.1" # 0.6+ removed serde feature; 0.5.x Ipv4Cidr renamed

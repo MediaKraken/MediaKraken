@@ -392,81 +392,132 @@ pub async fn mk_lib_database_metadata_movie_status(
     Ok(())
 }
 
-/*
+/// Read in movie metadata via a media guid.
+///
+/// NOTE: the Python original joined `mm_media_metadata_guid = mm_metadata_guid`
+/// (no such movie column); ported as `= mm_metadata_movie_guid`.
+pub async fn mk_lib_database_metadata_movie_by_media_uuid(
+    sqlx_pool: &sqlx::PgPool,
+    media_guid: uuid::Uuid,
+) -> Result<Option<(serde_json::Value, serde_json::Value)>, sqlx::Error> {
+    let row: Option<(serde_json::Value, serde_json::Value)> = sqlx::query_as(
+        r#"select mm_metadata_movie_json, mm_metadata_movie_localimage_json
+        from mm_media, mm_metadata_movie
+        where mm_media_metadata_guid = mm_metadata_movie_guid
+        and mm_media_guid = $1"#,
+    )
+    .bind(media_guid)
+    .fetch_optional(sqlx_pool)
+    .await?;
+    Ok(row)
+}
 
-// TODO port query
-pub async fn db_meta_movie_by_media_uuid(self, media_guid):
-    """
-    # read in metadata via media id
-    """
-    return await db_conn.fetchrow('select mm_metadata_movie_json,'
-                                  ' mm_metadata_movie_localimage_json'
-                                  ' from mm_media, mm_metadata_movie'
-                                  ' where mm_media_metadata_guid = mm_metadata_guid'
-                                  ' and mm_media_guid = $1', media_guid)
+/// Find a random movie image of the requested type (e.g. "Poster").
+///
+/// NOTE: the Python original selected `->'Images'->'themoviedb'->>type` but
+/// filtered on `->'Images'->>type` (missing the themoviedb hop); ported as-is.
+/// The image type is embedded in a JSON path in the SQL, so it is restricted
+/// to `[A-Za-z0-9_-]`; the Python original was injectable ("little bobby
+/// tables").
+pub async fn mk_lib_database_metadata_movie_image_random(
+    sqlx_pool: &sqlx::PgPool,
+    return_image_type: &str,
+) -> Result<Option<(serde_json::Value, uuid::Uuid)>, sqlx::Error> {
+    if !is_valid_image_type(return_image_type) {
+        return Err(sqlx::Error::Configuration(
+            format!("invalid image type: {return_image_type}").into(),
+        ));
+    }
+    let sql = format!(
+        r#"select mm_metadata_movie_localimage_json->'Images'->'themoviedb'->{return_image_type} as image_json,
+        mm_metadata_movie_guid
+        from mm_media, mm_metadata_movie
+        where mm_media_metadata_guid = mm_metadata_movie_guid
+        and (mm_metadata_movie_localimage_json->'Images'->>'{return_image_type}')::text != 'null'
+        order by random() limit 1"#,
+    );
+    let row: Option<(serde_json::Value, uuid::Uuid)> = sqlx::query_as(sqlx::AssertSqlSafe(sql))
+        .fetch_optional(sqlx_pool)
+        .await?;
+    Ok(row)
+}
 
-# poster, backdrop, etc
-// TODO port query
-def db_meta_movie_image_random(self, return_image_type='Poster'):
-    """
-    Find random movie image
-    """
-    // TODO little bobby tables
-    self.db_cursor.execute('select mm_metadata_movie_localimage_json->'Images'->'themoviedb'->>''
-                           + return_image_type + '' as image_json,mm_metadata_movie_guid'
-                                                 ' from mm_media,mm_metadata_movie'
-                                                 ' where mm_media_metadata_guid = mm_metadata_movie_guid'
-                                                 ' and (mm_metadata_movie_localimage_json->'Images'->>''
-                           + return_image_type + ''' + ')::text != 'null''
-                                                        ' order by random() limit 1')
-    try:
-        // then if no results.....a None will except which will then pass None, None
-        image_json, metadata_id = self.db_cursor.fetchone()
-        return image_json, metadata_id
-    except:
-        return None, None
-
-
-// TODO port query
-def db_meta_movie_update_castcrew(self, cast_crew_json, metadata_id):
-    """
-    Update the cast/crew for selected media
-    """
-    common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
-                                                         message_text={'upt castcrew': metadata_id})
-    self.db_cursor.execute('select mm_metadata_movie_json'
-                           ' from mm_metadata_movie'
-                           ' where mm_metadata_guid = $1', (metadata_id,))
-    cast_crew_json_row = self.db_cursor.fetchone()[0]
-    common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text={
-        'castrow': cast_crew_json_row})
+/// Update the cast/crew json for the movie with the given metadata guid.
+///
+/// Only the `cast`/`crew` keys of `cast_crew_json` are copied, under
+/// `Cast`/`Crew`, into the stored movie json.
+pub async fn mk_lib_database_metadata_movie_update_castcrew(
+    sqlx_pool: &sqlx::PgPool,
+    cast_crew_json: &serde_json::Value,
+    metadata_guid: uuid::Uuid,
+) -> Result<(), sqlx::Error> {
+    let mut transaction = sqlx_pool.begin().await?;
+    let row: Option<(serde_json::Value,)> = sqlx::query_as(
+        r#"select mm_metadata_movie_json
+        from mm_metadata_movie
+        where mm_metadata_movie_guid = $1"#,
+    )
+    .bind(metadata_guid)
+    .fetch_optional(&mut *transaction)
+    .await?;
+    let Some((mut movie_json,)) = row else {
+        return Err(sqlx::Error::RowNotFound);
+    };
     // TODO for dumping 'meta'
-    if 'cast' in cast_crew_json:
-        cast_crew_json_row.update({'Cast': cast_crew_json['cast']})
+    if let Some(cast) = cast_crew_json.get("cast") {
+        movie_json["Cast"] = cast.clone();
+    }
     // TODO for dumping 'meta'
-    if 'crew' in cast_crew_json:
-        cast_crew_json_row.update({'Crew': cast_crew_json['crew']})
-    common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
-                                                         message_text={'upt': cast_crew_json_row})
-    self.db_cursor.execute('update mm_metadata_movie set mm_metadata_movie_json = $1'
-                           ' where mm_metadata_movie_guid = $2',
-                           (json.dumps(cast_crew_json_row), metadata_id))
-    self.db_commit()
+    if let Some(crew) = cast_crew_json.get("crew") {
+        movie_json["Crew"] = crew.clone();
+    }
+    sqlx::query(
+        r#"update mm_metadata_movie set mm_metadata_movie_json = $1
+        where mm_metadata_movie_guid = $2"#,
+    )
+    .bind(movie_json)
+    .bind(metadata_guid)
+    .execute(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(())
+}
 
-    // TODO port query
-def db_meta_update(self, series_id_json, result_json, image_json):
-    """
-    # update record by tmdb
-    """
-    // um, mm_metadata_media_id is wrong
-    self.db_cursor.execute('update mm_metadata_movie set mm_metadata_movie_media_id = $1,'
-                           ' mm_metadata_movie_name = $2,'
-                           ' mm_metadata_movie_json = $3,'
-                           ' mm_metadata_movie_localimage_json = $4'
-                           ' where mm_metadata_movie_media_id = $5',
-                           (series_id_json, result_json['title'],
-                            json.dumps(result_json), json.dumps(image_json),
-                            result_json['id']))
-    self.db_commit()
+/// Update a movie record by its tmdb media id.
+///
+/// NOTE: the Python original bound a json `series_id_json` to the integer
+/// `mm_metadata_movie_media_id` column (flagged "wrong" in the original
+/// comment); ported with an explicit `media_id: i32` instead.
+pub async fn mk_lib_database_metadata_movie_update(
+    sqlx_pool: &sqlx::PgPool,
+    media_id: i32,
+    result_json: &serde_json::Value,
+    image_json: &serde_json::Value,
+) -> Result<(), sqlx::Error> {
+    let mut transaction = sqlx_pool.begin().await?;
+    sqlx::query(
+        r#"update mm_metadata_movie
+        set mm_metadata_movie_media_id = $1,
+            mm_metadata_movie_name = $2,
+            mm_metadata_movie_json = $3,
+            mm_metadata_movie_localimage_json = $4
+        where mm_metadata_movie_media_id = $5"#,
+    )
+    .bind(media_id)
+    .bind(result_json["title"].as_str().unwrap_or("").to_string())
+    .bind(result_json)
+    .bind(image_json)
+    .bind(result_json["id"].as_i64().unwrap_or(0) as i32)
+    .execute(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(())
+}
 
- */
+/// True when the image type is safe to embed in a SQL JSON path.
+fn is_valid_image_type(image_type: &str) -> bool {
+    !image_type.is_empty()
+        && image_type
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+}

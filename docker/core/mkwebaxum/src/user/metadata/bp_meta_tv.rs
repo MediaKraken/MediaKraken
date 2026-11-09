@@ -229,7 +229,8 @@ pub async fn user_metadata_tv_status(
         )
         .await
         .unwrap();
-        Redirect::to("/admin/cron")
+        let target = format!("/user/metadata/tv_detail/{}", guid);
+        Redirect::to(target.as_str())
     }
 }
 

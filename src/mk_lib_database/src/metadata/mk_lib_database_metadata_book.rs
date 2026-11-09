@@ -134,27 +134,37 @@ pub async fn mk_lib_database_metadata_book_guid_by_name(
     Ok(row.0)
 }
 
-/*
+/// Find a random book image of the requested type (e.g. "Cover").
+///
+/// The image type is embedded in a JSON path in the SQL, so it is restricted to
+/// `[A-Za-z0-9_-]`; the Python original was injectable ("little bobby tables").
+pub async fn mk_lib_database_metadata_book_image_random(
+    sqlx_pool: &sqlx::PgPool,
+    return_image_type: &str,
+) -> Result<Option<(serde_json::Value, uuid::Uuid)>, sqlx::Error> {
+    if !is_valid_image_type(return_image_type) {
+        return Err(sqlx::Error::Configuration(
+            format!("invalid image type: {return_image_type}").into(),
+        ));
+    }
+    let sql = format!(
+        r#"select mm_metadata_book_localimage->'Images'->>{return_image_type} as image_json,
+        mm_metadata_book_guid
+        from mm_media, mm_metadata_book
+        where mm_media_metadata_guid = mm_metadata_book_guid
+        and (mm_metadata_book_localimage->'Images'->>{return_image_type})::text != 'null'
+        order by random() limit 1"#,
+    );
+    let row: Option<(serde_json::Value, uuid::Uuid)> = sqlx::query_as(sqlx::AssertSqlSafe(sql))
+        .fetch_optional(sqlx_pool)
+        .await?;
+    Ok(row)
+}
 
-// TODO port query
-def db_meta_book_image_random(self, return_image_type='Cover'):
-    """
-    Find random book image
-    """
-    // TODO little bobby tables
-    self.db_cursor.execute(
-        'select mm_metadata_book_localimage_json->'Images'->>''
-        + return_image_type + '' as image_json,mm_metadata_book_guid'
-                              ' from mm_media,mm_metadata_book'
-                              ' where mm_media_metadata_guid = mm_metadata_book_guid'
-                              ' and (mm_metadata_book_localimage_json->'Images'->>''
-        + return_image_type + ''' + ')::text != 'null''
-                                     ' order by random() limit 1')
-    try:
-        // then if no results.....a None will except which will then pass None, None
-        image_json, metadata_id = self.db_cursor.fetchone()
-        return image_json, metadata_id
-    except:
-        return None, None
-
- */
+/// True when the image type is safe to embed in a SQL JSON path.
+fn is_valid_image_type(image_type: &str) -> bool {
+    !image_type.is_empty()
+        && image_type
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+}

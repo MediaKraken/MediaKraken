@@ -1,3 +1,4 @@
+use chrono::{Duration, Utc};
 use mk_lib_common::mk_lib_common_enum_media_type;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
@@ -125,743 +126,218 @@ pub async fn mk_lib_database_media_movie_count(
     }
 }
 
-/*
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMediaMovieMetadataBothList {
+    pub mm_media_ffprobe_json: serde_json::Value,
+    pub mm_metadata_movie_json: serde_json::Value,
+    pub mm_metadata_movie_localimage_json: serde_json::Value,
+}
 
-def db_read_media_metadata_movie_both(self, media_guid):
-    """
-    # read in metadata and ffprobe by id
-    """
-    self.db_cursor.execute('select mm_media_ffprobe_json,'
-                           'mm_metadata_json,'
-                           'mm_metadata_localimage_json'
-                           ' from mm_media, mm_metadata_movie'
-                           ' where mm_media_metadata_guid = mm_metadata_guid'
-                           ' and mm_media_guid = $1', (media_guid,))
-    try:
-        return self.db_cursor.fetchone()
-    except:
-        return None
+/// Read in movie metadata and ffprobe by media guid.
+///
+/// NOTE: the Python original used the short names `mm_metadata_json` /
+/// `mm_metadata_localimage_json` (no such movie columns); ported to
+/// `mm_metadata_movie_*`. The Python self-join
+/// `mm_media_metadata_guid = mm_metadata_guid` was a tautology against a
+/// non-existent column; ported as `= mm_metadata_movie_guid`.
+pub async fn mk_lib_database_media_movie_read_media_metadata_both(
+    sqlx_pool: &sqlx::PgPool,
+    media_guid: Uuid,
+) -> Result<Option<DBMediaMovieMetadataBothList>, sqlx::Error> {
+    let row: Option<DBMediaMovieMetadataBothList> = sqlx::query_as(
+        r#"select mm_media_ffprobe_json,
+        mm_metadata_movie_json,
+        mm_metadata_movie_localimage_json
+        from mm_media, mm_metadata_movie
+        where mm_media_metadata_guid = mm_metadata_movie_guid
+        and mm_media_guid = $1"#,
+    )
+    .bind(media_guid)
+    .fetch_optional(sqlx_pool)
+    .await?;
+    Ok(row)
+}
 
-def db_read_media_list_by_uuid(self, media_guid):
-    self.db_cursor.execute('select mm_media_ffprobe_json'
-                           ' from mm_media'
-                           ' where mm_media_metadata_guid in (select mm_metadata_guid from '
-                           'mm_media where mm_media_guild = $1)', (media_guid,))
-    video_data = []
-    for file_data in self.db_cursor.fetchall():
-        # go through streams
-        audio_streams = []
-        subtitle_streams = ['None']
-        if 'streams' in file_data['FFprobe'] and file_data['FFprobe']['streams'] != None:
-            for stream_info in file_data['FFprobe']['streams']:
-                common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
-                                                                     message_text={
-                                                                         "info": stream_info})
-                stream_language = ''
-                stream_title = ''
-                stream_codec = ''
-                try:
-                    stream_language = stream_info['tags']['language'] + ' - '
-                except:
-                    pass
-                try:
-                    stream_title = stream_info['tags']['title'] + ' - '
-                except:
-                    pass
-                try:
-                    stream_codec \
-                        = stream_info['codec_long_name'].rsplit('(', 1)[1].replace(')', '') \
-                          + ' - '
-                except:
-                    pass
-                if stream_info['codec_type'] == 'audio':
-                    common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
-                                                                         message_text={
-                                                                             'stuff': 'audio'})
-                    audio_streams.append((stream_codec + stream_language
-                                          + stream_title)[:-3])
-                else if stream_info['codec_type'] == 'subtitle':
-                    subtitle_streams.append(stream_language)
-                    common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
-                                                                         message_text={
-                                                                             'stuff': 'subtitle'})
-    return video_data
+/// The ffprobe json of all media sharing the metadata of the given media.
+///
+/// NOTE: the Python original had typos `mm_media_guild` (ported as
+/// `mm_media_guid`) and selected the non-existent `mm_metadata_guid` from
+/// `mm_media` (ported as `mm_media_metadata_guid`); both fixed. The Python
+/// loop over the ffprobe streams built local audio/subtitle lists that were
+/// never returned (the function always returned an empty list); that dead
+/// loop and the ES logging were dropped.
+pub async fn mk_lib_database_media_movie_read_media_list_by_uuid(
+    sqlx_pool: &sqlx::PgPool,
+    media_guid: Uuid,
+) -> Result<Vec<serde_json::Value>, sqlx::Error> {
+    let rows: Vec<(serde_json::Value,)> = sqlx::query_as(
+        r#"select mm_media_ffprobe_json
+        from mm_media
+        where mm_media_metadata_guid in (select mm_media_metadata_guid
+        from mm_media where mm_media_guid = $1)"#,
+    )
+    .bind(media_guid)
+    .fetch_all(sqlx_pool)
+    .await?;
+    Ok(rows.into_iter().map(|row| row.0).collect())
+}
 
-// TODO port query
-pub async fn db_media_movie_list(self, class_guid, list_type=None, list_genre='all',
-                              list_limit=0, group_collection=False, offset=None,
-                              include_remote=False,
-                              search_text=None):
-    """
-    # web media return
-    """
-    if list_genre == 'all':
-        if list_type == "recent_addition":
-            if not group_collection:
-                if not include_remote:
-                    if offset is None:
-                        return await db_conn.fetch('select * from (select distinct'
-                                                   ' on (mm_media_metadata_guid)'
-                                                   ' mm_media_name, mm_media_guid,'
-                                                   ' mm_metadata_user_json,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' mm_media_path,'
-                                                   ' mm_metadata_json'
-                                                   ' from mm_media, mm_metadata_movie'
-                                                   ' where mm_media_class_guid = $1'
-                                                   ' and mm_media_metadata_guid = mm_metadata_guid'
-                                                   ' and mm_media_json->>'DateAdded' >= $2) as temp'
-                                                   ' order by LOWER(mm_media_name),'
-                                                   ' mm_metadata_json->>'release_date''
-                                                   ' asc',
-                                                   class_guid, (datetime.datetime.now()
-                                                                - datetime.timedelta(
-                                        days=7)).strftime(
-                                "%Y-%m-%d"))
-                    else:
-                        return await db_conn.fetch('select * from (select distinct'
-                                                   ' on (mm_media_metadata_guid) mm_media_name,'
-                                                   ' mm_media_guid,'
-                                                   ' mm_metadata_user_json,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' mm_media_path, mm_metadata_json'
-                                                   ' from mm_media, mm_metadata_movie'
-                                                   ' where mm_media_class_guid = $1'
-                                                   ' and mm_media_metadata_guid = mm_metadata_guid'
-                                                   ' and mm_media_json->>'DateAdded' >= $2) as temp'
-                                                   ' order by LOWER(mm_media_name),'
-                                                   ' mm_metadata_json->>'release_date' asc'
-                                                   ' offset $3 limit $4',
-                                                   class_guid, (datetime.datetime.now()
-                                                                - datetime.timedelta(
-                                        days=7)).strftime(
-                                "%Y-%m-%d"),
-                                                   offset, list_limit)
-                else:
-                    if offset is None:
-                        return await db_conn.fetch('select mm_media_metadata_guid)'
-                                                   ' mm_media_name, mm_media_guid,'
-                                                   ' mm_metadata_user_json,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' mm_media_path, mm_metadata_json'
-                                                   ' from mm_media, mm_metadata_movie'
-                                                   ' where mm_media_class_guid = $1'
-                                                   ' and mm_media_metadata_guid = mm_metadata_guid'
-                                                   ' and mm_media_json->>'DateAdded' >= $2)'
-                                                   ' union (select distinct on (mmr_media_metadata_guid) mm_media_name,'
-                                                   ' mmr_media_guid, mmr_media_json,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster, NULL as '
-                                                   'mmr_media_path, mm_metadata_json'
-                                                   ' from mm_media_remote, mm_metadata_movie'
-                                                   ' where mmr_media_class_guid = $3'
-                                                   ' and mmr_media_metadata_guid'
-                                                   ' = mm_metadata_guid and mmr_media_json->>'DateAdded' >= $4) as temp'
-                                                   ' order by LOWER(mm_media_name),'
-                                                   ' mm_metadata_json->>'release_date' asc',
-                                                   class_guid, (datetime.datetime.now()
-                                                                - datetime.timedelta(
-                                        days=7)).strftime(
-                                "%Y-%m-%d"),
-                                                   class_guid, (datetime.datetime.now()
-                                                                - datetime.timedelta(
-                                        days=7)).strftime(
-                                "%Y-%m-%d"))
-                    else:
-                        return await db_conn.fetch('mm_media_metadata_guid)'
-                                                   ' mm_media_name, mm_media_guid,'
-                                                   ' mm_metadata_user_json,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' mm_media_path, mm_metadata_json'
-                                                   ' from mm_media, mm_metadata_movie'
-                                                   ' where mm_media_class_guid = $1'
-                                                   ' and mm_media_metadata_guid = mm_metadata_guid'
-                                                   ' and mm_media_json->>'DateAdded' >= $2)'
-                                                   ' union (select distinct on (mmr_media_metadata_guid) mm_media_name,'
-                                                   ' mmr_media_guid, mmr_media_json, '
-                                                   'mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster, NULL as '
-                                                   'mmr_media_path,'
-                                                   ' mm_metadata_json'
-                                                   '  from mm_media_remote, mm_metadata_movie'
-                                                   ' where mmr_media_class_guid = $3'
-                                                   ' and mmr_media_metadata_guid'
-                                                   ' = mm_metadata_guid and mmr_media_json->>'DateAdded' >= $4) as temp'
-                                                   ' order by LOWER(mm_media_name),'
-                                                   ' mm_metadata_json->>'release_date' asc'
-                                                   ' offset $5 limit $6',
-                                                   class_guid, (datetime.datetime.now()
-                                                                - datetime.timedelta(
-                                        days=7)).strftime(
-                                "%Y-%m-%d"),
-                                                   class_guid, (datetime.datetime.now()
-                                                                - datetime.timedelta(
-                                        days=7)).strftime(
-                                "%Y-%m-%d"),
-                                                   offset, list_limit)
-            else:
-                if offset is None:
-                    return await db_conn.fetch('select 1')
-                else:
-                    return await db_conn.fetch('select 1')
-        else:
-            if not group_collection:
-                if not include_remote:
-                    if offset is None:
-                        return await db_conn.fetch('select * from (select distinct'
-                                                   ' on (mm_media_metadata_guid) mm_media_name,'
-                                                   ' mm_media_guid,'
-                                                   ' mm_metadata_user_json,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' mm_media_path,'
-                                                   ' mm_metadata_json'
-                                                   ' from mm_media, mm_metadata_movie'
-                                                   ' where mm_media_class_guid = $1'
-                                                   ' and mm_media_metadata_guid = mm_metadata_guid) as temp'
-                                                   ' order by LOWER(mm_media_name),'
-                                                   ' mm_metadata_json->>'release_date' asc',
-                                                   class_guid)
-                    else:
-                        return await db_conn.fetch('select * from (select distinct'
-                                                   ' on (mm_media_metadata_guid) mm_media_name,'
-                                                   ' mm_media_guid,'
-                                                   ' mm_metadata_user_json,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' mm_media_path,'
-                                                   ' mm_metadata_json'
-                                                   ' from mm_media, mm_metadata_movie'
-                                                   ' where mm_media_class_guid = $1'
-                                                   ' and mm_media_metadata_guid = mm_metadata_guid) as temp'
-                                                   ' order by LOWER(mm_media_name),'
-                                                   ' mm_metadata_json->>'release_date' asc',
-                                                   ' offset $2 limit $3',
-                                                   class_guid, offset, list_limit)
-                else:
-                    if offset is None:
-                        return await db_conn.fetch('select * from ((select distinct'
-                                                   ' on (mm_media_metadata_guid) mm_media_name,'
-                                                   ' mm_media_guid,'
-                                                   ' mm_metadata_user_json,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' mm_media_path,'
-                                                   ' mm_metadata_json'
-                                                   ' from mm_media, mm_metadata_movie'
-                                                   ' where mm_media_class_guid = $1'
-                                                   ' and mm_media_metadata_guid = mm_metadata_guid)'
-                                                   ' union (select distinct on (mmr_media_metadata_guid) mm_media_name,'
-                                                   ' mmr_media_guid,'
-                                                   ' mmr_media_json, '
-                                                   'mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster, NULL as '
-                                                   'mmr_media_path, mm_metadata_json'
-                                                   '  from mm_media_remote, mm_metadata_movie'
-                                                   ' where mmr_media_class_guid = $2'
-                                                   ' and mmr_media_metadata_guid'
-                                                   ' = mm_metadata_guid)) as temp'
-                                                   ' order by LOWER(mm_media_name),'
-                                                   ' mm_metadata_json->>'release_date' asc',
-                                                   class_guid, class_guid)
-                    else:
-                        return await db_conn.fetch('select * from ((select distinct'
-                                                   ' on (mm_media_metadata_guid) mm_media_name,'
-                                                   ' mm_media_guid,'
-                                                   ' mm_metadata_user_json,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' mm_media_path,'
-                                                   ' mm_metadata_json'
-                                                   ' from mm_media, mm_metadata_movie'
-                                                   ' where mm_media_class_guid = $1'
-                                                   ' and mm_media_metadata_guid = mm_metadata_guid)'
-                                                   ' union (select distinct on (mmr_media_metadata_guid) mm_media_name,'
-                                                   ' mmr_media_guid, mmr_media_json, '
-                                                   'mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster, NULL as '
-                                                   'mmr_media_path, mm_metadata_json'
-                                                   '  from mm_media_remote, mm_metadata_movie'
-                                                   ' where mmr_media_class_guid = $2'
-                                                   ' and mmr_media_metadata_guid'
-                                                   ' = mm_metadata_guid)) as temp'
-                                                   ' order by LOWER(mm_media_name),'
-                                                   ' mm_metadata_json->>'release_date' asc'
-                                                   ' offset $3 limit $4',
-                                                   class_guid, class_guid, offset,
-                                                   list_limit)
-            else:
-                if not include_remote:
-                    if offset is None:
-                        return await db_conn.fetch('select * from (select distinct'
-                                                   ' on (mm_media_metadata_guid) mm_media_name as name,'
-                                                   ' mm_media_guid as guid,'
-                                                   ' mm_metadata_user_json as mediajson,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' mm_media_path as mediapath'
-                                                   ' from mm_media, mm_metadata_movie,'
-                                                   ' mm_metadata_json'
-                                                   ' where mm_media_class_guid = $1'
-                                                   ' and mm_media_metadata_guid = mm_metadata_guid'
-                                                   ' and (mm_metadata_json->>'belongs_to_collection') is null'
-                                                   ' union select mm_metadata_collection_name as name,'
-                                                   ' mm_metadata_collection_guid as guid,'
-                                                   ' nullb as metajson,'
-                                                   ' mm_media_path as mediapath'
-                                                   ' from mm_metadata_collection) as temp'
-                                                   ' order by LOWER(name),'
-                                                   ' mm_metadata_json->>'release_date' asc',
-                                                   class_guid)
-                    else:
-                        return await db_conn.fetch('select * from (select distinct'
-                                                   ' on (mm_media_metadata_guid)'
-                                                   ' mm_media_name as name,'
-                                                   ' mm_media_guid as guid,'
-                                                   ' mm_metadata_user_json as mediajson,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' mm_media_path as mediapath,'
-                                                   ' mm_metadata_json'
-                                                   ' from mm_media,'
-                                                   ' mm_metadata_movie where mm_media_class_guid = $1'
-                                                   ' and mm_media_metadata_guid = mm_metadata_guid'
-                                                   ' and (mm_metadata_json->>'belongs_to_collection') is null'
-                                                   ' union select mm_metadata_collection_name as name,'
-                                                   ' mm_metadata_collection_guid as guid,'
-                                                   ' nullb as metajson,'
-                                                   ' mm_media_path as mediapath,'
-                                                   ' mm_metadata_json'
-                                                   ' from mm_metadata_collection) as temp'
-                                                   ' order by LOWER(name),'
-                                                   ' mm_metadata_json->>'release_date' asc'
-                                                   ' offset $2 limit $3',
-                                                   class_guid, offset, list_limit)
-                else:
-                    if offset is None:
-                        return await db_conn.fetch('select * from (select distinct'
-                                                   ' on (mm_media_metadata_guid)'
-                                                   ' mm_media_name as name,'
-                                                   ' mm_media_guid as guid,'
-                                                   ' mm_metadata_user_json as mediajson,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' mm_media_path as mediapath,'
-                                                   ' mm_metadata_json'
-                                                   ' from mm_media, mm_metadata_movie'
-                                                   ' where mm_media_class_guid = $1'
-                                                   ' and mm_media_metadata_guid = mm_metadata_guid'
-                                                   ' and (mm_metadata_json->>'belongs_to_collection') is null'
-                                                   // TODO put back in
-                                                   #                        ' union select mm_metadata_collection_name as name,'
-                                                   #                        ' mm_metadata_collection_guid as guid,'
-                                                   #                        ' nullb as mediajson, nullb as metajson,'
-                                                   #                        ' nullb as metaimagejson, mm_media_path as mediapath'
-                                                   #                        ' from mm_metadata_collection'
-                                                   ') as temp'
-                                                   ' order by LOWER(name),'
-                                                   ' mm_metadata_json->>'release_date' asc',
-                                                   class_guid)
-                    else:
-                        return await db_conn.fetch('select * from (select distinct'
-                                                   ' on (mm_media_metadata_guid)'
-                                                   ' mm_media_name as name,'
-                                                   ' mm_media_guid as guid,'
-                                                   ' mm_metadata_user_json as mediajson,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' mm_media_path as mediapath,'
-                                                   ' mm_metadata_json'
-                                                   ' from mm_media, mm_metadata_movie'
-                                                   ' where mm_media_class_guid = $1'
-                                                   ' and mm_media_metadata_guid = mm_metadata_guid'
-                                                   ' and (mm_metadata_json->>'belongs_to_collection') is null'
-                                                   // TODO put back in
-                                                   #                        ' union select mm_metadata_collection_name as name,'
-                                                   #                        ' mm_metadata_collection_guid as guid,'
-                                                   #                        ' nullb as mediajson, nullb as metajson,'
-                                                   #                        ' nullb as metaimagejson, mm_media_path as mediapath'
-                                                   #                        ' from mm_metadata_collection'
-                                                   ') as temp'
-                                                   ' order by LOWER(name),'
-                                                   ' mm_metadata_json->>'release_date' asc'
-                                                   ' offset $2 limit $3',
-                                                   class_guid, offset, list_limit)
-    else:
-        if list_type == "recent_addition":
-            if not group_collection:
-                if not include_remote:
-                    if offset is None:
-                        return await db_conn.fetch('select * from (select distinct'
-                                                   ' on (mm_media_metadata_guid)'
-                                                   ' mm_media_name, mm_media_guid,'
-                                                   ' mm_metadata_user_json,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' mm_media_path,'
-                                                   ' mm_metadata_json'
-                                                   ' from mm_media, mm_metadata_movie'
-                                                   ' where mm_media_class_guid = $1'
-                                                   ' and mm_media_metadata_guid = mm_metadata_guid'
-                                                   ' and mm_media_json->>'DateAdded' >= $2'
-                                                   ' and mm_metadata_json->'genres'->0->'name' ? $3) as temp'
-                                                   ' order by LOWER(mm_media_name),'
-                                                   ' mm_metadata_json->>'release_date' asc',
-                                                   class_guid, (datetime.datetime.now()
-                                                                - datetime.timedelta(
-                                        days=7)).strftime(
-                                "%Y-%m-%d"),
-                                                   list_genre)
-                    else:
-                        return await db_conn.fetch('select * from (select distinct'
-                                                   ' on (mm_media_metadata_guid) mm_media_name,'
-                                                   ' mm_media_guid,'
-                                                   ' mm_metadata_user_json,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' mm_media_path,'
-                                                   ' mm_metadata_json'
-                                                   ' from mm_media, mm_metadata_movie'
-                                                   ' where mm_media_class_guid = $1'
-                                                   ' and mm_media_metadata_guid = mm_metadata_guid'
-                                                   ' and mm_media_json->>'DateAdded' >= $2'
-                                                   ' and mm_metadata_json->'genres'->0->'name' ? $3) as temp'
-                                                   ' order by LOWER(mm_media_name),'
-                                                   ' mm_metadata_json->>'release_date' asc'
-                                                   ' offset $4 limit $5',
-                                                   class_guid, (datetime.datetime.now()
-                                                                - datetime.timedelta(
-                                        days=7)).strftime(
-                                "%Y-%m-%d"),
-                                                   list_genre, offset, list_limit)
-                else:
-                    if offset is None:
-                        return await db_conn.fetch('select * from ((select distinct'
-                                                   ' on (mm_media_metadata_guid) mm_media_name,'
-                                                   ' mm_media_guid,'
-                                                   ' mm_metadata_user_json,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' mm_media_path,'
-                                                   ' mm_metadata_json'
-                                                   ' from mm_media, mm_metadata_movie'
-                                                   ' where mm_media_class_guid = $1'
-                                                   ' and mm_media_metadata_guid = mm_metadata_guid'
-                                                   ' and mm_media_json->>'DateAdded' >= $2'
-                                                   ' and mm_metadata_json->'genres'->0->'name' ? $3)'
-                                                   ' union (select distinct on (mmr_media_metadata_guid) mm_media_name,'
-                                                   ' mmr_media_guid,'
-                                                   ' mmr_media_json, '
-                                                   'mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster, NULL as '
-                                                   'mmr_media_path, mm_metadata_json'
-                                                   '  from mm_media_remote, mm_metadata_movie'
-                                                   ' where mmr_media_class_guid = $4'
-                                                   ' and mmr_media_metadata_guid = mm_metadata_guid'
-                                                   ' and mmr_media_json->>'DateAdded' >= $5'
-                                                   ' and mm_metadata_json->'genres'->0->'name' ? %6)) as temp'
-                                                   ' order by LOWER(mm_media_name),'
-                                                   ' mm_metadata_json->>'release_date' asc',
-                                                   class_guid, (datetime.datetime.now()
-                                                                - datetime.timedelta(
-                                        days=7)).strftime(
-                                "%Y-%m-%d"),
-                                                   list_genre, class_guid,
-                                                   (datetime.datetime.now()
-                                                    - datetime.timedelta(
-                                                               days=7)).strftime(
-                                                       "%Y-%m-%d"),
-                                                   list_genre)
-                    else:
-                        return await db_conn.fetch('select * from ((select distinct'
-                                                   ' on (mm_media_metadata_guid)'
-                                                   ' mm_media_name, mm_media_guid,'
-                                                   ' mm_metadata_user_json,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' mm_media_path,'
-                                                   ' mm_metadata_json'
-                                                   ' from mm_media, mm_metadata_movie'
-                                                   ' where mm_media_class_guid = $1'
-                                                   ' and mm_media_metadata_guid = mm_metadata_guid'
-                                                   ' and mm_media_json->>'DateAdded' >= $2'
-                                                   ' and mm_metadata_json->'genres'->0->'name' ? $3)'
-                                                   ' union (select distinct on (mmr_media_metadata_guid) mm_media_name,'
-                                                   ' mmr_media_guid,'
-                                                   ' mmr_media_json, '
-                                                   'mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster, NULL as '
-                                                   'mmr_media_path,'
-                                                   ' mm_metadata_json'
-                                                   '  from mm_media_remote, mm_metadata_movie'
-                                                   ' where mmr_media_class_guid = $4'
-                                                   ' and mmr_media_metadata_guid = mm_metadata_guid'
-                                                   ' and mmr_media_json->>'DateAdded' >= $5'
-                                                   ' and mm_metadata_json->'genres'->0->'name' ? $6)) as temp'
-                                                   ' order by LOWER(mm_media_name),'
-                                                   ' mm_metadata_json->>'release_date' asc'
-                                                   ' offset $7 limit $8',
-                                                   class_guid, (datetime.datetime.now()
-                                                                - datetime.timedelta(
-                                        days=7)).strftime(
-                                "%Y-%m-%d"),
-                                                   list_genre, class_guid,
-                                                   (datetime.datetime.now()
-                                                    - datetime.timedelta(
-                                                               days=7)).strftime(
-                                                       "%Y-%m-%d"),
-                                                   list_genre, offset, list_limit)
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMediaMovieListRow {
+    pub mm_media_name: String,
+    pub mm_media_guid: Uuid,
+    pub mm_metadata_movie_user_json: serde_json::Value,
+    pub mm_poster: serde_json::Value,
+    pub mm_media_path: Option<String>,
+    pub mm_metadata_movie_json: serde_json::Value,
+}
 
-            else:
-                return await db_conn.fetch('select 1')
-        else:
-            if not group_collection:
-                if not include_remote:
-                    if offset is None:
-                        return await db_conn.fetch('select * from (select distinct'
-                                                   ' on (mm_media_metadata_guid)'
-                                                   ' mm_media_name, mm_media_guid,'
-                                                   ' mm_metadata_user_json,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' mm_media_path,'
-                                                   ' mm_metadata_json'
-                                                   ' from mm_media, mm_metadata_movie'
-                                                   ' where mm_media_class_guid = $1'
-                                                   ' and mm_media_metadata_guid = mm_metadata_guid'
-                                                   ' and mm_metadata_json->'genres'->0->'name' ? $2) as temp'
-                                                   ' order by LOWER(mm_media_name),'
-                                                   ' mm_metadata_json->>'release_date' asc',
-                                                   class_guid, list_genre)
-                    else:
-                        return await db_conn.fetch('select * from (select distinct'
-                                                   ' on (mm_media_metadata_guid)'
-                                                   ' mm_media_name, mm_media_guid,'
-                                                   ' mm_metadata_user_json,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' mm_media_path, mm_metadata_json'
-                                                   ' from mm_media, mm_metadata_movie'
-                                                   ' where mm_media_class_guid = $1'
-                                                   ' and mm_media_metadata_guid = mm_metadata_guid'
-                                                   ' and mm_metadata_json->'genres'->0->'name' ? $2) as temp'
-                                                   ' order by LOWER(mm_media_name),'
-                                                   ' mm_metadata_json->>'release_date' asc'
-                                                   ' offset $3 limit $4',
-                                                   class_guid, list_genre, offset,
-                                                   list_limit)
+/// The web media movie list.
+///
+/// `recent_addition` restricts to media added within the last 7 days;
+/// `list_genre` is "all" (no genre filter) or a genre name matched against
+/// the first genre in the movie json; `include_remote` unions in the
+/// `mm_media_remote` rows.
+///
+/// NOTE: the Python original had a `group_collection` branch; all of its
+/// variants were `select 1` stubs or referenced non-existent columns
+/// (`nullb`, `mm_metadata_collection_name`, `xxxx`); not ported. The
+/// `search_text` parameter was accepted but never used; not ported. The
+/// remote branch selected `mmr_media_name`, which does not exist on
+/// `mm_media_remote`; reconstructed as `mm_metadata_movie_name` (available
+/// via the metadata join). Some of the Python remote-union variants had
+/// unbalanced parentheses and an invalid `%6` placeholder; the builder
+/// emits balanced SQL. The Python self-join
+/// `mm_media_metadata_guid = mm_metadata_guid` was a tautology against a
+/// non-existent column; ported as `= mm_metadata_movie_guid`. Short names
+/// `mm_metadata_user_json` / `mm_metadata_localimage_json` /
+/// `mm_metadata_json` ported to `mm_metadata_movie_*`.
+pub async fn mk_lib_database_media_movie_list(
+    sqlx_pool: &sqlx::PgPool,
+    class_enum: i16,
+    recent_addition: bool,
+    list_genre: &str,
+    include_remote: bool,
+    offset: Option<i64>,
+    limit: i64,
+) -> Result<Vec<DBMediaMovieListRow>, sqlx::Error> {
+    let date_added = (Utc::now() - Duration::days(7))
+        .format("%Y-%m-%d")
+        .to_string();
+    let has_genre = list_genre != "all";
+    let mut query = sqlx::QueryBuilder::<sqlx::Postgres>::new(String::new());
+    query.push(
+        "select * from (select distinct on (mm_media_metadata_guid) mm_media_name, \
+         mm_media_guid, mm_metadata_movie_user_json, \
+         mm_metadata_movie_localimage_json->'Poster' as mm_poster, mm_media_path, \
+         mm_metadata_movie_json from mm_media, mm_metadata_movie \
+         where mm_media_class_guid = ",
+    );
+    query.push_bind(class_enum);
+    query.push(" and mm_media_metadata_guid = mm_metadata_movie_guid");
+    if recent_addition {
+        query.push(" and mm_media_json->>'DateAdded' >= ");
+        query.push_bind(&date_added);
+    }
+    if has_genre {
+        query.push(" and mm_metadata_movie_json->'genres'->0->'name' ? ");
+        query.push_bind(list_genre);
+    }
+    if include_remote {
+        query.push(
+            " union (select distinct on (mmr_media_metadata_guid) \
+             mm_metadata_movie_name, mmr_media_guid, mmr_media_json, \
+             mm_metadata_movie_localimage_json->'Poster' as mm_poster, \
+             NULL as mmr_media_path, mm_metadata_movie_json \
+             from mm_media_remote, mm_metadata_movie \
+             where mmr_media_class_guid = ",
+        );
+        query.push_bind(class_enum);
+        query.push(" and mmr_media_metadata_guid = mm_metadata_movie_guid");
+        if recent_addition {
+            query.push(" and mmr_media_json->>'DateAdded' >= ");
+            query.push_bind(&date_added);
+        }
+        if has_genre {
+            query.push(" and mm_metadata_movie_json->'genres'->0->'name' ? ");
+            query.push_bind(list_genre);
+        }
+        query.push(")");
+    }
+    query.push(
+        ") as temp order by LOWER(mm_media_name), \
+         mm_metadata_movie_json->>'release_date' asc",
+    );
+    if let Some(offset) = offset {
+        query.push(" offset ");
+        query.push_bind(offset);
+        query.push(" limit ");
+        query.push_bind(limit);
+    }
+    let rows: Vec<DBMediaMovieListRow> = query.build_query_as().fetch_all(sqlx_pool).await?;
+    Ok(rows)
+}
 
-                else:
-                    if offset is None:
-                        return await db_conn.fetch('select * from ((select distinct'
-                                                   ' on (mm_media_metadata_guid)'
-                                                   ' mm_media_name, mm_media_guid,'
-                                                   ' mm_metadata_user_json,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' mm_media_path,'
-                                                   ' mm_metadata_json'
-                                                   ' from mm_media, mm_metadata_movie'
-                                                   ' where mm_media_class_guid = $1'
-                                                   ' and mm_media_metadata_guid = mm_metadata_guid'
-                                                   ' and mm_metadata_json->'genres'->0->'name' ? $2)'
-                                                   ' union (select distinct on (mmr_media_metadata_guid)'
-                                                   ' mm_media_name,'
-                                                   ' mmr_media_guid,'
-                                                   ' mmr_media_json,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster, NULL as '
-                                                   'mmr_media_path,'
-                                                   ' mm_metadata_json'
-                                                   '  from mm_media_remote, mm_metadata_movie'
-                                                   ' where mmr_media_class_guid = $3'
-                                                   ' and mmr_media_metadata_guid'
-                                                   ' = mm_metadata_guid and mm_metadata_json->'genres'->0->'name' ? $4)) as temp'
-                                                   ' order by LOWER(mm_media_name),'
-                                                   ' mm_metadata_json->>'release_date' asc',
-                                                   class_guid, list_genre, class_guid,
-                                                   list_genre)
-                    else:
-                        return await db_conn.fetch('select * from ((select distinct'
-                                                   ' on (mm_media_metadata_guid) mm_media_name,'
-                                                   ' mm_media_guid,'
-                                                   ' mm_metadata_user_json,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' mm_media_path, mm_metadata_json'
-                                                   ' from mm_media,'
-                                                   ' mm_metadata_movie where mm_media_class_guid = $1'
-                                                   ' and mm_media_metadata_guid = mm_metadata_guid'
-                                                   ' and mm_metadata_json->'genres'->0->'name' ? $2)'
-                                                   ' union (select distinct on (mmr_media_metadata_guid)'
-                                                   ' mm_media_name,'
-                                                   ' mmr_media_guid,'
-                                                   ' mmr_media_json,'
-                                                   ' mm_metadata_localimage_json->'Poster''
-                                                   ' as mm_poster,'
-                                                   ' NULL as mmr_media_path,'
-                                                   ' mm_metadata_json'
-                                                   ' from mm_media_remote, mm_metadata_movie'
-                                                   ' where mmr_media_class_guid = $3'
-                                                   ' and mmr_media_metadata_guid'
-                                                   ' = mm_metadata_guid and mm_metadata_json->'genres'->0->'name' ? $4)) as temp'
-                                                   ' order by LOWER(mm_media_name),'
-                                                   ' mm_metadata_json->>'release_date' asc'
-                                                   ' offset $5 limit $6',
-                                                   class_guid, list_genre, class_guid,
-                                                   list_genre,
-                                                   offset, list_limit)
-            else:
-                if offset is None:
-                    return await db_conn.fetch('select 1')
-                else:
-                    return await db_conn.fetch('select 1')
-
-
-// TODO port query
-pub async fn db_media_movie_list_count(self, class_guid, list_type=None,
-                                    list_genre='all',
-                                    group_collection=False, include_remote=False, search_text=None,
-                                    db_connection=None):
-    """
-    # web media count
-    """
-    # messageWords[0]=="movie" or messageWords[0]=='in_progress' or messageWords[0]=='video':
-    if list_genre == 'all':
-        if list_type == "recent_addition":
-            if not group_collection:
-                if not include_remote:
-                    return await db_conn.fetchval('select count(*) from (select distinct'
-                                                  ' mm_metadata_guid'
-                                                  ' from mm_media, mm_metadata_movie'
-                                                  ' where mm_media_class_guid = $1'
-                                                  ' and mm_media_metadata_guid'
-                                                  ' = mm_metadata_guid'
-                                                  ' and mm_media_json->>'DateAdded' >= $2)'
-                                                  ' as temp',
-                                                  class_guid, (datetime.datetime.now()
-                                                               - datetime.timedelta(
-                                    days=7)).strftime("%Y-%m-%d"), )
-                else:
-                    return await db_conn.fetchval(
-                        'select count(*) from ((select distinct'
-                        ' mm_metadata_guid from mm_media, mm_metadata_movie'
-                        ' where mm_media_class_guid = $1'
-                        ' and mm_media_metadata_guid'
-                        ' = mm_metadata_guid'
-                        ' and mm_media_json->>'DateAdded' >= $2)'
-                        ' union (select distinct mmr_metadata_guid'
-                        ' from mm_media_remote,'
-                        ' mm_metadata_movie where mmr_media_class_guid = $3'
-                        ' and mmr_media_metadata_guid = mm_metadata_guid'
-                        ' and mm_media_json->>'DateAdded' >= $4)) as temp',
-                        class_guid, (datetime.datetime.now()
-                                     - datetime.timedelta(
-                                    days=7)).strftime(
-                            "%Y-%m-%d"),
-                        class_guid, (datetime.datetime.now()
-                                     - datetime.timedelta(
-                                    days=7)).strftime(
-                            "%Y-%m-%d"))
-            else:
-                return await db_conn.fetchval('select 1')
-        else:
-            if not group_collection:
-                if not include_remote:
-                    return await db_conn.fetchval('select count(*) from (select distinct'
-                                                  ' mm_metadata_guid'
-                                                  ' from mm_media, mm_metadata_movie'
-                                                  ' where mm_media_class_guid = $1'
-                                                  ' and mm_media_metadata_guid'
-                                                  ' = mm_metadata_guid) as temp',
-                                                  class_guid)
-                else:
-                    return await db_conn.fetchval(
-                        'select count(*) from ((select distinct'
-                        ' mm_metadata_guid from mm_media, mm_metadata_movie'
-                        ' where mm_media_class_guid = $1 and mm_media_metadata_guid'
-                        ' = mm_metadata_guid)'
-                        ' union (select distinct mm_metadata_guid'
-                        ' from mm_media_remote, mm_metadata_movie'
-                        ' where mmr_media_class_guid = $2'
-                        ' and mmr_media_metadata_guid = mm_metadata_guid)) as temp',
-                        class_guid, class_guid)
-            else:
-                if not include_remote:
-                    return await db_conn.fetchval('select count(*) as row_count'
-                                                  ' from ((select distinct mm_metadata_guid from mm_media,'
-                                                  ' mm_metadata_movie where mm_media_class_guid = $1'
-                                                  ' and mm_media_metadata_guid = mm_metadata_guid'
-                                                  ' and (mm_metadata_json->>'belongs_to_collection') is null)'
-                                                  ' union (select count(*) from xxxx as row_count)) as temp',
-                                                  class_guid, class_guid)
-                else:
-                    return await db_conn.fetchval('select 1')
-    else:
-        if list_type == "recent_addition":
-            if not group_collection:
-                if not include_remote:
-                    return await db_conn.fetchval('select count(*) from (select distinct'
-                                                  ' mm_metadata_guid from mm_media,'
-                                                  ' mm_metadata_movie'
-                                                  ' where mm_media_class_guid = $1'
-                                                  ' and mm_media_metadata_guid'
-                                                  ' = mm_metadata_guid and mm_media_json->>'DateAdded' >= $2'
-                                                  ' and mm_metadata_json->'genres'->0->'name' ? $3) as temp',
-                                                  class_guid, (datetime.datetime.now()
-                                                               - datetime.timedelta(
-                                    days=7)).strftime(
-                            "%Y-%m-%d"), list_genre)
-                else:
-                    return await db_conn.fetchval(
-                        'select count(*) from ((select distinct'
-                        ' mm_metadata_guid from mm_media, mm_metadata_movie'
-                        ' where mm_media_class_guid = $1 and mm_media_metadata_guid'
-                        ' = mm_metadata_guid and mm_media_json->>'DateAdded' >= $2'
-                        ' and mm_metadata_json->'genres'->0->'name' ? $3)'
-                        ' union (select distinct mmr_metadata_guid from mm_media_remote,'
-                        ' mm_metadata_movie where mmr_media_class_guid = $4'
-                        ' and mmr_media_metadata_guid = mm_metadata_guid'
-                        ' and mmr_media_json->>'DateAdded' >= $5'
-                        ' and mm_metadata_json->'genres'->0->'name' ? $6)) as temp',
-                        class_guid, (datetime.datetime.now()
-                                     - datetime.timedelta(
-                                    days=7)).strftime(
-                            "%Y-%m-%d"), list_genre,
-                        class_guid, (datetime.datetime.now()
-                                     - datetime.timedelta(
-                                    days=7)).strftime(
-                            "%Y-%m-%d"), list_genre)
-            else:
-                return await db_conn.fetchval('select 1')
-        else:
-            if not group_collection:
-                if not include_remote:
-                    return await db_conn.fetchval('select count(*) from (select distinct'
-                                                  ' mm_metadata_guid from mm_media,'
-                                                  ' mm_metadata_movie'
-                                                  ' where mm_media_class_guid = $1 '
-                                                  'and mm_media_metadata_guid'
-                                                  ' = mm_metadata_guid and mm_metadata_json->'genres'->0->'name' ? $2)'
-                                                  ' as temp', class_guid, list_genre)
-                else:
-                    return await db_conn.fetchval(
-                        'select count(*) from ((select distinct'
-                        ' mm_metadata_guid'
-                        ' from mm_media, mm_metadata_movie'
-                        ' where mm_media_class_guid = $1 and mm_media_metadata_guid'
-                        ' = mm_metadata_guid and mm_metadata_json->'genres'->0->'name' ? $2)'
-                        ' union (select distinct mmr_media_metadata_guid from mm_media_remote,'
-                        ' mm_metadata_movie where mmr_media_class_guid = $3'
-                        ' and mmr_media_metadata_guid = mm_metadata_guid'
-                        ' and mm_metadata_json->'genres'->0->'name' ? $4)) as temp',
-                        class_guid, list_genre, class_guid,
-                        list_genre)
-            else:
-                return await db_conn.fetchval('select 1')
-
- */
+/// The web media movie list count.
+///
+/// `recent_addition` restricts to media added within the last 7 days;
+/// `list_genre` is "all" (no genre filter) or a genre name matched against
+/// the first genre in the movie json; `include_remote` unions in the
+/// `mm_media_remote` rows.
+///
+/// NOTE: the Python `group_collection` branches were `select 1` stubs or
+/// broken (`union (select count(*) from xxxx ...)`) SQL; not ported. The
+/// Python remote branch selected the non-existent `mmr_metadata_guid`;
+/// ported as `mmr_media_metadata_guid`. The short name `mm_metadata_guid`
+/// is ported as `mm_metadata_movie_guid`. The Python self-join
+/// `mm_media_metadata_guid = mm_metadata_guid` was a tautology against a
+/// non-existent column; ported as `= mm_metadata_movie_guid`.
+pub async fn mk_lib_database_media_movie_list_count(
+    sqlx_pool: &sqlx::PgPool,
+    class_enum: i16,
+    recent_addition: bool,
+    list_genre: &str,
+    include_remote: bool,
+) -> Result<i64, sqlx::Error> {
+    let date_added = (Utc::now() - Duration::days(7))
+        .format("%Y-%m-%d")
+        .to_string();
+    let has_genre = list_genre != "all";
+    let mut query = sqlx::QueryBuilder::<sqlx::Postgres>::new(String::new());
+    query.push(
+        "select count(*) from (select distinct mm_metadata_movie_guid \
+         from mm_media, mm_metadata_movie \
+         where mm_media_class_guid = ",
+    );
+    query.push_bind(class_enum);
+    query.push(" and mm_media_metadata_guid = mm_metadata_movie_guid");
+    if recent_addition {
+        query.push(" and mm_media_json->>'DateAdded' >= ");
+        query.push_bind(&date_added);
+    }
+    if has_genre {
+        query.push(" and mm_metadata_movie_json->'genres'->0->'name' ? ");
+        query.push_bind(list_genre);
+    }
+    if include_remote {
+        query.push(
+            " union (select distinct mmr_media_metadata_guid \
+             from mm_media_remote, mm_metadata_movie \
+             where mmr_media_class_guid = ",
+        );
+        query.push_bind(class_enum);
+        query.push(" and mmr_media_metadata_guid = mm_metadata_movie_guid");
+        if recent_addition {
+            query.push(" and mmr_media_json->>'DateAdded' >= ");
+            query.push_bind(&date_added);
+        }
+        if has_genre {
+            query.push(" and mm_metadata_movie_json->'genres'->0->'name' ? ");
+            query.push_bind(list_genre);
+        }
+        query.push(")");
+    }
+    query.push(") as temp");
+    let row: (i64,) = query.build_query_as().fetch_one(sqlx_pool).await?;
+    Ok(row.0)
+}

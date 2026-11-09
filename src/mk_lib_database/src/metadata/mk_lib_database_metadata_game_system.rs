@@ -111,9 +111,8 @@ pub async fn mk_lib_database_metadata_game_system_game_count_by_short_name(
     sqlx_pool: &sqlx::PgPool,
     game_system_short_name: &str,
 ) -> Result<i64, sqlx::Error> {
-    // TODO this query doesn't return game count.......
     let row: (i64,) = sqlx::query_as(
-        r#"select count(*) from mm_metadata_game_systems_info where gs_game_system_name = $1"#,
+        r#"select count(*) from mm_metadata_game_software_info, mm_metadata_game_systems_info where gi_game_info_system_id = gs_game_system_id and gs_game_system_name = $1"#,
     )
     .bind(game_system_short_name)
     .fetch_one(sqlx_pool)

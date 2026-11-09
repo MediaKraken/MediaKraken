@@ -8,7 +8,6 @@ pub async fn metadata_game_lookup(
     sqlx_pool: &sqlx::PgPool,
     download_data: &DBDownloadQueueByProviderList,
 ) -> Result<uuid::Uuid, Box<dyn Error>> {
-    // TODO remove the file extension
     let download_path = download_data
         .mm_download_path
         .as_ref()
@@ -19,11 +18,18 @@ pub async fn metadata_game_lookup(
         .to_str()
         .ok_or("download path is not valid UTF-8")?
         .to_string();
+    // stored game names don't include the archive/file extension, so match on the stem only
+    let game_name = Path::new(&file_name)
+        .file_stem()
+        .ok_or("download file name has no stem")?
+        .to_str()
+        .ok_or("download file name stem is not valid UTF-8")?
+        .to_string();
 
     let mut metadata_uuid =
         mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_uuid_by_name_and_system(
             sqlx_pool,
-            file_name,
+            game_name,
             "systemfakeshortname".to_string(),
         )
         .await?;
