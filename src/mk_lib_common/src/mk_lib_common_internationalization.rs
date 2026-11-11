@@ -61,30 +61,45 @@ mod tests {
 
     #[test]
     fn test_prefers_fallback_locale_c() {
-        std::env::set_var("LC_ALL", "C");
-        assert!(prefers_fallback_locale());
-        std::env::remove_var("LC_ALL");
+        // SAFETY: test-only process env mutation; these locale variables are
+        // only read/written by the locale tests in this module.
+        unsafe {
+            std::env::set_var("LC_ALL", "C");
+            assert!(prefers_fallback_locale());
+            std::env::remove_var("LC_ALL");
+        }
     }
 
     #[test]
     fn test_prefers_fallback_locale_c_with_region() {
-        std::env::set_var("LC_NUMERIC", "C_US");
-        assert!(prefers_fallback_locale());
-        std::env::remove_var("LC_NUMERIC");
+        // SAFETY: test-only process env mutation; see test_prefers_fallback_locale_c.
+        unsafe {
+            // "C.UTF-8" is the real-world C locale with an encoding suffix;
+            // it matches the `C.` prefix check in `prefers_fallback_locale`.
+            std::env::set_var("LC_NUMERIC", "C.UTF-8");
+            assert!(prefers_fallback_locale());
+            std::env::remove_var("LC_NUMERIC");
+        }
     }
 
     #[test]
     fn test_prefers_fallback_locale_posix() {
-        std::env::set_var("LANG", "POSIX");
-        assert!(prefers_fallback_locale());
-        std::env::remove_var("LANG");
+        // SAFETY: test-only process env mutation; see test_prefers_fallback_locale_c.
+        unsafe {
+            std::env::set_var("LANG", "POSIX");
+            assert!(prefers_fallback_locale());
+            std::env::remove_var("LANG");
+        }
     }
 
     #[test]
     fn test_prefers_fallback_locale_not_c() {
-        std::env::set_var("LC_ALL", "en_US.UTF-8");
-        assert!(!prefers_fallback_locale());
-        std::env::remove_var("LC_ALL");
+        // SAFETY: test-only process env mutation; see test_prefers_fallback_locale_c.
+        unsafe {
+            std::env::set_var("LC_ALL", "en_US.UTF-8");
+            assert!(!prefers_fallback_locale());
+            std::env::remove_var("LC_ALL");
+        }
     }
 
     #[test]
@@ -109,12 +124,13 @@ mod tests {
 
     #[test]
     fn test_locale_from_name_with_hyphen() {
-        assert!(locale_from_name("en-US").is_some());
+        // "de-AT" is in num-format's locale set (en-US is not shipped with it).
+        assert!(locale_from_name("de-AT").is_some());
     }
 
     #[test]
     fn test_locale_from_name_with_underscore() {
-        assert!(locale_from_name("en_US").is_some());
+        assert!(locale_from_name("de_AT").is_some());
     }
 
     #[test]

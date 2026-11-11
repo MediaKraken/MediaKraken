@@ -1,9 +1,7 @@
+use crate::mk_lib_common_internationalization::mk_lib_common_internationalization_number_format_locale;
 use core::fmt::Write;
 use paginator::{PageItem, Paginator};
 use std::error::Error;
-
-#[path = "./mk_lib_common_internationalization.rs"]
-mod mk_lib_common_internationalization;
 
 fn build_suffix(starts_with: Option<&str>) -> String {
     match starts_with {
@@ -86,11 +84,10 @@ class="px-3 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-2
                         url = base_url,
                         p = p,
                         suffix = suffix,
-                        label = mk_lib_common_internationalization::
-                            mk_lib_common_internationalization_number_format_locale(
-                                p.get() as i64,
-                                locale_name
-                            )
+                        label = mk_lib_common_internationalization_number_format_locale(
+                            p.get() as i64,
+                            locale_name
+                        )
                     )?;
                 }
 

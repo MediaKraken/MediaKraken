@@ -24,7 +24,6 @@ pub fn system_time_to_date_time(t: SystemTime) -> DateTime<Utc> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::thread;
     use std::time::Duration;
 
     #[test]
@@ -39,7 +38,7 @@ mod tests {
         let result = system_time_to_date_time(now);
         let current = Utc::now();
         let diff = (current - result).abs();
-        assert!(diff < Duration::from_secs(2));
+        assert!(diff < chrono::TimeDelta::seconds(2));
     }
 
     #[test]
@@ -48,7 +47,7 @@ mod tests {
         let result = system_time_to_date_time(future);
         let expected = Utc::now() + Duration::from_secs(3600);
         let diff = (expected - result).abs();
-        assert!(diff < Duration::from_secs(2));
+        assert!(diff < chrono::TimeDelta::seconds(2));
     }
 
     #[test]
@@ -57,7 +56,7 @@ mod tests {
         let result = system_time_to_date_time(past);
         let expected = DateTime::<Utc>::UNIX_EPOCH - Duration::from_secs(3600);
         let diff = (expected - result).abs();
-        assert!(diff < Duration::from_secs(1));
+        assert!(diff < chrono::TimeDelta::seconds(1));
     }
 
     #[test]

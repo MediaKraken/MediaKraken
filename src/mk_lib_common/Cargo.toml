@@ -10,8 +10,6 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_logging = { version = "0.0.248", registry = "kellnr" }
-
 bytesize = { version = "2.7.0", features = ["serde"] }
 chrono = { version = "0.4.45", features = ["serde"] }
 docker-api = { version = "0.14.0", features = ["swarm"] }
