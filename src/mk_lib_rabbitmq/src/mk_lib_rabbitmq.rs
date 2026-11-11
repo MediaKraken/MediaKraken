@@ -1,4 +1,4 @@
-use amqprs::channel::Channel;
+use amqprs::channel::{BasicQosArguments, Channel};
 use amqprs::{
     BasicProperties,
     callbacks::{DefaultChannelCallback, DefaultConnectionCallback},
@@ -24,6 +24,16 @@ pub async fn rabbitmq_ack(
 ) -> Result<(), Box<dyn std::error::Error>> {
     rabbit_channel
         .basic_ack(BasicAckArguments::new(rabbit_msg_id, false))
+        .await?;
+    Ok(())
+}
+
+pub async fn rabbitmq_qos(
+    rabbit_channel: &Channel,
+    rabbit_prefetch_count: u16,
+) -> Result<(), Box<dyn std::error::Error>> {
+    rabbit_channel
+        .basic_qos(BasicQosArguments::new(0, rabbit_prefetch_count, false))
         .await?;
     Ok(())
 }
@@ -72,6 +82,22 @@ pub async fn rabbitmq_consumer(
         .finish();
     let (_consumer_tag, rabbit_rx) = rabbit_channel.basic_consume_rx(rabbit_args).await?;
     Ok(rabbit_rx)
+}
+
+/// Re-establish a full consumer session: open the connection, declare/bind the
+/// durable queue, apply a per-consumer prefetch cap, and start consuming.
+///
+/// Intended for consumers that must survive broker disconnects: when the
+/// consumer receiver closes (the connection dropped), call this again to come
+/// back. amqprs' default connection callbacks do not reconnect on their own.
+pub async fn rabbitmq_reestablish(
+    rabbit_queue: &str,
+    rabbit_prefetch_count: u16,
+) -> Result<(Connection, Channel, UnboundedReceiver<ConsumerMessage>), Box<dyn std::error::Error>> {
+    let (rabbit_connection, rabbit_channel) = rabbitmq_connect(rabbit_queue).await?;
+    rabbitmq_qos(&rabbit_channel, rabbit_prefetch_count).await?;
+    let rabbit_consumer = rabbitmq_consumer(rabbit_queue, &rabbit_channel).await?;
+    Ok((rabbit_connection, rabbit_channel, rabbit_consumer))
 }
 
 pub async fn rabbitmq_publish(

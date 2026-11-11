@@ -153,7 +153,7 @@
                 {% endif %}
               </td>
               <td class="px-3 py-2">{{ row_data.mm_media_dir_path }}</td>
-              <td class="px-3 py-2">{{ row_data.mm_media_dir_class_enum }}</td>
+              <td class="px-3 py-2">{{ media_class_description(row_data.mm_media_dir_class_enum) }}</td>
               <td class="px-3 py-2">
                 {% if row_data.mm_media_dir_last_scanned.to_string() == "1970-01-01 00:00:00 UTC" %}
                   <i>Never Scanned</i>

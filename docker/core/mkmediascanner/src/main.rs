@@ -6,7 +6,7 @@ use serde_json::json;
 use std::error::Error;
 use std::ffi::OsStr;
 use std::path::Path;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use tokio::process::Command;
 use uuid::Uuid;
 
@@ -17,6 +17,7 @@ use mk_lib_common::mk_lib_common_media_extension::{
 use mk_lib_database::mk_lib_database_network_share::{DBShareList, parse_share_name};
 use mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push;
 use mk_lib_share::mk_lib_smb_pavao::FileMetadata;
+use mk_lib_share::mk_lib_smb_smbclient::is_smb_ls_date;
 
 fn compile_stack(pattern: &str) -> Regex {
     match Regex::new(pattern) {
@@ -40,6 +41,18 @@ lazy_static! {
     static ref STACK_DISC1: Regex = compile_stack(r"(?i)-disc1(?!\d)");
 }
 
+// Queue this scanner consumes, and the per-consumer prefetch it requests.
+const RABBIT_QUEUE: &str = "mkmediascanner";
+const RABBIT_PREFETCH_COUNT: u16 = 1;
+
+// Bounds for the smbclient / nfs-ls subprocesses so a hung network session
+// cannot stall the consumer indefinitely. A timeout takes the same path as a
+// failed probe (treated as unreachable) or a failed listing (empty file
+// list), which the caller already handles.
+const SMB_PROBE_TIMEOUT: Duration = Duration::from_secs(60);
+const SMB_TREE_TIMEOUT: Duration = Duration::from_secs(1800);
+const NFS_TREE_TIMEOUT: Duration = Duration::from_secs(1800);
+
 fn mk_nfs_uri(share_info: &DBShareList, uri: &str) -> String {
     let share_path = share_info.mm_network_share_path.trim_start_matches('/');
     let path_part = uri.trim_start_matches('/');
@@ -59,11 +72,15 @@ async fn mk_nfs_tree(
     share_info: &DBShareList,
     uri: &str,
 ) -> Result<Vec<FileMetadata>, Box<dyn Error>> {
-    let output = Command::new("nfs-ls")
-        .arg("-R")
-        .arg(mk_nfs_uri(share_info, uri))
-        .output()
-        .await?;
+    let output = tokio::time::timeout(
+        NFS_TREE_TIMEOUT,
+        Command::new("nfs-ls")
+            .arg("-R")
+            .arg(mk_nfs_uri(share_info, uri))
+            .output(),
+    )
+    .await
+    .map_err(|_| format!("nfs-ls timed out after {NFS_TREE_TIMEOUT:?}"))??;
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         return Err(format!(
@@ -152,14 +169,45 @@ fn smb_path_is_safe(cleaned: &str) -> bool {
     !cleaned.contains([';', '"', '\n', '\r', '\\'])
 }
 
+// The probe returns a plain bool, so without this the reason for `false`
+// (invalid URI, timeout, auth failure, ...) would be invisible.
+async fn mk_smb_probe_failure(share_info: &DBShareList, path_on_share: &str, reason: &str) {
+    if let Err(err) = mk_logging_loki_push(json!({
+        "level": "warn",
+        "message": format!("smbclient probe failed: {path_on_share}"),
+        "module": module_path!(),
+        "payload": {
+            "share_ip": share_info.mm_network_share_ip.to_string(),
+            // Raw DB value: `mk_smb_share_uri` parses this to build `//ip/share`,
+            // so it is the decisive field for the "invalid SMB share URI" reason.
+            "share_path_db": share_info.mm_network_share_path,
+            "workgroup": share_info.mm_network_share_workgroup,
+            "has_auth": share_info.mm_share_auth_user.is_some(),
+            "path": path_on_share,
+            "reason": reason,
+        },
+    }))
+    .await
+    {
+        eprintln!("mkmediascanner loki push failed ({err})");
+    }
+}
+
 // Reachability probe: `cd path; ls`. Success = share is reachable and the
 // requested directory exists / is accessible.
 async fn mk_smb_probe(share_info: &DBShareList, path_on_share: &str) -> bool {
     let Some(share_uri) = mk_smb_share_uri(share_info) else {
+        mk_smb_probe_failure(share_info, path_on_share, "invalid SMB share URI").await;
         return false;
     };
     let cleaned = path_on_share.trim_start_matches('/');
     if !smb_path_is_safe(cleaned) {
+        mk_smb_probe_failure(
+            share_info,
+            path_on_share,
+            "path contains disallowed characters",
+        )
+        .await;
         return false;
     }
     let mut commands: Vec<String> = Vec::new();
@@ -169,12 +217,167 @@ async fn mk_smb_probe(share_info: &DBShareList, path_on_share: &str) -> bool {
     commands.push(String::from("ls"));
     let mut cmd = match build_smbclient_command(share_info, &share_uri, &commands) {
         Ok(c) => c,
-        Err(_) => return false,
+        Err(error) => {
+            mk_smb_probe_failure(
+                share_info,
+                path_on_share,
+                &format!("command build failed: {error}"),
+            )
+            .await;
+            return false;
+        }
     };
-    matches!(cmd.output().await, Ok(out) if out.status.success())
+    let output = match tokio::time::timeout(SMB_PROBE_TIMEOUT, cmd.output()).await {
+        Ok(output) => output,
+        Err(_) => {
+            mk_smb_probe_failure(
+                share_info,
+                path_on_share,
+                &format!("timed out after {SMB_PROBE_TIMEOUT:?}"),
+            )
+            .await;
+            return false;
+        }
+    };
+    let Ok(output) = output else {
+        mk_smb_probe_failure(
+            share_info,
+            path_on_share,
+            &format!("spawn failed: {output:?}"),
+        )
+        .await;
+        return false;
+    };
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        mk_smb_probe_failure(
+            share_info,
+            path_on_share,
+            &format!("exited {:?}: {}", output.status.code(), stderr.trim()),
+        )
+        .await;
+        return false;
+    }
+    true
 }
 
-// Recursive listing via `recurse ON; cd path; ls` parsed from `-g` pipe output.
+// Parse `smbclient -c "recurse ON; ...; ls"` stdout into file metadata.
+//
+// The image's samba-client (Alpine 4.22.x) emits the fixed-width column form
+// from samba's display_finfo() *regardless of `-g`*:
+//   "  %-30s%7.7s %8.0f  %s"  = 2sp, name (>=30 cols), 7-col attrs,
+//   sp, 8-col size, 2sp, 24-col date.
+// Other builds emit pipe rows (`<type>|<name>|...`); both shapes are accepted,
+// mirroring the admin share-browse parser. In recursive mode each subdirectory
+// block is introduced by a share-root-relative `\a\b\c` header line; the
+// header is tracked so entries can be reassembled into `path_on_share`-relative
+// paths. Column fields are parsed from the right so names with internal
+// whitespace survive and names longer than 30 columns do not shift the fields.
+fn mk_parse_smb_ls_output(stdout: &str, path_on_share: &str) -> Vec<FileMetadata> {
+    let mut file_list: Vec<FileMetadata> = vec![];
+    // Directory of the block currently being read, relative to
+    // `path_on_share` ("" while reading the top-level listing).
+    let mut current_dir: String = String::new();
+    for line in stdout.lines() {
+        let pipe_entry = line.split_once('|').and_then(|(type_field, rest)| {
+            if type_field == "D" || type_field == "F" {
+                let name = rest.split('|').next().unwrap_or_default();
+                (!name.is_empty() && name != "." && name != "..").then_some((type_field, name))
+            } else {
+                None
+            }
+        });
+        if let Some((type_field, name)) = pipe_entry {
+            let path_value = if name.starts_with('/') {
+                name.to_string()
+            } else if path_on_share.ends_with('/') {
+                format!("{}{}", path_on_share, name)
+            } else {
+                format!("{}/{}", path_on_share, name)
+            };
+            file_list.push(FileMetadata {
+                name: path_value,
+                directory: type_field == "D",
+            });
+            continue;
+        }
+        // Recursive subdirectory header: `\MediaKraken_Test_Media\Movie\Season 01`.
+        if let Some(header) = line.strip_prefix('\\') {
+            let normalized = format!("/{}", header.replace('\\', "/").trim_end_matches('/'));
+            let base = format!("/{}", path_on_share.trim_matches('/'));
+            current_dir = if base == "/" {
+                normalized.trim_matches('/').to_string()
+            } else if let Some(stripped) = normalized.strip_prefix(&base) {
+                stripped.trim_matches('/').to_string()
+            } else {
+                // Header outside the scanned prefix (should not happen): fall
+                // back to the share-root-relative form rather than guessing.
+                normalized.trim_matches('/').to_string()
+            };
+            continue;
+        }
+        if line.len() < 74 {
+            continue;
+        }
+        let date_start = line.len() - 24;
+        if !is_smb_ls_date(&line[date_start..]) {
+            continue;
+        }
+        let head = match line[..date_start].strip_suffix("  ") {
+            Some(head) => head,
+            None => continue,
+        };
+        if head.len() < 8 {
+            continue;
+        }
+        let (head, size_field) = head.split_at(head.len() - 8);
+        if size_field.trim_start().parse::<u64>().is_err() {
+            continue;
+        }
+        let head = match head.strip_suffix(' ') {
+            Some(head) => head,
+            None => continue,
+        };
+        if head.len() < 7 {
+            continue;
+        }
+        let (head, attrs_field) = head.split_at(head.len() - 7);
+        let attrs = attrs_field.trim_start();
+        if attrs.is_empty()
+            || !attrs
+                .chars()
+                .all(|c| matches!(c, 'D' | 'A' | 'H' | 'S' | 'R' | 'N' | 'V'))
+        {
+            continue;
+        }
+        let name_padded = match head.strip_prefix("  ") {
+            Some(name) => name,
+            None => continue,
+        };
+        let filename = name_padded.trim_end_matches(' ');
+        if filename.is_empty() || filename == "." || filename == ".." {
+            continue;
+        }
+        let relative_name = if current_dir.is_empty() {
+            filename.to_string()
+        } else {
+            format!("{}/{}", current_dir, filename)
+        };
+        let path_value = if path_on_share.ends_with('/') {
+            format!("{}{}", path_on_share, relative_name)
+        } else {
+            format!("{}/{}", path_on_share, relative_name)
+        };
+        file_list.push(FileMetadata {
+            name: path_value,
+            directory: attrs.contains('D'),
+        });
+    }
+    file_list
+}
+
+// Recursive listing via `recurse ON; cd path; ls`; output parsed by
+// `mk_parse_smb_ls_output` (column form on this image, pipe rows elsewhere).
 async fn mk_smb_tree(
     share_info: &DBShareList,
     path_on_share: &str,
@@ -191,37 +394,18 @@ async fn mk_smb_tree(
     }
     commands.push(String::from("ls"));
     let mut cmd = build_smbclient_command(share_info, &share_uri, &commands)?;
-    let output = cmd.output().await?;
+    let output = tokio::time::timeout(SMB_TREE_TIMEOUT, cmd.output())
+        .await
+        .map_err(|_| {
+            format!("smbclient recursive listing timed out after {SMB_TREE_TIMEOUT:?}")
+        })??;
     // smbclient with `recurse ON` exits non-zero when any subdirectory in the
     // tree fails (e.g. one inaccessible folder), but still emits the entries
     // it could read on stdout. Parse stdout regardless and only surface an
     // error if we got nothing — otherwise a single permission glitch would
     // discard every discovery for the share.
     let stdout_data = String::from_utf8(output.stdout)?;
-    let mut file_list: Vec<FileMetadata> = vec![];
-    for line in stdout_data.lines() {
-        let parts: Vec<&str> = line.split('|').collect();
-        if parts.len() < 2 {
-            continue;
-        }
-        if parts[0] != "D" && parts[0] != "F" {
-            continue;
-        }
-        if parts[1] == "." || parts[1] == ".." {
-            continue;
-        }
-        let path_value = if parts[1].starts_with('/') {
-            parts[1].to_string()
-        } else if path_on_share.ends_with('/') {
-            format!("{}{}", path_on_share, parts[1])
-        } else {
-            format!("{}/{}", path_on_share, parts[1])
-        };
-        file_list.push(FileMetadata {
-            name: path_value,
-            directory: parts[0] == "D",
-        });
-    }
+    let file_list = mk_parse_smb_ls_output(&stdout_data, path_on_share);
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         let summary = format!(
@@ -363,13 +547,70 @@ async fn main() -> Result<(), Box<dyn Error>> {
     )
     .await;
 
-    let (_rabbit_connection, rabbit_channel) =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkmediascanner").await?;
-    let mut rabbit_consumer =
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mkmediascanner", &rabbit_channel)
+    let (mut _rabbit_connection, mut rabbit_channel, mut rabbit_consumer) =
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_reestablish(RABBIT_QUEUE, RABBIT_PREFETCH_COUNT)
             .await?;
 
-    while let Some(msg) = rabbit_consumer.recv().await {
+    // Steady-state consume loop: `recv()` closing is handled by reconnecting
+    // with backoff (below), so it never exits. It is the tail expression of
+    // `main`, which therefore returns only via the never-type coercion.
+    loop {
+        let Some(msg) = rabbit_consumer.recv().await else {
+            // recv() returned None: the broker connection dropped. amqprs'
+            // default connection callback does not reconnect, so re-establish
+            // the connection with exponential backoff instead of exiting and
+            // leaving the queue unconsumed.
+            if let Err(err) = mk_logging_loki_push(json!({
+                "level": "warn",
+                "message": "rabbitmq consumer connection lost; reconnecting with backoff",
+                "module": module_path!(),
+                "payload": {"queue": RABBIT_QUEUE},
+            }))
+            .await
+            {
+                eprintln!("mkmediascanner loki push failed ({err})");
+            }
+            let mut backoff = Duration::from_secs(5);
+            (_rabbit_connection, rabbit_channel, rabbit_consumer) = loop {
+                tokio::time::sleep(backoff).await;
+                match mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_reestablish(
+                    RABBIT_QUEUE,
+                    RABBIT_PREFETCH_COUNT,
+                )
+                .await
+                {
+                    Ok(reestablished) => break reestablished,
+                    Err(error) => {
+                        if let Err(err) = mk_logging_loki_push(json!({
+                            "level": "warn",
+                            "message": "rabbitmq reconnect attempt failed",
+                            "module": module_path!(),
+                            "payload": {
+                                "queue": RABBIT_QUEUE,
+                                "retry_in_secs": backoff.as_secs(),
+                                "error": error.to_string(),
+                            },
+                        }))
+                        .await
+                        {
+                            eprintln!("mkmediascanner loki push failed ({err})");
+                        }
+                        backoff = (backoff * 2).min(Duration::from_secs(300));
+                    }
+                }
+            };
+            if let Err(err) = mk_logging_loki_push(json!({
+                "level": "info",
+                "message": "rabbitmq consumer reconnected",
+                "module": module_path!(),
+                "payload": {"queue": RABBIT_QUEUE},
+            }))
+            .await
+            {
+                eprintln!("mkmediascanner loki push failed ({err})");
+            }
+            continue;
+        };
         // Message content is a wake-up signal; the actual list of paths comes from the DB.
         let audit_rows =
             match mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_audit_read(
@@ -418,6 +659,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
             };
 
+        if audit_rows.is_empty()
+            && let Err(err) = mk_logging_loki_push(json!({
+                "level": "warn",
+                "message": "library_path_audit_read returned 0 rows; nothing to scan",
+                "module": module_path!(),
+                "payload": {},
+            }))
+            .await
+        {
+            eprintln!("mkmediascanner loki push failed ({err})");
+        }
+
         for row_data in audit_rows {
             if let Err(err) = mk_logging_loki_push(json!({
                 "level": "info",
@@ -430,29 +683,29 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 eprintln!("mkmediascanner loki push failed ({err})");
             }
             let share_info = match mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_detail(
-                &sqlx_pool_ro,
-                row_data.mm_media_dir_share_guid,
-            )
-            .await
-            {
-                Ok(s) => s,
-                Err(error) => {
-                    if let Err(err) = mk_logging_loki_push(json!({
-                        "level": "error",
-                        "message": "network_share_detail failed",
-                        "module": module_path!(),
-                        "payload": {
-                            "share_guid": row_data.mm_media_dir_share_guid,
-                            "error": error.to_string(),
-                        },
-                    }))
-                    .await
-                    {
-                        eprintln!("mkmediascanner loki push failed ({err})");
+                    &sqlx_pool_ro,
+                    row_data.mm_media_dir_share_guid,
+                )
+                .await
+                {
+                    Ok(s) => s,
+                    Err(error) => {
+                        if let Err(err) = mk_logging_loki_push(json!({
+                            "level": "error",
+                            "message": "network_share_detail failed",
+                            "module": module_path!(),
+                            "payload": {
+                                "share_guid": row_data.mm_media_dir_share_guid,
+                                "error": error.to_string(),
+                            },
+                        }))
+                        .await
+                        {
+                            eprintln!("mkmediascanner loki push failed ({err})");
+                        }
+                        continue;
                     }
-                    continue;
-                }
-            };
+                };
 
             let path_on_share = format!("/{}", row_data.mm_media_dir_path.trim_start_matches('/'));
 
@@ -460,39 +713,60 @@ async fn main() -> Result<(), Box<dyn Error>> {
             // mkwebaxum's share-browse handler). Only fall back to NFS if the
             // SMB probe fails. Per-file dedup below handles already-known files,
             // so we don't try to short-circuit scans by directory mtime.
+            let probe_started = Instant::now();
             let smb_reachable = mk_smb_probe(&share_info, &path_on_share).await;
+            let probe_elapsed_ms = probe_started.elapsed().as_millis();
 
             if let Err(err) = mk_logging_loki_push(json!({
-                "level": "info",
-                "message": format!("library_path_audit after smbclient: {}", row_data.mm_media_dir_path),
-                "module": module_path!(),
-                "payload": {"info": "Completed SMB reachability probe", "smb_reachable": smb_reachable},
-            }))
-            .await
-            {
-                eprintln!("mkmediascanner loki push failed ({err})");
-            }
+                    "level": "info",
+                    "message": format!("library_path_audit after smbclient: {}", row_data.mm_media_dir_path),
+                    "module": module_path!(),
+                    "payload": {"info": "Completed SMB reachability probe", "smb_reachable": smb_reachable, "probe_elapsed_ms": probe_elapsed_ms},
+                }))
+                .await
+                {
+                    eprintln!("mkmediascanner loki push failed ({err})");
+                }
 
-            let reachable = smb_reachable || mk_nfs_tree(&share_info, &path_on_share).await.is_ok();
+            let reachable = if smb_reachable {
+                true
+            } else {
+                match mk_nfs_tree(&share_info, &path_on_share).await {
+                    Ok(_) => true,
+                    Err(error) => {
+                        if let Err(err) = mk_logging_loki_push(json!({
+                            "level": "warn",
+                            "message": format!("nfs reachability check failed: {}", row_data.mm_media_dir_path),
+                            "module": module_path!(),
+                            "payload": {"path": path_on_share, "error": error.to_string()},
+                        }))
+                        .await
+                        {
+                            eprintln!("mkmediascanner loki push failed ({err})");
+                        }
+                        false
+                    }
+                }
+            };
 
             if let Err(err) = mk_logging_loki_push(json!({
-                "level": "info",
-                "message": format!("reachable {} after smbclient: {}", reachable, row_data.mm_media_dir_path),
-                "module": module_path!(),
-                "payload": {"info": "reachable"},
-            }))
-            .await
-            {
-                eprintln!("mkmediascanner loki push failed ({err})");
-            }
+                    "level": "info",
+                    "message": format!("reachable {} after smbclient: {}", reachable, row_data.mm_media_dir_path),
+                    "module": module_path!(),
+                    "payload": {"info": "reachable"},
+                }))
+                .await
+                {
+                    eprintln!("mkmediascanner loki push failed ({err})");
+                }
 
             if !reachable {
                 let _ = mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_insert(
-                    &sqlx_pool_rw,
-                    format!("Unable to connect to share: {}", row_data.mm_media_dir_path),
-                    true,
-                )
-                .await;
+                        &sqlx_pool_rw,
+                        format!("Unable to connect to share: {}", row_data.mm_media_dir_path),
+                        true,
+                    )
+                    .await;
                 continue;
             }
 
@@ -508,23 +782,23 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
 
             let _ = mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_status_update(
-                &sqlx_pool_rw,
-                row_data.mm_media_dir_guid,
-                json!({"Status": "Added to scan", "Pct": 100}),
-            )
-            .await;
+                    &sqlx_pool_rw,
+                    row_data.mm_media_dir_guid,
+                    json!({"Status": "Added to scan", "Pct": 100}),
+                )
+                .await;
             // Bump timestamp up front so files added mid-scan aren't skipped next round.
             let _ = mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_timestamp_update(
-                &sqlx_pool_rw,
-                row_data.mm_media_dir_guid,
-            )
-            .await;
+                    &sqlx_pool_rw,
+                    row_data.mm_media_dir_guid,
+                )
+                .await;
             let _ = mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_status_update(
-                &sqlx_pool_rw,
-                row_data.mm_media_dir_guid,
-                json!({"Status": "File search scan", "Pct": 0.0}),
-            )
-            .await;
+                    &sqlx_pool_rw,
+                    row_data.mm_media_dir_guid,
+                    json!({"Status": "File search scan", "Pct": 0.0}),
+                )
+                .await;
 
             // Collect every file under the library path. We run a single
             // recursive smbclient subprocess (matching mkwebaxum's working
@@ -567,10 +841,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
             };
 
             if let Err(err) = mk_logging_loki_push(json!({
-                "level": "info",
-                "message": format!("b4 total: {}", row_data.mm_media_dir_path),
+                "level": if files.is_empty() { "warn" } else { "info" },
+                "message": format!("b4 total: {} entries from {}", files.len(), row_data.mm_media_dir_path),
                 "module": module_path!(),
-                "payload": {"info": "reachable check complete"},
+                "payload": {
+                    "source": if smb_reachable { "smbclient" } else { "nfs-ls" },
+                    "entries": files.len(),
+                    "files": files.iter().filter(|f| !f.directory).count(),
+                    "directories": files.iter().filter(|f| f.directory).count(),
+                },
             }))
             .await
             {
@@ -580,6 +859,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let total_candidates = files.iter().filter(|f| !f.directory).count().max(1) as f64;
             let mut scanned: u64 = 0;
             let mut total_files: u64 = 0;
+            let mut already_known_count: u64 = 0;
+            let mut filtered_count: u64 = 0;
             let original_media_class = row_data.mm_media_dir_class_enum;
 
             for file_metadata in files {
@@ -590,38 +871,39 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 if scanned % 100 == 0 {
                     let pct = (scanned as f64 / total_candidates) * 100.0;
                     let _ = mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_status_update(
-                        &sqlx_pool_rw,
-                        row_data.mm_media_dir_guid,
-                        json!({"Status": "File search scan", "Pct": pct}),
-                    )
-                    .await;
+                            &sqlx_pool_rw,
+                            row_data.mm_media_dir_guid,
+                            json!({"Status": "File search scan", "Pct": pct}),
+                        )
+                        .await;
                 }
 
                 // On DB error we skip rather than defaulting to "not present";
                 // otherwise a transient read outage would fan every file into
                 // an insert attempt and flood the queue with duplicates.
                 let already_known = match mk_lib_database::mk_lib_database_library::mk_lib_database_library_file_exists(
-                    &sqlx_pool_ro,
-                    &file_metadata.name,
-                )
-                .await
-                {
-                    Ok(known) => known,
-                    Err(error) => {
-                        if let Err(err) = mk_logging_loki_push(json!({
-                            "level": "error",
-                            "message": "library_file_exists failed; skipping file",
-                            "module": module_path!(),
-                            "payload": {"path": file_metadata.name, "error": error.to_string()},
-                        }))
-                        .await
-                        {
-                            eprintln!("mkmediascanner loki push failed ({err})");
+                        &sqlx_pool_ro,
+                        &file_metadata.name,
+                    )
+                    .await
+                    {
+                        Ok(known) => known,
+                        Err(error) => {
+                            if let Err(err) = mk_logging_loki_push(json!({
+                                "level": "error",
+                                "message": "library_file_exists failed; skipping file",
+                                "module": module_path!(),
+                                "payload": {"path": file_metadata.name, "error": error.to_string()},
+                            }))
+                            .await
+                            {
+                                eprintln!("mkmediascanner loki push failed ({err})");
+                            }
+                            continue;
                         }
-                        continue;
-                    }
-                };
+                    };
                 if already_known {
+                    already_known_count += 1;
                     continue;
                 }
 
@@ -631,6 +913,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     .and_then(OsStr::to_str)
                     .map(str::to_owned)
                 else {
+                    filtered_count += 1;
                     continue;
                 };
 
@@ -638,6 +921,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let is_subtitle = SUBTITLE_EXTENSION.contains(&file_extension.as_str());
                 let is_game = GAME_EXTENSION.contains(&file_extension.as_str());
                 if !is_media && !is_subtitle && !is_game {
+                    filtered_count += 1;
                     continue;
                 }
 
@@ -655,28 +939,28 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let media_id = Uuid::now_v7();
                 let media_json = json!({ "Added": Utc::now().to_string() });
                 if let Err(error) = mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_insert(
-                    &sqlx_pool_rw,
-                    media_id,
-                    new_class_type,
-                    &file_metadata.name,
-                    None,
-                    json!({}),
-                    media_json,
-                )
-                .await
-                {
-                    if let Err(err) = mk_logging_loki_push(json!({
-                        "level": "error",
-                        "message": "media insert failed",
-                        "module": module_path!(),
-                        "payload": {"path": file_metadata.name, "error": error.to_string()},
-                    }))
+                        &sqlx_pool_rw,
+                        media_id,
+                        new_class_type,
+                        &file_metadata.name,
+                        None,
+                        json!({}),
+                        media_json,
+                    )
                     .await
                     {
-                        eprintln!("mkmediascanner loki push failed ({err})");
+                        if let Err(err) = mk_logging_loki_push(json!({
+                            "level": "error",
+                            "message": "media insert failed",
+                            "module": module_path!(),
+                            "payload": {"path": file_metadata.name, "error": error.to_string()},
+                        }))
+                        .await
+                        {
+                            eprintln!("mkmediascanner loki push failed ({err})");
+                        }
+                        continue;
                     }
-                    continue;
-                }
 
                 let needs_ffprobe =
                     !MEDIA_EXTENSION_SKIP_FFMPEG.contains(&file_extension.as_str()) && is_media;
@@ -734,48 +1018,64 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
                 if save_dl_record {
                     if let Err(error) = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(
-                        &sqlx_pool_rw,
-                        "Z".to_string(),
-                        new_class_type,
-                        media_id,
-                        None,
-                        "Search".to_string(),
-                        Some(&file_metadata.name),
-                    )
-                    .await
-                    {
-                        if let Err(err) = mk_logging_loki_push(json!({
-                            "level": "error",
-                            "message": "download queue insert failed",
-                            "module": module_path!(),
-                            "payload": {"media_id": media_id, "error": error.to_string()},
-                        }))
+                            &sqlx_pool_rw,
+                            "Z".to_string(),
+                            new_class_type,
+                            media_id,
+                            None,
+                            "Search".to_string(),
+                            Some(&file_metadata.name),
+                        )
                         .await
                         {
-                            eprintln!("mkmediascanner loki push failed ({err})");
+                            if let Err(err) = mk_logging_loki_push(json!({
+                                "level": "error",
+                                "message": "download queue insert failed",
+                                "module": module_path!(),
+                                "payload": {"media_id": media_id, "error": error.to_string()},
+                            }))
+                            .await
+                            {
+                                eprintln!("mkmediascanner loki push failed ({err})");
+                            }
                         }
-                    }
                 }
             }
 
+            if let Err(err) = mk_logging_loki_push(json!({
+                "level": "info",
+                "message": format!("scan summary: {}", row_data.mm_media_dir_path),
+                "module": module_path!(),
+                "payload": {
+                    "candidates": scanned,
+                    "added": total_files,
+                    "already_known": already_known_count,
+                    "filtered": filtered_count,
+                },
+            }))
+            .await
+            {
+                eprintln!("mkmediascanner loki push failed ({err})");
+            }
+
             let _ = mk_lib_database::mk_lib_database_library::mk_lib_database_library_path_status_update(
-                &sqlx_pool_rw,
-                row_data.mm_media_dir_guid,
-                json!({"Status": "File scan complete", "Pct": 100}),
-            )
-            .await;
+                    &sqlx_pool_rw,
+                    row_data.mm_media_dir_guid,
+                    json!({"Status": "File scan complete", "Pct": 100}),
+                )
+                .await;
 
             if total_files > 0 {
                 let _ = mk_lib_database::mk_lib_database_notification::mk_lib_database_notification_insert(
-                    &sqlx_pool_rw,
-                    format!(
-                        "{} file(s) added from {}",
-                        total_files.to_formatted_string(&Locale::en),
-                        row_data.mm_media_dir_path
-                    ),
-                    true,
-                )
-                .await;
+                        &sqlx_pool_rw,
+                        format!(
+                            "{} file(s) added from {}",
+                            total_files.to_formatted_string(&Locale::en),
+                            row_data.mm_media_dir_path
+                        ),
+                        true,
+                    )
+                    .await;
             }
         }
 
@@ -799,7 +1099,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
         }
     }
-    Ok(())
 }
 
 #[cfg(test)]
@@ -855,21 +1154,163 @@ mod tests {
     #[test]
     fn test_mk_smb_share_uri_simple() {
         let share = test_share();
-        assert_eq!(mk_smb_share_uri(&share), Some("//192.168.1.100/shared"));
+        assert_eq!(
+            mk_smb_share_uri(&share),
+            Some("//192.168.1.100/shared".to_string())
+        );
     }
 
     #[test]
     fn test_mk_smb_share_uri_unc_path() {
         let mut share = test_share();
         share.mm_network_share_path = "\\\\server\\share\\sub".to_string();
-        assert_eq!(mk_smb_share_uri(&share), Some("//192.168.1.100/share"));
+        assert_eq!(
+            mk_smb_share_uri(&share),
+            Some("//192.168.1.100/share".to_string())
+        );
     }
 
     #[test]
     fn test_mk_smb_share_uri_ip_path() {
         let mut share = test_share();
         share.mm_network_share_path = "//192.168.1.10/media".to_string();
-        assert_eq!(mk_smb_share_uri(&share), Some("//192.168.1.100/media"));
+        assert_eq!(
+            mk_smb_share_uri(&share),
+            Some("//192.168.1.100/media".to_string())
+        );
+    }
+
+    // Verbatim capture of `smbclient //127.0.0.1/media -g -N -c "recurse ON;
+    // prompt OFF; cd \"MediaKraken_Test_Media/Movie\"; ls"` from the scanner
+    // image stack (Alpine 3.23.2 + apk samba-client 4.22.10): guest login,
+    // 3-level tree. The fixed-width column form is emitted regardless of `-g`;
+    // subdirectory blocks are introduced by share-root-relative `\a\b\c`
+    // header lines, and the listing ends with a tab-indented disk-stats line.
+    fn smb_walk_capture_movie() -> &'static str {
+        concat!(
+            "Anonymous login successful\n",
+            "  .                                   D        0  Wed Nov 11 04:00:35 2026\n",
+            "  ..                                  D        0  Wed Nov 11 04:00:35 2026\n",
+            "  a_very_long_filename_that_exceeds_thirty_chars.mkv      N        2  Wed Nov 11 04:00:35 2026\n",
+            "  Season 01                           D        0  Wed Nov 11 04:00:35 2026\n",
+            "  readme.txt                          N        2  Wed Nov 11 04:00:35 2026\n",
+            "  Movie_One.mkv                       N        2  Wed Nov 11 04:00:35 2026\n",
+            "\n",
+            "\\MediaKraken_Test_Media\\Movie\\Season 01\n",
+            "  .                                   D        0  Wed Nov 11 04:00:35 2026\n",
+            "  ..                                  D        0  Wed Nov 11 04:00:35 2026\n",
+            "  E01.mkv                             N        2  Wed Nov 11 04:00:35 2026\n",
+            "  Disc 2                              D        0  Wed Nov 11 04:00:35 2026\n",
+            "\n",
+            "\\MediaKraken_Test_Media\\Movie\\Season 01\\Disc 2\n",
+            "  .                                   D        0  Wed Nov 11 04:00:35 2026\n",
+            "  ..                                  D        0  Wed Nov 11 04:00:35 2026\n",
+            "  E02.mkv                             N        2  Wed Nov 11 04:00:35 2026\n",
+            "\n",
+            "\t\t3275929728 blocks of size 1024. 1475094292 blocks available\n",
+        )
+    }
+
+    // Same share, walk issued from the share root (no `cd`), i.e.
+    // `path_on_share == ""`: headers are not under any scan prefix.
+    fn smb_walk_capture_share_root() -> &'static str {
+        concat!(
+            "Anonymous login successful\n",
+            "  .                                   D        0  Wed Nov 11 04:00:35 2026\n",
+            "  ..                                  D        0  Wed Nov 11 04:00:35 2026\n",
+            "  MediaKraken_Test_Media              D        0  Wed Nov 11 04:00:35 2026\n",
+            "\n",
+            "\\MediaKraken_Test_Media\n",
+            "  .                                   D        0  Wed Nov 11 04:00:35 2026\n",
+            "  ..                                  D        0  Wed Nov 11 04:00:35 2026\n",
+            "  Movie                               D        0  Wed Nov 11 04:00:35 2026\n",
+            "\n",
+            "\\MediaKraken_Test_Media\\Movie\n",
+            "  .                                   D        0  Wed Nov 11 04:00:35 2026\n",
+            "  ..                                  D        0  Wed Nov 11 04:00:35 2026\n",
+            "  a_very_long_filename_that_exceeds_thirty_chars.mkv      N        2  Wed Nov 11 04:00:35 2026\n",
+            "  Season 01                           D        0  Wed Nov 11 04:00:35 2026\n",
+            "  readme.txt                          N        2  Wed Nov 11 04:00:35 2026\n",
+            "  Movie_One.mkv                       N        2  Wed Nov 11 04:00:35 2026\n",
+            "\n",
+            "\\MediaKraken_Test_Media\\Movie\\Season 01\n",
+            "  .                                   D        0  Wed Nov 11 04:00:35 2026\n",
+            "  ..                                  D        0  Wed Nov 11 04:00:35 2026\n",
+            "  E01.mkv                             N        2  Wed Nov 11 04:00:35 2026\n",
+            "  Disc 2                              D        0  Wed Nov 11 04:00:35 2026\n",
+            "\n",
+            "\\MediaKraken_Test_Media\\Movie\\Season 01\\Disc 2\n",
+            "  .                                   D        0  Wed Nov 11 04:00:35 2026\n",
+            "  ..                                  D        0  Wed Nov 11 04:00:35 2026\n",
+            "  E02.mkv                             N        2  Wed Nov 11 04:00:35 2026\n",
+            "\n",
+            "\t\t3275929728 blocks of size 1024. 1475094268 blocks available\n",
+        )
+    }
+
+    #[test]
+    fn test_parse_smb_ls_column_form_recursive() {
+        let entries =
+            mk_parse_smb_ls_output(smb_walk_capture_movie(), "MediaKraken_Test_Media/Movie");
+        let names: Vec<&str> = entries.iter().map(|e| e.name.as_str()).collect();
+        assert_eq!(
+            names,
+            vec![
+                "MediaKraken_Test_Media/Movie/a_very_long_filename_that_exceeds_thirty_chars.mkv",
+                "MediaKraken_Test_Media/Movie/Season 01",
+                "MediaKraken_Test_Media/Movie/readme.txt",
+                "MediaKraken_Test_Media/Movie/Movie_One.mkv",
+                "MediaKraken_Test_Media/Movie/Season 01/E01.mkv",
+                "MediaKraken_Test_Media/Movie/Season 01/Disc 2",
+                "MediaKraken_Test_Media/Movie/Season 01/Disc 2/E02.mkv",
+            ]
+        );
+        let directories: Vec<bool> = entries.iter().map(|e| e.directory).collect();
+        assert_eq!(
+            directories,
+            vec![false, true, false, false, false, true, false]
+        );
+    }
+
+    #[test]
+    fn test_parse_smb_ls_column_form_share_root() {
+        let entries = mk_parse_smb_ls_output(smb_walk_capture_share_root(), "");
+        let names: Vec<&str> = entries.iter().map(|e| e.name.as_str()).collect();
+        assert_eq!(
+            names,
+            vec![
+                "/MediaKraken_Test_Media",
+                "/MediaKraken_Test_Media/Movie",
+                "/MediaKraken_Test_Media/Movie/a_very_long_filename_that_exceeds_thirty_chars.mkv",
+                "/MediaKraken_Test_Media/Movie/Season 01",
+                "/MediaKraken_Test_Media/Movie/readme.txt",
+                "/MediaKraken_Test_Media/Movie/Movie_One.mkv",
+                "/MediaKraken_Test_Media/Movie/Season 01/E01.mkv",
+                "/MediaKraken_Test_Media/Movie/Season 01/Disc 2",
+                "/MediaKraken_Test_Media/Movie/Season 01/Disc 2/E02.mkv",
+            ]
+        );
+    }
+
+    // Legacy pipe rows (`<type>|<name>|<size>|<date>`) from other smbclient
+    // builds must keep working unchanged.
+    #[test]
+    fn test_parse_smb_ls_pipe_form() {
+        let stdout = "F|Movie_One.mkv|2|Wed Nov 11 04:00:35 2026\n".to_string()
+            + "D|Season 01|0|Wed Nov 11 04:00:35 2026\n"
+            + "D|.|0|Wed Nov 11 04:00:35 2026\n"
+            + "D|..|0|Wed Nov 11 04:00:35 2026\n";
+        let entries = mk_parse_smb_ls_output(&stdout, "MediaKraken_Test_Media/Movie");
+        let names: Vec<&str> = entries.iter().map(|e| e.name.as_str()).collect();
+        assert_eq!(
+            names,
+            vec![
+                "MediaKraken_Test_Media/Movie/Movie_One.mkv",
+                "MediaKraken_Test_Media/Movie/Season 01"
+            ]
+        );
+        let directories: Vec<bool> = entries.iter().map(|e| e.directory).collect();
+        assert_eq!(directories, vec![false, true]);
     }
 
     #[test]

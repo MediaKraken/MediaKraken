@@ -1,4 +1,7 @@
+use std::borrow::Cow;
+
 use crate::AppState;
+use crate::admin::bp_library::media_class_description;
 use crate::mk_lib_database;
 use crate::user_preferences;
 use askama::Template;
@@ -29,6 +32,14 @@ struct TemplateReportKnownMediaContext<'a> {
     pagination_bar: &'a String,
     page: &'a usize,
     page_title: Option<String>,
+}
+
+impl TemplateReportKnownMediaContext<'_> {
+    /// Display name for a media class enum value (see the shared
+    /// `media_class_description` free function).
+    fn media_class_description(&self, value: &i16) -> Cow<'static, str> {
+        media_class_description(*value)
+    }
 }
 
 pub async fn admin_report_known_media(

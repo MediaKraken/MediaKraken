@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use crate::AppState;
 use crate::mk_lib_database;
 use askama::Template;
@@ -12,6 +14,7 @@ use axum_flash::Flash;
 use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
+use mk_lib_common::mk_lib_common_enum_media_type::DLMediaType;
 use mk_lib_rabbitmq;
 use mk_lib_share::mk_lib_file_smb::{classify_smbclient_browse_error, is_smb_ls_date};
 use serde::{Deserialize, Serialize};
@@ -37,6 +40,55 @@ struct LibraryRowDisplay {
     mm_network_share_path: Option<String>,
 }
 
+/// Human-readable name for a `DLMediaType` media class value, covering the
+/// core classes and their subtypes (e.g. `MOVIE_HOME` -> "Movie"). Values
+/// that are not a known `DLMediaType` fall back to the raw number.
+pub(crate) fn media_class_description(value: i16) -> Cow<'static, str> {
+    let name: Option<&'static str> = match value {
+        DLMediaType::MOVIE
+        | DLMediaType::MOVIE_HOME
+        | DLMediaType::MOVIE_EXTRAS
+        | DLMediaType::MOVIE_SOUNDTRACK
+        | DLMediaType::MOVIE_SUBTITLE
+        | DLMediaType::MOVIE_THEME
+        | DLMediaType::MOVIE_TRAILER => Some("Movie"),
+        DLMediaType::TV
+        | DLMediaType::TV_EPISODE
+        | DLMediaType::TV_EXTRAS
+        | DLMediaType::TV_SEASON
+        | DLMediaType::TV_SUBTITLE
+        | DLMediaType::TV_THEME
+        | DLMediaType::TV_TRAILER => Some("TV"),
+        DLMediaType::PERSON => Some("Person"),
+        DLMediaType::SPORTS => Some("Sports"),
+        DLMediaType::GAME
+        | DLMediaType::GAME_CHD
+        | DLMediaType::GAME_CINEMATICS
+        | DLMediaType::GAME_TRAILER
+        | DLMediaType::GAME_ISO
+        | DLMediaType::GAME_ROM
+        | DLMediaType::GAME_SPEEDRUN
+        | DLMediaType::GAME_SUPERPLAY => Some("Game"),
+        DLMediaType::PUBLICATION
+        | DLMediaType::PUBLICATION_BOOK
+        | DLMediaType::PUBLICATION_COMIC
+        | DLMediaType::PUBLICATION_COMIC_STRIP
+        | DLMediaType::PUBLICATION_MAGAZINE
+        | DLMediaType::PUBLICATION_GRAPHIC_NOVEL => Some("Publication"),
+        DLMediaType::PICTURE => Some("Picture"),
+        DLMediaType::ANIME => Some("Anime"),
+        DLMediaType::MUSIC
+        | DLMediaType::MUSIC_ALBUM
+        | DLMediaType::MUSIC_LYRICS
+        | DLMediaType::MUSIC_SONG
+        | DLMediaType::MUSIC_VIDEO => Some("Music"),
+        DLMediaType::ADULT | DLMediaType::ADULT_IMAGE | DLMediaType::ADULT_SCENE => Some("Adult"),
+        DLMediaType::COLLECTION => Some("Collection"),
+        _ => None,
+    };
+    name.map_or_else(|| Cow::Owned(value.to_string()), Cow::Borrowed)
+}
+
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_library.html")]
 struct TemplateAdminLibraryContext<'a> {
@@ -58,6 +110,12 @@ impl TemplateAdminLibraryContext<'_> {
             share.mm_share_auth_user.as_deref(),
             Some(user) if user == auth_user.mm_share_auth_user
         )
+    }
+
+    /// Display name for a media class enum value (see the shared
+    /// `media_class_description` free function).
+    fn media_class_description(&self, value: &i16) -> Cow<'static, str> {
+        media_class_description(*value)
     }
 }
 

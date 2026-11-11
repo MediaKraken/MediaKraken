@@ -5,8 +5,8 @@ edition = "2024"
 
 
 [dependencies]
-mk_lib_database = { version = "0.0.275", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.243", registry = "kellnr" }
+mk_lib_database = { version = "0.0.280", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.248", registry = "kellnr" }
 
 tokio = { version = "1.53.1", features = ["full"] }
 

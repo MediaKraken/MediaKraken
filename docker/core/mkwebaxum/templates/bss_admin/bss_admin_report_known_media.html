@@ -36,7 +36,7 @@
             <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
               <td class="px-3 py-2 text-zinc-500 dark:text-zinc-400">{{ loop.index + (page - 1) * 30 }}</td>
               <td class="px-3 py-2 break-all font-mono">{{ row_data.mm_media_path }}</td>
-              <td class="px-3 py-2">{{ row_data.mm_media_class_enum }}</td>
+              <td class="px-3 py-2">{{ media_class_description(row_data.mm_media_class_enum) }}</td>
               <td class="px-3 py-2 font-mono text-xs text-zinc-600 dark:text-zinc-400">{{ row_data.mm_media_json_added }}</td>
             </tr>
             {% endfor %}

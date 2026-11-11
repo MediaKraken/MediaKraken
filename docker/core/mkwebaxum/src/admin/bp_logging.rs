@@ -42,6 +42,24 @@ struct TemplateLogContext<'a> {
     page_title: Option<String>,
 }
 
+impl TemplateLogContext<'_> {
+    /// Human-readable UTC rendering of a Loki nanosecond timestamp
+    /// (e.g. "2026-11-09 12:34:56 UTC"), matching the format used on the
+    /// admin S3 browser page. Values that are not a valid Unix timestamp
+    /// fall back to the raw number.
+    fn timestamp_to_datetime(&self, timestamp_ns: &i128) -> String {
+        let Ok(nanos) = i64::try_from(*timestamp_ns) else {
+            return timestamp_ns.to_string();
+        };
+        // `rem_euclid` is in [0, 1e9), which always fits a u32.
+        let secs = nanos.div_euclid(1_000_000_000);
+        let nsecs = nanos.rem_euclid(1_000_000_000) as u32;
+        chrono::DateTime::<chrono::Utc>::from_timestamp(secs, nsecs)
+            .map(|dt| dt.format("%Y-%m-%d %H:%M:%S UTC").to_string())
+            .unwrap_or_else(|| timestamp_ns.to_string())
+    }
+}
+
 fn stream_labels_to_string(labels: &HashMap<String, String>) -> String {
     let mut pairs: Vec<_> = labels.iter().collect();
     pairs.sort_by_key(|(k, _)| *k);
