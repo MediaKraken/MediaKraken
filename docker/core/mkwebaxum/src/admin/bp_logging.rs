@@ -51,10 +51,9 @@ pub struct LoggingQueryParams {
 }
 
 impl TemplateLogContext<'_> {
-    /// Human-readable UTC rendering of a Loki nanosecond timestamp
-    /// (e.g. "2026-11-09 12:34:56 UTC"), matching the format used on the
-    /// admin S3 browser page. Values that are not a valid Unix timestamp
-    /// fall back to the raw number.
+    /// Human-readable UTC rendering of a Loki nanosecond timestamp with
+    /// milliseconds (e.g. "2026-11-09 12:34:56.123 UTC"). Values that are
+    /// not a valid Unix timestamp fall back to the raw number.
     fn timestamp_to_datetime(&self, timestamp_ns: &i128) -> String {
         let Ok(nanos) = i64::try_from(*timestamp_ns) else {
             return timestamp_ns.to_string();
@@ -63,7 +62,7 @@ impl TemplateLogContext<'_> {
         let secs = nanos.div_euclid(1_000_000_000);
         let nsecs = nanos.rem_euclid(1_000_000_000) as u32;
         chrono::DateTime::<chrono::Utc>::from_timestamp(secs, nsecs)
-            .map(|dt| dt.format("%Y-%m-%d %H:%M:%S UTC").to_string())
+            .map(|dt| dt.format("%Y-%m-%d %H:%M:%S.%3f UTC").to_string())
             .unwrap_or_else(|| timestamp_ns.to_string())
     }
 }
