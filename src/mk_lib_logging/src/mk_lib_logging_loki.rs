@@ -191,7 +191,7 @@ pub async fn mk_logging_loki_read(
     let end_str = now_ns.to_string();
     let url = Url::parse_with_params(
         LOKI_QUERY_URL,
-        &[
+        [
             ("query", query.as_str()),
             ("limit", "100"),
             ("direction", "backward"),

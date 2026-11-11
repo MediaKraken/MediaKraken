@@ -79,7 +79,9 @@ fn insecure_elasticsearch_client() -> Result<&'static Elasticsearch, Box<dyn std
         .build()?;
 
     // Try to set the client - if this fails, we'll return an error
-    CLIENT.set(Elasticsearch::new(transport)).map_err(|_| "Failed to initialize insecure elasticsearch client: client already initialized".to_string())?;
+    CLIENT.set(Elasticsearch::new(transport)).map_err(|_| {
+        "Failed to initialize insecure elasticsearch client: client already initialized".to_string()
+    })?;
 
     // Return the client
     CLIENT.get().ok_or(
