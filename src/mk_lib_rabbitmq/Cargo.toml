@@ -10,10 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_logging = { version = "0.0.249", registry = "kellnr" }
-
 amqprs = "2.1.5"
-sys-info = "0.9.1"
 tokio = "1.53.1"
 
 [dev-dependencies]
