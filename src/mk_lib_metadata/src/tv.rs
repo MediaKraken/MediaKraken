@@ -2,8 +2,7 @@ use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue:
 use std::error::Error;
 use torrent_name_parser::Metadata;
 
-#[path = "provider/tmdb.rs"]
-mod provider_tmdb;
+use crate::metadata_provider::tmdb as provider_tmdb;
 
 pub struct MetadataTVLastLookup {
     metadata_last_id: uuid::Uuid,

@@ -2,11 +2,8 @@ use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue:
 use std::error::Error;
 use torrent_name_parser::Metadata;
 
-#[path = "provider/pornhub.rs"]
-mod provider_pornhub;
-
-#[path = "provider/tmdb.rs"]
-mod provider_tmdb;
+use crate::metadata_provider::pornhub as provider_pornhub;
+use crate::metadata_provider::tmdb as provider_tmdb;
 
 pub struct MetadataAdultLastLookup {
     metadata_last_id: uuid::Uuid,

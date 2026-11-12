@@ -14,6 +14,33 @@ pub struct MediaStatusUpdatePayload {
     pub trash: bool,
 }
 
+pub async fn mk_lib_database_open_pool(
+    pool_connections: u32,
+    connection_timeout: u64,
+) -> Result<(sqlx::PgPool, sqlx::PgPool), Box<dyn std::error::Error + Send + Sync>> {
+    let db_user = env::var("POSTGRES_USER").map_err(|e| format!("POSTGRES_USER not set: {e}"))?;
+    let db_pass =
+        env::var("POSTGRES_PASSWORD").map_err(|e| format!("POSTGRES_PASSWORD not set: {e}"))?;
+    let create_pool = |host: &str| {
+        let connection_string = format!(
+            "postgresql://{}:{}@{}:5432/mkdatabase?sslmode=prefer",
+            db_user,
+            encode(&db_pass),
+            host
+        );
+        PgPoolOptions::new()
+            .max_connections(pool_connections)
+            .acquire_timeout(Duration::from_secs(connection_timeout))
+            .max_lifetime(Duration::from_secs(1800))
+            .connect_lazy(&connection_string)
+    };
+    let sqlx_pool_rw = create_pool("pgcluster-with-metrics-pgbouncer-rw.cnpg-system")
+        .map_err(|e| format!("failed to create rw pool: {e}"))?;
+    let sqlx_pool_ro = create_pool("pgcluster-with-metrics-pgbouncer-ro.cnpg-system")
+        .map_err(|e| format!("failed to create ro pool: {e}"))?;
+    Ok((sqlx_pool_rw, sqlx_pool_ro))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -92,31 +119,4 @@ mod tests {
         assert_eq!(payload.guid, cloned.guid);
         assert_eq!(payload.favorite, cloned.favorite);
     }
-}
-
-pub async fn mk_lib_database_open_pool(
-    pool_connections: u32,
-    connection_timeout: u64,
-) -> Result<(sqlx::PgPool, sqlx::PgPool), Box<dyn std::error::Error + Send + Sync>> {
-    let db_user = env::var("POSTGRES_USER").map_err(|e| format!("POSTGRES_USER not set: {e}"))?;
-    let db_pass =
-        env::var("POSTGRES_PASSWORD").map_err(|e| format!("POSTGRES_PASSWORD not set: {e}"))?;
-    let create_pool = |host: &str| {
-        let connection_string = format!(
-            "postgresql://{}:{}@{}:5432/mkdatabase?sslmode=prefer",
-            db_user,
-            encode(&db_pass),
-            host
-        );
-        PgPoolOptions::new()
-            .max_connections(pool_connections)
-            .acquire_timeout(Duration::from_secs(connection_timeout))
-            .max_lifetime(Duration::from_secs(1800))
-            .connect_lazy(&connection_string)
-    };
-    let sqlx_pool_rw = create_pool("pgcluster-with-metrics-pgbouncer-rw.cnpg-system")
-        .map_err(|e| format!("failed to create rw pool: {e}"))?;
-    let sqlx_pool_ro = create_pool("pgcluster-with-metrics-pgbouncer-ro.cnpg-system")
-        .map_err(|e| format!("failed to create ro pool: {e}"))?;
-    Ok((sqlx_pool_rw, sqlx_pool_ro))
 }

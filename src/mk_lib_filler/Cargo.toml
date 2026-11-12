@@ -12,4 +12,4 @@ codegen-units = 1
 [dependencies]
 
 [dev-dependencies]
-tokio-test = "*"
+tokio = { version = "1.53.1", features = ["macros", "rt"] }

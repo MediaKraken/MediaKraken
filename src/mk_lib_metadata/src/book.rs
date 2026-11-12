@@ -1,11 +1,8 @@
 use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 use std::error::Error;
 
-#[path = "provider/isbndb.rs"]
-mod provider_isbndb;
-
-#[path = "provider/open_library.rs"]
-mod provider_open_library;
+use crate::metadata_provider::isbndb as provider_isbndb;
+use crate::metadata_provider::open_library as provider_open_library;
 
 pub async fn metadata_book_lookup(
     _sqlx_pool: &sqlx::PgPool,

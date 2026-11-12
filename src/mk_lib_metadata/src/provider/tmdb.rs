@@ -50,11 +50,11 @@ pub async fn provider_tmdb_movie_fetch(
 ) -> Result<(), Box<dyn std::error::Error>> {
     // fetch and save json data via tmdb id
     let result_json = provider_tmdb_movie_fetch_by_id(tmdb_id, tmdb_api_key).await?;
-    if let Some(status) = result_json.get("status_code").and_then(|v| v.as_i64()) {
-        if status != 0 {
-            println!("Skip Movie: {}", tmdb_id);
-            return Ok(());
-        }
+    if let Some(status) = result_json.get("status_code").and_then(|v| v.as_i64())
+        && status != 0
+    {
+        println!("Skip Movie: {}", tmdb_id);
+        return Ok(());
     }
     let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await?;
     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_insert(
@@ -103,11 +103,11 @@ pub async fn provider_tmdb_person_fetch(
         )
         .await?;
     }
-    if let Some(status) = result_json.get("status_code").and_then(|v| v.as_i64()) {
-        if status != 0 {
-            println!("Skip Person: {}", tmdb_id);
-            return Ok(());
-        }
+    if let Some(status) = result_json.get("status_code").and_then(|v| v.as_i64())
+        && status != 0
+    {
+        println!("Skip Person: {}", tmdb_id);
+        return Ok(());
     }
     if debug_logging_enabled() {
         mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
@@ -135,11 +135,11 @@ pub async fn provider_tmdb_tv_fetch(
 ) -> Result<(), Box<dyn std::error::Error>> {
     // fetch and save json data via tmdb id
     let result_json = provider_tmdb_tv_fetch_by_id(tmdb_id, tmdb_api_key).await?;
-    if let Some(status) = result_json.get("status_code").and_then(|v| v.as_i64()) {
-        if status != 0 {
-            println!("Skip TV: {}", tmdb_id);
-            return Ok(());
-        }
+    if let Some(status) = result_json.get("status_code").and_then(|v| v.as_i64())
+        && status != 0
+    {
+        println!("Skip TV: {}", tmdb_id);
+        return Ok(());
     }
     let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await?;
     let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_insert(
@@ -179,11 +179,11 @@ pub async fn provider_tmdb_collection_fetch(
 ) -> Result<(), Box<dyn std::error::Error>> {
     // fetch and save json data via tmdb id
     let result_json = provider_tmdb_collection_fetch_by_id(tmdb_id, tmdb_api_key).await?;
-    if let Some(status) = result_json.get("status_code").and_then(|v| v.as_i64()) {
-        if status != 0 {
-            println!("Skip Collection: {}", tmdb_id);
-            return Ok(());
-        }
+    if let Some(status) = result_json.get("status_code").and_then(|v| v.as_i64())
+        && status != 0
+    {
+        println!("Skip Collection: {}", tmdb_id);
+        return Ok(());
     }
     // let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
     // let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_collection::mk_lib_database_meta_collection_insert(

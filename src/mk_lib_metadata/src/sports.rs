@@ -1,8 +1,7 @@
 use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 use std::error::Error;
 
-#[path = "provider/thesportsdb.rs"]
-mod provider_thesportsdb;
+use crate::metadata_provider::thesportsdb as provider_thesportsdb;
 
 pub struct MetadataSportsLastLookup {
     metadata_last_id: uuid::Uuid,

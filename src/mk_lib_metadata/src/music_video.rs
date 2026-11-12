@@ -1,8 +1,7 @@
 use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 use std::error::Error;
 
-#[path = "provider/imvdb.rs"]
-mod provider_imvdb;
+use crate::metadata_provider::imvdb as provider_imvdb;
 
 pub struct MetadataMusicVideoLastLookup {
     metadata_last_id: uuid::Uuid,

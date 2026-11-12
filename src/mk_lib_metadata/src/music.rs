@@ -1,14 +1,9 @@
 use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 use std::error::Error;
 
-#[path = "provider/musicbrainz.rs"]
-mod provider_musicbrainz;
-
-#[path = "provider/pitchfork.rs"]
-mod provider_pitchfork;
-
-#[path = "provider/shoutcast.rs"]
-mod provider_shoutcast;
+use crate::metadata_provider::musicbrainz as provider_musicbrainz;
+use crate::metadata_provider::pitchfork as provider_pitchfork;
+use crate::metadata_provider::shoutcast as provider_shoutcast;
 
 pub async fn metadata_music_lookup(
     _sqlx_pool: &sqlx::PgPool,

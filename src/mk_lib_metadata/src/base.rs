@@ -105,14 +105,12 @@ pub async fn metadata_search(
             //     }
             // }
         }
-    } else if provider_name == "chart_lyrics" {
+    } else if provider_name == "chart_lyrics"
+        || provider_name == "comicvine"
+        || provider_name == "giantbomb"
+        || provider_name == "imdb"
+    {
         //provider_chart_lyrics::provider_chart_lyrics_fetch(&sqlx_pool, artist_name, song_name);
-        lookup_halt = true;
-    } else if provider_name == "comicvine" {
-        lookup_halt = true;
-    } else if provider_name == "giantbomb" {
-        lookup_halt = true;
-    } else if provider_name == "imdb" {
         lookup_halt = true;
     } else if provider_name == "imvdb" {
         metadata_uuid =
@@ -138,13 +136,11 @@ pub async fn metadata_search(
         if metadata_uuid == uuid::Uuid::nil() {
             lookup_halt = true;
         }
-    } else if provider_name == "omdb" {
-        lookup_halt = true;
-    } else if provider_name == "openlibrary" {
-        lookup_halt = true;
-    } else if provider_name == "pitchfork" {
-        lookup_halt = true;
-    } else if provider_name == "pornhub" {
+    } else if provider_name == "omdb"
+        || provider_name == "openlibrary"
+        || provider_name == "pitchfork"
+        || provider_name == "pornhub"
+    {
         lookup_halt = true;
     } else if provider_name == "televisiontunes" {
         // if download succeeds remove dl
@@ -166,9 +162,7 @@ pub async fn metadata_search(
         } else {
             lookup_halt = true;
         }
-    } else if provider_name == "theaudiodb" {
-        lookup_halt = true;
-    } else if provider_name == "thegamesdb" {
+    } else if provider_name == "theaudiodb" || provider_name == "thegamesdb" {
         lookup_halt = true;
     } else if provider_name == "themoviedb" {
         guessit_data = guessit::metadata_guessit(
@@ -247,9 +241,7 @@ pub async fn metadata_search(
         //         set_fetch = true;
         //     }
         // }
-    } else if provider_name == "tv_intros" {
-        lookup_halt = true;
-    } else if provider_name == "twitch" {
+    } else if provider_name == "tv_intros" || provider_name == "twitch" {
         lookup_halt = true;
     }
     Ok(())

@@ -266,7 +266,8 @@ async fn mk_smb_probe(share_info: &DBShareList, path_on_share: &str) -> bool {
 // The image's samba-client (Alpine 4.22.x) emits the fixed-width column form
 // from samba's display_finfo() *regardless of `-g`*:
 //   "  %-30s%7.7s %8.0f  %s"  = 2sp, name (>=30 cols), 7-col attrs,
-//   sp, 8-col size, 2sp, 24-col date.
+//   sp, size (8 cols minimum — samba widens it for 100MB+ files, e.g.
+//   12 digits for a 100GB file), 2sp, 24-col date.
 // Other builds emit pipe rows (`<type>|<name>|...`); both shapes are accepted,
 // mirroring the admin share-browse parser. In recursive mode each subdirectory
 // block is introduced by a share-root-relative `\a\b\c` header line; the
@@ -330,14 +331,22 @@ fn mk_parse_smb_ls_output(stdout: &str, path_on_share: &str) -> Vec<FileMetadata
         if head.len() < 8 {
             continue;
         }
-        let (head, size_field) = head.split_at(head.len() - 8);
-        if size_field.trim_start().parse::<u64>().is_err() {
+        // samba's `%8.0f` widens beyond 8 columns for sizes of 100MB+
+        // (a 100GB file is 12 digits), so the size is the trailing digit
+        // run, not a fixed-width field.
+        let size_len = head
+            .bytes()
+            .rev()
+            .take_while(u8::is_ascii_digit)
+            .count();
+        if size_len == 0 {
             continue;
         }
-        let head = match head.strip_suffix(' ') {
-            Some(head) => head,
-            None => continue,
-        };
+        let (head, size_field) = head.split_at(head.len() - size_len);
+        if size_field.parse::<u64>().is_err() {
+            continue;
+        }
+        let head = head.trim_end_matches(' ');
         if head.len() < 7 {
             continue;
         }
@@ -1292,6 +1301,33 @@ mod tests {
         );
     }
 
+    // Files of 100MB+ widen samba's `%8.0f` size column past 8 chars
+    // (100MB = 9 digits, 100GB = 12, 1TB = 13); the parser must keep them
+    // instead of silently dropping them (the old fixed-8 split_at left the
+    // leading digit glued to the attrs field and `strip_suffix(' ')` failed).
+    #[test]
+    fn test_parse_smb_ls_column_form_large_sizes() {
+        let stdout = concat!(
+            "  Movie_100MB.mkv                     N 100000000  Wed Nov 11 04:00:35 2026\n",
+            "  Movie_100GB.mkv                     N 100000000000  Wed Nov 11 04:00:35 2026\n",
+            "  Movie_1TB.mkv                       N 1000000000000  Wed Nov 11 04:00:35 2026\n",
+            "  Small_Song.mp3                      N        2  Wed Nov 11 04:00:35 2026\n",
+        );
+        let entries = mk_parse_smb_ls_output(stdout, "Media");
+        let names: Vec<&str> = entries.iter().map(|e| e.name.as_str()).collect();
+        assert_eq!(
+            names,
+            vec![
+                "Media/Movie_100MB.mkv",
+                "Media/Movie_100GB.mkv",
+                "Media/Movie_1TB.mkv",
+                "Media/Small_Song.mp3",
+            ]
+        );
+        let directories: Vec<bool> = entries.iter().map(|e| e.directory).collect();
+        assert_eq!(directories, vec![false, false, false, false]);
+    }
+
     // Legacy pipe rows (`<type>|<name>|<size>|<date>`) from other smbclient
     // builds must keep working unchanged.
     #[test]
@@ -1437,7 +1473,12 @@ mod tests {
 
     #[test]
     fn test_path_contains_prefix_partial_no_match() {
-        assert!(!path_contains_prefix("/movies/action/file.mkv", "movie"));
+        // Unlike path_contains_segment, a component that *starts with* the
+        // prefix matches (that is what the "theme." check relies on):
+        // "/movies" starts with "movie".
+        assert!(path_contains_prefix("/movies/action/file.mkv", "movie"));
+        // A prefix no component starts with does not match.
+        assert!(!path_contains_prefix("/movies/action/file.mkv", "movie2"));
     }
 
     #[test]
