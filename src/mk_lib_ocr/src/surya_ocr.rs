@@ -17,11 +17,11 @@ pub async fn mk_ocr_surya(file_path: &str) -> Result<OcrResult, Box<dyn Error>> 
 
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(format!("surya failed: {}", stderr).into());
+            return Err(format!("surya failed: {}", stderr));
         }
 
         let text = String::from_utf8_lossy(&output.stdout).to_string();
-        Ok::<OcrResult, Box<dyn Error>>(OcrResult {
+        Ok::<OcrResult, String>(OcrResult {
             text,
             confidence: 0.0,
         })
@@ -53,11 +53,11 @@ pub async fn mk_ocr_surya_with_lang(
 
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(format!("surya failed: {}", stderr).into());
+            return Err(format!("surya failed: {}", stderr));
         }
 
         let text = String::from_utf8_lossy(&output.stdout).to_string();
-        Ok::<OcrResult, Box<dyn Error>>(OcrResult {
+        Ok::<OcrResult, String>(OcrResult {
             text,
             confidence: 0.0,
         })
