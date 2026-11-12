@@ -52,20 +52,18 @@ pub async fn mk_network_share_scan_port_rustscan(
     let mut vec_share = Vec::new();
     for line in stdout.split("\n") {
         let text_line = &line.trim().to_string();
-        let ip_addr = text_line.split(" ").next().ok_or("no ip addr found")?.to_string();
+        let ip_addr = text_line
+            .split(" ")
+            .next()
+            .ok_or("no ip addr found")?
+            .to_string();
         if text_line.contains("445") {
             // smb share
-            vec_share.extend(
-                mk_network_share_smb_detail(ip_addr.parse()?)
-                    .await?,
-            );
+            vec_share.extend(mk_network_share_smb_detail(ip_addr.parse()?).await?);
         }
         if text_line.contains("2049") {
             // nfs share
-            vec_share.extend(
-                mk_network_share_nfs_detail(ip_addr.parse()?)
-                    .await?,
-            );
+            vec_share.extend(mk_network_share_nfs_detail(ip_addr.parse()?).await?);
         }
     }
     Ok(vec_share)
@@ -86,26 +84,23 @@ pub async fn mk_network_share_scan_port(
         .output()
         .map_err(|e| format!("nmap failed: {e}"))?;
     let mut vec_share = Vec::new();
-    let file = File::open("port.txt")
-        .map_err(|e| format!("failed to open port.txt: {e}"))?;
+    let file = File::open("port.txt").map_err(|e| format!("failed to open port.txt: {e}"))?;
     let reader = BufReader::new(file);
     let mut ip_addr = String::new();
     for line in reader.lines() {
         let text_line = &line?.trim().to_string();
         if text_line.starts_with("Nmap scan report for") {
-            ip_addr = text_line.split(" ").last().ok_or("no ip addr found")?.to_string();
+            ip_addr = text_line
+                .split(" ")
+                .last()
+                .ok_or("no ip addr found")?
+                .to_string();
         } else if text_line.starts_with("445/tcp") {
             // smb share
-            vec_share.extend(
-                mk_network_share_smb_detail(ip_addr.parse()?)
-                    .await?,
-            );
+            vec_share.extend(mk_network_share_smb_detail(ip_addr.parse()?).await?);
         } else if text_line.starts_with("2049/tcp") {
             // nfs share
-            vec_share.extend(
-                mk_network_share_nfs_detail(ip_addr.parse()?)
-                    .await?,
-            );
+            vec_share.extend(mk_network_share_nfs_detail(ip_addr.parse()?).await?);
         }
     }
     Ok(vec_share)
@@ -176,7 +171,10 @@ pub async fn mk_network_share_nfs_detail(
     let file_data = mk_lib_file::mk_read_file_data("scan.xml").await?;
     if !file_data.contains("(0 hosts up)") && file_data.contains("table key=") {
         let nmap_json = xml_string_to_json(file_data.to_string(), &conf)?;
-        for val in nmap_json["nmaprun"]["host"].as_object().ok_or("no nmaprun host object")? {
+        for val in nmap_json["nmaprun"]["host"]
+            .as_object()
+            .ok_or("no nmaprun host object")?
+        {
             let (key, v) = val;
             if key == "table" {
                 let shares = v.as_array().ok_or("no array in nfs table")?;

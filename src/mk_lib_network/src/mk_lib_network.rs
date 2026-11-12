@@ -43,19 +43,13 @@ mod tests {
     #[test]
     fn test_sanitize_url_for_logging_with_query() {
         let url = "https://example.com/path?token=secret&foo=bar";
-        assert_eq!(
-            sanitize_url_for_logging(url),
-            "https://example.com/path"
-        );
+        assert_eq!(sanitize_url_for_logging(url), "https://example.com/path");
     }
 
     #[test]
     fn test_sanitize_url_for_logging_query_at_start() {
         let url = "https://example.com?token=secret";
-        assert_eq!(
-            sanitize_url_for_logging(url),
-            "https://example.com"
-        );
+        assert_eq!(sanitize_url_for_logging(url), "https://example.com");
     }
 
     #[test]
@@ -94,10 +88,7 @@ mod tests {
     #[test]
     fn test_sanitize_url_for_logging_multiple_queries() {
         let url = "https://example.com/path?a=1&b=2&c=3";
-        assert_eq!(
-            sanitize_url_for_logging(url),
-            "https://example.com/path"
-        );
+        assert_eq!(sanitize_url_for_logging(url), "https://example.com/path");
     }
 
     #[test]

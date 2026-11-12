@@ -6,7 +6,8 @@ use std::io::BufReader;
 
 pub async fn rss_file_open(file_path: String) -> Result<Channel, Box<dyn std::error::Error>> {
     let file = File::open(&file_path).map_err(|e| format!("failed to open rss file: {e}"))?;
-    let channel = Channel::read_from(BufReader::new(file)).map_err(|e| format!("failed to parse rss channel: {e}"))?;
+    let channel = Channel::read_from(BufReader::new(file))
+        .map_err(|e| format!("failed to parse rss channel: {e}"))?;
     Ok(channel)
 }
 

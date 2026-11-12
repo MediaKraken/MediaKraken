@@ -33,14 +33,18 @@ pub async fn telnet_connect(
     Ok(telnet_instance)
 }
 
-pub async fn telnet_execute_normal(mut telnet_instance: Telnet, telnet_command: String) -> Result<(), Box<dyn std::error::Error>> {
-    telnet_instance
-        .normal_execute(&telnet_command)
-        .await?;
+pub async fn telnet_execute_normal(
+    mut telnet_instance: Telnet,
+    telnet_command: String,
+) -> Result<(), Box<dyn std::error::Error>> {
+    telnet_instance.normal_execute(&telnet_command).await?;
     Ok(())
 }
 
-pub async fn telnet_execute(mut telnet_instance: Telnet, telnet_command: String) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn telnet_execute(
+    mut telnet_instance: Telnet,
+    telnet_command: String,
+) -> Result<(), Box<dyn std::error::Error>> {
     telnet_instance.execute(&telnet_command).await?;
     Ok(())
 }

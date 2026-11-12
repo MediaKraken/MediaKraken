@@ -12,11 +12,12 @@ firewall-cmd --reload
  */
 
 pub async fn mk_lib_network_find_mediakraken_server() -> Result<String, Box<dyn Error>> {
-    let socket = UdpSocket::bind("0.0.0.0:9999")
-        .map_err(|e| format!("failed to bind udp socket: {e}"))?;
+    let socket =
+        UdpSocket::bind("0.0.0.0:9999").map_err(|e| format!("failed to bind udp socket: {e}"))?;
     let buf = [1u8; 15000];
     let count = 1473;
-    socket.send_to(&buf[0..count], "234.2.2.2:8888")
+    socket
+        .send_to(&buf[0..count], "234.2.2.2:8888")
         .map_err(|e| format!("failed to send discovery packet: {e}"))?;
 
     let mut buf = [0u8; 64];

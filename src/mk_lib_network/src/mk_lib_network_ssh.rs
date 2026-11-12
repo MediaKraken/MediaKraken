@@ -13,9 +13,16 @@ pub async fn mk_network_ssh_command(
         .connect(format!("{}:{}", host_ip, host_port))
         .map_err(|e| format!("ssh connect failed: {e}"))?
         .run_local();
-    let exec = session.open_exec().map_err(|e| format!("open exec failed: {e}"))?;
-    let vec: Vec<u8> = exec.send_command(command_string).map_err(|e| format!("send command failed: {e}"))?;
-    println!("{}", String::from_utf8(vec).map_err(|e| format!("invalid utf8: {e}"))?);
+    let exec = session
+        .open_exec()
+        .map_err(|e| format!("open exec failed: {e}"))?;
+    let vec: Vec<u8> = exec
+        .send_command(command_string)
+        .map_err(|e| format!("send command failed: {e}"))?;
+    println!(
+        "{}",
+        String::from_utf8(vec).map_err(|e| format!("invalid utf8: {e}"))?
+    );
     session.close();
     Ok(())
 }
@@ -34,8 +41,11 @@ pub async fn mk_network_ssh_upload(
         .connect(format!("{}:{}", host_ip, host_port))
         .map_err(|e| format!("ssh connect failed: {e}"))?
         .run_local();
-    let scp = session.open_scp().map_err(|e| format!("open scp failed: {e}"))?;
-    scp.upload(local_file, remote_file).map_err(|e| format!("scp upload failed: {e}"))?;
+    let scp = session
+        .open_scp()
+        .map_err(|e| format!("open scp failed: {e}"))?;
+    scp.upload(local_file, remote_file)
+        .map_err(|e| format!("scp upload failed: {e}"))?;
     session.close();
     Ok(())
 }
@@ -54,8 +64,11 @@ pub async fn mk_network_ssh_download(
         .connect(format!("{}:{}", host_ip, host_port))
         .map_err(|e| format!("ssh connect failed: {e}"))?
         .run_local();
-    let scp = session.open_scp().map_err(|e| format!("open scp failed: {e}"))?;
-    scp.download(local_file, remote_file).map_err(|e| format!("scp download failed: {e}"))?;
+    let scp = session
+        .open_scp()
+        .map_err(|e| format!("open scp failed: {e}"))?;
+    scp.download(local_file, remote_file)
+        .map_err(|e| format!("scp download failed: {e}"))?;
     session.close();
     Ok(())
 }
