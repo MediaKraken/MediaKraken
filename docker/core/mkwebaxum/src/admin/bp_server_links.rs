@@ -70,7 +70,7 @@ pub async fn admin_server_links_post(
     State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
-    mut flash: Flash,
+    flash: Flash,
     Form(input_data): Form<ServerLinkInput>,
 ) -> impl IntoResponse {
     let current_user = auth.current_user.clone().unwrap_or_default();

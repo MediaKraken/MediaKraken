@@ -112,13 +112,12 @@ pub async fn metadata_object_proxy(
         .get(header::CONTENT_LENGTH)
         .and_then(|v| v.to_str().ok())
         .and_then(|v| v.parse::<u64>().ok())
+        && len > MAX_UPSTREAM_BYTES
     {
-        if len > MAX_UPSTREAM_BYTES {
-            return text_response(
-                StatusCode::PAYLOAD_TOO_LARGE,
-                "metadata object exceeds maximum size",
-            );
-        }
+        return text_response(
+            StatusCode::PAYLOAD_TOO_LARGE,
+            "metadata object exceeds maximum size",
+        );
     }
 
     let content_type = upstream_response

@@ -20,6 +20,7 @@ struct TemplateError401Context {}
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_500.html")]
 struct TemplateError500Context {
+    #[allow(dead_code)]
     page_title: Option<String>,
     is_admin: bool,
 }
@@ -31,6 +32,7 @@ struct OpenLibraryWorkRow {
 }
 
 struct OpenLibraryBrowseItem {
+    #[allow(dead_code)]
     work_id: String,
     route_work_id: String,
     title: String,

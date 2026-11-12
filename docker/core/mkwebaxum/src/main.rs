@@ -18,7 +18,12 @@ use axum_session::{Key, SameSite, SessionConfig, SessionLayer, SessionStore};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use hyper_util::{client::legacy::connect::HttpConnector, rt::TokioExecutor};
+// These single-component imports are required: the codebase references the
+// crates via `crate::mk_lib_database::...` / `crate::mk_lib_logging::...`
+// paths, which only resolve with a root-level `use` re-export.
+#[allow(clippy::single_component_path_imports)]
 use mk_lib_database;
+#[allow(clippy::single_component_path_imports)]
 use mk_lib_logging;
 use ring::digest;
 use serde_json::json;
@@ -137,7 +142,7 @@ pub mod user_playback {
 }
 
 #[derive(Clone)]
-struct AppState {
+pub struct AppState {
     flash_config: axum_flash::Config,
     pub sqlx_pool_rw: PgPool,
     pub sqlx_pool_ro: PgPool,
@@ -788,7 +793,7 @@ async fn main() {
                 i64,
                 SessionPgPool,
                 PgPool,
-            >::new(Some(sqlx_pool_rw.clone().into()))
+            >::new(Some(sqlx_pool_rw.clone()))
             .with_config(auth_config),
         )
         .layer(SessionLayer::new(session_store))

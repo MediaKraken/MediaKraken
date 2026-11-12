@@ -12,6 +12,3 @@ codegen-units = 1
 [dependencies]
 brother_ql = { version = "2.2.0", features = ["usb"] }
 image = "0.25.9"
-
-[dev-dependencies]
-tokio-test = "*"

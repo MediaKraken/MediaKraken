@@ -45,7 +45,14 @@ fn build_limiter(tokens: u64, window: Duration) -> Result<Ratelimiter, String> {
         .max_tokens(tokens)
         .initial_available(tokens)
         .build()
-        .map_err(|e| format!("ratelimiter build failed for {} tokens/{}ms: {}", tokens, window.as_millis(), e))
+        .map_err(|e| {
+            format!(
+                "ratelimiter build failed for {} tokens/{}ms: {}",
+                tokens,
+                window.as_millis(),
+                e
+            )
+        })
 }
 
 // Waits until every limiter has a token available, or returns true if
@@ -251,14 +258,16 @@ mod tests {
 
     #[tokio::test]
     async fn test_build_limiter_basic() {
-        let limiter = build_limiter(10, Duration::from_secs(60)).expect("build_limiter failed in test");
+        let limiter =
+            build_limiter(10, Duration::from_secs(60)).expect("build_limiter failed in test");
         let result = limiter.try_wait();
         assert!(result.is_ok());
     }
 
     #[tokio::test]
     async fn test_build_limiter_max_tokens() {
-        let limiter = build_limiter(5, Duration::from_secs(60)).expect("build_limiter failed in test");
+        let limiter =
+            build_limiter(5, Duration::from_secs(60)).expect("build_limiter failed in test");
         for _ in 0..5 {
             assert!(limiter.try_wait().is_ok());
         }
@@ -267,14 +276,16 @@ mod tests {
 
     #[tokio::test]
     async fn test_build_limiter_single_token() {
-        let limiter = build_limiter(1, Duration::from_secs(60)).expect("build_limiter failed in test");
+        let limiter =
+            build_limiter(1, Duration::from_secs(60)).expect("build_limiter failed in test");
         assert!(limiter.try_wait().is_ok());
         assert!(limiter.try_wait().is_err());
     }
 
     #[tokio::test]
     async fn test_build_limiter_large_tokens() {
-        let limiter = build_limiter(1000, Duration::from_secs(60)).expect("build_limiter failed in test");
+        let limiter =
+            build_limiter(1000, Duration::from_secs(60)).expect("build_limiter failed in test");
         for _ in 0..1000 {
             assert!(limiter.try_wait().is_ok());
         }
@@ -283,7 +294,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_build_limiter_short_window() {
-        let limiter = build_limiter(2, Duration::from_millis(100)).expect("build_limiter failed in test");
+        let limiter =
+            build_limiter(2, Duration::from_millis(100)).expect("build_limiter failed in test");
         assert!(limiter.try_wait().is_ok());
         assert!(limiter.try_wait().is_ok());
         assert!(limiter.try_wait().is_err());
@@ -293,8 +305,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_build_limiter_different_windows() {
-        let limiter1 = build_limiter(5, Duration::from_secs(10)).expect("build_limiter failed in test");
-        let limiter2 = build_limiter(5, Duration::from_secs(60)).expect("build_limiter failed in test");
+        let limiter1 =
+            build_limiter(5, Duration::from_secs(10)).expect("build_limiter failed in test");
+        let limiter2 =
+            build_limiter(5, Duration::from_secs(60)).expect("build_limiter failed in test");
         assert!(limiter1.try_wait().is_ok());
         assert!(limiter2.try_wait().is_ok());
     }

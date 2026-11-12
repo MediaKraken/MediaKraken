@@ -148,7 +148,7 @@ async fn verify_authy_token(authy_id: &str, authy_token: &str, api_key: &str) ->
 
 pub async fn public_login_post(
     State(state): State<AppState>,
-    mut auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
     flash: Flash,
     Form(input_data): Form<LoginInput>,
 ) -> (Flash, Redirect) {

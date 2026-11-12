@@ -1,21 +1,15 @@
 use crate::AppState;
-use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
 use askama::Template;
 use axum::extract::State;
 use axum::{
-    Extension,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
 };
-use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
-use serde::{Deserialize, Serialize};
-use serde_json::json;
-use sqlx::postgres::{PgPool, PgRow};
-use sqlx::{FromRow, Row};
+use sqlx::postgres::PgPool;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_401.html")]

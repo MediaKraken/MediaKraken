@@ -4,18 +4,13 @@ use crate::user_preferences;
 use askama::Template;
 use axum::extract::State;
 use axum::{
-    Extension,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
-    routing::{get, post},
 };
-use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
-use serde::{Deserialize, Serialize};
-use serde_json::json;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -98,10 +93,10 @@ struct TemplateAdminUserDetailContext {
 }
 
 pub async fn admin_user_detail(
-    State(state): State<AppState>,
+    State(_state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
-    Path(guid): Path<uuid::Uuid>,
+    Path(_guid): Path<uuid::Uuid>,
 ) -> impl IntoResponse {
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(

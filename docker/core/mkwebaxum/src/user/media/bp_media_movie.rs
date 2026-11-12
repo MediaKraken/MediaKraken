@@ -1,22 +1,16 @@
 use crate::AppState;
-use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
 use crate::user_preferences;
 use askama::Template;
 use axum::extract::State;
-use axum::response::Redirect;
-use axum::response::Response;
 use axum::{
-    Extension,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
 };
-use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
-use serde_json::json;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -30,6 +24,7 @@ struct TemplateMediaMovieContext<'a> {
         &'a Vec<mk_lib_database::database_media::mk_lib_database_media_movie::DBMediaMovieList>,
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
+    #[allow(dead_code)]
     page: &'a usize,
     page_title: Option<String>,
 }
@@ -98,7 +93,7 @@ pub async fn user_media_movie(
                 }
             };
         let mut template_data_exists = false;
-        if movie_list.len() > 0 {
+        if !movie_list.is_empty() {
             template_data_exists = true;
         }
         let page_usize = page as usize;
@@ -106,6 +101,7 @@ pub async fn user_media_movie(
             template_data: &movie_list,
             template_data_exists: &template_data_exists,
             pagination_bar: &pagination_html,
+            #[allow(dead_code)]
             page: &page_usize,
             page_title: Some("MediaKraken Movies".to_string()),
         };
@@ -152,13 +148,13 @@ fn parse_ffprobe_resolution(ffprobe: &serde_json::Value) -> String {
         return "NA".to_string();
     };
     for stream in streams {
-        if stream.get("codec_type").and_then(serde_json::Value::as_str) == Some("video") {
-            if let (Some(width), Some(height)) = (
+        if stream.get("codec_type").and_then(serde_json::Value::as_str) == Some("video")
+            && let (Some(width), Some(height)) = (
                 stream.get("width").and_then(serde_json::Value::as_u64),
                 stream.get("height").and_then(serde_json::Value::as_u64),
-            ) {
-                return format!("{width}x{height}");
-            }
+            )
+        {
+            return format!("{width}x{height}");
         }
     }
     "NA".to_string()
@@ -322,9 +318,9 @@ pub async fn user_media_movie_status(
     .validate(&current_user, &method, None)
     .await
     {
-        return StatusCode::UNAUTHORIZED.into_response();
+        StatusCode::UNAUTHORIZED.into_response()
     } else {
-        let _row_data = mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_status(
+        mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_status(
             &state.sqlx_pool_rw, payload, current_user.id
         )
         .await

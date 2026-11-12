@@ -3,12 +3,9 @@ use crate::mk_lib_database;
 use askama::Template;
 use axum::extract::State;
 use axum::{
-    Extension,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
-    routing::{get, post},
 };
-use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use sqlx::postgres::PgPool;
@@ -35,7 +32,7 @@ Cloud stuff
  */
 
 pub async fn admin_settings(
-    State(state): State<AppState>,
+    State(_state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {

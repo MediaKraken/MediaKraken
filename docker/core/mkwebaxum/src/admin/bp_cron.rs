@@ -137,7 +137,7 @@ pub async fn admin_cron_run(
             mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp")
                 .await
                 .unwrap();
-        let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
             rabbit_channel.clone(),
             row_data["route_key"].as_str().unwrap(),
             row_data.to_string(),
@@ -147,7 +147,7 @@ pub async fn admin_cron_run(
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
             .await
             .unwrap();
-        let _result = mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_time_update(
+        mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_time_update(
             &state.sqlx_pool_rw,
             guid,
         )

@@ -5,13 +5,12 @@ use crate::mk_lib_database;
 use askama::Template;
 use axum::extract::{Form, State};
 use axum::{
-    Extension, Json,
-    extract::{Path, Query},
+    Json,
+    extract::Query,
     http::{Method, StatusCode},
     response::{Html, IntoResponse, Redirect},
 };
 use axum_flash::Flash;
-use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_enum_media_type::DLMediaType;
@@ -208,7 +207,7 @@ pub async fn admin_library(
         .await
         .unwrap();
         let mut template_data_exists: bool = false;
-        if library_list.len() > 0 {
+        if !library_list.is_empty() {
             template_data_exists = true;
         }
         let template = TemplateAdminLibraryContext {
@@ -260,7 +259,7 @@ pub async fn admin_library_share_add(
     State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
-    mut flash: Flash,
+    flash: Flash,
     Form(input_data): Form<AddShareLibraryInput>,
 ) -> impl IntoResponse {
     let current_user = auth.current_user.clone().unwrap_or_default();
@@ -489,7 +488,7 @@ pub async fn admin_library_share_directories(
     // That makes `ls` enumerate every subdirectory in the share and surface
     // them all in the picker regardless of the requested cwd.
     let mut smb_commands: Vec<String> = Vec::new();
-    if cleaned_path.is_empty() == false {
+    if !cleaned_path.is_empty() {
         smb_commands.push(format!("cd \"{}\"", cleaned_path));
     }
     smb_commands.push(String::from("ls"));
@@ -500,10 +499,10 @@ pub async fn admin_library_share_directories(
         .arg("-g")
         .arg("-c")
         .arg(smb_commands.join(";"));
-    if let Some(workgroup) = share_info.mm_network_share_workgroup.as_deref() {
-        if workgroup.is_empty() == false {
-            smb_command.arg("-W").arg(workgroup);
-        }
+    if let Some(workgroup) = share_info.mm_network_share_workgroup.as_deref()
+        && !workgroup.is_empty()
+    {
+        smb_command.arg("-W").arg(workgroup);
     }
     if let Some(user) = share_info.mm_share_auth_user.as_deref() {
         let pass = share_info
@@ -547,7 +546,7 @@ pub async fn admin_library_share_directories(
         }
     };
 
-    if smb_output.status.success() == false {
+    if !smb_output.status.success() {
         let stdout_output = String::from_utf8_lossy(&smb_output.stdout).to_string();
         let stderr_output = String::from_utf8_lossy(&smb_output.stderr).to_string();
         let details_output = if stderr_output.is_empty() {
@@ -605,13 +604,13 @@ pub async fn admin_library_share_directories(
         // (`<type>|<name>|<size>|<date>`); accept both shapes. Parse the
         // column form by trimming fixed-width fields off the right so internal
         // whitespace inside directory names is preserved verbatim.
-        if let Some((type_field, rest)) = line.split_once('|') {
-            if type_field == "D" {
-                let name = rest.split('|').next().unwrap_or_default();
-                if !name.is_empty() && name != "." && name != ".." {
-                    directories.push(name.to_string());
-                    continue;
-                }
+        if let Some((type_field, rest)) = line.split_once('|')
+            && type_field == "D"
+        {
+            let name = rest.split('|').next().unwrap_or_default();
+            if !name.is_empty() && name != "." && name != ".." {
+                directories.push(name.to_string());
+                continue;
             }
         }
         let trimmed = line.trim_end_matches(['\r', '\n']);
@@ -631,14 +630,18 @@ pub async fn admin_library_share_directories(
         if head.len() < 8 {
             continue;
         }
-        let (head, size_field) = head.split_at(head.len() - 8);
-        if size_field.trim_start().parse::<u64>().is_err() {
+        // samba's `%8.0f` widens beyond 8 columns for sizes of 100MB+
+        // (a 100GB file is 12 digits), so the size is the trailing digit
+        // run, not a fixed-width field (mirrors mkmediascanner).
+        let size_len = head.bytes().rev().take_while(u8::is_ascii_digit).count();
+        if size_len == 0 {
             continue;
         }
-        let head = match head.strip_suffix(' ') {
-            Some(rest) => rest,
-            None => continue,
-        };
+        let (head, size_field) = head.split_at(head.len() - size_len);
+        if size_field.parse::<u64>().is_err() {
+            continue;
+        }
+        let head = head.trim_end_matches(' ');
         if head.len() < 7 {
             continue;
         }

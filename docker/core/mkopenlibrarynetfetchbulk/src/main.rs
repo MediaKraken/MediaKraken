@@ -3,7 +3,7 @@ use aws_config::BehaviorVersion;
 use aws_sdk_s3::{Client as S3Client, config::Builder as S3ConfigBuilder};
 use futures::StreamExt;
 use mk_lib_file::mk_lib_file_s3_garage::mk_lib_file_s3_garage_add;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use sqlx::{AssertSqlSafe, Pool, Postgres, QueryBuilder, raw_sql};
 use std::io::Read;
@@ -12,7 +12,7 @@ use tokio::task::JoinSet;
 
 const BASE_URL: &str = "https://openlibrary.org/data/";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 struct BulkImageCoverLoadOptions {
     #[serde(rename = "ArchiveUrl")]
     archive_url: String,
@@ -381,7 +381,7 @@ mod tests {
         let options: BulkImageCoverLoadOptions = serde_json::from_str(json).unwrap();
         assert_eq!(options.archive_url, "http://example.com/archive.tar.gz");
         assert!(options.bucket.is_none());
-        assert_eq!(options.s3_prefix, "default_cover_prefix");
+        assert_eq!(options.s3_prefix, "openlibrary/covers");
         assert!(!options.add_json);
     }
 

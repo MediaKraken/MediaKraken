@@ -31,6 +31,7 @@ struct TemplateMetaSportsContext<'a> {
     >,
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
+    #[allow(dead_code)]
     page: &'a usize,
     page_title: Option<String>,
     pub current: Option<String>,
@@ -141,6 +142,7 @@ pub async fn user_metadata_sports(
             template_data: &sports_list,
             template_data_exists: &template_data_exists,
             pagination_bar: &pagination_html,
+            #[allow(dead_code)]
             page: &page_usize,
             page_title: Some("MediaKraken Metadata Sports".to_string()),
             current: starts_with,

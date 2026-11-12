@@ -1,15 +1,11 @@
 use crate::AppState;
-use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
 use askama::Template;
 use axum::extract::State;
-use axum::response::Redirect;
 use axum::{
-    Extension,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
 };
-use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use sqlx::postgres::PgPool;
@@ -25,7 +21,7 @@ struct TemplateUserGenreContext {
 }
 
 pub async fn user_media_genre(
-    State(state): State<AppState>,
+    State(_state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {

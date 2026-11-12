@@ -45,10 +45,10 @@ fn summary_cache() -> &'static RwLock<Option<CachedSummaries>> {
 async fn cached_bucket_summaries(client: &S3Client) -> Result<Vec<BucketSummary>, String> {
     {
         let guard = summary_cache().read().await;
-        if let Some(cached) = guard.as_ref() {
-            if cached.captured_at.elapsed() < SUMMARY_CACHE_TTL {
-                return Ok(cached.summaries.clone());
-            }
+        if let Some(cached) = guard.as_ref()
+            && cached.captured_at.elapsed() < SUMMARY_CACHE_TTL
+        {
+            return Ok(cached.summaries.clone());
         }
     }
     let fresh = gather_bucket_summaries(client).await?;
@@ -256,9 +256,9 @@ fn read_disk_stats(path: &str) -> Option<(u64, u64)> {
     if ret != 0 {
         return None;
     }
-    let frsize = u64::try_from(stat.f_frsize).unwrap_or(0);
-    let blocks = u64::try_from(stat.f_blocks).unwrap_or(0);
-    let avail = u64::try_from(stat.f_bavail).unwrap_or(0);
+    let frsize = stat.f_frsize;
+    let blocks = stat.f_blocks;
+    let avail = stat.f_bavail;
     Some((blocks.saturating_mul(frsize), avail.saturating_mul(frsize)))
 }
 

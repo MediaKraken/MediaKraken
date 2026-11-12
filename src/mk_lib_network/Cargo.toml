@@ -48,6 +48,3 @@ wakey = "0.4.1"
 
 [features]
 infiniband = ["dep:ibverbs"]
-
-[dev-dependencies]
-tokio-test = "*"

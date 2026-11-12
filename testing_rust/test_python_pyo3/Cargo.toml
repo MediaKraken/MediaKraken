@@ -11,6 +11,3 @@ codegen-units = 1
 
 [dependencies]
 pyo3 = { version = "0.18.3", default-features = true }
-
-[dev-dependencies]
-tokio-test = "*"

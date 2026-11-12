@@ -3,14 +3,11 @@ use crate::mk_lib_database;
 use askama::Template;
 use axum::extract::State;
 use axum::{
-    Extension,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
 };
-use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
-use serde_json::json;
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -23,6 +20,7 @@ struct TemplateError403Context {
 #[template(path = "bss_admin/bss_admin_hardware.html")]
 struct AdminHardwareTemplate<'a> {
     template_data: &'a Vec<mk_lib_database::mk_lib_database_hardware_device::DBDeviceList>,
+    #[allow(dead_code)]
     template_data_exists: &'a bool,
     page_title: Option<String>,
 }
@@ -52,7 +50,7 @@ pub async fn admin_hardware(
             .await
             .unwrap();
         let mut hardware_data: bool = false;
-        if hardware_list.len() > 0 {
+        if !hardware_list.is_empty() {
             hardware_data = true;
         }
         let template = AdminHardwareTemplate {

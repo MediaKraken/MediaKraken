@@ -94,7 +94,7 @@ async fn fetch_app_names() -> Vec<String> {
 
     let url = match reqwest::Url::parse_with_params(
         LOKI_APP_LABEL_VALUES_URL,
-        &[
+        [
             ("start", start_ns.to_string().as_str()),
             ("end", now_ns.to_string().as_str()),
         ],

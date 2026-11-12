@@ -22,6 +22,3 @@ serde = { version = "1.0.195", features = ["derive"] }
 serde_json = "1.0.111"
 tokio = { version = "1.35.1", features = ["full"] }
 walkdir = "2.4.0"
-
-[dev-dependencies]
-tokio-test = "*"

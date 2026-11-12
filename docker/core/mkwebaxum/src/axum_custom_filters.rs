@@ -1,5 +1,4 @@
-use mk_lib_common;
-
+#[allow(dead_code)]
 pub mod filters {
     pub fn t_as_i64<T: std::fmt::Display>(s: T) -> i64 {
         let s = s.to_string();
@@ -7,10 +6,10 @@ pub mod filters {
             return value;
         }
 
-        if let Ok(value) = s.parse::<f64>() {
-            if value.is_finite() {
-                return value.round() as i64;
-            }
+        if let Ok(value) = s.parse::<f64>()
+            && value.is_finite()
+        {
+            return value.round() as i64;
         }
 
         0

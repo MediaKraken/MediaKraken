@@ -3,12 +3,9 @@ use crate::mk_lib_database;
 use askama::Template;
 use axum::extract::State;
 use axum::{
-    Extension,
-    extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
 };
-use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use sqlx::postgres::PgPool;
@@ -25,7 +22,7 @@ struct TemplateUserHardwareContext<'a> {
 }
 
 pub async fn user_hardware(
-    State(state): State<AppState>,
+    State(_state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -42,7 +39,7 @@ pub async fn user_hardware(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let mut phue_exists: bool = true;
+        let phue_exists: bool = true;
         let template = TemplateUserHardwareContext {
             template_data_phue_exists: &phue_exists,
             page_title: Some("MediaKraken Hardware".to_string()),
@@ -60,7 +57,7 @@ struct TemplateUserHardwarePhueContext {
 }
 
 pub async fn user_hardware_phue(
-    State(state): State<AppState>,
+    State(_state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {

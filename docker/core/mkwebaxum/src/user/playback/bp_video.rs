@@ -119,9 +119,7 @@ enum RangeRequest {
 /// Returns `None` when no (usable) Range header is present. Multiple ranges
 /// are collapsed to the first one; the rest are not served.
 fn parse_range_header(range: Option<&HeaderValue>, size: u64) -> Option<RangeRequest> {
-    let Some(raw) = range.and_then(|header| header.to_str().ok()) else {
-        return None;
-    };
+    let raw = range.and_then(|header| header.to_str().ok())?;
     let Some(spec) = raw.trim().strip_prefix("bytes=") else {
         return Some(RangeRequest::Unsatisfiable);
     };
@@ -252,10 +250,10 @@ pub async fn user_playback_stream(
     );
     headers.insert("accept-ranges", HeaderValue::from_static("bytes"));
     headers.insert("content-length", HeaderValue::from(length));
-    if let Some(content_range) = &content_range {
-        if let Ok(value) = HeaderValue::from_str(content_range) {
-            headers.insert("content-range", value);
-        }
+    if let Some(content_range) = &content_range
+        && let Ok(value) = HeaderValue::from_str(content_range)
+    {
+        headers.insert("content-range", value);
     }
     response
 }
@@ -284,7 +282,7 @@ impl MediaFileStream {
 impl Stream for MediaFileStream {
     type Item = Result<Bytes, std::io::Error>;
 
-    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+    fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         let this = self.get_mut();
         if this.remaining == 0 {
             return Poll::Ready(None);

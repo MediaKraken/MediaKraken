@@ -1,27 +1,21 @@
 use crate::AppState;
-use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
 use crate::user_preferences;
 use askama::Template;
 use axum::extract::Query;
 use axum::extract::State;
-use axum::response::Redirect;
-use axum::response::Response;
 use axum::{
-    Extension,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
 };
-use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use core::fmt::Write;
 use paginator::{PageItem, Paginator};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sqlx::FromRow;
-use sqlx::postgres::{PgPool, PgRow};
+use sqlx::postgres::PgPool;
 use sqlx::types::chrono::DateTime;
 use sqlx::types::chrono::Utc;
 use std::collections::HashMap;
@@ -82,6 +76,7 @@ struct TemplateMetaMovieContext<'a> {
     template_data: &'a Vec<TemplateMetaMovieList>,
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
+    #[allow(dead_code)]
     page: &'a usize,
     page_title: Option<String>,
     pub current: Option<String>,
@@ -91,6 +86,7 @@ struct TemplateMetaMovieContext<'a> {
     pub status_filter: Option<String>,
     pub status_options: &'a Vec<FilterOption>,
     pub primary_language_options: &'a Vec<FilterOption>,
+    #[allow(dead_code)]
     pub filter_query_suffix: String,
     pub base_path: String,
 }
@@ -384,9 +380,9 @@ pub async fn user_metadata_movie(
                     "favorite": false
                 })
             });
-            let mut request_status: serde_json::Value = json!(false);
-            let mut rating_status: serde_json::Value = json!(null);
-            let mut queue_status: serde_json::Value = json!(false);
+            let request_status: serde_json::Value = json!(false);
+            let rating_status: serde_json::Value = json!(null);
+            let queue_status: serde_json::Value = json!(false);
 
             // if !row_data.mm_metadata_user_json.is_none()
             //     && row_data
@@ -409,7 +405,7 @@ pub async fn user_metadata_movie(
             // }
 
             let mut mm_poster: String = "/static/image/Movie-icon.png".to_string();
-            if row_data.mm_poster.len() > 0 {
+            if !row_data.mm_poster.is_empty() {
                 mm_poster = row_data.mm_poster.clone();
             }
 
@@ -438,7 +434,7 @@ pub async fn user_metadata_movie(
                     as f32,
                 template_metadata_availability: row_data.mm_availibility.clone(),
                 template_metadata_tagline: row_data.mm_metadata_tagline.clone(),
-                template_metadata_photo_updated: row_data.photo_updated.clone(),
+                template_metadata_photo_updated: row_data.photo_updated,
                 template_metadata_genre: genres,
                 template_metadata_user_watched: watched_status,
                 template_metadata_user_rating: rating_status,
@@ -448,7 +444,7 @@ pub async fn user_metadata_movie(
             template_data_vec.push(temp_meta_line);
         }
         let mut template_data_exists = false;
-        if template_data_vec.len() > 0 {
+        if !template_data_vec.is_empty() {
             template_data_exists = true;
         }
         let page_usize = page as usize;
@@ -479,20 +475,35 @@ pub async fn user_metadata_movie(
 #[template(path = "bss_user/metadata/bss_user_metadata_movie_detail.html")]
 struct TemplateMetaMovieDetailContext<'a> {
     template_data_json: &'a serde_json::Value,
+    #[allow(dead_code)]
     template_metadata_name_alt: Option<String>,
+    #[allow(dead_code)]
     template_metadata_poster: String,
+    #[allow(dead_code)]
     template_metadata_backdrop: String,
+    #[allow(dead_code)]
     template_metadata_rating: String,
+    #[allow(dead_code)]
     template_metadata_star_rating: f32,
+    #[allow(dead_code)]
     template_metadata_availability: String,
+    #[allow(dead_code)]
     template_metadata_tagline: Option<String>,
+    #[allow(dead_code)]
     template_metadata_photo_updated: DateTime<Utc>,
+    #[allow(dead_code)]
     template_metadata_genre: Vec<Genre>,
+    #[allow(dead_code)]
     template_metadata_cast: Vec<MovieCastMember>,
+    #[allow(dead_code)]
     template_metadata_crew: Vec<MovieCrewMember>,
+    #[allow(dead_code)]
     template_metadata_user_watched: serde_json::Value,
+    #[allow(dead_code)]
     template_metadata_user_rating: serde_json::Value,
+    #[allow(dead_code)]
     template_metadata_user_request: serde_json::Value,
+    #[allow(dead_code)]
     template_metadata_user_queue: serde_json::Value,
     page_title: Option<String>,
 }
@@ -535,12 +546,12 @@ pub async fn user_metadata_movie_detail(
                     "favorite": false
                 })
             });
-        let mut request_status: serde_json::Value = json!(false);
-        let mut rating_status: serde_json::Value = json!(null);
-        let mut queue_status: serde_json::Value = json!(false);
+        let request_status: serde_json::Value = json!(false);
+        let rating_status: serde_json::Value = json!(null);
+        let queue_status: serde_json::Value = json!(false);
 
         let mut mm_poster: String = "/static/image/Movie-icon.png".to_string();
-        if movie_metadata.mm_poster.len() > 0 {
+        if !movie_metadata.mm_poster.is_empty() {
             mm_poster = movie_metadata.mm_poster.clone();
         }
 
@@ -648,7 +659,7 @@ pub async fn user_metadata_movie_detail(
                 as f32,
             template_metadata_availability: movie_metadata.mm_availibility.clone(),
             template_metadata_tagline: movie_metadata.mm_metadata_tagline.clone(),
-            template_metadata_photo_updated: movie_metadata.photo_updated.clone(),
+            template_metadata_photo_updated: movie_metadata.photo_updated,
             template_metadata_genre: genres,
             template_metadata_cast: cast_members,
             template_metadata_crew: crew_members,
@@ -681,10 +692,10 @@ pub async fn user_metadata_movie_status(
         println!("here is the user: {:?}", current_user.id);
         // let template = TemplateError401Context {};
         // let reply_html = template.render().unwrap();
-        return StatusCode::UNAUTHORIZED.into_response();
+        StatusCode::UNAUTHORIZED.into_response()
     } else {
         println!("here is the payload4: {:?}", payload);
-        let _row_data = mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_status(
+        mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_status(
             &state.sqlx_pool_rw, payload, current_user.id
         )
         .await

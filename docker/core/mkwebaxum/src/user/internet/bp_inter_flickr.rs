@@ -20,6 +20,7 @@ struct TemplateError401Context {}
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_500.html")]
 struct TemplateError500Context {
+    #[allow(dead_code)]
     page_title: Option<String>,
     is_admin: bool,
 }
@@ -205,10 +206,10 @@ async fn fetch_flickr_public_feed(
         .get(FLICKR_PUBLIC_FEED_URL)
         .query(&[("format", "json"), ("nojsoncallback", "1")]);
 
-    if let Some(tag_filter) = tags {
-        if !tag_filter.trim().is_empty() {
-            request = request.query(&[("tags", tag_filter)]);
-        }
+    if let Some(tag_filter) = tags
+        && !tag_filter.trim().is_empty()
+    {
+        request = request.query(&[("tags", tag_filter)]);
     }
 
     let response = request.send().await?.error_for_status()?;

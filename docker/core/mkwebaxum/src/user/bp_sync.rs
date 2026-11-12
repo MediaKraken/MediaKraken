@@ -4,12 +4,10 @@ use crate::user_preferences;
 use askama::Template;
 use axum::extract::State;
 use axum::{
-    Extension,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
 };
-use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
@@ -75,7 +73,7 @@ pub async fn user_sync(
         .await
         .unwrap();
         let mut template_data_exists = false;
-        if sync_list.len() > 0 {
+        if !sync_list.is_empty() {
             template_data_exists = true;
         }
         let page_usize = page as usize;

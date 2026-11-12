@@ -18,7 +18,7 @@ mk_lib_database = { path = "../../src/mk_lib_database" }
 mk_lib_network = { path = "../../src/mk_lib_network" }
 mk_lib_share = { path = "../../src/mk_lib_share" }
 pavao = "0.2.3"
-reqwest = { version = "0.11.23", default-features = false, features = [
+reqwest = { version = "0.13.5", default-features = false, features = [
     "json",
     "rustls-tls",
 ] }
@@ -27,6 +27,3 @@ serde = { version = "1.0.195", features = ["derive"] }
 serde_json = "1.0.111"
 tokio = { version = "1.35.1", features = ["full"] }
 walkdir = "2.4.0"
-
-[dev-dependencies]
-tokio-test = "*"

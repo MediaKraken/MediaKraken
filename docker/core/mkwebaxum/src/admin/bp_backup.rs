@@ -1,17 +1,13 @@
 use crate::AppState;
-use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
 use crate::user_preferences;
 use askama::Template;
 use axum::extract::State;
 use axum::{
-    Extension,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
-    routing::{get, post},
 };
-use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_enum_backup_type;
@@ -30,6 +26,7 @@ struct TemplateBackupContext<'a> {
     template_data: &'a Vec<mk_lib_database::mk_lib_database_backup::DBBackupList>,
     template_backup_class: &'a Vec<(i32, String)>,
     template_data_exists: &'a bool,
+    #[allow(dead_code)]
     pagination_bar: &'a String,
     page: &'a usize,
     page_title: Option<String>,
@@ -83,7 +80,7 @@ pub async fn admin_backup(
         .await
         .unwrap();
         let mut template_data_exists = false;
-        if backup_list.len() > 0 {
+        if !backup_list.is_empty() {
             template_data_exists = true;
         }
         let page_usize = page as usize;

@@ -1,9 +1,4 @@
 use chrono::Local;
-use mk_lib_common;
-use mk_lib_compression;
-use mk_lib_database;
-use mk_lib_network;
-use mk_lib_rabbitmq;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::error::Error;
@@ -47,22 +42,22 @@ async fn process_rabbit_message(
                 };
                 let result =
                     mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_exists_movie(
-                        &sqlx_pool_rw,
+                        sqlx_pool_rw,
                         metadata_id,
                     )
                     .await
                     ?;
-                if result == false {
-                    let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
+                if !result {
+                    let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(sqlx_pool_rw,
                                                                                                                             "themoviedb".to_string(),
                                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                                             metadata_id).await?;
-                    if download_result == false {
+                    if !download_result {
                         record_count += 1;
                         if record_count > record_limit {
                             break;
                         }
-                        let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
+                        mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(sqlx_pool_rw,
                                                                                                                         "themoviedb".to_string(),
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                                         uuid::Uuid::now_v7(),
@@ -99,22 +94,22 @@ async fn process_rabbit_message(
                 };
                 let result =
                     mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_exists_tv(
-                        &sqlx_pool_rw,
+                        sqlx_pool_rw,
                         metadata_id,
                     )
                     .await
                     ?;
-                if result == false {
-                    let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
+                if !result {
+                    let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(sqlx_pool_rw,
                                                                                                                             "themoviedb".to_string(),
                                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                                             metadata_id).await?;
-                    if download_result == false {
+                    if !download_result {
                         record_count += 1;
                         if record_count > record_limit {
                             break;
                         }
-                        let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
+                        mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(sqlx_pool_rw,
                                                                                                                         "themoviedb".to_string(),
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                                         uuid::Uuid::now_v7(),
@@ -152,22 +147,22 @@ async fn process_rabbit_message(
                 };
                 let result =
                     mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_exists_person(
-                        &sqlx_pool_rw,
+                        sqlx_pool_rw,
                         metadata_id,
                     )
                     .await
                     ?;
-                if result == false {
-                    let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
+                if !result {
+                    let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(sqlx_pool_rw,
                                                                                                                             "themoviedb".to_string(),
                                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
                                                                                                                             metadata_id).await?;
-                    if download_result == false {
+                    if !download_result {
                         record_count += 1;
                         if record_count > record_limit {
                             break;
                         }
-                        let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
+                        mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(sqlx_pool_rw,
                                                                                                                         "themoviedb".to_string(),
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
                                                                                                                         uuid::Uuid::now_v7(),
@@ -206,22 +201,22 @@ async fn process_rabbit_message(
                 };
                 let result =
                     mk_lib_database::database_metadata::mk_lib_database_metadata_collection::mk_lib_database_metadata_exists_collection(
-                        &sqlx_pool_rw,
+                        sqlx_pool_rw,
                         metadata_id,
                     )
                     .await
                     ?;
-                if result == false {
-                    let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
+                if !result {
+                    let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(sqlx_pool_rw,
                                                                                                                             "themoviedb".to_string(),
                                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::COLLECTION,
                                                                                                                             metadata_id).await?;
-                    if download_result == false {
+                    if !download_result {
                         record_count += 1;
                         if record_count > record_limit {
                             break;
                         }
-                        let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
+                        mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(sqlx_pool_rw,
                                                                                                                         "themoviedb".to_string(),
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::COLLECTION,
                                                                                                                         uuid::Uuid::now_v7(),
@@ -234,7 +229,7 @@ async fn process_rabbit_message(
     } else {
         let option_config_json: serde_json::Value =
             mk_lib_database::mk_lib_database_option_status::mk_lib_database_option_read(
-                &sqlx_pool_ro,
+                sqlx_pool_ro,
             )
             .await?;
         let url_result = mk_lib_network::mk_lib_network::mk_data_from_url(
@@ -246,30 +241,30 @@ async fn process_rabbit_message(
         )
         .await?;
         println!("one {:?}", url_result);
-        let resp: ResponseMetadata = serde_json::from_str(&url_result.trim())?;
+        let resp: ResponseMetadata = serde_json::from_str(url_result.trim())?;
         for json_item in resp.results {
             println!("movie item {}", json_item.id);
             let result =
                 mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_exists_movie(
-                    &sqlx_pool_rw,
+                    sqlx_pool_rw,
                     json_item.id,
                 )
                 .await
                 ?;
-            if result == false {
-                let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
+            if !result {
+                let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(sqlx_pool_rw,
                                                                                                                                         "themoviedb".to_string(),
                                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                                                         json_item.id).await?;
-                if download_result == false {
-                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
+                if !download_result {
+                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(sqlx_pool_rw,
                                                                                                                         "themoviedb".to_string(),
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                                         uuid::Uuid::now_v7(),
                                                                                                                        Some(json_item.id),
                                                                                                                         "Fetch".to_string(), None).await;
                 } else {
-                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
+                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(sqlx_pool_rw,
                                                                                                                         "themoviedb".to_string(),
                                                                                                                         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::MOVIE,
                                                                                                                         uuid::Uuid::now_v7(),
@@ -287,30 +282,30 @@ async fn process_rabbit_message(
             .replace("\"", ""),
         )
         .await?;
-        let resp: ResponseMetadata = serde_json::from_str(&url_result.trim())?;
+        let resp: ResponseMetadata = serde_json::from_str(url_result.trim())?;
         for json_item in resp.results {
             println!("tv item {}", json_item.id);
             let result =
                 mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_exists_tv(
-                    &sqlx_pool_rw,
+                    sqlx_pool_rw,
                     json_item.id,
                 )
                 .await
                 ?;
-            if result == false {
-                let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
+            if !result {
+                let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(sqlx_pool_rw,
                                                                                                                                             "themoviedb".to_string(),
                                                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                                                             json_item.id).await?;
-                if download_result == false {
-                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
+                if !download_result {
+                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(sqlx_pool_rw,
                                                                                                                             "themoviedb".to_string(),
                                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                                             uuid::Uuid::now_v7(),
                                                                                                                             Some(json_item.id),
                                                                                                                             "Fetch".to_string(), None).await;
                 } else {
-                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
+                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(sqlx_pool_rw,
                                                                                                                             "themoviedb".to_string(),
                                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::TV,
                                                                                                                             uuid::Uuid::now_v7(),
@@ -333,25 +328,25 @@ async fn process_rabbit_message(
             println!("person item {}", json_item.id);
             let result =
                 mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_exists_person(
-                    &sqlx_pool_rw,
+                    sqlx_pool_rw,
                     json_item.id,
                 )
                 .await
                 ?;
-            if result == false {
-                let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(&sqlx_pool_rw,
+            if !result {
+                let download_result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(sqlx_pool_rw,
                                                                                                                                             "themoviedb".to_string(),
                                                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
                                                                                                                                             json_item.id).await?;
-                if download_result == false {
-                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
+                if !download_result {
+                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(sqlx_pool_rw,
                                                                                                                             "themoviedb".to_string(),
                                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
                                                                                                                             uuid::Uuid::now_v7(),
                                                                                                                             Some(json_item.id),
                                                                                                                             "Fetch".to_string(), None).await;
                 } else {
-                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(&sqlx_pool_rw,
+                    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_insert(sqlx_pool_rw,
                                                                                                                             "themoviedb".to_string(),
                                                                                                                             mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::PERSON,
                                                                                                                             uuid::Uuid::now_v7(),
@@ -364,7 +359,7 @@ async fn process_rabbit_message(
     Ok(())
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 struct MetadataMovie {
     adult: bool,
     id: Option<i32>,
@@ -373,14 +368,14 @@ struct MetadataMovie {
     video: bool,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 struct MetadataTV {
     id: Option<i32>,
     original_name: String,
     popularity: f32,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 struct MetadataPerson {
     adult: bool,
     id: Option<i32>,
@@ -388,7 +383,7 @@ struct MetadataPerson {
     popularity: f32,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 struct MetadataCollection {
     id: Option<i32>,
     name: String,
@@ -402,6 +397,7 @@ struct ResponseMetadata {
 #[derive(Deserialize)]
 struct MetadataGeneral {
     id: i32,
+    #[allow(dead_code)]
     adult: Option<bool>,
 }
 

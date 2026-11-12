@@ -4,14 +4,11 @@ use crate::user_preferences;
 use askama::Template;
 use axum::extract::Query;
 use axum::extract::State;
-use axum::response::Redirect;
 use axum::{
-    Extension,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
 };
-use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use core::fmt::Write;
@@ -30,6 +27,7 @@ struct TemplateMetaGameContext<'a> {
         &'a Vec<mk_lib_database::database_metadata::mk_lib_database_metadata_game::DBMetaGameList>,
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
+    #[allow(dead_code)]
     page: &'a usize,
     page_title: Option<String>,
     pub current: Option<String>,
@@ -111,7 +109,7 @@ fn build_filter_query_suffix(
 
 fn build_game_pagination(
     total_items: i64,
-    page: i64,
+    #[allow(dead_code)] page: i64,
     pagination_count: i64,
     starts_with: Option<&str>,
     genre: Option<&str>,
@@ -282,7 +280,7 @@ pub async fn user_metadata_game(
             })
             .collect();
         let mut template_data_exists = false;
-        if game_list.len() > 0 {
+        if !game_list.is_empty() {
             template_data_exists = true;
         }
         let page_usize = page as usize;
@@ -290,6 +288,7 @@ pub async fn user_metadata_game(
             template_data: &game_list,
             template_data_exists: &template_data_exists,
             pagination_bar: &pagination_html,
+            #[allow(dead_code)]
             page: &page_usize,
             page_title: Some("MediaKraken Metadata Games".to_string()),
             current: starts_with.clone(),

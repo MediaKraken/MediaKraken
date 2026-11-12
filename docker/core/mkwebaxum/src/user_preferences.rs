@@ -25,6 +25,7 @@ pub fn normalize_number_format_language(value: &str) -> String {
     }
 }
 
+#[allow(dead_code)]
 pub fn number_format_locale_for_language(language: &str) -> Locale {
     let normalized = normalize_number_format_language(language);
     Locale::from_name(&normalized).unwrap_or(Locale::en)

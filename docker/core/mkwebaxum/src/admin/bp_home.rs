@@ -5,16 +5,14 @@ use crate::user_preferences;
 use askama::Template;
 use axum::extract::State;
 use axum::{
-    Extension,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
 };
-use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common;
 use mk_lib_network;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use sqlx::Row;
 use sqlx::postgres::PgPool;
 
@@ -54,8 +52,11 @@ struct TemplateHomeContext<'a> {
     template_data_number_format_language: &'a String,
     template_server_notifications:
         &'a Vec<mk_lib_database::mk_lib_database_notification::DBNotificationList>,
+    #[allow(dead_code)]
     template_server_streams: &'a Vec<TemplateHomeStreamListContext>,
+    #[allow(dead_code)]
     template_server_users: &'a Vec<mk_lib_database::mk_lib_database_user::DBUserList>,
+    #[allow(dead_code)]
     template_data_scan_info: &'a Vec<TemplateHomeScanListContext>,
     page_title: Option<String>,
 }
@@ -100,9 +101,9 @@ pub async fn admin_home(
             .await
             .unwrap();
         let option_json: serde_json::Value = option_status_row.get("mm_options_json");
-        let status_json: serde_json::Value = option_status_row.get("mm_status_json");
+        let _status_json: serde_json::Value = option_status_row.get("mm_status_json");
         let boot_seconds: libc::timeval = sys_info::boottime().unwrap();
-        let boot_duration = chrono::Duration::seconds(i64::from(boot_seconds.tv_sec));
+        let boot_duration = chrono::Duration::seconds(boot_seconds.tv_sec);
         let external_ip = match mk_lib_network::mk_lib_network::mk_data_from_url(
             "https://myexternalip.com/raw".to_string(),
         )
@@ -117,8 +118,8 @@ pub async fn admin_home(
                 "unavailable".to_string()
             }
         };
-        let mut server_streams = Vec::new();
-        let mut server_scans = Vec::new();
+        let server_streams = Vec::new();
+        let server_scans = Vec::new();
         let number_format_language = user_preferences::load_user_number_format_language(
             &state.sqlx_pool_ro,
             current_user.id,

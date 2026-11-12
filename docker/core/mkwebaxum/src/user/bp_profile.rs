@@ -12,7 +12,6 @@ use axum_session_sqlx::SessionPgPool;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::{FromRow, postgres::PgPool};
-use std::collections::HashSet;
 
 const DEFAULT_PROFILE_IMAGE_URL: &str = "/static/image/K3.png";
 const PROFILE_IMAGE_DIR: &str = "static/image/user_profile";

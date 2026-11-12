@@ -98,6 +98,7 @@ pub async fn general_error(query: Query<ErrorPageQuery>) -> Response {
 }
 
 /// Error type usable from handlers via `Result<_, MKAxumError>`.
+#[allow(dead_code)]
 pub enum MKAxumError {
     Error401,
     Error403,

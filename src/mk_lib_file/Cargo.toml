@@ -23,6 +23,3 @@ walkdir = "2.5.0"
 [features]
 s3 = ["dep:aws-config", "dep:aws-sdk-s3"]
 garage-admin = ["dep:reqwest", "dep:serde"]
-
-[dev-dependencies]
-tokio-test = "*"

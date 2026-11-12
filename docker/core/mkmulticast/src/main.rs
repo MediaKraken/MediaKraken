@@ -194,9 +194,9 @@ mod tests {
     fn test_detect_local_ipv4_returns_some_or_none() {
         let result = detect_local_ipv4();
         if let Some(ip) = result {
+            // `ip` is already typed `Ipv4Addr`, so IPv4-ness is guaranteed by construction
             assert!(!ip.is_loopback());
             assert!(!ip.is_unspecified());
-            assert!(ip.is_ipv4());
         }
     }
 

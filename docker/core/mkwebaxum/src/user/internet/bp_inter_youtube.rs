@@ -221,10 +221,10 @@ fn find_json_block<'a>(page_body: &'a str, marker: &str) -> Option<&'a str> {
 fn collect_video_renderers(value: &Value, results: &mut Vec<YoutubeVideoItem>) {
     match value {
         Value::Object(map) => {
-            if let Some(video_renderer) = map.get("videoRenderer") {
-                if let Some(item) = parse_video_renderer(video_renderer) {
-                    results.push(item);
-                }
+            if let Some(video_renderer) = map.get("videoRenderer")
+                && let Some(item) = parse_video_renderer(video_renderer)
+            {
+                results.push(item);
             }
 
             for nested in map.values() {

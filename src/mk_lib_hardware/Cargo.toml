@@ -38,6 +38,3 @@ yeelib_rs = "0.1.1"
 arduino = []
 #raspberry = ["dep:rascam", "dep:rppal", "dep:rppal-dht11"]
 raspberry = ["dep:rascam", "dep:rppal"]
-
-[dev-dependencies]
-tokio-test = "*"

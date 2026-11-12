@@ -11,6 +11,3 @@ codegen-units = 1
 
 [dependencies]
 postgres = "0.19.7"
-
-[dev-dependencies]
-tokio-test = "*"

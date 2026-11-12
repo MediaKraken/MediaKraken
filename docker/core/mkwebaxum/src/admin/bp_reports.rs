@@ -7,12 +7,10 @@ use crate::user_preferences;
 use askama::Template;
 use axum::extract::State;
 use axum::{
-    Extension,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
 };
-use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
@@ -28,6 +26,7 @@ struct TemplateError403Context {
 #[template(path = "bss_admin/bss_admin_report_known_media.html")]
 struct TemplateReportKnownMediaContext<'a> {
     template_data: &'a Vec<mk_lib_database::mk_lib_database_report::DBReportKnownMediaList>,
+    #[allow(dead_code)]
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
     page: &'a usize,
@@ -90,7 +89,7 @@ pub async fn admin_report_known_media(
             .await
             .unwrap();
         let mut report_data: bool = false;
-        if report_list.len() > 0 {
+        if !report_list.is_empty() {
             report_data = true;
         }
         let page_usize = page as usize;

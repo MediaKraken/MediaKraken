@@ -4,15 +4,13 @@ use askama::Template;
 use axum::extract::Query;
 use axum::extract::State;
 use axum::{
-    Extension,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
 };
-use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
+use serde::Deserialize;
 use serde::de::Deserializer;
-use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgPool;
 
 #[derive(Template)]
@@ -26,7 +24,7 @@ struct UserSearchTemplate {
 }
 
 pub async fn user_search(
-    State(state): State<AppState>,
+    State(_state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
 ) -> impl IntoResponse {
@@ -94,7 +92,7 @@ pub struct SearchTemplate {
 }
 
 pub async fn search_handler(Query(params): Query<SearchParams>) -> Html<String> {
-    let mut results = Vec::new();
+    let results = Vec::new();
     // If no filters are selected, maybe default to "all"
     let active_filters = if params.filter.is_empty() {
         vec!["all".to_string()]
@@ -103,16 +101,15 @@ pub async fn search_handler(Query(params): Query<SearchParams>) -> Html<String> 
     };
     // Logic to aggregate results based on active filters
     for f in &active_filters {
-        match f.as_str() {
-            //"movie" => results.extend(fetch_movies(&params.q).await),
-            // "book" => results.extend(fetch_books(&params.q).await),
-            // "anime" => results.extend(fetch_anime(&params.q).await),
-            // "game" => results.extend(fetch_games(&params.q).await),
-            // "music" => results.extend(fetch_music(&params.q).await),
-            // "sports" => results.extend(fetch_sports(&params.q).await),
-            // "tv" => results.extend(fetch_tv(&params.q).await),
-            _ => {} // Handle "all" or unknowns
-        }
+        let _ = f.as_str();
+        //"movie" => results.extend(fetch_movies(&params.q).await),
+        // "book" => results.extend(fetch_books(&params.q).await),
+        // "anime" => results.extend(fetch_anime(&params.q).await),
+        // "game" => results.extend(fetch_games(&params.q).await),
+        // "music" => results.extend(fetch_music(&params.q).await),
+        // "sports" => results.extend(fetch_sports(&params.q).await),
+        // "tv" => results.extend(fetch_tv(&params.q).await),
+        {} // Handle "all" or unknowns
     }
     let template = SearchTemplate {
         query: params.q,
@@ -120,7 +117,7 @@ pub async fn search_handler(Query(params): Query<SearchParams>) -> Html<String> 
         results,
         page_title: Some("MediaKraken Search Results".to_string()),
     };
-    Html(template.render().unwrap_or_else(|e| format!("<!DOCTYPE html><html><head><title>Error</title></head><body><h1>Search Error</h1><p>Template rendering failed.</p></body></html>")))
+    Html(template.render().unwrap_or_else(|_e| "<!DOCTYPE html><html><head><title>Error</title></head><body><h1>Search Error</h1><p>Template rendering failed.</p></body></html>".to_string()))
 }
 
 /*

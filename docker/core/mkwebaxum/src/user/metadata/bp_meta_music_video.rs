@@ -4,14 +4,11 @@ use crate::user_preferences;
 use askama::Template;
 use axum::extract::Query;
 use axum::extract::State;
-use axum::response::Redirect;
 use axum::{
-    Extension,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
 };
-use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
@@ -29,6 +26,7 @@ struct TemplateMetaMusicVideoContext<'a> {
         &'a Vec<mk_lib_database::database_metadata::mk_lib_database_metadata_music_video::DBMetaMusicVideoList>,
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
+    #[allow(dead_code)]
     page: &'a usize,
     page_title: Option<String>,
     pub current: Option<String>,
@@ -110,7 +108,7 @@ pub async fn user_metadata_music_video(
         .await
         .unwrap();
         let mut template_data_exists = false;
-        if music_video_list.len() > 0 {
+        if !music_video_list.is_empty() {
             template_data_exists = true;
         }
         let page_usize = page as usize;
@@ -118,6 +116,7 @@ pub async fn user_metadata_music_video(
             template_data: &music_video_list,
             template_data_exists: &template_data_exists,
             pagination_bar: &pagination_html,
+            #[allow(dead_code)]
             page: &page_usize,
             page_title: Some("MediaKraken Metadata Music Videos".to_string()),
             current: starts_with,

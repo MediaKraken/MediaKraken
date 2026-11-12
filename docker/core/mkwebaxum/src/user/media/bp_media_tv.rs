@@ -1,17 +1,14 @@
 use crate::AppState;
-use crate::axum_custom_filters::filters;
 use crate::mk_lib_database;
 use crate::user_preferences;
 use askama::Template;
 use axum::extract::State;
 use axum::response::Redirect;
 use axum::{
-    Extension,
     extract::Path,
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
 };
-use axum_session::{SessionConfig, SessionLayer};
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use mk_lib_common::mk_lib_common_pagination;
@@ -28,6 +25,7 @@ struct TemplateMediaTVContext<'a> {
         &'a Vec<mk_lib_database::database_media::mk_lib_database_media_tv::DBMediaTVShowList>,
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
+    #[allow(dead_code)]
     page: &'a usize,
     page_title: Option<String>,
 }
@@ -82,7 +80,7 @@ pub async fn user_media_tv(
         .await
         .unwrap();
         let mut template_data_exists = false;
-        if tv_list.len() > 0 {
+        if !tv_list.is_empty() {
             template_data_exists = true;
         }
         let page_usize = page as usize;
@@ -90,6 +88,7 @@ pub async fn user_media_tv(
             template_data: &tv_list,
             template_data_exists: &template_data_exists,
             pagination_bar: &pagination_html,
+            #[allow(dead_code)]
             page: &page_usize,
             page_title: Some("MediaKraken TV Shows".to_string()),
         };
@@ -190,7 +189,7 @@ pub async fn user_media_tv_status(
     {
         Redirect::to("/error/401")
     } else {
-        let _row_data = mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_status(
+        mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_status(
             &state.sqlx_pool_rw, guid, event_type, current_user.id
         )
         .await

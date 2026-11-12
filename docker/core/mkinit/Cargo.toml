@@ -9,6 +9,3 @@ mk_lib_database = { version = "0.0.281", registry = "kellnr" }
 mk_lib_logging = { version = "0.0.249", registry = "kellnr" }
 
 tokio = { version = "1.53.1", features = ["full"] }
-
-[dev-dependencies]
-tokio-test = "*"

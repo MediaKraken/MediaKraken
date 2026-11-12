@@ -293,9 +293,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         }
                     } else if json_message["Subtype"] == "Cast" {
                         let device_name = json_message["Device"].as_str().unwrap_or_default();
-                        if json_message["Command"] == "Chapter Back" {
-                        } else if json_message["Command"] == "Chapter Forward" {
-                        } else if json_message["Command"] == "Fast Forward" {
+                        if json_message["Command"] == "Chapter Back"
+                            || json_message["Command"] == "Chapter Forward"
+                            || json_message["Command"] == "Fast Forward"
+                        {
+                            // unimplemented cast commands
                         } else if json_message["Command"] == "Mute" {
                             run_cast_command(device_name, "-mute", None).await;
                         } else if json_message["Command"] == "Pause" {
@@ -590,7 +592,8 @@ mod tests {
         let message = json!({
             "Data": {"Source Path": "/books/a.epub", "Format": ".MOBI"}
         });
-        let (input, output) = ebook_conversion_targets(&message)?;
+        let (input, output) =
+            ebook_conversion_targets(&message).expect("expected conversion targets for .MOBI");
         assert_eq!(input, "/books/a.epub");
         assert_eq!(output, "/books/a.mobi");
     }

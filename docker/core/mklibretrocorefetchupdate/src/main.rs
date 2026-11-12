@@ -1,6 +1,3 @@
-use mk_lib_hash;
-use mk_lib_network;
-use mk_lib_rabbitmq;
 use std::collections::HashMap;
 use std::error::Error;
 use std::ffi::OsStr;
@@ -8,7 +5,7 @@ use std::os::unix::ffi::OsStrExt;
 use tokio::sync::Notify;
 use walkdir::WalkDir;
 
-async fn process_cores(rabbit_channel: &amqprs::channel::Channel) -> Result<(), Box<dyn Error>> {
+async fn process_cores(_rabbit_channel: &amqprs::channel::Channel) -> Result<(), Box<dyn Error>> {
     let mut emulation_cores = HashMap::new();
     let walker = WalkDir::new("/mediakraken/emulation/cores").into_iter();
     for entry in walker
@@ -18,24 +15,25 @@ async fn process_cores(rabbit_channel: &amqprs::channel::Channel) -> Result<(), 
         .filter(|e| !e.file_type().is_dir())
     {
         let file_name = entry.path().display().to_string();
-        let crc = mk_lib_hash::mk_lib_hash_crc32::mk_file_hash_crc32(&file_name)
-            .await?;
+        let crc = mk_lib_hash::mk_lib_hash_crc32::mk_file_hash_crc32(&file_name).await?;
         emulation_cores.insert(file_name, crc);
     }
 
     let stable_root = "http://buildbot.libretro.com/stable/";
-    let stable_index = mk_lib_network::mk_lib_network::mk_data_from_url(stable_root.to_string()).await?;
+    let stable_index =
+        mk_lib_network::mk_lib_network::mk_data_from_url(stable_root.to_string()).await?;
     let latest_version = latest_stable_version(&stable_index).ok_or("No stable version found")?;
     let libtro_url = format!("{}{}/linux/x86_64/", stable_root, latest_version);
     let fetch_result = mk_lib_network::mk_lib_network::mk_data_from_url(format!(
         "{}{}",
-        &libtro_url, ".index-extended"
-    )).await?;
+        libtro_url, ".index-extended"
+    ))
+    .await?;
 
     for libretro_core in fetch_result.split('\n') {
-        if libretro_core.len() > 0 {
+        if !libretro_core.is_empty() {
             let mut parts = libretro_core.splitn(3, " ");
-            let core_date = parts.next().ok_or("Missing core_date")?;
+            let _core_date = parts.next().ok_or("Missing core_date")?;
             let core_crc32 = parts.next().ok_or("Missing core_crc32")?;
             let core_name = parts.next().ok_or("Missing core_name")?;
             let path_core_name = format!(
@@ -45,15 +43,17 @@ async fn process_cores(rabbit_channel: &amqprs::channel::Channel) -> Result<(), 
             if emulation_cores.contains_key(&path_core_name) {
                 if emulation_cores[&path_core_name] != core_crc32 {
                     mk_lib_network::mk_lib_network::mk_download_file_from_url(
-                        format!("{}{}", &libtro_url, core_name),
+                        format!("{}{}", libtro_url, core_name),
                         &format!("/mediakraken/emulation/cores/{}", core_name),
-                    ).await?;
+                    )
+                    .await?;
                 }
             } else {
                 mk_lib_network::mk_lib_network::mk_download_file_from_url(
-                    format!("{}{}", &libtro_url, core_name),
+                    format!("{}{}", libtro_url, core_name),
                     &format!("/mediakraken/emulation/cores/{}", core_name),
-                ).await?;
+                )
+                .await?;
             }
         }
     }
@@ -102,7 +102,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     )
     .await?;
 
-   tokio::spawn(async move {
+    tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             if let Some(payload) = msg.content {
                 let _parsed: serde_json::Value = match serde_json::from_slice(&payload) {

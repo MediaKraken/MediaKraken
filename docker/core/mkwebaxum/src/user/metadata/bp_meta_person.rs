@@ -44,6 +44,7 @@ struct TemplateMetaPersonContext<'a> {
     template_data: &'a Vec<TemplateMetaPersonList>,
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
+    #[allow(dead_code)]
     page: &'a usize,
     page_title: Option<String>,
     pub current: Option<String>,
@@ -237,6 +238,7 @@ pub async fn user_metadata_person(
             template_data: &person_list,
             template_data_exists: &template_data_exists,
             pagination_bar: &pagination_html,
+            #[allow(dead_code)]
             page: &page_usize,
             page_title: Some("MediaKraken Metadata Persons".to_string()),
             current: starts_with,

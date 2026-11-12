@@ -18,8 +18,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_m3u8_valid_simple_playlist() {
-        let playlist =
-            "#EXTM3U\n#EXTINF:111,Track One\ntrack1.mp3\n#EXTINF:222,Track Two\ntrack2.mp3\n";
+        let playlist = "#EXTM3U\n#EXT-X-TARGETDURATION:222\n#EXTINF:111,Track One\ntrack1.mp3\n\
+             #EXTINF:222,Track Two\ntrack2.mp3\n";
         let result = mk_lib_metadata_m3u8_validate_playlist(playlist).await;
         assert!(result.is_ok());
     }
@@ -39,14 +39,14 @@ mod tests {
 
     #[tokio::test]
     async fn test_m3u8_single_track() {
-        let playlist = "#EXTM3U\n#EXTINF:60,Single Track\nsingle.mp3\n";
+        let playlist = "#EXTM3U\n#EXT-X-TARGETDURATION:60\n#EXTINF:60,Single Track\nsingle.mp3\n";
         let result = mk_lib_metadata_m3u8_validate_playlist(playlist).await;
         assert!(result.is_ok());
     }
 
     #[tokio::test]
     async fn test_m3u8_zero_duration() {
-        let playlist = "#EXTM3U\n#EXTINF:0,Zero Duration\nzero.mp3\n";
+        let playlist = "#EXTM3U\n#EXT-X-TARGETDURATION:0\n#EXTINF:0,Zero Duration\nzero.mp3\n";
         let result = mk_lib_metadata_m3u8_validate_playlist(playlist).await;
         assert!(result.is_ok());
     }

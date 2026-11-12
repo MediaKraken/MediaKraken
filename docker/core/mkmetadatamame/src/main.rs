@@ -1,7 +1,3 @@
-use mk_lib_compression;
-use mk_lib_database;
-use mk_lib_network;
-use mk_lib_rabbitmq;
 use quickxml_to_serde::{Config, JsonArray, JsonType, NullValue, xml_string_to_json};
 use serde_json::Value;
 use serde_json::json;
@@ -27,7 +23,7 @@ fn extract_7z_dat(src: &Path, dest_dir: &str) -> Result<(), Box<dyn Error>> {
 
 async fn process_rabbit_message(
     msg: serde_json::Value,
-    rabbit_channel: &amqprs::channel::Channel,
+    _rabbit_channel: &amqprs::channel::Channel,
     sqlx_pool_rw: &sqlx::PgPool,
 ) -> Result<(), Box<dyn Error>> {
     let json_message: Value = serde_json::from_value(msg)?;
@@ -70,9 +66,9 @@ async fn process_rabbit_message(
                 if xml_line.is_empty() {
                     continue;
                 }
-                if xml_line.starts_with("<machine") == true {
+                if xml_line.starts_with("<machine") {
                     xml_data = xml_line.to_string();
-                } else if xml_line.starts_with("</machine") == true {
+                } else if xml_line.starts_with("</machine") {
                     xml_data.push_str(xml_line);
                     let json_data = xml_string_to_json(xml_data.to_string(), &conf)?;
                     mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_insert(
@@ -107,7 +103,7 @@ async fn process_rabbit_message(
         mk_lib_compression::mk_lib_compression::mk_decompress_zip(
             &file_name,
             false,
-            &"/mediakraken/emulation/",
+            "/mediakraken/emulation/",
         )
         .await?;
 
@@ -128,9 +124,9 @@ async fn process_rabbit_message(
             if xml_line.is_empty() {
                 continue;
             }
-            if xml_line.starts_with("<entry") == true {
+            if xml_line.starts_with("<entry") {
                 xml_data = xml_line.to_string();
-            } else if xml_line.starts_with("</entry") == true {
+            } else if xml_line.starts_with("</entry") {
                 xml_data.push_str(xml_line);
                 let json_data = match xml_string_to_json(xml_data.to_string(), &conf) {
                     Ok(j) => j,
@@ -208,10 +204,10 @@ async fn process_rabbit_message(
         mk_lib_compression::mk_lib_compression::mk_decompress_zip(
             &file_name,
             false,
-            &"/mediakraken/emulation/",
+            "/mediakraken/emulation/",
         )
         .await?;
-        let file = File::open(&"/mediakraken/emulation/catver.ini")?;
+        let file = File::open("/mediakraken/emulation/catver.ini")?;
         let reader = BufReader::new(file);
         let mut category_found = false;
         for line in reader.lines() {
@@ -219,12 +215,10 @@ async fn process_rabbit_message(
             if xml_line.is_empty() {
                 continue;
             }
-            if xml_line.len() > 1 {
-                if category_found == true {
-                    // TODO
-                }
+            if xml_line.len() > 1 && category_found {
+                // TODO
             }
-            if xml_line.starts_with("[Category]") == true {
+            if xml_line.starts_with("[Category]") {
                 category_found = true;
             }
         }
@@ -247,7 +241,7 @@ async fn process_rabbit_message(
         mk_lib_compression::mk_lib_compression::mk_decompress_zip(
             &file_name,
             false,
-            &"/mediakraken/emulation/",
+            "/mediakraken/emulation/",
         )
         .await?;
         // messinfo zips >= 0.281 ship the dat as messinfo.7z instead of messinfo.dat
@@ -259,7 +253,7 @@ async fn process_rabbit_message(
                 "/mediakraken/emulation/",
             )?;
         }
-        let file = File::open(&"/mediakraken/emulation/messinfo.dat")?;
+        let file = File::open("/mediakraken/emulation/messinfo.dat")?;
         let mut reader = BufReader::new(file);
         let mut dat_line = String::new();
         let mut in_drv_block = false;
@@ -338,11 +332,8 @@ async fn process_rabbit_message(
                                 .map(|s| s.trim().to_string())
                                 .unwrap_or_default();
                         } else if dat_line.starts_with("Save State:") {
-                            if dat_line.split_whitespace().rev().next() == Some("Supported") {
-                                sys_save_state = true;
-                            } else {
-                                sys_save_state = false;
-                            }
+                            sys_save_state =
+                                dat_line.split_whitespace().next_back() == Some("Supported");
                         } else if dat_line.starts_with("WIP:") {
                             wip_in_progress = true;
                         } else if dat_line.starts_with("Romset:") {
@@ -381,7 +372,7 @@ async fn process_rabbit_message(
                             if dat_line.starts_with("$end") {
                                 romset_in_progress = false;
                                 if sys_desc.trim_end_matches('\n') == "..." {
-                                    sys_desc = String::new();
+                                    sys_desc.clear();
                                 } else {
                                     sys_desc = sys_desc.trim_end_matches('\n').to_string();
                                 }
@@ -407,8 +398,8 @@ async fn process_rabbit_message(
                                 }
                                 in_drv_block = false;
                             }
-                            sys_wip = String::new();
-                            sys_romset = String::new();
+                            sys_wip.clear();
+                            sys_romset.clear();
                         }
                     }
                 }
@@ -434,7 +425,7 @@ async fn process_rabbit_message(
         mk_lib_compression::mk_lib_compression::mk_decompress_zip(
             &file_name,
             false,
-            &"/mediakraken/emulation/",
+            "/mediakraken/emulation/",
         )
         .await?;
 
@@ -457,7 +448,7 @@ async fn process_rabbit_message(
         for hash_file_path in entries {
             let ext = Path::new(&hash_file_path)
                 .extension()
-                .unwrap_or(&std::ffi::OsStr::new("no_extension"));
+                .unwrap_or(std::ffi::OsStr::new("no_extension"));
             if ext == "xml" {
                 let file = File::open(&hash_file_path)?;
                 let reader = BufReader::new(file);
@@ -481,19 +472,19 @@ async fn process_rabbit_message(
                     if xml_line.is_empty() {
                         continue;
                     }
-                    if xml_line.starts_with("<softwarelist") == true {
+                    if xml_line.starts_with("<softwarelist") {
                         println!("xml_line: {:?}", xml_line);
                         let system_string_split: Vec<&str> = xml_line.split("\"").collect();
                         println!("split: {:?}", system_string_split);
-                        let system_counter = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_game_count_by_short_name(sqlx_pool_rw, &system_string_split[1].to_string()).await?;
+                        let system_counter = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_game_count_by_short_name(sqlx_pool_rw, system_string_split[1]).await?;
                         if system_counter == 0 {
                             game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_upsert(sqlx_pool_rw, system_string_split[1].to_string(), system_string_split[3].to_string(), json!({})).await?;
                         } else {
-                            game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(sqlx_pool_rw, &system_string_split[1].to_string()).await?;
+                            game_system_uuid = mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_guid_by_short_name(sqlx_pool_rw, system_string_split[1]).await?;
                         }
-                    } else if xml_line.starts_with("<software") == true {
+                    } else if xml_line.starts_with("<software") {
                         xml_data = xml_line.to_string();
-                    } else if xml_line.starts_with("</software") == true {
+                    } else if xml_line.starts_with("</software") {
                         xml_data.push_str(xml_line);
                         match xml_string_to_json(xml_data.to_string(), &conf) {
                             Ok(json_data) => {

@@ -56,11 +56,13 @@ pub async fn metadata_guessit(
     Ok(guessit_data)
 }
 
+// Cross-platform by construction: treats both '/' and '\\' as separators and
+// reports no filename for directory paths (trailing separator) or empty input.
 fn extract_filename(path: &str) -> Option<String> {
-    Path::new(path)
-        .file_name()
-        .and_then(|f| f.to_str())
-        .map(|s| s.to_string())
+    if path.is_empty() || path.ends_with('/') || path.ends_with('\\') {
+        return None;
+    }
+    path.rsplit(['/', '\\']).next().map(str::to_string)
 }
 
 fn compare_titles_and_years(
