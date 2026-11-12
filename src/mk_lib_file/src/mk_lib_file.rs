@@ -30,7 +30,9 @@ pub fn mk_file_is_hidden(entry: &DirEntry) -> bool {
 //  .filter_map(Result::ok)
 //  .filter(|d| d.path().extension() == Some(OsStr::from_bytes(b"zip")))
 //  .filter(|e| !e.file_type().is_dir())
-pub async fn mk_directory_walk(dir_path: String) -> Result<Vec<String>, Box<dyn Error + Send + Sync>> {
+pub async fn mk_directory_walk(
+    dir_path: String,
+) -> Result<Vec<String>, Box<dyn Error + Send + Sync>> {
     // WalkDir performs blocking syscalls per entry, so run it off the async
     // runtime to avoid stalling other tasks on the current worker thread.
     task::spawn_blocking(move || -> Result<Vec<String>, walkdir::Error> {
@@ -71,7 +73,9 @@ mod tests {
 
     #[tokio::test]
     async fn test_mk_read_file_data_u8() {
-        let result = mk_read_file_data_u8("testing_data/HashCalc.txt").await.unwrap();
+        let result = mk_read_file_data_u8("testing_data/HashCalc.txt")
+            .await
+            .unwrap();
         assert_eq!(result, b"thisisafileforhashcalctests");
     }
 

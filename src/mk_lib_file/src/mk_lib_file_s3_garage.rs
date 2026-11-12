@@ -2,9 +2,9 @@
 // Operations against a local Garage S3 cluster.
 
 use aws_config::BehaviorVersion;
+use aws_sdk_s3::Client as S3Client;
 use aws_sdk_s3::config::{Builder as S3ConfigBuilder, Credentials, Region};
 use aws_sdk_s3::primitives::ByteStream;
-use aws_sdk_s3::Client as S3Client;
 use std::error::Error;
 
 /// Build an S3 client targeting a local Garage cluster.
@@ -89,12 +89,7 @@ pub async fn mk_lib_file_s3_garage_load(
     bucket: &str,
     key: &str,
 ) -> Result<Vec<u8>, Box<dyn Error>> {
-    let response = client
-        .get_object()
-        .bucket(bucket)
-        .key(key)
-        .send()
-        .await?;
+    let response = client.get_object().bucket(bucket).key(key).send().await?;
     let bytes = response.body.collect().await?.into_bytes();
     Ok(bytes.to_vec())
 }
