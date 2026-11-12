@@ -4,6 +4,7 @@ pub mod mk_lib_hardware_appletv;
 #[cfg(feature = "arduino")]
 pub mod mk_lib_hardware_arduino;
 #[cfg(feature = "arduino")]
+#[allow(non_snake_case)]
 pub mod mk_lib_hardware_arduino_SPL06_007;
 #[cfg(feature = "arduino")]
 pub mod mk_lib_hardware_arduino_lm1602;

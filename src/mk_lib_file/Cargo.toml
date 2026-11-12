@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_file"
-version = "0.0.257"
+version = "0.0.258"
 edition = "2024"
 [profile.release]
 panic = 'abort'

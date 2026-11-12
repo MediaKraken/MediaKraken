@@ -11,6 +11,35 @@ pub struct ChromecastDevice {
     pub address: String,
 }
 
+pub async fn mk_hardware_chromecast_discover()
+-> Result<Vec<ChromecastDevice>, Box<dyn std::error::Error>> {
+    let stream = mdns::discover::all(CHROMECAST_SERVICE_NAME, Duration::from_secs(15))?.listen();
+
+    pin_mut!(stream);
+
+    let mut seen = HashSet::new();
+    let mut devices = Vec::new();
+
+    while let Some(Ok(response)) = stream.next().await {
+        let Some(hostname) = response.hostname() else {
+            continue;
+        };
+
+        let Some(addr) = response.socket_address() else {
+            continue;
+        };
+
+        let hostname = hostname.to_string();
+        let address = addr.to_string();
+
+        if seen.insert((hostname.clone(), address.clone())) {
+            devices.push(ChromecastDevice { hostname, address });
+        }
+    }
+
+    Ok(devices)
+}
+
 #[cfg(test)]
 mod tests {
     use super::ChromecastDevice;
@@ -47,33 +76,4 @@ mod tests {
         let debug_str = format!("{:?}", device);
         assert!(debug_str.contains("ChromecastDevice"));
     }
-}
-
-pub async fn mk_hardware_chromecast_discover()
--> Result<Vec<ChromecastDevice>, Box<dyn std::error::Error>> {
-    let stream = mdns::discover::all(CHROMECAST_SERVICE_NAME, Duration::from_secs(15))?.listen();
-
-    pin_mut!(stream);
-
-    let mut seen = HashSet::new();
-    let mut devices = Vec::new();
-
-    while let Some(Ok(response)) = stream.next().await {
-        let Some(hostname) = response.hostname() else {
-            continue;
-        };
-
-        let Some(addr) = response.socket_address() else {
-            continue;
-        };
-
-        let hostname = hostname.to_string();
-        let address = addr.to_string();
-
-        if seen.insert((hostname.clone(), address.clone())) {
-            devices.push(ChromecastDevice { hostname, address });
-        }
-    }
-
-    Ok(devices)
 }

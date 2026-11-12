@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_hardware"
-version = "0.0.253"
+version = "0.0.254"
 edition = "2024"
 
 [profile.release]
@@ -10,16 +10,14 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_network = { version = "0.0.247", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.248", registry = "kellnr" }
+mk_lib_network = { version = "0.0.248", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.249", registry = "kellnr" }
 
 futures = "0.3.34"
 futures-util = "0.3.34"
 huelib = "0.13.2"
-LGremote = "0.2.1"
 lsdp = "0.3.0"
 mdns = "3.0.0"
-mini-telnet = "0.1.8"
 # onvif = { git = "https://github.com/lumeohq/onvif-rs" } # has request with default
 rascam = { version = "0.0.2", optional = true }                     # breaks on mmal-sys compile - mmal-sys is for raspberry pi only
 rppal = { version = "0.22.1", features = ["hal"], optional = true }
@@ -27,10 +25,8 @@ rppal = { version = "0.22.1", features = ["hal"], optional = true }
 rups = { version = "0.6.1", features = ["async", "async-ssl"] }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"
-serialport = "4.9.0"
 smartcast = "0.1.1"
 sonos_discovery = "0.0.2"
-spl06-007 = { version = "0.3.3", optional = true }
 ssdp-client = "2.1.0"
 tokio = "1.53.1"
 url = "2.5.8"
@@ -39,7 +35,7 @@ weectrl = { version = "2.0.2", registry = "kellnr" }
 yeelib_rs = "0.1.1"
 
 [features]
-arduino = ["dep:spl06-007"]
+arduino = []
 #raspberry = ["dep:rascam", "dep:rppal", "dep:rppal-dht11"]
 raspberry = ["dep:rascam", "dep:rppal"]
 

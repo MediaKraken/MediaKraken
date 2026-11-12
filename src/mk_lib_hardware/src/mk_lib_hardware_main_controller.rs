@@ -8,6 +8,16 @@ pub struct DeviceJson {
     pub value: f64,
 }
 
+pub async fn mk_hardware_main_command(
+    _machine_brand: String,
+    _machine_type: String,
+    _machine_model: String,
+    _command_type: String,
+    _command_value: String,
+) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+    Ok(json!(null))
+}
+
 #[cfg(test)]
 mod tests {
     use super::DeviceJson;
@@ -18,7 +28,7 @@ mod tests {
         let original = DeviceJson {
             id: 42,
             name: "Test Device".to_string(),
-            value: 3.14,
+            value: 3.5,
         };
         let serialized = serde_json::to_string(&original).unwrap();
         let deserialized: DeviceJson = serde_json::from_str(&serialized).unwrap();
@@ -48,14 +58,4 @@ mod tests {
         assert_eq!(json_value["name"], "Amplifier");
         assert_eq!(json_value["value"], 0.0);
     }
-}
-
-pub async fn mk_hardware_main_command(
-    _machine_brand: String,
-    _machine_type: String,
-    _machine_model: String,
-    _command_type: String,
-    _command_value: String,
-) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
-    Ok(json!(null))
 }
