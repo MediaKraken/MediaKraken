@@ -3,6 +3,7 @@ use dioxus::prelude::*;
 use crate::api::ApiClient;
 use crate::models::{MediaItem, MediaKind};
 
+#[allow(dead_code)]
 #[derive(Clone, Debug, PartialEq)]
 pub enum PlaybackState {
     Idle,
@@ -21,6 +22,7 @@ pub enum PlaybackState {
     Error(String),
 }
 
+#[allow(dead_code)]
 #[derive(Clone, Debug, PartialEq)]
 pub enum PlaybackMode {
     Movie,

@@ -73,7 +73,10 @@ fn ScanResultView(state: ScanState) -> Element {
             p { class: "muted", "Asking the server..." }
         },
         ScanState::Found(result) => {
-            let title = result.title.clone().unwrap_or_else(|| "Unknown title".to_string());
+            let title = result
+                .title
+                .clone()
+                .unwrap_or_else(|| "Unknown title".to_string());
             let media_type = result
                 .media_type
                 .clone()
@@ -82,8 +85,16 @@ fn ScanResultView(state: ScanState) -> Element {
                 .year
                 .map(|y| y.to_string())
                 .unwrap_or_else(|| "—".to_string());
-            let status = if result.owned { "Already in library" } else { "Not in library" };
-            let class = if result.owned { "result owned" } else { "result missing" };
+            let status = if result.owned {
+                "Already in library"
+            } else {
+                "Not in library"
+            };
+            let class = if result.owned {
+                "result owned"
+            } else {
+                "result missing"
+            };
             rsx! {
                 div { class: "{class}",
                     h3 { "{status}" }

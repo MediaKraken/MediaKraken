@@ -14,12 +14,7 @@ use std::{
 };
 
 const HTTP_BIND_ADDR: &str = "127.0.0.1:7878";
-const ALLOWED_HOSTS: &[&str] = &[
-    "127.0.0.1",
-    "127.0.0.1:7878",
-    "localhost",
-    "localhost:7878",
-];
+const ALLOWED_HOSTS: &[&str] = &["127.0.0.1", "127.0.0.1:7878", "localhost", "localhost:7878"];
 const REQUEST_HEADER_LIMIT: usize = 8 * 1024;
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(5);
 const MPV_READY_TIMEOUT: Duration = Duration::from_secs(10);
@@ -64,8 +59,8 @@ impl MpvController {
         if matches!(self.child.lock(), Ok(guard) if guard.is_none()) {
             return Err("mpv is not running".to_string());
         }
-        let mut stream = UnixStream::connect(&self.socket_path)
-            .map_err(|e| format!("connect: {e}"))?;
+        let mut stream =
+            UnixStream::connect(&self.socket_path).map_err(|e| format!("connect: {e}"))?;
         let _ = stream.set_write_timeout(Some(MPV_SOCKET_WRITE_TIMEOUT));
         stream
             .write_all(command.as_bytes())
@@ -75,10 +70,11 @@ impl MpvController {
 
     fn shutdown(&self) {
         if let Ok(mut guard) = self.child.lock()
-            && let Some(mut child) = guard.take() {
-                let _ = child.kill();
-                let _ = child.wait();
-            }
+            && let Some(mut child) = guard.take()
+        {
+            let _ = child.kill();
+            let _ = child.wait();
+        }
         let _ = fs::remove_file(&self.socket_path);
     }
 }
@@ -112,7 +108,16 @@ fn main() {
         eprintln!("warning: running under Wayland without XWayland; mpv embedding will not work");
     }
 
-    let _ = mk_lib_network::mk_lib_network_mediakraken::mk_lib_network_find_mediakraken_server();
+    let runtime = match tokio::runtime::Builder::new_current_thread().build() {
+        Ok(rt) => rt,
+        Err(e) => {
+            eprintln!("failed to build tokio runtime: {e}");
+            return;
+        }
+    };
+    let _server = runtime.block_on(
+        mk_lib_network::mk_lib_network_mediakraken::mk_lib_network_find_mediakraken_server(),
+    );
 
     let app = app::App::default().with_scheme(app::AppScheme::Gtk);
     let mut win = window::Window::new(100, 100, 800, 600, "Media Player");
@@ -226,10 +231,9 @@ fn handle_client(
         };
         let value = value.trim();
         match name.trim().to_ascii_lowercase().as_str() {
-            "host"
-                if ALLOWED_HOSTS.iter().any(|h| h.eq_ignore_ascii_case(value)) => {
-                    host_ok = true;
-                }
+            "host" if ALLOWED_HOSTS.iter().any(|h| h.eq_ignore_ascii_case(value)) => {
+                host_ok = true;
+            }
             "authorization" => auth_header = Some(value.to_string()),
             _ => {}
         }

@@ -1,5 +1,9 @@
+use brother_ql::{
+    connection::{PrinterConnection, UsbConnection, UsbConnectionInfo},
+    media::Media,
+    printjob::PrintJob,
+};
 use std::error::Error;
-use brother_ql::{connection::{PrinterConnection, UsbConnection, UsbConnectionInfo}, media::Media, printjob::PrintJob};
 
 // DK1209
 // 62mm x 29mm
@@ -15,6 +19,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     no headers and nothing checked
     need it for a ql800 printer
     without the rating, date and botton upc line
- 
+
 Die-cut labels, WxH 62x29mm (696x318px)
  */

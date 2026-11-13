@@ -31,10 +31,13 @@ spec:
         io.kompose.service: mkstack-transcode-service
     spec:
       containers:
-        - args:
-            - sh
-            - -c
+        - name: mkstack-transcode
+          image: mediakraken/mktranscode:dev
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c"]
+          args:
             - /mktranscode
+          env:
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
@@ -50,17 +53,13 @@ spec:
                 secretKeyRef:
                   name: run-env-type
                   key: debug
-          image: mediakraken/mktranscode:dev
-          imagePullPolicy: IfNotPresent
-          name: mkstack-transcode
           volumeMounts:
-            - mountPath: /mediakraken/mnt
-              name: mkstack-transcode-claim
+            - name: mkstack-transcode-claim
+              mountPath: /mediakraken/mnt
               readOnly: true
-      restartPolicy: OnFailure
+      restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
         - name: mkstack-transcode-claim
           persistentVolumeClaim:
             claimName: mkstack-transcode-claim
-            readOnly: true

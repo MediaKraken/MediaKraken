@@ -9,3 +9,5 @@ members = [
     "theater_full",
     "theater_thin",
 ]
+
+exclude = ["pi_audio"]

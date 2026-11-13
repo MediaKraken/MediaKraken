@@ -11,6 +11,7 @@ enum LibraryState {
     Error(String),
 }
 
+#[allow(dead_code)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PlaybackMode {
     Movie,
@@ -20,8 +21,8 @@ pub enum PlaybackMode {
 
 #[component]
 pub fn MediaPage(client: ApiClient) -> Element {
-    let mut kind = use_signal(|| MediaKind::Movie);
-    let mut state = use_signal(|| LibraryState::Idle);
+    let kind = use_signal(|| MediaKind::Movie);
+    let state = use_signal(|| LibraryState::Idle);
     let mut playback_item = use_signal(|| None::<(MediaItem, MediaKind)>);
 
     let active = kind();
@@ -48,15 +49,15 @@ pub fn MediaPage(client: ApiClient) -> Element {
             }
             match playback_item() {
                 Some((item, kind)) => rsx! {
-                    PlaybackView { 
-                        item: item, 
+                    PlaybackView {
+                        item: item,
                         kind: kind,
-                        on_back: move |_| playback_item.set(None) 
+                        on_back: move |_| playback_item.set(None)
                     }
                 },
                 None => rsx! {
-                    MediaListView { 
-                        state: state(), 
+                    MediaListView {
+                        state: state(),
                         kind: active,
                         on_play: Callback::new(play_item)
                     }
@@ -91,7 +92,11 @@ fn tab_class(active: bool) -> &'static str {
 }
 
 #[component]
-fn MediaListView(state: LibraryState, kind: MediaKind, on_play: Callback<(MediaItem, MediaKind)>) -> Element {
+fn MediaListView(
+    state: LibraryState,
+    kind: MediaKind,
+    on_play: Callback<(MediaItem, MediaKind)>,
+) -> Element {
     match state {
         LibraryState::Idle => rsx! {
             p { class: "muted", "Pick a category above to load {kind.label()}." }
@@ -109,9 +114,9 @@ fn MediaListView(state: LibraryState, kind: MediaKind, on_play: Callback<(MediaI
                 rsx! {
                     div { class: "media-grid",
                         for item in items {
-                            MediaCard { 
-                                key: "{item.id}", 
-                                item: item, 
+                            MediaCard {
+                                key: "{item.id}",
+                                item: item,
                                 kind: kind,
                                 on_play: on_play
                             }
@@ -124,7 +129,11 @@ fn MediaListView(state: LibraryState, kind: MediaKind, on_play: Callback<(MediaI
 }
 
 #[component]
-fn MediaCard(item: MediaItem, kind: MediaKind, on_play: Callback<(MediaItem, MediaKind)>) -> Element {
+fn MediaCard(
+    item: MediaItem,
+    kind: MediaKind,
+    on_play: Callback<(MediaItem, MediaKind)>,
+) -> Element {
     let year = item
         .year
         .map(|y| y.to_string())
@@ -157,7 +166,7 @@ fn MediaCard(item: MediaItem, kind: MediaKind, on_play: Callback<(MediaItem, Med
 fn PlaybackView(item: MediaItem, kind: MediaKind, on_back: Callback<()>) -> Element {
     rsx! {
         section { class: "page",
-            button { 
+            button {
                 class: "back-button",
                 onclick: move |_| on_back(()),
                 "← Back to Library"

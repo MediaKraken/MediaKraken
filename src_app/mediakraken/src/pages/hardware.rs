@@ -162,9 +162,13 @@ fn DeviceCard(
     let volume_value = device.volume.unwrap_or(0);
     let volume_label = device
         .volume
-        .map(|v| format!("{v}"))
+        .map(|v| v.to_string())
         .unwrap_or_else(|| "—".to_string());
-    let power_label = if device.powered { "Power off" } else { "Power on" };
+    let power_label = if device.powered {
+        "Power off"
+    } else {
+        "Power on"
+    };
     let mute_label = if device.muted { "Unmute" } else { "Mute" };
     let power_state = if device.powered { "on" } else { "off" };
 

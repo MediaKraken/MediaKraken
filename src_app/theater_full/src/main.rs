@@ -1,12 +1,4 @@
-use fltk::{
-    app,
-    button::Button,
-    dialog,
-    group::Flex,
-    image::PngImage,
-    prelude::*,
-    window::Window,
-};
+use fltk::{app, button::Button, dialog, group::Flex, image::PngImage, prelude::*, window::Window};
 use fltk_theme::{SchemeType, WidgetScheme};
 use std::error::Error;
 

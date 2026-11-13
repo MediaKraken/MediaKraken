@@ -269,9 +269,7 @@ fn handle_play_category(category: MediaCategory, api_addr: &str) {
             message_default(&format!("theater_thin playing:\n{path}"));
         }
         Ok((code, body)) => {
-            alert_default(&format!(
-                "theater_thin play failed:\nHTTP {code}\n{body}"
-            ));
+            alert_default(&format!("theater_thin play failed:\nHTTP {code}\n{body}"));
         }
         Err(error) => {
             alert_default(&format!("Unable to reach theater_thin API:\n{error}"));
@@ -281,7 +279,9 @@ fn handle_play_category(category: MediaCategory, api_addr: &str) {
 
 fn pick_media_file(category_label: &str, filter: &str) -> Option<String> {
     let mut chooser = NativeFileChooser::new(FileDialogType::BrowseFile);
-    chooser.set_title(&format!("Select {category_label} file to play in theater_thin"));
+    chooser.set_title(&format!(
+        "Select {category_label} file to play in theater_thin"
+    ));
     chooser.set_filter(filter);
     chooser.show();
 

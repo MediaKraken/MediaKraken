@@ -5,12 +5,12 @@ edition = "2024"
 
 
 [dependencies]
-mk_lib_common = { version = "0.0.248", registry = "kellnr" }
-mk_lib_compression = { version = "0.0.247", registry = "kellnr" }
-mk_lib_database = { version = "0.0.281", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.249", registry = "kellnr" }
-mk_lib_network = { version = "0.0.248", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.252", registry = "kellnr" }
+mk_lib_common = { version = "0.0.249", registry = "kellnr" }
+mk_lib_compression = { version = "0.0.248", registry = "kellnr" }
+mk_lib_database = { version = "0.0.282", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.250", registry = "kellnr" }
+mk_lib_network = { version = "0.0.249", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.253", registry = "kellnr" }
 
 chrono = { version = "0.4.45", features = ["serde"] }
 sqlx = { version = "0.9.0", default-features = false, features = [

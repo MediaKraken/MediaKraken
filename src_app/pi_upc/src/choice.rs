@@ -96,7 +96,6 @@ impl MyPopup {
 }
 
 pub struct MyChoice {
-    grp: group::Group,
     frame: frame::Frame,
     btn: button::Button,
     choices: Rc<RefCell<Vec<&'static str>>>,
@@ -123,7 +122,6 @@ impl MyChoice {
             }
         });
         Self {
-            grp,
             frame,
             btn,
             choices,
@@ -140,10 +138,6 @@ impl MyChoice {
 
     pub fn frame(&mut self) -> &mut frame::Frame {
         &mut self.frame
-    }
-
-    pub fn group(&mut self) -> &mut group::Group {
-        &mut self.grp
     }
 
     pub fn set_current_choice(&mut self, idx: i32) {

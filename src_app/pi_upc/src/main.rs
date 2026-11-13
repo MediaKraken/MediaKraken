@@ -1,6 +1,4 @@
-use fltk::{
-    app, enums::*, frame::*, group::*, input::*, output::Output, prelude::*, window::*,
-};
+use fltk::{app, enums::*, frame::*, group::*, input::*, output::Output, prelude::*, window::*};
 mod choice;
 mod database;
 use std::error::Error;
@@ -48,7 +46,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     window_main.show();
     window_main.make_current();
 
-    upc_input.take_focus();
+    let _ = upc_input.take_focus();
     upc_input.set_visible_focus();
 
     while app.wait() {
@@ -72,7 +70,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
             out.set_value(&output_text);
             upc_input.set_value("");
-            upc_input.take_focus();
+            let _ = upc_input.take_focus();
             upc_input.set_visible_focus();
         }
     }

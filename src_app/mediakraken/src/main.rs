@@ -1,3 +1,8 @@
+// Nightly clippy fires `useless_format` on Dioxus `rsx!` string-interpolation text nodes
+// (e.g. `p { "{message}" }`), where the suggested `.to_string()` form is not expressible
+// in rsx syntax. Stable clippy does not fire it.
+#![allow(clippy::useless_format)]
+
 mod api;
 mod models;
 mod pages;

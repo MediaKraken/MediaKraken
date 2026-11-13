@@ -31,8 +31,10 @@ pub fn database_insert_logs(
     db: &sqlite::Connection,
     log_text: String,
 ) -> Result<(), Box<dyn Error>> {
-    let query = "insert into logs (log_timestamp, log_text) values (CURRENT_TIMESTAMP, ?);";
-    db.execute(query, sqlite::params![log_text])?;
+    let mut statement =
+        db.prepare("insert into logs (log_timestamp, log_text) values (CURRENT_TIMESTAMP, ?);")?;
+    statement.bind((1, log_text.as_str()))?;
+    statement.next()?;
     Ok(())
 }
 
@@ -41,8 +43,12 @@ pub fn database_upc_insert(
     upc_code: i64,
     upc_type: i32,
 ) -> Result<(), Box<dyn Error>> {
-    let query = "insert into upc_codes (upc_code, upc_code_type, added_timestamp) values (?, ?, CURRENT_TIMESTAMP);";
-    db.execute(query, sqlite::params![upc_code, upc_type])?;
+    let mut statement = db.prepare(
+        "insert into upc_codes (upc_code, upc_code_type, added_timestamp) values (?, ?, CURRENT_TIMESTAMP);",
+    )?;
+    statement.bind((1, upc_code))?;
+    statement.bind((2, upc_type as i64))?;
+    statement.next()?;
     Ok(())
 }
 
@@ -52,17 +58,18 @@ pub fn database_upc_owned(
     upc_type: i32,
 ) -> Result<i64, Box<dyn Error>> {
     let mut record_count: i64 = 0;
-    let query = "SELECT count(*) as total_found FROM upc_codes WHERE upc_code = ? and upc_code_type = ?";
-    let mut statement = db.prepare(query)?.bind(upc_code)?.bind(upc_type);
+    let query =
+        "SELECT count(*) as total_found FROM upc_codes WHERE upc_code = ? and upc_code_type = ?";
+    let mut statement = db.prepare(query)?;
+    statement.bind((1, upc_code))?;
+    statement.bind((2, upc_type as i64))?;
     while let Ok(State::Row) = statement.next() {
         record_count = statement.read::<i64, _>("total_found")?;
     }
     Ok(record_count)
 }
 
-pub fn database_upc_known_count(
-    db: &sqlite::Connection,
-) -> Result<i64, Box<dyn Error>> {
+pub fn database_upc_known_count(db: &sqlite::Connection) -> Result<i64, Box<dyn Error>> {
     let mut record_count: i64 = 0;
     let query = "SELECT count(*) as total_found FROM upc_codes";
     let mut statement = db.prepare(query)?;

@@ -1,6 +1,5 @@
 use fltk::{
-    app, app::*, button::*, enums::*, frame::*, group::*, input::*, output::Output, prelude::*,
-    window::*,
+    app, button::*, enums::*, frame::*, group::*, input::*, output::Output, prelude::*, window::*,
 };
 mod choice;
 mod database;
@@ -18,7 +17,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let app = app::App::default().with_scheme(app::Scheme::Gleam);
     let mut window_main = Window::default().with_size(800, 480); // pi 7" screen default
 
-    let mut button_sync = Button::new(666, 384, 133, 96, "Sync");
+    let _button_sync = Button::new(666, 384, 133, 96, "Sync");
 
     let mut choice_media_type = choice::MyChoice::new(20, 20, 90, 30, None);
     choice_media_type.add_choices(&["Media", "CD", "Book", "Misc"]);
@@ -32,7 +31,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut container_upc_codes = Pack::new(300, 25, 150, 40, "UPC Codes");
 
-    let mut frame_upc_known = Frame::default().with_size(40, 20).with_label(format!("Known: {}", total_codes).as_str());
+    let mut frame_upc_known = Frame::default()
+        .with_size(40, 20)
+        .with_label(format!("Known: {}", total_codes).as_str());
 
     container_upc_codes.end();
     container_upc_codes.set_frame(FrameType::BorderFrame);
@@ -53,7 +54,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     window_main.show();
     window_main.make_current();
 
-    upc_input.take_focus();
+    let _ = upc_input.take_focus();
     upc_input.set_visible_focus();
 
     while app.wait() {
@@ -73,8 +74,11 @@ fn main() -> Result<(), Box<dyn Error>> {
                             continue;
                         }
                     };
-                    let mut output_text: String = "No Data".to_string();
-                    let _ = database::database_insert_logs(&db_instance, format!("{} scanned", inp1_val));
+                    let output_text: String;
+                    let _ = database::database_insert_logs(
+                        &db_instance,
+                        format!("{} scanned", inp1_val),
+                    );
                     let upc_count = match database::database_upc_owned(
                         &db_instance,
                         inp1_val,
@@ -94,13 +98,13 @@ fn main() -> Result<(), Box<dyn Error>> {
                             choice_media_type.value(),
                         );
                         output_text = format!("{} - Added", inp1_val);
-                        let _ = database::database_insert_logs(&db_instance, format!("{} added", inp1_val));
+                        let _ = database::database_insert_logs(
+                            &db_instance,
+                            format!("{} added", inp1_val),
+                        );
                         total_codes += 1;
 
-                        frame_upc_known.set_label(&format!(
-                            "Known: {}",
-                            &total_codes.to_string()
-                        ));
+                        frame_upc_known.set_label(&format!("Known: {}", total_codes));
                     } else {
                         output_text = format!("{} - DUPLICATE!", inp1_val);
                         let _ = database::database_insert_logs(
@@ -111,7 +115,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     out.set_value(&output_text);
 
                     upc_input.set_value("");
-                    upc_input.take_focus();
+                    let _ = upc_input.take_focus();
                     upc_input.set_visible_focus();
                 }
             }

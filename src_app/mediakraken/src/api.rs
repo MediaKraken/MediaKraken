@@ -30,6 +30,7 @@ impl ApiClient {
             .expect("failed to build reqwest client")
     }
 
+    #[allow(dead_code)]
     pub fn default_http_client_or_exit() -> Client {
         match Client::builder().timeout(REQUEST_TIMEOUT).build() {
             Ok(client) => client,
@@ -205,17 +206,26 @@ mod tests {
 
     #[test]
     fn trims_single_trailing_slash() {
-        assert_eq!(client("https://www.mediakraken.media/").base_url(), "https://www.mediakraken.media");
+        assert_eq!(
+            client("https://www.mediakraken.media/").base_url(),
+            "https://www.mediakraken.media"
+        );
     }
 
     #[test]
     fn trims_multiple_trailing_slashes() {
-        assert_eq!(client("https://www.mediakraken.media///").base_url(), "https://www.mediakraken.media");
+        assert_eq!(
+            client("https://www.mediakraken.media///").base_url(),
+            "https://www.mediakraken.media"
+        );
     }
 
     #[test]
     fn leaves_clean_url_unchanged() {
-        assert_eq!(client("https://www.mediakraken.media").base_url(), "https://www.mediakraken.media");
+        assert_eq!(
+            client("https://www.mediakraken.media").base_url(),
+            "https://www.mediakraken.media"
+        );
     }
 
     #[test]
