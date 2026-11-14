@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_rabbitmq"
-version = "0.0.253"
+version = "0.0.255"
 edition = "2024"
 
 [profile.release]
@@ -11,4 +11,4 @@ codegen-units = 1
 
 [dependencies]
 amqprs = "2.1.5"
-tokio = "1.53.1"
+tokio = { version = "1.53.1", features = ["time"] }

@@ -5,9 +5,9 @@ edition = "2024"
 
 
 [dependencies]
-mk_lib_database = { version = "0.0.282", registry = "kellnr" }
-mk_lib_network = { version = "0.0.249", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.253", registry = "kellnr" }
+mk_lib_database = { version = "0.0.283", registry = "kellnr" }
+mk_lib_network = { version = "0.0.250", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.255", registry = "kellnr" }
 
 reqwest = { version = "0.13.4", default-features = false, features = [
     "json",

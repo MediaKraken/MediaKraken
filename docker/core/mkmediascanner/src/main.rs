@@ -552,7 +552,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     )
     .await;
 
-    let (mut _rabbit_connection, mut rabbit_channel, mut rabbit_consumer) =
+    let (mut rabbit_connection, mut rabbit_channel, mut rabbit_consumer) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_reestablish(RABBIT_QUEUE, RABBIT_PREFETCH_COUNT)
             .await?;
 
@@ -576,7 +576,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 eprintln!("mkmediascanner loki push failed ({err})");
             }
             let mut backoff = Duration::from_secs(5);
-            (_rabbit_connection, rabbit_channel, rabbit_consumer) = loop {
+            (rabbit_connection, rabbit_channel, rabbit_consumer) = loop {
                 tokio::time::sleep(backoff).await;
                 match mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_reestablish(
                     RABBIT_QUEUE,
@@ -967,18 +967,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 let needs_ffprobe =
                     !MEDIA_EXTENSION_SKIP_FFMPEG.contains(&file_extension.as_str()) && is_media;
                 if needs_ffprobe {
-                    if let Err(error) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
-                        rabbit_channel.clone(),
-                        "mktranscode",
-                        json!({
-                            "Type": "FFMPEG",
-                            "Subtype": "Probe",
-                            "Media UUID": media_id,
-                            "Media Path": file_metadata.name,
-                        })
-                        .to_string(),
-                    )
-                    .await
+                    if let Err(error) =
+                        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish_with_retry(
+                            &rabbit_connection,
+                            "mktranscode",
+                            json!({
+                                "Type": "FFMPEG",
+                                "Subtype": "Probe",
+                                "Media UUID": media_id,
+                                "Media Path": file_metadata.name,
+                            })
+                            .to_string(),
+                        )
+                        .await
                         && let Err(err) = mk_logging_loki_push(json!({
                             "level": "error",
                             "message": "ffprobe publish failed",
@@ -991,17 +992,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     }
                     if generate_roku_thumb
                         && original_media_class != DLMediaType::MUSIC
-                        && let Err(error) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
-                            rabbit_channel.clone(),
-                            "mktranscode",
-                            json!({
-                                "Type": "Roku",
-                                "Media UUID": media_id,
-                                "Media Path": file_metadata.name,
-                            })
-                            .to_string(),
-                        )
-                        .await
+                        && let Err(error) =
+                            mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish_with_retry(
+                                &rabbit_connection,
+                                "mktranscode",
+                                json!({
+                                    "Type": "Roku",
+                                    "Media UUID": media_id,
+                                    "Media Path": file_metadata.name,
+                                })
+                                .to_string(),
+                            )
+                            .await
                         && let Err(err) = mk_logging_loki_push(json!({
                             "level": "error",
                             "message": "roku publish failed",

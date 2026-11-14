@@ -15,7 +15,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     mk_lib_database::mk_lib_database_version::mk_lib_database_version_check(&sqlx_pool_ro, false)
         .await?;
 
-    let (_rabbit_connection, rabbit_channel) =
+    let (rabbit_connection, _rabbit_channel) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkinotify").await?;
 
     let mut inotify = Inotify::init().map_err(|e| format!("Failed to initialize inotify: {e}"))?;
@@ -85,8 +85,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // Channel closed (reader task exited) → nothing left to publish.
                 let Some(payload) = maybe_payload else { break };
 
-                if let Err(error) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
-                    rabbit_channel.clone(),
+                if let Err(error) = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish_with_retry(
+                    &rabbit_connection,
                     "mk_inotify",
                     payload,
                 )

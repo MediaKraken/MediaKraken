@@ -235,23 +235,33 @@ pub async fn admin_library_media_scan(
     .validate(&current_user, &method, None)
     .await
     {
-        Redirect::to("/error/403?admin=true")
+        Redirect::to("/error/403?admin=true").into_response()
     } else {
         let (rabbit_connection, rabbit_channel) =
             mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp")
                 .await
                 .unwrap();
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
-            rabbit_channel.clone(),
-            "mkmediascanner",
-            json!({"Type": "Library Scan"}).to_string(),
-        )
-        .await
-        .unwrap();
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
-            .await
-            .unwrap();
-        Redirect::to("/admin/library")
+        // Collapse the publish result before the next await: the error type
+        // (Box<dyn std::error::Error>) is not Send and must not live across it.
+        let publish_ok = matches!(
+            mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish_with_retry(
+                &rabbit_connection,
+                "mkmediascanner",
+                json!({"Type": "Library Scan"}).to_string(),
+            )
+            .await,
+            Ok(())
+        );
+        let _ = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
+            .await;
+        if !publish_ok {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Unable to queue the media scan.",
+            )
+                .into_response();
+        }
+        Redirect::to("/admin/library").into_response()
     }
 }
 
@@ -341,23 +351,33 @@ pub async fn admin_library_share_scan(
     .validate(&current_user, &method, None)
     .await
     {
-        Redirect::to("/error/403?admin=true")
+        Redirect::to("/error/403?admin=true").into_response()
     } else {
         let (rabbit_connection, rabbit_channel) =
             mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp")
                 .await
                 .unwrap();
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
-            rabbit_channel.clone(),
-            "mksharescanner",
-            json!({"Type": "Share Scan", "Data": "192.168.1"}).to_string(),
-        )
-        .await
-        .unwrap();
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
-            .await
-            .unwrap();
-        Redirect::to("/admin/library")
+        // Collapse the publish result before the next await: the error type
+        // (Box<dyn std::error::Error>) is not Send and must not live across it.
+        let publish_ok = matches!(
+            mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish_with_retry(
+                &rabbit_connection,
+                "mksharescanner",
+                json!({"Type": "Share Scan", "Data": "192.168.1"}).to_string(),
+            )
+            .await,
+            Ok(())
+        );
+        let _ = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
+            .await;
+        if !publish_ok {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Unable to queue the share scan.",
+            )
+                .into_response();
+        }
+        Redirect::to("/admin/library").into_response()
     }
 }
 

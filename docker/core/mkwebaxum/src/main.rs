@@ -448,6 +448,10 @@ async fn main() {
         )
         .route_with_tsr("/admin/hardware", get(admin::bp_hardware::admin_hardware))
         .route_with_tsr("/admin/home", get(admin::bp_home::admin_home))
+        .route_with_tsr(
+            "/admin/housekeeping_run/{script_name}",
+            get(admin::bp_cron::admin_housekeeping_run),
+        )
         .route_with_tsr("/admin/logging", get(admin::bp_logging::admin_logging))
         .route_with_tsr(
             "/admin/library",

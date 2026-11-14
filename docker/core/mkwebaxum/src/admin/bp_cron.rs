@@ -13,6 +13,19 @@ use sqlx::postgres::PgPool;
 
 const ALLOWED_CRON_SCHEDULE_TYPES: [&str; 4] = ["Week(s)", "Day(s)", "Hour(s)", "Minute(s)"];
 
+/// A manually triggered housekeeping script.
+///
+/// Housekeeping scripts are static and are intentionally not populated from
+/// the database. Add new entries to `HOUSEKEEPING_SCRIPTS`.
+struct HousekeepingScript {
+    name: &'static str,
+    description: &'static str,
+    queue_name: &'static str,
+    payload: &'static str,
+}
+
+const HOUSEKEEPING_SCRIPTS: &[HousekeepingScript] = &[];
+
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_403.html")]
 struct TemplateError403Context {
@@ -24,6 +37,8 @@ struct TemplateError403Context {
 struct TemplateCronContext<'a> {
     template_data: &'a Vec<mk_lib_database::mk_lib_database_cron::DBCronList>,
     template_data_exists: &'a bool,
+    housekeeping_data: &'a [HousekeepingScript],
+    housekeeping_exists: &'a bool,
     page_title: Option<String>,
 }
 
@@ -108,9 +123,13 @@ pub async fn admin_cron(
         .await
         .unwrap();
         let cron_data = !cron_list.is_empty();
+        let housekeeping_data = HOUSEKEEPING_SCRIPTS;
+        let housekeeping_data_exists = !housekeeping_data.is_empty();
         let template = TemplateCronContext {
             template_data: &cron_list,
             template_data_exists: &cron_data,
+            housekeeping_data,
+            housekeeping_exists: &housekeeping_data_exists,
             page_title: Some("MediaKraken Admin Cron".to_string()),
         };
         let reply_html = template.render().unwrap();
@@ -125,7 +144,7 @@ pub async fn admin_cron_run(
     Path(guid): Path<uuid::Uuid>,
 ) -> impl IntoResponse {
     if !user_can_view_admin_cron(&method, &auth).await {
-        Redirect::to("/error/403?admin=true")
+        Redirect::to("/error/403?admin=true").into_response()
     } else {
         let row_data = mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_service_json(
             &state.sqlx_pool_rw,
@@ -137,23 +156,88 @@ pub async fn admin_cron_run(
             mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp")
                 .await
                 .unwrap();
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish(
-            rabbit_channel.clone(),
-            row_data["route_key"].as_str().unwrap(),
-            row_data.to_string(),
-        )
-        .await
-        .unwrap();
-        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
-            .await
-            .unwrap();
+        // Collapse the publish result before the next await: the error type
+        // (Box<dyn std::error::Error>) is not Send and must not live across it.
+        let publish_ok = matches!(
+            mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish_with_retry(
+                &rabbit_connection,
+                row_data["route_key"].as_str().unwrap(),
+                row_data.to_string(),
+            )
+            .await,
+            Ok(())
+        );
+        let _ = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection)
+            .await;
+        if !publish_ok {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Unable to queue the cron job.",
+            )
+                .into_response();
+        }
         mk_lib_database::mk_lib_database_cron::mk_lib_database_cron_time_update(
             &state.sqlx_pool_rw,
             guid,
         )
         .await
         .unwrap();
-        Redirect::to("/admin/cron")
+        Redirect::to("/admin/cron").into_response()
+    }
+}
+
+pub async fn admin_housekeeping_run(
+    method: Method,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    Path(script_name): Path<String>,
+) -> impl IntoResponse {
+    if !user_can_view_admin_cron(&method, &auth).await {
+        return Redirect::to("/error/403?admin=true").into_response();
+    }
+
+    let script = match HOUSEKEEPING_SCRIPTS
+        .iter()
+        .find(|item| item.name == script_name.as_str())
+    {
+        Some(item) => item,
+        None => return (StatusCode::NOT_FOUND, "Housekeeping script not found.").into_response(),
+    };
+
+    let (rabbit_connection, rabbit_channel) =
+        match mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp").await {
+            Ok(connection) => connection,
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Unable to connect to the message queue.",
+                )
+                    .into_response();
+            }
+        };
+
+    // Collapse the publish result before the next await: the error type
+    // (Box<dyn std::error::Error>) is not Send and must not live across it.
+    let publish_ok = matches!(
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish_with_retry(
+            &rabbit_connection,
+            script.queue_name,
+            script.payload.to_string(),
+        )
+        .await,
+        Ok(())
+    );
+
+    let _ =
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection).await;
+
+    if publish_ok {
+        Redirect::to("/admin/cron").into_response()
+    } else {
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Unable to queue the housekeeping script.",
+        )
+            .into_response()
     }
 }
 

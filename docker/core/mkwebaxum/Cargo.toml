@@ -5,13 +5,13 @@ edition = "2024"
 
 
 [dependencies]
-mk_lib_common = { version = "0.0.249", registry = "kellnr" }
-mk_lib_database = { version = "0.0.282", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.250", registry = "kellnr" }
-mk_lib_metadata = { version = "0.0.261", registry = "kellnr" }
-mk_lib_network = { version = "0.0.249", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.253", registry = "kellnr" }
-mk_lib_share = { version = "0.0.258", registry = "kellnr" }
+mk_lib_common = { version = "0.0.250", registry = "kellnr" }
+mk_lib_database = { version = "0.0.283", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.251", registry = "kellnr" }
+mk_lib_metadata = { version = "0.0.262", registry = "kellnr" }
+mk_lib_network = { version = "0.0.250", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.255", registry = "kellnr" }
+mk_lib_share = { version = "0.0.259", registry = "kellnr" }
 
 askama = "0.16.0"
 askama_axum = "0.4.0"

@@ -5,11 +5,11 @@ edition = "2024"
 
 
 [dependencies]
-mk_lib_compression = { version = "0.0.248", registry = "kellnr" }
-mk_lib_database = { version = "0.0.282", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.250", registry = "kellnr" }
-mk_lib_network = { version = "0.0.249", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.253", registry = "kellnr" }
+mk_lib_compression = { version = "0.0.249", registry = "kellnr" }
+mk_lib_database = { version = "0.0.283", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.251", registry = "kellnr" }
+mk_lib_network = { version = "0.0.250", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.255", registry = "kellnr" }
 
 amqprs = "2.1.3"
 async-std = "1.13.2"

@@ -10,11 +10,11 @@
   <div class="flex flex-1">
     {% include "bss_admin/bss_admin_include_menu.html" %}
 
-  <main class="flex-1 p-6" x-data="cronPage()">
+  <main class="flex-1 p-6 space-y-6" x-data="cronPage()">
 
     <section class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow p-6">
       <h2 class="text-xl font-semibold mb-6 text-zinc-900 dark:text-zinc-100">
-        Cron / Housekeeping Jobs
+        Cron Jobs
       </h2>
 
       {% if template_data_exists %}
@@ -99,6 +99,49 @@
       {% endif %}
     </section>
 
+    <section class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow p-6">
+      <h2 class="text-xl font-semibold mb-6 text-zinc-900 dark:text-zinc-100">
+        Housekeeping
+      </h2>
+
+      {% if housekeeping_exists %}
+      <div class="overflow-x-auto">
+        <table class="min-w-full border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-700 dark:text-zinc-300">
+          <thead class="bg-zinc-50 dark:bg-zinc-800">
+            <tr class="text-left font-semibold text-zinc-700 dark:text-zinc-200">
+              <th class="px-3 py-2">#</th>
+              <th class="px-3 py-2">Script Name</th>
+              <th class="px-3 py-2">Description</th>
+              <th class="px-3 py-2 text-center">Run</th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+            {% for row_data in housekeeping_data %}
+            <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
+              <td class="px-3 py-2">{{ loop.index }}</td>
+              <td class="px-3 py-2 font-medium">{{ row_data.name }}</td>
+              <td class="px-3 py-2">{{ row_data.description }}</td>
+              <td class="px-3 py-2 text-center">
+                <button
+                  type="button"
+                  aria-label="Run housekeeping script {{ row_data.name }}"
+                  @click="confirmHousekeeping('{{ row_data.name }}')"
+                  class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+                  title="Run Housekeeping">
+                  {% include "icons/play.svg" %}
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <p class="text-zinc-500 dark:text-zinc-400">No housekeeping scripts available.</p>
+      {% endif %}
+    </section>
+
     <div
       x-show="showRunConfirm"
       x-cloak
@@ -106,14 +149,14 @@
 
       <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow-lg w-full max-w-md p-6">
         <h3 class="text-lg font-semibold mb-4 text-zinc-900 dark:text-zinc-100">
-          Run Cron Job
+          Run Job
         </h3>
 
         <p class="text-red-600 dark:text-red-400 mb-6">
           <span class="mr-1 inline-flex align-middle">
             {% include "icons/alert_triangle.svg" %}
           </span>
-          Are you sure you want to run this cron?
+          Are you sure you want to run this job?
         </p>
 
         <div class="flex justify-end gap-3">
@@ -244,6 +287,7 @@ function cronPage() {
     showEdit: false,
     isSaving: false,
     selectedGuid: null,
+    runHref: '',
     editName: '',
     editDescription: '',
     editEnabled: false,
@@ -254,11 +298,17 @@ function cronPage() {
 
     confirmRun(guid) {
       this.selectedGuid = guid
+      this.runHref = `/admin/cron_run/${this.selectedGuid}`
+      this.showRunConfirm = true
+    },
+
+    confirmHousekeeping(name) {
+      this.runHref = `/admin/housekeeping_run/${encodeURIComponent(name)}`
       this.showRunConfirm = true
     },
 
     runCron() {
-      window.location.href = `/admin/cron_run/${this.selectedGuid}`
+      window.location.href = this.runHref
     },
 
     openEdit(guid) {

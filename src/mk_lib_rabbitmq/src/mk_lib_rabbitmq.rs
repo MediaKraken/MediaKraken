@@ -8,6 +8,7 @@ use amqprs::{
     },
     connection::{Connection, OpenConnectionArguments},
 };
+use std::time::Duration;
 use tokio::sync::mpsc::UnboundedReceiver;
 
 const RABBITMQ_HOST: &str = "mkstack-rabbitmq-production.rabbitmq-system";
@@ -17,6 +18,8 @@ const RABBITMQ_PASSWORD: &str = "guest";
 const DEFAULT_EXCHANGE: &str = "amq.direct";
 const CONSUMER_TAG: &str = "mkrabbitconsume";
 const CONTENT_TYPE_JSON: &str = "application/json";
+const PUBLISH_RETRY_DELAY: Duration = Duration::from_secs(5);
+const PUBLISH_MAX_ATTEMPTS: u32 = 3;
 
 pub async fn rabbitmq_ack(
     rabbit_channel: &Channel,
@@ -105,7 +108,8 @@ pub async fn rabbitmq_publish(
     rabbit_queue: &str,
     rabbit_message: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let args = BasicPublishArguments::new(DEFAULT_EXCHANGE, rabbit_queue);
+    let mut args = BasicPublishArguments::new(DEFAULT_EXCHANGE, rabbit_queue);
+    args.mandatory(true);
     let properties = BasicProperties::default()
         .with_content_type(CONTENT_TYPE_JSON)
         .with_persistence(true)
@@ -116,6 +120,58 @@ pub async fn rabbitmq_publish(
         .await?;
 
     Ok(())
+}
+
+/// Publish a message, waiting for the target queue to exist first.
+///
+/// `rabbitmq_connect` declares the caller's own queue, but this one publishes
+/// to *another* service's queue (e.g. `"mktranscode"` from the web admin). If
+/// that queue does not exist yet (consumer not running, or mid-restart), the
+/// broker cannot route the message even when it is `mandatory`.
+///
+/// Each attempt opens a fresh channel and issues a passive `queue_declare`
+/// as an existence check: it succeeds when the queue exists and fails
+/// (404, channel closed by the broker) when it does not, without creating or
+/// modifying anything. After `PUBLISH_MAX_ATTEMPTS` attempts spaced
+/// `PUBLISH_RETRY_DELAY` apart, the last error is reported.
+///
+/// A new channel is required per attempt because a broker-initiated
+/// `channel.close` (the 404 response) terminates that channel in amqprs.
+pub async fn rabbitmq_publish_with_retry(
+    rabbit_connection: &Connection,
+    rabbit_queue: &str,
+    rabbit_message: String,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let mut last_error = String::new();
+    for attempt in 1..=PUBLISH_MAX_ATTEMPTS {
+        let channel = rabbit_connection.open_channel(None).await?;
+        channel.register_callback(DefaultChannelCallback).await?;
+
+        match channel
+            .queue_declare(
+                QueueDeclareArguments::durable_client_named(rabbit_queue)
+                    .passive(true)
+                    .finish(),
+            )
+            .await
+        {
+            Ok(_) => {
+                // Queue exists: publish on this channel. The channel handle is
+                // moved into rabbitmq_publish and gracefully closed on drop.
+                return rabbitmq_publish(channel, rabbit_queue, rabbit_message).await;
+            }
+            Err(error) => {
+                last_error = error.to_string();
+                if attempt < PUBLISH_MAX_ATTEMPTS {
+                    tokio::time::sleep(PUBLISH_RETRY_DELAY).await;
+                }
+            }
+        }
+    }
+    Err(format!(
+        "queue '{rabbit_queue}' not available after {PUBLISH_MAX_ATTEMPTS} publish attempts: {last_error}"
+    )
+    .into())
 }
 
 pub async fn rabbitmq_close(
