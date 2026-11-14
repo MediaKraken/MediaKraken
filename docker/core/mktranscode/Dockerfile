@@ -395,6 +395,17 @@ RUN cargo build --release --target x86_64-unknown-linux-musl \
 RUN ldd /mediakraken/target/mktranscode | tr -s '[:blank:]' '\n' | grep '^/' | \
   xargs -I % sh -c 'mkdir -p $(dirname /mediakraken/deps%); cp % /mediakraken/deps%;'
 
+# ffmpeg/ffprobe are installed in the sibling cargo-build-ffmpeg stage; pull them and
+# their full shared-library closure (libav*, libx264, libaom, X11/xcb, ...) into deps/
+# the same way as above, so the final scratch image can actually run them
+COPY --from=cargo-build-ffmpeg /usr/local/bin/ffmpeg /usr/local/bin/ffmpeg
+COPY --from=cargo-build-ffmpeg /usr/local/bin/ffprobe /usr/local/bin/ffprobe
+COPY --from=cargo-build-ffmpeg /usr/local/lib /usr/local/lib
+# cp -L: ldd reports symlink paths (e.g. libvpl.so.2 -> libvpl.so.2.11) whose targets
+# are not in the list, so copy resolved content under the reported name
+RUN ldd /usr/local/bin/ffmpeg /usr/local/bin/ffprobe | tr -s '[:blank:]' '\n' | grep '^/' | grep -v ':' | sort -u | \
+  xargs -I % sh -c 'mkdir -p $(dirname /mediakraken/deps%); cp -L % /mediakraken/deps%;'
+
 ####################################################################################################
 ## Final image
 ####################################################################################################
@@ -417,7 +428,10 @@ COPY --from=cargo-build-mktranscode /etc/passwd /etc/passwd
 COPY --from=cargo-build-mktranscode /etc/group /etc/group
 COPY --from=cargo-build-ffmpeg /usr/local/bin/ffmpeg /usr/local/bin/ffmpeg
 COPY --from=cargo-build-ffmpeg /usr/local/bin/ffprobe /usr/local/bin/ffprobe
-# COPY --from=ffmpeg-build-mktranscode /usr/local/lib /usr/local/lib
+# ffmpeg's shared libs (libav* etc. in /usr/local/lib) arrive via the deps/ copy above;
+# LD_LIBRARY_PATH is a safety net for that path in case a stock musl (which does not
+# search /usr/local/lib by default) is ever substituted for the bundled minirootfs
+ENV LD_LIBRARY_PATH=/usr/local/lib
 COPY --from=cargo-build-mktranscode /wait /wait
 
 # Copy our build
