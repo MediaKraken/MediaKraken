@@ -946,7 +946,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         new_class_type,
                         &file_metadata.name,
                         None,
-                        json!({}),
+                        // NULL until the ffprobe pass fills it in; {} would
+                        // look like "probed but empty"
+                        serde_json::Value::Null,
                         media_json,
                     )
                     .await
