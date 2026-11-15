@@ -1,4 +1,4 @@
-FROM rust:1.95.0-alpine3.23
+FROM rust:1.100.0-alpine3.24
 
 # Use a more minimal approach with explicit layer management
 RUN apk update && \
@@ -25,13 +25,20 @@ RUN wget -qO /wait https://github.com/ufoscout/docker-compose-wait/releases/down
     && chmod +x /wait
 
 # Install sccache
-ARG SCCACHE_VERSION=0.14.0
+ARG SCCACHE_VERSION=0.19.0
 RUN set -eux; \
     wget -q "https://github.com/mozilla/sccache/releases/download/v${SCCACHE_VERSION}/sccache-v${SCCACHE_VERSION}-x86_64-unknown-linux-musl.tar.gz"; \
     tar -xzf "sccache-v${SCCACHE_VERSION}-x86_64-unknown-linux-musl.tar.gz"; \
     mv "sccache-v${SCCACHE_VERSION}-x86_64-unknown-linux-musl/sccache" /usr/local/bin/sccache; \
     chmod +x /usr/local/bin/sccache; \
     rm -rf "sccache-v${SCCACHE_VERSION}-x86_64-unknown-linux-musl.tar.gz" "sccache-v${SCCACHE_VERSION}-x86_64-unknown-linux-musl"
+
+# sccache probes `rustc +stable` to detect rustup-managed toolchains. Without a
+# local `stable` toolchain, rustup downloads one (~40s) in every fresh build
+# container. Link the default toolchain as `stable` so the probe is instant.
+# (`rustup toolchain link` refuses channel names, hence the direct symlink.)
+RUN ln -s "$(basename "$(rustc --print sysroot)")" \
+    "${RUSTUP_HOME}/toolchains/stable-$(rustc -vV | sed -n 's/^host: //p')"
 
 # Install cargo-chef
 RUN cargo install cargo-chef

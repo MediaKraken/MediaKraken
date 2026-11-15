@@ -4,68 +4,31 @@ ARG BRANCHTAG
 FROM mediakraken/mkbase_rust_alpine:"${BRANCHTAG}" as planner-mktranscode
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
-#ENV RUSTFLAGS="--Awarnings"
 
 COPY . .
 
 RUN cargo chef prepare --recipe-path recipe.json
 
 ####################################################################################################
-## ffmpeg image
+## ffmpeg image (Shared Libraries in /usr/lib)
 ####################################################################################################
 FROM planner-mktranscode AS cargo-build-ffmpeg
 
-ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig \
-    SRC=/usr/local \
+ENV PKG_CONFIG_PATH=/usr/lib/pkgconfig \
+    SRC=/usr \
     DEBIAN_FRONTEND="noninteractive" \
     CARGO_INCREMENTAL=0
 
-# https://aomedia.googlesource.com/aom  <- this is av1
-# ARG AOM=v3.13.1
-# https://github.com/mstorsjo/fdk-aac
 ARG FDKAAC_VERSION=2.0.3
-# https://ffmpeg.org/download.html
 ARG FFMPEG_VERSION=9.0.2
-# FONTCONFIG=2.14.2 - 2.14.2-r3
-# FREETYPE=2.12.1 - 2.13.0-r5
-# https://github.com/intel/gmmlib
-#ARG GMMLIB=22.3.16
-# https://github.com/intel/media-driver
-#ARG IHD=23.4.3
-# https://github.com/ultravideo/kvazaar
 ARG KVAZAAR=2.3.2
-# LAME=3.100 - 3.100-r5
-# LIBASS=0.17.1 - 0.17.1-r0
-# https://dri.freedesktop.org/libdrm
-# ARG LIBDRM=2.4.131
-# https://github.com/Intel-Media-SDK/MediaSDK
 ARG LIBMFX=22.5.4
-# LIBVA=2.18.0 - 2.18.0-r1
-# LIBVDPAU=1.5 - 1.5-r1
-# https://github.com/georgmartius/vid.stab
-# ARG LIBVIDSTAB=1.1.1 - eol basically
-# https://github.com/Netflix/vmaf
 ARG LIBVMAF=3.0.0
-# https://github.com/oneapi-src/oneVPL
 ARG LIBVPL=2.11.0
-# NVCODEC=n12.0.16.0
-# OGG=1.3.5 - 1.3.5-r4
-# https://github.com/oneapi-src/oneVPL-intel-gpu/
 ARG ONEVPL=24.1.5
-# http://downloads.sourceforge.net/project/opencore-amr/opencore-amr
 ARG OPENCOREAMR=0.1.6
-# https://github.com/cisco/openh264
 ARG OPENH264=2.6.0
-# https://lib.openmpt.org/files/libopenmpt/src/
 ARG OPENMPT_VERSION=0.7.7+release.makefile
-# OPENJPEG=2.5.0 - 2.5.0-r3
-# OPUS=1.3.1 - 1.4-r0
-# THEORA=1.1.1 - 1.1.1-r17
-# VORBIS=1.3.7 - 1.3.7-r1
-# VPX=1.13.0 -1.13.0-r1
-# https://bitbucket.org/multicoreware/x265_git
-# ARG X265=4.1
-# XVID=1.3.7 - 1.3.7-r1
 
 RUN buildDeps="aom-dev \
         autoconf \
@@ -125,30 +88,8 @@ RUN buildDeps="aom-dev \
     apk add --no-cache ${buildDeps} libgcc libstdc++ \
     ca-certificates busybox && \
     pip3 install --no-cache-dir meson cmake --break-system-packages
-    #pip3 install --no-cache-dir --trusted-host mksonatype -i http://mksonatype:8081/repository/pypi/simple meson cmake --break-system-packages
 
-    # aom
-    # RUN echo "Begin: aom" && \
-    #   DIR=$(mktemp -d) && cd ${DIR} && \
-    #   git clone --branch ${AOM} --depth 1 https://aomedia.googlesource.com/aom && \
-    #   cd aom && \
-    #   mkdir -p aom_build && \
-    #   cd aom_build && \
-    #   cmake -DBUILD_STATIC_LIBS=0 .. && \
-    #   make -j`getconf _NPROCESSORS_ONLN` && \
-    #   make install
-
-    # RUN echo "Begin: aom" && \
-    #   DIR=$(mktemp -d) && cd ${DIR} && \
-    #   git clone --branch ${AOM} --depth 1 https://aomedia.googlesource.com/aom && \
-    #   cd aom && \
-    #   mkdir -p aom_build && \
-    #   cd aom_build && \
-    #   cmake .. -DENABLE_EXAMPLES=0 -DENABLE_DOCS=0 -DENABLE_TESTS=0 && \
-    #   make -j`getconf _NPROCESSORS_ONLN` && \
-    #   make install
-
-    # x264
+    # x264 (Shared)
     RUN echo "Begin: x264" && \
       DIR=$(mktemp -d) && cd ${DIR} && \
       git clone --depth 1 https://code.videolan.org/videolan/x264.git && \
@@ -157,13 +98,13 @@ RUN buildDeps="aom-dev \
       make -j`getconf _NPROCESSORS_ONLN` && \
       make install
 
-    # fdk-aac
+    # fdk-aac (Shared)
     RUN echo "Begin: fdk-aac" && \
       DIR=$(mktemp -d) && cd ${DIR} && \
       curl -L --insecure https://github.com/mstorsjo/fdk-aac/archive/refs/tags/v${FDKAAC_VERSION}.tar.gz | \
       tar -zx --strip-components=1 && \
       autoreconf -fiv && \
-      ./configure --prefix="${SRC}" --disable-static --datadir="${DIR}" && \
+      ./configure --prefix="${SRC}" --disable-static --enable-shared --datadir="${DIR}" && \
       make -j`getconf _NPROCESSORS_ONLN` && \
       make install
 
@@ -172,8 +113,8 @@ RUN buildDeps="aom-dev \
       DIR=$(mktemp -d) && cd ${DIR} && \
       curl -L --insecure https://lib.openmpt.org/files/libopenmpt/src/libopenmpt-${OPENMPT_VERSION}.tar.gz | \
       tar -zx --strip-components=1 && \
-      make -j`getconf _NPROCESSORS_ONLN` EXAMPLES=0 && \
-      make install
+      make -j`getconf _NPROCESSORS_ONLN` EXAMPLES=0 PREFIX="${SRC}" && \
+      make install PREFIX="${SRC}"
 
     # kvazaar
     RUN echo "Begin: kvazaar" && \
@@ -181,16 +122,16 @@ RUN buildDeps="aom-dev \
       curl -L --insecure https://github.com/ultravideo/kvazaar/archive/refs/tags/v${KVAZAAR}.tar.gz | \
       tar -zx --strip-components=1 && \
       ./autogen.sh && \
-      ./configure --enable-static && \
+      ./configure --prefix="${SRC}" --enable-shared && \
       make -j`getconf _NPROCESSORS_ONLN` && \
       make install
 
-    # OPENCOREAMR
+    # OPENCOREAMR (Shared)
     RUN echo "Begin: opencoreamr" && \
       DIR=$(mktemp -d) && cd ${DIR} && \
       curl -Lf http://downloads.sourceforge.net/project/opencore-amr/opencore-amr/opencore-amr-${OPENCOREAMR}.tar.gz | \
       tar -zx --strip-components=1 && \
-      ./configure --disable-static --enable-shared && \
+      ./configure --prefix="${SRC}" --disable-static --enable-shared && \
       make -j`getconf _NPROCESSORS_ONLN` && \
       make install
 
@@ -199,49 +140,8 @@ RUN buildDeps="aom-dev \
       DIR=$(mktemp -d) && cd ${DIR} && \
       curl -L --insecure https://github.com/cisco/openh264/archive/refs/tags/v${OPENH264}.tar.gz | \
       tar -zx --strip-components=1 && \
-      make -j`getconf _NPROCESSORS_ONLN` && \
-      make install
-
-    # # vistab
-    # RUN echo "Begin: vistab" && \
-    #   DIR=$(mktemp -d) && cd ${DIR} && \
-    #   curl -L --insecure https://github.com/georgmartius/vid.stab/archive/refs/tags/v${LIBVIDSTAB}.tar.gz | \
-    #   tar -zx --strip-components=1 && \
-    #   cmake . && \
-    #   make -j`getconf _NPROCESSORS_ONLN` && \
-    #   make install
-
-    # # GMMLIB
-    # RUN echo "Begin: gmmlib" && \
-    #   DIR=$(mktemp -d) && cd ${DIR} && \
-    #   curl -Lf https://github.com/intel/gmmlib/archive/refs/tags/intel-gmmlib-${GMMLIB}.tar.gz | \
-    #   tar -zx --strip-components=1 && \
-    #   mkdir build && cd build && \
-    #   cmake -DCMAKE_BUILD_TYPE=Release -DARCH=64 .. && \
-    #   make -j`getconf _NPROCESSORS_ONLN` && \
-    #   make install && \
-    #   strip -d /usr/local/lib/libigdgmm.so
-
-    # # IHD
-    # RUN echo "Begin: ihd" && \
-    #   DIR=$(mktemp -d) && cd ${DIR} && \
-    #   curl -Lf https://github.com/intel/media-driver/archive/refs/tags/intel-media-${IHD}.tar.gz | \
-    #   tar -zx --strip-components=1 && \
-    #   mkdir build && cd build && \
-    #   cmake -DLIBVA_DRIVERS_PATH=/usr/lib/x86_64-linux-gnu/dri/ .. && \
-    #   make -j`getconf _NPROCESSORS_ONLN` && \
-    #   make install && \
-    #   strip -d /usr/lib/x86_64-linux-gnu/dri/iHD_drv_video.so
-
-    # # LIBDRM
-    # RUN echo "Begin: libdrm" && \
-    #   DIR=$(mktemp -d) && cd ${DIR} && \
-    #   curl -Lf https://dri.freedesktop.org/libdrm/libdrm-${LIBDRM}.tar.xz | \
-    #   tar -xJ --strip-components=1 && \
-    #   meson setup --prefix=/usr --libdir=/usr/local/lib/x86_64-linux-gnu -Dvalgrind=disabled . build && \
-    #   ninja -C build && \
-    #   ninja -C build install && \
-    #   strip -d /usr/local/lib/x86_64-linux-gnu/libdrm*.so
+      make -j`getconf _NPROCESSORS_ONLN` PREFIX="${SRC}" && \
+      make install PREFIX="${SRC}"
 
     # LIBMFX
     RUN echo "Begin: libmfx" && \
@@ -250,17 +150,14 @@ RUN buildDeps="aom-dev \
       tar -zx --strip-components=1 && \
       cmake \
         -DCMAKE_INSTALL_PREFIX=/usr \
-        -DCMAKE_INSTALL_LIBDIR=/usr/local/lib \
+        -DCMAKE_INSTALL_LIBDIR=/usr/lib \
         -DBUILD_SAMPLES=OFF \
         -DENABLE_X11_DRI3=ON \
         -DBUILD_DISPATCHER=OFF \
         -DBUILD_TUTORIALS=OFF \
         . && \ 
       make -j`getconf _NPROCESSORS_ONLN` && \
-      make install && \
-      strip -d \
-        /usr/local/lib/libmfxhw64.so \
-        /usr/local/lib/mfx/libmfx_*.so
+      make install
 
     # LIBVMAF
     RUN echo "Begin: libvmaf" && \
@@ -269,7 +166,7 @@ RUN buildDeps="aom-dev \
       tar -zx --strip-components=1 && \
       cd libvmaf && \
       meson setup \
-        --prefix=/usr --libdir=/usr/local/lib \
+        --prefix=/usr --libdir=/usr/lib \
         --buildtype release \
         build && \
       ninja -vC build && \
@@ -280,10 +177,9 @@ RUN buildDeps="aom-dev \
       DIR=$(mktemp -d) && cd ${DIR} && \
       curl -Lf https://github.com/oneapi-src/oneVPL/archive/refs/tags/v${LIBVPL}.tar.gz | \
       tar -zx --strip-components=1 && \
-      cmake . && \ 
+      cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=/usr/lib . && \ 
       cmake --build . --config Release && \
-      cmake --build . --config Release --target install && \
-      strip -d /usr/local/lib/libvpl.so
+      cmake --build . --config Release --target install
 
     # ONEVPL
     RUN echo "Begin: onevpl" && \
@@ -292,31 +188,18 @@ RUN buildDeps="aom-dev \
       tar -zx --strip-components=1 && \
       cmake \
         -DCMAKE_INSTALL_PREFIX=/usr \
-        -DCMAKE_INSTALL_LIBDIR=/usr/local/lib \
+        -DCMAKE_INSTALL_LIBDIR=/usr/lib \
         . && \ 
       make -j`getconf _NPROCESSORS_ONLN` && \
-      make install && \
-      strip -d /usr/local/lib/libmfx-gen.so
-
-    # # x265
-    # RUN echo "Begin: x265" && \
-    #   DIR=$(mktemp -d) && cd ${DIR} && \
-    #   # curl -L --insecure https://bitbucket.org/multicoreware/x265_git/downloads/x265_${X265}.tar.gz | \
-    #   # tar -zx --strip-components=1 && \
-    #   git clone --depth 1 https://bitbucket.org/multicoreware/x265_git.git  && \
-    #   cd x265_git/build/linux && \
-    #   # cd build/linux && \
-    #   ./multilib.sh && \
-    #   make -j`getconf _NPROCESSORS_ONLN` -C 8bit install
+      make install
 
     # nvenc headers for ffmpeg
     RUN echo "Begin: nvenc" && \    
       git clone --depth 1 https://git.videolan.org/git/ffmpeg/nv-codec-headers.git && \
       cd nv-codec-headers && \
-      make -j`getconf _NPROCESSORS_ONLN` && \
-      make install
+      make PREFIX=/usr install
 
-    # ffmpeg itself
+    # ffmpeg itself (Shared)
     RUN echo "Begin: ffmpeg" && \    
       DIR=$(mktemp -d) && cd ${DIR} && \
       curl -LO --insecure http://ffmpeg.org/releases/ffmpeg-${FFMPEG_VERSION}.tar.gz && \
@@ -324,7 +207,7 @@ RUN buildDeps="aom-dev \
       ./configure \
       --target-os=linux \
           --bindir="${SRC}/bin" \
-          --extra-libs=-ldl \
+          --extra-libs="-ldl -lpthread" \
           --extra-cflags="-I${SRC}/include" \
           --extra-ldflags="-L${SRC}/lib" \
           --prefix="${SRC}" \
@@ -335,7 +218,6 @@ RUN buildDeps="aom-dev \
           --enable-libaom \
           --enable-libass \
           --enable-libfdk_aac \
-          --enable-fontconfig \
           --enable-libfreetype \
           --enable-libkvazaar \
           --enable-libmodplug \
@@ -361,16 +243,15 @@ RUN buildDeps="aom-dev \
           --enable-libx265 \
           --enable-libxvid \
           --enable-nonfree \
-#          --enable-postproc \
           --enable-pthreads \
           --enable-shared \
+          --disable-static \
           --enable-small \
           --enable-vdpau \
           --enable-version3 \
           --enable-zlib \
           --disable-debug \
           --disable-doc \
-          --disable-static \
           --disable-ffplay && \
       make -j`getconf _NPROCESSORS_ONLN` && \
       make install && \
@@ -382,7 +263,6 @@ RUN buildDeps="aom-dev \
 FROM planner-mktranscode AS cargo-build-mktranscode
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
-#ENV RUSTFLAGS="--Awarnings"
 
 COPY --from=planner-mktranscode /mediakraken/recipe.json recipe.json
 
@@ -392,19 +272,6 @@ COPY ./ .
 
 RUN cargo build --release --target x86_64-unknown-linux-musl \
   && cp /mediakraken/target/x86_64-unknown-linux-musl/release/mk* /mediakraken/target/.;
-RUN ldd /mediakraken/target/mktranscode | tr -s '[:blank:]' '\n' | grep '^/' | \
-  xargs -I % sh -c 'mkdir -p $(dirname /mediakraken/deps%); cp % /mediakraken/deps%;'
-
-# ffmpeg/ffprobe are installed in the sibling cargo-build-ffmpeg stage; pull them and
-# their full shared-library closure (libav*, libx264, libaom, X11/xcb, ...) into deps/
-# the same way as above, so the final scratch image can actually run them
-COPY --from=cargo-build-ffmpeg /usr/local/bin/ffmpeg /usr/local/bin/ffmpeg
-COPY --from=cargo-build-ffmpeg /usr/local/bin/ffprobe /usr/local/bin/ffprobe
-COPY --from=cargo-build-ffmpeg /usr/local/lib /usr/local/lib
-# cp -L: ldd reports symlink paths (e.g. libvpl.so.2 -> libvpl.so.2.11) whose targets
-# are not in the list, so copy resolved content under the reported name
-RUN ldd /usr/local/bin/ffmpeg /usr/local/bin/ffprobe | tr -s '[:blank:]' '\n' | grep '^/' | grep -v ':' | sort -u | \
-  xargs -I % sh -c 'mkdir -p $(dirname /mediakraken/deps%); cp -L % /mediakraken/deps%;'
 
 ####################################################################################################
 ## Final image
@@ -412,8 +279,6 @@ RUN ldd /usr/local/bin/ffmpeg /usr/local/bin/ffprobe | tr -s '[:blank:]' '\n' | 
 FROM scratch
 # otherwise throws file not found error
 ADD alpine-minirootfs-x86_64.tar.gz /
-# deps has full /usr/lib/x86_64-linux-gnu path.....hence copy to /
-COPY --from=cargo-build-mktranscode /mediakraken/deps/* /
 
 RUN apk update && apk add --no-cache cifs-utils nfs-utils \
  && apk add --no-cache \
@@ -426,12 +291,12 @@ RUN apk update && apk add --no-cache cifs-utils nfs-utils \
 # Import from builder.
 COPY --from=cargo-build-mktranscode /etc/passwd /etc/passwd
 COPY --from=cargo-build-mktranscode /etc/group /etc/group
-COPY --from=cargo-build-ffmpeg /usr/local/bin/ffmpeg /usr/local/bin/ffmpeg
-COPY --from=cargo-build-ffmpeg /usr/local/bin/ffprobe /usr/local/bin/ffprobe
-# ffmpeg's shared libs (libav* etc. in /usr/local/lib) arrive via the deps/ copy above;
-# LD_LIBRARY_PATH is a safety net for that path in case a stock musl (which does not
-# search /usr/local/lib by default) is ever substituted for the bundled minirootfs
-ENV LD_LIBRARY_PATH=/usr/local/lib
+
+# Copy ffmpeg binaries and the complete /usr/lib shared library closure directly into native paths
+COPY --from=cargo-build-ffmpeg /usr/bin/ffmpeg /usr/bin/ffmpeg
+COPY --from=cargo-build-ffmpeg /usr/bin/ffprobe /usr/bin/ffprobe
+COPY --from=cargo-build-ffmpeg /usr/lib /usr/lib
+
 COPY --from=cargo-build-mktranscode /wait /wait
 
 # Copy our build

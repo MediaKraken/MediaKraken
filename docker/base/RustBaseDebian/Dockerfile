@@ -1,6 +1,6 @@
 # don't use the slim version as it's just a stage one image
 # as too much stuff is missing causing stuff later to not compile
-FROM rust:1.95.0-bookworm
+FROM rust:1.100.0-bookworm
 RUN rustup target add x86_64-unknown-linux-musl
 RUN apt update && apt install -y \
     libudev-dev \
@@ -17,13 +17,20 @@ RUN apt update && apt install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # docker run -d --name redis-stack -p 6379:6379 -p 8001:8001 redis/redis-stack:latest
-ARG SCCACHE_VERSION=0.14.0
+ARG SCCACHE_VERSION=0.19.0
 RUN set -eux; \
     wget -q "https://github.com/mozilla/sccache/releases/download/v${SCCACHE_VERSION}/sccache-v${SCCACHE_VERSION}-x86_64-unknown-linux-musl.tar.gz"; \
     tar -xzf "sccache-v${SCCACHE_VERSION}-x86_64-unknown-linux-musl.tar.gz"; \
     mv "sccache-v${SCCACHE_VERSION}-x86_64-unknown-linux-musl/sccache" /usr/local/bin/sccache; \
     chmod +x /usr/local/bin/sccache; \
     rm -rf "sccache-v${SCCACHE_VERSION}-x86_64-unknown-linux-musl.tar.gz" "sccache-v${SCCACHE_VERSION}-x86_64-unknown-linux-musl"
+
+# sccache probes `rustc +stable` to detect rustup-managed toolchains. Without a
+# local `stable` toolchain, rustup downloads one (~40s) in every fresh build
+# container. Link the default toolchain as `stable` so the probe is instant.
+# (`rustup toolchain link` refuses channel names, hence the direct symlink.)
+RUN ln -s "$(basename "$(rustc --print sysroot)")" \
+    "${RUSTUP_HOME}/toolchains/stable-$(rustc -vV | sed -n 's/^host: //p')"
 
 # for layer cache later in build
 RUN cargo install cargo-chef

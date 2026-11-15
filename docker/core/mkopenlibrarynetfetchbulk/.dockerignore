@@ -1,3 +1,6 @@
 target
+**/target
+node_modules
+.env
 .gitignore
 ol_cdump_latest.txt
