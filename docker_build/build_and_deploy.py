@@ -161,14 +161,14 @@ async def main():
         ]
         await asyncio.gather(*tasks)
 
-    run_command([
-        os.path.join(
-            cwd_home_directory,
-            'MediaKraken',
-            'docker_build',
-            'purge_images_none.sh'
-        )
-    ])
+    # run_command([
+    #     os.path.join(
+    #         cwd_home_directory,
+    #         'MediaKraken',
+    #         'docker_build',
+    #         'purge_images_none.sh'
+    #     )
+    # ])
 
 
 if __name__ == "__main__":
