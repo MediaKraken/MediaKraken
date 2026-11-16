@@ -129,14 +129,16 @@ fn mk_smb_share_uri(share_info: &DBShareList) -> Option<String> {
 }
 
 // Connection header to prefix onto a share-root-relative media path so
-// message consumers can open the file directly: `//ip/share` when the share
-// was reached over SMB, otherwise the `nfs://ip/share_path` form.
+// message consumers can open the file directly: `smb://ip/share` when the
+// share was reached over SMB, otherwise the `nfs://ip/share_path` form.
 fn mk_media_path_prefix(share_info: &DBShareList, smb_reachable: bool) -> String {
     if smb_reachable {
         // `mk_smb_probe` only returns true after `mk_smb_share_uri`
         // succeeded, so the Some arm is the only one in practice;
         // `unwrap_or_default` keeps this infallible without `expect`.
-        mk_smb_share_uri(share_info).unwrap_or_default()
+        mk_smb_share_uri(share_info)
+            .map(|share_uri| format!("smb:{share_uri}"))
+            .unwrap_or_default()
     } else {
         mk_nfs_uri(share_info, "")
     }
@@ -1198,7 +1200,10 @@ mod tests {
     #[test]
     fn test_mk_media_path_prefix_smb() {
         let share = test_share();
-        assert_eq!(mk_media_path_prefix(&share, true), "//192.168.1.100/shared");
+        assert_eq!(
+            mk_media_path_prefix(&share, true),
+            "smb://192.168.1.100/shared"
+        );
     }
 
     #[test]
