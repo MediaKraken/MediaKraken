@@ -862,7 +862,7 @@ dependencies = [
 
 [[package]]
 name = "mk_lib_xbox"
-version = "0.0.15"
+version = "0.0.16"
 dependencies = [
  "reqwest",
  "serde",

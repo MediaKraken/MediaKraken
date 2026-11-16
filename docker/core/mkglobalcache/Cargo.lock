@@ -2600,9 +2600,9 @@ dependencies = [
 
 [[package]]
 name = "mk_lib_common"
-version = "0.0.251"
+version = "0.0.252"
 source = "sparse+http://mkdevkellnrapi.mediakraken.media:8000/api/v1/crates/"
-checksum = "3b0e3c0813dc7f5b18de5f17b74b9ebf72d7a74f2b30f293c613da0c9b1e6ae3"
+checksum = "2bc258ceec5957727f2cafc654d12e92562db0634dd8f87180e3fe8a03c2e461"
 dependencies = [
  "bytesize",
  "chrono",
@@ -2618,9 +2618,9 @@ dependencies = [
 
 [[package]]
 name = "mk_lib_database"
-version = "0.0.284"
+version = "0.0.285"
 source = "sparse+http://mkdevkellnrapi.mediakraken.media:8000/api/v1/crates/"
-checksum = "b8306b576ea7091d80ab1ae7930627b6ebe1206d4828100ea26ac6ad9ab7723b"
+checksum = "41f1cb2c0e44d473aeee639be8132fb55b539d34ac2fd06590743cf5578dfc2e"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2637,9 +2637,9 @@ dependencies = [
 
 [[package]]
 name = "mk_lib_file"
-version = "0.0.261"
+version = "0.0.262"
 source = "sparse+http://mkdevkellnrapi.mediakraken.media:8000/api/v1/crates/"
-checksum = "3053ecfbebaa4ecb14939c2504c26d79edbf37c905727d1818d74eb093dc6b60"
+checksum = "d7fc68bfe8806104901ef0f4225af587925264e076e27532175005df45f42654"
 dependencies = [
  "tokio",
  "walkdir",
@@ -2647,9 +2647,9 @@ dependencies = [
 
 [[package]]
 name = "mk_lib_network"
-version = "0.0.251"
+version = "0.0.252"
 source = "sparse+http://mkdevkellnrapi.mediakraken.media:8000/api/v1/crates/"
-checksum = "ec38e7ea88ea1f560a120fc581dd647f59138dfe006687a0d6ef4c6943f0a1ac"
+checksum = "cc08beda56b79819e6698659b469e15a8e4641a055b9dbc10d3412ebb069927a"
 dependencies = [
  "bytes",
  "cidr-utils",
@@ -2682,9 +2682,9 @@ dependencies = [
 
 [[package]]
 name = "mk_lib_rabbitmq"
-version = "0.0.256"
+version = "0.0.257"
 source = "sparse+http://mkdevkellnrapi.mediakraken.media:8000/api/v1/crates/"
-checksum = "1622ec02a79070765b63eb04b417b9d497db47a706b9e201606c0d4fd35772b1"
+checksum = "0d4c75361653512a6e9f4a3703067b6485dcb5ff7ee19f2a824866ac2159e05e"
 dependencies = [
  "amqprs",
  "tokio",

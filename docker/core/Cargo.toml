@@ -32,9 +32,11 @@ panic = 'unwind'
 strip = "none"
 
 [profile.release]
-panic = 'abort'
-strip = "symbols"
-lto = true
+opt-level = 3          # Maximum optimization level for performance
+lto = "fat"            # Link-Time Optimization: "fat" allows cross-crate optimization (try "thin" if compile times get too long)
+codegen-units = 1      # Forces the compiler to process the crate as a single unit, maximizing optimization opportunities
+panic = "abort"        # Removes unwinding infrastructure, reducing binary size and sometimes improving performance
+strip = true           # Removes debug symbols from the binary to reduce size (optional)
 
 
 [patch.crates-io]

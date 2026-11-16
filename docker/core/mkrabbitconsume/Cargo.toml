@@ -3,10 +3,16 @@ name = "mkrabbitconsume"
 version = "0.0.1"
 edition = "2024"
 
+[profile.release]
+opt-level = 3          # Maximum optimization level for performance
+lto = "fat"            # Link-Time Optimization: "fat" allows cross-crate optimization (try "thin" if compile times get too long)
+codegen-units = 1      # Forces the compiler to process the crate as a single unit, maximizing optimization opportunities
+panic = "abort"        # Removes unwinding infrastructure, reducing binary size and sometimes improving performance
+strip = true           # Removes debug symbols from the binary to reduce size (optional)
 
 [dependencies]
-mk_lib_database = { version = "0.0.284", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.256", registry = "kellnr" }
+mk_lib_database = { version = "0.0.285", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.257", registry = "kellnr" }
 
 serde_json = "1.0.150"
 tokio = { version = "1.53.1", features = ["full"] }
