@@ -107,11 +107,13 @@ pub async fn mk_lib_database_media_known(
     Ok(table_rows)
 }
 
+#[allow(clippy::too_many_arguments)]
 pub async fn mk_lib_database_media_insert(
     sqlx_pool: &sqlx::PgPool,
     mm_media_guid: Uuid,
     mm_media_class_enum: i16,
     mm_media_path: &str,
+    mm_media_share_guid: Uuid,
     mm_media_metadata_guid: Option<Uuid>,
     mm_media_ffprobe_json: serde_json::Value,
     mm_media_json: serde_json::Value,
@@ -119,12 +121,14 @@ pub async fn mk_lib_database_media_insert(
     let mut transaction = sqlx_pool.begin().await?;
     sqlx::query(
         r#"insert into mm_media (mm_media_guid, mm_media_class_enum,
-         mm_media_path, mm_media_metadata_guid, mm_media_ffprobe_json, mm_media_json)
-         values ($1, $2, $3, $4, $5, $6)"#,
+         mm_media_path, mm_media_share_guid, mm_media_metadata_guid,
+         mm_media_ffprobe_json, mm_media_json)
+         values ($1, $2, $3, $4, $5, $6, $7)"#,
     )
     .bind(mm_media_guid)
     .bind(mm_media_class_enum)
     .bind(mm_media_path)
+    .bind(mm_media_share_guid)
     .bind(mm_media_metadata_guid)
     .bind(mm_media_ffprobe_json)
     .bind(mm_media_json)

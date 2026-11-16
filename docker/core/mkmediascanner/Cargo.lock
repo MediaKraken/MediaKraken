@@ -1954,9 +1954,9 @@ dependencies = [
 
 [[package]]
 name = "mk_lib_common"
-version = "0.0.250"
+version = "0.0.251"
 source = "sparse+http://mkdevkellnrapi.mediakraken.media:8000/api/v1/crates/"
-checksum = "17380ac5812eea15a6174c4be11d2c86d1fea7f12073c3273daf17b8912fb5b9"
+checksum = "3b0e3c0813dc7f5b18de5f17b74b9ebf72d7a74f2b30f293c613da0c9b1e6ae3"
 dependencies = [
  "bytesize",
  "chrono",
@@ -1972,9 +1972,9 @@ dependencies = [
 
 [[package]]
 name = "mk_lib_database"
-version = "0.0.283"
+version = "0.0.284"
 source = "sparse+http://mkdevkellnrapi.mediakraken.media:8000/api/v1/crates/"
-checksum = "ea0eccfcb2e6cf6caf7f4e0129ac822e21f465be80ffcdfd3be73afa6aac3ba1"
+checksum = "b8306b576ea7091d80ab1ae7930627b6ebe1206d4828100ea26ac6ad9ab7723b"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1991,9 +1991,9 @@ dependencies = [
 
 [[package]]
 name = "mk_lib_logging"
-version = "0.0.251"
+version = "0.0.252"
 source = "sparse+http://mkdevkellnrapi.mediakraken.media:8000/api/v1/crates/"
-checksum = "6e89e0a76502dd02c95d9954e2c3a2ada40020960246fca3b712bbea5852f190"
+checksum = "ce2738bb1480b962a4b431f75f94dae63a8aa82980b2e66a27ae0f5b455d2407"
 dependencies = [
  "chrono",
  "elasticsearch",
@@ -2008,9 +2008,9 @@ dependencies = [
 
 [[package]]
 name = "mk_lib_rabbitmq"
-version = "0.0.255"
+version = "0.0.256"
 source = "sparse+http://mkdevkellnrapi.mediakraken.media:8000/api/v1/crates/"
-checksum = "d15db9e84c40495dd510c426dd086e495e2ffbf406ede71a0d874150a14a9c7c"
+checksum = "1622ec02a79070765b63eb04b417b9d497db47a706b9e201606c0d4fd35772b1"
 dependencies = [
  "amqprs",
  "tokio",
@@ -2018,9 +2018,9 @@ dependencies = [
 
 [[package]]
 name = "mk_lib_share"
-version = "0.0.259"
+version = "0.0.260"
 source = "sparse+http://mkdevkellnrapi.mediakraken.media:8000/api/v1/crates/"
-checksum = "9c40b56a60689e591d3198185d01a96ca5db038aa246e1395ec5fccfe8a3d21a"
+checksum = "b12330942416758502d7b3870999da44b82bf217d5ccf6180ad151a953249c81"
 dependencies = [
  "mk_lib_database",
  "pavao",

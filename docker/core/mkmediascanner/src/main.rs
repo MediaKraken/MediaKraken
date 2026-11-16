@@ -945,6 +945,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         media_id,
                         new_class_type,
                         &file_metadata.name,
+                        share_info.mm_network_share_guid,
                         None,
                         // NULL until the ffprobe pass fills it in; {} would
                         // look like "probed but empty"

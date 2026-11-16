@@ -2,7 +2,7 @@ use crate::mk_lib_database_postgresql;
 use crate::mk_lib_database_version_schema;
 use tokio::time::{Duration, sleep};
 
-pub static DATABASE_VERSION: i32 = 83;
+pub static DATABASE_VERSION: i32 = 84;
 
 pub async fn mk_lib_database_postgresql_version(
     sqlx_pool: &sqlx::PgPool,
@@ -83,7 +83,7 @@ mod tests {
 
     #[test]
     fn test_database_version_value() {
-        assert_eq!(DATABASE_VERSION, 83);
+        assert_eq!(DATABASE_VERSION, 84);
     }
 
     #[test]

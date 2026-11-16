@@ -112,14 +112,14 @@ async def main():
 
     os.chdir(os.path.join(cwd_home_directory, 'MediaKraken', 'docker_build'))
 
-    run_command([
-        os.path.join(
-            cwd_home_directory,
-            'MediaKraken',
-            'docker_build',
-            'source_sync_local_lib.sh'
-        )
-    ])
+    # run_command([
+    #     os.path.join(
+    #         cwd_home_directory,
+    #         'MediaKraken',
+    #         'docker_build',
+    #         'source_sync_local_lib.sh'
+    #     )
+    # ])
 
     images_to_build = []
 

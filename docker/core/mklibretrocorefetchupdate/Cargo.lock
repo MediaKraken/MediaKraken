@@ -2218,9 +2218,9 @@ dependencies = [
 
 [[package]]
 name = "mk_lib_compression"
-version = "0.0.249"
+version = "0.0.250"
 source = "sparse+http://mkdevkellnrapi.mediakraken.media:8000/api/v1/crates/"
-checksum = "0ec1a567e54a8b12ae4f47397996d1e7282bddde9253c2642c98640cd2fc3fb7"
+checksum = "32a1362a48d81b3552bcf32a668b48e87081fd7df798a134c911440d0de8c760"
 dependencies = [
  "flate2",
  "tar",
@@ -2230,9 +2230,9 @@ dependencies = [
 
 [[package]]
 name = "mk_lib_file"
-version = "0.0.260"
+version = "0.0.261"
 source = "sparse+http://mkdevkellnrapi.mediakraken.media:8000/api/v1/crates/"
-checksum = "ebba1a69d69e4bec56625f4a14311e4ac113517aa42f26e42f5c1ebc110b15ec"
+checksum = "3053ecfbebaa4ecb14939c2504c26d79edbf37c905727d1818d74eb093dc6b60"
 dependencies = [
  "tokio",
  "walkdir",
@@ -2240,9 +2240,9 @@ dependencies = [
 
 [[package]]
 name = "mk_lib_hash"
-version = "0.0.253"
+version = "0.0.254"
 source = "sparse+http://mkdevkellnrapi.mediakraken.media:8000/api/v1/crates/"
-checksum = "799fc0f4b0dfb5285643ee28dfba85c70b538bb06df30902791a70382e9b8b8b"
+checksum = "c46cf6db5e6388c655d6e90d964c62733ef7056a163b80ed309cc52bc9d3735b"
 dependencies = [
  "blake3",
  "crc32fast",
@@ -2255,9 +2255,9 @@ dependencies = [
 
 [[package]]
 name = "mk_lib_logging"
-version = "0.0.251"
+version = "0.0.252"
 source = "sparse+http://mkdevkellnrapi.mediakraken.media:8000/api/v1/crates/"
-checksum = "6e89e0a76502dd02c95d9954e2c3a2ada40020960246fca3b712bbea5852f190"
+checksum = "ce2738bb1480b962a4b431f75f94dae63a8aa82980b2e66a27ae0f5b455d2407"
 dependencies = [
  "chrono",
  "elasticsearch",
@@ -2272,9 +2272,9 @@ dependencies = [
 
 [[package]]
 name = "mk_lib_network"
-version = "0.0.250"
+version = "0.0.251"
 source = "sparse+http://mkdevkellnrapi.mediakraken.media:8000/api/v1/crates/"
-checksum = "2d5d1d638b8cec9acfe0e8302f6c38b58dc647ea84a8553a789e533925d8e22e"
+checksum = "ec38e7ea88ea1f560a120fc581dd647f59138dfe006687a0d6ef4c6943f0a1ac"
 dependencies = [
  "bytes",
  "cidr-utils",
@@ -2307,9 +2307,9 @@ dependencies = [
 
 [[package]]
 name = "mk_lib_rabbitmq"
-version = "0.0.255"
+version = "0.0.256"
 source = "sparse+http://mkdevkellnrapi.mediakraken.media:8000/api/v1/crates/"
-checksum = "d15db9e84c40495dd510c426dd086e495e2ffbf406ede71a0d874150a14a9c7c"
+checksum = "1622ec02a79070765b63eb04b417b9d497db47a706b9e201606c0d4fd35772b1"
 dependencies = [
  "amqprs",
  "tokio",

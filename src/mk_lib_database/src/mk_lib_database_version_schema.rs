@@ -1198,6 +1198,18 @@ pub async fn mk_lib_database_update_schema(
         transaction.commit().await?;
         mk_lib_database_version_update(sqlx_pool, 83).await?;
     }
+
+    if version_no < 84 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(
+            r#"ALTER TABLE mm_media ADD COLUMN IF NOT EXISTS mm_media_share_guid UUID NOT NULL;"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(sqlx_pool, 84).await?;
+    }
+
     // TODO, movie alt name, tv alt name and person alt name cleanup
 
     Ok(true)

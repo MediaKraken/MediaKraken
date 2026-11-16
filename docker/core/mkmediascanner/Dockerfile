@@ -4,7 +4,6 @@ ARG BRANCHTAG
 FROM mediakraken/mkbase_rust_alpine:"${BRANCHTAG}" as planner-mkmediascanner
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
-#ENV RUSTFLAGS="--Awarnings"
 
 COPY . .
 
@@ -16,7 +15,6 @@ RUN cargo chef prepare --recipe-path recipe.json
 FROM planner-mkmediascanner AS cargo-build-mkmediascanner
 WORKDIR /mediakraken
 ENV CARGO_INCREMENTAL=0
-#ENV RUSTFLAGS="--Awarnings"
 
 COPY --from=planner-mkmediascanner /mediakraken/recipe.json recipe.json
 
@@ -25,9 +23,7 @@ RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path r
 COPY ./ .
 
 RUN cargo build --release --target x86_64-unknown-linux-musl \
-  && cp /mediakraken/target/x86_64-unknown-linux-musl/release/mk* /mediakraken/target/.;
-RUN ldd /mediakraken/target/mkmediascanner | tr -s '[:blank:]' '\n' | grep '^/' | \
-  xargs -I % sh -c 'mkdir -p $(dirname /mediakraken/deps%); cp % /mediakraken/deps%;'
+  && cp /mediakraken/target/x86_64-unknown-linux-musl/release/mk* /mediakraken/target/.
 
 ####################################################################################################
 ## Final image
@@ -35,9 +31,8 @@ RUN ldd /mediakraken/target/mkmediascanner | tr -s '[:blank:]' '\n' | grep '^/' 
 FROM scratch
 # otherwise throws file not found error
 ADD alpine-minirootfs-x86_64.tar.gz /
-# deps has full /usr/lib/x86_64-linux-gnu path.....hence copy to /
-COPY --from=cargo-build-mkmediascanner /mediakraken/deps/* /
 
+# Install native Alpine packages (manages all shared libraries correctly for musl)
 RUN apk update && apk add --no-cache cifs-utils nfs-utils libsmbclient samba-client \
  && rm -rf /var/cache/apk/*
 
@@ -46,7 +41,7 @@ COPY --from=cargo-build-mkmediascanner /etc/passwd /etc/passwd
 COPY --from=cargo-build-mkmediascanner /etc/group /etc/group
 COPY --from=cargo-build-mkmediascanner /wait /wait
 
-# Copy our build
+# Copy our build binary
 COPY --from=cargo-build-mkmediascanner /mediakraken/target/mkmediascanner /mkmediascanner
 
 # Use an unprivileged user.
