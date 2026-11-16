@@ -376,7 +376,7 @@ pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_
         | mk_lib_common_enum_media_type::DLMediaType::MOVIE_SUBTITLE
         | mk_lib_common_enum_media_type::DLMediaType::MOVIE_THEME
         | mk_lib_common_enum_media_type::DLMediaType::MOVIE_TRAILER => {
-            let _url_result = tmdb_fetch_json_with_retry(format!(
+            let url_result = tmdb_fetch_json_with_retry(format!(
                 "https://api.themoviedb.org/3/search/movie\
                 ?api_key={}&include_adult=1&query={}",
                 tmdb_api_key, search_text
@@ -390,7 +390,7 @@ pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_
         | mk_lib_common_enum_media_type::DLMediaType::TV_SUBTITLE
         | mk_lib_common_enum_media_type::DLMediaType::TV_THEME
         | mk_lib_common_enum_media_type::DLMediaType::TV_TRAILER => {
-            let _url_result = tmdb_fetch_json_with_retry(format!(
+            let url_result = tmdb_fetch_json_with_retry(format!(
                 "https://api.themoviedb.org/3/search/tv\
                 ?api_key={}&include_adult=1&query={}",
                 tmdb_api_key, search_text
@@ -398,7 +398,7 @@ pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_
             .await;
         }
         mk_lib_common_enum_media_type::DLMediaType::PERSON => {
-            let _url_result = tmdb_fetch_json_with_retry(format!(
+            let url_result = tmdb_fetch_json_with_retry(format!(
                 "https://api.themoviedb.org/3/search/person\
                 ?api_key={}&include_adult=1&query={}",
                 tmdb_api_key, search_text
@@ -407,55 +407,53 @@ pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_
         }
         _ => eprintln!("provider_tmdb_search type does not equal any value"),
     }
+
+    if url_result != None and url_result['total_results'] > 0:
+        for res in url_result['results']:
+            await common_logging_elasticsearch_httpx.com_es_httpx_post_async(
+                message_type='info',
+                message_text={
+                    "result": res['title'],
+                    'id': res['id'],
+                    'date':
+                        res[
+                            'release_date'].split(
+                            '-',
+                            1)[
+                            0]})
+            if media_year != None and type(media_year) is not list \
+                    and (str(media_year) == res['release_date'].split('-', 1)[0]
+                            or str(int(media_year) - 1) == res['release_date'].split('-', 1)[0]
+                            or str(int(media_year) - 2) == res['release_date'].split('-', 1)[0]
+                            or str(int(media_year) - 3) == res['release_date'].split('-', 1)[0]
+                            or str(int(media_year) + 1) == res['release_date'].split('-', 1)[0]
+                            or str(int(media_year) + 2) == res['release_date'].split('-', 1)[0]
+                            or str(int(media_year) + 3) == res['release_date'].split('-', 1)[0]):
+                if not id_only:
+                    return 'info', self.com_tmdb_metadata_by_id(res['id'])
+                else:
+                    return 'idonly', res['id']
+        return None, None
+    else:
+        return None, None
 }
 
-/*
-        search_json = search_json.json()
-        if search_json != None and search_json['total_results'] > 0:
-            for res in search_json['results']:
-                await common_logging_elasticsearch_httpx.com_es_httpx_post_async(
-                    message_type='info',
-                    message_text={
-                        "result": res['title'],
-                        'id': res['id'],
-                        'date':
-                            res[
-                                'release_date'].split(
-                                '-',
-                                1)[
-                                0]})
-                if media_year != None and type(media_year) is not list \
-                        and (str(media_year) == res['release_date'].split('-', 1)[0]
-                             or str(int(media_year) - 1) == res['release_date'].split('-', 1)[0]
-                             or str(int(media_year) - 2) == res['release_date'].split('-', 1)[0]
-                             or str(int(media_year) - 3) == res['release_date'].split('-', 1)[0]
-                             or str(int(media_year) + 1) == res['release_date'].split('-', 1)[0]
-                             or str(int(media_year) + 2) == res['release_date'].split('-', 1)[0]
-                             or str(int(media_year) + 3) == res['release_date'].split('-', 1)[0]):
-                    if not id_only:
-                        return 'info', self.com_tmdb_metadata_by_id(res['id'])
-                    else:
-                        return 'idonly', res['id']
-            return None, None
-        else:
-            return None, None
-
-    pub async fn com_tmdb_meta_bio_image_build(self, result_json):
-        """
-        # download info and set data to be ready for insert into database
-        """
-        // create file path for poster
-        image_file_path = await common_metadata.com_meta_image_file_path(result_json['name'],
-                                                                         'person')
-        if 'profile_path' in result_json and result_json['profile_path'] != None:
-            if not os.path.isfile(image_file_path + result_json['profile_path']):
-                if result_json['profile_path'] != None:
-                    if not os.path.isfile(image_file_path):
-                        await common_network_async.mk_network_fetch_from_url_async(
-                            'https://image.tmdb.org/t/p/original' + result_json['profile_path'],
-                            image_file_path + result_json['profile_path'])
-        // set local image json
-        return image_file_path.replace(common_global.static_data_directory, '')
+pub async fn com_tmdb_meta_bio_image_build(self, result_json):
+    """
+    # download info and set data to be ready for insert into database
+    """
+    // create file path for poster
+    image_file_path = await common_metadata.com_meta_image_file_path(result_json['name'],
+                                                                        'person')
+    if 'profile_path' in result_json and result_json['profile_path'] != None:
+        if not os.path.isfile(image_file_path + result_json['profile_path']):
+            if result_json['profile_path'] != None:
+                if not os.path.isfile(image_file_path):
+                    await common_network_async.mk_network_fetch_from_url_async(
+                        'https://image.tmdb.org/t/p/original' + result_json['profile_path'],
+                        image_file_path + result_json['profile_path'])
+    // set local image json
+    return image_file_path.replace(common_global.static_data_directory, '')
 
 pub async fn movie_search_tmdb(db_connection, file_name):
     """
@@ -549,5 +547,3 @@ pub async fn movie_fetch_save_tmdb_collection(db_connection, tmdb_collection_id,
         // update
         // db_connection.db_collection_update(collection_guid, guid_list)
         return 0  # to add totals later
-
- */

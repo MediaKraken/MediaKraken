@@ -199,7 +199,7 @@ dependencies = [
 
 [[package]]
 name = "mk_lib_hash"
-version = "0.0.255"
+version = "0.0.256"
 dependencies = [
  "blake3",
  "crc32fast",

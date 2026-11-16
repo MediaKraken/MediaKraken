@@ -11,7 +11,7 @@ panic = "abort"        # Removes unwinding infrastructure, reducing binary size 
 strip = true           # Removes debug symbols from the binary to reduce size (optional)
 
 [dependencies]
-mk_lib_database = { version = "0.0.285", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.253", registry = "kellnr" }
+mk_lib_database = { version = "0.0.286", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.254", registry = "kellnr" }
 
 tokio = { version = "1.53.1", features = ["full"] }
