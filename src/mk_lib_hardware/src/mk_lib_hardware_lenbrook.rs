@@ -9,8 +9,7 @@ pub async fn mk_hardware_lenbrook_discovery() -> Result<(), Box<dyn std::error::
     for _d in d.inventory().await.lock().await.values() {
         // #[cfg(debug_assertions)]
         // {
-        //     mk_lib_logging::mk_logging_post_elk(
-        //         std::module_path!(),
+        //     mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
         //         json!({ "found": d.addr, "records": d.records[0].cid, "data":, d.records[0].data }),
         //     )
         //     .await

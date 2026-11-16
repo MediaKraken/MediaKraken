@@ -247,7 +247,7 @@ pub async fn url_bp_user_metadata_tvshow_detail(request, guid):
     db_connection = await request.app.db_pool.acquire()
     data_metadata = await request.app.db_functions.db_meta_tv_detail(guid,
                                                                      db_connection=db_connection)
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+    await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                      message_text={
                                                                          'meta tvshow json':
                                                                              data_metadata[
@@ -468,11 +468,11 @@ pub async fn url_bp_user_metadata_tvshow_season_detail(request, guid, season):
     data_episode_count = await request.app.db_functions.db_meta_tv_season_eps_list(
         guid, int(season), db_connection=db_connection)
     await request.app.db_pool.release(db_connection)
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+    await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                      message_text={
                                                                          'dataeps': data_episode_count})
     data_episode_keys = natsort.natsorted(data_episode_count)
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+    await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                      message_text={
                                                                          'dataepskeys': data_episode_keys})
     # poster image

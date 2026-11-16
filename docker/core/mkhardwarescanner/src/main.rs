@@ -36,14 +36,14 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // # crestron_devices = common_hardware_crestron.com_hardware_crestron_discover()
                 // # if crestron_devices != None:
                 // #     for crestron in crestron_devices:
-                // #         common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text= {'crestron out': crestron})
+                // #         mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info', message_text= {'crestron out': crestron})
                 // #         media_devices.append({'Crestron': crestron})
 
                 // dlna devices
                 // mk_lib_network::mk_lib_network_dlna::mk_lib_network_dlna_discover().await;
                 // #[cfg(debug_assertions)]
                 // {
-                //     mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"HWScan": "After DLNA"}))
+                //     mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({"HWScan": "After DLNA"}))
                 //         .await
                 //         ?;
                 // }
@@ -56,7 +56,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // # tuner_api = common_hardware_hdhomerun.CommonHardwareHDHomeRun()
                 // # tuner_api.com_hdhomerun_discover()
                 // # for row_tuner in tuner_api.com_hdhomerun_list():
-                // #     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text= {
+                // #     mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info', message_text= {
                 // #         'hdhomerun out': common_string.com_string_ip_int_to_ascii(row_tuner.get_device_ip())})
                 // #     media_devices.append({'HDHomeRun': {'Model': row_tuner.get_var(item='/sys/model'),
                 // #                                         'HWModel': row_tuner.get_var(item='/sys/hwmodel'),
@@ -84,13 +84,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 //     ?;
                 // #[cfg(debug_assertions)]
                 // {
-                //     mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({"HWScan": "After PHue"}))
+                //     mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({"HWScan": "After PHue"}))
                 //         .await
                 //         ?;
                 // }
                 // roku discover
                 // for roku in common_hardware_roku_network.com_roku_network_discovery():
-                //     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
+                //     mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                 //                                                          message_text={'roku out': roku})
                 //     media_devices.append({'Roku': roku})
 
@@ -98,7 +98,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // soco_devices = common_hardware_soco.com_hardware_soco_discover()
                 // if soco_devices != None:
                 //     for soco in soco_devices:
-                //         common_logging_elasticsearch_httpx.com_es_httpx_post(
+                //         mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
                 //             message_type='info',
                 //             message_text={'soco out': soco})
                 //         media_devices.append({'Soco': soco})
@@ -110,7 +110,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 //     println!("Sonos Discovered {}", name);
                 // }
 
-                // common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
+                // mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                 //                                                      message_text={'devices': media_devices})
                 //
                 // common_file.com_file_save_data(file_name='/mediakraken/devices/device_scan.txt',

@@ -83,7 +83,7 @@ pub async fn url_bp_user_movie_page(request, user, genre):
             include_remote=True,
             search_text=request.ctx.session['search_text'],
             db_connection=db_connection):
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+        await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                          message_text=
                                                                          {"row2": row_data[
                                                                              'mm_metadata_user_json']})
@@ -121,7 +121,7 @@ pub async fn url_bp_user_movie_page(request, user, genre):
             match_status = row_data['mismatch']
         except (KeyError, TypeError):
             match_status = False
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+        await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                          message_text={
                                                                              "status": watched_status,
                                                                              'sync': sync_status,

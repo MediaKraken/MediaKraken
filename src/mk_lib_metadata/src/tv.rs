@@ -85,7 +85,7 @@ pub async fn metadata_tv_lookup(db_connection, download_data, file_name):
                 metadata_uuid = dl_meta
     if metadata_uuid is None:
         // no ids found on the local database so begin name/year searches
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+        await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                          message_text=
                                                                          {'stuff': "tv db lookup",
                                                                           'file': str(file_name)})
@@ -96,7 +96,7 @@ pub async fn metadata_tv_lookup(db_connection, download_data, file_name):
         else:
             metadata_uuid = await db_connection.db_metatv_guid_by_tvshow_name(file_name['title'],
                                                                               None)
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+        await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                          message_text={
                                                                              "tv db meta": metadata_uuid})
         if metadata_uuid is None:

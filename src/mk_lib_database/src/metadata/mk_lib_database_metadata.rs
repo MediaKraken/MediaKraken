@@ -144,7 +144,7 @@ def db_meta_update_media_id_from_scudlee(self, media_tvid, media_imdbid,
     # do the update if a record is found
     if row_data != None:
         # update json data
-        common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
+        mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                              message_text={"id": media_tvid,
                                                                            'imdb': media_imdbid,
                                                                            'ani': media_aniid})
@@ -163,7 +163,7 @@ def db_meta_update_media_id_from_scudlee(self, media_tvid, media_imdbid,
     # do the update if a record is found
     if row_data != None:
         # update json data
-        common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
+        mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                              message_text={"id2": media_tvid,
                                                                            'imdb': media_imdbid,
                                                                            'anidb': media_aniid})

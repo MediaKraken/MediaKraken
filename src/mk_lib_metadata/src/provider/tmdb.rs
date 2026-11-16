@@ -370,18 +370,19 @@ pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_
         raw_query.push_str(&year.to_string());
     }
     let search_text: String = url::form_urlencoded::byte_serialize(raw_query.as_bytes()).collect();
-    match media_type {
+    let url_result = match media_type {
         mk_lib_common_enum_media_type::DLMediaType::MOVIE
         | mk_lib_common_enum_media_type::DLMediaType::MOVIE_EXTRAS
         | mk_lib_common_enum_media_type::DLMediaType::MOVIE_SUBTITLE
         | mk_lib_common_enum_media_type::DLMediaType::MOVIE_THEME
         | mk_lib_common_enum_media_type::DLMediaType::MOVIE_TRAILER => {
-            let url_result = tmdb_fetch_json_with_retry(format!(
+            tmdb_fetch_json_with_retry(format!(
                 "https://api.themoviedb.org/3/search/movie\
                 ?api_key={}&include_adult=1&query={}",
                 tmdb_api_key, search_text
             ))
-            .await;
+            .await
+            .ok()
         }
         mk_lib_common_enum_media_type::DLMediaType::TV
         | mk_lib_common_enum_media_type::DLMediaType::TV_EPISODE
@@ -390,53 +391,95 @@ pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_
         | mk_lib_common_enum_media_type::DLMediaType::TV_SUBTITLE
         | mk_lib_common_enum_media_type::DLMediaType::TV_THEME
         | mk_lib_common_enum_media_type::DLMediaType::TV_TRAILER => {
-            let url_result = tmdb_fetch_json_with_retry(format!(
+            tmdb_fetch_json_with_retry(format!(
                 "https://api.themoviedb.org/3/search/tv\
                 ?api_key={}&include_adult=1&query={}",
                 tmdb_api_key, search_text
             ))
-            .await;
+            .await
+            .ok()
         }
-        mk_lib_common_enum_media_type::DLMediaType::PERSON => {
-            let url_result = tmdb_fetch_json_with_retry(format!(
-                "https://api.themoviedb.org/3/search/person\
+        mk_lib_common_enum_media_type::DLMediaType::PERSON => tmdb_fetch_json_with_retry(format!(
+            "https://api.themoviedb.org/3/search/person\
                 ?api_key={}&include_adult=1&query={}",
-                tmdb_api_key, search_text
-            ))
-            .await;
+            tmdb_api_key, search_text
+        ))
+        .await
+        .ok(),
+        _ => {
+            eprintln!("provider_tmdb_search type does not equal any value");
+            None
         }
-        _ => eprintln!("provider_tmdb_search type does not equal any value"),
-    }
+    };
 
-    if url_result != None and url_result['total_results'] > 0:
-        for res in url_result['results']:
-            await common_logging_elasticsearch_httpx.com_es_httpx_post_async(
-                message_type='info',
-                message_text={
-                    "result": res['title'],
-                    'id': res['id'],
-                    'date':
-                        res[
-                            'release_date'].split(
-                            '-',
-                            1)[
-                            0]})
-            if media_year != None and type(media_year) is not list \
-                    and (str(media_year) == res['release_date'].split('-', 1)[0]
-                            or str(int(media_year) - 1) == res['release_date'].split('-', 1)[0]
-                            or str(int(media_year) - 2) == res['release_date'].split('-', 1)[0]
-                            or str(int(media_year) - 3) == res['release_date'].split('-', 1)[0]
-                            or str(int(media_year) + 1) == res['release_date'].split('-', 1)[0]
-                            or str(int(media_year) + 2) == res['release_date'].split('-', 1)[0]
-                            or str(int(media_year) + 3) == res['release_date'].split('-', 1)[0]):
-                if not id_only:
-                    return 'info', self.com_tmdb_metadata_by_id(res['id'])
-                else:
-                    return 'idonly', res['id']
-        return None, None
-    else:
-        return None, None
+    // Result handling ported from the Python `com_tmdb_search` tail.
+    // ES logging (common_logging_elasticsearch_httpx) is replaced with
+    // loki push, matching the rest of this crate.
+    let Some(url_result) = url_result else {
+        return;
+    };
+    if url_result
+        .get("total_results")
+        .and_then(|v| v.as_i64())
+        .unwrap_or(0)
+        <= 0
+    {
+        return;
+    }
+    let Some(results) = url_result.get("results").and_then(|v| v.as_array()) else {
+        return;
+    };
+    let Some(media_year) = guessit_data.year() else {
+        return;
+    };
+
+    for res in results {
+        // Python: res['release_date'].split('-', 1)[0]
+        let release_date = res
+            .get("release_date")
+            .and_then(|v| v.as_str())
+            .unwrap_or_default();
+        let release_year = release_date.split('-').next().unwrap_or_default();
+        if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
+            "Type": "info",
+            "result": res.get("title").and_then(|v| v.as_str()).unwrap_or_default(),
+            "id": res.get("id"),
+            "date": release_year,
+        }))
+        .await
+        {
+            eprintln!("provider_tmdb_search loki push failed: {error}");
+        }
+        // Python matched the release year against media_year ± 3
+        // (the Python `type(media_year) is not list` guard no longer applies
+        // because guessit_data.year() is a single Option<i32>).
+        let year_match = release_year
+            .parse::<i64>()
+            .is_ok_and(|year| ((media_year as i64 - 3)..=(media_year as i64 + 3)).contains(&year));
+        if year_match {
+            if let Err(error) = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({
+                "Type": "info",
+                "match": "provider_tmdb_search",
+                "id": res.get("id"),
+                "media_year": media_year,
+            }))
+            .await
+            {
+                eprintln!("provider_tmdb_search loki push failed: {error}");
+            }
+            // Python returned ('idonly', res['id']) or
+            // ('info', self.com_tmdb_metadata_by_id(res['id'])) here.
+            // The converted signature returns (); extend when the lookup
+            // callers (movie_search_tmdb / metadata_movie_lookup) are ported.
+            return;
+        }
+    }
 }
+
+/*
+// Not ported: the Python originals below reference helpers that don't exist in this crate yet
+// (db_connection API, common_global, common_metadata, common_network_async, common_string).
+// Their ES logging calls are redirected to the loki push API for the future port.
 
 pub async fn com_tmdb_meta_bio_image_build(self, result_json):
     """
@@ -476,18 +519,18 @@ pub async fn movie_search_tmdb(db_connection, file_name):
     if match_response == 'idonly':
         // check to see if metadata exists for TMDB id
         metadata_uuid = await db_connection.db_meta_guid_by_tmdb(match_result)
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+        await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                          message_text={
                                                                              "meta movie db result": metadata_uuid})
     else if match_response == 'info':
         // store new metadata record and set uuid
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+        await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                          message_text={
                                                                              "meta movie movielookup info "
                                                                              "results": match_result})
     else if match_response == 're':
         // multiple results
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+        await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                          message_text={
                                                                              "movielookup multiple results":
                                                                                  match_result})
@@ -512,7 +555,7 @@ pub async fn movie_fetch_save_tmdb_collection(db_connection, tmdb_collection_id,
     // store/update the record
     // don't string this since it's a pure result store
     collection_guid = await db_connection.db_collection_by_tmdb(tmdb_collection_id)
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+    await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                      message_text={
                                                                          "collection": tmdb_collection_id,
                                                                          'guid': collection_guid})
@@ -520,7 +563,7 @@ pub async fn movie_fetch_save_tmdb_collection(db_connection, tmdb_collection_id,
         // insert
         collection_meta = common_global.api_instance.com_tmdb_meta_collection_by_id(
             tmdb_collection_id)
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+        await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                          message_text={
                                                                              "col": collection_meta})
         // poster path
@@ -547,3 +590,5 @@ pub async fn movie_fetch_save_tmdb_collection(db_connection, tmdb_collection_id,
         // update
         // db_connection.db_collection_update(collection_guid, guid_list)
         return 0  # to add totals later
+
+ */

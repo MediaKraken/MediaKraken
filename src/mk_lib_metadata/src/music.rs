@@ -39,7 +39,7 @@ pub async fn metadata_music_lookup(db_connection, download_json):
     metadata_uuid = None
     // get ffmpeg data from database
     ffmpeg_data_json = await db_connection.db_ffprobe_data(download_json['MediaID'])
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+    await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                      message_text={
                                                                          "meta music ffmpeg": ffmpeg_data_json})
     // see if record is stored locally as long as there is valid tagging
@@ -64,7 +64,7 @@ pub async fn metadata_music_lookup(db_connection, download_json):
         // set provider last so it's not picked up by the wrong thread
         await db_connection.db_download_update_provider('musicbrainz', download_json['mdq_id'])
         await db_connection.db_commit()
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+    await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                      message_text=
                                                                      {
                                                                          "metadata_music_lookup return uuid": metadata_uuid})

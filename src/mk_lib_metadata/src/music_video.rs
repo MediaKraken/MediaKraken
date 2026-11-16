@@ -38,7 +38,7 @@ pub async fn metadata_music_video_lookup(db_connection, file_name):
         // set name for lookups
         band_name = band_name.strip().replace(' ', '-')
         song_name = song_name.strip().replace(' ', '-')
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+        await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                          message_text={
                                                                              'mv title': band_name,
                                                                              'song': song_name})
@@ -47,7 +47,7 @@ pub async fn metadata_music_video_lookup(db_connection, file_name):
                 and song_name == metadata_music_video_lookup.metadata_last_song:
             return metadata_music_video_lookup.metadata_last_id
         metadata_uuid = db_connection.db_meta_music_video_lookup(band_name, song_name)
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+        await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                          message_text={
                                                                              "uuid": metadata_uuid})
         if metadata_uuid == []:
@@ -55,7 +55,7 @@ pub async fn metadata_music_video_lookup(db_connection, file_name):
         if metadata_uuid is None:
             if IMVDB_CONNECTION != None:
                 imvdb_json = IMVDB_CONNECTION.com_imvdb_search_video(band_name, song_name)
-                await common_logging_elasticsearch_httpx.com_es_httpx_post_async(
+                await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
                     message_type='info',
                     message_text={
                         "imvdb return": imvdb_json})
@@ -63,7 +63,7 @@ pub async fn metadata_music_video_lookup(db_connection, file_name):
                     # parse the results and insert/update
                     for video_data in imvdb_json['results']:
                         // the results are bit crazy....hence the breakup and insert
-                        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(
+                        await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
                             message_type='info',
                             message_text={
                                 "vid data": video_data})

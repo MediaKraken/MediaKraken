@@ -42,7 +42,7 @@ be linked to any number of tracks.
         // print "{}, by {}".format(rel['title'], rel["artist-credit-phrase"])
         if 'date' in rel:
             pass
-        common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text={
+        mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info', message_text={
             "musicbrainz ID": "{}".format(rel['id'])})
 
     pub async fn com_mediabrainz_get_releases(self, disc_id=None, artist_name=None,
@@ -58,13 +58,13 @@ be linked to any number of tracks.
             result = musicbrainzngs.search_releases(artist=artist_name, release=artist_recording,
                                                     limit=return_limit, strict=strict_flag)
         if not result['release-list']:
-            common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='error',
+            mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='error',
                                                                        message_text={
                                                                            'stuff': "no release found"})
             return None
         else:
             for (idx, release) in enumerate(result['release-list']):
-                common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+                mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                            message_text={
                                                                                "match #{}:".format(
                                                                                    idx + 1)})
@@ -80,13 +80,13 @@ be linked to any number of tracks.
                                                   recording=song_name, limit=return_limit,
                                                   strict=strict_flag)
         if not result['recording-list']:
-            common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='error',
+            mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='error',
                                                                        message_text={
                                                                            'stuff': "no recording found"})
             return None
         else:
             for (idx, release) in enumerate(result['recording-list']):
-                common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+                mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                            message_text={
                                                                                "match #{}:".format(
                                                                                    idx + 1)})
@@ -116,7 +116,7 @@ pub async fn music_fetch_save_musicbrainz(db_connection, tmdb_id, metadata_uuid)
     // fetch and save json data via tmdb id
     result_json = TMDB_CONNECTION.com_tmdb_metadata_by_id(tmdb_id)
     if result_json != None:
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+        await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                          message_text={
                                                                              "meta movie code": result_json.status_code,
                                                                              "header": result_json.headers})
@@ -126,7 +126,7 @@ pub async fn music_fetch_save_musicbrainz(db_connection, tmdb_id, metadata_uuid)
         // redo fetch due to 504
         movie_fetch_save_tmdb(db_connection, tmdb_id, metadata_uuid)
     else if result_json.status_code == 200:
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+        await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                          message_text={
                                                                              "meta movie save fetch result":
                                                                                  result_json.json()})
@@ -134,7 +134,7 @@ pub async fn music_fetch_save_musicbrainz(db_connection, tmdb_id, metadata_uuid)
             = TMDB_CONNECTION.com_tmdb_meta_info_build(result_json.json())
         // set and insert the record
         meta_json = ({'Meta': {'themoviedb': {'Meta': result_json}}})
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+        await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                          message_text={
                                                                              "series": series_id_json})
         // set and insert the record

@@ -382,7 +382,7 @@ pub async fn user_media_movie_status(
                                                       db_connection=db_connection)[
                                                       0] + '\" http://localhost/stream.ffm'),
                                             stdout=subprocess.PIPE, shell=False)
-           await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+           await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                             message_text={
                                                                                 "FFServer PID": proc_ffserver.pid})
            return redirect(
@@ -450,7 +450,7 @@ pub async fn user_media_movie_status(
        for video_version in await request.app.db_functions.db_media_ffprobe_all_guid(guid,
                                                                                      common_global.DLMediaType.Movie.value,
                                                                                      db_connection=db_connection):
-           await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+           await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                             message_text={
                                                                                 "vid_version": video_version})
            # not all files have ffprobe

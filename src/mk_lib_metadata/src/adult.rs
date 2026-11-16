@@ -28,7 +28,7 @@ pub async fn metadata_adult_lookup(db_connection, download_data, file_name):
     nfo_data, xml_data = await metadata_nfo_xml.nfo_xml_file(download_data['Path'])
     imdb_id, tmdb_id = await metadata_nfo_xml.nfo_xml_id_lookup(nfo_data, xml_data)
     if imdb_id != None or tmdb_id != None:
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+        await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                          message_text={
                                                                              "meta adult look": imdb_id,
                                                                              'tmdb': tmdb_id})
@@ -85,7 +85,7 @@ pub async fn metadata_adult_lookup(db_connection, download_data, file_name):
                                                                       file_name['year'])
         else:
             metadata_uuid = await db_connection.db_find_metadata_guid(file_name['title'], None)
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+        await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                          message_text={
                                                                              "meta adult db meta": metadata_uuid})
         if metadata_uuid == None:

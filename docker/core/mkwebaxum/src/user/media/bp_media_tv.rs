@@ -447,11 +447,11 @@ pub async fn url_bp_user_tv_show_season_detail_page(request, guid, season):
                                                                                    int(season),
                                                                                    db_connection=db_connection)
     await request.app.db_pool.release(db_connection)
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+    await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                      message_text={
                                                                          'dataeps': data_episode_count})
     data_episode_keys = natsort.natsorted(data_episode_count)
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+    await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                      message_text={
                                                                          'dataepskeys': data_episode_keys})
     # poster image

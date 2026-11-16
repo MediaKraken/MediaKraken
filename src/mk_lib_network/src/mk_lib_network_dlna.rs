@@ -12,7 +12,7 @@ pub async fn mk_lib_network_dlna_discover() -> Result<(), Box<dyn std::error::Er
     for _render in renders_discovered {
         // #[cfg(debug_assertions)]
         // {
-        //     mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "render": render }))
+        //     mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({ "render": render }))
         //         .await
         //         .unwrap();
         // }

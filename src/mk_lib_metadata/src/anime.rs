@@ -114,7 +114,7 @@ pub async fn metadata_anime_lookup(db_connection, download_data, file_name):
                 await db_connection.db_download_delete(download_data['mdq_id'])
                 await db_connection.db_commit()
                 metadata_uuid = dl_meta
-    await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+    await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                      message_text={
                                                                          "meta anime metadata_uuid B": metadata_uuid})
     if metadata_uuid is None:

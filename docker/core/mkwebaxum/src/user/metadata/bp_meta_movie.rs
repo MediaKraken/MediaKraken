@@ -818,7 +818,7 @@ pub async fn url_bp_user_metadata_movie_list(request, user):
             queue_status = user_json['UserStats'][str(user.id)]['queue']
         except (KeyError, TypeError):
             queue_status = None
-        await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type='info',
+        await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                                                                          message_text={
                                                                              "status": watched_status,
                                                                              'rating': rating_status,

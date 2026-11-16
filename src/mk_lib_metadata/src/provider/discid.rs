@@ -7,7 +7,7 @@ use stdext::function_name;
 async fn print_disc_info(disc: DiscId) {
     // #[cfg(debug_assertions)]
     // {
-    //     mk_lib_logging::mk_logging_post_elk(std::module_path!(), json!({ "DiscId": disc.id(), "TOC": disc.toc_string(), "Submitvia": disc.submission_url() }))
+    //     mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(json!({ "DiscId": disc.id(), "TOC": disc.toc_string(), "Submitvia": disc.submission_url() }))
     //             .await.unwrap()
     // }
 }

@@ -101,7 +101,7 @@ pub async fn mk_lib_database_media_remote_read(
 #        else if row_data[1] == 'Book':
 #            pass
 #        else:
-#            common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='error', message_text={'stuff':'Link bad data type: %s', row_data[1])
+#            mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='error', message_text={'stuff':'Link bad data type: %s', row_data[1])
 #            return None
 #        if metadata_guid != None:
 #            self.db_insert_remote_media(link_uuid, row_data[0], \

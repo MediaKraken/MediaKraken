@@ -133,26 +133,26 @@ pub async fn metadata_identification(&sqlx_pool, dl_row, guessit_data):
     #                                                        guessit_data)
 
     # else if dl_row["mdq_que_type"] == common_global.DLMediaType.TV_Theme.value:
-    #     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type="info", message_text= {"stuff": "tv theme ident"})
+    #     await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type="info", message_text= {"stuff": "tv theme ident"})
     #     // include end slash so theme.mp3 doesn't get chopped up
-    #     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type="info", message_text= {"stuff": "tv theme ident 2"})
+    #     await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type="info", message_text= {"stuff": "tv theme ident 2"})
     #     metadata_uuid = &sqlx_pool.db_read_media_path_like(os.path.abspath(
     #         download_que_json["Path"].replace(
     #             "/theme/", "/").replace("/backdrops/", "/")
     #             .rsplit("/", 1)[0]))
-    #     await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type="info", message_text= {"stuff": "tv theme ident 3"})
+    #     await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type="info", message_text= {"stuff": "tv theme ident 3"})
     #     if metadata_uuid != None:
-    #         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type="info", message_text= {"stuff": "tv theme ident 4"})
+    #         await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type="info", message_text= {"stuff": "tv theme ident 4"})
     #         &sqlx_pool.db_download_delete(download_que_id)
     #     else:
-    #         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type="info", message_text= {"stuff": "tv theme ident 5"})
+    #         await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type="info", message_text= {"stuff": "tv theme ident 5"})
     #         metadata_uuid = metadata_tv.metadata_tv_lookup(&sqlx_pool,
     #                                                        download_que_json,
     #                                                        download_que_id,
     #                                                        guessit_data)
-    #         await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type="info", message_text= {"stuff": "tv theme ident 6"})
+    #         await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type="info", message_text= {"stuff": "tv theme ident 6"})
     #         if metadata_uuid == None:
-    #             await common_logging_elasticsearch_httpx.com_es_httpx_post_async(message_type="info", message_text= {"stuff": "tv theme ident 7"})
+    #             await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type="info", message_text= {"stuff": "tv theme ident 7"})
     #             // TODO so, the show hasn"t been fetched yet.....so, no path match
     #             &sqlx_pool.db_download_update_provider("ZZ", download_que_id)
     # else if dl_row["mdq_que_type"] == common_global.DLMediaType.TV_Trailer.value:

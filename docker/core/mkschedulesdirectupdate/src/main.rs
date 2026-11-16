@@ -52,11 +52,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
             if let Some(_payload) = msg.content {
                 //
                 // def mk_schedules_direct_program_info_fetch(meta_program_fetch):
-                //     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
+                //     mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                 //                                                          message_text={'array': meta_program_fetch})
                 //     meta_program_json = sd.com_schedules_direct_program_info(
                 //         json.dumps(meta_program_fetch))
-                //     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info',
+                //     mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
                 //                                                          message_text={'result': meta_program_json})
                 //     #   meta_program_json = sd.com_Schedules_Direct_Program_Desc(
                 //     # json.dumps([{'programID': program_json['programID']}]))
@@ -72,37 +72,37 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // if status_data['systemStatus'][0]['status'] == "Online":
                 //     pass
                 // else:
-                //     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='critical',
+                //     mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='critical',
                 //                                                          message_text={'stuff': 'SD is unavailable'})
                 //     sys.exit(0)
                 // # version check
                 // # version_json = sd.com_Schedules_Direct_Client_Version()
                 // // TODO
                 // # if version_json != "MediaKraken_0.1.0":
-                // #    common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='critical', message_text= {'stuff':"Outdated Client Version! Upgrade MediaKraken_")
+                // #    mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='critical', message_text= {'stuff':"Outdated Client Version! Upgrade MediaKraken_")
                 // #    sys.exit(0)
                 //
                 // # get headends
                 // # headends_json = sd.com_Schedules_Direct_Headends('USA', '58701')
                 //
                 // # add to lineup
-                // # common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text= {'stuff':sd.com_Schedules_Direct_Lineup_Add('USA-ND33420-DEFAULT'))
+                // # mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info', message_text= {'stuff':sd.com_Schedules_Direct_Lineup_Add('USA-ND33420-DEFAULT'))
                 //
                 // # remove from lineup
-                // # common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text= {'stuff':sd.com_Schedules_Direct_Lineup_Delete('USA-DISH687-DEFAULT'))
+                // # mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info', message_text= {'stuff':sd.com_Schedules_Direct_Lineup_Delete('USA-DISH687-DEFAULT'))
                 //
                 //
                 // # list lineups and channels for them
                 // # for line_name in sd.com_Schedules_Direct_Lineup_List()['lineups']:
                 // #    # channel map
                 // #    channel_map = sd.com_Schedules_Direct_Lineup_Channel_Map(line_name['lineup'])
-                // #    common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text= {'stuff':"Map: %s", channel_map['map'])
+                // #    mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info', message_text= {'stuff':"Map: %s", channel_map['map'])
                 // #    for channel_id in channel_map['map']:
-                // #        common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text= {'stuff':"mapchannel: %s", channel_id)
+                // #        mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info', message_text= {'stuff':"mapchannel: %s", channel_id)
                 // #        db_connection.db_tv_station_insert(channel_id['stationID'], channel_id['channel'])
-                // #    common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text= {'stuff':"Stations: %s", channel_map['stations'])
+                // #    mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info', message_text= {'stuff':"Stations: %s", channel_map['stations'])
                 // #    for channel_meta in channel_map['stations']:
-                // #        common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text= {'stuff':"stationschannel: %s", channel_meta)
+                // #        mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info', message_text= {'stuff':"stationschannel: %s", channel_meta)
                 // #        db_connection.db_tv_station_update(channel_meta['name'], channel_meta['stationID'],\
                 // # json.dumps(channel_meta))
                 //
@@ -111,7 +111,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // # - good for what the show is......not an episode itself
                 //
                 // station_fetch = []
-                // common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text={
+                // mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info', message_text={
                 //     'list': db_connection.db_tv_stations_read_stationid_list()})
                 // # grab all stations in DB
                 // for station_id in db_connection.db_tv_stations_read_stationid_list():
@@ -122,7 +122,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 // meta_program_fetch = []
                 // # grab station info from SD
                 // if len(station_fetch) > 5000:
-                //     common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='critical', message_text=
+                //     mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='critical', message_text=
                 //                                             {'stuff': 'Too many channels!!!!  Exiting...'})
                 // else if len(station_fetch) > 0:
                 //     schedule_json = sd.com_schedules_direct_schedules_by_stationid(
@@ -141,7 +141,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 //             db_connection.db_tv_schedule_insert(station_json['stationID'],
                 //                                                 program_json['airDateTime'],
                 //                                                 json.dumps(program_json))
-                //             common_logging_elasticsearch_httpx.com_es_httpx_post(message_type='info', message_text=
+                //             mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info', message_text=
                 //             {'programid': program_json['programID']})
                 //             # if program_json['programID'][0:2] != "MV":
                 //             meta_program_fetch.append(program_json['programID'])
