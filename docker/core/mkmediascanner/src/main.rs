@@ -128,6 +128,20 @@ fn mk_smb_share_uri(share_info: &DBShareList) -> Option<String> {
     ))
 }
 
+// Connection header to prefix onto a share-root-relative media path so
+// message consumers can open the file directly: `//ip/share` when the share
+// was reached over SMB, otherwise the `nfs://ip/share_path` form.
+fn mk_media_path_prefix(share_info: &DBShareList, smb_reachable: bool) -> String {
+    if smb_reachable {
+        // `mk_smb_probe` only returns true after `mk_smb_share_uri`
+        // succeeded, so the Some arm is the only one in practice;
+        // `unwrap_or_default` keeps this infallible without `expect`.
+        mk_smb_share_uri(share_info).unwrap_or_default()
+    } else {
+        mk_nfs_uri(share_info, "")
+    }
+}
+
 // Construct an `smbclient` command running the supplied `-c` script, with
 // auth/workgroup args. Rejects metacharacters that could break out of the
 // quoted `cd` arg in the script.
@@ -864,6 +878,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let mut already_known_count: u64 = 0;
             let mut filtered_count: u64 = 0;
             let original_media_class = row_data.mm_media_dir_class_enum;
+            // "Media Path" in the messages below is published with this
+            // connection header prefixed; `file_metadata.name` is
+            // share-root-relative and always starts with '/'.
+            let media_path_prefix = mk_media_path_prefix(&share_info, smb_reachable);
 
             for file_metadata in files {
                 if file_metadata.directory {
@@ -978,7 +996,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 "Type": "FFMPEG",
                                 "Subtype": "Probe",
                                 "Media UUID": media_id,
-                                "Media Path": file_metadata.name,
+                                "Media Path": format!("{media_path_prefix}{}", file_metadata.name),
                             })
                             .to_string(),
                         )
@@ -1002,7 +1020,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 json!({
                                     "Type": "Roku",
                                     "Media UUID": media_id,
-                                    "Media Path": file_metadata.name,
+                                    "Media Path": format!("{media_path_prefix}{}", file_metadata.name),
                                 })
                                 .to_string(),
                             )
@@ -1174,6 +1192,21 @@ mod tests {
         assert_eq!(
             mk_smb_share_uri(&share),
             Some("//192.168.1.100/media".to_string())
+        );
+    }
+
+    #[test]
+    fn test_mk_media_path_prefix_smb() {
+        let share = test_share();
+        assert_eq!(mk_media_path_prefix(&share, true), "//192.168.1.100/shared");
+    }
+
+    #[test]
+    fn test_mk_media_path_prefix_nfs() {
+        let share = test_share();
+        assert_eq!(
+            mk_media_path_prefix(&share, false),
+            "nfs://192.168.1.100/shared/media"
         );
     }
 
